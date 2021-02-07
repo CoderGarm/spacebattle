@@ -8,14 +8,14 @@ create table alliance
 
 create table building
 (
-    idBuilding                integer not null auto_increment,
-    baseValue                 integer not null,
-    description               varchar(255),
-    increasmentFactorPerLevel decimal(19, 2),
-    name                      varchar(30),
-    resourceType              varchar(255),
-    idCosts                   integer,
-    idResearch                integer not null,
+    idBuilding               integer not null auto_increment,
+    baseValue                integer not null,
+    description              varchar(255),
+    increasingFactorPerLevel decimal(19, 2),
+    name                     varchar(30),
+    resourceType             varchar(255),
+    idCosts                  integer,
+    idResearch               integer not null,
     primary key (idBuilding)
 ) engine = InnoDB;
 
@@ -161,15 +161,16 @@ create table shipclass
     raceType    varchar(255) not null,
     idCosts     integer,
     idHull      integer      not null,
-    idOwner     integer,
+    idOwner     integer      not null,
     primary key (idShipclass)
 ) engine = InnoDB;
 
 create table starsystem
 (
-    idStarsystem integer not null auto_increment,
-    xCoordinate  integer not null,
-    yCoordinate  integer not null,
+    idStarsystem integer      not null auto_increment,
+    name         varchar(255) not null,
+    xCoordinate  integer      not null,
+    yCoordinate  integer      not null,
     primary key (idStarsystem)
 ) engine = InnoDB;
 
@@ -181,10 +182,10 @@ create table systemcomposition
 
 create table tick
 (
-    id         integer     not null auto_increment,
+    idTick     integer     not null auto_increment,
     tickEnds   datetime(6),
     tickStarts datetime(6) not null,
-    primary key (id)
+    primary key (idTick)
 ) engine = InnoDB;
 
 create table unlockedResearch

@@ -1,5 +1,6 @@
 package de.yuga.spacebattle;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -17,7 +18,8 @@ public class NotifySBUserExceptionHandler extends ResponseEntityExceptionHandler
 
     @ExceptionHandler(value = {NotifySBUserException.class, RuntimeException.class})
     protected ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
-        LOGGER.info(ex.getMessage());
+        String stacktrace = ExceptionUtils.getStackTrace(ex);
+        LOGGER.info(stacktrace);
         return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
 }

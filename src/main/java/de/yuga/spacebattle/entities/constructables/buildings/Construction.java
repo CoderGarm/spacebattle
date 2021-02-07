@@ -39,7 +39,6 @@ public class Construction extends AbstractEntityKey {
 
     @Nullable
     @OneToOne(mappedBy = "facility")
-    //@JoinColumn(name = "idJob")
     private Job job;
 
     public Construction() {
@@ -63,9 +62,9 @@ public class Construction extends AbstractEntityKey {
     public BigDecimal getTickOutput(@Nonnull final BigDecimal rescourceFactorByPlanet) {
         Preconditions.checkNotNull(rescourceFactorByPlanet, "rescourceFactorByPlanet shouldn't be null!");
 
-        BigDecimal increasmentFactorPerLevel = building.getIncreasmentFactorPerLevel();
+        BigDecimal increasingFactorPerLevel = building.getIncreasingFactorPerLevel();
         int baseValue = building.getBaseValue();
-        BigDecimal result = new BigDecimal(baseValue).add(increasmentFactorPerLevel).multiply(new BigDecimal(level));
+        BigDecimal result = new BigDecimal(baseValue).add(increasingFactorPerLevel).multiply(new BigDecimal(level));
         return result.multiply(rescourceFactorByPlanet);
     }
 

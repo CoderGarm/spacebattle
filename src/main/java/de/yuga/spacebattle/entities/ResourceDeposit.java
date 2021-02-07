@@ -42,10 +42,10 @@ public class ResourceDeposit extends AbstractEntityKey {
     private Map<EResourceType, BigDecimal> resources = new HashMap<>();
 
     @Nonnull
-    @NotNull
+    @NotNull(message = "SubType must be defined.")
     @Enumerated(EnumType.STRING)
     @Column(updatable = false)
-    private EResourceSubType subType;
+    private EResourceSubType subType = EResourceSubType.DEFAULT;
 
     public ResourceDeposit() {
     }
@@ -111,13 +111,28 @@ public class ResourceDeposit extends AbstractEntityKey {
 
         for (EResourceType type : EResourceType.values()) {
             double rand = 0;
-            if (subType == EResourceSubType.MININGFACTORS) {
-                rand = ThreadLocalRandom.current().nextDouble(0.1, 2.01);
-            }
-            if (subType == EResourceSubType.COSTS) {
-                rand = ThreadLocalRandom.current().nextDouble(10, 51);
+            switch (subType) {
+                case COSTS:
+                    rand = ThreadLocalRandom.current().nextDouble(10, 51);
+                    break;
+                case DEPOSITS:
+                    // stay zero
+                    break;
+                case MININGFACTORS:
+                    rand = ThreadLocalRandom.current().nextDouble(0.1, 2.01);
+                    break;
             }
             resources.put(type, new BigDecimal(rand, mathContext));
         }
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("ResourceDeposit{");
+        sb.append(", id=").append(id);
+        sb.append("resources=").append(resources);
+        sb.append(", subType=").append(subType);
+        sb.append('}');
+        return sb.toString();
     }
 }

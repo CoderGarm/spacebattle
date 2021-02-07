@@ -1,8 +1,9 @@
-package de.yuga.spacebattle.impl;
+package de.yuga.spacebattle.restapi.impl.account;
+
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.entities.account.User;
-import de.yuga.spacebattle.repositories.UserRepository;
+import de.yuga.spacebattle.repositories.account.UserRepository;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,10 +32,7 @@ public class UserApiImpl {
     @GetMapping
     @ResponseBody
     public ResponseEntity<?> getUser() {
-        /*Iterable<User> all1 = userC.findAll();
-        final List<User> all = new ArrayList<>();
-        all1.forEach(all::add);*/
-        List<User> all = userC.findAllUsers();
+        final List<User> all = userC.findAllUsers();
         return ResponseEntity.ok(all);
     }
 

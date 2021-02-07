@@ -49,7 +49,7 @@ public class Planet extends AbstractEntityKey {
      * Describes the mining factors for every rescource.
      */
     @Nonnull
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "idRescourcefactors", updatable = false)
     private final ResourceDeposit resourcefactors = new ResourceDeposit(EResourceSubType.MININGFACTORS);
 
@@ -80,6 +80,7 @@ public class Planet extends AbstractEntityKey {
         this.name = name;
         this.system = system;
         this.orbit = orbit;
+
     }
 
     @Nullable
@@ -125,5 +126,20 @@ public class Planet extends AbstractEntityKey {
     @Nonnull
     public Orbit getOrbit() {
         return orbit;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Planet{");
+        sb.append(", id=").append(id);
+        sb.append("owner=").append(owner);
+        sb.append(", name='").append(name).append('\'');
+        sb.append(", system=").append(system);
+        sb.append(", orbit=").append(orbit);
+        sb.append(", resourcefactors=").append(resourcefactors);
+        sb.append(", resourceDeposit=").append(resourceDeposit);
+        sb.append(", constructions=").append(constructions);
+        sb.append('}');
+        return sb.toString();
     }
 }

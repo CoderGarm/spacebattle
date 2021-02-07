@@ -47,8 +47,8 @@ public class Fleet extends AbstractEntityKey {
     private final Map<ShipClass, Integer> ships = new HashMap<>();
 
     @Nonnull
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "idResourceDeposit")
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "idResourceDeposit", updatable = false)
     private final ResourceDeposit resourceDeposit = new ResourceDeposit(EResourceSubType.DEPOSITS);
 
     @Nullable

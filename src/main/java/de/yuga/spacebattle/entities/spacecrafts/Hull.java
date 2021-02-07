@@ -30,8 +30,8 @@ public class Hull extends AbstractEntityKey {
     private int constructionCapacity;
 
     @Nonnull
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "idCosts")
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "idCosts", updatable = false)
     private final ResourceDeposit costs = new ResourceDeposit(EResourceSubType.COSTS);
 
     @Nonnull
@@ -41,7 +41,7 @@ public class Hull extends AbstractEntityKey {
     @JsonIgnore
     @Nonnull
     @NotNull
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "idResearch")
     private Research unlockedThrough;
 
@@ -90,5 +90,19 @@ public class Hull extends AbstractEntityKey {
     @Nonnull
     public Research getUnlockedThrough() {
         return unlockedThrough;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Hull{");
+        sb.append(", id=").append(id);
+        sb.append("name='").append(name).append('\'');
+        sb.append(", level=").append(level);
+        sb.append(", constructionCapacity=").append(constructionCapacity);
+        sb.append(", costs=").append(costs);
+        sb.append(", description='").append(description).append('\'');
+        sb.append(", unlockedThrough=").append(unlockedThrough);
+        sb.append('}');
+        return sb.toString();
     }
 }

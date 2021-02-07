@@ -34,6 +34,7 @@ public class User extends AbstractEntityKey {
     @Column(unique = true)
     private String username;
 
+    // todo attributeconverter
     @Nonnull
     @NotNull(message = "password must not be null")
     @Size(min = 1, max = 50)
@@ -44,7 +45,7 @@ public class User extends AbstractEntityKey {
     @Enumerated(EnumType.STRING)
     private ERaceType raceType;
 
-    @JsonIgnore // note: com.fasterxml.jackson.annotation.JsonIgnore
+    @JsonIgnore
     @Nullable
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "idAlliance")
@@ -52,7 +53,7 @@ public class User extends AbstractEntityKey {
 
     @Nonnull
     @NotNull(message = "ownedPlanets must not be null")
-    @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinTable(name = "ownedPlanet",
             joinColumns = @JoinColumn(name = "idUser"),
             inverseJoinColumns = @JoinColumn(name = "idPlanet"))
@@ -69,9 +70,9 @@ public class User extends AbstractEntityKey {
     public User() {
     }
 
-    public User(@Nonnull String username,
-                @Nonnull String password,
-                @Nonnull ERaceType raceType) {
+    public User(@Nonnull final String username,
+                @Nonnull final String password,
+                @Nonnull final ERaceType raceType) {
         Preconditions.checkNotNull(username, "username shouldn't be null!");
         Preconditions.checkNotNull(password, "password shouldn't be null!");
         Preconditions.checkNotNull(raceType, "raceType shouldn't be null!");
@@ -141,5 +142,19 @@ public class User extends AbstractEntityKey {
     @Override
     public int hashCode() {
         return username != null ? username.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("User{");
+        sb.append(", id=").append(id);
+        sb.append("username='").append(username).append('\'');
+        //sb.append(", password='").append(password).append('\'');
+        sb.append(", raceType=").append(raceType);
+        sb.append(", alliance=").append(alliance);
+        sb.append(", ownedPlanets=").append(ownedPlanets);
+        sb.append(", researches=").append(researches);
+        sb.append('}');
+        return sb.toString();
     }
 }

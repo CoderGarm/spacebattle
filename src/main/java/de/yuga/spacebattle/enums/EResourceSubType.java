@@ -2,6 +2,7 @@ package de.yuga.spacebattle.enums;
 
 public enum EResourceSubType {
 
+    DEFAULT(-1),
     MININGFACTORS(0),
     DEPOSITS(1),
     COSTS(2);

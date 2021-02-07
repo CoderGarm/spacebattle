@@ -5,6 +5,7 @@ import de.yuga.spacebattle.entities.AbstractEntityKey;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,11 @@ import java.util.List;
 @Table(name = "starsystem", uniqueConstraints = @UniqueConstraint(columnNames = {"xCoordinate", "yCoordinate"}))
 @AttributeOverride(name = "id", column = @Column(name = "idStarsystem"))
 public class Starsystem extends AbstractEntityKey {
+
+    @Nonnull
+    @NotNull
+    @Column(updatable = false)
+    private String name;
 
     @Nonnull
     @Embedded
@@ -38,9 +44,11 @@ public class Starsystem extends AbstractEntityKey {
     public Starsystem() {
     }
 
-    public Starsystem(@Nonnull final Orbit orbit) {
+    public Starsystem(@Nonnull final String name, @Nonnull final Orbit orbit) {
+        Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(orbit, "orbit shouldn't be null!");
 
+        this.name = name;
         this.orbit = orbit;
     }
 
@@ -58,5 +66,15 @@ public class Starsystem extends AbstractEntityKey {
         Preconditions.checkNotNull(orbit, "orbit shouldn't be null!");
 
         this.orbit = orbit;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Starsystem{");
+        sb.append(", id=").append(id);
+        sb.append("orbit=").append(orbit);
+        sb.append(", planets=").append(planets.size());
+        sb.append('}');
+        return sb.toString();
     }
 }

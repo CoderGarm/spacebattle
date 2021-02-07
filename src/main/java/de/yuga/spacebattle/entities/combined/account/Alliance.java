@@ -75,4 +75,15 @@ public class Alliance extends AbstractEntityKey {
     public Set<User> getMembers() {
         return members;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Alliance{");
+        sb.append(", id=").append(id);
+        sb.append("name='").append(name).append('\'');
+        sb.append(", code='").append(code).append('\'');
+        sb.append(", members=").append(members.size());
+        sb.append('}');
+        return sb.toString();
+    }
 }

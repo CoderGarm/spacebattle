@@ -31,7 +31,7 @@ public class ShipClass extends AbstractEntityKey {
 
     @Nonnull
     @NotNull(message = "owner should not be null")
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "idOwner")
     private User owner;
 
@@ -68,12 +68,13 @@ public class ShipClass extends AbstractEntityKey {
      */
     @Nonnull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "idCosts")
+    @JoinColumn(name = "idCosts", updatable = false)
     private final ResourceDeposit costs = new ResourceDeposit(EResourceSubType.COSTS);
 
     public ShipClass(@Nonnull final User owner,
                      @Nonnull final String name,
                      @Nonnull final Hull hull) {
+        Preconditions.checkNotNull(owner, "owner shouldn't be null!");
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(hull, "hull shouldn't be null!");
 
@@ -164,14 +165,15 @@ public class ShipClass extends AbstractEntityKey {
 
     @Override
     public String toString() {
-
-        String moduleString = "";//modules != null && !modules.isEmpty() ? ",\n\tmodules=\n\t" + modules.stream().map(Module::toString).collect(Collectors.joining("\n\t\t")) : "";
-
-        return "Ship{" +
-                "name='" + name + "'" +
-                ", raceType=" + raceType +
-                ", shipLevel=" + "is hull now" +
-                moduleString +
-                "\n}\n";
+        final StringBuilder sb = new StringBuilder("ShipClass{");
+        sb.append(", id=").append(id);
+        sb.append(", name='").append(name).append('\'');
+        sb.append("owner=").append(owner);
+        sb.append(", raceType=").append(raceType);
+        sb.append(", hull=").append(hull);
+        sb.append(", modules=").append(modules);
+        sb.append(", costs=").append(costs);
+        sb.append('}');
+        return sb.toString();
     }
 }

@@ -32,20 +32,20 @@ public class Research extends AbstractEntityKey {
     private int levelCap;
 
     @Nonnull
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "idCosts")
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "idCosts", updatable = false)
     private final ResourceDeposit costs = new ResourceDeposit(EResourceSubType.COSTS);
 
     @Nonnull // is nonnull when arg-constructor is removed
-    @OneToMany(mappedBy = "unlockedThrough")
+    @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
     private Set<Building> unlocksBuildings;
 
     @Nonnull // is nonnull when arg-constructor is removed
-    @OneToMany(mappedBy = "unlockedThrough")
+    @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
     private Set<Hull> unlocksHulls;
 
     @Nonnull // is nonnull when arg-constructor is removed
-    @OneToMany(mappedBy = "unlockedThrough")
+    @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
     private Set<Module> unlocksModules;
 
     public Research() {
@@ -92,5 +92,35 @@ public class Research extends AbstractEntityKey {
     @Nonnull
     public Set<Module> getUnlocksModules() {
         return unlocksModules;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Research)) return false;
+
+        Research research = (Research) o;
+
+        return getId() == research.getId();
+    }
+
+    @Override
+    public int hashCode() {
+        return getId() * 31;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Research{");
+        sb.append(", id=").append(id);
+        sb.append("name='").append(name).append('\'');
+        sb.append(", description='").append(description).append('\'');
+        sb.append(", levelCap=").append(levelCap);
+        sb.append(", costs=").append(costs);
+        /*sb.append(", unlocksBuildings=").append(unlocksBuildings);
+        sb.append(", unlocksHulls=").append(unlocksHulls);
+        sb.append(", unlocksModules=").append(unlocksModules);*/
+        sb.append('}');
+        return sb.toString();
     }
 }

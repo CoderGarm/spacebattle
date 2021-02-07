@@ -87,4 +87,13 @@ public class Orbit {
             throw new NotifySBUserException("no distance calculatable");
         }
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Orbit{");
+        sb.append("xCoordinate=").append(xCoordinate);
+        sb.append(", yCoordinate=").append(yCoordinate);
+        sb.append('}');
+        return sb.toString();
+    }
 }

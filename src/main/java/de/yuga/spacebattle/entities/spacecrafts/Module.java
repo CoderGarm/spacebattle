@@ -42,8 +42,8 @@ public class Module extends AbstractEntityKey {
     private String description;
 
     @Nonnull
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "idCosts")
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "idCosts", updatable = false)
     private final ResourceDeposit costs = new ResourceDeposit(EResourceSubType.COSTS);
 
     private int level;
@@ -51,7 +51,7 @@ public class Module extends AbstractEntityKey {
     @JsonIgnore
     @Nonnull
     @NotNull
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "idResearch")
     private Research unlockedThrough;
 
@@ -122,13 +122,17 @@ public class Module extends AbstractEntityKey {
 
     @Override
     public String toString() {
-        return "Module{" +
-                "name='" + name + '\'' +
-                ", useCapacity=" + useCapacity +
-                ", value=" + value +
-                ", moduleType=" + moduleType +
-                ", techLevel=" + level +
-                ", description='" + description + '\'' +
-                '}';
+        final StringBuilder sb = new StringBuilder("Module{");
+        sb.append(", id=").append(id);
+        sb.append("name='").append(name).append('\'');
+        sb.append(", description='").append(description).append('\'');
+        sb.append(", moduleType=").append(moduleType);
+        sb.append(", value=").append(value);
+        sb.append(", useCapacity=").append(useCapacity);
+        sb.append(", costs=").append(costs);
+        sb.append(", level=").append(level);
+        sb.append(", unlockedThrough=").append(unlockedThrough);
+        sb.append('}');
+        return sb.toString();
     }
 }

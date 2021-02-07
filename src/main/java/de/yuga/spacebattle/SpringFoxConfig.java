@@ -15,6 +15,7 @@ public class SpringFoxConfig {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
                 .apis(RequestHandlerSelectors.any())
+                //.apis(RequestHandlerSelectors.basePackage("de.yuga.spacebattle"))
                 .paths(PathSelectors.any())
                 .build();
     }

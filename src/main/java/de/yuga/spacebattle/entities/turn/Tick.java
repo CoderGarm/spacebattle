@@ -5,10 +5,7 @@ import de.yuga.spacebattle.entities.AbstractEntityKey;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.Entity;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
@@ -17,6 +14,7 @@ import java.time.LocalDateTime;
 })
 @Entity
 @Table(name = "tick")
+@AttributeOverride(name = "id", column = @Column(name = "idTick"))
 public class Tick extends AbstractEntityKey {
 
     @Nonnull

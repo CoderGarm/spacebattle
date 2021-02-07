@@ -1,0 +1,3266 @@
+{
+    "basePath": "/",
+    "definitions": {
+        "Alliance": {
+            "properties": {
+                "code": {
+                    "maxLength": 30,
+                    "minLength": 1,
+                    "type": "string"
+                },
+                "id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "members": {
+                    "items": {
+                        "$ref": "#/definitions/User"
+                    },
+                    "type": "array",
+                    "uniqueItems": true
+                },
+                "name": {
+                    "maxLength": 30,
+                    "minLength": 1,
+                    "type": "string"
+                }
+            },
+            "required": [
+                "code",
+                "members",
+                "name"
+            ],
+            "title": "Alliance",
+            "type": "object"
+        },
+        "Building": {
+            "properties": {
+                "baseValue": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "costs": {
+                    "$ref": "#/definitions/ResourceDeposit"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "increasingFactorPerLevel": {
+                  "type": "number"
+                },
+                "name": {
+                    "maxLength": 30,
+                    "minLength": 1,
+                    "type": "string"
+                },
+                "resourceType": {
+                    "enum": [
+                        "CONSTRUCTION",
+                        "CREDITS",
+                        "HYPERONIUM",
+                        "MERCURIUM",
+                        "METALORE",
+                        "ORBITALCONSTRUCTION",
+                        "RESEARCH"
+                    ],
+                    "type": "string"
+                }
+            },
+            "title": "Building",
+            "type": "object"
+        },
+        "Constructable": {
+            "properties": {
+                "amountShips": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "building": {
+                    "$ref": "#/definitions/Building"
+                },
+                "research": {
+                    "$ref": "#/definitions/Research"
+                },
+                "resourceType": {
+                    "enum": [
+                        "CONSTRUCTION",
+                        "CREDITS",
+                        "HYPERONIUM",
+                        "MERCURIUM",
+                        "METALORE",
+                        "ORBITALCONSTRUCTION",
+                        "RESEARCH"
+                    ],
+                    "type": "string"
+                },
+                "shipClass": {
+                    "$ref": "#/definitions/ShipClass"
+                },
+                "targetLevel": {
+                    "format": "int32",
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "resourceType"
+            ],
+            "title": "Constructable",
+            "type": "object"
+        },
+        "Construction": {
+            "properties": {
+                "building": {
+                    "$ref": "#/definitions/Building"
+                },
+                "id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "job": {
+                    "$ref": "#/definitions/Job"
+                },
+                "level": {
+                    "format": "int32",
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "building"
+            ],
+            "title": "Construction",
+            "type": "object"
+        },
+        "Fleet": {
+            "properties": {
+                "id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "orbit": {
+                    "$ref": "#/definitions/FleetOrbit"
+                },
+                "owner": {
+                    "$ref": "#/definitions/User"
+                },
+                "resourceDeposit": {
+                    "$ref": "#/definitions/ResourceDeposit"
+                },
+                "ships": {
+                    "additionalProperties": {
+                        "format": "int32",
+                        "type": "integer"
+                    },
+                    "type": "object"
+                }
+            },
+            "required": [
+                "name",
+                "owner",
+                "ships"
+            ],
+            "title": "Fleet",
+            "type": "object"
+        },
+        "FleetOrbit": {
+            "properties": {
+                "planet": {
+                    "$ref": "#/definitions/Planet"
+                },
+                "system": {
+                    "$ref": "#/definitions/Starsystem"
+                }
+            },
+            "title": "FleetOrbit",
+            "type": "object"
+        },
+        "Hull": {
+            "properties": {
+                "constructionCapacity": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "costs": {
+                    "$ref": "#/definitions/ResourceDeposit"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "level": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "name": {
+                    "maxLength": 30,
+                    "minLength": 1,
+                    "type": "string"
+                }
+            },
+            "required": [
+                "description",
+                "name"
+            ],
+            "title": "Hull",
+            "type": "object"
+        },
+        "Job": {
+            "properties": {
+                "constructable": {
+                    "$ref": "#/definitions/Constructable"
+                },
+                "id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "jobDoneAtZero": {
+                    "type": "number"
+                },
+                "owner": {
+                    "$ref": "#/definitions/User"
+                }
+            },
+            "required": [
+                "jobDoneAtZero",
+                "owner"
+            ],
+            "title": "Job",
+            "type": "object"
+        },
+        "Link": {
+            "properties": {
+                "href": {
+                    "type": "string"
+                },
+                "templated": {
+                    "type": "boolean"
+                }
+            },
+            "title": "Link",
+            "type": "object"
+        },
+        "ModelAndView": {
+            "properties": {
+                "empty": {
+                    "type": "boolean"
+                },
+                "model": {
+                    "type": "object"
+                },
+                "modelMap": {
+                    "additionalProperties": {
+                        "type": "object"
+                    },
+                    "type": "object"
+                },
+                "reference": {
+                    "type": "boolean"
+                },
+                "status": {
+                    "enum": [
+                        "ACCEPTED",
+                        "ALREADY_REPORTED",
+                        "BAD_GATEWAY",
+                        "BAD_REQUEST",
+                        "BANDWIDTH_LIMIT_EXCEEDED",
+                        "CHECKPOINT",
+                        "CONFLICT",
+                        "CONTINUE",
+                        "CREATED",
+                        "DESTINATION_LOCKED",
+                        "EXPECTATION_FAILED",
+                        "FAILED_DEPENDENCY",
+                        "FORBIDDEN",
+                        "FOUND",
+                        "GATEWAY_TIMEOUT",
+                        "GONE",
+                        "HTTP_VERSION_NOT_SUPPORTED",
+                        "IM_USED",
+                        "INSUFFICIENT_SPACE_ON_RESOURCE",
+                        "INSUFFICIENT_STORAGE",
+                        "INTERNAL_SERVER_ERROR",
+                        "I_AM_A_TEAPOT",
+                        "LENGTH_REQUIRED",
+                        "LOCKED",
+                        "LOOP_DETECTED",
+                        "METHOD_FAILURE",
+                        "METHOD_NOT_ALLOWED",
+                        "MOVED_PERMANENTLY",
+                        "MOVED_TEMPORARILY",
+                        "MULTIPLE_CHOICES",
+                        "MULTI_STATUS",
+                        "NETWORK_AUTHENTICATION_REQUIRED",
+                        "NON_AUTHORITATIVE_INFORMATION",
+                        "NOT_ACCEPTABLE",
+                        "NOT_EXTENDED",
+                        "NOT_FOUND",
+                        "NOT_IMPLEMENTED",
+                        "NOT_MODIFIED",
+                        "NO_CONTENT",
+                        "OK",
+                        "PARTIAL_CONTENT",
+                        "PAYLOAD_TOO_LARGE",
+                        "PAYMENT_REQUIRED",
+                        "PERMANENT_REDIRECT",
+                        "PRECONDITION_FAILED",
+                        "PRECONDITION_REQUIRED",
+                        "PROCESSING",
+                        "PROXY_AUTHENTICATION_REQUIRED",
+                        "REQUESTED_RANGE_NOT_SATISFIABLE",
+                        "REQUEST_ENTITY_TOO_LARGE",
+                        "REQUEST_HEADER_FIELDS_TOO_LARGE",
+                        "REQUEST_TIMEOUT",
+                        "REQUEST_URI_TOO_LONG",
+                        "RESET_CONTENT",
+                        "SEE_OTHER",
+                        "SERVICE_UNAVAILABLE",
+                        "SWITCHING_PROTOCOLS",
+                        "TEMPORARY_REDIRECT",
+                        "TOO_EARLY",
+                        "TOO_MANY_REQUESTS",
+                        "UNAUTHORIZED",
+                        "UNAVAILABLE_FOR_LEGAL_REASONS",
+                        "UNPROCESSABLE_ENTITY",
+                        "UNSUPPORTED_MEDIA_TYPE",
+                        "UPGRADE_REQUIRED",
+                        "URI_TOO_LONG",
+                        "USE_PROXY",
+                        "VARIANT_ALSO_NEGOTIATES"
+                    ],
+                    "type": "string"
+                },
+                "view": {
+                    "$ref": "#/definitions/View"
+                },
+                "viewName": {
+                    "type": "string"
+                }
+            },
+            "title": "ModelAndView",
+            "type": "object"
+        },
+        "Module": {
+            "properties": {
+                "costs": {
+                    "$ref": "#/definitions/ResourceDeposit"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "level": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "moduleType": {
+                    "enum": [
+                        "ARMOR",
+                        "FTLPROPULSION",
+                        "PROPULSION",
+                        "SCANNER",
+                        "SHIELD",
+                        "WEAPON"
+                    ],
+                    "type": "string"
+                },
+                "name": {
+                    "maxLength": 30,
+                    "minLength": 3,
+                    "type": "string"
+                },
+                "useCapacity": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "value": {
+                    "format": "int32",
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "description",
+                "moduleType",
+                "name",
+                "useCapacity",
+                "value"
+            ],
+            "title": "Module",
+            "type": "object"
+        },
+        "Orbit": {
+            "properties": {
+                "xcoordinate": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "ycoordinate": {
+                    "format": "int32",
+                    "type": "integer"
+                }
+            },
+            "title": "Orbit",
+            "type": "object"
+        },
+        "Planet": {
+            "properties": {
+                "constructions": {
+                    "items": {
+                        "$ref": "#/definitions/Construction"
+                    },
+                    "type": "array",
+                    "uniqueItems": true
+                },
+                "id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "name": {
+                    "maxLength": 30,
+                    "minLength": 1,
+                    "type": "string"
+                },
+                "orbit": {
+                    "$ref": "#/definitions/Orbit"
+                },
+                "owner": {
+                    "$ref": "#/definitions/User"
+                },
+                "resourceDeposit": {
+                    "$ref": "#/definitions/ResourceDeposit"
+                },
+                "resourcefactors": {
+                    "$ref": "#/definitions/ResourceDeposit"
+                },
+                "system": {
+                    "$ref": "#/definitions/Starsystem"
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "title": "Planet",
+            "type": "object"
+        },
+        "Research": {
+            "properties": {
+                "costs": {
+                    "$ref": "#/definitions/ResourceDeposit"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "levelCap": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "name": {
+                    "maxLength": 30,
+                    "minLength": 1,
+                    "type": "string"
+                },
+                "unlocksBuildings": {
+                    "items": {
+                        "$ref": "#/definitions/Building"
+                    },
+                    "type": "array",
+                    "uniqueItems": true
+                },
+                "unlocksHulls": {
+                    "items": {
+                        "$ref": "#/definitions/Hull"
+                    },
+                    "type": "array",
+                    "uniqueItems": true
+                },
+                "unlocksModules": {
+                    "items": {
+                        "$ref": "#/definitions/Module"
+                    },
+                    "type": "array",
+                    "uniqueItems": true
+                }
+            },
+            "title": "Research",
+            "type": "object"
+        },
+        "ResourceDeposit": {
+            "properties": {
+                "id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "resources": {
+                    "additionalProperties": {
+                        "type": "number"
+                    },
+                    "type": "object"
+                },
+                "subType": {
+                    "enum": [
+                      "COSTS",
+                      "DEFAULT",
+                      "DEPOSITS",
+                      "MININGFACTORS"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "resources",
+                "subType"
+            ],
+            "title": "ResourceDeposit",
+            "type": "object"
+        },
+        "ShipClass": {
+            "properties": {
+                "hull": {
+                    "$ref": "#/definitions/Hull"
+                },
+                "id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "modules": {
+                    "additionalProperties": {
+                        "format": "int32",
+                        "type": "integer"
+                    },
+                    "type": "object"
+                },
+                "name": {
+                    "maxLength": 30,
+                    "minLength": 3,
+                    "type": "string"
+                },
+                "owner": {
+                    "$ref": "#/definitions/User"
+                },
+                "raceType": {
+                    "enum": [
+                        "HUMAN",
+                        "KANDORIAN"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "hull",
+                "modules",
+                "name",
+                "owner",
+                "raceType"
+            ],
+            "title": "ShipClass",
+            "type": "object"
+        },
+        "Starsystem": {
+            "properties": {
+                "id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "orbit": {
+                    "$ref": "#/definitions/Orbit"
+                },
+                "planets": {
+                    "items": {
+                        "$ref": "#/definitions/Planet"
+                    },
+                    "type": "array"
+                }
+            },
+            "title": "Starsystem",
+            "type": "object"
+        },
+        "User": {
+            "properties": {
+                "id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "ownedPlanets": {
+                    "items": {
+                        "$ref": "#/definitions/Planet"
+                    },
+                    "type": "array",
+                    "uniqueItems": true
+                },
+                "password": {
+                    "maxLength": 50,
+                    "minLength": 1,
+                    "type": "string"
+                },
+                "raceType": {
+                    "enum": [
+                        "HUMAN",
+                        "KANDORIAN"
+                    ],
+                    "type": "string"
+                },
+                "researches": {
+                    "additionalProperties": {
+                        "format": "int32",
+                        "type": "integer"
+                    },
+                    "type": "object"
+                },
+                "username": {
+                    "maxLength": 30,
+                    "minLength": 1,
+                    "type": "string"
+                }
+            },
+            "required": [
+                "ownedPlanets",
+                "password",
+                "raceType",
+                "researches",
+                "username"
+            ],
+            "title": "User",
+            "type": "object"
+        },
+        "View": {
+            "properties": {
+                "contentType": {
+                    "type": "string"
+                }
+            },
+            "title": "View",
+            "type": "object"
+        }
+    },
+    "host": "localhost:8080",
+    "info": {
+        "contact": {},
+        "description": "Api Documentation",
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0"
+        },
+        "termsOfService": "urn:tos",
+        "title": "Api Documentation",
+        "version": "1.0"
+    },
+    "paths": {
+        "/actuator": {
+            "get": {
+                "operationId": "linksUsingGET",
+                "produces": [
+                    "application/json",
+                    "application/vnd.spring-boot.actuator.v2+json",
+                    "application/vnd.spring-boot.actuator.v3+json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "additionalProperties": {
+                                "additionalProperties": {
+                                    "$ref": "#/definitions/Link"
+                                },
+                                "type": "object"
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "links",
+                "tags": [
+                    "web-mvc-links-handler"
+                ]
+            }
+        },
+        "/actuator/health": {
+            "get": {
+                "operationId": "handleUsingGET",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "in": "body",
+                        "name": "body",
+                        "required": false,
+                        "schema": {
+                            "additionalProperties": {
+                                "type": "string"
+                            },
+                            "type": "object"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json",
+                    "application/vnd.spring-boot.actuator.v2+json",
+                    "application/vnd.spring-boot.actuator.v3+json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "handle",
+                "tags": [
+                    "operation-handler"
+                ]
+            }
+        },
+        "/actuator/health/**": {
+            "get": {
+                "operationId": "handleUsingGET_1",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "in": "body",
+                        "name": "body",
+                        "required": false,
+                        "schema": {
+                            "additionalProperties": {
+                                "type": "string"
+                            },
+                            "type": "object"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json",
+                    "application/vnd.spring-boot.actuator.v2+json",
+                    "application/vnd.spring-boot.actuator.v3+json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "handle",
+                "tags": [
+                    "operation-handler"
+                ]
+            }
+        },
+        "/actuator/info": {
+            "get": {
+                "operationId": "handleUsingGET_2",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "in": "body",
+                        "name": "body",
+                        "required": false,
+                        "schema": {
+                            "additionalProperties": {
+                                "type": "string"
+                            },
+                            "type": "object"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json",
+                    "application/vnd.spring-boot.actuator.v2+json",
+                    "application/vnd.spring-boot.actuator.v3+json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "handle",
+                "tags": [
+                    "operation-handler"
+                ]
+            }
+        },
+        "/error": {
+            "delete": {
+              "operationId": "errorHtmlUsingDELETE",
+              "produces": [
+                "text/html"
+              ],
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "schema": {
+                    "$ref": "#/definitions/ModelAndView"
+                  }
+                },
+                "204": {
+                  "description": "No Content"
+                },
+                "401": {
+                  "description": "Unauthorized"
+                },
+                "403": {
+                  "description": "Forbidden"
+                }
+              },
+              "summary": "errorHtml",
+              "tags": [
+                "basic-error-controller"
+              ]
+            },
+            "get": {
+              "operationId": "errorHtmlUsingGET",
+              "produces": [
+                "text/html"
+              ],
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "schema": {
+                    "$ref": "#/definitions/ModelAndView"
+                  }
+                },
+                "401": {
+                  "description": "Unauthorized"
+                },
+                "403": {
+                  "description": "Forbidden"
+                },
+                "404": {
+                  "description": "Not Found"
+                }
+              },
+              "summary": "errorHtml",
+              "tags": [
+                "basic-error-controller"
+              ]
+            },
+            "head": {
+              "consumes": [
+                "application/json"
+              ],
+              "operationId": "errorHtmlUsingHEAD",
+              "produces": [
+                "text/html"
+              ],
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "schema": {
+                    "$ref": "#/definitions/ModelAndView"
+                  }
+                },
+                "204": {
+                  "description": "No Content"
+                },
+                "401": {
+                  "description": "Unauthorized"
+                },
+                "403": {
+                  "description": "Forbidden"
+                }
+              },
+              "summary": "errorHtml",
+              "tags": [
+                "basic-error-controller"
+              ]
+            },
+            "options": {
+              "consumes": [
+                "application/json"
+              ],
+              "operationId": "errorHtmlUsingOPTIONS",
+              "produces": [
+                "text/html"
+              ],
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "schema": {
+                    "$ref": "#/definitions/ModelAndView"
+                  }
+                },
+                "204": {
+                  "description": "No Content"
+                },
+                "401": {
+                  "description": "Unauthorized"
+                },
+                "403": {
+                  "description": "Forbidden"
+                }
+              },
+              "summary": "errorHtml",
+              "tags": [
+                "basic-error-controller"
+              ]
+            },
+            "patch": {
+              "consumes": [
+                "application/json"
+              ],
+              "operationId": "errorHtmlUsingPATCH",
+              "produces": [
+                "text/html"
+              ],
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "schema": {
+                    "$ref": "#/definitions/ModelAndView"
+                  }
+                },
+                "204": {
+                  "description": "No Content"
+                },
+                "401": {
+                  "description": "Unauthorized"
+                },
+                "403": {
+                  "description": "Forbidden"
+                }
+              },
+              "summary": "errorHtml",
+              "tags": [
+                "basic-error-controller"
+              ]
+            },
+            "post": {
+              "consumes": [
+                "application/json"
+              ],
+              "operationId": "errorHtmlUsingPOST",
+              "produces": [
+                "text/html"
+              ],
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "schema": {
+                    "$ref": "#/definitions/ModelAndView"
+                  }
+                },
+                    "201": {
+                        "description": "Created"
+                    },
+                "401": {
+                  "description": "Unauthorized"
+                },
+                "403": {
+                  "description": "Forbidden"
+                },
+                "404": {
+                  "description": "Not Found"
+                }
+              },
+              "summary": "errorHtml",
+              "tags": [
+                "basic-error-controller"
+              ]
+            },
+            "put": {
+              "consumes": [
+                "application/json"
+              ],
+              "operationId": "errorHtmlUsingPUT",
+              "produces": [
+                "text/html"
+              ],
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "schema": {
+                    "$ref": "#/definitions/ModelAndView"
+                  }
+                },
+                    "201": {
+                        "description": "Created"
+                    },
+                "401": {
+                  "description": "Unauthorized"
+                },
+                "403": {
+                  "description": "Forbidden"
+                },
+                "404": {
+                  "description": "Not Found"
+                }
+              },
+              "summary": "errorHtml",
+              "tags": [
+                "basic-error-controller"
+              ]
+            }
+        },
+        "/sb/alliance": {
+            "delete": {
+                "operationId": "deleteAllianceUsingDELETE",
+                "parameters": [
+                    {
+                        "description": "alliance",
+                        "in": "body",
+                        "name": "alliance",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Alliance"
+                        }
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "summary": "deleteAlliance",
+                "tags": [
+                    "alliance-api-impl"
+                ]
+            },
+            "get": {
+                "operationId": "getAllianceUsingGET",
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getAlliance",
+                "tags": [
+                    "alliance-api-impl"
+                ]
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "putAllianceUsingPUT",
+                "parameters": [
+                    {
+                        "description": "alliance",
+                        "in": "body",
+                        "name": "alliance",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Alliance"
+                        }
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "201": {
+                        "description": "Created"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "putAlliance",
+                "tags": [
+                    "alliance-api-impl"
+                ]
+            }
+        },
+        "/sb/alliance/user": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "putUserUsingPUT",
+                "parameters": [
+                    {
+                        "description": "alliance",
+                        "in": "body",
+                        "name": "alliance",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Alliance"
+                        }
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "201": {
+                        "description": "Created"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "putUser",
+                "tags": [
+                    "alliance-api-impl"
+                ]
+            }
+        },
+        "/sb/alliance/{idAlliance}": {
+            "get": {
+                "operationId": "getAllianceUsingGET_1",
+                "parameters": [
+                    {
+                        "description": "idAlliance",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idAlliance",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getAlliance",
+                "tags": [
+                    "alliance-api-impl"
+                ]
+            }
+        },
+        "/sb/building": {
+            "get": {
+                "operationId": "getBuildingUsingGET",
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getBuilding",
+                "tags": [
+                    "building-api-impl"
+                ]
+            }
+        },
+        "/sb/building/{idBuilding}": {
+            "get": {
+                "operationId": "getBuildingUsingGET_1",
+                "parameters": [
+                    {
+                        "description": "idBuilding",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idBuilding",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getBuilding",
+                "tags": [
+                    "building-api-impl"
+                ]
+            }
+        },
+        "/sb/construction": {
+            "delete": {
+                "operationId": "deleteConstructionUsingDELETE",
+                "parameters": [
+                    {
+                        "description": "construction",
+                        "in": "body",
+                        "name": "construction",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Construction"
+                        }
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "summary": "deleteConstruction",
+                "tags": [
+                    "construction-api-impl"
+                ]
+            },
+            "get": {
+                "operationId": "getConstructionUsingGET",
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getConstruction",
+                "tags": [
+                    "construction-api-impl"
+                ]
+            }
+        },
+        "/sb/construction/{idConstruction}": {
+            "get": {
+                "operationId": "getConstructionUsingGET_1",
+                "parameters": [
+                    {
+                        "description": "idConstruction",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idConstruction",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getConstruction",
+                "tags": [
+                    "construction-api-impl"
+                ]
+            }
+        },
+        "/sb/createInitialData": {
+            "get": {
+                "operationId": "createInitialDataUsingGET",
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "createInitialData",
+                "tags": [
+                    "default-api-impl"
+                ]
+            }
+        },
+        "/sb/doTick": {
+            "get": {
+                "operationId": "doTickUsingGET",
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "doTick",
+                "tags": [
+                    "default-api-impl"
+                ]
+            }
+        },
+        "/sb/fleet": {
+            "delete": {
+                "operationId": "deleteFleetUsingDELETE",
+                "parameters": [
+                    {
+                        "description": "fleet",
+                        "in": "body",
+                        "name": "fleet",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Fleet"
+                        }
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "summary": "deleteFleet",
+                "tags": [
+                    "fleet-api-impl"
+                ]
+            },
+            "get": {
+                "operationId": "getFleetUsingGET",
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getFleet",
+                "tags": [
+                    "fleet-api-impl"
+                ]
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "putFleetUsingPUT",
+                "parameters": [
+                    {
+                        "description": "fleet",
+                        "in": "body",
+                        "name": "fleet",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Fleet"
+                        }
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "201": {
+                        "description": "Created"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "putFleet",
+                "tags": [
+                    "fleet-api-impl"
+                ]
+            }
+        },
+        "/sb/fleet/=idFleet={idFleet}": {
+            "get": {
+                "operationId": "getFleetUsingGET_1",
+                "parameters": [
+                    {
+                        "description": "idFleet",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idFleet",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getFleet",
+                "tags": [
+                    "fleet-api-impl"
+                ]
+            }
+        },
+        "/sb/fleet/?idFleet1={idFleet1};idFleet2={idFLeet2}": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "mergeFleetsUsingPOST",
+                "parameters": [
+                    {
+                        "description": "idFleet1",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idFleet1",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "description": "idFLeet2",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idFLeet2",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "201": {
+                        "description": "Created"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "mergeFleets",
+                "tags": [
+                    "fleet-api-impl"
+                ]
+            }
+        },
+        "/sb/fleet/checkRange/?idFleet={idFleet};idPlanet={idPlanet}": {
+            "get": {
+                "operationId": "checkRangeUsingGET",
+                "parameters": [
+                    {
+                        "description": "idFleet",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idFleet",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "description": "idPlanet",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idPlanet",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "checkRange",
+                "tags": [
+                    "fleet-api-impl"
+                ]
+            }
+        },
+        "/sb/fleet/move/?idFleet={idFleet};idPlanet={idPlanet}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "moveUsingPUT",
+                "parameters": [
+                    {
+                        "description": "idFleet",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idFleet",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "description": "idPlanet",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idPlanet",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "201": {
+                        "description": "Created"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "move",
+                "tags": [
+                    "fleet-api-impl"
+                ]
+            }
+        },
+        "/sb/fleet/range/?idFLeet={idFleet}": {
+            "get": {
+                "operationId": "getTickRangeUsingGET",
+                "parameters": [
+                    {
+                        "description": "idFleet",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idFleet",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getTickRange",
+                "tags": [
+                    "fleet-api-impl"
+                ]
+            }
+        },
+        "/sb/hull": {
+            "get": {
+                "operationId": "getHullUsingGET",
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getHull",
+                "tags": [
+                    "hull-api-impl"
+                ]
+            }
+        },
+        "/sb/hull/{idHull}": {
+            "get": {
+                "operationId": "getHullUsingGET_1",
+                "parameters": [
+                    {
+                        "description": "idHull",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idHull",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getHull",
+                "tags": [
+                    "hull-api-impl"
+                ]
+            }
+        },
+        "/sb/job": {
+            "delete": {
+                "operationId": "deleteJobUsingDELETE",
+                "parameters": [
+                    {
+                        "description": "job",
+                        "in": "body",
+                        "name": "job",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Job"
+                        }
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "summary": "deleteJob",
+                "tags": [
+                    "job-api-impl"
+                ]
+            },
+            "get": {
+                "operationId": "getJobUsingGET",
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getJob",
+                "tags": [
+                    "job-api-impl"
+                ]
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "putJobUsingPUT",
+                "parameters": [
+                    {
+                        "description": "job",
+                        "in": "body",
+                        "name": "job",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Job"
+                        }
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "201": {
+                        "description": "Created"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "putJob",
+                "tags": [
+                    "job-api-impl"
+                ]
+            }
+        },
+        "/sb/job/construction/{idPlanet}/{idBuilding}": {
+            "get": {
+                "operationId": "putConstructionJobUsingGET",
+                "parameters": [
+                    {
+                        "description": "idBuilding",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idBuilding",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "description": "idPlanet",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idPlanet",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "putConstructionJob",
+                "tags": [
+                    "job-api-impl"
+                ]
+            }
+        },
+        "/sb/job/research?idPlanet={idPlanet};idResearch={idResearch}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "putResearchJobUsingPUT",
+                "parameters": [
+                    {
+                        "description": "idPlanet",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idPlanet",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "description": "idResearch",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idResearch",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "201": {
+                        "description": "Created"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "putResearchJob",
+                "tags": [
+                    "job-api-impl"
+                ]
+            }
+        },
+        "/sb/job/shipyard?idPlanet={idPlanet};idShipClass={idShipClass};amount={amount}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "putShipyardJobUsingPUT",
+                "parameters": [
+                    {
+                        "description": "amount",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "amount",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "description": "idPlanet",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idPlanet",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "description": "idShipClass",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idShipClass",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "201": {
+                        "description": "Created"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "putShipyardJob",
+                "tags": [
+                    "job-api-impl"
+                ]
+            }
+        },
+        "/sb/job/{idJob}": {
+            "get": {
+                "operationId": "getJobUsingGET_1",
+                "parameters": [
+                    {
+                        "description": "idJob",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idJob",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getJob",
+                "tags": [
+                    "job-api-impl"
+                ]
+            }
+        },
+        "/sb/module": {
+            "delete": {
+                "operationId": "deleteModuleUsingDELETE",
+                "parameters": [
+                    {
+                        "description": "module",
+                        "in": "body",
+                        "name": "module",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Module"
+                        }
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "summary": "deleteModule",
+                "tags": [
+                    "module-api-impl"
+                ]
+            },
+            "get": {
+                "operationId": "getModuleUsingGET",
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getModule",
+                "tags": [
+                    "module-api-impl"
+                ]
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "putModuleUsingPUT",
+                "parameters": [
+                    {
+                        "description": "module",
+                        "in": "body",
+                        "name": "module",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Module"
+                        }
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "201": {
+                        "description": "Created"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "putModule",
+                "tags": [
+                    "module-api-impl"
+                ]
+            }
+        },
+        "/sb/module/{idModule}": {
+            "get": {
+                "operationId": "getModuleUsingGET_1",
+                "parameters": [
+                    {
+                        "description": "idModule",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idModule",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getModule",
+                "tags": [
+                    "module-api-impl"
+                ]
+            }
+        },
+        "/sb/planet": {
+            "delete": {
+                "operationId": "deletePlanetUsingDELETE",
+                "parameters": [
+                    {
+                        "description": "planet",
+                        "in": "body",
+                        "name": "planet",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Planet"
+                        }
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "summary": "deletePlanet",
+                "tags": [
+                    "planet-api-impl"
+                ]
+            },
+            "get": {
+                "operationId": "getPlanetUsingGET",
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getPlanet",
+                "tags": [
+                    "planet-api-impl"
+                ]
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "putPlanetUsingPUT",
+                "parameters": [
+                    {
+                        "description": "planet",
+                        "in": "body",
+                        "name": "planet",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Planet"
+                        }
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "201": {
+                        "description": "Created"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "putPlanet",
+                "tags": [
+                    "planet-api-impl"
+                ]
+            }
+        },
+        "/sb/planet/{idPlanet}": {
+            "get": {
+                "operationId": "getPlanetUsingGET_1",
+                "parameters": [
+                    {
+                        "description": "idPlanet",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idPlanet",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getPlanet",
+                "tags": [
+                    "planet-api-impl"
+                ]
+            }
+        },
+        "/sb/research": {
+            "delete": {
+                "operationId": "deleteResearchUsingDELETE",
+                "parameters": [
+                    {
+                        "description": "research",
+                        "in": "body",
+                        "name": "research",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Research"
+                        }
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "summary": "deleteResearch",
+                "tags": [
+                    "research-api-impl"
+                ]
+            },
+            "get": {
+                "operationId": "getResearchUsingGET",
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getResearch",
+                "tags": [
+                    "research-api-impl"
+                ]
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "putResearchUsingPUT",
+                "parameters": [
+                    {
+                        "description": "research",
+                        "in": "body",
+                        "name": "research",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Research"
+                        }
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "201": {
+                        "description": "Created"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "putResearch",
+                "tags": [
+                    "research-api-impl"
+                ]
+            }
+        },
+        "/sb/research/{idResearch}": {
+            "get": {
+                "operationId": "getResearchUsingGET_1",
+                "parameters": [
+                    {
+                        "description": "idResearch",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idResearch",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getResearch",
+                "tags": [
+                    "research-api-impl"
+                ]
+            }
+        },
+        "/sb/shipClass": {
+            "delete": {
+                "operationId": "deleteShipClassUsingDELETE",
+                "parameters": [
+                    {
+                        "description": "shipClass",
+                        "in": "body",
+                        "name": "shipClass",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ShipClass"
+                        }
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "summary": "deleteShipClass",
+                "tags": [
+                    "ship-class-api-impl"
+                ]
+            },
+            "get": {
+                "operationId": "getShipClassUsingGET",
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getShipClass",
+                "tags": [
+                    "ship-class-api-impl"
+                ]
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "putShipClassUsingPUT",
+                "parameters": [
+                    {
+                        "description": "shipClass",
+                        "in": "body",
+                        "name": "shipClass",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ShipClass"
+                        }
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "201": {
+                        "description": "Created"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "putShipClass",
+                "tags": [
+                    "ship-class-api-impl"
+                ]
+            }
+        },
+        "/sb/shipClass/{idShipClass}": {
+            "get": {
+                "operationId": "getShipClassUsingGET_1",
+                "parameters": [
+                    {
+                        "description": "idShipClass",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idShipClass",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getShipClass",
+                "tags": [
+                    "ship-class-api-impl"
+                ]
+            }
+        },
+        "/sb/starsystem": {
+            "delete": {
+                "operationId": "deleteStarsystemUsingDELETE",
+                "parameters": [
+                    {
+                        "description": "starsystem",
+                        "in": "body",
+                        "name": "starsystem",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Starsystem"
+                        }
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "summary": "deleteStarsystem",
+                "tags": [
+                    "starsystem-api-impl"
+                ]
+            },
+            "get": {
+                "operationId": "getStarsystemUsingGET",
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getStarsystem",
+                "tags": [
+                    "starsystem-api-impl"
+                ]
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "putStarsystemUsingPUT",
+                "parameters": [
+                    {
+                        "description": "starsystem",
+                        "in": "body",
+                        "name": "starsystem",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Starsystem"
+                        }
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "201": {
+                        "description": "Created"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "putStarsystem",
+                "tags": [
+                    "starsystem-api-impl"
+                ]
+            }
+        },
+        "/sb/starsystem/{idStarsystem}": {
+            "get": {
+                "operationId": "getStarsystemUsingGET_1",
+                "parameters": [
+                    {
+                        "description": "idStarsystem",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idStarsystem",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getStarsystem",
+                "tags": [
+                    "starsystem-api-impl"
+                ]
+            }
+        },
+        "/sb/tick": {
+            "get": {
+                "operationId": "getTickUsingGET",
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getTick",
+                "tags": [
+                    "tick-api-impl"
+                ]
+            }
+        },
+        "/sb/tick/doTick": {
+            "get": {
+                "operationId": "tickUsingGET",
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "tick",
+                "tags": [
+                    "tick-api-impl"
+                ]
+            }
+        },
+        "/sb/tick/{idTick}": {
+            "get": {
+                "operationId": "getTickUsingGET_1",
+                "parameters": [
+                    {
+                        "description": "idTick",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idTick",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getTick",
+                "tags": [
+                    "tick-api-impl"
+                ]
+            }
+        },
+        "/sb/user": {
+            "delete": {
+                "operationId": "deleteUserUsingDELETE",
+                "parameters": [
+                    {
+                        "description": "user",
+                        "in": "body",
+                        "name": "user",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "summary": "deleteUser",
+                "tags": [
+                    "user-api-impl"
+                ]
+            },
+            "get": {
+                "operationId": "getUserUsingGET",
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getUser",
+                "tags": [
+                    "user-api-impl"
+                ]
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "putUserUsingPUT_1",
+                "parameters": [
+                    {
+                        "description": "user",
+                        "in": "body",
+                        "name": "user",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "201": {
+                        "description": "Created"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "putUser",
+                "tags": [
+                    "user-api-impl"
+                ]
+            }
+        },
+        "/sb/user/{idUser}": {
+            "get": {
+                "operationId": "getUserUsingGET_1",
+                "parameters": [
+                    {
+                        "description": "idUser",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idUser",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getUser",
+                "tags": [
+                    "user-api-impl"
+                ]
+            }
+        }
+    },
+    "swagger": "2.0",
+    "tags": [
+        {
+            "description": "Alliance Api Impl",
+            "name": "alliance-api-impl"
+        },
+        {
+            "description": "Basic Error Controller",
+            "name": "basic-error-controller"
+        },
+        {
+            "description": "Building Api Impl",
+            "name": "building-api-impl"
+        },
+        {
+            "description": "Construction Api Impl",
+            "name": "construction-api-impl"
+        },
+        {
+            "description": "Default Api Impl",
+            "name": "default-api-impl"
+        },
+        {
+            "description": "Fleet Api Impl",
+            "name": "fleet-api-impl"
+        },
+        {
+            "description": "Hull Api Impl",
+            "name": "hull-api-impl"
+        },
+        {
+            "description": "Job Api Impl",
+            "name": "job-api-impl"
+        },
+        {
+            "description": "Module Api Impl",
+            "name": "module-api-impl"
+        },
+        {
+            "description": "Operation Handler",
+            "name": "operation-handler"
+        },
+        {
+            "description": "Planet Api Impl",
+            "name": "planet-api-impl"
+        },
+        {
+            "description": "Research Api Impl",
+            "name": "research-api-impl"
+        },
+        {
+            "description": "Ship Class Api Impl",
+            "name": "ship-class-api-impl"
+        },
+        {
+            "description": "Starsystem Api Impl",
+            "name": "starsystem-api-impl"
+        },
+        {
+            "description": "Tick Api Impl",
+            "name": "tick-api-impl"
+        },
+      {
+        "description": "User Api Impl",
+        "name": "user-api-impl"
+      },
+      {
+        "description": "Web Mvc Links Handler",
+        "name": "web-mvc-links-handler"
+      }
+    ]
+}
+done with formatting

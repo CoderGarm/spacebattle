@@ -31,7 +31,7 @@ public class Building extends AbstractEntityKey {
 
     private int baseValue;
 
-    private final BigDecimal increasmentFactorPerLevel = new BigDecimal("0.2");
+    private final BigDecimal increasingFactorPerLevel = new BigDecimal("0.2");
 
     /**
      * what is this building producing
@@ -41,14 +41,14 @@ public class Building extends AbstractEntityKey {
     private EResourceType resourceType;
 
     @Nonnull
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "idCosts")
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "idCosts", updatable = false)
     private final ResourceDeposit costs = new ResourceDeposit(EResourceSubType.COSTS);
 
     @JsonIgnore
     @Nonnull
     @NotNull
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "idResearch")
     private Research unlockedThrough;
 
@@ -58,7 +58,8 @@ public class Building extends AbstractEntityKey {
     public Building(@Nonnull final String name,
                     @Nonnull final String description,
                     final int baseValue,
-                    @Nonnull final EResourceType resourceType, @Nonnull final Research unlockedThrough) {
+                    @Nonnull final EResourceType resourceType,
+                    @Nonnull final Research unlockedThrough) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
@@ -87,8 +88,8 @@ public class Building extends AbstractEntityKey {
     }
 
     @Nonnull
-    public BigDecimal getIncreasmentFactorPerLevel() {
-        return increasmentFactorPerLevel;
+    public BigDecimal getIncreasingFactorPerLevel() {
+        return increasingFactorPerLevel;
     }
 
     @Nonnull
@@ -120,5 +121,20 @@ public class Building extends AbstractEntityKey {
     public int hashCode() {
         int result = 31 * id;
         return result;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Building{");
+        sb.append(", id=").append(id);
+        sb.append("name='").append(name).append('\'');
+        sb.append(", description='").append(description).append('\'');
+        sb.append(", baseValue=").append(baseValue);
+        sb.append(", increasingFactorPerLevel=").append(increasingFactorPerLevel);
+        sb.append(", resourceType=").append(resourceType);
+        sb.append(", costs=").append(costs);
+        sb.append(", unlockedThrough=").append(unlockedThrough);
+        sb.append('}');
+        return sb.toString();
     }
 }

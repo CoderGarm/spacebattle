@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.repositories.impl;
+package de.yuga.spacebattle.repositories.account;
 
 import de.yuga.spacebattle.entities.account.User;
 import org.springframework.stereotype.Service;
