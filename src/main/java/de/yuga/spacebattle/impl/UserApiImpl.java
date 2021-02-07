@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -32,9 +31,10 @@ public class UserApiImpl {
     @GetMapping
     @ResponseBody
     public ResponseEntity<?> getUser() {
-        Iterable<User> all1 = userC.findAll();
+        /*Iterable<User> all1 = userC.findAll();
         final List<User> all = new ArrayList<>();
-        all1.forEach(all::add);
+        all1.forEach(all::add);*/
+        List<User> all = userC.findAllUsers();
         return ResponseEntity.ok(all);
     }
 
