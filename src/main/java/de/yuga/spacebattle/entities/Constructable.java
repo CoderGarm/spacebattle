@@ -58,7 +58,7 @@ public class Constructable {
 
         this.building = building;
         this.targetLevel = targetLevel;
-        this.resourceType = EResourceType.ORBITALCONSTRUCTION;
+        this.resourceType = EResourceType.CONSTRUCTION;
     }
 
     public Constructable(@Nonnull final Research research, @Nonnull final Integer targetLevel) {
@@ -78,7 +78,7 @@ public class Constructable {
 
         this.shipClass = shipClass;
         this.amountShips = amountShips;
-        this.resourceType = EResourceType.CONSTRUCTION;
+        this.resourceType = EResourceType.ORBITALCONSTRUCTION;
     }
 
     @Nullable

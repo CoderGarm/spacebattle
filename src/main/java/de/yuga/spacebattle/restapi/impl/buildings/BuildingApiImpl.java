@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 @RestController
-@RequestMapping("/sb/building")
+@RequestMapping(value = "/sb/building")
 public class BuildingApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(BuildingApiImpl.class);

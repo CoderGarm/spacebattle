@@ -11,7 +11,6 @@ import de.yuga.spacebattle.entities.orbitals.Starsystem;
 import de.yuga.spacebattle.entities.researches.Research;
 import de.yuga.spacebattle.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.entities.spacecrafts.Module;
-import de.yuga.spacebattle.entities.turn.Tick;
 import de.yuga.spacebattle.enums.EModuleType;
 import de.yuga.spacebattle.enums.ERaceType;
 import de.yuga.spacebattle.enums.EResourceType;
@@ -39,7 +38,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 @RestController
-@RequestMapping("/sb")
+@RequestMapping(value = "/sb")
 public class DefaultApiImpl {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DefaultApiImpl.class);
@@ -74,13 +73,6 @@ public class DefaultApiImpl {
     @Nonnull
     private final ResearchService researchService;
 
-
-    //@Scheduled(cron = "* */1 * * * *")
-    private void doIt() {
-        tickService.doTick();
-        LOGGER.info("Tick has processed!");
-    }
-
     @Autowired
     public DefaultApiImpl(@Nonnull final TickService tickService,
                           @Nonnull final UserService userService,
@@ -113,14 +105,6 @@ public class DefaultApiImpl {
         this.hullService = hullService;
         this.shipClassService = shipClassService;
         this.researchService = researchService;
-    }
-
-
-    @GetMapping(value = "/doTick")
-    @ResponseBody
-    public ResponseEntity<?> doTick() {
-        Tick now = tickService.doTick();
-        return ResponseEntity.ok(now);
     }
 
     @GetMapping(value = "/createInitialData")

@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -69,6 +70,25 @@ public class TickService {
         this.planetC = planetC;
         this.moveC = moveC;
         this.fleetC = fleetC;
+    }
+
+    //@Scheduled(cron = "* */1 * * * *")
+    private void doIt() {
+        LOGGER.info("Tick scheduled");
+        this.doTick();
+        LOGGER.info("Tick has processed!");
+    }
+
+    @Nonnull
+    public List<Tick> findAll() {
+        return tickC.findAllTicks();
+    }
+
+    @Nullable
+    public Tick find(@Nonnull final Integer idHull) {
+        Preconditions.checkNotNull(idHull, "idHull shouldn't be null!");
+
+        return tickC.findById(idHull).orElse(null);
     }
 
     @Transactional(rollbackFor = Exception.class)

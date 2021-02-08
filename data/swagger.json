@@ -12,13 +12,6 @@
                     "format": "int32",
                     "type": "integer"
                 },
-                "members": {
-                    "items": {
-                        "$ref": "#/definitions/User"
-                    },
-                    "type": "array",
-                    "uniqueItems": true
-                },
                 "name": {
                     "maxLength": 30,
                     "minLength": 1,
@@ -27,7 +20,6 @@
             },
             "required": [
                 "code",
-                "members",
                 "name"
             ],
             "title": "Alliance",
@@ -50,7 +42,7 @@
                     "type": "integer"
                 },
                 "increasingFactorPerLevel": {
-                  "type": "number"
+                    "type": "number"
                 },
                 "name": {
                     "maxLength": 30,
@@ -513,10 +505,10 @@
                 },
                 "subType": {
                     "enum": [
-                      "COSTS",
-                      "DEFAULT",
-                      "DEPOSITS",
-                      "MININGFACTORS"
+                        "COSTS",
+                        "DEFAULT",
+                        "DEPOSITS",
+                        "MININGFACTORS"
                     ],
                     "type": "string"
                 }
@@ -834,214 +826,214 @@
         },
         "/error": {
             "delete": {
-              "operationId": "errorHtmlUsingDELETE",
-              "produces": [
-                "text/html"
-              ],
-              "responses": {
-                "200": {
-                  "description": "OK",
-                  "schema": {
-                    "$ref": "#/definitions/ModelAndView"
-                  }
+                "operationId": "errorHtmlUsingDELETE",
+                "produces": [
+                    "text/html"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ModelAndView"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
                 },
-                "204": {
-                  "description": "No Content"
-                },
-                "401": {
-                  "description": "Unauthorized"
-                },
-                "403": {
-                  "description": "Forbidden"
-                }
-              },
-              "summary": "errorHtml",
-              "tags": [
-                "basic-error-controller"
-              ]
+                "summary": "errorHtml",
+                "tags": [
+                    "basic-error-controller"
+                ]
             },
             "get": {
-              "operationId": "errorHtmlUsingGET",
-              "produces": [
-                "text/html"
-              ],
-              "responses": {
-                "200": {
-                  "description": "OK",
-                  "schema": {
-                    "$ref": "#/definitions/ModelAndView"
-                  }
+                "operationId": "errorHtmlUsingGET",
+                "produces": [
+                    "text/html"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ModelAndView"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
                 },
-                "401": {
-                  "description": "Unauthorized"
-                },
-                "403": {
-                  "description": "Forbidden"
-                },
-                "404": {
-                  "description": "Not Found"
-                }
-              },
-              "summary": "errorHtml",
-              "tags": [
-                "basic-error-controller"
-              ]
+                "summary": "errorHtml",
+                "tags": [
+                    "basic-error-controller"
+                ]
             },
             "head": {
-              "consumes": [
-                "application/json"
-              ],
-              "operationId": "errorHtmlUsingHEAD",
-              "produces": [
-                "text/html"
-              ],
-              "responses": {
-                "200": {
-                  "description": "OK",
-                  "schema": {
-                    "$ref": "#/definitions/ModelAndView"
-                  }
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "errorHtmlUsingHEAD",
+                "produces": [
+                    "text/html"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ModelAndView"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
                 },
-                "204": {
-                  "description": "No Content"
-                },
-                "401": {
-                  "description": "Unauthorized"
-                },
-                "403": {
-                  "description": "Forbidden"
-                }
-              },
-              "summary": "errorHtml",
-              "tags": [
-                "basic-error-controller"
-              ]
+                "summary": "errorHtml",
+                "tags": [
+                    "basic-error-controller"
+                ]
             },
             "options": {
-              "consumes": [
-                "application/json"
-              ],
-              "operationId": "errorHtmlUsingOPTIONS",
-              "produces": [
-                "text/html"
-              ],
-              "responses": {
-                "200": {
-                  "description": "OK",
-                  "schema": {
-                    "$ref": "#/definitions/ModelAndView"
-                  }
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "errorHtmlUsingOPTIONS",
+                "produces": [
+                    "text/html"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ModelAndView"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
                 },
-                "204": {
-                  "description": "No Content"
-                },
-                "401": {
-                  "description": "Unauthorized"
-                },
-                "403": {
-                  "description": "Forbidden"
-                }
-              },
-              "summary": "errorHtml",
-              "tags": [
-                "basic-error-controller"
-              ]
+                "summary": "errorHtml",
+                "tags": [
+                    "basic-error-controller"
+                ]
             },
             "patch": {
-              "consumes": [
-                "application/json"
-              ],
-              "operationId": "errorHtmlUsingPATCH",
-              "produces": [
-                "text/html"
-              ],
-              "responses": {
-                "200": {
-                  "description": "OK",
-                  "schema": {
-                    "$ref": "#/definitions/ModelAndView"
-                  }
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "errorHtmlUsingPATCH",
+                "produces": [
+                    "text/html"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ModelAndView"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
                 },
-                "204": {
-                  "description": "No Content"
-                },
-                "401": {
-                  "description": "Unauthorized"
-                },
-                "403": {
-                  "description": "Forbidden"
-                }
-              },
-              "summary": "errorHtml",
-              "tags": [
-                "basic-error-controller"
-              ]
+                "summary": "errorHtml",
+                "tags": [
+                    "basic-error-controller"
+                ]
             },
             "post": {
-              "consumes": [
-                "application/json"
-              ],
-              "operationId": "errorHtmlUsingPOST",
-              "produces": [
-                "text/html"
-              ],
-              "responses": {
-                "200": {
-                  "description": "OK",
-                  "schema": {
-                    "$ref": "#/definitions/ModelAndView"
-                  }
-                },
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "errorHtmlUsingPOST",
+                "produces": [
+                    "text/html"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ModelAndView"
+                        }
+                    },
                     "201": {
                         "description": "Created"
                     },
-                "401": {
-                  "description": "Unauthorized"
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
                 },
-                "403": {
-                  "description": "Forbidden"
-                },
-                "404": {
-                  "description": "Not Found"
-                }
-              },
-              "summary": "errorHtml",
-              "tags": [
-                "basic-error-controller"
-              ]
+                "summary": "errorHtml",
+                "tags": [
+                    "basic-error-controller"
+                ]
             },
             "put": {
-              "consumes": [
-                "application/json"
-              ],
-              "operationId": "errorHtmlUsingPUT",
-              "produces": [
-                "text/html"
-              ],
-              "responses": {
-                "200": {
-                  "description": "OK",
-                  "schema": {
-                    "$ref": "#/definitions/ModelAndView"
-                  }
-                },
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "errorHtmlUsingPUT",
+                "produces": [
+                    "text/html"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ModelAndView"
+                        }
+                    },
                     "201": {
                         "description": "Created"
                     },
-                "401": {
-                  "description": "Unauthorized"
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
                 },
-                "403": {
-                  "description": "Forbidden"
-                },
-                "404": {
-                  "description": "Not Found"
-                }
-              },
-              "summary": "errorHtml",
-              "tags": [
-                "basic-error-controller"
-              ]
+                "summary": "errorHtml",
+                "tags": [
+                    "basic-error-controller"
+                ]
             }
         },
         "/sb/alliance": {
@@ -1059,7 +1051,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1086,7 +1078,7 @@
             "get": {
                 "operationId": "getAllianceUsingGET",
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1127,7 +1119,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1173,7 +1165,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1215,7 +1207,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1244,7 +1236,7 @@
             "get": {
                 "operationId": "getBuildingUsingGET",
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1283,7 +1275,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1323,7 +1315,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1350,7 +1342,7 @@
             "get": {
                 "operationId": "getConstructionUsingGET",
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1389,7 +1381,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1418,7 +1410,7 @@
             "get": {
                 "operationId": "createInitialDataUsingGET",
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1443,35 +1435,6 @@
                 ]
             }
         },
-        "/sb/doTick": {
-            "get": {
-                "operationId": "doTickUsingGET",
-                "produces": [
-                    "*/*"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    }
-                },
-                "summary": "doTick",
-                "tags": [
-                    "default-api-impl"
-                ]
-            }
-        },
         "/sb/fleet": {
             "delete": {
                 "operationId": "deleteFleetUsingDELETE",
@@ -1487,7 +1450,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1514,7 +1477,7 @@
             "get": {
                 "operationId": "getFleetUsingGET",
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1555,7 +1518,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1597,7 +1560,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1622,60 +1585,7 @@
                 ]
             }
         },
-        "/sb/fleet/?idFleet1={idFleet1};idFleet2={idFLeet2}": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "operationId": "mergeFleetsUsingPOST",
-                "parameters": [
-                    {
-                        "description": "idFleet1",
-                        "format": "int32",
-                        "in": "path",
-                        "name": "idFleet1",
-                        "required": true,
-                        "type": "integer"
-                    },
-                    {
-                        "description": "idFLeet2",
-                        "format": "int32",
-                        "in": "path",
-                        "name": "idFLeet2",
-                        "required": true,
-                        "type": "integer"
-                    }
-                ],
-                "produces": [
-                    "*/*"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "201": {
-                        "description": "Created"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    }
-                },
-                "summary": "mergeFleets",
-                "tags": [
-                    "fleet-api-impl"
-                ]
-            }
-        },
-        "/sb/fleet/checkRange/?idFleet={idFleet};idPlanet={idPlanet}": {
+        "/sb/fleet/checkRange/{idFleet}/{idPlanet}": {
             "get": {
                 "operationId": "checkRangeUsingGET",
                 "parameters": [
@@ -1697,7 +1607,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1722,7 +1632,7 @@
                 ]
             }
         },
-        "/sb/fleet/move/?idFleet={idFleet};idPlanet={idPlanet}": {
+        "/sb/fleet/move/{idFleet}/{idPlanet}": {
             "put": {
                 "consumes": [
                     "application/json"
@@ -1747,7 +1657,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1789,7 +1699,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1814,11 +1724,64 @@
                 ]
             }
         },
+        "/sb/fleet/{idFleet1}/{idFLeet2}": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "operationId": "mergeFleetsUsingPOST",
+                "parameters": [
+                    {
+                        "description": "idFleet1",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idFleet1",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "description": "idFLeet2",
+                        "format": "int32",
+                        "in": "path",
+                        "name": "idFLeet2",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "201": {
+                        "description": "Created"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "mergeFleets",
+                "tags": [
+                    "fleet-api-impl"
+                ]
+            }
+        },
         "/sb/hull": {
             "get": {
                 "operationId": "getHullUsingGET",
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1857,7 +1820,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1897,7 +1860,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1924,7 +1887,7 @@
             "get": {
                 "operationId": "getJobUsingGET",
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -1965,7 +1928,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2015,7 +1978,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2040,12 +2003,9 @@
                 ]
             }
         },
-        "/sb/job/research?idPlanet={idPlanet};idResearch={idResearch}": {
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "operationId": "putResearchJobUsingPUT",
+        "/sb/job/research/{idPlanet}/{idResearch}": {
+            "get": {
+                "operationId": "putResearchJobUsingGET",
                 "parameters": [
                     {
                         "description": "idPlanet",
@@ -2065,7 +2025,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2073,9 +2033,6 @@
                         "schema": {
                             "type": "object"
                         }
-                    },
-                    "201": {
-                        "description": "Created"
                     },
                     "401": {
                         "description": "Unauthorized"
@@ -2093,12 +2050,9 @@
                 ]
             }
         },
-        "/sb/job/shipyard?idPlanet={idPlanet};idShipClass={idShipClass};amount={amount}": {
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "operationId": "putShipyardJobUsingPUT",
+        "/sb/job/shipyard/{idPlanet}/{idShipClass}/{amount}": {
+            "get": {
+                "operationId": "putShipyardJobUsingGET",
                 "parameters": [
                     {
                         "description": "amount",
@@ -2126,7 +2080,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2134,9 +2088,6 @@
                         "schema": {
                             "type": "object"
                         }
-                    },
-                    "201": {
-                        "description": "Created"
                     },
                     "401": {
                         "description": "Unauthorized"
@@ -2168,7 +2119,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2208,7 +2159,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2235,7 +2186,7 @@
             "get": {
                 "operationId": "getModuleUsingGET",
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2276,7 +2227,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2318,7 +2269,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2358,7 +2309,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2385,7 +2336,7 @@
             "get": {
                 "operationId": "getPlanetUsingGET",
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2426,7 +2377,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2468,7 +2419,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2508,7 +2459,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2535,7 +2486,7 @@
             "get": {
                 "operationId": "getResearchUsingGET",
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2576,7 +2527,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2618,7 +2569,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2658,7 +2609,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2685,7 +2636,7 @@
             "get": {
                 "operationId": "getShipClassUsingGET",
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2726,7 +2677,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2768,7 +2719,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2808,7 +2759,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2835,7 +2786,7 @@
             "get": {
                 "operationId": "getStarsystemUsingGET",
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2876,7 +2827,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2918,7 +2869,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2947,7 +2898,7 @@
             "get": {
                 "operationId": "getTickUsingGET",
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -2976,7 +2927,7 @@
             "get": {
                 "operationId": "tickUsingGET",
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -3015,7 +2966,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -3055,7 +3006,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -3082,7 +3033,7 @@
             "get": {
                 "operationId": "getUserUsingGET",
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -3123,7 +3074,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -3165,7 +3116,7 @@
                     }
                 ],
                 "produces": [
-                    "*/*"
+                    "application/json"
                 ],
                 "responses": {
                     "200": {
@@ -3253,14 +3204,13 @@
             "description": "Tick Api Impl",
             "name": "tick-api-impl"
         },
-      {
-        "description": "User Api Impl",
-        "name": "user-api-impl"
-      },
-      {
-        "description": "Web Mvc Links Handler",
-        "name": "web-mvc-links-handler"
-      }
+        {
+            "description": "User Api Impl",
+            "name": "user-api-impl"
+        },
+        {
+            "description": "Web Mvc Links Handler",
+            "name": "web-mvc-links-handler"
+        }
     ]
 }
-done with formatting

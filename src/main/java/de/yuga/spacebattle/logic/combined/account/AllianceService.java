@@ -34,6 +34,13 @@ public class AllianceService {
     }
 
     @Nonnull
+    public final Alliance save(@Nonnull final Alliance entity) {
+        Preconditions.checkNotNull(entity, "entity shouldn't be null!");
+
+        return allianceRepository.save(entity);
+    }
+
+    @Nonnull
     public List<Alliance> findAll() {
         return allianceRepository.findAllAlliances();
     }
@@ -70,5 +77,11 @@ public class AllianceService {
             throw new NotifySBUserException("Someone deleted the alliance in between. Shit happens.");
         }
         return fetchedAlliance;
+    }
+
+    public void delete(@Nonnull final Alliance entity) {
+        Preconditions.checkNotNull(entity, "entity shouldn't be null!");
+
+        allianceRepository.delete(entity);
     }
 }

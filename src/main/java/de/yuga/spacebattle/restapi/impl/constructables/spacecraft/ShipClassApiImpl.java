@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 @RestController
-@RequestMapping("/sb/shipClass")
+@RequestMapping(value = "/sb/shipClass")
 public class ShipClassApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ShipClassApiImpl.class);

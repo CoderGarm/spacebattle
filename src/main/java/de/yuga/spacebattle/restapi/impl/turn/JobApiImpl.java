@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 @RestController
-@RequestMapping("/sb/job")
+@RequestMapping(value = "/sb/job")
 public class JobApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(JobApiImpl.class);
@@ -76,7 +76,7 @@ public class JobApiImpl {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @GetMapping("/construction/{idPlanet}/{idBuilding}")//("/construction?idPlanet={idPlanet};idBuilding={idBuilding}")
+    @GetMapping("/construction/{idPlanet}/{idBuilding}")
     @ResponseBody
     public ResponseEntity<?> putConstructionJob(@PathVariable("idPlanet") Integer idPlanet,
                                                 @PathVariable("idBuilding") Integer idBuilding) {
@@ -86,7 +86,7 @@ public class JobApiImpl {
         return ResponseEntity.ok(job);
     }
 
-    @PutMapping("/research?idPlanet={idPlanet};idResearch={idResearch}")
+    @GetMapping("/research/{idPlanet}/{idResearch}")
     @ResponseBody
     public ResponseEntity<?> putResearchJob(@PathVariable("idPlanet") Integer idPlanet,
                                             @PathVariable("idResearch") Integer idResearch) {
@@ -96,7 +96,7 @@ public class JobApiImpl {
         return ResponseEntity.ok(job);
     }
 
-    @PutMapping("/shipyard?idPlanet={idPlanet};idShipClass={idShipClass};amount={amount}")
+    @GetMapping("/shipyard/{idPlanet}/{idShipClass}/{amount}")
     @ResponseBody
     public ResponseEntity<?> putShipyardJob(@PathVariable("idPlanet") Integer idPlanet,
                                             @PathVariable("idShipClass") Integer idShipClass,

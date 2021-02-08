@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/sb/fleet")
+@RequestMapping(value = "/sb/fleet")
 public class FleetApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(FleetApiImpl.class);
@@ -70,7 +70,7 @@ public class FleetApiImpl {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @PostMapping("/?idFleet1={idFleet1};idFleet2={idFLeet2}")
+    @PostMapping("/{idFleet1}/{idFLeet2}")
     @ResponseBody
     public ResponseEntity<?> mergeFleets(@PathVariable("idFleet1") Integer idFleet1,
                                          @PathVariable("idFLeet2") Integer idFLeet2) {
@@ -101,7 +101,7 @@ public class FleetApiImpl {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
-    @GetMapping("/checkRange/?idFleet={idFleet};idPlanet={idPlanet}")
+    @GetMapping("/checkRange/{idFleet}/{idPlanet}")
     @ResponseBody
     public ResponseEntity<?> checkRange(@PathVariable("idFleet") Integer idFleet,
                                         @PathVariable("idPlanet") Integer idPlanet) {
@@ -112,7 +112,7 @@ public class FleetApiImpl {
         return ResponseEntity.ok(calculateDistance);
     }
 
-    @PutMapping("/move/?idFleet={idFleet};idPlanet={idPlanet}")
+    @PutMapping("/move/{idFleet}/{idPlanet}")
     @ResponseBody
     public ResponseEntity<?> move(@PathVariable("idFleet") Integer idFleet,
                                   @PathVariable("idPlanet") Integer idPlanet) {

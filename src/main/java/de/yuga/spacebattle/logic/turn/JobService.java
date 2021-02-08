@@ -12,11 +12,11 @@ import de.yuga.spacebattle.entities.orbitals.Planet;
 import de.yuga.spacebattle.entities.researches.Research;
 import de.yuga.spacebattle.entities.turn.Job;
 import de.yuga.spacebattle.enums.EResourceType;
-import de.yuga.spacebattle.repositories.account.UserRepository;
-import de.yuga.spacebattle.repositories.buildings.BuildingRepository;
-import de.yuga.spacebattle.repositories.constructables.spacecraft.ShipClassRepository;
-import de.yuga.spacebattle.repositories.orbitals.PlanetRepository;
-import de.yuga.spacebattle.repositories.researches.ResearchRepository;
+import de.yuga.spacebattle.logic.account.UserService;
+import de.yuga.spacebattle.logic.buildings.BuildingService;
+import de.yuga.spacebattle.logic.constructables.spacecraft.ShipClassService;
+import de.yuga.spacebattle.logic.orbitals.PlanetService;
+import de.yuga.spacebattle.logic.researches.ResearchService;
 import de.yuga.spacebattle.repositories.turn.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,50 +31,50 @@ import java.util.Set;
 public class JobService {
 
     @Nonnull
-    private final JobRepository jobC;
+    private final JobRepository jobRepository;
 
     @Nonnull
-    private final PlanetRepository planetC;
+    private final PlanetService planetService;
 
     @Nonnull
-    private final BuildingRepository buildingC;
+    private final BuildingService buildingService;
 
     @Nonnull
-    private final ResearchRepository researchC;
+    private final ResearchService researchService;
 
     @Nonnull
-    private final ShipClassRepository shipClassC;
+    private final ShipClassService shipClassService;
 
     @Nonnull
-    private final UserRepository userC;
+    private final UserService userService;
 
     @Autowired
-    public JobService(@Nonnull final JobRepository jobC,
-                      @Nonnull final PlanetRepository planetC,
-                      @Nonnull final BuildingRepository buildingC,
-                      @Nonnull final ResearchRepository researchC,
-                      @Nonnull final ShipClassRepository shipClassC,
-                      @Nonnull final UserRepository userC) {
-        Preconditions.checkNotNull(jobC, "jobC shouldn't be null!");
-        Preconditions.checkNotNull(planetC, "planetC shouldn't be null!");
-        Preconditions.checkNotNull(buildingC, "buildingC shouldn't be null!");
-        Preconditions.checkNotNull(researchC, "researchC shouldn't be null!");
-        Preconditions.checkNotNull(shipClassC, "shipClassC shouldn't be null!");
-        Preconditions.checkNotNull(userC, "userC shouldn't be null!");
+    public JobService(@Nonnull final JobRepository jobRepository,
+                      @Nonnull final PlanetService planetService,
+                      @Nonnull final BuildingService buildingService,
+                      @Nonnull final ResearchService researchService,
+                      @Nonnull final ShipClassService shipClassService,
+                      @Nonnull final UserService userService) {
+        Preconditions.checkNotNull(jobRepository, "jobC shouldn't be null!");
+        Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
+        Preconditions.checkNotNull(buildingService, "buildingService shouldn't be null!");
+        Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
+        Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
+        Preconditions.checkNotNull(userService, "userService shouldn't be null!");
 
-        this.jobC = jobC;
-        this.planetC = planetC;
-        this.buildingC = buildingC;
-        this.researchC = researchC;
-        this.shipClassC = shipClassC;
-        this.userC = userC;
+        this.jobRepository = jobRepository;
+        this.planetService = planetService;
+        this.buildingService = buildingService;
+        this.researchService = researchService;
+        this.shipClassService = shipClassService;
+        this.userService = userService;
     }
 
     public void delete(@Nullable final Job entity) {
         if (entity == null || entity.getId() < 1) {
             return;
         }
-        Job doDelete = jobC.findById(entity.getId()).orElse(null);
+        Job doDelete = jobRepository.findById(entity.getId()).orElse(null);
         if (doDelete == null) {
             throw new NotifySBUserException("no job to delete");
         }
@@ -84,8 +84,40 @@ public class JobService {
         for (EResourceType resourceType : entityCosts.keySet()) {
             resourceDeposit.updateResource(resourceType, entityCosts.get(resourceType));
         }
-        planetC.save(planet);
-        jobC.delete(doDelete);
+        planetService.save(planet);
+        jobRepository.delete(doDelete);
+    }
+
+    /**
+     * Checks if the debit is in the credit and calculates if in the good case.
+     *
+     * @param planet the planet which should pay the bill
+     * @param costs  the costs
+     * @return <code>true</code>, if the bill is payed, <code>false</code> if not
+     */
+    private void checkAndBalances(@Nonnull final Planet planet,
+                                  @Nonnull final Map<EResourceType, BigDecimal> costs) {
+        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+        Preconditions.checkNotNull(costs, "costs shouldn't be null!");
+
+        ResourceDeposit resourceDeposit = planet.getResourceDeposit();
+        boolean isFine = true;
+        for (EResourceType resourceType : costs.keySet()) {
+            BigDecimal credit = resourceDeposit.getResourceAmountByType(resourceType);
+            BigDecimal debit = costs.get(resourceType);
+            BigDecimal subtract = credit.subtract(debit, ResourceDeposit.mathContext);
+            if (subtract.compareTo(BigDecimal.ZERO) < 0) {
+                isFine = false;
+            }
+        }
+        if (isFine) {
+            for (EResourceType resourceType : costs.keySet()) {
+                BigDecimal debit = costs.get(resourceType);
+                resourceDeposit.updateResource(resourceType, debit.negate());
+            }
+        } else {
+            throw new NotifySBUserException("This job is to expensive");
+        }
     }
 
 
@@ -101,8 +133,8 @@ public class JobService {
         Preconditions.checkNotNull(idPlanet, "idPlanet shouldn't be null!");
         Preconditions.checkNotNull(idBuilding, "idBuilding shouldn't be null!");
 
-        Planet planet = planetC.findById(idPlanet).get();
-        Building building = buildingC.findById(idBuilding).get();
+        Planet planet = planetService.find(idPlanet);
+        Building building = buildingService.find(idBuilding);
         if (planet == null || planet.getOwner() == null || building == null) {
             throw new NotifySBUserException("not that way!");
         }
@@ -118,9 +150,9 @@ public class JobService {
                 .findFirst().orElse(null);
 
         checkIfFree(facility);
+        checkAndBalances(planet, constructable.getJobCosts());
         Job entity = new Job(planet.getOwner(), facility, constructable);
-        jobC.save(entity);
-
+        jobRepository.save(entity);
         return entity;
     }
 
@@ -137,8 +169,8 @@ public class JobService {
         Preconditions.checkNotNull(idPlanet, "idPlanet shouldn't be null!");
         Preconditions.checkNotNull(idResearch, "idResearch shouldn't be null!");
 
-        Planet planet = planetC.findById(idPlanet).orElse(null);
-        Research research = researchC.findById(idResearch).orElse(null);
+        Planet planet = planetService.find(idPlanet);
+        Research research = researchService.find(idResearch);
         if (planet == null || planet.getOwner() == null || research == null) {
             throw new NotifySBUserException("not that way!");
         }
@@ -161,8 +193,9 @@ public class JobService {
                 .findFirst().orElse(null);
 
         checkIfFree(facility);
+        checkAndBalances(planet, constructable.getJobCosts());
         Job entity = new Job(owner, facility, constructable);
-        jobC.save(entity);
+        jobRepository.save(entity);
         return entity;
     }
 
@@ -183,8 +216,8 @@ public class JobService {
         Preconditions.checkNotNull(amount, "amount shouldn't be null!");
         Preconditions.checkArgument(amount > 0, "amount shouldn't be lower than one!");
 
-        Planet planet = planetC.findById(idPlanet).orElse(null);
-        ShipClass shipClass = shipClassC.findById(idShipClass).orElse(null);
+        Planet planet = planetService.find(idPlanet);
+        ShipClass shipClass = shipClassService.find(idShipClass);
         if (planet == null || planet.getOwner() == null || shipClass == null) {
             throw new NotifySBUserException("not that way!");
         }
@@ -195,8 +228,9 @@ public class JobService {
                 .findFirst().orElse(null);
 
         checkIfFree(facility);
+        checkAndBalances(planet, constructable.getJobCosts());
         Job entity = new Job(planet.getOwner(), facility, constructable);
-        jobC.save(entity);
+        jobRepository.save(entity);
         return entity;
     }
 

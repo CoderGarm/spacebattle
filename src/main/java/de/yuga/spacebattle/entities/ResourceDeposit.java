@@ -116,10 +116,11 @@ public class ResourceDeposit extends AbstractEntityKey {
                     rand = ThreadLocalRandom.current().nextDouble(10, 51);
                     break;
                 case DEPOSITS:
-                    // stay zero
+                    // stay zero but to play games at start
+                    rand = ThreadLocalRandom.current().nextDouble(1000, 5100);
                     break;
                 case MININGFACTORS:
-                    rand = ThreadLocalRandom.current().nextDouble(0.1, 2.01);
+                    rand = ThreadLocalRandom.current().nextDouble(29, 201);
                     break;
             }
             resources.put(type, new BigDecimal(rand, mathContext));

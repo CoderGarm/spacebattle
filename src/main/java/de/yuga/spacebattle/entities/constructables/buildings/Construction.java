@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.entities.AbstractEntityKey;
+import de.yuga.spacebattle.entities.ResourceDeposit;
 import de.yuga.spacebattle.entities.buildings.Building;
 import de.yuga.spacebattle.entities.orbitals.Planet;
 import de.yuga.spacebattle.entities.turn.Job;
@@ -65,7 +66,8 @@ public class Construction extends AbstractEntityKey {
         BigDecimal increasingFactorPerLevel = building.getIncreasingFactorPerLevel();
         int baseValue = building.getBaseValue();
         BigDecimal result = new BigDecimal(baseValue).add(increasingFactorPerLevel).multiply(new BigDecimal(level));
-        return result.multiply(rescourceFactorByPlanet);
+        return result.multiply(
+                rescourceFactorByPlanet.divide(BigDecimal.TEN.movePointRight(1), ResourceDeposit.mathContext));
     }
 
     @Nonnull

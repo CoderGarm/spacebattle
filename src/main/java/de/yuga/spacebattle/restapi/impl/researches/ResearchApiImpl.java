@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 @RestController
-@RequestMapping("/sb/research")
+@RequestMapping(value = "/sb/research")
 public class ResearchApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ResearchApiImpl.class);

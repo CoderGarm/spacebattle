@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 @RestController
-@RequestMapping("/sb/hull")
+@RequestMapping(value = "/sb/hull")
 public class HullApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(HullApiImpl.class);

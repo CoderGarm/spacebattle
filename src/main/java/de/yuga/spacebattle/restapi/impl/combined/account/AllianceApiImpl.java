@@ -2,8 +2,8 @@ package de.yuga.spacebattle.restapi.impl.combined.account;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.entities.combined.account.Alliance;
-import de.yuga.spacebattle.repositories.account.UserRepository;
-import de.yuga.spacebattle.repositories.combined.account.AllianceRepository;
+import de.yuga.spacebattle.logic.account.UserService;
+import de.yuga.spacebattle.logic.combined.account.AllianceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,38 +15,38 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 @RestController
-@RequestMapping("/sb/alliance")
+@RequestMapping(value = "/sb/alliance")
 public class AllianceApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(AllianceApiImpl.class);
 
     @Nonnull
-    private final AllianceRepository allianceRepository;
+    private final AllianceService allianceService;
 
     @Nonnull
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Autowired
-    public AllianceApiImpl(@Nonnull final AllianceRepository allianceRepository,
-                           @Nonnull final UserRepository userRepository) {
-        Preconditions.checkNotNull(allianceRepository, "allianceC shouldn't be null!");
-        Preconditions.checkNotNull(userRepository, "userRepository shouldn't be null!");
+    public AllianceApiImpl(@Nonnull final AllianceService allianceService,
+                           @Nonnull final UserService userService) {
+        Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");
+        Preconditions.checkNotNull(userService, "userService shouldn't be null!");
 
-        this.allianceRepository = allianceRepository;
-        this.userRepository = userRepository;
+        this.allianceService = allianceService;
+        this.userService = userService;
     }
 
     @GetMapping
     @ResponseBody
     public ResponseEntity<?> getAlliance() {
-        final List<Alliance> all = allianceRepository.findAllAlliances();
+        final List<Alliance> all = allianceService.findAll();
         return ResponseEntity.ok(all);
     }
 
     @GetMapping("{idAlliance}")
     @ResponseBody
     public ResponseEntity<?> getAlliance(@PathVariable("idAlliance") final int idAlliance) {
-        Alliance alliance = allianceRepository.findById(idAlliance).get();
+        Alliance alliance = allianceService.find(idAlliance);
         if (alliance == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -59,7 +59,7 @@ public class AllianceApiImpl {
         if (alliance.getId() < -1 || alliance.getId() == 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-        allianceRepository.save(alliance);
+        allianceService.save(alliance);
         return ResponseEntity.ok(alliance);
     }
 
@@ -69,7 +69,7 @@ public class AllianceApiImpl {
         if (alliance.getId() < -1 || alliance.getId() == 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-        allianceRepository.save(alliance);
+        allianceService.save(alliance);
         return ResponseEntity.ok(alliance);
     }
 
@@ -79,7 +79,7 @@ public class AllianceApiImpl {
         if (alliance.getId() < -1 || alliance.getId() == 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-        allianceRepository.delete(alliance);
+        allianceService.delete(alliance);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

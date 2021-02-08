@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 @RestController
-@RequestMapping("/sb/construction")
+@RequestMapping(value = "/sb/construction")
 public class ConstructionApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ConstructionApiImpl.class);

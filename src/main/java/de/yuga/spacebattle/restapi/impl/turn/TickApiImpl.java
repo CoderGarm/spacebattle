@@ -2,7 +2,7 @@ package de.yuga.spacebattle.restapi.impl.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.entities.turn.Tick;
-import de.yuga.spacebattle.repositories.turn.TickRepository;
+import de.yuga.spacebattle.logic.turn.TickService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,16 +14,16 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 @RestController
-@RequestMapping("/sb/tick")
+@RequestMapping(value = "/sb/tick")
 public class TickApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(TickApiImpl.class);
 
     @Nonnull
-    private final TickRepository tickController;
+    private final TickService tickController;
 
     @Autowired
-    public TickApiImpl(@Nonnull final TickRepository tickController) {
+    public TickApiImpl(@Nonnull final TickService tickController) {
         Preconditions.checkNotNull(tickController, "tickC shouldn't be null!");
 
         this.tickController = tickController;
@@ -32,14 +32,14 @@ public class TickApiImpl {
     @GetMapping
     @ResponseBody
     public ResponseEntity<?> getTick() {
-        final List<Tick> all = tickController.findAllTicks();
+        final List<Tick> all = tickController.findAll();
         return ResponseEntity.ok(all);
     }
 
     @GetMapping("{idTick}")
     @ResponseBody
     public ResponseEntity<?> getTick(@PathVariable("idTick") final int idTick) {
-        Tick tick = tickController.findById(idTick).get();
+        Tick tick = tickController.find(idTick);
         if (tick == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -49,8 +49,8 @@ public class TickApiImpl {
     @GetMapping(value = "/doTick")
     @ResponseBody
     public ResponseEntity<?> tick() {
-        Tick now = new Tick();
-        tickController.save(now);
+        LOGGER.info("Tick initialized");
+        Tick now = tickController.doTick();
         return ResponseEntity.ok(now);
     }
 }
