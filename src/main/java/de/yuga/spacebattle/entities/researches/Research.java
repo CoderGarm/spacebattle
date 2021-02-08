@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.entities.researches;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.entities.AbstractEntityKey;
 import de.yuga.spacebattle.entities.ResourceDeposit;
@@ -10,6 +11,7 @@ import de.yuga.spacebattle.entities.spacecrafts.Module;
 import de.yuga.spacebattle.enums.EResourceSubType;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.util.Set;
@@ -31,6 +33,12 @@ public class Research extends AbstractEntityKey {
 
     private int levelCap;
 
+    @JsonIgnore
+    @Nullable
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "unlockedThrough")
+    private Research unlockedThrough;
+
     @Nonnull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "idCosts", updatable = false)
@@ -51,13 +59,17 @@ public class Research extends AbstractEntityKey {
     public Research() {
     }
 
-    public Research(@Nonnull final String name, @Nonnull final String description, final int levelCap) {
+    public Research(@Nonnull final String name,
+                    @Nonnull final String description,
+                    final int levelCap,
+                    @Nullable final Research unlockedThrough) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
 
         this.name = name;
         this.description = description;
         this.levelCap = levelCap;
+        this.unlockedThrough = unlockedThrough;
     }
 
     @Nonnull
@@ -92,6 +104,11 @@ public class Research extends AbstractEntityKey {
     @Nonnull
     public Set<Module> getUnlocksModules() {
         return unlocksModules;
+    }
+
+    @Nonnull
+    public Research getUnlockedThrough() {
+        return unlockedThrough;
     }
 
     @Override

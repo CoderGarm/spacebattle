@@ -41,10 +41,13 @@ public class ResearchService {
      * @return the new research
      */
     @Nonnull
-    public Research createResearch(@Nonnull final String name, @Nonnull final String description, final int levelCap) {
+    public Research createResearch(@Nonnull final String name,
+                                   @Nonnull final String description,
+                                   final int levelCap,
+                                   @Nullable final Research unlockedThrough) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
 
-        return researchRepository.save(new Research(name, description, levelCap));
+        return researchRepository.save(new Research(name, description, levelCap, unlockedThrough));
     }
 }

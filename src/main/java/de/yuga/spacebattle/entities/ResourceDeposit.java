@@ -45,7 +45,7 @@ public class ResourceDeposit extends AbstractEntityKey {
     @NotNull(message = "SubType must be defined.")
     @Enumerated(EnumType.STRING)
     @Column(updatable = false)
-    private EResourceSubType subType = EResourceSubType.DEFAULT;
+    private EResourceSubType subType = EResourceSubType.DEFAULT; // strange validation at instanziating proxies through spring
 
     public ResourceDeposit() {
     }

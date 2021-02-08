@@ -2,6 +2,7 @@ package de.yuga.spacebattle.entities.turn;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.entities.AbstractEntityKey;
 import de.yuga.spacebattle.entities.Constructable;
 import de.yuga.spacebattle.entities.account.User;
@@ -9,13 +10,15 @@ import de.yuga.spacebattle.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.enums.EResourceType;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 @NamedQueries({
         @NamedQuery(name = "Job.getAll", query = "SELECT p FROM Job p"),
-        @NamedQuery(name = "Job.getAllByOwner", query = "SELECT p FROM Job p WHERE p.owner = :owner")
+        @NamedQuery(name = "Job.getAllByOwner", query = "SELECT p FROM Job p WHERE p.owner = :owner"),
+        @NamedQuery(name = "Job.researchPossibleForOwner", query = "SELECT COUNT(p) FROM Job p WHERE p.owner = :owner AND p.facility IS NULL")
 })
 @Entity
 @Table(name = "job", uniqueConstraints = @UniqueConstraint(columnNames = "idFacility"))
@@ -29,8 +32,8 @@ public class Job extends AbstractEntityKey {
     private User owner;
 
     @JsonIgnore
-    @Nonnull
-    @OneToOne//(cascade = CascadeType.ALL) // todo detached entity problem
+    @Nullable
+    @OneToOne
     @JoinColumn(name = "idFacility")
     private Construction facility;
 
@@ -52,7 +55,19 @@ public class Job extends AbstractEntityKey {
     public Job() {
     }
 
-    public Job(@Nonnull User owner, @Nonnull Construction facility, @Nonnull Constructable constructable) {
+    /**
+     * Unhappy with the facility-hack in case of a research.
+     *
+     * @param owner         the job's owner
+     * @param facility      the facility if the job is locatable
+     * @param constructable to job's content
+     */
+    public Job(@Nonnull User owner, @Nullable Construction facility, @Nonnull Constructable constructable) {
+        Preconditions.checkNotNull(owner, "owner shouldn't be null!");
+        Preconditions.checkNotNull(constructable, "constructable shouldn't be null!");
+        if (constructable.getResourceType() == EResourceType.RESEARCH && facility != null) {
+            throw new NotifySBUserException("Something went wrong - call the support!");
+        }
         this.owner = owner;
         this.facility = facility;
         this.constructable = constructable;
@@ -70,13 +85,12 @@ public class Job extends AbstractEntityKey {
         this.owner = owner;
     }
 
-    @Nonnull
+    @Nullable
     public Construction getFacility() {
         return facility;
     }
 
-    public void setFacility(@Nonnull final Construction facility) {
-        Preconditions.checkNotNull(facility, "facility shouldn't be null!");
+    public void setFacility(@Nullable final Construction facility) {
 
         this.facility = facility;
     }

@@ -70,6 +70,18 @@ public class JobService {
         this.userService = userService;
     }
 
+    @Nonnull
+    public final Job save(@Nonnull final Job entity) {
+        Preconditions.checkNotNull(entity, "entity shouldn't be null!");
+
+        return jobRepository.save(entity);
+    }
+
+    /**
+     * Returns the job cost if they were payed - no costs for researches!
+     *
+     * @param entity the job to delete
+     */
     public void delete(@Nullable final Job entity) {
         if (entity == null || entity.getId() < 1) {
             return;
@@ -78,22 +90,28 @@ public class JobService {
         if (doDelete == null) {
             throw new NotifySBUserException("no job to delete");
         }
-        Map<EResourceType, BigDecimal> entityCosts = entity.getConstructable().getJobCosts();
-        Planet planet = entity.getFacility().getPlanet();
-        ResourceDeposit resourceDeposit = planet.getResourceDeposit();
-        for (EResourceType resourceType : entityCosts.keySet()) {
-            resourceDeposit.updateResource(resourceType, entityCosts.get(resourceType));
+
+        if (doDelete.getJobDoneAtZero().compareTo(BigDecimal.ZERO) > 0 && entity.getFacility() != null) {
+            // if reached job is not done -> payback the paycheck
+            // not reached if the job is a research
+            Map<EResourceType, BigDecimal> entityCosts = entity.getConstructable().getJobCosts();
+            Planet planet = entity.getFacility().getPlanet();
+
+            ResourceDeposit resourceDeposit = planet.getResourceDeposit();
+            for (EResourceType resourceType : entityCosts.keySet()) {
+                resourceDeposit.updateResource(resourceType, entityCosts.get(resourceType));
+            }
+            planetService.save(planet);
         }
-        planetService.save(planet);
         jobRepository.delete(doDelete);
     }
 
     /**
      * Checks if the debit is in the credit and calculates if in the good case.
+     * No exception is thrown if the bill is payed.
      *
      * @param planet the planet which should pay the bill
      * @param costs  the costs
-     * @return <code>true</code>, if the bill is payed, <code>false</code> if not
      */
     private void checkAndBalances(@Nonnull final Planet planet,
                                   @Nonnull final Map<EResourceType, BigDecimal> costs) {
@@ -120,6 +138,23 @@ public class JobService {
         }
     }
 
+    /**
+     * Checks if the user can build that.
+     *
+     * @param user     the use who want to build the building
+     * @param research the building to build
+     */
+    private void canUseResearch(@Nonnull final User user, @Nullable final Research research) {
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
+
+        if (research != null) {
+            Set<Research> researches = user.getResearches().keySet();
+            if (!researches.contains(research)) {
+                throw new NotifySBUserException("You can't do that");
+            }
+        }
+    }
+
 
     /**
      * Creates a entity by {@link Building#getId()} and {@link Planet#getId()}.
@@ -138,6 +173,8 @@ public class JobService {
         if (planet == null || planet.getOwner() == null || building == null) {
             throw new NotifySBUserException("not that way!");
         }
+
+        canUseResearch(planet.getOwner(), building.getUnlockedThrough());
 
         Set<Construction> constructions = planet.getConstructions();
         Construction existingC = constructions.stream()
@@ -160,41 +197,51 @@ public class JobService {
     /**
      * Creates a entity by {@link Research#getId()} and {@link Planet#getId()}.
      * The research's level will be incremented by 1 in every {@link Job}.
+     * <p>
+     * The research is mapped to the home planet.
      *
-     * @param idPlanet   the planet where the entity should be executed
+     * @param idUser     the planet where the entity should be executed
      * @param idResearch the research which should be researches
      * @return the created entity
      */
-    public Job createResearchJob(@Nonnull final Integer idPlanet, @Nonnull final Integer idResearch) {
-        Preconditions.checkNotNull(idPlanet, "idPlanet shouldn't be null!");
+    public Job createResearchJob(@Nonnull final Integer idUser, @Nonnull final Integer idResearch) {
+        Preconditions.checkNotNull(idUser, "idUser shouldn't be null!");
         Preconditions.checkNotNull(idResearch, "idResearch shouldn't be null!");
 
-        Planet planet = planetService.find(idPlanet);
+        User user = userService.find(idUser);
         Research research = researchService.find(idResearch);
-        if (planet == null || planet.getOwner() == null || research == null) {
+        if (user == null || research == null) {
             throw new NotifySBUserException("not that way!");
         }
+        canUseResearch(user, research.getUnlockedThrough());
+
         int levelCap = research.getLevelCap();
 
-        User owner = planet.getOwner();
-        Map<Research, Integer> researches = owner.getResearches();
-        Integer level = 0;
+        Map<Research, Integer> researches = user.getResearches();
+        int level = 1;
         if (researches.containsKey(research)) {
-            level = researches.get(research);
+            level = researches.get(research) + 1;
         }
-
-        if (level + 1 > levelCap) {
+        if (level > levelCap) {
             throw new NotifySBUserException("no way!");
         }
-
         Constructable constructable = new Constructable(research, level + 1);
-        Construction facility = planet.getConstructions().stream()
-                .filter(construction -> construction.getBuilding().getResourceType() == EResourceType.RESEARCH)
-                .findFirst().orElse(null);
+        Planet planet = user.getOwnedPlanets().stream().filter(inlinePlanet -> {
+            Construction orElse = inlinePlanet.getConstructions().stream()
+                    .filter(construction -> construction.getBuilding().getResourceType() == EResourceType.RESEARCH)
+                    .findFirst().orElse(null);
+            return orElse != null;
+        }).findFirst().orElse(null);
 
-        checkIfFree(facility);
-        checkAndBalances(planet, constructable.getJobCosts());
-        Job entity = new Job(owner, facility, constructable);
+        if (planet == null) {
+            throw new NotifySBUserException("You need a research facility on at leas one planet.");
+        }
+
+        if (jobRepository.researchPossible(planet.getOwner())) {
+            throw new NotifySBUserException("Job in progress");
+        }
+
+        Job entity = new Job(user, null, constructable);
         jobRepository.save(entity);
         return entity;
     }
@@ -234,6 +281,11 @@ public class JobService {
         return entity;
     }
 
+    /**
+     * CHecks if the pointed faciliy is in use.
+     *
+     * @param facility
+     */
     private void checkIfFree(Construction facility) {
         if (facility == null) {
             throw new NotifySBUserException("not here, buddy!");

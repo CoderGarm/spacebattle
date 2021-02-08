@@ -76,9 +76,9 @@ public class JobApiImpl {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @GetMapping("/construction/{idPlanet}/{idBuilding}")
+    @GetMapping("/construction/{idUser}/{idBuilding}")
     @ResponseBody
-    public ResponseEntity<?> putConstructionJob(@PathVariable("idPlanet") Integer idPlanet,
+    public ResponseEntity<?> putConstructionJob(@PathVariable("idUser") Integer idPlanet,
                                                 @PathVariable("idBuilding") Integer idBuilding) {
         if (validateID(idPlanet) || validateID(idBuilding))
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -86,19 +86,19 @@ public class JobApiImpl {
         return ResponseEntity.ok(job);
     }
 
-    @GetMapping("/research/{idPlanet}/{idResearch}")
+    @GetMapping("/research/{idUser}/{idResearch}")
     @ResponseBody
-    public ResponseEntity<?> putResearchJob(@PathVariable("idPlanet") Integer idPlanet,
+    public ResponseEntity<?> putResearchJob(@PathVariable("idUser") Integer idUser,
                                             @PathVariable("idResearch") Integer idResearch) {
-        if (validateID(idPlanet) || validateID(idResearch))
+        if (validateID(idUser) || validateID(idResearch))
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        Job job = jobS.createResearchJob(idPlanet, idResearch);
+        Job job = jobS.createResearchJob(idUser, idResearch);
         return ResponseEntity.ok(job);
     }
 
-    @GetMapping("/shipyard/{idPlanet}/{idShipClass}/{amount}")
+    @GetMapping("/shipyard/{idUser}/{idShipClass}/{amount}")
     @ResponseBody
-    public ResponseEntity<?> putShipyardJob(@PathVariable("idPlanet") Integer idPlanet,
+    public ResponseEntity<?> putShipyardJob(@PathVariable("idUser") Integer idPlanet,
                                             @PathVariable("idShipClass") Integer idShipClass,
                                             @PathVariable("amount") Integer amount) {
         if (validateID(idPlanet) || validateID(idShipClass) || validateID(amount)) {

@@ -29,6 +29,11 @@ public class PlanetService {
         return planetRepository.findAllPlanets();
     }
 
+    @Nonnull
+    public List<Planet> findAllColonized() {
+        return planetRepository.findAllOwnedPlanets();
+    }
+
     @Nullable
     public Planet find(@Nonnull final Integer idPlanet) {
         Preconditions.checkNotNull(idPlanet, "idPlanet shouldn't be null!");

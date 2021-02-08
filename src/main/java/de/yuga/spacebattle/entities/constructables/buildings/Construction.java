@@ -99,19 +99,4 @@ public class Construction extends AbstractEntityKey {
     public void setJob(@Nullable Job job) {
         this.job = job;
     }
-
-    /**
-     * Returns the costs for this construction.
-     *
-     * @return the costs
-     *//*
-    public Map<EResourceType, BigDecimal> getJobCosts() {
-        ResourceDeposit costs = building.getCosts();
-        Map<EResourceType, BigDecimal> resources = new HashMap<>(costs.getResources());
-        for (EResourceType resourceType : resources.keySet()) {
-            BigDecimal resourceAmountByType = costs.getResourceAmountByType(resourceType);
-            costs.updateResource(resourceType, resourceAmountByType.multiply(new BigDecimal(level)));
-        }
-        return resources;
-    }*/
 }
