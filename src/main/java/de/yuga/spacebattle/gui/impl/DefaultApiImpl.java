@@ -14,16 +14,16 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.ERaceType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
-import de.yuga.spacebattle.backend.logic.account.UserService;
-import de.yuga.spacebattle.backend.logic.buildings.BuildingService;
-import de.yuga.spacebattle.backend.logic.combined.account.AllianceService;
-import de.yuga.spacebattle.backend.logic.constructables.spacecraft.ShipClassService;
-import de.yuga.spacebattle.backend.logic.orbitals.PlanetService;
-import de.yuga.spacebattle.backend.logic.orbitals.StarsystemService;
-import de.yuga.spacebattle.backend.logic.researches.ResearchService;
-import de.yuga.spacebattle.backend.logic.spacecraft.HullService;
-import de.yuga.spacebattle.backend.logic.spacecraft.ModuleService;
-import de.yuga.spacebattle.backend.logic.turn.TickService;
+import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.backend.services.buildings.BuildingService;
+import de.yuga.spacebattle.backend.services.combined.account.AllianceService;
+import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
+import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.backend.services.orbitals.StarsystemService;
+import de.yuga.spacebattle.backend.services.researches.ResearchService;
+import de.yuga.spacebattle.backend.services.spacecraft.HullService;
+import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
+import de.yuga.spacebattle.backend.services.turn.TickService;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,7 +38,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/sb")
+@RequestMapping(value = "/rest/sb")
 public class DefaultApiImpl {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DefaultApiImpl.class);
@@ -127,8 +127,8 @@ public class DefaultApiImpl {
         LOGGER.info(a2.toString());
         LOGGER.info("Alliances created");
 
-        final User u1 = userService.createUser("Flashkid", "test", ERaceType.HUMAN);
-        final User u2 = userService.createUser("Yufiel", "test", ERaceType.KANDORIAN);
+        final User u1 = userService.createUser("Flashkid", "test", "mail", ERaceType.HUMAN);
+        final User u2 = userService.createUser("Yufiel", "test", "mail", ERaceType.KANDORIAN);
         LOGGER.info(u1.toString());
         LOGGER.info(u2.toString());
         LOGGER.info("Users created");

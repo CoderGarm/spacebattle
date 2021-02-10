@@ -2,8 +2,8 @@ package de.yuga.spacebattle.gui.impl.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.turn.Job;
-import de.yuga.spacebattle.backend.logic.turn.JobService;
 import de.yuga.spacebattle.backend.repositories.turn.JobRepository;
+import de.yuga.spacebattle.backend.services.turn.JobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/sb/job")
+@RequestMapping(value = "/rest/sb/job")
 public class JobApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(JobApiImpl.class);

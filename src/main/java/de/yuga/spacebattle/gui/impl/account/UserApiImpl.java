@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/sb/user")
+@RequestMapping(value = "/rest/sb/user")
 public class UserApiImpl {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(UserApiImpl.class);

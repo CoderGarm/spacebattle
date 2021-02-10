@@ -21,7 +21,8 @@ import java.util.Set;
 
 
 @NamedQueries({
-        @NamedQuery(name = "User.getAll", query = "SELECT u FROM User u")
+        @NamedQuery(name = "User.getAll", query = "SELECT u FROM User u"),
+        @NamedQuery(name = "User.login", query = "SELECT u FROM User u LEFT JOIN FETCH u.ownedPlanets p LEFT JOIN FETCH u.alliance a LEFT JOIN FETCH u.researches r WHERE UPPER(u.username) = :username AND UPPER(u.password) = :password")
 })
 @Entity
 @Table(name = "user")
@@ -41,6 +42,11 @@ public class User extends AbstractEntityKey {
     private String password;
 
     @Nonnull
+    @NotNull(message = "eMail must not be null")
+    @Size(min = 1, max = 50)
+    private String email;
+
+    @Nonnull
     @NotNull(message = "racetype must not be null")
     @Enumerated(EnumType.STRING)
     private ERaceType raceType;
@@ -53,10 +59,10 @@ public class User extends AbstractEntityKey {
 
     @Nonnull
     @NotNull(message = "ownedPlanets must not be null")
-    @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinTable(name = "ownedPlanet",
+    @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "owner")
+    /*@JoinTable(name = "ownedPlanet",
             joinColumns = @JoinColumn(name = "idUser"),
-            inverseJoinColumns = @JoinColumn(name = "idPlanet"))
+            inverseJoinColumns = @JoinColumn(name = "idPlanet"))*/
     private final Set<Planet> ownedPlanets = new HashSet<>();
 
     @Nonnull
@@ -72,14 +78,17 @@ public class User extends AbstractEntityKey {
 
     public User(@Nonnull final String username,
                 @Nonnull final String password,
+                @Nonnull final String email,
                 @Nonnull final ERaceType raceType) {
         Preconditions.checkNotNull(username, "username shouldn't be null!");
         Preconditions.checkNotNull(password, "password shouldn't be null!");
+        Preconditions.checkNotNull(email, "email shouldn't be null!");
         Preconditions.checkNotNull(raceType, "raceType shouldn't be null!");
 
         this.username = username;
         this.password = password;
         this.raceType = raceType;
+        this.email = email;
     }
 
     @Nonnull
@@ -102,6 +111,15 @@ public class User extends AbstractEntityKey {
         Preconditions.checkNotNull(password, "password shouldn't be null!");
 
         this.password = password;
+    }
+
+    @Nonnull
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(@Nonnull String email) {
+        this.email = email;
     }
 
     public ERaceType getRaceType() {
@@ -151,9 +169,9 @@ public class User extends AbstractEntityKey {
         sb.append("username='").append(username).append('\'');
         //sb.append(", password='").append(password).append('\'');
         sb.append(", raceType=").append(raceType);
-        sb.append(", alliance=").append(alliance);
-        sb.append(", ownedPlanets=").append(ownedPlanets);
-        sb.append(", researches=").append(researches);
+        sb.append(", alliance=").append(alliance.getCode());
+        sb.append(", ownedPlanets=").append(ownedPlanets.size());
+        sb.append(", researches=").append(researches.size());
         sb.append('}');
         return sb.toString();
     }

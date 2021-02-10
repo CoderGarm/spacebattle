@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/sb/planet")
+@RequestMapping(value = "/rest/sb/planet")
 public class PlanetApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PlanetApiImpl.class);

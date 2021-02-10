@@ -2,8 +2,8 @@ package de.yuga.spacebattle.gui.impl.combined.account;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
-import de.yuga.spacebattle.backend.logic.account.UserService;
-import de.yuga.spacebattle.backend.logic.combined.account.AllianceService;
+import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.backend.services.combined.account.AllianceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/sb/alliance")
+@RequestMapping(value = "/rest/sb/alliance")
 public class AllianceApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(AllianceApiImpl.class);

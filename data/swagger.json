@@ -583,16 +583,21 @@
         },
         "User": {
             "properties": {
-                "id": {
-                    "format": "int32",
-                    "type": "integer"
+              "email": {
+                "maxLength": 50,
+                "minLength": 1,
+                "type": "string"
+              },
+              "id": {
+                "format": "int32",
+                "type": "integer"
+              },
+              "ownedPlanets": {
+                "items": {
+                  "$ref": "#/definitions/Planet"
                 },
-                "ownedPlanets": {
-                    "items": {
-                        "$ref": "#/definitions/Planet"
-                    },
-                    "type": "array",
-                    "uniqueItems": true
+                "type": "array",
+                "uniqueItems": true
                 },
                 "password": {
                     "maxLength": 50,
@@ -620,11 +625,12 @@
                 }
             },
             "required": [
-                "ownedPlanets",
-                "password",
-                "raceType",
-                "researches",
-                "username"
+              "email",
+              "ownedPlanets",
+              "password",
+              "raceType",
+              "researches",
+              "username"
             ],
             "title": "User",
             "type": "object"
@@ -826,20 +832,17 @@
         },
         "/error": {
             "delete": {
-              "operationId": "errorUsingDELETE",
+              "operationId": "errorHtmlUsingDELETE",
               "produces": [
-                "*/*"
+                "text/html"
               ],
               "responses": {
                 "200": {
                   "description": "OK",
                   "schema": {
-                    "additionalProperties": {
-                      "type": "object"
-                    },
-                    "type": "object"
+                    "$ref": "#/definitions/ModelAndView"
                   }
-                    },
+                },
                 "204": {
                   "description": "No Content"
                 },
@@ -850,26 +853,23 @@
                   "description": "Forbidden"
                 }
               },
-              "summary": "error",
+              "summary": "errorHtml",
               "tags": [
                 "basic-error-controller"
               ]
             },
             "get": {
-              "operationId": "errorUsingGET",
+              "operationId": "errorHtmlUsingGET",
               "produces": [
-                "*/*"
+                "text/html"
               ],
               "responses": {
                 "200": {
                   "description": "OK",
                   "schema": {
-                    "additionalProperties": {
-                      "type": "object"
-                    },
-                    "type": "object"
+                    "$ref": "#/definitions/ModelAndView"
                   }
-                    },
+                },
                 "401": {
                   "description": "Unauthorized"
                 },
@@ -880,7 +880,7 @@
                   "description": "Not Found"
                 }
               },
-              "summary": "error",
+              "summary": "errorHtml",
               "tags": [
                 "basic-error-controller"
               ]
@@ -889,20 +889,17 @@
               "consumes": [
                 "application/json"
               ],
-              "operationId": "errorUsingHEAD",
+              "operationId": "errorHtmlUsingHEAD",
               "produces": [
-                "*/*"
+                "text/html"
               ],
               "responses": {
                 "200": {
                   "description": "OK",
                   "schema": {
-                    "additionalProperties": {
-                      "type": "object"
-                    },
-                    "type": "object"
+                    "$ref": "#/definitions/ModelAndView"
                   }
-                    },
+                },
                 "204": {
                   "description": "No Content"
                 },
@@ -913,7 +910,7 @@
                   "description": "Forbidden"
                 }
               },
-              "summary": "error",
+              "summary": "errorHtml",
               "tags": [
                 "basic-error-controller"
               ]
@@ -922,20 +919,17 @@
               "consumes": [
                 "application/json"
               ],
-              "operationId": "errorUsingOPTIONS",
+              "operationId": "errorHtmlUsingOPTIONS",
               "produces": [
-                "*/*"
+                "text/html"
               ],
               "responses": {
                 "200": {
                   "description": "OK",
                   "schema": {
-                    "additionalProperties": {
-                      "type": "object"
-                    },
-                    "type": "object"
+                    "$ref": "#/definitions/ModelAndView"
                   }
-                    },
+                },
                 "204": {
                   "description": "No Content"
                 },
@@ -946,7 +940,7 @@
                   "description": "Forbidden"
                 }
               },
-              "summary": "error",
+              "summary": "errorHtml",
               "tags": [
                 "basic-error-controller"
               ]
@@ -955,20 +949,17 @@
               "consumes": [
                 "application/json"
               ],
-              "operationId": "errorUsingPATCH",
+              "operationId": "errorHtmlUsingPATCH",
               "produces": [
-                "*/*"
+                "text/html"
               ],
               "responses": {
                 "200": {
                   "description": "OK",
                   "schema": {
-                    "additionalProperties": {
-                      "type": "object"
-                    },
-                    "type": "object"
+                    "$ref": "#/definitions/ModelAndView"
                   }
-                    },
+                },
                 "204": {
                   "description": "No Content"
                 },
@@ -979,7 +970,7 @@
                   "description": "Forbidden"
                 }
               },
-              "summary": "error",
+              "summary": "errorHtml",
               "tags": [
                 "basic-error-controller"
               ]
@@ -988,23 +979,20 @@
               "consumes": [
                 "application/json"
               ],
-              "operationId": "errorUsingPOST",
+              "operationId": "errorHtmlUsingPOST",
               "produces": [
-                "*/*"
+                "text/html"
               ],
               "responses": {
                 "200": {
                   "description": "OK",
                   "schema": {
-                    "additionalProperties": {
-                      "type": "object"
-                    },
-                    "type": "object"
+                    "$ref": "#/definitions/ModelAndView"
                   }
-                    },
-                    "201": {
-                        "description": "Created"
-                    },
+                },
+                "201": {
+                  "description": "Created"
+                },
                 "401": {
                   "description": "Unauthorized"
                 },
@@ -1015,7 +1003,7 @@
                   "description": "Not Found"
                 }
               },
-              "summary": "error",
+              "summary": "errorHtml",
               "tags": [
                 "basic-error-controller"
               ]
@@ -1024,23 +1012,20 @@
               "consumes": [
                 "application/json"
               ],
-              "operationId": "errorUsingPUT",
+              "operationId": "errorHtmlUsingPUT",
               "produces": [
-                "*/*"
+                "text/html"
               ],
               "responses": {
                 "200": {
                   "description": "OK",
                   "schema": {
-                    "additionalProperties": {
-                      "type": "object"
-                    },
-                    "type": "object"
+                    "$ref": "#/definitions/ModelAndView"
                   }
-                    },
-                    "201": {
-                        "description": "Created"
-                    },
+                },
+                "201": {
+                  "description": "Created"
+                },
                 "401": {
                   "description": "Unauthorized"
                 },
@@ -1051,23 +1036,23 @@
                   "description": "Not Found"
                 }
               },
-              "summary": "error",
+              "summary": "errorHtml",
               "tags": [
                 "basic-error-controller"
               ]
             }
         },
-        "/sb/alliance": {
-            "delete": {
-                "operationId": "deleteAllianceUsingDELETE",
-                "parameters": [
-                    {
-                        "description": "alliance",
-                        "in": "body",
-                        "name": "alliance",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Alliance"
+      "/rest/sb/alliance": {
+        "delete": {
+          "operationId": "deleteAllianceUsingDELETE",
+          "parameters": [
+            {
+              "description": "alliance",
+              "in": "body",
+              "name": "alliance",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Alliance"
                         }
                     }
                 ],
@@ -1168,17 +1153,17 @@
                 ]
             }
         },
-        "/sb/alliance/user": {
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "operationId": "putUserUsingPUT",
-                "parameters": [
-                    {
-                        "description": "alliance",
-                        "in": "body",
-                        "name": "alliance",
+      "/rest/sb/alliance/user": {
+        "put": {
+          "consumes": [
+            "application/json"
+          ],
+          "operationId": "putUserUsingPUT",
+          "parameters": [
+            {
+              "description": "alliance",
+              "in": "body",
+              "name": "alliance",
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/Alliance"
@@ -1214,17 +1199,17 @@
                 ]
             }
         },
-        "/sb/alliance/{idAlliance}": {
-            "get": {
-                "operationId": "getAllianceUsingGET_1",
-                "parameters": [
-                    {
-                        "description": "idAlliance",
-                        "format": "int32",
-                        "in": "path",
-                        "name": "idAlliance",
-                        "required": true,
-                        "type": "integer"
+      "/rest/sb/alliance/{idAlliance}": {
+        "get": {
+          "operationId": "getAllianceUsingGET_1",
+          "parameters": [
+            {
+              "description": "idAlliance",
+              "format": "int32",
+              "in": "path",
+              "name": "idAlliance",
+              "required": true,
+              "type": "integer"
                     }
                 ],
                 "produces": [
@@ -1253,85 +1238,17 @@
                 ]
             }
         },
-        "/sb/building": {
-            "get": {
-                "operationId": "getBuildingUsingGET",
-                "produces": [
-                  "*/*"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    }
-                },
-                "summary": "getBuilding",
-                "tags": [
-                    "building-api-impl"
-                ]
-            }
-        },
-        "/sb/building/{idBuilding}": {
-            "get": {
-                "operationId": "getBuildingUsingGET_1",
-                "parameters": [
-                    {
-                        "description": "idBuilding",
-                        "format": "int32",
-                        "in": "path",
-                        "name": "idBuilding",
-                        "required": true,
-                        "type": "integer"
-                    }
-                ],
-                "produces": [
-                  "*/*"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    }
-                },
-                "summary": "getBuilding",
-                "tags": [
-                    "building-api-impl"
-                ]
-            }
-        },
-        "/sb/construction": {
-            "delete": {
-                "operationId": "deleteConstructionUsingDELETE",
-                "parameters": [
-                    {
-                        "description": "construction",
-                        "in": "body",
-                        "name": "construction",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Construction"
+      "/rest/sb/construction": {
+        "delete": {
+          "operationId": "deleteConstructionUsingDELETE",
+          "parameters": [
+            {
+              "description": "construction",
+              "in": "body",
+              "name": "construction",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Construction"
                         }
                     }
                 ],
@@ -1388,17 +1305,17 @@
                 ]
             }
         },
-        "/sb/construction/{idConstruction}": {
-            "get": {
-                "operationId": "getConstructionUsingGET_1",
-                "parameters": [
-                    {
-                        "description": "idConstruction",
-                        "format": "int32",
-                        "in": "path",
-                        "name": "idConstruction",
-                        "required": true,
-                        "type": "integer"
+      "/rest/sb/construction/{idConstruction}": {
+        "get": {
+          "operationId": "getConstructionUsingGET_1",
+          "parameters": [
+            {
+              "description": "idConstruction",
+              "format": "int32",
+              "in": "path",
+              "name": "idConstruction",
+              "required": true,
+              "type": "integer"
                     }
                 ],
                 "produces": [
@@ -1427,17 +1344,17 @@
                 ]
             }
         },
-        "/sb/createInitialData": {
-            "get": {
-                "operationId": "createInitialDataUsingGET",
-                "produces": [
-                  "*/*"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object"
+      "/rest/sb/createInitialData": {
+        "get": {
+          "operationId": "createInitialDataUsingGET",
+          "produces": [
+            "*/*"
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": {
+                "type": "object"
                         }
                     },
                     "401": {
@@ -1456,17 +1373,17 @@
                 ]
             }
         },
-        "/sb/fleet": {
-            "delete": {
-                "operationId": "deleteFleetUsingDELETE",
-                "parameters": [
-                    {
-                        "description": "fleet",
-                        "in": "body",
-                        "name": "fleet",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Fleet"
+      "/rest/sb/fleet": {
+        "delete": {
+          "operationId": "deleteFleetUsingDELETE",
+          "parameters": [
+            {
+              "description": "fleet",
+              "in": "body",
+              "name": "fleet",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Fleet"
                         }
                     }
                 ],
@@ -1567,17 +1484,17 @@
                 ]
             }
         },
-        "/sb/fleet/=idFleet={idFleet}": {
-            "get": {
-                "operationId": "getFleetUsingGET_1",
-                "parameters": [
-                    {
-                        "description": "idFleet",
-                        "format": "int32",
-                        "in": "path",
-                        "name": "idFleet",
-                        "required": true,
-                        "type": "integer"
+      "/rest/sb/fleet/=idFleet={idFleet}": {
+        "get": {
+          "operationId": "getFleetUsingGET_1",
+          "parameters": [
+            {
+              "description": "idFleet",
+              "format": "int32",
+              "in": "path",
+              "name": "idFleet",
+              "required": true,
+              "type": "integer"
                     }
                 ],
                 "produces": [
@@ -1606,17 +1523,17 @@
                 ]
             }
         },
-        "/sb/fleet/checkRange/{idFleet}/{idPlanet}": {
-            "get": {
-                "operationId": "checkRangeUsingGET",
-                "parameters": [
-                    {
-                        "description": "idFleet",
-                        "format": "int32",
-                        "in": "path",
-                        "name": "idFleet",
-                        "required": true,
-                        "type": "integer"
+      "/rest/sb/fleet/checkRange/{idFleet}/{idPlanet}": {
+        "get": {
+          "operationId": "checkRangeUsingGET",
+          "parameters": [
+            {
+              "description": "idFleet",
+              "format": "int32",
+              "in": "path",
+              "name": "idFleet",
+              "required": true,
+              "type": "integer"
                     },
                     {
                         "description": "idPlanet",
@@ -1653,17 +1570,17 @@
                 ]
             }
         },
-        "/sb/fleet/move/{idFleet}/{idPlanet}": {
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "operationId": "moveUsingPUT",
-                "parameters": [
-                    {
-                        "description": "idFleet",
-                        "format": "int32",
-                        "in": "path",
+      "/rest/sb/fleet/move/{idFleet}/{idPlanet}": {
+        "put": {
+          "consumes": [
+            "application/json"
+          ],
+          "operationId": "moveUsingPUT",
+          "parameters": [
+            {
+              "description": "idFleet",
+              "format": "int32",
+              "in": "path",
                         "name": "idFleet",
                         "required": true,
                         "type": "integer"
@@ -1706,17 +1623,17 @@
                 ]
             }
         },
-        "/sb/fleet/range/?idFLeet={idFleet}": {
-            "get": {
-                "operationId": "getTickRangeUsingGET",
-                "parameters": [
-                    {
-                        "description": "idFleet",
-                        "format": "int32",
-                        "in": "path",
-                        "name": "idFleet",
-                        "required": true,
-                        "type": "integer"
+      "/rest/sb/fleet/range/?idFLeet={idFleet}": {
+        "get": {
+          "operationId": "getTickRangeUsingGET",
+          "parameters": [
+            {
+              "description": "idFleet",
+              "format": "int32",
+              "in": "path",
+              "name": "idFleet",
+              "required": true,
+              "type": "integer"
                     }
                 ],
                 "produces": [
@@ -1745,17 +1662,17 @@
                 ]
             }
         },
-        "/sb/fleet/{idFleet1}/{idFLeet2}": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "operationId": "mergeFleetsUsingPOST",
-                "parameters": [
-                    {
-                        "description": "idFleet1",
-                        "format": "int32",
-                        "in": "path",
+      "/rest/sb/fleet/{idFleet1}/{idFLeet2}": {
+        "post": {
+          "consumes": [
+            "application/json"
+          ],
+          "operationId": "mergeFleetsUsingPOST",
+          "parameters": [
+            {
+              "description": "idFleet1",
+              "format": "int32",
+              "in": "path",
                         "name": "idFleet1",
                         "required": true,
                         "type": "integer"
@@ -1798,9 +1715,48 @@
                 ]
             }
         },
-        "/sb/hull": {
-            "get": {
-                "operationId": "getHullUsingGET",
+      "/rest/sb/hull": {
+        "get": {
+          "operationId": "getHullUsingGET",
+          "produces": [
+            "*/*"
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": {
+                "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "summary": "getHull",
+                "tags": [
+                    "hull-api-impl"
+                ]
+            }
+        },
+      "/rest/sb/hull/{idHull}": {
+        "get": {
+          "operationId": "getHullUsingGET_1",
+          "parameters": [
+            {
+              "description": "idHull",
+              "format": "int32",
+              "in": "path",
+              "name": "idHull",
+              "required": true,
+              "type": "integer"
+                    }
+                ],
                 "produces": [
                   "*/*"
                 ],
@@ -1827,56 +1783,17 @@
                 ]
             }
         },
-        "/sb/hull/{idHull}": {
-            "get": {
-                "operationId": "getHullUsingGET_1",
-                "parameters": [
-                    {
-                        "description": "idHull",
-                        "format": "int32",
-                        "in": "path",
-                        "name": "idHull",
-                        "required": true,
-                        "type": "integer"
-                    }
-                ],
-                "produces": [
-                  "*/*"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    }
-                },
-                "summary": "getHull",
-                "tags": [
-                    "hull-api-impl"
-                ]
-            }
-        },
-        "/sb/job": {
-            "delete": {
-                "operationId": "deleteJobUsingDELETE",
-                "parameters": [
-                    {
-                        "description": "job",
-                        "in": "body",
-                        "name": "job",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Job"
+      "/rest/sb/job": {
+        "delete": {
+          "operationId": "deleteJobUsingDELETE",
+          "parameters": [
+            {
+              "description": "job",
+              "in": "body",
+              "name": "job",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Job"
                         }
                     }
                 ],
@@ -1967,17 +1884,17 @@
                     "403": {
                         "description": "Forbidden"
                     },
-                    "404": {
-                        "description": "Not Found"
-                    }
+                  "404": {
+                    "description": "Not Found"
+                  }
                 },
-                "summary": "putJob",
-                "tags": [
-                    "job-api-impl"
-                ]
+              "summary": "putJob",
+              "tags": [
+                "job-api-impl"
+              ]
             }
-        },
-      "/sb/job/construction/{idUser}/{idBuilding}": {
+      },
+      "/rest/sb/job/construction/{idUser}/{idBuilding}": {
         "get": {
           "operationId": "putConstructionJobUsingGET",
           "parameters": [
@@ -1988,7 +1905,7 @@
               "name": "idBuilding",
               "required": true,
               "type": "integer"
-                    },
+            },
             {
               "description": "idUser",
               "format": "int32",
@@ -1997,7 +1914,7 @@
               "required": true,
               "type": "integer"
             }
-                ],
+          ],
                 "produces": [
                   "*/*"
                 ],
@@ -2014,17 +1931,17 @@
                     "403": {
                         "description": "Forbidden"
                     },
-                    "404": {
-                        "description": "Not Found"
-                    }
+                  "404": {
+                    "description": "Not Found"
+                  }
                 },
-                "summary": "putConstructionJob",
-                "tags": [
-                    "job-api-impl"
-                ]
-            }
-        },
-      "/sb/job/research/{idUser}/{idResearch}": {
+          "summary": "putConstructionJob",
+          "tags": [
+            "job-api-impl"
+          ]
+        }
+      },
+      "/rest/sb/job/research/{idUser}/{idResearch}": {
         "get": {
           "operationId": "putResearchJobUsingGET",
           "parameters": [
@@ -2044,16 +1961,16 @@
               "required": true,
               "type": "integer"
             }
-                ],
-                "produces": [
-                  "*/*"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object"
-                        }
+          ],
+          "produces": [
+            "*/*"
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": {
+                "type": "object"
+              }
                     },
                     "401": {
                         "description": "Unauthorized"
@@ -2061,17 +1978,17 @@
                     "403": {
                         "description": "Forbidden"
                     },
-                    "404": {
-                        "description": "Not Found"
-                    }
-                },
-                "summary": "putResearchJob",
-                "tags": [
-                    "job-api-impl"
-                ]
+            "404": {
+              "description": "Not Found"
             }
-        },
-      "/sb/job/shipyard/{idUser}/{idShipClass}/{amount}": {
+          },
+          "summary": "putResearchJob",
+          "tags": [
+            "job-api-impl"
+          ]
+        }
+      },
+      "/rest/sb/job/shipyard/{idUser}/{idShipClass}/{amount}": {
         "get": {
           "operationId": "putShipyardJobUsingGET",
           "parameters": [
@@ -2082,7 +1999,7 @@
               "name": "amount",
               "required": true,
               "type": "integer"
-                    },
+            },
             {
               "description": "idShipClass",
               "format": "int32",
@@ -2099,7 +2016,7 @@
               "required": true,
               "type": "integer"
             }
-                ],
+          ],
                 "produces": [
                   "*/*"
                 ],
@@ -2126,17 +2043,17 @@
                 ]
             }
         },
-        "/sb/job/{idJob}": {
-            "get": {
-                "operationId": "getJobUsingGET_1",
-                "parameters": [
-                    {
-                        "description": "idJob",
-                        "format": "int32",
-                        "in": "path",
-                        "name": "idJob",
-                        "required": true,
-                        "type": "integer"
+      "/rest/sb/job/{idJob}": {
+        "get": {
+          "operationId": "getJobUsingGET_1",
+          "parameters": [
+            {
+              "description": "idJob",
+              "format": "int32",
+              "in": "path",
+              "name": "idJob",
+              "required": true,
+              "type": "integer"
                     }
                 ],
                 "produces": [
@@ -2165,17 +2082,17 @@
                 ]
             }
         },
-        "/sb/module": {
-            "delete": {
-                "operationId": "deleteModuleUsingDELETE",
-                "parameters": [
-                    {
-                        "description": "module",
-                        "in": "body",
-                        "name": "module",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Module"
+      "/rest/sb/module": {
+        "delete": {
+          "operationId": "deleteModuleUsingDELETE",
+          "parameters": [
+            {
+              "description": "module",
+              "in": "body",
+              "name": "module",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Module"
                         }
                     }
                 ],
@@ -2276,17 +2193,17 @@
                 ]
             }
         },
-        "/sb/module/{idModule}": {
-            "get": {
-                "operationId": "getModuleUsingGET_1",
-                "parameters": [
-                    {
-                        "description": "idModule",
-                        "format": "int32",
-                        "in": "path",
-                        "name": "idModule",
-                        "required": true,
-                        "type": "integer"
+      "/rest/sb/module/{idModule}": {
+        "get": {
+          "operationId": "getModuleUsingGET_1",
+          "parameters": [
+            {
+              "description": "idModule",
+              "format": "int32",
+              "in": "path",
+              "name": "idModule",
+              "required": true,
+              "type": "integer"
                     }
                 ],
                 "produces": [
@@ -2315,17 +2232,17 @@
                 ]
             }
         },
-        "/sb/planet": {
-            "delete": {
-                "operationId": "deletePlanetUsingDELETE",
-                "parameters": [
-                    {
-                        "description": "planet",
-                        "in": "body",
-                        "name": "planet",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Planet"
+      "/rest/sb/planet": {
+        "delete": {
+          "operationId": "deletePlanetUsingDELETE",
+          "parameters": [
+            {
+              "description": "planet",
+              "in": "body",
+              "name": "planet",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Planet"
                         }
                     }
                 ],
@@ -2426,17 +2343,17 @@
                 ]
             }
         },
-        "/sb/planet/{idPlanet}": {
-            "get": {
-                "operationId": "getPlanetUsingGET_1",
-                "parameters": [
-                    {
-                        "description": "idPlanet",
-                        "format": "int32",
-                        "in": "path",
-                        "name": "idPlanet",
-                        "required": true,
-                        "type": "integer"
+      "/rest/sb/planet/{idPlanet}": {
+        "get": {
+          "operationId": "getPlanetUsingGET_1",
+          "parameters": [
+            {
+              "description": "idPlanet",
+              "format": "int32",
+              "in": "path",
+              "name": "idPlanet",
+              "required": true,
+              "type": "integer"
                     }
                 ],
                 "produces": [
@@ -2465,17 +2382,17 @@
                 ]
             }
         },
-        "/sb/research": {
-            "delete": {
-                "operationId": "deleteResearchUsingDELETE",
-                "parameters": [
-                    {
-                        "description": "research",
-                        "in": "body",
-                        "name": "research",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Research"
+      "/rest/sb/research": {
+        "delete": {
+          "operationId": "deleteResearchUsingDELETE",
+          "parameters": [
+            {
+              "description": "research",
+              "in": "body",
+              "name": "research",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Research"
                         }
                     }
                 ],
@@ -2576,17 +2493,17 @@
                 ]
             }
         },
-        "/sb/research/{idResearch}": {
-            "get": {
-                "operationId": "getResearchUsingGET_1",
-                "parameters": [
-                    {
-                        "description": "idResearch",
-                        "format": "int32",
-                        "in": "path",
-                        "name": "idResearch",
-                        "required": true,
-                        "type": "integer"
+      "/rest/sb/research/{idResearch}": {
+        "get": {
+          "operationId": "getResearchUsingGET_1",
+          "parameters": [
+            {
+              "description": "idResearch",
+              "format": "int32",
+              "in": "path",
+              "name": "idResearch",
+              "required": true,
+              "type": "integer"
                     }
                 ],
                 "produces": [
@@ -2615,17 +2532,17 @@
                 ]
             }
         },
-        "/sb/shipClass": {
-            "delete": {
-                "operationId": "deleteShipClassUsingDELETE",
-                "parameters": [
-                    {
-                        "description": "shipClass",
-                        "in": "body",
-                        "name": "shipClass",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ShipClass"
+      "/rest/sb/shipClass": {
+        "delete": {
+          "operationId": "deleteShipClassUsingDELETE",
+          "parameters": [
+            {
+              "description": "shipClass",
+              "in": "body",
+              "name": "shipClass",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/ShipClass"
                         }
                     }
                 ],
@@ -2726,17 +2643,17 @@
                 ]
             }
         },
-        "/sb/shipClass/{idShipClass}": {
-            "get": {
-                "operationId": "getShipClassUsingGET_1",
-                "parameters": [
-                    {
-                        "description": "idShipClass",
-                        "format": "int32",
-                        "in": "path",
-                        "name": "idShipClass",
-                        "required": true,
-                        "type": "integer"
+      "/rest/sb/shipClass/{idShipClass}": {
+        "get": {
+          "operationId": "getShipClassUsingGET_1",
+          "parameters": [
+            {
+              "description": "idShipClass",
+              "format": "int32",
+              "in": "path",
+              "name": "idShipClass",
+              "required": true,
+              "type": "integer"
                     }
                 ],
                 "produces": [
@@ -2765,17 +2682,17 @@
                 ]
             }
         },
-        "/sb/starsystem": {
-            "delete": {
-                "operationId": "deleteStarsystemUsingDELETE",
-                "parameters": [
-                    {
-                        "description": "starsystem",
-                        "in": "body",
-                        "name": "starsystem",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Starsystem"
+      "/rest/sb/starsystem": {
+        "delete": {
+          "operationId": "deleteStarsystemUsingDELETE",
+          "parameters": [
+            {
+              "description": "starsystem",
+              "in": "body",
+              "name": "starsystem",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Starsystem"
                         }
                     }
                 ],
@@ -2876,17 +2793,17 @@
                 ]
             }
         },
-        "/sb/starsystem/{idStarsystem}": {
-            "get": {
-                "operationId": "getStarsystemUsingGET_1",
-                "parameters": [
-                    {
-                        "description": "idStarsystem",
-                        "format": "int32",
-                        "in": "path",
-                        "name": "idStarsystem",
-                        "required": true,
-                        "type": "integer"
+      "/rest/sb/starsystem/{idStarsystem}": {
+        "get": {
+          "operationId": "getStarsystemUsingGET_1",
+          "parameters": [
+            {
+              "description": "idStarsystem",
+              "format": "int32",
+              "in": "path",
+              "name": "idStarsystem",
+              "required": true,
+              "type": "integer"
                     }
                 ],
                 "produces": [
@@ -2915,17 +2832,17 @@
                 ]
             }
         },
-        "/sb/tick": {
-            "get": {
-                "operationId": "getTickUsingGET",
-                "produces": [
-                  "*/*"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object"
+      "/rest/sb/tick": {
+        "get": {
+          "operationId": "getTickUsingGET",
+          "produces": [
+            "*/*"
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": {
+                "type": "object"
                         }
                     },
                     "401": {
@@ -2944,17 +2861,17 @@
                 ]
             }
         },
-        "/sb/tick/doTick": {
-            "get": {
-                "operationId": "tickUsingGET",
-                "produces": [
-                  "*/*"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object"
+      "/rest/sb/tick/doTick": {
+        "get": {
+          "operationId": "tickUsingGET",
+          "produces": [
+            "*/*"
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": {
+                "type": "object"
                         }
                     },
                     "401": {
@@ -2973,17 +2890,17 @@
                 ]
             }
         },
-        "/sb/tick/{idTick}": {
-            "get": {
-                "operationId": "getTickUsingGET_1",
-                "parameters": [
-                    {
-                        "description": "idTick",
-                        "format": "int32",
-                        "in": "path",
-                        "name": "idTick",
-                        "required": true,
-                        "type": "integer"
+      "/rest/sb/tick/{idTick}": {
+        "get": {
+          "operationId": "getTickUsingGET_1",
+          "parameters": [
+            {
+              "description": "idTick",
+              "format": "int32",
+              "in": "path",
+              "name": "idTick",
+              "required": true,
+              "type": "integer"
                     }
                 ],
                 "produces": [
@@ -3012,17 +2929,17 @@
                 ]
             }
         },
-        "/sb/user": {
-            "delete": {
-                "operationId": "deleteUserUsingDELETE",
-                "parameters": [
-                    {
-                        "description": "user",
-                        "in": "body",
-                        "name": "user",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/User"
+      "/rest/sb/user": {
+        "delete": {
+          "operationId": "deleteUserUsingDELETE",
+          "parameters": [
+            {
+              "description": "user",
+              "in": "body",
+              "name": "user",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/User"
                         }
                     }
                 ],
@@ -3123,17 +3040,17 @@
                 ]
             }
         },
-        "/sb/user/{idUser}": {
-            "get": {
-                "operationId": "getUserUsingGET_1",
-                "parameters": [
-                    {
-                        "description": "idUser",
-                        "format": "int32",
-                        "in": "path",
-                        "name": "idUser",
-                        "required": true,
-                        "type": "integer"
+      "/rest/sb/user/{idUser}": {
+        "get": {
+          "operationId": "getUserUsingGET_1",
+          "parameters": [
+            {
+              "description": "idUser",
+              "format": "int32",
+              "in": "path",
+              "name": "idUser",
+              "required": true,
+              "type": "integer"
                     }
                 ],
                 "produces": [
@@ -3152,16 +3069,84 @@
                     "403": {
                         "description": "Forbidden"
                     },
-                    "404": {
-                        "description": "Not Found"
-                    }
+                  "404": {
+                    "description": "Not Found"
+                  }
                 },
-                "summary": "getUser",
-                "tags": [
-                    "user-api-impl"
-                ]
-            }
+          "summary": "getUser",
+          "tags": [
+            "user-api-impl"
+          ]
         }
+      },
+      "/v/sb/building": {
+        "get": {
+          "operationId": "getBuildingUsingGET",
+          "produces": [
+            "*/*"
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": {
+                "type": "object"
+              }
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "403": {
+              "description": "Forbidden"
+            },
+            "404": {
+              "description": "Not Found"
+            }
+          },
+          "summary": "getBuilding",
+          "tags": [
+            "building-api-impl"
+          ]
+        }
+      },
+      "/v/sb/building/{idBuilding}": {
+        "get": {
+          "operationId": "getBuildingUsingGET_1",
+          "parameters": [
+            {
+              "description": "idBuilding",
+              "format": "int32",
+              "in": "path",
+              "name": "idBuilding",
+              "required": true,
+              "type": "integer"
+            }
+          ],
+          "produces": [
+            "*/*"
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": {
+                "type": "object"
+              }
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "403": {
+              "description": "Forbidden"
+            },
+            "404": {
+              "description": "Not Found"
+            }
+          },
+          "summary": "getBuilding",
+          "tags": [
+            "building-api-impl"
+          ]
+        }
+      }
     },
     "swagger": "2.0",
     "tags": [

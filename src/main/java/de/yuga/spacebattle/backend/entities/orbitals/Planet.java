@@ -132,7 +132,9 @@ public class Planet extends AbstractEntityKey {
     public String toString() {
         final StringBuilder sb = new StringBuilder("Planet{");
         sb.append(", id=").append(id);
-        sb.append("owner=").append(owner);
+        if (owner != null) {
+            sb.append("owner=").append(owner.getUsername());
+        }
         sb.append(", name='").append(name).append('\'');
         sb.append(", system=").append(system);
         sb.append(", orbit=").append(orbit);

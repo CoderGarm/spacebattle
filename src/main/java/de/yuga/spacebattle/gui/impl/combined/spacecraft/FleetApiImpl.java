@@ -5,7 +5,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.turn.Move;
-import de.yuga.spacebattle.backend.logic.combined.spacecraft.FleetService;
+import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/sb/fleet")
+@RequestMapping(value = "/rest/sb/fleet")
 public class FleetApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(FleetApiImpl.class);

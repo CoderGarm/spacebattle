@@ -3,8 +3,12 @@
   box-shadow: var(--lumo-box-shadow-s);
 }
 
-#header vaadin-avatar {
+#header .first-on-the-right {
   margin-left: auto;
+  margin-right: var(--lumo-space-m);
+}
+
+#header vaadin-avatar {
   margin-right: var(--lumo-space-m);
 }
 

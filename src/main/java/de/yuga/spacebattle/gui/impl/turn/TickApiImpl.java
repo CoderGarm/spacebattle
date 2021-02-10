@@ -2,7 +2,7 @@ package de.yuga.spacebattle.gui.impl.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
-import de.yuga.spacebattle.backend.logic.turn.TickService;
+import de.yuga.spacebattle.backend.services.turn.TickService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/sb/tick")
+@RequestMapping(value = "/rest/sb/tick")
 public class TickApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(TickApiImpl.class);

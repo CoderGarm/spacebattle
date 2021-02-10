@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/sb/starsystem")
+@RequestMapping(value = "/rest/sb/starsystem")
 public class StarsystemApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(StarsystemApiImpl.class);
