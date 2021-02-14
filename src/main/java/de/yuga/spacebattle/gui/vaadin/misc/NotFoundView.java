@@ -1,13 +1,14 @@
-package de.yuga.spacebattle.gui.vaadin;
+package de.yuga.spacebattle.gui.vaadin.misc;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.router.*;
+import de.yuga.spacebattle.gui.vaadin.MainView;
 
 import javax.servlet.http.HttpServletResponse;
 
 @ParentLayout(MainView.class)
-@PreserveOnRefresh
+//@PreserveOnRefresh
 public class NotFoundView extends Div implements HasErrorParameter<NotFoundException> {
 
     private final Label error = new Label();

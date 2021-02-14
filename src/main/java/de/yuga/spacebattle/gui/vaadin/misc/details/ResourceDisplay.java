@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.gui.vaadin;
+package de.yuga.spacebattle.gui.vaadin.misc.details;
 
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;

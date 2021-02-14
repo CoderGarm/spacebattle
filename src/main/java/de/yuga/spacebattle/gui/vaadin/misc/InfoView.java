@@ -1,11 +1,10 @@
-package de.yuga.spacebattle.gui.vaadin.account.info;
+package de.yuga.spacebattle.gui.vaadin.misc;
 
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -15,7 +14,7 @@ import de.yuga.spacebattle.gui.vaadin.MainView;
 import static de.yuga.spacebattle.gui.vaadin.MainView.MAX_WIDTH;
 
 @SpringComponent
-@PreserveOnRefresh
+//@PreserveOnRefresh
 @UIScope
 @Route(value = InfoView.ROUTE, layout = MainView.class)
 @CssImport("./styles/views/account/user-view.css")

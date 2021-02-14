@@ -60,9 +60,6 @@ public class User extends AbstractEntityKey {
     @Nonnull
     @NotNull(message = "ownedPlanets must not be null")
     @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "owner")
-    /*@JoinTable(name = "ownedPlanet",
-            joinColumns = @JoinColumn(name = "idUser"),
-            inverseJoinColumns = @JoinColumn(name = "idPlanet"))*/
     private final Set<Planet> ownedPlanets = new HashSet<>();
 
     @Nonnull

@@ -3,26 +3,23 @@ package de.yuga.spacebattle.gui.vaadin;
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.accordion.Accordion;
-import com.vaadin.flow.component.accordion.AccordionPanel;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.login.LoginOverlay;
+import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.PWA;
@@ -30,13 +27,12 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
+import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.services.account.UserService;
-import de.yuga.spacebattle.gui.vaadin.account.UserView;
-import de.yuga.spacebattle.gui.vaadin.account.info.InfoView;
-import de.yuga.spacebattle.gui.vaadin.account.info.LoginView;
-import de.yuga.spacebattle.gui.vaadin.dashboard.DashboardView;
+import de.yuga.spacebattle.gui.vaadin.account.dashboard.DashboardView;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
+import de.yuga.spacebattle.gui.vaadin.misc.LoginView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,13 +42,19 @@ import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static de.yuga.spacebattle.gui.vaadin.SBRouting.SB_ROUTING_ITEMS;
 
 /**
  * The main view is a top-level placeholder for other views.
  */
 @SpringComponent
-@PreserveOnRefresh
+//@PreserveOnRefresh
 @Controller
 @UIScope
 @Theme(value = Material.class/*, variant = Material.DARK*/)
@@ -71,10 +73,7 @@ public class MainView extends AppLayout {
 
     public static final String MAX_WIDTH = "80%";
 
-    public static final Class<?>[] NO_LOGIN_NEEDED_TARGETS = {
-            LoginView.class,
-            InfoView.class
-    };
+    public static final String MAX_MENU_HEIGHT = "80%";
 
     @Nonnull
     private final UserService userService;
@@ -82,13 +81,26 @@ public class MainView extends AppLayout {
     @Nonnull
     private final EventBus.UIEventBus uiEventBus;
 
-    private Tabs menu;
-    private H1 viewTitle;
-    private Component headerContent;
-    private Component drawerContent;
-    private final LoginOverlay loginOverlay = new LoginOverlay();
-    private final Button logout;
-    private final Button login;
+    @Nonnull
+    private H1 viewTitle = new H1("Spacebattle");
+
+    @Nonnull
+    private final Map<Tab, ? extends Class<? extends Component>> tabs = createTabs();
+
+    @Nonnull
+    private final Tabs menu = createMenu();
+
+    @Nonnull
+    private final MenuBar wantToKnowMore = createWantToKnowMore();
+
+    @Nonnull
+    private final LoginOverlay loginOverlay = createLogin();
+
+    @Nonnull
+    private final Button logoutButton = createLogoutButton();
+
+    @Nonnull
+    private final Button loginButton = createLoginButton();
 
 
     @Autowired
@@ -101,17 +113,14 @@ public class MainView extends AppLayout {
         this.uiEventBus.subscribe(this);
 
         createLogin();
-        logout = createLogoutButton();
-        login = createLoginButton();
         setPrimarySection(Section.DRAWER);
-        headerContent = createHeaderContent();
-        addToNavbar(true, headerContent);
-        menu = createMenu();
-        drawerContent = createDrawerContent(menu);
-        addToDrawer(drawerContent);
+        addToNavbar(true, createHeaderContent());
+        addToDrawer(createDrawerContent(menu));
+        updateMenu();
     }
 
-    private void createLogin() {
+    private LoginOverlay createLogin() {
+        LoginOverlay loginOverlay = new LoginOverlay();
         loginOverlay.addLoginListener(e -> {
             final User user = this.userService.login(e.getUsername(), e.getPassword());
             if (user != null) {
@@ -127,18 +136,22 @@ public class MainView extends AppLayout {
         LoginI18n i18n = LoginI18n.createDefault();
         i18n.setAdditionalInformation("To close the login form submit non-empty username and password");
         loginOverlay.setI18n(i18n);
+        return loginOverlay;
     }
 
     @EventBusListenerMethod
     protected void onEvent(Event<String> e) {
         if (e.getPayload().equals(ESBEvent.LOGIN.name())) {
-            LOGGER.debug("logged in");
-            createMenuByLoginState();
-        } else {
-            LOGGER.debug("not this event");
+            updateMenu();
         }
     }
 
+    private Map<Tab, ? extends Class<? extends Component>> createTabs() {
+        return Arrays.stream(SB_ROUTING_ITEMS).collect(Collectors.toMap(
+                item -> createTab(item.getNavText(), item.getClazz()),
+                SBRouting::getClazz
+        ));
+    }
 
     private Component createHeaderContent() {
         HorizontalLayout layout = new HorizontalLayout();
@@ -150,11 +163,9 @@ public class MainView extends AppLayout {
         layout.add(new DrawerToggle());
         viewTitle = new H1();
         layout.add(viewTitle);
-        if (userService.isLoggedIn() != null) {
-            layout.add(logout);
-        } else {
-            layout.add(login);
-        }
+        layout.add(wantToKnowMore);
+        layout.add(this.logoutButton);
+        layout.add(this.loginButton);
         layout.add(new Avatar());
         return layout;
     }
@@ -172,21 +183,10 @@ public class MainView extends AppLayout {
         final Button logout;
         logout = new Button("Logout", e -> {
             this.userService.setLogin(null);
-            createMenuByLoginState();
-            getUI().ifPresent(ui -> ui.navigate(MainView.class));
+            updateMenu();
+            getUI().ifPresent(ui -> ui.navigate(LoginView.class));
         });
-        logout.setClassName("first-on-the-right");
         return logout;
-    }
-
-    private void createMenuByLoginState() {
-        remove(headerContent);
-        headerContent = createHeaderContent();
-        addToNavbar(true, headerContent);
-        remove(drawerContent);
-        menu = createMenu();
-        drawerContent = createDrawerContent(menu);
-        addToDrawer(drawerContent);
     }
 
     private Component createDrawerContent(Tabs menu) {
@@ -196,14 +196,44 @@ public class MainView extends AppLayout {
         layout.setSpacing(false);
         layout.getThemeList().set("spacing-s", true);
         layout.setAlignItems(FlexComponent.Alignment.STRETCH);
+
         HorizontalLayout logoLayout = new HorizontalLayout();
         logoLayout.setId("logo");
         logoLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         logoLayout.add(new Image("images/logo.png", "Spacebattle logo"));
         logoLayout.add(new H1("Spacebattle"));
+
         layout.add(logoLayout, menu);
         layout.setHeightFull();
         return layout;
+    }
+
+    private void updateMenu() {
+        boolean isLoggedIn = userService.isLoggedIn() != null;
+
+        wantToKnowMore.setVisible(isLoggedIn);
+        wantToKnowMore.onEnabledStateChanged(isLoggedIn);
+        loginButton.setEnabled(!isLoggedIn);
+        loginButton.setVisible(!isLoggedIn);
+        logoutButton.setEnabled(isLoggedIn);
+        logoutButton.setVisible(isLoggedIn);
+        menu.getChildren().forEach(view -> {
+            Tab tab = (Tab) view;
+            this.tabs.keySet().forEach(arr -> {
+                if (arr.equals(tab)) {
+                    SBRouting sbRouting = Arrays.stream(SB_ROUTING_ITEMS)
+                            .filter(item -> item.getClazz().equals(this.tabs.get(arr))).findFirst().orElse(null);
+                    if (sbRouting == null) {
+                        throw new NotifySBUserException("Someone has stolen a tab while you are afk - call your admin");
+                    }
+                    boolean needLogin = sbRouting.isLoginNeeded();
+
+                    boolean b = needLogin == isLoggedIn;
+                    tab.setVisible(b);
+                    tab.setEnabled(b);
+                }
+            });
+        });
     }
 
     private Tabs createMenu() {
@@ -211,53 +241,57 @@ public class MainView extends AppLayout {
         tabs.setOrientation(Tabs.Orientation.VERTICAL);
         tabs.setId("tabs");
 
-        Tab login = createTab("Login", LoginView.class);
-        Tab info = createTab("Info", InfoView.class);
-        if (userService.isLoggedIn() != null) {
-            tabs.add(createMenuItems());
-            Accordion accordion = new Accordion();
-            AccordionPanel accordionPanel = new AccordionPanel();
-            accordionPanel.setSummaryText("Want to know more?");
-            accordionPanel.addContent(login, info);
-            accordionPanel.addThemeVariants(DetailsVariant.FILLED);
-            accordion.add(accordionPanel);
-            accordion.close();
-            tabs.add(accordion);
-        } else {
-            tabs.add(login, info);
-        }
-        tabs.setHeight("80%");
+        this.tabs.keySet().forEach(tabs::add);
+        tabs.setHeight(MAX_MENU_HEIGHT);
         return tabs;
     }
 
-    private Component[] createMenuItems() {
-        return new Tab[]{
-                createTab("Dashboard", DashboardView.class),
-                createTab("User", UserView.class)
-        };
-    }
 
-    private static Tab createTab(String text, Class<? extends Component> navigationTarget) {
+    public static Tab createTab(@Nonnull final String text,
+                                @Nonnull final Class<? extends Component> navigationTarget) {
+        Preconditions.checkNotNull(text, "text shouldn't be null!");
+        Preconditions.checkNotNull(navigationTarget, "navigationTarget shouldn't be null!");
+
         final Tab tab = new Tab();
         tab.add(new RouterLink(text, navigationTarget));
         ComponentUtil.setData(tab, Class.class, navigationTarget);
         return tab;
     }
 
+    private MenuBar createWantToKnowMore() {
+        MenuBar wantToKnowMore = new MenuBar();
+        MenuItem menuItem = wantToKnowMore.addItem("You want to know more?");
+        wantToKnowMore.setOpenOnHover(true);
+        Arrays.stream(SBRouting.SB_ROUTING_ITEMS).filter(view -> !view.isLoginNeeded()).forEach(view -> {
+            Class<? extends Component> aClass = view.getClazz();
+            menuItem.getSubMenu().addItem(view.getPageName(), e -> getUI().ifPresent(ui -> ui.navigate(aClass)));
+        });
+        wantToKnowMore.setVisible(false);
+        wantToKnowMore.onEnabledStateChanged(false);
+        wantToKnowMore.setClassName("first-on-the-right");
+        return wantToKnowMore;
+    }
+
     @Override
     protected void afterNavigation() {
         super.afterNavigation();
-        getTabForComponent(getContent()).ifPresent(menu::setSelectedTab);
+        Optional<Tab> tabForComponent = getTabForComponent(getContent());
+        tabForComponent.ifPresent(menu::setSelectedTab);
         viewTitle.setText(getCurrentPageTitle());
     }
 
-    private Optional<Tab> getTabForComponent(Component component) {
-        return menu.getChildren().filter(tab -> ComponentUtil.getData(tab, Class.class).equals(component.getClass()))
-                .findFirst().map(Tab.class::cast);
+    private Optional<Tab> getTabForComponent(@Nullable final Component component) {
+        if (component != null) {
+            return menu.getChildren().filter(tab -> ComponentUtil.getData(tab, Class.class).equals(component.getClass()))
+                    .findFirst().map(Tab.class::cast);
+        }
+        return Optional.empty();
     }
 
     private String getCurrentPageTitle() {
-        PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
-        return title == null ? "" : title.value();
+        String title = Arrays.stream(SB_ROUTING_ITEMS)
+                .collect(Collectors.toMap(SBRouting::getClazz, SBRouting::getPageName))
+                .get(getContent().getClass());
+        return title == null ? "" : title;
     }
 }

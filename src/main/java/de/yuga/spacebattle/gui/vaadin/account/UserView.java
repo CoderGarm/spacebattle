@@ -3,7 +3,6 @@ package de.yuga.spacebattle.gui.vaadin.account;
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -19,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SpringComponent
-@PreserveOnRefresh
+//@PreserveOnRefresh
 @UIScope
 @Route(value = UserView.ROUTE, layout = MainView.class)
 @CssImport("./styles/views/account/user-view.css")
