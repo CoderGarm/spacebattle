@@ -5,7 +5,6 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.repositories.orbitals.PlanetRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-@RestController
-@RequestMapping(value = "/rest/sb/planet")
+//@RestController
+//@RequestMapping(value = "/rest/sb/planet")
 public class PlanetApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PlanetApiImpl.class);
@@ -22,7 +21,7 @@ public class PlanetApiImpl {
     @Nonnull
     private final PlanetRepository planetController;
 
-    @Autowired
+    //@Autowired
     public PlanetApiImpl(@Nonnull final PlanetRepository planetController) {
         Preconditions.checkNotNull(planetController, "planetC shouldn't be null!");
 

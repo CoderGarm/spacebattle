@@ -17,6 +17,11 @@ vaadin-app-layout[dir='rtl'] #header vaadin-avatar {
   margin-right: auto;
 }
 
+vaadin-accordion {
+  border: solid darkgray 2px;
+  border-radius: 5px;
+}
+
 #header h1 {
   font-size: var(--lumo-font-size-l);
   margin: 0;

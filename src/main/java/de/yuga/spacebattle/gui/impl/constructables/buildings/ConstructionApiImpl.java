@@ -5,7 +5,6 @@ import de.yuga.spacebattle.backend.entities.constructables.buildings.Constructio
 import de.yuga.spacebattle.backend.repositories.constructables.buildings.ConstructionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-@RestController
-@RequestMapping(value = "/rest/sb/construction")
+//@RestController
+//@RequestMapping(value = "/rest/sb/construction")
 public class ConstructionApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ConstructionApiImpl.class);
@@ -22,7 +21,7 @@ public class ConstructionApiImpl {
     @Nonnull
     private final ConstructionRepository constructionController;
 
-    @Autowired
+    //@Autowired
     public ConstructionApiImpl(@Nonnull final ConstructionRepository constructionController) {
         Preconditions.checkNotNull(constructionController, "constructionC shouldn't be null!");
 

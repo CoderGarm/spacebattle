@@ -5,7 +5,6 @@ import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.repositories.researches.ResearchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-@RestController
-@RequestMapping(value = "/rest/sb/research")
+//@RestController
+//@RequestMapping(value = "/rest/sb/research")
 public class ResearchApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ResearchApiImpl.class);
@@ -22,7 +21,7 @@ public class ResearchApiImpl {
     @Nonnull
     private final ResearchRepository researchController;
 
-    @Autowired
+    //@Autowired
     public ResearchApiImpl(@Nonnull final ResearchRepository researchController) {
         Preconditions.checkNotNull(researchController, "researchC shouldn't be null!");
 

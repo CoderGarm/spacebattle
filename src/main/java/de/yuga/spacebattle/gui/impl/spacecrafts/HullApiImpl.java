@@ -5,16 +5,17 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.repositories.spacecraft.HullRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 
-@RestController
-@RequestMapping(value = "/rest/sb/hull")
+//@RestController
+//@RequestMapping(value = "/rest/sb/hull")
 public class HullApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(HullApiImpl.class);
@@ -22,7 +23,7 @@ public class HullApiImpl {
     @Nonnull
     private final HullRepository hullController;
 
-    @Autowired
+    //@Autowired
     public HullApiImpl(@Nonnull final HullRepository hullController) {
         Preconditions.checkNotNull(hullController, "hullC shouldn't be null!");
 

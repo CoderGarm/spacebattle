@@ -10,8 +10,7 @@ import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import de.yuga.spacebattle.gui.vaadin.MainView;
-
-import static de.yuga.spacebattle.gui.vaadin.MainView.MAX_WIDTH;
+import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 
 @SpringComponent
 //@PreserveOnRefresh
@@ -38,6 +37,6 @@ public class InfoView extends VerticalLayout {
         setMargin(true);
         // just a demonstration of the API, by default the spacing is on
         setSpacing(true);
-        setMaxWidth(MAX_WIDTH);
+        ViewHelper.setWidth(this, null);
     }
 }

@@ -185,6 +185,20 @@ public class DefaultApiImpl {
         LOGGER.info(unlockhull3.toString());
         LOGGER.info("Researches created");
 
+        u1.getResearches().put(unlockConstructionYard, 1);
+        u1.getResearches().put(unlockShipyard, 1);
+        u1.getResearches().put(unlockLaboratoy, 1);
+        u1.getResearches().put(unlockBank, 1);
+        u1.getResearches().put(unlockmetals, 1);
+        u2.getResearches().put(unlockConstructionYard, 1);
+        u2.getResearches().put(unlockShipyard, 1);
+        u2.getResearches().put(unlockLaboratoy, 1);
+        u2.getResearches().put(unlockBank, 1);
+        u2.getResearches().put(unlockmetals, 1);
+        userService.save(u1);
+        userService.save(u2);
+        LOGGER.info("Researches populated");
+
         Building constructionYard = buildingService.createBuilding("Construction Yard", "The construction yard construct constructions.", 10, EResourceType.CONSTRUCTION, unlockConstructionYard);
         Building shipYard = buildingService.createBuilding("Orbitals Construction Yard", "The construction yard construct orbital constructions.", 10, EResourceType.ORBITALCONSTRUCTION, unlockShipyard);
         Building researchB = buildingService.createBuilding("Research Laboratories", "The lab investigates researches.", 10, EResourceType.RESEARCH, unlockLaboratoy);

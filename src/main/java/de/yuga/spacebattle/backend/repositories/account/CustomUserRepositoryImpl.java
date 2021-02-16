@@ -32,7 +32,7 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
         Preconditions.checkNotNull(password, "password shouldn't be null!");
 
         try {
-            User u = em.createNamedQuery("User.login", User.class)
+            final User u = em.createNamedQuery("User.login", User.class)
                     .setParameter("username", StringUtils.upperCase(username))
                     .setParameter("password", StringUtils.upperCase(password))
                     .getSingleResult();

@@ -5,7 +5,6 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
 import de.yuga.spacebattle.backend.repositories.spacecraft.ModuleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-@RestController
-@RequestMapping(value = "/rest/sb/module")
+//@RestController
+//@RequestMapping(value = "/rest/sb/module")
 public class ModuleApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ModuleApiImpl.class);
@@ -22,7 +21,7 @@ public class ModuleApiImpl {
     @Nonnull
     private final ModuleRepository moduleController;
 
-    @Autowired
+    //@Autowired
     public ModuleApiImpl(@Nonnull final ModuleRepository moduleController) {
         Preconditions.checkNotNull(moduleController, "moduleC shouldn't be null!");
 

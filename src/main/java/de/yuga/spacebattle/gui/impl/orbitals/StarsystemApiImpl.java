@@ -5,7 +5,6 @@ import de.yuga.spacebattle.backend.entities.orbitals.Starsystem;
 import de.yuga.spacebattle.backend.repositories.orbitals.StarsystemRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-@RestController
-@RequestMapping(value = "/rest/sb/starsystem")
+//@RestController
+//@RequestMapping(value = "/rest/sb/starsystem")
 public class StarsystemApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(StarsystemApiImpl.class);
@@ -22,7 +21,7 @@ public class StarsystemApiImpl {
     @Nonnull
     private final StarsystemRepository starsystemController;
 
-    @Autowired
+    //@Autowired
     public StarsystemApiImpl(@Nonnull final StarsystemRepository starsystemController) {
         Preconditions.checkNotNull(starsystemController, "starsystemC shouldn't be null!");
 

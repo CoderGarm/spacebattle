@@ -12,6 +12,7 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.gui.vaadin.MainView;
+import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,6 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import javax.annotation.Nonnull;
 
-import static de.yuga.spacebattle.gui.vaadin.MainView.MAX_WIDTH;
 
 @SpringComponent
 //@PreserveOnRefresh
@@ -64,7 +64,7 @@ public class LoginView extends VerticalLayout {
         setMargin(true);
         // just a demonstration of the API, by default the spacing is on
         setSpacing(true);
-        setMaxWidth(MAX_WIDTH);
+        ViewHelper.setWidth(this, null);
     }
 
     @EventBusListenerMethod

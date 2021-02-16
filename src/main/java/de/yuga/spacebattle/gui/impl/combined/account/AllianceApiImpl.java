@@ -6,7 +6,6 @@ import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.combined.account.AllianceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,8 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-@RestController
-@RequestMapping(value = "/rest/sb/alliance")
+//@RestController
+//@RequestMapping(value = "/rest/sb/alliance")
 public class AllianceApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(AllianceApiImpl.class);
@@ -26,7 +25,7 @@ public class AllianceApiImpl {
     @Nonnull
     private final UserService userService;
 
-    @Autowired
+    //@Autowired
     public AllianceApiImpl(@Nonnull final AllianceService allianceService,
                            @Nonnull final UserService userService) {
         Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");

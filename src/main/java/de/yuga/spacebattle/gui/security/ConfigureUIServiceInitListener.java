@@ -61,6 +61,6 @@ public class ConfigureUIServiceInitListener implements VaadinServiceInitListener
     public static boolean checkIfLoginNeeded(@Nonnull final Class<?> clazz) {
         Preconditions.checkNotNull(clazz, "clazz shouldn't be null!");
 
-        return Arrays.stream(SB_ROUTING_ITEMS).map(SBRouting::getClazz).collect(Collectors.toList()).contains(clazz);
+        return !Arrays.stream(SB_ROUTING_ITEMS).map(SBRouting::getClazz).collect(Collectors.toList()).contains(clazz);
     }
 }

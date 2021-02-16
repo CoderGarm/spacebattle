@@ -20,6 +20,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.PWA;
@@ -54,10 +55,10 @@ import static de.yuga.spacebattle.gui.vaadin.SBRouting.SB_ROUTING_ITEMS;
  * The main view is a top-level placeholder for other views.
  */
 @SpringComponent
-//@PreserveOnRefresh
+@PreserveOnRefresh
 @Controller
 @UIScope
-@Theme(value = Material.class/*, variant = Material.DARK*/)
+@Theme(value = Material.class, variant = Material.DARK)
 @CssImport("./styles/views/main/main-view.css")
 @PWA(name = "Spacebattle", shortName = "SB", enableInstallPrompt = false)
 @JsModule("./styles/shared-styles.js")
@@ -70,8 +71,6 @@ public class MainView extends AppLayout {
     private static final long serialVersionUID = 4136300596358225703L;
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MainView.class);
-
-    public static final String MAX_WIDTH = "80%";
 
     public static final String MAX_MENU_HEIGHT = "80%";
 
@@ -173,7 +172,16 @@ public class MainView extends AppLayout {
     @Nonnull
     private Button createLoginButton() {
         final Button login;
-        login = new Button("Login", e -> loginOverlay.setOpened(true));
+        //login = new Button("Login", e -> //loginOverlay.setOpened(true)); todo check
+        login = new Button("Login", e -> {
+            final User user = this.userService.login("flashkid", "test");
+            if (user != null) {
+                this.userService.setLogin(user);
+                loginOverlay.close();
+                getUI().ifPresent(ui -> ui.navigate(DashboardView.class));
+                uiEventBus.publish(this, ESBEvent.LOGIN.name());
+            }
+        });
         login.setClassName("first-on-the-right");
         return login;
     }
@@ -219,10 +227,10 @@ public class MainView extends AppLayout {
         logoutButton.setVisible(isLoggedIn);
         menu.getChildren().forEach(view -> {
             Tab tab = (Tab) view;
-            this.tabs.keySet().forEach(arr -> {
-                if (arr.equals(tab)) {
+            this.tabs.keySet().forEach(menuTab -> {
+                if (menuTab.equals(tab)) {
                     SBRouting sbRouting = Arrays.stream(SB_ROUTING_ITEMS)
-                            .filter(item -> item.getClazz().equals(this.tabs.get(arr))).findFirst().orElse(null);
+                            .filter(item -> item.getClazz().equals(this.tabs.get(menuTab))).findFirst().orElse(null);
                     if (sbRouting == null) {
                         throw new NotifySBUserException("Someone has stolen a tab while you are afk - call your admin");
                     }
@@ -294,4 +302,6 @@ public class MainView extends AppLayout {
                 .get(getContent().getClass());
         return title == null ? "" : title;
     }
+
+
 }

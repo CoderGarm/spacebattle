@@ -45,13 +45,13 @@ public class DashboardView extends HorizontalLayout {
         UserDisplay userDisplay = new UserDisplay(user);
         add(userDisplay);
 
-        Alliance alliance = user.getAlliance(); //warum leer?
+        Alliance alliance = user.getAlliance();
         if (alliance != null) {
             add(new AllianceDisplay(alliance));
         }
 
         add(new PlanetDisplayMulti(user.getOwnedPlanets()));
-        add(new ResearchDisplayMulti(user.getResearches().keySet()));
+        add(new ResearchDisplayMulti(user.getResearches()));
 
 
         addClassName("user-view");

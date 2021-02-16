@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.repositories.account.UserRepository;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-@RestController
-@RequestMapping(value = "/rest/sb/user")
+//@RestController
+//@RequestMapping(value = "/rest/sb/user")
 public class UserApiImpl {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(UserApiImpl.class);
@@ -22,7 +21,7 @@ public class UserApiImpl {
     @Nonnull
     private final UserRepository userC;
 
-    @Autowired
+    //@Autowired
     public UserApiImpl(@Nonnull final UserRepository userC) {
         Preconditions.checkNotNull(userC, "userC shouldn't be null!");
 
