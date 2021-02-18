@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 
 @SpringComponent
-//@PreserveOnRefresh
 @UIScope
 @Route(value = DashboardView.ROUTE, layout = MainView.class)
 @CssImport("./styles/views/account/user-view.css")

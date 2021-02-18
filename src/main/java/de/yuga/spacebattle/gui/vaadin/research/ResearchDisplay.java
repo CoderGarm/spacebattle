@@ -4,10 +4,9 @@ import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.accordion.AccordionPanel;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.splitlayout.SplitLayout;
-import com.vaadin.flow.component.splitlayout.SplitLayoutVariant;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.constructables.buildings.BuildingDisplay;
@@ -58,19 +57,19 @@ public class ResearchDisplay extends HorizontalLayout {
         levelCapV.add(levelCapLabel, levelCapValue);
         groupH.add(levelV, delmimiterV, levelCapV);
         groupH.setMaxWidth("50%");
-        accordion.setMaxWidth("50%");
 
-        SplitLayout split = new SplitLayout();
-        split.setOrientation(SplitLayout.Orientation.VERTICAL);
-        split.setSplitterPosition(110);
-        split.addThemeVariants(SplitLayoutVariant.LUMO_MINIMAL);
 
-        split.addToPrimary(groupH, accordion);
-        //levelH.addToPrimary(groupH);
-        //levelH.addToSecondary(accordion);
+        HorizontalLayout combinatorH = new HorizontalLayout();
 
-        mainV.add(descH, split);
+        FlexLayout fl = new FlexLayout();
+        fl.setMaxHeight("50%");
+        fl.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+        fl.add(accordion);
 
+
+        combinatorH.add(groupH, fl);
+
+        mainV.add(descH, combinatorH);
         add(mainV);
     }
 }

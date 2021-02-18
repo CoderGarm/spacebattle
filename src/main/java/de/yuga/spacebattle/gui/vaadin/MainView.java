@@ -15,6 +15,7 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.login.LoginOverlay;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -31,12 +32,14 @@ import com.vaadin.flow.theme.material.Material;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.gui.impl.DefaultApiImpl;
 import de.yuga.spacebattle.gui.vaadin.account.dashboard.DashboardView;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
 import de.yuga.spacebattle.gui.vaadin.misc.LoginView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.vaadin.spring.events.Event;
 import org.vaadin.spring.events.EventBus;
@@ -81,6 +84,9 @@ public class MainView extends AppLayout {
     private final EventBus.UIEventBus uiEventBus;
 
     @Nonnull
+    private final DefaultApiImpl defaultApi;
+
+    @Nonnull
     private H1 viewTitle = new H1("Spacebattle");
 
     @Nonnull
@@ -99,17 +105,23 @@ public class MainView extends AppLayout {
     private final Button logoutButton = createLogoutButton();
 
     @Nonnull
+    private final Button initialDataButton = createCreateInitialDataButton();
+
+    @Nonnull
     private final Button loginButton = createLoginButton();
 
 
     @Autowired
-    public MainView(@Nonnull final UserService userService, @Nonnull final EventBus.UIEventBus uiEventBus) {
+    public MainView(@Nonnull final UserService userService,
+                    @Nonnull final EventBus.UIEventBus uiEventBus,
+                    @Nonnull final DefaultApiImpl defaultApi) {
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         Preconditions.checkNotNull(uiEventBus, "uiEventBus shouldn't be null!");
 
         this.userService = userService;
         this.uiEventBus = uiEventBus;
         this.uiEventBus.subscribe(this);
+        this.defaultApi = defaultApi;
 
         createLogin();
         setPrimarySection(Section.DRAWER);
@@ -165,6 +177,7 @@ public class MainView extends AppLayout {
         layout.add(wantToKnowMore);
         layout.add(this.logoutButton);
         layout.add(this.loginButton);
+        layout.add(initialDataButton);
         layout.add(new Avatar());
         return layout;
     }
@@ -195,6 +208,25 @@ public class MainView extends AppLayout {
             getUI().ifPresent(ui -> ui.navigate(LoginView.class));
         });
         return logout;
+    }
+
+    @Nonnull
+    private Button createCreateInitialDataButton() {
+        final Button initialDataButton = new Button("Create Initial Data", e -> {
+            ResponseEntity<?> initialData = defaultApi.createInitialData();
+            Notification notification = new Notification();
+            switch (initialData.getStatusCode()) {
+                case OK:
+                    notification.setText("OK");
+                    break;
+                case BAD_REQUEST:
+                    String msg = (String) initialData.getBody();
+                    notification.setText(msg);
+                    break;
+            }
+            notification.open();
+        });
+        return initialDataButton;
     }
 
     private Component createDrawerContent(Tabs menu) {
