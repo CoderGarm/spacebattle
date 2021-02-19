@@ -1,9 +1,12 @@
 package de.yuga.spacebattle.backend.services.account;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.enums.ERaceType;
 import de.yuga.spacebattle.backend.repositories.account.UserRepository;
+import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,14 +20,19 @@ public class UserService {
     @Nonnull
     private final UserRepository userRepository;
 
+    @Nonnull
+    private final ResearchService researchService;
+
     @Nullable
     private User login;
 
     @Autowired
-    public UserService(@Nonnull final UserRepository userRepository) {
+    public UserService(@Nonnull final UserRepository userRepository, @Nonnull final ResearchService researchService) {
         Preconditions.checkNotNull(userRepository, "userRepository shouldn't be null!");
+        Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
 
         this.userRepository = userRepository;
+        this.researchService = researchService;
     }
 
     @Nullable
@@ -56,10 +64,25 @@ public class UserService {
         return userRepository.findById(idUser).orElse(null);
     }
 
+    @Nonnull
     public User save(@Nonnull final User entity) {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
 
         return userRepository.save(entity);
+    }
+
+    @Nonnull
+    public User addUnlockedResearch(@Nonnull final User entity, @Nonnull final Research research) {
+        Preconditions.checkNotNull(entity, "entity shouldn't be null!");
+        Preconditions.checkNotNull(research, "research shouldn't be null!");
+
+        User user = find(entity.getId());
+        Research research1 = researchService.find(research.getId());
+        if (user == null || research1 == null) {
+            throw new NotifySBUserException("Funny idea...");
+        }
+        user.addResearch(research1);
+        return this.save(user);
     }
 
     @Nonnull
@@ -72,6 +95,6 @@ public class UserService {
         Preconditions.checkNotNull(email, "email shouldn't be null!");
         Preconditions.checkNotNull(raceType, "raceType shouldn't be null!");
 
-        return userRepository.save(new User(username, password, email, raceType));
+        return this.save(new User(username, password, email, raceType));
     }
 }

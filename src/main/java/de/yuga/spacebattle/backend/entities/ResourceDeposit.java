@@ -126,14 +126,4 @@ public class ResourceDeposit extends AbstractEntityKey {
             resources.put(type, new BigDecimal(rand, mathContext));
         }
     }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("ResourceDeposit{");
-        sb.append(", id=").append(id);
-        sb.append("resources=").append(resources);
-        sb.append(", subType=").append(subType);
-        sb.append('}');
-        return sb.toString();
-    }
 }

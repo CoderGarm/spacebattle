@@ -1,8 +1,6 @@
 package de.yuga.spacebattle.backend.services.combined.account;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifySBUserException;
-import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.repositories.combined.account.AllianceRepository;
 import de.yuga.spacebattle.backend.services.account.UserService;
@@ -57,26 +55,6 @@ public class AllianceService {
         Preconditions.checkNotNull(code, "code shouldn't be null!");
 
         return allianceRepository.save(new Alliance(name, code));
-    }
-
-    @Nonnull
-    public Alliance addMember(@Nonnull final Alliance alliance, @Nonnull final User user) {
-        Preconditions.checkNotNull(alliance, "alliance shouldn't be null!");
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-
-        Alliance fetchedAlliance = this.find(alliance.getId());
-        User user1 = userService.find(user.getId());
-        if (fetchedAlliance == null || user1 == null) {
-            throw new NotifySBUserException("No alliance or user were found.");
-        }
-
-        user1.setAlliance(fetchedAlliance);
-        userService.save(user1);
-        fetchedAlliance = this.find(fetchedAlliance.getId());
-        if (fetchedAlliance == null) {
-            throw new NotifySBUserException("Someone deleted the alliance in between. Shit happens.");
-        }
-        return fetchedAlliance;
     }
 
     public void delete(@Nonnull final Alliance entity) {

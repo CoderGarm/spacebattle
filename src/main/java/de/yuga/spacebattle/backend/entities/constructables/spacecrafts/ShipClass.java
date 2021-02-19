@@ -162,18 +162,4 @@ public class ShipClass extends AbstractEntityKey {
             }
         }
     }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("ShipClass{");
-        sb.append(", id=").append(id);
-        sb.append(", name='").append(name).append('\'');
-        sb.append("owner=").append(owner);
-        sb.append(", raceType=").append(raceType);
-        sb.append(", hull=").append(hull);
-        sb.append(", modules=").append(modules);
-        sb.append(", costs=").append(costs);
-        sb.append('}');
-        return sb.toString();
-    }
 }

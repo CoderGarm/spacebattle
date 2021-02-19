@@ -125,19 +125,4 @@ public class Research extends AbstractEntityKey {
     public int hashCode() {
         return getId() * 31;
     }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Research{");
-        sb.append(", id=").append(id);
-        sb.append("name='").append(name).append('\'');
-        sb.append(", description='").append(description).append('\'');
-        sb.append(", levelCap=").append(levelCap);
-        sb.append(", costs=").append(costs);
-        /*sb.append(", unlocksBuildings=").append(unlocksBuildings);
-        sb.append(", unlocksHulls=").append(unlocksHulls);
-        sb.append(", unlocksModules=").append(unlocksModules);*/
-        sb.append('}');
-        return sb.toString();
-    }
 }

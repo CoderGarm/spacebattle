@@ -119,20 +119,4 @@ public class Module extends AbstractEntityKey {
     public Research getUnlockedThrough() {
         return unlockedThrough;
     }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Module{");
-        sb.append(", id=").append(id);
-        sb.append("name='").append(name).append('\'');
-        sb.append(", description='").append(description).append('\'');
-        sb.append(", moduleType=").append(moduleType);
-        sb.append(", value=").append(value);
-        sb.append(", useCapacity=").append(useCapacity);
-        sb.append(", costs=").append(costs);
-        sb.append(", level=").append(level);
-        sb.append(", unlockedThrough=").append(unlockedThrough);
-        sb.append('}');
-        return sb.toString();
-    }
 }

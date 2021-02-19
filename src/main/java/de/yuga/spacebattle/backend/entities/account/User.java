@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.enums.ERaceType;
 
 import javax.annotation.Nonnull;
@@ -69,6 +70,10 @@ public class User extends AbstractEntityKey {
     @Column(name = "level")
     @CollectionTable(name = "unlockedResearch", joinColumns = @JoinColumn(name = "idUser"))
     private final Map<Research, Integer> researches = new HashMap<>();
+
+    @Nonnull
+    @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "owner")
+    private final Set<Job> jobs = new HashSet<>();
 
     public User() {
     }
@@ -144,6 +149,22 @@ public class User extends AbstractEntityKey {
         return researches;
     }
 
+    public void addResearch(@Nonnull final Research research) {
+        Preconditions.checkNotNull(research, "research shouldn't be null!");
+
+        if (researches.containsKey(research)) {
+            Integer level = researches.get(research);
+            researches.put(research, ++level);
+        } else {
+            researches.put(research, 1);
+        }
+    }
+
+    @Nonnull
+    public Set<Job> getJobs() {
+        return jobs;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -157,19 +178,5 @@ public class User extends AbstractEntityKey {
     @Override
     public int hashCode() {
         return username != null ? username.hashCode() : 0;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("User{");
-        sb.append(", id=").append(id);
-        sb.append("username='").append(username).append('\'');
-        //sb.append(", password='").append(password).append('\'');
-        sb.append(", raceType=").append(raceType);
-        sb.append(", alliance=").append(alliance.getCode());
-        sb.append(", ownedPlanets=").append(ownedPlanets.size());
-        sb.append(", researches=").append(researches.size());
-        sb.append('}');
-        return sb.toString();
     }
 }

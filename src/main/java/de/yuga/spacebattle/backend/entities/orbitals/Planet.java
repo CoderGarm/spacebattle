@@ -127,21 +127,4 @@ public class Planet extends AbstractEntityKey {
     public Orbit getOrbit() {
         return orbit;
     }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Planet{");
-        sb.append(", id=").append(id);
-        if (owner != null) {
-            sb.append("owner=").append(owner.getUsername());
-        }
-        sb.append(", name='").append(name).append('\'');
-        sb.append(", system=").append(system);
-        sb.append(", orbit=").append(orbit);
-        sb.append(", resourcefactors=").append(resourcefactors);
-        sb.append(", resourceDeposit=").append(resourceDeposit);
-        sb.append(", constructions=").append(constructions);
-        sb.append('}');
-        return sb.toString();
-    }
 }

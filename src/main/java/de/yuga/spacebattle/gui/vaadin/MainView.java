@@ -32,10 +32,12 @@ import com.vaadin.flow.theme.material.Material;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.gui.impl.DefaultApiImpl;
 import de.yuga.spacebattle.gui.vaadin.account.dashboard.DashboardView;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
 import de.yuga.spacebattle.gui.vaadin.misc.LoginView;
+import de.yuga.spacebattle.gui.vaadin.turn.TickDisplay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +50,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -87,6 +90,9 @@ public class MainView extends AppLayout {
     private final DefaultApiImpl defaultApi;
 
     @Nonnull
+    private final TickService tickService;
+
+    @Nonnull
     private H1 viewTitle = new H1("Spacebattle");
 
     @Nonnull
@@ -113,12 +119,16 @@ public class MainView extends AppLayout {
 
     @Autowired
     public MainView(@Nonnull final UserService userService,
-                    @Nonnull final EventBus.UIEventBus uiEventBus,
-                    @Nonnull final DefaultApiImpl defaultApi) {
+                    @Nonnull final TickService tickService,
+                    @Nonnull final DefaultApiImpl defaultApi,
+                    @Nonnull final EventBus.UIEventBus uiEventBus) {
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
+        Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
+        Preconditions.checkNotNull(defaultApi, "defaultApi shouldn't be null!");
         Preconditions.checkNotNull(uiEventBus, "uiEventBus shouldn't be null!");
 
         this.userService = userService;
+        this.tickService = tickService;
         this.uiEventBus = uiEventBus;
         this.uiEventBus.subscribe(this);
         this.defaultApi = defaultApi;
@@ -172,12 +182,17 @@ public class MainView extends AppLayout {
         layout.setSpacing(false);
         layout.setAlignItems(FlexComponent.Alignment.CENTER);
         layout.add(new DrawerToggle());
+        TickDisplay tickDisplay = new TickDisplay(tickService.getLatest());
+        layout.add(tickDisplay);
         viewTitle = new H1();
         layout.add(viewTitle);
         layout.add(wantToKnowMore);
         layout.add(this.logoutButton);
         layout.add(this.loginButton);
-        layout.add(initialDataButton);
+        List<User> all = userService.findAll();
+        if (all.isEmpty()) {
+            layout.add(initialDataButton);
+        }
         layout.add(new Avatar());
         return layout;
     }
@@ -201,20 +216,19 @@ public class MainView extends AppLayout {
 
     @Nonnull
     private Button createLogoutButton() {
-        final Button logout;
-        logout = new Button("Logout", e -> {
+        return new Button("Logout", e -> {
             this.userService.setLogin(null);
             updateMenu();
             getUI().ifPresent(ui -> ui.navigate(LoginView.class));
         });
-        return logout;
     }
 
     @Nonnull
     private Button createCreateInitialDataButton() {
-        final Button initialDataButton = new Button("Create Initial Data", e -> {
+        return new Button("Create Initial Data", e -> {
             ResponseEntity<?> initialData = defaultApi.createInitialData();
             Notification notification = new Notification();
+            notification.setDuration(5000);
             switch (initialData.getStatusCode()) {
                 case OK:
                     notification.setText("OK");
@@ -225,8 +239,8 @@ public class MainView extends AppLayout {
                     break;
             }
             notification.open();
+            updateMenu();
         });
-        return initialDataButton;
     }
 
     private Component createDrawerContent(Tabs menu) {
@@ -274,6 +288,14 @@ public class MainView extends AppLayout {
                 }
             });
         });
+
+        if (userService.findAll().isEmpty()) {
+            initialDataButton.setEnabled(true);
+            initialDataButton.setVisible(true);
+        } else {
+            initialDataButton.setEnabled(false);
+            initialDataButton.setVisible(false);
+        }
     }
 
     private Tabs createMenu() {

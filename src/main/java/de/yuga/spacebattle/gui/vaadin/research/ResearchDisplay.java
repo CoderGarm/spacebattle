@@ -25,7 +25,7 @@ public class ResearchDisplay extends HorizontalLayout {
         HorizontalLayout descH = new HorizontalLayout();
 
         VerticalLayout levelV = new VerticalLayout();
-        VerticalLayout delmimiterV = new VerticalLayout();
+        VerticalLayout delimiterV = new VerticalLayout();
         VerticalLayout levelCapV = new VerticalLayout();
 
         Label name = new Label(research.getName());
@@ -47,27 +47,26 @@ public class ResearchDisplay extends HorizontalLayout {
                 accordionPanel.addContent(new HullDisplay(hull)));
 
         research.getUnlocksModules().forEach(module ->
-                accordionPanel.addContent(new ModuleDisplay(module)));
+                accordionPanel.addContent(new ModuleDisplay(module, null)));
         accordion.add(accordionPanel);
 
         descH.add(name, description);
 
         levelV.add(levelLabel, levelValue);
-        delmimiterV.add(delimiter, delimiter);
+        delimiterV.add(delimiter, delimiter);
         levelCapV.add(levelCapLabel, levelCapValue);
-        groupH.add(levelV, delmimiterV, levelCapV);
-        groupH.setMaxWidth("50%");
-
+        groupH.add(levelV, delimiterV, levelCapV);
+        groupH.setJustifyContentMode(JustifyContentMode.START);
+        groupH.setMargin(true);
 
         HorizontalLayout combinatorH = new HorizontalLayout();
-
         FlexLayout fl = new FlexLayout();
-        fl.setMaxHeight("50%");
+        fl.setMaxHeight("70%");
         fl.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
         fl.add(accordion);
 
-
         combinatorH.add(groupH, fl);
+        combinatorH.setMargin(true);
 
         mainV.add(descH, combinatorH);
         add(mainV);

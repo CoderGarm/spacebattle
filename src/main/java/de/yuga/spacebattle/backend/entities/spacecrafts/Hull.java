@@ -91,18 +91,4 @@ public class Hull extends AbstractEntityKey {
     public Research getUnlockedThrough() {
         return unlockedThrough;
     }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Hull{");
-        sb.append(", id=").append(id);
-        sb.append("name='").append(name).append('\'');
-        sb.append(", level=").append(level);
-        sb.append(", constructionCapacity=").append(constructionCapacity);
-        sb.append(", costs=").append(costs);
-        sb.append(", description='").append(description).append('\'');
-        sb.append(", unlockedThrough=").append(unlockedThrough);
-        sb.append('}');
-        return sb.toString();
-    }
 }

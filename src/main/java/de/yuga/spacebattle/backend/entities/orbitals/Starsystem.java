@@ -7,8 +7,8 @@ import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * The star system which every action founds a place.
@@ -34,12 +34,9 @@ public class Starsystem extends AbstractEntityKey {
      * The planets in this star system.
      */
     @Nonnull
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
-    @JoinTable(name = "systemcomposition",
-            joinColumns = @JoinColumn(name = "idPlanet"),
-            inverseJoinColumns = @JoinColumn(name = "idStarsystem"))
     @Size(max = 20)
-    private final List<Planet> planets = new ArrayList<>();
+    @OneToMany(mappedBy = "system", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    private final Set<Planet> planets = new HashSet<>();
 
     public Starsystem() {
     }
@@ -53,7 +50,12 @@ public class Starsystem extends AbstractEntityKey {
     }
 
     @Nonnull
-    public List<Planet> getPlanets() {
+    public String getName() {
+        return name;
+    }
+
+    @Nonnull
+    public Set<Planet> getPlanets() {
         return planets;
     }
 
@@ -66,15 +68,5 @@ public class Starsystem extends AbstractEntityKey {
         Preconditions.checkNotNull(orbit, "orbit shouldn't be null!");
 
         this.orbit = orbit;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Starsystem{");
-        sb.append(", id=").append(id);
-        sb.append("orbit=").append(orbit);
-        sb.append(", planets=").append(planets.size());
-        sb.append('}');
-        return sb.toString();
     }
 }

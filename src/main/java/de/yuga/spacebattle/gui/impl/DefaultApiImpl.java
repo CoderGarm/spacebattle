@@ -30,17 +30,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 
 @Service
-@RestController
-@RequestMapping(value = "/rest/sb")
+//@RestController
+//@RequestMapping(value = "/rest/sb")
 public class DefaultApiImpl {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DefaultApiImpl.class);
@@ -109,15 +105,15 @@ public class DefaultApiImpl {
         this.researchService = researchService;
     }
 
-    @GetMapping(value = "/createInitialData")
-    @ResponseBody
+    //@GetMapping(value = "/createInitialData")
+    //@ResponseBody
     public ResponseEntity<?> createInitialData() {
-        List<Alliance> allianceList = allianceService.findAll();
-        if (!allianceList.isEmpty()) {
+        List<User> all = userService.findAll();
+        if (!all.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The database was already initialized!");
         }
         createInitialDataPayload();
-        final List<User> all = userService.findAll();
+        all = userService.findAll();
         return ResponseEntity.status(HttpStatus.OK).body(all);
     }
 
@@ -125,32 +121,24 @@ public class DefaultApiImpl {
     void createInitialDataPayload() {
         Alliance a1 = allianceService.createAlliance("Argonauten", "A");
         Alliance a2 = allianceService.createAlliance("111er", "111er");
-        LOGGER.info(a1.toString());
-        LOGGER.info(a2.toString());
         LOGGER.info("Alliances created");
 
         final User u1 = userService.createUser("Flashkid", "test", "mail", ERaceType.HUMAN);
         final User u2 = userService.createUser("Yufiel", "test", "mail", ERaceType.KANDORIAN);
-        LOGGER.info(u1.toString());
-        LOGGER.info(u2.toString());
         LOGGER.info("Users created");
 
-        a1 = allianceService.addMember(a1, u1);
-        a2 = allianceService.addMember(a2, u2);
-        LOGGER.info(a1.toString());
-        LOGGER.info(a2.toString());
+        u1.setAlliance(a1);
+        u2.setAlliance(a2);
+        userService.save(u1);
+        userService.save(u2);
         LOGGER.info("Alliances populated.");
 
         Starsystem s1 = starsystemService.createStarsystem("Argonaut", 1, 1);
         Starsystem s2 = starsystemService.createStarsystem("111", 2, 2);
-        LOGGER.info(s1.toString());
-        LOGGER.info(s2.toString());
         LOGGER.info("Starsystems created");
 
         Planet p1 = planetService.createPlanet("Argonauten HQ", u1, s1, 1, 1);
         Planet p2 = planetService.createPlanet("111er HQ", u2, s2, 2, 2);
-        LOGGER.info(p1.toString());
-        LOGGER.info(p2.toString());
         LOGGER.info("Planets created");
 
         Research unlockConstructionYard = researchService.createResearch("Construction Yard", "The construction yard research researches the construction yard.", 1, null);
@@ -169,37 +157,7 @@ public class DefaultApiImpl {
         Research unlockhull1 = researchService.createResearch("Corvette", "The Corvette research researches Corvettes.", 1, null);
         Research unlockhull2 = researchService.createResearch("Frigate", "The Frigate research researches Frigates.", 1, null);
         Research unlockhull3 = researchService.createResearch("Cruiser", "The Cruiser research researches Cruisers.", 1, unlockhull2);
-        LOGGER.info(unlockConstructionYard.toString());
-        LOGGER.info(unlockShipyard.toString());
-        LOGGER.info(unlockLaboratoy.toString());
-        LOGGER.info(unlockBank.toString());
-        LOGGER.info(unlockmetals.toString());
-        LOGGER.info(unlockmecur.toString());
-        LOGGER.info(unlockhyperworks.toString());
-        LOGGER.info(unlocklaser.toString());
-        LOGGER.info(unlockarmor.toString());
-        LOGGER.info(unlockshield.toString());
-        LOGGER.info(unlockpropulsion.toString());
-        LOGGER.info(unlockftl.toString());
-        LOGGER.info(unlockscanner.toString());
-        LOGGER.info(unlockhull1.toString());
-        LOGGER.info(unlockhull2.toString());
-        LOGGER.info(unlockhull3.toString());
         LOGGER.info("Researches created");
-
-        u1.getResearches().put(unlockConstructionYard, 1);
-        u1.getResearches().put(unlockShipyard, 1);
-        u1.getResearches().put(unlockLaboratoy, 1);
-        u1.getResearches().put(unlockBank, 1);
-        u1.getResearches().put(unlockmetals, 1);
-        u2.getResearches().put(unlockConstructionYard, 1);
-        u2.getResearches().put(unlockShipyard, 1);
-        u2.getResearches().put(unlockLaboratoy, 1);
-        u2.getResearches().put(unlockBank, 1);
-        u2.getResearches().put(unlockmetals, 1);
-        userService.save(u1);
-        userService.save(u2);
-        LOGGER.info("Researches populated");
 
         Building constructionYard = buildingService.createBuilding("Construction Yard", "The construction yard construct constructions.", 10, EResourceType.CONSTRUCTION, unlockConstructionYard);
         Building shipYard = buildingService.createBuilding("Orbitals Construction Yard", "The construction yard construct orbital constructions.", 10, EResourceType.ORBITALCONSTRUCTION, unlockShipyard);
@@ -208,21 +166,12 @@ public class DefaultApiImpl {
         Building metals = buildingService.createBuilding("Metal works", "Metals for progress.", 10, EResourceType.METALORE, unlockmetals);
         Building mecur = buildingService.createBuilding("Special orbital ores", "Better metals for more progress.", 10, EResourceType.MERCURIUM, unlockmecur);
         Building hyperworks = buildingService.createBuilding("Asynchronous Investigations", "The clock works creates time.", 10, EResourceType.HYPERONIUM, unlockhyperworks);
-        LOGGER.info(constructionYard.toString());
-        LOGGER.info(shipYard.toString());
-        LOGGER.info(researchB.toString());
-        LOGGER.info(bank.toString());
-        LOGGER.info(metals.toString());
-        LOGGER.info(mecur.toString());
-        LOGGER.info(hyperworks.toString());
         LOGGER.info("Buildings created");
 
         p1.getConstructions().add(new Construction(p1, constructionYard, 1));
         p2.getConstructions().add(new Construction(p2, constructionYard, 1));
         planetService.save(p1);
         planetService.save(p2);
-        LOGGER.info(p1.toString());
-        LOGGER.info(p2.toString());
         LOGGER.info("Planets populated with Construction Yards.");
 
         Module laser = moduleService.createModule("Laser Mk I", EModuleType.WEAPON, "A laser", 5, 10, 1, unlocklaser);
@@ -231,20 +180,11 @@ public class DefaultApiImpl {
         Module propulsion = moduleService.createModule("Speed Mk I", EModuleType.PROPULSION, "A drive", 5, 10, 1, unlockpropulsion);
         Module ftl = moduleService.createModule("FTL Speed Mk I", EModuleType.FTLPROPULSION, "A FTL drive", 5, 10, 1, unlockftl);
         Module scanner = moduleService.createModule("Scanner Mk I", EModuleType.SCANNER, "A scanner", 5, 10, 1, unlockscanner);
-        LOGGER.info(laser.toString());
-        LOGGER.info(armor.toString());
-        LOGGER.info(shield.toString());
-        LOGGER.info(propulsion.toString());
-        LOGGER.info(ftl.toString());
-        LOGGER.info(scanner.toString());
         LOGGER.info("Modules created");
 
         Hull hull1 = hullService.createHull("Corvette vessel", 1, 50, "The corvette hull", unlockhull1);
         Hull hull2 = hullService.createHull("Frigate vessel", 1, 100, "The frigate hull", unlockhull2);
         Hull hull3 = hullService.createHull("Cruiser vessel", 1, 150, "The cruiser hull", unlockhull3);
-        LOGGER.info(hull1.toString());
-        LOGGER.info(hull2.toString());
-        LOGGER.info(hull3.toString());
         LOGGER.info("Hulls created");
 
         ShipClass as1 = shipClassService.createShipClass(u1, "Argonauts corvette", hull1);
@@ -260,12 +200,21 @@ public class DefaultApiImpl {
         ers2 = shipClassService.addModules(ers2, laser, armor, shield, propulsion, ftl, scanner, laser, armor, shield, propulsion, ftl);
         ShipClass ers3 = shipClassService.createShipClass(u2, "111er cruiser", hull3);
         ers3 = shipClassService.addModules(ers3, laser, armor, shield, propulsion, ftl, scanner, laser, armor, shield, propulsion, ftl, laser, armor, shield);
-        LOGGER.info(as1.toString());
-        LOGGER.info(as2.toString());
-        LOGGER.info(as3.toString());
-        LOGGER.info(ers1.toString());
-        LOGGER.info(ers2.toString());
-        LOGGER.info(ers3.toString());
         LOGGER.info("ShipClasses created");
+
+        userService.addUnlockedResearch(u1, unlockConstructionYard);
+        userService.addUnlockedResearch(u1, unlockShipyard);
+        userService.addUnlockedResearch(u1, unlockLaboratoy);
+        userService.addUnlockedResearch(u1, unlockBank);
+        userService.addUnlockedResearch(u1, unlockmetals);
+        userService.addUnlockedResearch(u2, unlockConstructionYard);
+        userService.addUnlockedResearch(u2, unlockShipyard);
+        userService.addUnlockedResearch(u2, unlockLaboratoy);
+        userService.addUnlockedResearch(u2, unlockBank);
+        userService.addUnlockedResearch(u2, unlockmetals);
+        LOGGER.info("Researches populated");
+
+        tickService.doTick();
+        LOGGER.info("All Data created");
     }
 }

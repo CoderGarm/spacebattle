@@ -1,207 +1,198 @@
-alter table building
-    drop
-        foreign key FK5vart3g8xv4gkgagwxxwyiuqi;
 
-alter table building
-    drop
-        foreign key FKbp0gn3eiexsa5p6s20md9yfi7;
+    alter table building 
+       drop 
+       foreign key FK5vart3g8xv4gkgagwxxwyiuqi;
 
-alter table construction
-    drop
-        foreign key FKlkteuncyf95jg9hhq28yefrcl;
+    alter table building 
+       drop 
+       foreign key FKbp0gn3eiexsa5p6s20md9yfi7;
 
-alter table construction
-    drop
-        foreign key FKg139setxu2ng9hj6h7sgpyb9s;
+    alter table construction 
+       drop 
+       foreign key FKlkteuncyf95jg9hhq28yefrcl;
 
-alter table fleet
-    drop
-        foreign key FKh6yguwrqsu1kah359o77c1b8h;
+    alter table construction 
+       drop 
+       foreign key FKg139setxu2ng9hj6h7sgpyb9s;
 
-alter table fleet
-    drop
-        foreign key FK9p7bc2hmluuk682gxv6pfk1ve;
+    alter table fleet 
+       drop 
+       foreign key FKh6yguwrqsu1kah359o77c1b8h;
 
-alter table fleet
-    drop
-        foreign key FKjo66qwgl0a9bba5x7xq23fvok;
+    alter table fleet 
+       drop 
+       foreign key FK9p7bc2hmluuk682gxv6pfk1ve;
 
-alter table fleet
-    drop
-        foreign key FKckq55cmimjpois3mst803atuy;
+    alter table fleet 
+       drop 
+       foreign key FKjo66qwgl0a9bba5x7xq23fvok;
 
-alter table fleetcomposition
-    drop
-        foreign key FK5gqfc5h0bjidbw1g27dm6p5vn;
+    alter table fleet 
+       drop 
+       foreign key FKckq55cmimjpois3mst803atuy;
 
-alter table fleetcomposition
-    drop
-        foreign key FK8xjjuy4dvxqwloaaf4wge42qw;
+    alter table fleetcomposition 
+       drop 
+       foreign key FK5gqfc5h0bjidbw1g27dm6p5vn;
 
-alter table hull
-    drop
-        foreign key FK65udyybp7syxvga5evxn8olhc;
+    alter table fleetcomposition 
+       drop 
+       foreign key FK8xjjuy4dvxqwloaaf4wge42qw;
 
-alter table hull
-    drop
-        foreign key FK4hpf1pawl0wynjx9kdg74opea;
+    alter table hull 
+       drop 
+       foreign key FK65udyybp7syxvga5evxn8olhc;
 
-alter table job
-    drop
-        foreign key FK7otfjvk4vhy0gt0m3hnyam6au;
+    alter table hull 
+       drop 
+       foreign key FK4hpf1pawl0wynjx9kdg74opea;
 
-alter table job
-    drop
-        foreign key FKdno72guom99osq9f36eixsd87;
+    alter table job 
+       drop 
+       foreign key FK7otfjvk4vhy0gt0m3hnyam6au;
 
-alter table job
-    drop
-        foreign key FKir289ws5tvge6hdcbbwtpw0gv;
+    alter table job 
+       drop 
+       foreign key FKdno72guom99osq9f36eixsd87;
 
-alter table job
-    drop
-        foreign key FK4ewa76co5drr08nptgdmax8d6;
+    alter table job 
+       drop 
+       foreign key FKir289ws5tvge6hdcbbwtpw0gv;
 
-alter table job
-    drop
-        foreign key FK2s6nln4ut6ul572h0flcpipx4;
+    alter table job 
+       drop 
+       foreign key FK4ewa76co5drr08nptgdmax8d6;
 
-alter table module
-    drop
-        foreign key FKqxpwocsv3vwcws3g1yj7hpw8i;
+    alter table job 
+       drop 
+       foreign key FK3urqlpl2jmbxlfk4q88i9i5tb;
 
-alter table module
-    drop
-        foreign key FK52hbj88ddt0mvoq1jv1rf5vk1;
+    alter table module 
+       drop 
+       foreign key FKqxpwocsv3vwcws3g1yj7hpw8i;
 
-alter table modulecomposition
-    drop
-        foreign key FKcudmav236bb3nh619ye8gcp9p;
+    alter table module 
+       drop 
+       foreign key FK52hbj88ddt0mvoq1jv1rf5vk1;
 
-alter table modulecomposition
-    drop
-        foreign key FKnclvtmoo3ftvkkaf45fpr8fpc;
+    alter table modulecomposition 
+       drop 
+       foreign key FKcudmav236bb3nh619ye8gcp9p;
 
-alter table move
-    drop
-        foreign key FKg65nht3m74odamnrqiv1cdyl6;
+    alter table modulecomposition 
+       drop 
+       foreign key FKnclvtmoo3ftvkkaf45fpr8fpc;
 
-alter table move
-    drop
-        foreign key FKm0l3o2yx8pq8hu2bww8maoa98;
+    alter table move 
+       drop 
+       foreign key FKg65nht3m74odamnrqiv1cdyl6;
 
-alter table move
-    drop
-        foreign key FKa1bs79m293x3ok5ose0jli0r9;
+    alter table move 
+       drop 
+       foreign key FKm0l3o2yx8pq8hu2bww8maoa98;
 
-alter table move
-    drop
-        foreign key FKnyt7l8mioxwrvahwb9p86kbq0;
+    alter table move 
+       drop 
+       foreign key FKa1bs79m293x3ok5ose0jli0r9;
 
-alter table move
-    drop
-        foreign key FKfhqgwhapcw4i2ydno4u1qlq77;
+    alter table move 
+       drop 
+       foreign key FKnyt7l8mioxwrvahwb9p86kbq0;
 
-alter table move
-    drop
-        foreign key FK7ttvnhp04l6htir72n61xkffj;
+    alter table move 
+       drop 
+       foreign key FKfhqgwhapcw4i2ydno4u1qlq77;
 
-alter table planet
-    drop
-        foreign key FKobjb6jgxji3jrrgoxy9r30uyc;
+    alter table move 
+       drop 
+       foreign key FK7ttvnhp04l6htir72n61xkffj;
 
-alter table planet
-    drop
-        foreign key FKefjg37nip5q3p67hxedb485n4;
+    alter table planet 
+       drop 
+       foreign key FKobjb6jgxji3jrrgoxy9r30uyc;
 
-alter table planet
-    drop
-        foreign key FKk3ha0bjd77n9thg57b6u1tue0;
+    alter table planet 
+       drop 
+       foreign key FKefjg37nip5q3p67hxedb485n4;
 
-alter table planet
-    drop
-        foreign key FKn5q9kybjning6d8qag1rfutvr;
+    alter table planet 
+       drop 
+       foreign key FKk3ha0bjd77n9thg57b6u1tue0;
 
-alter table rescources
-    drop
-        foreign key FK1g6ky1b4jtewtsbt384qpc5qi;
+    alter table planet 
+       drop 
+       foreign key FKn5q9kybjning6d8qag1rfutvr;
 
-alter table research
-    drop
-        foreign key FKni50te130dndarqgicsq3svhb;
+    alter table rescources 
+       drop 
+       foreign key FK1g6ky1b4jtewtsbt384qpc5qi;
 
-alter table research
-    drop
-        foreign key FKch37eb44iv0ls442yu7usvvtp;
+    alter table research 
+       drop 
+       foreign key FKni50te130dndarqgicsq3svhb;
 
-alter table shipclass
-    drop
-        foreign key FK1ruka89wdh2fw4x3e3kasjg7l;
+    alter table research 
+       drop 
+       foreign key FKch37eb44iv0ls442yu7usvvtp;
 
-alter table shipclass
-    drop
-        foreign key FKb1t7hnfcn96sywd3vyqv9xdyc;
+    alter table shipclass 
+       drop 
+       foreign key FK1ruka89wdh2fw4x3e3kasjg7l;
 
-alter table shipclass
-    drop
-        foreign key FKpx7092ewe0n8g9hu56dhqp7ip;
+    alter table shipclass 
+       drop 
+       foreign key FKb1t7hnfcn96sywd3vyqv9xdyc;
 
-alter table systemcomposition
-    drop
-        foreign key FKcwpi16v4q8b3ifkguo88hsebd;
+    alter table shipclass 
+       drop 
+       foreign key FKpx7092ewe0n8g9hu56dhqp7ip;
 
-alter table systemcomposition
-    drop
-        foreign key FK5hvyh64i3b88ui993bblu9heb;
+    alter table unlockedResearch 
+       drop 
+       foreign key FKc4x693khs2f17y0jjfb625o51;
 
-alter table unlockedResearch
-    drop
-        foreign key FKc4x693khs2f17y0jjfb625o51;
+    alter table unlockedResearch 
+       drop 
+       foreign key FKigikopnlfckk76o2yo3utm5s9;
 
-alter table unlockedResearch
-    drop
-        foreign key FKigikopnlfckk76o2yo3utm5s9;
+    alter table user 
+       drop 
+       foreign key FKd0120p7tkvssh9r8hldenpw1w;
 
-alter table user
-    drop
-        foreign key FKd0120p7tkvssh9r8hldenpw1w;
+    drop table if exists alliance;
 
-drop table if exists alliance;
+    drop table if exists building;
 
-drop table if exists building;
+    drop table if exists construction;
 
-drop table if exists construction;
+    drop table if exists fleet;
 
-drop table if exists fleet;
+    drop table if exists fleetcomposition;
 
-drop table if exists fleetcomposition;
+    drop table if exists hull;
 
-drop table if exists hull;
+    drop table if exists job;
 
-drop table if exists job;
+    drop table if exists module;
 
-drop table if exists module;
+    drop table if exists modulecomposition;
 
-drop table if exists modulecomposition;
+    drop table if exists move;
 
-drop table if exists move;
+    drop table if exists planet;
 
-drop table if exists planet;
+    drop table if exists rescources;
 
-drop table if exists rescources;
+    drop table if exists research;
 
-drop table if exists research;
+    drop table if exists resourceDeposit;
 
-drop table if exists resourceDeposit;
+    drop table if exists shipclass;
 
-drop table if exists shipclass;
+    drop table if exists starsystem;
 
-drop table if exists starsystem;
+    drop table if exists tick;
 
-drop table if exists systemcomposition;
+    drop table if exists unlockedResearch;
 
-drop table if exists tick;
-
-drop table if exists unlockedResearch;
-
-drop table if exists user;
+    drop table if exists user;

@@ -27,8 +27,8 @@ public class Job extends AbstractEntityKey {
 
     @Nonnull
     @NotNull
-    @OneToOne
-    @JoinColumn(name = "idUser", updatable = false)
+    @ManyToOne
+    @JoinColumn(name = "idOwner", updatable = false)
     private User owner;
 
     @JsonIgnore

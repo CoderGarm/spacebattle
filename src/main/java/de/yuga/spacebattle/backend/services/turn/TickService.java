@@ -105,6 +105,11 @@ public class TickService {
         return tickC.findById(idHull).orElse(null);
     }
 
+    @Nonnull
+    public Tick getLatest() {
+        return tickC.getLatest();
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public Tick doTick() {
         Tick entity = new Tick();
