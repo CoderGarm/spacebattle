@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
-import de.yuga.spacebattle.backend.entities.orbitals.Starsystem;
+import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.repositories.orbitals.PlanetRepository;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +53,7 @@ public class PlanetService {
     @Nonnull
     public Planet createPlanet(@Nonnull final String name,
                                @Nullable final User owner,
-                               @Nonnull final Starsystem system,
+                               @Nonnull final StarSystem system,
                                @Nonnull final Integer xCoordinate,
                                @Nonnull final Integer yCoordinate) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");

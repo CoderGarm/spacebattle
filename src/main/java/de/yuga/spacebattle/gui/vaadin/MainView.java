@@ -183,6 +183,7 @@ public class MainView extends AppLayout {
         layout.setAlignItems(FlexComponent.Alignment.CENTER);
         layout.add(new DrawerToggle());
         TickDisplay tickDisplay = new TickDisplay(tickService.getLatest());
+        tickDisplay.setMargin(true);
         layout.add(tickDisplay);
         viewTitle = new H1();
         layout.add(viewTitle);
@@ -200,7 +201,8 @@ public class MainView extends AppLayout {
     @Nonnull
     private Button createLoginButton() {
         final Button login;
-        //login = new Button("Login", e -> //loginOverlay.setOpened(true)); todo check
+        //login = new Button("Login", e -> loginOverlay.setOpened(true));
+
         login = new Button("Login", e -> {
             final User user = this.userService.login("flashkid", "test");
             if (user != null) {
@@ -210,6 +212,7 @@ public class MainView extends AppLayout {
                 uiEventBus.publish(this, ESBEvent.LOGIN.name());
             }
         });
+
         login.setClassName("first-on-the-right");
         return login;
     }

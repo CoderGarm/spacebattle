@@ -21,7 +21,7 @@
 
     alter table fleet 
        drop 
-       foreign key FK9p7bc2hmluuk682gxv6pfk1ve;
+       foreign key FK2vpu4blpguup7j52xnn42ypnl;
 
     alter table fleet 
        drop 
@@ -33,7 +33,7 @@
 
     alter table fleetcomposition 
        drop 
-       foreign key FK5gqfc5h0bjidbw1g27dm6p5vn;
+       foreign key FK2xo81l4vrqmcwboo06cumtens;
 
     alter table fleetcomposition 
        drop 
@@ -57,7 +57,7 @@
 
     alter table job 
        drop 
-       foreign key FKir289ws5tvge6hdcbbwtpw0gv;
+       foreign key FKgbuspxcwyu67ktf3pkxwaxj6b;
 
     alter table job 
        drop 
@@ -75,13 +75,13 @@
        drop 
        foreign key FK52hbj88ddt0mvoq1jv1rf5vk1;
 
-    alter table modulecomposition 
+    alter table moduleComposition 
        drop 
-       foreign key FKcudmav236bb3nh619ye8gcp9p;
+       foreign key FKgtipiaku2mvi9j3of7ju7th6g;
 
-    alter table modulecomposition 
+    alter table moduleComposition 
        drop 
-       foreign key FKnclvtmoo3ftvkkaf45fpr8fpc;
+       foreign key FKr2iuudhohjx8cacih40d1bpv6;
 
     alter table move 
        drop 
@@ -97,7 +97,7 @@
 
     alter table move 
        drop 
-       foreign key FKnyt7l8mioxwrvahwb9p86kbq0;
+       foreign key FK66wwxap7hrv54faje90tmrbb0;
 
     alter table move 
        drop 
@@ -105,7 +105,7 @@
 
     alter table move 
        drop 
-       foreign key FK7ttvnhp04l6htir72n61xkffj;
+       foreign key FKr8obp03f86v1f41icg4xro1rl;
 
     alter table planet 
        drop 
@@ -113,19 +113,15 @@
 
     alter table planet 
        drop 
-       foreign key FKefjg37nip5q3p67hxedb485n4;
+       foreign key FK9cd80e9yxwnobejr9twlcknab;
 
     alter table planet 
        drop 
-       foreign key FKk3ha0bjd77n9thg57b6u1tue0;
+       foreign key FKjw116v1g0p9ghu41k1jddkw50;
 
     alter table planet 
        drop 
-       foreign key FKn5q9kybjning6d8qag1rfutvr;
-
-    alter table rescources 
-       drop 
-       foreign key FK1g6ky1b4jtewtsbt384qpc5qi;
+       foreign key FK2qd4p5ry3gaskjau8i2gutj0n;
 
     alter table research 
        drop 
@@ -135,17 +131,21 @@
        drop 
        foreign key FKch37eb44iv0ls442yu7usvvtp;
 
-    alter table shipclass 
+    alter table resources 
        drop 
-       foreign key FK1ruka89wdh2fw4x3e3kasjg7l;
+       foreign key FK8l4tmivydxr3qd5g2hmes0ieh;
 
-    alter table shipclass 
+    alter table shipClass 
        drop 
-       foreign key FKb1t7hnfcn96sywd3vyqv9xdyc;
+       foreign key FK5iggor36gwq8904cpdvcfjc1n;
 
-    alter table shipclass 
+    alter table shipClass 
        drop 
-       foreign key FKpx7092ewe0n8g9hu56dhqp7ip;
+       foreign key FKgkjpsgpvfaupqxr7cv9nhc9ai;
+
+    alter table shipClass 
+       drop 
+       foreign key FKovqcf68xgq4mm2n32sdoburq6;
 
     alter table unlockedResearch 
        drop 
@@ -175,21 +175,21 @@
 
     drop table if exists module;
 
-    drop table if exists modulecomposition;
+    drop table if exists moduleComposition;
 
     drop table if exists move;
 
     drop table if exists planet;
 
-    drop table if exists rescources;
-
     drop table if exists research;
 
     drop table if exists resourceDeposit;
 
-    drop table if exists shipclass;
+    drop table if exists resources;
 
-    drop table if exists starsystem;
+    drop table if exists shipClass;
+
+    drop table if exists starSystem;
 
     drop table if exists tick;
 
@@ -279,11 +279,11 @@
         primary key (idModule)
     ) engine=InnoDB;
 
-    create table modulecomposition (
-       idShipclass integer not null,
+    create table moduleComposition (
+       idShipClass integer not null,
         amount integer,
         idModule integer not null,
-        primary key (idShipclass, idModule)
+        primary key (idShipClass, idModule)
     ) engine=InnoDB;
 
     create table move (
@@ -304,17 +304,10 @@
         xCoordinate integer not null,
         yCoordinate integer not null,
         idOwner integer,
-        idRescourcedeposits integer,
-        idRescourcefactors integer,
-        idStarsystem integer,
+        idResourceDeposit integer,
+        idResourceFactor integer,
+        idStarSystem integer,
         primary key (idPlanet)
-    ) engine=InnoDB;
-
-    create table rescources (
-       idResourceDeposit integer not null,
-        amount decimal(19,2),
-        type varchar(50) not null,
-        primary key (idResourceDeposit, type)
     ) engine=InnoDB;
 
     create table research (
@@ -333,22 +326,29 @@
         primary key (idResourceDeposit)
     ) engine=InnoDB;
 
-    create table shipclass (
-       idShipclass integer not null auto_increment,
+    create table resources (
+       idResourceDeposit integer not null,
+        amount decimal(19,2),
+        type varchar(50) not null,
+        primary key (idResourceDeposit, type)
+    ) engine=InnoDB;
+
+    create table shipClass (
+       idShipClass integer not null auto_increment,
         name varchar(30) not null,
         raceType varchar(255) not null,
         idCosts integer,
         idHull integer not null,
         idOwner integer not null,
-        primary key (idShipclass)
+        primary key (idShipClass)
     ) engine=InnoDB;
 
-    create table starsystem (
-       idStarsystem integer not null auto_increment,
+    create table starSystem (
+       idStarSystem integer not null auto_increment,
         name varchar(255) not null,
         xCoordinate integer not null,
         yCoordinate integer not null,
-        primary key (idStarsystem)
+        primary key (idStarSystem)
     ) engine=InnoDB;
 
     create table tick (
@@ -382,19 +382,22 @@
        add constraint UK_7nuq4ufi5qsmpn1u6i8n2nxot unique (name);
 
     alter table construction 
-       add constraint UK8c4oqqvxa4xpl5rmgoafhpc69 unique (idPlanet, idBuilding);
+       add constraint CONSTRUCTION_UK unique (idPlanet, idBuilding);
 
     alter table job 
-       add constraint UK970jvv9t5arj4vbk44ygd9nrp unique (idFacility);
+       add constraint FACILITY_UK unique (idFacility);
 
     alter table planet 
-       add constraint UKdv40vo9ta4ir5vsolqropht2r unique (idStarsystem, idPlanet, xCoordinate, yCoordinate);
+       add constraint PLANET_UK unique (idStarSystem, idPlanet, xCoordinate, yCoordinate);
 
-    alter table shipclass 
-       add constraint UKhgcmmw0vvkvg6511jjpuw6bws unique (idOwner, name);
+    alter table shipClass 
+       add constraint SHIPCLASS_UK unique (idOwner, name);
 
-    alter table starsystem 
-       add constraint UKt4lv9qo63hlsg9mbs7mddql8h unique (xCoordinate, yCoordinate);
+    alter table starSystem 
+       add constraint COORDINATE_UK unique (xCoordinate, yCoordinate);
+
+    alter table user 
+       add constraint EMAIL_UK unique (email);
 
     alter table user 
        add constraint UK_sb8bbouer5wak8vyiiy4pf2bx unique (username);
@@ -425,9 +428,9 @@
        references planet (idPlanet);
 
     alter table fleet 
-       add constraint FK9p7bc2hmluuk682gxv6pfk1ve 
+       add constraint FK2vpu4blpguup7j52xnn42ypnl 
        foreign key (idStarsystem) 
-       references starsystem (idStarsystem);
+       references starSystem (idStarSystem);
 
     alter table fleet 
        add constraint FKjo66qwgl0a9bba5x7xq23fvok 
@@ -440,9 +443,9 @@
        references resourceDeposit (idResourceDeposit);
 
     alter table fleetcomposition 
-       add constraint FK5gqfc5h0bjidbw1g27dm6p5vn 
+       add constraint FK2xo81l4vrqmcwboo06cumtens 
        foreign key (idShipClass) 
-       references shipclass (idShipclass);
+       references shipClass (idShipClass);
 
     alter table fleetcomposition 
        add constraint FK8xjjuy4dvxqwloaaf4wge42qw 
@@ -470,9 +473,9 @@
        references research (idResearch);
 
     alter table job 
-       add constraint FKir289ws5tvge6hdcbbwtpw0gv 
+       add constraint FKgbuspxcwyu67ktf3pkxwaxj6b 
        foreign key (idShipclass) 
-       references shipclass (idShipclass);
+       references shipClass (idShipClass);
 
     alter table job 
        add constraint FK4ewa76co5drr08nptgdmax8d6 
@@ -494,15 +497,15 @@
        foreign key (idResearch) 
        references research (idResearch);
 
-    alter table modulecomposition 
-       add constraint FKcudmav236bb3nh619ye8gcp9p 
+    alter table moduleComposition 
+       add constraint FKgtipiaku2mvi9j3of7ju7th6g 
        foreign key (idModule) 
        references module (idModule);
 
-    alter table modulecomposition 
-       add constraint FKnclvtmoo3ftvkkaf45fpr8fpc 
-       foreign key (idShipclass) 
-       references shipclass (idShipclass);
+    alter table moduleComposition 
+       add constraint FKr2iuudhohjx8cacih40d1bpv6 
+       foreign key (idShipClass) 
+       references shipClass (idShipClass);
 
     alter table move 
        add constraint FKg65nht3m74odamnrqiv1cdyl6 
@@ -520,9 +523,9 @@
        references planet (idPlanet);
 
     alter table move 
-       add constraint FKnyt7l8mioxwrvahwb9p86kbq0 
+       add constraint FK66wwxap7hrv54faje90tmrbb0 
        foreign key (startIdStarsystem) 
-       references starsystem (idStarsystem);
+       references starSystem (idStarSystem);
 
     alter table move 
        add constraint FKfhqgwhapcw4i2ydno4u1qlq77 
@@ -530,9 +533,9 @@
        references planet (idPlanet);
 
     alter table move 
-       add constraint FK7ttvnhp04l6htir72n61xkffj 
+       add constraint FKr8obp03f86v1f41icg4xro1rl 
        foreign key (targetIdStarsystem) 
-       references starsystem (idStarsystem);
+       references starSystem (idStarSystem);
 
     alter table planet 
        add constraint FKobjb6jgxji3jrrgoxy9r30uyc 
@@ -540,24 +543,19 @@
        references user (idUser);
 
     alter table planet 
-       add constraint FKefjg37nip5q3p67hxedb485n4 
-       foreign key (idRescourcedeposits) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table planet 
-       add constraint FKk3ha0bjd77n9thg57b6u1tue0 
-       foreign key (idRescourcefactors) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table planet 
-       add constraint FKn5q9kybjning6d8qag1rfutvr 
-       foreign key (idStarsystem) 
-       references starsystem (idStarsystem);
-
-    alter table rescources 
-       add constraint FK1g6ky1b4jtewtsbt384qpc5qi 
+       add constraint FK9cd80e9yxwnobejr9twlcknab 
        foreign key (idResourceDeposit) 
        references resourceDeposit (idResourceDeposit);
+
+    alter table planet 
+       add constraint FKjw116v1g0p9ghu41k1jddkw50 
+       foreign key (idResourceFactor) 
+       references resourceDeposit (idResourceDeposit);
+
+    alter table planet 
+       add constraint FK2qd4p5ry3gaskjau8i2gutj0n 
+       foreign key (idStarSystem) 
+       references starSystem (idStarSystem);
 
     alter table research 
        add constraint FKni50te130dndarqgicsq3svhb 
@@ -569,18 +567,23 @@
        foreign key (unlockedThrough) 
        references research (idResearch);
 
-    alter table shipclass 
-       add constraint FK1ruka89wdh2fw4x3e3kasjg7l 
+    alter table resources 
+       add constraint FK8l4tmivydxr3qd5g2hmes0ieh 
+       foreign key (idResourceDeposit) 
+       references resourceDeposit (idResourceDeposit);
+
+    alter table shipClass 
+       add constraint FK5iggor36gwq8904cpdvcfjc1n 
        foreign key (idCosts) 
        references resourceDeposit (idResourceDeposit);
 
-    alter table shipclass 
-       add constraint FKb1t7hnfcn96sywd3vyqv9xdyc 
+    alter table shipClass 
+       add constraint FKgkjpsgpvfaupqxr7cv9nhc9ai 
        foreign key (idHull) 
        references hull (idHull);
 
-    alter table shipclass 
-       add constraint FKpx7092ewe0n8g9hu56dhqp7ip 
+    alter table shipClass 
+       add constraint FKovqcf68xgq4mm2n32sdoburq6 
        foreign key (idOwner) 
        references user (idUser);
 

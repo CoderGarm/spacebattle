@@ -2,7 +2,7 @@ package de.yuga.spacebattle.backend.services.orbitals;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
-import de.yuga.spacebattle.backend.entities.orbitals.Starsystem;
+import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.repositories.orbitals.StarsystemRepository;
 import org.springframework.stereotype.Service;
 
@@ -23,31 +23,31 @@ public class StarsystemService {
     }
 
     @Nonnull
-    public List<Starsystem> findAll() {
+    public List<StarSystem> findAll() {
         return starsystemRepository.findAllStarsystems();
     }
 
     @Nullable
-    public Starsystem find(@Nonnull final Integer idStarsystem) {
+    public StarSystem find(@Nonnull final Integer idStarsystem) {
         Preconditions.checkNotNull(idStarsystem, "idStarsystem shouldn't be null!");
         return starsystemRepository.findById(idStarsystem).orElse(null);
     }
 
     /**
-     * Creates a new {@link Starsystem}.
+     * Creates a new {@link StarSystem}.
      *
      * @param xCoordinate the x coordinate for the star map
      * @param yCoordinate the y coordinate for the star map
      * @return the new system
      */
     @Nonnull
-    public Starsystem createStarsystem(@Nonnull final String name,
+    public StarSystem createStarsystem(@Nonnull final String name,
                                        @Nonnull final Integer xCoordinate,
                                        @Nonnull final Integer yCoordinate) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(xCoordinate, "xCoordinate shouldn't be null!");
         Preconditions.checkNotNull(yCoordinate, "yCoordinate shouldn't be null!");
 
-        return starsystemRepository.save(new Starsystem(name, new Orbit(xCoordinate, yCoordinate)));
+        return starsystemRepository.save(new StarSystem(name, new Orbit(xCoordinate, yCoordinate)));
     }
 }

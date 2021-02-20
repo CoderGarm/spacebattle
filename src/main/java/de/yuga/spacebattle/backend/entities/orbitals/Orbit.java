@@ -39,7 +39,7 @@ public class Orbit {
      * @param xCoordinate the X of the sun's orbital
      * @param yCoordinate the Y of the sun's orbital
      */
-    public Orbit(@Nonnull final Starsystem system, final int xCoordinate, final int yCoordinate) {
+    public Orbit(@Nonnull final StarSystem system, final int xCoordinate, final int yCoordinate) {
         Preconditions.checkNotNull(system, "system shouldn't be null!");
 
         Orbit orbit = system.getOrbit();

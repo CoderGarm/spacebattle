@@ -11,7 +11,7 @@ import de.yuga.spacebattle.backend.entities.constructables.buildings.Constructio
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
-import de.yuga.spacebattle.backend.entities.orbitals.Starsystem;
+import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.Move;
@@ -105,7 +105,7 @@ public class TickService {
         return tickC.findById(idHull).orElse(null);
     }
 
-    @Nonnull
+    @Nullable
     public Tick getLatest() {
         return tickC.getLatest();
     }
@@ -145,7 +145,7 @@ public class TickService {
         }
 
         FleetOrbit targetOrbit = move.getTargetOrbit();
-        Starsystem targetSystem = targetOrbit.getSystem();
+        StarSystem targetSystem = targetOrbit.getSystem();
         Planet targetPlanet = targetOrbit.getPlanet();
 
         Fleet fleet = move.getFleet();
@@ -261,7 +261,7 @@ public class TickService {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkNotNull(construction, "construction shouldn't be null!");
 
-        ResourceDeposit resourcefactors = planet.getResourcefactors();
+        ResourceDeposit resourcefactors = planet.getResourceFactors();
         EResourceType resourceType = construction.getBuilding().getResourceType();
         BigDecimal factorByPlanet = resourcefactors.getResourceAmountByType(resourceType);
         BigDecimal tickOutput = construction.getTickOutput(factorByPlanet);

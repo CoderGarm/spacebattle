@@ -13,7 +13,7 @@ public class FleetOrbit {
     @Nonnull
     @OneToOne
     @JoinColumn(name = "idStarsystem", referencedColumnName = "idStarsystem")
-    private Starsystem system;
+    private StarSystem system;
 
     @Nonnull
     @OneToOne
@@ -23,7 +23,7 @@ public class FleetOrbit {
     public FleetOrbit() {
     }
 
-    public FleetOrbit(@Nonnull final Starsystem system, @Nonnull final Planet planet) {
+    public FleetOrbit(@Nonnull final StarSystem system, @Nonnull final Planet planet) {
         Preconditions.checkNotNull(system, "system shouldn't be null!");
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
 
@@ -32,11 +32,11 @@ public class FleetOrbit {
     }
 
     @Nonnull
-    public Starsystem getSystem() {
+    public StarSystem getSystem() {
         return system;
     }
 
-    public void setSystem(@Nonnull Starsystem system) {
+    public void setSystem(@Nonnull StarSystem system) {
         this.system = system;
     }
 

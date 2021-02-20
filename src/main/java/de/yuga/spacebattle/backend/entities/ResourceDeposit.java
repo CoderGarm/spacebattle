@@ -38,14 +38,14 @@ public class ResourceDeposit extends AbstractEntityKey {
     @MapKeyColumn(name = "type", updatable = false, length = 50)
     @MapKeyEnumerated(value = EnumType.STRING)
     @Column(name = "amount", scale = 2)
-    @CollectionTable(name = "rescources", joinColumns = @JoinColumn(name = "idResourceDeposit"))
+    @CollectionTable(name = "resources", joinColumns = @JoinColumn(name = "idResourceDeposit"))
     private Map<EResourceType, BigDecimal> resources = new HashMap<>();
 
     @Nonnull
     @NotNull(message = "SubType must be defined.")
     @Enumerated(EnumType.STRING)
     @Column(updatable = false)
-    private EResourceSubType subType = EResourceSubType.DEFAULT; // strange validation at instanziating proxies through spring
+    private EResourceSubType subType = EResourceSubType.DEFAULT; // strange validation at instantiation proxies through spring
 
     public ResourceDeposit() {
     }

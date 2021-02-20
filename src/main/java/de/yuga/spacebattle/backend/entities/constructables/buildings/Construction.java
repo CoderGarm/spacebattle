@@ -19,7 +19,8 @@ import java.math.BigDecimal;
         @NamedQuery(name = "Construction.getAll", query = "SELECT a FROM Construction a")
 })
 @Entity
-@Table(name = "construction", uniqueConstraints = @UniqueConstraint(columnNames = {"idPlanet", "idBuilding"}))
+@Table(name = "construction",
+        uniqueConstraints = @UniqueConstraint(name = "CONSTRUCTION_UK", columnNames = {"idPlanet", "idBuilding"}))
 @AttributeOverride(name = "id", column = @Column(name = "idConstruction"))
 public class Construction extends AbstractEntityKey {
 

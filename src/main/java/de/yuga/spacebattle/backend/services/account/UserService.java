@@ -85,6 +85,14 @@ public class UserService {
         return this.save(user);
     }
 
+    @Nullable
+    public User checkParameter(@Nonnull final String username, @Nonnull final String email) {
+        Preconditions.checkNotNull(username, "username shouldn't be null!");
+        Preconditions.checkNotNull(email, "email shouldn't be null!");
+
+        return userRepository.checkParameter(username, email);
+    }
+
     @Nonnull
     public User createUser(@Nonnull final String username,
                            @Nonnull final String password,

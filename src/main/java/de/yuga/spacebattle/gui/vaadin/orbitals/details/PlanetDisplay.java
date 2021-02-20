@@ -19,7 +19,7 @@ public class PlanetDisplay extends VerticalLayout {
         H5 depositsTitle = new H5("Deposits");
         ResourceDisplay deposits = new ResourceDisplay(planet.getResourceDeposit());
         H5 miningFactorsTitle = new H5("Mining factors");
-        ResourceDisplay factors = new ResourceDisplay(planet.getResourcefactors());
+        ResourceDisplay factors = new ResourceDisplay(planet.getResourceFactors());
 
         add(name, depositsTitle, deposits, miningFactorsTitle, factors);
     }

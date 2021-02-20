@@ -21,7 +21,7 @@ import java.math.BigDecimal;
         @NamedQuery(name = "Job.researchPossibleForOwner", query = "SELECT COUNT(p) FROM Job p WHERE p.owner = :owner AND p.facility IS NULL")
 })
 @Entity
-@Table(name = "job", uniqueConstraints = @UniqueConstraint(columnNames = "idFacility"))
+@Table(name = "job", uniqueConstraints = @UniqueConstraint(name = "FACILITY_UK", columnNames = "idFacility"))
 @AttributeOverride(name = "id", column = @Column(name = "idJob"))
 public class Job extends AbstractEntityKey {
 

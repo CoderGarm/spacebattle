@@ -27,7 +27,7 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
 
     @Nullable
     @Override
-    public User login(@Nonnull String username, @Nonnull String password) {
+    public User login(@Nonnull final String username, @Nonnull final String password) {
         Preconditions.checkNotNull(username, "username shouldn't be null!");
         Preconditions.checkNotNull(password, "password shouldn't be null!");
 
@@ -35,6 +35,23 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
             final User u = em.createNamedQuery("User.login", User.class)
                     .setParameter("username", StringUtils.upperCase(username))
                     .setParameter("password", StringUtils.upperCase(password))
+                    .getSingleResult();
+            return u;
+        } catch (final NoResultException e) {
+            return null;
+        }
+    }
+
+    @Nullable
+    @Override
+    public User checkParameter(@Nonnull final String username, @Nonnull final String email) {
+        Preconditions.checkNotNull(username, "username shouldn't be null!");
+        Preconditions.checkNotNull(email, "email shouldn't be null!");
+
+        try {
+            final User u = em.createNamedQuery("User.checkParameter", User.class)
+                    .setParameter("username", StringUtils.upperCase(username))
+                    .setParameter("email", StringUtils.upperCase(email))
                     .getSingleResult();
             return u;
         } catch (final NoResultException e) {

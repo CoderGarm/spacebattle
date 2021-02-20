@@ -23,10 +23,15 @@ import java.util.Set;
 
 @NamedQueries({
         @NamedQuery(name = "User.getAll", query = "SELECT u FROM User u"),
+        @NamedQuery(name = "User.checkParameter", query = "SELECT u FROM User u WHERE UPPER(u.username) = :username AND UPPER(u.email) = :email"),
         @NamedQuery(name = "User.login", query = "SELECT u FROM User u LEFT JOIN FETCH u.ownedPlanets p LEFT JOIN FETCH u.alliance a LEFT JOIN FETCH u.researches r WHERE UPPER(u.username) = :username AND UPPER(u.password) = :password")
 })
 @Entity
-@Table(name = "user")
+@Table(name = "user",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "USERNAME_UK", columnNames = {"username"}),
+                @UniqueConstraint(name = "EMAIL_UK", columnNames = {"email"})
+        })
 @AttributeOverride(name = "id", column = @Column(name = "idUser"))
 public class User extends AbstractEntityKey {
 
@@ -113,6 +118,12 @@ public class User extends AbstractEntityKey {
         Preconditions.checkNotNull(password, "password shouldn't be null!");
 
         this.password = password;
+    }
+
+    public void setRaceType(@Nonnull ERaceType raceType) {
+        Preconditions.checkNotNull(raceType, "raceType shouldn't be null!");
+
+        this.raceType = raceType;
     }
 
     @Nonnull

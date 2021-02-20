@@ -21,7 +21,7 @@
 
     alter table fleet 
        drop 
-       foreign key FK9p7bc2hmluuk682gxv6pfk1ve;
+       foreign key FK2vpu4blpguup7j52xnn42ypnl;
 
     alter table fleet 
        drop 
@@ -33,7 +33,7 @@
 
     alter table fleetcomposition 
        drop 
-       foreign key FK5gqfc5h0bjidbw1g27dm6p5vn;
+       foreign key FK2xo81l4vrqmcwboo06cumtens;
 
     alter table fleetcomposition 
        drop 
@@ -57,7 +57,7 @@
 
     alter table job 
        drop 
-       foreign key FKir289ws5tvge6hdcbbwtpw0gv;
+       foreign key FKgbuspxcwyu67ktf3pkxwaxj6b;
 
     alter table job 
        drop 
@@ -75,13 +75,13 @@
        drop 
        foreign key FK52hbj88ddt0mvoq1jv1rf5vk1;
 
-    alter table modulecomposition 
+    alter table moduleComposition 
        drop 
-       foreign key FKcudmav236bb3nh619ye8gcp9p;
+       foreign key FKgtipiaku2mvi9j3of7ju7th6g;
 
-    alter table modulecomposition 
+    alter table moduleComposition 
        drop 
-       foreign key FKnclvtmoo3ftvkkaf45fpr8fpc;
+       foreign key FKr2iuudhohjx8cacih40d1bpv6;
 
     alter table move 
        drop 
@@ -97,7 +97,7 @@
 
     alter table move 
        drop 
-       foreign key FKnyt7l8mioxwrvahwb9p86kbq0;
+       foreign key FK66wwxap7hrv54faje90tmrbb0;
 
     alter table move 
        drop 
@@ -105,7 +105,7 @@
 
     alter table move 
        drop 
-       foreign key FK7ttvnhp04l6htir72n61xkffj;
+       foreign key FKr8obp03f86v1f41icg4xro1rl;
 
     alter table planet 
        drop 
@@ -113,19 +113,15 @@
 
     alter table planet 
        drop 
-       foreign key FKefjg37nip5q3p67hxedb485n4;
+       foreign key FK9cd80e9yxwnobejr9twlcknab;
 
     alter table planet 
        drop 
-       foreign key FKk3ha0bjd77n9thg57b6u1tue0;
+       foreign key FKjw116v1g0p9ghu41k1jddkw50;
 
     alter table planet 
        drop 
-       foreign key FKn5q9kybjning6d8qag1rfutvr;
-
-    alter table rescources 
-       drop 
-       foreign key FK1g6ky1b4jtewtsbt384qpc5qi;
+       foreign key FK2qd4p5ry3gaskjau8i2gutj0n;
 
     alter table research 
        drop 
@@ -135,17 +131,21 @@
        drop 
        foreign key FKch37eb44iv0ls442yu7usvvtp;
 
-    alter table shipclass 
+    alter table resources 
        drop 
-       foreign key FK1ruka89wdh2fw4x3e3kasjg7l;
+       foreign key FK8l4tmivydxr3qd5g2hmes0ieh;
 
-    alter table shipclass 
+    alter table shipClass 
        drop 
-       foreign key FKb1t7hnfcn96sywd3vyqv9xdyc;
+       foreign key FK5iggor36gwq8904cpdvcfjc1n;
 
-    alter table shipclass 
+    alter table shipClass 
        drop 
-       foreign key FKpx7092ewe0n8g9hu56dhqp7ip;
+       foreign key FKgkjpsgpvfaupqxr7cv9nhc9ai;
+
+    alter table shipClass 
+       drop 
+       foreign key FKovqcf68xgq4mm2n32sdoburq6;
 
     alter table unlockedResearch 
        drop 
@@ -175,21 +175,21 @@
 
     drop table if exists module;
 
-    drop table if exists modulecomposition;
+    drop table if exists moduleComposition;
 
     drop table if exists move;
 
     drop table if exists planet;
 
-    drop table if exists rescources;
-
     drop table if exists research;
 
     drop table if exists resourceDeposit;
 
-    drop table if exists shipclass;
+    drop table if exists resources;
 
-    drop table if exists starsystem;
+    drop table if exists shipClass;
+
+    drop table if exists starSystem;
 
     drop table if exists tick;
 

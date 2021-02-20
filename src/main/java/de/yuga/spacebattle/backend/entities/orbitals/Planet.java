@@ -22,8 +22,7 @@ import java.util.Set;
 @Entity
 @Table(name = "planet",
         uniqueConstraints =
-        @UniqueConstraint(columnNames =
-                {"idStarsystem", "idPlanet", "xCoordinate", "yCoordinate"}))
+        @UniqueConstraint(name = "PLANET_UK", columnNames = {"idStarSystem", "idPlanet", "xCoordinate", "yCoordinate"}))
 @AttributeOverride(name = "id", column = @Column(name = "idPlanet"))
 public class Planet extends AbstractEntityKey {
 
@@ -39,8 +38,8 @@ public class Planet extends AbstractEntityKey {
 
     @Nonnull
     @ManyToOne
-    @JoinColumn(name = "idStarsystem", updatable = false)
-    private Starsystem system;
+    @JoinColumn(name = "idStarSystem", updatable = false)
+    private StarSystem system;
 
     @Embedded
     private Orbit orbit;
@@ -50,15 +49,15 @@ public class Planet extends AbstractEntityKey {
      */
     @Nonnull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "idRescourcefactors", updatable = false)
-    private final ResourceDeposit resourcefactors = new ResourceDeposit(EResourceSubType.MININGFACTORS);
+    @JoinColumn(name = "idResourceFactor", updatable = false)
+    private final ResourceDeposit resourceFactors = new ResourceDeposit(EResourceSubType.MININGFACTORS);
 
     /**
      * The amount of resources at this planet.
      */
     @Nonnull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "idRescourcedeposits", updatable = false)
+    @JoinColumn(name = "idResourceDeposit", updatable = false)
     private final ResourceDeposit resourceDeposit = new ResourceDeposit(EResourceSubType.DEPOSITS);
 
     @Nonnull
@@ -70,7 +69,7 @@ public class Planet extends AbstractEntityKey {
 
     public Planet(@Nullable final User owner,
                   @Nonnull final String name,
-                  @Nonnull final Starsystem system,
+                  @Nonnull final StarSystem system,
                   @Nonnull final Orbit orbit) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(system, "system shouldn't be null!");
@@ -114,13 +113,13 @@ public class Planet extends AbstractEntityKey {
     }
 
     @Nonnull
-    public Starsystem getSystem() {
+    public StarSystem getSystem() {
         return system;
     }
 
     @Nonnull
-    public ResourceDeposit getResourcefactors() {
-        return resourcefactors;
+    public ResourceDeposit getResourceFactors() {
+        return resourceFactors;
     }
 
     @Nonnull

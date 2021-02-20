@@ -13,4 +13,7 @@ public interface CustomUserRepository {
 
     @Nullable
     User login(@Nonnull final String username, @Nonnull final String password);
+
+    @Nullable
+    User checkParameter(@Nonnull final String username, @Nonnull final String email);
 }

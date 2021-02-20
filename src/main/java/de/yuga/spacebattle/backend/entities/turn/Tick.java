@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @NamedQueries({
         @NamedQuery(name = "Tick.getAll", query = "SELECT p FROM Tick p"),
-        @NamedQuery(name = "Tick.getLatest", query = "SELECT p FROM Tick p ORDER BY p.idTick DESC")
+        @NamedQuery(name = "Tick.getLatest", query = "SELECT p FROM Tick p ORDER BY p.id DESC")
 })
 @Entity
 @Table(name = "tick")

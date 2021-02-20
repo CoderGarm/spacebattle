@@ -14,12 +14,13 @@ import java.util.Set;
  * The star system which every action founds a place.
  */
 @NamedQueries({
-        @NamedQuery(name = "Starsystem.getAll", query = "SELECT p FROM Starsystem p")
+        @NamedQuery(name = "StarSystem.getAll", query = "SELECT p FROM StarSystem p")
 })
 @Entity
-@Table(name = "starsystem", uniqueConstraints = @UniqueConstraint(columnNames = {"xCoordinate", "yCoordinate"}))
-@AttributeOverride(name = "id", column = @Column(name = "idStarsystem"))
-public class Starsystem extends AbstractEntityKey {
+@Table(name = "starSystem",
+        uniqueConstraints = @UniqueConstraint(name = "COORDINATE_UK", columnNames = {"xCoordinate", "yCoordinate"}))
+@AttributeOverride(name = "id", column = @Column(name = "idStarSystem"))
+public class StarSystem extends AbstractEntityKey {
 
     @Nonnull
     @NotNull
@@ -38,10 +39,10 @@ public class Starsystem extends AbstractEntityKey {
     @OneToMany(mappedBy = "system", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     private final Set<Planet> planets = new HashSet<>();
 
-    public Starsystem() {
+    public StarSystem() {
     }
 
-    public Starsystem(@Nonnull final String name, @Nonnull final Orbit orbit) {
+    public StarSystem(@Nonnull final String name, @Nonnull final Orbit orbit) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(orbit, "orbit shouldn't be null!");
 

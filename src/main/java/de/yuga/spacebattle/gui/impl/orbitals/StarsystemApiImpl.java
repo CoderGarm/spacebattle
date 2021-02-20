@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.gui.impl.orbitals;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.orbitals.Starsystem;
+import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.repositories.orbitals.StarsystemRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,14 +31,14 @@ public class StarsystemApiImpl {
     @GetMapping
     @ResponseBody
     public ResponseEntity<?> getStarsystem() {
-        final List<Starsystem> all = starsystemController.findAllStarsystems();
+        final List<StarSystem> all = starsystemController.findAllStarsystems();
         return ResponseEntity.ok(all);
     }
 
     @GetMapping("{idStarsystem}")
     @ResponseBody
     public ResponseEntity<?> getStarsystem(@PathVariable("idStarsystem") final int idStarsystem) {
-        Starsystem starsystem = starsystemController.findById(idStarsystem).get();
+        StarSystem starsystem = starsystemController.findById(idStarsystem).get();
         if (starsystem == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -47,7 +47,7 @@ public class StarsystemApiImpl {
 
     @PutMapping
     @ResponseBody
-    public ResponseEntity<?> putStarsystem(@RequestBody Starsystem starsystem) {
+    public ResponseEntity<?> putStarsystem(@RequestBody StarSystem starsystem) {
         if (starsystem.getId() < -1 || starsystem.getId() == 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
@@ -57,7 +57,7 @@ public class StarsystemApiImpl {
 
     @DeleteMapping
     @ResponseBody
-    public ResponseEntity<?> deleteStarsystem(@RequestBody Starsystem starsystem) {
+    public ResponseEntity<?> deleteStarsystem(@RequestBody StarSystem starsystem) {
         if (starsystem.getId() < -1 || starsystem.getId() == 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }

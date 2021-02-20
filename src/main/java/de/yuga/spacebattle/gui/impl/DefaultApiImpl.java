@@ -7,7 +7,7 @@ import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
-import de.yuga.spacebattle.backend.entities.orbitals.Starsystem;
+import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
@@ -124,7 +124,7 @@ public class DefaultApiImpl {
         LOGGER.info("Alliances created");
 
         final User u1 = userService.createUser("Flashkid", "test", "mail", ERaceType.HUMAN);
-        final User u2 = userService.createUser("Yufiel", "test", "mail", ERaceType.KANDORIAN);
+        final User u2 = userService.createUser("Yufiel", "test", "mail2", ERaceType.KANDORIAN);
         LOGGER.info("Users created");
 
         u1.setAlliance(a1);
@@ -133,8 +133,8 @@ public class DefaultApiImpl {
         userService.save(u2);
         LOGGER.info("Alliances populated.");
 
-        Starsystem s1 = starsystemService.createStarsystem("Argonaut", 1, 1);
-        Starsystem s2 = starsystemService.createStarsystem("111", 2, 2);
+        StarSystem s1 = starsystemService.createStarsystem("Argonaut", 1, 1);
+        StarSystem s2 = starsystemService.createStarsystem("111", 2, 2);
         LOGGER.info("Starsystems created");
 
         Planet p1 = planetService.createPlanet("Argonauten HQ", u1, s1, 1, 1);

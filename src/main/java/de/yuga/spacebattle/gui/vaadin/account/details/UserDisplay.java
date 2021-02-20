@@ -41,9 +41,9 @@ public class UserDisplay extends HorizontalLayout {
         this.email.setValue(user.getEmail());
         this.email.setReadOnly(true);
 
-        this.raceSelector = new RaceSelect(user.getRaceType(), true);
+        this.raceSelector = new RaceSelect(user.getRaceType());
+        this.raceSelector.setReadOnly(true);
 
         add(username, password, raceSelector, email);
-        setVerticalComponentAlignment(Alignment.END, username, password, raceSelector, email);
     }
 }

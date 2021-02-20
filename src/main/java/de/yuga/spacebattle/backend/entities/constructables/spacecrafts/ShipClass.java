@@ -24,8 +24,9 @@ import java.util.Map;
         @NamedQuery(name = "ShipClass.getAll", query = "SELECT a FROM ShipClass a")
 })
 @Entity
-@Table(name = "shipclass", uniqueConstraints = @UniqueConstraint(columnNames = {"idOwner", "name"}))
-@AttributeOverride(name = "id", column = @Column(name = "idShipclass"))
+@Table(name = "shipClass",
+        uniqueConstraints = @UniqueConstraint(name = "SHIPCLASS_UK", columnNames = {"idOwner", "name"}))
+@AttributeOverride(name = "id", column = @Column(name = "idShipClass"))
 @ShipValidator
 public class ShipClass extends AbstractEntityKey {
 
@@ -57,7 +58,7 @@ public class ShipClass extends AbstractEntityKey {
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyJoinColumn(name = "idModule", referencedColumnName = "idModule")
     @Column(name = "amount")
-    @CollectionTable(name = "modulecomposition", joinColumns = @JoinColumn(name = "idShipclass"))
+    @CollectionTable(name = "moduleComposition", joinColumns = @JoinColumn(name = "idShipClass"))
     private final Map<Module, Integer> modules = new HashMap<>();
 
     public ShipClass() {

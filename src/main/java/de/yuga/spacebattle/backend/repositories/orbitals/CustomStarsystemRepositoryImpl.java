@@ -1,6 +1,6 @@
 package de.yuga.spacebattle.backend.repositories.orbitals;
 
-import de.yuga.spacebattle.backend.entities.orbitals.Starsystem;
+import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
@@ -14,8 +14,8 @@ public class CustomStarsystemRepositoryImpl implements CustomStarsystemRepositor
     private EntityManager em;
 
     @Override
-    public List<Starsystem> findAllStarsystems() {
-        final List<Starsystem> resultList = em.createNamedQuery("Starsystem.getAll", Starsystem.class).getResultList();
+    public List<StarSystem> findAllStarsystems() {
+        final List<StarSystem> resultList = em.createNamedQuery("StarSystem.getAll", StarSystem.class).getResultList();
         return resultList;
     }
 }

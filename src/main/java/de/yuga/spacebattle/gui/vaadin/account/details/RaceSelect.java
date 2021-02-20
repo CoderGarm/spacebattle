@@ -7,11 +7,14 @@ import javax.annotation.Nullable;
 
 public class RaceSelect extends Select<ERaceType> {
 
-    public RaceSelect(@Nullable final ERaceType raceType, final boolean readOnly) {
+    public RaceSelect(@Nullable final ERaceType raceType) {
+        this();
+        setValue(raceType);
+    }
+
+    public RaceSelect() {
         setItems(ERaceType.values());
         setLabel("Species");
         setEmptySelectionAllowed(false);
-        setValue(raceType);
-        setReadOnly(readOnly);
     }
 }
