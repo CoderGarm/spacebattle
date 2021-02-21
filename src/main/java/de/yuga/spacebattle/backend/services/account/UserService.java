@@ -40,6 +40,11 @@ public class UserService {
         return login;
     }
 
+    public User refresh() {
+        login = find(login.getId());
+        return login;
+    }
+
     public void setLogin(@Nullable final User login) {
         this.login = login;
     }

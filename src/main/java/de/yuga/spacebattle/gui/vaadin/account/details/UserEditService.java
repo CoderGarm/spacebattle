@@ -43,9 +43,6 @@ public class UserEditService extends VerticalLayout {
     @Nonnull
     private final EventBus.UIEventBus uiEventBus;
 
-    @Nonnull
-    private final Validator validator = CustomValidatorFactory.buildCustomValidator();
-
     @Autowired
     public UserEditService(@Nonnull final EventBus.UIEventBus uiEventBus) {
         Preconditions.checkNotNull(uiEventBus, "uiEventBus shouldn't be null!");

@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.gui.vaadin.constructables.buildings;
+package de.yuga.spacebattle.gui.vaadin.buildings;
 
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.html.Label;

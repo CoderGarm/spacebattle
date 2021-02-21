@@ -3,29 +3,26 @@ package de.yuga.spacebattle.gui.vaadin.turn;
 
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 
 public class TickDisplay extends HorizontalLayout {
 
     @Nonnull
-    public final static DateTimeFormatter tickFormatter = new DateTimeFormatterBuilder().appendPattern("yyyy MM dd").toFormatter();
+    private final Binder<Tick> binder = new Binder<>(Tick.class);
 
-    public TickDisplay(@Nullable final Tick tick) {
+    public TickDisplay() {
+        final Label tickTextLabel = new Label();
+        final ReadOnlyHasValue<String> tickText = new ReadOnlyHasValue<>(tickTextLabel::setText);
+        binder.forField(tickText).bind(Tick::convertTickToText, null);
+        add(tickTextLabel);
+    }
 
-        String text1 = "Tick ";
-        if (tick != null) {
-            text1 += tick.getId() + " at " + tick.getTickStarts().format(tickFormatter);
-        } else {
-            text1 += "zero has not passed.";
-        }
-
-        Label tickL = new Label(text1);
-
-        add(tickL);
+    public void updateTick(@Nullable Tick tick) {
+        binder.readBean(tick);
     }
 }

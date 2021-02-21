@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.gui.vaadin.account;
+package de.yuga.spacebattle.gui.vaadin.views;
 
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SpringComponent
-//@PreserveOnRefresh
 @UIScope
 @Route(value = UserView.ROUTE, layout = MainView.class)
 @CssImport("./styles/views/account/user-view.css")

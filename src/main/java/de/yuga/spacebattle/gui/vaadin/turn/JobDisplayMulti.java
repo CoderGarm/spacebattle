@@ -20,8 +20,8 @@ public class JobDisplayMulti extends VerticalLayout {
         AccordionPanel accordionPanel = new AccordionPanel();
         accordionPanel.setSummaryText("Jobs");
         jobs.forEach(job -> {
-            JobDisplay researchDisplay = new JobDisplay(job);
-            accordionPanel.addContent(researchDisplay);
+            JobDisplay jobDisplay = new JobDisplay(job);
+            accordionPanel.addContent(jobDisplay);
         });
         accordion.add(accordionPanel);
         accordion.close();

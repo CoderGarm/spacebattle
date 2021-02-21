@@ -6,7 +6,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import de.yuga.spacebattle.gui.vaadin.SBRouting;
-import de.yuga.spacebattle.gui.vaadin.misc.LoginView;
+import de.yuga.spacebattle.gui.vaadin.views.LoginView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

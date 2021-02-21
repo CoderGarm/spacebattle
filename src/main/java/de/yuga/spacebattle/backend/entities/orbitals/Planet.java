@@ -17,7 +17,8 @@ import java.util.Set;
 
 @NamedQueries({
         @NamedQuery(name = "Planet.getAll", query = "SELECT p FROM Planet p"),
-        @NamedQuery(name = "Planet.getAllOwned", query = "SELECT p FROM Planet p WHERE p.owner IS NOT NULL")
+        @NamedQuery(name = "Planet.getAllOwned", query = "SELECT p FROM Planet p WHERE p.owner IS NOT NULL"),
+        @NamedQuery(name = "Planet.getAllOwnedBy", query = "SELECT p FROM Planet p WHERE p.owner = :owner ORDER BY p.id")
 })
 @Entity
 @Table(name = "planet",

@@ -40,7 +40,8 @@ public class Construction extends AbstractEntityKey {
     private int level = 1;
 
     @Nullable
-    @OneToOne(mappedBy = "facility")
+    @OneToOne(mappedBy = "facility", orphanRemoval = true)
+//, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     private Job job;
 
     public Construction() {
@@ -58,17 +59,17 @@ public class Construction extends AbstractEntityKey {
     /**
      * Calculates the tickly output of this construction.
      *
-     * @param rescourceFactorByPlanet the planets opportunity to produce
+     * @param resourceFactorByPlanet the planets opportunity to produce
      * @return the tickly production
      */
-    public BigDecimal getTickOutput(@Nonnull final BigDecimal rescourceFactorByPlanet) {
-        Preconditions.checkNotNull(rescourceFactorByPlanet, "rescourceFactorByPlanet shouldn't be null!");
+    public BigDecimal getTickOutput(@Nonnull final BigDecimal resourceFactorByPlanet) {
+        Preconditions.checkNotNull(resourceFactorByPlanet, "resourceFactorByPlanet shouldn't be null!");
 
         BigDecimal increasingFactorPerLevel = building.getIncreasingFactorPerLevel();
         int baseValue = building.getBaseValue();
         BigDecimal result = new BigDecimal(baseValue).add(increasingFactorPerLevel).multiply(new BigDecimal(level));
         return result.multiply(
-                rescourceFactorByPlanet.divide(BigDecimal.TEN.movePointRight(1), ResourceDeposit.mathContext));
+                resourceFactorByPlanet.divide(BigDecimal.TEN.movePointRight(1), ResourceDeposit.mathContext));
     }
 
     @Nonnull

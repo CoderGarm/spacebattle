@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.gui.vaadin.misc;
+package de.yuga.spacebattle.gui.vaadin.views;
 
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.Text;

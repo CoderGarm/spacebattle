@@ -82,6 +82,7 @@ public class JobService {
      *
      * @param entity the job to delete
      */
+    //@Transactional
     public void delete(@Nullable final Job entity) {
         if (entity == null || entity.getId() < 1) {
             return;
@@ -282,11 +283,11 @@ public class JobService {
     }
 
     /**
-     * CHecks if the pointed faciliy is in use.
+     * Checks if the pointed facility is in use.
      *
-     * @param facility
+     * @param facility the facility which could be in use
      */
-    private void checkIfFree(Construction facility) {
+    private void checkIfFree(@Nullable final Construction facility) {
         if (facility == null) {
             throw new NotifySBUserException("not here, buddy!");
         }

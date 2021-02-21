@@ -34,11 +34,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class TickService {
 
+    @Nonnull
     private static final Logger LOGGER = LoggerFactory.getLogger(TickService.class);
+
 
     @Nonnull
     private final TickRepository tickC;
@@ -113,11 +116,9 @@ public class TickService {
     @Transactional(rollbackFor = Exception.class)
     public Tick doTick() {
         Tick entity = new Tick();
-        tickC.save(entity);
         List<Planet> planets = planetService.findAllColonized();
         for (Planet p : planets) {
             tick(p);
-            planetService.save(p);
         }
         List<Move> movings = moveService.findAll();
         for (Move m : movings) {
@@ -131,7 +132,7 @@ public class TickService {
         }
 
         entity.setTickEnds(LocalDateTime.now());
-        return entity;
+        return tickC.save(entity);
     }
 
     private boolean move(@Nonnull final Move move) {
@@ -156,22 +157,23 @@ public class TickService {
     }
 
     /**
-     * Calulates the tickly output of this planet.
+     * Calculates the tickly output of this planet.
+     * This includes the amount of generated resources and the calculations of jobs which could be successfully ended.
      */
-    @Transactional
     void tick(@Nonnull final Planet planet) {
         Preconditions.checkState(planet.getOwner() != null,
                 "The owner must be set, otherwise there is nothing to do.");
 
+        calculateTickOutput(planet);
         Set<Construction> constructions = planet.getConstructions();
         ResourceDeposit resourceDeposit = planet.getResourceDeposit();
-        for (Construction construction : constructions) {
-            EResourceType resourceType = calculateTickOutput(resourceDeposit, planet, construction);
-            Job job = construction.getJob();
+        for (Construction facility : constructions) {
+            EResourceType resourceType = facility.getBuilding().getResourceType();
+            Job job = facility.getJob();
             if (job == null) {
                 continue;
             }
-            boolean remainingPoints = calculateConstructablePointsRemaining(job, resourceDeposit, resourceType);
+            boolean remainingPoints = calculateConstructablePointsRemaining(job, resourceDeposit);
             if (remainingPoints) {
                 jobService.save(job);
                 continue;
@@ -205,7 +207,6 @@ public class TickService {
                         workInProgress = new Construction(planet, building, 1);
                         constructions.add(workInProgress);
                     }
-                    constructionService.save(workInProgress);
                     break;
                 case ORBITALCONSTRUCTION:
 
@@ -219,7 +220,7 @@ public class TickService {
                     fleetService.save(fleet);
                     break;
             }
-            jobService.delete(job);
+            facility.setJob(null);
         }
         planetService.save(planet);
     }
@@ -229,43 +230,41 @@ public class TickService {
      *
      * @param job             the {@link Job} to do
      * @param resourceDeposit the {@link ResourceDeposit} to take from
-     * @param resourceType    the {@link EResourceType} wo calculate for
-     * @return <code>true</code> is the job is done
+     * @return <code>true</code> if the job is done
      */
     private boolean calculateConstructablePointsRemaining(@Nonnull final Job job,
-                                                          @Nonnull final ResourceDeposit resourceDeposit,
-                                                          @Nonnull final EResourceType resourceType) {
+                                                          @Nonnull final ResourceDeposit resourceDeposit) {
         Preconditions.checkNotNull(job, "job shouldn't be null!");
         Preconditions.checkNotNull(resourceDeposit, "resourceDeposit shouldn't be null!");
-        Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
 
+        EResourceType resourceType = job.getConstructable().getResourceType();
         BigDecimal jobDoneAtZero = job.getJobDoneAtZero();
         BigDecimal pointsLeftOverForToday = resourceDeposit.getResourceAmountByType(resourceType);
         BigDecimal remainingToZero = jobDoneAtZero.subtract(pointsLeftOverForToday);
-        resourceDeposit.updateResource(resourceType, pointsLeftOverForToday.negate().add(remainingToZero));
 
-        if (remainingToZero.compareTo(BigDecimal.ZERO) < 1) {
+        if (remainingToZero.compareTo(BigDecimal.ZERO) <= 0) {
             job.setJobDoneAtZero(BigDecimal.ZERO);
+            resourceDeposit.updateResource(resourceType, pointsLeftOverForToday.negate().add(remainingToZero.negate()));
         } else {
             job.setJobDoneAtZero(remainingToZero);
+            resourceDeposit.updateResource(resourceType, BigDecimal.ZERO);
             return true;
         }
         return false;
     }
 
-    @Nonnull
-    private EResourceType calculateTickOutput(@Nonnull final ResourceDeposit resourceDeposit,
-                                              @Nonnull final Planet planet,
-                                              @Nonnull final Construction construction) {
-        Preconditions.checkNotNull(resourceDeposit, "resourceDeposit shouldn't be null!");
+    private void calculateTickOutput(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
-        Preconditions.checkNotNull(construction, "construction shouldn't be null!");
 
-        ResourceDeposit resourcefactors = planet.getResourceFactors();
-        EResourceType resourceType = construction.getBuilding().getResourceType();
-        BigDecimal factorByPlanet = resourcefactors.getResourceAmountByType(resourceType);
-        BigDecimal tickOutput = construction.getTickOutput(factorByPlanet);
-        resourceDeposit.updateResource(resourceType, tickOutput);
-        return resourceType;
+        Set<EResourceType> resourceTypes = planet.getConstructions().stream()
+                .map(construction -> construction.getBuilding().getResourceType())
+                .collect(Collectors.toSet());
+
+        ResourceDeposit resourceDeposit = planet.getResourceDeposit();
+        ResourceDeposit resourceFactors = planet.getResourceFactors();
+        resourceTypes.forEach(resourceType -> {
+            BigDecimal newResourceAmountByType = resourceFactors.getResourceAmountByType(resourceType);
+            resourceDeposit.updateResource(resourceType, newResourceAmountByType);
+        });
     }
 }

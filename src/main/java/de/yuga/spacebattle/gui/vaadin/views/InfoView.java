@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.gui.vaadin.misc;
+package de.yuga.spacebattle.gui.vaadin.views;
 
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.CssImport;

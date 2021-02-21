@@ -31,13 +31,14 @@ import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.material.Material;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.gui.impl.DefaultApiImpl;
-import de.yuga.spacebattle.gui.vaadin.account.dashboard.DashboardView;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
-import de.yuga.spacebattle.gui.vaadin.misc.LoginView;
 import de.yuga.spacebattle.gui.vaadin.turn.TickDisplay;
+import de.yuga.spacebattle.gui.vaadin.views.DashboardView;
+import de.yuga.spacebattle.gui.vaadin.views.LoginView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +57,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.gui.vaadin.SBRouting.SB_ROUTING_ITEMS;
+import static de.yuga.spacebattle.gui.vaadin.ViewHelper.MAX_MENU_HEIGHT;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -77,8 +79,6 @@ public class MainView extends AppLayout {
     private static final long serialVersionUID = 4136300596358225703L;
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MainView.class);
-
-    public static final String MAX_MENU_HEIGHT = "80%";
 
     @Nonnull
     private final UserService userService;
@@ -115,6 +115,9 @@ public class MainView extends AppLayout {
 
     @Nonnull
     private final Button loginButton = createLoginButton();
+
+    @Nonnull
+    private final TickDisplay tickDisplay = new TickDisplay();
 
 
     @Autowired
@@ -165,6 +168,7 @@ public class MainView extends AppLayout {
         if (e.getPayload().equals(ESBEvent.LOGIN.name())) {
             updateMenu();
         }
+        userService.refresh();
     }
 
     private Map<Tab, ? extends Class<? extends Component>> createTabs() {
@@ -174,6 +178,7 @@ public class MainView extends AppLayout {
         ));
     }
 
+
     private Component createHeaderContent() {
         HorizontalLayout layout = new HorizontalLayout();
         layout.setId("header");
@@ -182,7 +187,7 @@ public class MainView extends AppLayout {
         layout.setSpacing(false);
         layout.setAlignItems(FlexComponent.Alignment.CENTER);
         layout.add(new DrawerToggle());
-        TickDisplay tickDisplay = new TickDisplay(tickService.getLatest());
+        tickDisplay.updateTick(tickService.getLatest());
         tickDisplay.setMargin(true);
         layout.add(tickDisplay);
         viewTitle = new H1();
@@ -330,6 +335,15 @@ public class MainView extends AppLayout {
         Arrays.stream(SBRouting.SB_ROUTING_ITEMS).filter(view -> !view.isLoginNeeded()).forEach(view -> {
             Class<? extends Component> aClass = view.getClazz();
             menuItem.getSubMenu().addItem(view.getPageName(), e -> getUI().ifPresent(ui -> ui.navigate(aClass)));
+        });
+        menuItem.getSubMenu().addItem("do Tick", event -> {
+            MenuItem source = event.getSource();
+            source.setEnabled(false); // todo buttons fire twice? #1
+            Tick tick = this.tickService.doTick();
+            LOGGER.info("do tick");
+            tickDisplay.updateTick(tick);
+            uiEventBus.publish(this, ESBEvent.TICK.name());
+            source.setEnabled(true);
         });
         wantToKnowMore.setVisible(false);
         wantToKnowMore.onEnabledStateChanged(false);

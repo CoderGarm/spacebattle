@@ -2,10 +2,7 @@ package de.yuga.spacebattle.gui.vaadin;
 
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.Component;
-import de.yuga.spacebattle.gui.vaadin.account.UserView;
-import de.yuga.spacebattle.gui.vaadin.account.dashboard.DashboardView;
-import de.yuga.spacebattle.gui.vaadin.misc.InfoView;
-import de.yuga.spacebattle.gui.vaadin.misc.LoginView;
+import de.yuga.spacebattle.gui.vaadin.views.*;
 
 import javax.annotation.Nonnull;
 
@@ -20,7 +17,8 @@ public class SBRouting {
                     new SBRouting(false, "Login", LoginView.class, "Login"),
                     new SBRouting(false, "Info", InfoView.class, "Info"),
                     new SBRouting(true, "Dashboard", DashboardView.class, "Dashboard"),
-                    new SBRouting(true, "User", UserView.class, "User")
+                    new SBRouting(true, "User", UserView.class, "User"),
+                    new SBRouting(true, "Planets", PlanetMainView.class, "Planets")
             };
 
     private final boolean loginNeeded;

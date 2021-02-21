@@ -9,7 +9,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
-import de.yuga.spacebattle.gui.vaadin.constructables.buildings.BuildingDisplay;
+import de.yuga.spacebattle.gui.vaadin.buildings.BuildingDisplay;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.HullDisplay;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.ModuleDisplay;
 

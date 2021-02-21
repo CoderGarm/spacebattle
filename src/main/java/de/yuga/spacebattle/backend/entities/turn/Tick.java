@@ -8,6 +8,8 @@ import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 
 @NamedQueries({
         @NamedQuery(name = "Tick.getAll", query = "SELECT p FROM Tick p"),
@@ -17,6 +19,9 @@ import java.time.LocalDateTime;
 @Table(name = "tick")
 @AttributeOverride(name = "id", column = @Column(name = "idTick"))
 public class Tick extends AbstractEntityKey {
+
+    @Nonnull
+    private final static DateTimeFormatter tickFormatter = new DateTimeFormatterBuilder().appendPattern("yyyy MM dd").toFormatter();
 
     @Nonnull
     @NotNull
@@ -53,5 +58,9 @@ public class Tick extends AbstractEntityKey {
 
     public void setTickEnds(@Nullable LocalDateTime tickEnds) {
         this.tickEnds = tickEnds;
+    }
+
+    public String convertTickToText() {
+        return "Tick " + this.getId() + " at " + this.getTickStarts().format(tickFormatter);
     }
 }

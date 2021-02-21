@@ -21,8 +21,8 @@ public class PlanetDisplayMulti extends VerticalLayout {
         AccordionPanel accordionPanel = new AccordionPanel();
         accordionPanel.setSummaryText("Planet");
         planets.forEach(planet -> {
-            PlanetDisplay planetDisplay = new PlanetDisplay(planet);
-            accordionPanel.addContent(planetDisplay);
+            PlanetResourceDisplay planetResourceDisplay = new PlanetResourceDisplay(planet);
+            accordionPanel.addContent(planetResourceDisplay);
         });
         accordion.add(accordionPanel);
         accordion.close();

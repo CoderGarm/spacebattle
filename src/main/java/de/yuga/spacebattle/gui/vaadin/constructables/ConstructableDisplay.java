@@ -9,7 +9,7 @@ import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.enums.EResourceType;
-import de.yuga.spacebattle.gui.vaadin.constructables.buildings.BuildingDisplay;
+import de.yuga.spacebattle.gui.vaadin.buildings.BuildingDisplay;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.ShipClassDisplay;
 import de.yuga.spacebattle.gui.vaadin.research.ResearchDisplay;
 
