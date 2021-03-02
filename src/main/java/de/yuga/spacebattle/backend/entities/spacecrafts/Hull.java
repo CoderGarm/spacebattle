@@ -13,7 +13,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @NamedQueries({
-        @NamedQuery(name = "Hull.getAll", query = "SELECT a FROM Hull a")
+        @NamedQuery(name = "Hull.getAll", query = "SELECT a FROM Hull a"),
+        @NamedQuery(name = "Hull.getAllByResearches", query = "SELECT a FROM Hull a WHERE a.unlockedThrough IN (:researches) OR a.unlockedThrough IS NULL")
 })
 @Entity
 @Table(name = "hull")
@@ -90,5 +91,14 @@ public class Hull extends AbstractEntityKey {
     @Nonnull
     public Research getUnlockedThrough() {
         return unlockedThrough;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(name).append(", ").append(description);
+        sb.append(", Level ").append(level);
+        sb.append(", Capacity ").append(constructionCapacity);
+        return sb.toString();
     }
 }

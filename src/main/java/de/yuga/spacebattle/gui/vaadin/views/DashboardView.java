@@ -14,7 +14,7 @@ import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.gui.vaadin.MainView;
 import de.yuga.spacebattle.gui.vaadin.account.details.UserDisplay;
 import de.yuga.spacebattle.gui.vaadin.combined.account.AllianceDisplay;
-import de.yuga.spacebattle.gui.vaadin.orbitals.details.PlanetDisplayMulti;
+import de.yuga.spacebattle.gui.vaadin.orbitals.details.PlanetResourceDisplayMulti;
 import de.yuga.spacebattle.gui.vaadin.research.ResearchDisplayMulti;
 import de.yuga.spacebattle.gui.vaadin.turn.JobDisplayMulti;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +50,7 @@ public class DashboardView extends HorizontalLayout {
             add(new AllianceDisplay(alliance));
         }
 
-        add(new PlanetDisplayMulti(user.getOwnedPlanets()));
+        add(new PlanetResourceDisplayMulti(user.getOwnedPlanets()));
         add(new ResearchDisplayMulti(user.getResearches()));
         add(new JobDisplayMulti(user.getJobs()));
 

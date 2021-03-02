@@ -31,7 +31,7 @@ public class ModuleApiImpl {
     @GetMapping
     @ResponseBody
     public ResponseEntity<?> getModule() {
-        final List<Module> all = moduleController.findAllModules();
+        final List<Module> all = moduleController.findAll();
         return ResponseEntity.ok(all);
     }
 

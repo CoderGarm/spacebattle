@@ -60,3 +60,11 @@ vaadin-tab[selected] {
     color: var(--material-primary-text-color);
     /*color: var(--lumo-primary-text-color);*/
 }
+
+.stats-drawer {
+    border-left: 1px solid dimgrey;
+}
+
+.stats-drawer label {
+    font-size: 14px;
+}

@@ -15,7 +15,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @NamedQueries({
-        @NamedQuery(name = "Module.getAll", query = "SELECT a FROM Module a")
+        @NamedQuery(name = "Module.getAll", query = "SELECT a FROM Module a"),
+        @NamedQuery(name = "Module.getAllByUser", query = "SELECT a FROM Module a WHERE a.unlockedThrough IN (:researches) OR a.unlockedThrough IS NULL")
 })
 @Entity
 @Table(name = "module")
@@ -30,8 +31,8 @@ public class Module extends AbstractEntityKey {
     @NotNull(message = "useCapacity should not be null")
     private int useCapacity;
 
-    @NotNull(message = "value should not be null")
-    private int value;
+    @NotNull(message = "effectValue should not be null")
+    private int effectValue;
 
     @Nonnull
     @NotNull(message = "EModuleType should not be null")
@@ -62,7 +63,7 @@ public class Module extends AbstractEntityKey {
                   @Nonnull final EModuleType moduleType,
                   @Nonnull final String description,
                   final int useCapacity,
-                  final int value,
+                  final int effectValue,
                   final int level,
                   @Nonnull final Research unlockedThrough) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
@@ -74,7 +75,7 @@ public class Module extends AbstractEntityKey {
         this.moduleType = moduleType;
         this.description = description;
         this.useCapacity = useCapacity;
-        this.value = value;
+        this.effectValue = effectValue;
         this.level = level;
         this.unlockedThrough = unlockedThrough;
     }
@@ -93,12 +94,12 @@ public class Module extends AbstractEntityKey {
         return moduleType;
     }
 
-    public int getValue() {
-        return value;
+    public int getEffectValue() {
+        return effectValue;
     }
 
-    public int getEffectiveValue(ERaceType raceType) {
-        return value * (1 + this.moduleType.getBonus(raceType));
+    public int getEffectiveEffectValue(ERaceType raceType) {
+        return effectValue * (1 + this.moduleType.getBonus(raceType));
     }
 
     @Nonnull
@@ -118,5 +119,19 @@ public class Module extends AbstractEntityKey {
     @Nonnull
     public Research getUnlockedThrough() {
         return unlockedThrough;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Module)) return false;
+
+        Module module = (Module) o;
+        return id == module.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * id;
     }
 }

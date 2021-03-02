@@ -56,8 +56,9 @@ public class ConstructableDisplay extends VerticalLayout {
                 if (amountShips == null) {
                     throw new NotifySBUserException("The amountShips cannot be null here.");
                 }
-                ShipClassDisplay shipClassDisplay = new ShipClassDisplay(shipClass, amountShips);
-                add(shipClassDisplay);
+                ShipClassDisplay shipClassDisplay = new ShipClassDisplay();
+                shipClassDisplay.update(shipClass);
+                add(shipClassDisplay, new Label("Amount: " + amountShips));
                 break;
         }
     }

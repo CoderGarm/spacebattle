@@ -23,7 +23,7 @@ public class ResearchService {
 
     @Nonnull
     public List<Research> findAll() {
-        return researchRepository.findAllResearchs();
+        return researchRepository.findAll();
     }
 
     @Nullable

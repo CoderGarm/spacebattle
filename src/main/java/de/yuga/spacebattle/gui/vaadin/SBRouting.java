@@ -18,7 +18,9 @@ public class SBRouting {
                     new SBRouting(false, "Info", InfoView.class, "Info"),
                     new SBRouting(true, "Dashboard", DashboardView.class, "Dashboard"),
                     new SBRouting(true, "User", UserView.class, "User"),
-                    new SBRouting(true, "Planets", PlanetMainView.class, "Planets")
+                    new SBRouting(true, "Planets", PlanetMainView.class, "Planets"),
+                    new SBRouting(true, "Ship classes", ShipClassMainView.class, "Ship classes")
+
             };
 
     private final boolean loginNeeded;

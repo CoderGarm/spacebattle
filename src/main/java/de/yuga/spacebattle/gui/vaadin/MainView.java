@@ -337,13 +337,10 @@ public class MainView extends AppLayout {
             menuItem.getSubMenu().addItem(view.getPageName(), e -> getUI().ifPresent(ui -> ui.navigate(aClass)));
         });
         menuItem.getSubMenu().addItem("do Tick", event -> {
-            MenuItem source = event.getSource();
-            source.setEnabled(false); // todo buttons fire twice? #1
             Tick tick = this.tickService.doTick();
             LOGGER.info("do tick");
             tickDisplay.updateTick(tick);
-            uiEventBus.publish(this, ESBEvent.TICK.name());
-            source.setEnabled(true);
+            uiEventBus.publish(this, ESBEvent.TICK_DONE.name());
         });
         wantToKnowMore.setVisible(false);
         wantToKnowMore.onEnabledStateChanged(false);

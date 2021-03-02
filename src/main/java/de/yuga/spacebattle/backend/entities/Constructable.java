@@ -17,9 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Embeddable
-/**
- * todo constraint building and targetlevel XOR shipclass and amount
- */
 public class Constructable {
 
     @Nonnull
@@ -42,7 +39,7 @@ public class Constructable {
 
     @Nullable
     @OneToOne
-    @JoinColumn(name = "idShipclass", referencedColumnName = "idShipclass")
+    @JoinColumn(name = "idShipClass", referencedColumnName = "idShipClass")
     private ShipClass shipClass;
 
     @Nullable

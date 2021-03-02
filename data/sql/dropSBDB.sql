@@ -57,7 +57,7 @@
 
     alter table job 
        drop 
-       foreign key FKgbuspxcwyu67ktf3pkxwaxj6b;
+       foreign key FKsevbhc9015r9wmqvojq1dbsen;
 
     alter table job 
        drop 

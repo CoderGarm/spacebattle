@@ -9,15 +9,13 @@ import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
-import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.account.UserService;
-import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.buildings.BuildingDisplay;
-import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.Event;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -29,9 +27,9 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static de.yuga.spacebattle.gui.vaadin.events.ESBEvent.CONSTRUCTION_JOB_STARTED;
-
 public class ConstructionEdit extends HorizontalLayout {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(ConstructionEdit.class);
 
     @Nonnull
     private final EventBus.UIEventBus uiEventBus = ViewHelper.getService(EventBus.UIEventBus.class);
@@ -40,13 +38,7 @@ public class ConstructionEdit extends HorizontalLayout {
     private final UserService userService = ViewHelper.getService(UserService.class);
 
     @Nonnull
-    private final JobService jobService = ViewHelper.getService(JobService.class);
-
-    @Nonnull
-    private User user;
-
-    @Nonnull
-    private final Planet planet;
+    private final User user;
 
     @Nonnull
     private Component content = new Label();
@@ -64,7 +56,6 @@ public class ConstructionEdit extends HorizontalLayout {
             throw new NotifySBUserException("I shall not pass!");
         }
         this.uiEventBus.subscribe(this);
-        this.planet = construction.getPlanet();
 
         Building building = construction.getBuilding();
         int level = construction.getLevel();
@@ -89,7 +80,7 @@ public class ConstructionEdit extends HorizontalLayout {
      *
      * @param construction the construction which includes the job options
      */
-    private void createConstructionSelection(@Nonnull Construction construction) {
+    private void createConstructionSelection(@Nonnull final Construction construction) {
         Preconditions.checkNotNull(construction, "construction shouldn't be null!");
 
         Set<Building> unlockedBuildings = user.getResearches().keySet().stream()
@@ -117,21 +108,11 @@ public class ConstructionEdit extends HorizontalLayout {
     }
 
     /**
-     * The event receiver which receives and published a job purpose.
+     * The event receiver which receives events.
      *
      * @param e the event to compute
      */
     @EventBusListenerMethod
     protected void onEvent(Event<String> e) {
-        if (e.getPayload().equals(ESBEvent.CONSTRUCT_BUILDING.name())) { // todo buttons fire twice? #3 event fired twice?
-            ConstructBuildingEdit source = (ConstructBuildingEdit) e.getSource();
-            Building building = source.getBuilding();
-            Job job = jobService.createConstructionYardJob(planet.getId(), building.getId());
-            if (job != null) {
-                this.user = this.userService.refresh();
-                this.uiEventBus.publish(source, CONSTRUCTION_JOB_STARTED.name());
-            }
-        }
-
     }
 }

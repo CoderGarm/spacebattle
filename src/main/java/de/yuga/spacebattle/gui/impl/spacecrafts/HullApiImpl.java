@@ -33,7 +33,7 @@ public class HullApiImpl {
     @GetMapping
     @ResponseBody
     public ResponseEntity<?> getHull() {
-        final List<Hull> all = hullController.findAllHulls();
+        final List<Hull> all = hullController.findAll();
         return ResponseEntity.ok(all);
     }
 

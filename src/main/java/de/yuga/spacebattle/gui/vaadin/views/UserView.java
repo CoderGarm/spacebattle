@@ -36,16 +36,8 @@ public class UserView extends HorizontalLayout {
     public UserView(@Nonnull final UserService userService) {
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
 
-        this.userService = userService;
-
-        /* todo example of loading beans
-         WebApplicationContextUtils
-                .getWebApplicationContext(VaadinServlet.getCurrent().getServletContext())
-                .getBean(UserService.class);
-        */
-
         addClassName("user-view");
-
+        this.userService = userService;
         List<User> all = userService.findAll();
         for (User user : all) {
             UserDisplay userDisplay = new UserDisplay(user);

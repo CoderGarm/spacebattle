@@ -41,10 +41,10 @@ public class User extends AbstractEntityKey {
     @Column(unique = true)
     private String username;
 
-    // todo attributeconverter
     @Nonnull
     @NotNull(message = "password must not be null")
     @Size(min = 1, max = 50)
+    //@Convert(converter = PasswordConverter.class)
     private String password;
 
     @Nonnull

@@ -35,8 +35,7 @@ public class ResourceOutputDisplay extends HorizontalLayout {
             final BigDecimal amount = resources.get(resourceType);
             final BigDecimal tickOutput = getTickOutput(planet, resourceType);
             final ResourceElementDisplay resourceElementDisplay = new ResourceElementDisplay();
-            resourceElementDisplay.updateTitle(resourceType);
-            resourceElementDisplay.updateAmount(new ResourceAmountWrapper(amount, tickOutput));
+            resourceElementDisplay.update(new EResourceAmountWrapper(resourceType, amount, tickOutput));
             componentMap.put(resourceType, resourceElementDisplay);
         });
 
@@ -85,8 +84,7 @@ public class ResourceOutputDisplay extends HorizontalLayout {
             if (resourceElementDisplay != null) {
                 final BigDecimal amount = resources.get(resourceType);
                 final BigDecimal tickOutput = getTickOutput(planet, resourceType);
-                resourceElementDisplay.updateTitle(resourceType);
-                resourceElementDisplay.updateAmount(new ResourceAmountWrapper(amount, tickOutput));
+                resourceElementDisplay.update(new EResourceAmountWrapper(resourceType, amount, tickOutput));
             }
         });
     }

@@ -5,7 +5,7 @@ import com.vaadin.flow.component.html.H5;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
-import de.yuga.spacebattle.gui.vaadin.misc.details.ResourceFactorDisplay;
+import de.yuga.spacebattle.gui.vaadin.misc.details.ResourceDisplay;
 import de.yuga.spacebattle.gui.vaadin.misc.details.ResourceOutputDisplay;
 
 import javax.annotation.Nonnull;
@@ -25,7 +25,7 @@ public class PlanetResourceDisplay extends VerticalLayout {
         deposits = new ResourceOutputDisplay(planet);
 
         final H5 miningFactorsTitle = new H5("Mining factors");
-        final ResourceFactorDisplay factors = new ResourceFactorDisplay(planet.getResourceFactors());
+        final ResourceDisplay factors = new ResourceDisplay(planet.getResourceFactors());
 
         add(name, depositsTitle, deposits, miningFactorsTitle, factors);
     }

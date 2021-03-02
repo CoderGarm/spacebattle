@@ -33,6 +33,13 @@ public class ShipClassService {
         return shipClassRepository.findAllShipClasses();
     }
 
+    @Nonnull
+    public List<ShipClass> findAllByOwner(@Nonnull final User owner) {
+        Preconditions.checkNotNull(owner, "owner shouldn't be null!");
+
+        return shipClassRepository.findAllShipClassesByOwner(owner);
+    }
+
     @Nullable
     public ShipClass find(@Nonnull final Integer idShipClass) {
         Preconditions.checkNotNull(idShipClass, "idShipClass shouldn't be null!");
@@ -73,6 +80,8 @@ public class ShipClassService {
         shipClass = shipClassRepository.findById(shipClass.getId()).orElse(null);
         if (shipClass == null) {
             throw new NotifySBUserException("There is no class to modify.");
+        } else if (shipClass.getHull() == null) {
+            throw new NotifySBUserException("The hull souldn't be empty here.");
         }
         int capacity = shipClass.getHull().getConstructionCapacity();
         Map<Module, Integer> alreadyUsedModules = shipClass.getModules();
@@ -102,5 +111,11 @@ public class ShipClassService {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
 
         return shipClassRepository.save(entity);
+    }
+
+    public void delete(@Nonnull final ShipClass entity) {
+        Preconditions.checkNotNull(entity, "entity shouldn't be null!");
+
+        shipClassRepository.delete(entity);
     }
 }

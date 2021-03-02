@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface CustomResearchRepository {
 
-    List<Research> findAllResearchs();
+    List<Research> findAll();
 }

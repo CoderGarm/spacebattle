@@ -73,9 +73,9 @@ public class UserEditService extends VerticalLayout {
 
     private void sendEvent(final boolean userIsValid) {
         if (userIsValid) {
-            this.uiEventBus.publish(this, ESBEvent.USERCOMPLETE.name());
+            this.uiEventBus.publish(this, ESBEvent.USER_COMPLETE.name());
         } else {
-            this.uiEventBus.publish(this, ESBEvent.USERINCOMPLETE.name());
+            this.uiEventBus.publish(this, ESBEvent.USER_INCOMPLETE.name());
         }
     }
 

@@ -133,7 +133,7 @@ public class Fleet extends AbstractEntityKey {
             int ftlSpeed = 0;
             for (Module m : sc.getModules().keySet()) {
                 if (m.getModuleType() == EModuleType.FTLPROPULSION) {
-                    ftlSpeed += m.getEffectiveValue(owner.getRaceType());
+                    ftlSpeed += m.getEffectiveEffectValue(owner.getRaceType());
                 }
             }
             speed.add(ftlSpeed);

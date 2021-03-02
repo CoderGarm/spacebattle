@@ -1,44 +1,53 @@
 package de.yuga.spacebattle.gui.vaadin.misc.details;
 
-import com.google.common.base.Preconditions;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
+import de.yuga.spacebattle.backend.enums.EIconPath;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-public class ResourceElementDisplay extends VerticalLayout {
-
-    @Nonnull
-    private final Binder<EResourceType> binderTitle = new Binder<>(EResourceType.class);
+public class ResourceElementDisplay extends HorizontalLayout {
 
     @Nonnull
-    private final Binder<ResourceAmountWrapper> binderAmount = new Binder<>(ResourceAmountWrapper.class);
+    private final Binder<EResourceAmountWrapper> binder = new Binder<>(EResourceAmountWrapper.class);
+
+    @Nullable
+    private EResourceAmountWrapper amount;
 
     public ResourceElementDisplay() {
-
-        final Label titleDisplay = new Label();
-        final ReadOnlyHasValue<String> titleDisplayText = new ReadOnlyHasValue<>(titleDisplay::setText);
-        binderTitle.forField(titleDisplayText).bind(EResourceType::getSingularName, null);
+        final Image titleImage = new Image();
+        final ReadOnlyHasValue<String> titleImageSrc = new ReadOnlyHasValue<>(titleImage::setSrc);
+        final ReadOnlyHasValue<String> titleImageAlt = new ReadOnlyHasValue<>(titleImage::setAlt);
+        final ReadOnlyHasValue<String> titleImageTitle = new ReadOnlyHasValue<>(titleImage::setTitle);
+        binder.forField(titleImageSrc).bind(wrapper -> {
+            final EResourceType resourceType = wrapper.getResourceType();
+            final String directory = resourceType.getDirectory();
+            final String iconName = resourceType.getIconName();
+            return EIconPath.getPath(directory, iconName);
+        }, null);
+        binder.forField(titleImageAlt).bind(wrapper -> wrapper.getResourceType().getSingularName(), null);
+        binder.forField(titleImageTitle).bind(wrapper -> wrapper.getResourceType().getSingularName(), null);
 
         final Label amountDisplay = new Label();
         final ReadOnlyHasValue<String> amountDisplayText = new ReadOnlyHasValue<>(amountDisplay::setText);
-        binderAmount.forField(amountDisplayText).bind(ResourceAmountWrapper::getAmountWithDiff, null);
+        binder.forField(amountDisplayText).bind(EResourceAmountWrapper::getAmountWithDiff, null);
 
-        add(titleDisplay, amountDisplay);
+        add(titleImage, amountDisplay);
     }
 
-    public void updateTitle(@Nonnull final EResourceType resourceType) {
-        Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
+    /**
+     * Updates the display with the given values.
+     *
+     * @param amount the input
+     */
+    public void update(@Nullable final EResourceAmountWrapper amount) {
 
-        binderTitle.readBean(resourceType);
-    }
-
-    public void updateAmount(@Nonnull final ResourceAmountWrapper amount) {
-        Preconditions.checkNotNull(amount, "amount shouldn't be null!");
-
-        binderAmount.readBean(amount);
+        binder.readBean(amount);
+        this.amount = amount;
     }
 }

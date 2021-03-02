@@ -57,7 +57,7 @@
 
     alter table job 
        drop 
-       foreign key FKgbuspxcwyu67ktf3pkxwaxj6b;
+       foreign key FKsevbhc9015r9wmqvojq1dbsen;
 
     alter table job 
        drop 
@@ -260,20 +260,21 @@
         jobDoneAtZero decimal(19,2) not null,
         idBuilding integer,
         idResearch integer,
-        idShipclass integer,
+        idShipClass integer,
         idFacility integer,
         idOwner integer not null,
-        primary key (idJob)
+        primary key (idJob),
+        check ((idBuilding IS NOT NULL AND targetLevel IS NOT NULL) OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) OR (idShipClass IS NOT NULL AND amountShips IS NOT NULL))
     ) engine=InnoDB;
 
     create table module (
        idModule integer not null auto_increment,
         description varchar(255) not null,
+        effectValue integer not null,
         level integer not null,
         moduleType integer not null,
         name varchar(30) not null,
         useCapacity integer not null,
-        value integer not null,
         idCosts integer,
         idResearch integer not null,
         primary key (idModule)
@@ -473,8 +474,8 @@
        references research (idResearch);
 
     alter table job 
-       add constraint FKgbuspxcwyu67ktf3pkxwaxj6b 
-       foreign key (idShipclass) 
+       add constraint FKsevbhc9015r9wmqvojq1dbsen 
+       foreign key (idShipClass) 
        references shipClass (idShipClass);
 
     alter table job 

@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.entities.Constructable;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -23,6 +24,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "job", uniqueConstraints = @UniqueConstraint(name = "FACILITY_UK", columnNames = "idFacility"))
 @AttributeOverride(name = "id", column = @Column(name = "idJob"))
+@Check(constraints = "(idBuilding IS NOT NULL AND targetLevel IS NOT NULL) OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) OR (idShipClass IS NOT NULL AND amountShips IS NOT NULL)")
 public class Job extends AbstractEntityKey {
 
     @Nonnull

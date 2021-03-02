@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services.spacecraft;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
 import de.yuga.spacebattle.backend.enums.EModuleType;
@@ -26,7 +27,14 @@ public class ModuleService {
 
     @Nonnull
     public List<Module> findAll() {
-        return moduleRepository.findAllModules();
+        return moduleRepository.findAll();
+    }
+
+    @Nonnull
+    public List<Module> findAllByUser(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
+
+        return moduleRepository.findAllByUser(user);
     }
 
     @Nullable
@@ -43,7 +51,7 @@ public class ModuleService {
      * @param description     the description
      * @param useCapacity     the amount of construction capacity used
      * @param value           the base effect value, e.g. damage, compare {@link EModuleType}
-     * @param level           the level of this module (e.g. laser Mk I, laser Mk II) which increases the effective value {@link Module#getEffectiveValue(ERaceType)}
+     * @param level           the level of this module (e.g. laser Mk I, laser Mk II) which increases the effective value {@link Module#getEffectiveEffectValue(ERaceType)}
      * @param unlockedThrough the research to unlock this module
      * @return the new module
      */

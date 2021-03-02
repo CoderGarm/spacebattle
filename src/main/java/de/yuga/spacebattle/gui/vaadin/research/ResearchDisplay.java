@@ -44,11 +44,19 @@ public class ResearchDisplay extends HorizontalLayout {
                 accordionPanel.addContent(new BuildingDisplay(building)));
 
         research.getUnlocksHulls().forEach(hull ->
-                accordionPanel.addContent(new HullDisplay(hull)));
+        {
+            HullDisplay hullDisplay = new HullDisplay();
+            hullDisplay.update(hull);
+            accordionPanel.addContent(hullDisplay);
+        });
 
-        research.getUnlocksModules().forEach(module ->
-                accordionPanel.addContent(new ModuleDisplay(module, null)));
+        research.getUnlocksModules().forEach(module -> {
+            ModuleDisplay moduleDisplay = new ModuleDisplay();
+            moduleDisplay.update(module, null);
+            accordionPanel.addContent(moduleDisplay);
+        });
         accordion.add(accordionPanel);
+        ViewHelper.setWidth(accordion, "250px");
 
         descH.add(name, description);
 

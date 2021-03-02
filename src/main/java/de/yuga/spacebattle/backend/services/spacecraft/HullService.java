@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services.spacecraft;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.repositories.spacecraft.HullRepository;
@@ -24,12 +25,20 @@ public class HullService {
 
     @Nonnull
     public List<Hull> findAll() {
-        return hullRepository.findAllHulls();
+        return hullRepository.findAll();
+    }
+
+    @Nonnull
+    public List<Hull> findAllByUser(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
+
+        return hullRepository.findAllByUser(user);
     }
 
     @Nullable
     public Hull find(@Nonnull final Integer idHull) {
         Preconditions.checkNotNull(idHull, "idHull shouldn't be null!");
+
         return hullRepository.findById(idHull).orElse(null);
     }
 

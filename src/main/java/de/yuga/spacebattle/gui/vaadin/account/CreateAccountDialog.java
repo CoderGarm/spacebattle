@@ -95,9 +95,9 @@ public class CreateAccountDialog extends Dialog {
 
     @EventBusListenerMethod
     protected void onEvent(Event<String> e) {
-        if (e.getPayload().equals(ESBEvent.USERCOMPLETE.name())) {
+        if (e.getPayload().equals(ESBEvent.USER_COMPLETE.name())) {
             submit.setEnabled(true);
-        } else if (e.getPayload().equals(ESBEvent.USERINCOMPLETE.name())) {
+        } else if (e.getPayload().equals(ESBEvent.USER_INCOMPLETE.name())) {
             submit.setEnabled(false);
         }
     }

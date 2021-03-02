@@ -14,7 +14,7 @@ public class CustomResearchRepositoryImpl implements CustomResearchRepository {
     private EntityManager em;
 
     @Override
-    public List<Research> findAllResearchs() {
+    public List<Research> findAll() {
         final List<Research> resultList = em.createNamedQuery("Research.getAll", Research.class).getResultList();
         return resultList;
     }

@@ -31,7 +31,7 @@ public class ResearchApiImpl {
     @GetMapping
     @ResponseBody
     public ResponseEntity<?> getResearch() {
-        final List<Research> all = researchController.findAllResearchs();
+        final List<Research> all = researchController.findAll();
         return ResponseEntity.ok(all);
     }
 

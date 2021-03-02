@@ -16,7 +16,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import javax.annotation.Nonnull;
 
-import static de.yuga.spacebattle.gui.vaadin.events.ESBEvent.CONSTRUCT_BUILDING;
+import static de.yuga.spacebattle.gui.vaadin.events.ESBEvent.CONSTRUCTION_JOB_BUILDING_START;
 
 public class ConstructBuildingEdit extends VerticalLayout {
 
@@ -44,11 +44,8 @@ public class ConstructBuildingEdit extends VerticalLayout {
         this.uiEventBus.subscribe(this);
 
         build = new Button("Build", event -> {
-            Button source = event.getSource();
-            source.setEnabled(false); // todo buttons fire twice? #2
-            uiEventBus.publish(this, CONSTRUCT_BUILDING.name());
+            uiEventBus.publish(this, CONSTRUCTION_JOB_BUILDING_START.name());
             LOGGER.info("build");
-            source.setEnabled(true);
         });
 
         add(buildingDisplay, levelValue, build);
@@ -56,7 +53,7 @@ public class ConstructBuildingEdit extends VerticalLayout {
 
     @EventBusListenerMethod
     protected void onEvent(Event<String> e) {
-        if (e.getPayload().equals(ESBEvent.CONSTRUCTION_JOB_STARTED.name())) {
+        if (e.getPayload().equals(ESBEvent.CONSTRUCTION_JOB_BUILDING_FEEDBACK_STARTED.name())) {
             build.setEnabled(false);
             if (e.getSource() == this) {
                 build.setText("Job started");
