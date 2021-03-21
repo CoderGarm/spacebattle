@@ -41,7 +41,11 @@ public class ResearchDisplay extends HorizontalLayout {
         AccordionPanel accordionPanel = new AccordionPanel();
         accordionPanel.setSummaryText("Unlocks");
         research.getUnlocksBuildings().forEach(building ->
-                accordionPanel.addContent(new BuildingDisplay(building)));
+        {
+            BuildingDisplay buildingDisplay = new BuildingDisplay();
+            buildingDisplay.setValue(building);
+            accordionPanel.addContent(buildingDisplay);
+        });
 
         research.getUnlocksHulls().forEach(hull ->
         {

@@ -43,7 +43,8 @@ public class ConstructableDisplay extends VerticalLayout {
                 if (targetLevel == null) {
                     throw new NotifySBUserException("The targetLevel cannot be null here.");
                 }
-                BuildingDisplay buildingDisplay = new BuildingDisplay(building);
+                BuildingDisplay buildingDisplay = new BuildingDisplay();
+                buildingDisplay.setValue(building);
                 Label levelValue = new Label("Target Level: " + targetLevel);
                 add(levelValue, buildingDisplay);
                 break;

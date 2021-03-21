@@ -7,6 +7,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
 
+import static de.yuga.spacebattle.backend.entities.ResourceDeposit.mathContext;
+
 /**
  * Wraps a {@link EResourceType} and it's amount.
  */
@@ -28,8 +30,8 @@ public class EResourceAmountWrapper {
         Preconditions.checkNotNull(amount, "amount shouldn't be null!");
 
         this.resourceType = resourceType;
-        this.amount = amount;
-        this.tickOutput = tickOutput;
+        this.amount = amount.setScale(0, mathContext.getRoundingMode());
+        this.tickOutput = tickOutput != null ? tickOutput.setScale(0, mathContext.getRoundingMode()) : null;
     }
 
     public String getAmountWithDiff() {

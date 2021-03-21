@@ -53,10 +53,10 @@ public class ShipClassMainView extends SBPageTopLevelLayout {
     private static final String CREATE_NEW_CLASS_SUBJECT_TITLE = "Create new Class";
 
     @Nonnull
-    private static final String STATS_ACTION_TITLE = "Stats";
+    private static final String STATS_ACTION_TITLE = "Class data";
 
     @Nonnull
-    private static final String MODIFY_ACTION_TITLE = "Modify";
+    private static final String MODIFY_ACTION_TITLE = "Modify class";
 
     @Nonnull
     private final EventBus.UIEventBus uiEventBus;
@@ -204,7 +204,6 @@ public class ShipClassMainView extends SBPageTopLevelLayout {
 
     @Override
     protected void updateActionMenuVisibility() {
-        actionSelectorMenu.setVisible(true);
         actionSelectorMenu.getItems().forEach(menuItem -> menuItem.setEnabled(shipClass != null || visibleFlag));
     }
 
@@ -229,6 +228,7 @@ public class ShipClassMainView extends SBPageTopLevelLayout {
 
     private void useSubjectEntry(ShipClass shipClass) {
         this.shipClass = shipClass;
+        content.getShipClassStatDisplay().update(shipClass);
         shipClassEdit.update(shipClass, modules);
         shipClassDisplay.update(shipClass);
         updateActionMenuVisibility();

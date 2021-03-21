@@ -1,12 +1,12 @@
 package de.yuga.spacebattle.gui.vaadin.misc.details;
 
 import com.google.common.base.Preconditions;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import de.yuga.spacebattle.backend.entities.ResourceDeposit;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.EResourceType;
-import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -18,29 +18,23 @@ import java.util.Map;
 /**
  * Displays the name, amount and the tickly difference yield if different from one.
  */
-public class ResourceOutputDisplay extends HorizontalLayout {
+public class ResourceOutputDisplay extends VerticalLayout {
 
     @Nonnull
     private final Map<EResourceType, ResourceElementDisplay> componentMap = new HashMap<>();
 
-    public ResourceOutputDisplay(@Nonnull final Planet planet) {
-        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
-
-        ViewHelper.setWidth(this, null);
-
-        final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
-        final Map<EResourceType, BigDecimal> resources = resourceDeposit.getResources();
+    public ResourceOutputDisplay() {
+        final Label depositsTitle = new Label("Deposits");
 
         Arrays.stream(EResourceType.values()).forEach(resourceType -> {
-            final BigDecimal amount = resources.get(resourceType);
-            final BigDecimal tickOutput = getTickOutput(planet, resourceType);
             final ResourceElementDisplay resourceElementDisplay = new ResourceElementDisplay();
-            resourceElementDisplay.update(new EResourceAmountWrapper(resourceType, amount, tickOutput));
+            resourceElementDisplay.update(new EResourceAmountWrapper(resourceType, BigDecimal.ZERO, BigDecimal.ZERO));
             componentMap.put(resourceType, resourceElementDisplay);
         });
 
         ResourceElementDisplay[] components = new ResourceElementDisplay[componentMap.values().size()];
         components = componentMap.values().toArray(components);
+        add(depositsTitle);
         add(components);
     }
 

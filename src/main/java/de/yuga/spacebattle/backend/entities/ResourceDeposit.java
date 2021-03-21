@@ -29,15 +29,14 @@ import java.util.concurrent.ThreadLocalRandom;
 @AttributeOverride(name = "id", column = @Column(name = "idResourceDeposit"))
 public class ResourceDeposit extends AbstractEntityKey {
 
-    // todo discuss rounding mode - scale 2 not really necessary if planet's resource prequisites is calculated at another way
-    public final static MathContext mathContext = new MathContext(2, RoundingMode.DOWN);
+    public final static MathContext mathContext = new MathContext(0, RoundingMode.DOWN);
 
     @Nonnull
     @NotNull
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "type", updatable = false, length = 50)
     @MapKeyEnumerated(value = EnumType.STRING)
-    @Column(name = "amount", scale = 2)
+    @Column(name = "amount", columnDefinition = "decimal(19, 0)")
     @CollectionTable(name = "resources", joinColumns = @JoinColumn(name = "idResourceDeposit"))
     private Map<EResourceType, BigDecimal> resources = new HashMap<>();
 

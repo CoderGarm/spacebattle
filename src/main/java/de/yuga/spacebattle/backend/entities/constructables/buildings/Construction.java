@@ -101,4 +101,19 @@ public class Construction extends AbstractEntityKey {
     public void setJob(@Nullable Job job) {
         this.job = job;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Construction)) return false;
+
+        Construction that = (Construction) o;
+
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id * 33;
+    }
 }

@@ -2,7 +2,9 @@ package de.yuga.spacebattle.gui.vaadin.misc;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
@@ -10,7 +12,8 @@ import de.yuga.spacebattle.gui.vaadin.misc.details.StatsDrawer;
 
 import javax.annotation.Nonnull;
 
-public abstract class SBPageTopLevelLayout extends HorizontalLayout {
+@CssImport("./styles/views/main/details/SBPageTopLevelLayout.css")
+public abstract class SBPageTopLevelLayout extends FlexLayout {
 
     private final static int INDEX_CONTENT = 2;
 
@@ -31,17 +34,20 @@ public abstract class SBPageTopLevelLayout extends HorizontalLayout {
 
     public SBPageTopLevelLayout() {
         actionSelectorMenu.setId("actionSelectorMenu");
-        actionSelectorMenu.setWidth("100%");
-
+        actionSelectorMenu.setClassName("selector");
+        ViewHelper.setWidth(actionSelectorMenu, "100%");
         subjectSelectorMenu.setId("subjectSelectorMenu");
-        subjectSelectorMenu.setWidth("100%");
+        subjectSelectorMenu.setClassName("selector");
+        ViewHelper.setWidth(subjectSelectorMenu, "100%");
+        mainContent.add(subjectSelectorMenu);
+        mainContent.add(actionSelectorMenu);
 
-        mainContent.add(this.subjectSelectorMenu);
-        mainContent.add(this.actionSelectorMenu);
-        mainContent.setMaxWidth("80%");
-        mainContent.setWidth("80%");
         setHeight("100%");
+        setFlexDirection(FlexDirection.ROW);
+
         mainContent.addComponentAtIndex(INDEX_CONTENT, content);
+        ViewHelper.setWidth(mainContent, "75%");
+        ViewHelper.setWidth(statsDrawer, "20%");
         add(mainContent, statsDrawer);
     }
 

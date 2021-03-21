@@ -1,10 +1,10 @@
 package de.yuga.spacebattle.gui.vaadin.misc.details;
 
 import com.google.common.base.Preconditions;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import de.yuga.spacebattle.backend.entities.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EResourceType;
-import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
@@ -15,26 +15,22 @@ import java.util.Map;
 /**
  * Displays the name and amount of the yield factors at the given planet.
  */
-public class ResourceDisplay extends HorizontalLayout {
+public class ResourceDisplay extends VerticalLayout {
 
     @Nonnull
     private final Map<EResourceType, ResourceElementDisplay> componentMap = new HashMap<>();
 
-    public ResourceDisplay(@Nonnull final ResourceDeposit resourceDeposit) {
-        Preconditions.checkNotNull(resourceDeposit, "resourceDeposit shouldn't be null!");
-
-        ViewHelper.setWidth(this, null);
-        Map<EResourceType, BigDecimal> resources = resourceDeposit.getResources();
-
+    public ResourceDisplay() {
+        final Label miningFactorsTitle = new Label("Mining factors");
         Arrays.stream(EResourceType.values()).forEach(resourceType -> {
-            final BigDecimal amount = resources.get(resourceType);
             final ResourceElementDisplay resourceElementDisplay = new ResourceElementDisplay();
-            resourceElementDisplay.update(new EResourceAmountWrapper(resourceType, amount, null));
+            resourceElementDisplay.update(new EResourceAmountWrapper(resourceType, BigDecimal.ZERO, null));
             componentMap.put(resourceType, resourceElementDisplay);
         });
 
         ResourceElementDisplay[] components = new ResourceElementDisplay[componentMap.values().size()];
         components = componentMap.values().toArray(components);
+        add(miningFactorsTitle);
         add(components);
     }
 
