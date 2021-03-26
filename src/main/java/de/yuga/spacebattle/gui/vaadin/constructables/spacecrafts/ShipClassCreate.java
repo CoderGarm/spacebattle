@@ -36,7 +36,7 @@ import java.util.Set;
 
 import static de.yuga.spacebattle.gui.vaadin.validators.ShipDataVaadinValidator.ShipDataVaadinValidatorField.*;
 
-public class ShipClassCreate extends ShipClassLayout {
+public class ShipClassCreate extends ShipClassLayout<ShipClass> {
 
     @Nonnull
     private final static Logger LOGGER = LoggerFactory.getLogger(ShipClassCreate.class);
@@ -208,5 +208,10 @@ public class ShipClassCreate extends ShipClassLayout {
      */
     @EventBusListenerMethod
     protected void onEvent(Event<String> e) {
+    }
+
+    @Override
+    public void update(ShipClass value) {
+        // nothing to
     }
 }

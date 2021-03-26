@@ -24,9 +24,6 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
     @Nonnull
     private final Map<Module, ModuleAmountEdit> componentMap = new HashMap<>();
 
-    @Nonnull
-    private final Map<Module, HasValue.ValueChangeListener<?>> listenerMap = new HashMap<>();
-
     @Nullable
     private ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ModuleMultiEdit, Map<Module, Integer>>> listener;
 
@@ -73,8 +70,6 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
                         listener.valueChanged(changeEvent);
                     }
                 };
-
-                listenerMap.put(module, valueChangeListener);
                 moduleEdit.addValueChangeListener(valueChangeListener);
                 add(moduleEdit);
             }

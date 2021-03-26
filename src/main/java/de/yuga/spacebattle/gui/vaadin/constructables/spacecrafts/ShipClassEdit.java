@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class ShipClassEdit extends ShipClassLayout {
+public class ShipClassEdit extends ShipClassLayout<ShipClass> {
 
     @Nonnull
     private final EventBus.UIEventBus uiEventBus = ViewHelper.getService(EventBus.UIEventBus.class);
@@ -41,6 +41,8 @@ public class ShipClassEdit extends ShipClassLayout {
 
     @Nonnull
     private final Binder<ShipClass> binderShipClass = new Binder<>(ShipClass.class);
+
+    private Map<Module, Integer> modulesMap;
 
     public ShipClassEdit() {
         this.uiEventBus.subscribe(this);
@@ -81,7 +83,7 @@ public class ShipClassEdit extends ShipClassLayout {
         // todo replace "here are all the modules you can use"-hack by a well thought-out display
         final Map<Module, Integer> modulesMap = modules.stream().collect(Collectors.toMap(Function.identity(), val -> 0));
         shipClass.addModules(modulesMap);
-
+        this.modulesMap = modulesMap;
         binderShipClass.setBean(shipClass);
     }
 
@@ -114,5 +116,11 @@ public class ShipClassEdit extends ShipClassLayout {
      */
     @EventBusListenerMethod
     protected void onEvent(Event<String> e) {
+    }
+
+    @Override
+    public void update(ShipClass value) {
+        value.addModules(modulesMap);
+        binderShipClass.readBean(value);
     }
 }

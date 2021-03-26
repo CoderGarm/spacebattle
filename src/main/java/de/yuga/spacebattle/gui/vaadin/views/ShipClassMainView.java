@@ -2,6 +2,7 @@ package de.yuga.spacebattle.gui.vaadin.views;
 
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -23,6 +24,7 @@ import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.ShipClassEdit;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.ShipClassLayout;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
 import de.yuga.spacebattle.gui.vaadin.misc.SBPageTopLevelLayout;
+import de.yuga.spacebattle.gui.vaadin.misc.StatsLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +41,7 @@ import java.util.stream.Collectors;
 @UIScope
 @Route(value = ShipClassMainView.ROUTE, layout = MainView.class)
 @RouteAlias(value = ShipClassMainView.ROUTE, layout = MainView.class)
-public class ShipClassMainView extends SBPageTopLevelLayout {
+public class ShipClassMainView extends SBPageTopLevelLayout<ShipClass> {
 
     @Nonnull
     public static final String ROUTE = "shipClass";
@@ -80,7 +82,7 @@ public class ShipClassMainView extends SBPageTopLevelLayout {
     private ShipClass shipClass;
 
     @Nonnull
-    private ShipClassLayout content = new ShipClassLayout();
+    private ShipClassLayout<ShipClass> content = new ShipClassDisplay();
 
     @Nonnull
     private final List<Hull> hulls;
@@ -173,7 +175,7 @@ public class ShipClassMainView extends SBPageTopLevelLayout {
      *
      * @param content the component to set
      */
-    protected void setContent(@Nonnull final ShipClassLayout content) {
+    protected void setContent(@Nonnull final ShipClassLayout<ShipClass> content) {
         Preconditions.checkNotNull(content, "content shouldn't be null!");
 
         this.content = content;
@@ -184,27 +186,22 @@ public class ShipClassMainView extends SBPageTopLevelLayout {
     @Override
     protected void createActionSelectorMenu() {
         // Stats
-        actionSelectorMenu.addItem(STATS_ACTION_TITLE, event -> {
-            shipClassDisplay.update(shipClass);
-            setContent(shipClassDisplay);
-        });
+        Tab tabStats = new Tab(STATS_ACTION_TITLE);
+        addComponentForTab(tabStats, shipClassDisplay);
         // ShipClasses
-        actionSelectorMenu.addItem(MODIFY_ACTION_TITLE, event -> {
-            final ShipClassLayout content;
-            if (shipClass == null) {
-                shipClassCreate.update(hulls, modules);
-                content = shipClassCreate;
-            } else {
-                shipClassEdit.update(shipClass, modules);
-                content = shipClassEdit;
-            }
-            setContent(content);
+        Tab tabShipClasses = new Tab(MODIFY_ACTION_TITLE);
+        addComponentForTab(tabShipClasses, shipClassDisplay);
+        actionSelectorMenu.addSelectedChangeListener(event -> {
+            Tab selectedTab = event.getSelectedTab();
+            StatsLayout<ShipClass> componentForTab = getComponentForTab(selectedTab);
+            componentForTab.update(shipClass);
+            setContent(componentForTab);
         });
     }
 
     @Override
     protected void updateActionMenuVisibility() {
-        actionSelectorMenu.getItems().forEach(menuItem -> menuItem.setEnabled(shipClass != null || visibleFlag));
+        actionSelectorMenu.getChildren().forEach(menuItem -> ((Tab) menuItem).setEnabled(shipClass != null || visibleFlag));
     }
 
     @Override
@@ -265,7 +262,7 @@ public class ShipClassMainView extends SBPageTopLevelLayout {
 
         remove(subjectSelectorMenu);
         addComponentAtIndex(INDEX_OF_SUBJECT_MENU_BAR, subjectSelectorMenu);
-        ShipClassLayout content = new ShipClassLayout();
+        ShipClassLayout<ShipClass> content = new ShipClassDisplay();
         if (shipClass != null) {
             shipClassEdit.update(shipClass, modules);
             shipClassDisplay.update(shipClass);

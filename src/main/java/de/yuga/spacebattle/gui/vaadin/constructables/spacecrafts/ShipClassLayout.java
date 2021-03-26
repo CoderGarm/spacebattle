@@ -7,7 +7,7 @@ import de.yuga.spacebattle.gui.vaadin.misc.StatsLayout;
 
 import javax.annotation.Nonnull;
 
-public class ShipClassLayout extends VerticalLayout implements StatsLayout {
+public abstract class ShipClassLayout<T> extends VerticalLayout implements StatsLayout<T> {
 
     private final ShipClassStatDisplay shipClassStatDisplay = new ShipClassStatDisplay();
 

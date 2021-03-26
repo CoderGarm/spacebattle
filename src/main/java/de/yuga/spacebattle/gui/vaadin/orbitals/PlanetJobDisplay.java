@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class PlanetJobDisplay extends PlanetLayout {
+public class PlanetJobDisplay extends PlanetLayout<Planet> {
 
     @Nonnull
     private final Binder<Planet> binderPlanet = new Binder<>(Planet.class);

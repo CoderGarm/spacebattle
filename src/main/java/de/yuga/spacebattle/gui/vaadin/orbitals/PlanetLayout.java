@@ -7,7 +7,7 @@ import de.yuga.spacebattle.gui.vaadin.orbitals.details.PlanetResourceDisplay;
 
 import javax.annotation.Nonnull;
 
-public class PlanetLayout extends VerticalLayout implements StatsLayout {
+public abstract class PlanetLayout<T> extends VerticalLayout implements StatsLayout<T> {
 
     private final PlanetResourceDisplay planetResourceDisplay = new PlanetResourceDisplay();
 

@@ -13,7 +13,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
 
-public class ShipClassDisplay extends ShipClassLayout {
+public class ShipClassDisplay extends ShipClassLayout<ShipClass> {
 
     @Nonnull
     private final Binder<ShipClass> binderShipClass = new Binder<>(ShipClass.class);
@@ -41,6 +41,7 @@ public class ShipClassDisplay extends ShipClassLayout {
      *
      * @param shipClass the ship class to display
      */
+    @Override
     public void update(@Nullable final ShipClass shipClass) {
         binderShipClass.readBean(shipClass);
     }

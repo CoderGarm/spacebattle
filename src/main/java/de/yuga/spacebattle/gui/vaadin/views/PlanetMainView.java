@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.gui.vaadin.views;
 
 import com.google.common.base.Preconditions;
+import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -17,12 +18,11 @@ import de.yuga.spacebattle.gui.vaadin.MainView;
 import de.yuga.spacebattle.gui.vaadin.constructables.buildings.ConstructBuildingEdit;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
 import de.yuga.spacebattle.gui.vaadin.misc.SBPageTopLevelLayout;
+import de.yuga.spacebattle.gui.vaadin.misc.StatsLayout;
 import de.yuga.spacebattle.gui.vaadin.orbitals.PlanetBuildingConstructionEdit;
 import de.yuga.spacebattle.gui.vaadin.orbitals.PlanetDashboardDisplay;
 import de.yuga.spacebattle.gui.vaadin.orbitals.PlanetJobDisplay;
 import de.yuga.spacebattle.gui.vaadin.orbitals.PlanetLayout;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.Event;
 import org.vaadin.spring.events.EventBus;
@@ -39,9 +39,7 @@ import static de.yuga.spacebattle.gui.vaadin.events.ESBEvent.CONSTRUCTION_JOB_BU
 @UIScope
 @Route(value = PlanetMainView.ROUTE, layout = MainView.class)
 @RouteAlias(value = PlanetMainView.ROUTE, layout = MainView.class)
-public class PlanetMainView extends SBPageTopLevelLayout {
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(PlanetMainView.class);
+public class PlanetMainView extends SBPageTopLevelLayout<Planet> {
 
     @Nonnull
     public static final String ROUTE = "planets";
@@ -65,7 +63,7 @@ public class PlanetMainView extends SBPageTopLevelLayout {
     private Planet planet;
 
     @Nonnull
-    private PlanetLayout content = new PlanetLayout();
+    private PlanetLayout<Planet> content = new PlanetDashboardDisplay();
 
     @Autowired
     public PlanetMainView(@Nonnull final UserService userService,
@@ -133,26 +131,29 @@ public class PlanetMainView extends SBPageTopLevelLayout {
     @Override
     protected void createActionSelectorMenu() {
         // Stats
-        actionSelectorMenu.addItem("Dashboard", event -> {
-            final PlanetDashboardDisplay planetDashboardDisplay = new PlanetDashboardDisplay();
-            planetDashboardDisplay.update(planet);
-            setContent(planetDashboardDisplay);
-        });
+        Tab dashboard = new Tab("Dashboard");
+        final PlanetDashboardDisplay planetDashboardDisplay = new PlanetDashboardDisplay();
+        addComponentForTab(dashboard, planetDashboardDisplay);
+
         // Buildings
-        actionSelectorMenu.addItem("Constructions", event -> {
-            final PlanetBuildingConstructionEdit planetBuildingConstructionEdit = new PlanetBuildingConstructionEdit();
-            planetBuildingConstructionEdit.update(planet);
-            setContent(planetBuildingConstructionEdit);
-        });
+        final PlanetBuildingConstructionEdit planetBuildingConstructionEdit = new PlanetBuildingConstructionEdit();
+        Tab constructions = new Tab("Constructions");
+        addComponentForTab(constructions, planetBuildingConstructionEdit);
+
         // Shipyard
-        actionSelectorMenu.addItem("Shipyard", event -> {
-            LOGGER.info("do shipyard stuff");
-        });
+        Tab shipyard = new Tab("Shipyard");
+        final PlanetDashboardDisplay shipyardDisplay = new PlanetDashboardDisplay();
+        addComponentForTab(shipyard, shipyardDisplay);
         // Jobs
-        actionSelectorMenu.addItem("Jobs", event -> {
-            final PlanetJobDisplay planetJobDisplay = new PlanetJobDisplay();
-            planetJobDisplay.update(planet);
-            setContent(planetJobDisplay);
+        final PlanetJobDisplay planetJobDisplay = new PlanetJobDisplay();
+        Tab jobs = new Tab("Jobs");
+        addComponentForTab(jobs, planetJobDisplay);
+
+        actionSelectorMenu.addSelectedChangeListener(event -> {
+            Tab selectedTab = event.getSelectedTab();
+            StatsLayout<Planet> componentForTab = getComponentForTab(selectedTab);
+            componentForTab.update(planet);
+            setContent(componentForTab);
         });
     }
 
@@ -170,7 +171,7 @@ public class PlanetMainView extends SBPageTopLevelLayout {
 
     @Override
     protected void updateActionMenuVisibility() {
-        this.actionSelectorMenu.getItems().forEach(menuItem -> menuItem.setEnabled(this.planet != null));
+        actionSelectorMenu.getChildren().forEach(menuItem -> ((Tab) menuItem).setEnabled(planet != null));
     }
 
     @Override
@@ -178,7 +179,7 @@ public class PlanetMainView extends SBPageTopLevelLayout {
 
     }
 
-    protected void setContent(@Nonnull final PlanetLayout content) {
+    protected void setContent(@Nonnull final PlanetLayout<Planet> content) {
         Preconditions.checkNotNull(content, "content shouldn't be null!");
 
         this.content = content;

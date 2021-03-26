@@ -19,7 +19,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class PlanetBuildingConstructionEdit extends PlanetLayout {
+public class PlanetBuildingConstructionEdit extends PlanetLayout<Planet> {
 
     @Nonnull
     private final Map<Building, ConstructBuildingEdit> componentsMap = new HashMap<>();
