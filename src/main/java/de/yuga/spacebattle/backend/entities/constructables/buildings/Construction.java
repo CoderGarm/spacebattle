@@ -10,10 +10,11 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 @NamedQueries({
         @NamedQuery(name = "Construction.getAll", query = "SELECT a FROM Construction a")
@@ -39,10 +40,9 @@ public class Construction extends AbstractEntityKey {
 
     private int level = 1;
 
-    @Nullable
-    @OneToOne(mappedBy = "facility", orphanRemoval = true)
-//, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
-    private Job job;
+    @Nonnull
+    @OneToMany(mappedBy = "facility", fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<Job> jobs = new HashSet<>();
 
     public Construction() {
     }
@@ -93,13 +93,9 @@ public class Construction extends AbstractEntityKey {
         this.level = level;
     }
 
-    @Nullable
-    public Job getJob() {
-        return job;
-    }
-
-    public void setJob(@Nullable Job job) {
-        this.job = job;
+    @Nonnull
+    public Set<Job> getJobs() {
+        return jobs;
     }
 
     @Override

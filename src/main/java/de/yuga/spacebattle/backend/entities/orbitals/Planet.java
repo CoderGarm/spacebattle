@@ -127,4 +127,19 @@ public class Planet extends AbstractEntityKey {
     public Orbit getOrbit() {
         return orbit;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Planet)) return false;
+
+        Planet planet = (Planet) o;
+
+        return id == planet.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id * 7;
+    }
 }

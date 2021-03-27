@@ -17,6 +17,8 @@ public enum ESBEvent {
     CONSTRUCTION_JOB_BUILDING_FEEDBACK_STARTED(6), // when a construction job has started
     SHIP_CLASS_SUBMITTED(7), // when a ship class is ready to be stored
     SHIP_CLASS_DELETION(8), // when a ship should be deleted
+    ORBITAL_CONSTRUCTION_JOB_BUILDING_START(9), // when a ship construction job should start
+    ORBITAL_CONSTRUCTION_JOB_BUILDING_FEEDBACK_STARTED(10), // when a ship construction job has started
     ;
 
     int sequence;

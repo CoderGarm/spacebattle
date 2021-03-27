@@ -1,27 +1,14 @@
 package de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details;
 
 import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
-import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
-import de.yuga.spacebattle.backend.enums.EModuleType;
-import de.yuga.spacebattle.backend.enums.ERaceType;
 import de.yuga.spacebattle.gui.vaadin.misc.details.CostsDisplay;
-import de.yuga.spacebattle.gui.vaadin.spacecrafts.ModuleDataElementDisplay;
-import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.EModuleAmountWrapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class ShipClassStatDisplay extends HorizontalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<ShipClassStatDisplay, ShipClass>, ShipClass> {
 
@@ -29,40 +16,22 @@ public class ShipClassStatDisplay extends HorizontalLayout implements HasValue<A
     private final CostsDisplay costsDisplay;
 
     @Nonnull
-    private final Map<EModuleType, BigDecimal> amountByModuleType;
-
-    @Nonnull
-    private final Map<EModuleType, ModuleDataElementDisplay> displayByModuleType;
+    private final ModuleValueTypeVerticalDisplay moduleValueTypeVerticalDisplay;
 
     public ShipClassStatDisplay() {
         costsDisplay = new CostsDisplay();
+        moduleValueTypeVerticalDisplay = new ModuleValueTypeVerticalDisplay();
 
-        amountByModuleType = Arrays.stream(EModuleType.values())
-                .collect(Collectors.toMap(Function.identity(), value -> BigDecimal.ZERO));
-
-        final Label title = new Label("Data");
-        final VerticalLayout statLayout = new VerticalLayout();
-        displayByModuleType = Arrays.stream(EModuleType.values())
-                .collect(Collectors.toMap(Function.identity(), eModuleType -> {
-                    ModuleDataElementDisplay display = new ModuleDataElementDisplay();
-                    display.update(new EModuleAmountWrapper(eModuleType, BigDecimal.ZERO));
-                    return display;
-                }));
-
-        Component[] statLabels = new Component[displayByModuleType.size()];
-        statLabels = displayByModuleType.values().toArray(statLabels);
-        statLayout.add(title);
-        statLayout.add(statLabels);
-        add(costsDisplay, statLayout);
+        add(costsDisplay, moduleValueTypeVerticalDisplay);
     }
 
     /**
      * Clears the full display in order to "show nothing of worth".
      */
     private void clearValues() {
-        this.updateStats();
-        this.costsDisplay.clear();
-        this.costsDisplay.update();
+        costsDisplay.clear();
+        costsDisplay.update();
+        moduleValueTypeVerticalDisplay.update(null);
     }
 
     /**
@@ -72,55 +41,17 @@ public class ShipClassStatDisplay extends HorizontalLayout implements HasValue<A
      */
     public void update(@Nullable final ShipClass shipClass) {
         clearValues();
+        moduleValueTypeVerticalDisplay.update(shipClass);
 
         if (shipClass != null) {
-            this.costsDisplay.addCosts(shipClass.getCosts());
+            costsDisplay.addCosts(shipClass.getCosts());
             if (shipClass.getHull() != null) {
-                this.costsDisplay.addCosts(shipClass.getHull().getCosts());
+                costsDisplay.addCosts(shipClass.getHull().getCosts());
             }
-
-            final Map<Module, Integer> modules = shipClass.getModules();
-            modules.keySet().forEach(module -> {
-                final Integer amountOfModule = modules.get(module);
-
-                addValueByType(shipClass.getOwner().getRaceType(), module, amountOfModule);
-
-                for (int i = 1; i <= amountOfModule; i++) {
-                    this.costsDisplay.addCosts(module.getCosts());
-                }
-            });
         } else {
-            this.costsDisplay.clear();
+            costsDisplay.clear();
         }
-        this.costsDisplay.update();
-        this.updateStats();
-    }
-
-    /**
-     * Adds the effective value by {@link EModuleType} to the stats display.
-     *
-     * @param raceType       the race type to calculate the effective value
-     * @param module         the module which effect value is used
-     * @param amountOfModule how often this module should be counted
-     */
-    private void addValueByType(@Nullable final ERaceType raceType, @Nullable final Module module, final int amountOfModule) {
-        if (raceType == null || module == null || amountOfModule == 0) {
-            return;
-        }
-        final EModuleType moduleType = module.getModuleType();
-        final int effectiveEffectValue = module.getEffectiveEffectValue(raceType);
-        final BigDecimal currentEffectValue = amountByModuleType.get(moduleType);
-        amountByModuleType.put(moduleType, currentEffectValue.add(new BigDecimal(effectiveEffectValue)).multiply(new BigDecimal(amountOfModule)));
-    }
-
-    /**
-     * Updates the stats display by stored values.
-     */
-    private void updateStats() {
-        displayByModuleType.forEach((eModuleType, moduleDataElementDisplay) -> {
-            final BigDecimal effectiveValue = amountByModuleType.get(eModuleType);
-            moduleDataElementDisplay.update(new EModuleAmountWrapper(eModuleType, effectiveValue));
-        });
+        costsDisplay.update();
     }
 
     @Override

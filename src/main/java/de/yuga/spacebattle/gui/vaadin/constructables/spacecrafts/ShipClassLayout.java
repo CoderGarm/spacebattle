@@ -16,6 +16,7 @@ public abstract class ShipClassLayout<T> extends VerticalLayout implements Stats
         return shipClassStatDisplay;
     }
 
+    @Nonnull
     @Override
     public Component getStatisticsComponent() {
         return shipClassStatDisplay;

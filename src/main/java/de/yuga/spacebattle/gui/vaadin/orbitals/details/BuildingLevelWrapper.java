@@ -2,13 +2,12 @@ package de.yuga.spacebattle.gui.vaadin.orbitals.details;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
-import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
 
 /**
- * Wraps a {@link Module} and it's amount.
+ * Wraps a {@link Building} and it's level.
  */
 public class BuildingLevelWrapper {
 

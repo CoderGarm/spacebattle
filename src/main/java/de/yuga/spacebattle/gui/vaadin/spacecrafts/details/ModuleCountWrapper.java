@@ -9,20 +9,20 @@ import java.util.Map;
 /**
  * Wraps a {@link Module} and it's amount.
  */
-public class ModuleAmountWrapper {
+public class ModuleCountWrapper {
 
     @Nonnull
     private final Module module;
 
     @Nonnull
-    private Integer amount;
+    private Integer count;
 
-    public ModuleAmountWrapper(@Nonnull final Module module, @Nonnull final Integer amount) {
+    public ModuleCountWrapper(@Nonnull final Module module, @Nonnull final Integer count) {
         Preconditions.checkNotNull(module, "module shouldn't be null!");
-        Preconditions.checkNotNull(amount, "amount shouldn't be null!");
+        Preconditions.checkNotNull(count, "amount shouldn't be null!");
 
         this.module = module;
-        this.amount = amount;
+        this.count = count;
     }
 
     @Nonnull
@@ -41,25 +41,25 @@ public class ModuleAmountWrapper {
     }
 
     @Nonnull
-    public Integer getAmountNumeric() {
-        return amount;
+    public Integer getCountNumeric() {
+        return count;
     }
 
     @Nonnull
-    public String getAmount() {
-        return String.valueOf(amount);
+    public String getCount() {
+        return String.valueOf(count);
     }
 
-    public void setAmount(@Nonnull final Integer amount) {
-        Preconditions.checkNotNull(amount, "amount shouldn't be null!");
+    public void setCount(@Nonnull final Integer count) {
+        Preconditions.checkNotNull(count, "count shouldn't be null!");
 
-        this.amount = amount;
+        this.count = count;
     }
 
-    public void setAmount(@Nonnull final String amount) {
-        Preconditions.checkNotNull(amount, "amount shouldn't be null!");
+    public void setCount(@Nonnull final String count) {
+        Preconditions.checkNotNull(count, "count shouldn't be null!");
 
-        this.amount = Integer.parseInt(amount);
+        this.count = Integer.parseInt(count);
     }
 
     /**
@@ -76,13 +76,13 @@ public class ModuleAmountWrapper {
 
             @Override
             public Integer getValue() {
-                return amount;
+                return count;
             }
 
             @Override
             public Integer setValue(Integer value) {
-                amount = value;
-                return amount;
+                count = value;
+                return count;
             }
         };
     }

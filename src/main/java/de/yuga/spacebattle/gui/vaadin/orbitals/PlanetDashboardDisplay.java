@@ -9,6 +9,8 @@ import de.yuga.spacebattle.gui.vaadin.turn.JobDisplayMulti;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,10 +36,14 @@ public class PlanetDashboardDisplay extends PlanetLayout<Planet> {
 
     public void update(@Nullable final Planet planet) {
         binderPlanet.readBean(planet);
-        Set<Job> jobSet = planet.getConstructions().stream()
-                .filter(construction -> construction.getJob() != null)
-                .map(Construction::getJob)
-                .collect(Collectors.toSet());
+        Set<Job> jobSet = new HashSet<>();
+        if (planet != null) {
+            jobSet = planet.getConstructions().stream()
+                    .filter(construction -> !construction.getJobs().isEmpty())
+                    .map(Construction::getJobs)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet());
+        }
         binderJobs.readBean(jobSet);
     }
 

@@ -59,21 +59,22 @@ public class PlanetBuildingConstructionEdit extends PlanetLayout<Planet> {
      */
     private void createConstructionSelection(@Nonnull final Construction construction) {
         Preconditions.checkNotNull(construction, "construction shouldn't be null!");
-        User user = construction.getPlanet().getOwner();
+
+        final User user = construction.getPlanet().getOwner();
         if (user == null) {
             throw new NotifySBUserException("You should be logged in here.");
         }
-        Set<Building> unlockedBuildings = user.getResearches().keySet().stream()
+        final Set<Building> unlockedBuildings = user.getResearches().keySet().stream()
                 .map(Research::getUnlocksBuildings)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
 
-        Set<Construction> constructions = construction.getPlanet().getConstructions();
+        final Set<Construction> constructions = construction.getPlanet().getConstructions();
 
-        Map<Building, Construction> constructionByBuilding = constructions.stream()
+        final Map<Building, Construction> constructionByBuilding = constructions.stream()
                 .collect(Collectors.toMap(Construction::getBuilding, Function.identity()));
 
-        Map<Building, Integer> levelByBuilding = unlockedBuildings.stream()
+        final Map<Building, Integer> levelByBuilding = unlockedBuildings.stream()
                 .collect(Collectors.toMap(
                         Function.identity(),
                         building -> constructionByBuilding.containsKey(building) ? constructionByBuilding.get(building).getLevel() + 1 : 1));
@@ -95,6 +96,7 @@ public class PlanetBuildingConstructionEdit extends PlanetLayout<Planet> {
                 componentsMap.put(building, constructBuildingEdit);
             }
             constructBuildingEdit.setValue(new BuildingLevelWrapper(building, integer));
+            constructBuildingEdit.setReadOnly(!construction.getJobs().isEmpty());
         });
         componentsMap.values().forEach(this::add);
     }

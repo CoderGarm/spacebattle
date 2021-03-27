@@ -22,7 +22,7 @@ import java.math.BigDecimal;
         @NamedQuery(name = "Job.researchPossibleForOwner", query = "SELECT COUNT(p) FROM Job p WHERE p.owner = :owner AND p.facility IS NULL")
 })
 @Entity
-@Table(name = "job", uniqueConstraints = @UniqueConstraint(name = "FACILITY_UK", columnNames = "idFacility"))
+@Table(name = "job")
 @AttributeOverride(name = "id", column = @Column(name = "idJob"))
 @Check(constraints = "(idBuilding IS NOT NULL AND targetLevel IS NOT NULL) OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) OR (idShipClass IS NOT NULL AND amountShips IS NOT NULL)")
 public class Job extends AbstractEntityKey {
@@ -35,7 +35,7 @@ public class Job extends AbstractEntityKey {
 
     @JsonIgnore
     @Nullable
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "idFacility")
     private Construction facility;
 

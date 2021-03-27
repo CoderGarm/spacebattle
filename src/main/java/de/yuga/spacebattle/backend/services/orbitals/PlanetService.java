@@ -44,7 +44,15 @@ public class PlanetService {
     @Nullable
     public Planet find(@Nonnull final Integer idPlanet) {
         Preconditions.checkNotNull(idPlanet, "idPlanet shouldn't be null!");
+
         return planetRepository.findById(idPlanet).orElse(null);
+    }
+
+    @Nullable
+    public Planet find(@Nonnull final Planet planet) {
+        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+
+        return planetRepository.findById(planet.getId()).orElse(null);
     }
 
     /**

@@ -5,8 +5,16 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.textfield.TextField;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.annotation.Nonnull;
+
 @CssImport("./styles/numeric-field-styles.css")
 public class NumericField extends TextField {
+
+    @Nonnull
+    private final Button subtractButton;
+
+    @Nonnull
+    private final Button addButton;
 
     private int numericValue;
 
@@ -29,8 +37,8 @@ public class NumericField extends TextField {
             }
         });
 
-        Button subtractButton = new Button("-", event -> setNumericValue(numericValue - 1));
-        Button addButton = new Button("+", event -> setNumericValue(numericValue + 1));
+        subtractButton = new Button("-", event -> setNumericValue(numericValue - 1));
+        addButton = new Button("+", event -> setNumericValue(numericValue + 1));
 
         getElement().setAttribute("theme", "numeric");
         subtractButton.getElement().setAttribute("theme", "icon");
@@ -40,12 +48,24 @@ public class NumericField extends TextField {
         addToSuffix(addButton);
     }
 
+    @Override
+    public void setValue(String value) {
+        setNumericValue(Integer.parseInt(value));
+    }
+
     public void setNumericValue(int value) {
         numericValue = value;
-        setValue(value + "");
+        super.setValue(value + "");
     }
 
     public int getNumericValue() {
         return numericValue;
+    }
+
+    @Override
+    public void setReadonly(boolean readOnly) {
+        super.setReadonly(readOnly);
+        subtractButton.setEnabled(!readOnly);
+        addButton.setEnabled(!readOnly);
     }
 }

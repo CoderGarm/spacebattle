@@ -43,7 +43,15 @@ public class ShipClassService {
     @Nullable
     public ShipClass find(@Nonnull final Integer idShipClass) {
         Preconditions.checkNotNull(idShipClass, "idShipClass shouldn't be null!");
+
         return shipClassRepository.findById(idShipClass).orElse(null);
+    }
+
+    @Nullable
+    public ShipClass find(@Nonnull final ShipClass shipClass) {
+        Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
+
+        return find(shipClass.getId());
     }
 
     /**

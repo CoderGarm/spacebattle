@@ -169,58 +169,57 @@ public class TickService {
         ResourceDeposit resourceDeposit = planet.getResourceDeposit();
         for (Construction facility : constructions) {
             EResourceType resourceType = facility.getBuilding().getResourceType();
-            Job job = facility.getJob();
-            if (job == null) {
-                continue;
-            }
-            boolean remainingPoints = calculateConstructablePointsRemaining(job, resourceDeposit);
-            if (remainingPoints) {
-                jobService.save(job);
-                continue;
-            }
-            Constructable constructable = job.getConstructable();
-            Integer targetLevel;
-            User owner = planet.getOwner();
-            switch (resourceType) {
-                case RESEARCH:
+            final Set<Job> jobs = facility.getJobs();
+            for (Job job : jobs) {
+                boolean remainingPoints = calculateConstructablePointsRemaining(job, resourceDeposit);
+                if (remainingPoints) {
+                    jobService.save(job);
+                    continue;
+                }
+                Constructable constructable = job.getConstructable();
+                Integer targetLevel;
+                User owner = planet.getOwner();
+                switch (resourceType) {
+                    case RESEARCH:
 
-                    Research research = constructable.getResearch();
-                    targetLevel = constructable.getTargetLevel();
-                    if (research == null || targetLevel == null) {
-                        throw new NotifySBUserException("Oh fuck, this should not happen while research whatever!");
-                    }
-                    owner.getResearches().put(research, targetLevel);
-                    userService.save(owner);
-                    break;
-                case CONSTRUCTION:
+                        Research research = constructable.getResearch();
+                        targetLevel = constructable.getTargetLevel();
+                        if (research == null || targetLevel == null) {
+                            throw new NotifySBUserException("Oh fuck, this should not happen while research whatever!");
+                        }
+                        owner.getResearches().put(research, targetLevel);
+                        userService.save(owner);
+                        break;
+                    case CONSTRUCTION:
 
-                    Building building = constructable.getBuilding();
-                    targetLevel = constructable.getTargetLevel();
-                    if (building == null || targetLevel == null) {
-                        throw new NotifySBUserException("Oh fuck, this should not happen while constructing buildings!");
-                    }
-                    Construction workInProgress = constructions.stream()
-                            .filter(c -> c.getBuilding().equals(building)).findFirst().orElse(null);
-                    if (workInProgress != null) {
-                        workInProgress.setLevel(targetLevel);
-                    } else {
-                        workInProgress = new Construction(planet, building, 1);
-                        constructions.add(workInProgress);
-                    }
-                    break;
-                case ORBITALCONSTRUCTION:
+                        Building building = constructable.getBuilding();
+                        targetLevel = constructable.getTargetLevel();
+                        if (building == null || targetLevel == null) {
+                            throw new NotifySBUserException("Oh fuck, this should not happen while constructing buildings!");
+                        }
+                        Construction workInProgress = constructions.stream()
+                                .filter(c -> c.getBuilding().equals(building)).findFirst().orElse(null);
+                        if (workInProgress != null) {
+                            workInProgress.setLevel(targetLevel);
+                        } else {
+                            workInProgress = new Construction(planet, building, 1);
+                            constructions.add(workInProgress);
+                        }
+                        break;
+                    case ORBITALCONSTRUCTION:
 
-                    ShipClass shipClass = constructable.getShipClass();
-                    Integer amountShips = constructable.getAmountShips();
-                    if (shipClass == null || amountShips == null || amountShips == 0) {
-                        throw new NotifySBUserException("This should never happen while build a fleet!");
-                    }
-                    Fleet fleet = new Fleet("Fresh Build @ " + planet.getName(), owner, new FleetOrbit(planet.getSystem(), planet));
-                    fleet.updateShips(shipClass, amountShips);
-                    fleetService.save(fleet);
-                    break;
+                        ShipClass shipClass = constructable.getShipClass();
+                        Integer amountShips = constructable.getAmountShips();
+                        if (shipClass == null || amountShips == null || amountShips == 0) {
+                            throw new NotifySBUserException("This should never happen while build a fleet!");
+                        }
+                        Fleet fleet = new Fleet("Fresh Build @ " + planet.getName(), owner, new FleetOrbit(planet.getSystem(), planet));
+                        fleet.updateShips(shipClass, amountShips);
+                        fleetService.save(fleet);
+                        break;
+                }
+                jobs.remove(job);
             }
-            facility.setJob(null);
         }
         planetService.save(planet);
     }

@@ -170,12 +170,12 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass> {
     }
 
     /**
-     * Will update the edit display, depending on the shipClass param.
+     * Defines the amount of base data which the user could use.
      *
      * @param hulls   the hulls to select in the UI
      * @param modules the modules to select in the UI
      */
-    public void update(@Nonnull final Collection<Hull> hulls, @Nonnull final Collection<Module> modules) {
+    public void setBaseData(@Nonnull final Collection<Hull> hulls, @Nonnull final Collection<Module> modules) {
         Preconditions.checkNotNull(hulls, "hulls shouldn't be null!");
         Preconditions.checkNotNull(modules, "modules shouldn't be null!");
 

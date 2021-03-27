@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.gui.vaadin.views;
 
 import com.google.common.base.Preconditions;
-import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -25,8 +24,6 @@ import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.ShipClassLayout
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
 import de.yuga.spacebattle.gui.vaadin.misc.SBPageTopLevelLayout;
 import de.yuga.spacebattle.gui.vaadin.misc.StatsLayout;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.Event;
 import org.vaadin.spring.events.EventBus;
@@ -35,7 +32,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @SpringComponent
 @UIScope
@@ -45,11 +42,6 @@ public class ShipClassMainView extends SBPageTopLevelLayout<ShipClass> {
 
     @Nonnull
     public static final String ROUTE = "shipClass";
-
-    @Nonnull
-    private final static Logger LOGGER = LoggerFactory.getLogger(ShipClassMainView.class);
-
-    private static final int INDEX_OF_SUBJECT_MENU_BAR = 0;
 
     @Nonnull
     private static final String CREATE_NEW_CLASS_SUBJECT_TITLE = "Create new Class";
@@ -82,13 +74,7 @@ public class ShipClassMainView extends SBPageTopLevelLayout<ShipClass> {
     private ShipClass shipClass;
 
     @Nonnull
-    private ShipClassLayout<ShipClass> content = new ShipClassDisplay();
-
-    @Nonnull
-    private final List<Hull> hulls;
-
-    @Nonnull
-    private final List<Module> modules;
+    private ShipClassLayout<ShipClass> content;
 
     @Nonnull
     private final ShipClassDisplay shipClassDisplay;
@@ -131,10 +117,20 @@ public class ShipClassMainView extends SBPageTopLevelLayout<ShipClass> {
         shipClassCreate = new ShipClassCreate();
         createSubjectSelectorMenu();
         createActionSelectorMenu();
+        content = shipClassDisplay;
         setContent(content);
-        updateActionMenuVisibility();
-        hulls = hullService.findAllByUser(this.user);
-        modules = moduleService.findAllByUser(this.user);
+        updateActionMenuUsability(null);
+        fetchBaseData();
+    }
+
+    /**
+     * Retrieves the user's current research base for modules and hulls and sets them to them are needed.
+     */
+    private void fetchBaseData() {
+        List<Hull> hulls = hullService.findAllByUser(user);
+        List<Module> modules = moduleService.findAllByUser(user);
+        shipClassEdit.setModules(modules);
+        shipClassCreate.setBaseData(hulls, modules);
     }
 
     /**
@@ -157,124 +153,119 @@ public class ShipClassMainView extends SBPageTopLevelLayout<ShipClass> {
             }
             this.shipClass = shipClassService.save(shipClass);
             NotificationHelper.notify("Class defined", 3000);
-            updateMenus();
+            updateSubjectMenu();
         } else if (e.getPayload().equals(ESBEvent.SHIP_CLASS_DELETION.name())) {
-            ShipClass shipClass = ((ShipClassEdit) content).getShipClass();
+            final ShipClass shipClass = ((ShipClassEdit) content).getShipClass();
             shipClassService.delete(shipClass);
             this.shipClass = null;
             NotificationHelper.notify("Class deleted", 3000);
-            updateMenus();
-            shipClassCreate.update(hulls, modules);
-            setContent(shipClassCreate);
+            updateSubjectMenu();
+            shipClassCreate.update(shipClass);
+            content = setContent(shipClassCreate);
+        } else if (e.getPayload().equals(ESBEvent.TICK_DONE.name())) {
+            fetchBaseData();
         }
-    }
-
-    /**
-     * Removes the already defined components and sets the given {@link ShipClassLayout} as content and
-     * it's stats display as stats display.
-     *
-     * @param content the component to set
-     */
-    protected void setContent(@Nonnull final ShipClassLayout<ShipClass> content) {
-        Preconditions.checkNotNull(content, "content shouldn't be null!");
-
-        this.content = content;
-        this.content.setWidth("100%");
-        super.setContent(this.content);
     }
 
     @Override
     protected void createActionSelectorMenu() {
         // Stats
         Tab tabStats = new Tab(STATS_ACTION_TITLE);
-        addComponentForTab(tabStats, shipClassDisplay);
+        addComponentForTabOfActionMenu(tabStats, shipClassDisplay);
         // ShipClasses
         Tab tabShipClasses = new Tab(MODIFY_ACTION_TITLE);
-        addComponentForTab(tabShipClasses, shipClassDisplay);
+        addComponentForTabOfActionMenu(tabShipClasses, shipClassEdit);
+
+        addActionListener();
+    }
+
+    @Override
+    protected void addActionListener() {
         actionSelectorMenu.addSelectedChangeListener(event -> {
             Tab selectedTab = event.getSelectedTab();
-            StatsLayout<ShipClass> componentForTab = getComponentForTab(selectedTab);
+            StatsLayout<ShipClass> componentForTab = getComponentForTabOfActionMenu(selectedTab);
+            if (shipClass != null) {
+                shipClass = shipClassService.find(shipClass);
+            }
             componentForTab.update(shipClass);
-            setContent(componentForTab);
+            content = setContent((ShipClassLayout<ShipClass>) componentForTab);
+            subjectSelectorMenu.getSelectedTab().setSelected(true);
         });
     }
 
     @Override
-    protected void updateActionMenuVisibility() {
+    protected void updateActionMenuUsability(@Nullable final Map<Tab, Boolean> readOnlyMap) {
         actionSelectorMenu.getChildren().forEach(menuItem -> ((Tab) menuItem).setEnabled(shipClass != null || visibleFlag));
     }
 
     @Override
     protected void createSubjectSelectorMenu() {
-        subjectSelectorMenu.addItem(CREATE_NEW_CLASS_SUBJECT_TITLE, event -> {
-            visibleFlag = false;
-            shipClass = null;
-            shipClassCreate.update(hulls, modules);
-            setContent(shipClassCreate);
-            updateActionMenuVisibility();
-        });
+        Tab createNewClass = new Tab(CREATE_NEW_CLASS_SUBJECT_TITLE);
+        addSubjectForTabOfSubjectMenu(createNewClass, null);
 
         final List<ShipClass> allByOwner = shipClassService.findAllByOwner(user);
         sort(allByOwner);
         allByOwner.forEach(shipClassFE -> {
-            subjectSelectorMenu.addItem(shipClassFE.getName(), event -> {
-                useSubjectEntry(shipClassFE);
-            });
+            Tab shipClassFETab = new Tab(shipClassFE.getName());
+            addSubjectForTabOfSubjectMenu(shipClassFETab, shipClassFE);
+        });
+        addSubjectListener();
+    }
+
+    @Override
+    protected void addSubjectListener() {
+        subjectSelectorMenu.addSelectedChangeListener(event -> {
+            final Tab selectedTab = event.getSelectedTab();
+            shipClass = getSubjectForTabOfSubjectMenu(selectedTab);
+            if (shipClass != null) {
+                shipClass = shipClassService.find(shipClass);
+            }
+            useSubjectEntry(shipClass);
         });
     }
 
-    private void useSubjectEntry(ShipClass shipClass) {
+    private void useSubjectEntry(@Nullable final ShipClass shipClass) {
+        visibleFlag = shipClass != null;
         this.shipClass = shipClass;
-        content.getShipClassStatDisplay().update(shipClass);
-        shipClassEdit.update(shipClass, modules);
-        shipClassDisplay.update(shipClass);
-        updateActionMenuVisibility();
+        if (this.shipClass == null) {
+            content = setContent(shipClassCreate);
+            actionSelectorMenu.setSelectedTab(null);
+        } else {
+            this.shipClass = shipClassService.find(this.shipClass);
+            shipClassEdit.update(this.shipClass);
+            shipClassDisplay.update(this.shipClass);
+            getTabForComponentOfActionMenu(this.content).setSelected(true);
+        }
+        content.update(this.shipClass);
+        updateActionMenuUsability(null);
     }
 
     /**
      * Updates the menu.
-     * Reattach the menu, removes the unnecessary menu items, adds the new items and reattach the current content.
+     * Removes the unnecessary menu items, adds the new items.
      */
     @Override
-    protected void updateMenus() {
+    protected void updateSubjectMenu() {
         final List<ShipClass> allByOwner = shipClassService.findAllByOwner(user);
         sort(allByOwner);
 
-        final List<String> shipNames = allByOwner.stream()
-                .map(ShipClass::getName)
-                .collect(Collectors.toList());
-
-        subjectSelectorMenu.getItems().forEach(menuItem -> {
-            final String itemTitle = menuItem.getText();
-            if (!CREATE_NEW_CLASS_SUBJECT_TITLE.equals(itemTitle) && !shipNames.contains(itemTitle)) {
-                subjectSelectorMenu.remove(menuItem);
+        subjectSelectorMenu.getChildren().forEach(component -> {
+            Tab tab = (Tab) component;
+            if (CREATE_NEW_CLASS_SUBJECT_TITLE.equals(tab.getLabel())) {
+                return;
+            }
+            ShipClass subject = getSubjectForTabOfSubjectMenu(tab);
+            if (!allByOwner.contains(subject)) {
+                removeFromSubject(tab);
             }
         });
-        final List<String> itemTitles = subjectSelectorMenu.getItems().stream()
-                .map(MenuItem::getText)
-                .collect(Collectors.toList());
 
-        allByOwner.stream().filter(shipClass -> !itemTitles.contains(shipClass.getName())).forEach(shipClassFE -> {
-            subjectSelectorMenu.addItem(shipClassFE.getName(), event -> {
-                useSubjectEntry(shipClassFE);
-            });
+        allByOwner.stream().filter(shipClass -> !subjectSelectorObject.containsValue(shipClass)).forEach(shipClassFE -> {
+            Tab shipClassFETab = new Tab(shipClassFE.getName());
+            addSubjectForTabOfSubjectMenu(shipClassFETab, shipClassFE);
         });
 
-        remove(subjectSelectorMenu);
-        addComponentAtIndex(INDEX_OF_SUBJECT_MENU_BAR, subjectSelectorMenu);
-        ShipClassLayout<ShipClass> content = new ShipClassDisplay();
-        if (shipClass != null) {
-            shipClassEdit.update(shipClass, modules);
-            shipClassDisplay.update(shipClass);
-
-            if (this.content instanceof ShipClassCreate) {
-                content = shipClassCreate;
-            } else if (this.content instanceof ShipClassEdit) {
-                content = shipClassDisplay;
-            }
-        }
-        setContent(content);
-        updateActionMenuVisibility();
+        addSubjectListener();
     }
 
     /**

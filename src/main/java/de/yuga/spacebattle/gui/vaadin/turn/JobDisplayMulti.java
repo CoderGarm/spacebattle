@@ -12,10 +12,8 @@ import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.gui.vaadin.orbitals.PlanetLayout;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import javax.annotation.Nullable;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class JobDisplayMulti extends PlanetLayout<Planet> implements HasValue<AbstractField.ComponentValueChangeEvent<JobDisplayMulti, Set<Job>>, Set<Job>> {
@@ -36,24 +34,30 @@ public class JobDisplayMulti extends PlanetLayout<Planet> implements HasValue<Ab
 
     @Override
     public void update(Planet value) {
-        Set<Job> collect = value.getConstructions().stream()
-                .filter(construction -> Arrays.stream(jobTypes).collect(Collectors.toList()).contains(construction.getBuilding().getResourceType()))
-                .map(Construction::getJob).collect(Collectors.toSet());
-        setValue(collect);
+        Set<Job> jobSet = new HashSet<>();
+        if (value != null) {
+            jobSet = value.getConstructions().stream()
+                    .filter(construction -> !construction.getJobs().isEmpty())
+                    .map(Construction::getJobs)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet());
+        }
+        setValue(jobSet);
     }
 
     @Override
-    public void setValue(Set<Job> value) {
+    public void setValue(@Nullable final Set<Job> value) {
 
         removeAll();
         componentsMap.clear(); // todo implement
         add(new Label("Jobs"));
-        value.forEach(job -> {
-            JobDisplay jobDisplay = new JobDisplay(job);
-            componentsMap.put(job, jobDisplay);
-            add(jobDisplay);
-
-        });
+        if (value != null) {
+            value.forEach(job -> {
+                JobDisplay jobDisplay = new JobDisplay(job);
+                componentsMap.put(job, jobDisplay);
+                add(jobDisplay);
+            });
+        }
     }
 
     @Override

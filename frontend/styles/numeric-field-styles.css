@@ -7,3 +7,9 @@
 :host([theme~="numeric"]) [part="value"] {
     text-align: center;
 }
+
+.numeric-before-amount {
+    padding: 0px;
+    margin: 0px 25px 0px 0px;
+    max-width: 160px;
+}

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Job;
@@ -79,6 +80,10 @@ public class User extends AbstractEntityKey {
     @Nonnull
     @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "owner")
     private final Set<Job> jobs = new HashSet<>();
+
+    @Nonnull
+    @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "owner")
+    private final Set<ShipClass> shipClasses = new HashSet<>();
 
     public User() {
     }
@@ -174,6 +179,11 @@ public class User extends AbstractEntityKey {
     @Nonnull
     public Set<Job> getJobs() {
         return jobs;
+    }
+
+    @Nonnull
+    public Set<ShipClass> getShipClasses() {
+        return shipClasses;
     }
 
     @Override

@@ -329,7 +329,7 @@
 
     create table resources (
        idResourceDeposit integer not null,
-        amount decimal(19,2),
+        amount decimal(19, 0),
         type varchar(50) not null,
         primary key (idResourceDeposit, type)
     ) engine=InnoDB;
@@ -384,9 +384,6 @@
 
     alter table construction 
        add constraint CONSTRUCTION_UK unique (idPlanet, idBuilding);
-
-    alter table job 
-       add constraint FACILITY_UK unique (idFacility);
 
     alter table planet 
        add constraint PLANET_UK unique (idStarSystem, idPlanet, xCoordinate, yCoordinate);

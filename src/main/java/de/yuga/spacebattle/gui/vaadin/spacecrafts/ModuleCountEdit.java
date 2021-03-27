@@ -10,49 +10,50 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.gui.vaadin.misc.details.NumericField;
-import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.ModuleAmountWrapper;
+import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.ModuleCountWrapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class ModuleAmountEdit extends HorizontalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<ModuleAmountEdit, ModuleAmountWrapper>, ModuleAmountWrapper>, HasValidation {
+public class ModuleCountEdit extends HorizontalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<ModuleCountEdit, ModuleCountWrapper>, ModuleCountWrapper>, HasValidation {
 
     @Nonnull
-    private final Binder<ModuleAmountWrapper> binderModule = new Binder<>(ModuleAmountWrapper.class);
+    private final Binder<ModuleCountWrapper> binderModule = new Binder<>(ModuleCountWrapper.class);
 
     @Nonnull
     private final NumericField amountField = new NumericField();
 
     @Nullable
-    private ModuleAmountWrapper moduleAmountWrapper;
+    private ModuleCountWrapper moduleCountWrapper;
 
-    public ModuleAmountEdit() {
+    public ModuleCountEdit() {
 
         Label name = new Label();
         final ReadOnlyHasValue<String> moduleNameReadOnly = new ReadOnlyHasValue<>(name::setText);
-        binderModule.forField(moduleNameReadOnly).bind(ModuleAmountWrapper::getModuleName, null);
+        binderModule.forField(moduleNameReadOnly).bind(ModuleCountWrapper::getModuleName, null);
 
         Label description = new Label();
         final ReadOnlyHasValue<String> moduleDescriptionReadOnly = new ReadOnlyHasValue<>(description::setText);
-        binderModule.forField(moduleDescriptionReadOnly).bind(ModuleAmountWrapper::getModuleDescription, null);
+        binderModule.forField(moduleDescriptionReadOnly).bind(ModuleCountWrapper::getModuleDescription, null);
 
-        binderModule.forField(amountField).bind(ModuleAmountWrapper::getAmount, ModuleAmountWrapper::setAmount);
+        binderModule.forField(amountField).bind(ModuleCountWrapper::getCount, ModuleCountWrapper::setCount);
 
-        add(name, description, amountField);
+        amountField.addClassName("numeric-before-amount");
+        add(amountField, name, description);
     }
 
-    public void update(@Nonnull final ModuleAmountWrapper moduleAmountWrapper) {
-        Preconditions.checkNotNull(moduleAmountWrapper, "moduleAmountWrapper shouldn't be null!");
+    public void update(@Nonnull final ModuleCountWrapper moduleCountWrapper) {
+        Preconditions.checkNotNull(moduleCountWrapper, "moduleCountWrapper shouldn't be null!");
 
-        if (this.moduleAmountWrapper == null) {
-            binderModule.setBean(moduleAmountWrapper);
+        if (this.moduleCountWrapper == null) {
+            binderModule.setBean(moduleCountWrapper);
         }
-        binderModule.readBean(moduleAmountWrapper);
-        this.moduleAmountWrapper = moduleAmountWrapper;
+        binderModule.readBean(moduleCountWrapper);
+        this.moduleCountWrapper = moduleCountWrapper;
     }
 
     @Override
-    public void setValue(ModuleAmountWrapper value) {
+    public void setValue(ModuleCountWrapper value) {
         this.update(value);
     }
 
@@ -63,14 +64,14 @@ public class ModuleAmountEdit extends HorizontalLayout implements HasValue<Abstr
      */
     @Nullable
     @Override
-    public ModuleAmountWrapper getValue() {
+    public ModuleCountWrapper getValue() {
         return binderModule.getBean();
     }
 
     @Override
-    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ModuleAmountEdit, ModuleAmountWrapper>> listener) {
+    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ModuleCountEdit, ModuleCountWrapper>> listener) {
         return binderModule.addValueChangeListener(event -> {
-            final AbstractField.ComponentValueChangeEvent<ModuleAmountEdit, ModuleAmountWrapper> changeEvent =
+            final AbstractField.ComponentValueChangeEvent<ModuleCountEdit, ModuleCountWrapper> changeEvent =
                     new AbstractField.ComponentValueChangeEvent<>(this, this, getValue(), false);
             listener.valueChanged(changeEvent);
         });

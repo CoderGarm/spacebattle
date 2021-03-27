@@ -6,9 +6,13 @@ import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import de.yuga.spacebattle.NotifySBUserException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SpringComponent
 public class MyVaadinServiceInitListener implements VaadinServiceInitListener {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(MyVaadinServiceInitListener.class);
 
     @Override
     public void serviceInit(ServiceInitEvent event) {
@@ -22,6 +26,8 @@ public class MyVaadinServiceInitListener implements VaadinServiceInitListener {
                 dialog.setOpened(true);
                 if (!(t instanceof NotifySBUserException)) {
                     t.printStackTrace();
+                } else {
+                    LOGGER.info(t.getMessage());
                 }
             });
         });

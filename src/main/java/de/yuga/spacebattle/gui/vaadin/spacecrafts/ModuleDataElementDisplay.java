@@ -7,7 +7,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import de.yuga.spacebattle.backend.enums.EIconPath;
 import de.yuga.spacebattle.backend.enums.EModuleType;
-import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.EModuleAmountWrapper;
+import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.EModuleValueWrapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -15,10 +15,10 @@ import javax.annotation.Nullable;
 public class ModuleDataElementDisplay extends HorizontalLayout {
 
     @Nonnull
-    private final Binder<EModuleAmountWrapper> binder = new Binder<>(EModuleAmountWrapper.class);
+    private final Binder<EModuleValueWrapper> binder = new Binder<>(EModuleValueWrapper.class);
 
     @Nullable
-    private EModuleAmountWrapper wrapper;
+    private EModuleValueWrapper wrapper;
 
     public ModuleDataElementDisplay() {
         final Image titleImage = new Image();
@@ -36,7 +36,7 @@ public class ModuleDataElementDisplay extends HorizontalLayout {
 
         final Label amountDisplay = new Label();
         final ReadOnlyHasValue<String> amountDisplayText = new ReadOnlyHasValue<>(amountDisplay::setText);
-        binder.forField(amountDisplayText).bind(EModuleAmountWrapper::getAmount, null);
+        binder.forField(amountDisplayText).bind(EModuleValueWrapper::getValue, null);
 
         add(titleImage, amountDisplay);
     }
@@ -46,7 +46,7 @@ public class ModuleDataElementDisplay extends HorizontalLayout {
      *
      * @param wrapper the input
      */
-    public void update(@Nullable final EModuleAmountWrapper wrapper) {
+    public void update(@Nullable final EModuleValueWrapper wrapper) {
 
         binder.readBean(wrapper);
         this.wrapper = wrapper;

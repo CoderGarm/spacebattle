@@ -43,6 +43,6 @@ public class ShipClassDisplay extends ShipClassLayout<ShipClass> {
      */
     @Override
     public void update(@Nullable final ShipClass shipClass) {
-        binderShipClass.readBean(shipClass);
+        binderShipClass.setBean(shipClass);
     }
 }

@@ -20,6 +20,7 @@ import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import java.util.Collection;
@@ -71,20 +72,15 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass> {
     }
 
     /**
-     * Will update the edit display, depending on the shipClass param.
+     * Sets the available modules to this view.
+     * todo replace "here are all the modules you can use"-hack by a well thought-out display
      *
-     * @param shipClass the ship class to display
-     * @param modules   the modules to select in the UI
+     * @param modules the modules to select in the UI
      */
-    public void update(@Nonnull ShipClass shipClass, @Nonnull final Collection<Module> modules) {
-        Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
+    public void setModules(@Nonnull final Collection<Module> modules) {
         Preconditions.checkNotNull(modules, "modules shouldn't be null!");
 
-        // todo replace "here are all the modules you can use"-hack by a well thought-out display
-        final Map<Module, Integer> modulesMap = modules.stream().collect(Collectors.toMap(Function.identity(), val -> 0));
-        shipClass.addModules(modulesMap);
-        this.modulesMap = modulesMap;
-        binderShipClass.setBean(shipClass);
+        modulesMap = modules.stream().collect(Collectors.toMap(Function.identity(), val -> 0));
     }
 
     /**
@@ -119,8 +115,14 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass> {
     }
 
     @Override
-    public void update(ShipClass value) {
-        value.addModules(modulesMap);
-        binderShipClass.readBean(value);
+    public void update(@Nullable final ShipClass value) {
+        if (value != null) {
+            value.addModules(modulesMap);
+        }
+        if (binderShipClass.getBean() == null) {
+            binderShipClass.setBean(value);
+        } else {
+            binderShipClass.readBean(value);
+        }
     }
 }

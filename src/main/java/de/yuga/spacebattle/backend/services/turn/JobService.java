@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services.turn;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.Constructable;
 import de.yuga.spacebattle.backend.entities.ResourceDeposit;
@@ -26,6 +27,7 @@ import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class JobService {
@@ -291,8 +293,33 @@ public class JobService {
         if (facility == null) {
             throw new NotifySBUserException("not here, buddy!");
         }
-        if (facility.getJob() != null) {
+        if (!facility.getJobs().isEmpty()) {
             throw new NotifySBUserException("Job in progress");
         }
+    }
+
+    public Set<Job> createShipyardJob(@Nonnull final Planet planet, @Nonnull final Map<ShipClass, Integer> shipJobPayload) {
+        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+        Preconditions.checkNotNull(shipJobPayload, "shipJobPayload shouldn't be null!");
+
+        final User owner = planet.getOwner();
+        if (owner == null) {
+            throw new NotifySBUserException("You should own this planet, buddy.");
+        }
+
+        final Construction facility = planet.getConstructions().stream()
+                .filter(construction -> construction.getBuilding().getResourceType() == EResourceType.ORBITALCONSTRUCTION)
+                .findFirst().orElse(null);
+
+        checkIfFree(facility);
+
+        final Set<Constructable> constructableSet = shipJobPayload.entrySet().stream()
+                .map(e -> new Constructable(e.getKey(), e.getValue())).collect(Collectors.toSet());
+
+        constructableSet.forEach(constructable -> checkAndBalances(planet, constructable.getJobCosts()));
+        Set<Job> newJobs = constructableSet.stream().map(constructable -> new Job(owner, facility, constructable)).collect(Collectors.toSet());
+
+        Iterable<Job> jobIterable = jobRepository.saveAll(newJobs);
+        return Sets.newHashSet(jobIterable);
     }
 }

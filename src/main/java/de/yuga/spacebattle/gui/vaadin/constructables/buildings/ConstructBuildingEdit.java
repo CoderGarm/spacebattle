@@ -13,24 +13,27 @@ import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.buildings.BuildingDisplay;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
 import de.yuga.spacebattle.gui.vaadin.orbitals.details.BuildingLevelWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.Event;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static de.yuga.spacebattle.gui.vaadin.events.ESBEvent.CONSTRUCTION_JOB_BUILDING_START;
 
 public class ConstructBuildingEdit extends VerticalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<ConstructBuildingEdit, BuildingLevelWrapper>, BuildingLevelWrapper> {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(ConstructBuildingEdit.class);
+    @Nonnull
+    private static final String BUILD = "Build";
+
+    @Nonnull
+    private static final String JOB_IN_PROGRESS = "Job in progress";
 
     @Nonnull
     private final EventBus.UIEventBus uiEventBus = ViewHelper.getService(EventBus.UIEventBus.class);
 
-    @Nonnull
+    @Nullable
     private BuildingLevelWrapper buildingLevelWrapper;
 
     @Nonnull
@@ -40,20 +43,16 @@ public class ConstructBuildingEdit extends VerticalLayout implements HasValue<Ab
     private final Binder<BuildingLevelWrapper> binderLevelWrapper = new Binder<>(BuildingLevelWrapper.class);
 
     public ConstructBuildingEdit() {
+        this.uiEventBus.subscribe(this);
 
-        BuildingDisplay buildingDisplay = new BuildingDisplay();
+        final BuildingDisplay buildingDisplay = new BuildingDisplay();
         binderLevelWrapper.forField(buildingDisplay).bind(BuildingLevelWrapper::getBuilding, null);
 
-        Label levelValue = new Label();
+        final Label levelValue = new Label();
         final ReadOnlyHasValue<String> levelValueReadOnly = new ReadOnlyHasValue<>(levelValue::setText);
         binderLevelWrapper.forField(levelValueReadOnly).bind(BuildingLevelWrapper::getLevelString, null);
 
-        this.uiEventBus.subscribe(this);
-
-        build = new Button("Build", event -> {
-            uiEventBus.publish(this, CONSTRUCTION_JOB_BUILDING_START.name());
-            LOGGER.info("build");
-        });
+        build = new Button(BUILD, event -> uiEventBus.publish(this, CONSTRUCTION_JOB_BUILDING_START.name()));
 
         add(buildingDisplay, levelValue, build);
     }
@@ -61,19 +60,26 @@ public class ConstructBuildingEdit extends VerticalLayout implements HasValue<Ab
     @EventBusListenerMethod
     protected void onEvent(Event<String> e) {
         if (e.getPayload().equals(ESBEvent.CONSTRUCTION_JOB_BUILDING_FEEDBACK_STARTED.name())) {
-            build.setEnabled(false);
+            setReadOnly(false);
             if (e.getSource() == this) {
                 build.setText("Job started");
             }
         }
     }
 
-    @Nonnull
+    @Nullable
     public Building getBuilding() {
+        if (buildingLevelWrapper == null) {
+            return null;
+        }
         return buildingLevelWrapper.getBuilding();
     }
 
-    public int getTargetLevel() {
+    @Nullable
+    public Integer getTargetLevel() {
+        if (buildingLevelWrapper == null) {
+            return null;
+        }
         return buildingLevelWrapper.getLevel();
     }
 
@@ -85,7 +91,7 @@ public class ConstructBuildingEdit extends VerticalLayout implements HasValue<Ab
 
     @Override
     public BuildingLevelWrapper getValue() {
-        return null;
+        return binderLevelWrapper.getBean();
     }
 
     @Override
@@ -96,12 +102,14 @@ public class ConstructBuildingEdit extends VerticalLayout implements HasValue<Ab
 
     @Override
     public void setReadOnly(boolean readOnly) {
-        // not necessary
+        build.setEnabled(!readOnly);
+        final String text = !readOnly ? BUILD : JOB_IN_PROGRESS;
+        build.setText(text);
     }
 
     @Override
     public boolean isReadOnly() {
-        return false;
+        return !build.isEnabled();
     }
 
     @Override

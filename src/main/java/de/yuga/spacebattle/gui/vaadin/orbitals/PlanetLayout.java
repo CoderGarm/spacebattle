@@ -16,6 +16,7 @@ public abstract class PlanetLayout<T> extends VerticalLayout implements StatsLay
         return planetResourceDisplay;
     }
 
+    @Nonnull
     @Override
     public Component getStatisticsComponent() {
         return planetResourceDisplay;

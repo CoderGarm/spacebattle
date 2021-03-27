@@ -331,7 +331,7 @@ public class MainView extends AppLayout {
     private MenuBar createWantToKnowMore() {
         MenuBar wantToKnowMore = new MenuBar();
         MenuItem menuItem = wantToKnowMore.addItem("You want to know more?");
-        wantToKnowMore.setOpenOnHover(true);
+        wantToKnowMore.setOpenOnHover(false);
         Arrays.stream(SBRouting.SB_ROUTING_ITEMS).filter(view -> !view.isLoginNeeded()).forEach(view -> {
             Class<? extends Component> aClass = view.getClazz();
             menuItem.getSubMenu().addItem(view.getPageName(), e -> getUI().ifPresent(ui -> ui.navigate(aClass)));
