@@ -32,3 +32,4 @@ build/
 
 ### VS Code ###
 .vscode/
+/home/karsten/idea-workspace/springgenerated/spacebattle/package-lock.json
