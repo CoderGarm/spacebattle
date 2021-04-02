@@ -62,9 +62,12 @@ public class NumericField extends TextField {
         return numericValue;
     }
 
-    @Override
-    public void setReadonly(boolean readOnly) {
-        super.setReadonly(readOnly);
+    /**
+     * Stupid pseudo-overriding the readOnly setter to access buttons.
+     *
+     * @param readOnly the value
+     */
+    public void setReadonlyForButtons(boolean readOnly) {
         subtractButton.setEnabled(!readOnly);
         addButton.setEnabled(!readOnly);
     }

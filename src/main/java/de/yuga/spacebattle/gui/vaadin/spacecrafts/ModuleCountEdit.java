@@ -80,6 +80,7 @@ public class ModuleCountEdit extends HorizontalLayout implements HasValue<Abstra
     @Override
     public void setReadOnly(boolean readOnly) {
         amountField.setReadOnly(readOnly);
+        amountField.setReadonlyForButtons(readOnly);
     }
 
     @Override

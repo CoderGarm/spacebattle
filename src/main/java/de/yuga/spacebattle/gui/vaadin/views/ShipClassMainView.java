@@ -31,6 +31,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,6 +52,9 @@ public class ShipClassMainView extends SBPageTopLevelLayout<ShipClass> {
 
     @Nonnull
     private static final String MODIFY_ACTION_TITLE = "Modify class";
+
+    @Nonnull
+    private static final String CREATE_ACTION_TITLE = "Create new class";
 
     @Nonnull
     private final EventBus.UIEventBus uiEventBus;
@@ -172,9 +176,13 @@ public class ShipClassMainView extends SBPageTopLevelLayout<ShipClass> {
         // Stats
         Tab tabStats = new Tab(STATS_ACTION_TITLE);
         addComponentForTabOfActionMenu(tabStats, shipClassDisplay);
-        // ShipClasses
+        // Modify ShipClasses
         Tab tabShipClasses = new Tab(MODIFY_ACTION_TITLE);
         addComponentForTabOfActionMenu(tabShipClasses, shipClassEdit);
+        // Create ShipClasses
+        Tab tabShipClassesCreate = new Tab(CREATE_ACTION_TITLE);
+        tabShipClassesCreate.setVisible(false); // todo ugly hack to hide create tab at
+        addComponentForTabOfActionMenu(tabShipClassesCreate, shipClassCreate);
 
         addActionListener();
     }
@@ -195,7 +203,17 @@ public class ShipClassMainView extends SBPageTopLevelLayout<ShipClass> {
 
     @Override
     protected void updateActionMenuUsability(@Nullable final Map<Tab, Boolean> readOnlyMap) {
-        actionSelectorMenu.getChildren().forEach(menuItem -> ((Tab) menuItem).setEnabled(shipClass != null || visibleFlag));
+        actionSelectorMenu.getChildren().forEach(menuItem -> {
+            final Tab tab = (Tab) menuItem;
+
+            if (readOnlyMap != null && readOnlyMap.containsKey(tab)) {
+                Boolean aBoolean = readOnlyMap.get(tab);
+                tab.setVisible(aBoolean);
+            }
+
+            boolean enabled = shipClass != null || visibleFlag;
+            tab.setEnabled(enabled);
+        });
     }
 
     @Override
@@ -229,15 +247,24 @@ public class ShipClassMainView extends SBPageTopLevelLayout<ShipClass> {
         this.shipClass = shipClass;
         if (this.shipClass == null) {
             content = setContent(shipClassCreate);
-            actionSelectorMenu.setSelectedTab(null);
         } else {
             this.shipClass = shipClassService.find(this.shipClass);
             shipClassEdit.update(this.shipClass);
             shipClassDisplay.update(this.shipClass);
-            getTabForComponentOfActionMenu(this.content).setSelected(true);
+            if (content == shipClassCreate) {
+                content = setContent(shipClassDisplay);
+            }
         }
+        final Tab currentTab = getTabForComponentOfActionMenu(content);
+        currentTab.setSelected(true);
+
+        boolean isCreateNew = CREATE_ACTION_TITLE.equals(currentTab.getLabel());
+        HashMap<Tab, Boolean> tabMap = new HashMap<>();
+        tabMap.put(getTabForComponentOfActionMenu(shipClassEdit), !isCreateNew);
+        tabMap.put(getTabForComponentOfActionMenu(shipClassCreate), isCreateNew);
+
         content.update(this.shipClass);
-        updateActionMenuUsability(null);
+        updateActionMenuUsability(tabMap);
     }
 
     /**

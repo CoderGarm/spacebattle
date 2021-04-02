@@ -94,7 +94,7 @@ public class PlanetShipyardConstructionEdit extends PlanetLayout<Planet> impleme
                 .filter(Objects::nonNull)
                 .filter(shipClassCountWrapper -> shipClassCountWrapper.getAmountNumeric() > 0)
                 .findFirst()
-                .ifPresentOrElse(shipClassCountWrapper -> submit.setEnabled(true), () -> submit.setEnabled(false));
+                .ifPresentOrElse(shipClassCountWrapper -> setReadOnly(true), () -> setReadOnly(false));
     }
 
     public void update(@Nullable final Planet planet) {

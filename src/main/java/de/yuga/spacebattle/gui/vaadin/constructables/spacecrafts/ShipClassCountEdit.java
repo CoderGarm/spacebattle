@@ -82,6 +82,7 @@ public class ShipClassCountEdit extends VerticalLayout implements HasValue<Abstr
     @Override
     public void setReadOnly(boolean readOnly) {
         amountField.setReadOnly(readOnly);
+        amountField.setReadonlyForButtons(readOnly);
     }
 
     @Override
