@@ -28,10 +28,8 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static de.yuga.spacebattle.gui.vaadin.events.ESBEvent.CONSTRUCTION_JOB_BUILDING_FEEDBACK_STARTED;
 import static de.yuga.spacebattle.gui.vaadin.events.ESBEvent.ORBITAL_CONSTRUCTION_JOB_BUILDING_FEEDBACK_STARTED;
@@ -99,12 +97,16 @@ public class PlanetMainView extends SBPageTopLevelLayout<Planet> {
         }
         this.user = loggedIn;
         planetDashboardDisplay = new PlanetDashboardDisplay();
+        planet = planetService.findAllColonizedBy(user).get(0);
+        if (planet != null) {
+            planetDashboardDisplay.update(planet);
+        }
         planetBuildingConstructionEdit = new PlanetBuildingConstructionEdit();
         planetShipyardConstructionEdit = new PlanetShipyardConstructionEdit();
         planetJobDisplay = new PlanetJobDisplay();
-        content = planetDashboardDisplay;
         createSubjectSelectorMenu();
         createActionSelectorMenu();
+        content = planetDashboardDisplay;
         setContent(content);
         updateActionMenuUsability(null);
     }
