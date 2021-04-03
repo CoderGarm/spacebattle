@@ -2,41 +2,25 @@
 name: Story template
 about: Template for user story
 title: ''
-labels: ''
+labels: Story
 assignees: ''
 
 ---
 
 ## Titel 
 
-[
-Short summary
-]
+[Short summary]
 
 ### Motivation
 
-Als [
-Anwender
-],
-
-möchte ich
-[
-Aufgabe
-],
-
-damit 
-[
-Ziel
-].
+Als [Anwender],
+möchte ich [Aufgabe],
+damit [Ziel].
 
 ### Akzeptanzkriterien
 
-1. [
-Punkt 1
-]
-1. [
-Punkt 2
-]
+1. [Punkt 1]
+1. [Punkt 2]
 
 
 ### Ergänzungen
