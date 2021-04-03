@@ -14,7 +14,7 @@ import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.gui.vaadin.MainView;
 import de.yuga.spacebattle.gui.vaadin.account.details.UserDisplay;
 import de.yuga.spacebattle.gui.vaadin.combined.account.AllianceDisplay;
-import de.yuga.spacebattle.gui.vaadin.research.ResearchDisplayMulti;
+import de.yuga.spacebattle.gui.vaadin.research.details.ResearchDisplayMulti;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -36,7 +36,7 @@ public class DashboardView extends HorizontalLayout {
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
 
         this.userService = userService;
-        User user = this.userService.isLoggedIn();
+        User user = this.userService.getLoggedInUser();
         if (user == null) {
             throw new NotifySBUserException("You are empty!");
         }
@@ -49,7 +49,9 @@ public class DashboardView extends HorizontalLayout {
         }
 
 
-        add(new ResearchDisplayMulti(user.getResearches()));
+        ResearchDisplayMulti researchDisplayMulti = new ResearchDisplayMulti();
+        researchDisplayMulti.setValue(user.getResearches());
+        add(researchDisplayMulti);
 
         addClassName("user-view");
     }

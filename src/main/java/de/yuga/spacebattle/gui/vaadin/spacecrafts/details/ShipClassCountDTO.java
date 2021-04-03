@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * Wraps a {@link ShipClass} and it's count.
  */
-public class ShipClassCountWrapper {
+public class ShipClassCountDTO {
 
     @Nonnull
     private final ShipClass shipClass;
@@ -17,7 +17,7 @@ public class ShipClassCountWrapper {
     @Nonnull
     private Integer count;
 
-    public ShipClassCountWrapper(@Nonnull final ShipClass shipClass, @Nonnull final Integer count) {
+    public ShipClassCountDTO(@Nonnull final ShipClass shipClass, @Nonnull final Integer count) {
         Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
         Preconditions.checkNotNull(count, "count shouldn't be null!");
 

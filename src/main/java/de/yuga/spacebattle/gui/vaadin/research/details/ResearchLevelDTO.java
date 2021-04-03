@@ -1,33 +1,33 @@
-package de.yuga.spacebattle.gui.vaadin.orbitals.details;
+package de.yuga.spacebattle.gui.vaadin.research.details;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.buildings.Building;
+import de.yuga.spacebattle.backend.entities.researches.Research;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
 
 /**
- * Wraps a {@link Building} and it's level.
+ * Wraps a {@link Research} and it's level.
  */
-public class BuildingLevelWrapper {
+public class ResearchLevelDTO {
 
     @Nonnull
-    private final Building building;
+    private final Research research;
 
     @Nonnull
     private Integer level;
 
-    public BuildingLevelWrapper(@Nonnull final Building building, @Nonnull final Integer level) {
-        Preconditions.checkNotNull(building, "module shouldn't be null!");
+    public ResearchLevelDTO(@Nonnull final Research research, @Nonnull final Integer level) {
+        Preconditions.checkNotNull(research, "research shouldn't be null!");
         Preconditions.checkNotNull(level, "amount shouldn't be null!");
 
-        this.building = building;
+        this.research = research;
         this.level = level;
     }
 
     @Nonnull
-    public Building getBuilding() {
-        return building;
+    public Research getResearch() {
+        return research;
     }
 
     @Nonnull
@@ -50,11 +50,11 @@ public class BuildingLevelWrapper {
      *
      * @return the entry which represents this wrapper
      */
-    public Map.Entry<Building, Integer> getAsEntry() {
-        return new Map.Entry<Building, Integer>() {
+    public Map.Entry<Research, Integer> getAsEntry() {
+        return new Map.Entry<Research, Integer>() {
             @Override
-            public Building getKey() {
-                return building;
+            public Research getKey() {
+                return research;
             }
 
             @Override

@@ -276,7 +276,7 @@ public class MainView extends AppLayout {
     }
 
     private void updateMenu() {
-        boolean isLoggedIn = userService.isLoggedIn() != null;
+        boolean isLoggedIn = userService.getLoggedInUser() != null;
 
         wantToKnowMore.setVisible(isLoggedIn);
         wantToKnowMore.onEnabledStateChanged(isLoggedIn);

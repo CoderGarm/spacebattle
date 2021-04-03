@@ -12,7 +12,7 @@ import static de.yuga.spacebattle.backend.entities.ResourceDeposit.mathContext;
 /**
  * Wraps a {@link EResourceType} and it's amount.
  */
-public class EResourceAmountWrapper {
+public class EResourceAmountDTO {
 
     @Nonnull
     private final EResourceType resourceType;
@@ -23,9 +23,9 @@ public class EResourceAmountWrapper {
     @Nullable
     private final BigDecimal tickOutput;
 
-    public EResourceAmountWrapper(@Nonnull final EResourceType resourceType,
-                                  @Nonnull final BigDecimal amount,
-                                  @Nullable final BigDecimal tickOutput) {
+    public EResourceAmountDTO(@Nonnull final EResourceType resourceType,
+                              @Nonnull final BigDecimal amount,
+                              @Nullable final BigDecimal tickOutput) {
         Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
         Preconditions.checkNotNull(amount, "amount shouldn't be null!");
 

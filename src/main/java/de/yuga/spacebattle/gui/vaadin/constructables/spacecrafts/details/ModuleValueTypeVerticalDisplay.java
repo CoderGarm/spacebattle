@@ -10,7 +10,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.ERaceType;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.ModuleDataElementDisplay;
-import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.EModuleValueWrapper;
+import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.EModuleValueDTO;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,7 +36,7 @@ public class ModuleValueTypeVerticalDisplay extends VerticalLayout implements Ha
         displayByModuleType = Arrays.stream(EModuleType.values())
                 .collect(Collectors.toMap(Function.identity(), eModuleType -> {
                     ModuleDataElementDisplay display = new ModuleDataElementDisplay();
-                    display.update(new EModuleValueWrapper(eModuleType, BigDecimal.ZERO));
+                    display.update(new EModuleValueDTO(eModuleType, BigDecimal.ZERO));
                     return display;
                 }));
 
@@ -98,7 +98,7 @@ public class ModuleValueTypeVerticalDisplay extends VerticalLayout implements Ha
     private void updateStats() {
         displayByModuleType.forEach((eModuleType, moduleDataElementDisplay) -> {
             final BigDecimal effectiveValue = amountByModuleType.get(eModuleType);
-            moduleDataElementDisplay.update(new EModuleValueWrapper(eModuleType, effectiveValue));
+            moduleDataElementDisplay.update(new EModuleValueDTO(eModuleType, effectiveValue));
         });
     }
 

@@ -2,6 +2,7 @@ package de.yuga.spacebattle.gui.vaadin;
 
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.Component;
+import de.yuga.spacebattle.gui.vaadin.research.ResearchMainView;
 import de.yuga.spacebattle.gui.vaadin.views.*;
 
 import javax.annotation.Nonnull;
@@ -19,7 +20,8 @@ public class SBRouting {
                     new SBRouting(true, "Dashboard", DashboardView.class, "Dashboard"),
                     new SBRouting(true, "User", UserView.class, "User"),
                     new SBRouting(true, "Planets", PlanetMainView.class, "Planets"),
-                    new SBRouting(true, "Ship classes", ShipClassMainView.class, "Ship classes")
+                    new SBRouting(true, "Ship classes", ShipClassMainView.class, "Ship classes"),
+                    new SBRouting(true, "Researches", ResearchMainView.class, "Researches")
 
             };
 

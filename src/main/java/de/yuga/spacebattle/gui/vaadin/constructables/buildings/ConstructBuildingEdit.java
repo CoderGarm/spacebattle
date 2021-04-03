@@ -12,7 +12,7 @@ import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.buildings.BuildingDisplay;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
-import de.yuga.spacebattle.gui.vaadin.orbitals.details.BuildingLevelWrapper;
+import de.yuga.spacebattle.gui.vaadin.orbitals.details.BuildingLevelDTO;
 import org.vaadin.spring.events.Event;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -22,7 +22,7 @@ import javax.annotation.Nullable;
 
 import static de.yuga.spacebattle.gui.vaadin.events.ESBEvent.CONSTRUCTION_JOB_BUILDING_START;
 
-public class ConstructBuildingEdit extends VerticalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<ConstructBuildingEdit, BuildingLevelWrapper>, BuildingLevelWrapper> {
+public class ConstructBuildingEdit extends VerticalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<ConstructBuildingEdit, BuildingLevelDTO>, BuildingLevelDTO> {
 
     @Nonnull
     private static final String BUILD = "Build";
@@ -34,23 +34,23 @@ public class ConstructBuildingEdit extends VerticalLayout implements HasValue<Ab
     private final EventBus.UIEventBus uiEventBus = ViewHelper.getService(EventBus.UIEventBus.class);
 
     @Nullable
-    private BuildingLevelWrapper buildingLevelWrapper;
+    private BuildingLevelDTO buildingLevelDTO;
 
     @Nonnull
     private final Button build;
 
     @Nonnull
-    private final Binder<BuildingLevelWrapper> binderLevelWrapper = new Binder<>(BuildingLevelWrapper.class);
+    private final Binder<BuildingLevelDTO> binderLevelWrapper = new Binder<>(BuildingLevelDTO.class);
 
     public ConstructBuildingEdit() {
         this.uiEventBus.subscribe(this);
 
         final BuildingDisplay buildingDisplay = new BuildingDisplay();
-        binderLevelWrapper.forField(buildingDisplay).bind(BuildingLevelWrapper::getBuilding, null);
+        binderLevelWrapper.forField(buildingDisplay).bind(BuildingLevelDTO::getBuilding, null);
 
         final Label levelValue = new Label();
         final ReadOnlyHasValue<String> levelValueReadOnly = new ReadOnlyHasValue<>(levelValue::setText);
-        binderLevelWrapper.forField(levelValueReadOnly).bind(BuildingLevelWrapper::getLevelString, null);
+        binderLevelWrapper.forField(levelValueReadOnly).bind(BuildingLevelDTO::getLevelString, null);
 
         build = new Button(BUILD, event -> uiEventBus.publish(this, CONSTRUCTION_JOB_BUILDING_START.name()));
 
@@ -69,33 +69,33 @@ public class ConstructBuildingEdit extends VerticalLayout implements HasValue<Ab
 
     @Nullable
     public Building getBuilding() {
-        if (buildingLevelWrapper == null) {
+        if (buildingLevelDTO == null) {
             return null;
         }
-        return buildingLevelWrapper.getBuilding();
+        return buildingLevelDTO.getBuilding();
     }
 
     @Nullable
     public Integer getTargetLevel() {
-        if (buildingLevelWrapper == null) {
+        if (buildingLevelDTO == null) {
             return null;
         }
-        return buildingLevelWrapper.getLevel();
+        return buildingLevelDTO.getLevel();
     }
 
     @Override
-    public void setValue(BuildingLevelWrapper value) {
-        this.buildingLevelWrapper = value;
+    public void setValue(BuildingLevelDTO value) {
+        this.buildingLevelDTO = value;
         binderLevelWrapper.readBean(value);
     }
 
     @Override
-    public BuildingLevelWrapper getValue() {
+    public BuildingLevelDTO getValue() {
         return binderLevelWrapper.getBean();
     }
 
     @Override
-    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ConstructBuildingEdit, BuildingLevelWrapper>> listener) {
+    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ConstructBuildingEdit, BuildingLevelDTO>> listener) {
         // not necessary
         return null;
     }

@@ -49,7 +49,7 @@ public final class SecurityUtils implements Serializable {
      * we have to ignore those tokens explicitly.
      */
     boolean isUserLoggedIn() {
-        return userService.isLoggedIn() != null;
+        return userService.getLoggedInUser() != null;
 		/*
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		return authentication != null
