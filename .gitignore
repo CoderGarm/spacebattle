@@ -33,3 +33,8 @@ build/
 ### VS Code ###
 .vscode/
 /home/karsten/idea-workspace/springgenerated/spacebattle/package-lock.json
+/.npmrc
+/pnpmfile.js
+/tsconfig.json
+/types.d.ts
+/frontend/generated/vaadin.ts
