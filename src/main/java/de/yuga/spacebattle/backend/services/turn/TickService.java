@@ -32,6 +32,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -170,6 +171,7 @@ public class TickService {
         for (Construction facility : constructions) {
             EResourceType resourceType = facility.getBuilding().getResourceType();
             final Set<Job> jobs = facility.getJobs();
+            final Set<Job> toDelete = new HashSet<>();
             for (Job job : jobs) {
                 boolean remainingPoints = calculateConstructablePointsRemaining(job, resourceDeposit);
                 if (remainingPoints) {
@@ -218,8 +220,9 @@ public class TickService {
                         fleetService.save(fleet);
                         break;
                 }
-                jobs.remove(job);
+                toDelete.add(job);
             }
+            jobs.removeIf(toDelete::contains);
         }
         planetService.save(planet);
     }

@@ -41,8 +41,8 @@ public class Construction extends AbstractEntityKey {
     private int level = 1;
 
     @Nonnull
-    @OneToMany(mappedBy = "facility", fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<Job> jobs = new HashSet<>();
+    @OneToMany(mappedBy = "facility", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private final Set<Job> jobs = new HashSet<>();
 
     public Construction() {
     }
