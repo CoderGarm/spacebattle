@@ -14,13 +14,16 @@ import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.misc.details.StatsDrawer;
 import de.yuga.spacebattle.gui.vaadin.views.PlanetMainView;
 import de.yuga.spacebattle.gui.vaadin.views.ShipClassMainView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Main layout for pages with a statistics section.
@@ -40,6 +43,8 @@ import java.util.Optional;
  */
 @CssImport("./styles/views/main/details/SBPageTopLevelLayout.css")
 public abstract class SBPageSubjectSelectorLayout<T> extends FlexLayout {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(SBPageSubjectSelectorLayout.class);
 
     /**
      * The index of the "do user stuff" section of the view below the two selector menus.
@@ -202,8 +207,6 @@ public abstract class SBPageSubjectSelectorLayout<T> extends FlexLayout {
         return tab;
     }
 
-
-
     /**
      * Sets and relate a selector tab to it's corresponding object.
      * Will add a new tab or simply update a object for a known tab.
@@ -229,21 +232,59 @@ public abstract class SBPageSubjectSelectorLayout<T> extends FlexLayout {
      */
     @Nullable
     public T getSubjectForTabOfSubjectMenu(@Nonnull final Tab tab) {
-        Preconditions.checkNotNull(tab, "tab shouldn't be null!");
+        Preconditions.checkNotNull(tab, "tab shouldn't be null while searching!");
 
         return subjectSelectorObject.get(tab);
     }
 
     /**
      * Removes a subject's tab and it's object.
+     * <p>
+     * Take care of the fact, that removing a tab will call the listener for the next index -
+     * and if there is no tab, than the event will called for a empty tab.
      *
      * @param tab the tab to remove.
      */
     public void removeFromSubject(@Nonnull final Tab tab) {
-        Preconditions.checkNotNull(tab, "tab shouldn't be null!");
+        Preconditions.checkNotNull(tab, "tab shouldn't be null while removing!");
 
         subjectSelectorMenu.remove(tab);
         subjectSelectorObject.remove(tab);
+    }
+
+    /**
+     * Select only the tab which is presented by the parameter.
+     * Every other tab of the tab's menu will deselected.
+     *
+     * @param tab the tab which should be selected
+     */
+    public void setSelected(@Nonnull final Tab tab) {
+        Preconditions.checkNotNull(tab, "tab shouldn't be null!");
+
+        setSelectedIndexForMenu(tab, actionSelectorMenu);
+        setSelectedIndexForMenu(tab, subjectSelectorMenu);
+    }
+
+    /**
+     * Sets the given task as selected in it's own menu.
+     *
+     * @param tab  the tab to select
+     * @param tabs the menu to crawl
+     */
+    private void setSelectedIndexForMenu(@Nonnull Tab tab, Tabs tabs) {
+        Preconditions.checkNotNull(tab, "tab shouldn't be null!");
+        Preconditions.checkNotNull(tabs, "tabs shouldn't be null!");
+
+        Set<Tab> subjectTabs = tabs.getChildren().map(Tab.class::cast).collect(Collectors.toSet());
+        if (subjectTabs.contains(tab)) {
+            tabs.getChildren().forEach(component -> {
+                Tab subjectTab = (Tab) component;
+                if (tab == subjectTab) {
+                    int i = tabs.indexOf(subjectTab);
+                    tabs.setSelectedIndex(i);
+                }
+            });
+        }
     }
 
     /**
@@ -258,9 +299,13 @@ public abstract class SBPageSubjectSelectorLayout<T> extends FlexLayout {
 
     /**
      * Must define the usability of the action tab.
-     * Leave blank if no disabling of action selector's tabs is needed.
+     * Leave blank if no change of action selector's tabs is needed.
+     * <p>
+     * Else:
+     * Boolean[0] - setVisible
+     * Boolean[1] - setEnabled
      */
-    protected abstract void updateActionMenuUsability(@Nullable final Map<Tab, Boolean> readOnlyMap);
+    protected abstract void updateActionMenuUsability(@Nullable final Map<Tab, Boolean[]> readOnlyMap);
 
     /**
      * Must update the subject selector's menu entries by removing or adding new tab-object combinations.
@@ -269,13 +314,17 @@ public abstract class SBPageSubjectSelectorLayout<T> extends FlexLayout {
 
     /**
      * Must define the behavior of <code>every</code> subject tab.
-     * Hint: fetch <T> on every call.
+     * <p>
+     * Hint #1: fetch <T> on every call.
+     * Hint #2: must only be called once for the full menu.
      */
     protected abstract void addSubjectListener();
 
     /**
      * Must define the behavior of <code>every</code> action tab.
-     * Hint: fetch <T> on every call.
+     * <p>
+     * Hint #1: fetch <T> on every call.
+     * Hint #2: must only be called once for the full menu.
      */
     protected abstract void addActionListener();
 }

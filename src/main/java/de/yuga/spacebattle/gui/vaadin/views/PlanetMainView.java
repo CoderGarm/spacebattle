@@ -214,13 +214,12 @@ public class PlanetMainView extends SBPageSubjectSelectorLayout<Planet> {
             }
             addSubjectForTabOfSubjectMenu(selectedTab, planet);
             content.update(planet);
-            getTabForComponentOfActionMenu(content).setSelected(true);
             updateActionMenuUsability(null);
         });
     }
 
     @Override
-    protected void updateActionMenuUsability(@Nullable final Map<Tab, Boolean> readOnlyMap) {
+    protected void updateActionMenuUsability(@Nullable final Map<Tab, Boolean[]> readOnlyMap) {
         actionSelectorMenu.getChildren().forEach(menuItem -> ((Tab) menuItem).setEnabled(planet != null));
     }
 
@@ -239,7 +238,5 @@ public class PlanetMainView extends SBPageSubjectSelectorLayout<Planet> {
             Tab subjectTab = new Tab(planet.getName());
             addSubjectForTabOfSubjectMenu(subjectTab, planet);
         });
-
-        addSubjectListener();
     }
 }

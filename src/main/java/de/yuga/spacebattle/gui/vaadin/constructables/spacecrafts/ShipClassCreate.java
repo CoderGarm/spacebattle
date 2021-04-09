@@ -17,7 +17,7 @@ import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.validators.base.CustomValidatorFactory;
 import de.yuga.spacebattle.gui.vaadin.NotificationHelper;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
-import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ShipClassWrapper;
+import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ShipClassDTO;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.HullSelector;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.ModuleMultiEdit;
@@ -49,7 +49,7 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass> {
     private final EventBus.UIEventBus uiEventBus = ViewHelper.getService(EventBus.UIEventBus.class);
 
     @Nonnull
-    private final Binder<ShipClassWrapper> binderShipClass = new Binder<>(ShipClassWrapper.class);
+    private final Binder<ShipClassDTO> binderShipClass = new Binder<>(ShipClassDTO.class);
 
     @Nonnull
     private final HullSelector hullSelect;
@@ -74,7 +74,7 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass> {
 
         shipClass = createStub();
 
-        binderShipClass.forField(getShipClassStatDisplay()).bind(ShipClassWrapper::getShipClass, null);
+        binderShipClass.forField(getShipClassStatDisplay()).bind(ShipClassDTO::getShipClass, null);
 
         final TextField name = new TextField();
         name.setRequiredIndicatorVisible(true);
@@ -85,7 +85,7 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass> {
                 })
                 .withValidationStatusHandler(this::openNotification)
                 .asRequired()
-                .bind(ShipClassWrapper::getName, ShipClassWrapper::setName);
+                .bind(ShipClassDTO::getName, ShipClassDTO::setName);
 
 
         hullSelect = new HullSelector();
@@ -96,11 +96,11 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass> {
                     return ShipDataVaadinValidator.check(shipClass, HULL);
                 })
                 .withValidationStatusHandler(this::openNotification)
-                .bind(ShipClassWrapper::getPossibleHulls, ShipClassWrapper::setHull);
+                .bind(ShipClassDTO::getPossibleHulls, ShipClassDTO::setHull);
 
         final ModuleMultiEdit moduleMultiEdit = new ModuleMultiEdit();
-        final ReadOnlyHasValue<Map<Module, Integer>> levelValueReadOnly = new ReadOnlyHasValue<>(moduleMultiEdit::setPossibleModules);
-        binderShipClass.forField(levelValueReadOnly).bind(ShipClassWrapper::getPossibleModules, null);
+        final ReadOnlyHasValue<Map<Module, Integer>> levelValueReadOnly = new ReadOnlyHasValue<>(moduleMultiEdit::setValue);
+        binderShipClass.forField(levelValueReadOnly).bind(ShipClassDTO::getPossibleModules, null);
 
         binderShipClass.forField(moduleMultiEdit)
                 .withValidator((value, context) -> {
@@ -108,9 +108,13 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass> {
                     return ShipDataVaadinValidator.check(shipClass, MODULES);
                 })
                 .withValidationStatusHandler(this::openNotification)
-                .bind(ShipClassWrapper::getPossibleModules, ShipClassWrapper::setModules);
+                .bind(ShipClassDTO::getPossibleModules, ShipClassDTO::setModules);
 
-        submit = new Button("Submit", event -> this.uiEventBus.publish(this, ESBEvent.SHIP_CLASS_SUBMITTED.name()));
+        submit = new Button("Submit", event -> {
+            this.uiEventBus.publish(this, ESBEvent.SHIP_CLASS_SUBMITTED.name());
+            event.getSource().setEnabled(false);
+            event.getSource().setText("Job started");
+        });
         submit.setEnabled(false);
 
         final Button clear = new Button("Clear display", event -> {
@@ -137,10 +141,10 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass> {
         }
         shipClass.setOwner(loggedIn);
         shipClass.setHull(new Hull());
-        final ShipClassWrapper shipClassWrapper = new ShipClassWrapper(shipClass);
-        shipClassWrapper.setPossibleModules(modules.stream().collect(Collectors.toMap(Function.identity(), val -> 0)));
-        shipClassWrapper.setPossibleHulls(hulls);
-        binderShipClass.setBean(shipClassWrapper);
+        final ShipClassDTO shipClassDTO = new ShipClassDTO(shipClass);
+        shipClassDTO.setPossibleModules(modules.stream().collect(Collectors.toMap(Function.identity(), val -> 0)));
+        shipClassDTO.setPossibleHulls(hulls);
+        binderShipClass.setBean(shipClassDTO);
         this.shipClass = shipClass;
         return shipClass;
     }
@@ -180,13 +184,13 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass> {
 
         this.hulls = hulls;
         this.modules = modules;
-        ShipClassWrapper shipClassWrapper = binderShipClass.getBean();
-        if (shipClassWrapper == null) {
-            shipClassWrapper = new ShipClassWrapper(this.shipClass);
+        ShipClassDTO shipClassDTO = binderShipClass.getBean();
+        if (shipClassDTO == null) {
+            shipClassDTO = new ShipClassDTO(this.shipClass);
         }
-        shipClassWrapper.setPossibleHulls(hulls);
-        shipClassWrapper.setPossibleModules(modules.stream().collect(Collectors.toMap(Function.identity(), val -> 0)));
-        binderShipClass.readBean(shipClassWrapper);
+        shipClassDTO.setPossibleHulls(hulls);
+        shipClassDTO.setPossibleModules(modules.stream().collect(Collectors.toMap(Function.identity(), val -> 0)));
+        binderShipClass.readBean(shipClassDTO);
     }
 
 
@@ -197,7 +201,7 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass> {
      */
     @Nonnull
     public ShipClass getShipClass() {
-        ShipClassWrapper shipClassBean = binderShipClass.getBean();
+        ShipClassDTO shipClassBean = binderShipClass.getBean();
         if (shipClassBean == null) {
             throw new NotifySBUserException("You could click on submit, congratulations! Please click only if this class is ready.");
         }

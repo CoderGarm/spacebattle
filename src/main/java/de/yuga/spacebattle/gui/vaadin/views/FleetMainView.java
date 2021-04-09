@@ -150,7 +150,7 @@ public class FleetMainView extends SBPageSubjectSelectorLayout<Fleet> {
     }
 
     @Override
-    protected void updateActionMenuUsability(@Nullable final Map<Tab, Boolean> readOnlyMap) {
+    protected void updateActionMenuUsability(@Nullable final Map<Tab, Boolean[]> readOnlyMap) {
         actionSelectorMenu.getChildren().forEach(menuItem -> ((Tab) menuItem).setEnabled(fleet != null));
     }
 

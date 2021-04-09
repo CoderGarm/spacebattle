@@ -142,6 +142,6 @@ public class ResearchMainView extends SBPageActionSelectorLayout<User> {
     }
 
     @Override
-    protected void updateActionMenuUsability(@Nullable final Map<Tab, Boolean> readOnlyMap) {
+    protected void updateActionMenuUsability(@Nullable final Map<Tab, Boolean[]> readOnlyMap) {
     }
 }

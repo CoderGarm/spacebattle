@@ -31,9 +31,8 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @SpringComponent
 @UIScope
@@ -44,17 +43,20 @@ public class ShipClassMainView extends SBPageSubjectSelectorLayout<ShipClass> {
     @Nonnull
     public static final String ROUTE = "shipClass";
 
+    /**
+     * Special stuff: This subject is null in the real world while it's tab is used without a nonnull-object.
+     */
     @Nonnull
     private static final String CREATE_NEW_CLASS_SUBJECT_TITLE = "Create new Class";
 
     @Nonnull
-    private static final String STATS_ACTION_TITLE = "Class data";
+    private static final String STATS_ACTION_TITLE = "Fitting data";
 
     @Nonnull
-    private static final String MODIFY_ACTION_TITLE = "Modify class";
+    private static final String MODIFY_ACTION_TITLE = "Modify fitting";
 
     @Nonnull
-    private static final String CREATE_ACTION_TITLE = "Create new class";
+    private static final String CREATE_NEW_CLASS_ACTION_TITLE = "Create new fitting";
 
     @Nonnull
     private final EventBus.UIEventBus uiEventBus;
@@ -89,11 +91,6 @@ public class ShipClassMainView extends SBPageSubjectSelectorLayout<ShipClass> {
     @Nonnull
     private final ShipClassCreate shipClassCreate;
 
-    /**
-     * If this flag is true the action menu bar is visible.
-     */
-    private boolean visibleFlag;
-
     @Autowired
     public ShipClassMainView(@Nonnull final UserService userService,
                              @Nonnull final ShipClassService shipClassService,
@@ -120,10 +117,15 @@ public class ShipClassMainView extends SBPageSubjectSelectorLayout<ShipClass> {
         shipClassEdit = new ShipClassEdit();
         shipClassCreate = new ShipClassCreate();
         createSubjectSelectorMenu();
+        subjectSelectorMenu.setAutoselect(false);
         createActionSelectorMenu();
-        content = shipClassDisplay;
+        actionSelectorMenu.setAutoselect(false);
+        content = shipClassCreate;
         setContent(content);
-        updateActionMenuUsability(null);
+        final Tab actionTab = getTabForComponentOfActionMenu(content);
+        final HashMap<Tab, Boolean[]> tabMap = getActionTabUsability(actionTab);
+        updateActionMenuUsability(tabMap);
+        setSelected(actionTab);
         fetchBaseData();
     }
 
@@ -163,9 +165,12 @@ public class ShipClassMainView extends SBPageSubjectSelectorLayout<ShipClass> {
             shipClassService.delete(shipClass);
             this.shipClass = null;
             NotificationHelper.notify("Class deleted", 3000);
-            updateSubjectMenu();
             shipClassCreate.update(shipClass);
+            subjectSelectorMenu.setSelectedIndex(0);
+            final Tab createNewClassTab = getTabForComponentOfActionMenu(shipClassCreate);
+            setSelected(createNewClassTab);
             content = setContent(shipClassCreate);
+            updateSubjectMenu();
         } else if (e.getPayload().equals(ESBEvent.TICK_DONE.name())) {
             fetchBaseData();
         }
@@ -180,8 +185,8 @@ public class ShipClassMainView extends SBPageSubjectSelectorLayout<ShipClass> {
         Tab tabShipClasses = new Tab(MODIFY_ACTION_TITLE);
         addComponentForTabOfActionMenu(tabShipClasses, shipClassEdit);
         // Create ShipClasses
-        Tab tabShipClassesCreate = new Tab(CREATE_ACTION_TITLE);
-        tabShipClassesCreate.setVisible(false); // todo ugly hack to hide create tab at
+        Tab tabShipClassesCreate = new Tab(CREATE_NEW_CLASS_ACTION_TITLE);
+        tabShipClassesCreate.setVisible(false);
         addComponentForTabOfActionMenu(tabShipClassesCreate, shipClassCreate);
 
         addActionListener();
@@ -197,22 +202,21 @@ public class ShipClassMainView extends SBPageSubjectSelectorLayout<ShipClass> {
             }
             componentForTab.update(shipClass);
             content = setContent((ShipClassLayout<ShipClass>) componentForTab);
-            subjectSelectorMenu.getSelectedTab().setSelected(true);
         });
     }
 
     @Override
-    protected void updateActionMenuUsability(@Nullable final Map<Tab, Boolean> readOnlyMap) {
+    protected void updateActionMenuUsability(@Nullable final Map<Tab, Boolean[]> readOnlyMap) {
+        if (readOnlyMap == null || readOnlyMap.isEmpty()) {
+            return;
+        }
         actionSelectorMenu.getChildren().forEach(menuItem -> {
             final Tab tab = (Tab) menuItem;
-
-            if (readOnlyMap != null && readOnlyMap.containsKey(tab)) {
-                Boolean aBoolean = readOnlyMap.get(tab);
-                tab.setVisible(aBoolean);
+            final Boolean[] aBoolean = readOnlyMap.get(tab);
+            if (aBoolean != null) {
+                tab.setVisible(aBoolean[0]);
+                tab.setEnabled(aBoolean[1]);
             }
-
-            boolean enabled = shipClass != null || visibleFlag;
-            tab.setEnabled(enabled);
         });
     }
 
@@ -222,7 +226,7 @@ public class ShipClassMainView extends SBPageSubjectSelectorLayout<ShipClass> {
         addSubjectForTabOfSubjectMenu(createNewClass, null);
 
         final List<ShipClass> allByOwner = shipClassService.findAllByOwner(user);
-        sort(allByOwner);
+        allByOwner.sort(new ShipClassComparator());
         allByOwner.forEach(shipClassFE -> {
             Tab shipClassFETab = new Tab(shipClassFE.getName());
             addSubjectForTabOfSubjectMenu(shipClassFETab, shipClassFE);
@@ -234,6 +238,10 @@ public class ShipClassMainView extends SBPageSubjectSelectorLayout<ShipClass> {
     protected void addSubjectListener() {
         subjectSelectorMenu.addSelectedChangeListener(event -> {
             final Tab selectedTab = event.getSelectedTab();
+            if (selectedTab == null) {
+                // strange thing with removing tabs from menu -> change event will be fired
+                return;
+            }
             shipClass = getSubjectForTabOfSubjectMenu(selectedTab);
             if (shipClass != null) {
                 shipClass = shipClassService.find(shipClass);
@@ -242,40 +250,61 @@ public class ShipClassMainView extends SBPageSubjectSelectorLayout<ShipClass> {
         });
     }
 
+    /**
+     * Proceeds the workload to change menus and view components by the given entity.
+     *
+     * @param shipClass the parameter
+     */
     private void useSubjectEntry(@Nullable final ShipClass shipClass) {
-        visibleFlag = shipClass != null;
         this.shipClass = shipClass;
-        if (this.shipClass == null) {
-            content = setContent(shipClassCreate);
-        } else {
-            this.shipClass = shipClassService.find(this.shipClass); // todo interesting: modules are missing at first call
-            shipClassEdit.update(this.shipClass);
-            shipClassDisplay.update(this.shipClass);
+        if (this.shipClass != null) {
             if (content == shipClassCreate) {
                 content = setContent(shipClassDisplay);
             }
+            content.update(this.shipClass);
+        } else {
+            // implement a subject of null is definitely the create view
+            content = setContent(shipClassCreate);
         }
         final Tab currentTab = getTabForComponentOfActionMenu(content);
-        currentTab.setSelected(true);
 
-        boolean isCreateNew = CREATE_ACTION_TITLE.equals(currentTab.getLabel());
-        HashMap<Tab, Boolean> tabMap = new HashMap<>();
-        tabMap.put(getTabForComponentOfActionMenu(shipClassEdit), !isCreateNew);
-        tabMap.put(getTabForComponentOfActionMenu(shipClassCreate), isCreateNew);
+        final HashMap<Tab, Boolean[]> tabMap = getActionTabUsability(currentTab);
+        updateActionMenuUsability(tabMap);
 
         content.update(this.shipClass);
-        updateActionMenuUsability(tabMap);
+        setSelected(currentTab);
+    }
+
+    /**
+     * Returns the visibility and usage state for every component by the current tab.
+     *
+     * @param currentTab the current tab
+     * @return a map which contains the states to their view component
+     */
+    @Nonnull
+    private HashMap<Tab, Boolean[]> getActionTabUsability(@Nonnull final Tab currentTab) {
+        Preconditions.checkNotNull(currentTab, "currentTab shouldn't be null!");
+
+        boolean isCreateNew = CREATE_NEW_CLASS_ACTION_TITLE.equals(currentTab.getLabel());
+        HashMap<Tab, Boolean[]> tabMap = new HashMap<>();
+        tabMap.put(getTabForComponentOfActionMenu(shipClassDisplay), new Boolean[]{true, !isCreateNew});
+        tabMap.put(getTabForComponentOfActionMenu(shipClassEdit), new Boolean[]{!isCreateNew, !isCreateNew});
+        tabMap.put(getTabForComponentOfActionMenu(shipClassCreate), new Boolean[]{isCreateNew, isCreateNew});
+        return tabMap;
     }
 
     /**
      * Updates the menu.
-     * Removes the unnecessary menu items, adds the new items.
+     * Removes the unnecessary menu items, adds the new items and order them.
+     * <p>
+     * todo rework because of ugly and redundant calls
      */
     @Override
     protected void updateSubjectMenu() {
         final List<ShipClass> allByOwner = shipClassService.findAllByOwner(user);
-        sort(allByOwner);
+        allByOwner.sort(new ShipClassComparator());
 
+        final List<Tab> toRemove = new ArrayList<>();
         subjectSelectorMenu.getChildren().forEach(component -> {
             Tab tab = (Tab) component;
             if (CREATE_NEW_CLASS_SUBJECT_TITLE.equals(tab.getLabel())) {
@@ -283,26 +312,44 @@ public class ShipClassMainView extends SBPageSubjectSelectorLayout<ShipClass> {
             }
             ShipClass subject = getSubjectForTabOfSubjectMenu(tab);
             if (!allByOwner.contains(subject)) {
-                removeFromSubject(tab);
+                toRemove.add(tab);
             }
         });
+        toRemove.forEach(super::removeFromSubject); // no problem while setting another tab active
 
-        allByOwner.stream().filter(shipClass -> !subjectSelectorObject.containsValue(shipClass)).forEach(shipClassFE -> {
-            Tab shipClassFETab = new Tab(shipClassFE.getName());
-            addSubjectForTabOfSubjectMenu(shipClassFETab, shipClassFE);
-        });
+        allByOwner.stream()
+                .filter(shipClass -> !subjectSelectorObject.containsValue(shipClass))
+                .forEach(shipClassFE -> {
+                    Tab shipClassFETab = new Tab(shipClassFE.getName());
+                    addSubjectForTabOfSubjectMenu(shipClassFETab, shipClassFE);
+                });
 
-        addSubjectListener();
+        final Map<ShipClass, Tab> shipClassTabMap = subjectSelectorMenu.getChildren()
+                .collect(Collectors.toMap(component -> getSubjectForTabOfSubjectMenu((Tab) component), component -> (Tab) component));
+
+        final List<ShipClass> orderedKeys = shipClassTabMap.keySet().stream()
+                .sorted(new ShipClassComparator()).collect(Collectors.toList());
+
+        final Tab selectedTab = subjectSelectorMenu.getSelectedTab();
+        subjectSelectorMenu.setSelectedIndex(-1); // see above, removing active tabs is not a good idea
+        shipClassTabMap.keySet().stream()
+                .sorted(new ShipClassComparator())
+                .forEach(shipClass1 -> {
+                    final Tab tab = shipClassTabMap.get(shipClass1);
+                    final int i = orderedKeys.indexOf(shipClass1);
+                    subjectSelectorMenu.addComponentAtIndex(i, tab);
+                });
+        setSelected(selectedTab);
     }
 
     /**
      * Sorts the list of ship classes from biggest hull to smallest.
-     *
-     * @param allByOwner the list to sort
      */
-    private void sort(List<ShipClass> allByOwner) {
-        allByOwner.sort((o1, o2) -> {
-            if (o1.getHull() == null || o2.getHull() == null) {
+    private static class ShipClassComparator implements Comparator<ShipClass> {
+
+        @Override
+        public int compare(ShipClass o1, ShipClass o2) {
+            if (o1 == null || o2 == null || o1.getHull() == null || o2.getHull() == null) {
                 return 1;
             }
             if (o1.getHull().getConstructionCapacity() < o2.getHull().getConstructionCapacity()) {
@@ -313,6 +360,6 @@ public class ShipClassMainView extends SBPageSubjectSelectorLayout<ShipClass> {
                 return -1;
             }
             return 0;
-        });
+        }
     }
 }

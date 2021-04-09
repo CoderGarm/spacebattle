@@ -174,7 +174,7 @@ public abstract class SBPageActionSelectorLayout<T> extends FlexLayout {
      * Must define the usability of the action tab.
      * Leave blank if no disabling of action selector's tabs is needed.
      */
-    protected abstract void updateActionMenuUsability(@Nullable final Map<Tab, Boolean> readOnlyMap);
+    protected abstract void updateActionMenuUsability(@Nullable final Map<Tab, Boolean[]> readOnlyMap);
 
     /**
      * Must define the behavior of <code>every</code> action tab.

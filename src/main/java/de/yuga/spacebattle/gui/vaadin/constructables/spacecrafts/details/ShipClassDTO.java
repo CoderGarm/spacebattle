@@ -9,7 +9,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class ShipClassWrapper {
+public class ShipClassDTO {
 
     @Nonnull
     private final ShipClass shipClass;
@@ -20,7 +20,7 @@ public class ShipClassWrapper {
     @Nonnull
     private Collection<Hull> possibleHulls = new HashSet<>();
 
-    public ShipClassWrapper(@Nonnull ShipClass shipClass) {
+    public ShipClassDTO(@Nonnull ShipClass shipClass) {
         this.shipClass = shipClass;
     }
 
@@ -31,6 +31,7 @@ public class ShipClassWrapper {
 
     public void setPossibleModules(@Nullable final Map<Module, Integer> possibleModules) {
         if (possibleModules == null) {
+            this.possibleModules = new HashMap<>();
             return;
         }
         this.possibleModules = possibleModules;
