@@ -28,10 +28,11 @@ public class ResourceDisplay extends VerticalLayout {
             componentMap.put(resourceType, resourceElementDisplay);
         });
 
-        ResourceElementDisplay[] components = new ResourceElementDisplay[componentMap.values().size()];
-        components = componentMap.values().toArray(components);
         add(miningFactorsTitle);
-        add(components);
+        for (int i = 0; i < EResourceType.values().length; i++) {
+            ResourceElementDisplay resourceElementDisplay = componentMap.get(EResourceType.values()[i]);
+            add(resourceElementDisplay);
+        }
     }
 
     /**

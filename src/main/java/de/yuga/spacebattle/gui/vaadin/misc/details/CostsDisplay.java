@@ -39,9 +39,10 @@ public class CostsDisplay extends VerticalLayout {
 
         update();
         add(title);
-        ResourceElementDisplay[] displays = new ResourceElementDisplay[componentMap.values().size()];
-        displays = componentMap.values().toArray(displays);
-        add(displays);
+        for (int i = 0; i < EResourceType.values().length; i++) {
+            ResourceElementDisplay resourceElementDisplay = componentMap.get(EResourceType.values()[i]);
+            add(resourceElementDisplay);
+        }
     }
 
     /**
@@ -61,10 +62,14 @@ public class CostsDisplay extends VerticalLayout {
             if (resourceElementDisplay == null) {
                 resourceElementDisplay = new ResourceElementDisplay();
                 componentMap.put(resourceType, resourceElementDisplay);
-                add(resourceElementDisplay);
             }
             resourceElementDisplay.update(new EResourceAmountWrapper(resourceType, amount, null));
         });
+
+        for (int i = 0; i < EResourceType.values().length; i++) {
+            ResourceElementDisplay resourceElementDisplay = componentMap.get(EResourceType.values()[i]);
+            add(resourceElementDisplay);
+        }
     }
 
     /**

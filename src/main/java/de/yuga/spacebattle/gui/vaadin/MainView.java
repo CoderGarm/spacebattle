@@ -51,8 +51,8 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -96,7 +96,7 @@ public class MainView extends AppLayout {
     private H1 viewTitle = new H1("Spacebattle");
 
     @Nonnull
-    private final Map<Tab, ? extends Class<? extends Component>> tabs = createTabs();
+    private final LinkedHashMap<Tab, Class<? extends Component>> tabs = createTabs();
 
     @Nonnull
     private final Tabs menu = createMenu();
@@ -171,11 +171,16 @@ public class MainView extends AppLayout {
         userService.refresh();
     }
 
-    private Map<Tab, ? extends Class<? extends Component>> createTabs() {
-        return Arrays.stream(SB_ROUTING_ITEMS).collect(Collectors.toMap(
-                item -> createTab(item.getNavText(), item.getClazz()),
-                SBRouting::getClazz
-        ));
+    private LinkedHashMap<Tab, Class<? extends Component>> createTabs() {
+        final LinkedHashMap<Tab, Class<? extends Component>> tabMap = new LinkedHashMap<>();
+        for (int i = 0; i < SB_ROUTING_ITEMS.length; i++) {
+            SBRouting item = SB_ROUTING_ITEMS[i];
+            Class<? extends Component> clazz = item.getClazz();
+            Tab tab = createTab(item.getNavText(), clazz);
+
+            tabMap.put(tab, clazz);
+        }
+        return tabMap;
     }
 
 
@@ -332,7 +337,8 @@ public class MainView extends AppLayout {
         MenuBar wantToKnowMore = new MenuBar();
         MenuItem menuItem = wantToKnowMore.addItem("You want to know more?");
         wantToKnowMore.setOpenOnHover(false);
-        Arrays.stream(SBRouting.SB_ROUTING_ITEMS).filter(view -> !view.isLoginNeeded()).forEach(view -> {
+        Arrays.stream(SBRouting.SB_ROUTING_ITEMS)
+                .filter(view -> !view.isLoginNeeded()).forEach(view -> {
             Class<? extends Component> aClass = view.getClazz();
             menuItem.getSubMenu().addItem(view.getPageName(), e -> getUI().ifPresent(ui -> ui.navigate(aClass)));
         });

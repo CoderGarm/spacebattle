@@ -32,10 +32,11 @@ public class ResourceOutputDisplay extends VerticalLayout {
             componentMap.put(resourceType, resourceElementDisplay);
         });
 
-        ResourceElementDisplay[] components = new ResourceElementDisplay[componentMap.values().size()];
-        components = componentMap.values().toArray(components);
         add(depositsTitle);
-        add(components);
+        for (int i = 0; i < EResourceType.values().length; i++) {
+            ResourceElementDisplay resourceElementDisplay = componentMap.get(EResourceType.values()[i]);
+            add(resourceElementDisplay);
+        }
     }
 
     @Nullable

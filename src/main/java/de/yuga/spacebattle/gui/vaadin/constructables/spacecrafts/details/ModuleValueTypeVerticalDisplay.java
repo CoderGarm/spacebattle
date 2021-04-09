@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details;
 
 import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -41,10 +40,11 @@ public class ModuleValueTypeVerticalDisplay extends VerticalLayout implements Ha
                     return display;
                 }));
 
-        Component[] statLabels = new Component[displayByModuleType.size()];
-        statLabels = displayByModuleType.values().toArray(statLabels);
         add(title);
-        add(statLabels);
+        for (int i = 0; i < EModuleType.values().length; i++) {
+            ModuleDataElementDisplay moduleDataElementDisplay = displayByModuleType.get(EModuleType.values()[i]);
+            add(moduleDataElementDisplay);
+        }
     }
 
     /**
