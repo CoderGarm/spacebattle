@@ -12,6 +12,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
 import de.yuga.spacebattle.backend.validators.base.CustomValidatorFactory;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
+import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ShipClassWrapper;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.HullDisplay;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.ModuleMultiEdit;
@@ -41,7 +42,7 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass> {
     private final Validator validator = CustomValidatorFactory.buildCustomValidator();
 
     @Nonnull
-    private final Binder<ShipClass> binderShipClass = new Binder<>(ShipClass.class);
+    private final Binder<ShipClassWrapper> binderShipClass = new Binder<>(ShipClassWrapper.class);
 
     private Map<Module, Integer> modulesMap;
 
@@ -49,16 +50,19 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass> {
         this.uiEventBus.subscribe(this);
 
         final TextField name = new TextField();
-        binderShipClass.forField(name).bind(ShipClass::getName, ShipClass::setName);
+        binderShipClass.forField(name).bind(ShipClassWrapper::getName, ShipClassWrapper::setName);
 
-        binderShipClass.forField(getShipClassStatDisplay()).bind(shipClass -> shipClass, null);
+        binderShipClass.forField(getShipClassStatDisplay()).bind(ShipClassWrapper::getShipClass, null);
 
         final HullDisplay hullDisplay = new HullDisplay();
         final ReadOnlyHasValue<Hull> hullSelectedReadOnly = new ReadOnlyHasValue<>(hullDisplay::update);
-        binderShipClass.forField(hullSelectedReadOnly).bind(ShipClass::getHull, null);
+        binderShipClass.forField(hullSelectedReadOnly).bind(ShipClassWrapper::getHull, null);
 
         final ModuleMultiEdit moduleMultiEdit = new ModuleMultiEdit();
-        binderShipClass.forField(moduleMultiEdit).bind(ShipClass::getModules, ShipClass::setModules);
+        final ReadOnlyHasValue<Map<Module, Integer>> levelValueReadOnly = new ReadOnlyHasValue<>(moduleMultiEdit::setPossibleModules);
+        binderShipClass.forField(levelValueReadOnly).bind(ShipClassWrapper::getPossibleModules, null);
+
+        binderShipClass.forField(moduleMultiEdit).bind(ShipClassWrapper::getModules, ShipClassWrapper::setModules);
 
         binderShipClass.addValueChangeListener(event -> validateSubmitButton());
 
@@ -73,14 +77,18 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass> {
 
     /**
      * Sets the available modules to this view.
-     * todo replace "here are all the modules you can use"-hack by a well thought-out display
      *
      * @param modules the modules to select in the UI
      */
-    public void setModules(@Nonnull final Collection<Module> modules) {
+    public void setBaseData(@Nonnull final Collection<Module> modules) {
         Preconditions.checkNotNull(modules, "modules shouldn't be null!");
 
         modulesMap = modules.stream().collect(Collectors.toMap(Function.identity(), val -> 0));
+        final ShipClassWrapper bean = binderShipClass.getBean();
+        if (bean != null) {
+            bean.setPossibleModules(modulesMap);
+            binderShipClass.readBean(bean);
+        }
     }
 
     /**
@@ -98,11 +106,11 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass> {
      */
     @Nonnull
     public ShipClass getShipClass() {
-        ShipClass bean = binderShipClass.getBean();
+        ShipClassWrapper bean = binderShipClass.getBean();
         if (bean == null) {
             throw new NotifySBUserException("You could click on submit, congratulations! Please click only if this class is ready.");
         }
-        return bean;
+        return bean.getShipClass();
     }
 
     /**
@@ -116,13 +124,15 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass> {
 
     @Override
     public void update(@Nullable final ShipClass value) {
+        ShipClassWrapper shipClassWrapper = null;
         if (value != null) {
-            value.addModules(modulesMap);
+            shipClassWrapper = new ShipClassWrapper(value);
+            shipClassWrapper.setPossibleModules(modulesMap);
         }
         if (binderShipClass.getBean() == null) {
-            binderShipClass.setBean(value);
+            binderShipClass.setBean(shipClassWrapper);
         } else {
-            binderShipClass.readBean(value);
+            binderShipClass.readBean(shipClassWrapper);
         }
     }
 }

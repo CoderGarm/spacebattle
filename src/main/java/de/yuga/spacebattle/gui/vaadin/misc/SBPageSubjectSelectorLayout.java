@@ -17,6 +17,7 @@ import de.yuga.spacebattle.gui.vaadin.views.ShipClassMainView;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -90,10 +91,12 @@ public abstract class SBPageSubjectSelectorLayout<T> extends FlexLayout {
     public SBPageSubjectSelectorLayout() {
         actionSelectorMenu.setId("actionSelectorMenu");
         actionSelectorMenu.setClassName("selector");
+        //actionSelectorMenu.setAutoselect(false);
         ViewHelper.setWidth(actionSelectorMenu, "100%");
 
         subjectSelectorMenu.setId("subjectSelectorMenu");
         subjectSelectorMenu.setClassName("selector");
+        //subjectSelectorMenu.setAutoselect(false);
         ViewHelper.setWidth(subjectSelectorMenu, "100%");
 
         mainContent.add(subjectSelectorMenu);
@@ -169,13 +172,16 @@ public abstract class SBPageSubjectSelectorLayout<T> extends FlexLayout {
     /**
      * Returns a Tab for a given subject.
      *
-     * @param subject nonnull subject
+     * @param subject the subject
      * @return Optional of a tab
      */
-    public Optional<Tab> getTabForSubject(@Nonnull T subject)
-    {
-        final Optional<Map.Entry<Tab, T>> first = subjectSelectorObject.entrySet().stream().filter(e -> e.getValue().equals(subject)).findFirst();
-        return first.map(Map.Entry::getKey);
+    public Optional<Tab> getTabForSubject(@Nonnull T subject) {
+        Preconditions.checkNotNull(subject, "subject shouldn't be null!");
+
+        return subjectSelectorObject.entrySet().stream()
+                .filter(e -> e.getValue().equals(subject))
+                .findFirst()
+                .map(Map.Entry::getKey);
     }
 
     /**

@@ -133,7 +133,7 @@ public class ShipClassMainView extends SBPageSubjectSelectorLayout<ShipClass> {
     private void fetchBaseData() {
         List<Hull> hulls = hullService.findAllByUser(user);
         List<Module> modules = moduleService.findAllByUser(user);
-        shipClassEdit.setModules(modules);
+        shipClassEdit.setBaseData(modules);
         shipClassCreate.setBaseData(hulls, modules);
     }
 
@@ -248,7 +248,7 @@ public class ShipClassMainView extends SBPageSubjectSelectorLayout<ShipClass> {
         if (this.shipClass == null) {
             content = setContent(shipClassCreate);
         } else {
-            this.shipClass = shipClassService.find(this.shipClass);
+            this.shipClass = shipClassService.find(this.shipClass); // todo interesting: modules are missing at first call
             shipClassEdit.update(this.shipClass);
             shipClassDisplay.update(this.shipClass);
             if (content == shipClassCreate) {

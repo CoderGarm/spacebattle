@@ -36,6 +36,7 @@ public class ModuleMultiDisplay extends VerticalLayout {
                 remove(moduleDisplay);
             }
         });
+        componentMap.keySet().removeIf(module -> !modules.containsKey(module));
 
         modules.forEach((module, amount) -> {
             ModuleDisplay moduleDisplay1 = componentMap.get(module);

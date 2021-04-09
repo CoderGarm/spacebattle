@@ -7,6 +7,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.binder.ErrorLevel;
+import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
@@ -16,6 +17,7 @@ import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.validators.base.CustomValidatorFactory;
 import de.yuga.spacebattle.gui.vaadin.NotificationHelper;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
+import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ShipClassWrapper;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.HullSelector;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.ModuleMultiEdit;
@@ -27,12 +29,11 @@ import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.gui.vaadin.validators.ShipDataVaadinValidator.ShipDataVaadinValidatorField.*;
 
@@ -48,10 +49,7 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass> {
     private final EventBus.UIEventBus uiEventBus = ViewHelper.getService(EventBus.UIEventBus.class);
 
     @Nonnull
-    private final Binder<ShipClass> binderShipClass = new Binder<>(ShipClass.class);
-
-    @Nonnull
-    private final Binder<ShipClass> binderShipClassStats = new Binder<>(ShipClass.class);
+    private final Binder<ShipClassWrapper> binderShipClass = new Binder<>(ShipClassWrapper.class);
 
     @Nonnull
     private final HullSelector hullSelect;
@@ -65,20 +63,18 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass> {
     @Nonnull
     private final Button submit;
 
-    @Nullable
-    private Collection<Hull> hulls;
+    @Nonnull
+    private Collection<Hull> hulls = new HashSet<>();
 
-    @Nullable
-    private Collection<Module> modules;
+    @Nonnull
+    private Collection<Module> modules = new HashSet<>();
 
     public ShipClassCreate() {
         this.uiEventBus.subscribe(this);
 
         shipClass = createStub();
 
-        binderShipClassStats.forField(getShipClassStatDisplay()).bind(shipClass -> shipClass, null);
-
-        binderShipClass.addValueChangeListener(event -> binderShipClassStats.readBean(shipClass));
+        binderShipClass.forField(getShipClassStatDisplay()).bind(ShipClassWrapper::getShipClass, null);
 
         final TextField name = new TextField();
         name.setRequiredIndicatorVisible(true);
@@ -89,7 +85,7 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass> {
                 })
                 .withValidationStatusHandler(this::openNotification)
                 .asRequired()
-                .bind(ShipClass::getName, ShipClass::setName);
+                .bind(ShipClassWrapper::getName, ShipClassWrapper::setName);
 
 
         hullSelect = new HullSelector();
@@ -100,16 +96,19 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass> {
                     return ShipDataVaadinValidator.check(shipClass, HULL);
                 })
                 .withValidationStatusHandler(this::openNotification)
-                .bind(ShipClass::getPossibleHulls, (shipClass1, hulls) -> shipClass.setHull(hullSelect.getValue().get(0)));
+                .bind(ShipClassWrapper::getPossibleHulls, ShipClassWrapper::setHull);
 
         final ModuleMultiEdit moduleMultiEdit = new ModuleMultiEdit();
+        final ReadOnlyHasValue<Map<Module, Integer>> levelValueReadOnly = new ReadOnlyHasValue<>(moduleMultiEdit::setPossibleModules);
+        binderShipClass.forField(levelValueReadOnly).bind(ShipClassWrapper::getPossibleModules, null);
+
         binderShipClass.forField(moduleMultiEdit)
                 .withValidator((value, context) -> {
                     shipClass.setModules(value);
                     return ShipDataVaadinValidator.check(shipClass, MODULES);
                 })
                 .withValidationStatusHandler(this::openNotification)
-                .bind(ShipClass::getPossibleModules, ShipClass::setModules);
+                .bind(ShipClassWrapper::getPossibleModules, ShipClassWrapper::setModules);
 
         submit = new Button("Submit", event -> this.uiEventBus.publish(this, ESBEvent.SHIP_CLASS_SUBMITTED.name()));
         submit.setEnabled(false);
@@ -138,9 +137,10 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass> {
         }
         shipClass.setOwner(loggedIn);
         shipClass.setHull(new Hull());
-        shipClass.setPossibleModules(modules);
-        shipClass.setPossibleHulls(hulls);
-        binderShipClass.setBean(shipClass);
+        final ShipClassWrapper shipClassWrapper = new ShipClassWrapper(shipClass);
+        shipClassWrapper.setPossibleModules(modules.stream().collect(Collectors.toMap(Function.identity(), val -> 0)));
+        shipClassWrapper.setPossibleHulls(hulls);
+        binderShipClass.setBean(shipClassWrapper);
         this.shipClass = shipClass;
         return shipClass;
     }
@@ -166,7 +166,6 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass> {
                         submit.setEnabled(false);
                     }
                 }));
-
     }
 
     /**
@@ -181,20 +180,24 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass> {
 
         this.hulls = hulls;
         this.modules = modules;
-        shipClass.setPossibleHulls(hulls);
-        shipClass.setPossibleModules(modules);
-        binderShipClass.readBean(shipClass);
+        ShipClassWrapper shipClassWrapper = binderShipClass.getBean();
+        if (shipClassWrapper == null) {
+            shipClassWrapper = new ShipClassWrapper(this.shipClass);
+        }
+        shipClassWrapper.setPossibleHulls(hulls);
+        shipClassWrapper.setPossibleModules(modules.stream().collect(Collectors.toMap(Function.identity(), val -> 0)));
+        binderShipClass.readBean(shipClassWrapper);
     }
 
 
     /**
-     * Returns the constructed ship class - or null if nothing were clicked.
+     * Returns the constructed ship class - or null if nothing was clicked.
      *
      * @return the ship class
      */
     @Nonnull
     public ShipClass getShipClass() {
-        ShipClass shipClassBean = binderShipClass.getBean();
+        ShipClassWrapper shipClassBean = binderShipClass.getBean();
         if (shipClassBean == null) {
             throw new NotifySBUserException("You could click on submit, congratulations! Please click only if this class is ready.");
         }
@@ -212,6 +215,6 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass> {
 
     @Override
     public void update(ShipClass value) {
-        // nothing to
+        // nothing to do
     }
 }

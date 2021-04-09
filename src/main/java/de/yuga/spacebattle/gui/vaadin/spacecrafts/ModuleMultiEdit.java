@@ -27,6 +27,9 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
     @Nullable
     private ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ModuleMultiEdit, Map<Module, Integer>>> listener;
 
+    @Nonnull
+    private Map<Module, Integer> possibleModules = new HashMap<>();
+
     public ModuleMultiEdit() {
     }
 
@@ -43,22 +46,22 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
             componentMap.clear();
             return;
         }
-        componentMap.forEach((module, moduleDisplay) -> {
-            if (!modules.containsKey(module)) {
-                remove(moduleDisplay);
+        componentMap.forEach((module, moduleEdit) -> {
+            if (!modules.containsKey(module) && !possibleModules.containsKey(module)) {
+                remove(moduleEdit);
             }
         });
 
-        modules.forEach((module, amount) -> {
+        possibleModules.forEach((module, zero) -> {
             ModuleCountEdit moduleEdit = componentMap.get(module);
             if (moduleEdit != null) {
-                moduleEdit.update(new ModuleCountDTO(module, amount));
+                moduleEdit.update(new ModuleCountDTO(module, zero));
             } else {
                 moduleEdit = new ModuleCountEdit();
                 if (module.getModuleType().isMandatory()) {
                     moduleEdit.setRequiredIndicatorVisible(true);
                 }
-                moduleEdit.update(new ModuleCountDTO(module, amount));
+                moduleEdit.update(new ModuleCountDTO(module, zero));
                 componentMap.put(module, moduleEdit);
                 final ModuleMultiEdit moduleMultiEdit = this;
                 ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ModuleCountEdit, ModuleCountDTO>> valueChangeListener = new ValueChangeListener() {
@@ -99,13 +102,9 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
         return new Registration() {
             @Override
             public void remove() {
-                removeListener();
+
             }
         };
-    }
-
-    private void removeListener() {
-        this.listener = null;
     }
 
     @Override
@@ -132,7 +131,7 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
 
     @Override
     public void setErrorMessage(String errorMessage) {
-        LOGGER.info(errorMessage);
+        LOGGER.info("error message: " + errorMessage);
     }
 
     @Override

@@ -17,10 +17,8 @@ import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @NamedQueries({
@@ -65,14 +63,6 @@ public class ShipClass extends AbstractEntityKey {
     @Column(name = "amount")
     @CollectionTable(name = "moduleComposition", joinColumns = @JoinColumn(name = "idShipClass"))
     private final Map<Module, Integer> modules = new HashMap<>();
-
-    @Nullable
-    @Transient
-    private Map<Module, Integer> possibleModules;
-
-    @Nullable
-    @Transient
-    private Collection<Hull> possibleHulls;
 
     public ShipClass() {
     }
@@ -177,20 +167,6 @@ public class ShipClass extends AbstractEntityKey {
     }
 
     /**
-     * Adds every possible module which is not in {@link ShipClass#modules}.
-     *
-     * @param modules the modules to add
-     */
-    public void addModules(@Nonnull final Map<Module, Integer> modules) {
-        Preconditions.checkNotNull(modules, "modules shouldn't be null!");
-
-        Map<Module, Integer> notIncludedModules = modules.keySet().stream()
-                .filter(module -> !this.modules.containsKey(module))
-                .collect(Collectors.toMap(Function.identity(), value -> 0));
-        this.modules.putAll(notIncludedModules);
-    }
-
-    /**
      * Removes a module from the ships modules.
      * <p>
      * IMPORTANT: This has to be validated later!
@@ -215,27 +191,6 @@ public class ShipClass extends AbstractEntityKey {
     @Nonnull
     public ResourceDeposit getCosts() {
         return costs;
-    }
-
-    @Nullable
-    public Map<Module, Integer> getPossibleModules() {
-        return possibleModules;
-    }
-
-    public void setPossibleModules(@Nullable final Collection<Module> possibleModules) {
-        if (possibleModules == null) {
-            return;
-        }
-        this.possibleModules = possibleModules.stream().collect(Collectors.toMap(Function.identity(), val -> 0));
-    }
-
-    @Nullable
-    public Collection<Hull> getPossibleHulls() {
-        return possibleHulls;
-    }
-
-    public void setPossibleHulls(@Nullable final Collection<Hull> possibleHulls) {
-        this.possibleHulls = possibleHulls;
     }
 
     @Override
