@@ -70,7 +70,7 @@ public class CreateAccountDialog extends Dialog {
             if (username == null || email == null) {
                 throw new NotifySBUserException("Something went wrong while creating a user.");
             }
-            User checkParameter = userService.checkParameter(username, email);
+            User checkParameter = userService.findByUsernameAndEmail(username, email);
             if (checkParameter != null) {
                 notification.setText("These username or email exists already - chose another");
                 notification.open(); // todo close button

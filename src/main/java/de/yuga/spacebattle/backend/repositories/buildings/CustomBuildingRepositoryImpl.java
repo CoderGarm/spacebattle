@@ -15,7 +15,6 @@ public class CustomBuildingRepositoryImpl implements CustomBuildingRepository {
 
     @Override
     public List<Building> findAllBuildings() {
-        final List<Building> resultList = em.createNamedQuery("Building.getAll", Building.class).getResultList();
-        return resultList;
+        return em.createNamedQuery("Building.getAll", Building.class).getResultList();
     }
 }

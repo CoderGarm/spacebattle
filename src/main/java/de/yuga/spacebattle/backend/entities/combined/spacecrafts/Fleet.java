@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.entities.combined.spacecrafts;
 
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.ResourceDeposit;
 import de.yuga.spacebattle.backend.entities.account.User;
@@ -139,6 +140,9 @@ public class Fleet extends AbstractEntityKey {
      * @return the maximal FTL speed
      */
     public BigDecimal getFTLRangePerTick() {
+        if (ships.isEmpty()) {
+            throw new NotifySBUserException("This should never happen");
+        }
         List<Integer> speed = new ArrayList<>();
         for (ShipClass sc : ships.keySet()) {
             int ftlSpeed = 0;

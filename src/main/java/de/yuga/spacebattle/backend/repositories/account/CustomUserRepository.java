@@ -15,5 +15,5 @@ public interface CustomUserRepository {
     User login(@Nonnull final String username, @Nonnull final String password);
 
     @Nullable
-    User checkParameter(@Nonnull final String username, @Nonnull final String email);
+    User findByUsernameAndEmail(@Nonnull final String username, @Nonnull final String email);
 }
