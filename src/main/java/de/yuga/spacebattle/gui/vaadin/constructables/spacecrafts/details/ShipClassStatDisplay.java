@@ -9,6 +9,8 @@ import de.yuga.spacebattle.gui.vaadin.misc.details.CostsDisplay;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ShipClassStatDisplay extends HorizontalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<ShipClassStatDisplay, ShipClass>, ShipClass> {
 
@@ -41,9 +43,11 @@ public class ShipClassStatDisplay extends HorizontalLayout implements HasValue<A
      */
     public void update(@Nullable final ShipClass shipClass) {
         clearValues();
-        moduleValueTypeVerticalDisplay.update(shipClass);
 
         if (shipClass != null) {
+            final Map<ShipClass, Integer> shipClassAmountHashMap = new HashMap<>();
+            shipClassAmountHashMap.put(shipClass, 1);
+            moduleValueTypeVerticalDisplay.update(shipClassAmountHashMap);
             costsDisplay.addCosts(shipClass.getCosts());
             if (shipClass.getHull() != null) {
                 costsDisplay.addCosts(shipClass.getHull().getCosts());

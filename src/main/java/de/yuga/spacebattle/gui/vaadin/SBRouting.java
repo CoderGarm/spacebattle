@@ -19,7 +19,8 @@ public class SBRouting {
                     new SBRouting(true, "Dashboard", DashboardView.class, "Dashboard"),
                     new SBRouting(true, "User", UserView.class, "User"),
                     new SBRouting(true, "Planets", PlanetMainView.class, "Planets"),
-                    new SBRouting(true, "Ship classes", ShipClassMainView.class, "Ship classes")
+                    new SBRouting(true, "Ship classes", ShipClassMainView.class, "Ship classes"),
+                    new SBRouting(true, "Fleets", FleetMainView.class, "Fleets"),
 
             };
 

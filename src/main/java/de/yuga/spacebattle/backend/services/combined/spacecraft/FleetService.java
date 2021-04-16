@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.services.combined.spacecraft;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.distance.DistanceCalculator;
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
@@ -116,11 +117,27 @@ public class FleetService {
         return fleetR.findById(idFleet).orElse(null);
     }
 
-    public void save(Fleet fleet) {
+    public Fleet find(@Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+
+        return fleetR.findById(fleet.getId()).orElse(null);
+    }
+
+    public void save(@Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+
         fleetR.save(fleet);
     }
 
-    public void delete(Fleet fleet) {
+    public void delete(@Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+
         fleetR.delete(fleet);
+    }
+
+    public List<Fleet> findAllFleetsBy(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
+
+        return fleetR.findAllFleetsBy(user);
     }
 }

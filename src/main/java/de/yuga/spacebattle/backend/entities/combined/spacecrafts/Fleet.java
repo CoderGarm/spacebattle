@@ -2,13 +2,13 @@ package de.yuga.spacebattle.backend.entities.combined.spacecrafts;
 
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.ResourceDeposit;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
+import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.EResourceSubType;
 
@@ -21,6 +21,7 @@ import java.util.*;
 
 @NamedQueries({
         @NamedQuery(name = "Fleet.getAll", query = "SELECT f FROM Fleet f"),
+        @NamedQuery(name = "Fleet.getAllByUser", query = "SELECT f FROM Fleet f WHERE f.owner = :owner"),
         @NamedQuery(name = "Fleet.checkShipInUse", query = "SELECT COUNT(f) FROM Fleet f LEFT JOIN f.ships s WHERE KEY(s) =:idShipClass")
 })
 @Entity
@@ -54,6 +55,11 @@ public class Fleet extends AbstractEntityKey {
     @Nullable
     @Embedded
     private FleetOrbit orbit;
+
+    @Nullable
+    @OneToOne(cascade = CascadeType.MERGE)
+    @JoinTable(name = "move", inverseJoinColumns = @JoinColumn(name = "idMove", updatable = false))
+    private Move move;
 
     public Fleet() {
     }
@@ -95,7 +101,6 @@ public class Fleet extends AbstractEntityKey {
 
     public void updateShips(@Nonnull final ShipClass shipClass, final int amount) {
         Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
-        Preconditions.checkState(ships != null, "This will not happen");
 
         if (ships.containsKey(shipClass)) {
             Integer oldAmount = this.ships.get(shipClass);
@@ -119,15 +124,21 @@ public class Fleet extends AbstractEntityKey {
         this.orbit = orbit;
     }
 
+    @Nullable
+    public Move getMove() {
+        return move;
+    }
+
+    public void setMove(@Nullable Move move) {
+        this.move = move;
+    }
+
     /**
      * Returns the range units which can be passed per turn based on the slowest ship.
      *
      * @return the maximal FTL speed
      */
     public BigDecimal getFTLRangePerTick() {
-        if (ships == null) {
-            throw new NotifySBUserException("This should never happen");
-        }
         List<Integer> speed = new ArrayList<>();
         for (ShipClass sc : ships.keySet()) {
             int ftlSpeed = 0;

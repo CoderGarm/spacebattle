@@ -26,6 +26,9 @@ public class Hull extends AbstractEntityKey {
     @Size(min = 1, max = 30)
     private String name;
 
+    /**
+     * The level represents the size of a ship, bigger levels represents bigger hulls.
+     */
     private int level;
 
     private int constructionCapacity;
@@ -100,5 +103,20 @@ public class Hull extends AbstractEntityKey {
         sb.append(", Level ").append(level);
         sb.append(", Capacity ").append(constructionCapacity);
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Hull)) return false;
+
+        Hull hull = (Hull) o;
+
+        return id == hull.getId();
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
     }
 }
