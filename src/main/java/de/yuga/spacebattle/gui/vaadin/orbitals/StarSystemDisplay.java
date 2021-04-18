@@ -1,6 +1,5 @@
 package de.yuga.spacebattle.gui.vaadin.orbitals;
 
-import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -9,19 +8,19 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.svg.Svg;
-import com.vaadin.flow.component.svg.elements.Circle;
+import com.vaadin.flow.component.svg.elements.SvgElement;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
-import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
-import de.yuga.spacebattle.gui.vaadin.NotificationHelper;
+import de.yuga.spacebattle.backend.services.orbitals.StarsystemService;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
-import de.yuga.spacebattle.gui.vaadin.misc.ViewBoxDefinition;
 import de.yuga.spacebattle.gui.vaadin.orbitals.details.OrbitCoordinatesDisplay;
 import de.yuga.spacebattle.gui.vaadin.orbitals.details.PlanetDisplay;
+import de.yuga.spacebattle.gui.vaadin.orbitals.starmap.ViewBoxDefinition;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -33,9 +32,6 @@ import java.util.stream.Collectors;
 import static de.yuga.spacebattle.gui.vaadin.orbitals.starmap.ViewBoxDefinition.FLEET_SELECTOR_ID_PREFIX;
 import static de.yuga.spacebattle.gui.vaadin.orbitals.starmap.ViewBoxDefinition.PLANET_SELECTOR_ID_PREFIX;
 
-/**
- * Home of a star system map and it's functionality.
- */
 @CssImport("./styles/views/main/details/starMap.css")
 public class StarSystemDisplay extends StarSystemLayout implements HasValue<AbstractField.ComponentValueChangeEvent<StarSystemDisplay, StarSystem>, StarSystem> {
 
@@ -43,7 +39,7 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
     private final Binder<StarSystem> binder = new Binder<>(StarSystem.class);
 
     @Nonnull
-    private final StarSystemService starsystemService = ViewHelper.getService(StarSystemService.class);
+    private final StarsystemService starsystemService = ViewHelper.getService(StarsystemService.class);
 
     @Nonnull
     private final Map<String, PlanetDisplay> planetMap = new HashMap<>();
@@ -147,7 +143,6 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
             final String fleetID = ViewBoxDefinition.createFleetID(fleet);
             fleetMap.putIfAbsent(fleetID, fleet);
         });
-    }
 
         viewBoxDefinition = new ViewBoxDefinition(value, canvas);
     }

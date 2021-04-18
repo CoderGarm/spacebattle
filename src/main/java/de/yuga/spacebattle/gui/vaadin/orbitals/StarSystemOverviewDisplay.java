@@ -14,7 +14,7 @@ import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.gui.vaadin.NotificationHelper;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
-import de.yuga.spacebattle.gui.vaadin.orbitals.starmap.ViewBoxDefinition;
+import de.yuga.spacebattle.gui.vaadin.misc.ViewBoxDefinition;
 import org.vaadin.spring.events.Event;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -51,12 +51,6 @@ public class StarSystemOverviewDisplay extends StarSystemLayout implements HasVa
     @Nonnull
     private Svg canvas = startCanvas();
 
-    /**
-     * This non-null is a prerequisite be cause this is an absolute requirement and a NPE is not a shame if this is not there.
-     */
-    @Nonnull
-    private ViewBoxDefinition viewBoxDefinition;
-
     public StarSystemOverviewDisplay() {
 
         uiEventBus.subscribe(this);
@@ -71,14 +65,13 @@ public class StarSystemOverviewDisplay extends StarSystemLayout implements HasVa
     }
 
     private Svg startCanvas() {
-        final Svg canvas = ViewBoxDefinition.createStarMapCanvas("universeMapID");
+        final Svg canvas = ViewBoxDefinition.createMapCanvas("universeMapID");
         // todo known issue: drag listener sucks if no movement must be possible
         canvas.addDragStartListener(event -> {
             SvgElement element = event.getElement();
             String id = element.getId();
             final StarSystem starSystem = starSystemDisplayMap.get(id);
-            final Orbit orbit = starSystem.getOrbit();
-            viewBoxDefinition.dragListenerWorkaround(element, orbit);
+            NotificationHelper.notify("yeah, its not a feature", 500);
             uiEventBus.publish(starSystem, ESBEvent.DISPLAY_PLANETARY_SYSTEM.name());
         });
         scroller.setContent(canvas);
@@ -94,9 +87,23 @@ public class StarSystemOverviewDisplay extends StarSystemLayout implements HasVa
             return;
         }
         starSystemDisplayMap = starSystems.stream().collect(Collectors.toMap(o -> o.getOrbit().getOrbitID(), Function.identity()));
-        viewBoxDefinition = new ViewBoxDefinition(starSystems, canvas);
-    }
 
+        final Set<Orbit> orbits = starSystems.stream()
+                .map(StarSystem::getOrbit)
+                .collect(Collectors.toSet());
+
+        new ViewBoxDefinition(UNIVERSE, orbits, canvas);
+        starSystems.forEach(starSystem -> {
+            final Orbit orbit = starSystem.getOrbit();
+            final String circleID = orbit.getOrbitID();
+            final Circle circle = new Circle(circleID, ViewBoxDefinition.SYSTEM_RADIUS);
+            circle.center(orbit.getXCoordinate(), orbit.getYCoordinate());
+            circle.setFillColor("red");
+            circle.setDraggable(true);
+
+            canvas.add(circle);
+        });
+    }
 
     @Override
     public Set<StarSystem> getValue() {
