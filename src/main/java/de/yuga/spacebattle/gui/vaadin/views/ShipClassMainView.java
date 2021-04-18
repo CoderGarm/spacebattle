@@ -22,7 +22,7 @@ import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.ShipClassDispla
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.ShipClassEdit;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.ShipClassLayout;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
-import de.yuga.spacebattle.gui.vaadin.misc.SBPageSubjectSelectorLayout;
+import de.yuga.spacebattle.gui.vaadin.misc.SBPageSubjectSelectorStatsLayout;
 import de.yuga.spacebattle.gui.vaadin.misc.StatsLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.Event;
@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 @UIScope
 @Route(value = ShipClassMainView.ROUTE, layout = MainView.class)
 @RouteAlias(value = ShipClassMainView.ROUTE, layout = MainView.class)
-public class ShipClassMainView extends SBPageSubjectSelectorLayout<ShipClass> {
+public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClass> {
 
     @Nonnull
     public static final String ROUTE = "shipClass";

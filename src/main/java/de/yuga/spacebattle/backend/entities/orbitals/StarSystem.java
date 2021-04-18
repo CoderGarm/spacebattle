@@ -70,4 +70,19 @@ public class StarSystem extends AbstractEntityKey {
 
         this.orbit = orbit;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof StarSystem)) return false;
+
+        StarSystem that = (StarSystem) o;
+
+        return orbit.equals(that.orbit);
+    }
+
+    @Override
+    public int hashCode() {
+        return orbit.hashCode();
+    }
 }

@@ -21,6 +21,7 @@ public enum ESBEvent {
     ORBITAL_CONSTRUCTION_JOB_BUILDING_FEEDBACK_STARTED(10), // when a ship construction job has started
     RESEARCH_JOB_START(11), // when a research job should start
     RESEARCH_JOB_FEEDBACK_STARTED(12), // when a research job has started
+    DISPLAY_PLANETARY_SYSTEM(13), // when a planetary system should displayed
     ;
 
     int sequence;

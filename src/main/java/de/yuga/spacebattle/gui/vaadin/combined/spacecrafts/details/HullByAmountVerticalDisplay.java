@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.gui.vaadin.combined.spacecrafts;
+package de.yuga.spacebattle.gui.vaadin.combined.spacecrafts.details;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;

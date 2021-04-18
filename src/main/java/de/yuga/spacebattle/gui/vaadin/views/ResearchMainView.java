@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.gui.vaadin.research;
+package de.yuga.spacebattle.gui.vaadin.views;
 
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.tabs.Tab;
@@ -12,8 +12,12 @@ import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.gui.vaadin.MainView;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
-import de.yuga.spacebattle.gui.vaadin.misc.SBPageActionSelectorLayout;
+import de.yuga.spacebattle.gui.vaadin.misc.SBPageActionSelectorStatsLayout;
 import de.yuga.spacebattle.gui.vaadin.misc.StatsLayout;
+import de.yuga.spacebattle.gui.vaadin.research.ResearchDoneDisplay;
+import de.yuga.spacebattle.gui.vaadin.research.ResearchLayout;
+import de.yuga.spacebattle.gui.vaadin.research.ResearchSelectionEdit;
+import de.yuga.spacebattle.gui.vaadin.research.ResearchTechTreeDisplay;
 import de.yuga.spacebattle.gui.vaadin.research.details.ResearchEdit;
 import de.yuga.spacebattle.gui.vaadin.research.details.ResearchLevelDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +33,7 @@ import java.util.Map;
 @UIScope
 @Route(value = ResearchMainView.ROUTE, layout = MainView.class)
 @RouteAlias(value = ResearchMainView.ROUTE, layout = MainView.class)
-public class ResearchMainView extends SBPageActionSelectorLayout<User> {
+public class ResearchMainView extends SBPageActionSelectorStatsLayout<User> {
 
     @Nonnull
     public static final String ROUTE = "researches";

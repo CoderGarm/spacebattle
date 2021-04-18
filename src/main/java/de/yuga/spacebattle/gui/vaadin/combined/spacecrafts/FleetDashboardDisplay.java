@@ -2,6 +2,7 @@ package de.yuga.spacebattle.gui.vaadin.combined.spacecrafts;
 
 import com.vaadin.flow.data.binder.Binder;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.gui.vaadin.combined.spacecrafts.details.GarrisonDisplay;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
