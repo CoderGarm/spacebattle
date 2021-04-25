@@ -18,7 +18,7 @@ import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.ShipClassCountEdit;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
-import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.ShipClassCountWrapper;
+import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.ShipClassCountDTO;
 import org.vaadin.spring.events.Event;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -67,7 +67,7 @@ public class PlanetShipyardConstructionEdit extends PlanetLayout<Planet> impleme
             shipJobPayload = componentsMap.values().stream()
                     .map(ShipClassCountEdit::getValue)
                     .filter(Objects::nonNull)
-                    .map(ShipClassCountWrapper::getAsEntry)
+                    .map(ShipClassCountDTO::getAsEntry)
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             uiEventBus.publish(this, ESBEvent.ORBITAL_CONSTRUCTION_JOB_BUILDING_START.name());
         });
@@ -75,7 +75,7 @@ public class PlanetShipyardConstructionEdit extends PlanetLayout<Planet> impleme
 
         final Button clear = new Button("Clear display", event -> {
             componentsMap.values().forEach(shipClassCountEdit -> {
-                ShipClassCountWrapper value = shipClassCountEdit.getValue();
+                ShipClassCountDTO value = shipClassCountEdit.getValue();
                 if (value == null) {
                     throw new NotifySBUserException("There should be an accountable amount. Talk to the admin.");
                 }
@@ -92,9 +92,9 @@ public class PlanetShipyardConstructionEdit extends PlanetLayout<Planet> impleme
     private void validateSubmitButton() {
         componentsMap.values().stream().map(ShipClassCountEdit::getValue)
                 .filter(Objects::nonNull)
-                .filter(shipClassCountWrapper -> shipClassCountWrapper.getAmountNumeric() > 0)
+                .filter(shipClassCountDTO -> shipClassCountDTO.getAmountNumeric() > 0)
                 .findFirst()
-                .ifPresentOrElse(shipClassCountWrapper -> setReadOnly(true), () -> setReadOnly(false));
+                .ifPresentOrElse(shipClassCountDTO -> setReadOnly(true), () -> setReadOnly(false));
     }
 
     public void update(@Nullable final Planet planet) {
@@ -177,7 +177,7 @@ public class PlanetShipyardConstructionEdit extends PlanetLayout<Planet> impleme
                 shipClassCountEdit.addValueChangeListener(event -> validateSubmitButton());
                 componentsMap.put(building, shipClassCountEdit);
             }
-            shipClassCountEdit.setValue(new ShipClassCountWrapper(building, 0));
+            shipClassCountEdit.setValue(new ShipClassCountDTO(building, 0));
             shipClassCountEdit.setReadOnly(!construction.getJobs().isEmpty());
         });
         setReadOnly(!construction.getJobs().isEmpty());

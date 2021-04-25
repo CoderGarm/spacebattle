@@ -15,7 +15,7 @@ import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.gui.vaadin.MainView;
 import de.yuga.spacebattle.gui.vaadin.combined.spacecrafts.FleetDashboardDisplay;
 import de.yuga.spacebattle.gui.vaadin.combined.spacecrafts.FleetLayout;
-import de.yuga.spacebattle.gui.vaadin.misc.SBPageTopLevelLayout;
+import de.yuga.spacebattle.gui.vaadin.misc.SBPageSubjectSelectorLayout;
 import de.yuga.spacebattle.gui.vaadin.misc.StatsLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.Event;
@@ -31,7 +31,7 @@ import java.util.Map;
 @UIScope
 @Route(value = FleetMainView.ROUTE, layout = MainView.class)
 @RouteAlias(value = FleetMainView.ROUTE, layout = MainView.class)
-public class FleetMainView extends SBPageTopLevelLayout<Fleet> {
+public class FleetMainView extends SBPageSubjectSelectorLayout<Fleet> {
 
     @Nonnull
     public static final String ROUTE = "fleets";
@@ -75,7 +75,7 @@ public class FleetMainView extends SBPageTopLevelLayout<Fleet> {
         this.userService = userService;
         this.planetService = planetService;
         this.fleetService = fleetService;
-        User loggedIn = userService.isLoggedIn();
+        User loggedIn = userService.getLoggedInUser();
         if (loggedIn == null) {
             throw new NotifySBUserException("You shouldn't see this.");
         }

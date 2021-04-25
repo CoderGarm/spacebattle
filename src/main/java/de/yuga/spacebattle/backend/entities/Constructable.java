@@ -2,10 +2,12 @@ package de.yuga.spacebattle.backend.entities;
 
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
+import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 
 import javax.annotation.Nonnull;
@@ -16,6 +18,12 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Represents the payload of a job.
+ *
+ * <code>What</code> is at work and <code>how much</code>.
+ * The parent {@link Job} contains the information about the <code>where</code> and <code>for whom</code>.
+ */
 @Embeddable
 public class Constructable {
 
@@ -83,17 +91,9 @@ public class Constructable {
         return building;
     }
 
-    public void setBuilding(@Nullable final Building building) {
-        this.building = building;
-    }
-
     @Nullable
     public Integer getTargetLevel() {
         return targetLevel;
-    }
-
-    public void setTargetLevel(@Nullable final Integer targetLevelBuilding) {
-        this.targetLevel = targetLevelBuilding;
     }
 
     @Nullable
@@ -101,17 +101,9 @@ public class Constructable {
         return shipClass;
     }
 
-    public void setShipClass(@Nullable final ShipClass shipClass) {
-        this.shipClass = shipClass;
-    }
-
     @Nullable
     public Integer getAmountShips() {
         return amountShips;
-    }
-
-    public void setAmountShips(@Nullable final Integer amountShips) {
-        this.amountShips = amountShips;
     }
 
     @Nullable
@@ -131,33 +123,53 @@ public class Constructable {
      */
     public Map<EResourceType, BigDecimal> getJobCosts() {
 
-        if (building == null || targetLevel == null) {
-            ResourceDeposit costsHull = shipClass.getHull().getCosts();
-            ResourceDeposit clone = new ResourceDeposit(costsHull);
-            Map<Module, Integer> modules = shipClass.getModules();
-            for (Module module : modules.keySet()) {
-                ResourceDeposit costs = module.getCosts();
-                Map<EResourceType, BigDecimal> resources = getCostsByMultiplyer(costs, modules.get(module));
-                for (EResourceType resourceType : resources.keySet()) {
-                    clone.updateResource(resourceType, resources.get(resourceType));
-                }
-            }
-            return clone.getResources();
+        if (research != null && targetLevel != null) {
+            final BigDecimal researchCosts = research.getCosts().getResourceAmountByType(EResourceType.RESEARCH).multiply(new BigDecimal(targetLevel));
+            final Map<EResourceType, BigDecimal> costs = new HashMap<>();
+            costs.put(EResourceType.RESEARCH, researchCosts);
+            return costs;
         }
 
-        Integer targetLevel = this.targetLevel;
-        ResourceDeposit costs = building.getCosts();
-        Map<EResourceType, BigDecimal> resources = getCostsByMultiplyer(costs, targetLevel);
-        return resources;
+        if (shipClass != null) {
+            if (shipClass.getHull() == null) {
+                throw new NotifySBUserException("You need a hull for your ship, really!");
+            }
+            final ResourceDeposit costsHull = shipClass.getHull().getCosts();
+            final ResourceDeposit clonedCostsHull = new ResourceDeposit(costsHull);
+            Map<Module, Integer> modules = shipClass.getModules();
+            for (Module module : modules.keySet()) {
+                final ResourceDeposit costs = module.getCosts();
+                final Map<EResourceType, BigDecimal> resources = getCostsForLevel(costs, modules.get(module));
+                for (EResourceType resourceType : resources.keySet()) {
+                    clonedCostsHull.updateResource(resourceType, resources.get(resourceType));
+                }
+            }
+            return clonedCostsHull.getResources();
+        }
+
+        if (building != null && targetLevel != null) {
+            Integer targetLevel = this.targetLevel;
+            ResourceDeposit costs = building.getCosts();
+            return getCostsForLevel(costs, targetLevel);
+        }
+
+        throw new NotifySBUserException("You have tried something interesting. May be you should talk to an admin.");
     }
 
+    /**
+     * Calculates the full costs by the given target level.
+     *
+     * @param costs       the base costs
+     * @param targetLevel the target level
+     * @return the costs for the target level
+     */
     @Nonnull
-    private Map<EResourceType, BigDecimal> getCostsByMultiplyer(@Nonnull final ResourceDeposit costs,
-                                                                final int targetLevel) {
+    private Map<EResourceType, BigDecimal> getCostsForLevel(@Nonnull final ResourceDeposit costs,
+                                                            final int targetLevel) {
 
-        Map<EResourceType, BigDecimal> resources = new HashMap<>(costs.getResources());
+        final Map<EResourceType, BigDecimal> resources = new HashMap<>(costs.getResources());
         for (EResourceType resourceType : resources.keySet()) {
-            BigDecimal resourceAmountByType = costs.getResourceAmountByType(resourceType);
+            final BigDecimal resourceAmountByType = costs.getResourceAmountByType(resourceType);
             costs.updateResource(resourceType, resourceAmountByType.multiply(new BigDecimal(targetLevel)));
         }
         return resources;

@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * Wraps a {@link Module} and it's amount.
  */
-public class ModuleCountWrapper {
+public class ModuleCountDTO {
 
     @Nonnull
     private final Module module;
@@ -17,7 +17,7 @@ public class ModuleCountWrapper {
     @Nonnull
     private Integer count;
 
-    public ModuleCountWrapper(@Nonnull final Module module, @Nonnull final Integer count) {
+    public ModuleCountDTO(@Nonnull final Module module, @Nonnull final Integer count) {
         Preconditions.checkNotNull(module, "module shouldn't be null!");
         Preconditions.checkNotNull(count, "amount shouldn't be null!");
 

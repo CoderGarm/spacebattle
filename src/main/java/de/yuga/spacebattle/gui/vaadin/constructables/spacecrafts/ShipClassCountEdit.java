@@ -12,31 +12,31 @@ import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ModuleValueTypeHorizontalDisplay;
 import de.yuga.spacebattle.gui.vaadin.misc.details.NumericField;
-import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.ShipClassCountWrapper;
+import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.ShipClassCountDTO;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class ShipClassCountEdit extends VerticalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<ShipClassCountEdit, ShipClassCountWrapper>, ShipClassCountWrapper>, HasValidation {
+public class ShipClassCountEdit extends VerticalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<ShipClassCountEdit, ShipClassCountDTO>, ShipClassCountDTO>, HasValidation {
 
     @Nonnull
-    private final Binder<ShipClassCountWrapper> binderShipClass = new Binder<>(ShipClassCountWrapper.class);
+    private final Binder<ShipClassCountDTO> binderShipClass = new Binder<>(ShipClassCountDTO.class);
 
     @Nonnull
     private final NumericField amountField = new NumericField();
 
     @Nullable
-    private ShipClassCountWrapper shipClassCountWrapper;
+    private ShipClassCountDTO shipClassCountDTO;
 
     public ShipClassCountEdit() {
         final Label name = new Label();
         final ReadOnlyHasValue<String> moduleNameReadOnly = new ReadOnlyHasValue<>(name::setText);
-        binderShipClass.forField(moduleNameReadOnly).bind(ShipClassCountWrapper::getName, null);
+        binderShipClass.forField(moduleNameReadOnly).bind(ShipClassCountDTO::getName, null);
 
         final ModuleValueTypeHorizontalDisplay moduleValueTypeVerticalDisplay = new ModuleValueTypeHorizontalDisplay();
-        binderShipClass.forField(moduleValueTypeVerticalDisplay).bind(ShipClassCountWrapper::getShipClass, null);
+        binderShipClass.forField(moduleValueTypeVerticalDisplay).bind(ShipClassCountDTO::getShipClass, null);
 
-        binderShipClass.forField(amountField).bind(ShipClassCountWrapper::getCount, ShipClassCountWrapper::setAmount);
+        binderShipClass.forField(amountField).bind(ShipClassCountDTO::getCount, ShipClassCountDTO::setAmount);
 
         amountField.addClassName("numeric-before-amount");
         HorizontalLayout horizontalLayout = new HorizontalLayout();
@@ -44,18 +44,18 @@ public class ShipClassCountEdit extends VerticalLayout implements HasValue<Abstr
         add(horizontalLayout, moduleValueTypeVerticalDisplay);
     }
 
-    public void update(@Nonnull final ShipClassCountWrapper shipClassCountWrapper) {
-        Preconditions.checkNotNull(shipClassCountWrapper, "shipClassCountWrapper shouldn't be null!");
+    public void update(@Nonnull final ShipClassCountDTO shipClassCountDTO) {
+        Preconditions.checkNotNull(shipClassCountDTO, "shipClassCountWrapper shouldn't be null!");
 
-        if (this.shipClassCountWrapper == null) {
-            binderShipClass.setBean(shipClassCountWrapper);
+        if (this.shipClassCountDTO == null) {
+            binderShipClass.setBean(shipClassCountDTO);
         }
-        binderShipClass.readBean(shipClassCountWrapper);
-        this.shipClassCountWrapper = shipClassCountWrapper;
+        binderShipClass.readBean(shipClassCountDTO);
+        this.shipClassCountDTO = shipClassCountDTO;
     }
 
     @Override
-    public void setValue(ShipClassCountWrapper value) {
+    public void setValue(ShipClassCountDTO value) {
         this.update(value);
     }
 
@@ -66,14 +66,14 @@ public class ShipClassCountEdit extends VerticalLayout implements HasValue<Abstr
      */
     @Nullable
     @Override
-    public ShipClassCountWrapper getValue() {
+    public ShipClassCountDTO getValue() {
         return binderShipClass.getBean();
     }
 
     @Override
-    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ShipClassCountEdit, ShipClassCountWrapper>> listener) {
+    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ShipClassCountEdit, ShipClassCountDTO>> listener) {
         return binderShipClass.addValueChangeListener(event -> {
-            final AbstractField.ComponentValueChangeEvent<ShipClassCountEdit, ShipClassCountWrapper> changeEvent =
+            final AbstractField.ComponentValueChangeEvent<ShipClassCountEdit, ShipClassCountDTO> changeEvent =
                     new AbstractField.ComponentValueChangeEvent<>(this, this, getValue(), false);
             listener.valueChanged(changeEvent);
         });

@@ -106,7 +106,7 @@ public class Research extends AbstractEntityKey {
         return unlocksModules;
     }
 
-    @Nonnull
+    @Nullable
     public Research getUnlockedThrough() {
         return unlockedThrough;
     }

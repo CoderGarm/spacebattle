@@ -6,7 +6,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
-import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.ModuleCountWrapper;
+import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.ModuleCountDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,16 +52,16 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
         modules.forEach((module, amount) -> {
             ModuleCountEdit moduleEdit = componentMap.get(module);
             if (moduleEdit != null) {
-                moduleEdit.update(new ModuleCountWrapper(module, amount));
+                moduleEdit.update(new ModuleCountDTO(module, amount));
             } else {
                 moduleEdit = new ModuleCountEdit();
                 if (module.getModuleType().isMandatory()) {
                     moduleEdit.setRequiredIndicatorVisible(true);
                 }
-                moduleEdit.update(new ModuleCountWrapper(module, amount));
+                moduleEdit.update(new ModuleCountDTO(module, amount));
                 componentMap.put(module, moduleEdit);
                 final ModuleMultiEdit moduleMultiEdit = this;
-                ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ModuleCountEdit, ModuleCountWrapper>> valueChangeListener = new ValueChangeListener() {
+                ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ModuleCountEdit, ModuleCountDTO>> valueChangeListener = new ValueChangeListener() {
                     @Override
                     public void valueChanged(ValueChangeEvent event) { // todo this is shitty shit shit
                         Map<Module, Integer> collect = componentMap.values().stream().collect(Collectors.toMap(o -> o.getValue().getModule(), o -> o.getValue().getCountNumeric()));
@@ -77,7 +77,7 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
     }
 
     @Nonnull
-    public Collection<ModuleCountWrapper> getModules() {
+    public Collection<ModuleCountDTO> getModules() {
         return componentMap.keySet().stream().map(module -> componentMap.get(module).getValue()).collect(Collectors.toList());
     }
 
@@ -89,7 +89,7 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
     @Nonnull
     @Override
     public Map<Module, Integer> getValue() {
-        return getModules().stream().map(ModuleCountWrapper::getAsEntry).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return getModules().stream().map(ModuleCountDTO::getAsEntry).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override
@@ -99,9 +99,13 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
         return new Registration() {
             @Override
             public void remove() {
-
+                removeListener();
             }
         };
+    }
+
+    private void removeListener() {
+        this.listener = null;
     }
 
     @Override

@@ -19,6 +19,8 @@ public enum ESBEvent {
     SHIP_CLASS_DELETION(8), // when a ship should be deleted
     ORBITAL_CONSTRUCTION_JOB_BUILDING_START(9), // when a ship construction job should start
     ORBITAL_CONSTRUCTION_JOB_BUILDING_FEEDBACK_STARTED(10), // when a ship construction job has started
+    RESEARCH_JOB_START(11), // when a research job should start
+    RESEARCH_JOB_FEEDBACK_STARTED(12), // when a research job has started
     ;
 
     int sequence;

@@ -28,7 +28,7 @@ public class ResourceOutputDisplay extends VerticalLayout {
 
         Arrays.stream(EResourceType.values()).forEach(resourceType -> {
             final ResourceElementDisplay resourceElementDisplay = new ResourceElementDisplay();
-            resourceElementDisplay.update(new EResourceAmountWrapper(resourceType, BigDecimal.ZERO, BigDecimal.ZERO));
+            resourceElementDisplay.update(new EResourceAmountDTO(resourceType, BigDecimal.ZERO, BigDecimal.ZERO));
             componentMap.put(resourceType, resourceElementDisplay);
         });
 
@@ -79,7 +79,7 @@ public class ResourceOutputDisplay extends VerticalLayout {
             if (resourceElementDisplay != null) {
                 final BigDecimal amount = resources.get(resourceType);
                 final BigDecimal tickOutput = getTickOutput(planet, resourceType);
-                resourceElementDisplay.update(new EResourceAmountWrapper(resourceType, amount, tickOutput));
+                resourceElementDisplay.update(new EResourceAmountDTO(resourceType, amount, tickOutput));
             }
         });
     }

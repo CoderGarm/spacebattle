@@ -2,7 +2,6 @@ package de.yuga.spacebattle.backend.entities.turn;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.Constructable;
 import de.yuga.spacebattle.backend.entities.account.User;
@@ -18,8 +17,7 @@ import java.math.BigDecimal;
 
 @NamedQueries({
         @NamedQuery(name = "Job.getAll", query = "SELECT p FROM Job p"),
-        @NamedQuery(name = "Job.getAllByOwner", query = "SELECT p FROM Job p WHERE p.owner = :owner"),
-        @NamedQuery(name = "Job.researchPossibleForOwner", query = "SELECT COUNT(p) FROM Job p WHERE p.owner = :owner AND p.facility IS NULL")
+        @NamedQuery(name = "Job.getAllByOwner", query = "SELECT p FROM Job p WHERE p.owner = :owner")
 })
 @Entity
 @Table(name = "job")
@@ -64,12 +62,11 @@ public class Job extends AbstractEntityKey {
      * @param facility      the facility if the job is locatable
      * @param constructable to job's content
      */
-    public Job(@Nonnull User owner, @Nullable Construction facility, @Nonnull Constructable constructable) {
+    public Job(@Nonnull User owner, @Nonnull Construction facility, @Nonnull Constructable constructable) {
         Preconditions.checkNotNull(owner, "owner shouldn't be null!");
+        Preconditions.checkNotNull(facility, "facility shouldn't be null!");
         Preconditions.checkNotNull(constructable, "constructable shouldn't be null!");
-        if (constructable.getResourceType() == EResourceType.RESEARCH && facility != null) {
-            throw new NotifySBUserException("Something went wrong - call the support!");
-        }
+
         this.owner = owner;
         this.facility = facility;
         this.constructable = constructable;

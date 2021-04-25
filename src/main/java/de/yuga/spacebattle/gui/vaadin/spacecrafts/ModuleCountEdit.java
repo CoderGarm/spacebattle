@@ -10,50 +10,50 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.gui.vaadin.misc.details.NumericField;
-import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.ModuleCountWrapper;
+import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.ModuleCountDTO;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class ModuleCountEdit extends HorizontalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<ModuleCountEdit, ModuleCountWrapper>, ModuleCountWrapper>, HasValidation {
+public class ModuleCountEdit extends HorizontalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<ModuleCountEdit, ModuleCountDTO>, ModuleCountDTO>, HasValidation {
 
     @Nonnull
-    private final Binder<ModuleCountWrapper> binderModule = new Binder<>(ModuleCountWrapper.class);
+    private final Binder<ModuleCountDTO> binderModule = new Binder<>(ModuleCountDTO.class);
 
     @Nonnull
     private final NumericField amountField = new NumericField();
 
     @Nullable
-    private ModuleCountWrapper moduleCountWrapper;
+    private ModuleCountDTO moduleCountDTO;
 
     public ModuleCountEdit() {
 
         Label name = new Label();
         final ReadOnlyHasValue<String> moduleNameReadOnly = new ReadOnlyHasValue<>(name::setText);
-        binderModule.forField(moduleNameReadOnly).bind(ModuleCountWrapper::getModuleName, null);
+        binderModule.forField(moduleNameReadOnly).bind(ModuleCountDTO::getModuleName, null);
 
         Label description = new Label();
         final ReadOnlyHasValue<String> moduleDescriptionReadOnly = new ReadOnlyHasValue<>(description::setText);
-        binderModule.forField(moduleDescriptionReadOnly).bind(ModuleCountWrapper::getModuleDescription, null);
+        binderModule.forField(moduleDescriptionReadOnly).bind(ModuleCountDTO::getModuleDescription, null);
 
-        binderModule.forField(amountField).bind(ModuleCountWrapper::getCount, ModuleCountWrapper::setCount);
+        binderModule.forField(amountField).bind(ModuleCountDTO::getCount, ModuleCountDTO::setCount);
 
         amountField.addClassName("numeric-before-amount");
         add(amountField, name, description);
     }
 
-    public void update(@Nonnull final ModuleCountWrapper moduleCountWrapper) {
-        Preconditions.checkNotNull(moduleCountWrapper, "moduleCountWrapper shouldn't be null!");
+    public void update(@Nonnull final ModuleCountDTO moduleCountDTO) {
+        Preconditions.checkNotNull(moduleCountDTO, "moduleCountWrapper shouldn't be null!");
 
-        if (this.moduleCountWrapper == null) {
-            binderModule.setBean(moduleCountWrapper);
+        if (this.moduleCountDTO == null) {
+            binderModule.setBean(moduleCountDTO);
         }
-        binderModule.readBean(moduleCountWrapper);
-        this.moduleCountWrapper = moduleCountWrapper;
+        binderModule.readBean(moduleCountDTO);
+        this.moduleCountDTO = moduleCountDTO;
     }
 
     @Override
-    public void setValue(ModuleCountWrapper value) {
+    public void setValue(ModuleCountDTO value) {
         this.update(value);
     }
 
@@ -64,14 +64,14 @@ public class ModuleCountEdit extends HorizontalLayout implements HasValue<Abstra
      */
     @Nullable
     @Override
-    public ModuleCountWrapper getValue() {
+    public ModuleCountDTO getValue() {
         return binderModule.getBean();
     }
 
     @Override
-    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ModuleCountEdit, ModuleCountWrapper>> listener) {
+    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ModuleCountEdit, ModuleCountDTO>> listener) {
         return binderModule.addValueChangeListener(event -> {
-            final AbstractField.ComponentValueChangeEvent<ModuleCountEdit, ModuleCountWrapper> changeEvent =
+            final AbstractField.ComponentValueChangeEvent<ModuleCountEdit, ModuleCountDTO> changeEvent =
                     new AbstractField.ComponentValueChangeEvent<>(this, this, getValue(), false);
             listener.valueChanged(changeEvent);
         });
