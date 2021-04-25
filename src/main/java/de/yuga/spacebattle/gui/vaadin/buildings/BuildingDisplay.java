@@ -43,22 +43,23 @@ public class BuildingDisplay extends HorizontalLayout implements HasValue<Abstra
 
     @Override
     public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<BuildingDisplay, Building>> listener) {
+        // not necessary
         return null;
     }
 
     @Override
     public void setReadOnly(boolean readOnly) {
-
+        // not necessary
     }
 
     @Override
     public boolean isReadOnly() {
-        return false;
+        return true;
     }
 
     @Override
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-
+        // not necessary
     }
 
     @Override

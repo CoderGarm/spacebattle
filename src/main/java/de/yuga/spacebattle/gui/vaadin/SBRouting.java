@@ -21,6 +21,7 @@ public class SBRouting {
                     new SBRouting(true, "Planets", PlanetMainView.class, "Planets"),
                     new SBRouting(true, "Ship classes", ShipClassMainView.class, "Ship classes"),
                     new SBRouting(true, "Fleets", FleetMainView.class, "Fleets"),
+                    new SBRouting(true, "Researches", ResearchMainView.class, "Researches")
 
             };
 

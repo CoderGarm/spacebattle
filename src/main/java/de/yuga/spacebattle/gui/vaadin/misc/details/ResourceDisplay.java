@@ -24,7 +24,7 @@ public class ResourceDisplay extends VerticalLayout {
         final Label miningFactorsTitle = new Label("Mining factors");
         Arrays.stream(EResourceType.values()).forEach(resourceType -> {
             final ResourceElementDisplay resourceElementDisplay = new ResourceElementDisplay();
-            resourceElementDisplay.update(new EResourceAmountWrapper(resourceType, BigDecimal.ZERO, null));
+            resourceElementDisplay.update(new EResourceAmountDTO(resourceType, BigDecimal.ZERO, null));
             componentMap.put(resourceType, resourceElementDisplay);
         });
 
@@ -48,7 +48,7 @@ public class ResourceDisplay extends VerticalLayout {
             ResourceElementDisplay resourceElementDisplay = componentMap.get(resourceType);
             if (resourceElementDisplay != null) {
                 final BigDecimal amount = resources.get(resourceType);
-                resourceElementDisplay.update(new EResourceAmountWrapper(resourceType, amount, null));
+                resourceElementDisplay.update(new EResourceAmountDTO(resourceType, amount, null));
             }
         });
     }

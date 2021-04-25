@@ -63,7 +63,7 @@ public class CostsDisplay extends VerticalLayout {
                 resourceElementDisplay = new ResourceElementDisplay();
                 componentMap.put(resourceType, resourceElementDisplay);
             }
-            resourceElementDisplay.update(new EResourceAmountWrapper(resourceType, amount, null));
+            resourceElementDisplay.update(new EResourceAmountDTO(resourceType, amount, null));
         });
 
         for (int i = 0; i < EResourceType.values().length; i++) {

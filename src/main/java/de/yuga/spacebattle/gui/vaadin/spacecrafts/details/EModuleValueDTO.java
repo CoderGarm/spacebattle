@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 /**
  * Wraps a {@link EModuleType} and it's value.
  */
-public class EModuleValueWrapper {
+public class EModuleValueDTO {
 
     @Nonnull
     private final EModuleType eModuleType;
@@ -17,8 +17,8 @@ public class EModuleValueWrapper {
     @Nonnull
     private final BigDecimal value;
 
-    public EModuleValueWrapper(@Nonnull final EModuleType eModuleType,
-                               @Nonnull final BigDecimal value) {
+    public EModuleValueDTO(@Nonnull final EModuleType eModuleType,
+                           @Nonnull final BigDecimal value) {
         Preconditions.checkNotNull(eModuleType, "eModuleType shouldn't be null!");
         Preconditions.checkNotNull(value, "value shouldn't be null!");
 

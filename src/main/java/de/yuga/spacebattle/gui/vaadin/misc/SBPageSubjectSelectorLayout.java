@@ -17,7 +17,6 @@ import de.yuga.spacebattle.gui.vaadin.views.ShipClassMainView;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -39,7 +38,7 @@ import java.util.Optional;
  * @param <T>
  */
 @CssImport("./styles/views/main/details/SBPageTopLevelLayout.css")
-public abstract class SBPageTopLevelLayout<T> extends FlexLayout {
+public abstract class SBPageSubjectSelectorLayout<T> extends FlexLayout {
 
     /**
      * The index of the "do user stuff" section of the view below the two selector menus.
@@ -88,15 +87,13 @@ public abstract class SBPageTopLevelLayout<T> extends FlexLayout {
     @Nonnull
     private final VerticalLayout mainContent = new VerticalLayout();
 
-    public SBPageTopLevelLayout() {
+    public SBPageSubjectSelectorLayout() {
         actionSelectorMenu.setId("actionSelectorMenu");
         actionSelectorMenu.setClassName("selector");
-        //actionSelectorMenu.setAutoselect(false);
         ViewHelper.setWidth(actionSelectorMenu, "100%");
 
         subjectSelectorMenu.setId("subjectSelectorMenu");
         subjectSelectorMenu.setClassName("selector");
-        //subjectSelectorMenu.setAutoselect(false);
         ViewHelper.setWidth(subjectSelectorMenu, "100%");
 
         mainContent.add(subjectSelectorMenu);
@@ -183,7 +180,7 @@ public abstract class SBPageTopLevelLayout<T> extends FlexLayout {
 
     /**
      * Returns the tab for it's corresponding component.
-     * Via versa for {@link SBPageTopLevelLayout#getComponentForTabOfActionMenu(Tab)}.
+     * Via versa for {@link SBPageSubjectSelectorLayout#getComponentForTabOfActionMenu(Tab)}.
      *
      * @param component the component to search for
      * @return the corresponding tab
@@ -244,12 +241,12 @@ public abstract class SBPageTopLevelLayout<T> extends FlexLayout {
     }
 
     /**
-     * Must define all action selectors menu entries and their behavior, {@link SBPageTopLevelLayout#addActionListener()}.
+     * Must define all action selectors menu entries and their behavior, {@link SBPageSubjectSelectorLayout#addActionListener()}.
      */
     protected abstract void createActionSelectorMenu();
 
     /**
-     * Must define all initial subject selectors menu entries and their behavior, {@link SBPageTopLevelLayout#addSubjectListener()}.
+     * Must define all initial subject selectors menu entries and their behavior, {@link SBPageSubjectSelectorLayout#addSubjectListener()}.
      */
     protected abstract void createSubjectSelectorMenu();
 

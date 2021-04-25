@@ -18,7 +18,7 @@ import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.gui.vaadin.MainView;
 import de.yuga.spacebattle.gui.vaadin.constructables.buildings.ConstructBuildingEdit;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
-import de.yuga.spacebattle.gui.vaadin.misc.SBPageTopLevelLayout;
+import de.yuga.spacebattle.gui.vaadin.misc.SBPageSubjectSelectorLayout;
 import de.yuga.spacebattle.gui.vaadin.misc.StatsLayout;
 import de.yuga.spacebattle.gui.vaadin.orbitals.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +28,10 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static de.yuga.spacebattle.gui.vaadin.events.ESBEvent.CONSTRUCTION_JOB_BUILDING_FEEDBACK_STARTED;
 import static de.yuga.spacebattle.gui.vaadin.events.ESBEvent.ORBITAL_CONSTRUCTION_JOB_BUILDING_FEEDBACK_STARTED;
@@ -38,7 +40,7 @@ import static de.yuga.spacebattle.gui.vaadin.events.ESBEvent.ORBITAL_CONSTRUCTIO
 @UIScope
 @Route(value = PlanetMainView.ROUTE, layout = MainView.class)
 @RouteAlias(value = PlanetMainView.ROUTE, layout = MainView.class)
-public class PlanetMainView extends SBPageTopLevelLayout<Planet> {
+public class PlanetMainView extends SBPageSubjectSelectorLayout<Planet> {
 
     @Nonnull
     public static final String ROUTE = "planets";
@@ -91,7 +93,7 @@ public class PlanetMainView extends SBPageTopLevelLayout<Planet> {
         this.userService = userService;
         this.planetService = planetService;
         this.jobService = jobService;
-        User loggedIn = userService.isLoggedIn();
+        User loggedIn = userService.getLoggedInUser();
         if (loggedIn == null) {
             throw new NotifySBUserException("You shouldn't see this.");
         }

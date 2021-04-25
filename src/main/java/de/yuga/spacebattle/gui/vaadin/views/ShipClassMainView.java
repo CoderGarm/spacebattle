@@ -22,7 +22,7 @@ import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.ShipClassDispla
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.ShipClassEdit;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.ShipClassLayout;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
-import de.yuga.spacebattle.gui.vaadin.misc.SBPageTopLevelLayout;
+import de.yuga.spacebattle.gui.vaadin.misc.SBPageSubjectSelectorLayout;
 import de.yuga.spacebattle.gui.vaadin.misc.StatsLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.Event;
@@ -39,7 +39,7 @@ import java.util.Map;
 @UIScope
 @Route(value = ShipClassMainView.ROUTE, layout = MainView.class)
 @RouteAlias(value = ShipClassMainView.ROUTE, layout = MainView.class)
-public class ShipClassMainView extends SBPageTopLevelLayout<ShipClass> {
+public class ShipClassMainView extends SBPageSubjectSelectorLayout<ShipClass> {
 
     @Nonnull
     public static final String ROUTE = "shipClass";
@@ -110,7 +110,7 @@ public class ShipClassMainView extends SBPageTopLevelLayout<ShipClass> {
         this.shipClassService = shipClassService;
         this.hullService = hullService;
         this.moduleService = moduleService;
-        User loggedIn = userService.isLoggedIn();
+        User loggedIn = userService.getLoggedInUser();
         if (loggedIn == null) {
             throw new NotifySBUserException("You shouldn't see this.");
         }

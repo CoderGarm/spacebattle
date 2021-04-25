@@ -132,7 +132,7 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass> {
         binderShipClass.readBean(null);
         ShipClass shipClass = new ShipClass();
 
-        final User loggedIn = userService.isLoggedIn();
+        final User loggedIn = userService.getLoggedInUser();
         if (loggedIn == null) {
             throw new NotifySBUserException("oha, this should not be possible.");
         }

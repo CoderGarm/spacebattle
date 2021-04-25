@@ -11,7 +11,8 @@ import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.gui.vaadin.buildings.BuildingDisplay;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.ShipClassDisplay;
-import de.yuga.spacebattle.gui.vaadin.research.ResearchDisplay;
+import de.yuga.spacebattle.gui.vaadin.research.details.ResearchDisplay;
+import de.yuga.spacebattle.gui.vaadin.research.details.ResearchLevelDTO;
 
 import javax.annotation.Nonnull;
 
@@ -32,7 +33,8 @@ public class ConstructableDisplay extends VerticalLayout {
                 if (targetLevel == null) {
                     throw new NotifySBUserException("The targetLevel cannot be null here.");
                 }
-                ResearchDisplay researchDisplay = new ResearchDisplay(research, targetLevel);
+                ResearchDisplay researchDisplay = new ResearchDisplay();
+                researchDisplay.setValue(new ResearchLevelDTO(research, targetLevel));
                 add(researchDisplay);
                 break;
             case CONSTRUCTION:

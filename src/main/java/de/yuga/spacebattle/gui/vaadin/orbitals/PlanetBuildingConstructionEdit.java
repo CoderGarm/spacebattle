@@ -11,7 +11,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.gui.vaadin.constructables.buildings.ConstructBuildingEdit;
-import de.yuga.spacebattle.gui.vaadin.orbitals.details.BuildingLevelWrapper;
+import de.yuga.spacebattle.gui.vaadin.orbitals.details.BuildingLevelDTO;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -95,7 +95,7 @@ public class PlanetBuildingConstructionEdit extends PlanetLayout<Planet> {
                 constructBuildingEdit = new ConstructBuildingEdit();
                 componentsMap.put(building, constructBuildingEdit);
             }
-            constructBuildingEdit.setValue(new BuildingLevelWrapper(building, integer));
+            constructBuildingEdit.setValue(new BuildingLevelDTO(building, integer));
             constructBuildingEdit.setReadOnly(!construction.getJobs().isEmpty());
         });
         componentsMap.values().forEach(this::add);

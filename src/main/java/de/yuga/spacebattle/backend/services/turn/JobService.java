@@ -201,7 +201,7 @@ public class JobService {
      * Creates a entity by {@link Research#getId()} and {@link Planet#getId()}.
      * The research's level will be incremented by 1 in every {@link Job}.
      * <p>
-     * The research is mapped to the home planet.
+     * The research is mapped to the planet with the lowest ID and a research facility.
      *
      * @param idUser     the planet where the entity should be executed
      * @param idResearch the research which should be researches
@@ -228,23 +228,17 @@ public class JobService {
         if (level > levelCap) {
             throw new NotifySBUserException("no way!");
         }
-        Constructable constructable = new Constructable(research, level + 1);
-        Planet planet = user.getOwnedPlanets().stream().filter(inlinePlanet -> {
-            Construction orElse = inlinePlanet.getConstructions().stream()
-                    .filter(construction -> construction.getBuilding().getResourceType() == EResourceType.RESEARCH)
-                    .findFirst().orElse(null);
-            return orElse != null;
-        }).findFirst().orElse(null);
+        Constructable constructable = new Constructable(research, level);
+        Planet planet = user.getResearchInstitute().orElse(null);
 
         if (planet == null) {
             throw new NotifySBUserException("You need a research facility on at leas one planet.");
         }
 
-        if (jobRepository.researchPossible(planet.getOwner())) {
-            throw new NotifySBUserException("Job in progress");
-        }
+        Construction facility = planet.getConstructionByResource(EResourceType.RESEARCH);
+        checkIfFree(facility);
 
-        Job entity = new Job(user, null, constructable);
+        Job entity = new Job(user, facility, constructable);
         jobRepository.save(entity);
         return entity;
     }

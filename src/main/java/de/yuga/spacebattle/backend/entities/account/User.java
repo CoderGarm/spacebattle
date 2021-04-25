@@ -5,21 +5,21 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
+import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.enums.ERaceType;
+import de.yuga.spacebattle.backend.enums.EResourceType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @NamedQueries({
@@ -54,7 +54,7 @@ public class User extends AbstractEntityKey {
     private String email;
 
     @Nonnull
-    @NotNull(message = "racetype must not be null")
+    @NotNull(message = "raceType must not be null")
     @Enumerated(EnumType.STRING)
     private ERaceType raceType;
 
@@ -140,6 +140,7 @@ public class User extends AbstractEntityKey {
         this.email = email;
     }
 
+    @Nonnull
     public ERaceType getRaceType() {
         return raceType;
     }
@@ -184,6 +185,28 @@ public class User extends AbstractEntityKey {
     @Nonnull
     public Set<ShipClass> getShipClasses() {
         return shipClasses;
+    }
+
+    /**
+     * Returns the possible planet which is designated for holding research jobs.
+     *
+     * @return the planet or even not the planet
+     */
+    public Optional<Planet> getResearchInstitute() {
+
+        List<Construction> collect = getOwnedPlanets().parallelStream()
+                .map(planet -> planet.getConstructions().stream()
+                        .filter(construction -> construction.getBuilding().getResourceType() == EResourceType.RESEARCH)
+                        .findFirst().get())
+                .sorted(Comparator.comparingInt(AbstractEntityKey::getId))
+                .collect(Collectors.toList());
+
+        if (collect.isEmpty()) {
+            return Optional.empty();
+        } else {
+            Construction construction = collect.get(0);
+            return Optional.of(construction.getPlanet());
+        }
     }
 
     @Override
