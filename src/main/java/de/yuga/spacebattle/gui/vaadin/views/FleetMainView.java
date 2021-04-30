@@ -81,7 +81,10 @@ public class FleetMainView extends SBPageSubjectSelectorLayout<Fleet> {
         }
         this.user = loggedIn;
         fleetDashboardDisplay = new FleetDashboardDisplay();
-        fleet = fleetService.findAllFleetsBy(user).get(0);
+        final List<Fleet> allFleetsForUser = fleetService.findAllFleetsBy(user);
+        if (!allFleetsForUser.isEmpty()) {
+            fleet = allFleetsForUser.get(0);
+        }
         if (fleet != null) {
             fleetDashboardDisplay.update(fleet);
         }
