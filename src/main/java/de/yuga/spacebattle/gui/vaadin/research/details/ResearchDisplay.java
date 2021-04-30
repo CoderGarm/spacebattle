@@ -52,6 +52,7 @@ public class ResearchDisplay extends HorizontalLayout implements HasValue<Abstra
 
         mainLayout.add(generalInfoLayout, combinatorH);
         add(mainLayout);
+        setVisible(false);
     }
 
     /**
@@ -158,9 +159,11 @@ public class ResearchDisplay extends HorizontalLayout implements HasValue<Abstra
     }
 
     @Override
-    public void setValue(ResearchLevelDTO value) {
+    public void setValue(@Nullable final ResearchLevelDTO value) {
+
         binder.readBean(value);
-        updateResearchDetails(value.getResearch());
+        setVisible(value != null);
+        updateResearchDetails(value != null ? value.getResearch() : null);
     }
 
     @Nullable

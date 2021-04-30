@@ -30,14 +30,14 @@ public class ResearchSelectionEdit extends ResearchLayout<User> {
     private final ResearchService researchService = ViewHelper.getService(ResearchService.class);
 
     @Nonnull
-    private final ResearchDisplay researchDisplay = new ResearchDisplay();
+    private final ResearchDisplay currentResearchDisplay = new ResearchDisplay();
 
     public ResearchSelectionEdit() {
 
         binderPlanet.forField(getResearchOutputDisplay()).bind(user -> user, null);
 
         final Label currentResearch = new Label("Current research");
-        add(currentResearch, researchDisplay);
+        add(currentResearch, currentResearchDisplay);
 
         final ResearchEditMulti researchDisplayMulti = new ResearchEditMulti();
         binderPlanet.forField(researchDisplayMulti).bind(researchService::getUnlockableResearches, null);
@@ -50,7 +50,7 @@ public class ResearchSelectionEdit extends ResearchLayout<User> {
     public void update(@Nullable final User user) {
         binderPlanet.readBean(user);
         if (user == null) {
-            researchDisplay.setValue(null);
+            currentResearchDisplay.setValue(null);
             return;
         }
         user.getResearchInstitute().ifPresent(planet -> {
@@ -65,7 +65,7 @@ public class ResearchSelectionEdit extends ResearchLayout<User> {
                 if (research == null || targetLevel == null) {
                     throw new NotifySBUserException("This should not work - try to use the real research!");
                 }
-                researchDisplay.setValue(new ResearchLevelDTO(research, targetLevel));
+                currentResearchDisplay.setValue(new ResearchLevelDTO(research, targetLevel));
             });
         });
     }

@@ -73,6 +73,10 @@ import static de.yuga.spacebattle.gui.vaadin.ViewHelper.MAX_MENU_HEIGHT;
 @Route
 public class MainView extends AppLayout {
 
+    private static final String USER_NAME_LOGIN_OVERRIDE =
+            //"flashkid";
+            "yufiel";
+
     /**
      * Strange Exception when the UID is another one.
      */
@@ -211,17 +215,19 @@ public class MainView extends AppLayout {
     @Nonnull
     private Button createLoginButton() {
         final Button login;
-        //login = new Button("Login", e -> loginOverlay.setOpened(true));
-
-        login = new Button("Login", e -> {
-            final User user = this.userService.login("flashkid", "test");
-            if (user != null) {
-                this.userService.setLogin(user);
-                loginOverlay.close();
-                getUI().ifPresent(ui -> ui.navigate(DashboardView.class));
-                uiEventBus.publish(this, ESBEvent.LOGIN.name());
-            }
-        });
+        if (USER_NAME_LOGIN_OVERRIDE.isBlank()) {
+            login = new Button("Login", e -> loginOverlay.setOpened(true));
+        } else {
+            login = new Button("Login", e -> {
+                final User user = this.userService.login(USER_NAME_LOGIN_OVERRIDE, "test");
+                if (user != null) {
+                    this.userService.setLogin(user);
+                    loginOverlay.close();
+                    getUI().ifPresent(ui -> ui.navigate(DashboardView.class));
+                    uiEventBus.publish(this, ESBEvent.LOGIN.name());
+                }
+            });
+        }
 
         login.setClassName("first-on-the-right");
         return login;
