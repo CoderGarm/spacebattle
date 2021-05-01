@@ -3,26 +3,26 @@ package de.yuga.spacebattle.gui.vaadin.combined.spacecrafts.details;
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ModuleValueTypeVerticalDisplay;
+import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ModuleValueTypePerFleetHorizontalDisplay;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class FleetStatsDisplay extends HorizontalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<FleetStatsDisplay, Fleet>, Fleet> {
+public class FleetStatsHorizontalDisplay extends VerticalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<FleetStatsHorizontalDisplay, Fleet>, Fleet> {
 
     @Nonnull
     private final Binder<Fleet> binderFleet = new Binder<>(Fleet.class);
 
-    public FleetStatsDisplay() {
-        final ModuleValueTypeVerticalDisplay moduleValueTypeVerticalDisplay = new ModuleValueTypeVerticalDisplay();
-        binderFleet.forField(moduleValueTypeVerticalDisplay).bind(Fleet::getShips, null);
-
-        final HullByAmountVerticalDisplay hullByAmountVerticalDisplay = new HullByAmountVerticalDisplay();
+    public FleetStatsHorizontalDisplay() {
+        final HullByAmountHorizontalDisplay hullByAmountVerticalDisplay = new HullByAmountHorizontalDisplay();
         binderFleet.forField(hullByAmountVerticalDisplay).bind(Fleet::getShips, null);
+
+        final ModuleValueTypePerFleetHorizontalDisplay moduleValueTypeVerticalDisplay = new ModuleValueTypePerFleetHorizontalDisplay();
+        binderFleet.forField(moduleValueTypeVerticalDisplay).bind(Fleet::getShips, null);
 
         add(hullByAmountVerticalDisplay, moduleValueTypeVerticalDisplay);
     }
@@ -42,7 +42,7 @@ public class FleetStatsDisplay extends HorizontalLayout implements HasValue<Abst
     }
 
     @Override
-    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<FleetStatsDisplay, Fleet>> listener) {
+    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<FleetStatsHorizontalDisplay, Fleet>> listener) {
         // not necessary
         return null;
     }

@@ -86,13 +86,13 @@
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>7.4.0</version>
-            <scope>test,compile</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.easymock</groupId>
             <artifactId>easymock</artifactId>
             <version>4.2</version>
-            <scope>test,compile</scope>
+            <scope>provided</scope>
         </dependency>
         <!-- test end -->
 
@@ -185,6 +185,11 @@
             <groupId>com.vaadin.componentfactory</groupId>
             <artifactId>svg</artifactId>
             <version>1.0.4</version>
+            <!--
+            System path for omitting web search for svg pom while mvn install -Pproduction
+            <scope>system</scope>
+            <systemPath>${user.home}/.m2/repository/com/vaadin/componentfactory/svg/1.0.4/svg-1.0.4.jar</systemPath>
+            -->
         </dependency>
 
         <dependency>

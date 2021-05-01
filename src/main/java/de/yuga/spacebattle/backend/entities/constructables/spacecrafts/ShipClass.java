@@ -71,7 +71,7 @@ public class ShipClass extends AbstractEntityKey {
      * The construction costs.
      */
     @Nonnull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "idCosts", updatable = false)
     private final ResourceDeposit costs = new ResourceDeposit(EResourceSubType.COSTS);
 

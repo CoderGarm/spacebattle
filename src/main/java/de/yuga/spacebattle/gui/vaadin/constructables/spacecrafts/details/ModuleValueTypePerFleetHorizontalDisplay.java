@@ -2,8 +2,7 @@ package de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
@@ -20,7 +19,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class ModuleValueTypeVerticalDisplay extends VerticalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<ModuleValueTypeVerticalDisplay, Map<ShipClass, Integer>>, Map<ShipClass, Integer>> {
+public class ModuleValueTypePerFleetHorizontalDisplay extends HorizontalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<ModuleValueTypePerFleetHorizontalDisplay, Map<ShipClass, Integer>>, Map<ShipClass, Integer>> {
 
     @Nonnull
     private final Map<EModuleType, BigDecimal> amountByModuleType;
@@ -28,11 +27,10 @@ public class ModuleValueTypeVerticalDisplay extends VerticalLayout implements Ha
     @Nonnull
     private final Map<EModuleType, ModuleDataElementDisplay> displayByModuleType;
 
-    public ModuleValueTypeVerticalDisplay() {
+    public ModuleValueTypePerFleetHorizontalDisplay() {
         amountByModuleType = Arrays.stream(EModuleType.values())
                 .collect(Collectors.toMap(Function.identity(), value -> BigDecimal.ZERO));
 
-        final Label title = new Label("Data");
         displayByModuleType = Arrays.stream(EModuleType.values())
                 .collect(Collectors.toMap(Function.identity(), eModuleType -> {
                     ModuleDataElementDisplay display = new ModuleDataElementDisplay();
@@ -40,7 +38,6 @@ public class ModuleValueTypeVerticalDisplay extends VerticalLayout implements Ha
                     return display;
                 }));
 
-        add(title);
         for (int i = 0; i < EModuleType.values().length; i++) {
             ModuleDataElementDisplay moduleDataElementDisplay = displayByModuleType.get(EModuleType.values()[i]);
             add(moduleDataElementDisplay);
@@ -108,7 +105,7 @@ public class ModuleValueTypeVerticalDisplay extends VerticalLayout implements Ha
                 effectiveResultingValue = effectiveEffectValueByModuleAmount;
             }
         } else {
-            effectiveResultingValue = currentEffectValue.add(effectiveEffectValueAsBigD).multiply(new BigDecimal(amountOfModule));
+            effectiveResultingValue = currentEffectValue.add(effectiveEffectValueAsBigD.multiply(new BigDecimal(amountOfModule)));
         }
         amountByModuleType.put(moduleType, effectiveResultingValue);
     }
@@ -135,7 +132,7 @@ public class ModuleValueTypeVerticalDisplay extends VerticalLayout implements Ha
     }
 
     @Override
-    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ModuleValueTypeVerticalDisplay, Map<ShipClass, Integer>>> listener) {
+    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ModuleValueTypePerFleetHorizontalDisplay, Map<ShipClass, Integer>>> listener) {
         // not necessary
         return null;
     }

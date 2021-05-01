@@ -48,7 +48,7 @@ public class DistanceCalculatorTest {
 
     @Test(dataProvider = "testCalculateDistanceData")
     public void testCalculateDistance(final Fleet fleet, final Planet planet, final int expectation) {
-        int calculateDistance = DistanceCalculator.calculateDistance(fleet, planet);
+        int calculateDistance = DistanceCalculator.calculateTimeToTravel(fleet, planet);
         assertEquals(calculateDistance, expectation);
     }
 

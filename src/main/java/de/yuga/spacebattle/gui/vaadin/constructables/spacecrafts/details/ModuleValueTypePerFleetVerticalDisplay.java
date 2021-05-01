@@ -2,7 +2,8 @@ package de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
@@ -19,7 +20,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class ModuleValueTypeHorizontalDisplay extends HorizontalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<ModuleValueTypeHorizontalDisplay, ShipClass>, ShipClass> {
+public class ModuleValueTypePerFleetVerticalDisplay extends VerticalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<ModuleValueTypePerFleetVerticalDisplay, Map<ShipClass, Integer>>, Map<ShipClass, Integer>> {
 
     @Nonnull
     private final Map<EModuleType, BigDecimal> amountByModuleType;
@@ -27,10 +28,11 @@ public class ModuleValueTypeHorizontalDisplay extends HorizontalLayout implement
     @Nonnull
     private final Map<EModuleType, ModuleDataElementDisplay> displayByModuleType;
 
-    public ModuleValueTypeHorizontalDisplay() {
+    public ModuleValueTypePerFleetVerticalDisplay() {
         amountByModuleType = Arrays.stream(EModuleType.values())
                 .collect(Collectors.toMap(Function.identity(), value -> BigDecimal.ZERO));
 
+        final Label title = new Label("Data");
         displayByModuleType = Arrays.stream(EModuleType.values())
                 .collect(Collectors.toMap(Function.identity(), eModuleType -> {
                     ModuleDataElementDisplay display = new ModuleDataElementDisplay();
@@ -38,6 +40,7 @@ public class ModuleValueTypeHorizontalDisplay extends HorizontalLayout implement
                     return display;
                 }));
 
+        add(title);
         for (int i = 0; i < EModuleType.values().length; i++) {
             ModuleDataElementDisplay moduleDataElementDisplay = displayByModuleType.get(EModuleType.values()[i]);
             add(moduleDataElementDisplay);
@@ -55,16 +58,22 @@ public class ModuleValueTypeHorizontalDisplay extends HorizontalLayout implement
     /**
      * Will update or clear the display, depending if the param exists.
      *
-     * @param shipClass the ship class to display
+     * @param shipClasses the ship classes to display
      */
-    public void update(@Nullable final ShipClass shipClass) {
+    public void update(@Nullable final Map<ShipClass, Integer> shipClasses) {
         clearValues();
 
-        if (shipClass != null) {
-            final Map<Module, Integer> modules = shipClass.getModules();
-            modules.keySet().forEach(module -> {
-                final Integer amountOfModule = modules.get(module);
-                addValueByType(shipClass.getOwner().getRaceType(), module, amountOfModule);
+        if (shipClasses != null) {
+            shipClasses.keySet().forEach(shipClass -> {
+                Integer amount = shipClasses.get(shipClass);
+                while (amount > 0) {
+                    final Map<Module, Integer> modules = shipClass.getModules();
+                    modules.keySet().forEach(module -> {
+                        final Integer amountOfModule = modules.get(module);
+                        addValueByType(shipClass.getOwner().getRaceType(), module, amountOfModule);
+                    });
+                    amount--;
+                }
             });
         } else {
             Arrays.stream(EModuleType.values()).forEach(eModuleType -> amountByModuleType.put(eModuleType, BigDecimal.ZERO));
@@ -74,6 +83,7 @@ public class ModuleValueTypeHorizontalDisplay extends HorizontalLayout implement
 
     /**
      * Adds the effective value by {@link EModuleType} to the stats display.
+     * Remember: Speeds will not added.
      *
      * @param raceType       the race type to calculate the effective value
      * @param module         the module which effect value is used
@@ -84,9 +94,23 @@ public class ModuleValueTypeHorizontalDisplay extends HorizontalLayout implement
             return;
         }
         final EModuleType moduleType = module.getModuleType();
+
         final int effectiveEffectValue = module.getEffectiveEffectValue(raceType);
+        final BigDecimal effectiveEffectValueAsBigD = new BigDecimal(effectiveEffectValue);
+
         final BigDecimal currentEffectValue = amountByModuleType.get(moduleType);
-        amountByModuleType.put(moduleType, currentEffectValue.add(new BigDecimal(effectiveEffectValue)).multiply(new BigDecimal(amountOfModule)));
+
+        BigDecimal effectiveResultingValue = BigDecimal.ZERO;
+        // it's only possible to reduce speed while the slowest ship defined this parameter
+        if (EModuleType.FTLPROPULSION == moduleType || EModuleType.PROPULSION == moduleType) {
+            final BigDecimal effectiveEffectValueByModuleAmount = effectiveEffectValueAsBigD.multiply(new BigDecimal(amountOfModule));
+            if (currentEffectValue.equals(BigDecimal.ZERO) || effectiveEffectValueByModuleAmount.compareTo(currentEffectValue) < 0) {
+                effectiveResultingValue = effectiveEffectValueByModuleAmount;
+            }
+        } else {
+            effectiveResultingValue = currentEffectValue.add(effectiveEffectValueAsBigD.multiply(new BigDecimal(amountOfModule)));
+        }
+        amountByModuleType.put(moduleType, effectiveResultingValue);
     }
 
     /**
@@ -100,18 +124,18 @@ public class ModuleValueTypeHorizontalDisplay extends HorizontalLayout implement
     }
 
     @Override
-    public void setValue(@Nullable final ShipClass value) {
+    public void setValue(@Nullable final Map<ShipClass, Integer> value) {
         this.update(value);
     }
 
     @Nullable
     @Override
-    public ShipClass getValue() {
+    public Map<ShipClass, Integer> getValue() {
         return null;
     }
 
     @Override
-    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ModuleValueTypeHorizontalDisplay, ShipClass>> listener) {
+    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ModuleValueTypePerFleetVerticalDisplay, Map<ShipClass, Integer>>> listener) {
         // not necessary
         return null;
     }

@@ -29,6 +29,7 @@
     create table fleet (
        idFleet integer not null auto_increment,
         name varchar(255) not null,
+        idMove integer,
         idPlanet integer,
         idStarsystem integer,
         idOwner integer not null,
@@ -98,7 +99,8 @@
         startIdStarsystem integer,
         targetIdPlanet integer,
         targetIdStarsystem integer,
-        primary key (idMove)
+        primary key (idMove),
+        check (startIdPlanet != targetIdPlanet)
     ) engine=InnoDB;
 
     create table planet (
@@ -187,6 +189,9 @@
     alter table construction 
        add constraint CONSTRUCTION_UK unique (idPlanet, idBuilding);
 
+    alter table fleet 
+       add constraint UK_duhimx7ydhmssl7vqp5w29yx0 unique (idMove);
+
     alter table planet 
        add constraint PLANET_UK unique (idStarSystem, idPlanet, xCoordinate, yCoordinate);
 
@@ -223,6 +228,11 @@
        references planet (idPlanet);
 
     alter table fleet 
+       add constraint FK5yy9whqh6562iaxuym0wrkjeq 
+       foreign key (idMove) 
+       references move (idMove);
+
+    alter table fleet 
        add constraint FKh6yguwrqsu1kah359o77c1b8h 
        foreign key (idPlanet) 
        references planet (idPlanet);
@@ -250,7 +260,8 @@
     alter table fleetcomposition 
        add constraint FK8xjjuy4dvxqwloaaf4wge42qw 
        foreign key (idFleet) 
-       references fleet (idFleet);
+       references fleet (idFleet) 
+       on delete cascade;
 
     alter table hull 
        add constraint FK65udyybp7syxvga5evxn8olhc 

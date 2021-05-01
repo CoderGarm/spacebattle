@@ -35,7 +35,11 @@ public enum EIconPath {
     private final static String FILE_EXTENSION_SEPARATOR = ".";
 
     @Nonnull
-    public static String getPath(@Nonnull final String directory, @Nonnull final String icon) {
-        return directory + EResolution.PX32.getResolution() + icon + DELIMITER + EIconType.COLOR.getComplement() + FILE_EXTENSION_SEPARATOR + FILE_EXTENSION;
+    public static String getPath(@Nonnull final String directory, @Nonnull final String icon, @Nonnull final String resolution) {
+        Preconditions.checkNotNull(directory, "directory shouldn't be null!");
+        Preconditions.checkNotNull(icon, "icon shouldn't be null!");
+        Preconditions.checkNotNull(resolution, "resolution shouldn't be null!");
+
+        return directory + resolution + icon + DELIMITER + EIconType.COLOR.getComplement() + FILE_EXTENSION_SEPARATOR + FILE_EXTENSION;
     }
 }

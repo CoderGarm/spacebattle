@@ -52,7 +52,7 @@ public class Planet extends AbstractEntityKey {
      * Describes the mining factors for every rescource.
      */
     @Nonnull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "idResourceFactor", updatable = false)
     private final ResourceDeposit resourceFactors = new ResourceDeposit(EResourceSubType.MININGFACTORS);
 
@@ -60,7 +60,7 @@ public class Planet extends AbstractEntityKey {
      * The amount of resources at this planet.
      */
     @Nonnull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "idResourceDeposit", updatable = false)
     private final ResourceDeposit resourceDeposit = new ResourceDeposit(EResourceSubType.DEPOSITS);
 

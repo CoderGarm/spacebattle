@@ -116,17 +116,17 @@ public class TickService {
 
     @Transactional(rollbackFor = Exception.class)
     public Tick doTick() {
-        Tick entity = new Tick();
-        List<Planet> planets = planetService.findAllColonized();
-        for (Planet p : planets) {
+        final Tick entity = new Tick();
+        final List<Planet> planets = planetService.findAllColonized();
+        for (final Planet p : planets) {
             tick(p);
         }
-        List<Move> movings = moveService.findAll();
-        for (Move m : movings) {
+        final List<Move> movings = moveService.findAll();
+        for (final Move m : movings) {
             boolean isDone = move(m);
             if (isDone) {
-                fleetService.save(m.getFleet());
                 moveService.delete(m);
+                fleetService.save(m.getFleet());
             } else {
                 moveService.save(m);
             }
@@ -146,11 +146,11 @@ public class TickService {
             return false;
         }
 
-        FleetOrbit targetOrbit = move.getTargetOrbit();
-        StarSystem targetSystem = targetOrbit.getSystem();
-        Planet targetPlanet = targetOrbit.getPlanet();
+        final FleetOrbit targetOrbit = move.getTargetOrbit();
+        final StarSystem targetSystem = targetOrbit.getSystem();
+        final Planet targetPlanet = targetOrbit.getPlanet();
 
-        Fleet fleet = move.getFleet();
+        final Fleet fleet = move.getFleet();
         fleet.setOrbit(new FleetOrbit(targetSystem, targetPlanet));
         fleetService.save(fleet);
         moveService.save(move);

@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
 /**
  * Displays the most basic data about an orbit like it's coordinates in it's parent map.
  */
-public class OrbitCoordinatesDisplay extends VerticalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<OrbitCoordinatesDisplay, Orbit>, Orbit> {
+public class OrbitCoordinatesVerticalDisplay extends VerticalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<OrbitCoordinatesVerticalDisplay, Orbit>, Orbit> {
 
     private static final String X_PREFIX = "X";
     private static final String Y_PREFIX = "Y";
@@ -24,7 +24,7 @@ public class OrbitCoordinatesDisplay extends VerticalLayout implements HasValue<
     @Nonnull
     private final Binder<Orbit> binder = new Binder<>(Orbit.class);
 
-    public OrbitCoordinatesDisplay() {
+    public OrbitCoordinatesVerticalDisplay() {
 
         final Label xOrbit = new Label();
         final ReadOnlyHasValue<String> xOrbitText = new ReadOnlyHasValue<>(xOrbit::setText);
@@ -72,7 +72,7 @@ public class OrbitCoordinatesDisplay extends VerticalLayout implements HasValue<
     }
 
     @Override
-    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<OrbitCoordinatesDisplay, Orbit>> listener) {
+    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<OrbitCoordinatesVerticalDisplay, Orbit>> listener) {
         // not necessary
         return null;
     }

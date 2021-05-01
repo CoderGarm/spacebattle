@@ -36,7 +36,7 @@ public class ShipClassCountDTO {
     }
 
     @Nonnull
-    public Integer getAmountNumeric() {
+    public Integer getCountNumeric() {
         return count;
     }
 
@@ -45,13 +45,13 @@ public class ShipClassCountDTO {
         return String.valueOf(count);
     }
 
-    public void setCount(@Nonnull final Integer count) {
+    public void setCountNumeric(@Nonnull final Integer count) {
         Preconditions.checkNotNull(count, "amount shouldn't be null!");
 
         this.count = count;
     }
 
-    public void setAmount(@Nonnull final String amount) {
+    public void setCount(@Nonnull final String amount) {
         Preconditions.checkNotNull(amount, "amount shouldn't be null!");
 
         this.count = Integer.parseInt(amount);
@@ -80,5 +80,30 @@ public class ShipClassCountDTO {
                 return count;
             }
         };
+    }
+
+    /**
+     * The key of this dto is the ship class and this has to be the truth for all cases where the dto is used.
+     *
+     * @param o the dto to check
+     * @return is equals or not
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ShipClassCountDTO)) return false;
+
+        ShipClassCountDTO that = (ShipClassCountDTO) o;
+
+        return shipClass.equals(that.shipClass);
+    }
+
+    /**
+     * The hash of this dto is the hash of it's key (the ship class)
+     * and this has to be the truth for all cases where the dto is used.
+     */
+    @Override
+    public int hashCode() {
+        return shipClass.hashCode();
     }
 }

@@ -24,10 +24,10 @@ public class PlanetDisplay extends VerticalLayout implements HasValue<AbstractFi
         final ReadOnlyHasValue<String> nameText = new ReadOnlyHasValue<>(name::setText);
         binder.forField(nameText).bind(Planet::getName, null);
 
-        final OrbitCoordinatesDisplay orbitCoordinatesDisplay = new OrbitCoordinatesDisplay();
-        binder.forField(orbitCoordinatesDisplay).bind(Planet::getOrbit, null);
+        final OrbitCoordinatesVerticalDisplay orbitCoordinatesVerticalDisplay = new OrbitCoordinatesVerticalDisplay();
+        binder.forField(orbitCoordinatesVerticalDisplay).bind(Planet::getOrbit, null);
 
-        add(name, orbitCoordinatesDisplay);
+        add(name, orbitCoordinatesVerticalDisplay);
     }
 
     @Override

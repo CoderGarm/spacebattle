@@ -7,6 +7,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import de.yuga.spacebattle.backend.enums.EIconPath;
 import de.yuga.spacebattle.backend.enums.EModuleType;
+import de.yuga.spacebattle.backend.enums.EResolution;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.EModuleValueDTO;
 
 import javax.annotation.Nonnull;
@@ -29,7 +30,7 @@ public class ModuleDataElementDisplay extends HorizontalLayout {
             EModuleType moduleType = wrapper.getModuleType();
             final String directory = moduleType.getDirectory();
             final String iconName = moduleType.getIconName();
-            return EIconPath.getPath(directory, iconName);
+            return EIconPath.getPath(directory, iconName, EResolution.PX16.getResolution());
         }, null);
         binder.forField(titleImageAlt).bind(wrapper -> wrapper.getModuleType().getName(), null);
         binder.forField(titleImageTitle).bind(wrapper -> wrapper.getModuleType().getName(), null);

@@ -9,6 +9,7 @@ import com.vaadin.flow.spring.annotation.UIScope;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClassComparator;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
 import de.yuga.spacebattle.backend.services.account.UserService;
@@ -34,7 +35,10 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @SpringComponent
@@ -362,26 +366,5 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
                     final int i = orderedKeys.indexOf(shipClass1);
                     subjectSelectorMenu.addComponentAtIndex(i, tab);
                 });
-    }
-
-    /**
-     * Sorts the list of ship classes from biggest hull to smallest.
-     */
-    private static class ShipClassComparator implements Comparator<ShipClass> {
-
-        @Override
-        public int compare(ShipClass o1, ShipClass o2) {
-            if (o1 == null || o2 == null || o1.getHull() == null || o2.getHull() == null) {
-                return 1;
-            }
-            if (o1.getHull().getConstructionCapacity() < o2.getHull().getConstructionCapacity()) {
-                return 1;
-            } else if (o1.getHull().getConstructionCapacity() == o2.getHull().getConstructionCapacity()) {
-                return 0;
-            } else if (o1.getHull().getConstructionCapacity() > o2.getHull().getConstructionCapacity()) {
-                return -1;
-            }
-            return 0;
-        }
     }
 }

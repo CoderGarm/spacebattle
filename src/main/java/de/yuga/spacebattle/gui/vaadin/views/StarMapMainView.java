@@ -1,11 +1,9 @@
 package de.yuga.spacebattle.gui.vaadin.views;
 
 import com.google.common.base.Preconditions;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.svg.Svg;
 import com.vaadin.flow.component.tabs.Tab;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import de.yuga.spacebattle.NotifySBUserException;
@@ -20,6 +18,8 @@ import de.yuga.spacebattle.gui.vaadin.misc.SBPageActionSelectorLayout;
 import de.yuga.spacebattle.gui.vaadin.orbitals.StarSystemDisplay;
 import de.yuga.spacebattle.gui.vaadin.orbitals.StarSystemLayout;
 import de.yuga.spacebattle.gui.vaadin.orbitals.StarSystemOverviewDisplay;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.Event;
 import org.vaadin.spring.events.EventBus;
@@ -36,7 +36,9 @@ import java.util.Set;
 @UIScope
 @Route(value = StarMapMainView.ROUTE, layout = MainView.class)
 @RouteAlias(value = StarMapMainView.ROUTE, layout = MainView.class)
-public class StarMapMainView extends SBPageActionSelectorLayout<StarSystemLayout> {
+public class StarMapMainView extends SBPageActionSelectorLayout<StarSystemLayout> implements BeforeLeaveObserver, BeforeEnterObserver {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StarMapMainView.class);
 
     @Nonnull
     public static final String ROUTE = "starmap";
@@ -99,20 +101,6 @@ public class StarMapMainView extends SBPageActionSelectorLayout<StarSystemLayout
         final Tab tab = getTabForComponentOfActionMenu(starSystemDisplay);
         readOnlyMap.put(tab, false);
         updateActionMenuUsability(readOnlyMap);
-
-        defineRefresh();
-    }
-
-    /**
-     * This refreshing is necessary because a {@link Svg} will clear it's own content if out of scope.
-     */
-    private void defineRefresh() {
-        UI.getCurrent().addBeforeEnterListener(event -> {
-            if (event.getNavigationTarget().getName().equals(this.getClass().getName())) {
-                starSystemOverviewDisplay.refresh();
-                starSystemDisplay.refresh();
-            }
-        });
     }
 
     /**
@@ -164,7 +152,29 @@ public class StarMapMainView extends SBPageActionSelectorLayout<StarSystemLayout
             final Tab selectedTab = event.getSelectedTab();
             final StarSystemLayout componentForTab = getComponentForTabOfActionMenu(selectedTab);
             content = setContent(componentForTab);
+            if (!(content instanceof StarSystemDisplay)) {
+                starSystemDisplay.closeDialogs();
+            }
             content.refresh();
         });
+    }
+
+    /**
+     * Detects if a @Route-ed page has left and fires the {@link BeforeLeaveEvent}.
+     *
+     * @param event the event
+     */
+    @Override
+    public void beforeLeave(BeforeLeaveEvent event) {
+        starSystemDisplay.closeDialogs();
+    }
+
+    /**
+     * This refreshing is necessary because a {@link Svg} will clear it's own content if out of scope.
+     */
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        starSystemOverviewDisplay.refresh();
+        starSystemDisplay.refresh();
     }
 }

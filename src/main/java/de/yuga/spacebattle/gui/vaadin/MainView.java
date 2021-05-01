@@ -3,7 +3,6 @@ package de.yuga.spacebattle.gui.vaadin;
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -75,7 +74,7 @@ import static de.yuga.spacebattle.gui.vaadin.ViewHelper.MAX_MENU_HEIGHT;
 @Route
 public class MainView extends AppLayout {
 
-    private String userNameLoginOverride = "yufiel";
+    private String userNameLoginOverride = "flashkid";
 
     /**
      * Strange Exception when the UID is another one.
@@ -220,9 +219,9 @@ public class MainView extends AppLayout {
         layout.add(tickDisplay);
         viewTitle = new H1();
         layout.add(viewTitle);
+        layout.add(userChoice);
         layout.add(wantToKnowMore);
         layout.add(this.logoutButton);
-        layout.add(userChoice);
         layout.add(this.loginButton);
         List<User> all = userService.findAll();
         if (all.isEmpty()) {
@@ -236,16 +235,15 @@ public class MainView extends AppLayout {
     private Button createLoginButton() {
         final Button login;
         if (userNameLoginOverride.isBlank()) {
-            login = new Button("Login", event -> loginOverlay.setOpened(true));
+            login = new Button("Login", e -> loginOverlay.setOpened(true));
         } else {
-            login = new Button("Login", event -> {
+            login = new Button("Login", e -> {
                 final User user = this.userService.login(userNameLoginOverride, "test");
                 if (user != null) {
                     this.userService.setLogin(user);
                     loginOverlay.close();
                     getUI().ifPresent(ui -> ui.navigate(DashboardView.class));
                     uiEventBus.publish(this, ESBEvent.LOGIN.name());
-                    updateMenu();
                 }
             });
         }
@@ -259,9 +257,7 @@ public class MainView extends AppLayout {
         return new Button("Logout", e -> {
             this.userService.setLogin(null);
             updateMenu();
-            // reload to throw away all caches
             getUI().ifPresent(ui -> ui.navigate(LoginView.class));
-            getUI().ifPresent(ui -> ui.getPage().reload());
         });
     }
 
@@ -313,7 +309,6 @@ public class MainView extends AppLayout {
         loginButton.setVisible(!isLoggedIn);
         logoutButton.setEnabled(isLoggedIn);
         logoutButton.setVisible(isLoggedIn);
-        userChoice.setVisible(!isLoggedIn);
         menu.getChildren().forEach(view -> {
             Tab tab = (Tab) view;
             this.tabs.keySet().forEach(menuTab -> {

@@ -18,13 +18,13 @@ public class ShipClassStatDisplay extends HorizontalLayout implements HasValue<A
     private final CostsDisplay costsDisplay;
 
     @Nonnull
-    private final ModuleValueTypeVerticalDisplay moduleValueTypeVerticalDisplay;
+    private final ModuleValueTypePerFleetVerticalDisplay moduleValueTypePerFleetVerticalDisplay;
 
     public ShipClassStatDisplay() {
         costsDisplay = new CostsDisplay();
-        moduleValueTypeVerticalDisplay = new ModuleValueTypeVerticalDisplay();
+        moduleValueTypePerFleetVerticalDisplay = new ModuleValueTypePerFleetVerticalDisplay();
 
-        add(costsDisplay, moduleValueTypeVerticalDisplay);
+        add(costsDisplay, moduleValueTypePerFleetVerticalDisplay);
     }
 
     /**
@@ -33,7 +33,7 @@ public class ShipClassStatDisplay extends HorizontalLayout implements HasValue<A
     private void clearValues() {
         costsDisplay.clear();
         costsDisplay.update();
-        moduleValueTypeVerticalDisplay.update(null);
+        moduleValueTypePerFleetVerticalDisplay.update(null);
     }
 
     /**
@@ -48,7 +48,7 @@ public class ShipClassStatDisplay extends HorizontalLayout implements HasValue<A
         if (shipClass != null) {
             final Map<ShipClass, Integer> shipClassAmountHashMap = new HashMap<>();
             shipClassAmountHashMap.put(shipClass, 1);
-            moduleValueTypeVerticalDisplay.update(shipClassAmountHashMap);
+            moduleValueTypePerFleetVerticalDisplay.update(shipClassAmountHashMap);
             costsDisplay.addCosts(shipClass.getCosts());
             if (shipClass.getHull() != null) {
                 costsDisplay.addCosts(shipClass.getHull().getCosts());

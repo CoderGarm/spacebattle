@@ -2,6 +2,7 @@ package de.yuga.spacebattle.gui.vaadin.orbitals.starmap;
 
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.svg.elements.AbstractPolyElement;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -18,7 +19,13 @@ class RestrictedFleetArea {
     private double maxY = Double.MIN_VALUE;
     private boolean isValid = false;
 
-    public RestrictedFleetArea(@Nonnull final List<AbstractPolyElement.PolyCoordinatePair> pointList) {
+    /**
+     * The fleet which occupies the here defined area.
+     */
+    @Nonnull
+    private Fleet fleetInSpace;
+
+    public RestrictedFleetArea(@Nonnull final List<AbstractPolyElement.PolyCoordinatePair> pointList, @Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(pointList, "pointList shouldn't be null!");
 
         pointList.forEach(polyPair -> {
@@ -39,6 +46,7 @@ class RestrictedFleetArea {
             }
             isValid = true;
         });
+        fleetInSpace = fleet;
     }
 
     public boolean isValid() {
@@ -73,5 +81,24 @@ class RestrictedFleetArea {
      */
     private double returnWithALittleSpace(final double coord) {
         return coord * 1;
+    }
+
+    @Nonnull
+    public Fleet getFleetInSpace() {
+        return fleetInSpace;
+    }
+
+    /**
+     * Checks if the given coordinates inside this specific area.
+     *
+     * @param xCoordinate the x coordinate
+     * @param yCoordinate the y coordinate
+     * @return <code>true</code> if the coordinates are inside, <code>false</code> otherwise
+     */
+    public boolean isInside(final double xCoordinate, final double yCoordinate) {
+        if (xCoordinate > minX && xCoordinate < maxX && yCoordinate > minY && yCoordinate < maxY) {
+            return true;
+        }
+        return false;
     }
 }

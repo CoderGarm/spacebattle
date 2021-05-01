@@ -3,16 +3,22 @@ package de.yuga.spacebattle.gui.vaadin.orbitals.starmap;
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.svg.Svg;
 import com.vaadin.flow.component.svg.elements.*;
+import de.yuga.spacebattle.backend.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
+import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.gui.vaadin.orbitals.details.Canvas;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.geo.Point;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.gui.vaadin.orbitals.starmap.ViewBoxDefinition.ECoordinateCrossType.PLANETARY_SYSTEM_CROSS;
@@ -33,6 +39,41 @@ public class ViewBoxDefinition {
      * A factor of 1.2 means that an axis from -10 to 10 is displayed as an axis from -12 to 12.
      */
     public static final double AXIS_ENLARGEMENT_FACTOR = 1.2;
+
+    /**
+     * CSS id prefix for every x axis.
+     */
+    public static final String AXIS_SCALE_X_ID = "axisScaleX";
+
+    /**
+     * CSS id prefix for every y axis.
+     */
+    public static final String AXIS_SCALE_Y_ID = "axisScaleY";
+
+    /**
+     * CSS id prefix for every x coord cross scale divider on the y axis.
+     */
+    public static final String X_LINE_ID = "xLine-";
+
+    /**
+     * CSS id prefix for every y coord cross scale divider on the x axis.
+     */
+    public static final String Y_LINE_ID = "yLine-";
+
+    /**
+     * CSS id prefix for every course plot.
+     */
+    public static final String COURSE_ID = "course-";
+
+    /**
+     * CSS id prefix extension for every course plot for already flown tracks.
+     */
+    public static final String BEHIND_ID = "behind";
+
+    /**
+     * CSS id prefix extension for every course plot for the track ahead.
+     */
+    public static final String BEFORE_ID = "before";
 
     /**
      * What this canvas is for, may be the universe itself, may be only for a star system.
@@ -95,6 +136,11 @@ public class ViewBoxDefinition {
     public static final int UNIVERSE_CENTER_RADIUS = 50;
 
     /**
+     * The radius of a planetary system in px in the canvas for a star system.
+     */
+    public static final double RADIUS_PLANETARY_SYSTEM = PLANET_RADIUS * 10;
+
+    /**
      * The color of the main coordinate cross' axis of the canvas.
      */
     private static final String MAIN_AXIS_COLOR = "white";
@@ -125,9 +171,14 @@ public class ViewBoxDefinition {
     public static final String TRANSPARENT_FILL_COLOR = "transparent";
 
     /**
-     * The color of the info box' outline.
+     * The course plot color for already flown tracks.
      */
-    public static final String INFO_BOX_STROKE_COLOR = "grey";
+    public static final String COURSE_PLOT_COLOR_BEHIND = "lightgray";
+
+    /**
+     * The course plot color for the track ahead.
+     */
+    public static final String COURSE_PLOT_COLOR_BEFORE = "lightgreen";
 
     /**
      * The canvas which is the base for all map related graphics.
@@ -148,7 +199,7 @@ public class ViewBoxDefinition {
     private final EViewBoxType eViewBoxType;
 
     /**
-     * The {@link #viewBoxFactor} is the factor which is calculated if the dimension of the displayed range will be calculated.
+     * The view box factor is the factor which is calculated if the dimension of the displayed range will be calculated.
      */
     private final double viewBoxFactor;
 
@@ -158,14 +209,45 @@ public class ViewBoxDefinition {
     private double biggestRadiusOfAllPlanetaryOrbits = Double.MIN_NORMAL;
 
     /**
+     * Holds the occupied area for each planet.
+     */
+    private final Map<OccupiedArea, Planet> occupiedAreaPlanetMap = new HashMap<>();
+
+    /**
+     * Holds the used slots in an orbit which are occupied by a fleet.
+     */
+    final Map<Orbit, List<RestrictedFleetArea>> usedFleetSlotsByOrbit = new HashMap<>();
+
+    /**
+     * Holds fleets to their representing svg shark polygons.
+     */
+    private final Map<Fleet, Polygon> fleetSharkMap = new HashMap<>();
+
+    /**
+     * Holds svg shark polygons to their fleet.
+     */
+    private final Map<Polygon, Fleet> fleetSharkFleetMap = new HashMap<>();
+
+    /**
+     * Holds all course plots for a given fleet.
+     */
+    private final Map<Fleet, List<Line>> fleetCourseMap = new HashMap<>();
+
+    /**
      * Creates the view box and coordinate system for the given canvas by the given orbits.
      *
      * @param starSystems all star systems to display in the universe star map
      * @param canvas      the canvas which holds the universe
      */
     public ViewBoxDefinition(@Nonnull final Set<StarSystem> starSystems, @Nonnull final Svg canvas) {
-        this(UNIVERSE, starSystems.stream().map(StarSystem::getOrbit).collect(Collectors.toSet()), canvas);
+        this.canvas = canvas;
+        this.eViewBoxType = UNIVERSE;
+        viewBoxFactor = getViewBoxFactor();
+        final Set<Orbit> orbitCollection = starSystems.stream().map(StarSystem::getOrbit).collect(Collectors.toSet());
+        adjustCanvas(orbitCollection);
+
         starSystems.forEach(this::createStarSystemCircle);
+
     }
 
     /**
@@ -175,44 +257,32 @@ public class ViewBoxDefinition {
      * @param canvas     the canvas which holds the star system
      */
     public ViewBoxDefinition(@Nonnull final StarSystem starSystem, @Nonnull final Svg canvas) {
-        this(STAR_SYSTEM, starSystem.getPlanets().stream().map(Planet::getOrbit).collect(Collectors.toSet()), canvas);
+        this.canvas = canvas;
+        this.eViewBoxType = STAR_SYSTEM;
+        viewBoxFactor = getViewBoxFactor();
+        final Set<Orbit> orbitCollection = starSystem.getPlanets().stream().map(Planet::getOrbit).collect(Collectors.toSet());
+        adjustCanvas(orbitCollection);
+
         final Set<Planet> planets = starSystem.getPlanets();
         planets.forEach(this::createPlanetCircle);
         final Map<Planet, Set<Fleet>> fleetInSystem = starSystem.getFleets().stream()
-                .filter(fleet -> fleet.getOrbit() != null)
+                .filter(fleet -> fleet.getOrbit() != null && fleet.getMove() == null)
                 .map(e -> new AbstractMap.SimpleEntry<>(e.getOrbit().getPlanet(), e))
                 .collect(Collectors.groupingBy(Map.Entry::getKey,
                         Collectors.mapping(Map.Entry::getValue, Collectors.toSet())));
-        planets.forEach(planet -> {
 
+        planets.forEach(planet -> {
             final Set<Fleet> fleetsInOrbit = fleetInSystem.get(planet);
             if (fleetsInOrbit != null) {
-                fleetsInOrbit.forEach(this::createFleetPolygon);
+                fleetsInOrbit.forEach(this::createFleetPolygonInOrbit);
             }
         });
-        setInfoTerminal(starSystem);
-    }
 
+        final Set<Fleet> movingFleets = starSystem.getFleets().stream()
+                .filter(fleet -> fleet.getMove() != null)
+                .collect(Collectors.toSet());
 
-    /**
-     * Creates the view box and coordinate system for the given canvas by the given orbits.
-     *
-     * @param eViewBoxType    for which kind of system the canvas is for
-     * @param planetaryOrbits the included orbits
-     * @param canvas          the canvas to update
-     */
-    public ViewBoxDefinition(@Nonnull final EViewBoxType eViewBoxType, @Nonnull final Collection<Orbit> planetaryOrbits, @Nonnull final Svg canvas) {
-        Preconditions.checkNotNull(eViewBoxType, "eViewBoxType shouldn't be null!");
-        Preconditions.checkNotNull(planetaryOrbits, "orbits shouldn't be null!");
-        Preconditions.checkArgument(!planetaryOrbits.isEmpty(), "orbits must not be empty");
-        Preconditions.checkNotNull(canvas, "canvas shouldn't be null!");
-
-        this.canvas = canvas;
-        this.eViewBoxType = eViewBoxType;
-        viewBoxFactor = getViewBoxFactor();
-        planetaryOrbits.forEach(this::update);
-        this.planetaryOrbits.addAll(planetaryOrbits);
-        adjustCanvas();
+        movingFleets.forEach(this::createMovingFleet);
     }
 
     /**
@@ -226,14 +296,41 @@ public class ViewBoxDefinition {
         final int xCoordinate = orbit.getXCoordinate();
         final int yCoordinate = orbit.getYCoordinate();
 
-        final double radius = getRadius(xCoordinate, yCoordinate);
+        final double radius = getDistance(xCoordinate, yCoordinate);
         if (radius > biggestRadiusOfAllPlanetaryOrbits) {
             biggestRadiusOfAllPlanetaryOrbits = radius;
         }
     }
 
-    private double getRadius(int xCoordinate, int yCoordinate) {
-        return Math.sqrt((xCoordinate * xCoordinate) + (yCoordinate * yCoordinate));
+    /**
+     * Returns the distance between the two given orbits.
+     *
+     * @param orbit1 the first orbit
+     * @param orbit2 the second orbit
+     * @return the distance
+     */
+    private double getOrbitalDistance(@Nonnull final Orbit orbit1, @Nonnull final Orbit orbit2) {
+        Preconditions.checkNotNull(orbit1, "orbit1 shouldn't be null!");
+        Preconditions.checkNotNull(orbit2, "orbit2 shouldn't be null!");
+
+        final int x1 = orbit1.getXCoordinate();
+        final int y1 = orbit1.getYCoordinate();
+
+        final int x2 = orbit2.getXCoordinate();
+        final int y2 = orbit2.getYCoordinate();
+
+        return getDistance(x2 - x1, y2 - y1);
+    }
+
+    /**
+     * Calculates the distance between thw two given coordinates.
+     *
+     * @param firstCoord  the first digit
+     * @param secondCoord the second digit
+     * @return the distance
+     */
+    private double getDistance(double firstCoord, double secondCoord) {
+        return Math.sqrt(Math.pow(firstCoord, 2) + Math.pow(secondCoord, 2));
     }
 
     /**
@@ -253,11 +350,16 @@ public class ViewBoxDefinition {
     /**
      * Puts all the stuff to the canvas and sets the initial view box.
      */
-    private void adjustCanvas() {
+    private void adjustCanvas(@Nonnull final Set<Orbit> orbitCollection) {
+        Preconditions.checkNotNull(orbitCollection, "orbitCollection shouldn't be null!");
+
+        orbitCollection.forEach(this::update);
+        this.planetaryOrbits.addAll(orbitCollection);
+
         switch (eViewBoxType) {
             case STAR_SYSTEM:
                 createVisibleOrbits();
-                createCenter();
+                createMapCenterObject();
                 createOrbitsCoordinateSystems();
                 break;
             case UNIVERSE:
@@ -277,7 +379,7 @@ public class ViewBoxDefinition {
     /**
      * Creates the sun or the universe center.
      */
-    private void createCenter() {
+    private void createMapCenterObject() {
 
         final String id;
         final String color;
@@ -312,7 +414,7 @@ public class ViewBoxDefinition {
             final int xCoord = Math.abs(orbit.getXCoordinate());
             final int yCoord = Math.abs(orbit.getYCoordinate());
 
-            final double radius = getRadius(xCoord, yCoord);
+            final double radius = getDistance(xCoord, yCoord);
 
             final Circle circle = new Circle("ellipsoid-" + orbit.getOrbitID(), radius);
             circle.setFillColor(TRANSPARENT_FILL_COLOR);
@@ -327,10 +429,8 @@ public class ViewBoxDefinition {
      */
     private void createOrbitsCoordinateSystems() {
         planetaryOrbits.forEach(orbit -> {
-            final double radius = PLANET_RADIUS * 10;
-
             final String id = "orbit-" + orbit.getOrbitID();
-            createCoordinateCross(PLANETARY_SYSTEM_CROSS, id, orbit, radius, PLANETARY_AXIS_COLOR);
+            createCoordinateCross(PLANETARY_SYSTEM_CROSS, id, orbit, RADIUS_PLANETARY_SYSTEM, PLANETARY_AXIS_COLOR);
         });
     }
 
@@ -360,8 +460,8 @@ public class ViewBoxDefinition {
         final double xAbsValueTo = enlargedRadius + xCoordinate;
         final double yAbsValueFrom = -1 * enlargedRadius + yCoordinate;
         final double yAbsValueTo = enlargedRadius + yCoordinate;
-        createLine("xLine-" + idSuffix, xAbsValueFrom, xAbsValueTo, yCoordinate, yCoordinate, color);
-        createLine("yLine-" + idSuffix, xCoordinate, xCoordinate, yAbsValueFrom, yAbsValueTo, color);
+        createLine(X_LINE_ID + idSuffix, new Point(xAbsValueFrom, yCoordinate), new Point(xAbsValueTo, yCoordinate), color);
+        createLine(Y_LINE_ID + idSuffix, new Point(xCoordinate, yAbsValueFrom), new Point(xCoordinate, yAbsValueTo), color);
     }
 
     /**
@@ -396,12 +496,10 @@ public class ViewBoxDefinition {
             final double yAbsValueFromScale = -1 * scale + yCoordinate;
             final double yAbsValueToScale = scale + yCoordinate;
 
-            final String idX = "axisScaleX" + idSuffix;
-            createLine(idX + countOfMiniLines, xAbsValueToScale, xAbsValueToScale, yAbsValueFrom, yAbsValueTo, color);
-            createLine(idX + (-1 * countOfMiniLines), xAbsValueFromScale, xAbsValueFromScale, yAbsValueFrom, yAbsValueTo, color);
-            final String idY = "axisScaleY" + idSuffix;
-            createLine(idY + countOfMiniLines, xAbsValueFrom, xAbsValueTo, yAbsValueToScale, yAbsValueToScale, color);
-            createLine(idY + (-1 * countOfMiniLines), xAbsValueFrom, xAbsValueTo, yAbsValueFromScale, yAbsValueFromScale, color);
+            createLine(AXIS_SCALE_X_ID + idSuffix + countOfMiniLines, new Point(xAbsValueToScale, yAbsValueFrom), new Point(xAbsValueToScale, yAbsValueTo), color);
+            createLine(AXIS_SCALE_X_ID + idSuffix + (-1 * countOfMiniLines), new Point(xAbsValueFromScale, yAbsValueFrom), new Point(xAbsValueFromScale, yAbsValueTo), color);
+            createLine(AXIS_SCALE_Y_ID + idSuffix + countOfMiniLines, new Point(xAbsValueFrom, yAbsValueToScale), new Point(xAbsValueTo, yAbsValueToScale), color);
+            createLine(AXIS_SCALE_Y_ID + idSuffix + (-1 * countOfMiniLines), new Point(xAbsValueFrom, yAbsValueFromScale), new Point(xAbsValueTo, yAbsValueFromScale), color);
         }
     }
 
@@ -430,7 +528,9 @@ public class ViewBoxDefinition {
                 break;
         }
 
-        if (scaleDividerNumber % bigDivider == 0) {
+        if (scaleDividerNumber <= 3) {
+            return 3;
+        } else if (scaleDividerNumber % bigDivider == 0) {
             return 50;
         } else if (scaleDividerNumber % smallDivider == 0) {
             return 30;
@@ -453,25 +553,29 @@ public class ViewBoxDefinition {
     /**
      * Creates a line (for the coordinate axis system).
      *
-     * @param id            the css selector for this line
-     * @param xAbsValueFrom the point on the x axis where the line starts
-     * @param xAbsValueTo   the point on the x axis where the line ends
-     * @param yAbsValueFrom the point on the y axis where the line starts
-     * @param yAbsValueTo   the point on the y axis where the line ends
-     * @param color         the color of the line stroke
+     * @param id    the css selector for this line
+     * @param start the point where the line starts
+     * @param end   the point where the line ends
+     * @param color the color of the line stroke
      */
     private void createLine(@Nonnull final String id,
-                            final double xAbsValueFrom,
-                            final double xAbsValueTo,
-                            final double yAbsValueFrom,
-                            final double yAbsValueTo,
+                            @Nonnull final Point start,
+                            @Nonnull final Point end,
                             @Nonnull final String color) {
         Preconditions.checkNotNull(id, "id shouldn't be null!");
+        Preconditions.checkNotNull(start, "start shouldn't be null!");
+        Preconditions.checkNotNull(end, "end shouldn't be null!");
         Preconditions.checkNotNull(color, "color shouldn't be null!");
 
+        final double startX = start.getX();
+        final double startY = start.getY();
+
+        final double endX = end.getX();
+        final double endY = end.getY();
+
         final Line line = new Line(id,
-                new AbstractPolyElement.PolyCoordinatePair(xAbsValueFrom, yAbsValueFrom),
-                new AbstractPolyElement.PolyCoordinatePair(xAbsValueTo, yAbsValueTo));
+                new AbstractPolyElement.PolyCoordinatePair(startX, startY),
+                new AbstractPolyElement.PolyCoordinatePair(endX, endY));
         line.setStroke(color, 1, Path.LINE_CAP.SQUARE, null);
         canvas.add(line);
     }
@@ -575,6 +679,8 @@ public class ViewBoxDefinition {
         circle.setFillColor("green");
         circle.setDraggable(true);
         canvas.add(circle);
+
+        occupiedAreaPlanetMap.put(new OccupiedArea(planet, circle, orbit, RADIUS_PLANETARY_SYSTEM), planet);
     }
 
     /**
@@ -600,19 +706,14 @@ public class ViewBoxDefinition {
     public static String createFleetID(@Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(fleet, FLEET_SELECTOR_ID_PREFIX + " shouldn't be null!");
 
-        return FLEET_SELECTOR_ID_PREFIX + "-" + fleet.hashCode();
+        return FLEET_SELECTOR_ID_PREFIX + "-" + fleet.getId();
     }
-
-    /**
-     * Holds the used slots in an orbit which are occupied by a fleet.
-     */
-    final Map<Orbit, List<RestrictedFleetArea>> usedFleetSlots = new HashMap<>();
 
     /**
      * Creates a triangle which represents a fleet.
      * Planet the fleet next to the planet in it's orbit in a random position.
      */
-    private void createFleetPolygon(@Nonnull final Fleet fleet) {
+    public void createFleetPolygonInOrbit(@Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(fleet, FLEET_SELECTOR_ID_PREFIX + " shouldn't be null!");
         Preconditions.checkArgument(fleet.getOrbit() != null, FLEET_SELECTOR_ID_PREFIX + "'s orbit shouldn't be null!");
 
@@ -623,7 +724,7 @@ public class ViewBoxDefinition {
         final int xCoordinate = orbit.getXCoordinate();
         final int yCoordinate = orbit.getYCoordinate();
 
-        final List<RestrictedFleetArea> restrictedFleetAreas = usedFleetSlots.computeIfAbsent(orbit, k -> new ArrayList<>());
+        final List<RestrictedFleetArea> restrictedFleetAreas = usedFleetSlotsByOrbit.computeIfAbsent(orbit, k -> new ArrayList<>());
 
         List<AbstractPolyElement.PolyCoordinatePair> points = new ArrayList<>();
         boolean breaker = true;
@@ -642,14 +743,149 @@ public class ViewBoxDefinition {
             if (counter > 100) break;
         }
 
-        final RestrictedFleetArea restrictedFleetArea = new RestrictedFleetArea(points);
+        final RestrictedFleetArea restrictedFleetArea = new RestrictedFleetArea(points, fleet);
         restrictedFleetAreas.add(restrictedFleetArea);
 
-        Polygon polygon = new Polygon(FLEET_SELECTOR_ID_PREFIX + "-icon" + createFleetID(fleet), points);
-        polygon.setFillColor(FLEET_ICON_FILL_COLOR);
-        polygon.setStroke(FLEET_STROKE_COLOR, 2, Path.LINE_CAP.SQUARE, Path.LINE_JOIN.ARCS);
-        polygon.setDraggable(true);
-        canvas.add(polygon);
+        final Polygon fleetShark = createFleetShark(fleet, points);
+
+        canvas.add(fleetShark);
+        fleetSharkMap.put(fleet, fleetShark);
+        fleetSharkFleetMap.put(fleetShark, fleet);
+    }
+
+    /**
+     * Creates a fleet shark aligned with the vector from the fleets start to it's target
+     * based on the amount of way which as already travelled.
+     *
+     * @param fleet the fleet in movement
+     */
+    public void createMovingFleet(@Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(fleet, FLEET_SELECTOR_ID_PREFIX + " shouldn't be null!");
+        Preconditions.checkArgument(fleet.getMove() != null, FLEET_SELECTOR_ID_PREFIX + "'s move shouldn't be null!");
+
+        final Move move = fleet.getMove();
+        final int moveDoneAtZero = move.getMoveDoneAtZero();
+
+        final FleetOrbit startOrbit = move.getStartOrbit();
+        final Planet startPlanet = startOrbit.getPlanet();
+        final Orbit startPlanetOrbit = startPlanet.getOrbit();
+
+        final FleetOrbit targetOrbit = move.getTargetOrbit();
+        final Planet targetPlanet = targetOrbit.getPlanet();
+        final Orbit targetPlanetOrbit = targetPlanet.getOrbit();
+
+        final int travelTime = DistanceCalculator.calculateTimeToTravel(fleet, targetPlanet);
+        double ticksToTravelAsFraction = ((double) moveDoneAtZero / (double) travelTime);
+
+        if (ticksToTravelAsFraction == 1) {
+            // case: 1-tick-run - just to place the fleet not on the orbit coord cross
+            ticksToTravelAsFraction = 0.6;
+        }
+
+        final Point point = calculatePositionOnTrack(ticksToTravelAsFraction, startPlanetOrbit, targetPlanetOrbit);
+        final double x = point.getX();
+        final double y = point.getY();
+
+        final Line line1 = printCoursePlot(COURSE_ID + BEHIND_ID + fleet.getId(),
+                new Point(startPlanetOrbit.getXCoordinate(), startPlanetOrbit.getYCoordinate()),
+                new Point(x, y),
+                COURSE_PLOT_COLOR_BEHIND);
+
+        final Line line2 = printCoursePlot(COURSE_ID + BEFORE_ID + fleet.getId(),
+                new Point(x, y),
+                new Point(targetPlanetOrbit.getXCoordinate(), targetPlanetOrbit.getYCoordinate()),
+                COURSE_PLOT_COLOR_BEFORE);
+
+        final List<AbstractPolyElement.PolyCoordinatePair> points = getPolyCoordinatePairsForFleet(x, y);
+        final Polygon fleetShark = createFleetShark(fleet, points);
+
+        // todo new RestrictedFleetArea for fleets in free space later
+
+        canvas.add(fleetShark);
+        fleetSharkMap.put(fleet, fleetShark);
+        fleetSharkFleetMap.put(fleetShark, fleet);
+
+        final List<Line> lines = fleetCourseMap.computeIfAbsent(fleet, k -> new ArrayList<>());
+        lines.add(line1);
+        lines.add(line2);
+    }
+
+    /**
+     * Prints the course plot by thd given values.
+     *
+     * @param id    the css id for this line
+     * @param start the starting point
+     * @param end   the target point
+     * @param color the color
+     * @return the plotted line
+     */
+    private Line printCoursePlot(@Nonnull final String id,
+                                 @Nonnull final Point start,
+                                 @Nonnull final Point end,
+                                 @Nonnull final String color) {
+        Preconditions.checkNotNull(id, "id shouldn't be null!");
+        Preconditions.checkNotNull(start, "start shouldn't be null!");
+        Preconditions.checkNotNull(end, "end shouldn't be null!");
+        Preconditions.checkNotNull(color, "color shouldn't be null!");
+
+        final double startX = start.getX();
+        final double startY = start.getY();
+
+        final double endX = end.getX();
+        final double endY = end.getY();
+
+        // reduces the length of the course plots about
+        final double lengthModifier = 0.1;
+
+        final double startXt = startX + (lengthModifier * (endX - startX));
+        final double startYt = startY + (lengthModifier * (endY - startY));
+
+        final double endXt = endX + (lengthModifier * (startX - endX));
+        final double endYt = endY + (lengthModifier * (startY - endY));
+
+        final Line line = new Line(id, new AbstractPolyElement.PolyCoordinatePair(startXt, startYt), new AbstractPolyElement.PolyCoordinatePair(endXt, endYt));
+
+        line.setStroke(color, 1, Path.LINE_CAP.ROUND, Path.LINE_JOIN.ROUND);
+        canvas.add(line);
+        return line;
+    }
+
+    /**
+     * Calculates a point on a vector from start to target with an already travelled track, represented by ticks.
+     *
+     * @param percentageFactorOfTrackTravelled the percentage as factor which are already travelled
+     * @param startPlanetOrbit                 the starting orbit
+     * @param targetPlanetOrbit                the target orbit
+     * @return the point on the track
+     */
+    private Point calculatePositionOnTrack(final double percentageFactorOfTrackTravelled,
+                                           @Nonnull final Orbit startPlanetOrbit,
+                                           @Nonnull final Orbit targetPlanetOrbit) {
+        Preconditions.checkNotNull(startPlanetOrbit, "startPlanetOrbit shouldn't be null!");
+        Preconditions.checkNotNull(targetPlanetOrbit, "targetPlanetOrbit shouldn't be null!");
+
+        final int startX = startPlanetOrbit.getXCoordinate();
+        final int startY = startPlanetOrbit.getYCoordinate();
+
+        final int targetX = targetPlanetOrbit.getXCoordinate();
+        final int targetY = targetPlanetOrbit.getYCoordinate();
+
+        // calculating resulting position by directional vector
+        final double resultX = startX + (percentageFactorOfTrackTravelled * (targetX - startX));
+        final double resultY = startY + (percentageFactorOfTrackTravelled * (targetY - startY));
+
+        return new Point(resultX, resultY);
+    }
+
+    @Nonnull
+    private Polygon createFleetShark(@Nonnull Fleet fleet, List<AbstractPolyElement.PolyCoordinatePair> points) {
+        Preconditions.checkNotNull(points, "points shouldn't be null!");
+
+        final Polygon fleetShark = new Polygon(createFleetID(fleet), points);
+        fleetShark.setFillColor(FLEET_ICON_FILL_COLOR);
+        fleetShark.setStroke(FLEET_STROKE_COLOR, 2, Path.LINE_CAP.SQUARE, Path.LINE_JOIN.ARCS); // todo where is stroke?
+        fleetShark.setDraggable(true);
+        return fleetShark;
     }
 
     /**
@@ -659,20 +895,22 @@ public class ViewBoxDefinition {
      * @param max the upper bound
      * @return the random number
      */
-    public double getRandomNumber(double min, double max) {
+    private double getRandomNumber(final double min, final double max) {
         return ((Math.random() * (max - min)) + min);
     }
 
     /**
      * Creates a poly line plot for a fleet triangle based on the given position.
-     * It must be ensured that the given base coordinates are in free space. Please take notice of some math magic to keep it clear.
+     * It must be ensured that the given base coordinates are in free space.
+     * Please take notice of some math magic to keep it clear.
      *
      * @param xCoordinate the base x coordinate
      * @param yCoordinate the base y coordinate
-     * @return the list of poly points
+     * @return the list of poly points which are in good relation to a planet's circle
      */
     @Nonnull
-    private List<AbstractPolyElement.PolyCoordinatePair> getPolyCoordinatePairsForFleet(final double xCoordinate, final double yCoordinate) {
+    private List<AbstractPolyElement.PolyCoordinatePair> getPolyCoordinatePairsForFleet(final double xCoordinate,
+                                                                                        final double yCoordinate) {
         final List<AbstractPolyElement.PolyCoordinatePair> points = new ArrayList<>();
 
         double xScale = PLANET_RADIUS * 100 / xCoordinate;
@@ -685,48 +923,32 @@ public class ViewBoxDefinition {
         final double trailEndYTop = peakYCoord + yScale * 7;
         final double trailEndYBottom = peakYCoord - yScale * 4;
 
-        /**
-         * The bigger the deeper is the shark fin of the icon
-         */
+        // The bigger the deeper is the shark fin of the icon.
         final double fin_depth_factor = 8;
 
-        points.add(new Polyline.PolyCoordinatePair(peakXCoord, peakYCoord));
-        points.add(new Polyline.PolyCoordinatePair(trailEndX, trailEndYTop));
-        points.add(new Polyline.PolyCoordinatePair(trailEndX - xScale * fin_depth_factor, trailEndYTop - (trailEndYTop - trailEndYBottom)));
-        points.add(new Polyline.PolyCoordinatePair(trailEndX, trailEndYBottom));
+        // to place the shark on the middle of the given x position and not at the peak
+        final double xShift = (trailEndX - peakXCoord) / 2;
+        // to place the shark on the middle of the given y position and not at the top
+        final double yShift = (trailEndYBottom - trailEndYTop) / 2.8;
+
+        // the toe x digit of the shark
+        final double xPeak = peakXCoord - xShift;
+        // the heel x digit of the shark
+        final double xTrail = trailEndX - xShift;
+        // the toe y digit of the shark
+        double peakY = peakYCoord + yShift;
+        // the upper y digit of the fin
+        double yTrailTop = trailEndYTop + yShift;
+        // the bottom y digit of the fin
+        double yTrailBottom = trailEndYBottom + yShift;
+        // the up front x digit of the fin's edge
+        double xFinSlim = xTrail - xScale * fin_depth_factor;
+
+        points.add(new Polyline.PolyCoordinatePair(xPeak, peakY));
+        points.add(new Polyline.PolyCoordinatePair(xTrail, yTrailTop));
+        points.add(new Polyline.PolyCoordinatePair(xFinSlim, yTrailTop - (trailEndYTop - trailEndYBottom)));
+        points.add(new Polyline.PolyCoordinatePair(xTrail, yTrailBottom));
         return points;
-    }
-
-    /**
-     * todo other window system? how to stick that on corner?
-     *
-     * @param starSystem
-     */
-    private void setInfoTerminal(@Nonnull final StarSystem starSystem) {
-        Preconditions.checkNotNull(starSystem, "starSystem shouldn't be null!");
-
-        final List<AbstractPolyElement.PolyCoordinatePair> points = new ArrayList<>();
-        points.add(new Polyline.PolyCoordinatePair(0, 0));
-        points.add(new Polyline.PolyCoordinatePair(500, 0));
-        points.add(new Polyline.PolyCoordinatePair(500, 500));
-        points.add(new Polyline.PolyCoordinatePair(150, 500));
-        points.add(new Polyline.PolyCoordinatePair(0, 350));
-
-        Polygon polygon = new Polygon("info-box", points);
-        polygon.setFillColor(TRANSPARENT_FILL_COLOR);
-        polygon.setStroke(INFO_BOX_STROKE_COLOR, 10, Path.LINE_CAP.SQUARE, Path.LINE_JOIN.ARCS);
-        polygon.move(getViewBoxMinX(), getViewBoxMinY() * 2);
-
-        canvas.add(polygon);
-
-        // name, orbit, planetcount
-        final Text text = new Text("text", "Sample text.");
-        text.setFontFamily("'Roboto', 'Noto', sans-serif");
-        text.setFillColor("transparent");
-        //text.move(x += space, y);
-        canvas.add(text);
-
-
     }
 
     /**
@@ -734,19 +956,87 @@ public class ViewBoxDefinition {
      * It's an ugly hack, but unless there is a working click listener, this must be enough.
      * <p>
      * In an ideal world there will be a click listener and these hack isn't needed.
+     * Main part of the drag listener workaround.
      *
      * @param element the element which must be re-centered
-     * @param orbit   the position where the element must be
      */
-    public void dragListenerWorkaround(@Nonnull final SvgElement element, @Nonnull final Orbit orbit) {
+    public void resetPositionOfSvgElement(@Nonnull final SvgElement element) {
         Preconditions.checkNotNull(element, "element shouldn't be null!");
-        Preconditions.checkNotNull(orbit, "orbit shouldn't be null!");
-        Preconditions.checkArgument(element.getClass().isAssignableFrom(Circle.class), "element must be a Svg Circle!");
 
-        final int xCoordinate = orbit.getXCoordinate();
-        final int yCoordinate = orbit.getYCoordinate();
-        canvas.remove(element);
-        ((Circle) element).center(xCoordinate, yCoordinate);
-        canvas.add(element);
+        canvas.update(element);
+    }
+
+    /**
+     * Removes the given fleets from the canvas und all related strorages.
+     *
+     * @param fleetsToRemove the fleets to remove
+     */
+    public void removeFleetSharksFromOrbits(@Nonnull final Set<Fleet> fleetsToRemove) {
+        Preconditions.checkNotNull(fleetsToRemove, "fleetsToRemove shouldn't be null!");
+
+        final Set<Polygon> fleetSharksToRemove = fleetsToRemove.stream().filter(fleetSharkMap::containsKey).map(fleetSharkMap::get).collect(Collectors.toSet());
+        fleetSharksToRemove.forEach(canvas::remove);
+        fleetSharksToRemove.forEach(fleetSharkFleetMap::remove);
+        fleetsToRemove.forEach(fleetSharkMap::remove);
+        fleetsToRemove.forEach(fleet -> {
+            final FleetOrbit fleetOrbit = fleet.getOrbit();
+            if (fleetOrbit != null) {
+                final Orbit orbit = fleetOrbit.getPlanet().getOrbit();
+                final List<RestrictedFleetArea> restrictedFleetAreas = usedFleetSlotsByOrbit.get(orbit);
+                restrictedFleetAreas.stream()
+                        .filter(r -> r.getFleetInSpace().equals(fleet))
+                        .findFirst()
+                        .ifPresent(restrictedFleetAreas::remove);
+            }
+        });
+    }
+
+    /**
+     * Returns the planet which occupies an are the coordinated may be inside.
+     *
+     * @param xCoordinate the xCoord
+     * @param yCoordinate the yCoord
+     * @return a planet which owns the area the coordinated are in or null
+     */
+    @Nullable
+    public Planet getOccupyingPlanet(final double xCoordinate, final double yCoordinate) {
+
+        final OccupiedArea area = occupiedAreaPlanetMap.keySet().stream()
+                .filter(occupiedArea -> occupiedArea.checkIfInside(xCoordinate, yCoordinate))
+                .findFirst().orElse(null);
+
+        if (area == null) {
+            return null;
+        }
+        return (Planet) area.getRelatedObject();
+    }
+
+    /**
+     * Returns the fleet which is inside the given planet's orbit and whom occupied area holds the given coordinates.
+     *
+     * @param planet      the planet which orbit should be searched
+     * @param xCoordinate the xCoordinate to search for
+     * @param yCoordinate the yCoordinate to search for
+     * @return the found (or not found) fleet to these coordinates in the planet's orbit
+     */
+    @Nullable
+    public Fleet getFleetByArea(@Nonnull final Planet planet, final double xCoordinate, final double yCoordinate) {
+        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+
+        final List<RestrictedFleetArea> restrictedFleetAreas = usedFleetSlotsByOrbit.get(planet.getOrbit());
+        final AtomicReference<RestrictedFleetArea> areaAtomicReference = new AtomicReference<>();
+        restrictedFleetAreas.stream().filter(r -> r.isInside(xCoordinate, yCoordinate)).findFirst().ifPresent(areaAtomicReference::set);
+        final RestrictedFleetArea restrictedFleetArea = areaAtomicReference.get();
+        if (restrictedFleetArea == null) {
+            return null;
+        }
+        return restrictedFleetArea.getFleetInSpace();
+    }
+
+    @Nonnull
+    public Set<Fleet> getAllFleetsInOrbit(@Nonnull final Planet planet) {
+        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+
+        return usedFleetSlotsByOrbit.computeIfAbsent(planet.getOrbit(), k -> new ArrayList<>()).stream().map(RestrictedFleetArea::getFleetInSpace).collect(Collectors.toSet());
     }
 }

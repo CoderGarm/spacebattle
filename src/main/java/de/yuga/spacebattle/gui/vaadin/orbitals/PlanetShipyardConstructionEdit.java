@@ -81,7 +81,7 @@ public class PlanetShipyardConstructionEdit extends PlanetLayout<Planet> impleme
                 if (value == null) {
                     throw new NotifySBUserException("There should be an accountable amount. Talk to the admin.");
                 }
-                value.setCount(0);
+                value.setCountNumeric(0);
                 shipClassCountEdit.setValue(value);
             });
             validateSubmitButton();
@@ -95,7 +95,7 @@ public class PlanetShipyardConstructionEdit extends PlanetLayout<Planet> impleme
     private void validateSubmitButton() {
         componentsMap.values().stream().map(ShipClassCountEdit::getValue)
                 .filter(Objects::nonNull)
-                .filter(shipClassCountDTO -> shipClassCountDTO.getAmountNumeric() > 0)
+                .filter(shipClassCountDTO -> shipClassCountDTO.getCountNumeric() > 0)
                 .findFirst()
                 .ifPresentOrElse(shipClassCountDTO -> setReadOnly(true), () -> setReadOnly(false));
     }

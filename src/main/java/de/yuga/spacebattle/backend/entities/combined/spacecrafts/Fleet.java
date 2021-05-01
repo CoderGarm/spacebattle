@@ -12,6 +12,8 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.EResourceSubType;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -46,10 +48,12 @@ public class Fleet extends AbstractEntityKey {
     @MapKeyJoinColumn(name = "idShipClass", referencedColumnName = "idShipClass")
     @Column(name = "amount")
     @CollectionTable(name = "fleetcomposition", joinColumns = @JoinColumn(name = "idFleet"))
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "idFleet")
     private final Map<ShipClass, Integer> ships = new HashMap<>();
 
     @Nonnull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "idResourceDeposit", updatable = false)
     private final ResourceDeposit resourceDeposit = new ResourceDeposit(EResourceSubType.DEPOSITS);
 
@@ -58,8 +62,8 @@ public class Fleet extends AbstractEntityKey {
     private FleetOrbit orbit;
 
     @Nullable
-    @OneToOne(cascade = CascadeType.MERGE)
-    @JoinTable(name = "move", inverseJoinColumns = @JoinColumn(name = "idMove", updatable = false))
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REMOVE, CascadeType.PERSIST})
+    @JoinColumn(name = "idMove", unique = true)
     private Move move;
 
     public Fleet() {
@@ -155,5 +159,20 @@ public class Fleet extends AbstractEntityKey {
         }
         Collections.sort(speed);
         return new BigDecimal(speed.get(0));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Fleet)) return false;
+
+        Fleet fleet = (Fleet) o;
+
+        return id == fleet.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id * 31;
     }
 }

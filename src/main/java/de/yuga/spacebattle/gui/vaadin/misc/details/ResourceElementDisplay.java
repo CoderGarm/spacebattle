@@ -6,6 +6,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import de.yuga.spacebattle.backend.enums.EIconPath;
+import de.yuga.spacebattle.backend.enums.EResolution;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 
 import javax.annotation.Nonnull;
@@ -28,7 +29,7 @@ public class ResourceElementDisplay extends HorizontalLayout {
             final EResourceType resourceType = wrapper.getResourceType();
             final String directory = resourceType.getDirectory();
             final String iconName = resourceType.getIconName();
-            return EIconPath.getPath(directory, iconName);
+            return EIconPath.getPath(directory, iconName, EResolution.PX32.getResolution());
         }, null);
         binder.forField(titleImageAlt).bind(wrapper -> wrapper.getResourceType().getSingularName(), null);
         binder.forField(titleImageTitle).bind(wrapper -> wrapper.getResourceType().getSingularName(), null);

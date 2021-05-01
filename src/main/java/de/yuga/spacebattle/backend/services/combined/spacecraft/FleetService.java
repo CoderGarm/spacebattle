@@ -10,14 +10,16 @@ import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.repositories.combined.spacecraft.FleetRepository;
-import de.yuga.spacebattle.backend.repositories.orbitals.PlanetRepository;
 import de.yuga.spacebattle.backend.repositories.turn.MoveRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class FleetService {
@@ -26,87 +28,64 @@ public class FleetService {
     private final FleetRepository fleetR;
 
     @Nonnull
-    private final PlanetRepository planetR;
-
-    @Nonnull
     private final MoveRepository moveR;
 
     @Autowired
     public FleetService(@Nonnull final FleetRepository fleetR,
-                        @Nonnull final PlanetRepository planetR,
                         @Nonnull final MoveRepository moveR) {
         Preconditions.checkNotNull(fleetR, "fleetR shouldn't be null!");
-        Preconditions.checkNotNull(planetR, "planetR shouldn't be null!");
         Preconditions.checkNotNull(moveR, "moveR shouldn't be null!");
 
         this.fleetR = fleetR;
-        this.planetR = planetR;
         this.moveR = moveR;
     }
 
     /**
      * Merges the second fleet into the first.
-     *
-     * @param idFleet1 id of the merge-into fleet
-     * @param idFleet2 if of the to-merge fleet
      */
-    public Fleet mergeFleets(final int idFleet1, final int idFleet2) {
-        Fleet fleet1 = fleetR.findById(idFleet1).orElse(null);
-        Fleet fleet2 = fleetR.findById(idFleet2).orElse(null);
+    @Transactional(rollbackFor = Exception.class)
+    public Fleet mergeFleets(@Nonnull final Fleet baseFleet, final Set<Fleet> fleetsToMerge) {
+        Preconditions.checkNotNull(baseFleet, "baseFleet shouldn't be null!");
+        Preconditions.checkNotNull(fleetsToMerge, "fleetsToMerge shouldn't be null!");
+        Preconditions.checkState(baseFleet.getOrbit() != null, "baseFleets orbit shouldn't be empty!");
 
-        if (fleet1 == null || fleet2 == null) {
-            throw new NotifySBUserException("Couldn't find at least one of the fleets.");
+        if (fleetsToMerge.isEmpty()) {
+            return baseFleet;
         }
 
-        FleetOrbit orbit = fleet1.getOrbit();
-        FleetOrbit orbit1 = fleet2.getOrbit();
-
-        if (!orbit.equals(orbit1)) {
-            throw new NotifySBUserException("haha, no.");
+        final FleetOrbit orbit = baseFleet.getOrbit();
+        if (fleetsToMerge.stream().anyMatch(fleetToMerge -> !orbit.equals(fleetToMerge.getOrbit()))) {
+            throw new NotifySBUserException("That's not possible, no.");
         }
-
-        Map<ShipClass, Integer> ships1 = fleet1.getShips();
-        Map<ShipClass, Integer> ships2 = fleet2.getShips();
-        for (ShipClass shipClass : ships2.keySet()) {
-            Integer amount2 = ships2.get(shipClass);
-            if (ships1.containsKey(shipClass)) {
-                Integer amount1 = ships1.get(shipClass);
-                ships1.put(shipClass, amount1 + amount2);
-            } else {
-                ships1.put(shipClass, amount2);
+        fleetsToMerge.forEach(fleet2 -> {
+            final Map<ShipClass, Integer> ships2 = fleet2.getShips();
+            for (ShipClass shipClass : ships2.keySet()) {
+                Integer amount2 = ships2.get(shipClass);
+                baseFleet.updateShips(shipClass, amount2);
             }
-        }
-        fleetR.delete(fleet2);
-        fleetR.save(fleet1);
-        return fleet1;
+            fleet2.getShips().clear();
+        });
+        fleetR.deleteAll(fleetsToMerge.stream().map(Fleet::getId).collect(Collectors.toSet()));
+        fleetR.save(baseFleet);
+        return baseFleet;
     }
 
-    public int calculateDistance(final int idFleet, final int idPlanet) {
-        Preconditions.checkState(idFleet < 1, "idFleet shouldn't be null!");
-        Preconditions.checkState(idPlanet < 1, "idPlanet shouldn't be null!");
+    /**
+     * Sets a fleet in motion to the target.
+     *
+     * @param fleet  the fleet which knows it's position
+     * @param target the target
+     * @return the fleet in motion
+     */
+    public Fleet moveFleet(@Nonnull final Fleet fleet, @Nonnull final Planet target) {
+        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+        Preconditions.checkNotNull(target, "target shouldn't be null!");
 
-        Fleet fleet = fleetR.findById(idFleet).orElse(null);
-        Planet planet = planetR.findById(idPlanet).orElse(null);
-        if (fleet == null || planet == null) {
-            throw new NotifySBUserException("You should chose existing entities.");
-        }
-        int calculatedDistance = DistanceCalculator.calculateDistance(fleet, planet);
-        return calculatedDistance;
-    }
-
-    public Move moveFleet(final int idFleet, final int idPlanet) {
-        Preconditions.checkState(idFleet < 1, "idFleet shouldn't be null!");
-        Preconditions.checkState(idPlanet < 1, "idPlanet shouldn't be null!");
-
-        Fleet fleet = fleetR.findById(idFleet).orElse(null);
-        Planet planet = planetR.findById(idPlanet).orElse(null);
-        if (fleet == null || planet == null) {
-            throw new NotifySBUserException("You should chose existing entities.");
-        }
-        int calculatedDistance = DistanceCalculator.calculateDistance(fleet, planet);
-        Move move = new Move(fleet, planet, calculatedDistance);
-        moveR.save(move);
-        return move;
+        final int calculatedDistance = DistanceCalculator.calculateTimeToTravel(fleet, target);
+        final Move move = new Move(fleet, target, calculatedDistance);
+        fleet.setMove(move);
+        fleetR.save(fleet);
+        return fleet;
     }
 
     public List<Fleet> findAllFleets() {
@@ -127,6 +106,12 @@ public class FleetService {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
         fleetR.save(fleet);
+    }
+
+    public Fleet saveAndFlush(@Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+
+        return fleetR.saveAndFlush(fleet);
     }
 
     public void delete(@Nonnull final Fleet fleet) {

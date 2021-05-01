@@ -61,3 +61,7 @@ vaadin-tab[selected] {
     /*color: var(--lumo-primary-text-color);*/
 }
 
+vaadin-button[disabled] {
+    color: darkgray;
+}
+

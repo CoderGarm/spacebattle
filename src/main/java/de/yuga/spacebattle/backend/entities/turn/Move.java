@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -17,6 +18,7 @@ import javax.validation.constraints.NotNull;
 })
 @Entity
 @Table(name = "move")
+@Check(constraints = "startIdPlanet != targetIdPlanet")
 @AttributeOverride(name = "id", column = @Column(name = "idMove"))
 public class Move extends AbstractEntityKey {
 
@@ -28,7 +30,7 @@ public class Move extends AbstractEntityKey {
 
     @Nonnull
     @NotNull
-    @OneToOne(cascade = CascadeType.MERGE)
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "idFleet", updatable = false)
     private Fleet fleet;
 
@@ -63,6 +65,7 @@ public class Move extends AbstractEntityKey {
                 final int moveDoneAtZero) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
         Preconditions.checkNotNull(target, "target shouldn't be null!");
+        Preconditions.checkArgument(fleet.getOrbit() != null, "The fleet must have an orbit currently");
 
         this.owner = fleet.getOwner();
         this.fleet = fleet;

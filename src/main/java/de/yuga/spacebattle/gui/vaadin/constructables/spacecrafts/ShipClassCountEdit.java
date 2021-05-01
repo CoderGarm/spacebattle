@@ -10,7 +10,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
-import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ModuleValueTypeHorizontalDisplay;
+import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ModuleValueTypePerShipHorizontalDisplay;
 import de.yuga.spacebattle.gui.vaadin.misc.details.NumericField;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.ShipClassCountDTO;
 
@@ -33,10 +33,10 @@ public class ShipClassCountEdit extends VerticalLayout implements HasValue<Abstr
         final ReadOnlyHasValue<String> moduleNameReadOnly = new ReadOnlyHasValue<>(name::setText);
         binderShipClass.forField(moduleNameReadOnly).bind(ShipClassCountDTO::getName, null);
 
-        final ModuleValueTypeHorizontalDisplay moduleValueTypeVerticalDisplay = new ModuleValueTypeHorizontalDisplay();
+        final ModuleValueTypePerShipHorizontalDisplay moduleValueTypeVerticalDisplay = new ModuleValueTypePerShipHorizontalDisplay();
         binderShipClass.forField(moduleValueTypeVerticalDisplay).bind(ShipClassCountDTO::getShipClass, null);
 
-        binderShipClass.forField(amountField).bind(ShipClassCountDTO::getCount, ShipClassCountDTO::setAmount);
+        binderShipClass.forField(amountField).bind(ShipClassCountDTO::getCount, ShipClassCountDTO::setCount);
 
         amountField.addClassName("numeric-before-amount");
         HorizontalLayout horizontalLayout = new HorizontalLayout();

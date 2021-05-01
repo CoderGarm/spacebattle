@@ -43,7 +43,7 @@ public class Module extends AbstractEntityKey {
     private String description;
 
     @Nonnull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "idCosts", updatable = false)
     private final ResourceDeposit costs = new ResourceDeposit(EResourceSubType.COSTS);
 

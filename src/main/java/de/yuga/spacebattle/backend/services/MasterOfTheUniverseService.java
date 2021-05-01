@@ -39,8 +39,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static de.yuga.spacebattle.gui.vaadin.misc.ViewBoxDefinition.STAR_RADIUS;
-import static de.yuga.spacebattle.gui.vaadin.misc.ViewBoxDefinition.UNIVERSE_CENTER_RADIUS;
+import static de.yuga.spacebattle.gui.vaadin.orbitals.starmap.ViewBoxDefinition.STAR_RADIUS;
+import static de.yuga.spacebattle.gui.vaadin.orbitals.starmap.ViewBoxDefinition.UNIVERSE_CENTER_RADIUS;
 
 /**
  * The master of all. Do do all the dev-stuff which could be removed or placed somewhere else.
