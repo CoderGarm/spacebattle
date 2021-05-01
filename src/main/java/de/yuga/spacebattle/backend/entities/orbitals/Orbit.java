@@ -140,4 +140,8 @@ public class Orbit implements Comparable<Orbit> {
         }
         return 1;
     }
+
+    public static Orbit getCenterOrbit() {
+        return new Orbit(0, 0);
+    }
 }

@@ -5,13 +5,14 @@ import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
 import javax.persistence.Embeddable;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
 @Embeddable
 public class FleetOrbit {
 
     @Nonnull
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "idStarsystem", referencedColumnName = "idStarsystem")
     private StarSystem system;
 

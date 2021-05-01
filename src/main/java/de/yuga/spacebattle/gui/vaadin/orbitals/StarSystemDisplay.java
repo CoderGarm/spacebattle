@@ -30,7 +30,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static de.yuga.spacebattle.gui.vaadin.misc.ViewBoxDefinition.EViewBoxType.STAR_SYSTEM;
+import static de.yuga.spacebattle.gui.vaadin.orbitals.starmap.ViewBoxDefinition.FLEET_SELECTOR_ID_PREFIX;
+import static de.yuga.spacebattle.gui.vaadin.orbitals.starmap.ViewBoxDefinition.PLANET_SELECTOR_ID_PREFIX;
 
 /**
  * Home of a star system map and it's functionality.
@@ -48,6 +49,9 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
     private final Map<String, PlanetDisplay> planetMap = new HashMap<>();
 
     @Nonnull
+    private final Map<String, Fleet> fleetMap = new HashMap<>();
+
+    @Nonnull
     private final Scroller scroller = new Scroller();
 
     @Nonnull
@@ -55,6 +59,12 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
 
     @Nonnull
     private Svg canvas = startCanvas();
+
+    /**
+     * This non-null is a prerequisite be cause this is an absolute requirement and a NPE is not a shame if this is not there.
+     */
+    @Nonnull
+    private ViewBoxDefinition viewBoxDefinition;
 
     public StarSystemDisplay() {
 
@@ -83,17 +93,23 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
         mainStatsLayout.setWidthFull();
 
         scroller.addClassName("mapScroller");
-        add(mainStatsLayout, scroller);
+        add(/*mainStatsLayout,*/ scroller);
     }
 
     private Svg startCanvas() {
-        final Svg canvas = ViewBoxDefinition.createMapCanvas("planetMapID");
+        final Svg canvas = ViewBoxDefinition.createStarMapCanvas("planetMapID");
         // todo known issue: drag listener sucks if no movement must be possible
         canvas.addDragStartListener(event -> {
-            final String id = event.getElement().getId();
-            final PlanetDisplay planetDisplay = planetMap.get(id);
-            content.setContent(planetDisplay);
-            NotificationHelper.notify("yeah, its not a feature", 500);
+            final SvgElement element = event.getElement();
+            final String id = element.getId();
+            if (id.startsWith(PLANET_SELECTOR_ID_PREFIX)) {
+                final PlanetDisplay planetDisplay = planetMap.get(id);
+                content.setContent(planetDisplay);
+                final Orbit orbit = planetDisplay.getValue().getOrbit();
+                viewBoxDefinition.dragListenerWorkaround(element, orbit);
+            } else if (id.startsWith(FLEET_SELECTOR_ID_PREFIX)) {
+                // todo replace dead end by some action possibilities
+            }
         });
         scroller.setContent(canvas);
         return canvas;
@@ -110,7 +126,7 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
 
         final Set<Planet> planets = value.getPlanets();
         final Set<String> orbitIDs = planets.stream()
-                .map(this::createPlanetID).collect(Collectors.toSet());
+                .map(ViewBoxDefinition::createPlanetID).collect(Collectors.toSet());
 
         final Set<String> toRemove = planetMap.keySet().stream()
                 .filter(id -> !orbitIDs.contains(id)).collect(Collectors.toSet());
@@ -118,7 +134,7 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
         planetMap.keySet().removeAll(toRemove);
 
         planets.forEach(planet -> {
-            final String orbitID = createPlanetID(planet);
+            final String orbitID = ViewBoxDefinition.createPlanetID(planet);
             PlanetDisplay planetDisplay = planetMap.get(orbitID);
             if (planetDisplay == null) {
                 planetDisplay = new PlanetDisplay();
@@ -127,32 +143,13 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
             planetDisplay.setValue(planet);
         });
 
-        final Set<Orbit> orbits = planetMap.values().stream()
-                .map(PlanetDisplay::getValue)
-                .map(Planet::getOrbit)
-                .collect(Collectors.toSet());
-
-        new ViewBoxDefinition(STAR_SYSTEM, orbits, canvas);
-        planetMap.forEach((id, planetDisplay) -> {
-            final Planet planet = planetDisplay.getValue();
-            final String circleID = createPlanetID(planet);
-            final Orbit orbit = planet.getOrbit();
-            final Circle circle = new Circle(circleID, ViewBoxDefinition.PLANET_RADIUS);
-            int xCoordinate = orbit.getXCoordinate();
-            int yCoordinate = orbit.getYCoordinate();
-            circle.center(xCoordinate, yCoordinate);
-            circle.setFillColor("green");
-            circle.setDraggable(true);
-
-            canvas.add(circle);
+        value.getFleets().forEach(fleet -> {
+            final String fleetID = ViewBoxDefinition.createFleetID(fleet);
+            fleetMap.putIfAbsent(fleetID, fleet);
         });
     }
 
-    @Nonnull
-    private String createPlanetID(@Nonnull final Planet planet) {
-        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
-
-        return "planet-" + planet.hashCode();
+        viewBoxDefinition = new ViewBoxDefinition(value, canvas);
     }
 
     @Override

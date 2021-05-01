@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.entities.orbitals;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -39,6 +40,10 @@ public class StarSystem extends AbstractEntityKey {
     @OneToMany(mappedBy = "system", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     private final Set<Planet> planets = new HashSet<>();
 
+    @Nonnull
+    @OneToMany(mappedBy = "orbit.system", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    private Set<Fleet> fleets = new HashSet<>();
+
     public StarSystem() {
     }
 
@@ -63,6 +68,17 @@ public class StarSystem extends AbstractEntityKey {
     @Nonnull
     public Orbit getOrbit() {
         return orbit;
+    }
+
+    @Nonnull
+    public Set<Fleet> getFleets() {
+        return fleets;
+    }
+
+    public void setFleets(@Nonnull final Set<Fleet> fleets) {
+        Preconditions.checkNotNull(fleets, "fleets shouldn't be null!");
+
+        this.fleets = fleets;
     }
 
     public void setOrbit(@Nonnull final Orbit orbit) {
