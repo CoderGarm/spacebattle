@@ -115,10 +115,18 @@ public class ShipClassService {
         return shipClassRepository.save(shipClass);
     }
 
+    @Nonnull
     public ShipClass save(@Nonnull final ShipClass entity) {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
 
         return shipClassRepository.save(entity);
+    }
+
+    @Nonnull
+    public ShipClass saveAndFlush(@Nonnull final ShipClass entity) {
+        Preconditions.checkNotNull(entity, "entity shouldn't be null!");
+
+        return shipClassRepository.saveAndFlush(entity);
     }
 
     public void delete(@Nonnull final ShipClass entity) {

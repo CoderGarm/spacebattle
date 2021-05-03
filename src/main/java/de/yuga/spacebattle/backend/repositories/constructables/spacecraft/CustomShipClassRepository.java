@@ -10,4 +10,6 @@ public interface CustomShipClassRepository {
     List<ShipClass> findAllShipClasses();
 
     List<ShipClass> findAllShipClassesByOwner(User user);
+
+    ShipClass saveAndFlush(ShipClass shipClass);
 }

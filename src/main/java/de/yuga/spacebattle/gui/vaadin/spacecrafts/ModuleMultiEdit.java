@@ -5,6 +5,7 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.shared.Registration;
+import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.ModuleCountDTO;
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
     private ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ModuleMultiEdit, Map<Module, Integer>>> listener;
 
     @Nonnull
-    private Map<Module, Integer> possibleModules = new HashMap<>();
+    private final Map<Module, Integer> possibleModules = new HashMap<>();
 
     public ModuleMultiEdit() {
     }
@@ -52,24 +53,29 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
             }
         });
 
-        possibleModules.forEach((module, zero) -> {
+        modules.forEach((module, zero) -> {
+            possibleModules.put(module, zero);
             ModuleCountEdit moduleEdit = componentMap.get(module);
             if (moduleEdit != null) {
-                moduleEdit.update(new ModuleCountDTO(module, zero));
+                moduleEdit.setValue(new ModuleCountDTO(module, zero));
             } else {
                 moduleEdit = new ModuleCountEdit();
                 if (module.getModuleType().isMandatory()) {
                     moduleEdit.setRequiredIndicatorVisible(true);
                 }
-                moduleEdit.update(new ModuleCountDTO(module, zero));
+                moduleEdit.setValue(new ModuleCountDTO(module, zero));
                 componentMap.put(module, moduleEdit);
                 final ModuleMultiEdit moduleMultiEdit = this;
                 ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ModuleCountEdit, ModuleCountDTO>> valueChangeListener = new ValueChangeListener() {
                     @Override
                     public void valueChanged(ValueChangeEvent event) { // todo this is shitty shit shit
-                        Map<Module, Integer> collect = componentMap.values().stream().collect(Collectors.toMap(o -> o.getValue().getModule(), o -> o.getValue().getCountNumeric()));
+                        final Map<Module, Integer> userSelectedModules = componentMap.values().stream().collect(Collectors.toMap(o -> o.getValue().getModule(), o -> o.getValue().getCountNumeric()));
                         final AbstractField.ComponentValueChangeEvent<ModuleMultiEdit, Map<Module, Integer>> changeEvent =
-                                new AbstractField.ComponentValueChangeEvent<ModuleMultiEdit, Map<Module, Integer>>(moduleMultiEdit, moduleMultiEdit, collect, false);
+                                new AbstractField.ComponentValueChangeEvent<>(moduleMultiEdit, moduleMultiEdit, userSelectedModules, false);
+                        if (listener == null) {
+                            LOGGER.info("The listener is broken.");
+                            throw new NotifySBUserException("Please contact the admin and say him, that the listener is broken.");
+                        }
                         listener.valueChanged(changeEvent);
                     }
                 };
@@ -99,11 +105,7 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
     public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ModuleMultiEdit, Map<Module, Integer>>> listener) {
 
         this.listener = listener;
-        return new Registration() {
-            @Override
-            public void remove() {
-
-            }
+        return (Registration) () -> {
         };
     }
 

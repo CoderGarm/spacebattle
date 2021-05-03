@@ -55,6 +55,9 @@ public class PlanetShipyardConstructionEdit extends PlanetLayout<Planet> impleme
     private final Button submit;
 
     @Nonnull
+    private final Button clear;
+
+    @Nonnull
     private Map<ShipClass, Integer> shipJobPayload = new HashMap<>();
 
     public PlanetShipyardConstructionEdit() {
@@ -71,9 +74,8 @@ public class PlanetShipyardConstructionEdit extends PlanetLayout<Planet> impleme
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             uiEventBus.publish(this, ESBEvent.ORBITAL_CONSTRUCTION_JOB_BUILDING_START.name());
         });
-        validateSubmitButton();
 
-        final Button clear = new Button("Clear display", event -> {
+        clear = new Button("Clear display", event -> {
             componentsMap.values().forEach(shipClassCountEdit -> {
                 ShipClassCountDTO value = shipClassCountEdit.getValue();
                 if (value == null) {
@@ -87,6 +89,7 @@ public class PlanetShipyardConstructionEdit extends PlanetLayout<Planet> impleme
 
         final HorizontalLayout buttonBar = new HorizontalLayout(submit, clear);
         add(title, verticalLayout, buttonBar);
+        validateSubmitButton();
     }
 
     private void validateSubmitButton() {
@@ -136,6 +139,7 @@ public class PlanetShipyardConstructionEdit extends PlanetLayout<Planet> impleme
         submit.setEnabled(!readOnly);
         final String text = !readOnly ? BUILD : JOB_IN_PROGRESS;
         submit.setText(text);
+        clear.setEnabled(!readOnly);
         componentsMap.values().forEach(shipClassCountEdit -> shipClassCountEdit.setReadOnly(readOnly));
     }
 

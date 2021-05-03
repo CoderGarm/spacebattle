@@ -41,7 +41,8 @@ public class ShipClassStatDisplay extends HorizontalLayout implements HasValue<A
      *
      * @param shipClass the ship class to display
      */
-    public void update(@Nullable final ShipClass shipClass) {
+    @Override
+    public void setValue(@Nullable final ShipClass shipClass) {
         clearValues();
 
         if (shipClass != null) {
@@ -56,11 +57,6 @@ public class ShipClassStatDisplay extends HorizontalLayout implements HasValue<A
             costsDisplay.clear();
         }
         costsDisplay.update();
-    }
-
-    @Override
-    public void setValue(@Nullable final ShipClass value) {
-        this.update(value);
     }
 
     @Nullable

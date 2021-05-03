@@ -9,6 +9,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
+import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.gui.vaadin.misc.details.NumericField;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.ModuleCountDTO;
 
@@ -42,7 +43,8 @@ public class ModuleCountEdit extends HorizontalLayout implements HasValue<Abstra
         add(amountField, name, description);
     }
 
-    public void update(@Nonnull final ModuleCountDTO moduleCountDTO) {
+    @Override
+    public void setValue(@Nonnull final ModuleCountDTO moduleCountDTO) {
         Preconditions.checkNotNull(moduleCountDTO, "moduleCountWrapper shouldn't be null!");
 
         if (this.moduleCountDTO == null) {
@@ -52,20 +54,20 @@ public class ModuleCountEdit extends HorizontalLayout implements HasValue<Abstra
         this.moduleCountDTO = moduleCountDTO;
     }
 
-    @Override
-    public void setValue(ModuleCountDTO value) {
-        this.update(value);
-    }
-
     /**
      * Returns the wrapper which should contain the original module itself and the possibly modified values.
      *
      * @return the wrapper
      */
-    @Nullable
+    @Nonnull
     @Override
     public ModuleCountDTO getValue() {
-        return binderModule.getBean();
+        ModuleCountDTO bean = binderModule.getBean();
+        if (bean == null) {
+            // todo remove if proved
+            throw new NotifySBUserException("this shouldn't be empty - check it");
+        }
+        return bean;
     }
 
     @Override

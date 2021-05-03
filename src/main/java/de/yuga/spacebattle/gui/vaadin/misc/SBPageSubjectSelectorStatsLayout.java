@@ -14,6 +14,8 @@ import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.misc.details.StatsDrawer;
 import de.yuga.spacebattle.gui.vaadin.views.PlanetMainView;
 import de.yuga.spacebattle.gui.vaadin.views.ShipClassMainView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -171,13 +173,21 @@ public abstract class SBPageSubjectSelectorStatsLayout<T> extends FlexLayout {
     /**
      * Returns a Tab for a given subject.
      *
-     * @param subject nonnull subject
+     * @param subject the subject
      * @return Optional of a tab
      */
-    public Optional<Tab> getTabForSubject(@Nonnull T subject)
-    {
-        final Optional<Map.Entry<Tab, T>> first = subjectSelectorObject.entrySet().stream().filter(e -> e.getValue().equals(subject)).findFirst();
-        return first.map(Map.Entry::getKey);
+    public Optional<Tab> getTabForSubject(@Nullable T subject) {
+
+
+        return subjectSelectorObject.entrySet().stream()
+                .filter(e -> {
+                    if (e.getValue() == null && subject == null) {
+                        return true;
+                    }
+                    return e.getValue() != null && e.getValue().equals(subject);
+                })
+                .findFirst()
+                .map(Map.Entry::getKey);
     }
 
     /**
@@ -197,8 +207,6 @@ public abstract class SBPageSubjectSelectorStatsLayout<T> extends FlexLayout {
         }
         return tab;
     }
-
-
 
     /**
      * Sets and relate a selector tab to it's corresponding object.
@@ -270,13 +278,8 @@ public abstract class SBPageSubjectSelectorStatsLayout<T> extends FlexLayout {
 
         Set<Tab> subjectTabs = tabs.getChildren().map(Tab.class::cast).collect(Collectors.toSet());
         if (subjectTabs.contains(tab)) {
-            tabs.getChildren().forEach(component -> {
-                Tab subjectTab = (Tab) component;
-                if (tab == subjectTab) {
-                    int i = tabs.indexOf(subjectTab);
-                    tabs.setSelectedIndex(i);
-                }
-            });
+            int i = tabs.indexOf(tab);
+            tabs.setSelectedIndex(i);
         }
     }
 

@@ -1,21 +1,27 @@
 package de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts;
 
 import com.google.common.base.Preconditions;
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.BindingValidationStatus;
+import com.vaadin.flow.data.binder.ErrorLevel;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
+import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
-import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
 import de.yuga.spacebattle.backend.validators.base.CustomValidatorFactory;
+import de.yuga.spacebattle.gui.vaadin.NotificationHelper;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
-import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ShipClassDTO;
+import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ShipClassEditDTO;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.HullDisplay;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.ModuleMultiEdit;
+import de.yuga.spacebattle.gui.vaadin.validators.ShipDataVaadinValidator;
 import org.vaadin.spring.events.Event;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -24,13 +30,12 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
-public class ShipClassEdit extends ShipClassLayout<ShipClass> {
+import static de.yuga.spacebattle.gui.vaadin.validators.ShipDataVaadinValidator.ShipDataVaadinValidatorField.*;
+
+public class ShipClassEdit extends ShipClassLayout<ShipClass>
+        implements HasValue<AbstractField.ComponentValueChangeEvent<ShipClassEdit, ShipClassEditDTO>, ShipClassEditDTO> {
 
     @Nonnull
     private final EventBus.UIEventBus uiEventBus = ViewHelper.getService(EventBus.UIEventBus.class);
@@ -42,29 +47,48 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass> {
     private final Validator validator = CustomValidatorFactory.buildCustomValidator();
 
     @Nonnull
-    private final Binder<ShipClassDTO> binderShipClass = new Binder<>(ShipClassDTO.class);
-
-    private Map<Module, Integer> modulesMap;
+    private final Binder<ShipClassEditDTO> binderShipClass = new Binder<>(ShipClassEditDTO.class);
 
     public ShipClassEdit() {
         this.uiEventBus.subscribe(this);
 
-        final TextField name = new TextField();
-        binderShipClass.forField(name).bind(ShipClassDTO::getName, ShipClassDTO::setName);
+        binderShipClass.addValueChangeListener(event -> {
+            final ShipClass shipClass = getShipClass();
+            getShipClassStatDisplay().setValue(shipClass);
+            validateSubmitButton();
+        });
 
-        binderShipClass.forField(getShipClassStatDisplay()).bind(ShipClassDTO::getShipClass, null);
+        final TextField name = new TextField();
+        binderShipClass.forField(name)
+                .withValidator((value, context) -> {
+                    final ShipClass shipClass = getShipClass();
+                    shipClass.setName(value);
+                    return ShipDataVaadinValidator.check(shipClass, NAME);
+                })
+                .withValidationStatusHandler(this::openNotification)
+                .asRequired()
+                .bind(ShipClassEditDTO::getName, ShipClassEditDTO::setName);
 
         final HullDisplay hullDisplay = new HullDisplay();
         final ReadOnlyHasValue<Hull> hullSelectedReadOnly = new ReadOnlyHasValue<>(hullDisplay::update);
-        binderShipClass.forField(hullSelectedReadOnly).bind(ShipClassDTO::getHull, null);
+        binderShipClass.forField(hullSelectedReadOnly)
+                .withValidator((value, context) -> {
+                    final ShipClass shipClass = getShipClass();
+                    shipClass.setHull(value);
+                    return ShipDataVaadinValidator.check(shipClass, HULL);
+                })
+                .withValidationStatusHandler(this::openNotification)
+                .bind(ShipClassEditDTO::getHull, null);
 
         final ModuleMultiEdit moduleMultiEdit = new ModuleMultiEdit();
-        final ReadOnlyHasValue<Map<Module, Integer>> levelValueReadOnly = new ReadOnlyHasValue<>(moduleMultiEdit::setValue);
-        binderShipClass.forField(levelValueReadOnly).bind(ShipClassDTO::getPossibleModules, null);
-
-        binderShipClass.forField(moduleMultiEdit).bind(ShipClassDTO::getModules, ShipClassDTO::setModules);
-
-        binderShipClass.addValueChangeListener(event -> validateSubmitButton());
+        binderShipClass.forField(moduleMultiEdit)
+                .withValidator((value, context) -> {
+                    final ShipClass shipClass = getShipClass();
+                    shipClass.setModules(value);
+                    return ShipDataVaadinValidator.check(shipClass, MODULES);
+                })
+                .withValidationStatusHandler(this::openNotification)
+                .bind(ShipClassEditDTO::getModules, ShipClassEditDTO::setModules);
 
         submit = new Button("Submit", event -> this.uiEventBus.publish(this, ESBEvent.SHIP_CLASS_SUBMITTED.name()));
         submit.setEnabled(false);
@@ -76,19 +100,23 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass> {
     }
 
     /**
-     * Sets the available modules to this view.
+     * Opens a notification with the validation message and validates the submit button.
      *
-     * @param modules the modules to select in the UI
+     * @param msg the validation message
      */
-    public void setBaseData(@Nonnull final Collection<Module> modules) {
-        Preconditions.checkNotNull(modules, "modules shouldn't be null!");
-
-        modulesMap = modules.stream().collect(Collectors.toMap(Function.identity(), val -> 0));
-        final ShipClassDTO bean = binderShipClass.getBean();
-        if (bean != null) {
-            bean.setPossibleModules(modulesMap);
-            binderShipClass.readBean(bean);
+    private void openNotification(BindingValidationStatus<?> msg) {
+        if (msg.getStatus() == BindingValidationStatus.Status.OK) {
+            validateSubmitButton();
+            return;
         }
+
+        msg.getResult().ifPresent(validationResult ->
+                validationResult.getErrorLevel().ifPresent(errorLevel -> {
+                    if (errorLevel != ErrorLevel.INFO) {
+                        NotificationHelper.notify(validationResult.getErrorMessage(), 3000);
+                        submit.setEnabled(false);
+                    }
+                }));
     }
 
     /**
@@ -106,7 +134,7 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass> {
      */
     @Nonnull
     public ShipClass getShipClass() {
-        ShipClassDTO bean = binderShipClass.getBean();
+        ShipClassEditDTO bean = binderShipClass.getBean();
         if (bean == null) {
             throw new NotifySBUserException("You could click on submit, congratulations! Please click only if this class is ready.");
         }
@@ -123,16 +151,45 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass> {
     }
 
     @Override
+    @Deprecated(since = "Implementation of create and edit dto.")
     public void update(@Nullable final ShipClass value) {
-        ShipClassDTO shipClassDTO = null;
-        if (value != null) {
-            shipClassDTO = new ShipClassDTO(value);
-            shipClassDTO.setPossibleModules(modulesMap);
-        }
-        if (binderShipClass.getBean() == null) {
-            binderShipClass.setBean(shipClassDTO);
-        } else {
-            binderShipClass.readBean(shipClassDTO);
-        }
+        throw new NotifySBUserException("You shouldn't need to call that, lil buddy!");
+    }
+
+    @Override
+    public void setValue(@Nonnull final ShipClassEditDTO value) {
+        Preconditions.checkNotNull(value, "value shouldn't be null!");
+
+        binderShipClass.setBean(value);
+    }
+
+    @Override
+    public ShipClassEditDTO getValue() {
+        return binderShipClass.getBean();
+    }
+
+    @Override
+    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ShipClassEdit, ShipClassEditDTO>> listener) {
+        return null;
+    }
+
+    @Override
+    public void setReadOnly(boolean readOnly) {
+        // not necessary
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return false;
+    }
+
+    @Override
+    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
+        // not necessary
+    }
+
+    @Override
+    public boolean isRequiredIndicatorVisible() {
+        return false;
     }
 }

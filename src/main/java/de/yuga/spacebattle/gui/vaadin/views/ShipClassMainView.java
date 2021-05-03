@@ -21,9 +21,12 @@ import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.ShipClassCreate
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.ShipClassDisplay;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.ShipClassEdit;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.ShipClassLayout;
+import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ShipClassCreateDTO;
+import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ShipClassEditDTO;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
 import de.yuga.spacebattle.gui.vaadin.misc.SBPageSubjectSelectorStatsLayout;
-import de.yuga.spacebattle.gui.vaadin.misc.StatsLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.Event;
 import org.vaadin.spring.events.EventBus;
@@ -42,6 +45,8 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
 
     @Nonnull
     public static final String ROUTE = "shipClass";
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(ShipClassMainView.class);
 
     /**
      * Special stuff: This subject is null in the real world while it's tab is used without a nonnull-object.
@@ -126,17 +131,26 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
         final HashMap<Tab, Boolean[]> tabMap = getActionTabUsability(actionTab);
         updateActionMenuUsability(tabMap);
         setSelected(actionTab);
-        fetchBaseData();
+        createShipClassCreateDTO();
     }
 
     /**
      * Retrieves the user's current research base for modules and hulls and sets them to them are needed.
      */
-    private void fetchBaseData() {
-        List<Hull> hulls = hullService.findAllByUser(user);
-        List<Module> modules = moduleService.findAllByUser(user);
-        shipClassEdit.setBaseData(modules);
-        shipClassCreate.setBaseData(hulls, modules);
+    private void createShipClassCreateDTO() {
+        final List<Hull> hulls = hullService.findAllByUser(user);
+        final List<Module> modules = moduleService.findAllByUser(user);
+        final Map<Module, Integer> availableModules = modules.stream().collect(Collectors.toMap(o -> o, o -> 0));
+
+        final ShipClassCreateDTO shipClassCreateDTO = new ShipClassCreateDTO(user, availableModules, hulls);
+        shipClassCreate.setValue(shipClassCreateDTO);
+    }
+
+    private ShipClassEditDTO createShipClassEditDTO(@Nonnull final ShipClass shipClass) {
+        Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
+
+        final List<Module> modules = moduleService.findAllByUser(user);
+        return new ShipClassEditDTO(user, modules, shipClass);
     }
 
     /**
@@ -150,16 +164,16 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
             ShipClass shipClass = null;
             if (content instanceof ShipClassCreate) {
                 shipClass = shipClassCreate.getShipClass();
-                shipClass.setOwner(user);
             } else if (content instanceof ShipClassEdit) {
                 shipClass = shipClassEdit.getShipClass();
             }
             if (shipClass == null) {
                 throw new NotifySBUserException("The ship class shouldn't be empty here.");
             }
-            this.shipClass = shipClassService.save(shipClass);
+            this.shipClass = shipClassService.saveAndFlush(shipClass);
             NotificationHelper.notify("Class defined", 3000);
             updateSubjectMenu();
+            useSubjectEntry();
         } else if (e.getPayload().equals(ESBEvent.SHIP_CLASS_DELETION.name())) {
             final ShipClass shipClass = ((ShipClassEdit) content).getShipClass();
             shipClassService.delete(shipClass);
@@ -171,8 +185,9 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
             setSelected(createNewClassTab);
             content = setContent(shipClassCreate);
             updateSubjectMenu();
+            useSubjectEntry();
         } else if (e.getPayload().equals(ESBEvent.TICK_DONE.name())) {
-            fetchBaseData();
+            createShipClassCreateDTO();
         }
     }
 
@@ -195,13 +210,23 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
     @Override
     protected void addActionListener() {
         actionSelectorMenu.addSelectedChangeListener(event -> {
-            Tab selectedTab = event.getSelectedTab();
-            StatsLayout<ShipClass> componentForTab = getComponentForTabOfActionMenu(selectedTab);
+            final Tab selectedTab = event.getSelectedTab();
+            final ShipClassLayout<ShipClass> componentForTab
+                    = (ShipClassLayout<ShipClass>) getComponentForTabOfActionMenu(selectedTab);
+
             if (shipClass != null) {
                 shipClass = shipClassService.find(shipClass);
             }
-            componentForTab.update(shipClass);
-            content = setContent((ShipClassLayout<ShipClass>) componentForTab);
+
+            if (shipClass != null) {
+                if (componentForTab instanceof ShipClassEdit) {
+                    shipClassEdit.setValue(createShipClassEditDTO(shipClass));
+                }
+            }
+            if (componentForTab instanceof ShipClassDisplay || componentForTab instanceof ShipClassCreate) {
+                componentForTab.update(shipClass);
+            }
+            content = setContent(componentForTab);
         });
     }
 
@@ -246,22 +271,20 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
             if (shipClass != null) {
                 shipClass = shipClassService.find(shipClass);
             }
-            useSubjectEntry(shipClass);
+            useSubjectEntry();
         });
     }
 
     /**
      * Proceeds the workload to change menus and view components by the given entity.
-     *
-     * @param shipClass the parameter
      */
-    private void useSubjectEntry(@Nullable final ShipClass shipClass) {
-        this.shipClass = shipClass;
-        if (this.shipClass != null) {
+    private void useSubjectEntry() {
+        if (shipClass != null) {
             if (content == shipClassCreate) {
                 content = setContent(shipClassDisplay);
             }
-            content.update(this.shipClass);
+            shipClassEdit.setValue(createShipClassEditDTO(shipClass));
+            shipClassDisplay.update(shipClass);
         } else {
             // implement a subject of null is definitely the create view
             content = setContent(shipClassCreate);
@@ -271,7 +294,8 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
         final HashMap<Tab, Boolean[]> tabMap = getActionTabUsability(currentTab);
         updateActionMenuUsability(tabMap);
 
-        content.update(this.shipClass);
+        shipClassCreate.update(shipClass);
+        getTabForSubject(shipClass).ifPresent(this::setSelected);
         setSelected(currentTab);
     }
 
@@ -285,7 +309,7 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
     private HashMap<Tab, Boolean[]> getActionTabUsability(@Nonnull final Tab currentTab) {
         Preconditions.checkNotNull(currentTab, "currentTab shouldn't be null!");
 
-        boolean isCreateNew = CREATE_NEW_CLASS_ACTION_TITLE.equals(currentTab.getLabel());
+        final boolean isCreateNew = CREATE_NEW_CLASS_ACTION_TITLE.equals(currentTab.getLabel());
         HashMap<Tab, Boolean[]> tabMap = new HashMap<>();
         tabMap.put(getTabForComponentOfActionMenu(shipClassDisplay), new Boolean[]{true, !isCreateNew});
         tabMap.put(getTabForComponentOfActionMenu(shipClassEdit), new Boolean[]{!isCreateNew, !isCreateNew});
@@ -330,7 +354,6 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
         final List<ShipClass> orderedKeys = shipClassTabMap.keySet().stream()
                 .sorted(new ShipClassComparator()).collect(Collectors.toList());
 
-        final Tab selectedTab = subjectSelectorMenu.getSelectedTab();
         subjectSelectorMenu.setSelectedIndex(-1); // see above, removing active tabs is not a good idea
         shipClassTabMap.keySet().stream()
                 .sorted(new ShipClassComparator())
@@ -339,7 +362,6 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
                     final int i = orderedKeys.indexOf(shipClass1);
                     subjectSelectorMenu.addComponentAtIndex(i, tab);
                 });
-        setSelected(selectedTab);
     }
 
     /**
