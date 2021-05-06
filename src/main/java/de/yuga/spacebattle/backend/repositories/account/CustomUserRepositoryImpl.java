@@ -44,12 +44,12 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
 
     @Nullable
     @Override
-    public User checkParameter(@Nonnull final String username, @Nonnull final String email) {
+    public User findByUsernameAndEmail(@Nonnull final String username, @Nonnull final String email) {
         Preconditions.checkNotNull(username, "username shouldn't be null!");
         Preconditions.checkNotNull(email, "email shouldn't be null!");
 
         try {
-            final User u = em.createNamedQuery("User.checkParameter", User.class)
+            final User u = em.createNamedQuery("User.findByUsernameAndEmail", User.class)
                     .setParameter("username", StringUtils.upperCase(username))
                     .setParameter("email", StringUtils.upperCase(email))
                     .getSingleResult();

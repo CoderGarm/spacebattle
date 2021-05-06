@@ -32,6 +32,7 @@ public class BuildingService {
     @Nullable
     public Building find(@Nonnull final Integer idBuilding) {
         Preconditions.checkNotNull(idBuilding, "idBuilding shouldn't be null!");
+
         return buildingRepository.findById(idBuilding).orElse(null);
     }
 

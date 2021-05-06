@@ -85,6 +85,7 @@ public class UserService {
     }
 
     @Nonnull
+    @Deprecated(since = "productive environment")
     public User addUnlockedResearch(@Nonnull final User entity, @Nonnull final Research research) {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
         Preconditions.checkNotNull(research, "research shouldn't be null!");
@@ -98,12 +99,13 @@ public class UserService {
         return this.save(user);
     }
 
+
     @Nullable
-    public User checkParameter(@Nonnull final String username, @Nonnull final String email) {
+    public User findByUsernameAndEmail(@Nonnull final String username, @Nonnull final String email) {
         Preconditions.checkNotNull(username, "username shouldn't be null!");
         Preconditions.checkNotNull(email, "email shouldn't be null!");
 
-        return userRepository.checkParameter(username, email);
+        return userRepository.findByUsernameAndEmail(username, email);
     }
 
     @Nonnull

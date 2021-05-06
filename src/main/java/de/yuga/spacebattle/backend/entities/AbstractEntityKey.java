@@ -1,5 +1,7 @@
 package de.yuga.spacebattle.backend.entities;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -23,4 +25,8 @@ public class AbstractEntityKey implements Serializable {
         return id;
     }
 
+    @VisibleForTesting
+    public void setId(final int id) {
+        this.id = id;
+    }
 }
