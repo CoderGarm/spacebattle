@@ -194,10 +194,14 @@ public class User extends AbstractEntityKey {
      */
     public Optional<Planet> getResearchInstitute() {
 
-        List<Construction> collect = getOwnedPlanets().parallelStream()
+        // reduces  all planet's constructions to this ones which are research buildings,
+        // extract the optionals and sorting the result
+        final List<Construction> collect = getOwnedPlanets().parallelStream()
                 .map(planet -> planet.getConstructions().stream()
                         .filter(construction -> construction.getBuilding().getResourceType() == EResourceType.RESEARCH)
-                        .findFirst().get())
+                        .findFirst()
+                ).filter(Optional::isPresent)
+                .map(Optional::get)
                 .sorted(Comparator.comparingInt(AbstractEntityKey::getId))
                 .collect(Collectors.toList());
 
