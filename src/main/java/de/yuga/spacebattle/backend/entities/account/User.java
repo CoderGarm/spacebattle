@@ -196,7 +196,7 @@ public class User extends AbstractEntityKey {
 
         // reduces  all planet's constructions to this ones which are research buildings,
         // extract the optionals and sorting the result
-        final List<Construction> collect = getOwnedPlanets().parallelStream()
+        final List<Construction> collect = getOwnedPlanets().stream()
                 .map(planet -> planet.getConstructions().stream()
                         .filter(construction -> construction.getBuilding().getResourceType() == EResourceType.RESEARCH)
                         .findFirst()
