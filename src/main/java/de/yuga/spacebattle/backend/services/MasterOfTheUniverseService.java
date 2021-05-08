@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.gui.impl;
+package de.yuga.spacebattle.backend.services;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.researches.Research;
@@ -19,7 +20,7 @@ import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.combined.account.AllianceService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
-import de.yuga.spacebattle.backend.services.orbitals.StarsystemService;
+import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.spacecraft.HullService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
@@ -32,14 +33,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import static de.yuga.spacebattle.gui.vaadin.misc.ViewBoxDefinition.STAR_RADIUS;
+import static de.yuga.spacebattle.gui.vaadin.misc.ViewBoxDefinition.UNIVERSE_CENTER_RADIUS;
+
+/**
+ * The master of all. Do do all the dev-stuff which could be removed or placed somewhere else.
+ */
 @Service
-//@RestController
-//@RequestMapping(value = "/rest/sb")
-public class DefaultApiImpl {
+public class MasterOfTheUniverseService {
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DefaultApiImpl.class);
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(MasterOfTheUniverseService.class);
 
     @Nonnull
     private final TickService tickService;
@@ -51,7 +60,7 @@ public class DefaultApiImpl {
     private final AllianceService allianceService;
 
     @Nonnull
-    private final StarsystemService starsystemService;
+    private final StarSystemService starsystemService;
 
     @Nonnull
     private final PlanetService planetService;
@@ -72,16 +81,16 @@ public class DefaultApiImpl {
     private final ResearchService researchService;
 
     @Autowired
-    public DefaultApiImpl(@Nonnull final TickService tickService,
-                          @Nonnull final UserService userService,
-                          @Nonnull final AllianceService allianceService,
-                          @Nonnull final StarsystemService starsystemService,
-                          @Nonnull final PlanetService planetService,
-                          @Nonnull final BuildingService buildingService,
-                          @Nonnull final ModuleService moduleService,
-                          @Nonnull final HullService hullService,
-                          @Nonnull final ShipClassService shipClassService,
-                          @Nonnull final ResearchService researchService) {
+    public MasterOfTheUniverseService(@Nonnull final TickService tickService,
+                                      @Nonnull final UserService userService,
+                                      @Nonnull final AllianceService allianceService,
+                                      @Nonnull final StarSystemService starsystemService,
+                                      @Nonnull final PlanetService planetService,
+                                      @Nonnull final BuildingService buildingService,
+                                      @Nonnull final ModuleService moduleService,
+                                      @Nonnull final HullService hullService,
+                                      @Nonnull final ShipClassService shipClassService,
+                                      @Nonnull final ResearchService researchService) {
         Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");
@@ -105,8 +114,11 @@ public class DefaultApiImpl {
         this.researchService = researchService;
     }
 
-    //@GetMapping(value = "/createInitialData")
-    //@ResponseBody
+    /**
+     * Create the minimal base data for the current stage of development.
+     *
+     * @return an empty list on a failure
+     */
     public ResponseEntity<?> createInitialData() {
         List<User> all = userService.findAll();
         if (!all.isEmpty()) {
@@ -115,6 +127,140 @@ public class DefaultApiImpl {
         createInitialDataPayload();
         all = userService.findAll();
         return ResponseEntity.status(HttpStatus.OK).body(all);
+    }
+
+    /**
+     * Generates a random int between the given borders.
+     *
+     * @param min the lower bound
+     * @param max the upper bound
+     * @return the random number
+     */
+    public int getRandomInt(final int min, final int max) {
+        return (int) ((Math.random() * (max - min)) + min);
+    }
+
+    /**
+     * Generates a random double between the given borders.
+     *
+     * @param min the lower bound
+     * @param max the upper bound
+     * @return the random number
+     */
+    public double getRandomDouble(final double min, final double max) {
+        return ((Math.random() * (max - min)) + min);
+    }
+
+    /**
+     * Generates a random orbit position for star system where a elliptical placing is not mandatory.
+     * It has an inner boundary to keep a circle around the middle clear.
+     *
+     * @return the orbit
+     */
+    private Orbit generateSystemPosition() {
+        final int min = -999;
+        final int max = 1001;
+        return createOrbit(UNIVERSE_CENTER_RADIUS * 3, min, max, false);
+    }
+
+    /**
+     * Generates a random orbit for an elliptical position.
+     * It has an inner boundary to keep a circle around the middle clear.
+     *
+     * @return the orbit
+     */
+    private Orbit generatePlanetaryOrbit() {
+        final int min = -999;
+        final int max = 1001;
+        return createOrbit(STAR_RADIUS * 3, min, max, true);
+    }
+
+    /**
+     * Creates an orbit the the given parameters.
+     *
+     * @param innerCircle    the radius in which no position is valid
+     * @param min            the minimum boundary
+     * @param max            the maximum boundary
+     * @param planetaryOrbit if the generated position must be possible for an acceptable elliptical orbit
+     * @return the orbit
+     */
+    @Nonnull
+    private Orbit createOrbit(final int innerCircle, int min, int max, final boolean planetaryOrbit) {
+
+        int xCoordinate = getCoordinateWithInnerBound(innerCircle, min, max);
+
+        final double maximumDifference;
+        if (planetaryOrbit) {
+            // the numeric eccentricity of a planetary orbit with maximal 2 % below or above 1
+            final double numEccentricity = getRandomDouble(0.98, 1.02);
+            maximumDifference = xCoordinate * numEccentricity;
+            min = (int) (xCoordinate - maximumDifference);
+            max = (int) (xCoordinate + maximumDifference);
+        }
+        int yCoordinate = getCoordinateWithInnerBound(innerCircle, min, max);
+        return new Orbit(xCoordinate, yCoordinate);
+    }
+
+    /**
+     * Creates a value between min and max but not within a rang from zero to inner bound.
+     *
+     * @param innerBound the radius from zero which is permitted
+     * @param min        the min value
+     * @param max        the max value
+     * @return the first created random value which fits the restrictions
+     */
+    private int getCoordinateWithInnerBound(final int innerBound, final int min, final int max) {
+        int xCoordinate = getRandomInt(min, max);
+        while (checkIfRangeInside(xCoordinate, innerBound)) {
+            xCoordinate = getRandomInt(min, max);
+        }
+        return xCoordinate;
+    }
+
+    /**
+     * Checks if the given position is inside the boundary.
+     *
+     * @param position the position to check
+     * @param boundary the border to check against
+     * @return <code>true</code> if the position violates the boundary, <code>false</code> otherwise
+     */
+    private boolean checkIfRangeInside(final int position, final int boundary) {
+        return Math.abs(position) <= Math.abs(boundary);
+    }
+
+    /**
+     * Generates up to 100 new star systems with planets.
+     */
+    @Transactional
+    public void createMorePopularizedStarSystems() {
+        final List<StarSystem> allSystems = starsystemService.findAll();
+        final Set<Orbit> knownOrbits = allSystems.stream().map(StarSystem::getOrbit).collect(Collectors.toSet());
+
+        final List<Orbit> newOrbits = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            newOrbits.add(generateSystemPosition());
+        }
+        newOrbits.removeAll(knownOrbits);
+        final Set<StarSystem> newStarSystems = newOrbits.stream().map(orbit -> {
+            final long timeInMillis = Calendar.getInstance().getTimeInMillis();
+            return starsystemService.createStarSystem("System-" + timeInMillis + newOrbits.indexOf(orbit), orbit);
+        }).collect(Collectors.toSet());
+        LOGGER.info("New star systems generated");
+
+        newStarSystems.forEach(starSystem -> {
+            final String starSystemName = starSystem.getName();
+            final int randomNumber = getRandomInt(0, 5);
+            final List<Orbit> newPlanetaryOrbits = new ArrayList<>();
+            for (int i = 0; i <= randomNumber; i++) {
+                Orbit orbit = generatePlanetaryOrbit();
+                while (newPlanetaryOrbits.contains(orbit)) {
+                    orbit = generatePlanetaryOrbit();
+                }
+                newPlanetaryOrbits.add(orbit);
+                planetService.createPlanet(starSystemName + "-" + i, null, starSystem, orbit);
+            }
+        });
+        LOGGER.info("New star systems populated");
     }
 
     @Transactional
@@ -133,8 +279,8 @@ public class DefaultApiImpl {
         userService.save(u2);
         LOGGER.info("Alliances populated.");
 
-        StarSystem s1 = starsystemService.createStarsystem("Argonaut", 1, 1);
-        StarSystem s2 = starsystemService.createStarsystem("111", 2, 2);
+        StarSystem s1 = starsystemService.createStarSystem("Argonaut", 1, 1);
+        StarSystem s2 = starsystemService.createStarSystem("111", 2, 2);
         LOGGER.info("Starsystems created");
 
         Planet p1 = planetService.createPlanet("Argonauten HQ", u1, s1, 1, 1);

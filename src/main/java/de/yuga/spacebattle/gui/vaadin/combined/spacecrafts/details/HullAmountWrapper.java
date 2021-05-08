@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.gui.vaadin.combined.spacecrafts;
+package de.yuga.spacebattle.gui.vaadin.combined.spacecrafts.details;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;

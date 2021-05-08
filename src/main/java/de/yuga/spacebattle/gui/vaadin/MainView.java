@@ -32,9 +32,9 @@ import com.vaadin.flow.theme.material.Material;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
+import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
-import de.yuga.spacebattle.gui.impl.DefaultApiImpl;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
 import de.yuga.spacebattle.gui.vaadin.turn.TickDisplay;
 import de.yuga.spacebattle.gui.vaadin.views.DashboardView;
@@ -91,7 +91,7 @@ public class MainView extends AppLayout {
     private final EventBus.UIEventBus uiEventBus;
 
     @Nonnull
-    private final DefaultApiImpl defaultApi;
+    private final MasterOfTheUniverseService masterOfTheUniverseService;
 
     @Nonnull
     private final TickService tickService;
@@ -127,18 +127,18 @@ public class MainView extends AppLayout {
     @Autowired
     public MainView(@Nonnull final UserService userService,
                     @Nonnull final TickService tickService,
-                    @Nonnull final DefaultApiImpl defaultApi,
+                    @Nonnull final MasterOfTheUniverseService masterOfTheUniverseService,
                     @Nonnull final EventBus.UIEventBus uiEventBus) {
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
-        Preconditions.checkNotNull(defaultApi, "defaultApi shouldn't be null!");
+        Preconditions.checkNotNull(masterOfTheUniverseService, "defaultApi shouldn't be null!");
         Preconditions.checkNotNull(uiEventBus, "uiEventBus shouldn't be null!");
 
         this.userService = userService;
         this.tickService = tickService;
         this.uiEventBus = uiEventBus;
         this.uiEventBus.subscribe(this);
-        this.defaultApi = defaultApi;
+        this.masterOfTheUniverseService = masterOfTheUniverseService;
 
         createLogin();
         setPrimarySection(Section.DRAWER);
@@ -245,7 +245,7 @@ public class MainView extends AppLayout {
     @Nonnull
     private Button createCreateInitialDataButton() {
         return new Button("Create Initial Data", e -> {
-            ResponseEntity<?> initialData = defaultApi.createInitialData();
+            ResponseEntity<?> initialData = masterOfTheUniverseService.createInitialData();
             Notification notification = new Notification();
             notification.setDuration(5000);
             switch (initialData.getStatusCode()) {
@@ -352,6 +352,11 @@ public class MainView extends AppLayout {
             Tick tick = this.tickService.doTick();
             LOGGER.info("do tick");
             tickDisplay.updateTick(tick);
+            uiEventBus.publish(this, ESBEvent.TICK_DONE.name());
+        });
+        menuItem.getSubMenu().addItem("generate more star systems", event -> {
+            LOGGER.info("generating star systems");
+            masterOfTheUniverseService.createMorePopularizedStarSystems();
             uiEventBus.publish(this, ESBEvent.TICK_DONE.name());
         });
         wantToKnowMore.setVisible(false);

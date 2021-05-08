@@ -14,8 +14,6 @@ import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.misc.details.StatsDrawer;
 import de.yuga.spacebattle.gui.vaadin.views.PlanetMainView;
 import de.yuga.spacebattle.gui.vaadin.views.ShipClassMainView;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -42,9 +40,7 @@ import java.util.stream.Collectors;
  * @param <T>
  */
 @CssImport("./styles/views/main/details/SBPageTopLevelLayout.css")
-public abstract class SBPageSubjectSelectorLayout<T> extends FlexLayout {
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(SBPageSubjectSelectorLayout.class);
+public abstract class SBPageSubjectSelectorStatsLayout<T> extends FlexLayout {
 
     /**
      * The index of the "do user stuff" section of the view below the two selector menus.
@@ -93,15 +89,13 @@ public abstract class SBPageSubjectSelectorLayout<T> extends FlexLayout {
     @Nonnull
     private final VerticalLayout mainContent = new VerticalLayout();
 
-    public SBPageSubjectSelectorLayout() {
+    public SBPageSubjectSelectorStatsLayout() {
         actionSelectorMenu.setId("actionSelectorMenu");
         actionSelectorMenu.setClassName("selector");
-        //actionSelectorMenu.setAutoselect(false);
         ViewHelper.setWidth(actionSelectorMenu, "100%");
 
         subjectSelectorMenu.setId("subjectSelectorMenu");
         subjectSelectorMenu.setClassName("selector");
-        //subjectSelectorMenu.setAutoselect(false);
         ViewHelper.setWidth(subjectSelectorMenu, "100%");
 
         mainContent.add(subjectSelectorMenu);
@@ -177,21 +171,18 @@ public abstract class SBPageSubjectSelectorLayout<T> extends FlexLayout {
     /**
      * Returns a Tab for a given subject.
      *
-     * @param subject the subject
+     * @param subject nonnull subject
      * @return Optional of a tab
      */
-    public Optional<Tab> getTabForSubject(@Nonnull T subject) {
-        Preconditions.checkNotNull(subject, "subject shouldn't be null!");
-
-        return subjectSelectorObject.entrySet().stream()
-                .filter(e -> e.getValue().equals(subject))
-                .findFirst()
-                .map(Map.Entry::getKey);
+    public Optional<Tab> getTabForSubject(@Nonnull T subject)
+    {
+        final Optional<Map.Entry<Tab, T>> first = subjectSelectorObject.entrySet().stream().filter(e -> e.getValue().equals(subject)).findFirst();
+        return first.map(Map.Entry::getKey);
     }
 
     /**
      * Returns the tab for it's corresponding component.
-     * Via versa for {@link SBPageSubjectSelectorLayout#getComponentForTabOfActionMenu(Tab)}.
+     * Via versa for {@link SBPageSubjectSelectorStatsLayout#getComponentForTabOfActionMenu(Tab)}.
      *
      * @param component the component to search for
      * @return the corresponding tab
@@ -206,6 +197,8 @@ public abstract class SBPageSubjectSelectorLayout<T> extends FlexLayout {
         }
         return tab;
     }
+
+
 
     /**
      * Sets and relate a selector tab to it's corresponding object.
@@ -288,12 +281,12 @@ public abstract class SBPageSubjectSelectorLayout<T> extends FlexLayout {
     }
 
     /**
-     * Must define all action selectors menu entries and their behavior, {@link SBPageSubjectSelectorLayout#addActionListener()}.
+     * Must define all action selectors menu entries and their behavior, {@link SBPageSubjectSelectorStatsLayout#addActionListener()}.
      */
     protected abstract void createActionSelectorMenu();
 
     /**
-     * Must define all initial subject selectors menu entries and their behavior, {@link SBPageSubjectSelectorLayout#addSubjectListener()}.
+     * Must define all initial subject selectors menu entries and their behavior, {@link SBPageSubjectSelectorStatsLayout#addSubjectListener()}.
      */
     protected abstract void createSubjectSelectorMenu();
 

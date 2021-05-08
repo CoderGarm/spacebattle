@@ -4,6 +4,9 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+package-lock.json
+package.json
+webpack.generated.js
 
 ### STS ###
 .apt_generated
@@ -32,7 +35,6 @@ build/
 
 ### VS Code ###
 .vscode/
-/home/karsten/idea-workspace/springgenerated/spacebattle/package-lock.json
 /package-lock.json
 /.npmrc
 /pnpmfile.js

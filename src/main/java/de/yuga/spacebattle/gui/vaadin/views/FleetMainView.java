@@ -15,7 +15,7 @@ import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.gui.vaadin.MainView;
 import de.yuga.spacebattle.gui.vaadin.combined.spacecrafts.FleetDashboardDisplay;
 import de.yuga.spacebattle.gui.vaadin.combined.spacecrafts.FleetLayout;
-import de.yuga.spacebattle.gui.vaadin.misc.SBPageSubjectSelectorLayout;
+import de.yuga.spacebattle.gui.vaadin.misc.SBPageSubjectSelectorStatsLayout;
 import de.yuga.spacebattle.gui.vaadin.misc.StatsLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.Event;
@@ -31,7 +31,7 @@ import java.util.Map;
 @UIScope
 @Route(value = FleetMainView.ROUTE, layout = MainView.class)
 @RouteAlias(value = FleetMainView.ROUTE, layout = MainView.class)
-public class FleetMainView extends SBPageSubjectSelectorLayout<Fleet> {
+public class FleetMainView extends SBPageSubjectSelectorStatsLayout<Fleet> {
 
     @Nonnull
     public static final String ROUTE = "fleets";

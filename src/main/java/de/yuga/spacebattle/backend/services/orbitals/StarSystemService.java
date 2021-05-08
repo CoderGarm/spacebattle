@@ -11,12 +11,12 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 @Service
-public class StarsystemService {
+public class StarSystemService {
 
     @Nonnull
     private final StarsystemRepository starsystemRepository;
 
-    public StarsystemService(@Nonnull final StarsystemRepository starsystemRepository) {
+    public StarSystemService(@Nonnull final StarsystemRepository starsystemRepository) {
         Preconditions.checkNotNull(starsystemRepository, "starsystemRepository shouldn't be null!");
 
         this.starsystemRepository = starsystemRepository;
@@ -28,9 +28,8 @@ public class StarsystemService {
     }
 
     @Nullable
-    public StarSystem find(@Nonnull final Integer idStarsystem) {
-        Preconditions.checkNotNull(idStarsystem, "idStarsystem shouldn't be null!");
-        return starsystemRepository.findById(idStarsystem).orElse(null);
+    public StarSystem find(final int idStarSystem) {
+        return starsystemRepository.findById(idStarSystem).orElse(null);
     }
 
     /**
@@ -41,7 +40,7 @@ public class StarsystemService {
      * @return the new system
      */
     @Nonnull
-    public StarSystem createStarsystem(@Nonnull final String name,
+    public StarSystem createStarSystem(@Nonnull final String name,
                                        @Nonnull final Integer xCoordinate,
                                        @Nonnull final Integer yCoordinate) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
@@ -49,5 +48,21 @@ public class StarsystemService {
         Preconditions.checkNotNull(yCoordinate, "yCoordinate shouldn't be null!");
 
         return starsystemRepository.save(new StarSystem(name, new Orbit(xCoordinate, yCoordinate)));
+    }
+
+    @Nonnull
+    public StarSystem createStarSystem(@Nonnull final String name,
+                                       @Nonnull final Orbit orbit) {
+        Preconditions.checkNotNull(name, "name shouldn't be null!");
+        Preconditions.checkNotNull(orbit, "orbit shouldn't be null!");
+
+        return starsystemRepository.save(new StarSystem(name, orbit));
+    }
+
+    @Nullable
+    public StarSystem find(@Nonnull final StarSystem starSystem) {
+        Preconditions.checkNotNull(starSystem, "starSystem shouldn't be null!");
+
+        return starsystemRepository.findById(starSystem.getId()).orElse(null);
     }
 }

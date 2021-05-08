@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 
 @Embeddable
-public class Orbit {
+public class Orbit implements Comparable<Orbit> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Orbit.class);
 
@@ -73,8 +73,8 @@ public class Orbit {
         Preconditions.checkNotNull(targetOrbit, "targetOrbit shouldn't be null!");
 
         try {
-            int diffX = targetOrbit.getXCoordinate() - this.xCoordinate;
-            int diffY = targetOrbit.getYCoordinate() - this.yCoordinate;
+            int diffX = targetOrbit.getXCoordinate() - xCoordinate;
+            int diffY = targetOrbit.getYCoordinate() - yCoordinate;
 
             BigDecimal diffXb = new BigDecimal(diffX);
             BigDecimal diffYb = new BigDecimal(diffY);
@@ -86,5 +86,58 @@ public class Orbit {
             LOGGER.warn(e.getMessage());
             throw new NotifySBUserException("no distance calculatable");
         }
+    }
+
+    @Nonnull
+    public String getOrbitID() {
+        return xCoordinate + "-" + yCoordinate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Orbit)) return false;
+
+        Orbit orbit = (Orbit) o;
+
+        if (xCoordinate != orbit.xCoordinate) return false;
+        return yCoordinate == orbit.yCoordinate;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = xCoordinate;
+        result = 31 * result + yCoordinate;
+        return result;
+    }
+
+    @Override
+    public int compareTo(@Nonnull final Orbit o) {
+        Preconditions.checkNotNull(o, "o shouldn't be null!");
+
+        if (this.equals(o)) {
+            // should not happen while orbits must be unique
+            return 0;
+        }
+        /*
+        a negative integer, zero, or a positive integer as
+        the first argument is less than, equal to, or greater than the second.
+        */
+        final int o1X = this.getXCoordinate();
+        final int o2X = o.getXCoordinate();
+
+        final int o1Y = this.getYCoordinate();
+        final int o2Y = o.getYCoordinate();
+
+        if (o1X < o2X) {
+            return -1;
+        } else if (o1X > o2X) {
+            return 1;
+        }
+
+        if (o1Y < o2Y) {
+            return -1;
+        }
+        return 1;
     }
 }

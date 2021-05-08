@@ -72,13 +72,23 @@ public class PlanetService {
                                @Nonnull final Integer xCoordinate,
                                @Nonnull final Integer yCoordinate) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
-        Preconditions.checkNotNull(owner, "owner shouldn't be null!");
         Preconditions.checkNotNull(system, "system shouldn't be null!");
         Preconditions.checkNotNull(xCoordinate, "xCoordinate shouldn't be null!");
         Preconditions.checkNotNull(yCoordinate, "yCoordinate shouldn't be null!");
 
-        Planet entity = new Planet(owner, name, system, new Orbit(xCoordinate, yCoordinate));
-        return planetRepository.save(entity);
+        return planetRepository.save(new Planet(owner, name, system, new Orbit(xCoordinate, yCoordinate)));
+    }
+
+    @Nonnull
+    public Planet createPlanet(@Nonnull final String name,
+                               @Nullable final User owner,
+                               @Nonnull final StarSystem system,
+                               @Nonnull final Orbit orbit) {
+        Preconditions.checkNotNull(name, "name shouldn't be null!");
+        Preconditions.checkNotNull(system, "system shouldn't be null!");
+        Preconditions.checkNotNull(orbit, "orbit shouldn't be null!");
+
+        return planetRepository.save(new Planet(owner, name, system, orbit));
     }
 
     public Planet save(@Nonnull final Planet entity) {
