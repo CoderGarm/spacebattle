@@ -19,6 +19,13 @@ public interface CustomUserRepository {
     @Nullable
     User login(@Nonnull String username, @Nonnull String password);
 
+    /**
+     * Check if a user with this user name <b>OR</b> this email address already exists.
+     *
+     * @param username a user name
+     * @param email an email address
+     * @return {@link User}
+     */
     @Nullable
     User findByUsernameAndEmail(@Nonnull String username, @Nonnull String email);
 

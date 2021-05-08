@@ -1,6 +1,5 @@
 package de.yuga.spacebattle.backend.entities.account;
 
-
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
@@ -24,7 +23,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-
 @NamedQueries({
         @NamedQuery(name = "User.getAll", query = "SELECT u FROM User u"),
         @NamedQuery(name = "User.findByUsernameAndEmail", query = "SELECT u FROM User u WHERE UPPER(u.username) = :username AND UPPER(u.email) = :email"),
@@ -33,6 +31,7 @@ import java.util.Set;
         @NamedQuery(name = "User.getWithResearches", query = "SELECT u FROM User u LEFT JOIN FETCH u.researches r WHERE u = :user"),
         @NamedQuery(name = "User.getWithKnownStarSystems", query = "SELECT u FROM User u LEFT JOIN FETCH u.knownStarSystems r WHERE u = :user"),
         @NamedQuery(name = "User.getColonizations", query = "SELECT u FROM User u LEFT JOIN FETCH u.colonizations r WHERE u = :user"),
+        @NamedQuery(name = "User.checkParameter", query = "SELECT u FROM User u WHERE UPPER(u.username) = :username OR UPPER(u.email) = :email"),
 })
 @Entity
 @Table(name = "user",

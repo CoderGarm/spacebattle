@@ -2,3 +2,23 @@
     display: block;
     padding: 1em;
 }
+
+.msg-list-entry {
+    font-size: small;
+    line-height: 0.7;
+    cursor: pointer;
+    border-bottom: 1px solid white;
+}
+.msg-list-entry:hover {
+    background-color: var(--lumo-contrast-20pct);
+}
+.msg-list-entry.bold {
+    font-weight: bold;
+}
+.msg-list-entry.selected {
+    background-color: var(--lumo-contrast-50pct);
+}
+
+wysiwyg-e {
+    color: darkgray;
+}

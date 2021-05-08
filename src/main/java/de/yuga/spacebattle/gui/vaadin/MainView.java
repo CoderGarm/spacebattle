@@ -159,6 +159,7 @@ public class MainView extends AppLayout {
         if (allUsers.size() != 0) {
             userChoice.setItems(allUsers.stream().map(User::getUsername));
             userChoice.setVisible(true);
+            userChoice.setValue(allUsers.get(0).getUsername());
         } else {
             userChoice.setVisible(false);
         }
@@ -257,6 +258,7 @@ public class MainView extends AppLayout {
         return new Button("Logout", e -> {
             this.userService.setLogin(null);
             updateMenu();
+            getUI().ifPresent(ui -> ui.getPage().reload());
             getUI().ifPresent(ui -> ui.navigate(LoginView.class));
         });
     }
@@ -309,6 +311,7 @@ public class MainView extends AppLayout {
         loginButton.setVisible(!isLoggedIn);
         logoutButton.setEnabled(isLoggedIn);
         logoutButton.setVisible(isLoggedIn);
+        userChoice.setVisible(!isLoggedIn);
         menu.getChildren().forEach(view -> {
             Tab tab = (Tab) view;
             this.tabs.keySet().forEach(menuTab -> {
