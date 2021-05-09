@@ -3,6 +3,7 @@ package de.yuga.spacebattle.gui.vaadin;
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -19,6 +20,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.PreserveOnRefresh;
@@ -73,9 +75,7 @@ import static de.yuga.spacebattle.gui.vaadin.ViewHelper.MAX_MENU_HEIGHT;
 @Route
 public class MainView extends AppLayout {
 
-    private static final String USER_NAME_LOGIN_OVERRIDE =
-            //"flashkid";
-            "yufiel";
+    private String userNameLoginOverride = "yufiel";
 
     /**
      * Strange Exception when the UID is another one.
@@ -117,6 +117,8 @@ public class MainView extends AppLayout {
     @Nonnull
     private final Button initialDataButton = createCreateInitialDataButton();
 
+    private final Select userChoice;
+
     @Nonnull
     private final Button loginButton = createLoginButton();
 
@@ -139,12 +141,29 @@ public class MainView extends AppLayout {
         this.uiEventBus = uiEventBus;
         this.uiEventBus.subscribe(this);
         this.masterOfTheUniverseService = masterOfTheUniverseService;
-
+        userChoice = createUserChoiceSelection();
         createLogin();
         setPrimarySection(Section.DRAWER);
         addToNavbar(true, createHeaderContent());
         addToDrawer(createDrawerContent(menu));
         updateMenu();
+    }
+
+    private Select<String> createUserChoiceSelection() {
+        final Select<String> userChoice = new Select<>();
+        userChoice.setEmptySelectionAllowed(false);
+        userChoice.setPlaceholder("Choose a user");
+        userChoice.setClassName("first-on-the-right");
+        userChoice.setLabel("Login as: ");
+        userChoice.addValueChangeListener(event -> userNameLoginOverride = event.getValue());
+        final List<User> allUsers = userService.findAll();
+        if (allUsers.size() != 0) {
+            userChoice.setItems(allUsers.stream().map(User::getUsername));
+            userChoice.setVisible(true);
+        } else {
+            userChoice.setVisible(false);
+        }
+        return userChoice;
     }
 
     private LoginOverlay createLogin() {
@@ -203,6 +222,7 @@ public class MainView extends AppLayout {
         layout.add(viewTitle);
         layout.add(wantToKnowMore);
         layout.add(this.logoutButton);
+        layout.add(userChoice);
         layout.add(this.loginButton);
         List<User> all = userService.findAll();
         if (all.isEmpty()) {
@@ -215,16 +235,17 @@ public class MainView extends AppLayout {
     @Nonnull
     private Button createLoginButton() {
         final Button login;
-        if (USER_NAME_LOGIN_OVERRIDE.isBlank()) {
-            login = new Button("Login", e -> loginOverlay.setOpened(true));
+        if (userNameLoginOverride.isBlank()) {
+            login = new Button("Login", event -> loginOverlay.setOpened(true));
         } else {
-            login = new Button("Login", e -> {
-                final User user = this.userService.login(USER_NAME_LOGIN_OVERRIDE, "test");
+            login = new Button("Login", event -> {
+                final User user = this.userService.login(userNameLoginOverride, "test");
                 if (user != null) {
                     this.userService.setLogin(user);
                     loginOverlay.close();
                     getUI().ifPresent(ui -> ui.navigate(DashboardView.class));
                     uiEventBus.publish(this, ESBEvent.LOGIN.name());
+                    updateMenu();
                 }
             });
         }
@@ -238,7 +259,9 @@ public class MainView extends AppLayout {
         return new Button("Logout", e -> {
             this.userService.setLogin(null);
             updateMenu();
+            // reload to throw away all caches
             getUI().ifPresent(ui -> ui.navigate(LoginView.class));
+            getUI().ifPresent(ui -> ui.getPage().reload());
         });
     }
 
@@ -290,6 +313,7 @@ public class MainView extends AppLayout {
         loginButton.setVisible(!isLoggedIn);
         logoutButton.setEnabled(isLoggedIn);
         logoutButton.setVisible(isLoggedIn);
+        userChoice.setVisible(!isLoggedIn);
         menu.getChildren().forEach(view -> {
             Tab tab = (Tab) view;
             this.tabs.keySet().forEach(menuTab -> {
