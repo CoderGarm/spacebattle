@@ -3,6 +3,7 @@ package de.yuga.spacebattle.gui.vaadin.orbitals.starmap;
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.svg.Svg;
 import com.vaadin.flow.component.svg.elements.*;
+import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
@@ -10,13 +11,15 @@ import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.Move;
-import de.yuga.spacebattle.gui.vaadin.orbitals.details.Canvas;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.geo.Point;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.awt.geom.PathIterator;
+import java.awt.geom.Point2D;
+import java.awt.geom.QuadCurve2D;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -66,14 +69,14 @@ public class ViewBoxDefinition {
     public static final String COURSE_ID = "course-";
 
     /**
-     * CSS id prefix extension for every course plot for already flown tracks.
+     * CSS id prefix for every fleet text.
      */
-    public static final String BEHIND_ID = "behind";
+    public static final String FLEET_TEXT_ID = "fleet-text-";
 
     /**
-     * CSS id prefix extension for every course plot for the track ahead.
+     * CSS id prefix for every fleet group.
      */
-    public static final String BEFORE_ID = "before";
+    public static final String FLEET_GROUP_ID = "fleet-group-";
 
     /**
      * What this canvas is for, may be the universe itself, may be only for a star system.
@@ -114,6 +117,11 @@ public class ViewBoxDefinition {
      * The css selector prefix for fleet sharks. Also used to identify clicked shark.
      */
     public static final String FLEET_SELECTOR_ID_PREFIX = "fleet";
+
+    /**
+     * The css selector prefix for orbit. Also used to identify clicked orbits.
+     */
+    public static final String ORBIT_SELECTOR_ID_PREFIX = "orbit";
 
     /**
      * The radius of a planet in px which is displayed in the canvas for a star system.
@@ -163,7 +171,7 @@ public class ViewBoxDefinition {
     /**
      * The fleet outline color.
      */
-    public static final String FLEET_STROKE_COLOR = "lightred";
+    public static final String FLEET_STROKE_COLOR = "transparent";
 
     /**
      * If a transparent background is needed, use this.
@@ -171,14 +179,19 @@ public class ViewBoxDefinition {
     public static final String TRANSPARENT_FILL_COLOR = "transparent";
 
     /**
+     * If a none filled area is needed.
+     */
+    public static final String FILL_COLOR_NONE = "NONE";
+
+    /**
      * The course plot color for already flown tracks.
      */
-    public static final String COURSE_PLOT_COLOR_BEHIND = "lightgray";
+    public static final String COURSE_PLOT_COLOR_INBOUND = "red";
 
     /**
      * The course plot color for the track ahead.
      */
-    public static final String COURSE_PLOT_COLOR_BEFORE = "lightgreen";
+    public static final String COURSE_PLOT_COLOR_OUTBOUND = "green";
 
     /**
      * The canvas which is the base for all map related graphics.
@@ -219,19 +232,19 @@ public class ViewBoxDefinition {
     final Map<Orbit, List<RestrictedFleetArea>> usedFleetSlotsByOrbit = new HashMap<>();
 
     /**
+     * Holds the used slots in on a course which are occupied by a fleet.
+     */
+    final Map<CourseDefinition, List<RestrictedFleetArea>> usedFleetSlotsByCourse = new HashMap<>();
+
+    /**
      * Holds fleets to their representing svg shark polygons.
      */
-    private final Map<Fleet, Polygon> fleetSharkMap = new HashMap<>();
+    private final Map<Fleet, FleetSvgWrapper> fleetSharkMap = new HashMap<>();
 
     /**
-     * Holds svg shark polygons to their fleet.
+     * Holds the course plot for a route.
      */
-    private final Map<Polygon, Fleet> fleetSharkFleetMap = new HashMap<>();
-
-    /**
-     * Holds all course plots for a given fleet.
-     */
-    private final Map<Fleet, List<Line>> fleetCourseMap = new HashMap<>();
+    private final Map<CourseDefinition, CoursePlot> courseDefinitions = new HashMap<>();
 
     /**
      * Creates the view box and coordinate system for the given canvas by the given orbits.
@@ -264,7 +277,6 @@ public class ViewBoxDefinition {
         adjustCanvas(orbitCollection);
 
         final Set<Planet> planets = starSystem.getPlanets();
-        planets.forEach(this::createPlanetCircle);
         final Map<Planet, Set<Fleet>> fleetInSystem = starSystem.getFleets().stream()
                 .filter(fleet -> fleet.getOrbit() != null && fleet.getMove() == null)
                 .map(e -> new AbstractMap.SimpleEntry<>(e.getOrbit().getPlanet(), e))
@@ -274,7 +286,7 @@ public class ViewBoxDefinition {
         planets.forEach(planet -> {
             final Set<Fleet> fleetsInOrbit = fleetInSystem.get(planet);
             if (fleetsInOrbit != null) {
-                fleetsInOrbit.forEach(this::createFleetPolygonInOrbit);
+                fleetsInOrbit.forEach(this::printFleetPolygonInOrbit);
             }
         });
 
@@ -282,7 +294,8 @@ public class ViewBoxDefinition {
                 .filter(fleet -> fleet.getMove() != null)
                 .collect(Collectors.toSet());
 
-        movingFleets.forEach(this::createMovingFleet);
+        movingFleets.forEach(this::printMovingFleet);
+        planets.forEach(this::createPlanetCircle);
     }
 
     /**
@@ -318,6 +331,26 @@ public class ViewBoxDefinition {
 
         final int x2 = orbit2.getXCoordinate();
         final int y2 = orbit2.getYCoordinate();
+
+        return getDistance(x2 - x1, y2 - y1);
+    }
+
+    /**
+     * Returns the distance between the two given orbits.
+     *
+     * @param orbit1 the first orbit
+     * @param orbit2 the second orbit
+     * @return the distance
+     */
+    private double getOrbitalDistance(@Nonnull final Point orbit1, @Nonnull final Point orbit2) {
+        Preconditions.checkNotNull(orbit1, "orbit1 shouldn't be null!");
+        Preconditions.checkNotNull(orbit2, "orbit2 shouldn't be null!");
+
+        final double x1 = orbit1.getX();
+        final double y1 = orbit1.getY();
+
+        final double x2 = orbit2.getX();
+        final double y2 = orbit2.getY();
 
         return getDistance(x2 - x1, y2 - y1);
     }
@@ -416,7 +449,7 @@ public class ViewBoxDefinition {
 
             final double radius = getDistance(xCoord, yCoord);
 
-            final Circle circle = new Circle("ellipsoid-" + orbit.getOrbitID(), radius);
+            final Circle circle = new Circle("ellipsoid-" + idCreateOrbitID(orbit), radius);
             circle.setFillColor(TRANSPARENT_FILL_COLOR);
             circle.setStroke(ORBIT_COLOR, 1);
             circle.center(0, 0);
@@ -429,7 +462,7 @@ public class ViewBoxDefinition {
      */
     private void createOrbitsCoordinateSystems() {
         planetaryOrbits.forEach(orbit -> {
-            final String id = "orbit-" + orbit.getOrbitID();
+            final String id = "orbit-" + idCreateOrbitID(orbit);
             createCoordinateCross(PLANETARY_SYSTEM_CROSS, id, orbit, RADIUS_PLANETARY_SYSTEM, PLANETARY_AXIS_COLOR);
         });
     }
@@ -638,7 +671,7 @@ public class ViewBoxDefinition {
     public static Svg createStarMapCanvas(@Nonnull final String cssID) {
         Preconditions.checkNotNull(cssID, "cssID shouldn't be null!");
 
-        final Svg canvas = new Canvas();
+        final Svg canvas = new Svg();
         canvas.setHeightFull();
         canvas.setWidthFull();
         canvas.setId(cssID);
@@ -656,7 +689,7 @@ public class ViewBoxDefinition {
         Preconditions.checkNotNull(starSystem, "starSystem shouldn't be null!");
 
         final Orbit orbit = starSystem.getOrbit();
-        final String circleID = orbit.getOrbitID();
+        final String circleID = idCreateOrbitID(orbit);
         final Circle circle = new Circle(circleID, ViewBoxDefinition.SYSTEM_RADIUS);
         circle.center(orbit.getXCoordinate(), orbit.getYCoordinate());
         circle.setFillColor("red");
@@ -672,7 +705,7 @@ public class ViewBoxDefinition {
     private void createPlanetCircle(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, PLANET_SELECTOR_ID_PREFIX + " shouldn't be null!");
 
-        final String circleID = createPlanetID(planet);
+        final String circleID = idCreatePlanetID(planet);
         final Orbit orbit = planet.getOrbit();
         final Circle circle = new Circle(circleID, ViewBoxDefinition.PLANET_RADIUS);
         circle.center(orbit.getXCoordinate(), orbit.getYCoordinate());
@@ -690,7 +723,7 @@ public class ViewBoxDefinition {
      * @return the id
      */
     @Nonnull
-    public static String createPlanetID(@Nonnull final Planet planet) {
+    public static String idCreatePlanetID(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, PLANET_SELECTOR_ID_PREFIX + " shouldn't be null!");
 
         return PLANET_SELECTOR_ID_PREFIX + "-" + planet.hashCode();
@@ -703,54 +736,86 @@ public class ViewBoxDefinition {
      * @return the id
      */
     @Nonnull
-    public static String createFleetID(@Nonnull final Fleet fleet) {
-        Preconditions.checkNotNull(fleet, FLEET_SELECTOR_ID_PREFIX + " shouldn't be null!");
+    public static String idCreateFleetID(@Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
         return FLEET_SELECTOR_ID_PREFIX + "-" + fleet.getId();
+    }
+
+    /**
+     * Creates an id for an orbit.
+     *
+     * @param orbit the orbit
+     * @return the id
+     */
+    @Nonnull
+    public static String idCreateOrbitID(@Nonnull final Orbit orbit) {
+        Preconditions.checkNotNull(orbit, "orbit shouldn't be null!");
+
+        return ORBIT_SELECTOR_ID_PREFIX + "-" + orbit.getXCoordinate() + "-" + orbit.getYCoordinate();
+    }
+
+    /**
+     * Creates an id for a fleet's text.
+     *
+     * @param fleet the fleet
+     * @return the fleet's text id
+     */
+    public static String idCreateFleetTextID(@Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+
+        return FLEET_TEXT_ID + fleet.getId();
+    }
+
+    /**
+     * Creates an id for a course.
+     *
+     * @param startOrbit  the starting orbit
+     * @param targetOrbit the target orbit
+     * @return the id
+     */
+    @Nonnull
+    private String idCreateCourseID(@Nonnull final Orbit startOrbit, @Nonnull final Orbit targetOrbit) {
+        Preconditions.checkNotNull(startOrbit, "startOrbit shouldn't be null!");
+        Preconditions.checkNotNull(targetOrbit, "targetOrbit shouldn't be null!");
+
+        return COURSE_ID + idCreateOrbitID(startOrbit) + idCreateOrbitID(targetOrbit);
+    }
+
+    /**
+     * Creates a fleet shark an a course plot, if needed. Will print them to the canvas, too.
+     *
+     * @param fleet the fleet to print
+     */
+    public void createFleetShark(@Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+
+        if (fleet.getMove() != null) {
+            printMovingFleet(fleet);
+        } else {
+            printFleetPolygonInOrbit(fleet);
+        }
     }
 
     /**
      * Creates a triangle which represents a fleet.
      * Planet the fleet next to the planet in it's orbit in a random position.
      */
-    public void createFleetPolygonInOrbit(@Nonnull final Fleet fleet) {
-        Preconditions.checkNotNull(fleet, FLEET_SELECTOR_ID_PREFIX + " shouldn't be null!");
-        Preconditions.checkArgument(fleet.getOrbit() != null, FLEET_SELECTOR_ID_PREFIX + "'s orbit shouldn't be null!");
+    private void printFleetPolygonInOrbit(@Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+        Preconditions.checkArgument(fleet.getOrbit() != null, "fleet's orbit shouldn't be null!");
+        Preconditions.checkArgument(fleet.getOrbit().getPlanet() != null, "fleet's orbit planet shouldn't be null!");
 
-        final double freeRadius = PLANET_RADIUS * 3;
-        final double maxRadius = PLANET_RADIUS * 6;
+        final double xOffset = PLANET_RADIUS * 5;
+        final double yOffset = PLANET_RADIUS * 5;
 
         final Orbit orbit = fleet.getOrbit().getPlanet().getOrbit();
-        final int xCoordinate = orbit.getXCoordinate();
-        final int yCoordinate = orbit.getYCoordinate();
+        final double x = orbit.getXCoordinate() + xOffset;
+        final double y = orbit.getYCoordinate() + yOffset;
 
         final List<RestrictedFleetArea> restrictedFleetAreas = usedFleetSlotsByOrbit.computeIfAbsent(orbit, k -> new ArrayList<>());
 
-        List<AbstractPolyElement.PolyCoordinatePair> points = new ArrayList<>();
-        boolean breaker = true;
-        int counter = 1;
-        while (breaker) {
-            double xRandomCoord = xCoordinate + getRandomNumber(freeRadius, maxRadius) * (Math.random() < 0.5 ? -1 : 1);
-            double yRandomCoord = yCoordinate + getRandomNumber(freeRadius, maxRadius) * (Math.random() < 0.5 ? -1 : 1);
-
-            points = getPolyCoordinatePairsForFleet(xRandomCoord, yRandomCoord);
-            final List<AbstractPolyElement.PolyCoordinatePair> finalPoints = points;
-            if (restrictedFleetAreas.stream().filter(restrictedFleetArea -> restrictedFleetArea.isNotFree(finalPoints)).findFirst().orElse(null) == null) {
-                breaker = false;
-            }
-            // try to find a free position maximal 100 times then place it anyways
-            counter++;
-            if (counter > 100) break;
-        }
-
-        final RestrictedFleetArea restrictedFleetArea = new RestrictedFleetArea(points, fleet);
-        restrictedFleetAreas.add(restrictedFleetArea);
-
-        final Polygon fleetShark = createFleetShark(fleet, points);
-
-        canvas.add(fleetShark);
-        fleetSharkMap.put(fleet, fleetShark);
-        fleetSharkFleetMap.put(fleetShark, fleet);
+        printFleetShark(fleet, x, y, restrictedFleetAreas, false);
     }
 
     /**
@@ -759,134 +824,253 @@ public class ViewBoxDefinition {
      *
      * @param fleet the fleet in movement
      */
-    public void createMovingFleet(@Nonnull final Fleet fleet) {
-        Preconditions.checkNotNull(fleet, FLEET_SELECTOR_ID_PREFIX + " shouldn't be null!");
-        Preconditions.checkArgument(fleet.getMove() != null, FLEET_SELECTOR_ID_PREFIX + "'s move shouldn't be null!");
+    private void printMovingFleet(@Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+        Preconditions.checkArgument(fleet.getMove() != null, "fleet's move shouldn't be null!");
 
         final Move move = fleet.getMove();
-        final int moveDoneAtZero = move.getMoveDoneAtZero();
-
-        final FleetOrbit startOrbit = move.getStartOrbit();
-        final Planet startPlanet = startOrbit.getPlanet();
-        final Orbit startPlanetOrbit = startPlanet.getOrbit();
+        if (move.getStartOrbit().getPlanet() == null || move.getTargetOrbit().getPlanet() == null) {
+            throw new NotifySBUserException("Should not happen while a movement needs a starting and a target point.");
+        }
+        final Orbit startPlanetOrbit = move.getStartOrbit().getPlanet().getOrbit();
 
         final FleetOrbit targetOrbit = move.getTargetOrbit();
         final Planet targetPlanet = targetOrbit.getPlanet();
         final Orbit targetPlanetOrbit = targetPlanet.getOrbit();
 
+        final CourseDefinition courseDefinition = new CourseDefinition(startPlanetOrbit, targetPlanetOrbit);
+
+        CoursePlot coursePlot = courseDefinitions.get(courseDefinition);
+        if (coursePlot == null) {
+            coursePlot = printCoursePlot(courseDefinition);
+        }
+
+        final double ticksToTravelAsFraction = getTicksToTravelAsFraction(fleet, move, targetPlanet);
+
+        final ProgressOnCourse byProgress = ProgressOnCourse.getByProgress(ticksToTravelAsFraction);
+        final List<Fleet> fleetsOnStage = coursePlot.getFleetsOnStage(byProgress);
+        boolean drawAgain = true;
+        if (fleetsOnStage.contains(fleet)) {
+            final ProgressOnCourse progressByFleet = coursePlot.getProgressByFleet(fleet);
+            // draw a new icon for the fleet if there is a difference between 'as is' and 'as should be'
+            if (byProgress != progressByFleet && fleetSharkMap.containsKey(fleet)) {
+                final FleetShark oldFleetShark = fleetSharkMap.get(fleet).getFleetShark();
+                final Text fleetText = fleetSharkMap.get(fleet).getFleetText();
+                canvas.remove(oldFleetShark);
+                canvas.remove(fleetText);
+                fleetSharkMap.remove(fleet);
+                fleetsOnStage.remove(fleet);
+            } else {
+                drawAgain = false;
+            }
+        }
+        if (drawAgain) {
+            fleetsOnStage.add(fleet);
+
+            final QuadCurve2D quadCurve2D = coursePlot.getQuadCurve2D();
+            final List<Point2D> fullCourseAsPoints2D = getFullCoursePoints(quadCurve2D);
+
+            final int pointOnCourseIndex = (int) (fullCourseAsPoints2D.size() * byProgress.getProgressOntrack());
+            final Point2D coursePoint2D = fullCourseAsPoints2D.get(pointOnCourseIndex);
+            final double x = coursePoint2D.getX();
+            final double y = coursePoint2D.getY();
+
+            final boolean courseOutbound = isCourseOutbound(startPlanetOrbit, targetPlanetOrbit);
+
+            final List<RestrictedFleetArea> restrictedFleetAreas = usedFleetSlotsByCourse.computeIfAbsent(courseDefinition, k -> new ArrayList<>());
+
+            printFleetShark(fleet, x, y, restrictedFleetAreas, courseOutbound);
+        }
+    }
+
+    /**
+     * Checks how many ticks are left on this journey - as a fraction of the already travelled track of the full track.
+     *
+     * @param fleet        the fleet in motion
+     * @param move         the planned move itself
+     * @param targetPlanet the destination
+     * @return the fraction of progress on the track
+     */
+    private double getTicksToTravelAsFraction(@Nonnull final Fleet fleet,
+                                              @Nonnull final Move move,
+                                              @Nonnull final Planet targetPlanet) {
+        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+        Preconditions.checkNotNull(move, "move shouldn't be null!");
+        Preconditions.checkNotNull(targetPlanet, "targetPlanet shouldn't be null!");
+
         final int travelTime = DistanceCalculator.calculateTimeToTravel(fleet, targetPlanet);
-        double ticksToTravelAsFraction = ((double) moveDoneAtZero / (double) travelTime);
+        final int moveDoneAtZero = move.getMoveDoneAtZero();
+        double ticksToTravelAsFraction = 1 - ((double) moveDoneAtZero / (double) travelTime);
 
         if (ticksToTravelAsFraction == 1) {
             // case: 1-tick-run - just to place the fleet not on the orbit coord cross
             ticksToTravelAsFraction = 0.6;
         }
-
-        final Point point = calculatePositionOnTrack(ticksToTravelAsFraction, startPlanetOrbit, targetPlanetOrbit);
-        final double x = point.getX();
-        final double y = point.getY();
-
-        final Line line1 = printCoursePlot(COURSE_ID + BEHIND_ID + fleet.getId(),
-                new Point(startPlanetOrbit.getXCoordinate(), startPlanetOrbit.getYCoordinate()),
-                new Point(x, y),
-                COURSE_PLOT_COLOR_BEHIND);
-
-        final Line line2 = printCoursePlot(COURSE_ID + BEFORE_ID + fleet.getId(),
-                new Point(x, y),
-                new Point(targetPlanetOrbit.getXCoordinate(), targetPlanetOrbit.getYCoordinate()),
-                COURSE_PLOT_COLOR_BEFORE);
-
-        final List<AbstractPolyElement.PolyCoordinatePair> points = getPolyCoordinatePairsForFleet(x, y);
-        final Polygon fleetShark = createFleetShark(fleet, points);
-
-        // todo new RestrictedFleetArea for fleets in free space later
-
-        canvas.add(fleetShark);
-        fleetSharkMap.put(fleet, fleetShark);
-        fleetSharkFleetMap.put(fleetShark, fleet);
-
-        final List<Line> lines = fleetCourseMap.computeIfAbsent(fleet, k -> new ArrayList<>());
-        lines.add(line1);
-        lines.add(line2);
+        return ticksToTravelAsFraction;
     }
 
     /**
-     * Prints the course plot by thd given values.
+     * Checks if the planned course is headed outwards or inwards the system.
      *
-     * @param id    the css id for this line
-     * @param start the starting point
-     * @param end   the target point
-     * @param color the color
-     * @return the plotted line
+     * @param startPlanetOrbit  the origin
+     * @param targetPlanetOrbit the destination
+     * @return <code>true</code> if the course is headed outwards, <code>false</code> otherwise
      */
-    private Line printCoursePlot(@Nonnull final String id,
-                                 @Nonnull final Point start,
-                                 @Nonnull final Point end,
-                                 @Nonnull final String color) {
-        Preconditions.checkNotNull(id, "id shouldn't be null!");
-        Preconditions.checkNotNull(start, "start shouldn't be null!");
-        Preconditions.checkNotNull(end, "end shouldn't be null!");
-        Preconditions.checkNotNull(color, "color shouldn't be null!");
-
-        final double startX = start.getX();
-        final double startY = start.getY();
-
-        final double endX = end.getX();
-        final double endY = end.getY();
-
-        // reduces the length of the course plots about
-        final double lengthModifier = 0.1;
-
-        final double startXt = startX + (lengthModifier * (endX - startX));
-        final double startYt = startY + (lengthModifier * (endY - startY));
-
-        final double endXt = endX + (lengthModifier * (startX - endX));
-        final double endYt = endY + (lengthModifier * (startY - endY));
-
-        final Line line = new Line(id, new AbstractPolyElement.PolyCoordinatePair(startXt, startYt), new AbstractPolyElement.PolyCoordinatePair(endXt, endYt));
-
-        line.setStroke(color, 1, Path.LINE_CAP.ROUND, Path.LINE_JOIN.ROUND);
-        canvas.add(line);
-        return line;
-    }
-
-    /**
-     * Calculates a point on a vector from start to target with an already travelled track, represented by ticks.
-     *
-     * @param percentageFactorOfTrackTravelled the percentage as factor which are already travelled
-     * @param startPlanetOrbit                 the starting orbit
-     * @param targetPlanetOrbit                the target orbit
-     * @return the point on the track
-     */
-    private Point calculatePositionOnTrack(final double percentageFactorOfTrackTravelled,
-                                           @Nonnull final Orbit startPlanetOrbit,
-                                           @Nonnull final Orbit targetPlanetOrbit) {
+    private boolean isCourseOutbound(@Nonnull final Orbit startPlanetOrbit, @Nonnull final Orbit targetPlanetOrbit) {
         Preconditions.checkNotNull(startPlanetOrbit, "startPlanetOrbit shouldn't be null!");
         Preconditions.checkNotNull(targetPlanetOrbit, "targetPlanetOrbit shouldn't be null!");
 
-        final int startX = startPlanetOrbit.getXCoordinate();
-        final int startY = startPlanetOrbit.getYCoordinate();
-
-        final int targetX = targetPlanetOrbit.getXCoordinate();
-        final int targetY = targetPlanetOrbit.getYCoordinate();
-
-        // calculating resulting position by directional vector
-        final double resultX = startX + (percentageFactorOfTrackTravelled * (targetX - startX));
-        final double resultY = startY + (percentageFactorOfTrackTravelled * (targetY - startY));
-
-        return new Point(resultX, resultY);
+        final double radiusStartOrbit = getDistance(startPlanetOrbit.getXCoordinate(), startPlanetOrbit.getYCoordinate());
+        final double radiusTargetOrbit = getDistance(targetPlanetOrbit.getXCoordinate(), targetPlanetOrbit.getYCoordinate());
+        // true if the fleet flies outwards
+        return radiusStartOrbit <= radiusTargetOrbit;
     }
 
+    /**
+     * Creates an points list which represents the full course.
+     *
+     * @param quadCurve2D the curve
+     * @return the course points list
+     */
     @Nonnull
-    private Polygon createFleetShark(@Nonnull Fleet fleet, List<AbstractPolyElement.PolyCoordinatePair> points) {
-        Preconditions.checkNotNull(points, "points shouldn't be null!");
+    private List<Point2D> getFullCoursePoints(@Nonnull final QuadCurve2D quadCurve2D) {
+        Preconditions.checkNotNull(quadCurve2D, "quadCurve2D shouldn't be null!");
 
-        final Polygon fleetShark = new Polygon(createFleetID(fleet), points);
-        fleetShark.setFillColor(FLEET_ICON_FILL_COLOR);
-        fleetShark.setStroke(FLEET_STROKE_COLOR, 2, Path.LINE_CAP.SQUARE, Path.LINE_JOIN.ARCS); // todo where is stroke?
-        fleetShark.setDraggable(true);
-        return fleetShark;
+        final PathIterator pi = quadCurve2D.getPathIterator(null, 1);
+        final List<Point2D> fullCourseAsPoints2D = new ArrayList<>();
+
+        while (!pi.isDone()) {
+            final double[] coords = new double[6];
+
+            switch (pi.currentSegment(coords)) {
+                case PathIterator.SEG_MOVETO:
+                    fullCourseAsPoints2D.add(new Point2D.Double(coords[0], coords[1]));
+                    break;
+                case PathIterator.SEG_LINETO:
+                    final Point2D p1 = fullCourseAsPoints2D.get(fullCourseAsPoints2D.size() - 1);
+                    final Point2D p2 = new Point2D.Double(coords[0], coords[1]);
+                    double d = p1.distance(p2);
+                    double i = d / 0.5;
+                    for (int j = 0; j < i; j++) {
+                        final Point2D p3 = new Point2D.Double(p1.getX() + (j / i) * (p2.getX() - p1.getX()), p1.getY() + (j / i) * (p2.getY() - p1.getY()));
+                        fullCourseAsPoints2D.add(p3);
+                    }
+                    break;
+            }
+            pi.next();
+        }
+        return fullCourseAsPoints2D;
     }
+
+    /**
+     * Prints the course plot by the given values.
+     *
+     * @param courseDefinition the course definition
+     * @return the plotted {@link Path} and the representing {@link QuadCurve2D}
+     */
+    private CoursePlot printCoursePlot(final CourseDefinition courseDefinition) {
+        Preconditions.checkNotNull(courseDefinition, "courseDefinition shouldn't be null!");
+
+        final Orbit startOrbit = courseDefinition.getStartOrbit();
+        final Orbit targetOrbit = courseDefinition.getTargetOrbit();
+
+        final double startX = startOrbit.getXCoordinate();
+        final double startY = startOrbit.getYCoordinate();
+
+        final double endX = targetOrbit.getXCoordinate();
+        final double endY = targetOrbit.getYCoordinate();
+
+        final double relativeTargetX = endX - startX;
+        final double relativeTargetY = endY - startY;
+
+        final double baseQx = 30;
+        final double baseQy = 50;
+
+        int qXMultiplier = 1;
+        int qYMultiplier = 1;
+        if (relativeTargetY < 0) {
+            // qY is negative if the movement on y-axis is inbound
+            qYMultiplier = -1;
+        }
+
+        final String color;
+        if (getDistance(startX, startY) <= getDistance(endX, endY)) {
+            color = COURSE_PLOT_COLOR_OUTBOUND;
+            // outbound qX is negative
+            qXMultiplier = -1;
+        } else {
+            color = COURSE_PLOT_COLOR_INBOUND;
+        }
+
+        final double cX = qXMultiplier * baseQx;
+        final double cY = qYMultiplier * baseQy;
+        final String qX = "" + cX;
+        final String qY = "" + cY;
+
+        final String id = idCreateCourseID(startOrbit, targetOrbit);
+        final Path path = new Path(id, "M" + startX + "," + startY + " q" + qX + "," + qY + " " + relativeTargetX + "," + relativeTargetY);
+        path.setFillColor(FILL_COLOR_NONE);
+        path.setStroke(color, 1, Path.LINE_CAP.ROUND, Path.LINE_JOIN.ROUND);
+        canvas.add(path);
+
+        final QuadCurve2D quadCurve2D = new QuadCurve2D.Double();
+        quadCurve2D.setCurve(startX, startY, startX + cX, startY + cY, endX, endY);
+
+        final CoursePlot coursePlot = new CoursePlot(path, quadCurve2D);
+        courseDefinitions.put(courseDefinition, coursePlot);
+
+        return coursePlot;
+    }
+
+    private void printFleetShark(@Nonnull final Fleet fleet, double x, double y, @Nonnull final List<RestrictedFleetArea> restrictedFleetAreas, final boolean courseOutbound) {
+        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+        Preconditions.checkNotNull(restrictedFleetAreas, "restrictedFleetAreas shouldn't be null!");
+
+        final double heightModifier;
+        final int spacerBetweenFleetSharks = 10;
+        if (!restrictedFleetAreas.isEmpty()) {
+            // if there are some fleets at the same spot get the height of one and multiply it by the amount
+            heightModifier = spacerBetweenFleetSharks + (restrictedFleetAreas.get(0).getHeight() + spacerBetweenFleetSharks) * restrictedFleetAreas.size();
+        } else {
+            heightModifier = spacerBetweenFleetSharks;
+        }
+        final double yModifiedCoord = y + heightModifier;
+        final List<AbstractPolyElement.PolyCoordinatePair> points = getPolyCoordinatePairsForFleet(x, yModifiedCoord, courseOutbound);
+
+        final RestrictedFleetArea restrictedFleetArea = new RestrictedFleetArea(points, fleet);
+        restrictedFleetAreas.add(restrictedFleetArea);
+
+        final FleetShark fleetShark = new FleetShark(fleet.getId(), idCreateFleetID(fleet), points);
+        fleetShark.setFillColor(FLEET_ICON_FILL_COLOR);
+        fleetShark.setStroke(FLEET_STROKE_COLOR, 1, Path.LINE_CAP.SQUARE, Path.LINE_JOIN.ARCS);
+        fleetShark.setDraggable(true);
+
+        final Point biggestPoint = getBiggestPoint(points);
+        final Text fleetText = new Text(idCreateFleetTextID(fleet), fleet.getName());
+        fleetText.setFillColor(FLEET_ICON_FILL_COLOR);
+        fleetText.move(biggestPoint.getX(), biggestPoint.getY());
+        fleetText.setDraggable(true);
+
+        fleetSharkMap.put(fleet, new FleetSvgWrapper(fleetShark, fleetText));
+        canvas.add(fleetShark);
+        canvas.add(fleetText); // todo wtf wie dragge ich das zusammen?
+    }
+
+    /**
+     * Returns the upper-right point of the points list.
+     *
+     * @param points the points list
+     * @return the upper-right point
+     */
+    private Point getBiggestPoint(@Nonnull final List<AbstractPolyElement.PolyCoordinatePair> points) {
+        Preconditions.checkNotNull(points, "points shouldn't be null!");
+        Preconditions.checkState(!points.isEmpty(), "points shouldn't be empty!");
+
+        final List<Double> xValues = points.stream().map(AbstractPolyElement.PolyCoordinatePair::getPolyX).sorted().collect(Collectors.toList());
+        final List<Double> yValues = points.stream().map(AbstractPolyElement.PolyCoordinatePair::getPolyY).sorted().collect(Collectors.toList());
+        return new Point(xValues.get(xValues.size() - 1), yValues.get(0));
+    }
+
 
     /**
      * Generates a random double between the given borders.
@@ -904,50 +1088,53 @@ public class ViewBoxDefinition {
      * It must be ensured that the given base coordinates are in free space.
      * Please take notice of some math magic to keep it clear.
      *
-     * @param xCoordinate the base x coordinate
-     * @param yCoordinate the base y coordinate
+     * @param xCoordinate    the base x coordinate
+     * @param yCoordinate    the base y coordinate
+     * @param courseOutbound if the course is outbound or not
      * @return the list of poly points which are in good relation to a planet's circle
      */
     @Nonnull
     private List<AbstractPolyElement.PolyCoordinatePair> getPolyCoordinatePairsForFleet(final double xCoordinate,
-                                                                                        final double yCoordinate) {
+                                                                                        final double yCoordinate,
+                                                                                        final boolean courseOutbound) {
         final List<AbstractPolyElement.PolyCoordinatePair> points = new ArrayList<>();
 
-        double xScale = PLANET_RADIUS * 100 / xCoordinate;
-        double yScale = PLANET_RADIUS * 100 / yCoordinate;
+        // sets the direction of the peak of the fleet shark to the outer rim
+        final int direction = courseOutbound && xCoordinate > 0 ? -1 : 1;
 
+        double xScale = PLANET_RADIUS * 100 / xCoordinate * direction;
+        double yScale = PLANET_RADIUS * 100 / yCoordinate * direction;
+
+        // the toe x digit of the shark
         final double peakXCoord = xCoordinate + xScale * 5;
+        // the toe y digit of the shark
         final double peakYCoord = yCoordinate + yScale * 5;
 
+        // the heel x digit of the shark
         final double trailEndX = peakXCoord + xScale * 25;
+        // the top heel x digit of the shark
+        final double trailEndXTop = peakXCoord + xScale * 35;
+        // the upper y digit of the fin
         final double trailEndYTop = peakYCoord + yScale * 7;
+        // the bottom y digit of the fin
         final double trailEndYBottom = peakYCoord - yScale * 4;
 
         // The bigger the deeper is the shark fin of the icon.
         final double fin_depth_factor = 8;
 
-        // to place the shark on the middle of the given x position and not at the peak
-        final double xShift = (trailEndX - peakXCoord) / 2;
         // to place the shark on the middle of the given y position and not at the top
         final double yShift = (trailEndYBottom - trailEndYTop) / 2.8;
 
-        // the toe x digit of the shark
-        final double xPeak = peakXCoord - xShift;
-        // the heel x digit of the shark
-        final double xTrail = trailEndX - xShift;
-        // the toe y digit of the shark
-        double peakY = peakYCoord + yShift;
-        // the upper y digit of the fin
-        double yTrailTop = trailEndYTop + yShift;
-        // the bottom y digit of the fin
-        double yTrailBottom = trailEndYBottom + yShift;
         // the up front x digit of the fin's edge
-        double xFinSlim = xTrail - xScale * fin_depth_factor;
+        double xFinSlim = trailEndX - xScale * fin_depth_factor;
+        // the y digit of the fin's edge
+        double polyY = trailEndYBottom - yShift;
 
-        points.add(new Polyline.PolyCoordinatePair(xPeak, peakY));
-        points.add(new Polyline.PolyCoordinatePair(xTrail, yTrailTop));
-        points.add(new Polyline.PolyCoordinatePair(xFinSlim, yTrailTop - (trailEndYTop - trailEndYBottom)));
-        points.add(new Polyline.PolyCoordinatePair(xTrail, yTrailBottom));
+        points.add(new Polyline.PolyCoordinatePair(peakXCoord, peakYCoord));
+        points.add(new Polyline.PolyCoordinatePair(trailEndXTop, trailEndYTop));
+        points.add(new Polyline.PolyCoordinatePair(xFinSlim, polyY));
+        points.add(new Polyline.PolyCoordinatePair(trailEndX, trailEndYBottom));
+
         return points;
     }
 
@@ -967,27 +1154,65 @@ public class ViewBoxDefinition {
     }
 
     /**
-     * Removes the given fleets from the canvas und all related strorages.
+     * Removes the given fleets from the canvas und all related storages.
      *
      * @param fleetsToRemove the fleets to remove
      */
-    public void removeFleetSharksFromOrbits(@Nonnull final Set<Fleet> fleetsToRemove) {
+    public void removeFleetSharks(@Nonnull final Set<Fleet> fleetsToRemove) {
         Preconditions.checkNotNull(fleetsToRemove, "fleetsToRemove shouldn't be null!");
 
-        final Set<Polygon> fleetSharksToRemove = fleetsToRemove.stream().filter(fleetSharkMap::containsKey).map(fleetSharkMap::get).collect(Collectors.toSet());
-        fleetSharksToRemove.forEach(canvas::remove);
-        fleetSharksToRemove.forEach(fleetSharkFleetMap::remove);
+        final Set<FleetSvgWrapper> fleetSvgWrappers = fleetsToRemove.stream().filter(fleetSharkMap::containsKey).map(fleetSharkMap::get).collect(Collectors.toSet());
+        fleetSvgWrappers.forEach(w -> {
+            canvas.remove(w.getFleetShark());
+            canvas.remove(w.getFleetText());
+        });
         fleetsToRemove.forEach(fleetSharkMap::remove);
+        final List<RestrictedFleetArea> restrictedFleetAreas = new ArrayList<>();
         fleetsToRemove.forEach(fleet -> {
-            final FleetOrbit fleetOrbit = fleet.getOrbit();
-            if (fleetOrbit != null) {
+            // detect stored fleets in map and delete them later
+            if (fleet.isInPlanetaryOrbit()) {
+                final FleetOrbit fleetOrbit = fleet.getOrbit();
+                if (fleetOrbit == null || fleetOrbit.getPlanet() == null) {
+                    throw new NotifySBUserException("Another easter egg because this should be prevented three lines before.");
+                }
                 final Orbit orbit = fleetOrbit.getPlanet().getOrbit();
-                final List<RestrictedFleetArea> restrictedFleetAreas = usedFleetSlotsByOrbit.get(orbit);
-                restrictedFleetAreas.stream()
-                        .filter(r -> r.getFleetInSpace().equals(fleet))
+                restrictedFleetAreas.addAll(usedFleetSlotsByOrbit.computeIfAbsent(orbit, k -> new ArrayList<>()));
+            } else {
+                // if not in orbit, fleet must be in motion
+                final Move move = fleet.getMove();
+                if (move == null || move.getStartOrbit().getPlanet() == null || move.getTargetOrbit().getPlanet() == null) {
+                    throw new NotifySBUserException("See above, this should not happen while a move is defined by a origin and a destination.");
+                }
+                final CourseDefinition courseDefinition = courseDefinitions.entrySet().stream()
+                        .filter(e -> e.getValue().getProgressByFleet(fleet) != null)
+                        .map(Map.Entry::getKey)
                         .findFirst()
-                        .ifPresent(restrictedFleetAreas::remove);
+                        .orElse(null);
+
+                if (courseDefinition != null) {
+                    final CoursePlot coursePlot = courseDefinitions.get(courseDefinition);
+                    coursePlot.removeFleet(fleet);
+                }
+
+                restrictedFleetAreas.addAll(usedFleetSlotsByCourse.computeIfAbsent(courseDefinition, k -> new ArrayList<>()));
+                // detect course plots without fleets on it and remove them
+                final Set<CourseDefinition> withoutCourses = courseDefinitions.entrySet().stream()
+                        .filter(e -> e.getValue().isEmpty())
+                        .map(Map.Entry::getKey)
+                        .collect(Collectors.toSet());
+
+                withoutCourses.stream().map(courseDefinitions::get).forEach(coursePlot -> {
+                    final Path course = coursePlot.getCourse();
+                    canvas.remove(course);
+                });
+                courseDefinitions.keySet().removeAll(withoutCourses);
             }
+            // remove deleted fleets
+            restrictedFleetAreas.stream()
+                    .filter(r -> r.getFleetInSpace().equals(fleet))
+                    .findFirst()
+                    .ifPresent(restrictedFleetAreas::remove);
+
         });
     }
 

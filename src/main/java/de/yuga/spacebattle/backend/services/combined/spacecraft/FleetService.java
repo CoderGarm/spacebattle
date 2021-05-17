@@ -77,13 +77,89 @@ public class FleetService {
      * @param target the target
      * @return the fleet in motion
      */
-    public Fleet moveFleet(@Nonnull final Fleet fleet, @Nonnull final Planet target) {
+    public Fleet moveFleet(@Nonnull final Fleet fleet, @Nonnull final Planet start, @Nonnull final Planet target) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+        Preconditions.checkNotNull(start, "start shouldn't be null!");
         Preconditions.checkNotNull(target, "target shouldn't be null!");
 
-        final int calculatedDistance = DistanceCalculator.calculateTimeToTravel(fleet, target);
-        final Move move = new Move(fleet, target, calculatedDistance);
+        final int calculatedDistance = DistanceCalculator.calculateTimeToTravel(fleet, start, target);
+        final Move move = new Move(fleet, start, target, calculatedDistance);
+        // set the move
         fleet.setMove(move);
+        fleetR.save(fleet);
+        return fleet;
+    }
+
+    /**
+     * Cancels a running flight and heads the fleet back to their origin.
+     * <p>
+     * Only possible in planetary systems due the lack of communication on deep space missions.
+     *
+     * @param fleet the fleet which has to be flown back
+     * @return the fleet with the ne movement
+     */
+    public Fleet cancelFlight(@Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+        Preconditions.checkArgument(fleet.getMove() != null, "fleet's move shouldn't be null!");
+
+        final Move move = fleet.getMove();
+        final FleetOrbit targetOrbit = move.getTargetOrbit();
+        final Planet targetPlanet = targetOrbit.getPlanet();
+
+        final FleetOrbit startOrbit = move.getStartOrbit();
+        final Planet startPlanet = startOrbit.getPlanet();
+
+        if (targetPlanet == null || startPlanet == null) {
+            throw new NotifySBUserException("A movement must always have a beginning and a designated target.");
+        }
+
+        // permute origin and destination
+        return moveFleet(fleet, targetPlanet, startPlanet, true);
+    }
+
+    /**
+     * Sets a fleet in motion to the target. From an origin which differs from the currents fleet's position.
+     * That means that this should be used for things like "cancel a flight" but it can be used accidentally as god-like jump-drive.
+     * Pay attention.
+     *
+     * @param fleet                      the fleet which knows it's position
+     * @param start                      the start planet if it is different from the fleets current position
+     * @param target                     the target
+     * @param useCurrentMovementProgress if <code>true</code> the progress on the current track will be used for the new movement
+     * @return the fleet in motion
+     */
+    private Fleet moveFleet(@Nonnull final Fleet fleet,
+                            @Nonnull final Planet start,
+                            @Nonnull final Planet target,
+                            final boolean useCurrentMovementProgress) {
+        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+        Preconditions.checkNotNull(start, "start shouldn't be null!");
+        Preconditions.checkNotNull(target, "target shouldn't be null!");
+        Preconditions.checkArgument(fleet.getMove() != null, "fleet's move shouldn't be null!");
+
+        final int moveDoneAtZero = fleet.getMove().getMoveDoneAtZero();
+
+        fleet.setOrbit(new FleetOrbit(start));
+        int calculateTimeToTravel = DistanceCalculator.calculateTimeToTravel(fleet, start, target);
+
+        final int alreadyTravelled = calculateTimeToTravel - moveDoneAtZero;
+        if (useCurrentMovementProgress) {
+            if (calculateTimeToTravel - alreadyTravelled <= 0) {
+                calculateTimeToTravel = 0;
+            } else {
+                calculateTimeToTravel = calculateTimeToTravel - alreadyTravelled;
+            }
+        }
+
+        if (calculateTimeToTravel > 0) {
+            // set move
+            final Move move = new Move(fleet, start, target, calculateTimeToTravel);
+            fleet.setMove(move);
+        } else {
+            // set fleet in planetary orbit
+            fleet.setMove(null);
+            fleet.setOrbit(new FleetOrbit(target));
+        }
         fleetR.save(fleet);
         return fleet;
     }

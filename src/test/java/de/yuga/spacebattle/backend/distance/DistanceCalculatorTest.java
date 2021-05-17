@@ -64,7 +64,7 @@ public class DistanceCalculatorTest {
         modules.put(module, 1);
         shipClass.setModules(modules);
         fleet.updateShips(shipClass, 1);
-        fleet.setOrbit(new FleetOrbit(planetStart.getSystem(), planetStart));
+        fleet.setOrbit(new FleetOrbit(planetStart));
         return fleet;
     }
 

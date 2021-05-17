@@ -39,8 +39,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.gui.vaadin.misc.SBDialog.Position.INITIAL_TOP_LEFT;
-import static de.yuga.spacebattle.gui.vaadin.orbitals.starmap.ViewBoxDefinition.FLEET_SELECTOR_ID_PREFIX;
-import static de.yuga.spacebattle.gui.vaadin.orbitals.starmap.ViewBoxDefinition.PLANET_SELECTOR_ID_PREFIX;
+import static de.yuga.spacebattle.gui.vaadin.orbitals.starmap.ViewBoxDefinition.*;
 
 /**
  * Home of a star system map and it's functionality.
@@ -62,12 +61,22 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
     @Nonnull
     private final Map<String, PlanetDisplay> planetMap = new HashMap<>();
 
+    /**
+     * Maps css selectors from {@link ViewBoxDefinition} to existing fleets.
+     * Will be updated by fleets and their texts.
+     */
     @Nonnull
     private final Map<String, Fleet> fleetMap = new HashMap<>();
 
+    /**
+     * The content container.
+     */
     @Nonnull
     private final Scroller mapScroller = new Scroller();
 
+    /**
+     * The canvas inside the content container.
+     */
     @Nonnull
     private Svg canvas;
 
@@ -145,7 +154,7 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
 
         final Set<Planet> planets = value.getPlanets();
         final Set<String> orbitIDs = planets.stream()
-                .map(ViewBoxDefinition::createPlanetID).collect(Collectors.toSet());
+                .map(ViewBoxDefinition::idCreatePlanetID).collect(Collectors.toSet());
 
         final Set<String> toRemove = planetMap.keySet().stream()
                 .filter(id -> !orbitIDs.contains(id)).collect(Collectors.toSet());
@@ -153,7 +162,7 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
         planetMap.keySet().removeAll(toRemove);
 
         planets.forEach(planet -> {
-            final String orbitID = ViewBoxDefinition.createPlanetID(planet);
+            final String orbitID = ViewBoxDefinition.idCreatePlanetID(planet);
             PlanetDisplay planetDisplay = planetMap.get(orbitID);
             if (planetDisplay == null) {
                 planetDisplay = new PlanetDisplay();
@@ -163,8 +172,10 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
         });
 
         value.getFleets().forEach(fleet -> {
-            final String fleetID = ViewBoxDefinition.createFleetID(fleet);
-            fleetMap.putIfAbsent(fleetID, fleet);
+            final String fleetID = ViewBoxDefinition.idCreateFleetID(fleet);
+            fleetMap.put(fleetID, fleet);
+            final String fleetTextID = idCreateFleetTextID(fleet);
+            fleetMap.put(fleetTextID, fleet);
         });
 
         viewBoxDefinition = new ViewBoxDefinition(value, canvas);
@@ -221,7 +232,7 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
                     sbDialog.open(INITIAL_TOP_LEFT);
                     openDialogs.put(id, sbDialog);
                 }
-            } else if (id.startsWith(FLEET_SELECTOR_ID_PREFIX)) {
+            } else if (id.startsWith(FLEET_SELECTOR_ID_PREFIX) || id.startsWith(FLEET_TEXT_ID)) {
                 final Fleet fleet = fleetMap.get(id);
 
                 Set<Fleet> allFleetsInOrbit = null;
@@ -235,7 +246,10 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
 
                 MoveDTO moveDTO = null;
                 if (fleet.getMove() != null) {
-                    moveDTO = new MoveDTO(fleet, fleet.getMove().getTargetOrbit().getPlanet());
+                    final Planet planet = fleet.getMove().getTargetOrbit().getPlanet();
+                    if (planet != null) {
+                        moveDTO = new MoveDTO(fleet, planet);
+                    }
                     // reset fleet position is fleet is in motion - must be non-movable for the user
                     viewBoxDefinition.resetPositionOfSvgElement(element);
                 }
@@ -299,7 +313,7 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
 
         SBConfirmationDialog sbDialog = (SBConfirmationDialog) openDialogs.get(id);
         if (sbDialog != null) {
-            ((FleetMoveMergeSplitEdit) sbDialog.getContent()).setValueFleetDisplay(fleet);
+            ((FleetMoveMergeSplitEdit) sbDialog.getContent()).setValueFleetDisplayAndSplit(fleet);
             ((FleetMoveMergeSplitEdit) sbDialog.getContent()).setValueMoveDisplay(moveDTO);
             ((FleetMoveMergeSplitEdit) sbDialog.getContent()).setValueFleetMergeEdit(allFleetsInOrbit);
             if (!sbDialog.isOpened()) {
@@ -307,10 +321,11 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
             }
         } else {
             final FleetMoveMergeSplitEdit fleetMoveMergeSplitEdit = new FleetMoveMergeSplitEdit();
-            fleetMoveMergeSplitEdit.setValueFleetDisplay(fleet);
+            fleetMoveMergeSplitEdit.setValueFleetDisplayAndSplit(fleet);
             fleetMoveMergeSplitEdit.setValueMoveDisplay(moveDTO);
             fleetMoveMergeSplitEdit.setValueFleetMergeEdit(allFleetsInOrbit);
             sbDialog = new SBConfirmationDialog(fleetMoveMergeSplitEdit);
+            sbDialog.setWidth("550px");
             sbDialog.open(INITIAL_TOP_LEFT);
             openDialogs.put(id, sbDialog);
 
@@ -320,7 +335,7 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
                 if (!fleetsToMerge.isEmpty()) {
                     final Fleet mergedFleet = fleetService.mergeFleets(fleet, fleetsToMerge);
                     // update display after merging fleets
-                    fleetMoveMergeSplitEdit.setValueFleetDisplay(mergedFleet);
+                    fleetMoveMergeSplitEdit.setValueFleetDisplayAndSplit(mergedFleet);
                     // update canvas and merge display after merging fleets
                     final StarSystem starSystem = starsystemService.find(getValue());
                     if (starSystem == null) {
@@ -329,24 +344,48 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
                     final FleetOrbit fleetOrbit = fleet.getOrbit();
                     if (fleetOrbit != null) {
                         final Planet planet = fleetOrbit.getPlanet();
+                        if (planet == null) {
+                            throw new NotifySBUserException("Merging fleets can only happen in planetary orbits.");
+                        }
                         final Set<Fleet> allFleetsInOrbit2 = starSystem.getFleets().stream()
                                 .filter(fleet1 -> fleet1.getOrbit() != null && planet.equals(fleet1.getOrbit().getPlanet()))
                                 .collect(Collectors.toSet());
 
                         fleetMoveMergeSplitEdit.setValueFleetMergeEdit(allFleetsInOrbit2);
-                        viewBoxDefinition.removeFleetSharksFromOrbits(fleetsToMerge);
+                        viewBoxDefinition.removeFleetSharks(fleetsToMerge);
                         NotificationHelper.notify("merge accepted", 3000);
                     }
                 } else if (fleetMoveMergeSplitEdit.getSelectedMove() != null) {
-                    final Planet target = fleetMoveMergeSplitEdit.getSelectedMove().getTarget();
-                    final Fleet fleetInMotion = fleetService.moveFleet(fleet, target);
+                    final MoveDTO selectedMove = fleetMoveMergeSplitEdit.getSelectedMove();
 
+                    final Fleet fleetInMotion;
+                    final Planet target;
+                    final Set<Fleet> fleetsToRemove = new HashSet<>();
+                    if (selectedMove.isInMotion() && selectedMove.isCancelFlight()) {
+                        // changing origin and destination while cancelling flight
+                        fleetInMotion = fleetService.cancelFlight(fleet);
+                        if (fleetInMotion.getMove() == null) {
+                            throw new NotifySBUserException("Should not be possible");
+                        }
+                        target = fleetInMotion.getMove().getTargetOrbit().getPlanet();
+                    } else {
+                        target = selectedMove.getTarget();
+                        final FleetOrbit fleetOrbit = fleet.getOrbit();
+                        if (fleetOrbit == null || fleetOrbit.getPlanet() == null) {
+                            throw new NotifySBUserException("");
+                        }
+                        final Planet startingPlanet = fleetOrbit.getPlanet();
+                        fleetInMotion = fleetService.moveFleet(fleet, startingPlanet, target);
+                    }
+                    fleetsToRemove.add(fleet);
+                    if (target == null) {
+                        throw new NotifySBUserException("Should not be possible, the target must be defined");
+                    }
                     final MoveDTO moveDTO1 = new MoveDTO(fleetInMotion, target);
                     fleetMoveMergeSplitEdit.setValueMoveDisplay(moveDTO1);
-                    Set<Fleet> fleetsToRemove = new HashSet<>();
-                    fleetsToRemove.add(fleet);
-                    viewBoxDefinition.removeFleetSharksFromOrbits(fleetsToRemove);
-                    viewBoxDefinition.createMovingFleet(fleetInMotion);
+                    // update canvas
+                    viewBoxDefinition.removeFleetSharks(fleetsToRemove);
+                    viewBoxDefinition.createFleetShark(fleetInMotion);
                     NotificationHelper.notify("move accepted", 3000);
 
                     // remove fleet in motion from all constructed dialogs
@@ -358,15 +397,17 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
                             content.setValueFleetMergeEdit(fleetsToMerge1);
                         }
                     });
+
                 } else if (fleetMoveMergeSplitEdit.getFleetsToSplit() != null) {
                     final Fleet[] splitResult = fleetMoveMergeSplitEdit.getFleetsToSplit().getSplitResult();
                     final Fleet baseFleet = splitResult[0];
                     Fleet splitFleet = splitResult[1];
                     fleetService.saveAndFlush(baseFleet);
                     splitFleet = fleetService.saveAndFlush(splitFleet);
-                    
-                    fleetMap.put(ViewBoxDefinition.createFleetID(splitFleet), splitFleet);
-                    viewBoxDefinition.createFleetPolygonInOrbit(splitFleet);
+
+                    fleetMap.put(ViewBoxDefinition.idCreateFleetID(splitFleet), splitFleet);
+                    fleetMap.put(ViewBoxDefinition.idCreateFleetTextID(splitFleet), splitFleet);
+                    viewBoxDefinition.createFleetShark(splitFleet);
                 }
 
                 openDialogs.get(id).close();

@@ -88,11 +88,6 @@ public class Orbit implements Comparable<Orbit> {
         }
     }
 
-    @Nonnull
-    public String getOrbitID() {
-        return xCoordinate + "-" + yCoordinate;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

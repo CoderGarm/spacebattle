@@ -23,6 +23,8 @@ public class MoveDTO {
      */
     private final boolean inMotion;
 
+    private boolean cancelFlight = false;
+
     public MoveDTO(@Nonnull final Fleet fleet, @Nonnull final Planet target) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
         Preconditions.checkNotNull(target, "target shouldn't be null!");
@@ -40,7 +42,11 @@ public class MoveDTO {
     @Nonnull
     public String getTimeToTravel() {
         final int timeToTravel = DistanceCalculator.calculateTimeToTravel(fleet, target);
-        return "Time to travel: " + timeToTravel + " Tick";
+        if (fleet.getMove() != null) {
+            final int moveDoneAtZero = fleet.getMove().getMoveDoneAtZero();
+            return (timeToTravel - moveDoneAtZero) + " / " + timeToTravel + " Ticks travelled";
+        }
+        return "Time to travel: " + timeToTravel + " Tick(s)";
     }
 
     /**
@@ -55,5 +61,21 @@ public class MoveDTO {
 
     public boolean isInMotion() {
         return inMotion;
+    }
+
+    /**
+     * Sets the flag for cancelling a flight.
+     */
+    public void setCancelFlight() {
+        cancelFlight = true;
+    }
+
+    /**
+     * Returns the "should the flight be cancelled" flag.
+     *
+     * @return <code>true</code> if the flight must be cancelled, <code>false</code> otherwise
+     */
+    public boolean isCancelFlight() {
+        return cancelFlight;
     }
 }

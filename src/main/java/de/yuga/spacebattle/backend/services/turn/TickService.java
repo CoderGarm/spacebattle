@@ -11,7 +11,6 @@ import de.yuga.spacebattle.backend.entities.constructables.buildings.Constructio
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
-import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.Move;
@@ -121,12 +120,13 @@ public class TickService {
         for (final Planet p : planets) {
             tick(p);
         }
-        final List<Move> movings = moveService.findAll();
-        for (final Move m : movings) {
+        final List<Move> movements = moveService.findAll();
+        for (final Move m : movements) {
             boolean isDone = move(m);
             if (isDone) {
-                moveService.delete(m);
-                fleetService.save(m.getFleet());
+                final Fleet fleet = m.getFleet();
+                fleet.setMove(null);
+                fleetService.save(fleet);
             } else {
                 moveService.save(m);
             }
@@ -136,6 +136,12 @@ public class TickService {
         return tickC.save(entity);
     }
 
+    /**
+     * Processes a movement.
+     *
+     * @param move the movement to process
+     * @return <code>true</code> if the movement is done, <code>false</code> otherwise
+     */
     private boolean move(@Nonnull final Move move) {
         Preconditions.checkNotNull(move, "move shouldn't be null!");
 
@@ -143,17 +149,18 @@ public class TickService {
         moveDoneAtZero--;
         if (moveDoneAtZero > 0) {
             move.setMoveDoneAtZero(moveDoneAtZero);
+            // todo detect if fleet is in hyperspace and remove fleet orbit completely
             return false;
         }
 
         final FleetOrbit targetOrbit = move.getTargetOrbit();
-        final StarSystem targetSystem = targetOrbit.getSystem();
         final Planet targetPlanet = targetOrbit.getPlanet();
+        if (targetPlanet == null) {
+            throw new NotifySBUserException("A movement must always have a designated target.");
+        }
 
         final Fleet fleet = move.getFleet();
-        fleet.setOrbit(new FleetOrbit(targetSystem, targetPlanet));
-        fleetService.save(fleet);
-        moveService.save(move);
+        fleet.setOrbit(new FleetOrbit(targetPlanet));
         return true;
     }
 
@@ -215,7 +222,7 @@ public class TickService {
                         if (shipClass == null || amountShips == null || amountShips == 0) {
                             throw new NotifySBUserException("This should never happen while build a fleet!");
                         }
-                        Fleet fleet = new Fleet("Fresh Build @ " + planet.getName(), owner, new FleetOrbit(planet.getSystem(), planet));
+                        Fleet fleet = new Fleet("Fresh Build @ " + planet.getName(), owner, new FleetOrbit(planet));
                         fleet.updateShips(shipClass, amountShips);
                         fleetService.save(fleet);
                         break;

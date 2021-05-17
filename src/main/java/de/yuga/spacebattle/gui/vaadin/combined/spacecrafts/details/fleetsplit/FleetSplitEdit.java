@@ -64,10 +64,7 @@ public class FleetSplitEdit extends VerticalLayout implements BeforeLeaveObserve
 
     @Nullable
     public FleetSplitDTO getValue() {
-        if (isValid()) {
-            return splitEdit.getValue();
-        }
-        return null;
+        return splitEdit.getValue();
     }
 
     public Registration addValueChangeListener(@Nonnull final ValueChangeListener<SBValueChangeEvent> listener) {

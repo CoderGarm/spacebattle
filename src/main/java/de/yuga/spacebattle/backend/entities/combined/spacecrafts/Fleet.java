@@ -2,7 +2,6 @@ package de.yuga.spacebattle.backend.entities.combined.spacecrafts;
 
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.ResourceDeposit;
 import de.yuga.spacebattle.backend.entities.account.User;
@@ -57,12 +56,20 @@ public class Fleet extends AbstractEntityKey {
     @JoinColumn(name = "idResourceDeposit", updatable = false)
     private final ResourceDeposit resourceDeposit = new ResourceDeposit(EResourceSubType.DEPOSITS);
 
+    /**
+     * The current location of this fleet.
+     * <p>
+     * If null, then this is in hyper space.
+     */
     @Nullable
     @Embedded
     private FleetOrbit orbit;
 
+    /**
+     * The move includes the origin and the destination if the start is different from the current {@link #orbit}.
+     */
     @Nullable
-    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REMOVE, CascadeType.PERSIST})
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "idMove", unique = true)
     private Move move;
 
@@ -134,8 +141,29 @@ public class Fleet extends AbstractEntityKey {
         return move;
     }
 
+    /**
+     * Sets this fleet in motion and modifies the fleet's orbit accordingly.
+     *
+     * @param move the planned move
+     */
     public void setMove(@Nullable Move move) {
+        if (move != null && orbit != null) {
+            if (move.isSystemTravel()) {
+                orbit = null;
+            } else {
+                orbit.leavePlanet();
+            }
+        }
         this.move = move;
+    }
+
+    /**
+     * Checks that this fleet is in a planetary orbit.
+     *
+     * @return <code>true</code> if this fleet is in a planetary orbit, <code>false</code> otherwise
+     */
+    public boolean isInPlanetaryOrbit() {
+        return orbit != null && orbit.getPlanet() != null;
     }
 
     /**
@@ -143,22 +171,23 @@ public class Fleet extends AbstractEntityKey {
      *
      * @return the maximal FTL speed
      */
-    public BigDecimal getFTLRangePerTick() {
-        if (ships.isEmpty()) {
-            throw new NotifySBUserException("This should never happen");
-        }
-        List<Integer> speed = new ArrayList<>();
+    public BigDecimal getRangePerTick(@Nonnull final EModuleType eModuleType) {
+        Preconditions.checkNotNull(eModuleType, "eModuleType shouldn't be null!");
+        Preconditions.checkArgument((eModuleType == EModuleType.FTLPROPULSION || eModuleType == EModuleType.PROPULSION),
+                "EModuleType must be kind of propulsion.");
+
+        List<Integer> speeds = new ArrayList<>();
         for (ShipClass sc : ships.keySet()) {
-            int ftlSpeed = 0;
+            int speed = 0;
             for (Module m : sc.getModules().keySet()) {
-                if (m.getModuleType() == EModuleType.FTLPROPULSION) {
-                    ftlSpeed += m.getEffectiveEffectValue(owner.getRaceType());
+                if (m.getModuleType() == eModuleType) {
+                    speed += m.getEffectiveEffectValue(owner.getRaceType());
                 }
             }
-            speed.add(ftlSpeed);
+            speeds.add(speed);
         }
-        Collections.sort(speed);
-        return new BigDecimal(speed.get(0));
+        Collections.sort(speeds);
+        return new BigDecimal(speeds.get(0));
     }
 
     @Override

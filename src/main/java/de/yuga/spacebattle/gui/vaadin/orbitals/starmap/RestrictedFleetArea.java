@@ -14,9 +14,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 class RestrictedFleetArea {
 
     private double minX = Double.MAX_VALUE;
-    private double maxX = Double.MIN_VALUE;
+    private double maxX = -1 * Double.MAX_VALUE;
     private double minY = Double.MAX_VALUE;
-    private double maxY = Double.MIN_VALUE;
+    private double maxY = -1 * Double.MAX_VALUE;
     private boolean isValid = false;
 
     /**
@@ -100,5 +100,14 @@ class RestrictedFleetArea {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Returns the height of this.
+     *
+     * @return the height
+     */
+    public double getHeight() {
+        return Math.abs(Math.abs(maxY) - Math.abs(minY));
     }
 }

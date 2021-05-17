@@ -84,7 +84,7 @@ public class StarSystemOverviewDisplay extends StarSystemLayout implements HasVa
         if (starSystems == null || starSystems.isEmpty()) {
             return;
         }
-        starSystemDisplayMap = starSystems.stream().collect(Collectors.toMap(o -> o.getOrbit().getOrbitID(), Function.identity()));
+        starSystemDisplayMap = starSystems.stream().collect(Collectors.toMap(o -> ViewBoxDefinition.idCreateOrbitID(o.getOrbit()), Function.identity()));
         viewBoxDefinition = new ViewBoxDefinition(starSystems, canvas);
     }
 

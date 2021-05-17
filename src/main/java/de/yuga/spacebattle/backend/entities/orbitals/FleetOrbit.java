@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.entities.orbitals;
 import com.google.common.base.Preconditions;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.Embeddable;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -16,7 +17,7 @@ public class FleetOrbit {
     @JoinColumn(name = "idStarsystem", referencedColumnName = "idStarsystem")
     private StarSystem system;
 
-    @Nonnull
+    @Nullable
     @OneToOne
     @JoinColumn(name = "idPlanet", referencedColumnName = "idPlanet")
     private Planet planet;
@@ -24,12 +25,22 @@ public class FleetOrbit {
     public FleetOrbit() {
     }
 
-    public FleetOrbit(@Nonnull final StarSystem system, @Nonnull final Planet planet) {
-        Preconditions.checkNotNull(system, "system shouldn't be null!");
+    public FleetOrbit(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
 
-        this.system = system;
+        this.system = planet.getSystem();
         this.planet = planet;
+    }
+
+    /**
+     * If the orbit defined a sojourn not in a planetary orbit but in a star system.
+     *
+     * @param system
+     */
+    public FleetOrbit(@Nonnull final StarSystem system) {
+        Preconditions.checkNotNull(system, "system shouldn't be null!");
+
+        this.system = system;
     }
 
     @Nonnull
@@ -41,13 +52,20 @@ public class FleetOrbit {
         this.system = system;
     }
 
-    @Nonnull
+    @Nullable
     public Planet getPlanet() {
         return planet;
     }
 
-    public void setPlanet(@Nonnull Planet planet) {
+    public void setPlanet(@Nullable Planet planet) {
         this.planet = planet;
+    }
+
+    /**
+     * In case of starting a movement but stay in the system, the planet has to be null.
+     */
+    public void leavePlanet() {
+        this.planet = null;
     }
 
     @Override
@@ -58,13 +76,14 @@ public class FleetOrbit {
         FleetOrbit that = (FleetOrbit) o;
 
         if (!system.equals(that.system)) return false;
-        return planet.equals(that.planet);
+        return planet != null ? planet.equals(that.planet) : that.planet == null;
     }
 
     @Override
     public int hashCode() {
         int result = system.hashCode();
-        result = 31 * result + planet.hashCode();
+        result = 31 * result + (planet != null ? planet.hashCode() : 0);
         return result;
     }
+
 }

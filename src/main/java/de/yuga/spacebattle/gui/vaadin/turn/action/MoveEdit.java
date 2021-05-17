@@ -3,8 +3,11 @@ package de.yuga.spacebattle.gui.vaadin.turn.action;
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
@@ -19,9 +22,10 @@ import javax.annotation.Nullable;
 /**
  * Displays a fleet in motion represented by the {@link MoveDTO}.
  */
-public class MoveDisplay extends HorizontalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<MoveDisplay, MoveDTO>, MoveDTO> {
+@CssImport("./styles/views/main/details/move-edit.css")
+public class MoveEdit extends VerticalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<MoveEdit, MoveDTO>, MoveDTO> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MoveDisplay.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MoveEdit.class);
 
     @Nonnull
     private final Binder<MoveDTO> binder = new Binder<>(MoveDTO.class);
@@ -29,7 +33,10 @@ public class MoveDisplay extends HorizontalLayout implements HasValue<AbstractFi
     @Nullable
     private ValueChangeListener<SBValueChangeEvent> valueChangeListener;
 
-    public MoveDisplay() {
+    @Nonnull
+    private final Button cancelFlight;
+
+    public MoveEdit() {
         final Label targetLabel = new Label();
         final ReadOnlyHasValue<String> targetLabelText = new ReadOnlyHasValue<>(targetLabel::setText);
         binder.forField(targetLabelText).bind(moveDTO -> {
@@ -45,17 +52,39 @@ public class MoveDisplay extends HorizontalLayout implements HasValue<AbstractFi
 
         final PlanetDisplay planetDisplay = new PlanetDisplay();
         binder.forField(planetDisplay).bind(MoveDTO::getTarget, null);
+        planetDisplay.setClassName("planet-display");
 
         final Label timeToTravelLabel = new Label();
         final ReadOnlyHasValue<String> timeToTravelLabelText = new ReadOnlyHasValue<>(timeToTravelLabel::setText);
         binder.forField(timeToTravelLabelText).bind(MoveDTO::getTimeToTravel, null);
 
-        add(targetLabel, planetDisplay, timeToTravelLabel);
+        cancelFlight = new Button("Cancel flight", event -> {
+            final MoveDTO moveDTO = getValue();
+            if (moveDTO != null) {
+                moveDTO.setCancelFlight();
+                binder.readBean(moveDTO);
+            }
+            event.getSource().setEnabled(false);
+            if (valueChangeListener == null) {
+                return;
+            }
+            valueChangeListener.valueChanged(new SBValueChangeEvent());
+        });
+
+        cancelFlight.setEnabled(false);
+
+        final HorizontalLayout horizontalWrapper = new HorizontalLayout();
+        horizontalWrapper.add(targetLabel, planetDisplay, timeToTravelLabel);
+
+        add(horizontalWrapper, cancelFlight);
     }
 
     @Override
     public void setValue(MoveDTO value) {
         binder.setBean(value);
+        if (value != null && value.isInMotion()) {
+            cancelFlight.setEnabled(true);
+        }
         if (valueChangeListener == null) {
             return;
         }
@@ -69,7 +98,7 @@ public class MoveDisplay extends HorizontalLayout implements HasValue<AbstractFi
     }
 
     @Override
-    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<MoveDisplay, MoveDTO>> listener) {
+    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<MoveEdit, MoveDTO>> listener) {
         // not necessary
         return null;
     }

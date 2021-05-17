@@ -119,6 +119,9 @@ public class StarMapMainView extends SBPageActionSelectorLayout<StarSystemLayout
             readOnlyMap.put(tab, true);
             updateActionMenuUsability(readOnlyMap);
             selectTabOfActionMenu(content);
+        } else if (e.getPayload().equals(ESBEvent.TICK_DONE.name())) {
+            starSystemOverviewDisplay.refresh();
+            starSystemDisplay.refresh();
         }
     }
 

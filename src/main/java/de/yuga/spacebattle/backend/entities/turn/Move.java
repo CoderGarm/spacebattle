@@ -30,7 +30,7 @@ public class Move extends AbstractEntityKey {
 
     @Nonnull
     @NotNull
-    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE})
+    @OneToOne
     @JoinColumn(name = "idFleet", updatable = false)
     private Fleet fleet;
 
@@ -61,6 +61,7 @@ public class Move extends AbstractEntityKey {
     }
 
     public Move(@Nonnull final Fleet fleet,
+                @Nonnull final Planet origin,
                 @Nonnull final Planet target,
                 final int moveDoneAtZero) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
@@ -69,8 +70,8 @@ public class Move extends AbstractEntityKey {
 
         this.owner = fleet.getOwner();
         this.fleet = fleet;
-        this.startOrbit = fleet.getOrbit();
-        this.targetOrbit = new FleetOrbit(target.getSystem(), target);
+        this.startOrbit = new FleetOrbit(origin);
+        this.targetOrbit = new FleetOrbit(target);
         this.moveDoneAtZero = moveDoneAtZero;
     }
 
@@ -121,5 +122,37 @@ public class Move extends AbstractEntityKey {
             throw new NotifySBUserException("You cannot increase the traffic time until you have warp scrambler");
         }
         this.moveDoneAtZero = moveDoneAtZero;
+    }
+
+    /**
+     * Checks if this move is between the stars.
+     *
+     * @return <code>true</code> if this move is between stars, <code>false</code> otherwise
+     */
+    public boolean isSystemTravel() {
+        if (startOrbit.getSystem().equals(targetOrbit.getSystem())) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Move)) return false;
+
+        Move move = (Move) o;
+
+        if (!fleet.equals(move.fleet)) return false;
+        if (!startOrbit.equals(move.startOrbit)) return false;
+        return targetOrbit.equals(move.targetOrbit);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = fleet.hashCode();
+        result = 31 * result + startOrbit.hashCode();
+        result = 31 * result + targetOrbit.hashCode();
+        return result;
     }
 }
