@@ -12,6 +12,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfar
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Sidewall;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
+import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
@@ -98,23 +99,53 @@ public class ShipDataVaadinValidator implements Validator<ShipClass> {
             final Armor armor = shipClass.getArmor();
             final ElectronicWarfare electronicWarfare = shipClass.getElectronicWarfare();
             final Sidewall sidewall = shipClass.getSidewall();
-            final Set<AlignedFitting> fittings = shipClass.getFittings();
 
             int usedCapacity = 0;
             usedCapacity = addUsedCapacity(usedCapacity, propulsion);
             usedCapacity = addUsedCapacity(usedCapacity, armor);
             usedCapacity = addUsedCapacity(usedCapacity, electronicWarfare);
             usedCapacity = addUsedCapacity(usedCapacity, sidewall);
-            for (AlignedFitting f : fittings) {
-                addUsedCapacity(usedCapacity, f.getWeapon());
-            }
+
             int constructionCapacity = shipClass.getHull().getConstructionCapacity();
             if (usedCapacity > constructionCapacity) {
                 status = ErrorLevel.ERROR;
                 errorMessages.put("ConstructionCapacity", "Capacity is overridden.");
             }
-        }
 
+            final Set<AlignedFitting> fittings = shipClass.getFittings();
+            final Set<AlignedFitting> bowFittings = fittings.stream().filter(f -> EWeaponAlignment.BOW == f.getWeaponAlignment()).collect(Collectors.toSet());
+            int usedCapacityBow = 0;
+            for (AlignedFitting f : bowFittings) {
+                addUsedCapacity(usedCapacityBow, f.getWeapon());
+            }
+            final int constructionCapacityBow = shipClass.getHull().getConstructionCapacityBow();
+            if (usedCapacityBow > constructionCapacityBow) {
+                status = ErrorLevel.ERROR;
+                errorMessages.put("ConstructionCapacity Bow", "Capacity is overridden.");
+            }
+
+            final Set<AlignedFitting> sternFittings = fittings.stream().filter(f -> EWeaponAlignment.STERN == f.getWeaponAlignment()).collect(Collectors.toSet());
+            int usedCapacityStern = 0;
+            for (AlignedFitting f : sternFittings) {
+                addUsedCapacity(usedCapacityStern, f.getWeapon());
+            }
+            final int constructionCapacityStern = shipClass.getHull().getConstructionCapacityStern();
+            if (usedCapacityStern > constructionCapacityStern) {
+                status = ErrorLevel.ERROR;
+                errorMessages.put("ConstructionCapacity Stern", "Capacity is overridden.");
+            }
+
+            final Set<AlignedFitting> broadsideFittings = fittings.stream().filter(f -> EWeaponAlignment.BROADSIDE == f.getWeaponAlignment()).collect(Collectors.toSet());
+            int usedCapacityBroadside = 0;
+            for (AlignedFitting f : broadsideFittings) {
+                addUsedCapacity(usedCapacityBroadside, f.getWeapon());
+            }
+            final int constructionCapacityBroadsides = shipClass.getHull().getConstructionCapacityBroadsides();
+            if (usedCapacityBroadside > constructionCapacityBroadsides) {
+                status = ErrorLevel.ERROR;
+                errorMessages.put("ConstructionCapacity Broadsides", "Capacity is overridden.");
+            }
+        }
         return getVaadinStyleResult(errorMessages, status);
     }
 
