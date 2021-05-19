@@ -66,6 +66,7 @@ public class PlanetService {
      * @return the new planet
      */
     @Nonnull
+    @Deprecated(since = "productive environment")
     public Planet createPlanet(@Nonnull final String name,
                                @Nullable final User owner,
                                @Nonnull final StarSystem system,

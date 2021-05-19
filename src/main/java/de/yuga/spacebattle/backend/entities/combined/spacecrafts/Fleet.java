@@ -7,7 +7,7 @@ import de.yuga.spacebattle.backend.entities.ResourceDeposit;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
-import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.EResourceSubType;
@@ -178,13 +178,12 @@ public class Fleet extends AbstractEntityKey {
 
         List<Integer> speeds = new ArrayList<>();
         for (ShipClass sc : ships.keySet()) {
-            int speed = 0;
-            for (Module m : sc.getModules().keySet()) {
-                if (m.getModuleType() == eModuleType) {
-                    speed += m.getEffectiveEffectValue(owner.getRaceType());
-                }
+            final Propulsion propulsion = sc.getPropulsion();
+            if (propulsion == null || (EModuleType.FTLPROPULSION == eModuleType && !propulsion.isFtlCapable())) {
+                // if no propulsion present or ftl is used and no ftl is present
+                return BigDecimal.ZERO;
             }
-            speeds.add(speed);
+            speeds.add(propulsion.getEffectValue());
         }
         Collections.sort(speeds);
         return new BigDecimal(speeds.get(0));

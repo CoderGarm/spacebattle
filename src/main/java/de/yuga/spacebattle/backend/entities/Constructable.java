@@ -6,7 +6,6 @@ import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 
@@ -134,17 +133,7 @@ public class Constructable {
             if (shipClass.getHull() == null) {
                 throw new NotifySBUserException("You need a hull for your ship, really!");
             }
-            final ResourceDeposit costsHull = shipClass.getHull().getCosts();
-            final ResourceDeposit clonedCostsHull = new ResourceDeposit(costsHull);
-            Map<Module, Integer> modules = shipClass.getModules();
-            for (Module module : modules.keySet()) {
-                final ResourceDeposit costs = module.getCosts();
-                final Map<EResourceType, BigDecimal> resources = getCostsForLevel(costs, modules.get(module));
-                for (EResourceType resourceType : resources.keySet()) {
-                    clonedCostsHull.updateResource(resourceType, resources.get(resourceType));
-                }
-            }
-            return clonedCostsHull.getResources();
+            return shipClass.getCostsOverall().getResources();
         }
 
         if (building != null && targetLevel != null) {

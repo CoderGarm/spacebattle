@@ -1,9 +1,28 @@
 
+    create table alignedFitting (
+       idShipClass integer not null,
+        amount integer,
+        idWeapon integer,
+        weaponAlignment varchar(255)
+    ) engine=InnoDB;
+
     create table alliance (
        idAlliance integer not null auto_increment,
         code varchar(30) not null,
         name varchar(30) not null,
         primary key (idAlliance)
+    ) engine=InnoDB;
+
+    create table armor (
+       idArmor integer not null auto_increment,
+        description varchar(255) not null,
+        effectValue integer not null,
+        name varchar(30) not null,
+        techLevel integer not null,
+        useCapacity integer not null,
+        idCosts integer not null,
+        idResearch integer not null,
+        primary key (idArmor)
     ) engine=InnoDB;
 
     create table building (
@@ -24,6 +43,18 @@
         idBuilding integer not null,
         idPlanet integer not null,
         primary key (idConstruction)
+    ) engine=InnoDB;
+
+    create table electronicWarfare (
+       idElectronicWarfare integer not null auto_increment,
+        description varchar(255) not null,
+        effectValue integer not null,
+        name varchar(30) not null,
+        techLevel integer not null,
+        useCapacity integer not null,
+        idCosts integer not null,
+        idResearch integer not null,
+        primary key (idElectronicWarfare)
     ) engine=InnoDB;
 
     create table fleet (
@@ -47,7 +78,11 @@
     create table hull (
        idHull integer not null auto_increment,
         constructionCapacity integer not null,
+        constructionCapacityBow integer not null,
+        constructionCapacityBroadsides integer not null,
+        constructionCapacityStern integer not null,
         description varchar(255) not null,
+        hullType varchar(255) not null,
         level integer not null,
         name varchar(30) not null,
         idCosts integer,
@@ -68,26 +103,6 @@
         idOwner integer not null,
         primary key (idJob),
         check ((idBuilding IS NOT NULL AND targetLevel IS NOT NULL) OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) OR (idShipClass IS NOT NULL AND amountShips IS NOT NULL))
-    ) engine=InnoDB;
-
-    create table module (
-       idModule integer not null auto_increment,
-        description varchar(255) not null,
-        effectValue integer not null,
-        level integer not null,
-        moduleType integer not null,
-        name varchar(30) not null,
-        useCapacity integer not null,
-        idCosts integer,
-        idResearch integer not null,
-        primary key (idModule)
-    ) engine=InnoDB;
-
-    create table moduleComposition (
-       idShipClass integer not null,
-        amount integer,
-        idModule integer not null,
-        primary key (idShipClass, idModule)
     ) engine=InnoDB;
 
     create table move (
@@ -113,6 +128,19 @@
         idResourceFactor integer,
         idStarSystem integer,
         primary key (idPlanet)
+    ) engine=InnoDB;
+
+    create table propulsion (
+       idPropulsion integer not null auto_increment,
+        description varchar(255) not null,
+        effectValue integer not null,
+        name varchar(30) not null,
+        techLevel integer not null,
+        useCapacity integer not null,
+        ftlCapable bit not null,
+        idCosts integer not null,
+        idResearch integer not null,
+        primary key (idPropulsion)
     ) engine=InnoDB;
 
     create table research (
@@ -141,11 +169,26 @@
     create table shipClass (
        idShipClass integer not null auto_increment,
         name varchar(30) not null,
-        raceType varchar(255) not null,
+        idArmor integer,
         idCosts integer,
+        idElectronicWarfare integer,
         idHull integer not null,
         idOwner integer not null,
+        idPropulsion integer not null,
+        idSidewall integer,
         primary key (idShipClass)
+    ) engine=InnoDB;
+
+    create table sidewall (
+       idSidewall integer not null auto_increment,
+        description varchar(255) not null,
+        effectValue integer not null,
+        name varchar(30) not null,
+        techLevel integer not null,
+        useCapacity integer not null,
+        idCosts integer not null,
+        idResearch integer not null,
+        primary key (idSidewall)
     ) engine=InnoDB;
 
     create table starSystem (
@@ -174,10 +217,28 @@
        idUser integer not null auto_increment,
         email varchar(50) not null,
         password varchar(50) not null,
-        raceType varchar(255) not null,
         username varchar(30) not null,
         idAlliance integer,
         primary key (idUser)
+    ) engine=InnoDB;
+
+    create table weapon (
+       idWeapon integer not null auto_increment,
+        description varchar(255) not null,
+        effectValue integer not null,
+        name varchar(30) not null,
+        techLevel integer not null,
+        useCapacity integer not null,
+        allowedForBow integer not null,
+        allowedForBroadsides integer not null,
+        allowedForStern integer not null,
+        damageType varchar(255) not null,
+        effectiveRange integer not null,
+        sideWallPenetration decimal(19, 5),
+        weaponType varchar(255) not null,
+        idCosts integer not null,
+        idResearch integer not null,
+        primary key (idWeapon)
     ) engine=InnoDB;
 
     alter table alliance 
@@ -207,6 +268,26 @@
     alter table user 
        add constraint UK_sb8bbouer5wak8vyiiy4pf2bx unique (username);
 
+    alter table alignedFitting 
+       add constraint FKt6aos80sh8332mepbkuwmo98i 
+       foreign key (idWeapon) 
+       references weapon (idWeapon);
+
+    alter table alignedFitting 
+       add constraint FKgdp5e1ylgswr29e2d5b7uhib 
+       foreign key (idShipClass) 
+       references shipClass (idShipClass);
+
+    alter table armor 
+       add constraint FK10dhr7h3pkps3d7u22q2pwpgc 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
+
+    alter table armor 
+       add constraint FKrb3h67mjdni459t4j1y8b7sw5 
+       foreign key (idResearch) 
+       references research (idResearch);
+
     alter table building 
        add constraint FK5vart3g8xv4gkgagwxxwyiuqi 
        foreign key (idCosts) 
@@ -226,6 +307,16 @@
        add constraint FKg139setxu2ng9hj6h7sgpyb9s 
        foreign key (idPlanet) 
        references planet (idPlanet);
+
+    alter table electronicWarfare 
+       add constraint FKccj76id0r5pq3p7f4viriwdqf 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
+
+    alter table electronicWarfare 
+       add constraint FKhr2adrrpeb3vshv11ajrgnkd7 
+       foreign key (idResearch) 
+       references research (idResearch);
 
     alter table fleet 
        add constraint FK5yy9whqh6562iaxuym0wrkjeq 
@@ -298,26 +389,6 @@
        foreign key (idOwner) 
        references user (idUser);
 
-    alter table module 
-       add constraint FKqxpwocsv3vwcws3g1yj7hpw8i 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table module 
-       add constraint FK52hbj88ddt0mvoq1jv1rf5vk1 
-       foreign key (idResearch) 
-       references research (idResearch);
-
-    alter table moduleComposition 
-       add constraint FKgtipiaku2mvi9j3of7ju7th6g 
-       foreign key (idModule) 
-       references module (idModule);
-
-    alter table moduleComposition 
-       add constraint FKr2iuudhohjx8cacih40d1bpv6 
-       foreign key (idShipClass) 
-       references shipClass (idShipClass);
-
     alter table move 
        add constraint FKg65nht3m74odamnrqiv1cdyl6 
        foreign key (idFleet) 
@@ -368,6 +439,16 @@
        foreign key (idStarSystem) 
        references starSystem (idStarSystem);
 
+    alter table propulsion 
+       add constraint FKqjsvyhjc6w21niim4aeptpm85 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
+
+    alter table propulsion 
+       add constraint FK7rr2gvpcbjjhl9tuxe6c50v5q 
+       foreign key (idResearch) 
+       references research (idResearch);
+
     alter table research 
        add constraint FKni50te130dndarqgicsq3svhb 
        foreign key (idCosts) 
@@ -384,9 +465,19 @@
        references resourceDeposit (idResourceDeposit);
 
     alter table shipClass 
+       add constraint FKouxjssb18x4jeutl5r1l0byeu 
+       foreign key (idArmor) 
+       references armor (idArmor);
+
+    alter table shipClass 
        add constraint FK5iggor36gwq8904cpdvcfjc1n 
        foreign key (idCosts) 
        references resourceDeposit (idResourceDeposit);
+
+    alter table shipClass 
+       add constraint FKfbii11hday9qcjpmi2i1k2611 
+       foreign key (idElectronicWarfare) 
+       references electronicWarfare (idElectronicWarfare);
 
     alter table shipClass 
        add constraint FKgkjpsgpvfaupqxr7cv9nhc9ai 
@@ -397,6 +488,26 @@
        add constraint FKovqcf68xgq4mm2n32sdoburq6 
        foreign key (idOwner) 
        references user (idUser);
+
+    alter table shipClass 
+       add constraint FKdd7voavc2cml9rodxm6vnlaqq 
+       foreign key (idPropulsion) 
+       references propulsion (idPropulsion);
+
+    alter table shipClass 
+       add constraint FKsa1b1j6ur2emh3jv7s0ft3nru 
+       foreign key (idSidewall) 
+       references sidewall (idSidewall);
+
+    alter table sidewall 
+       add constraint FKlo0i3byallqh89wd535yrbs3l 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
+
+    alter table sidewall 
+       add constraint FK693a9gix6ifpkiop612tghdy0 
+       foreign key (idResearch) 
+       references research (idResearch);
 
     alter table unlockedResearch 
        add constraint FKc4x693khs2f17y0jjfb625o51 
@@ -412,3 +523,13 @@
        add constraint FKd0120p7tkvssh9r8hldenpw1w 
        foreign key (idAlliance) 
        references alliance (idAlliance);
+
+    alter table weapon 
+       add constraint FK1rsb3ampiw8yjy8ngrget6ay 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
+
+    alter table weapon 
+       add constraint FKo22n18dgjpraqosj7nkamrnvb 
+       foreign key (idResearch) 
+       references research (idResearch);

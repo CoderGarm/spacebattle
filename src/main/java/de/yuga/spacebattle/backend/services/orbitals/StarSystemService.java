@@ -40,6 +40,7 @@ public class StarSystemService {
      * @return the new system
      */
     @Nonnull
+    @Deprecated(since = "productive environment")
     public StarSystem createStarSystem(@Nonnull final String name,
                                        @Nonnull final Integer xCoordinate,
                                        @Nonnull final Integer yCoordinate) {

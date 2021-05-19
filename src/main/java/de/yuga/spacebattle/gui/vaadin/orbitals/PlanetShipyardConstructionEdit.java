@@ -70,6 +70,7 @@ public class PlanetShipyardConstructionEdit extends PlanetLayout<Planet> impleme
             shipJobPayload = componentsMap.values().stream()
                     .map(ShipClassCountEdit::getValue)
                     .filter(Objects::nonNull)
+                    .filter(dto -> dto.getCountNumeric() > 0)
                     .map(ShipClassCountDTO::getAsEntry)
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             uiEventBus.publish(this, ESBEvent.ORBITAL_CONSTRUCTION_JOB_BUILDING_START.name());
@@ -95,9 +96,9 @@ public class PlanetShipyardConstructionEdit extends PlanetLayout<Planet> impleme
     private void validateSubmitButton() {
         componentsMap.values().stream().map(ShipClassCountEdit::getValue)
                 .filter(Objects::nonNull)
-                .filter(shipClassCountDTO -> shipClassCountDTO.getCountNumeric() > 0)
+                .filter(dto -> dto.getCountNumeric() > 0)
                 .findFirst()
-                .ifPresentOrElse(shipClassCountDTO -> setReadOnly(true), () -> setReadOnly(false));
+                .ifPresentOrElse(shipClassCountDTO -> setReadOnly(false), () -> submit.setEnabled(false));
     }
 
     public void update(@Nullable final Planet planet) {

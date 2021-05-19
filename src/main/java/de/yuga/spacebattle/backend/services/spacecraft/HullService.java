@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
+import de.yuga.spacebattle.backend.enums.EHullType;
 import de.yuga.spacebattle.backend.repositories.spacecraft.HullRepository;
 import org.springframework.stereotype.Service;
 
@@ -53,16 +54,22 @@ public class HullService {
      * @return the new hull
      */
     @Nonnull
+    @Deprecated(since = "productive environment")
     public Hull createHull(@Nonnull final String name,
                            final int level,
                            final int constructionCapacity,
+                           final int constructionCapacityBow,
+                           final int constructionCapacityStern,
+                           final int constructionCapacityBroadsides,
                            @Nonnull final String description,
-                           @Nonnull final Research unlockedThrough) {
+                           @Nonnull final Research unlockedThrough,
+                           @Nonnull final EHullType hullType) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
+        Preconditions.checkNotNull(hullType, "hullType shouldn't be null!");
 
-        return hullRepository.save(new Hull(name, level, constructionCapacity, description, unlockedThrough));
+        return hullRepository.save(new Hull(name, level, constructionCapacity, constructionCapacityBow, constructionCapacityStern, constructionCapacityBroadsides, description, unlockedThrough, hullType));
     }
 
     public Hull save(@Nonnull final Hull entity) {

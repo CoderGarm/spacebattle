@@ -5,11 +5,15 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.ResourceDeposit;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
-import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
-import de.yuga.spacebattle.backend.enums.EModuleType;
-import de.yuga.spacebattle.backend.enums.ERaceType;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Armor;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Sidewall;
 import de.yuga.spacebattle.backend.enums.EResourceSubType;
+import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
+import de.yuga.spacebattle.backend.enums.EWeaponType;
 import de.yuga.spacebattle.backend.validators.ShipValidator;
 
 import javax.annotation.Nonnull;
@@ -17,8 +21,8 @@ import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @NamedQueries({
@@ -43,26 +47,38 @@ public class ShipClass extends AbstractEntityKey {
     @Size(min = 3, max = 30, message = "name should be between 3 and 30 characters long")
     private String name;
 
-    @Nonnull
-    @NotNull(message = "ERaceType should not be null")
-    @Enumerated(EnumType.STRING)
-    private ERaceType raceType;
-
     @Nullable
     @NotNull(message = "hull should not be null")
     @ManyToOne
     @JoinColumn(name = "idHull", updatable = false)
     private Hull hull;
 
+    @Nullable
+    @NotNull(message = "propulsion must not be null")
+    @ManyToOne
+    @JoinColumn(name = "idPropulsion", updatable = false)
+    private Propulsion propulsion;
+
+    @Nullable
+    @ManyToOne
+    @JoinColumn(name = "idArmor", updatable = false)
+    private Armor armor;
+
+    @Nullable
+    @ManyToOne
+    @JoinColumn(name = "idSidewall", updatable = false)
+    private Sidewall sidewall;
+
+    @Nullable
+    @ManyToOne
+    @JoinColumn(name = "idElectronicWarfare", updatable = false)
+    private ElectronicWarfare electronicWarfare;
+
     @Nonnull
     @NotNull
-    //@Valid
-    //@ModuleChecker
     @ElementCollection(fetch = FetchType.EAGER)
-    @MapKeyJoinColumn(name = "idModule", referencedColumnName = "idModule")
-    @Column(name = "amount")
-    @CollectionTable(name = "moduleComposition", joinColumns = @JoinColumn(name = "idShipClass"))
-    private final Map<Module, Integer> modules = new HashMap<>();
+    @CollectionTable(name = "alignedFitting", joinColumns = @JoinColumn(name = "idShipClass"))
+    private final Set<AlignedFitting> fittings = new HashSet<>();
 
     public ShipClass() {
     }
@@ -84,7 +100,6 @@ public class ShipClass extends AbstractEntityKey {
 
         this.owner = owner;
         this.name = name;
-        this.raceType = owner.getRaceType();
         this.hull = hull;
     }
 
@@ -97,7 +112,6 @@ public class ShipClass extends AbstractEntityKey {
         Preconditions.checkNotNull(owner, "owner shouldn't be null!");
 
         this.owner = owner;
-        this.raceType = owner.getRaceType();
     }
 
     @Nonnull
@@ -111,11 +125,6 @@ public class ShipClass extends AbstractEntityKey {
         this.name = name;
     }
 
-    @Nonnull
-    public ERaceType getRaceType() {
-        return raceType;
-    }
-
     public void setHull(@Nullable final Hull hull) {
         this.hull = hull;
     }
@@ -126,71 +135,125 @@ public class ShipClass extends AbstractEntityKey {
     }
 
     @Nonnull
-    public Map<Module, Integer> getModules() {
-        return modules;
+    public ResourceDeposit getCosts() {
+        return costs;
+    }
+
+    public ResourceDeposit getCostsOverall() {
+        final ResourceDeposit clonedDeposit = new ResourceDeposit(costs);
+
+        if (hull != null) {
+            hull.getCosts().getResources().forEach(clonedDeposit::updateResource);
+        }
+        if (propulsion != null) {
+            propulsion.getCosts().getResources().forEach(clonedDeposit::updateResource);
+        }
+        if (armor != null) {
+            armor.getCosts().getResources().forEach(clonedDeposit::updateResource);
+        }
+        if (electronicWarfare != null) {
+            electronicWarfare.getCosts().getResources().forEach(clonedDeposit::updateResource);
+        }
+        if (sidewall != null) {
+            sidewall.getCosts().getResources().forEach(clonedDeposit::updateResource);
+        }
+        fittings.forEach(a -> a.getWeapon().getCosts().getResources().forEach(clonedDeposit::updateResource));
+        return clonedDeposit;
+    }
+
+    @Nonnull
+    public Set<AlignedFitting> getFittings() {
+        return fittings;
+    }
+
+    @Nonnull
+    public Set<AlignedFitting> getFittingByType(@Nonnull final EWeaponType weaponType) {
+        Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
+
+        return fittings.stream()
+                .filter(e -> weaponType == e.getWeapon().getWeaponType())
+                .collect(Collectors.toSet());
+    }
+
+    @Nonnull
+    public Set<AlignedFitting> getFittingByTypeAndAlignment(@Nonnull final EWeaponType weaponType,
+                                                            @Nonnull final EWeaponAlignment weaponAlignment) {
+        Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
+        Preconditions.checkNotNull(weaponAlignment, "weaponAlignment shouldn't be null!");
+
+        return fittings.stream()
+                .filter(e -> weaponType == e.getWeapon().getWeaponType() && weaponAlignment == e.getWeaponAlignment())
+                .collect(Collectors.toSet());
     }
 
     /**
-     * Adds a module to the ships modules.
-     * <p>
-     * IMPORTANT: This has to be validated later!
-     * - The impact on construction points are not validated.
-     * - The mandatory {@link EModuleType}s are not validated.
+     * Adds a fitting to the ships modules.
      *
-     * @param module the module to add
+     * @param fitting the fitting to add
      */
-    public void addModule(@Nonnull final Module module) {
-        Preconditions.checkNotNull(module, "module shouldn't be null!");
+    public void addFitting(@Nonnull final AlignedFitting fitting) {
+        Preconditions.checkNotNull(fitting, "fitting shouldn't be null!");
 
-        if (modules.containsKey(module)) {
-            Integer amount = modules.get(module);
-            modules.put(module, ++amount);
-        } else {
-            modules.put(module, 1);
-        }
+        fittings.stream()
+                .filter(fitting::equals)
+                .findFirst()
+                .ifPresentOrElse(
+                        alignedFitting -> alignedFitting.setAmount(fitting.getAmount()),
+                        () -> fittings.add(fitting));
+    }
+
+    /**
+     * Removes a module from the ships modules.
+     *
+     * @param fitting the fitting to remove
+     */
+    public void removeFitting(@Nonnull final AlignedFitting fitting) {
+        Preconditions.checkNotNull(fitting, "fitting shouldn't be null!");
+
+        fittings.stream()
+                .filter(fitting::equals)
+                .findFirst()
+                .ifPresent(fittings::remove);
     }
 
     /**
      * Necessary while vaadin data binding needs a setter for a full set of data and is not able to use an incremental add method.
      * Removes all not longer contained modules and add or replace everything else.
      *
-     * @param modules the set of modules
+     * @param fittings the set of fittings
      */
-    public void setModules(@Nonnull final Map<Module, Integer> modules) {
-        Preconditions.checkNotNull(modules, "modules shouldn't be null!");
+    public void setFittings(@Nonnull final Set<AlignedFitting> fittings) {
+        Preconditions.checkNotNull(fittings, "fittings shouldn't be null!");
 
-        this.modules.clear();
-        Map<Module, Integer> includedModules = modules.entrySet().stream()
-                .filter(entry -> modules.get(entry.getKey()) > 0)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        this.modules.putAll(includedModules);
+        this.fittings.clear();
+        this.fittings.addAll(fittings);
     }
 
-    /**
-     * Removes a module from the ships modules.
-     * <p>
-     * IMPORTANT: This has to be validated later!
-     * - The impact on construction points are not validated.
-     * - The mandatory {@link EModuleType}s are not validated.
-     *
-     * @param module the module to remove
-     */
-    public void removeModule(@Nonnull final Module module) {
-        Preconditions.checkNotNull(module, "module shouldn't be null!");
-
-        if (modules.containsKey(module)) {
-            Integer amount = modules.get(module);
-            if (amount > 1) {
-                modules.put(module, --amount);
-            } else {
-                modules.remove(module);
-            }
-        }
+    @Nullable
+    public Propulsion getPropulsion() {
+        return propulsion;
     }
 
-    @Nonnull
-    public ResourceDeposit getCosts() {
-        return costs;
+    public void setPropulsion(@Nullable Propulsion propulsion) {
+        this.propulsion = propulsion;
+    }
+
+    @Nullable
+    public Armor getArmor() {
+        return armor;
+    }
+
+    public void setArmor(@Nullable Armor armor) {
+        this.armor = armor;
+    }
+
+    @Nullable
+    public Sidewall getSidewall() {
+        return sidewall;
+    }
+
+    public void setSidewall(@Nullable Sidewall sidewall) {
+        this.sidewall = sidewall;
     }
 
     @Override
@@ -205,5 +268,14 @@ public class ShipClass extends AbstractEntityKey {
     @Override
     public int hashCode() {
         return 31 * id;
+    }
+
+    @Nullable
+    public ElectronicWarfare getElectronicWarfare() {
+        return electronicWarfare;
+    }
+
+    public void setElectronicWarfare(@Nullable ElectronicWarfare electronicWarfare) {
+        this.electronicWarfare = electronicWarfare;
     }
 }

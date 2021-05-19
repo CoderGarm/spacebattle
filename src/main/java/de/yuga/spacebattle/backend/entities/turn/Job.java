@@ -115,4 +115,19 @@ public class Job extends AbstractEntityKey {
 
         this.jobDoneAtZero = jobDoneAtZero;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Job)) return false;
+
+        Job job = (Job) o;
+
+        return id == job.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id * 31;
+    }
 }

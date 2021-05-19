@@ -5,7 +5,11 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.ResourceDeposit;
 import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
+import de.yuga.spacebattle.backend.enums.EHullType;
 import de.yuga.spacebattle.backend.enums.EResourceSubType;
+import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -31,7 +35,25 @@ public class Hull extends AbstractEntityKey {
      */
     private int level;
 
+    /**
+     * This is used by all other {@link BaseModule}s which has no {@link EWeaponAlignment}.
+     */
     private int constructionCapacity;
+
+    /**
+     * This is used by {@link Weapon}s which has {@link EWeaponAlignment#BOW}.
+     */
+    private int constructionCapacityBow;
+
+    /**
+     * This is used by {@link Weapon}s which has {@link EWeaponAlignment#STERN}.
+     */
+    private int constructionCapacityStern;
+
+    /**
+     * This is used by {@link Weapon}s which has {@link EWeaponAlignment#BROADSIDE}.
+     */
+    private int constructionCapacityBroadsides;
 
     @Nonnull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
@@ -49,23 +71,38 @@ public class Hull extends AbstractEntityKey {
     @JoinColumn(name = "idResearch")
     private Research unlockedThrough;
 
+
+    @Nonnull
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private EHullType hullType;
+
     public Hull() {
     }
 
     public Hull(@Nonnull final String name,
                 final int level,
                 final int constructionCapacity,
+                final int constructionCapacityBow,
+                final int constructionCapacityStern,
+                int constructionCapacityBroadsides,
                 @Nonnull final String description,
-                @Nonnull final Research unlockedThrough) {
+                @Nonnull final Research unlockedThrough,
+                @Nonnull final EHullType hullType) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
+        Preconditions.checkNotNull(hullType, "hullType shouldn't be null!");
 
         this.name = name;
         this.level = level;
         this.constructionCapacity = constructionCapacity;
+        this.constructionCapacityBow = constructionCapacityBow;
+        this.constructionCapacityStern = constructionCapacityStern;
+        this.constructionCapacityBroadsides = constructionCapacityBroadsides;
         this.description = description;
         this.unlockedThrough = unlockedThrough;
+        this.hullType = hullType;
     }
 
     @Nonnull
@@ -81,6 +118,18 @@ public class Hull extends AbstractEntityKey {
         return constructionCapacity;
     }
 
+    public int getConstructionCapacityBow() {
+        return constructionCapacityBow;
+    }
+
+    public int getConstructionCapacityStern() {
+        return constructionCapacityStern;
+    }
+
+    public int getConstructionCapacityBroadsides() {
+        return constructionCapacityBroadsides;
+    }
+
     @Nonnull
     public ResourceDeposit getCosts() {
         return costs;
@@ -88,7 +137,7 @@ public class Hull extends AbstractEntityKey {
 
     @Nonnull
     public String getDescription() {
-        return description;
+        return description + " hull type: " + hullType.getDescription();
     }
 
     @Nonnull
@@ -96,13 +145,9 @@ public class Hull extends AbstractEntityKey {
         return unlockedThrough;
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(name).append(", ").append(description);
-        sb.append(", Level ").append(level);
-        sb.append(", Capacity ").append(constructionCapacity);
-        return sb.toString();
+    @Nonnull
+    public EHullType getHullType() {
+        return hullType;
     }
 
     @Override

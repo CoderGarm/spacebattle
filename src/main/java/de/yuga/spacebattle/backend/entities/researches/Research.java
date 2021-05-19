@@ -7,13 +7,14 @@ import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.ResourceDeposit;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
-import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.enums.EResourceSubType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
+import java.util.HashSet;
 import java.util.Set;
 
 @NamedQueries({
@@ -44,17 +45,33 @@ public class Research extends AbstractEntityKey {
     @JoinColumn(name = "idCosts", updatable = false)
     private final ResourceDeposit costs = new ResourceDeposit(EResourceSubType.COSTS);
 
-    @Nonnull // is nonnull when arg-constructor is removed
+    @Nonnull
     @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
-    private Set<Building> unlocksBuildings;
+    private final Set<Building> unlocksBuildings = new HashSet<>();
 
-    @Nonnull // is nonnull when arg-constructor is removed
+    @Nonnull
     @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
-    private Set<Hull> unlocksHulls;
+    private final Set<Hull> unlocksHulls = new HashSet<>();
 
-    @Nonnull // is nonnull when arg-constructor is removed
+    @Nonnull
     @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
-    private Set<Module> unlocksModules;
+    private final Set<Weapon> unlocksWeapons = new HashSet<>();
+
+    @Nonnull
+    @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
+    private final Set<Armor> unlocksArmor = new HashSet<>();
+
+    @Nonnull
+    @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
+    private final Set<Propulsion> unlocksPropulsion = new HashSet<>();
+
+    @Nonnull
+    @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
+    private final Set<Sidewall> unlocksSidewall = new HashSet<>();
+
+    @Nonnull
+    @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
+    private final Set<ElectronicWarfare> unlocksElectronicWarfare = new HashSet<>();
 
     public Research() {
     }
@@ -102,8 +119,28 @@ public class Research extends AbstractEntityKey {
     }
 
     @Nonnull
-    public Set<Module> getUnlocksModules() {
-        return unlocksModules;
+    public Set<Weapon> getUnlocksWeapons() {
+        return unlocksWeapons;
+    }
+
+    @Nonnull
+    public Set<Armor> getUnlocksArmor() {
+        return unlocksArmor;
+    }
+
+    @Nonnull
+    public Set<Propulsion> getUnlocksPropulsion() {
+        return unlocksPropulsion;
+    }
+
+    @Nonnull
+    public Set<Sidewall> getUnlocksSidewall() {
+        return unlocksSidewall;
+    }
+
+    @Nonnull
+    public Set<ElectronicWarfare> getUnlocksElectronicWarfare() {
+        return unlocksElectronicWarfare;
     }
 
     @Nullable

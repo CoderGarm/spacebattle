@@ -10,7 +10,6 @@ import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Job;
-import de.yuga.spacebattle.backend.enums.ERaceType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 
 import javax.annotation.Nonnull;
@@ -53,11 +52,6 @@ public class User extends AbstractEntityKey {
     @Size(min = 1, max = 50)
     private String email;
 
-    @Nonnull
-    @NotNull(message = "raceType must not be null")
-    @Enumerated(EnumType.STRING)
-    private ERaceType raceType;
-
     @JsonIgnore
     @Nullable
     @ManyToOne(cascade = CascadeType.MERGE)
@@ -90,16 +84,13 @@ public class User extends AbstractEntityKey {
 
     public User(@Nonnull final String username,
                 @Nonnull final String password,
-                @Nonnull final String email,
-                @Nonnull final ERaceType raceType) {
+                @Nonnull final String email) {
         Preconditions.checkNotNull(username, "username shouldn't be null!");
         Preconditions.checkNotNull(password, "password shouldn't be null!");
         Preconditions.checkNotNull(email, "email shouldn't be null!");
-        Preconditions.checkNotNull(raceType, "raceType shouldn't be null!");
 
         this.username = username;
         this.password = password;
-        this.raceType = raceType;
         this.email = email;
     }
 
@@ -125,12 +116,6 @@ public class User extends AbstractEntityKey {
         this.password = password;
     }
 
-    public void setRaceType(@Nonnull ERaceType raceType) {
-        Preconditions.checkNotNull(raceType, "raceType shouldn't be null!");
-
-        this.raceType = raceType;
-    }
-
     @Nonnull
     public String getEmail() {
         return email;
@@ -138,11 +123,6 @@ public class User extends AbstractEntityKey {
 
     public void setEmail(@Nonnull String email) {
         this.email = email;
-    }
-
-    @Nonnull
-    public ERaceType getRaceType() {
-        return raceType;
     }
 
     @Nullable

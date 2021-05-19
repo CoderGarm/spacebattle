@@ -5,9 +5,13 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
-import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Armor;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Sidewall;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
 import de.yuga.spacebattle.backend.enums.EModuleType;
-import de.yuga.spacebattle.backend.enums.ERaceType;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.ModuleDataElementDisplay;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.EModuleValueDTO;
 
@@ -16,19 +20,20 @@ import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ModuleValueTypePerShipHorizontalDisplay extends HorizontalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<ModuleValueTypePerShipHorizontalDisplay, ShipClass>, ShipClass> {
 
     @Nonnull
-    private final Map<EModuleType, BigDecimal> amountByModuleType;
+    private final Map<EModuleType, BigDecimal> effectValueByModuleType;
 
     @Nonnull
     private final Map<EModuleType, ModuleDataElementDisplay> displayByModuleType;
 
     public ModuleValueTypePerShipHorizontalDisplay() {
-        amountByModuleType = Arrays.stream(EModuleType.values())
+        effectValueByModuleType = Arrays.stream(EModuleType.values())
                 .collect(Collectors.toMap(Function.identity(), value -> BigDecimal.ZERO));
 
         displayByModuleType = Arrays.stream(EModuleType.values())
@@ -48,7 +53,7 @@ public class ModuleValueTypePerShipHorizontalDisplay extends HorizontalLayout im
      * Clears the full display in order to "show nothing of worth".
      */
     private void clearValues() {
-        Arrays.stream(EModuleType.values()).forEach(eModuleType -> amountByModuleType.put(eModuleType, BigDecimal.ZERO));
+        Arrays.stream(EModuleType.values()).forEach(eModuleType -> effectValueByModuleType.put(eModuleType, BigDecimal.ZERO));
         this.updateStats();
     }
 
@@ -61,13 +66,26 @@ public class ModuleValueTypePerShipHorizontalDisplay extends HorizontalLayout im
         clearValues();
 
         if (shipClass != null) {
-            final Map<Module, Integer> modules = shipClass.getModules();
-            modules.keySet().forEach(module -> {
-                final Integer amountOfModule = modules.get(module);
-                addValueByType(shipClass.getOwner().getRaceType(), module, amountOfModule);
+            final Armor armor = shipClass.getArmor();
+            addValueByType(armor, 1, EModuleType.ARMOR);
+
+            final Propulsion propulsion = shipClass.getPropulsion();
+            addValueByType(propulsion, 1, EModuleType.PROPULSION);
+            if (propulsion != null && propulsion.isFtlCapable()) {
+                addValueByType(propulsion, 1, EModuleType.FTLPROPULSION);
+            }
+            final Sidewall sidewall = shipClass.getSidewall();
+            addValueByType(sidewall, 1, EModuleType.SHIELD);
+
+            final ElectronicWarfare electronicWarfare = shipClass.getElectronicWarfare();
+            addValueByType(electronicWarfare, 1, EModuleType.ELECTRONIC_WARFARE);
+            // todo define module types or icons for missiles, counter missiles, whatever
+            final Set<AlignedFitting> fittings = shipClass.getFittings();
+            fittings.forEach(fitting -> {
+                addValueByType(fitting.getWeapon(), fitting.getAmount(), EModuleType.WEAPON);
             });
         } else {
-            Arrays.stream(EModuleType.values()).forEach(eModuleType -> amountByModuleType.put(eModuleType, BigDecimal.ZERO));
+            Arrays.stream(EModuleType.values()).forEach(eModuleType -> effectValueByModuleType.put(eModuleType, BigDecimal.ZERO));
         }
         this.updateStats();
     }
@@ -75,18 +93,18 @@ public class ModuleValueTypePerShipHorizontalDisplay extends HorizontalLayout im
     /**
      * Adds the effective value by {@link EModuleType} to the stats display.
      *
-     * @param raceType       the race type to calculate the effective value
      * @param module         the module which effect value is used
      * @param amountOfModule how often this module should be counted
+     * @param moduleType     the type which the module is for
      */
-    private void addValueByType(@Nullable final ERaceType raceType, @Nullable final Module module, final int amountOfModule) {
-        if (raceType == null || module == null || amountOfModule == 0) {
+    private void addValueByType(@Nullable final BaseModule module, final int amountOfModule, @Nullable final EModuleType moduleType) {
+        if (module == null || amountOfModule == 0 || moduleType == null) {
             return;
         }
-        final EModuleType moduleType = module.getModuleType();
-        final int effectiveEffectValue = module.getEffectiveEffectValue(raceType);
-        final BigDecimal currentEffectValue = amountByModuleType.get(moduleType);
-        amountByModuleType.put(moduleType, currentEffectValue.add(new BigDecimal(effectiveEffectValue)).multiply(new BigDecimal(amountOfModule)));
+
+        final int effectiveEffectValue = module.getEffectValue();
+        final BigDecimal currentEffectValue = effectValueByModuleType.get(moduleType);
+        effectValueByModuleType.put(moduleType, currentEffectValue.add(new BigDecimal(effectiveEffectValue).multiply(new BigDecimal(amountOfModule))));
     }
 
     /**
@@ -94,7 +112,7 @@ public class ModuleValueTypePerShipHorizontalDisplay extends HorizontalLayout im
      */
     private void updateStats() {
         displayByModuleType.forEach((eModuleType, moduleDataElementDisplay) -> {
-            final BigDecimal effectiveValue = amountByModuleType.get(eModuleType);
+            final BigDecimal effectiveValue = effectValueByModuleType.get(eModuleType);
             moduleDataElementDisplay.update(new EModuleValueDTO(eModuleType, effectiveValue));
         });
     }

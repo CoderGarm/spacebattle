@@ -49,8 +49,8 @@ public class JobDisplayMulti extends PlanetLayout<Planet> implements HasValue<Ab
     public void setValue(@Nullable final Set<Job> value) {
 
         removeAll();
-        componentsMap.clear(); // todo implement
         add(new Label("Jobs"));
+        componentsMap.clear();
         if (value != null) {
             value.forEach(job -> {
                 JobDisplay jobDisplay = new JobDisplay(job);

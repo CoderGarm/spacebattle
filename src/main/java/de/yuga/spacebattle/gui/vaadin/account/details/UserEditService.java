@@ -5,7 +5,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
-import de.yuga.spacebattle.backend.enums.ERaceType;
 import de.yuga.spacebattle.backend.validators.base.CustomValidatorFactory;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +37,6 @@ public class UserEditService extends VerticalLayout {
     private final TextField email;
 
     @Nonnull
-    private final RaceSelect raceSelector;
-
-    @Nonnull
     private final EventBus.UIEventBus uiEventBus;
 
     @Autowired
@@ -53,7 +49,6 @@ public class UserEditService extends VerticalLayout {
         this.username = new TextField("Username");
         this.password = new TextField("Password");
         this.email = new TextField("eMail");
-        this.raceSelector = new RaceSelect();
 
         this.username.addValueChangeListener(u -> {
             sendEvent(this.user.setUsername(u.getValue()));
@@ -64,11 +59,8 @@ public class UserEditService extends VerticalLayout {
         this.email.addValueChangeListener(u -> {
             sendEvent(this.user.setEmail(u.getValue()));
         });
-        this.raceSelector.addValueChangeListener(u -> {
-            sendEvent(this.user.setRaceType(u.getValue()));
-        });
 
-        add(username, password, raceSelector, email);
+        add(username, password, email);
     }
 
     private void sendEvent(final boolean userIsValid) {
@@ -99,11 +91,6 @@ public class UserEditService extends VerticalLayout {
         return email;
     }
 
-    @Nonnull
-    public RaceSelect getRaceSelector() {
-        return raceSelector;
-    }
-
     @EventBusListenerMethod
     protected void onEvent(Event<String> e) {
     }
@@ -124,10 +111,6 @@ public class UserEditService extends VerticalLayout {
         @NotNull(message = "eMail must not be null")
         @Size(min = 1, max = 50)
         private String email;
-
-        @Nullable
-        @NotNull(message = "racetype must not be null")
-        private ERaceType raceType;
 
         private final Validator validator = CustomValidatorFactory.buildCustomValidator();
 
@@ -170,16 +153,6 @@ public class UserEditService extends VerticalLayout {
 
         public boolean setEmail(@Nullable final String email) {
             this.email = email;
-            return this.isValid();
-        }
-
-        @Nullable
-        public ERaceType getRaceType() {
-            return raceType;
-        }
-
-        public boolean setRaceType(@Nullable final ERaceType raceType) {
-            this.raceType = raceType;
             return this.isValid();
         }
     }

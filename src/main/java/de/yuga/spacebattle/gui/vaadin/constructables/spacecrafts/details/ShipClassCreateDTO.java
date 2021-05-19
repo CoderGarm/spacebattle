@@ -3,7 +3,7 @@ package de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
-import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 
 public class ShipClassCreateDTO extends ShipClassEditDTO {
 
@@ -20,13 +20,17 @@ public class ShipClassCreateDTO extends ShipClassEditDTO {
     @Nonnull
     private final Collection<Hull> possibleHulls = new HashSet<>();
 
-    public ShipClassCreateDTO(@Nonnull final User owner,
-                              @Nonnull final Map<Module, Integer> modules,
-                              @Nonnull final Collection<Hull> possibleHulls) {
-        super(owner, modules);
-        Preconditions.checkNotNull(possibleHulls, "possibleHulls shouldn't be null!");
+    public ShipClassCreateDTO(@Nonnull final User user,
+                              @Nonnull final List<Armor> allArmorByUser,
+                              @Nonnull final List<ElectronicWarfare> allElectronicWarfareByUser,
+                              @Nonnull final List<Propulsion> allPropulsionByUser,
+                              @Nonnull final List<Sidewall> allSidewallByUser,
+                              @Nonnull final List<Weapon> allWeaponByUser,
+                              @Nonnull final List<Hull> allHullByUser) {
+        super(user, allArmorByUser, allElectronicWarfareByUser, allPropulsionByUser, allSidewallByUser, allWeaponByUser);
+        Preconditions.checkNotNull(allHullByUser, "allHullByUser shouldn't be null!");
 
-        this.possibleHulls.addAll(possibleHulls);
+        this.possibleHulls.addAll(allHullByUser);
     }
 
     @Nonnull

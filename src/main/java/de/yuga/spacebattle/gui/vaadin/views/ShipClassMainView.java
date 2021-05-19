@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.gui.vaadin.views;
 
 import com.google.common.base.Preconditions;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -11,7 +12,7 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClassComparator;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
-import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.spacecraft.HullService;
@@ -43,6 +44,7 @@ import java.util.stream.Collectors;
 
 @SpringComponent
 @UIScope
+@CssImport("./styles/views/main/details/module-display.css")
 @Route(value = ShipClassMainView.ROUTE, layout = MainView.class)
 @RouteAlias(value = ShipClassMainView.ROUTE, layout = MainView.class)
 public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClass> {
@@ -135,26 +137,53 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
         final HashMap<Tab, Boolean[]> tabMap = getActionTabUsability(actionTab);
         updateActionMenuUsability(tabMap);
         setSelected(actionTab);
-        createShipClassCreateDTO();
+        updateShipClassCreate();
     }
 
     /**
      * Retrieves the user's current research base for modules and hulls and sets them to them are needed.
      */
-    private void createShipClassCreateDTO() {
-        final List<Hull> hulls = hullService.findAllByUser(user);
-        final List<Module> modules = moduleService.findAllByUser(user);
-        final Map<Module, Integer> availableModules = modules.stream().collect(Collectors.toMap(o -> o, o -> 0));
+    private void updateShipClassCreate() {
+        final List<Hull> allHullByUser = hullService.findAllByUser(user);
+        final List<Armor> allArmorByUser = moduleService.findAllArmorByUser(user);
+        final List<ElectronicWarfare> allElectronicWarfareByUser = moduleService.findAllElectronicWarfareByUser(user);
+        final List<Propulsion> allPropulsionByUser = moduleService.findAllPropulsionByUser(user);
+        final List<Sidewall> allSidewallByUser = moduleService.findAllSidewallByUser(user);
+        final List<Weapon> allWeaponByUser = moduleService.findAllWeaponByUser(user);
 
-        final ShipClassCreateDTO shipClassCreateDTO = new ShipClassCreateDTO(user, availableModules, hulls);
+        final ShipClassCreateDTO shipClassCreateDTO =
+                new ShipClassCreateDTO(user,
+                        allArmorByUser,
+                        allElectronicWarfareByUser,
+                        allPropulsionByUser,
+                        allSidewallByUser,
+                        allWeaponByUser,
+                        allHullByUser);
         shipClassCreate.setValue(shipClassCreateDTO);
     }
 
-    private ShipClassEditDTO createShipClassEditDTO(@Nonnull final ShipClass shipClass) {
+    /**
+     * Retrieves the user's current research base for modules and hulls and sets them to them are needed.
+     *
+     * @param shipClass the ship class to modify
+     */
+    private void updateShipClassEdit(@Nonnull final ShipClass shipClass) {
         Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
 
-        final List<Module> modules = moduleService.findAllByUser(user);
-        return new ShipClassEditDTO(user, modules, shipClass);
+        final List<Armor> allArmorByUser = moduleService.findAllArmorByUser(user);
+        final List<ElectronicWarfare> allElectronicWarfareByUser = moduleService.findAllElectronicWarfareByUser(user);
+        final List<Propulsion> allPropulsionByUser = moduleService.findAllPropulsionByUser(user);
+        final List<Sidewall> allSidewallByUser = moduleService.findAllSidewallByUser(user);
+        final List<Weapon> allWeaponByUser = moduleService.findAllWeaponByUser(user);
+
+        final ShipClassEditDTO shipClassEditDTO = new ShipClassEditDTO(user,
+                allArmorByUser,
+                allElectronicWarfareByUser,
+                allPropulsionByUser,
+                allSidewallByUser,
+                allWeaponByUser,
+                shipClass);
+        shipClassEdit.setValue(shipClassEditDTO);
     }
 
     /**
@@ -191,7 +220,7 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
             updateSubjectMenu();
             useSubjectEntry();
         } else if (e.getPayload().equals(ESBEvent.TICK_DONE.name())) {
-            createShipClassCreateDTO();
+            updateShipClassCreate();
         }
     }
 
@@ -224,12 +253,13 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
 
             if (shipClass != null) {
                 if (componentForTab instanceof ShipClassEdit) {
-                    shipClassEdit.setValue(createShipClassEditDTO(shipClass));
+                    updateShipClassEdit(shipClass);
                 }
             }
             if (componentForTab instanceof ShipClassDisplay || componentForTab instanceof ShipClassCreate) {
                 componentForTab.update(shipClass);
             }
+            componentForTab.refresh();
             content = setContent(componentForTab);
         });
     }
@@ -287,7 +317,7 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
             if (content == shipClassCreate) {
                 content = setContent(shipClassDisplay);
             }
-            shipClassEdit.setValue(createShipClassEditDTO(shipClass));
+            updateShipClassEdit(shipClass);
             shipClassDisplay.update(shipClass);
         } else {
             // implement a subject of null is definitely the create view
@@ -325,7 +355,6 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
      * Updates the menu.
      * Removes the unnecessary menu items, adds the new items and order them.
      * <p>
-     * todo rework because of ugly and redundant calls
      */
     @Override
     protected void updateSubjectMenu() {

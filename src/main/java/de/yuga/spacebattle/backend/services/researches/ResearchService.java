@@ -94,6 +94,7 @@ public class ResearchService {
      * @return the new research
      */
     @Nonnull
+    @Deprecated(since = "productive environment")
     public Research createResearch(@Nonnull final String name,
                                    @Nonnull final String description,
                                    final int levelCap,

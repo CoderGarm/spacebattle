@@ -63,7 +63,7 @@ public class ShipClassCountDTO {
      * @return the entry which represents this wrapper
      */
     public Map.Entry<ShipClass, Integer> getAsEntry() {
-        return new Map.Entry<ShipClass, Integer>() {
+        return new Map.Entry<>() {
             @Override
             public ShipClass getKey() {
                 return shipClass;

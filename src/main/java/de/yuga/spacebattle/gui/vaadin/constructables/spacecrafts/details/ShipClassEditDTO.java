@@ -3,17 +3,16 @@ package de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
-import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ShipClassEditDTO {
@@ -29,8 +28,23 @@ public class ShipClassEditDTO {
      * Holds the modules which are possible.
      * Every integer bigger than 0 means a user selected upgrade and only these ones should be computed.
      */
-    @Nonnull
+    /*@Nonnull
     private final Map<Module, Integer> modules = new HashMap<>();
+*/
+    @Nonnull
+    private final Collection<Armor> possibleArmors = new HashSet<>();
+
+    @Nonnull
+    private final Collection<ElectronicWarfare> possibleElectronicWarfare = new HashSet<>();
+
+    @Nonnull
+    private final Collection<Propulsion> possiblePropulsion = new HashSet<>();
+
+    @Nonnull
+    private final Collection<Sidewall> possibleSidewalls = new HashSet<>();
+
+    @Nonnull
+    private final Collection<Weapon> possibleWeapons = new HashSet<>();
 
     @Nullable
     private Hull hull;
@@ -38,31 +52,72 @@ public class ShipClassEditDTO {
     @Nullable
     private String name;
 
+    @Nullable
+    private Armor selectedArmor;
+
+    @Nullable
+    private ElectronicWarfare selectedElectronicWarfare;
+
+    @Nullable
+    private Propulsion selectedPropulsion;
+
+    @Nullable
+    private Sidewall selectedSidewall;
+
+    @Nonnull
+    private Set<AlignedFitting> selectedAlignedFittings = new HashSet<>();
+
     protected ShipClassEditDTO(@Nonnull final User owner,
-                               @Nonnull final Map<Module, Integer> modules) {
+                               @Nonnull final List<Armor> allArmorByUser,
+                               @Nonnull final List<ElectronicWarfare> allElectronicWarfareByUser,
+                               @Nonnull final List<Propulsion> allPropulsionByUser,
+                               @Nonnull final List<Sidewall> allSidewallByUser,
+                               @Nonnull final List<Weapon> allWeaponByUser) {
         Preconditions.checkNotNull(owner, "owner shouldn't be null!");
-        Preconditions.checkNotNull(modules, "modules shouldn't be null!");
+        Preconditions.checkNotNull(allArmorByUser, "allArmorByUser shouldn't be null!");
+        Preconditions.checkNotNull(allElectronicWarfareByUser, "allElectronicWarfareByUser shouldn't be null!");
+        Preconditions.checkNotNull(allPropulsionByUser, "allPropulsionByUser shouldn't be null!");
+        Preconditions.checkNotNull(allSidewallByUser, "allSidewallByUser shouldn't be null!");
+        Preconditions.checkNotNull(allWeaponByUser, "allWeaponByUser shouldn't be null!");
 
         this.owner = owner;
-        this.modules.putAll(modules);
+        possibleArmors.addAll(allArmorByUser);
+        possibleElectronicWarfare.addAll(allElectronicWarfareByUser);
+        possiblePropulsion.addAll(allPropulsionByUser);
+        possibleSidewalls.addAll(allSidewallByUser);
+        possibleWeapons.addAll(allWeaponByUser);
     }
 
     public ShipClassEditDTO(@Nonnull final User owner,
-                            @Nonnull final List<Module> moduleList,
+                            @Nonnull final List<Armor> allArmorByUser,
+                            @Nonnull final List<ElectronicWarfare> allElectronicWarfareByUser,
+                            @Nonnull final List<Propulsion> allPropulsionByUser,
+                            @Nonnull final List<Sidewall> allSidewallByUser,
+                            @Nonnull final List<Weapon> allWeaponByUser,
                             @Nonnull final ShipClass shipClass) {
         Preconditions.checkNotNull(owner, "owner shouldn't be null!");
-        Preconditions.checkNotNull(moduleList, "moduleList shouldn't be null!");
+        Preconditions.checkNotNull(allArmorByUser, "allArmorByUser shouldn't be null!");
+        Preconditions.checkNotNull(allElectronicWarfareByUser, "allElectronicWarfareByUser shouldn't be null!");
+        Preconditions.checkNotNull(allPropulsionByUser, "allPropulsionByUser shouldn't be null!");
+        Preconditions.checkNotNull(allSidewallByUser, "allSidewallByUser shouldn't be null!");
+        Preconditions.checkNotNull(allWeaponByUser, "allWeaponByUser shouldn't be null!");
         Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
 
-        final Map<Module, Integer> availableModules = moduleList.stream().collect(Collectors.toMap(o -> o, o -> 0));
-        final Map<Module, Integer> modulesInShipClass = shipClass.getModules();
-        availableModules.putAll(modulesInShipClass);
+        possibleArmors.addAll(allArmorByUser);
+        possibleElectronicWarfare.addAll(allElectronicWarfareByUser);
+        possiblePropulsion.addAll(allPropulsionByUser);
+        possibleSidewalls.addAll(allSidewallByUser);
+        possibleWeapons.addAll(allWeaponByUser);
 
         this.id = shipClass.getId();
         this.owner = owner;
         this.name = shipClass.getName();
         this.hull = shipClass.getHull();
-        this.modules.putAll(availableModules);
+        selectedArmor = shipClass.getArmor();
+        selectedElectronicWarfare = shipClass.getElectronicWarfare();
+        selectedPropulsion = shipClass.getPropulsion();
+        selectedSidewall = shipClass.getSidewall();
+        selectedAlignedFittings.addAll(shipClass.getFittings());
     }
 
     public int getId() {
@@ -74,13 +129,19 @@ public class ShipClassEditDTO {
     }
 
     @Nonnull
-    public Map<Module, Integer> getModules() {
-        return modules;
+    public Set<AlignedFitting> getFittings() {
+        return selectedAlignedFittings;
     }
 
     public void resetModules() {
-        final Map<Module, Integer> availableModules = modules.keySet().stream().collect(Collectors.toMap(o -> o, o -> 0));
-        modules.putAll(availableModules);
+        id = -1;
+        name = null;
+        hull = null;
+        selectedArmor = null;
+        selectedElectronicWarfare = null;
+        selectedPropulsion = null;
+        selectedSidewall = null;
+        selectedAlignedFittings.clear();
     }
 
     public void setHull(@Nullable Hull hull) {
@@ -115,17 +176,55 @@ public class ShipClassEditDTO {
         if (id != -1) {
             shipClass.setId(id);
         }
-        final Map<Module, Integer> userSelectedModules = modules.entrySet().stream().filter(moduleIntegerEntry -> moduleIntegerEntry.getValue() > 0)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        shipClass.setModules(userSelectedModules);
+        shipClass.setArmor(selectedArmor);
+        shipClass.setPropulsion(selectedPropulsion);
+        shipClass.setElectronicWarfare(selectedElectronicWarfare);
+        shipClass.setSidewall(selectedSidewall);
+        // removing fittings with an amount of zero - this is necessary here to remove a fitting which was added before
+        shipClass.setFittings(selectedAlignedFittings.stream().filter(a -> a.getAmount() > 0).collect(Collectors.toSet()));
         return shipClass;
     }
 
-    public void setModules(@Nullable final Map<Module, Integer> moduleIntegerMap) {
-        if (moduleIntegerMap == null || moduleIntegerMap.isEmpty()) {
-            resetModules();
+    /**
+     * To set the user selection of fittings.
+     *
+     * @param alignedFittings the fittings to set
+     */
+    public void setFittings(@Nullable final Set<AlignedFitting> alignedFittings) {
+        selectedAlignedFittings.clear();
+        if (alignedFittings == null || alignedFittings.isEmpty()) {
             return;
         }
-        modules.putAll(moduleIntegerMap);
+        selectedAlignedFittings.addAll(alignedFittings);
+    }
+
+    /**
+     * To set the user selection of modules.
+     *
+     * @param modules the modules to set
+     */
+    public void setModules(@Nullable final ModuleContainerDTO modules) {
+
+        if (modules == null) {
+            return;
+        }
+        selectedArmor = modules.getSelectedArmor();
+        selectedElectronicWarfare = modules.getSelectedElectronicWarfare();
+        selectedPropulsion = modules.getSelectedPropulsion();
+        selectedSidewall = modules.getSelectedSidewall();
+        selectedAlignedFittings.addAll(modules.getSelectedAlignedFittings());
+    }
+
+    public ModuleContainerDTO getModules() {
+        return new ModuleContainerDTO(new ArrayList<>(possibleArmors),
+                new ArrayList<>(possibleElectronicWarfare),
+                new ArrayList<>(possiblePropulsion),
+                new ArrayList<>(possibleSidewalls),
+                new ArrayList<>(possibleWeapons),
+                selectedArmor,
+                selectedElectronicWarfare,
+                selectedPropulsion,
+                selectedSidewall,
+                selectedAlignedFittings);
     }
 }

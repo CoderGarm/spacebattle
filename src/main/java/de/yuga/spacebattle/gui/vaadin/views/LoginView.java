@@ -7,6 +7,7 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.svg.Svg;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -15,6 +16,7 @@ import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.gui.vaadin.MainView;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.account.CreateAccountDialog;
+import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.StarShipSvgHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +69,11 @@ public class LoginView extends VerticalLayout {
 
         add(createUser);
 
+        StarShipSvgHelper starShipSvgHelper = new StarShipSvgHelper();
+        Svg canvas = starShipSvgHelper.getCanvas();
+        canvas.setWidthFull();
+        add(canvas);
+
         add(new H1(new Text("Lorem ipsum")));
         add(new Text("Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."));
         add(new H2(new Text("Ipsum lorem")));
@@ -74,9 +81,7 @@ public class LoginView extends VerticalLayout {
         setPadding(false);
         setMargin(true);
         setSpacing(true);
-        ViewHelper.setWidth(this, null);
-
-
+        ViewHelper.setWidth(this, "100%");
     }
 
     @Nonnull

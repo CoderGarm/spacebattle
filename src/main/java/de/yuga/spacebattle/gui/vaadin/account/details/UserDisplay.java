@@ -21,9 +21,6 @@ public class UserDisplay extends HorizontalLayout {
     @Nonnull
     private final TextField email;
 
-    @Nonnull
-    private final RaceSelect raceSelector;
-
     public UserDisplay(@Nonnull User user) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
 
@@ -41,9 +38,6 @@ public class UserDisplay extends HorizontalLayout {
         this.email.setValue(user.getEmail());
         this.email.setReadOnly(true);
 
-        this.raceSelector = new RaceSelect(user.getRaceType());
-        this.raceSelector.setReadOnly(true);
-
-        add(username, password, raceSelector, email);
+        add(username, password, email);
     }
 }

@@ -107,7 +107,7 @@ public abstract class SBPageActionSelectorStatsLayout<SUBJECT_TYPE> extends Flex
     public <LAYOUT extends StatsLayout<SUBJECT_TYPE>> LAYOUT setContent(LAYOUT content) {
         mainContent.remove(this.content);
         this.content = (Component) content;
-        ViewHelper.setWidth((HasSize) this.content, "80%");
+        ViewHelper.setWidth((HasSize) this.content, "100%");
         mainContent.addComponentAtIndex(INDEX_CONTENT, this.content);
         setDrawer(content.getStatisticsComponent());
         return content;

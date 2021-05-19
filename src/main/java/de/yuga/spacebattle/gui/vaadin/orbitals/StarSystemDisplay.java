@@ -135,7 +135,6 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
 
     private Svg startCanvas() {
         final Svg canvas = ViewBoxDefinition.createStarMapCanvas("planetMapID");
-        // todo known issue: drag listener sucks if no movement must be possible
         registrationList.add(attachDragStartListener(canvas));
         registrationList.add(addDragEndListener(canvas));
 

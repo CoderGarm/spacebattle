@@ -47,6 +47,7 @@ public class BuildingService {
      * @return the new building
      */
     @Nonnull
+    @Deprecated(since = "productive environment")
     public Building createBuilding(@Nonnull final String name,
                                    @Nonnull final String description,
                                    final int baseValue,

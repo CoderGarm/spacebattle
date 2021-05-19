@@ -28,20 +28,29 @@ public class HullSelector extends VerticalLayout implements HasValue<AbstractFie
     private final Binder<Hull> hullBinder = new Binder<>(Hull.class);
 
     @Nonnull
-    private final RadioButtonGroup<Hull> hullSelectGroup;
+    private final RadioButtonGroup<Hull> selectGroup;
 
     public HullSelector() {
+        setClassName("module-display");
 
-        hullSelectGroup = new RadioButtonGroup<>();
-        hullSelectGroup.setLabel("Hull selection");
-        hullSelectGroup.setRenderer(new TextRenderer<>(Hull::toString));
-        hullSelectGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+        selectGroup = new RadioButtonGroup<>();
+        selectGroup.setClassName("module-display");
+
+        selectGroup.setLabel("Hull selection");
+        selectGroup.setRenderer(new TextRenderer<>(hull -> {
+            final StringBuilder sb = new StringBuilder();
+            sb.append(hull.getName()).append(", ").append(hull.getDescription());
+            sb.append(", Level ").append(hull.getLevel());
+            sb.append(", Capacity ").append(hull.getConstructionCapacity());
+            return sb.toString();
+        }));
+        selectGroup.addThemeVariants(RadioGroupVariant.MATERIAL_VERTICAL);
 
         final HullDisplay hullDisplay = new HullDisplay();
         final ReadOnlyHasValue<Hull> hullSelectedReadOnly = new ReadOnlyHasValue<>(hullDisplay::update);
         hullBinder.forField(hullSelectedReadOnly).bind(hull -> hull, null);
 
-        add(hullSelectGroup, hullDisplay);
+        add(selectGroup, hullDisplay);
     }
 
     /**
@@ -51,9 +60,9 @@ public class HullSelector extends VerticalLayout implements HasValue<AbstractFie
      */
     public void update(@Nullable final Collection<Hull> hulls) {
         if (hulls != null) {
-            hullSelectGroup.setItems(hulls);
+            selectGroup.setItems(hulls);
         } else {
-            hullSelectGroup.clear();
+            selectGroup.clear();
         }
     }
 
@@ -66,14 +75,14 @@ public class HullSelector extends VerticalLayout implements HasValue<AbstractFie
     @Override
     public List<Hull> getValue() {
         final List<Hull> hullList = new ArrayList<>();
-        hullList.add(hullSelectGroup.getValue());
+        hullList.add(selectGroup.getValue());
         return hullList;
     }
 
     @Override
     public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<HullSelector, Collection<Hull>>> listener) {
 
-        return hullSelectGroup.addValueChangeListener(event -> {
+        return selectGroup.addValueChangeListener(event -> {
             final Hull selectedHull = event.getValue();
             ArrayList<Hull> hulls = new ArrayList<>();
             hulls.add(selectedHull);
@@ -87,41 +96,41 @@ public class HullSelector extends VerticalLayout implements HasValue<AbstractFie
 
     @Override
     public void setReadOnly(boolean readOnly) {
-        hullSelectGroup.setReadOnly(readOnly);
+        selectGroup.setReadOnly(readOnly);
     }
 
     @Override
     public boolean isReadOnly() {
-        return hullSelectGroup.isReadOnly();
+        return selectGroup.isReadOnly();
     }
 
     @Override
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        hullSelectGroup.setRequiredIndicatorVisible(true);
+        selectGroup.setRequiredIndicatorVisible(true);
     }
 
     @Override
     public boolean isRequiredIndicatorVisible() {
-        return hullSelectGroup.isRequiredIndicatorVisible();
+        return selectGroup.isRequiredIndicatorVisible();
     }
 
     @Override
     public void setErrorMessage(String errorMessage) {
-        hullSelectGroup.setErrorMessage(errorMessage);
+        selectGroup.setErrorMessage(errorMessage);
     }
 
     @Override
     public String getErrorMessage() {
-        return hullSelectGroup.getErrorMessage();
+        return selectGroup.getErrorMessage();
     }
 
     @Override
     public void setInvalid(boolean invalid) {
-        hullSelectGroup.setInvalid(invalid);
+        selectGroup.setInvalid(invalid);
     }
 
     @Override
     public boolean isInvalid() {
-        return hullSelectGroup.isInvalid();
+        return selectGroup.isInvalid();
     }
 }

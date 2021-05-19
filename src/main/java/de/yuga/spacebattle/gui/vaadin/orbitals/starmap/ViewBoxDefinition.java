@@ -253,6 +253,9 @@ public class ViewBoxDefinition {
      * @param canvas      the canvas which holds the universe
      */
     public ViewBoxDefinition(@Nonnull final Set<StarSystem> starSystems, @Nonnull final Svg canvas) {
+        Preconditions.checkNotNull(starSystems, "starSystems shouldn't be null!");
+        Preconditions.checkNotNull(canvas, "canvas shouldn't be null!");
+
         this.canvas = canvas;
         this.eViewBoxType = UNIVERSE;
         viewBoxFactor = getViewBoxFactor();
@@ -270,6 +273,9 @@ public class ViewBoxDefinition {
      * @param canvas     the canvas which holds the star system
      */
     public ViewBoxDefinition(@Nonnull final StarSystem starSystem, @Nonnull final Svg canvas) {
+        Preconditions.checkNotNull(starSystem, "starSystem shouldn't be null!");
+        Preconditions.checkNotNull(canvas, "canvas shouldn't be null!");
+
         this.canvas = canvas;
         this.eViewBoxType = STAR_SYSTEM;
         viewBoxFactor = getViewBoxFactor();

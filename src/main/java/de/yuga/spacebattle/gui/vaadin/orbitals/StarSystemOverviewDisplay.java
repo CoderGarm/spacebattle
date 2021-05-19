@@ -64,7 +64,6 @@ public class StarSystemOverviewDisplay extends StarSystemLayout implements HasVa
 
     private Svg startCanvas() {
         final Svg canvas = ViewBoxDefinition.createStarMapCanvas("universeMapID");
-        // todo known issue: drag listener sucks if no movement must be possible
         canvas.addDragStartListener(event -> {
             SvgElement element = event.getElement();
             String id = element.getId();

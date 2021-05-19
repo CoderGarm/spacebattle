@@ -12,13 +12,16 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.buildings.BuildingDisplay;
+import de.yuga.spacebattle.gui.vaadin.spacecrafts.BaseModuleDisplay;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.HullDisplay;
-import de.yuga.spacebattle.gui.vaadin.spacecrafts.ModuleDisplay;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Vaadin component to display all relevant information about a particular research.
@@ -63,6 +66,7 @@ public class ResearchDisplay extends HorizontalLayout implements HasValue<Abstra
     private void updateResearchDetails(@Nullable final Research research) {
         accordion.remove(accordionPanel);
         accordionPanel = new AccordionPanel();
+        accordionPanel.setEnabled(false);
         if (research != null) {
             accordionPanel.setSummaryText("Unlocks");
             research.getUnlocksBuildings().forEach(building ->
@@ -70,6 +74,7 @@ public class ResearchDisplay extends HorizontalLayout implements HasValue<Abstra
                 BuildingDisplay buildingDisplay = new BuildingDisplay();
                 buildingDisplay.setValue(building);
                 accordionPanel.addContent(buildingDisplay);
+                accordionPanel.setEnabled(true);
             });
 
             research.getUnlocksHulls().forEach(hull ->
@@ -77,12 +82,23 @@ public class ResearchDisplay extends HorizontalLayout implements HasValue<Abstra
                 HullDisplay hullDisplay = new HullDisplay();
                 hullDisplay.update(hull);
                 accordionPanel.addContent(hullDisplay);
+                accordionPanel.setEnabled(true);
             });
 
-            research.getUnlocksModules().forEach(module -> {
-                ModuleDisplay moduleDisplay = new ModuleDisplay();
-                moduleDisplay.update(module, null);
-                accordionPanel.addContent(moduleDisplay);
+            // todo module individuell darstellen
+            final Set<BaseModule> modulesSet = new HashSet<>();
+
+            modulesSet.addAll(research.getUnlocksArmor());
+            modulesSet.addAll(research.getUnlocksPropulsion());
+            modulesSet.addAll(research.getUnlocksSidewall());
+            modulesSet.addAll(research.getUnlocksElectronicWarfare());
+            modulesSet.addAll(research.getUnlocksWeapons());
+
+            modulesSet.forEach(module -> {
+                final BaseModuleDisplay display = new BaseModuleDisplay();
+                display.setValue(module);
+                accordionPanel.addContent(display);
+                accordionPanel.setEnabled(true);
             });
         } else {
             accordionPanel.setSummaryText("Unlocks nothing");
@@ -102,7 +118,7 @@ public class ResearchDisplay extends HorizontalLayout implements HasValue<Abstra
 
         accordion.add(accordionPanel);
         ViewHelper.setWidth(accordion, "250px");
-
+        accordionPanel.setOpened(false);
         return accordion;
     }
 

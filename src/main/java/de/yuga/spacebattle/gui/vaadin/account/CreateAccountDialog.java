@@ -3,13 +3,12 @@ package de.yuga.spacebattle.gui.vaadin.account;
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.enums.ERaceType;
 import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.gui.vaadin.NotificationHelper;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.account.details.UserEditService;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
@@ -61,8 +60,6 @@ public class CreateAccountDialog extends Dialog {
             this.close();
         });
         this.submit = new Button("Submit", s -> {
-            Notification notification = new Notification();
-
             UserEditService.UserObject user = userEditService.getUser();
 
             String username = user.getUsername();
@@ -72,15 +69,13 @@ public class CreateAccountDialog extends Dialog {
             }
             User checkParameter = userService.findByUsernameAndEmail(username, email);
             if (checkParameter != null) {
-                notification.setText("These username or email exists already - chose another");
-                notification.open(); // todo close button
+                NotificationHelper.notify("These username or email exists already - chose another", null);
             } else {
                 String password = user.getPassword();
-                ERaceType raceType = user.getRaceType();
-                if (password == null || raceType == null) {
+                if (password == null) {
                     throw new NotifySBUserException("Something went wrong while creating a user.");
                 }
-                User newUser = userService.createUser(username, password, email, raceType);
+                User newUser = userService.createUser(username, password, email);
 
                 this.userService.setLogin(newUser);
                 this.close();

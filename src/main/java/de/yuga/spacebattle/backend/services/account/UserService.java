@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.enums.ERaceType;
 import de.yuga.spacebattle.backend.repositories.account.UserRepository;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,13 +110,11 @@ public class UserService {
     @Nonnull
     public User createUser(@Nonnull final String username,
                            @Nonnull final String password,
-                           @Nonnull final String email,
-                           @Nonnull final ERaceType raceType) {
+                           @Nonnull final String email) {
         Preconditions.checkNotNull(username, "username shouldn't be null!");
         Preconditions.checkNotNull(password, "password shouldn't be null!");
         Preconditions.checkNotNull(email, "email shouldn't be null!");
-        Preconditions.checkNotNull(raceType, "raceType shouldn't be null!");
 
-        return this.save(new User(username, password, email, raceType));
+        return this.save(new User(username, password, email));
     }
 }

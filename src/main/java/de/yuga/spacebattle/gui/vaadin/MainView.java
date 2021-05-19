@@ -373,11 +373,6 @@ public class MainView extends AppLayout {
             tickDisplay.updateTick(tick);
             uiEventBus.publish(this, ESBEvent.TICK_DONE.name());
         });
-        menuItem.getSubMenu().addItem("generate more star systems", event -> {
-            LOGGER.info("generating star systems");
-            masterOfTheUniverseService.createMorePopularizedStarSystems();
-            uiEventBus.publish(this, ESBEvent.TICK_DONE.name());
-        });
         wantToKnowMore.setVisible(false);
         wantToKnowMore.onEnabledStateChanged(false);
         wantToKnowMore.setClassName("first-on-the-right");

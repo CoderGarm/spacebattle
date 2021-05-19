@@ -5,124 +5,30 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
-import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
 import de.yuga.spacebattle.backend.enums.EModuleType;
-import de.yuga.spacebattle.backend.enums.ERaceType;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.ModuleDataElementDisplay;
-import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.EModuleValueDTO;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class ModuleValueTypePerFleetHorizontalDisplay extends HorizontalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<ModuleValueTypePerFleetHorizontalDisplay, Map<ShipClass, Integer>>, Map<ShipClass, Integer>> {
 
     @Nonnull
-    private final Map<EModuleType, BigDecimal> amountByModuleType;
-
-    @Nonnull
-    private final Map<EModuleType, ModuleDataElementDisplay> displayByModuleType;
+    private final ModuleValueTypePerFleetDatasource datasource;
 
     public ModuleValueTypePerFleetHorizontalDisplay() {
-        amountByModuleType = Arrays.stream(EModuleType.values())
-                .collect(Collectors.toMap(Function.identity(), value -> BigDecimal.ZERO));
-
-        displayByModuleType = Arrays.stream(EModuleType.values())
-                .collect(Collectors.toMap(Function.identity(), eModuleType -> {
-                    ModuleDataElementDisplay display = new ModuleDataElementDisplay();
-                    display.update(new EModuleValueDTO(eModuleType, BigDecimal.ZERO));
-                    return display;
-                }));
+        datasource = new ModuleValueTypePerFleetDatasource();
 
         for (int i = 0; i < EModuleType.values().length; i++) {
-            ModuleDataElementDisplay moduleDataElementDisplay = displayByModuleType.get(EModuleType.values()[i]);
+            ModuleDataElementDisplay moduleDataElementDisplay = datasource.displayByModuleType.get(EModuleType.values()[i]);
             add(moduleDataElementDisplay);
         }
     }
 
-    /**
-     * Clears the full display in order to "show nothing of worth".
-     */
-    private void clearValues() {
-        Arrays.stream(EModuleType.values()).forEach(eModuleType -> amountByModuleType.put(eModuleType, BigDecimal.ZERO));
-        this.updateStats();
-    }
-
-    /**
-     * Will update or clear the display, depending if the param exists.
-     *
-     * @param shipClasses the ship classes to display
-     */
-    public void update(@Nullable final Map<ShipClass, Integer> shipClasses) {
-        clearValues();
-
-        if (shipClasses != null) {
-            shipClasses.keySet().forEach(shipClass -> {
-                Integer amount = shipClasses.get(shipClass);
-                while (amount > 0) {
-                    final Map<Module, Integer> modules = shipClass.getModules();
-                    modules.keySet().forEach(module -> {
-                        final Integer amountOfModule = modules.get(module);
-                        addValueByType(shipClass.getOwner().getRaceType(), module, amountOfModule);
-                    });
-                    amount--;
-                }
-            });
-        } else {
-            Arrays.stream(EModuleType.values()).forEach(eModuleType -> amountByModuleType.put(eModuleType, BigDecimal.ZERO));
-        }
-        this.updateStats();
-    }
-
-    /**
-     * Adds the effective value by {@link EModuleType} to the stats display.
-     * Remember: Speeds will not added.
-     *
-     * @param raceType       the race type to calculate the effective value
-     * @param module         the module which effect value is used
-     * @param amountOfModule how often this module should be counted
-     */
-    private void addValueByType(@Nullable final ERaceType raceType, @Nullable final Module module, final int amountOfModule) {
-        if (raceType == null || module == null || amountOfModule == 0) {
-            return;
-        }
-        final EModuleType moduleType = module.getModuleType();
-
-        final int effectiveEffectValue = module.getEffectiveEffectValue(raceType);
-        final BigDecimal effectiveEffectValueAsBigD = new BigDecimal(effectiveEffectValue);
-
-        final BigDecimal currentEffectValue = amountByModuleType.get(moduleType);
-
-        BigDecimal effectiveResultingValue = BigDecimal.ZERO;
-        // it's only possible to reduce speed while the slowest ship defined this parameter
-        if (EModuleType.FTLPROPULSION == moduleType || EModuleType.PROPULSION == moduleType) {
-            final BigDecimal effectiveEffectValueByModuleAmount = effectiveEffectValueAsBigD.multiply(new BigDecimal(amountOfModule));
-            if (currentEffectValue.equals(BigDecimal.ZERO) || effectiveEffectValueByModuleAmount.compareTo(currentEffectValue) < 0) {
-                effectiveResultingValue = effectiveEffectValueByModuleAmount;
-            }
-        } else {
-            effectiveResultingValue = currentEffectValue.add(effectiveEffectValueAsBigD.multiply(new BigDecimal(amountOfModule)));
-        }
-        amountByModuleType.put(moduleType, effectiveResultingValue);
-    }
-
-    /**
-     * Updates the stats display by stored values.
-     */
-    private void updateStats() {
-        displayByModuleType.forEach((eModuleType, moduleDataElementDisplay) -> {
-            final BigDecimal effectiveValue = amountByModuleType.get(eModuleType);
-            moduleDataElementDisplay.update(new EModuleValueDTO(eModuleType, effectiveValue));
-        });
-    }
-
     @Override
     public void setValue(@Nullable final Map<ShipClass, Integer> value) {
-        this.update(value);
+        datasource.update(value);
     }
 
     @Nullable

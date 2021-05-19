@@ -15,7 +15,7 @@
     <description>spacebattle rework</description>
     <properties>
         <java.version>11</java.version>
-        <vaadin.version>14.4.7</vaadin.version>
+        <vaadin.version>14.6.1</vaadin.version>
     </properties>
     <dependencies>
         <dependency>
@@ -173,6 +173,12 @@
                     <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.6.1</version>
         </dependency>
 
         <dependency>

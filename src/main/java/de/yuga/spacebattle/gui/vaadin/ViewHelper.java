@@ -14,7 +14,7 @@ public class ViewHelper {
 
     public static final String MAX_MENU_HEIGHT = "80%";
 
-    public static final String MAX_WIDTH = "80%";
+    public static final String MAX_WIDTH = "100%";
 
     /**
      * Sets the width, max- and min-width to spacebattle default if with-param is null;

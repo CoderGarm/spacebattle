@@ -1,4 +1,20 @@
 
+    alter table alignedFitting 
+       drop 
+       foreign key FKt6aos80sh8332mepbkuwmo98i;
+
+    alter table alignedFitting 
+       drop 
+       foreign key FKgdp5e1ylgswr29e2d5b7uhib;
+
+    alter table armor 
+       drop 
+       foreign key FK10dhr7h3pkps3d7u22q2pwpgc;
+
+    alter table armor 
+       drop 
+       foreign key FKrb3h67mjdni459t4j1y8b7sw5;
+
     alter table building 
        drop 
        foreign key FK5vart3g8xv4gkgagwxxwyiuqi;
@@ -14,6 +30,18 @@
     alter table construction 
        drop 
        foreign key FKg139setxu2ng9hj6h7sgpyb9s;
+
+    alter table electronicWarfare 
+       drop 
+       foreign key FKccj76id0r5pq3p7f4viriwdqf;
+
+    alter table electronicWarfare 
+       drop 
+       foreign key FKhr2adrrpeb3vshv11ajrgnkd7;
+
+    alter table fleet 
+       drop 
+       foreign key FK5yy9whqh6562iaxuym0wrkjeq;
 
     alter table fleet 
        drop 
@@ -67,22 +95,6 @@
        drop 
        foreign key FK3urqlpl2jmbxlfk4q88i9i5tb;
 
-    alter table module 
-       drop 
-       foreign key FKqxpwocsv3vwcws3g1yj7hpw8i;
-
-    alter table module 
-       drop 
-       foreign key FK52hbj88ddt0mvoq1jv1rf5vk1;
-
-    alter table moduleComposition 
-       drop 
-       foreign key FKgtipiaku2mvi9j3of7ju7th6g;
-
-    alter table moduleComposition 
-       drop 
-       foreign key FKr2iuudhohjx8cacih40d1bpv6;
-
     alter table move 
        drop 
        foreign key FKg65nht3m74odamnrqiv1cdyl6;
@@ -123,6 +135,14 @@
        drop 
        foreign key FK2qd4p5ry3gaskjau8i2gutj0n;
 
+    alter table propulsion 
+       drop 
+       foreign key FKqjsvyhjc6w21niim4aeptpm85;
+
+    alter table propulsion 
+       drop 
+       foreign key FK7rr2gvpcbjjhl9tuxe6c50v5q;
+
     alter table research 
        drop 
        foreign key FKni50te130dndarqgicsq3svhb;
@@ -137,7 +157,15 @@
 
     alter table shipClass 
        drop 
+       foreign key FKouxjssb18x4jeutl5r1l0byeu;
+
+    alter table shipClass 
+       drop 
        foreign key FK5iggor36gwq8904cpdvcfjc1n;
+
+    alter table shipClass 
+       drop 
+       foreign key FKfbii11hday9qcjpmi2i1k2611;
 
     alter table shipClass 
        drop 
@@ -146,6 +174,22 @@
     alter table shipClass 
        drop 
        foreign key FKovqcf68xgq4mm2n32sdoburq6;
+
+    alter table shipClass 
+       drop 
+       foreign key FKdd7voavc2cml9rodxm6vnlaqq;
+
+    alter table shipClass 
+       drop 
+       foreign key FKsa1b1j6ur2emh3jv7s0ft3nru;
+
+    alter table sidewall 
+       drop 
+       foreign key FKlo0i3byallqh89wd535yrbs3l;
+
+    alter table sidewall 
+       drop 
+       foreign key FK693a9gix6ifpkiop612tghdy0;
 
     alter table unlockedResearch 
        drop 
@@ -159,11 +203,25 @@
        drop 
        foreign key FKd0120p7tkvssh9r8hldenpw1w;
 
+    alter table weapon 
+       drop 
+       foreign key FK1rsb3ampiw8yjy8ngrget6ay;
+
+    alter table weapon 
+       drop 
+       foreign key FKo22n18dgjpraqosj7nkamrnvb;
+
+    drop table if exists alignedFitting;
+
     drop table if exists alliance;
+
+    drop table if exists armor;
 
     drop table if exists building;
 
     drop table if exists construction;
+
+    drop table if exists electronicWarfare;
 
     drop table if exists fleet;
 
@@ -173,13 +231,11 @@
 
     drop table if exists job;
 
-    drop table if exists module;
-
-    drop table if exists moduleComposition;
-
     drop table if exists move;
 
     drop table if exists planet;
+
+    drop table if exists propulsion;
 
     drop table if exists research;
 
@@ -189,6 +245,8 @@
 
     drop table if exists shipClass;
 
+    drop table if exists sidewall;
+
     drop table if exists starSystem;
 
     drop table if exists tick;
@@ -196,3 +254,5 @@
     drop table if exists unlockedResearch;
 
     drop table if exists user;
+
+    drop table if exists weapon;

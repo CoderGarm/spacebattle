@@ -14,8 +14,6 @@ import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.misc.details.StatsDrawer;
 import de.yuga.spacebattle.gui.vaadin.views.PlanetMainView;
 import de.yuga.spacebattle.gui.vaadin.views.ShipClassMainView;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -130,7 +128,7 @@ public abstract class SBPageSubjectSelectorStatsLayout<T> extends FlexLayout {
     public <L extends StatsLayout<T>> L setContent(L content) {
         mainContent.remove(this.content);
         this.content = (Component) content;
-        ViewHelper.setWidth((HasSize) this.content, "80%");
+        ViewHelper.setWidth((HasSize) this.content, "100%");
         mainContent.addComponentAtIndex(INDEX_CONTENT, this.content);
         setDrawer(content.getStatisticsComponent());
         return content;

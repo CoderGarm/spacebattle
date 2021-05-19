@@ -17,7 +17,7 @@ public class HullDisplay extends VerticalLayout {
 
     public HullDisplay() {
 
-        HorizontalLayout payload = new HorizontalLayout();
+        final HorizontalLayout payload = new HorizontalLayout();
         final Label name = new Label();
         final ReadOnlyHasValue<String> nameReadOnly = new ReadOnlyHasValue<>(name::setText);
         hullBinder.forField(nameReadOnly).bind(Hull::getName, null);

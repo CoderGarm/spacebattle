@@ -55,7 +55,11 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass>
     private final Button submit;
 
     public ShipClassCreate() {
+        setClassName("module-display");
+
         this.uiEventBus.subscribe(this);
+
+        createHullSvg();
 
         binderShipClass.addValueChangeListener(event -> {
             final ShipClass shipClass = getShipClass();
@@ -75,7 +79,7 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass>
                 .bind(ShipClassEditDTO::getName, ShipClassEditDTO::setName);
 
 
-        HullSelector hullSelect = new HullSelector();
+        final HullSelector hullSelect = new HullSelector();
         binderShipClass.forField(hullSelect)
                 .withValidator((value, context) -> {
                     final Hull hull = new ArrayList<>(value).get(0);
@@ -86,11 +90,11 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass>
                 .withValidationStatusHandler(this::openNotification)
                 .bind(ShipClassCreateDTO::getPossibleHulls, ShipClassCreateDTO::setHulls);
 
-        final ModuleMultiEdit moduleMultiEdit = new ModuleMultiEdit();
+        final ModuleMultiEdit moduleMultiEdit = new ModuleMultiEdit(starShipSvgHelper);
         binderShipClass.forField(moduleMultiEdit)
                 .withValidator((value, context) -> {
                     final ShipClass shipClass = getShipClass();
-                    shipClass.setModules(value);
+                    value.prepareShipClassValidation(shipClass);
                     return ShipDataVaadinValidator.check(shipClass, MODULES);
                 })
                 .withValidationStatusHandler(this::openNotification)
@@ -109,7 +113,15 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass>
         });
 
         final HorizontalLayout buttonBar = new HorizontalLayout(submit, clear);
+
         add(name, hullSelect, moduleMultiEdit, buttonBar);
+    }
+
+    @Override
+    protected void addDragStartListener() {
+        canvas.addDragStartListener(event -> {
+
+        });
     }
 
     /**

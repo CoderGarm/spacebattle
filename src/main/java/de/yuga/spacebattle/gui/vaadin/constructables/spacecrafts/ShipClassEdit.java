@@ -22,6 +22,8 @@ import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.HullDisplay;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.ModuleMultiEdit;
 import de.yuga.spacebattle.gui.vaadin.validators.ShipDataVaadinValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.Event;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.annotation.EventBusListenerMethod;
@@ -37,6 +39,8 @@ import static de.yuga.spacebattle.gui.vaadin.validators.ShipDataVaadinValidator.
 public class ShipClassEdit extends ShipClassLayout<ShipClass>
         implements HasValue<AbstractField.ComponentValueChangeEvent<ShipClassEdit, ShipClassEditDTO>, ShipClassEditDTO> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShipClassEdit.class);
+
     @Nonnull
     private final EventBus.UIEventBus uiEventBus = ViewHelper.getService(EventBus.UIEventBus.class);
 
@@ -47,19 +51,23 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass>
     private final Validator validator = CustomValidatorFactory.buildCustomValidator();
 
     @Nonnull
-    private final Binder<ShipClassEditDTO> binderShipClass = new Binder<>(ShipClassEditDTO.class);
+    private final Binder<ShipClassEditDTO> binder = new Binder<>(ShipClassEditDTO.class);
 
     public ShipClassEdit() {
+        setClassName("module-display");
+
         this.uiEventBus.subscribe(this);
 
-        binderShipClass.addValueChangeListener(event -> {
+        createHullSvg();
+
+        binder.addValueChangeListener(event -> {
             final ShipClass shipClass = getShipClass();
             getShipClassStatDisplay().setValue(shipClass);
             validateSubmitButton();
         });
 
         final TextField name = new TextField();
-        binderShipClass.forField(name)
+        binder.forField(name)
                 .withValidator((value, context) -> {
                     final ShipClass shipClass = getShipClass();
                     shipClass.setName(value);
@@ -71,7 +79,7 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass>
 
         final HullDisplay hullDisplay = new HullDisplay();
         final ReadOnlyHasValue<Hull> hullSelectedReadOnly = new ReadOnlyHasValue<>(hullDisplay::update);
-        binderShipClass.forField(hullSelectedReadOnly)
+        binder.forField(hullSelectedReadOnly)
                 .withValidator((value, context) -> {
                     final ShipClass shipClass = getShipClass();
                     shipClass.setHull(value);
@@ -80,11 +88,11 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass>
                 .withValidationStatusHandler(this::openNotification)
                 .bind(ShipClassEditDTO::getHull, null);
 
-        final ModuleMultiEdit moduleMultiEdit = new ModuleMultiEdit();
-        binderShipClass.forField(moduleMultiEdit)
+        final ModuleMultiEdit moduleMultiEdit = new ModuleMultiEdit(starShipSvgHelper);
+        binder.forField(moduleMultiEdit)
                 .withValidator((value, context) -> {
                     final ShipClass shipClass = getShipClass();
-                    shipClass.setModules(value);
+                    value.prepareShipClassValidation(shipClass);
                     return ShipDataVaadinValidator.check(shipClass, MODULES);
                 })
                 .withValidationStatusHandler(this::openNotification)
@@ -97,6 +105,13 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass>
 
         final HorizontalLayout buttonBar = new HorizontalLayout(submit, delete);
         add(name, hullDisplay, moduleMultiEdit, buttonBar);
+    }
+
+    @Override
+    protected void addDragStartListener() {
+        canvas.addDragStartListener(event -> {
+
+        });
     }
 
     /**
@@ -134,7 +149,7 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass>
      */
     @Nonnull
     public ShipClass getShipClass() {
-        ShipClassEditDTO bean = binderShipClass.getBean();
+        ShipClassEditDTO bean = binder.getBean();
         if (bean == null) {
             throw new NotifySBUserException("You could click on submit, congratulations! Please click only if this class is ready.");
         }
@@ -160,12 +175,12 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass>
     public void setValue(@Nonnull final ShipClassEditDTO value) {
         Preconditions.checkNotNull(value, "value shouldn't be null!");
 
-        binderShipClass.setBean(value);
+        binder.setBean(value);
     }
 
     @Override
     public ShipClassEditDTO getValue() {
-        return binderShipClass.getBean();
+        return binder.getBean();
     }
 
     @Override

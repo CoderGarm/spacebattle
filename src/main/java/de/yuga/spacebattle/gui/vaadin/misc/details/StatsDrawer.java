@@ -20,7 +20,7 @@ public class StatsDrawer extends HorizontalLayout {
 
     /**
      * Will updates the statistics section by the given parameter.
-     * If null parameter, the section will be fully cleared. Has to be updated with a meaningful behavior. todo
+     * If null parameter, the section will be fully cleared. Has to be updated with a meaningful behavior.
      *
      * @param components the components to display
      */

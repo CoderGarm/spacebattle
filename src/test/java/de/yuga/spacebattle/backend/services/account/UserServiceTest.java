@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.services.account;
 
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.enums.ERaceType;
 import de.yuga.spacebattle.backend.repositories.account.UserRepository;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.test.MocksNotUsedTestListener;
@@ -235,13 +234,12 @@ public class UserServiceTest extends SBEasyMockSupport {
         final String username = "user";
         final String password = "password";
         final String email = "email";
-        final ERaceType raceType = ERaceType.HUMAN;
-        final User user = new User(username, password, email, raceType);
+        final User user = new User(username, password, email);
         // prepare mocks
         expect(userRepositoryMock.save(user)).andReturn(user);
         // test method
         replayAll();
-        final User result = testObject.createUser(username, password, email, raceType);
+        final User result = testObject.createUser(username, password, email);
         // verify mocks
         verifyAll();
         // check expectation

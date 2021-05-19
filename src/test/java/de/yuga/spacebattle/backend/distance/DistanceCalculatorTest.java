@@ -8,14 +8,9 @@ import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.spacecrafts.Module;
-import de.yuga.spacebattle.backend.enums.EModuleType;
-import de.yuga.spacebattle.backend.enums.ERaceType;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
 
@@ -54,15 +49,12 @@ public class DistanceCalculatorTest {
 
     private Fleet createFleet(final int effectFTLValue, final Planet planetStart) {
         final User user = new User();
-        user.setRaceType(ERaceType.HUMAN);
         final Fleet fleet = new Fleet();
         fleet.setOwner(user);
         final ShipClass shipClass = new ShipClass();
-        final Map<Module, Integer> modules = new HashMap<>();
-        final Module module = new Module("module1", EModuleType.FTLPROPULSION, "description",
-                1, effectFTLValue, 1, new Research());
-        modules.put(module, 1);
-        shipClass.setModules(modules);
+        final Propulsion propulsion = new Propulsion("module1", "description", new Research(),
+                1, effectFTLValue, 1, true);
+        shipClass.setPropulsion(propulsion);
         fleet.updateShips(shipClass, 1);
         fleet.setOrbit(new FleetOrbit(planetStart));
         return fleet;
