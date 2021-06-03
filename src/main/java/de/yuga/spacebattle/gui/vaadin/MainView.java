@@ -69,7 +69,7 @@ import static de.yuga.spacebattle.gui.vaadin.ViewHelper.MAX_MENU_HEIGHT;
 @UIScope
 @Theme(value = Material.class, variant = Material.DARK)
 @CssImport("./styles/views/main/main-view.css")
-@PWA(name = "Spacebattle", shortName = "SB", enableInstallPrompt = false)
+@PWA(name = "Battle For Honor", shortName = "BfH", enableInstallPrompt = false)
 @JsModule("./styles/shared-styles.js")
 @Route
 public class MainView extends AppLayout {

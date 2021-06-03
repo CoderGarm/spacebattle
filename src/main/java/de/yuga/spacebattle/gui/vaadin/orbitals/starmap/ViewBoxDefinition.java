@@ -1,16 +1,20 @@
 package de.yuga.spacebattle.gui.vaadin.orbitals.starmap;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.svg.Svg;
 import com.vaadin.flow.component.svg.elements.*;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.distance.DistanceCalculator;
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.Move;
+import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.geo.Point;
@@ -36,6 +40,36 @@ import static de.yuga.spacebattle.gui.vaadin.orbitals.starmap.ViewBoxDefinition.
 public class ViewBoxDefinition {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ViewBoxDefinition.class);
+
+    /**
+     * The color for the star system "is colonizable" marker.
+     */
+    public static final String COLONIZABLE_SYSTEM_MARKER_COLOR = "#306f91";
+
+    /**
+     * The color for the star system circle which has a user colony.
+     */
+    public static final String IS_COLONIZED_BY_USER_COLOR = "darkolivegreen";
+
+    /**
+     * The color for a star system circle which is not colonized.
+     */
+    public static final String NOT_COLONIZED_COLOR = "darkgoldenrod";
+
+    /**
+     * The color for a not by user colonized system circle.
+     */
+    public static final String COLONIZED_BY_OTHERS_COLOR = "#6f1585";
+
+    /**
+     * The color for the "colonization in progress" marker.
+     */
+    public static final String COLONIZATION_IN_PROGRESS = "GoldenRod";
+
+    /**
+     * The color of the marker which displays the panned to point.
+     */
+    public static final String PAN_TO_MARKER_COLOR = "darkred";
 
     /**
      * The factor defines the enlargement of the coordinate cross' axis above their real width.
@@ -72,11 +106,6 @@ public class ViewBoxDefinition {
      * CSS id prefix for every fleet text.
      */
     public static final String FLEET_TEXT_ID = "fleet-text-";
-
-    /**
-     * CSS id prefix for every fleet group.
-     */
-    public static final String FLEET_GROUP_ID = "fleet-group-";
 
     /**
      * What this canvas is for, may be the universe itself, may be only for a star system.
@@ -156,7 +185,7 @@ public class ViewBoxDefinition {
     /**
      * The color of the planetary system's coordinate cross axis.
      */
-    private static final String PLANETARY_AXIS_COLOR = "yellow";
+    private static final String PLANETARY_AXIS_COLOR = "#b8860b";
 
     /**
      * The color of the displayed orbit for a planet in the star system canvas.
@@ -193,6 +222,9 @@ public class ViewBoxDefinition {
      */
     public static final String COURSE_PLOT_COLOR_OUTBOUND = "green";
 
+    @Nonnull
+    private final UserService userService = ViewHelper.getService(UserService.class);
+
     /**
      * The canvas which is the base for all map related graphics.
      */
@@ -227,6 +259,16 @@ public class ViewBoxDefinition {
     private final Map<OccupiedArea, Planet> occupiedAreaPlanetMap = new HashMap<>();
 
     /**
+     * Holds the svg circle for each planet.
+     */
+    private final Map<Planet, Circle> planetCircleMap = new HashMap<>();
+
+    /**
+     * Holds the svg circle for each star system
+     */
+    private final Map<StarSystem, Circle> systemCircleMap = new HashMap<>();
+
+    /**
      * Holds the used slots in an orbit which are occupied by a fleet.
      */
     final Map<Orbit, List<RestrictedFleetArea>> usedFleetSlotsByOrbit = new HashMap<>();
@@ -252,7 +294,7 @@ public class ViewBoxDefinition {
      * @param starSystems all star systems to display in the universe star map
      * @param canvas      the canvas which holds the universe
      */
-    public ViewBoxDefinition(@Nonnull final Set<StarSystem> starSystems, @Nonnull final Svg canvas) {
+    public ViewBoxDefinition(@Nonnull final Set<StarSystem> starSystems, @Nonnull final Svg canvas, @Nullable final StarSystem starSystemToPan) {
         Preconditions.checkNotNull(starSystems, "starSystems shouldn't be null!");
         Preconditions.checkNotNull(canvas, "canvas shouldn't be null!");
 
@@ -262,8 +304,8 @@ public class ViewBoxDefinition {
         final Set<Orbit> orbitCollection = starSystems.stream().map(StarSystem::getOrbit).collect(Collectors.toSet());
         adjustCanvas(orbitCollection);
 
+        panToStarSystem(starSystemToPan);
         starSystems.forEach(this::createStarSystemCircle);
-
     }
 
     /**
@@ -272,7 +314,7 @@ public class ViewBoxDefinition {
      * @param starSystem all planets to display in the star system map
      * @param canvas     the canvas which holds the star system
      */
-    public ViewBoxDefinition(@Nonnull final StarSystem starSystem, @Nonnull final Svg canvas) {
+    public ViewBoxDefinition(@Nonnull final StarSystem starSystem, @Nonnull final Svg canvas, @Nullable final Planet planetToPan) {
         Preconditions.checkNotNull(starSystem, "starSystem shouldn't be null!");
         Preconditions.checkNotNull(canvas, "canvas shouldn't be null!");
 
@@ -301,7 +343,144 @@ public class ViewBoxDefinition {
                 .collect(Collectors.toSet());
 
         movingFleets.forEach(this::printMovingFleet);
+        panToPlanet(planetToPan);
         planets.forEach(this::createPlanetCircle);
+    }
+
+    /**
+     * Rotates the point from a x-y coordinate set around the given angle and center it at the gicen oddset coodinates.
+     *
+     * @param x       the x coordinate
+     * @param xOffset the x center coordinate
+     * @param y       the y coordinate
+     * @param yOffset the y center coordinate
+     * @param angle   the angle
+     * @return the resulting point
+     */
+    @VisibleForTesting
+    static AbstractPolyElement.PolyCoordinatePair rotatePointOffset(final double x, final double xOffset, final double y, final double yOffset, final double angle) {
+        final double rotatedX = (x * Math.cos(Math.toRadians(angle))) - (y * Math.sin(Math.toRadians(angle)));
+        final double rotatedY = (x * Math.sin(Math.toRadians(angle))) + (y * Math.cos(Math.toRadians(angle)));
+        return new Polyline.PolyCoordinatePair(xOffset + rotatedX, yOffset + rotatedY);
+    }
+
+    /**
+     * Creates markers for the panned svg element.
+     *
+     * @param orbit        the orbit which has to be marked as panned
+     * @param eViewBoxType if the marked orbit is inside a star system or the universe
+     */
+    private void createPanToMarker(@Nonnull final Orbit orbit, EViewBoxType eViewBoxType) {
+        Preconditions.checkNotNull(orbit, "orbit shouldn't be null!");
+
+        final int x = orbit.getXCoordinate();
+        final int y = orbit.getYCoordinate();
+        final double baseRadius = eViewBoxType == UNIVERSE ? SYSTEM_RADIUS * 2 : PLANET_RADIUS * 2;
+        final double pinDistanceSummand = baseRadius * 2;
+        final double pinWidthSummand = baseRadius * 0.7;
+        final double pinLengthSummand = baseRadius * 4;
+        final int strokeWidth = 2;
+
+        final List<SvgElement> svgElements = new ArrayList<>();
+        double outerAngle = 45;
+        final List<AbstractPolyElement.PolyCoordinatePair> points1 = new ArrayList<>();
+        points1.add(rotatePointOffset(0, x, pinDistanceSummand, y, outerAngle));
+        points1.add(rotatePointOffset(pinWidthSummand, x, pinLengthSummand, y, outerAngle));
+        points1.add(rotatePointOffset(-1 * pinWidthSummand, x, pinLengthSummand, y, outerAngle));
+
+        final Polygon panToMarker1 = new Polygon("panToMarker1", points1);
+        panToMarker1.setFillColor(TRANSPARENT_FILL_COLOR);
+        panToMarker1.setStroke(PAN_TO_MARKER_COLOR, strokeWidth, Path.LINE_CAP.ROUND, Path.LINE_JOIN.ROUND);
+
+        final List<AbstractPolyElement.PolyCoordinatePair> points2 = new ArrayList<>();
+        points2.add(rotatePointOffset(0, x, -1 * pinDistanceSummand, y, outerAngle));
+        points2.add(rotatePointOffset(pinWidthSummand, x, -1 * pinLengthSummand, y, outerAngle));
+        points2.add(rotatePointOffset(-1 * pinWidthSummand, x, -1 * pinLengthSummand, y, outerAngle));
+
+        final Polygon panToMarker2 = new Polygon("panToMarker2", points2);
+        panToMarker2.setFillColor(TRANSPARENT_FILL_COLOR);
+        panToMarker2.setStroke("darkred", strokeWidth, Path.LINE_CAP.ROUND, Path.LINE_JOIN.ROUND);
+
+        final List<AbstractPolyElement.PolyCoordinatePair> points3 = new ArrayList<>();
+        points3.add(rotatePointOffset(-1 * pinDistanceSummand, x, 0, y, outerAngle));
+        points3.add(rotatePointOffset(-1 * pinLengthSummand, x, -1 * pinWidthSummand, y, outerAngle));
+        points3.add(rotatePointOffset(-1 * pinLengthSummand, x, 1 * pinWidthSummand, y, outerAngle));
+
+        final Polygon panToMarker3 = new Polygon("panToMarker3", points3);
+        panToMarker3.setFillColor(TRANSPARENT_FILL_COLOR);
+        panToMarker3.setStroke("darkred", strokeWidth, Path.LINE_CAP.ROUND, Path.LINE_JOIN.ROUND);
+
+        final List<AbstractPolyElement.PolyCoordinatePair> points4 = new ArrayList<>();
+        points4.add(rotatePointOffset(pinDistanceSummand, x, 0, y, outerAngle));
+        points4.add(rotatePointOffset(pinLengthSummand, x, -1 * pinWidthSummand, y, outerAngle));
+        points4.add(rotatePointOffset(pinLengthSummand, x, 1 * pinWidthSummand, y, outerAngle));
+
+        final Polygon panToMarker4 = new Polygon("panToMarker4", points4);
+        panToMarker4.setFillColor(TRANSPARENT_FILL_COLOR);
+        panToMarker4.setStroke("darkred", strokeWidth, Path.LINE_CAP.ROUND, Path.LINE_JOIN.ROUND);
+
+        // creating a inner ring
+        final List<Polyline.PolyCoordinatePair> distanceRing = new ArrayList<>();
+        final int amountOfCirclePoints = 360;
+        for (int i = 0; i < amountOfCirclePoints; ++i) {
+            final double angle = Math.toRadians(((double) i / amountOfCirclePoints) * 360d);
+            // pinDistanceSummand - 2 is to separate the ring optically from the markers
+            distanceRing.add(
+                    new Polyline.PolyCoordinatePair(x + Math.cos(angle) * (pinDistanceSummand - 2),
+                            y + Math.sin(angle) * (pinDistanceSummand - 2)));
+        }
+        // fully close the ring
+        distanceRing.add(distanceRing.get(0));
+
+        Polyline polyline = new Polyline("panToMarkerRing", distanceRing);
+        polyline.setFillColor(TRANSPARENT_FILL_COLOR);
+        polyline.setStroke("darkred", 1, Path.LINE_CAP.ROUND, Path.LINE_JOIN.ROUND);
+
+        svgElements.add(polyline);
+        svgElements.add(panToMarker1);
+        svgElements.add(panToMarker2);
+        svgElements.add(panToMarker3);
+        svgElements.add(panToMarker4);
+        svgElements.forEach(canvas::add);
+    }
+
+    /**
+     * If a user has to be finger-pointed to a star system.
+     */
+    private void panToStarSystem(@Nullable final StarSystem system) {
+        if (system != null) {
+            final Orbit o = system.getOrbit();
+            createPanToMarker(o, UNIVERSE);
+            centerAndZoomViewBox(o);
+        }
+    }
+
+    /**
+     * Centers the view box to the given orbit.
+     *
+     * @param orbit the orbit to center
+     */
+    private void centerAndZoomViewBox(@Nonnull final Orbit orbit) {
+        Preconditions.checkNotNull(orbit, "orbit shouldn't be null!");
+
+        final int x = orbit.getXCoordinate();
+        final int y = orbit.getYCoordinate();
+        final double viewBoxWidth = getViewBoxWidth() / 2;
+        final double viewBoxHeight = getViewBoxHeight() / 2;
+        final double minX = x - viewBoxWidth / 2;
+        final double minY = y - viewBoxHeight / 2;
+        canvas.viewbox(minX, minY, viewBoxWidth, viewBoxHeight);
+    }
+
+    /**
+     * If a user has to be finger-pointed to a planet.
+     */
+    private void panToPlanet(@Nullable final Planet planet) {
+        if (planet != null) {
+            final Orbit o = planet.getOrbit();
+            createPanToMarker(o, STAR_SYSTEM);
+            centerAndZoomViewBox(o);
+        }
     }
 
     /**
@@ -309,7 +488,7 @@ public class ViewBoxDefinition {
      *
      * @param orbit the orbit to check.
      */
-    private void update(@Nonnull final Orbit orbit) {
+    private void updateMapRanges(@Nonnull final Orbit orbit) {
         Preconditions.checkNotNull(orbit, "orbit shouldn't be null!");
 
         final int xCoordinate = orbit.getXCoordinate();
@@ -328,7 +507,7 @@ public class ViewBoxDefinition {
      * @param orbit2 the second orbit
      * @return the distance
      */
-    private double getOrbitalDistance(@Nonnull final Orbit orbit1, @Nonnull final Orbit orbit2) {
+    public static double getOrbitalDistance(@Nonnull final Orbit orbit1, @Nonnull final Orbit orbit2) {
         Preconditions.checkNotNull(orbit1, "orbit1 shouldn't be null!");
         Preconditions.checkNotNull(orbit2, "orbit2 shouldn't be null!");
 
@@ -348,7 +527,7 @@ public class ViewBoxDefinition {
      * @param orbit2 the second orbit
      * @return the distance
      */
-    private double getOrbitalDistance(@Nonnull final Point orbit1, @Nonnull final Point orbit2) {
+    private static double getOrbitalDistance(@Nonnull final Point orbit1, @Nonnull final Point orbit2) {
         Preconditions.checkNotNull(orbit1, "orbit1 shouldn't be null!");
         Preconditions.checkNotNull(orbit2, "orbit2 shouldn't be null!");
 
@@ -368,7 +547,7 @@ public class ViewBoxDefinition {
      * @param secondCoord the second digit
      * @return the distance
      */
-    private double getDistance(double firstCoord, double secondCoord) {
+    private static double getDistance(double firstCoord, double secondCoord) {
         return Math.sqrt(Math.pow(firstCoord, 2) + Math.pow(secondCoord, 2));
     }
 
@@ -392,7 +571,7 @@ public class ViewBoxDefinition {
     private void adjustCanvas(@Nonnull final Set<Orbit> orbitCollection) {
         Preconditions.checkNotNull(orbitCollection, "orbitCollection shouldn't be null!");
 
-        orbitCollection.forEach(this::update);
+        orbitCollection.forEach(this::updateMapRanges);
         this.planetaryOrbits.addAll(orbitCollection);
 
         switch (eViewBoxType) {
@@ -412,7 +591,6 @@ public class ViewBoxDefinition {
         double viewBoxHeight = getViewBoxHeight();
         double viewBoxWidth = getViewBoxWidth();
         canvas.viewbox(viewBoxMinX, viewBoxMinY, viewBoxWidth, viewBoxHeight);
-
     }
 
     /**
@@ -695,12 +873,56 @@ public class ViewBoxDefinition {
         Preconditions.checkNotNull(starSystem, "starSystem shouldn't be null!");
 
         final Orbit orbit = starSystem.getOrbit();
+        // creates colonizable markers
+        starSystem.getPlanets().stream().filter(Planet::isColonizable).findFirst().ifPresent(planet -> {
+            final double x1 = orbit.getXCoordinate() - 9;
+            final double y1 = orbit.getYCoordinate() - 8;
+            final double x2 = orbit.getXCoordinate() + 9;
+            final double y2 = orbit.getYCoordinate() + 8;
+            final Path path = new Path(starSystem.getName() + "isColonizable", "M" + x1 + "," + y1 + " A 1,1,1 1 1 " + x2 + "," + y2);
+            path.setFillColor(TRANSPARENT_FILL_COLOR);
+            path.setStroke(COLONIZABLE_SYSTEM_MARKER_COLOR, 2, Path.LINE_CAP.SQUARE, Path.LINE_JOIN.ROUND);
+            canvas.add(path);
+        });
+        // define color of system circle
+        String systemCircleFillColor = NOT_COLONIZED_COLOR;
+        final User loggedInUser = userService.getLoggedInUser();
+        if (loggedInUser != null) {
+            final boolean isColonizedByLoggedInUser = starSystem.getPlanets().stream()
+                    .anyMatch(planet -> loggedInUser.equals(planet.getOwner()));
+
+            final boolean isColonizedByOtherUser = starSystem.getPlanets().stream()
+                    .filter(planet -> planet.getOwner() != null)
+                    .anyMatch(planet -> !loggedInUser.equals(planet.getOwner()));
+
+            if (isColonizedByLoggedInUser) {
+                systemCircleFillColor = IS_COLONIZED_BY_USER_COLOR;
+                // is colonized by other, too
+                if (isColonizedByOtherUser) {
+
+                    final double x1 = orbit.getXCoordinate() + (SYSTEM_RADIUS + 4);
+                    final double y1 = orbit.getYCoordinate() + (SYSTEM_RADIUS + 3);
+                    final double x2 = orbit.getXCoordinate() - (SYSTEM_RADIUS + 4);
+                    final double y2 = orbit.getYCoordinate() - (SYSTEM_RADIUS + 3);
+                    final Path path = new Path(starSystem.getName() + "isColonizable", "M" + x1 + "," + y1 + " A 1,1,1 1 1 " + x2 + "," + y2);
+                    path.setFillColor(TRANSPARENT_FILL_COLOR);
+                    path.setStroke(COLONIZED_BY_OTHERS_COLOR, 1, Path.LINE_CAP.SQUARE, Path.LINE_JOIN.ROUND);
+                    canvas.add(path);
+                }
+            } else if (isColonizedByOtherUser) {
+                // is only colonized by other
+                systemCircleFillColor = COLONIZED_BY_OTHERS_COLOR;
+            }
+        }
+
+        // creates the system circle
         final String circleID = idCreateOrbitID(orbit);
         final Circle circle = new Circle(circleID, ViewBoxDefinition.SYSTEM_RADIUS);
         circle.center(orbit.getXCoordinate(), orbit.getYCoordinate());
-        circle.setFillColor("red");
+        circle.setFillColor(systemCircleFillColor);
         circle.setDraggable(true);
         canvas.add(circle);
+        systemCircleMap.put(starSystem, circle);
     }
 
     /**
@@ -711,14 +933,43 @@ public class ViewBoxDefinition {
     private void createPlanetCircle(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, PLANET_SELECTOR_ID_PREFIX + " shouldn't be null!");
 
-        final String circleID = idCreatePlanetID(planet);
+        final User loggedInUser = userService.getLoggedInUser();
         final Orbit orbit = planet.getOrbit();
+        if (loggedInUser != null) {
+            loggedInUser.getColonizations().stream()
+                    .filter(c -> c.getPlanet().equals(planet))
+                    .findFirst()
+                    .ifPresent(colonization -> {
+
+                        final double x1 = orbit.getXCoordinate() + (PLANET_RADIUS + 4);
+                        final double y1 = orbit.getYCoordinate() + (SYSTEM_RADIUS + 3);
+                        final double x2 = orbit.getXCoordinate() - (PLANET_RADIUS + 4);
+                        final double y2 = orbit.getYCoordinate() - (SYSTEM_RADIUS + 3);
+                        final Path path = new Path(planet.getName() + "colonizationInProgress", "M" + x1 + "," + y1 + " A 1,1,1 1 1 " + x2 + "," + y2);
+                        path.setFillColor(TRANSPARENT_FILL_COLOR);
+                        path.setStroke(COLONIZATION_IN_PROGRESS, 1, Path.LINE_CAP.SQUARE, Path.LINE_JOIN.ROUND);
+                        canvas.add(path);
+                    });
+        }
+
+        String planetsCircleColor = NOT_COLONIZED_COLOR;
+        if (!planet.isColonizable()) {
+            if (loggedInUser != null && loggedInUser.equals(planet.getOwner())) {
+                planetsCircleColor = IS_COLONIZED_BY_USER_COLOR;
+            } else {
+                planetsCircleColor = COLONIZED_BY_OTHERS_COLOR;
+            }
+        }
+
+        // create planet circle
+        final String circleID = idCreatePlanetID(planet);
         final Circle circle = new Circle(circleID, ViewBoxDefinition.PLANET_RADIUS);
         circle.center(orbit.getXCoordinate(), orbit.getYCoordinate());
-        circle.setFillColor("green");
+        circle.setFillColor(planetsCircleColor);
         circle.setDraggable(true);
         canvas.add(circle);
 
+        planetCircleMap.put(planet, circle);
         occupiedAreaPlanetMap.put(new OccupiedArea(planet, circle, orbit, RADIUS_PLANETARY_SYSTEM), planet);
     }
 
@@ -1153,7 +1404,7 @@ public class ViewBoxDefinition {
      *
      * @param element the element which must be re-centered
      */
-    public void resetPositionOfSvgElement(@Nonnull final SvgElement element) {
+    public void updateSvgElement(@Nonnull final SvgElement element) {
         Preconditions.checkNotNull(element, "element shouldn't be null!");
 
         canvas.update(element);

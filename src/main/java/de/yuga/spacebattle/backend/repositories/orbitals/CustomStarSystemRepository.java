@@ -4,7 +4,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 
 import java.util.List;
 
-public interface CustomStarsystemRepository {
+public interface CustomStarSystemRepository {
 
-    List<StarSystem> findAllStarsystems();
+    List<StarSystem> findAllStarSystems();
 }

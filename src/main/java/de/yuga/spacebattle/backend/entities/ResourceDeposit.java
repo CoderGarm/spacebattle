@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.entities;
 
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.enums.EResourceSubType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 
@@ -87,21 +88,24 @@ public class ResourceDeposit extends AbstractEntityKey {
         this.subType = subType;
     }
 
-    public void updateResource(@Nonnull final EResourceType rescourceType, @Nonnull final BigDecimal amount) {
-        Preconditions.checkNotNull(rescourceType, "rescourceType shouldn't be null!");
+    public void updateResource(@Nonnull final EResourceType resourceType, @Nonnull final BigDecimal amount) {
+        Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
         Preconditions.checkNotNull(amount, "amount shouldn't be null!");
 
         BigDecimal value;
-        if (resources.containsKey(rescourceType)) {
-            value = this.resources.get(rescourceType).add(amount);
+        if (resources.containsKey(resourceType)) {
+            value = this.resources.get(resourceType).add(amount);
         } else {
             value = amount;
         }
-        this.resources.put(rescourceType, value.setScale(mathContext.getPrecision(), mathContext.getRoundingMode()));
+        if (value.compareTo(BigDecimal.ZERO) < 0) {
+            throw new NotifySBUserException("No, you cannot do that.");
+        }
+        this.resources.put(resourceType, value.setScale(mathContext.getPrecision(), mathContext.getRoundingMode()));
     }
 
     /**
-     * Initializes the map and creates, if not happended before, the natural resources.
+     * Initializes the map and creates, if not happened before, the natural resources.
      */
     private void initialize() {
         if (!resources.isEmpty()) {

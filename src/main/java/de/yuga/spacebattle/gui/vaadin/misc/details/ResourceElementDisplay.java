@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.gui.vaadin.misc.details;
 
+import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -20,7 +21,9 @@ public class ResourceElementDisplay extends HorizontalLayout {
     @Nullable
     private EResourceAmountDTO amount;
 
-    public ResourceElementDisplay() {
+    public ResourceElementDisplay(@Nonnull final EResolution resolution) {
+        Preconditions.checkNotNull(resolution, "resolution shouldn't be null!");
+
         final Image titleImage = new Image();
         final ReadOnlyHasValue<String> titleImageSrc = new ReadOnlyHasValue<>(titleImage::setSrc);
         final ReadOnlyHasValue<String> titleImageAlt = new ReadOnlyHasValue<>(titleImage::setAlt);
@@ -29,7 +32,7 @@ public class ResourceElementDisplay extends HorizontalLayout {
             final EResourceType resourceType = wrapper.getResourceType();
             final String directory = resourceType.getDirectory();
             final String iconName = resourceType.getIconName();
-            return EIconPath.getPath(directory, iconName, EResolution.PX32.getResolution());
+            return EIconPath.getPath(directory, iconName, resolution.getResolution());
         }, null);
         binder.forField(titleImageAlt).bind(wrapper -> wrapper.getResourceType().getSingularName(), null);
         binder.forField(titleImageTitle).bind(wrapper -> wrapper.getResourceType().getSingularName(), null);

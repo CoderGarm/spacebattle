@@ -23,6 +23,14 @@
        drop 
        foreign key FKbp0gn3eiexsa5p6s20md9yfi7;
 
+    alter table colonization 
+       drop 
+       foreign key FKr6k79x7m4igtmpu720nfxk2mw;
+
+    alter table colonization 
+       drop 
+       foreign key FKrfuwalj6y19xvtebuy1q05pbt;
+
     alter table construction 
        drop 
        foreign key FKlkteuncyf95jg9hhq28yefrcl;
@@ -94,6 +102,14 @@
     alter table job 
        drop 
        foreign key FK3urqlpl2jmbxlfk4q88i9i5tb;
+
+    alter table knownStarSystem 
+       drop 
+       foreign key FKayr540k7tyu8v1vuni31u2j17;
+
+    alter table knownStarSystem 
+       drop 
+       foreign key FKtjhh901to46le5kkmsybuwdbb;
 
     alter table move 
        drop 
@@ -219,6 +235,8 @@
 
     drop table if exists building;
 
+    drop table if exists colonization;
+
     drop table if exists construction;
 
     drop table if exists electronicWarfare;
@@ -230,6 +248,8 @@
     drop table if exists hull;
 
     drop table if exists job;
+
+    drop table if exists knownStarSystem;
 
     drop table if exists move;
 

@@ -6,8 +6,9 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
-import de.yuga.spacebattle.gui.vaadin.misc.details.ResourceDisplay;
+import de.yuga.spacebattle.backend.enums.EResolution;
 import de.yuga.spacebattle.gui.vaadin.misc.details.ResourceOutputDisplay;
+import de.yuga.spacebattle.gui.vaadin.misc.details.ResourceVerticalDisplay;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -18,11 +19,11 @@ public class PlanetResourceDisplay extends HorizontalLayout implements HasValue<
     private final ResourceOutputDisplay deposits;
 
     @Nonnull
-    private final ResourceDisplay factors;
+    private final ResourceVerticalDisplay factors;
 
     public PlanetResourceDisplay() {
-        deposits = new ResourceOutputDisplay();
-        factors = new ResourceDisplay();
+        deposits = new ResourceOutputDisplay(EResolution.PX32);
+        factors = new ResourceVerticalDisplay(EResolution.PX32);
         add(deposits, factors);
     }
 

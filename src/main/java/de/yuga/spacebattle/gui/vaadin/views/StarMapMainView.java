@@ -12,6 +12,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
+import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.gui.vaadin.MainView;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
 import de.yuga.spacebattle.gui.vaadin.misc.SBPageActionSelectorLayout;
@@ -47,6 +48,9 @@ public class StarMapMainView extends SBPageActionSelectorLayout<StarSystemLayout
     private final EventBus.UIEventBus uiEventBus;
 
     @Nonnull
+    private final ColonizationService colonizationService;
+
+    @Nonnull
     private User user;
 
     @Nonnull
@@ -56,7 +60,7 @@ public class StarMapMainView extends SBPageActionSelectorLayout<StarSystemLayout
     private final PlanetService planetService;
 
     @Nonnull
-    private final StarSystemService starsystemService;
+    private final StarSystemService starSystemService;
 
     @Nonnull
     private StarSystemLayout content;
@@ -67,30 +71,30 @@ public class StarMapMainView extends SBPageActionSelectorLayout<StarSystemLayout
     @Nonnull
     private final StarSystemDisplay starSystemDisplay;
 
-    @Nonnull
-    private Set<StarSystem> starSystems = new HashSet<>();
-
     @Autowired
     public StarMapMainView(@Nonnull final UserService userService,
                            @Nonnull final PlanetService planetService,
-                           @Nonnull final StarSystemService starsystemService,
+                           @Nonnull final StarSystemService starSystemService,
+                           @Nonnull final ColonizationService colonizationService,
                            @Nonnull final EventBus.UIEventBus uiEventBus) {
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
-        Preconditions.checkNotNull(starsystemService, "starsystemService shouldn't be null!");
+        Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
+        Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
         Preconditions.checkNotNull(uiEventBus, "uiEventBus shouldn't be null!");
 
         this.uiEventBus = uiEventBus;
         this.uiEventBus.subscribe(this);
         this.userService = userService;
         this.planetService = planetService;
-        this.starsystemService = starsystemService;
+        this.starSystemService = starSystemService;
+        this.colonizationService = colonizationService;
         User loggedIn = userService.getLoggedInUser();
         if (loggedIn == null) {
             throw new NotifySBUserException("You shouldn't see this.");
         }
         this.user = loggedIn;
-        starSystems.addAll(starsystemService.findAll());
+        final Set<StarSystem> starSystems = new HashSet<>(starSystemService.findAll());
         starSystemDisplay = new StarSystemDisplay();
         starSystemOverviewDisplay = new StarSystemOverviewDisplay();
         starSystemOverviewDisplay.setValue(starSystems);
@@ -169,6 +173,9 @@ public class StarMapMainView extends SBPageActionSelectorLayout<StarSystemLayout
      */
     @Override
     public void beforeLeave(BeforeLeaveEvent event) {
+        // remove the "view planed colonization" when leaving the star map
+        colonizationService.setColonizationToDisplay(null);
+        // close all dialogs at leave
         starSystemDisplay.closeDialogs();
     }
 

@@ -23,6 +23,14 @@
        drop 
        foreign key FKbp0gn3eiexsa5p6s20md9yfi7;
 
+    alter table colonization 
+       drop 
+       foreign key FKr6k79x7m4igtmpu720nfxk2mw;
+
+    alter table colonization 
+       drop 
+       foreign key FKrfuwalj6y19xvtebuy1q05pbt;
+
     alter table construction 
        drop 
        foreign key FKlkteuncyf95jg9hhq28yefrcl;
@@ -94,6 +102,14 @@
     alter table job 
        drop 
        foreign key FK3urqlpl2jmbxlfk4q88i9i5tb;
+
+    alter table knownStarSystem 
+       drop 
+       foreign key FKayr540k7tyu8v1vuni31u2j17;
+
+    alter table knownStarSystem 
+       drop 
+       foreign key FKtjhh901to46le5kkmsybuwdbb;
 
     alter table move 
        drop 
@@ -219,6 +235,8 @@
 
     drop table if exists building;
 
+    drop table if exists colonization;
+
     drop table if exists construction;
 
     drop table if exists electronicWarfare;
@@ -230,6 +248,8 @@
     drop table if exists hull;
 
     drop table if exists job;
+
+    drop table if exists knownStarSystem;
 
     drop table if exists move;
 
@@ -293,6 +313,15 @@
         idCosts integer,
         idResearch integer not null,
         primary key (idBuilding)
+    ) engine=InnoDB;
+
+    create table colonization (
+       idColonization integer not null auto_increment,
+        doneAtZero integer not null,
+        idPlanet integer not null,
+        idUser integer not null,
+        primary key (idColonization),
+        check (idPlanet is not null AND idUser is not null)
     ) engine=InnoDB;
 
     create table construction (
@@ -363,6 +392,12 @@
         check ((idBuilding IS NOT NULL AND targetLevel IS NOT NULL) OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) OR (idShipClass IS NOT NULL AND amountShips IS NOT NULL))
     ) engine=InnoDB;
 
+    create table knownStarSystem (
+       idOwner integer not null,
+        idStarSystem integer not null,
+        primary key (idOwner, idStarSystem)
+    ) engine=InnoDB;
+
     create table move (
        idMove integer not null auto_increment,
         moveDoneAtZero integer not null,
@@ -378,6 +413,7 @@
 
     create table planet (
        idPlanet integer not null auto_increment,
+        colonizedAt datetime(6),
         name varchar(30) not null,
         xCoordinate integer not null,
         yCoordinate integer not null,
@@ -496,7 +532,8 @@
         weaponType varchar(255) not null,
         idCosts integer not null,
         idResearch integer not null,
-        primary key (idWeapon)
+        primary key (idWeapon),
+        check ((allowedForBow = true AND allowedForStern = true AND allowedForBroadsides = false) OR (allowedForBow = false AND allowedForStern = false AND allowedForBroadsides = true))
     ) engine=InnoDB;
 
     alter table alliance 
@@ -555,6 +592,16 @@
        add constraint FKbp0gn3eiexsa5p6s20md9yfi7 
        foreign key (idResearch) 
        references research (idResearch);
+
+    alter table colonization 
+       add constraint FKr6k79x7m4igtmpu720nfxk2mw 
+       foreign key (idPlanet) 
+       references planet (idPlanet);
+
+    alter table colonization 
+       add constraint FKrfuwalj6y19xvtebuy1q05pbt 
+       foreign key (idUser) 
+       references user (idUser);
 
     alter table construction 
        add constraint FKlkteuncyf95jg9hhq28yefrcl 
@@ -644,6 +691,16 @@
 
     alter table job 
        add constraint FK3urqlpl2jmbxlfk4q88i9i5tb 
+       foreign key (idOwner) 
+       references user (idUser);
+
+    alter table knownStarSystem 
+       add constraint FKayr540k7tyu8v1vuni31u2j17 
+       foreign key (idStarSystem) 
+       references starSystem (idStarSystem);
+
+    alter table knownStarSystem 
+       add constraint FKtjhh901to46le5kkmsybuwdbb 
        foreign key (idOwner) 
        references user (idUser);
 

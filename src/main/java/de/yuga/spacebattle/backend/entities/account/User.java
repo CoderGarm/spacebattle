@@ -1,16 +1,19 @@
 package de.yuga.spacebattle.backend.entities.account;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -52,7 +55,6 @@ public class User extends AbstractEntityKey {
     @Size(min = 1, max = 50)
     private String email;
 
-    @JsonIgnore
     @Nullable
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "idAlliance")
@@ -63,6 +65,9 @@ public class User extends AbstractEntityKey {
     @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "owner")
     private final Set<Planet> ownedPlanets = new HashSet<>();
 
+    /**
+     * All already researched researches for the user.
+     */
     @Nonnull
     @NotNull
     @ElementCollection(fetch = FetchType.EAGER)
@@ -71,13 +76,46 @@ public class User extends AbstractEntityKey {
     @CollectionTable(name = "unlockedResearch", joinColumns = @JoinColumn(name = "idUser"))
     private final Map<Research, Integer> researches = new HashMap<>();
 
+    /**
+     * The currently running jobs for the user.
+     */
     @Nonnull
     @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "owner")
     private final Set<Job> jobs = new HashSet<>();
 
+    /**
+     * The ship classes which was created by the user.
+     */
     @Nonnull
     @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "owner")
     private final Set<ShipClass> shipClasses = new HashSet<>();
+
+    /**
+     * Represents all star systems which information was bought by the user in order to colonize them.<br>
+     * <p>
+     * <b>Attention: </b>
+     * Currently this implies that the new owner will get all information about the system without buying it especially.<br>
+     * <br>
+     * Compare:<br>
+     * - {@link PlanetService#colonizePlanet(User, Planet)}<br>
+     * - {@link PlanetService#createPlanet(String, User, StarSystem, Orbit)}<br>
+     * - {@link PlanetService#createPlanet(String, User, StarSystem, Integer, Integer)}
+     * </p>
+     */
+    @Nonnull
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, fetch = FetchType.EAGER)
+    @JoinTable(name = "knownStarSystem",
+            joinColumns = @JoinColumn(name = "idOwner"),
+            inverseJoinColumns = @JoinColumn(name = "idStarSystem"),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"idOwner", "idStarSystem"}))
+    private final Set<StarSystem> knownStarSystems = new HashSet<>();
+
+    /**
+     * The ship classes which was created by the user.
+     */
+    @Nonnull
+    @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "user")
+    private final Set<Colonization> colonizations = new HashSet<>();
 
     public User() {
     }
@@ -167,6 +205,11 @@ public class User extends AbstractEntityKey {
         return shipClasses;
     }
 
+    @Nonnull
+    public Set<Colonization> getColonizations() {
+        return colonizations;
+    }
+
     /**
      * Returns the possible planet which is designated for holding research jobs.
      *
@@ -191,6 +234,30 @@ public class User extends AbstractEntityKey {
             Construction construction = collect.get(0);
             return Optional.of(construction.getPlanet());
         }
+    }
+
+    /**
+     * Returns the first colonized planet.
+     *
+     * @return the main planet
+     */
+    @Nonnull
+    public Planet getMainPlanet() {
+        return getOwnedPlanets().stream()
+                .filter(planet -> planet.getColonizedAt() != null)
+                .sorted((o1, o2) -> {
+                    assert o2.getColonizedAt() != null;
+                    return o1.getColonizedAt().compareTo(o2.getColonizedAt());
+                }).collect(Collectors.toList()).get(0);
+    }
+
+    public void addKnownStarSystems(@Nonnull final StarSystem starSystem) {
+        knownStarSystems.add(starSystem);
+    }
+
+    @Nonnull
+    public Set<StarSystem> getKnownStarSystems() {
+        return knownStarSystems;
     }
 
     @Override

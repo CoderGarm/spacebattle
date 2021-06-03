@@ -34,6 +34,17 @@ public class EResourceAmountDTO {
         this.tickOutput = tickOutput != null ? tickOutput.setScale(0, mathContext.getRoundingMode()) : null;
     }
 
+    /**
+     * Returns a String like "500 (50)".
+     * <p>
+     * There are two possibilities:<br>
+     * <br>
+     * - without tick output it will return "500"<br>
+     * - with tick output it will return "500 (50)"<br>
+     * </p>
+     *
+     * @return the string
+     */
     public String getAmountWithDiff() {
         String text = amount.toString();
         if (tickOutput != null) {
@@ -45,5 +56,10 @@ public class EResourceAmountDTO {
     @Nonnull
     public EResourceType getResourceType() {
         return resourceType;
+    }
+
+    @Nonnull
+    public BigDecimal getAmount() {
+        return amount;
     }
 }

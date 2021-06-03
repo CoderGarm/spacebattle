@@ -12,6 +12,7 @@ import de.yuga.spacebattle.backend.entities.ResourceDeposit;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.enums.EResolution;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.gui.vaadin.misc.details.EResourceAmountDTO;
 import de.yuga.spacebattle.gui.vaadin.misc.details.PlanetIconDisplay;
@@ -134,7 +135,7 @@ public class ResearchOutputDisplay extends VerticalLayout implements HasValue<Ab
             final BigDecimal amount = resources.get(EResourceType.RESEARCH);
             final BigDecimal tickOutput = getTickOutput(planet);
             if (resourceElementDisplay == null) {
-                resourceElementDisplay = new ResourceElementDisplay();
+                resourceElementDisplay = new ResourceElementDisplay(EResolution.PX32);
                 planetResearchDisplayComponentMap.put(planet, resourceElementDisplay);
             }
             resourceElementDisplay.update(new EResourceAmountDTO(EResourceType.RESEARCH, amount, tickOutput));

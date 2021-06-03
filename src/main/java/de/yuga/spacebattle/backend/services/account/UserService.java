@@ -2,12 +2,18 @@ package de.yuga.spacebattle.backend.services.account;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.NotifySBUserException;
+import de.yuga.spacebattle.backend.colonization.ColonizationCostCalculator;
+import de.yuga.spacebattle.backend.entities.ResourceDeposit;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.repositories.account.UserRepository;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
+import de.yuga.spacebattle.gui.vaadin.misc.details.EResourceAmountDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -27,7 +33,8 @@ public class UserService {
     private User login;
 
     @Autowired
-    public UserService(@Nonnull final UserRepository userRepository, @Nonnull final ResearchService researchService) {
+    public UserService(@Nonnull final UserRepository userRepository,
+                       @Nonnull final ResearchService researchService) {
         Preconditions.checkNotNull(userRepository, "userRepository shouldn't be null!");
         Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
 
@@ -40,8 +47,16 @@ public class UserService {
         return login;
     }
 
+    /**
+     * Refreshes the logged in user;
+     *
+     * @return the re-fetched logged in user
+     */
+    @Nonnull
     public User refresh() {
-        assert login != null; // this only can be called by logged in users
+        if (login == null) {
+            throw new NotifySBUserException("you should be logged in, think about that.");
+        }
         return find(login).orElse(login);
     }
 
@@ -116,5 +131,22 @@ public class UserService {
         Preconditions.checkNotNull(email, "email shouldn't be null!");
 
         return this.save(new User(username, password, email));
+    }
+
+    /**
+     * Adds a star system to the user's known systems.
+     *
+     * @param user       the user wh should know the new system
+     * @param starSystem the star system
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void addToKnownSystems(@Nonnull final User user, @Nonnull final StarSystem starSystem) {
+        final EResourceAmountDTO costs = ColonizationCostCalculator.calculateInformationCost(starSystem);
+        final Planet mainPlanet = user.getMainPlanet();
+        final ResourceDeposit resourceDeposit = mainPlanet.getResourceDeposit();
+        // the costs must be validated by the instance before
+        resourceDeposit.updateResource(costs.getResourceType(), costs.getAmount());
+        user.addKnownStarSystems(starSystem);
+        save(user);
     }
 }

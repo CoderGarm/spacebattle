@@ -15,7 +15,7 @@ import java.util.Set;
  * The star system which every action founds a place.
  */
 @NamedQueries({
-        @NamedQuery(name = "StarSystem.getAll", query = "SELECT p FROM StarSystem p")
+        @NamedQuery(name = "StarSystem.getAll", query = "SELECT s FROM StarSystem s")
 })
 @Entity
 @Table(name = "starSystem",
@@ -99,6 +99,6 @@ public class StarSystem extends AbstractEntityKey {
 
     @Override
     public int hashCode() {
-        return orbit.hashCode();
+        return id * 31;
     }
 }

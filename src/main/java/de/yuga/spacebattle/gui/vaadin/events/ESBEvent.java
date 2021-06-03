@@ -22,6 +22,7 @@ public enum ESBEvent {
     RESEARCH_JOB_START(11), // when a research job should start
     RESEARCH_JOB_FEEDBACK_STARTED(12), // when a research job has started
     DISPLAY_PLANETARY_SYSTEM(13), // when a planetary system should displayed
+    PAN_TO_PLANNED_COLONIZATION(14), // when a colonization plan wants to be views by the user
     ;
 
     int sequence;

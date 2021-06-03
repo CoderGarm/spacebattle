@@ -2,21 +2,23 @@ package de.yuga.spacebattle.backend.services.orbitals;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
+import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
-import de.yuga.spacebattle.backend.repositories.orbitals.StarsystemRepository;
+import de.yuga.spacebattle.backend.repositories.orbitals.StarSystemRepository;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class StarSystemService {
 
     @Nonnull
-    private final StarsystemRepository starsystemRepository;
+    private final StarSystemRepository starsystemRepository;
 
-    public StarSystemService(@Nonnull final StarsystemRepository starsystemRepository) {
+    public StarSystemService(@Nonnull final StarSystemRepository starsystemRepository) {
         Preconditions.checkNotNull(starsystemRepository, "starsystemRepository shouldn't be null!");
 
         this.starsystemRepository = starsystemRepository;
@@ -24,7 +26,12 @@ public class StarSystemService {
 
     @Nonnull
     public List<StarSystem> findAll() {
-        return starsystemRepository.findAllStarsystems();
+        return starsystemRepository.findAllStarSystems();
+    }
+
+    @Nonnull
+    public List<StarSystem> findAllUncolonized() {
+        return findAll().stream().filter(system -> system.getPlanets().stream().anyMatch(Planet::isColonizable)).collect(Collectors.toList());
     }
 
     @Nullable

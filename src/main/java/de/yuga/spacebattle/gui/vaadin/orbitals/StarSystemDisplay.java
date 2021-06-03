@@ -19,8 +19,10 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
+import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
+import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.gui.vaadin.NotificationHelper;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.combined.spacecrafts.details.FleetMoveMergeSplitEdit;
@@ -59,6 +61,9 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
     private final FleetService fleetService = ViewHelper.getService(FleetService.class);
 
     @Nonnull
+    private final ColonizationService colonizationService = ViewHelper.getService(ColonizationService.class);
+
+    @Nonnull
     private final Map<String, PlanetDisplay> planetMap = new HashMap<>();
 
     /**
@@ -89,12 +94,14 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
     /**
      * Holds every created dialog by the identifier of the dialog's subject.
      */
+    @Nonnull
     private final Map<String, SBDialog> openDialogs = new HashMap<>();
 
     /**
      * Holds every registered listener for this and it's children component. But you have to register them manually.
      * Every {@link Registration} will be removed if it's part of this list and the component will be left.
      */
+    @Nonnull
     private final List<Registration> registrationList = new ArrayList<>();
 
     public StarSystemDisplay() {
@@ -177,7 +184,13 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
             fleetMap.put(fleetTextID, fleet);
         });
 
-        viewBoxDefinition = new ViewBoxDefinition(value, canvas);
+        final Colonization colonizationToDisplay = colonizationService.getColonizationToDisplay();
+        if (colonizationToDisplay != null) {
+            viewBoxDefinition = new ViewBoxDefinition(value, canvas, colonizationToDisplay.getPlanet());
+            //viewBoxDefinition.panToPlanet(colonizationToDisplay.getPlanet());
+        } else {
+            viewBoxDefinition = new ViewBoxDefinition(value, canvas, null);
+        }
     }
 
     @Override
@@ -216,7 +229,7 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
             if (id.startsWith(PLANET_SELECTOR_ID_PREFIX)) {
                 final PlanetDisplay planetDisplay = planetMap.get(id);
                 final Planet planet = planetDisplay.getValue();
-                viewBoxDefinition.resetPositionOfSvgElement(element);
+                viewBoxDefinition.updateSvgElement(element);
 
                 SBDialog sbDialog = openDialogs.get(id);
                 if (sbDialog != null) {
@@ -250,7 +263,7 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
                         moveDTO = new MoveDTO(fleet, planet);
                     }
                     // reset fleet position is fleet is in motion - must be non-movable for the user
-                    viewBoxDefinition.resetPositionOfSvgElement(element);
+                    viewBoxDefinition.updateSvgElement(element);
                 }
                 createOrUpdateFleetDialog(id, fleet, allFleetsInOrbit, moveDTO, element);
             }
@@ -417,7 +430,7 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
             Registration cancelListener = sbDialog.addCancelListener(cancelEvent -> {
                 openDialogs.get(id).close();
                 openDialogs.remove(id);
-                viewBoxDefinition.resetPositionOfSvgElement(element);
+                viewBoxDefinition.updateSvgElement(element);
             });
             registrationList.add(cancelListener);
 

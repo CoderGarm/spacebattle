@@ -23,6 +23,7 @@ public class SBRouting {
                     new SBRouting(true, "Researches", ResearchMainView.class, "Researches"),
                     new SBRouting(true, "Fleets", FleetMainView.class, "Fleets"),
                     new SBRouting(true, "Star map", StarMapMainView.class, "Star map"),
+                    new SBRouting(true, "Expansion", ColonizationMainView.class, "Expansion"),
             };
 
     private final boolean loginNeeded;

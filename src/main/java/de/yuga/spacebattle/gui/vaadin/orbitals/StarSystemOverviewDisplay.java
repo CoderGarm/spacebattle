@@ -8,7 +8,9 @@ import com.vaadin.flow.component.svg.Svg;
 import com.vaadin.flow.component.svg.elements.SvgElement;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
+import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
+import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
 import de.yuga.spacebattle.gui.vaadin.orbitals.starmap.ViewBoxDefinition;
@@ -35,6 +37,9 @@ public class StarSystemOverviewDisplay extends StarSystemLayout implements HasVa
     private final StarSystemService starsystemService = ViewHelper.getService(StarSystemService.class);
 
     @Nonnull
+    private final ColonizationService colonizationService = ViewHelper.getService(ColonizationService.class);
+
+    @Nonnull
     private Map<String, StarSystem> starSystemDisplayMap = new HashMap<>();
 
     @Nonnull
@@ -50,7 +55,6 @@ public class StarSystemOverviewDisplay extends StarSystemLayout implements HasVa
     private ViewBoxDefinition viewBoxDefinition;
 
     public StarSystemOverviewDisplay() {
-
         uiEventBus.subscribe(this);
 
         setHeightFull();
@@ -62,13 +66,22 @@ public class StarSystemOverviewDisplay extends StarSystemLayout implements HasVa
         add(mapScroller);
     }
 
+    /**
+     * The event receiver which receives events.
+     *
+     * @param e the event to compute
+     */
+    @EventBusListenerMethod
+    protected void onEvent(Event<String> e) {
+    }
+
     private Svg startCanvas() {
         final Svg canvas = ViewBoxDefinition.createStarMapCanvas("universeMapID");
         canvas.addDragStartListener(event -> {
             SvgElement element = event.getElement();
             String id = element.getId();
             final StarSystem starSystem = starSystemDisplayMap.get(id);
-            viewBoxDefinition.resetPositionOfSvgElement(element);
+            viewBoxDefinition.updateSvgElement(element);
             uiEventBus.publish(starSystem, ESBEvent.DISPLAY_PLANETARY_SYSTEM.name());
         });
         mapScroller.setContent(canvas);
@@ -84,7 +97,13 @@ public class StarSystemOverviewDisplay extends StarSystemLayout implements HasVa
             return;
         }
         starSystemDisplayMap = starSystems.stream().collect(Collectors.toMap(o -> ViewBoxDefinition.idCreateOrbitID(o.getOrbit()), Function.identity()));
-        viewBoxDefinition = new ViewBoxDefinition(starSystems, canvas);
+        final Colonization colonizationToDisplay = colonizationService.getColonizationToDisplay();
+        if (colonizationToDisplay != null) {
+            viewBoxDefinition = new ViewBoxDefinition(starSystems, canvas, colonizationToDisplay.getPlanet().getSystem());
+            //viewBoxDefinition.panToStarSystem(colonizationToDisplay.getPlanet().getSystem());
+        } else {
+            viewBoxDefinition = new ViewBoxDefinition(starSystems, canvas, null);
+        }
     }
 
 
@@ -125,15 +144,5 @@ public class StarSystemOverviewDisplay extends StarSystemLayout implements HasVa
     @Override
     public boolean isRequiredIndicatorVisible() {
         return false;
-    }
-
-    /**
-     * The event receiver which receives events.
-     *
-     * @param e the event to compute
-     */
-    @EventBusListenerMethod
-    protected void onEvent(Event<String> e) {
-
     }
 }

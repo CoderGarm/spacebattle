@@ -14,6 +14,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -68,6 +69,9 @@ public class Planet extends AbstractEntityKey {
     @OneToMany(mappedBy = "planet", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private final Set<Construction> constructions = new HashSet<>();
 
+    @Nullable
+    private LocalDateTime colonizedAt;
+
     public Planet() {
     }
 
@@ -80,6 +84,7 @@ public class Planet extends AbstractEntityKey {
         Preconditions.checkNotNull(orbit, "orbit shouldn't be null!");
 
         this.owner = owner;
+        this.colonizedAt = owner != null ? LocalDateTime.now() : null;
         this.name = name;
         this.system = system;
         this.orbit = orbit;
@@ -94,6 +99,7 @@ public class Planet extends AbstractEntityKey {
     public void setOwner(@Nonnull final User owner) {
         Preconditions.checkNotNull(owner, "owner shouldn't be null!");
 
+        colonizedAt = LocalDateTime.now();
         this.owner = owner;
     }
 
@@ -129,6 +135,11 @@ public class Planet extends AbstractEntityKey {
     @Nonnull
     public Orbit getOrbit() {
         return orbit;
+    }
+
+    @Nullable
+    public LocalDateTime getColonizedAt() {
+        return colonizedAt;
     }
 
     @Override
@@ -182,5 +193,14 @@ public class Planet extends AbstractEntityKey {
         return getConstructions().stream()
                 .filter(construction -> construction.getBuilding().getResourceType() == resourceType)
                 .findFirst().orElse(null);
+    }
+
+    /**
+     * Checks the the planet is colonizable.
+     *
+     * @return <code>true</code> if the planet is colonizable, <code>false</code> otherwise
+     */
+    public boolean isColonizable() {
+        return owner == null;
     }
 }

@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import de.yuga.spacebattle.backend.entities.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.EResolution;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 
 import javax.annotation.Nonnull;
@@ -60,7 +61,7 @@ public class CostsDisplay extends VerticalLayout {
             ResourceElementDisplay resourceElementDisplay = componentMap.get(resourceType);
             final BigDecimal amount = resources.get(resourceType);
             if (resourceElementDisplay == null) {
-                resourceElementDisplay = new ResourceElementDisplay();
+                resourceElementDisplay = new ResourceElementDisplay(EResolution.PX32);
                 componentMap.put(resourceType, resourceElementDisplay);
             }
             resourceElementDisplay.update(new EResourceAmountDTO(resourceType, amount, null));

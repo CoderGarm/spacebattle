@@ -12,6 +12,7 @@ import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
@@ -64,6 +65,9 @@ public class TickService {
     @Nonnull
     private final UserService userService;
 
+    @Nonnull
+    private final ColonizationService colonizationService;
+
     @Autowired
     public TickService(@Nonnull final TickRepository tickC,
                        @Nonnull final JobService jobService,
@@ -71,7 +75,8 @@ public class TickService {
                        @Nonnull final MoveService moveService,
                        @Nonnull final FleetService fleetService,
                        @Nonnull final ConstructionService constructionService,
-                       @Nonnull final UserService userService) {
+                       @Nonnull final UserService userService,
+                       @Nonnull final ColonizationService colonizationService) {
         Preconditions.checkNotNull(tickC, "tickC shouldn't be null!");
         Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
         Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
@@ -79,6 +84,7 @@ public class TickService {
         Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
+        Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
 
         this.tickC = tickC;
         this.jobService = jobService;
@@ -87,6 +93,7 @@ public class TickService {
         this.fleetService = fleetService;
         this.constructionService = constructionService;
         this.userService = userService;
+        this.colonizationService = colonizationService;
     }
 
     //@Scheduled(cron = "* */1 * * * *")
@@ -129,6 +136,20 @@ public class TickService {
                 fleetService.save(fleet);
             } else {
                 moveService.save(m);
+            }
+        }
+
+        final List<Colonization> colonizations = colonizationService.findAll();
+        for (final Colonization colonization : colonizations) {
+            int doneAtZero = colonization.getDoneAtZero();
+            doneAtZero--;
+
+            if (doneAtZero < 1) {
+                planetService.colonizePlanet(colonization.getUser(), colonization.getPlanet());
+                colonizationService.delete(colonization);
+            } else {
+                colonization.setDoneAtZero(doneAtZero);
+                colonizationService.save(colonization);
             }
         }
 

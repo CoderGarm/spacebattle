@@ -8,14 +8,13 @@ import javax.persistence.PersistenceContext;
 import java.util.List;
 
 @Service
-public class CustomStarsystemRepositoryImpl implements CustomStarsystemRepository {
+public class CustomStarSystemRepositoryImpl implements CustomStarSystemRepository {
 
     @PersistenceContext
     private EntityManager em;
 
     @Override
-    public List<StarSystem> findAllStarsystems() {
-        final List<StarSystem> resultList = em.createNamedQuery("StarSystem.getAll", StarSystem.class).getResultList();
-        return resultList;
+    public List<StarSystem> findAllStarSystems() {
+        return em.createNamedQuery("StarSystem.getAll", StarSystem.class).getResultList();
     }
 }

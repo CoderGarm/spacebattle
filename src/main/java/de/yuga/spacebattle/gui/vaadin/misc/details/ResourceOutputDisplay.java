@@ -6,6 +6,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import de.yuga.spacebattle.backend.entities.ResourceDeposit;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.enums.EResolution;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 
 import javax.annotation.Nonnull;
@@ -23,11 +24,13 @@ public class ResourceOutputDisplay extends VerticalLayout {
     @Nonnull
     private final Map<EResourceType, ResourceElementDisplay> componentMap = new HashMap<>();
 
-    public ResourceOutputDisplay() {
+    public ResourceOutputDisplay(@Nonnull final EResolution resolution) {
+        Preconditions.checkNotNull(resolution, "resolution shouldn't be null!");
+
         final Label depositsTitle = new Label("Deposits");
 
         Arrays.stream(EResourceType.values()).forEach(resourceType -> {
-            final ResourceElementDisplay resourceElementDisplay = new ResourceElementDisplay();
+            final ResourceElementDisplay resourceElementDisplay = new ResourceElementDisplay(resolution);
             resourceElementDisplay.update(new EResourceAmountDTO(resourceType, BigDecimal.ZERO, BigDecimal.ZERO));
             componentMap.put(resourceType, resourceElementDisplay);
         });

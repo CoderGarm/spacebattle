@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import de.yuga.spacebattle.backend.entities.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.EResolution;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 
 import javax.annotation.Nonnull;
@@ -15,15 +16,17 @@ import java.util.Map;
 /**
  * Displays the name and amount of the yield factors at the given planet.
  */
-public class ResourceDisplay extends VerticalLayout {
+public class ResourceVerticalDisplay extends VerticalLayout {
 
     @Nonnull
     private final Map<EResourceType, ResourceElementDisplay> componentMap = new HashMap<>();
 
-    public ResourceDisplay() {
+    public ResourceVerticalDisplay(@Nonnull final EResolution resolution) {
+        Preconditions.checkNotNull(resolution, "resolution shouldn't be null!");
+
         final Label miningFactorsTitle = new Label("Mining factors");
         Arrays.stream(EResourceType.values()).forEach(resourceType -> {
-            final ResourceElementDisplay resourceElementDisplay = new ResourceElementDisplay();
+            final ResourceElementDisplay resourceElementDisplay = new ResourceElementDisplay(resolution);
             resourceElementDisplay.update(new EResourceAmountDTO(resourceType, BigDecimal.ZERO, null));
             componentMap.put(resourceType, resourceElementDisplay);
         });

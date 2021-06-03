@@ -1,6 +1,5 @@
 package de.yuga.spacebattle.backend.entities.turn;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.Constructable;
@@ -22,7 +21,9 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "job")
 @AttributeOverride(name = "id", column = @Column(name = "idJob"))
-@Check(constraints = "(idBuilding IS NOT NULL AND targetLevel IS NOT NULL) OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) OR (idShipClass IS NOT NULL AND amountShips IS NOT NULL)")
+@Check(constraints = "(idBuilding IS NOT NULL AND targetLevel IS NOT NULL) " +
+        "OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) " +
+        "OR (idShipClass IS NOT NULL AND amountShips IS NOT NULL)")
 public class Job extends AbstractEntityKey {
 
     @Nonnull
@@ -31,7 +32,6 @@ public class Job extends AbstractEntityKey {
     @JoinColumn(name = "idOwner", updatable = false)
     private User owner;
 
-    @JsonIgnore
     @Nullable
     @ManyToOne
     @JoinColumn(name = "idFacility")
@@ -90,7 +90,6 @@ public class Job extends AbstractEntityKey {
     }
 
     public void setFacility(@Nullable final Construction facility) {
-
         this.facility = facility;
     }
 
@@ -110,7 +109,7 @@ public class Job extends AbstractEntityKey {
         return jobDoneAtZero;
     }
 
-    public void setJobDoneAtZero(@Nonnull BigDecimal jobDoneAtZero) {
+    public void setJobDoneAtZero(@Nonnull final BigDecimal jobDoneAtZero) {
         Preconditions.checkNotNull(jobDoneAtZero, "jobDoneAtZero shouldn't be null!");
 
         this.jobDoneAtZero = jobDoneAtZero;
