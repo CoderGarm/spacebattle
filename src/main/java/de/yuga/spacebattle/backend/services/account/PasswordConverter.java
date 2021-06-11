@@ -11,7 +11,7 @@ import javax.persistence.Converter;
 
 /**
  * Converts the password to a hashed representation.
- * todo: hashing in frontend
+ * todo: hashing in frontend?
  */
 @Converter
 public class PasswordConverter implements AttributeConverter<String, String> {

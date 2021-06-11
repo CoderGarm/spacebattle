@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.modules;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
 import de.yuga.spacebattle.backend.enums.EAlignmentType;
@@ -80,8 +81,9 @@ public class Weapon extends BaseModule {
                   @Nullable final Double sideWallPenetration,
                   @Nonnull final EDamageType damageType,
                   @Nonnull final EWeaponType weaponType,
-                  @Nonnull final EAlignmentType alignmentType) {
-        super(name, description, unlockedThrough, useCapacity, effectValue, techLevel);
+                  @Nonnull final EAlignmentType alignmentType,
+                  @Nonnull final CrewRequirementDTO crewRequirement) {
+        super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement);
         Preconditions.checkNotNull(damageType, "eDamageType shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "eWeaponType shouldn't be null!");
         Preconditions.checkNotNull(alignmentType, "alignmentType shouldn't be null!");

@@ -1,14 +1,15 @@
 package de.yuga.spacebattle.backend.entities.researches;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
-import de.yuga.spacebattle.backend.entities.ResourceDeposit;
+import de.yuga.spacebattle.backend.entities.HasNameAndDescription;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
-import de.yuga.spacebattle.backend.enums.EResourceSubType;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.EDepositType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -34,7 +35,6 @@ public class Research extends AbstractEntityKey {
 
     private int levelCap;
 
-    @JsonIgnore
     @Nullable
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "unlockedThrough")
@@ -43,7 +43,7 @@ public class Research extends AbstractEntityKey {
     @Nonnull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "idCosts", updatable = false)
-    private final ResourceDeposit costs = new ResourceDeposit(EResourceSubType.COSTS);
+    private final ResourceDeposit costs = ResourceDepositInitializerCalculator.initializeResourceDeposit(Research.class, EDepositType.COSTS);
 
     @Nonnull
     @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
@@ -146,6 +146,23 @@ public class Research extends AbstractEntityKey {
     @Nullable
     public Research getUnlockedThrough() {
         return unlockedThrough;
+    }
+
+    /**
+     * Returns all the unlocked things by name and description.
+     *
+     * @return the unlocked stuff
+     */
+    public Set<HasNameAndDescription> getUnlocks() {
+        final Set<HasNameAndDescription> nameAndDescriptions = new HashSet<>();
+        nameAndDescriptions.addAll(getUnlocksBuildings());
+        nameAndDescriptions.addAll(getUnlocksHulls());
+        nameAndDescriptions.addAll(getUnlocksArmor());
+        nameAndDescriptions.addAll(getUnlocksElectronicWarfare());
+        nameAndDescriptions.addAll(getUnlocksPropulsion());
+        nameAndDescriptions.addAll(getUnlocksSidewall());
+        nameAndDescriptions.addAll(getUnlocksWeapons());
+        return nameAndDescriptions;
     }
 
     @Override

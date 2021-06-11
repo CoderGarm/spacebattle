@@ -1,0 +1,57 @@
+.caption-label {
+    display: block;
+    font-size: 1em;
+    line-height: 1;
+    height: 20px;
+    margin-bottom: -4px;
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    transform-origin: 0 75%;
+    transform: scale(0.75);
+    color: var(--material-disabled-text-color);
+    -webkit-text-fill-color: var(--material-disabled-text-color);
+}
+
+.simple-label {
+    position: relative;
+    top: -0.2px;
+    height: 32px;
+    background-color: transparent;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    flex: auto;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    outline: none;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    min-width: 0;
+    font: inherit;
+    font-size: 1em;
+    line-height: normal;
+    color: inherit;
+    box-shadow: none;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 100%;
+}
+
+.simple-label-with-caption {
+    flex-direction: column;
+    max-width: -webkit-fill-available;
+    display: inline-flex;
+    position: relative;
+    padding-top: 8px;
+    margin-bottom: 8px;
+    outline: none;
+    color: var(--material-body-text-color);
+    font-size: var(--material-body-font-size);
+    line-height: 24px;
+    font-family: var(--material-font-family);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+

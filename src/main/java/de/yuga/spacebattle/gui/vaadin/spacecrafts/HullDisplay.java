@@ -39,7 +39,7 @@ public class HullDisplay extends VerticalLayout {
      *
      * @param hull the hull to display
      */
-    public void update(@Nullable final Hull hull) {
+    public void setValue(@Nullable final Hull hull) {
 
         hullBinder.readBean(hull);
     }

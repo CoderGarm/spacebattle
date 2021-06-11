@@ -2,11 +2,10 @@ package de.yuga.spacebattle.gui.vaadin.combined.spacecrafts.details;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.shared.Registration;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,8 +23,6 @@ public class HullByAmountVerticalDisplay extends VerticalLayout implements HasVa
     private final Map<Hull, HullAmountDisplay> displayByHullType = new HashMap<>();
 
     public HullByAmountVerticalDisplay() {
-        final Label title = new Label("Composition");
-        add(title);
     }
 
     @Override
@@ -76,7 +73,7 @@ public class HullByAmountVerticalDisplay extends VerticalLayout implements HasVa
                 add(hullAmountDisplay);
                 displayByHullType.put(hull, hullAmountDisplay);
             }
-            hullAmountDisplay.update(new HullAmountWrapper(hull, amount));
+            hullAmountDisplay.setValue(new HullAmountWrapper(hull, amount));
         });
     }
 

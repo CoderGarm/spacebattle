@@ -1,7 +1,12 @@
 package de.yuga.spacebattle.gui.vaadin.spacecrafts.details;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.enums.EHullType;
+import de.yuga.spacebattle.backend.enums.EIconPath;
+import de.yuga.spacebattle.backend.enums.EResolution;
+import de.yuga.spacebattle.gui.vaadin.misc.details.misc.ImageMapper;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
@@ -9,7 +14,7 @@ import java.util.Map;
 /**
  * Wraps a {@link ShipClass} and it's count.
  */
-public class ShipClassCountDTO {
+public class ShipClassCountDTO implements ImageMapper {
 
     @Nonnull
     private final ShipClass shipClass;
@@ -28,6 +33,24 @@ public class ShipClassCountDTO {
     @Nonnull
     public ShipClass getShipClass() {
         return shipClass;
+    }
+
+    @Nonnull
+    public String getHullClass() {
+        final Hull hull = getShipClass().getHull();
+        if (hull == null) {
+            return "";
+        }
+        return hull.getHullType().getType();
+    }
+
+    @Nonnull
+    public String getHullDescription() {
+        final Hull hull = getShipClass().getHull();
+        if (hull == null) {
+            return "";
+        }
+        return hull.getHullType().getDescription();
     }
 
     @Nonnull
@@ -57,6 +80,10 @@ public class ShipClassCountDTO {
         this.count = Integer.parseInt(amount);
     }
 
+    public String getMark() {
+        return "" + getShipClass().getMark();
+    }
+
     /**
      * Necessary while vaadin data binding uses this entry to compute further.
      *
@@ -80,6 +107,25 @@ public class ShipClassCountDTO {
                 return count;
             }
         };
+    }
+
+    @Override
+    public String getAlternativeText() {
+        return getShipClass().getHull().getHullType().name();
+    }
+
+    @Override
+    public String getTitleText() {
+        return getAlternativeText();
+    }
+
+    @Override
+    public String getPath(@Nonnull final EResolution resolution) {
+        Preconditions.checkNotNull(resolution, "resolution shouldn't be null!");
+
+        final EHullType hullType = getShipClass().getHull().getHullType();
+        final String iconName = hullType.getIconName();
+        return EIconPath.getPath(hullType, iconName, resolution.getResolution());
     }
 
     /**

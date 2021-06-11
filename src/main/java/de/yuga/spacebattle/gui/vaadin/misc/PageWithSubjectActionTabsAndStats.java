@@ -2,15 +2,14 @@ package de.yuga.spacebattle.gui.vaadin.misc;
 
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.splitlayout.SplitLayoutVariant;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import de.yuga.spacebattle.NotifySBUserException;
-import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.misc.details.StatsDrawer;
 import de.yuga.spacebattle.gui.vaadin.views.PlanetMainView;
 import de.yuga.spacebattle.gui.vaadin.views.ShipClassMainView;
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
 
 /**
  * Main layout for pages with a statistics section.
- * Every usages must extending an abstract class which is implementing {@link StatsLayout<T>}.
+ * Every usages must extending an abstract class which is implementing {@link StatsLayout< GenericSubject >}.
  * <p>
  * This will define the structure to automatically use a statistics panel,
  * a subject selector menu for ever usable entity and
@@ -37,10 +36,10 @@ import java.util.stream.Collectors;
  * <p>
  * In a perfect world all these methods should be self-explanatory, but if not, submit a pull request.
  *
- * @param <T>
+ * @param <GenericSubject>
  */
 @CssImport("./styles/views/main/details/SBPageTopLevelLayout.css")
-public abstract class PageWithSubjectActionTabsAndStats<T> extends FlexLayout {
+public abstract class PageWithSubjectActionTabsAndStats<GenericSubject> extends SplitLayout {
 
     /**
      * The index of the "do user stuff" section of the view below the two selector menus.
@@ -69,7 +68,7 @@ public abstract class PageWithSubjectActionTabsAndStats<T> extends FlexLayout {
      * This map holds the specific object to their corresponding selector tab.
      */
     @Nonnull
-    public final Map<Tab, T> subjectSelectorObject = new HashMap<>();
+    public final Map<Tab, GenericSubject> subjectSelectorObject = new HashMap<>();
 
     /**
      * The "what the user want to do with the object" menu.
@@ -81,7 +80,7 @@ public abstract class PageWithSubjectActionTabsAndStats<T> extends FlexLayout {
      * This map holds the specific component to their corresponding action tab.
      */
     @Nonnull
-    public final Map<Tab, StatsLayout<T>> actionSelectorPages = new HashMap<>();
+    public final Map<Tab, StatsLayout<GenericSubject>> actionSelectorPages = new HashMap<>();
 
     /**
      * The canvas which displays all the stuff above.
@@ -90,24 +89,20 @@ public abstract class PageWithSubjectActionTabsAndStats<T> extends FlexLayout {
     private final VerticalLayout mainContent = new VerticalLayout();
 
     public PageWithSubjectActionTabsAndStats() {
-        actionSelectorMenu.setId("actionSelectorMenu");
-        actionSelectorMenu.setClassName("selector");
-        ViewHelper.setWidth(actionSelectorMenu, "100%");
-
         subjectSelectorMenu.setId("subjectSelectorMenu");
-        subjectSelectorMenu.setClassName("selector");
-        ViewHelper.setWidth(subjectSelectorMenu, "100%");
-
+        subjectSelectorMenu.addClassName("selector");
         mainContent.add(subjectSelectorMenu);
+        actionSelectorMenu.setId("actionSelectorMenu");
+        actionSelectorMenu.addClassName("selector");
         mainContent.add(actionSelectorMenu);
 
-        setHeight("100%");
-        setFlexDirection(FlexDirection.ROW);
-
         mainContent.addComponentAtIndex(INDEX_CONTENT, content);
-        ViewHelper.setWidth(mainContent, "75%");
-        ViewHelper.setWidth(statsDrawer, "20%");
-        add(mainContent, statsDrawer);
+        setOrientation(Orientation.HORIZONTAL);
+        addToPrimary(mainContent);
+        addToSecondary(statsDrawer);
+        setSplitterPosition(80);
+        addThemeVariants(SplitLayoutVariant.LUMO_MINIMAL);
+        setHeight("100%");
     }
 
     /**
@@ -115,20 +110,21 @@ public abstract class PageWithSubjectActionTabsAndStats<T> extends FlexLayout {
      *
      * @param content the component to set
      */
-    private void setDrawer(@Nullable final Component content) {
-        statsDrawer.update(content);
+    private void setDrawer(@Nullable final StatisticsDisplay content) {
+        statsDrawer.setValue(content);
     }
 
     /**
      * Sets the full content to display including the statistics section.
      *
-     * @param content the content to set
-     * @param <L>     the type definition which must be used
+     * @param content         the content to set
+     * @param <GenericLayout> the type definition which must be used
      */
-    public <L extends StatsLayout<T>> L setContent(L content) {
+    public <GenericLayout extends StatsLayout<GenericSubject>> GenericLayout setContent(@Nonnull final GenericLayout content) {
+        Preconditions.checkNotNull(content, "content shouldn't be null!");
+
         mainContent.remove(this.content);
         this.content = (Component) content;
-        ViewHelper.setWidth((HasSize) this.content, "100%");
         mainContent.addComponentAtIndex(INDEX_CONTENT, this.content);
         setDrawer(content.getStatisticsComponent());
         return content;
@@ -141,7 +137,7 @@ public abstract class PageWithSubjectActionTabsAndStats<T> extends FlexLayout {
      * @param tab       the selector's tab
      * @param component the tab's component
      */
-    public void addComponentForTabOfActionMenu(@Nonnull final Tab tab, @Nonnull final StatsLayout<T> component) {
+    public void addComponentForTabOfActionMenu(@Nonnull final Tab tab, @Nonnull final StatsLayout<GenericSubject> component) {
         Preconditions.checkNotNull(tab, "tab shouldn't be null!");
         Preconditions.checkNotNull(component, "component shouldn't be null!");
 
@@ -159,9 +155,9 @@ public abstract class PageWithSubjectActionTabsAndStats<T> extends FlexLayout {
      * @return the corresponding component
      */
     @Nonnull
-    public StatsLayout<T> getComponentForTabOfActionMenu(@Nonnull final Tab tab) {
+    public StatsLayout<GenericSubject> getComponentForTabOfActionMenu(@Nonnull final Tab tab) {
         Preconditions.checkNotNull(tab, "tab shouldn't be null!");
-        final StatsLayout<T> statsLayout = actionSelectorPages.get(tab);
+        final StatsLayout<GenericSubject> statsLayout = actionSelectorPages.get(tab);
         if (statsLayout == null) {
             throw new NotifySBUserException("You should talk to the administrator about that.");
         }
@@ -174,9 +170,7 @@ public abstract class PageWithSubjectActionTabsAndStats<T> extends FlexLayout {
      * @param subject the subject
      * @return Optional of a tab
      */
-    public Optional<Tab> getTabForSubject(@Nullable T subject) {
-
-
+    public Optional<Tab> getTabForSubject(@Nullable GenericSubject subject) {
         return subjectSelectorObject.entrySet().stream()
                 .filter(e -> {
                     if (e.getValue() == null && subject == null) {
@@ -196,7 +190,7 @@ public abstract class PageWithSubjectActionTabsAndStats<T> extends FlexLayout {
      * @return the corresponding tab
      */
     @Nonnull
-    public Tab getTabForComponentOfActionMenu(@Nonnull final StatsLayout<T> component) {
+    public Tab getTabForComponentOfActionMenu(@Nonnull final StatsLayout<GenericSubject> component) {
         Preconditions.checkNotNull(component, "component shouldn't be null!");
 
         Tab tab = actionSelectorPages.keySet().stream().filter(tabA -> actionSelectorPages.get(tabA) == component).findFirst().orElse(null);
@@ -213,7 +207,7 @@ public abstract class PageWithSubjectActionTabsAndStats<T> extends FlexLayout {
      * @param tab     the selector's tab
      * @param subject the tab's object
      */
-    public void addSubjectForTabOfSubjectMenu(@Nonnull final Tab tab, @Nullable final T subject) {
+    public void addSubjectForTabOfSubjectMenu(@Nonnull final Tab tab, @Nullable final GenericSubject subject) {
         Preconditions.checkNotNull(tab, "tab shouldn't be null!");
 
         final Component knownTab = subjectSelectorMenu.getChildren().filter(tab::equals).findFirst().orElse(null);
@@ -230,7 +224,7 @@ public abstract class PageWithSubjectActionTabsAndStats<T> extends FlexLayout {
      * @return the tab's object
      */
     @Nullable
-    public T getSubjectForTabOfSubjectMenu(@Nonnull final Tab tab) {
+    public GenericSubject getSubjectForTabOfSubjectMenu(@Nonnull final Tab tab) {
         Preconditions.checkNotNull(tab, "tab shouldn't be null while searching!");
 
         return subjectSelectorObject.get(tab);

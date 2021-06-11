@@ -1,0 +1,15 @@
+.compact-block {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+}
+
+.block-element {
+    padding: 5px;
+}
+
+.construction-image {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}

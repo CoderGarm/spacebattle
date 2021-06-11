@@ -19,10 +19,10 @@ public class FleetStatsHorizontalDisplay extends VerticalLayout implements HasVa
 
     public FleetStatsHorizontalDisplay() {
         final HullByAmountHorizontalDisplay hullByAmountVerticalDisplay = new HullByAmountHorizontalDisplay();
-        binderFleet.forField(hullByAmountVerticalDisplay).bind(Fleet::getShips, null);
+        binderFleet.forField(hullByAmountVerticalDisplay).bind(Fleet::getShipsByClass, null);
 
         final ModuleValueTypePerFleetHorizontalDisplay moduleValueTypeVerticalDisplay = new ModuleValueTypePerFleetHorizontalDisplay();
-        binderFleet.forField(moduleValueTypeVerticalDisplay).bind(Fleet::getShips, null);
+        binderFleet.forField(moduleValueTypeVerticalDisplay).bind(Fleet::getShipsByClass, null);
 
         add(hullByAmountVerticalDisplay, moduleValueTypeVerticalDisplay);
     }

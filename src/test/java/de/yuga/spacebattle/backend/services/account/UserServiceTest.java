@@ -3,7 +3,6 @@ package de.yuga.spacebattle.backend.services.account;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.repositories.account.UserMessageRepository;
 import de.yuga.spacebattle.backend.repositories.account.UserRepository;
-import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.test.MocksNotUsedTestListener;
 import de.yuga.spacebattle.backend.test.MocksNotUsedTestListener.MocksNotUsed;
 import de.yuga.spacebattle.backend.test.SBEasyMockSupport;
@@ -24,9 +23,6 @@ public class UserServiceTest extends SBEasyMockSupport {
     private UserRepository userRepositoryMock;
 
     @Mock
-    private ResearchService researchServiceMock;
-
-    @Mock
     private UserMessageRepository userMessageRepositoryMock;
 
     private UserService testObject;
@@ -34,19 +30,18 @@ public class UserServiceTest extends SBEasyMockSupport {
     @BeforeClass
     public void beforeClass() {
         injectMocks(this);
-        testObject = new UserService(userRepositoryMock, researchServiceMock, userMessageRepositoryMock);
+        testObject = new UserService(userRepositoryMock, userMessageRepositoryMock);
     }
 
     @AfterClass
     public void afterClass() {
         userRepositoryMock = null;
-        researchServiceMock = null;
         testObject = null;
     }
 
     @AfterMethod
     public void afterMethod() {
-        testObject = new UserService(userRepositoryMock, researchServiceMock, userMessageRepositoryMock);
+        testObject = new UserService(userRepositoryMock, userMessageRepositoryMock);
     }
 
     @Test

@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.services.spacecraft;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.enums.EHullType;
@@ -63,13 +64,15 @@ public class HullService {
                            final int constructionCapacityBroadsides,
                            @Nonnull final String description,
                            @Nonnull final Research unlockedThrough,
-                           @Nonnull final EHullType hullType) {
+                           @Nonnull final EHullType hullType,
+                           @Nonnull final CrewRequirementDTO crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
         Preconditions.checkNotNull(hullType, "hullType shouldn't be null!");
+        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        return hullRepository.save(new Hull(name, level, constructionCapacity, constructionCapacityBow, constructionCapacityStern, constructionCapacityBroadsides, description, unlockedThrough, hullType));
+        return hullRepository.save(new Hull(name, level, constructionCapacity, constructionCapacityBow, constructionCapacityStern, constructionCapacityBroadsides, description, unlockedThrough, hullType, crewRequirement));
     }
 
     public Hull save(@Nonnull final Hull entity) {

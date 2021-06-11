@@ -4,7 +4,7 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.shared.Registration;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.ModuleDataElementDisplay;
 
@@ -28,7 +28,7 @@ public class ModuleValueTypePerFleetHorizontalDisplay extends HorizontalLayout i
 
     @Override
     public void setValue(@Nullable final Map<ShipClass, Integer> value) {
-        datasource.update(value);
+        datasource.setValue(value);
     }
 
     @Nullable

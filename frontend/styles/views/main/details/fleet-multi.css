@@ -29,7 +29,7 @@ vaadin-details {
 
 vaadin-details[disabled] {
     width: 30%;
-    background-color: var(--material-secondary-background-color);
+    background-color: black;
 }
 
 /*

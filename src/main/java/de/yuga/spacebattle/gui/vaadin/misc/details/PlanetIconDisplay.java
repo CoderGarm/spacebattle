@@ -1,13 +1,14 @@
 package de.yuga.spacebattle.gui.vaadin.misc.details;
 
-import com.vaadin.flow.component.html.Label;
+import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.enums.EResolution;
+import de.yuga.spacebattle.gui.vaadin.misc.details.misc.ImageContainer;
+import de.yuga.spacebattle.gui.vaadin.orbitals.details.PlanetIconDTO;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Vaadin component to display the name, icon and a type of a planet.
@@ -15,29 +16,14 @@ import javax.annotation.Nullable;
 public class PlanetIconDisplay extends HorizontalLayout {
 
     @Nonnull
-    private final Binder<Planet> binder = new Binder<>(Planet.class);
+    private final Binder<PlanetIconDTO> binder = new Binder<>();
 
     public PlanetIconDisplay() {
         // todo planet icon by planet type - think about star types for map
-        /*
-        final Image titleImage = new Image();
-        final ReadOnlyHasValue<String> titleImageSrc = new ReadOnlyHasValue<>(titleImage::setSrc);
-        final ReadOnlyHasValue<String> titleImageAlt = new ReadOnlyHasValue<>(titleImage::setAlt);
-        final ReadOnlyHasValue<String> titleImageTitle = new ReadOnlyHasValue<>(titleImage::setTitle);
-        binder.forField(titleImageSrc).bind(wrapper -> {
-            final EResourceType resourceType = wrapper.getResourceType();
-            final String directory = resourceType.getDirectory();
-            final String iconName = resourceType.getIconName();
-            return EIconPath.getPath(directory, iconName);
-        }, null);
-        binder.forField(titleImageAlt).bind(wrapper -> wrapper.getResourceType().getSingularName(), null);
-        binder.forField(titleImageTitle).bind(wrapper -> wrapper.getResourceType().getSingularName(), null);
-        */
-        final Label amountDisplay = new Label();
-        final ReadOnlyHasValue<String> amountDisplayText = new ReadOnlyHasValue<>(amountDisplay::setText);
-        binder.forField(amountDisplayText).bind(Planet::getName, null);
+        final ImageContainer imageContainer = new ImageContainer(EResolution.PX24);
+        binder.forField(imageContainer).bind(w -> w, null);
 
-        add(/*titleImage,*/ amountDisplay);
+        add(imageContainer);
     }
 
     /**
@@ -45,8 +31,9 @@ public class PlanetIconDisplay extends HorizontalLayout {
      *
      * @param planet the input
      */
-    public void update(@Nullable final Planet planet) {
+    public void update(@Nonnull final Planet planet) {
+        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
 
-        binder.readBean(planet);
+        binder.readBean(new PlanetIconDTO(planet));
     }
 }

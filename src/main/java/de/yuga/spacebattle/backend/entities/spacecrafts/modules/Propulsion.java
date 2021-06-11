@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.modules;
 
+import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
 
@@ -34,8 +35,9 @@ public class Propulsion extends BaseModule {
                       final int useCapacity,
                       final int effectValue,
                       final int techLevel,
-                      final boolean ftlCapable) {
-        super(name, description, unlockedThrough, useCapacity, effectValue, techLevel);
+                      final boolean ftlCapable,
+                      @Nonnull final CrewRequirementDTO crewRequirement) {
+        super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement);
         this.ftlCapable = ftlCapable;
     }
 

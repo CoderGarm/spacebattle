@@ -1,4 +1,32 @@
+.sticky-top {
+    position: sticky;
+    top: 16px;
+}
+
+.sticky-second {
+    position: sticky;
+    top: 65px;
+}
 
 .selector {
     border-bottom: 1px solid dimgrey;
+    width: -webkit-fill-available;
+    margin-right: 24px;
+}
+
+.stats-drawer {
+    float: right;
+    right: 0;
+    margin-right: 15px;
+}
+
+#statsSelectorMenu {
+    align-items: center;
+    border-bottom: 1px solid dimgrey;
+    position: sticky;
+    top: 16px;
+}
+
+.statsSelectorContainer {
+    align-items: center;
 }

@@ -3,11 +3,11 @@ package de.yuga.spacebattle.backend.entities.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
@@ -101,17 +101,17 @@ public class User extends AbstractEntityKey {
      * Currently this implies that the new owner will get all information about the system without buying it especially.<br>
      * <br>
      * Compare:<br>
-     * - {@link ColonizationService#colonizePlanet(User, Planet)}<br>
+     * - {@link ColonizationService#startColonizingPlanet(User, Planet)}<br>
      * - {@link PlanetService#createPlanet(String, StarSystem, Orbit)}<br>
      * - {@link PlanetService#createPlanet(String, StarSystem, Integer, Integer)}
      * </p>
      */
     @Nonnull
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinTable(name = "knownStarSystem",
             joinColumns = @JoinColumn(name = "idOwner"),
             inverseJoinColumns = @JoinColumn(name = "idStarSystem"),
-            uniqueConstraints = @UniqueConstraint(columnNames = {"idOwner", "idStarSystem"}))
+            uniqueConstraints = @UniqueConstraint(name = "knownStarSystem_UC", columnNames = {"idOwner", "idStarSystem"}))
     private final Set<StarSystem> knownStarSystems = new HashSet<>();
 
     /**

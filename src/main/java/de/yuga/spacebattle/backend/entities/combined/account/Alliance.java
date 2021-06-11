@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.entities.combined.account;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.account.User;
@@ -33,7 +32,6 @@ public class Alliance extends AbstractEntityKey {
     @Column(unique = true)
     private String code;
 
-    @JsonIgnore
     @Nonnull
     @NotNull(message = "members must not be null")
     @OneToMany(mappedBy = "alliance", fetch = FetchType.EAGER)

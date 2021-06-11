@@ -50,25 +50,14 @@ public class PassiveModuleCountDTO {
     }
 
     @Nonnull
-    public Integer getCountNumeric() {
+    public Integer getCount() {
         return count;
-    }
-
-    @Nonnull
-    public String getCount() {
-        return String.valueOf(count);
     }
 
     public void setCount(@Nonnull final Integer count) {
         Preconditions.checkNotNull(count, "count shouldn't be null!");
 
         this.count = count;
-    }
-
-    public void setCount(@Nonnull final String count) {
-        Preconditions.checkNotNull(count, "count shouldn't be null!");
-
-        this.count = Integer.parseInt(count);
     }
 
     @Override

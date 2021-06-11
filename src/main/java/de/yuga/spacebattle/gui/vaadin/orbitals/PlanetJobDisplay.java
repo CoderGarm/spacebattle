@@ -34,7 +34,8 @@ public class PlanetJobDisplay extends PlanetLayout<Planet> {
         add(jobDisplayMulti);
     }
 
-    public void update(@Nullable final Planet planet) {
+    @Override
+    public void updateStatistics(@Nullable final Planet planet) {
         binderPlanet.readBean(planet);
         Set<Job> jobSet = new HashSet<>();
         if (planet != null) {

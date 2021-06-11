@@ -8,7 +8,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
-import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -34,12 +33,8 @@ public class GarrisonDisplay extends HorizontalLayout implements HasValue<Abstra
     private String getOrbit(@Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
-        final FleetOrbit fleetOrbit = fleet.getOrbit();
-        if (fleetOrbit == null) {
-            final Move move = fleet.getMove();
-            if (move == null) {
-                throw new NotifySBUserException("Buddy, you should do something with your fleet, really.");
-            }
+        final Move move = fleet.getMove();
+        if (move != null) {
             final FleetOrbit startOrbit = move.getStartOrbit();
             final FleetOrbit targetOrbit = move.getTargetOrbit();
             final int moveDoneAtZero = move.getMoveDoneAtZero();
@@ -48,6 +43,7 @@ public class GarrisonDisplay extends HorizontalLayout implements HasValue<Abstra
                     + " and will arrive in " + moveDoneAtZero + " ticks.";
         }
 
+        final FleetOrbit fleetOrbit = fleet.getOrbit();
         final String stringForOrbit = getStringForOrbit(fleetOrbit);
         return "This fleet is in orbit of the " + stringForOrbit;
     }
@@ -60,8 +56,12 @@ public class GarrisonDisplay extends HorizontalLayout implements HasValue<Abstra
         final Planet planet = fleetOrbit.getPlanet();
 
         final String systemName = system.getName();
-        final String planetName = planet.getName();
-        return "system " + systemName + " and it's planet " + planetName;
+        String s = "system " + systemName;
+        if (planet != null) {
+            final String planetName = planet.getName();
+            s += " and it's planet " + planetName;
+        }
+        return s;
     }
 
 

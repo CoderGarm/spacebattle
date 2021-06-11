@@ -2,17 +2,17 @@ package de.yuga.spacebattle.backend.entities.combined.spacecrafts;
 
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
-import de.yuga.spacebattle.backend.entities.ResourceDeposit;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 import de.yuga.spacebattle.backend.entities.turn.Move;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EModuleType;
-import de.yuga.spacebattle.backend.enums.EResourceSubType;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -20,11 +20,12 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @NamedQueries({
         @NamedQuery(name = "Fleet.getAll", query = "SELECT f FROM Fleet f"),
         @NamedQuery(name = "Fleet.getAllByUser", query = "SELECT f FROM Fleet f WHERE f.owner = :owner"),
-        @NamedQuery(name = "Fleet.checkShipInUse", query = "SELECT COUNT(f) FROM Fleet f LEFT JOIN f.ships s WHERE KEY(s) =:idShipClass")
+        @NamedQuery(name = "Fleet.checkShipInUse", query = "SELECT COUNT(f) FROM Fleet f LEFT JOIN f.ships s WHERE s.shipClass.id =:idShipClass")
 })
 @Entity
 @Table(name = "fleet")
@@ -43,23 +44,23 @@ public class Fleet extends AbstractEntityKey {
 
     @Nonnull
     @NotNull
-    @ElementCollection(fetch = FetchType.EAGER)
-    @MapKeyJoinColumn(name = "idShipClass", referencedColumnName = "idShipClass")
-    @Column(name = "amount")
-    @CollectionTable(name = "fleetcomposition", joinColumns = @JoinColumn(name = "idFleet"))
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "idFleet")
-    private final Map<ShipClass, Integer> ships = new HashMap<>();
+    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
+    @JoinTable(name = "fleetComposition",
+            joinColumns = @JoinColumn(name = "idFleet"),
+            inverseJoinColumns = @JoinColumn(name = "idWarShip"),
+            uniqueConstraints = @UniqueConstraint(name = "fleetComposition_UC", columnNames = {"idFleet", "idWarShip"}))
+    private final Set<WarShip> ships = new HashSet<>();
 
     @Nonnull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "idResourceDeposit", updatable = false)
-    private final ResourceDeposit resourceDeposit = new ResourceDeposit(EResourceSubType.DEPOSITS);
+    private final ResourceDeposit resourceDeposit = new ResourceDeposit(EDepositType.DEPOSITS);
 
     /**
-     * The current location of this fleet.
-     * <p>
-     * If null, then this is in hyper space.
+     * The current location of this fleet. <br>
+     * <br>
+     * If null, then this is in hyper space.<br>
+     * The planet could be null if the fleet is on a local movement.
      */
     @Nullable
     @Embedded
@@ -107,19 +108,48 @@ public class Fleet extends AbstractEntityKey {
     }
 
     @Nonnull
-    public Map<ShipClass, Integer> getShips() {
+    public Map<ShipClass, Integer> getShipsByClass() {
+        return ships.stream().collect(Collectors.groupingBy(WarShip::getShipClass, Collectors.summingInt(x -> 1)));
+    }
+
+    @Nonnull
+    public Set<WarShip> getShips() {
         return ships;
     }
 
-    public void updateShips(@Nonnull final ShipClass shipClass, final int amount) {
-        Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
+    /**
+     * Creates a new set of war ships by the given parameter.
+     *
+     * @param splitFleet the amount of ships by class as return
+     * @return the separated war ships
+     */
+    public Set<WarShip> separateShips(@Nonnull final Map<ShipClass, Integer> splitFleet) {
+        Preconditions.checkNotNull(splitFleet, "splitFleet shouldn't be null!");
 
-        if (ships.containsKey(shipClass)) {
-            Integer oldAmount = this.ships.get(shipClass);
-            this.ships.put(shipClass, oldAmount + amount);
-        } else {
-            this.ships.put(shipClass, amount);
-        }
+        final Map<ShipClass, Integer> shipsByClass = getShipsByClass();
+        // check if enough ships are present
+        splitFleet.forEach((shipClass, amountToSeparate) -> {
+            final Integer availableAmount = shipsByClass.get(shipClass);
+            if (availableAmount < amountToSeparate) {
+                throw new NotifySBUserException("There are not enough ships in the fleet do split them in that way.");
+            }
+        });
+        // separate ships
+        final Set<WarShip> toMove = new HashSet<>();
+        splitFleet.forEach((shipClass, amountToSeparate) -> {
+            final Set<WarShip> warShips = ships.stream()
+                    .filter(w -> w.getShipClass().equals(shipClass)).limit(amountToSeparate)
+                    .collect(Collectors.toSet());
+            toMove.addAll(warShips);
+        });
+        ships.removeAll(toMove);
+        return toMove;
+    }
+
+    public void updateShips(@Nonnull final Set<WarShip> warShips) {
+        Preconditions.checkNotNull(warShips, "warShips shouldn't be null!");
+
+        ships.addAll(warShips);
     }
 
     @Nonnull
@@ -176,8 +206,9 @@ public class Fleet extends AbstractEntityKey {
         Preconditions.checkArgument((eModuleType == EModuleType.FTLPROPULSION || eModuleType == EModuleType.PROPULSION),
                 "EModuleType must be kind of propulsion.");
 
-        List<Integer> speeds = new ArrayList<>();
-        for (ShipClass sc : ships.keySet()) {
+        final List<Integer> speeds = new ArrayList<>();
+        final Set<ShipClass> shipClasses = ships.stream().map(WarShip::getShipClass).collect(Collectors.toSet());
+        for (ShipClass sc : shipClasses) {
             final Propulsion propulsion = sc.getPropulsion();
             if (propulsion == null || (EModuleType.FTLPROPULSION == eModuleType && !propulsion.isFtlCapable())) {
                 // if no propulsion present or ftl is used and no ftl is present

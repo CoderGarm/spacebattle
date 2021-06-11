@@ -2,11 +2,11 @@ package de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AlignedFitting;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AmmunitionFitting;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

@@ -22,7 +22,7 @@ public class TickDisplay extends HorizontalLayout {
         add(tickTextLabel);
     }
 
-    public void updateTick(@Nullable Tick tick) {
-        binder.readBean(tick);
+    public void setValue(@Nullable final Tick value) {
+        binder.readBean(value);
     }
 }

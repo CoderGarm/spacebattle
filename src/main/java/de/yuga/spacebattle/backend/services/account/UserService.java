@@ -3,30 +3,24 @@ package de.yuga.spacebattle.backend.services.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.account.UserMessage;
+import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.repositories.account.UserMessageRepository;
 import de.yuga.spacebattle.backend.repositories.account.UserRepository;
-import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
 
     @Nonnull
     private final UserRepository userRepository;
-
-    @Nonnull
-    private final ResearchService researchService;
 
     @Nonnull
     private final UserMessageRepository userMessageRepository;
@@ -36,14 +30,11 @@ public class UserService {
 
     @Autowired
     public UserService(@Nonnull final UserRepository userRepository,
-                       @Nonnull final ResearchService researchService,
                        @Nonnull final UserMessageRepository userMessageRepository) {
         Preconditions.checkNotNull(userRepository, "userRepository shouldn't be null!");
-        Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
         Preconditions.checkNotNull(userMessageRepository, "userMessageRepository should not be null");
 
         this.userRepository = userRepository;
-        this.researchService = researchService;
         this.userMessageRepository = userMessageRepository;
     }
 
@@ -182,6 +173,7 @@ public class UserService {
 
     /**
      * Returns all sent messages of the current logged in user.
+     *
      * @return empty if no user is logged in or no messages were sent.
      */
     public List<UserMessage> getAllSentMessages() {
@@ -190,6 +182,7 @@ public class UserService {
 
     /**
      * Returns all received messages of the current logged in user.
+     *
      * @return empty if no user is logged in or no messages were received.
      */
     public List<UserMessage> getAllReceivedMessages() {
@@ -198,6 +191,7 @@ public class UserService {
 
     /**
      * Saves a {@link UserMessage}.
+     *
      * @param msg the msg
      */
     public void saveUserMessage(@Nonnull UserMessage msg) {
@@ -207,8 +201,10 @@ public class UserService {
         msg.setSentAt();
         userMessageRepository.save(msg);
     }
+
     /**
      * Updates a {@link UserMessage}.
+     *
      * @param msg the msg
      */
     public void updateUserMessage(@Nonnull UserMessage msg) {

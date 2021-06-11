@@ -4,7 +4,7 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.shared.Registration;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.ModuleDataElementDisplay;
 
@@ -21,14 +21,15 @@ public class ModuleValueTypePerFleetVerticalDisplay extends VerticalLayout imple
         datasource = new ModuleValueTypePerFleetDatasource();
 
         for (int i = 0; i < EModuleType.values().length; i++) {
-            ModuleDataElementDisplay moduleDataElementDisplay = datasource.displayByModuleType.get(EModuleType.values()[i]);
+            final ModuleDataElementDisplay moduleDataElementDisplay = datasource.displayByModuleType.get(EModuleType.values()[i]);
+            moduleDataElementDisplay.addClassName("statistics-tight");
             add(moduleDataElementDisplay);
         }
     }
 
     @Override
     public void setValue(@Nullable final Map<ShipClass, Integer> value) {
-        datasource.update(value);
+        datasource.setValue(value);
     }
 
     @Nullable

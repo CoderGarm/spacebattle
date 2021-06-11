@@ -167,7 +167,7 @@ public class FleetMoveMergeSplitEdit extends VerticalLayout implements BeforeLea
 
         if (fleetDisplayValue != null) {
             boolean fleetInMotion = moveDTO != null && moveDTO.isInMotion();
-            boolean shipsPresent = !fleetDisplayValue.getShips().isEmpty();
+            boolean shipsPresent = !fleetDisplayValue.getShipsByClass().isEmpty();
             boolean active = shipsPresent && !fleetInMotion;
             if (active) {
                 activate(fleetSplitDetails, fleetSplitEdit);

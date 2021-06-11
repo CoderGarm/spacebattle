@@ -1,24 +1,24 @@
 package de.yuga.spacebattle.gui.vaadin.combined.spacecrafts;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import de.yuga.spacebattle.gui.vaadin.combined.spacecrafts.details.FleetStatsVerticalDisplay;
+import de.yuga.spacebattle.gui.vaadin.combined.spacecrafts.details.FleetStatisticsDisplay;
+import de.yuga.spacebattle.gui.vaadin.misc.StatisticsDisplay;
 import de.yuga.spacebattle.gui.vaadin.misc.StatsLayout;
 
 import javax.annotation.Nonnull;
 
-public abstract class FleetLayout<T> extends VerticalLayout implements StatsLayout<T> {
+public abstract class FleetLayout<GenericSubject> extends VerticalLayout implements StatsLayout<GenericSubject> {
 
-    private final FleetStatsVerticalDisplay fleetStatsVerticalDisplay = new FleetStatsVerticalDisplay();
+    private final FleetStatisticsDisplay fleetStatisticsDisplay = new FleetStatisticsDisplay();
 
     @Nonnull
-    public FleetStatsVerticalDisplay getFleetStatsDisplay() {
-        return fleetStatsVerticalDisplay;
+    public FleetStatisticsDisplay getFleetStatsDisplay() {
+        return fleetStatisticsDisplay;
     }
 
     @Nonnull
     @Override
-    public Component getStatisticsComponent() {
-        return fleetStatsVerticalDisplay;
+    public StatisticsDisplay getStatisticsComponent() {
+        return fleetStatisticsDisplay;
     }
 }

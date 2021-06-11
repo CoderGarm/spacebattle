@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.gui.vaadin.turn.action;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.distance.DistanceCalculator;
+import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 

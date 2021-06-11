@@ -3,16 +3,21 @@ package de.yuga.spacebattle.backend.enums;
 import com.google.common.base.Preconditions;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
+
+import static de.yuga.spacebattle.backend.enums.ECollectableType.*;
 
 public enum EResourceType {
 
-    CONSTRUCTION("Construction Point", "Construction Points", EBuildingType.JOB, EIconPath.RESOURCES.getPath(), "construction"),
-    ORBITALCONSTRUCTION("Shipyard Construction Point", "Shipyard Construction Points", EBuildingType.JOB, EIconPath.RESOURCES.getPath(), "orbitalconstruction"),
-    RESEARCH("Research Point", "Research Point", EBuildingType.JOB, EIconPath.RESOURCES.getPath(), "research"),
-    CREDITS("Credit", "Credits", EBuildingType.PRODUCING, EIconPath.RESOURCES.getPath(), "credit"),
-    METALORE("Metalore", "Metalore", EBuildingType.PRODUCING, EIconPath.RESOURCES.getPath(), "metalore"),
-    MERCURIUM("Mercurium", "Mercurium", EBuildingType.PRODUCING, EIconPath.RESOURCES.getPath(), "mercurium"),
-    HYPERONIUM("Hyperonium", "Hyperonium", EBuildingType.PRODUCING, EIconPath.RESOURCES.getPath(), "hyperonium");
+    CONSTRUCTION(FORFEITABLE, "Construction Point", "Construction Points", "construction"),
+    ORBITAL_CONSTRUCTION(FORFEITABLE, "Shipyard Construction Point", "Shipyard Construction Points", "orbitalconstruction"),
+    RESEARCH(FORFEITABLE, "Research Point", "Research Point", "research"),
+    CREDITS(COLLECTABLE, "Credit", "Credits", "credit"),
+    METALORE(COLLECTABLE, "Metalore", "Metalore", "metalore"),
+    RARE_ELEMENTS(COLLECTABLE, "Rare elements", "Rare elements", "mercurium"),
+    HEAVY_METALS(COLLECTABLE, "Heavy metal", "Heavy metals", "hyperonium"),
+    POPULATION(VIABLE, "Population", "Population", "population"),
+    ;
 
     @Nonnull
     private final String singularName;
@@ -21,30 +26,29 @@ public enum EResourceType {
     private final String pluralName;
 
     @Nonnull
-    private final EBuildingType buildingType;
-
-    @Nonnull
-    final String directory;
-
-    @Nonnull
     final String iconName;
 
-    EResourceType(@Nonnull final String singularName,
+    @Nonnull
+    private final ECollectableType collectableType;
+
+    EResourceType(@Nonnull final ECollectableType collectableType,
+                  @Nonnull final String singularName,
                   @Nonnull final String pluralName,
-                  @Nonnull final EBuildingType buildingType,
-                  @Nonnull final String directory,
                   @Nonnull final String iconName) {
+        Preconditions.checkNotNull(collectableType, "collectableType shouldn't be null!");
         Preconditions.checkNotNull(singularName, "singularName shouldn't be null!");
         Preconditions.checkNotNull(pluralName, "pluralName shouldn't be null!");
-        Preconditions.checkNotNull(buildingType, "buildingType shouldn't be null!");
-        Preconditions.checkNotNull(directory, "directory shouldn't be null!");
         Preconditions.checkNotNull(iconName, "iconName shouldn't be null!");
 
+        this.collectableType = collectableType;
         this.singularName = singularName;
         this.pluralName = pluralName;
-        this.buildingType = buildingType;
-        this.directory = directory;
         this.iconName = iconName;
+    }
+
+    @Nonnull
+    public ECollectableType getCollectableType() {
+        return collectableType;
     }
 
     @Nonnull
@@ -58,17 +62,16 @@ public enum EResourceType {
     }
 
     @Nonnull
-    public EBuildingType getBuildingType() {
-        return buildingType;
-    }
-
-    @Nonnull
-    public String getDirectory() {
-        return directory;
-    }
-
-    @Nonnull
     public String getIconName() {
         return iconName;
+    }
+
+    /**
+     * Returns all the the values of {@link EResourceType} except {@link #POPULATION}.
+     *
+     * @return the values
+     */
+    public static EResourceType[] valuesWithoutPopulation() {
+        return Arrays.stream(EResourceType.values()).filter(e -> EResourceType.POPULATION != e).toArray(EResourceType[]::new);
     }
 }

@@ -14,7 +14,7 @@ public class FleetOrbit {
 
     @Nonnull
     @ManyToOne
-    @JoinColumn(name = "idStarsystem", referencedColumnName = "idStarsystem")
+    @JoinColumn(name = "idStarSystem", referencedColumnName = "idStarSystem")
     private StarSystem system;
 
     @Nullable

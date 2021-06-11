@@ -24,11 +24,11 @@ public class CustomBuildingRepositoryImpl implements CustomBuildingRepository {
 
     @Nullable
     @Override
-    public Building findBuildingByType(@Nonnull final EResourceType resourceType) {
-        Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
+    public Building findBuildingByProductionTarget(@Nonnull final EResourceType productionTarget) {
+        Preconditions.checkNotNull(productionTarget, "productionTarget shouldn't be null!");
 
         return em.createNamedQuery("Building.getByResourceType", Building.class)
-                .setParameter("resourceType", resourceType)
+                .setParameter("productionTarget", productionTarget)
                 .getSingleResult();
     }
 }

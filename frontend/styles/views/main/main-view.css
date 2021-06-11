@@ -47,7 +47,6 @@ vaadin-tab {
     font-size: var(--lumo-font-size-s);
     height: var(--lumo-size-l);
     font-weight: 600;
-    /*color: var(--lumo-body-text-color);*/
     color: var(--material-secondary-text-color);
 }
 
@@ -58,7 +57,6 @@ vaadin-tab:hover {
 vaadin-tab[selected] {
     background-color: var(--lumo-primary-color-10pct);
     color: var(--material-primary-text-color);
-    /*color: var(--lumo-primary-text-color);*/
 }
 
 vaadin-button[disabled] {

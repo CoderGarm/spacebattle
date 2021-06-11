@@ -16,7 +16,8 @@ public class ResearchTechTreeDisplay extends ResearchLayout<User> {
         binderPlanet.forField(getResearchOutputDisplay()).bind(user -> user, null);
     }
 
-    public void update(@Nullable final User user) {
+    @Override
+    public void updateStatistics(@Nullable final User user) {
         binderPlanet.readBean(user);
     }
 

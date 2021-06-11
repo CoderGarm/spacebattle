@@ -4,14 +4,17 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.Constructable;
-import de.yuga.spacebattle.backend.entities.ResourceDeposit;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Job;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.ECollectableType;
+import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.turn.JobRepository;
 import de.yuga.spacebattle.backend.services.account.UserService;
@@ -24,7 +27,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -88,29 +90,35 @@ public class JobService {
     }
 
     /**
-     * Returns the job cost if they were payed - no costs for researches!
+     * Returns the job cost if they were payed - no costs and no costs back for researches!
      *
      * @param entity the job to delete
      */
-    //@Transactional
+    //@Transactional todo test and remove or comment in
     public void delete(@Nullable final Job entity) {
         if (entity == null || entity.getId() < 1) {
             return;
         }
-        Job doDelete = jobRepository.findById(entity.getId()).orElse(null);
+        final Job doDelete = jobRepository.findById(entity.getId()).orElse(null);
         if (doDelete == null) {
-            throw new NotifySBUserException("no job to delete");
+            throw new NotifySBUserException("no job to delete"); // fail first for development
         }
 
-        if (doDelete.getJobDoneAtZero().compareTo(BigDecimal.ZERO) > 0 && entity.getFacility() != null) {
+        if (doDelete.getJobDoneAtZero() > 0 && EResourceType.RESEARCH != doDelete.getConstructable().getResourceType()) {
             // if reached job is not done -> payback the paycheck
             // not reached if the job is a research
-            Map<EResourceType, BigDecimal> entityCosts = entity.getConstructable().getJobCosts();
-            Planet planet = entity.getFacility().getPlanet();
+            final ResourceDeposit jobCosts = entity.getConstructable().getJobCosts();
+            final Planet planet = entity.getFacility().getPlanet();
 
-            ResourceDeposit resourceDeposit = planet.getResourceDeposit();
-            for (EResourceType resourceType : entityCosts.keySet()) {
-                resourceDeposit.updateResource(resourceType, entityCosts.get(resourceType));
+            final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
+            for (final EResourceType resourceType : EResourceType.values()) {
+                // must be added again because payback and not thanks for the tip
+                if (EResourceType.POPULATION == resourceType) {
+                    final CrewRequirementDTO crewRequirementDTO = jobCosts.getCrewRequirement().toggleToDepositMode();
+                    resourceDeposit.updatePopulation(crewRequirementDTO);
+                } else {
+                    resourceDeposit.updateResource(resourceType, jobCosts.getResourceAmountByType(resourceType));
+                }
             }
             planetService.save(planet);
         }
@@ -125,27 +133,23 @@ public class JobService {
      * @param costs  the costs
      */
     private void checkAndBalances(@Nonnull final Planet planet,
-                                  @Nonnull final Map<EResourceType, BigDecimal> costs) {
+                                  @Nonnull final ResourceDeposit costs) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkNotNull(costs, "costs shouldn't be null!");
+        Preconditions.checkArgument(EDepositType.COSTS == costs.getSubType(), "costs must be flagged as costs!");
 
-        ResourceDeposit resourceDeposit = planet.getResourceDeposit();
-        boolean isFine = true;
-        for (EResourceType resourceType : costs.keySet()) {
-            BigDecimal credit = resourceDeposit.getResourceAmountByType(resourceType);
-            BigDecimal debit = costs.get(resourceType);
-            BigDecimal subtract = credit.subtract(debit, ResourceDeposit.mathContext);
-            if (subtract.compareTo(BigDecimal.ZERO) < 0) {
-                isFine = false;
-            }
+        final ResourceDeposit debitorDeposit = planet.getResourceDeposit();
+        if (!debitorDeposit.isPayingPossible(costs)) {
+            throw new NotifySBUserException("This job is to expensive!");
         }
-        if (isFine) {
-            for (EResourceType resourceType : costs.keySet()) {
-                BigDecimal debit = costs.get(resourceType);
-                resourceDeposit.updateResource(resourceType, debit.negate());
+
+        for (final EResourceType resourceType : EResourceType.values()) {
+            if (EResourceType.POPULATION == resourceType) {
+                debitorDeposit.getCrewRequirement().updateCrew(costs.getCrewRequirement());
+            } else if (ECollectableType.COLLECTABLE == resourceType.getCollectableType()) {
+                final long debit = costs.getResourceAmountByType(resourceType) * -1;
+                debitorDeposit.updateResource(resourceType, debit);
             }
-        } else {
-            throw new NotifySBUserException("This job is to expensive");
         }
     }
 
@@ -195,13 +199,13 @@ public class JobService {
 
         final Constructable constructable = new Constructable(building, existingC != null ? existingC.getLevel() + 1 : 1);
         final Construction facility = planet.getConstructions().stream()
-                .filter(construction -> construction.getBuilding().getResourceType() == EResourceType.CONSTRUCTION)
+                .filter(construction -> construction.getBuilding().getProductionTarget() == EResourceType.CONSTRUCTION)
                 .findFirst().orElse(null);
 
         checkIfFree(facility);
         checkAndBalances(planet, constructable.getJobCosts());
-        final Job entity = new Job(planet.getOwner(), facility, constructable);
-        jobRepository.save(entity);
+        final Job entity = new Job(planet, facility, constructable);
+        save(entity);
         return entity;
     }
 
@@ -243,10 +247,11 @@ public class JobService {
             throw new NotifySBUserException("You need a research facility on at leas one planet.");
         }
 
-        final Construction facility = researchPlanet.getConstructionByResource(EResourceType.RESEARCH);
+        final Construction facility = researchPlanet.getConstructionByResource(EResourceType.RESEARCH)
+                .stream().findFirst().orElse(null);
         checkIfFree(facility);
 
-        final Job entity = new Job(user, facility, constructable);
+        final Job entity = new Job(researchPlanet, facility, constructable);
         jobRepository.save(entity);
         return entity;
     }
@@ -276,12 +281,12 @@ public class JobService {
 
         Constructable constructable = new Constructable(shipClass, amount);
         Construction facility = planet.getConstructions().stream()
-                .filter(construction -> construction.getBuilding().getResourceType() == EResourceType.ORBITALCONSTRUCTION)
+                .filter(construction -> construction.getBuilding().getProductionTarget() == EResourceType.ORBITAL_CONSTRUCTION)
                 .findFirst().orElse(null);
 
         checkIfFree(facility);
         checkAndBalances(planet, constructable.getJobCosts());
-        Job entity = new Job(planet.getOwner(), facility, constructable);
+        Job entity = new Job(planet, facility, constructable);
         jobRepository.save(entity);
         return entity;
     }
@@ -310,7 +315,7 @@ public class JobService {
         }
 
         final Construction facility = planet.getConstructions().stream()
-                .filter(construction -> construction.getBuilding().getResourceType() == EResourceType.ORBITALCONSTRUCTION)
+                .filter(construction -> construction.getBuilding().getProductionTarget() == EResourceType.ORBITAL_CONSTRUCTION)
                 .findFirst().orElse(null);
 
         checkIfFree(facility);
@@ -319,7 +324,7 @@ public class JobService {
                 .map(e -> new Constructable(e.getKey(), e.getValue())).collect(Collectors.toSet());
 
         constructableSet.forEach(constructable -> checkAndBalances(planet, constructable.getJobCosts()));
-        Set<Job> newJobs = constructableSet.stream().map(constructable -> new Job(owner, facility, constructable)).collect(Collectors.toSet());
+        Set<Job> newJobs = constructableSet.stream().map(constructable -> new Job(planet, facility, constructable)).collect(Collectors.toSet());
 
         Iterable<Job> jobIterable = jobRepository.saveAll(newJobs);
         return Sets.newHashSet(jobIterable);

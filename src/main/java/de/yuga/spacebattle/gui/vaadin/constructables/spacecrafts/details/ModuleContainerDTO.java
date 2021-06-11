@@ -1,10 +1,10 @@
 package de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AlignedFitting;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AmmunitionFitting;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.SupportFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 
 import javax.annotation.Nonnull;

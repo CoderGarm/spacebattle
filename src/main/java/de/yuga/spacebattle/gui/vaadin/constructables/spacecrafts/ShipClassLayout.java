@@ -1,37 +1,37 @@
 package de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.svg.Svg;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
-import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ShipClassStatDisplay;
+import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ShipClassStatisticsDisplay;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.StarShipSvgHelper;
+import de.yuga.spacebattle.gui.vaadin.misc.StatisticsDisplay;
 import de.yuga.spacebattle.gui.vaadin.misc.StatsLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 
-public abstract class ShipClassLayout<T> extends VerticalLayout implements StatsLayout<T>, BeforeEnterObserver {
+public abstract class ShipClassLayout<GenericSubject> extends VerticalLayout implements StatsLayout<GenericSubject>, BeforeEnterObserver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShipClassLayout.class);
 
-    private final ShipClassStatDisplay shipClassStatDisplay = new ShipClassStatDisplay();
+    private final ShipClassStatisticsDisplay shipClassStatisticsDisplay = new ShipClassStatisticsDisplay();
 
     protected StarShipSvgHelper starShipSvgHelper;
 
     protected Svg canvas;
 
     @Nonnull
-    public ShipClassStatDisplay getShipClassStatDisplay() {
-        return shipClassStatDisplay;
+    public ShipClassStatisticsDisplay getShipClassStatDisplay() {
+        return shipClassStatisticsDisplay;
     }
 
     @Nonnull
     @Override
-    public Component getStatisticsComponent() {
-        return shipClassStatDisplay;
+    public StatisticsDisplay getStatisticsComponent() {
+        return shipClassStatisticsDisplay;
     }
 
     /**

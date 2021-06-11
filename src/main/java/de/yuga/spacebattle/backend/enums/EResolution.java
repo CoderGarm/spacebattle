@@ -9,7 +9,7 @@ public enum EResolution {
     PX16("png16x/"),
     PX24("png24x/"),
     PX32("png32x/"),
-    PC64("png64x/");
+    PX64("png64x/");
 
     @Nonnull
     final String resolution;

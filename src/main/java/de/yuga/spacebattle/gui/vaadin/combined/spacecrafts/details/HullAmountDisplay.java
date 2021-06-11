@@ -6,6 +6,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
+import de.yuga.spacebattle.backend.enums.EResolution;
+import de.yuga.spacebattle.gui.vaadin.misc.details.misc.ImageContainer;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
@@ -20,20 +22,9 @@ public class HullAmountDisplay extends HorizontalLayout {
     private HullAmountWrapper wrapper;
 
     public HullAmountDisplay() {
-        /*
-        final Image titleImage = new Image();
-        final ReadOnlyHasValue<String> titleImageSrc = new ReadOnlyHasValue<>(titleImage::setSrc);
-        final ReadOnlyHasValue<String> titleImageAlt = new ReadOnlyHasValue<>(titleImage::setAlt);
-        final ReadOnlyHasValue<String> titleImageTitle = new ReadOnlyHasValue<>(titleImage::setTitle);
-        binder.forField(titleImageSrc).bind(wrapper -> {
-            final Hull moduleType = wrapper.getHull(); // todo hull icons per class
-            final String directory = moduleType.getDirectory();
-            final String iconName = moduleType.getIconName();
-            return EIconPath.getPath(directory, iconName);
-        }, null);
-        binder.forField(titleImageAlt).bind(wrapper -> wrapper.getHull().getName(), null);
-        binder.forField(titleImageTitle).bind(wrapper -> wrapper.getHull().getName(), null);
-        */
+        // todo hull icons per class
+        final ImageContainer imageContainer = new ImageContainer(EResolution.PX24);
+        binder.forField(imageContainer).bind(w -> w, null);
 
         final Label hullDisplay = new Label();
         final ReadOnlyHasValue<String> hullDisplayText = new ReadOnlyHasValue<>(hullDisplay::setText);
@@ -43,7 +34,7 @@ public class HullAmountDisplay extends HorizontalLayout {
         final ReadOnlyHasValue<String> amountDisplayText = new ReadOnlyHasValue<>(amountDisplay::setText);
         binder.forField(amountDisplayText).bind(HullAmountWrapper::getValue, null);
 
-        add(/*titleImage, */hullDisplay, amountDisplay);
+        add(imageContainer, hullDisplay, amountDisplay);
     }
 
     /**
@@ -63,7 +54,7 @@ public class HullAmountDisplay extends HorizontalLayout {
      *
      * @param wrapper the input
      */
-    public void update(@Nullable final HullAmountWrapper wrapper) {
+    public void setValue(@Nullable final HullAmountWrapper wrapper) {
 
         binder.readBean(wrapper);
         this.wrapper = wrapper;

@@ -50,7 +50,7 @@ public class WeaponAlignmentMultiEdit extends VerticalLayout implements HasValue
 
         final Map<Weapon, Integer> modules = value.stream()
                 .filter(v -> v.getAllowedWeaponAlignments().contains(weaponAlignment))
-                .collect(Collectors.toMap(WeaponAlignmentCountDTO::getWeapon, WeaponAlignmentCountDTO::getCountNumeric));
+                .collect(Collectors.toMap(WeaponAlignmentCountDTO::getWeapon, WeaponAlignmentCountDTO::getCount));
 
         componentMap.forEach((module, moduleEdit) -> {
             if (!modules.containsKey(module)) {
@@ -94,7 +94,7 @@ public class WeaponAlignmentMultiEdit extends VerticalLayout implements HasValue
     public Set<WeaponAlignmentCountDTO> getValue() {
         return componentMap.keySet().stream()
                 .map(module -> componentMap.get(module).getValue())
-                .filter(dto -> dto.getCountNumeric() > 0)
+                .filter(dto -> dto.getCount() > 0)
                 .collect(Collectors.toSet());
     }
 

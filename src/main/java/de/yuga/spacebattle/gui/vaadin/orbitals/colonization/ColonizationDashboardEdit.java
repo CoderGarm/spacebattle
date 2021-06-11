@@ -57,6 +57,8 @@ public class ColonizationDashboardEdit extends ColonizationLayout implements Has
     private ColonizationTransportUniverseDTO universe;
 
     public ColonizationDashboardEdit() {
+        grid.setColumnReorderingAllowed(true);
+
         final User loggedInUser = userService.getLoggedInUser();
 
         final HorizontalLayout control = new HorizontalLayout();

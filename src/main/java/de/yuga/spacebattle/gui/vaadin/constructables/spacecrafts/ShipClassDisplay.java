@@ -4,8 +4,8 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.HullDisplay;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.ModuleMultiDisplay;
 import org.slf4j.Logger;
@@ -41,7 +41,7 @@ public class ShipClassDisplay extends ShipClassLayout<ShipClass> {
         binder.forField(getShipClassStatDisplay()).bind(shipClass -> shipClass, null);
 
         final HullDisplay hullDisplay = new HullDisplay();
-        final ReadOnlyHasValue<Hull> hullReadOnly = new ReadOnlyHasValue<>(hullDisplay::update);
+        final ReadOnlyHasValue<Hull> hullReadOnly = new ReadOnlyHasValue<>(hullDisplay::setValue);
         binder.forField(hullReadOnly).bind(ShipClass::getHull, null);
 
         final ModuleMultiDisplay moduleMultiDisplay = new ModuleMultiDisplay(starShipSvgHelper);
@@ -58,7 +58,7 @@ public class ShipClassDisplay extends ShipClassLayout<ShipClass> {
      * @param shipClass the ship class to display
      */
     @Override
-    public void update(@Nullable final ShipClass shipClass) {
+    public void updateStatistics(@Nullable final ShipClass shipClass) {
         binder.setBean(shipClass);
     }
 

@@ -9,14 +9,14 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
-import de.yuga.spacebattle.backend.colonization.ColonizationCostCalculator;
+import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
-import de.yuga.spacebattle.gui.vaadin.misc.details.EResourceAmountDTO;
+import de.yuga.spacebattle.gui.vaadin.turn.resource.ResourceCostAmountDTO;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -46,9 +46,9 @@ public class ColonizeConfirmationEdit extends HorizontalLayout {
         final ReadOnlyHasValue<String> costsText = new ReadOnlyHasValue<>(costs::setText);
         binder.forField(costsText)
                 .bind(planet -> {
-                            final EResourceAmountDTO costsDTO = ColonizationCostCalculator.calculateColonizationCost(planet);
+                            final ResourceCostAmountDTO costsDTO = ColonizationCostCalculator.calculateColonizationCost(planet);
                             final EResourceType resourceType = costsDTO.getResourceType();
-                            final String amountWithDiff = costsDTO.getAmountWithDiff();
+                            final String amountWithDiff = costsDTO.getAmountAsString();
                             return amountWithDiff + " " + resourceType.getPluralName();
                         },
                         null);
@@ -86,8 +86,8 @@ public class ColonizeConfirmationEdit extends HorizontalLayout {
                 return;
             }
             final Planet mainPlanet = planetService.findMainPlanet(loggedInUser);
-            final EResourceAmountDTO costs = ColonizationCostCalculator.calculateColonizationCost(value);
-            if (mainPlanet.getResourceDeposit().getResourceAmountByType(costs.getResourceType()).compareTo(costs.getAmount()) >= 0) {
+            final ResourceCostAmountDTO costs = ColonizationCostCalculator.calculateColonizationCost(value);
+            if (mainPlanet.getResourceDeposit().isReducingResourcePossible(costs.getResourceType(), costs.getAmount())) {
                 submit.setEnabled(true);
             }
 

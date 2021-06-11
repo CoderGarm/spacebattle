@@ -2,9 +2,9 @@ package de.yuga.spacebattle.backend.services.constructables.spacecraft;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClassComparator;
-import de.yuga.spacebattle.backend.repositories.constructables.spacecraft.ShipClassRepository;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClassComparator;
+import de.yuga.spacebattle.backend.repositories.spacecraft.ShipClassRepository;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;

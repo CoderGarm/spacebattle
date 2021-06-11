@@ -1,11 +1,14 @@
 package de.yuga.spacebattle.backend.entities.buildings;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
-import de.yuga.spacebattle.backend.entities.ResourceDeposit;
+import de.yuga.spacebattle.backend.entities.HasNameAndDescription;
+import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.enums.EResourceSubType;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.EBuildingType;
+import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 
 import javax.annotation.Nonnull;
@@ -16,12 +19,14 @@ import java.math.BigDecimal;
 
 @NamedQueries({
         @NamedQuery(name = "Building.getAll", query = "SELECT p FROM Building p"),
-        @NamedQuery(name = "Building.getByResourceType", query = "SELECT p FROM Building p WHERE p.resourceType = :resourceType")
+        @NamedQuery(name = "Building.getByResourceType", query = "SELECT p FROM Building p WHERE p.productionType.productionTarget = :productionTarget")
 })
 @Entity
 @Table(name = "building")
 @AttributeOverride(name = "id", column = @Column(name = "idBuilding"))
-public class Building extends AbstractEntityKey {
+// todo check constraint for productionType.productionCategory and refinementSequence
+// todo check constraint for productionType.productionCategory == PRODUCE and productionType.productionTarget == POPULATION must have baseValue with single digit only
+public class Building extends AbstractEntityKey implements HasNameAndDescription {
 
     @Nonnull
     @Size(min = 1, max = 30)
@@ -30,28 +35,39 @@ public class Building extends AbstractEntityKey {
     @Nonnull
     private String description;
 
+    /**
+     * The basic effect value at level 1.
+     */
     private int baseValue;
 
+    /**
+     * The increasement of value for the next level. todo
+     */
     private final BigDecimal increasingFactorPerLevel = new BigDecimal("0.2");
 
     /**
-     * what is this building producing
+     * Defines the job of this building.
      */
     @Nonnull
-    @Enumerated(EnumType.STRING)
-    private EResourceType resourceType;
+    @NotNull
+    @Embedded
+    private ProductionType productionType;
 
     @Nonnull
+    @NotNull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "idCosts", updatable = false)
-    private final ResourceDeposit costs = new ResourceDeposit(EResourceSubType.COSTS);
+    private final ResourceDeposit costs = ResourceDepositInitializerCalculator.initializeResourceDeposit(Building.class, EDepositType.COSTS);
 
-    @JsonIgnore
     @Nonnull
     @NotNull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "idResearch")
     private Research unlockedThrough;
+
+    @Nonnull
+    @Transient
+    private final EBuildingType buildingType = EBuildingType.BUILDING;
 
     public Building() {
     }
@@ -59,31 +75,35 @@ public class Building extends AbstractEntityKey {
     public Building(@Nonnull final String name,
                     @Nonnull final String description,
                     final int baseValue,
-                    @Nonnull final EResourceType resourceType,
+                    @Nonnull final ProductionType productionType,
+                    @Nonnull final CrewRequirementDTO crewRequirement,
                     @Nonnull final Research unlockedThrough) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
-        Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
+        Preconditions.checkNotNull(productionType, "productionType shouldn't be null!");
+        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
 
         this.name = name;
         this.description = description;
         this.baseValue = baseValue;
-        this.resourceType = resourceType;
+        this.productionType = productionType;
+        this.costs.setCrewRequirement(crewRequirement);
         this.unlockedThrough = unlockedThrough;
     }
 
     @Nonnull
+    @Override
     public String getName() {
         return name;
     }
 
     @Nonnull
+    @Override
     public String getDescription() {
         return description;
     }
 
-    @Nonnull
     public int getBaseValue() {
         return baseValue;
     }
@@ -94,8 +114,13 @@ public class Building extends AbstractEntityKey {
     }
 
     @Nonnull
-    public EResourceType getResourceType() {
-        return resourceType;
+    public EResourceType getProductionTarget() {
+        return productionType.getProductionTarget();
+    }
+
+    @Nonnull
+    public ProductionType getProductionType() {
+        return productionType;
     }
 
     @Nonnull
@@ -106,6 +131,11 @@ public class Building extends AbstractEntityKey {
     @Nonnull
     public Research getUnlockedThrough() {
         return unlockedThrough;
+    }
+
+    @Nonnull
+    public EBuildingType getBuildingType() {
+        return buildingType;
     }
 
     @Override
@@ -120,7 +150,6 @@ public class Building extends AbstractEntityKey {
 
     @Override
     public int hashCode() {
-        int result = 31 * id;
-        return result;
+        return 31 * id;
     }
 }

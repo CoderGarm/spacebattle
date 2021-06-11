@@ -1,10 +1,13 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
-import de.yuga.spacebattle.backend.entities.ResourceDeposit;
+import de.yuga.spacebattle.backend.entities.HasNameAndDescription;
+import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.enums.EResourceSubType;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.EDepositType;
 
 import javax.annotation.Nonnull;
 import javax.persistence.CascadeType;
@@ -15,7 +18,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @MappedSuperclass
-public class BaseModule extends AbstractEntityKey {
+public class BaseModule extends AbstractEntityKey implements HasNameAndDescription {
 
     @Nonnull
     @NotNull(message = "name should not be null")
@@ -27,10 +30,10 @@ public class BaseModule extends AbstractEntityKey {
     private String description;
 
     @Nonnull
-    @NotNull(message = "everything costs smething")
+    @NotNull(message = "everything costs something")
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "idCosts", updatable = false)
-    private final ResourceDeposit costs = new ResourceDeposit(EResourceSubType.COSTS);
+    private final ResourceDeposit costs = ResourceDepositInitializerCalculator.initializeResourceDeposit(BaseModule.class, EDepositType.COSTS);
 
     @Nonnull
     @NotNull
@@ -59,10 +62,12 @@ public class BaseModule extends AbstractEntityKey {
                       @Nonnull final Research unlockedThrough,
                       final int useCapacity,
                       final int effectValue,
-                      final int techLevel) {
+                      final int techLevel,
+                      @Nonnull final CrewRequirementDTO crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
+        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
         this.name = name;
         this.description = description;
@@ -70,14 +75,17 @@ public class BaseModule extends AbstractEntityKey {
         this.useCapacity = useCapacity;
         this.effectValue = effectValue;
         this.techLevel = techLevel;
+        this.costs.setCrewRequirement(crewRequirement);
     }
 
     @Nonnull
+    @Override
     public String getName() {
         return name;
     }
 
     @Nonnull
+    @Override
     public String getDescription() {
         return description;
     }

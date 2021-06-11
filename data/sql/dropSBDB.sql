@@ -41,7 +41,11 @@
 
     alter table colonization 
        drop 
-       foreign key FKr6k79x7m4igtmpu720nfxk2mw;
+       foreign key FK6kxulldcu79b6d6ecjr7pvpyw;
+
+    alter table colonization 
+       drop 
+       foreign key FKb2jrbwdwy0j8t2tggwtbf64ty;
 
     alter table colonization 
        drop 
@@ -73,7 +77,7 @@
 
     alter table fleet 
        drop 
-       foreign key FK2vpu4blpguup7j52xnn42ypnl;
+       foreign key FKtv4xu7x5k69o40m38jmf2lip;
 
     alter table fleet 
        drop 
@@ -83,13 +87,13 @@
        drop 
        foreign key FKckq55cmimjpois3mst803atuy;
 
-    alter table fleetcomposition 
+    alter table fleetComposition 
        drop 
-       foreign key FK2xo81l4vrqmcwboo06cumtens;
+       foreign key FK9v3ldmrdaym225uw9487vw2ek;
 
-    alter table fleetcomposition 
+    alter table fleetComposition 
        drop 
-       foreign key FK8xjjuy4dvxqwloaaf4wge42qw;
+       foreign key FKfk2nrx1fso8buadj6v4sw1j04;
 
     alter table hull 
        drop 
@@ -98,6 +102,10 @@
     alter table hull 
        drop 
        foreign key FK4hpf1pawl0wynjx9kdg74opea;
+
+    alter table humanResources 
+       drop 
+       foreign key FKh3v7ra6rwylc7sofs1is80fb8;
 
     alter table job 
        drop 
@@ -126,6 +134,10 @@
     alter table knownStarSystem 
        drop 
        foreign key FKtjhh901to46le5kkmsybuwdbb;
+
+    alter table miningFactorsComposition 
+       drop 
+       foreign key FK7pw467msglkrl51uo8uu6v6l6;
 
     alter table move 
        drop 
@@ -161,15 +173,15 @@
 
     alter table planet 
        drop 
+       foreign key FK6290orio72djryi0kktbn3esu;
+
+    alter table planet 
+       drop 
        foreign key FKobjb6jgxji3jrrgoxy9r30uyc;
 
     alter table planet 
        drop 
        foreign key FK9cd80e9yxwnobejr9twlcknab;
-
-    alter table planet 
-       drop 
-       foreign key FKjw116v1g0p9ghu41k1jddkw50;
 
     alter table planet 
        drop 
@@ -191,17 +203,13 @@
        drop 
        foreign key FKch37eb44iv0ls442yu7usvvtp;
 
-    alter table resources 
+    alter table resourcesDepositComposition 
        drop 
-       foreign key FK8l4tmivydxr3qd5g2hmes0ieh;
+       foreign key FK6q26jn3ftmq2x638tsgi0aemy;
 
     alter table shipClass 
        drop 
        foreign key FKouxjssb18x4jeutl5r1l0byeu;
-
-    alter table shipClass 
-       drop 
-       foreign key FK5iggor36gwq8904cpdvcfjc1n;
 
     alter table shipClass 
        drop 
@@ -259,6 +267,26 @@
        drop 
        foreign key FKd0120p7tkvssh9r8hldenpw1w;
 
+    alter table userMessage 
+       drop 
+       foreign key FK5mctsyrt040xp1wgghtk6lxxr;
+
+    alter table userMessage 
+       drop 
+       foreign key FK6xs6p78lala5xtd4eoe4xxrnv;
+
+    alter table warShip 
+       drop 
+       foreign key FK3kovfkp6003a62x5ff41h44hw;
+
+    alter table warShip 
+       drop 
+       foreign key FKjr13y2u3qkka7d3npp9omwdoa;
+
+    alter table warShip 
+       drop 
+       foreign key FKdywyvdwb0ovbd6oruywo13nyx;
+
     alter table weapon 
        drop 
        foreign key FK1rsb3ampiw8yjy8ngrget6ay;
@@ -291,13 +319,19 @@
 
     drop table if exists fleet;
 
-    drop table if exists fleetcomposition;
+    drop table if exists fleetComposition;
 
     drop table if exists hull;
+
+    drop table if exists humanResources;
 
     drop table if exists job;
 
     drop table if exists knownStarSystem;
+
+    drop table if exists miningFactors;
+
+    drop table if exists miningFactorsComposition;
 
     drop table if exists move;
 
@@ -311,7 +345,7 @@
 
     drop table if exists resourceDeposit;
 
-    drop table if exists resources;
+    drop table if exists resourcesDepositComposition;
 
     drop table if exists shipClass;
 
@@ -326,5 +360,9 @@
     drop table if exists unlockedResearch;
 
     drop table if exists user;
+
+    drop table if exists userMessage;
+
+    drop table if exists warShip;
 
     drop table if exists weapon;

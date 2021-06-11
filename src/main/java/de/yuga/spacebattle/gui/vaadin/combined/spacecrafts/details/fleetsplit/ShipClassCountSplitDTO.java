@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.gui.vaadin.combined.spacecrafts.details.fleetsplit;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 
 import javax.annotation.Nonnull;
 
@@ -19,7 +19,7 @@ public class ShipClassCountSplitDTO implements Cloneable {
     /**
      * The reference amount from the original fleet. More than that couldn't be distributed.
      */
-    private final int referenceAmount;
+    private final long referenceAmount;
 
     /**
      * The payload of this dto.
@@ -29,7 +29,7 @@ public class ShipClassCountSplitDTO implements Cloneable {
     private int splitCount = 0;
 
     public ShipClassCountSplitDTO(@Nonnull final ShipClass shipClass,
-                                  final int referenceAmount) {
+                                  final long referenceAmount) {
         Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
 
         this.shipClass = shipClass;
@@ -54,7 +54,7 @@ public class ShipClassCountSplitDTO implements Cloneable {
         return shipClass;
     }
 
-    public int getReferenceAmountNumeric() {
+    public long getReferenceAmountNumeric() {
         return referenceAmount;
     }
 
@@ -62,7 +62,7 @@ public class ShipClassCountSplitDTO implements Cloneable {
         return String.valueOf(getReferenceAmountNumeric());
     }
 
-    public int getCalculatedReferenceAmountNumeric() {
+    public long getCalculatedReferenceAmountNumeric() {
         return referenceAmount - splitCount;
     }
 
@@ -76,14 +76,6 @@ public class ShipClassCountSplitDTO implements Cloneable {
 
     public void setSplitCount(final int splitCount) {
         this.splitCount = splitCount;
-    }
-
-    public String getSplitCountString() {
-        return String.valueOf(splitCount);
-    }
-
-    public void setSplitCountString(final String splitCount) {
-        this.splitCount = Integer.parseInt(splitCount);
     }
 
     @Override

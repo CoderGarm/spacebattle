@@ -41,7 +41,11 @@
 
     alter table colonization 
        drop 
-       foreign key FKr6k79x7m4igtmpu720nfxk2mw;
+       foreign key FK6kxulldcu79b6d6ecjr7pvpyw;
+
+    alter table colonization 
+       drop 
+       foreign key FKb2jrbwdwy0j8t2tggwtbf64ty;
 
     alter table colonization 
        drop 
@@ -73,7 +77,7 @@
 
     alter table fleet 
        drop 
-       foreign key FK2vpu4blpguup7j52xnn42ypnl;
+       foreign key FKtv4xu7x5k69o40m38jmf2lip;
 
     alter table fleet 
        drop 
@@ -83,13 +87,13 @@
        drop 
        foreign key FKckq55cmimjpois3mst803atuy;
 
-    alter table fleetcomposition 
+    alter table fleetComposition 
        drop 
-       foreign key FK2xo81l4vrqmcwboo06cumtens;
+       foreign key FK9v3ldmrdaym225uw9487vw2ek;
 
-    alter table fleetcomposition 
+    alter table fleetComposition 
        drop 
-       foreign key FK8xjjuy4dvxqwloaaf4wge42qw;
+       foreign key FKfk2nrx1fso8buadj6v4sw1j04;
 
     alter table hull 
        drop 
@@ -98,6 +102,10 @@
     alter table hull 
        drop 
        foreign key FK4hpf1pawl0wynjx9kdg74opea;
+
+    alter table humanResources 
+       drop 
+       foreign key FKh3v7ra6rwylc7sofs1is80fb8;
 
     alter table job 
        drop 
@@ -126,6 +134,10 @@
     alter table knownStarSystem 
        drop 
        foreign key FKtjhh901to46le5kkmsybuwdbb;
+
+    alter table miningFactorsComposition 
+       drop 
+       foreign key FK7pw467msglkrl51uo8uu6v6l6;
 
     alter table move 
        drop 
@@ -161,15 +173,15 @@
 
     alter table planet 
        drop 
+       foreign key FK6290orio72djryi0kktbn3esu;
+
+    alter table planet 
+       drop 
        foreign key FKobjb6jgxji3jrrgoxy9r30uyc;
 
     alter table planet 
        drop 
        foreign key FK9cd80e9yxwnobejr9twlcknab;
-
-    alter table planet 
-       drop 
-       foreign key FKjw116v1g0p9ghu41k1jddkw50;
 
     alter table planet 
        drop 
@@ -191,17 +203,13 @@
        drop 
        foreign key FKch37eb44iv0ls442yu7usvvtp;
 
-    alter table resources 
+    alter table resourcesDepositComposition 
        drop 
-       foreign key FK8l4tmivydxr3qd5g2hmes0ieh;
+       foreign key FK6q26jn3ftmq2x638tsgi0aemy;
 
     alter table shipClass 
        drop 
        foreign key FKouxjssb18x4jeutl5r1l0byeu;
-
-    alter table shipClass 
-       drop 
-       foreign key FK5iggor36gwq8904cpdvcfjc1n;
 
     alter table shipClass 
        drop 
@@ -259,6 +267,26 @@
        drop 
        foreign key FKd0120p7tkvssh9r8hldenpw1w;
 
+    alter table userMessage 
+       drop 
+       foreign key FK5mctsyrt040xp1wgghtk6lxxr;
+
+    alter table userMessage 
+       drop 
+       foreign key FK6xs6p78lala5xtd4eoe4xxrnv;
+
+    alter table warShip 
+       drop 
+       foreign key FK3kovfkp6003a62x5ff41h44hw;
+
+    alter table warShip 
+       drop 
+       foreign key FKjr13y2u3qkka7d3npp9omwdoa;
+
+    alter table warShip 
+       drop 
+       foreign key FKdywyvdwb0ovbd6oruywo13nyx;
+
     alter table weapon 
        drop 
        foreign key FK1rsb3ampiw8yjy8ngrget6ay;
@@ -291,13 +319,19 @@
 
     drop table if exists fleet;
 
-    drop table if exists fleetcomposition;
+    drop table if exists fleetComposition;
 
     drop table if exists hull;
+
+    drop table if exists humanResources;
 
     drop table if exists job;
 
     drop table if exists knownStarSystem;
+
+    drop table if exists miningFactors;
+
+    drop table if exists miningFactorsComposition;
 
     drop table if exists move;
 
@@ -311,7 +345,7 @@
 
     drop table if exists resourceDeposit;
 
-    drop table if exists resources;
+    drop table if exists resourcesDepositComposition;
 
     drop table if exists shipClass;
 
@@ -326,6 +360,10 @@
     drop table if exists unlockedResearch;
 
     drop table if exists user;
+
+    drop table if exists userMessage;
+
+    drop table if exists warShip;
 
     drop table if exists weapon;
 
@@ -379,8 +417,10 @@
         description varchar(255),
         increasingFactorPerLevel decimal(19,2),
         name varchar(30),
-        resourceType varchar(255),
-        idCosts integer,
+        productionCategory varchar(255) not null,
+        productionTarget varchar(255) not null,
+        refinementSequence varchar(255),
+        idCosts integer not null,
         idResearch integer not null,
         primary key (idBuilding)
     ) engine=InnoDB;
@@ -388,10 +428,10 @@
     create table colonization (
        idColonization integer not null auto_increment,
         doneAtZero integer not null,
-        idPlanet integer not null,
+        idCosts integer not null,
+        idTarget integer not null,
         idUser integer not null,
-        primary key (idColonization),
-        check (idPlanet is not null AND idUser is not null)
+        primary key (idColonization)
     ) engine=InnoDB;
 
     create table construction (
@@ -419,17 +459,16 @@
         name varchar(255) not null,
         idMove integer,
         idPlanet integer,
-        idStarsystem integer,
+        idStarSystem integer,
         idOwner integer not null,
         idResourceDeposit integer,
         primary key (idFleet)
     ) engine=InnoDB;
 
-    create table fleetcomposition (
+    create table fleetComposition (
        idFleet integer not null,
-        amount integer,
-        idShipClass integer not null,
-        primary key (idFleet, idShipClass)
+        idWarShip integer not null,
+        primary key (idFleet, idWarShip)
     ) engine=InnoDB;
 
     create table hull (
@@ -447,16 +486,23 @@
         primary key (idHull)
     ) engine=InnoDB;
 
+    create table humanResources (
+       idResourceDeposit integer not null,
+        amount decimal(19, 0) not null,
+        educationType varchar(50) not null,
+        primary key (idResourceDeposit, educationType)
+    ) engine=InnoDB;
+
     create table job (
        idJob integer not null auto_increment,
         amountShips integer,
         resourceType varchar(255),
         targetLevel integer,
-        jobDoneAtZero decimal(19,2) not null,
+        jobDoneAtZero decimal(19, 0) not null,
         idBuilding integer,
         idResearch integer,
         idShipClass integer,
-        idFacility integer,
+        idFacility integer not null,
         idOwner integer not null,
         primary key (idJob),
         check ((idBuilding IS NOT NULL AND targetLevel IS NOT NULL) OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) OR (idShipClass IS NOT NULL AND amountShips IS NOT NULL))
@@ -466,6 +512,18 @@
        idOwner integer not null,
         idStarSystem integer not null,
         primary key (idOwner, idStarSystem)
+    ) engine=InnoDB;
+
+    create table miningFactors (
+       idMiningFactors integer not null auto_increment,
+        primary key (idMiningFactors)
+    ) engine=InnoDB;
+
+    create table miningFactorsComposition (
+       idMiningFactors integer not null,
+        amount decimal(19, 0),
+        resourceType varchar(50) not null,
+        primary key (idMiningFactors, resourceType)
     ) engine=InnoDB;
 
     create table move (
@@ -501,9 +559,9 @@
         name varchar(30) not null,
         xCoordinate integer not null,
         yCoordinate integer not null,
+        idMiningFactors integer not null,
         idOwner integer,
         idResourceDeposit integer,
-        idResourceFactor integer,
         idStarSystem integer,
         primary key (idPlanet)
     ) engine=InnoDB;
@@ -537,11 +595,11 @@
         primary key (idResourceDeposit)
     ) engine=InnoDB;
 
-    create table resources (
+    create table resourcesDepositComposition (
        idResourceDeposit integer not null,
-        amount decimal(19, 0),
-        type varchar(50) not null,
-        primary key (idResourceDeposit, type)
+        amount decimal(19, 0) not null,
+        resourceType varchar(50) not null,
+        primary key (idResourceDeposit, resourceType)
     ) engine=InnoDB;
 
     create table shipClass (
@@ -549,7 +607,6 @@
         isDeleted bit not null,
         name varchar(30) not null,
         idArmor integer,
-        idCosts integer,
         idElectronicWarfare integer,
         idHull integer not null,
         idOwner integer not null,
@@ -609,6 +666,26 @@
         primary key (idUser)
     ) engine=InnoDB;
 
+    create table userMessage (
+       idUserMessage integer not null auto_increment,
+        message varchar(255),
+        receivedAt datetime(6),
+        sentAt datetime(6) not null,
+        subject varchar(255) not null,
+        idUserReceiver integer not null,
+        idUserSender integer not null,
+        primary key (idUserMessage)
+    ) engine=InnoDB;
+
+    create table warShip (
+       idWarShip integer not null auto_increment,
+        name varchar(255) not null,
+        idFleet integer not null,
+        idShipClass integer not null,
+        idShipyard integer not null,
+        primary key (idWarShip)
+    ) engine=InnoDB;
+
     create table weapon (
        idWeapon integer not null auto_increment,
         description varchar(255) not null,
@@ -638,6 +715,9 @@
 
     alter table fleet 
        add constraint UK_duhimx7ydhmssl7vqp5w29yx0 unique (idMove);
+
+    alter table fleetComposition 
+       add constraint UK_9aa4dwwkuicd7n10h7jn471am unique (idWarShip);
 
     alter table planet 
        add constraint PLANET_UK unique (idStarSystem, idPlanet, xCoordinate, yCoordinate);
@@ -708,8 +788,13 @@
        references research (idResearch);
 
     alter table colonization 
-       add constraint FKr6k79x7m4igtmpu720nfxk2mw 
-       foreign key (idPlanet) 
+       add constraint FK6kxulldcu79b6d6ecjr7pvpyw 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
+
+    alter table colonization 
+       add constraint FKb2jrbwdwy0j8t2tggwtbf64ty 
+       foreign key (idTarget) 
        references planet (idPlanet);
 
     alter table colonization 
@@ -748,8 +833,8 @@
        references planet (idPlanet);
 
     alter table fleet 
-       add constraint FK2vpu4blpguup7j52xnn42ypnl 
-       foreign key (idStarsystem) 
+       add constraint FKtv4xu7x5k69o40m38jmf2lip 
+       foreign key (idStarSystem) 
        references starSystem (idStarSystem);
 
     alter table fleet 
@@ -762,16 +847,15 @@
        foreign key (idResourceDeposit) 
        references resourceDeposit (idResourceDeposit);
 
-    alter table fleetcomposition 
-       add constraint FK2xo81l4vrqmcwboo06cumtens 
-       foreign key (idShipClass) 
-       references shipClass (idShipClass);
+    alter table fleetComposition 
+       add constraint FK9v3ldmrdaym225uw9487vw2ek 
+       foreign key (idWarShip) 
+       references warShip (idWarShip);
 
-    alter table fleetcomposition 
-       add constraint FK8xjjuy4dvxqwloaaf4wge42qw 
+    alter table fleetComposition 
+       add constraint FKfk2nrx1fso8buadj6v4sw1j04 
        foreign key (idFleet) 
-       references fleet (idFleet) 
-       on delete cascade;
+       references fleet (idFleet);
 
     alter table hull 
        add constraint FK65udyybp7syxvga5evxn8olhc 
@@ -782,6 +866,11 @@
        add constraint FK4hpf1pawl0wynjx9kdg74opea 
        foreign key (idResearch) 
        references research (idResearch);
+
+    alter table humanResources 
+       add constraint FKh3v7ra6rwylc7sofs1is80fb8 
+       foreign key (idResourceDeposit) 
+       references resourceDeposit (idResourceDeposit);
 
     alter table job 
        add constraint FK7otfjvk4vhy0gt0m3hnyam6au 
@@ -817,6 +906,11 @@
        add constraint FKtjhh901to46le5kkmsybuwdbb 
        foreign key (idOwner) 
        references user (idUser);
+
+    alter table miningFactorsComposition 
+       add constraint FK7pw467msglkrl51uo8uu6v6l6 
+       foreign key (idMiningFactors) 
+       references miningFactors (idMiningFactors);
 
     alter table move 
        add constraint FKg65nht3m74odamnrqiv1cdyl6 
@@ -859,6 +953,11 @@
        references research (idResearch);
 
     alter table planet 
+       add constraint FK6290orio72djryi0kktbn3esu 
+       foreign key (idMiningFactors) 
+       references miningFactors (idMiningFactors);
+
+    alter table planet 
        add constraint FKobjb6jgxji3jrrgoxy9r30uyc 
        foreign key (idOwner) 
        references user (idUser);
@@ -866,11 +965,6 @@
     alter table planet 
        add constraint FK9cd80e9yxwnobejr9twlcknab 
        foreign key (idResourceDeposit) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table planet 
-       add constraint FKjw116v1g0p9ghu41k1jddkw50 
-       foreign key (idResourceFactor) 
        references resourceDeposit (idResourceDeposit);
 
     alter table planet 
@@ -898,8 +992,8 @@
        foreign key (unlockedThrough) 
        references research (idResearch);
 
-    alter table resources 
-       add constraint FK8l4tmivydxr3qd5g2hmes0ieh 
+    alter table resourcesDepositComposition 
+       add constraint FK6q26jn3ftmq2x638tsgi0aemy 
        foreign key (idResourceDeposit) 
        references resourceDeposit (idResourceDeposit);
 
@@ -907,11 +1001,6 @@
        add constraint FKouxjssb18x4jeutl5r1l0byeu 
        foreign key (idArmor) 
        references armor (idArmor);
-
-    alter table shipClass 
-       add constraint FK5iggor36gwq8904cpdvcfjc1n 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
 
     alter table shipClass 
        add constraint FKfbii11hday9qcjpmi2i1k2611 
@@ -982,6 +1071,31 @@
        add constraint FKd0120p7tkvssh9r8hldenpw1w 
        foreign key (idAlliance) 
        references alliance (idAlliance);
+
+    alter table userMessage 
+       add constraint FK5mctsyrt040xp1wgghtk6lxxr 
+       foreign key (idUserReceiver) 
+       references user (idUser);
+
+    alter table userMessage 
+       add constraint FK6xs6p78lala5xtd4eoe4xxrnv 
+       foreign key (idUserSender) 
+       references user (idUser);
+
+    alter table warShip 
+       add constraint FK3kovfkp6003a62x5ff41h44hw 
+       foreign key (idFleet) 
+       references fleet (idFleet);
+
+    alter table warShip 
+       add constraint FKjr13y2u3qkka7d3npp9omwdoa 
+       foreign key (idShipClass) 
+       references shipClass (idShipClass);
+
+    alter table warShip 
+       add constraint FKdywyvdwb0ovbd6oruywo13nyx 
+       foreign key (idShipyard) 
+       references planet (idPlanet);
 
     alter table weapon 
        add constraint FK1rsb3ampiw8yjy8ngrget6ay 

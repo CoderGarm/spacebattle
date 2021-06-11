@@ -10,8 +10,8 @@ import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.binder.ErrorLevel;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.NotifySBUserException;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.gui.vaadin.NotificationHelper;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ShipClassCreateDTO;
@@ -190,7 +190,7 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass>
     }
 
     @Override
-    public void update(ShipClass value) {
+    public void updateStatistics(ShipClass value) {
         resetDTO();
     }
 

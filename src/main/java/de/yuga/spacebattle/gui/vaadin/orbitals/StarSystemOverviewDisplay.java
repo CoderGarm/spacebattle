@@ -99,7 +99,7 @@ public class StarSystemOverviewDisplay extends StarSystemLayout implements HasVa
         starSystemDisplayMap = starSystems.stream().collect(Collectors.toMap(o -> ViewBoxDefinition.idCreateOrbitID(o.getOrbit()), Function.identity()));
         final Colonization colonizationToDisplay = colonizationService.getColonizationToDisplay();
         if (colonizationToDisplay != null) {
-            viewBoxDefinition = new ViewBoxDefinition(starSystems, canvas, colonizationToDisplay.getPlanet().getSystem());
+            viewBoxDefinition = new ViewBoxDefinition(starSystems, canvas, colonizationToDisplay.getTarget().getSystem());
             //viewBoxDefinition.panToStarSystem(colonizationToDisplay.getPlanet().getSystem());
         } else {
             viewBoxDefinition = new ViewBoxDefinition(starSystems, canvas, null);

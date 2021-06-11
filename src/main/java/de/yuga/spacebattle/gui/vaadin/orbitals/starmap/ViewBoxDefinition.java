@@ -5,7 +5,7 @@ import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.svg.Svg;
 import com.vaadin.flow.component.svg.elements.*;
 import de.yuga.spacebattle.NotifySBUserException;
-import de.yuga.spacebattle.backend.distance.DistanceCalculator;
+import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
@@ -936,7 +936,7 @@ public class ViewBoxDefinition {
         final Orbit orbit = planet.getOrbit();
         final Set<Colonization> colonizations = userService.getColonizations(loggedInUser);
         colonizations.stream()
-                .filter(c -> c.getPlanet().equals(planet))
+                .filter(c -> c.getTarget().equals(planet))
                 .findFirst()
                 .ifPresent(colonization -> {
 

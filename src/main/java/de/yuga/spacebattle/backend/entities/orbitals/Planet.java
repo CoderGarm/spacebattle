@@ -1,11 +1,16 @@
 package de.yuga.spacebattle.backend.entities.orbitals;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
+import de.yuga.spacebattle.backend.calculator.resource.TickOutputCalculator;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
-import de.yuga.spacebattle.backend.entities.ResourceDeposit;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
-import de.yuga.spacebattle.backend.enums.EResourceSubType;
+import de.yuga.spacebattle.backend.entities.turn.resources.MiningFactors;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.EDepositType;
+import de.yuga.spacebattle.backend.enums.EPlanetType;
+import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 
 import javax.annotation.Nonnull;
@@ -17,14 +22,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @NamedQueries({
         @NamedQuery(name = "Planet.getAll", query = "SELECT p FROM Planet p"),
         @NamedQuery(name = "Planet.getAllOwned", query = "SELECT p FROM Planet p WHERE p.owner IS NOT NULL"),
-        @NamedQuery(name = "Planet.getAllOwnedBy", query = "SELECT p FROM Planet p WHERE p.owner = :owner ORDER BY p.id"),
-        @NamedQuery(name = "Planet.getPlanetsWithBuildingForResourceType",
-                query = "SELECT p FROM Planet p LEFT JOIN FETCH p.constructions c WHERE p.owner = :owner AND c.building.resourceType = :resourceType"),
+        @NamedQuery(name = "Planet.getAllOwnedBy", query = "SELECT p FROM Planet p WHERE p.owner = :owner ORDER BY p.colonizedAt"),
+        @NamedQuery(name = "Planet.getPlanetsWithBuildingsForResourceType",
+                query = "SELECT p FROM Planet p LEFT JOIN FETCH p.constructions c WHERE p.owner = :owner AND c.building.productionType.productionTarget = :resourceType"),
         @NamedQuery(name = "Planet.getMainPlanet", query = "SELECT p FROM Planet p WHERE p.owner = :owner GROUP BY p.colonizedAt"),
 })
 @Entity
@@ -53,12 +58,13 @@ public class Planet extends AbstractEntityKey {
     private Orbit orbit;
 
     /**
-     * Describes the mining factors for every rescource.
+     * Describes the mining factors for every resource.
      */
     @Nonnull
+    @NotNull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
-    @JoinColumn(name = "idResourceFactor", updatable = false)
-    private final ResourceDeposit resourceFactors = new ResourceDeposit(EResourceSubType.MININGFACTORS);
+    @JoinColumn(name = "idMiningFactors", nullable = false)
+    private final MiningFactors miningFactors = new MiningFactors();
 
     /**
      * The amount of resources at this planet.
@@ -66,14 +72,18 @@ public class Planet extends AbstractEntityKey {
     @Nonnull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "idResourceDeposit", updatable = false)
-    private final ResourceDeposit resourceDeposit = new ResourceDeposit(EResourceSubType.DEPOSITS);
+    private final ResourceDeposit resourceDeposit = ResourceDepositInitializerCalculator.initializeResourceDeposit(Planet.class, EDepositType.DEPOSITS);
 
     @Nonnull
-    @OneToMany(mappedBy = "planet", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, mappedBy = "planet")
     private final Set<Construction> constructions = new HashSet<>();
 
     @Nullable
     private LocalDateTime colonizedAt;
+
+    @Nonnull
+    @Transient
+    private final EPlanetType planetType = EPlanetType.PLANET;
 
     public Planet() {
     }
@@ -91,7 +101,6 @@ public class Planet extends AbstractEntityKey {
         this.name = name;
         this.system = system;
         this.orbit = orbit;
-
     }
 
     @Nullable
@@ -131,8 +140,8 @@ public class Planet extends AbstractEntityKey {
     }
 
     @Nonnull
-    public ResourceDeposit getResourceFactors() {
-        return resourceFactors;
+    public MiningFactors getMiningFactors() {
+        return miningFactors;
     }
 
     @Nonnull
@@ -143,6 +152,11 @@ public class Planet extends AbstractEntityKey {
     @Nullable
     public LocalDateTime getColonizedAt() {
         return colonizedAt;
+    }
+
+    @Nonnull
+    public EPlanetType getPlanetType() {
+        return planetType;
     }
 
     @Override
@@ -161,41 +175,18 @@ public class Planet extends AbstractEntityKey {
     }
 
     /**
-     * Returns the tickly output of this planet for a specific resource type.
-     *
-     * @param resourceType the resource type which should be calculated
-     * @return the effective tickly output
-     */
-    @Nonnull
-    public BigDecimal getTickOutputForResourceType(@Nonnull final EResourceType resourceType) {
-        Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
-
-        final AtomicReference<BigDecimal> output = new AtomicReference<>();
-        output.set(BigDecimal.ZERO);
-        final BigDecimal resourceAmountByType = getResourceFactors().getResourceAmountByType(resourceType);
-        getConstructions().stream()
-                .filter(construction -> construction.getBuilding().getResourceType() == resourceType)
-                .findFirst()
-                .ifPresent(construction -> {
-                    output.set(construction.getTickOutput(resourceAmountByType));
-                });
-
-        return output.get();
-    }
-
-    /**
      * Returns the facility which produces the resource type.
      *
      * @param resourceType the requested resource type
      * @return the facility
      */
-    @Nullable
-    public Construction getConstructionByResource(@Nonnull final EResourceType resourceType) {
+    @Nonnull
+    public Set<Construction> getConstructionByResource(@Nonnull final EResourceType resourceType) {
         Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
 
         return getConstructions().stream()
-                .filter(construction -> construction.getBuilding().getResourceType() == resourceType)
-                .findFirst().orElse(null);
+                .filter(construction -> construction.getBuilding().getProductionTarget() == resourceType)
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -205,5 +196,28 @@ public class Planet extends AbstractEntityKey {
      */
     public boolean isColonizable() {
         return owner == null;
+    }
+
+    /**
+     * Checks if this planet has a building for this resource type.
+     *
+     * @param resourceType the resource type
+     * @return <code>true</code> if this planet has a construction for this type, <code>false</code> otherwise
+     */
+    public boolean hasProductionTarget(@Nonnull final EResourceType resourceType) {
+        Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
+
+        return getConstructions().stream().anyMatch(c -> resourceType == c.getBuilding().getProductionTarget());
+    }
+
+    /**
+     * Returns the population capacity of this planet.
+     *
+     * @return the maximum capacity
+     */
+    public long getPopulationCapacity() {
+        return getConstructionByResource(EResourceType.POPULATION).stream()
+                .filter(c -> EProductionCategory.CAPACITY == c.getBuilding().getProductionType().getProductionCategory())
+                .map(TickOutputCalculator::getTickOutputByLevelForPopulation).reduce(BigDecimal.ZERO, BigDecimal::add).longValue();
     }
 }

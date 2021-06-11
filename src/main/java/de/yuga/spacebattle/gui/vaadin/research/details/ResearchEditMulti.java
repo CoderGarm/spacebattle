@@ -74,7 +74,8 @@ public class ResearchEditMulti extends VerticalLayout implements HasValue<Abstra
         final User loggedIn = userService.getLoggedInUser();
         final Planet researchPlanet = planetService.findResearchPlanet(loggedIn);
         if (researchPlanet != null) {
-            Construction facility = researchPlanet.getConstructionByResource(EResourceType.RESEARCH);
+            final Construction facility = researchPlanet.getConstructionByResource(EResourceType.RESEARCH)
+                    .stream().findFirst().orElse(null);
             if (facility == null) {
                 throw new NotifySBUserException("You can't research without a lab.");
             }

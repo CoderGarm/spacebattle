@@ -2,15 +2,21 @@ package de.yuga.spacebattle.backend.services.buildings;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
+import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
+import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
+import de.yuga.spacebattle.backend.enums.EDepositType;
+import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.buildings.BuildingRepository;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class BuildingService {
@@ -42,7 +48,9 @@ public class BuildingService {
      * @param name            the name of the planet
      * @param description     the description
      * @param baseValue       the amount of production per {@link Tick} multiplied with {@link Building#getIncreasingFactorPerLevel()}
-     * @param resourceType    what does it produces
+     * @param productionType  what does it produces
+     * @param educationType   the education type needed to run the building
+     * @param amountOfWorkers the amount of employees
      * @param unlockedThrough the research which unlocks this building
      * @return the new building
      */
@@ -51,19 +59,23 @@ public class BuildingService {
     public Building createBuilding(@Nonnull final String name,
                                    @Nonnull final String description,
                                    final int baseValue,
-                                   @Nonnull final EResourceType resourceType,
+                                   @Nonnull final ProductionType productionType,
+                                   @Nonnull final EEducationType educationType,
+                                   final long amountOfWorkers,
                                    @Nonnull final Research unlockedThrough) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
-        Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
+        Preconditions.checkNotNull(productionType, "productionType shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
 
-        return buildingRepository.save(new Building(name, description, baseValue, resourceType, unlockedThrough));
+        final Map<EEducationType, Long> crewRequirement = new HashMap<>();
+        crewRequirement.put(educationType, amountOfWorkers);
+        return buildingRepository.save(new Building(name, description, baseValue, productionType, new CrewRequirementDTO(crewRequirement, EDepositType.COSTS), unlockedThrough));
     }
 
-    public Building findBuildingByType(@Nonnull final EResourceType resourceType) {
-        Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
+    public Building findBuildingByProductionType(@Nonnull final EResourceType productionType) {
+        Preconditions.checkNotNull(productionType, "productionType shouldn't be null!");
 
-        return buildingRepository.findBuildingByType(resourceType);
+        return buildingRepository.findBuildingByProductionTarget(productionType);
     }
 }

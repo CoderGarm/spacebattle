@@ -12,5 +12,5 @@ public interface CustomBuildingRepository {
     List<Building> findAllBuildings();
 
     @Nullable
-    Building findBuildingByType(@Nonnull EResourceType resourceType);
+    Building findBuildingByProductionTarget(@Nonnull EResourceType resourceType);
 }

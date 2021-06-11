@@ -1,10 +1,8 @@
 package de.yuga.spacebattle.backend.entities.constructables.buildings;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
-import de.yuga.spacebattle.backend.entities.ResourceDeposit;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Job;
@@ -12,7 +10,6 @@ import de.yuga.spacebattle.backend.entities.turn.Job;
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,7 +22,6 @@ import java.util.Set;
 @AttributeOverride(name = "id", column = @Column(name = "idConstruction"))
 public class Construction extends AbstractEntityKey {
 
-    @JsonIgnore
     @Nonnull
     @NotNull
     @ManyToOne
@@ -38,7 +34,7 @@ public class Construction extends AbstractEntityKey {
     @JoinColumn(name = "idBuilding", updatable = false)
     private Building building;
 
-    private int level = 1;
+    private int level;
 
     @Nonnull
     @OneToMany(mappedBy = "facility", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -54,22 +50,6 @@ public class Construction extends AbstractEntityKey {
         this.planet = planet;
         this.building = building;
         this.level = level;
-    }
-
-    /**
-     * Calculates the tickly output of this construction.
-     *
-     * @param resourceFactorByPlanet the planets opportunity to produce
-     * @return the tickly production
-     */
-    public BigDecimal getTickOutput(@Nonnull final BigDecimal resourceFactorByPlanet) {
-        Preconditions.checkNotNull(resourceFactorByPlanet, "resourceFactorByPlanet shouldn't be null!");
-
-        BigDecimal increasingFactorPerLevel = building.getIncreasingFactorPerLevel();
-        int baseValue = building.getBaseValue();
-        BigDecimal result = new BigDecimal(baseValue).add(increasingFactorPerLevel).multiply(new BigDecimal(level));
-        return result.multiply(
-                resourceFactorByPlanet.divide(BigDecimal.TEN.movePointRight(1), ResourceDeposit.mathContext));
     }
 
     @Nonnull
@@ -98,6 +78,7 @@ public class Construction extends AbstractEntityKey {
         return jobs;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -105,11 +86,14 @@ public class Construction extends AbstractEntityKey {
 
         Construction that = (Construction) o;
 
-        return id == that.id;
+        if (!planet.equals(that.planet)) return false;
+        return building.equals(that.building);
     }
 
     @Override
     public int hashCode() {
-        return id * 33;
+        int result = planet.hashCode();
+        result = 31 * result + building.hashCode();
+        return result;
     }
 }

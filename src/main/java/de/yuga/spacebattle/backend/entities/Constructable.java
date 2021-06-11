@@ -3,10 +3,13 @@ package de.yuga.spacebattle.backend.entities;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.NotifySBUserException;
+import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Job;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 
 import javax.annotation.Nonnull;
@@ -14,8 +17,6 @@ import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Represents the payload of a job.
@@ -82,7 +83,7 @@ public class Constructable {
 
         this.shipClass = shipClass;
         this.amountShips = amountShips;
-        this.resourceType = EResourceType.ORBITALCONSTRUCTION;
+        this.resourceType = EResourceType.ORBITAL_CONSTRUCTION;
     }
 
     @Nullable
@@ -120,47 +121,33 @@ public class Constructable {
      *
      * @return the costs
      */
-    public Map<EResourceType, BigDecimal> getJobCosts() {
-
+    @Nonnull
+    public ResourceDeposit getJobCosts() {
         if (research != null && targetLevel != null) {
-            final BigDecimal researchCosts = research.getCosts().getResourceAmountByType(EResourceType.RESEARCH).multiply(new BigDecimal(targetLevel));
-            final Map<EResourceType, BigDecimal> costs = new HashMap<>();
-            costs.put(EResourceType.RESEARCH, researchCosts);
-            return costs;
+            final long amountByType = research.getCosts().getResourceAmountByType(EResourceType.RESEARCH);
+            final BigDecimal researchCosts = new BigDecimal(amountByType)
+                    .multiply(new BigDecimal(targetLevel, ResourceDeposit.MATH_CONTEXT_INTEGER));
+            final ResourceDeposit resources = new ResourceDeposit();
+            resources.setSubType(EDepositType.COSTS);
+            resources.updateResource(EResourceType.RESEARCH, researchCosts.longValue());
+            return resources;
         }
 
         if (shipClass != null) {
             if (shipClass.getHull() == null) {
                 throw new NotifySBUserException("You need a hull for your ship, really!");
             }
-            return shipClass.getCostsOverall().getResources();
+            return shipClass.getCostsOverall();
         }
 
         if (building != null && targetLevel != null) {
-            Integer targetLevel = this.targetLevel;
-            ResourceDeposit costs = building.getCosts();
-            return getCostsForLevel(costs, targetLevel);
+            final Integer targetLevel = this.targetLevel;
+            final ResourceDeposit costs = building.getCosts();
+            return JobCostsCalculator.getCostsForLevel(costs, targetLevel);
         }
 
         throw new NotifySBUserException("You have tried something interesting. May be you should talk to an admin.");
     }
 
-    /**
-     * Calculates the full costs by the given target level.
-     *
-     * @param costs       the base costs
-     * @param targetLevel the target level
-     * @return the costs for the target level
-     */
-    @Nonnull
-    private Map<EResourceType, BigDecimal> getCostsForLevel(@Nonnull final ResourceDeposit costs,
-                                                            final int targetLevel) {
 
-        final Map<EResourceType, BigDecimal> resources = new HashMap<>(costs.getResources());
-        for (EResourceType resourceType : resources.keySet()) {
-            final BigDecimal resourceAmountByType = costs.getResourceAmountByType(resourceType);
-            costs.updateResource(resourceType, resourceAmountByType.multiply(new BigDecimal(targetLevel)));
-        }
-        return resources;
-    }
 }

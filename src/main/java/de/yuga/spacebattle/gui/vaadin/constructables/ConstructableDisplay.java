@@ -6,11 +6,11 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.Constructable;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.enums.EResourceType;
-import de.yuga.spacebattle.gui.vaadin.buildings.BuildingDisplay;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.ShipClassDisplay;
+import de.yuga.spacebattle.gui.vaadin.misc.details.misc.HasNameAndDescriptionDisplayHorizontal;
 import de.yuga.spacebattle.gui.vaadin.research.details.ResearchDisplay;
 import de.yuga.spacebattle.gui.vaadin.research.details.ResearchLevelDTO;
 
@@ -45,12 +45,12 @@ public class ConstructableDisplay extends VerticalLayout {
                 if (targetLevel == null) {
                     throw new NotifySBUserException("The targetLevel cannot be null here.");
                 }
-                BuildingDisplay buildingDisplay = new BuildingDisplay();
-                buildingDisplay.setValue(building);
+                HasNameAndDescriptionDisplayHorizontal hasNameAndDescriptionDisplayHorizontal = new HasNameAndDescriptionDisplayHorizontal();
+                hasNameAndDescriptionDisplayHorizontal.setValue(building);
                 Label levelValue = new Label("Target Level: " + targetLevel);
-                add(levelValue, buildingDisplay);
+                add(levelValue, hasNameAndDescriptionDisplayHorizontal);
                 break;
-            case ORBITALCONSTRUCTION:
+            case ORBITAL_CONSTRUCTION:
                 ShipClass shipClass = constructable.getShipClass();
                 Integer amountShips = constructable.getAmountShips();
                 if (shipClass == null) {
@@ -60,7 +60,7 @@ public class ConstructableDisplay extends VerticalLayout {
                     throw new NotifySBUserException("The amountShips cannot be null here.");
                 }
                 ShipClassDisplay shipClassDisplay = new ShipClassDisplay();
-                shipClassDisplay.update(shipClass);
+                shipClassDisplay.updateStatistics(shipClass);
                 add(shipClassDisplay, new Label("Amount: " + amountShips));
                 break;
         }

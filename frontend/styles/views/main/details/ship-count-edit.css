@@ -1,0 +1,24 @@
+.ship-frame {
+    border: dimgrey 1px solid;
+    position: relative;
+    max-width: 850px;
+}
+
+.ship-frame .simple-label-with-caption .simple-label {
+    font-size: 0.9rem;
+}
+
+.ship-image {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+.stats {
+
+}
+
+.costs {
+    width: 155px;
+    height: 250px;
+}

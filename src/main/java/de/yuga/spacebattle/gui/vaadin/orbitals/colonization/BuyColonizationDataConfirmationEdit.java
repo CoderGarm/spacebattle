@@ -9,8 +9,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
-import de.yuga.spacebattle.NotifySBUserException;
-import de.yuga.spacebattle.backend.colonization.ColonizationCostCalculator;
+import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
@@ -18,7 +17,7 @@ import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
-import de.yuga.spacebattle.gui.vaadin.misc.details.EResourceAmountDTO;
+import de.yuga.spacebattle.gui.vaadin.turn.resource.ResourceCostAmountDTO;
 
 import javax.annotation.Nonnull;
 
@@ -43,18 +42,13 @@ public class BuyColonizationDataConfirmationEdit extends HorizontalLayout {
     private final Button submit;
 
     public BuyColonizationDataConfirmationEdit() {
-        final User loggedInUser = userService.getLoggedInUser();
-        if (loggedInUser == null) {
-            throw new NotifySBUserException("You should hold a login here.");
-        }
-
         final Label costs = new Label();
         final ReadOnlyHasValue<String> costsText = new ReadOnlyHasValue<>(costs::setText);
         binder.forField(costsText)
                 .bind(system -> {
-                            final EResourceAmountDTO costsDTO = ColonizationCostCalculator.calculateInformationCost(system);
+                            final ResourceCostAmountDTO costsDTO = ColonizationCostCalculator.calculateInformationCost(system);
                             final EResourceType resourceType = costsDTO.getResourceType();
-                            final String amountWithDiff = costsDTO.getAmountWithDiff();
+                            final String amountWithDiff = costsDTO.getAmountAsString();
                             return amountWithDiff + " " + resourceType.getPluralName();
                         },
                         null);
@@ -87,8 +81,8 @@ public class BuyColonizationDataConfirmationEdit extends HorizontalLayout {
         if (value != null) {
             final User loggedInUser = userService.getLoggedInUser();
             final Planet mainPlanet = planetService.findMainPlanet(loggedInUser);
-            final EResourceAmountDTO costs = ColonizationCostCalculator.calculateInformationCost(value);
-            if (mainPlanet.getResourceDeposit().getResourceAmountByType(costs.getResourceType()).compareTo(costs.getAmount()) >= 0) {
+            final ResourceCostAmountDTO costs = ColonizationCostCalculator.calculateInformationCost(value);
+            if (mainPlanet.getResourceDeposit().isReducingResourcePossible(costs.getResourceType(), costs.getAmount())) {
                 submit.setEnabled(true);
             }
 

@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.Binder;
@@ -12,8 +11,8 @@ import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
@@ -69,7 +68,6 @@ public class PlanetShipyardConstructionEdit extends PlanetLayout<Planet> impleme
         uiEventBus.subscribe(this);
         binderPlanet.forField(getPlanetResourceDisplay()).bind(planet -> planet, null);
 
-        final Label title = new Label("Shipyard");
         submit = new Button(BUILD, event -> {
             shipJobPayload = componentsMap.values().stream()
                     .map(ShipClassCountEdit::getValue)
@@ -93,7 +91,7 @@ public class PlanetShipyardConstructionEdit extends PlanetLayout<Planet> impleme
         });
 
         final HorizontalLayout buttonBar = new HorizontalLayout(submit, clear);
-        add(title, verticalLayout, buttonBar);
+        add(verticalLayout, buttonBar);
         validateSubmitButton();
     }
 
@@ -102,24 +100,25 @@ public class PlanetShipyardConstructionEdit extends PlanetLayout<Planet> impleme
                 .filter(Objects::nonNull)
                 .filter(dto -> dto.getCountNumeric() > 0)
                 .findFirst()
-                .ifPresentOrElse(shipClassCountDTO -> setReadOnly(false), () -> submit.setEnabled(false));
+                .ifPresentOrElse(dto -> setReadOnly(false), () -> submit.setEnabled(false));
     }
 
-    public void update(@Nullable final Planet planet) {
+    @Override
+    public void updateStatistics(@Nullable final Planet planet) {
         binderPlanet.readBean(planet);
         if (planet == null) {
             clear();
             return;
         }
         planet.getConstructions().stream()
-                .filter(construction -> construction.getBuilding().getResourceType() == EResourceType.ORBITALCONSTRUCTION)
+                .filter(construction -> construction.getBuilding().getProductionTarget() == EResourceType.ORBITAL_CONSTRUCTION)
                 .findFirst()
                 .ifPresentOrElse(this::createConstructionSelection, this::clear);
     }
 
     @Override
     public void setValue(Planet value) {
-        update(value);
+        updateStatistics(value);
     }
 
     @Nullable

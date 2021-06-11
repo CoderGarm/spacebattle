@@ -1,9 +1,9 @@
 package de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AlignedFitting;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.SupportFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Armor;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
@@ -56,7 +56,7 @@ public class ModuleValueTypePerFleetDatasource {
      *
      * @param shipClasses the ship classes to display
      */
-    public void update(@Nullable final Map<ShipClass, Integer> shipClasses) {
+    public void setValue(@Nullable final Map<ShipClass, Integer> shipClasses) {
         clearValues();
 
         if (shipClasses != null) {

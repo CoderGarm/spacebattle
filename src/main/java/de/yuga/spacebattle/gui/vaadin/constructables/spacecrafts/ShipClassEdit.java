@@ -13,8 +13,8 @@ import com.vaadin.flow.data.binder.ErrorLevel;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.NotifySBUserException;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.gui.vaadin.NotificationHelper;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ShipClassEditDTO;
@@ -85,7 +85,7 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass>
         nameLayout.add(name, markLabel);
 
         final HullDisplay hullDisplay = new HullDisplay();
-        final ReadOnlyHasValue<Hull> hullSelectedReadOnly = new ReadOnlyHasValue<>(hullDisplay::update);
+        final ReadOnlyHasValue<Hull> hullSelectedReadOnly = new ReadOnlyHasValue<>(hullDisplay::setValue);
         binder.forField(hullSelectedReadOnly)
                 .withValidator((value, context) -> {
                     final ShipClass shipClass = getShipClass();
@@ -175,7 +175,7 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass>
 
     @Override
     @Deprecated(since = "Implementation of create and edit dto.")
-    public void update(@Nullable final ShipClass value) {
+    public void updateStatistics(@Nullable final ShipClass value) {
         throw new NotifySBUserException("You shouldn't need to call that, lil buddy!");
     }
 

@@ -50,13 +50,8 @@ public class WeaponAlignmentCountDTO {
     }
 
     @Nonnull
-    public Integer getCountNumeric() {
+    public Integer getCount() {
         return count;
-    }
-
-    @Nonnull
-    public String getCount() {
-        return String.valueOf(count);
     }
 
     @Nullable

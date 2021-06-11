@@ -1,0 +1,5 @@
+
+:host, [part='container'] {
+    background-color: var(--material-background-color);
+    color: var(--material-body-text-color);
+}

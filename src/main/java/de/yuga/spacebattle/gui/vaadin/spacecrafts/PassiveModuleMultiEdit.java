@@ -37,7 +37,7 @@ public class PassiveModuleMultiEdit extends VerticalLayout implements HasValue<A
         }
 
         final Map<PassiveModule, Integer> modules = value.stream()
-                .collect(Collectors.toMap(PassiveModuleCountDTO::getPassiveModule, PassiveModuleCountDTO::getCountNumeric));
+                .collect(Collectors.toMap(PassiveModuleCountDTO::getPassiveModule, PassiveModuleCountDTO::getCount));
 
         componentMap.forEach((module, moduleEdit) -> {
             if (!modules.containsKey(module)) {
@@ -80,7 +80,7 @@ public class PassiveModuleMultiEdit extends VerticalLayout implements HasValue<A
     public Set<PassiveModuleCountDTO> getValue() {
         return componentMap.keySet().stream()
                 .map(module -> componentMap.get(module).getValue())
-                .filter(dto -> dto.getCountNumeric() > 0)
+                .filter(dto -> dto.getCount() > 0)
                 .collect(Collectors.toSet());
     }
 

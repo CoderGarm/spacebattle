@@ -9,18 +9,22 @@ import com.vaadin.flow.spring.annotation.UIScope;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.gui.vaadin.MainView;
 import de.yuga.spacebattle.gui.vaadin.constructables.buildings.ConstructBuildingEdit;
+import de.yuga.spacebattle.gui.vaadin.constructables.buildings.ConstructionBuildingEditMulti;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
 import de.yuga.spacebattle.gui.vaadin.misc.PageWithSubjectActionTabsAndStats;
 import de.yuga.spacebattle.gui.vaadin.misc.StatsLayout;
-import de.yuga.spacebattle.gui.vaadin.orbitals.*;
+import de.yuga.spacebattle.gui.vaadin.orbitals.PlanetDashboardDisplay;
+import de.yuga.spacebattle.gui.vaadin.orbitals.PlanetJobDisplay;
+import de.yuga.spacebattle.gui.vaadin.orbitals.PlanetLayout;
+import de.yuga.spacebattle.gui.vaadin.orbitals.PlanetShipyardConstructionEdit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.Event;
 import org.vaadin.spring.events.EventBus;
@@ -70,7 +74,7 @@ public class PlanetMainView extends PageWithSubjectActionTabsAndStats<Planet> {
     private final PlanetShipyardConstructionEdit planetShipyardConstructionEdit;
 
     @Nonnull
-    private final PlanetBuildingConstructionEdit planetBuildingConstructionEdit;
+    private final ConstructionBuildingEditMulti constructionBuildingEditMulti;
 
     @Nonnull
     private final PlanetJobDisplay planetJobDisplay;
@@ -91,18 +95,17 @@ public class PlanetMainView extends PageWithSubjectActionTabsAndStats<Planet> {
         this.planetService = planetService;
         this.jobService = jobService;
         final User loggedIn = userService.getLoggedInUser();
+        planet = planetService.findMainPlanet(loggedIn);
         planetDashboardDisplay = new PlanetDashboardDisplay();
-        planet = planetService.findAllColonizedBy(loggedIn).get(0);
         if (planet != null) {
-            planetDashboardDisplay.update(planet);
+            planetDashboardDisplay.updateStatistics(planet);
         }
-        planetBuildingConstructionEdit = new PlanetBuildingConstructionEdit();
+        constructionBuildingEditMulti = new ConstructionBuildingEditMulti();
         planetShipyardConstructionEdit = new PlanetShipyardConstructionEdit();
         planetJobDisplay = new PlanetJobDisplay();
         createSubjectSelectorMenu();
         createActionSelectorMenu();
-        content = planetDashboardDisplay;
-        setContent(content);
+        setContent(planetDashboardDisplay);
         updateActionMenuUsability(null);
     }
 
@@ -123,7 +126,7 @@ public class PlanetMainView extends PageWithSubjectActionTabsAndStats<Planet> {
         events.add(ESBEvent.TICK_DONE.name());
         if (events.contains(e.getPayload())) {
             planet = planetService.find(planet.getId());
-            content.update(this.planet);
+            content.updateStatistics(this.planet);
             content = setContent(content);
         }
 
@@ -162,7 +165,7 @@ public class PlanetMainView extends PageWithSubjectActionTabsAndStats<Planet> {
 
         // Buildings
         Tab constructions = new Tab("Constructions");
-        addComponentForTabOfActionMenu(constructions, planetBuildingConstructionEdit);
+        addComponentForTabOfActionMenu(constructions, constructionBuildingEditMulti);
 
         // Shipyard
         Tab shipyard = new Tab("Shipyard");
@@ -177,12 +180,12 @@ public class PlanetMainView extends PageWithSubjectActionTabsAndStats<Planet> {
     @Override
     protected void addActionListener() {
         actionSelectorMenu.addSelectedChangeListener(event -> {
-            Tab selectedTab = event.getSelectedTab();
-            StatsLayout<Planet> componentForTab = getComponentForTabOfActionMenu(selectedTab);
+            final Tab selectedTab = event.getSelectedTab();
+            final StatsLayout<Planet> componentForTab = getComponentForTabOfActionMenu(selectedTab);
             if (planet != null) {
                 planet = planetService.find(planet);
             }
-            componentForTab.update(planet);
+            componentForTab.updateStatistics(planet);
             content = setContent((PlanetLayout<Planet>) componentForTab);
         });
     }
@@ -207,7 +210,7 @@ public class PlanetMainView extends PageWithSubjectActionTabsAndStats<Planet> {
                 planet = planetService.find(planet);
             }
             addSubjectForTabOfSubjectMenu(selectedTab, planet);
-            content.update(planet);
+            content.updateStatistics(planet);
             updateActionMenuUsability(null);
         });
     }

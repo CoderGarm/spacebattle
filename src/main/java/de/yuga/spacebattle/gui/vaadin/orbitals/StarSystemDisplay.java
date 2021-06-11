@@ -186,7 +186,7 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
 
         final Colonization colonizationToDisplay = colonizationService.getColonizationToDisplay();
         if (colonizationToDisplay != null) {
-            viewBoxDefinition = new ViewBoxDefinition(value, canvas, colonizationToDisplay.getPlanet());
+            viewBoxDefinition = new ViewBoxDefinition(value, canvas, colonizationToDisplay.getTarget());
             //viewBoxDefinition.panToPlanet(colonizationToDisplay.getPlanet());
         } else {
             viewBoxDefinition = new ViewBoxDefinition(value, canvas, null);

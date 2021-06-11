@@ -3,22 +3,26 @@ package de.yuga.spacebattle.backend.services;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
+import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AlignedFitting;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AmmunitionFitting;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.SupportFitting;
+import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.combined.account.AllianceService;
+import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
@@ -32,12 +36,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit.MATH_CONTEXT_MORE_PRECISION;
 import static de.yuga.spacebattle.gui.vaadin.orbitals.starmap.ViewBoxDefinition.STAR_RADIUS;
 import static de.yuga.spacebattle.gui.vaadin.orbitals.starmap.ViewBoxDefinition.UNIVERSE_CENTER_RADIUS;
 
@@ -82,6 +89,9 @@ public class MasterOfTheUniverseService {
     @Nonnull
     private final ColonizationService colonizationService;
 
+    @Nonnull
+    private final ConstructionService constructionService;
+
     @Autowired
     public MasterOfTheUniverseService(@Nonnull final TickService tickService,
                                       @Nonnull final UserService userService,
@@ -93,7 +103,8 @@ public class MasterOfTheUniverseService {
                                       @Nonnull final HullService hullService,
                                       @Nonnull final ShipClassService shipClassService,
                                       @Nonnull final ResearchService researchService,
-                                      @Nonnull final ColonizationService colonizationService) {
+                                      @Nonnull final ColonizationService colonizationService,
+                                      @Nonnull final ConstructionService constructionService) {
         Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");
@@ -105,6 +116,7 @@ public class MasterOfTheUniverseService {
         Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
         Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
         Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
+        Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
 
         this.tickService = tickService;
         this.userService = userService;
@@ -117,6 +129,7 @@ public class MasterOfTheUniverseService {
         this.shipClassService = shipClassService;
         this.researchService = researchService;
         this.colonizationService = colonizationService;
+        this.constructionService = constructionService;
     }
 
     /**
@@ -303,13 +316,14 @@ public class MasterOfTheUniverseService {
         createMorePopularizedStarSystems();
 
         // buildings
+        Research livingStuff = researchService.createResearch("Eternal live", "How to buy wine.", 1, null);
         Research unlocksConstructionYard = researchService.createResearch("Construction Yard", "The construction yard research researches the construction yard.", 1, null);
         Research unlocksShipyard = researchService.createResearch("Orbitals Construction Yard", "The orbitals Construction Yard research researches the orbitals construction yard.", 1, null);
         Research unlocksLaboratory = researchService.createResearch("Laboratories", "The laboratories research researches laboratories.", 1, null);
         Research unlocksBank = researchService.createResearch("Market place", "The Market place research researches Market places.", 1, null);
         Research unlocksMetals = researchService.createResearch("Metal works", "The Metal works research researches Metal works.", 1, null);
         Research unlocksMecur = researchService.createResearch("Special orbital ores", "The Special orbital ores research researches Special orbital ores.", 1, unlocksMetals);
-        Research unlocksHyperworks = researchService.createResearch("Asynchronous Investigations", "The Asynchronous Investigations research researches Asynchronous Investigations.", 1, unlocksMecur);
+        Research unlocksHyperWorks = researchService.createResearch("Asynchronous Investigations", "The Asynchronous Investigations research researches Asynchronous Investigations.", 1, unlocksMecur);
 
         // modules
         Research unlockLaser = researchService.createResearch("Laser", "The Laser research researches ...", 1, null);
@@ -320,7 +334,7 @@ public class MasterOfTheUniverseService {
         Research unlockShield = researchService.createResearch("Shield", "The Shield research researches ...", 1, null);
         Research unlockPropulsion = researchService.createResearch("Speed", "The Speed research researches sub light ...", 1, null);
         Research unlockFTLPropulsion = researchService.createResearch("FTL Speed", "The FTL Speed research researches FTL ...", 1, null);
-        Research unlockElectronicWarfare = researchService.createResearch("Electronic Warfare", "The ElWa research researches electronic warfare.", 1, null);
+        Research unlockElectronicWarfare = researchService.createResearch("Electronic Warfare", "The EW research researches electronic warfare.", 1, null);
         Research unlocksRocketAmmunition = researchService.createResearch("Rocket Ammunition", "a bunch of rockets.", 1, null);
         Research unlocksPointDefenseAmmunition = researchService.createResearch("Point Defense Ammunition", "a bunch of bullets.", 1, null);
         Research unlocksCounterRocketAmmunition = researchService.createResearch("Counter Rocket Ammunition", "another bunch of rockets.", 1, null);
@@ -332,54 +346,56 @@ public class MasterOfTheUniverseService {
         Research unlockHull3 = researchService.createResearch("Cruiser", "The Cruiser research researches Cruisers.", 1, unlockHull2);
         LOGGER.info("Researches created");
 
-        Building constructionYard = buildingService.createBuilding("Construction Yard", "The construction yard construct constructions.", 10, EResourceType.CONSTRUCTION, unlocksConstructionYard);
-        Building shipYard = buildingService.createBuilding("Orbitals Construction Yard", "The construction yard construct orbital constructions.", 10, EResourceType.ORBITALCONSTRUCTION, unlocksShipyard);
-        Building researchB = buildingService.createBuilding("Research Laboratories", "The lab investigates researches.", 10, EResourceType.RESEARCH, unlocksLaboratory);
-        Building bank = buildingService.createBuilding("Market place", "The market makes money.", 10, EResourceType.CREDITS, unlocksBank);
-        Building metalsWorks = buildingService.createBuilding("Metal works", "Metals for progress.", 10, EResourceType.METALORE, unlocksMetals);
-        Building specialOre = buildingService.createBuilding("Special orbital ores", "Better metals for more progress.", 10, EResourceType.MERCURIUM, unlocksMecur);
-        Building hyperWorks = buildingService.createBuilding("Asynchronous Investigations", "The clock works creates time.", 10, EResourceType.HYPERONIUM, unlocksHyperworks);
+        Building constructionYard = buildingService.createBuilding("Construction Yard", "The construction yard construct constructions.", 10, new ProductionType(EResourceType.CONSTRUCTION, EProductionCategory.PRODUCE, null), EEducationType.CIVIL_MK_II, 10, unlocksConstructionYard);
+        Building shipYard = buildingService.createBuilding("Orbitals Construction Yard", "The construction yard construct orbital constructions.", 10, new ProductionType(EResourceType.ORBITAL_CONSTRUCTION, EProductionCategory.PRODUCE, null), EEducationType.CIVIL_MK_II, 10, unlocksShipyard);
+        Building researchB = buildingService.createBuilding("Research Laboratories", "The lab investigates researches.", 10, new ProductionType(EResourceType.RESEARCH, EProductionCategory.PRODUCE, null), EEducationType.CIVIL_MK_III, 10, unlocksLaboratory);
+        Building bank = buildingService.createBuilding("Market place", "The market makes money.", 10, new ProductionType(EResourceType.CREDITS, EProductionCategory.PRODUCE, null), EEducationType.CIVIL_MK_II, 10, unlocksBank);
+        Building metalsWorks = buildingService.createBuilding("Metal works", "Metals for progress.", 10, new ProductionType(EResourceType.METALORE, EProductionCategory.PRODUCE, null), EEducationType.CIVIL_MK_II, 10, unlocksMetals);
+        Building specialOre = buildingService.createBuilding("Special orbital ores", "Better metals for more progress.", 10, new ProductionType(EResourceType.RARE_ELEMENTS, EProductionCategory.PRODUCE, null), EEducationType.CIVIL_MK_III, 10, unlocksMecur);
+        Building hyperWorks = buildingService.createBuilding("Asynchronous Investigations", "The clock works creates time.", 10, new ProductionType(EResourceType.HEAVY_METALS, EProductionCategory.PRODUCE, null), EEducationType.CIVIL_MK_III, 10, unlocksHyperWorks);
+
+        Building livingRoom = buildingService.createBuilding("Living room", "Everyone needs a home", 200, new ProductionType(EResourceType.POPULATION, EProductionCategory.CAPACITY, null), EEducationType.CIVIL_MK_II, 15, livingStuff);
+        Building hospital = buildingService.createBuilding("Hospital", "Everyone needs a doctor", 1, new ProductionType(EResourceType.POPULATION, EProductionCategory.PRODUCE, null), EEducationType.CIVIL_MK_III, 10, livingStuff);
+        Building elementarySchool = buildingService.createBuilding("Elementary schools", "a school", 1000, new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_CIVIL_I), EEducationType.CIVIL_MK_III, 10, livingStuff);
+        Building secondarySchool = buildingService.createBuilding("Secondary schools", "another school", 1000, new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_CIVIL_II), EEducationType.CIVIL_MK_III, 10, livingStuff);
+        Building university = buildingService.createBuilding("University", "a university", 1000, new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_CIVIL_III), EEducationType.CIVIL_MK_III, 10, livingStuff);
+        Building subOfficerSchool = buildingService.createBuilding("Teams Rank School", "for the guys which are loud", 200, new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_MILITARY_I), EEducationType.MILITARY_MK_I, 10, livingStuff);
+        Building militaryAcademy = buildingService.createBuilding("Military Academy", "for the guys which are silent", 100, new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_MILITARY_II), EEducationType.MILITARY_MK_II, 10, livingStuff);
         LOGGER.info("Buildings created");
 
-        colonizePlanet(u1, p11, constructionYard);
-        colonizePlanet(u1, p12, constructionYard);
-        colonizePlanet(u1, p13, constructionYard);
-        colonizePlanet(u1, p14, constructionYard);
-        colonizePlanet(u2, p21, constructionYard);
-        colonizePlanet(u2, p22, constructionYard);
-        colonizePlanet(u2, p23, constructionYard);
-        colonizePlanet(u2, p24, constructionYard);
-        LOGGER.info("Planets colonized");
+        // todo create real starting setting
+        // todo test constructions
+        colonizePlanet(u1, p11, constructionYard, researchB, bank, metalsWorks, livingRoom, hospital, elementarySchool);
+        colonizePlanet(u2, p21, constructionYard, researchB, bank, metalsWorks, livingRoom, hospital, elementarySchool);
+        //planetService.save(p11);
+        //planetService.save(p21);
+        LOGGER.info("Planets colonized and populated.");
 
-        addBuilding(p11, shipYard);
-        addBuilding(p11, researchB);
-        addBuilding(p21, shipYard);
-        addBuilding(p21, researchB);
-        planetService.save(p11);
-        planetService.save(p21);
-        LOGGER.info("Planets populated with Construction Yards.");
+        Map<EEducationType, Long> militaryCrew = new HashMap<>();
+        militaryCrew.put(EEducationType.MILITARY_MK_I, 20L);
+        militaryCrew.put(EEducationType.MILITARY_MK_II, 10L);
 
-        Armor armor = moduleService.createArmor("Armor Mk I", "An armor", unlockArmor, 5, 10, 1);
-        Propulsion propulsion = moduleService.createPropulsion("Speed Mk I", "A drive", unlockPropulsion, 5, 10, 1, false);
-        Propulsion propulsionFTL = moduleService.createPropulsion("FTL Speed Mk I", "A FTL drive", unlockFTLPropulsion, 10, 15, 1, true);
-        ElectronicWarfare electronicWarfare = moduleService.createElectronicWarfare("Scanner Mk I", "A scanner", unlockElectronicWarfare, 5, 10, 1);
-        Sidewall sidewall = moduleService.createSidewall("Shield Mk I", "A shield", unlockShield, 5, 10, 1);
+        Armor armor = moduleService.createArmor("Armor Mk I", "An armor", unlockArmor, 5, 10, 1, new CrewRequirementDTO(militaryCrew, EDepositType.COSTS));
+        Propulsion propulsion = moduleService.createPropulsion("Speed Mk I", "A drive", unlockPropulsion, 5, 10, 1, false, new CrewRequirementDTO(militaryCrew, EDepositType.COSTS));
+        Propulsion propulsionFTL = moduleService.createPropulsion("FTL Speed Mk I", "A FTL drive", unlockFTLPropulsion, 10, 15, 1, true, new CrewRequirementDTO(militaryCrew, EDepositType.COSTS));
+        ElectronicWarfare electronicWarfare = moduleService.createElectronicWarfare("Scanner Mk I", "A scanner", unlockElectronicWarfare, 5, 10, 1, new CrewRequirementDTO(militaryCrew, EDepositType.COSTS));
+        Sidewall sidewall = moduleService.createSidewall("Shield Mk I", "A shield", unlockShield, 5, 10, 1, new CrewRequirementDTO(militaryCrew, EDepositType.COSTS));
 
-        AmmunitionModule rocketAmmunition = moduleService.createAmmunitionModule("Rocket Ammunition", "A bunch of rockets.", unlocksRocketAmmunition, 5, 10, 1);
-        AmmunitionModule pointDefAmmunition = moduleService.createAmmunitionModule("Point Defense Ammunition", "A bunch of bullets.", unlocksPointDefenseAmmunition, 5, 10, 1);
-        AmmunitionModule counterRocketAmmunition = moduleService.createAmmunitionModule("Counter Rocket Ammunition", "Another bunch of rockets.", unlocksCounterRocketAmmunition, 5, 10, 1);
+        AmmunitionModule rocketAmmunition = moduleService.createAmmunitionModule("Rocket Ammunition", "A bunch of rockets.", unlocksRocketAmmunition, 5, 10, 1, new CrewRequirementDTO(militaryCrew, EDepositType.COSTS));
+        AmmunitionModule pointDefAmmunition = moduleService.createAmmunitionModule("Point Defense Ammunition", "A bunch of bullets.", unlocksPointDefenseAmmunition, 5, 10, 1, new CrewRequirementDTO(militaryCrew, EDepositType.COSTS));
+        AmmunitionModule counterRocketAmmunition = moduleService.createAmmunitionModule("Counter Rocket Ammunition", "Another bunch of rockets.", unlocksCounterRocketAmmunition, 5, 10, 1, new CrewRequirementDTO(militaryCrew, EDepositType.COSTS));
 
-        Weapon laserWeapon = moduleService.createWeapon("Laser Mk I", "A laser", unlockLaser, null, 5, 10, 1, 1000, null, EDamageType.DART, EWeaponType.BEAM, EAlignmentType.HUNTING_ALIGNMENT);
-        Weapon counterMissile = moduleService.createWeapon("Counter Missile Mk I", "A counter missile", unlockCounterMissiles, counterRocketAmmunition, 5, 10, 1, 1000, null, EDamageType.DART, EWeaponType.COUNTER_MISSILE, EAlignmentType.BATTLE_ALIGNMENT);
-        Weapon pointDefense = moduleService.createWeapon("Point Defense Mk I", "A point defense", unlockPointDefense, pointDefAmmunition, 5, 10, 1, 1000, null, EDamageType.DART, EWeaponType.POINT_DEFENSE, EAlignmentType.BATTLE_ALIGNMENT);
-        Weapon missile = moduleService.createWeapon("Missile Mk I", "A missile", unlockMissiles, rocketAmmunition, 5, 10, 1, 1000, 0.05, EDamageType.EXPLOSION, EWeaponType.MISSILE, EAlignmentType.BATTLE_ALIGNMENT);
+        Weapon laserWeapon = moduleService.createWeapon("Laser Mk I", "A laser", unlockLaser, null, 5, 10, 1, 1000, null, EDamageType.DART, EWeaponType.BEAM, EAlignmentType.HUNTING_ALIGNMENT, new CrewRequirementDTO(militaryCrew, EDepositType.COSTS));
+        Weapon counterMissile = moduleService.createWeapon("Counter Missile Mk I", "A counter missile", unlockCounterMissiles, counterRocketAmmunition, 5, 10, 1, 1000, null, EDamageType.DART, EWeaponType.COUNTER_MISSILE, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirementDTO(militaryCrew, EDepositType.COSTS));
+        Weapon pointDefense = moduleService.createWeapon("Point Defense Mk I", "A point defense", unlockPointDefense, pointDefAmmunition, 5, 10, 1, 1000, null, EDamageType.DART, EWeaponType.POINT_DEFENSE, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirementDTO(militaryCrew, EDepositType.COSTS));
+        Weapon missile = moduleService.createWeapon("Missile Mk I", "A missile", unlockMissiles, rocketAmmunition, 5, 10, 1, 1000, 0.05, EDamageType.EXPLOSION, EWeaponType.MISSILE, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirementDTO(militaryCrew, EDepositType.COSTS));
 
-        PassiveModule passiveModule = moduleService.createPassiveModule("Improves armor", "Increases the amount of armor", unlockPassive, ESupportType.ARMOR, ECalculationType.ADD, 5, 10, 1);
+        PassiveModule passiveModule = moduleService.createPassiveModule("Improves armor", "Increases the amount of armor", unlockPassive, ESupportType.ARMOR, ECalculationType.ADD, 5, 10, 1, new CrewRequirementDTO(militaryCrew, EDepositType.COSTS));
         LOGGER.info("Modules created");
 
-        Hull hull1 = hullService.createHull("Corvette vessel", 1, 50, 15, 15, 35, "The corvette hull", unlockHull1, EHullType.FG);
-        Hull hull2 = hullService.createHull("Frigate vessel", 1, 100, 35, 35, 55, "The frigate hull", unlockHull2, EHullType.FG);
-        Hull hull3 = hullService.createHull("Cruiser vessel", 1, 150, 45, 45, 75, "The cruiser hull", unlockHull3, EHullType.CC);
+        Hull hull1 = hullService.createHull("Corvette vessel", 1, 50, 15, 15, 35, "The corvette hull", unlockHull1, EHullType.FG, new CrewRequirementDTO(militaryCrew, EDepositType.COSTS));
+        Hull hull2 = hullService.createHull("Frigate vessel", 1, 100, 35, 35, 55, "The frigate hull", unlockHull2, EHullType.FG, new CrewRequirementDTO(militaryCrew, EDepositType.COSTS));
+        Hull hull3 = hullService.createHull("Cruiser vessel", 1, 150, 45, 45, 75, "The cruiser hull", unlockHull3, EHullType.CC, new CrewRequirementDTO(militaryCrew, EDepositType.COSTS));
         LOGGER.info("Hulls created");
 
         ShipClass as3 = new ShipClass(u1, "Argonauts cruiser", hull3, null);
@@ -390,8 +406,8 @@ public class MasterOfTheUniverseService {
         LOGGER.info("ShipClasses created");
 
 
-        addUnlockedResearches(u1, unlocksConstructionYard, unlocksShipyard, unlocksLaboratory, unlocksBank, unlocksMetals, unlockLaser, unlockArmor, unlockShield, unlockPropulsion, unlockFTLPropulsion, unlockElectronicWarfare, unlockMissiles, unlockPointDefense, unlockCounterMissiles, unlocksRocketAmmunition, unlocksCounterRocketAmmunition, unlocksPointDefenseAmmunition, unlockPassive, unlockHull1, unlockHull2, unlockHull3);
-        addUnlockedResearches(u2, unlocksConstructionYard, unlocksShipyard, unlocksLaboratory, unlocksBank, unlocksMetals, unlockLaser, unlockArmor, unlockShield, unlockPropulsion, unlockFTLPropulsion, unlockElectronicWarfare, unlockMissiles, unlockPointDefense, unlockCounterMissiles, unlocksRocketAmmunition, unlocksCounterRocketAmmunition, unlocksPointDefenseAmmunition, unlockPassive, unlockHull1, unlockHull2, unlockHull3);
+        addUnlockedResearches(u1, livingStuff, unlocksConstructionYard, unlocksShipyard, unlocksLaboratory, unlocksBank, unlocksMetals, unlockLaser, unlockArmor, unlockShield, unlockPropulsion, unlockFTLPropulsion, unlockElectronicWarfare, unlockMissiles, unlockPointDefense, unlockCounterMissiles, unlocksRocketAmmunition, unlocksCounterRocketAmmunition, unlocksPointDefenseAmmunition, unlockPassive, unlockHull1, unlockHull2, unlockHull3);
+        addUnlockedResearches(u2, livingStuff, unlocksConstructionYard, unlocksShipyard, unlocksLaboratory, unlocksBank, unlocksMetals, unlockLaser, unlockArmor, unlockShield, unlockPropulsion, unlockFTLPropulsion, unlockElectronicWarfare, unlockMissiles, unlockPointDefense, unlockCounterMissiles, unlocksRocketAmmunition, unlocksCounterRocketAmmunition, unlocksPointDefenseAmmunition, unlockPassive, unlockHull1, unlockHull2, unlockHull3);
         LOGGER.info("Researches populated");
 
         tickService.doTick();
@@ -399,11 +415,36 @@ public class MasterOfTheUniverseService {
     }
 
     @Deprecated(since = "productive environment")
-    public Planet colonizePlanet(@Nonnull final User owner, @Nonnull final Planet planet, Building constructionYard) {
-        planet.setOwner(owner);
-        final Construction constructedConstructionYard = new Construction(planet, constructionYard, 1);
-        planet.getConstructions().add(constructedConstructionYard);
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public Planet colonizePlanet(@Nonnull final User owner, @Nonnull final Planet planet, @Nonnull final Building... buildings) {
         owner.addKnownStarSystems(planet.getSystem());
+        planet.setOwner(owner);
+        // first the guys, then the buildings
+        final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
+        resourceDeposit.setAbsolutePopulation(EEducationType.NONE, 200);
+        resourceDeposit.setAbsolutePopulation(EEducationType.CIVIL_MK_I, 200);
+        resourceDeposit.setAbsolutePopulation(EEducationType.CIVIL_MK_II, 500);
+        resourceDeposit.setAbsolutePopulation(EEducationType.CIVIL_MK_III, 1000);
+        resourceDeposit.setAbsolutePopulation(EEducationType.MILITARY_MK_I, 50);
+        resourceDeposit.setAbsolutePopulation(EEducationType.MILITARY_MK_II, 20);
+        planetService.save(planet);
+
+        for (final Building building : buildings) {
+            final int level;
+            if (EResourceType.POPULATION == building.getProductionTarget() && EProductionCategory.CAPACITY == building.getProductionType().getProductionCategory()) {
+                // calculate which Level must a capacity construction have to suit all the people
+                final int baseValue = building.getBaseValue();
+                final BigDecimal increasingFactorPerLevel = BigDecimal.ONE.add(building.getIncreasingFactorPerLevel());
+                final BigDecimal levelTo = new BigDecimal(resourceDeposit.getCrewRequirement().getSumOfPopulation())
+                        .divide(new BigDecimal(baseValue).multiply(increasingFactorPerLevel), MATH_CONTEXT_MORE_PRECISION)
+                        .add(BigDecimal.ONE);
+                level = levelTo.intValue();
+            } else {
+                level = 1;
+            }
+            final Construction construction = new Construction(planet, building, level);
+            constructionService.save(construction);
+        }
         return planet;
     }
 

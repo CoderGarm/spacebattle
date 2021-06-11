@@ -47,7 +47,7 @@ public class HullSelector extends VerticalLayout implements HasValue<AbstractFie
         selectGroup.addThemeVariants(RadioGroupVariant.MATERIAL_VERTICAL);
 
         final HullDisplay hullDisplay = new HullDisplay();
-        final ReadOnlyHasValue<Hull> hullSelectedReadOnly = new ReadOnlyHasValue<>(hullDisplay::update);
+        final ReadOnlyHasValue<Hull> hullSelectedReadOnly = new ReadOnlyHasValue<>(hullDisplay::setValue);
         hullBinder.forField(hullSelectedReadOnly).bind(hull -> hull, null);
 
         add(selectGroup, hullDisplay);

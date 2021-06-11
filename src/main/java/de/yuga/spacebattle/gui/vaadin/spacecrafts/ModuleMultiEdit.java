@@ -7,9 +7,9 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.NotifySBUserException;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AlignedFitting;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AmmunitionFitting;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.SupportFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Armor;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
@@ -172,9 +172,9 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
         final Set<WeaponAlignmentCountDTO> sternWeapons = stern.getValue();
         final Set<WeaponAlignmentCountDTO> broadsideWeapons = broadsides.getValue();
 
-        bowWeapons.stream().map(WeaponAlignmentCountDTO::getCountNumeric).reduce(Integer::sum).ifPresent(sum -> starShipSvgHelper.calculateBowSlots(3, sum));
-        broadsideWeapons.stream().map(WeaponAlignmentCountDTO::getCountNumeric).reduce(Integer::sum).ifPresent(sum -> starShipSvgHelper.calculateBroadsideSlots(3, sum));
-        sternWeapons.stream().map(WeaponAlignmentCountDTO::getCountNumeric).reduce(Integer::sum).ifPresent(sum -> starShipSvgHelper.calculateSternSlots(3, sum));
+        bowWeapons.stream().map(WeaponAlignmentCountDTO::getCount).reduce(Integer::sum).ifPresent(sum -> starShipSvgHelper.calculateBowSlots(3, sum));
+        broadsideWeapons.stream().map(WeaponAlignmentCountDTO::getCount).reduce(Integer::sum).ifPresent(sum -> starShipSvgHelper.calculateBroadsideSlots(3, sum));
+        sternWeapons.stream().map(WeaponAlignmentCountDTO::getCount).reduce(Integer::sum).ifPresent(sum -> starShipSvgHelper.calculateSternSlots(3, sum));
     }
 
     @Override
@@ -364,7 +364,7 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
 
         return value.stream()
                 .filter(a -> a.getSelectedWeaponAlignment() != null)
-                .map(a -> new AlignedFitting(a.getSelectedWeaponAlignment(), a.getWeapon(), a.getCountNumeric()))
+                .map(a -> new AlignedFitting(a.getSelectedWeaponAlignment(), a.getWeapon(), a.getCount()))
                 .collect(Collectors.toSet());
     }
 
@@ -373,7 +373,7 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
         Preconditions.checkNotNull(value, "value shouldn't be null!");
 
         return value.stream()
-                .map(a -> new AmmunitionFitting(a.getAmmunitionModule(), a.getCountNumeric()))
+                .map(a -> new AmmunitionFitting(a.getAmmunitionModule(), a.getCount()))
                 .collect(Collectors.toSet());
     }
 
@@ -382,7 +382,7 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
         Preconditions.checkNotNull(value, "value shouldn't be null!");
 
         return value.stream()
-                .map(a -> new SupportFitting(a.getPassiveModule(), a.getCountNumeric()))
+                .map(a -> new SupportFitting(a.getPassiveModule(), a.getCount()))
                 .collect(Collectors.toSet());
     }
 

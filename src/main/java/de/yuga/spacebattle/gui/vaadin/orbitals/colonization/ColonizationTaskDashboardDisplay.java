@@ -51,6 +51,8 @@ public class ColonizationTaskDashboardDisplay extends ColonizationLayout impleme
     public ColonizationTaskDashboardDisplay() {
         uiEventBus.subscribe(this);
 
+        grid.setColumnReorderingAllowed(true);
+
         final TextField nameColumnFilterField = new TextField();
 
         final Button resetAllSorting = new Button("Reset filter", event -> {
@@ -68,7 +70,7 @@ public class ColonizationTaskDashboardDisplay extends ColonizationLayout impleme
                 if (StringUtils.isBlank(filter)) {
                     return true;
                 }
-                return dto.getPlanet().getName().toLowerCase().contains(filter.toLowerCase().trim());
+                return dto.getTarget().getName().toLowerCase().contains(filter.toLowerCase().trim());
             });
             dataProvider.refreshAll();
         });
@@ -80,7 +82,7 @@ public class ColonizationTaskDashboardDisplay extends ColonizationLayout impleme
 
         grid.addClassName("header-grid");
         final Grid.Column<Colonization> nameColumn =
-                grid.addColumn(colo -> colo.getPlanet().getName(), "Planet name")
+                grid.addColumn(colo -> colo.getTarget().getName(), "Planet name")
                         .setHeader("Planet name");
 
         grid.addColumn(Colonization::getDoneAtZero, "Ticks left")
@@ -90,7 +92,7 @@ public class ColonizationTaskDashboardDisplay extends ColonizationLayout impleme
 
         final Grid.Column<Colonization> orbitColumn = grid.addComponentColumn(dto -> {
             final OrbitCoordinatesHorizontalDisplay orbitDisplay = new OrbitCoordinatesHorizontalDisplay();
-            orbitDisplay.setValue(dto.getPlanet().getOrbit());
+            orbitDisplay.setValue(dto.getTarget().getOrbit());
             return orbitDisplay;
         });
         orbitColumn.setHeader("Orbit");

@@ -47,7 +47,7 @@ public class CustomPlanetRepositoryImpl implements CustomPlanetRepository {
         Preconditions.checkNotNull(owner, "owner shouldn't be null!");
 
         try {
-            return em.createNamedQuery("Planet.getPlanetsWithBuildingForResourceType", Planet.class)
+            return em.createNamedQuery("Planet.getPlanetsWithBuildingsForResourceType", Planet.class)
                     .setParameter("owner", owner)
                     .setParameter("resourceType", EResourceType.RESEARCH)
                     .getSingleResult();

@@ -2,20 +2,23 @@ package de.yuga.spacebattle.backend.services.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.NotifySBUserException;
+import de.yuga.spacebattle.backend.calculator.resource.PopulationControlCalculator;
+import de.yuga.spacebattle.backend.calculator.resource.ResourceControlCalculator;
 import de.yuga.spacebattle.backend.entities.Constructable;
-import de.yuga.spacebattle.backend.entities.ResourceDeposit;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.turn.TickRepository;
 import de.yuga.spacebattle.backend.services.account.UserService;
@@ -30,12 +33,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class TickService {
@@ -145,7 +147,7 @@ public class TickService {
             doneAtZero--;
 
             if (doneAtZero < 1) {
-                colonizationService.colonizePlanet(colonization.getUser(), colonization.getPlanet());
+                colonizationService.colonizePlanet(colonization);
                 colonizationService.delete(colonization);
             } else {
                 colonization.setDoneAtZero(doneAtZero);
@@ -190,29 +192,30 @@ public class TickService {
      * This includes the amount of generated resources and the calculations of jobs which could be successfully ended.
      */
     void tick(@Nonnull final Planet planet) {
-        Preconditions.checkState(planet.getOwner() != null,
-                "The owner must be set, otherwise there is nothing to do.");
+        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+        Preconditions.checkState(planet.getOwner() != null, "The owner must be set, otherwise there is nothing to do.");
 
-        calculateTickOutput(planet);
-        Set<Construction> constructions = planet.getConstructions();
-        ResourceDeposit resourceDeposit = planet.getResourceDeposit();
+        final Set<Construction> constructions = planet.getConstructions();
+        for (final EResourceType resourceType : EResourceType.values()) {
+            updateResourceDeposit(planet, resourceType);
+        }
         for (Construction facility : constructions) {
-            EResourceType resourceType = facility.getBuilding().getResourceType();
-            final Set<Job> jobs = facility.getJobs();
+            final EResourceType resourceType = facility.getBuilding().getProductionTarget();
             final Set<Job> toDelete = new HashSet<>();
-            for (Job job : jobs) {
-                boolean remainingPoints = calculateConstructablePointsRemaining(job, resourceDeposit);
-                if (remainingPoints) {
+            final Set<Job> jobs = facility.getJobs();
+            for (final Job job : jobs) {
+                if (!tickJob(job)) {
                     jobService.save(job);
                     continue;
                 }
-                Constructable constructable = job.getConstructable();
-                Integer targetLevel;
-                User owner = planet.getOwner();
+                // realize job result if job is done
+                final Constructable constructable = job.getConstructable();
+                final Integer targetLevel;
+                final User owner = planet.getOwner();
                 switch (resourceType) {
                     case RESEARCH:
 
-                        Research research = constructable.getResearch();
+                        final Research research = constructable.getResearch();
                         targetLevel = constructable.getTargetLevel();
                         if (research == null || targetLevel == null) {
                             throw new NotifySBUserException("Oh fuck, this should not happen while research whatever!");
@@ -222,7 +225,7 @@ public class TickService {
                         break;
                     case CONSTRUCTION:
 
-                        Building building = constructable.getBuilding();
+                        final Building building = constructable.getBuilding();
                         targetLevel = constructable.getTargetLevel();
                         if (building == null || targetLevel == null) {
                             throw new NotifySBUserException("Oh fuck, this should not happen while constructing buildings!");
@@ -233,18 +236,23 @@ public class TickService {
                             workInProgress.setLevel(targetLevel);
                         } else {
                             workInProgress = new Construction(planet, building, 1);
-                            constructions.add(workInProgress);
+                            constructionService.save(workInProgress);
                         }
                         break;
-                    case ORBITALCONSTRUCTION:
+                    case ORBITAL_CONSTRUCTION:
 
-                        ShipClass shipClass = constructable.getShipClass();
-                        Integer amountShips = constructable.getAmountShips();
+                        final ShipClass shipClass = constructable.getShipClass();
+                        final Integer amountShips = constructable.getAmountShips();
                         if (shipClass == null || amountShips == null || amountShips == 0) {
                             throw new NotifySBUserException("This should never happen while build a fleet!");
                         }
-                        Fleet fleet = new Fleet("Fresh Build @ " + planet.getName(), owner, new FleetOrbit(planet));
-                        fleet.updateShips(shipClass, amountShips);
+                        final Fleet fleet = new Fleet("Fresh Build @ " + planet.getName(), owner, new FleetOrbit(planet));
+                        final Set<WarShip> newFleetComposition = new HashSet<>();
+                        for (int i = 0; i <= amountShips; i++) {
+                            final String randomName = generateRandomName();
+                            newFleetComposition.add(new WarShip(randomName, planet, fleet, shipClass));
+                        }
+                        fleet.updateShips(newFleetComposition);
                         fleetService.save(fleet);
                         break;
                 }
@@ -256,45 +264,65 @@ public class TickService {
     }
 
     /**
-     * Counts down the remaining {@link Job#getJobDoneAtZero()}.
+     * Will update the resource deposit of a planet with the newly created stuff.
      *
-     * @param job             the {@link Job} to do
-     * @param resourceDeposit the {@link ResourceDeposit} to take from
-     * @return <code>true</code> if the job is done
+     * @param planet       the planet to update
+     * @param resourceType the resource type
      */
-    private boolean calculateConstructablePointsRemaining(@Nonnull final Job job,
-                                                          @Nonnull final ResourceDeposit resourceDeposit) {
-        Preconditions.checkNotNull(job, "job shouldn't be null!");
-        Preconditions.checkNotNull(resourceDeposit, "resourceDeposit shouldn't be null!");
+    private void updateResourceDeposit(@Nonnull final Planet planet, @Nonnull final EResourceType resourceType) {
+        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+        Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
 
-        EResourceType resourceType = job.getConstructable().getResourceType();
-        BigDecimal jobDoneAtZero = job.getJobDoneAtZero();
-        BigDecimal pointsLeftOverForToday = resourceDeposit.getResourceAmountByType(resourceType);
-        BigDecimal remainingToZero = jobDoneAtZero.subtract(pointsLeftOverForToday);
-
-        if (remainingToZero.compareTo(BigDecimal.ZERO) <= 0) {
-            job.setJobDoneAtZero(BigDecimal.ZERO);
-            resourceDeposit.updateResource(resourceType, pointsLeftOverForToday.negate().add(remainingToZero.negate()));
-        } else {
-            job.setJobDoneAtZero(remainingToZero);
-            resourceDeposit.updateResource(resourceType, BigDecimal.ZERO);
-            return true;
+        Long tickOutput = null;
+        if (EResourceType.POPULATION != resourceType) {
+            tickOutput = ResourceControlCalculator.getTickOutput(planet, resourceType);
         }
-        return false;
+        final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
+        switch (resourceType.getCollectableType()) {
+            case VIABLE:
+                // do school
+                PopulationControlCalculator.educatePopulation(planet);
+                // do birth
+                PopulationControlCalculator.populatePlanet(planet);
+                break;
+            case FORFEITABLE:
+                // only set new available points
+                if (tickOutput != null) {
+                    resourceDeposit.setAbsoluteResourceValue(resourceType, tickOutput);
+                }
+                break;
+            default:
+            case COLLECTABLE:
+                // add points to the old deposit
+                if (tickOutput != null) {
+                    resourceDeposit.updateResource(resourceType, tickOutput);
+                }
+                break;
+        }
     }
 
-    private void calculateTickOutput(@Nonnull final Planet planet) {
-        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+    private String generateRandomName() {
+        int leftLimit = 97; // letter 'a'
+        int rightLimit = 122; // letter 'z'
+        int targetStringLength = 10;
+        Random random = new Random();
 
-        Set<EResourceType> resourceTypes = planet.getConstructions().stream()
-                .map(construction -> construction.getBuilding().getResourceType())
-                .collect(Collectors.toSet());
+        return random.ints(leftLimit, rightLimit + 1)
+                .limit(targetStringLength)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
+    }
 
-        ResourceDeposit resourceDeposit = planet.getResourceDeposit();
-        ResourceDeposit resourceFactors = planet.getResourceFactors();
-        resourceTypes.forEach(resourceType -> {
-            BigDecimal newResourceAmountByType = resourceFactors.getResourceAmountByType(resourceType);
-            resourceDeposit.updateResource(resourceType, newResourceAmountByType);
-        });
+    /**
+     * Counts down the remaining {@link Job#getJobDoneAtZero()}.
+     *
+     * @param job the {@link Job} to do
+     * @return <code>true</code> if the job is done
+     */
+    private boolean tickJob(@Nonnull final Job job) {
+        Preconditions.checkNotNull(job, "job shouldn't be null!");
+
+        job.tick();
+        return job.getJobDoneAtZero() <= 0;
     }
 }

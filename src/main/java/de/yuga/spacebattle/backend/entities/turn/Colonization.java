@@ -4,37 +4,47 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
-import org.hibernate.annotations.Check;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.EDepositType;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
+/**
+ * This describes a running colonization.
+ */
 @NamedQueries({
         @NamedQuery(name = "Colonization.getAll", query = "SELECT p FROM Colonization p"),
         @NamedQuery(name = "Colonization.getAllForUser", query = "SELECT p FROM Colonization p WHERE p.user = :user")
 })
 @Entity
 @Table(name = "colonization")
-@Check(constraints = "idPlanet is not null AND idUser is not null")
 @AttributeOverride(name = "id", column = @Column(name = "idColonization"))
 public class Colonization extends AbstractEntityKey {
 
     @Nonnull
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "idUser", updatable = false)
+    @JoinColumn(name = "idUser", updatable = false, nullable = false)
     private User user;
 
     @Nonnull
     @NotNull
     @OneToOne
-    @JoinColumn(name = "idPlanet", updatable = false)
-    private Planet planet;
+    @JoinColumn(name = "idTarget", updatable = false, nullable = false)
+    private Planet target;
+
+    @Nonnull
+    @NotNull
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    @JoinColumn(name = "idCosts", updatable = false)
+    private final ResourceDeposit costs = new ResourceDeposit(EDepositType.COSTS);
 
     /**
-     * Principle: Countdown to zero -> job done.
+     * Principle: Countdown ticks to zero -> job done.
      * It's about full ticks
      */
     private int doneAtZero;
@@ -44,13 +54,16 @@ public class Colonization extends AbstractEntityKey {
 
     public Colonization(@Nonnull final User user,
                         @Nonnull final Planet target,
+                        @Nonnull final CrewRequirementDTO crewRequirement,
                         final int doneAtZero) {
         Preconditions.checkNotNull(user, "fleet shouldn't be null!");
         Preconditions.checkNotNull(target, "target shouldn't be null!");
 
         this.user = user;
-        this.planet = target;
+        this.target = target;
         this.doneAtZero = doneAtZero;
+        // do the switch because this are costs up to here but the running colonization knows all the people as deposit
+        this.costs.updatePopulation(crewRequirement.toggleToDepositMode());
     }
 
     @Nonnull
@@ -65,12 +78,12 @@ public class Colonization extends AbstractEntityKey {
     }
 
     @Nonnull
-    public Planet getPlanet() {
-        return planet;
+    public Planet getTarget() {
+        return target;
     }
 
-    public void setPlanet(@Nonnull final Planet planet) {
-        this.planet = planet;
+    public void setTarget(@Nonnull final Planet planet) {
+        this.target = planet;
     }
 
     public int getDoneAtZero() {
@@ -82,6 +95,11 @@ public class Colonization extends AbstractEntityKey {
             throw new NotifySBUserException("You cannot increase the traffic time until you have warp scrambler");
         }
         this.doneAtZero = moveDoneAtZero;
+    }
+
+    @Nonnull
+    public ResourceDeposit getCosts() {
+        return costs;
     }
 
     @Override

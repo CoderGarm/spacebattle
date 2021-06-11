@@ -1,9 +1,11 @@
 package de.yuga.spacebattle.gui.vaadin.research.details;
 
+import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.accordion.Accordion;
-import com.vaadin.flow.component.accordion.AccordionPanel;
+import com.vaadin.flow.component.details.Details;
+import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -13,9 +15,8 @@ import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
-import de.yuga.spacebattle.gui.vaadin.ViewHelper;
-import de.yuga.spacebattle.gui.vaadin.buildings.BuildingDisplay;
-import de.yuga.spacebattle.gui.vaadin.spacecrafts.BaseModuleDisplay;
+import de.yuga.spacebattle.gui.vaadin.misc.details.misc.HasNameAndDescriptionDisplayHorizontal;
+import de.yuga.spacebattle.gui.vaadin.misc.details.misc.HasNameAndDescriptionDisplayVertical;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.HullDisplay;
 
 import javax.annotation.Nonnull;
@@ -32,23 +33,20 @@ public class ResearchDisplay extends HorizontalLayout implements HasValue<Abstra
     private final Binder<ResearchLevelDTO> binder = new Binder<>(ResearchLevelDTO.class);
 
     @Nonnull
-    private AccordionPanel accordionPanel = new AccordionPanel();
-
-    @Nonnull
-    private final Accordion accordion;
+    private Details unlocksResearchDetails;
 
     public ResearchDisplay() {
         final VerticalLayout mainLayout = new VerticalLayout();
 
         final HorizontalLayout generalInfoLayout = createGeneralInfoLayout();
         final HorizontalLayout levelInfoLayout = createLevelInfoLayout();
-        accordion = createUnlocksAccordion();
+        unlocksResearchDetails = createUnlocksDetails();
 
         final HorizontalLayout combinatorH = new HorizontalLayout();
         final FlexLayout fl = new FlexLayout();
         fl.setMaxHeight("70%");
         fl.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
-        fl.add(accordion);
+        fl.add(unlocksResearchDetails);
 
         combinatorH.add(levelInfoLayout, fl);
         combinatorH.setMargin(true);
@@ -64,25 +62,17 @@ public class ResearchDisplay extends HorizontalLayout implements HasValue<Abstra
      * @param research the parameter
      */
     private void updateResearchDetails(@Nullable final Research research) {
-        accordion.remove(accordionPanel);
-        accordionPanel = new AccordionPanel();
-        accordionPanel.setEnabled(false);
         if (research != null) {
-            accordionPanel.setSummaryText("Unlocks");
-            research.getUnlocksBuildings().forEach(building ->
-            {
-                BuildingDisplay buildingDisplay = new BuildingDisplay();
-                buildingDisplay.setValue(building);
-                accordionPanel.addContent(buildingDisplay);
-                accordionPanel.setEnabled(true);
+            research.getUnlocksBuildings().forEach(building -> {
+                HasNameAndDescriptionDisplayHorizontal hasNameAndDescriptionDisplayHorizontal = new HasNameAndDescriptionDisplayHorizontal();
+                hasNameAndDescriptionDisplayHorizontal.setValue(building);
+                activate(hasNameAndDescriptionDisplayHorizontal);
             });
 
-            research.getUnlocksHulls().forEach(hull ->
-            {
+            research.getUnlocksHulls().forEach(hull -> {
                 HullDisplay hullDisplay = new HullDisplay();
-                hullDisplay.update(hull);
-                accordionPanel.addContent(hullDisplay);
-                accordionPanel.setEnabled(true);
+                hullDisplay.setValue(hull);
+                activate(hullDisplay);
             });
 
             // todo module individuell darstellen
@@ -95,31 +85,47 @@ public class ResearchDisplay extends HorizontalLayout implements HasValue<Abstra
             modulesSet.addAll(research.getUnlocksWeapons());
 
             modulesSet.forEach(module -> {
-                final BaseModuleDisplay display = new BaseModuleDisplay();
+                final HasNameAndDescriptionDisplayVertical display = new HasNameAndDescriptionDisplayVertical();
                 display.setValue(module);
-                accordionPanel.addContent(display);
-                accordionPanel.setEnabled(true);
+                activate(display);
             });
         } else {
-            accordionPanel.setSummaryText("Unlocks nothing");
+            inactivate();
         }
-        accordion.add(accordionPanel);
+    }
+
+    @Nonnull
+    private Details createUnlocksDetails() {
+        unlocksResearchDetails = new Details();
+        unlocksResearchDetails.setSummaryText("Unlocks researches");
+        unlocksResearchDetails.addClassName("unlocks-researches-detail");
+        unlocksResearchDetails.addThemeVariants(DetailsVariant.REVERSE, DetailsVariant.FILLED);
+        return unlocksResearchDetails;
+    }
+
+
+    /**
+     * Sets a view and it's detail to usable and viewable for the user.
+     *
+     * @param content the content
+     */
+    private void activate(@Nonnull final Component content) {
+        Preconditions.checkNotNull(content, "content shouldn't be null!");
+
+        if (!unlocksResearchDetails.isEnabled()) {
+            unlocksResearchDetails.setEnabled(true);
+        }
+        unlocksResearchDetails.addContent(content);
     }
 
     /**
-     * Simple accordion generation.
-     *
-     * @return the accordion
+     * Sets the detail in a not-usable state for the user.
      */
-    @Nonnull
-    private Accordion createUnlocksAccordion() {
-        final Accordion accordion = new Accordion();
-        ViewHelper.setWidth(accordion, null);
-
-        accordion.add(accordionPanel);
-        ViewHelper.setWidth(accordion, "250px");
-        accordionPanel.setOpened(false);
-        return accordion;
+    private void inactivate() {
+        unlocksResearchDetails.setSummaryText("Unlocks nothing");
+        unlocksResearchDetails.setEnabled(false);
+        unlocksResearchDetails.setContent(null);
+        unlocksResearchDetails.setOpened(false);
     }
 
     /**

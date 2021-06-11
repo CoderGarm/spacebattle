@@ -2,10 +2,10 @@ package de.yuga.spacebattle.backend.services.combined.spacecraft;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.NotifySBUserException;
-import de.yuga.spacebattle.backend.distance.DistanceCalculator;
+import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Move;
@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -58,12 +57,9 @@ public class FleetService {
             throw new NotifySBUserException("That's not possible, no.");
         }
         fleetsToMerge.forEach(fleet2 -> {
-            final Map<ShipClass, Integer> ships2 = fleet2.getShips();
-            for (ShipClass shipClass : ships2.keySet()) {
-                Integer amount2 = ships2.get(shipClass);
-                baseFleet.updateShips(shipClass, amount2);
-            }
-            fleet2.getShips().clear();
+            final Set<WarShip> ships = fleet2.getShips();
+            baseFleet.updateShips(ships);
+            fleet2.getShipsByClass().clear();
         });
         fleetR.deleteAll(fleetsToMerge.stream().map(Fleet::getId).collect(Collectors.toSet()));
         fleetR.save(baseFleet);

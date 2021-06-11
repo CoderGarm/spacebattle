@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.gui.vaadin.views;
 
 import com.google.common.base.Preconditions;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -33,6 +34,7 @@ import java.util.Map;
 @UIScope
 @Route(value = ResearchMainView.ROUTE, layout = MainView.class)
 @RouteAlias(value = ResearchMainView.ROUTE, layout = MainView.class)
+@CssImport("./styles/views/main/details/research-view.css")
 public class ResearchMainView extends PageWithActionTabsAndStats<User> {
 
     @Nonnull
@@ -77,7 +79,7 @@ public class ResearchMainView extends PageWithActionTabsAndStats<User> {
         researchTechTreeDisplay = new ResearchTechTreeDisplay();
         createActionSelectorMenu();
         content = researchSelectionEdit;
-        content.update(loggedIn);
+        content.updateStatistics(loggedIn);
         setContent(content);
         updateActionMenuUsability(null);
     }
@@ -120,7 +122,7 @@ public class ResearchMainView extends PageWithActionTabsAndStats<User> {
         actionSelectorMenu.addSelectedChangeListener(event -> {
             final Tab selectedTab = event.getSelectedTab();
             final StatsLayout<User> componentForTab = getComponentForTabOfActionMenu(selectedTab);
-            componentForTab.update(loggedInUser);
+            componentForTab.updateStatistics(loggedInUser);
             content = setContent((ResearchLayout<User>) componentForTab);
         });
     }

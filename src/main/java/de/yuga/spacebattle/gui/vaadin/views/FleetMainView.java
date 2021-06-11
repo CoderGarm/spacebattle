@@ -71,7 +71,7 @@ public class FleetMainView extends PageWithSubjectActionTabsAndStats<Fleet> {
             fleet = allFleetsForUser.get(0);
         }
         if (fleet != null) {
-            fleetDashboardDisplay.update(fleet);
+            fleetDashboardDisplay.updateStatistics(fleet);
         }
         createSubjectSelectorMenu();
         createActionSelectorMenu();
@@ -107,7 +107,7 @@ public class FleetMainView extends PageWithSubjectActionTabsAndStats<Fleet> {
             if (fleet != null) {
                 fleet = fleetService.find(fleet);
             }
-            componentForTab.update(fleet);
+            componentForTab.updateStatistics(fleet);
             content = setContent((FleetLayout<Fleet>) componentForTab);
         });
     }
@@ -132,7 +132,7 @@ public class FleetMainView extends PageWithSubjectActionTabsAndStats<Fleet> {
                 fleet = fleetService.find(fleet);
             }
             addSubjectForTabOfSubjectMenu(selectedTab, fleet);
-            content.update(fleet);
+            content.updateStatistics(fleet);
             getTabForComponentOfActionMenu(content).setSelected(true);
             updateActionMenuUsability(null);
         });

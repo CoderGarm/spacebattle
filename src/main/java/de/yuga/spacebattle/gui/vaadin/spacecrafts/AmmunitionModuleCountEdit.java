@@ -6,11 +6,11 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.NotifySBUserException;
-import de.yuga.spacebattle.gui.vaadin.misc.details.NumericField;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.AmmunitionModuleCountDTO;
 
 import javax.annotation.Nonnull;
@@ -21,7 +21,7 @@ public class AmmunitionModuleCountEdit extends HorizontalLayout implements HasVa
     private final Binder<AmmunitionModuleCountDTO> binder = new Binder<>(AmmunitionModuleCountDTO.class);
 
     @Nonnull
-    private final NumericField amountField = new NumericField();
+    private final IntegerField amountField = new IntegerField();
 
     public AmmunitionModuleCountEdit() {
 
@@ -39,9 +39,10 @@ public class AmmunitionModuleCountEdit extends HorizontalLayout implements HasVa
         final ReadOnlyHasValue<String> supportsWhatReadOnly = new ReadOnlyHasValue<>(supportsWhat::setText);
         binder.forField(supportsWhatReadOnly).bind(AmmunitionModuleCountDTO::getSupportsWhatDescription, null);
 
+        amountField.setHasControls(true);
+        amountField.setMin(0);
         binder.forField(amountField).bind(AmmunitionModuleCountDTO::getCount, AmmunitionModuleCountDTO::setCount);
 
-        amountField.addClassName("numeric-before-amount");
         add(amountField, name, description, supportsWhat);
     }
 
@@ -79,7 +80,6 @@ public class AmmunitionModuleCountEdit extends HorizontalLayout implements HasVa
     @Override
     public void setReadOnly(boolean readOnly) {
         amountField.setReadOnly(readOnly);
-        amountField.setReadonlyForButtons(readOnly);
     }
 
     @Override

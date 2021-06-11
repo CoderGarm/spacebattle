@@ -77,7 +77,7 @@ public class MainView extends AppLayout {
     private String userNameLoginOverride = "flashkid";
 
     /**
-     * Strange Exception when the UID is another one.
+     * Strange Exception when the UID is another one. // todo solve that
      */
     private static final long serialVersionUID = 4136300596358225703L;
 
@@ -96,7 +96,7 @@ public class MainView extends AppLayout {
     private final TickService tickService;
 
     @Nonnull
-    private H1 viewTitle = new H1("Spacebattle");
+    private H1 viewTitle = new H1("BoH");
 
     @Nonnull
     private final LinkedHashMap<Tab, Class<? extends Component>> tabs = createTabs();
@@ -116,7 +116,7 @@ public class MainView extends AppLayout {
     @Nonnull
     private final Button initialDataButton = createCreateInitialDataButton();
 
-    private final Select userChoice;
+    private final Select<String> userChoice;
 
     @Nonnull
     private final Button loginButton = createLoginButton();
@@ -194,28 +194,37 @@ public class MainView extends AppLayout {
         userService.refresh();
     }
 
+    /**
+     * Creates the left sided tabs for the main navigation element.
+     *
+     * @return the sequenced tabs
+     */
+    @Nonnull
     private LinkedHashMap<Tab, Class<? extends Component>> createTabs() {
         final LinkedHashMap<Tab, Class<? extends Component>> tabMap = new LinkedHashMap<>();
-        for (int i = 0; i < SB_ROUTING_ITEMS.length; i++) {
-            SBRouting item = SB_ROUTING_ITEMS[i];
-            Class<? extends Component> clazz = item.getClazz();
-            Tab tab = createTab(item.getNavText(), clazz);
-
+        for (final SBRouting item : SB_ROUTING_ITEMS) {
+            final Class<? extends Component> clazz = item.getClazz();
+            final Tab tab = createTab(item.getNavText(), clazz);
             tabMap.put(tab, clazz);
         }
         return tabMap;
     }
 
-
+    /**
+     * Creates the header content for the row above the main content area.
+     *
+     * @return the component which represents the header bar
+     */
+    @Nonnull
     private Component createHeaderContent() {
-        HorizontalLayout layout = new HorizontalLayout();
+        final HorizontalLayout layout = new HorizontalLayout();
         layout.setId("header");
         layout.getThemeList().set("dark", true);
         layout.setWidthFull();
         layout.setSpacing(false);
         layout.setAlignItems(FlexComponent.Alignment.CENTER);
         layout.add(new DrawerToggle());
-        tickDisplay.updateTick(tickService.getLatest());
+        tickDisplay.setValue(tickService.getLatest());
         tickDisplay.setMargin(true);
         layout.add(tickDisplay);
         viewTitle = new H1();
@@ -224,7 +233,7 @@ public class MainView extends AppLayout {
         layout.add(wantToKnowMore);
         layout.add(this.logoutButton);
         layout.add(this.loginButton);
-        List<User> all = userService.findAll();
+        final List<User> all = userService.findAll();
         if (all.isEmpty()) {
             layout.add(initialDataButton);
         }
@@ -265,7 +274,7 @@ public class MainView extends AppLayout {
 
     @Nonnull
     private Button createCreateInitialDataButton() {
-        return new Button("Create Initial Data", e -> {
+        return new Button("Create initial data", e -> {
             ResponseEntity<?> initialData = masterOfTheUniverseService.createInitialData();
             Notification notification = new Notification();
             notification.setDuration(5000);
@@ -283,19 +292,27 @@ public class MainView extends AppLayout {
         });
     }
 
-    private Component createDrawerContent(Tabs menu) {
-        VerticalLayout layout = new VerticalLayout();
+    /**
+     * Creates the drawer on the left which is part of the main navigation.
+     *
+     * @param menu the main navigation
+     * @return the drawer
+     */
+    private Component createDrawerContent(@Nonnull final Tabs menu) {
+        Preconditions.checkNotNull(menu, "menu shouldn't be null!");
+
+        final VerticalLayout layout = new VerticalLayout();
         layout.setSizeFull();
         layout.setPadding(false);
         layout.setSpacing(false);
         layout.getThemeList().set("spacing-s", true);
         layout.setAlignItems(FlexComponent.Alignment.STRETCH);
 
-        HorizontalLayout logoLayout = new HorizontalLayout();
+        final HorizontalLayout logoLayout = new HorizontalLayout();
         logoLayout.setId("logo");
         logoLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        logoLayout.add(new Image("images/logo.png", "Spacebattle logo"));
-        logoLayout.add(new H1("Spacebattle"));
+        logoLayout.add(new Image("images/logo.png", "BfH logo"));
+        logoLayout.add(new H1("Battle for Honor"));
 
         layout.add(logoLayout, menu);
         layout.setHeightFull();
@@ -303,6 +320,8 @@ public class MainView extends AppLayout {
     }
 
     private void updateMenu() {
+        // notnull-user if only set for more convenience in every logged-in-component -
+        // accessing that without login must be prohibited by desgin
         boolean isLoggedIn = userService.getLoggedInUser() != null;
 
         wantToKnowMore.setVisible(isLoggedIn);
@@ -373,7 +392,7 @@ public class MainView extends AppLayout {
         menuItem.getSubMenu().addItem("do Tick", event -> {
             Tick tick = this.tickService.doTick();
             LOGGER.info("do tick");
-            tickDisplay.updateTick(tick);
+            tickDisplay.setValue(tick);
             uiEventBus.publish(this, ESBEvent.TICK_DONE.name());
         });
         wantToKnowMore.setVisible(false);

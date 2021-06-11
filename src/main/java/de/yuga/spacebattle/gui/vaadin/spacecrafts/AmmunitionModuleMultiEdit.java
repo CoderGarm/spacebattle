@@ -37,7 +37,7 @@ public class AmmunitionModuleMultiEdit extends VerticalLayout implements HasValu
         }
 
         final Map<AmmunitionModule, Integer> modules = value.stream()
-                .collect(Collectors.toMap(AmmunitionModuleCountDTO::getAmmunitionModule, AmmunitionModuleCountDTO::getCountNumeric));
+                .collect(Collectors.toMap(AmmunitionModuleCountDTO::getAmmunitionModule, AmmunitionModuleCountDTO::getCount));
 
         componentMap.forEach((module, moduleEdit) -> {
             if (!modules.containsKey(module)) {
@@ -80,7 +80,7 @@ public class AmmunitionModuleMultiEdit extends VerticalLayout implements HasValu
     public Set<AmmunitionModuleCountDTO> getValue() {
         return componentMap.keySet().stream()
                 .map(module -> componentMap.get(module).getValue())
-                .filter(dto -> dto.getCountNumeric() > 0)
+                .filter(dto -> dto.getCount() > 0)
                 .collect(Collectors.toSet());
     }
 

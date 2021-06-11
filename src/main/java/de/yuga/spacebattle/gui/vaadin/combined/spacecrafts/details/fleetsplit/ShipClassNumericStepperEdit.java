@@ -4,10 +4,10 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
-import de.yuga.spacebattle.gui.vaadin.misc.details.NumericStepEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +22,7 @@ public class ShipClassNumericStepperEdit extends HorizontalLayout implements Has
     private final Binder<ShipClassCountSplitDTO> binder = new Binder<>();
 
     @Nonnull
-    private final NumericStepEdit stepEdit = new NumericStepEdit();
+    private final IntegerField stepEdit = new IntegerField();
 
     @Nullable
     private ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<ShipClassNumericStepperEdit, ShipClassCountSplitDTO>> valueChangeListener;
@@ -36,6 +36,8 @@ public class ShipClassNumericStepperEdit extends HorizontalLayout implements Has
         final ReadOnlyHasValue<String> referenceAmountLabelReadOnly = new ReadOnlyHasValue<>(referenceAmountLabel::setText);
         binder.forField(referenceAmountLabelReadOnly).bind(ShipClassCountSplitDTO::getCalculatedReferenceAmount, null);
 
+        stepEdit.setHasControls(true);
+        stepEdit.setMin(0);
         binder.forField(stepEdit)
                 // validate that the split count is not below zero and not above the reference count
                 .withValidator(integer -> getValue() != null && integer >= 0 && integer <= getValue().getReferenceAmountNumeric(), "You cannot exceed the amount limit.")

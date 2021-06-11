@@ -1,67 +1,141 @@
 package de.yuga.spacebattle.gui.vaadin.research.details;
 
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.shared.Registration;
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.HasNameAndDescription;
 import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.enums.EEntityType;
 
 import javax.annotation.Nonnull;
-import java.util.Comparator;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Vaadin component to display an amount of researches, ordered by their IDs.
- * todo: ID-ordering is primitive and will be obsolete in usability when there is a more-then-one-dimensional tech tree
  */
 public class ResearchDisplayMulti extends VerticalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<ResearchDisplayMulti, Map<Research, Integer>>, Map<Research, Integer>> {
 
     @Nonnull
-    final private Map<Research, ResearchDisplay> componentMap = new HashMap<>();
-
-    Label title = new Label("Research display multi");
+    final private Grid<ResearchLevelDTO> grid = new Grid<>();
 
     public ResearchDisplayMulti() {
+        grid.setHeightByRows(true);
+        grid.setColumnReorderingAllowed(true);
+        grid.addColumn(dto -> dto.getResearch().getName())
+                .setComparator((o1, o2) -> {
+                    // create sorting by distance to either universe center or the selected planet
+                    if (o1 == null && o2 == null) {
+                        return 0;
+                    }
+                    if (o1 == null) {
+                        return -1;
+                    }
+                    if (o2 == null) {
+                        return 1;
+                    }
+                    return o1.getResearch().getName().compareTo(o2.getResearch().getName());
+                })
+                .setHeader("Research");
 
-        add(title);
-    }
+        grid.addColumn(ResearchLevelDTO::getLevel)
+                .setComparator((o1, o2) -> {
+                    // create sorting by distance to either universe center or the selected planet
+                    if (o1 == null && o2 == null) {
+                        return 0;
+                    }
+                    if (o1 == null) {
+                        return -1;
+                    }
+                    if (o2 == null) {
+                        return 1;
+                    }
+                    return o1.getLevel().compareTo(o2.getLevel());
+                })
+                .setHeader("Level");
 
-    @Override
-    public void clear() {
-        removeAll();
-        componentMap.clear();
-        add(title);
+        grid.addColumn(dto -> dto.getResearch().getLevelCap())
+                .setComparator((o1, o2) -> {
+                    // create sorting by distance to either universe center or the selected planet
+                    if (o1 == null && o2 == null) {
+                        return 0;
+                    }
+                    if (o1 == null) {
+                        return -1;
+                    }
+                    if (o2 == null) {
+                        return 1;
+                    }
+                    return Integer.compare(o1.getResearch().getLevelCap(), o2.getResearch().getLevelCap());
+                })
+                .setHeader("Level cap");
+
+        grid.addColumn(dto -> dto.getResearch().getDescription()).setHeader("Description");
+
+        final ComponentRenderer<Component, ResearchLevelDTO> detailRenderer = new ComponentRenderer<>(dto -> {
+            final Grid<HasNameAndDescription> inlineGrid = new Grid<>();
+            inlineGrid.setColumnReorderingAllowed(true);
+            inlineGrid.setHeightByRows(true);
+            inlineGrid.addColumn(HasNameAndDescription::getName)
+                    .setComparator((o1, o2) -> {
+                        // create sorting by distance to either universe center or the selected planet
+                        if (o1 == null && o2 == null) {
+                            return 0;
+                        }
+                        if (o1 == null) {
+                            return -1;
+                        }
+                        if (o2 == null) {
+                            return 1;
+                        }
+                        return o1.getName().compareTo(o2.getName());
+                    }).setHeader("Name");
+
+            inlineGrid.addColumn(nad -> EEntityType.getTypeByClazz(nad.getClass()).getType())
+                    .setComparator((o1, o2) -> {
+                        // create sorting by distance to either universe center or the selected planet
+                        if (o1 == null && o2 == null) {
+                            return 0;
+                        }
+                        if (o1 == null) {
+                            return -1;
+                        }
+                        if (o2 == null) {
+                            return 1;
+                        }
+                        return o1.getName().compareTo(o2.getName());
+                    }).setHeader("Type");
+
+            inlineGrid.addColumn(HasNameAndDescription::getDescription).setHeader("Description");
+
+            final Set<HasNameAndDescription> unlocks = dto.getResearch().getUnlocks();
+            inlineGrid.setItems(unlocks);
+            return inlineGrid;
+        });
+        grid.setItemDetailsRenderer(detailRenderer);
+
+        grid.getColumns().forEach(c -> c.setAutoWidth(true));
+        add(grid);
     }
 
     @Override
     public void setValue(@Nonnull final Map<Research, Integer> researches) {
 
         if (researches.isEmpty()) {
-            clear();
+            grid.setItems(new HashSet<>());
+            grid.getDataProvider().refreshAll();
             return;
         }
-
-        componentMap.keySet().stream()
-                .filter(research -> !researches.containsKey(research))
-                .map(componentMap::get)
-                .forEach(this::remove);
-
-        componentMap.keySet().removeIf(research -> !researches.containsKey(research));
-
-        researches.keySet().stream().sorted(Comparator.comparingInt(AbstractEntityKey::getId)).forEach(research -> {
-            final Integer level = researches.get(research);
-            ResearchDisplay researchDisplay = componentMap.get(research);
-            if (researchDisplay == null) {
-                researchDisplay = new ResearchDisplay();
-                componentMap.put(research, researchDisplay);
-                add(researchDisplay);
-            }
-            researchDisplay.setValue(new ResearchLevelDTO(research, level));
-        });
-
+        final Set<ResearchLevelDTO> researchLevelDTOS = researches.entrySet().stream()
+                .map(e -> new ResearchLevelDTO(e.getKey(), e.getValue())).collect(Collectors.toSet());
+        grid.setItems(researchLevelDTOS);
+        grid.getDataProvider().refreshAll();
     }
 
     @Override

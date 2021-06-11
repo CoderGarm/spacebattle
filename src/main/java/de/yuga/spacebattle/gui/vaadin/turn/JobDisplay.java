@@ -9,19 +9,17 @@ import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.gui.vaadin.constructables.ConstructableDisplay;
 
 import javax.annotation.Nonnull;
-import java.math.BigDecimal;
 
 public class JobDisplay extends VerticalLayout {
 
     public JobDisplay(@Nonnull final Job job) {
         Preconditions.checkNotNull(job, "job shouldn't be null!");
 
-        Constructable constructable = job.getConstructable();
-        ConstructableDisplay constructableDisplay = new ConstructableDisplay(constructable);
+        final Constructable constructable = job.getConstructable();
+        final ConstructableDisplay constructableDisplay = new ConstructableDisplay(constructable);
 
-        BigDecimal jobDoneAtZero = job.getJobDoneAtZero();
-        Label jobDoneAtZeroL = new Label("Points to finish left: " + jobDoneAtZero);
-
+        final long jobDoneAtZero = job.getJobDoneAtZero();
+        final Label jobDoneAtZeroL = new Label("Points to finish left: " + jobDoneAtZero);
         add(constructableDisplay, jobDoneAtZeroL);
     }
 }

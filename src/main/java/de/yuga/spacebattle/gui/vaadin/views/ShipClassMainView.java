@@ -9,9 +9,9 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClassComparator;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClassComparator;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
@@ -214,7 +214,7 @@ public class ShipClassMainView extends PageWithSubjectActionTabsAndStats<ShipCla
             shipClassService.delete(shipClass);
             this.shipClass = null;
             NotificationHelper.notify("Class deleted", 3000);
-            shipClassCreate.update(shipClass);
+            shipClassCreate.updateStatistics(shipClass);
             subjectSelectorMenu.setSelectedIndex(0);
             final Tab createNewClassTab = getTabForComponentOfActionMenu(shipClassCreate);
             setSelected(createNewClassTab);
@@ -259,7 +259,7 @@ public class ShipClassMainView extends PageWithSubjectActionTabsAndStats<ShipCla
                 }
             }
             if (componentForTab instanceof ShipClassDisplay || componentForTab instanceof ShipClassCreate) {
-                componentForTab.update(shipClass);
+                componentForTab.updateStatistics(shipClass);
             }
             componentForTab.refresh();
             content = setContent(componentForTab);
@@ -320,7 +320,7 @@ public class ShipClassMainView extends PageWithSubjectActionTabsAndStats<ShipCla
                 content = setContent(shipClassDisplay);
             }
             updateShipClassEdit(shipClass);
-            shipClassDisplay.update(shipClass);
+            shipClassDisplay.updateStatistics(shipClass);
         } else {
             // implement a subject of null is definitely the create view
             content = setContent(shipClassCreate);
@@ -330,7 +330,7 @@ public class ShipClassMainView extends PageWithSubjectActionTabsAndStats<ShipCla
         final HashMap<Tab, Boolean[]> tabMap = getActionTabUsability(currentTab);
         updateActionMenuUsability(tabMap);
 
-        shipClassCreate.update(shipClass);
+        shipClassCreate.updateStatistics(shipClass);
         getTabForSubject(shipClass).ifPresent(this::setSelected);
         setSelected(currentTab);
     }

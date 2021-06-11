@@ -14,8 +14,8 @@ import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
-import de.yuga.spacebattle.gui.vaadin.buildings.BuildingDisplay;
-import de.yuga.spacebattle.gui.vaadin.spacecrafts.BaseModuleDisplay;
+import de.yuga.spacebattle.gui.vaadin.misc.details.misc.HasNameAndDescriptionDisplayHorizontal;
+import de.yuga.spacebattle.gui.vaadin.misc.details.misc.HasNameAndDescriptionDisplayVertical;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.HullDisplay;
 
 import javax.annotation.Nonnull;
@@ -78,43 +78,43 @@ public class ResearchEdit extends HorizontalLayout implements HasValue<AbstractF
         if (research != null) {
             accordionPanel.setSummaryText("Unlocks");
             research.getUnlocksBuildings().forEach(building -> {
-                BuildingDisplay buildingDisplay = new BuildingDisplay();
+                final HasNameAndDescriptionDisplayHorizontal buildingDisplay = new HasNameAndDescriptionDisplayHorizontal();
                 buildingDisplay.setValue(building);
                 accordionPanel.addContent(buildingDisplay);
             });
 
             research.getUnlocksHulls().forEach(hull -> {
-                HullDisplay hullDisplay = new HullDisplay();
-                hullDisplay.update(hull);
+                final HullDisplay hullDisplay = new HullDisplay();
+                hullDisplay.setValue(hull);
                 accordionPanel.addContent(hullDisplay);
             });
 
             research.getUnlocksArmor().forEach(module -> {
-                BaseModuleDisplay moduleDisplay = new BaseModuleDisplay();
+                final HasNameAndDescriptionDisplayVertical moduleDisplay = new HasNameAndDescriptionDisplayVertical();
                 moduleDisplay.setValue(module);
                 accordionPanel.addContent(moduleDisplay);
             });
 
             research.getUnlocksElectronicWarfare().forEach(module -> {
-                BaseModuleDisplay moduleDisplay = new BaseModuleDisplay();
+                final HasNameAndDescriptionDisplayVertical moduleDisplay = new HasNameAndDescriptionDisplayVertical();
                 moduleDisplay.setValue(module);
                 accordionPanel.addContent(moduleDisplay);
             });
 
             research.getUnlocksPropulsion().forEach(module -> {
-                BaseModuleDisplay moduleDisplay = new BaseModuleDisplay();
+                final HasNameAndDescriptionDisplayVertical moduleDisplay = new HasNameAndDescriptionDisplayVertical();
                 moduleDisplay.setValue(module);
                 accordionPanel.addContent(moduleDisplay);
             });
 
             research.getUnlocksSidewall().forEach(module -> {
-                BaseModuleDisplay moduleDisplay = new BaseModuleDisplay();
+                final HasNameAndDescriptionDisplayVertical moduleDisplay = new HasNameAndDescriptionDisplayVertical();
                 moduleDisplay.setValue(module);
                 accordionPanel.addContent(moduleDisplay);
             });
 
             research.getUnlocksWeapons().forEach(module -> {
-                BaseModuleDisplay moduleDisplay = new BaseModuleDisplay();
+                final HasNameAndDescriptionDisplayVertical moduleDisplay = new HasNameAndDescriptionDisplayVertical();
                 moduleDisplay.setValue(module);
                 accordionPanel.addContent(moduleDisplay);
             });

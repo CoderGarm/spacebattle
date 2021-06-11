@@ -1,6 +1,6 @@
 package de.yuga.spacebattle.gui.vaadin.combined.spacecrafts.details.fleetsplit;
 
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClassComparator;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClassComparator;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.ShipClassCountDTO;
 
 import java.util.Comparator;

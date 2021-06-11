@@ -1,29 +1,29 @@
 package de.yuga.spacebattle.gui.vaadin.research;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import de.yuga.spacebattle.gui.vaadin.misc.StatisticsDisplay;
 import de.yuga.spacebattle.gui.vaadin.misc.StatsLayout;
-import de.yuga.spacebattle.gui.vaadin.research.details.ResearchOutputDisplay;
+import de.yuga.spacebattle.gui.vaadin.research.details.ResearchStatisticsDisplay;
 
 import javax.annotation.Nonnull;
 
 /**
  * General layout for research pages.
  *
- * @param <T> the generic type of basic information
+ * @param <GenericSubject> the generic type of basic information
  */
-public abstract class ResearchLayout<T> extends VerticalLayout implements StatsLayout<T> {
+public abstract class ResearchLayout<GenericSubject> extends VerticalLayout implements StatsLayout<GenericSubject> {
 
-    private final ResearchOutputDisplay researchOutputDisplay = new ResearchOutputDisplay();
+    private final ResearchStatisticsDisplay researchStatisticsDisplay = new ResearchStatisticsDisplay();
 
     @Nonnull
-    public ResearchOutputDisplay getResearchOutputDisplay() {
-        return researchOutputDisplay;
+    public ResearchStatisticsDisplay getResearchOutputDisplay() {
+        return researchStatisticsDisplay;
     }
 
     @Nonnull
     @Override
-    public Component getStatisticsComponent() {
-        return researchOutputDisplay;
+    public StatisticsDisplay getStatisticsComponent() {
+        return researchStatisticsDisplay;
     }
 }

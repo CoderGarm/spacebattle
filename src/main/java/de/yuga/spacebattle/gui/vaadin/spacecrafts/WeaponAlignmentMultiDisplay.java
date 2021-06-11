@@ -3,7 +3,7 @@ package de.yuga.spacebattle.gui.vaadin.spacecrafts;
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 
 import javax.annotation.Nonnull;

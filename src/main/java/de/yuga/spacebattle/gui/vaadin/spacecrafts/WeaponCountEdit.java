@@ -6,11 +6,11 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.NotifySBUserException;
-import de.yuga.spacebattle.gui.vaadin.misc.details.NumericField;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.WeaponAlignmentCountDTO;
 
 import javax.annotation.Nonnull;
@@ -21,7 +21,7 @@ public class WeaponCountEdit extends HorizontalLayout implements HasValue<Abstra
     private final Binder<WeaponAlignmentCountDTO> binder = new Binder<>(WeaponAlignmentCountDTO.class);
 
     @Nonnull
-    private final NumericField amountField = new NumericField();
+    private final IntegerField amountField = new IntegerField();
 
     public WeaponCountEdit() {
 
@@ -35,9 +35,10 @@ public class WeaponCountEdit extends HorizontalLayout implements HasValue<Abstra
         final ReadOnlyHasValue<String> moduleDescriptionReadOnly = new ReadOnlyHasValue<>(description::setText);
         binder.forField(moduleDescriptionReadOnly).bind(WeaponAlignmentCountDTO::getWeaponDescription, null);
 
+        amountField.setHasControls(true);
+        amountField.setMin(0);
         binder.forField(amountField).bind(WeaponAlignmentCountDTO::getCount, WeaponAlignmentCountDTO::setCount);
 
-        amountField.addClassName("numeric-before-amount");
         add(amountField, name, description);
     }
 
@@ -75,7 +76,6 @@ public class WeaponCountEdit extends HorizontalLayout implements HasValue<Abstra
     @Override
     public void setReadOnly(boolean readOnly) {
         amountField.setReadOnly(readOnly);
-        amountField.setReadonlyForButtons(readOnly);
     }
 
     @Override

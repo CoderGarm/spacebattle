@@ -5,8 +5,8 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.shared.Registration;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -76,7 +76,7 @@ public class HullByAmountHorizontalDisplay extends HorizontalLayout implements H
                 add(hullAmountDisplay);
                 displayByHullType.put(hull, hullAmountDisplay);
             }
-            hullAmountDisplay.update(new HullAmountWrapper(hull, amount));
+            hullAmountDisplay.setValue(new HullAmountWrapper(hull, amount));
         });
     }
 

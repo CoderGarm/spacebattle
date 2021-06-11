@@ -1,7 +1,12 @@
 package de.yuga.spacebattle.backend.services.buildings;
 
 import de.yuga.spacebattle.backend.entities.buildings.Building;
+import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
+import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
 import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.enums.EDepositType;
+import de.yuga.spacebattle.backend.enums.EEducationType;
+import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.buildings.BuildingRepository;
 import de.yuga.spacebattle.backend.test.MocksNotUsedTestListener;
@@ -12,9 +17,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
@@ -85,13 +88,16 @@ public class BuildingServiceTest extends SBEasyMockSupport {
         final int baseValue = 1;
         final EResourceType researchType = EResourceType.RESEARCH;
         final Research unlockedThrough = new Research();
-        final Building expectation = new Building(name, description, baseValue, researchType, unlockedThrough);
+        Map<EEducationType, Long> crewRequirement = new HashMap<>();
+        crewRequirement.put(EEducationType.CIVIL_MK_III, 100L);
+        CrewRequirementDTO militaryCrew = new CrewRequirementDTO(crewRequirement, EDepositType.COSTS);
+        final Building expectation = new Building(name, description, baseValue, new ProductionType(researchType, EProductionCategory.PRODUCE, null), militaryCrew, unlockedThrough);
         // prepare mocks
         expect(buildingRepositoryMock.save(expectation)).andReturn(expectation);
         // replay mocks
         replayAll();
         // test method
-        final Building result = testObject.createBuilding(name, description, baseValue, researchType, unlockedThrough);
+        final Building result = testObject.createBuilding(name, description, baseValue, new ProductionType(researchType, EProductionCategory.PRODUCE, null), EEducationType.CIVIL_MK_III, 100L, unlockedThrough);
         // verify mocks
         verifyAll();
         // check expectation

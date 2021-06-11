@@ -2,13 +2,15 @@ package de.yuga.spacebattle.gui.vaadin.combined.spacecrafts.details.fleetsplit;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -38,7 +40,7 @@ public class FleetSplitDTO {
         Preconditions.checkNotNull(baseFleet, "baseFleet shouldn't be null!");
 
         this.baseFleet = baseFleet;
-        this.ships = baseFleet.getShips().entrySet()
+        this.ships = baseFleet.getShipsByClass().entrySet()
                 .stream()
                 .map(e -> new ShipClassCountSplitDTO(e.getKey(), e.getValue()))
                 .sorted(new ShipClassCountSplitDTOComparator())
@@ -106,11 +108,11 @@ public class FleetSplitDTO {
         final Map<ShipClass, Integer> splitFleetSetup = ships.stream()
                 .collect(Collectors.toMap(ShipClassCountSplitDTO::getShipClass, ShipClassCountSplitDTO::getSplitCount));
 
-        splitFleetSetup.forEach((shipClass, integer) -> baseFleet.updateShips(shipClass, (-1 * integer)));
+        final Set<WarShip> separatedPart = baseFleet.separateShips(splitFleetSetup);
 
         assert baseFleet.getOrbit() != null; // already checked but to remove idea warning
         final Fleet splitFleet = new Fleet(name, baseFleet.getOwner(), baseFleet.getOrbit());
-        splitFleetSetup.forEach(splitFleet::updateShips);
+        splitFleet.updateShips(separatedPart);
 
         return new Fleet[]{baseFleet, splitFleet};
     }

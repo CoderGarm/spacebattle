@@ -3,14 +3,15 @@ package de.yuga.spacebattle.gui.vaadin.spacecrafts;
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Armor;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Sidewall;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.StarShipSvgHelper;
+import de.yuga.spacebattle.gui.vaadin.misc.details.misc.HasNameAndDescriptionDisplayVertical;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.AmmunitionModuleCountDTO;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.PassiveModuleCountDTO;
 
@@ -22,16 +23,16 @@ import java.util.stream.Collectors;
 public class ModuleMultiDisplay extends VerticalLayout {
 
     @Nonnull
-    private final BaseModuleDisplay armorDisplay = new BaseModuleDisplay();
+    private final HasNameAndDescriptionDisplayVertical armorDisplay = new HasNameAndDescriptionDisplayVertical();
 
     @Nonnull
-    private final BaseModuleDisplay propulsionDisplay = new BaseModuleDisplay();
+    private final HasNameAndDescriptionDisplayVertical propulsionDisplay = new HasNameAndDescriptionDisplayVertical();
 
     @Nonnull
-    private final BaseModuleDisplay electronicWarfareDisplay = new BaseModuleDisplay();
+    private final HasNameAndDescriptionDisplayVertical electronicWarfareDisplay = new HasNameAndDescriptionDisplayVertical();
 
     @Nonnull
-    private final BaseModuleDisplay sidewallDisplay = new BaseModuleDisplay();
+    private final HasNameAndDescriptionDisplayVertical sidewallDisplay = new HasNameAndDescriptionDisplayVertical();
 
     @Nonnull
     private final WeaponAlignmentMultiDisplay bow = new WeaponAlignmentMultiDisplay(EWeaponAlignment.BOW);

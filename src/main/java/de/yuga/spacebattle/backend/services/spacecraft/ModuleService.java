@@ -2,10 +2,11 @@ package de.yuga.spacebattle.backend.services.spacecraft;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.enums.*;
-import de.yuga.spacebattle.backend.repositories.spacecraft.*;
+import de.yuga.spacebattle.backend.repositories.spacecraft.modules.*;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -79,12 +80,14 @@ public class ModuleService {
                              @Nonnull final Research unlockedThrough,
                              final int useCapacity,
                              final int value,
-                             final int techLevel) {
+                             final int techLevel,
+                             @Nonnull final CrewRequirementDTO crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
+        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        return armorRepository.save(new Armor(name, description, unlockedThrough, useCapacity, value, techLevel));
+        return armorRepository.save(new Armor(name, description, unlockedThrough, useCapacity, value, techLevel, crewRequirement));
     }
 
     /**
@@ -105,12 +108,14 @@ public class ModuleService {
                                                      @Nonnull final Research unlockedThrough,
                                                      final int useCapacity,
                                                      final int value,
-                                                     final int techLevel) {
+                                                     final int techLevel,
+                                                     @Nonnull final CrewRequirementDTO crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
+        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        return electronicWarfareRepository.save(new ElectronicWarfare(name, description, unlockedThrough, useCapacity, value, techLevel));
+        return electronicWarfareRepository.save(new ElectronicWarfare(name, description, unlockedThrough, useCapacity, value, techLevel, crewRequirement));
     }
 
     /**
@@ -131,12 +136,14 @@ public class ModuleService {
                                    @Nonnull final Research unlockedThrough,
                                    final int useCapacity,
                                    final int value,
-                                   final int techLevel) {
+                                   final int techLevel,
+                                   @Nonnull final CrewRequirementDTO crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
+        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        return sidewallRepository.save(new Sidewall(name, description, unlockedThrough, useCapacity, value, techLevel));
+        return sidewallRepository.save(new Sidewall(name, description, unlockedThrough, useCapacity, value, techLevel, crewRequirement));
     }
 
     /**
@@ -163,15 +170,17 @@ public class ModuleService {
                                @Nullable final Double sideWallPenetration,
                                @Nonnull final EDamageType damageType,
                                @Nonnull final EWeaponType weaponType,
-                               @Nonnull final EAlignmentType alignmentType) {
+                               @Nonnull final EAlignmentType alignmentType,
+                               @Nonnull final CrewRequirementDTO crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
         Preconditions.checkNotNull(damageType, "damageType shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
         Preconditions.checkNotNull(alignmentType, "alignmentType shouldn't be null!");
+        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        return weaponRepository.save(new Weapon(name, description, unlockedThrough, ammunitionModule, useCapacity, value, techLevel, range, sideWallPenetration, damageType, weaponType, alignmentType));
+        return weaponRepository.save(new Weapon(name, description, unlockedThrough, ammunitionModule, useCapacity, value, techLevel, range, sideWallPenetration, damageType, weaponType, alignmentType, crewRequirement));
     }
 
     /**
@@ -193,12 +202,14 @@ public class ModuleService {
                                        final int useCapacity,
                                        final int value,
                                        final int level,
-                                       final boolean ftlCapable) {
+                                       final boolean ftlCapable,
+                                       @Nonnull final CrewRequirementDTO crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
+        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        return propulsionRepository.save(new Propulsion(name, description, unlockedThrough, useCapacity, value, level, ftlCapable));
+        return propulsionRepository.save(new Propulsion(name, description, unlockedThrough, useCapacity, value, level, ftlCapable, crewRequirement));
     }
 
     @Nonnull
@@ -210,12 +221,14 @@ public class ModuleService {
                                              @Nonnull final ECalculationType calculationType,
                                              final int useCapacity,
                                              final int value,
-                                             final int techLevel) {
+                                             final int techLevel,
+                                             @Nonnull final CrewRequirementDTO crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
+        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        return passiveModuleRepository.save(new PassiveModule(name, description, unlockedThrough, useCapacity, value, techLevel, supportType, calculationType));
+        return passiveModuleRepository.save(new PassiveModule(name, description, unlockedThrough, useCapacity, value, techLevel, supportType, calculationType, crewRequirement));
     }
 
     @Nonnull
@@ -225,12 +238,14 @@ public class ModuleService {
                                                    @Nonnull final Research unlockedThrough,
                                                    final int useCapacity,
                                                    final int value,
-                                                   final int techLevel) {
+                                                   final int techLevel,
+                                                   @Nonnull final CrewRequirementDTO crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
+        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        return ammunitionRepository.save(new AmmunitionModule(name, description, unlockedThrough, useCapacity, value, techLevel));
+        return ammunitionRepository.save(new AmmunitionModule(name, description, unlockedThrough, useCapacity, value, techLevel, crewRequirement));
     }
 
     public List<Armor> findAllArmorByUser(@Nonnull final User user) {

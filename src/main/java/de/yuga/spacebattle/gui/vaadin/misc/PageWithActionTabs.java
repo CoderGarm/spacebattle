@@ -65,8 +65,6 @@ public abstract class PageWithActionTabs<GenericLayout extends Component> extend
     public PageWithActionTabs() {
         actionSelectorMenu.setId("actionSelectorMenu");
         actionSelectorMenu.setClassName("selector");
-        ViewHelper.setWidth(actionSelectorMenu, "100%");
-
         mainContent.add(actionSelectorMenu);
 
         setHeightFull();

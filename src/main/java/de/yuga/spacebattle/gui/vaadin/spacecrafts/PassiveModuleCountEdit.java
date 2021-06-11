@@ -6,11 +6,11 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.NotifySBUserException;
-import de.yuga.spacebattle.gui.vaadin.misc.details.NumericField;
 import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.PassiveModuleCountDTO;
 
 import javax.annotation.Nonnull;
@@ -21,7 +21,7 @@ public class PassiveModuleCountEdit extends HorizontalLayout implements HasValue
     private final Binder<PassiveModuleCountDTO> binder = new Binder<>(PassiveModuleCountDTO.class);
 
     @Nonnull
-    private final NumericField amountField = new NumericField();
+    private final IntegerField amountField = new IntegerField();
 
     public PassiveModuleCountEdit() {
 
@@ -39,9 +39,10 @@ public class PassiveModuleCountEdit extends HorizontalLayout implements HasValue
         final ReadOnlyHasValue<String> supportsWhatReadOnly = new ReadOnlyHasValue<>(supportsWhat::setText);
         binder.forField(supportsWhatReadOnly).bind(PassiveModuleCountDTO::getSupportsWhatDescription, null);
 
+        amountField.setHasControls(true);
+        amountField.setMin(0);
         binder.forField(amountField).bind(PassiveModuleCountDTO::getCount, PassiveModuleCountDTO::setCount);
 
-        amountField.addClassName("numeric-before-amount");
         add(amountField, name, description, supportsWhat);
     }
 
@@ -79,7 +80,6 @@ public class PassiveModuleCountEdit extends HorizontalLayout implements HasValue
     @Override
     public void setReadOnly(boolean readOnly) {
         amountField.setReadOnly(readOnly);
-        amountField.setReadonlyForButtons(readOnly);
     }
 
     @Override

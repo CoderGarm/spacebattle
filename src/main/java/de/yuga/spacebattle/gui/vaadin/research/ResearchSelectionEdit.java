@@ -62,7 +62,7 @@ public class ResearchSelectionEdit extends ResearchLayout<User> {
     }
 
     @Override
-    public void update(@Nullable User user) {
+    public void updateStatistics(@Nullable User user) {
         if (user == null) {
             currentResearchDisplay.setValue(null);
             return;
@@ -72,7 +72,8 @@ public class ResearchSelectionEdit extends ResearchLayout<User> {
 
         final Planet researchPlanet = planetService.findResearchPlanet(user);
         if (researchPlanet != null) {
-            final Construction researchFacility = researchPlanet.getConstructionByResource(EResourceType.RESEARCH);
+            final Construction researchFacility = researchPlanet.getConstructionByResource(EResourceType.RESEARCH)
+                    .stream().findFirst().orElse(null);
             if (researchFacility == null) {
                 throw new NotifySBUserException("This should not work - try to use the correct planet!");
             }

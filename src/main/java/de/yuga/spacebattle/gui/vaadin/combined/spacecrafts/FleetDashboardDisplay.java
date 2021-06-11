@@ -23,7 +23,8 @@ public class FleetDashboardDisplay extends FleetLayout<Fleet> {
 
     }
 
-    public void update(@Nullable final Fleet planet) {
+    @Override
+    public void updateStatistics(@Nullable final Fleet planet) {
         binderFleet.readBean(planet);
     }
 

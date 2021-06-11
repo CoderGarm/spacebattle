@@ -10,8 +10,9 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.turn.resources.MiningFactors;
 import de.yuga.spacebattle.backend.enums.EResolution;
-import de.yuga.spacebattle.gui.vaadin.misc.details.ResourceHorizontalDisplay;
+import de.yuga.spacebattle.gui.vaadin.turn.resource.ResourceHorizontalDisplay;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -35,17 +36,20 @@ public class PlanetSelectionGrid extends VerticalLayout implements HasValue<Abst
     private ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<PlanetSelectionGrid, ColonizationTransportStarSystemDTO>> valueChangeListener;
 
     public PlanetSelectionGrid() {
+        grid.setColumnReorderingAllowed(true);
         grid.addClassName("header-grid");
 
+        grid.setHeightByRows(true);
         grid.addColumn(Planet::getName)
                 .setHeader("Planet's name")
                 .setWidth("250px")
                 .setFlexGrow(0);
 
         grid.addComponentColumn(planet -> {
-            final ResourceHorizontalDisplay resourceVerticalDisplay = new ResourceHorizontalDisplay(EResolution.PX16);
-            resourceVerticalDisplay.updateResourceDeposit(planet.getResourceFactors());
-            return resourceVerticalDisplay;
+            final ResourceHorizontalDisplay resourceHorizontalDisplay = new ResourceHorizontalDisplay(EResolution.PX16);
+            final MiningFactors miningFactors = planet.getMiningFactors();
+            resourceHorizontalDisplay.updateResources(miningFactors);
+            return resourceHorizontalDisplay;
         }).setHeader("Resource factors");
 
         final Map<Button, ColonizeConfirmationEdit> colonizePlanetMap = new HashMap<>();

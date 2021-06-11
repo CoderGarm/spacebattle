@@ -1,14 +1,16 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
-import de.yuga.spacebattle.backend.entities.ResourceDeposit;
+import de.yuga.spacebattle.backend.entities.HasNameAndDescription;
+import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EHullType;
-import de.yuga.spacebattle.backend.enums.EResourceSubType;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 
 import javax.annotation.Nonnull;
@@ -23,7 +25,7 @@ import javax.validation.constraints.Size;
 @Entity
 @Table(name = "hull")
 @AttributeOverride(name = "id", column = @Column(name = "idHull"))
-public class Hull extends AbstractEntityKey {
+public class Hull extends AbstractEntityKey implements HasNameAndDescription {
 
     @Nonnull
     @NotNull(message = "name must not be null")
@@ -58,13 +60,12 @@ public class Hull extends AbstractEntityKey {
     @Nonnull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "idCosts", updatable = false)
-    private final ResourceDeposit costs = new ResourceDeposit(EResourceSubType.COSTS);
+    private final ResourceDeposit costs = ResourceDepositInitializerCalculator.initializeResourceDeposit(Hull.class, EDepositType.COSTS);
 
     @Nonnull
     @NotNull(message = "description must not be null")
     private String description;
 
-    @JsonIgnore
     @Nonnull
     @NotNull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -88,11 +89,13 @@ public class Hull extends AbstractEntityKey {
                 int constructionCapacityBroadsides,
                 @Nonnull final String description,
                 @Nonnull final Research unlockedThrough,
-                @Nonnull final EHullType hullType) {
+                @Nonnull final EHullType hullType,
+                @Nonnull final CrewRequirementDTO crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
         Preconditions.checkNotNull(hullType, "hullType shouldn't be null!");
+        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
         this.name = name;
         this.level = level;
@@ -103,9 +106,11 @@ public class Hull extends AbstractEntityKey {
         this.description = description;
         this.unlockedThrough = unlockedThrough;
         this.hullType = hullType;
+        this.costs.setCrewRequirement(crewRequirement);
     }
 
     @Nonnull
+    @Override
     public String getName() {
         return name;
     }
@@ -136,6 +141,7 @@ public class Hull extends AbstractEntityKey {
     }
 
     @Nonnull
+    @Override
     public String getDescription() {
         return description + " hull type: " + hullType.getDescription();
     }

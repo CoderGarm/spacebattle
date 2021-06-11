@@ -6,31 +6,25 @@ import javax.annotation.Nonnull;
 
 public enum EModuleType {
 
-    WEAPON("Attack", EIconPath.STATS.getPath(), "attack"),
-    ARMOR("Armor", EIconPath.STATS.getPath(), "armor"),
-    SHIELD("Shield", EIconPath.STATS.getPath(), "shield"),
-    PROPULSION("Propulsion", EIconPath.STATS.getPath(), "propulsion"),
-    FTLPROPULSION("FTLPropulsion", EIconPath.STATS.getPath(), "ftlpropulsion"),
-    ELECTRONIC_WARFARE("Electronic warfare", EIconPath.STATS.getPath(), "scanner");
+    WEAPON("Attack", "attack"),
+    ARMOR("Armor", "armor"),
+    SHIELD("Shield", "shield"),
+    PROPULSION("Propulsion", "propulsion"),
+    FTLPROPULSION("FTLPropulsion", "ftlpropulsion"),
+    ELECTRONIC_WARFARE("Electronic warfare", "scanner");
 
     @Nonnull
     final String name;
 
     @Nonnull
-    final String directory;
-
-    @Nonnull
     final String iconName;
 
     EModuleType(@Nonnull final String name,
-                @Nonnull final String directory,
                 @Nonnull final String iconName) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
-        Preconditions.checkNotNull(directory, "directory shouldn't be null!");
         Preconditions.checkNotNull(iconName, "iconName shouldn't be null!");
 
         this.name = name;
-        this.directory = directory;
         this.iconName = iconName;
     }
 
@@ -39,10 +33,6 @@ public enum EModuleType {
         return name;
     }
 
-    @Nonnull
-    public String getDirectory() {
-        return directory;
-    }
 
     @Nonnull
     public String getIconName() {
