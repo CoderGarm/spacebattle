@@ -42,9 +42,6 @@ public class ResearchMainView extends SBPageActionSelectorStatsLayout<User> {
     private final EventBus.UIEventBus uiEventBus;
 
     @Nonnull
-    private User user;
-
-    @Nonnull
     private final UserService userService;
 
     @Nonnull
@@ -74,32 +71,15 @@ public class ResearchMainView extends SBPageActionSelectorStatsLayout<User> {
         this.uiEventBus.subscribe(this);
         this.userService = userService;
         this.jobService = jobService;
-        User loggedIn = userService.getLoggedInUser();
-        if (loggedIn == null) {
-            throw new NotifySBUserException("You shouldn't see this.");
-        }
-        this.user = loggedIn;
+        final User loggedIn = userService.getLoggedInUser();
         researchSelectionEdit = new ResearchSelectionEdit();
         researchDoneDisplay = new ResearchDoneDisplay();
         researchTechTreeDisplay = new ResearchTechTreeDisplay();
         createActionSelectorMenu();
         content = researchSelectionEdit;
-        update(user);
+        content.update(loggedIn);
         setContent(content);
         updateActionMenuUsability(null);
-    }
-
-    /**
-     * Updates every view component with the current logged in user.
-     *
-     * @param user the user
-     */
-    private void update(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-
-        researchSelectionEdit.update(user);
-        researchDoneDisplay.update(user);
-        researchTechTreeDisplay.update(user);
     }
 
     /**
@@ -115,7 +95,8 @@ public class ResearchMainView extends SBPageActionSelectorStatsLayout<User> {
             if (researchLevelDTO == null) {
                 throw new NotifySBUserException("Something went wrong while communicate your research request. Call the admin.");
             }
-            jobService.createResearchJob(user.getId(), researchLevelDTO.getResearch().getId());
+            final User loggedInUser = userService.getLoggedInUser();
+            jobService.createResearchJob(loggedInUser.getId(), researchLevelDTO.getResearch().getId());
         }
     }
 
@@ -135,12 +116,11 @@ public class ResearchMainView extends SBPageActionSelectorStatsLayout<User> {
 
     @Override
     protected void addActionListener() {
+        final User loggedInUser = userService.getLoggedInUser();
         actionSelectorMenu.addSelectedChangeListener(event -> {
             final Tab selectedTab = event.getSelectedTab();
             final StatsLayout<User> componentForTab = getComponentForTabOfActionMenu(selectedTab);
-            user = userService.find(user).orElseThrow(NotifySBUserException::new);
-            update(user);
-            componentForTab.update(user);
+            componentForTab.update(loggedInUser);
             content = setContent((ResearchLayout<User>) componentForTab);
         });
     }

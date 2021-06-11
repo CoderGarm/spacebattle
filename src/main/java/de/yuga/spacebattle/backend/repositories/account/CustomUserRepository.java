@@ -1,10 +1,15 @@
 package de.yuga.spacebattle.backend.repositories.account;
 
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
+import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.turn.Colonization;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface CustomUserRepository {
 
@@ -12,8 +17,23 @@ public interface CustomUserRepository {
     List<User> findAllUsers();
 
     @Nullable
-    User login(@Nonnull final String username, @Nonnull final String password);
+    User login(@Nonnull String username, @Nonnull String password);
 
     @Nullable
-    User findByUsernameAndEmail(@Nonnull final String username, @Nonnull final String email);
+    User findByUsernameAndEmail(@Nonnull String username, @Nonnull String email);
+
+    @Nonnull
+    User findWithResearchesAndJobs(@Nonnull User user);
+
+    @Nonnull
+    User findWithKnownStarSystems(@Nonnull User user);
+
+    @Nonnull
+    Map<Research, Integer> getResearchesForUser(@Nonnull User user);
+
+    @Nonnull
+    Set<StarSystem> getKnownStarSystems(@Nonnull User user);
+
+    @Nonnull
+    Set<Colonization> getColonizations(@Nonnull User user);
 }

@@ -14,6 +14,9 @@ import de.yuga.spacebattle.backend.entities.constructables.buildings.Constructio
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.EResolution;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.misc.details.EResourceAmountDTO;
 import de.yuga.spacebattle.gui.vaadin.misc.details.PlanetIconDisplay;
 import de.yuga.spacebattle.gui.vaadin.misc.details.ResourceElementDisplay;
@@ -21,13 +24,16 @@ import de.yuga.spacebattle.gui.vaadin.misc.details.ResourceElementDisplay;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ResearchOutputDisplay extends VerticalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<ResearchOutputDisplay, User>, User> {
+
+    @Nonnull
+    private final UserService userService = ViewHelper.getService(UserService.class);
+
+    @Nonnull
+    private final PlanetService planetService = ViewHelper.getService(PlanetService.class);
 
     @Nonnull
     private final Map<Planet, ResourceElementDisplay> planetResearchDisplayComponentMap = new HashMap<>();
@@ -39,9 +45,6 @@ public class ResearchOutputDisplay extends VerticalLayout implements HasValue<Ab
     private final Map<Planet, HorizontalLayout> planetFullDisplayComponentMap = new HashMap<>();
 
     @Nonnull
-    private final Label title = new Label("Research output");
-
-    @Nonnull
     private final Label sum = new Label();
 
     @Nonnull
@@ -49,6 +52,7 @@ public class ResearchOutputDisplay extends VerticalLayout implements HasValue<Ab
 
 
     public ResearchOutputDisplay() {
+        final Label title = new Label("Research output");
         titleLayout.add(title, sum);
         add(titleLayout);
     }
@@ -129,8 +133,8 @@ public class ResearchOutputDisplay extends VerticalLayout implements HasValue<Ab
             }
             planetIconDisplay.update(planet);
 
-            ResourceDeposit resourceDeposit = planet.getResourceDeposit();
-            Map<EResourceType, BigDecimal> resources = resourceDeposit.getResources();
+            final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
+            final Map<EResourceType, BigDecimal> resources = resourceDeposit.getResources();
             ResourceElementDisplay resourceElementDisplay = planetResearchDisplayComponentMap.get(planet);
             final BigDecimal amount = resources.get(EResourceType.RESEARCH);
             final BigDecimal tickOutput = getTickOutput(planet);
@@ -147,11 +151,12 @@ public class ResearchOutputDisplay extends VerticalLayout implements HasValue<Ab
 
     @Override
     public void setValue(User value) {
-        if (value == null || value.getOwnedPlanets().isEmpty()) {
+        if (value == null) {
             clear();
             return;
         }
-        update(value.getOwnedPlanets());
+        final Set<Planet> allColonizedBy = new HashSet<>(planetService.findAllColonizedBy(value));
+        update(allColonizedBy);
     }
 
     @Nullable

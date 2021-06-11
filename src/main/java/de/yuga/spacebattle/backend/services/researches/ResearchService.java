@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -52,10 +53,10 @@ public class ResearchService {
     public Map<Research, Integer> getUnlockableResearches(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
 
-        final List<Research> fullResearchList = findAll();
+        final List<Research> fullResearchList = new ArrayList<>(findAll());
         fullResearchList.removeIf(research -> {
             boolean shouldRemove = false;
-            Research unlockedThrough = research.getUnlockedThrough();
+            final Research unlockedThrough = research.getUnlockedThrough();
             if (unlockedThrough != null && !user.getResearches().containsKey(unlockedThrough)) {
                 shouldRemove = true;
             }
@@ -67,7 +68,7 @@ public class ResearchService {
                 shouldRemove = research.getLevelCap() <= currentLevel;
             }
 
-            Job runningJob = user.getJobs().stream()
+            final Job runningJob = user.getJobs().stream()
                     .filter(job ->
                             EResourceType.RESEARCH == job.getConstructable().getResourceType()
                                     && job.getConstructable().getResearch() != null

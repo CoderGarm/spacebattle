@@ -3,6 +3,8 @@ package de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AmmunitionFitting;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 
 import javax.annotation.Nonnull;
@@ -29,6 +31,12 @@ public class ModuleContainerDTO {
     @Nonnull
     private final Collection<Weapon> possibleWeapons = new HashSet<>();
 
+    @Nonnull
+    private final Collection<AmmunitionModule> possibleAmmunitionModules = new HashSet<>();
+
+    @Nonnull
+    private final Collection<PassiveModule> possiblePassiveModule = new HashSet<>();
+
     @Nullable
     private Armor selectedArmor;
 
@@ -44,33 +52,51 @@ public class ModuleContainerDTO {
     @Nonnull
     private Set<AlignedFitting> selectedAlignedFittings = new HashSet<>();
 
+    @Nonnull
+    private Set<AmmunitionFitting> selectedAmmunitionFittings = new HashSet<>();
+
+    @Nonnull
+    private Set<SupportFitting> selectedSupportFittings = new HashSet<>();
+
     public ModuleContainerDTO(@Nonnull final List<Armor> allArmorByUser,
                               @Nonnull final List<ElectronicWarfare> allElectronicWarfareByUser,
                               @Nonnull final List<Propulsion> allPropulsionByUser,
                               @Nonnull final List<Sidewall> allSidewallByUser,
                               @Nonnull final List<Weapon> allWeaponByUser,
+                              @Nonnull final List<AmmunitionModule> allAmmunitionModulesByUser,
+                              @Nonnull final List<PassiveModule> allPassiveModuleByUser,
                               @Nullable final Armor selectedArmor,
                               @Nullable final ElectronicWarfare selectedElectronicWarfare,
                               @Nullable final Propulsion selectedPropulsion,
                               @Nullable final Sidewall selectedSidewall,
-                              @Nonnull final Set<AlignedFitting> selectedAlignedFittings) {
+                              @Nonnull final Set<AlignedFitting> selectedAlignedFittings,
+                              @Nonnull final Set<AmmunitionFitting> selectedAmmunitionFittings,
+                              @Nonnull final Set<SupportFitting> selectedSupportFittings) {
         Preconditions.checkNotNull(allArmorByUser, "allArmorByUser shouldn't be null!");
         Preconditions.checkNotNull(allElectronicWarfareByUser, "allElectronicWarfareByUser shouldn't be null!");
         Preconditions.checkNotNull(allPropulsionByUser, "allPropulsionByUser shouldn't be null!");
         Preconditions.checkNotNull(allSidewallByUser, "allSidewallByUser shouldn't be null!");
         Preconditions.checkNotNull(allWeaponByUser, "allWeaponByUser shouldn't be null!");
+        Preconditions.checkNotNull(allAmmunitionModulesByUser, "allAmmunitionModulesByUser shouldn't be null!");
+        Preconditions.checkNotNull(allPassiveModuleByUser, "allPassiveModuleByUser shouldn't be null!");
+        Preconditions.checkNotNull(selectedAmmunitionFittings, "selectedAmmunitionFittings shouldn't be null!");
+        Preconditions.checkNotNull(selectedSupportFittings, "selectedSupportFittings shouldn't be null!");
 
         possibleArmors.addAll(allArmorByUser);
         possibleElectronicWarfare.addAll(allElectronicWarfareByUser);
         possiblePropulsion.addAll(allPropulsionByUser);
         possibleSidewalls.addAll(allSidewallByUser);
         possibleWeapons.addAll(allWeaponByUser);
+        possibleAmmunitionModules.addAll(allAmmunitionModulesByUser);
+        possiblePassiveModule.addAll(allPassiveModuleByUser);
 
         this.selectedArmor = selectedArmor;
         this.selectedElectronicWarfare = selectedElectronicWarfare;
         this.selectedPropulsion = selectedPropulsion;
         this.selectedSidewall = selectedSidewall;
         this.selectedAlignedFittings.addAll(selectedAlignedFittings);
+        this.selectedAmmunitionFittings.addAll(selectedAmmunitionFittings);
+        this.selectedSupportFittings.addAll(selectedSupportFittings);
     }
 
     @Nonnull
@@ -96,6 +122,16 @@ public class ModuleContainerDTO {
     @Nonnull
     public Collection<Weapon> getPossibleWeapons() {
         return possibleWeapons;
+    }
+
+    @Nonnull
+    public Collection<AmmunitionModule> getPossibleAmmunitionModules() {
+        return possibleAmmunitionModules;
+    }
+
+    @Nonnull
+    public Collection<PassiveModule> getPossiblePassiveModule() {
+        return possiblePassiveModule;
     }
 
     @Nullable
@@ -139,33 +175,81 @@ public class ModuleContainerDTO {
         return selectedAlignedFittings;
     }
 
-    public void addSelectedAlignedFittings(@Nonnull Set<AlignedFitting> selectedAlignedFittings) {
-        Preconditions.checkNotNull(selectedAlignedFittings, "selectedAlignedFittings shouldn't be null!");
+    public void addSelectedAlignedFittings(@Nonnull Set<AlignedFitting> fittings) {
+        Preconditions.checkNotNull(fittings, "fittings shouldn't be null!");
 
-        this.selectedAlignedFittings.removeAll(selectedAlignedFittings);
-        this.selectedAlignedFittings.addAll(selectedAlignedFittings);
+        selectedAlignedFittings.removeAll(fittings);
+        selectedAlignedFittings.addAll(fittings);
     }
 
     /**
      * Sets the given set as new.
      *
-     * @param selectedAlignedFittings the new set
+     * @param fittings the new set
      */
-    public void setSelectedAlignedFittings(@Nonnull Set<AlignedFitting> selectedAlignedFittings) {
-        Preconditions.checkNotNull(selectedAlignedFittings, "selectedAlignedFittings shouldn't be null!");
+    public void setSelectedAlignedFittings(@Nonnull Set<AlignedFitting> fittings) {
+        Preconditions.checkNotNull(fittings, "fittings shouldn't be null!");
 
-        this.selectedAlignedFittings = selectedAlignedFittings;
+        selectedAlignedFittings = fittings;
     }
+
+    @Nonnull
+    public Set<AmmunitionFitting> getSelectedAmmunitionFittings() {
+        return selectedAmmunitionFittings;
+    }
+
+    public void addSelectedAmmunitionFittings(@Nonnull Set<AmmunitionFitting> fittings) {
+        Preconditions.checkNotNull(fittings, "fittings shouldn't be null!");
+
+        selectedAmmunitionFittings.removeAll(fittings);
+        selectedAmmunitionFittings.addAll(fittings);
+    }
+
+    /**
+     * Sets the given set as new.
+     *
+     * @param fittings the new set
+     */
+    public void setSelectedAmmunitionFittings(@Nonnull Set<AmmunitionFitting> fittings) {
+        Preconditions.checkNotNull(fittings, "fittings shouldn't be null!");
+
+        selectedAmmunitionFittings = fittings;
+    }
+
+    @Nonnull
+    public Set<SupportFitting> getSelectedSupportFittings() {
+        return selectedSupportFittings;
+    }
+
+    public void addSelectedSupportFittings(@Nonnull Set<SupportFitting> fittings) {
+        Preconditions.checkNotNull(fittings, "fittings shouldn't be null!");
+
+        selectedSupportFittings.removeAll(fittings);
+        selectedSupportFittings.addAll(fittings);
+    }
+
+    /**
+     * Sets the given set as new.
+     *
+     * @param fittings the new set
+     */
+    public void setSelectedSupportFittings(@Nonnull Set<SupportFitting> fittings) {
+        Preconditions.checkNotNull(fittings, "fittings shouldn't be null!");
+
+        selectedSupportFittings = fittings;
+    }
+
 
     @Deprecated(since = "the validation must be work on a better way, this seems strange")
     public void prepareShipClassValidation(@Nonnull final ShipClass shipClass) {
         Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
 
-        shipClass.setArmor(this.selectedArmor);
-        shipClass.setElectronicWarfare(this.selectedElectronicWarfare);
-        shipClass.setPropulsion(this.selectedPropulsion);
-        shipClass.setSidewall(this.selectedSidewall);
-        shipClass.setFittings(this.selectedAlignedFittings);
-
+        shipClass.setArmor(selectedArmor);
+        shipClass.setElectronicWarfare(selectedElectronicWarfare);
+        shipClass.setPropulsion(selectedPropulsion);
+        shipClass.setSidewall(selectedSidewall);
+        shipClass.setFittings(selectedAlignedFittings);
+        shipClass.setAmmunitionFittings(selectedAmmunitionFittings);
+        shipClass.setSupportFittings(selectedSupportFittings);
     }
 }

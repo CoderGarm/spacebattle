@@ -3,11 +3,10 @@ package de.yuga.spacebattle.backend.entities.spacecrafts.modules;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
+import de.yuga.spacebattle.backend.enums.EAlignmentType;
 import de.yuga.spacebattle.backend.enums.EDamageType;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
-import org.hibernate.annotations.Check;
-import org.hibernate.annotations.Type;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -23,7 +22,6 @@ import java.util.Set;
 @Entity
 @Table(name = "weapon")
 @AttributeOverride(name = "id", column = @Column(name = "idWeapon"))
-@Check(constraints = "(allowedForBow = true AND allowedForStern = true AND allowedForBroadsides = false) OR (allowedForBow = false AND allowedForStern = false AND allowedForBroadsides = true)")
 public class Weapon extends BaseModule {
 
     /**
@@ -43,39 +41,30 @@ public class Weapon extends BaseModule {
      * The way of damage projection.
      */
     @Nonnull
-    @NotNull(message = "eDamageType must not be null")
+    @NotNull(message = "The damageType must not be null.")
     @Enumerated(EnumType.STRING)
     private EDamageType damageType;
 
     @Nonnull
-    @NotNull(message = "weaponType must not be null")
+    @NotNull(message = "The weaponType must not be null.")
     @Enumerated(EnumType.STRING)
     private EWeaponType weaponType;
 
     /**
-     * Holds the information for the bow alignment ability.
-     * todo check is bow/stern/broadsides is better displayed by "weapon for hund / weapon for battle"
+     * Holds the information about the alignment ability.
      */
-    @Type(type = "org.hibernate.type.NumericBooleanType")
-    private boolean allowedForBow = false;
+    @Nonnull
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private EAlignmentType alignmentType;
 
     /**
-     * Holds the information for the stern alignment ability.
+     * An empty ammunition module means that the weapon needs no ammunition.
      */
-    @Type(type = "org.hibernate.type.NumericBooleanType")
-    private boolean allowedForStern = false;
-
-    /**
-     * Holds the information for the broadsides alignment ability.
-     */
-    @Type(type = "org.hibernate.type.NumericBooleanType")
-    private boolean allowedForBroadsides = false;
-
-    /**
-     * Conclusion of the alignment fields - just for convenience.
-     */
-    @Transient
-    private Set<EWeaponAlignment> allowedWeaponAlignments = new HashSet<>();
+    @Nullable
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "idAmmunitionModule")
+    private AmmunitionModule ammunitionModule;
 
     public Weapon() {
     }
@@ -83,6 +72,7 @@ public class Weapon extends BaseModule {
     public Weapon(@Nonnull final String name,
                   @Nonnull final String description,
                   @Nonnull final Research unlockedThrough,
+                  @Nullable final AmmunitionModule ammunitionModule,
                   final int useCapacity,
                   final int effectValue,
                   final int techLevel,
@@ -90,26 +80,18 @@ public class Weapon extends BaseModule {
                   @Nullable final Double sideWallPenetration,
                   @Nonnull final EDamageType damageType,
                   @Nonnull final EWeaponType weaponType,
-                  @Nonnull final Set<EWeaponAlignment> allowedWeaponAlignments) {
+                  @Nonnull final EAlignmentType alignmentType) {
         super(name, description, unlockedThrough, useCapacity, effectValue, techLevel);
         Preconditions.checkNotNull(damageType, "eDamageType shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "eWeaponType shouldn't be null!");
-        Preconditions.checkNotNull(allowedWeaponAlignments, "allowedWeaponAlignments shouldn't be null!");
+        Preconditions.checkNotNull(alignmentType, "alignmentType shouldn't be null!");
 
         this.effectiveRange = effectiveRange;
         this.sideWallPenetration = sideWallPenetration;
         this.damageType = damageType;
         this.weaponType = weaponType;
-        this.allowedWeaponAlignments = allowedWeaponAlignments;
-        if (allowedWeaponAlignments.contains(EWeaponAlignment.BOW)) {
-            allowedForBow = true;
-        }
-        if (allowedWeaponAlignments.contains(EWeaponAlignment.STERN)) {
-            allowedForStern = true;
-        }
-        if (allowedWeaponAlignments.contains(EWeaponAlignment.BROADSIDE)) {
-            allowedForBroadsides = true;
-        }
+        this.ammunitionModule = ammunitionModule;
+        this.alignmentType = alignmentType;
     }
 
     public int getEffectiveRange() {
@@ -133,16 +115,22 @@ public class Weapon extends BaseModule {
 
     @Nonnull
     public Set<EWeaponAlignment> getAllowedWeaponAlignments() {
-        if (allowedForBow) {
+        final Set<EWeaponAlignment> allowedWeaponAlignments = new HashSet<>();
+        if (EAlignmentType.HUNTING_ALIGNMENT == alignmentType) {
             allowedWeaponAlignments.add(EWeaponAlignment.BOW);
         }
-        if (allowedForStern) {
+        if (EAlignmentType.HUNTING_ALIGNMENT == alignmentType) {
             allowedWeaponAlignments.add(EWeaponAlignment.STERN);
         }
-        if (allowedForBroadsides) {
+        if (EAlignmentType.BATTLE_ALIGNMENT == alignmentType) {
             allowedWeaponAlignments.add(EWeaponAlignment.BROADSIDE);
 
         }
         return allowedWeaponAlignments;
+    }
+
+    @Nullable
+    public AmmunitionModule getAmmunitionModule() {
+        return ammunitionModule;
     }
 }

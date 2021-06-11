@@ -11,5 +11,7 @@ public interface CustomShipClassRepository {
 
     List<ShipClass> findAllShipClassesByOwner(User user);
 
+    List<ShipClass> findAllLatestShipClassesByOwner(User user);
+
     ShipClass saveAndFlush(ShipClass shipClass);
 }

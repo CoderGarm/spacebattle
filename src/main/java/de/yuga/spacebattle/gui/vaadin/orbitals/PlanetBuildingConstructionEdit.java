@@ -10,6 +10,8 @@ import de.yuga.spacebattle.backend.entities.constructables.buildings.Constructio
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.constructables.buildings.ConstructBuildingEdit;
 import de.yuga.spacebattle.gui.vaadin.orbitals.details.BuildingLevelDTO;
 
@@ -20,6 +22,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class PlanetBuildingConstructionEdit extends PlanetLayout<Planet> {
+
+    @Nonnull
+    private final UserService userService = ViewHelper.getService(UserService.class);
 
     @Nonnull
     private final Map<Building, ConstructBuildingEdit> componentsMap = new HashMap<>();
@@ -64,7 +69,8 @@ public class PlanetBuildingConstructionEdit extends PlanetLayout<Planet> {
         if (user == null) {
             throw new NotifySBUserException("You should be logged in here.");
         }
-        final Set<Building> unlockedBuildings = user.getResearches().keySet().stream()
+        final Map<Research, Integer> researchesForUser = userService.getResearchesForUser(user);
+        final Set<Building> unlockedBuildings = researchesForUser.keySet().stream()
                 .map(Research::getUnlocksBuildings)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());

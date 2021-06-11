@@ -32,6 +32,15 @@ public class CustomShipClassRepositoryImpl implements CustomShipClassRepository 
                 .getResultList();
     }
 
+    @Override
+    public List<ShipClass> findAllLatestShipClassesByOwner(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
+
+        return em.createNamedQuery("ShipClass.getAllLatestByOwner", ShipClass.class)
+                .setParameter("owner", user)
+                .getResultList();
+    }
+
     /**
      * The normal {@link JpaRepository#save(Object)} is not definitely safe to return not null
      * but storing the entity nevertheless. Strange but sadly true.

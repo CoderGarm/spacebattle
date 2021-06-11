@@ -38,7 +38,7 @@ public class AlignedFitting {
      * Note that a {@link EWeaponAlignment#BROADSIDE} aligned fit needs to be doubled.
      */
     @Min(0)
-    private Integer amount;
+    private int amount;
 
     public AlignedFitting() {
     }

@@ -12,6 +12,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
+import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
@@ -887,32 +888,30 @@ public class ViewBoxDefinition {
         // define color of system circle
         String systemCircleFillColor = NOT_COLONIZED_COLOR;
         final User loggedInUser = userService.getLoggedInUser();
-        if (loggedInUser != null) {
-            final boolean isColonizedByLoggedInUser = starSystem.getPlanets().stream()
-                    .anyMatch(planet -> loggedInUser.equals(planet.getOwner()));
+        final boolean isColonizedByLoggedInUser = starSystem.getPlanets().stream()
+                .anyMatch(planet -> loggedInUser.equals(planet.getOwner()));
 
-            final boolean isColonizedByOtherUser = starSystem.getPlanets().stream()
-                    .filter(planet -> planet.getOwner() != null)
-                    .anyMatch(planet -> !loggedInUser.equals(planet.getOwner()));
+        final boolean isColonizedByOtherUser = starSystem.getPlanets().stream()
+                .filter(planet -> planet.getOwner() != null)
+                .anyMatch(planet -> !loggedInUser.equals(planet.getOwner()));
 
-            if (isColonizedByLoggedInUser) {
-                systemCircleFillColor = IS_COLONIZED_BY_USER_COLOR;
-                // is colonized by other, too
-                if (isColonizedByOtherUser) {
+        if (isColonizedByLoggedInUser) {
+            systemCircleFillColor = IS_COLONIZED_BY_USER_COLOR;
+            // is colonized by other, too
+            if (isColonizedByOtherUser) {
 
-                    final double x1 = orbit.getXCoordinate() + (SYSTEM_RADIUS + 4);
-                    final double y1 = orbit.getYCoordinate() + (SYSTEM_RADIUS + 3);
-                    final double x2 = orbit.getXCoordinate() - (SYSTEM_RADIUS + 4);
-                    final double y2 = orbit.getYCoordinate() - (SYSTEM_RADIUS + 3);
-                    final Path path = new Path(starSystem.getName() + "isColonizable", "M" + x1 + "," + y1 + " A 1,1,1 1 1 " + x2 + "," + y2);
-                    path.setFillColor(TRANSPARENT_FILL_COLOR);
-                    path.setStroke(COLONIZED_BY_OTHERS_COLOR, 1, Path.LINE_CAP.SQUARE, Path.LINE_JOIN.ROUND);
-                    canvas.add(path);
-                }
-            } else if (isColonizedByOtherUser) {
-                // is only colonized by other
-                systemCircleFillColor = COLONIZED_BY_OTHERS_COLOR;
+                final double x1 = orbit.getXCoordinate() + (SYSTEM_RADIUS + 4);
+                final double y1 = orbit.getYCoordinate() + (SYSTEM_RADIUS + 3);
+                final double x2 = orbit.getXCoordinate() - (SYSTEM_RADIUS + 4);
+                final double y2 = orbit.getYCoordinate() - (SYSTEM_RADIUS + 3);
+                final Path path = new Path(starSystem.getName() + "isColonizable", "M" + x1 + "," + y1 + " A 1,1,1 1 1 " + x2 + "," + y2);
+                path.setFillColor(TRANSPARENT_FILL_COLOR);
+                path.setStroke(COLONIZED_BY_OTHERS_COLOR, 1, Path.LINE_CAP.SQUARE, Path.LINE_JOIN.ROUND);
+                canvas.add(path);
             }
+        } else if (isColonizedByOtherUser) {
+            // is only colonized by other
+            systemCircleFillColor = COLONIZED_BY_OTHERS_COLOR;
         }
 
         // creates the system circle
@@ -935,26 +934,25 @@ public class ViewBoxDefinition {
 
         final User loggedInUser = userService.getLoggedInUser();
         final Orbit orbit = planet.getOrbit();
-        if (loggedInUser != null) {
-            loggedInUser.getColonizations().stream()
-                    .filter(c -> c.getPlanet().equals(planet))
-                    .findFirst()
-                    .ifPresent(colonization -> {
+        final Set<Colonization> colonizations = userService.getColonizations(loggedInUser);
+        colonizations.stream()
+                .filter(c -> c.getPlanet().equals(planet))
+                .findFirst()
+                .ifPresent(colonization -> {
 
-                        final double x1 = orbit.getXCoordinate() + (PLANET_RADIUS + 4);
-                        final double y1 = orbit.getYCoordinate() + (SYSTEM_RADIUS + 3);
-                        final double x2 = orbit.getXCoordinate() - (PLANET_RADIUS + 4);
-                        final double y2 = orbit.getYCoordinate() - (SYSTEM_RADIUS + 3);
-                        final Path path = new Path(planet.getName() + "colonizationInProgress", "M" + x1 + "," + y1 + " A 1,1,1 1 1 " + x2 + "," + y2);
-                        path.setFillColor(TRANSPARENT_FILL_COLOR);
-                        path.setStroke(COLONIZATION_IN_PROGRESS, 1, Path.LINE_CAP.SQUARE, Path.LINE_JOIN.ROUND);
-                        canvas.add(path);
-                    });
-        }
+                    final double x1 = orbit.getXCoordinate() + (PLANET_RADIUS + 4);
+                    final double y1 = orbit.getYCoordinate() + (SYSTEM_RADIUS + 3);
+                    final double x2 = orbit.getXCoordinate() - (PLANET_RADIUS + 4);
+                    final double y2 = orbit.getYCoordinate() - (SYSTEM_RADIUS + 3);
+                    final Path path = new Path(planet.getName() + "colonizationInProgress", "M" + x1 + "," + y1 + " A 1,1,1 1 1 " + x2 + "," + y2);
+                    path.setFillColor(TRANSPARENT_FILL_COLOR);
+                    path.setStroke(COLONIZATION_IN_PROGRESS, 1, Path.LINE_CAP.SQUARE, Path.LINE_JOIN.ROUND);
+                    canvas.add(path);
+                });
 
         String planetsCircleColor = NOT_COLONIZED_COLOR;
         if (!planet.isColonizable()) {
-            if (loggedInUser != null && loggedInUser.equals(planet.getOwner())) {
+            if (loggedInUser.equals(planet.getOwner())) {
                 planetsCircleColor = IS_COLONIZED_BY_USER_COLOR;
             } else {
                 planetsCircleColor = COLONIZED_BY_OTHERS_COLOR;

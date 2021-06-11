@@ -4,7 +4,6 @@ package de.yuga.spacebattle.backend.entities.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
-import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -12,22 +11,28 @@ import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Job;
-import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 
 @NamedQueries({
         @NamedQuery(name = "User.getAll", query = "SELECT u FROM User u"),
         @NamedQuery(name = "User.findByUsernameAndEmail", query = "SELECT u FROM User u WHERE UPPER(u.username) = :username AND UPPER(u.email) = :email"),
-        @NamedQuery(name = "User.login", query = "SELECT u FROM User u LEFT JOIN FETCH u.ownedPlanets p LEFT JOIN FETCH u.alliance a LEFT JOIN FETCH u.researches r WHERE UPPER(u.username) = :username AND UPPER(u.password) = :password")
+        @NamedQuery(name = "User.login", query = "SELECT u FROM User u LEFT JOIN FETCH u.ownedPlanets p LEFT JOIN FETCH u.alliance a LEFT JOIN FETCH u.researches r WHERE UPPER(u.username) = :username AND UPPER(u.password) = :password"),
+        @NamedQuery(name = "User.getWithResearchesAndJobs", query = "SELECT u FROM User u LEFT JOIN FETCH u.researches r LEFT JOIN FETCH u.jobs j WHERE u = :user"),
+        @NamedQuery(name = "User.getWithResearches", query = "SELECT u FROM User u LEFT JOIN FETCH u.researches r WHERE u = :user"),
+        @NamedQuery(name = "User.getWithKnownStarSystems", query = "SELECT u FROM User u LEFT JOIN FETCH u.knownStarSystems r WHERE u = :user"),
+        @NamedQuery(name = "User.getColonizations", query = "SELECT u FROM User u LEFT JOIN FETCH u.colonizations r WHERE u = :user"),
 })
 @Entity
 @Table(name = "user",
@@ -62,7 +67,7 @@ public class User extends AbstractEntityKey {
 
     @Nonnull
     @NotNull(message = "ownedPlanets must not be null")
-    @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "owner")
+    @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, mappedBy = "owner")
     private final Set<Planet> ownedPlanets = new HashSet<>();
 
     /**
@@ -70,7 +75,7 @@ public class User extends AbstractEntityKey {
      */
     @Nonnull
     @NotNull
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection
     @MapKeyJoinColumn(name = "idResearch", referencedColumnName = "idResearch")
     @Column(name = "level")
     @CollectionTable(name = "unlockedResearch", joinColumns = @JoinColumn(name = "idUser"))
@@ -80,14 +85,14 @@ public class User extends AbstractEntityKey {
      * The currently running jobs for the user.
      */
     @Nonnull
-    @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "owner")
+    @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, mappedBy = "owner")
     private final Set<Job> jobs = new HashSet<>();
 
     /**
      * The ship classes which was created by the user.
      */
     @Nonnull
-    @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "owner")
+    @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, mappedBy = "owner")
     private final Set<ShipClass> shipClasses = new HashSet<>();
 
     /**
@@ -97,13 +102,13 @@ public class User extends AbstractEntityKey {
      * Currently this implies that the new owner will get all information about the system without buying it especially.<br>
      * <br>
      * Compare:<br>
-     * - {@link PlanetService#colonizePlanet(User, Planet)}<br>
-     * - {@link PlanetService#createPlanet(String, User, StarSystem, Orbit)}<br>
-     * - {@link PlanetService#createPlanet(String, User, StarSystem, Integer, Integer)}
+     * - {@link ColonizationService#colonizePlanet(User, Planet)}<br>
+     * - {@link PlanetService#createPlanet(String, StarSystem, Orbit)}<br>
+     * - {@link PlanetService#createPlanet(String, StarSystem, Integer, Integer)}
      * </p>
      */
     @Nonnull
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinTable(name = "knownStarSystem",
             joinColumns = @JoinColumn(name = "idOwner"),
             inverseJoinColumns = @JoinColumn(name = "idStarSystem"),
@@ -114,7 +119,7 @@ public class User extends AbstractEntityKey {
      * The ship classes which was created by the user.
      */
     @Nonnull
-    @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "user")
+    @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, mappedBy = "user")
     private final Set<Colonization> colonizations = new HashSet<>();
 
     public User() {
@@ -184,17 +189,6 @@ public class User extends AbstractEntityKey {
         return researches;
     }
 
-    public void addResearch(@Nonnull final Research research) {
-        Preconditions.checkNotNull(research, "research shouldn't be null!");
-
-        if (researches.containsKey(research)) {
-            Integer level = researches.get(research);
-            researches.put(research, ++level);
-        } else {
-            researches.put(research, 1);
-        }
-    }
-
     @Nonnull
     public Set<Job> getJobs() {
         return jobs;
@@ -208,47 +202,6 @@ public class User extends AbstractEntityKey {
     @Nonnull
     public Set<Colonization> getColonizations() {
         return colonizations;
-    }
-
-    /**
-     * Returns the possible planet which is designated for holding research jobs.
-     *
-     * @return the planet or even not the planet
-     */
-    public Optional<Planet> getResearchInstitute() {
-
-        // reduces  all planet's constructions to this ones which are research buildings,
-        // extract the optionals and sorting the result
-        final List<Construction> collect = getOwnedPlanets().stream()
-                .map(planet -> planet.getConstructions().stream()
-                        .filter(construction -> construction.getBuilding().getResourceType() == EResourceType.RESEARCH)
-                        .findFirst()
-                ).filter(Optional::isPresent)
-                .map(Optional::get)
-                .sorted(Comparator.comparingInt(AbstractEntityKey::getId))
-                .collect(Collectors.toList());
-
-        if (collect.isEmpty()) {
-            return Optional.empty();
-        } else {
-            Construction construction = collect.get(0);
-            return Optional.of(construction.getPlanet());
-        }
-    }
-
-    /**
-     * Returns the first colonized planet.
-     *
-     * @return the main planet
-     */
-    @Nonnull
-    public Planet getMainPlanet() {
-        return getOwnedPlanets().stream()
-                .filter(planet -> planet.getColonizedAt() != null)
-                .sorted((o1, o2) -> {
-                    assert o2.getColonizedAt() != null;
-                    return o1.getColonizedAt().compareTo(o2.getColonizedAt());
-                }).collect(Collectors.toList()).get(0);
     }
 
     public void addKnownStarSystems(@Nonnull final StarSystem starSystem) {

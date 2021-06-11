@@ -5,7 +5,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
-import de.yuga.spacebattle.backend.validators.base.CustomValidatorFactory;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.Event;
@@ -15,6 +14,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -112,7 +112,8 @@ public class UserEditService extends VerticalLayout {
         @Size(min = 1, max = 50)
         private String email;
 
-        private final Validator validator = CustomValidatorFactory.buildCustomValidator();
+        @Nonnull
+        private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
         public UserObject() {
         }

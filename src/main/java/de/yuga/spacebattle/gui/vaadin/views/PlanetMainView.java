@@ -49,9 +49,6 @@ public class PlanetMainView extends SBPageSubjectSelectorStatsLayout<Planet> {
     private final EventBus.UIEventBus uiEventBus;
 
     @Nonnull
-    private User user;
-
-    @Nonnull
     private final UserService userService;
 
     @Nonnull
@@ -93,13 +90,9 @@ public class PlanetMainView extends SBPageSubjectSelectorStatsLayout<Planet> {
         this.userService = userService;
         this.planetService = planetService;
         this.jobService = jobService;
-        User loggedIn = userService.getLoggedInUser();
-        if (loggedIn == null) {
-            throw new NotifySBUserException("You shouldn't see this.");
-        }
-        this.user = loggedIn;
+        final User loggedIn = userService.getLoggedInUser();
         planetDashboardDisplay = new PlanetDashboardDisplay();
-        planet = planetService.findAllColonizedBy(user).get(0);
+        planet = planetService.findAllColonizedBy(loggedIn).get(0);
         if (planet != null) {
             planetDashboardDisplay.update(planet);
         }
@@ -142,8 +135,8 @@ public class PlanetMainView extends SBPageSubjectSelectorStatsLayout<Planet> {
             }
             final Job job = jobService.createConstructionYardJob(planet.getId(), building.getId());
             if (job != null) {
-                this.user = this.userService.refresh();
                 this.uiEventBus.publish(source, CONSTRUCTION_JOB_BUILDING_FEEDBACK_STARTED.name());
+                userService.refresh();
             }
         }
 
@@ -155,8 +148,8 @@ public class PlanetMainView extends SBPageSubjectSelectorStatsLayout<Planet> {
             }
             final Set<Job> shipyardJob = jobService.createShipyardJob(planet, shipJobPayload);
             if (!shipyardJob.isEmpty()) {
-                this.user = this.userService.refresh();
                 this.uiEventBus.publish(source, ORBITAL_CONSTRUCTION_JOB_BUILDING_FEEDBACK_STARTED.name());
+                userService.refresh();
             }
         }
     }
@@ -196,7 +189,8 @@ public class PlanetMainView extends SBPageSubjectSelectorStatsLayout<Planet> {
 
     @Override
     protected void createSubjectSelectorMenu() {
-        List<Planet> allColonizedBy = planetService.findAllColonizedBy(user);
+        final User loggedInUser = userService.getLoggedInUser();
+        final List<Planet> allColonizedBy = planetService.findAllColonizedBy(loggedInUser);
         allColonizedBy.forEach(planet -> {
             Tab planetTab = new Tab(planet.getName());
             addSubjectForTabOfSubjectMenu(planetTab, planet);
@@ -225,7 +219,8 @@ public class PlanetMainView extends SBPageSubjectSelectorStatsLayout<Planet> {
 
     @Override
     protected void updateSubjectMenu() {
-        List<Planet> allColonizedBy = planetService.findAllColonizedBy(user);
+        final User loggedInUser = userService.getLoggedInUser();
+        List<Planet> allColonizedBy = planetService.findAllColonizedBy(loggedInUser);
         subjectSelectorMenu.getChildren().forEach(component -> {
             Tab tab = (Tab) component;
             Planet subject = getSubjectForTabOfSubjectMenu(tab);

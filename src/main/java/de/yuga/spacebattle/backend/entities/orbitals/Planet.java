@@ -22,7 +22,10 @@ import java.util.concurrent.atomic.AtomicReference;
 @NamedQueries({
         @NamedQuery(name = "Planet.getAll", query = "SELECT p FROM Planet p"),
         @NamedQuery(name = "Planet.getAllOwned", query = "SELECT p FROM Planet p WHERE p.owner IS NOT NULL"),
-        @NamedQuery(name = "Planet.getAllOwnedBy", query = "SELECT p FROM Planet p WHERE p.owner = :owner ORDER BY p.id")
+        @NamedQuery(name = "Planet.getAllOwnedBy", query = "SELECT p FROM Planet p WHERE p.owner = :owner ORDER BY p.id"),
+        @NamedQuery(name = "Planet.getPlanetsWithBuildingForResourceType",
+                query = "SELECT p FROM Planet p LEFT JOIN FETCH p.constructions c WHERE p.owner = :owner AND c.building.resourceType = :resourceType"),
+        @NamedQuery(name = "Planet.getMainPlanet", query = "SELECT p FROM Planet p WHERE p.owner = :owner GROUP BY p.colonizedAt"),
 })
 @Entity
 @Table(name = "planet",

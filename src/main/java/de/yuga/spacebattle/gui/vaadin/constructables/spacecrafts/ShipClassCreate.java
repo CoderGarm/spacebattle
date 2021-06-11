@@ -12,7 +12,6 @@ import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
-import de.yuga.spacebattle.backend.validators.base.CustomValidatorFactory;
 import de.yuga.spacebattle.gui.vaadin.NotificationHelper;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ShipClassCreateDTO;
@@ -30,6 +29,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
 import javax.validation.Validator;
 import java.util.ArrayList;
 import java.util.Set;
@@ -46,10 +46,10 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass>
     private final EventBus.UIEventBus uiEventBus = ViewHelper.getService(EventBus.UIEventBus.class);
 
     @Nonnull
-    private final Binder<ShipClassCreateDTO> binderShipClass = new Binder<>(ShipClassCreateDTO.class);
+    private final Binder<ShipClassCreateDTO> binder = new Binder<>(ShipClassCreateDTO.class);
 
     @Nonnull
-    private final Validator validator = CustomValidatorFactory.buildCustomValidator();
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     @Nonnull
     private final Button submit;
@@ -61,14 +61,14 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass>
 
         createHullSvg();
 
-        binderShipClass.addValueChangeListener(event -> {
+        binder.addValueChangeListener(event -> {
             final ShipClass shipClass = getShipClass();
             getShipClassStatDisplay().setValue(shipClass);
         });
 
         final TextField name = new TextField();
         name.setRequiredIndicatorVisible(true);
-        binderShipClass.forField(name)
+        binder.forField(name)
                 .withValidator((value, context) -> {
                     final ShipClass shipClass = getShipClass();
                     shipClass.setName(value);
@@ -78,9 +78,8 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass>
                 .asRequired()
                 .bind(ShipClassEditDTO::getName, ShipClassEditDTO::setName);
 
-
         final HullSelector hullSelect = new HullSelector();
-        binderShipClass.forField(hullSelect)
+        binder.forField(hullSelect)
                 .withValidator((value, context) -> {
                     final Hull hull = new ArrayList<>(value).get(0);
                     final ShipClass shipClass = getShipClass();
@@ -91,7 +90,7 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass>
                 .bind(ShipClassCreateDTO::getPossibleHulls, ShipClassCreateDTO::setHulls);
 
         final ModuleMultiEdit moduleMultiEdit = new ModuleMultiEdit(starShipSvgHelper);
-        binderShipClass.forField(moduleMultiEdit)
+        binder.forField(moduleMultiEdit)
                 .withValidator((value, context) -> {
                     final ShipClass shipClass = getShipClass();
                     value.prepareShipClassValidation(shipClass);
@@ -128,12 +127,12 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass>
      * Resets the user input in that way that the dto is untouched like freshly fallen snow.
      */
     private void resetDTO() {
-        final ShipClassCreateDTO bean = binderShipClass.getBean();
+        final ShipClassCreateDTO bean = binder.getBean();
         if (bean != null) {
             bean.setHull(null);
             bean.setName(null);
             bean.resetModules();
-            binderShipClass.readBean(bean);
+            binder.readBean(bean);
         }
     }
 
@@ -142,7 +141,7 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass>
      */
     private void validateSubmitButton() {
         final ShipClass shipClass = getShipClass();
-        Set<ConstraintViolation<ShipClass>> validate = validator.validate(shipClass);
+        final Set<ConstraintViolation<ShipClass>> validate = validator.validate(shipClass);
         this.submit.setEnabled(validate.isEmpty());
     }
 
@@ -173,7 +172,7 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass>
      */
     @Nonnull
     public ShipClass getShipClass() {
-        ShipClassCreateDTO shipClassBean = binderShipClass.getBean();
+        ShipClassCreateDTO shipClassBean = binder.getBean();
         if (shipClassBean == null) {
             throw new NotifySBUserException("You could click on submit, congratulations! Please click only if this class is ready.");
         }
@@ -199,15 +198,15 @@ public class ShipClassCreate extends ShipClassLayout<ShipClass>
     @Override
     public void setValue(@Nullable final ShipClassCreateDTO value) {
         if (value == null) {
-            binderShipClass.readBean(null);
+            binder.readBean(null);
         } else {
-            binderShipClass.setBean(value);
+            binder.setBean(value);
         }
     }
 
     @Override
     public ShipClassCreateDTO getValue() {
-        return binderShipClass.getBean();
+        return binder.getBean();
     }
 
     @Override

@@ -11,7 +11,7 @@ import java.util.Set;
 /**
  * Wraps a {@link Weapon} and it's amount.
  */
-public class WeaponAlignmentDTO {
+public class WeaponAlignmentCountDTO {
 
     @Nonnull
     private final Weapon weapon;
@@ -25,7 +25,7 @@ public class WeaponAlignmentDTO {
     @Nonnull
     private final Set<EWeaponAlignment> allowedWeaponAlignments;
 
-    public WeaponAlignmentDTO(@Nonnull final Weapon weapon, @Nonnull final Integer count) {
+    public WeaponAlignmentCountDTO(@Nonnull final Weapon weapon, @Nonnull final Integer count) {
         Preconditions.checkNotNull(weapon, "module shouldn't be null!");
         Preconditions.checkNotNull(count, "amount shouldn't be null!");
 
@@ -88,9 +88,9 @@ public class WeaponAlignmentDTO {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof WeaponAlignmentDTO)) return false;
+        if (!(o instanceof WeaponAlignmentCountDTO)) return false;
 
-        WeaponAlignmentDTO that = (WeaponAlignmentDTO) o;
+        WeaponAlignmentCountDTO that = (WeaponAlignmentCountDTO) o;
 
         if (!weapon.equals(that.weapon)) return false;
         return selectedWeaponAlignment == that.selectedWeaponAlignment;

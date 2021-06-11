@@ -145,7 +145,7 @@ public class TickService {
             doneAtZero--;
 
             if (doneAtZero < 1) {
-                planetService.colonizePlanet(colonization.getUser(), colonization.getPlanet());
+                colonizationService.colonizePlanet(colonization.getUser(), colonization.getPlanet());
                 colonizationService.delete(colonization);
             } else {
                 colonization.setDoneAtZero(doneAtZero);

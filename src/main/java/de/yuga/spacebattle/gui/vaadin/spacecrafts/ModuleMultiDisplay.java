@@ -11,6 +11,8 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Sidewall;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.StarShipSvgHelper;
+import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.AmmunitionModuleCountDTO;
+import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.PassiveModuleCountDTO;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -41,6 +43,12 @@ public class ModuleMultiDisplay extends VerticalLayout {
     private final WeaponAlignmentMultiDisplay broadsides = new WeaponAlignmentMultiDisplay(EWeaponAlignment.BROADSIDE);
 
     @Nonnull
+    private final AmmunitionModuleMultiDisplay ammunitionModuleMultiDisplay = new AmmunitionModuleMultiDisplay();
+
+    @Nonnull
+    private final PassiveModuleMultiDisplay passiveModuleMultiDisplay = new PassiveModuleMultiDisplay();
+
+    @Nonnull
     private final StarShipSvgHelper starShipSvgHelper;
 
     public ModuleMultiDisplay(@Nonnull final StarShipSvgHelper starShipSvgHelper) {
@@ -48,7 +56,8 @@ public class ModuleMultiDisplay extends VerticalLayout {
 
         this.starShipSvgHelper = starShipSvgHelper;
         setClassName("module-display");
-        add(armorDisplay, propulsionDisplay, electronicWarfareDisplay, sidewallDisplay, bow, stern, broadsides);
+        add(armorDisplay, propulsionDisplay, electronicWarfareDisplay, sidewallDisplay, bow, stern, broadsides,
+                ammunitionModuleMultiDisplay, passiveModuleMultiDisplay);
     }
 
     /**
@@ -89,6 +98,10 @@ public class ModuleMultiDisplay extends VerticalLayout {
         bow.setValue(alignedFittings);
         stern.setValue(alignedFittings);
         broadsides.setValue(alignedFittings);
+        final Set<AmmunitionModuleCountDTO> ammunitionModuleCountDTOS = value.getAmmunitionFittings().stream().map(a -> new AmmunitionModuleCountDTO(a.getAmmunitionModule(), a.getAmount())).collect(Collectors.toSet());
+        ammunitionModuleMultiDisplay.setValue(ammunitionModuleCountDTOS);
+        final Set<PassiveModuleCountDTO> supportFittings = value.getSupportFittings().stream().map(a -> new PassiveModuleCountDTO(a.getPassiveModule(), a.getAmount())).collect(Collectors.toSet());
+        passiveModuleMultiDisplay.setValue(supportFittings);
 
         final int bowAmount = alignedFittings.stream().filter(a -> EWeaponAlignment.BOW == a.getWeaponAlignment()).collect(Collectors.toSet()).size();
         starShipSvgHelper.calculateBowSlots(3, bowAmount);

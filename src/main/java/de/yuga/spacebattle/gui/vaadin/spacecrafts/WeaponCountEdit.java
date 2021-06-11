@@ -11,14 +11,14 @@ import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.gui.vaadin.misc.details.NumericField;
-import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.WeaponAlignmentDTO;
+import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.WeaponAlignmentCountDTO;
 
 import javax.annotation.Nonnull;
 
-public class WeaponCountEdit extends HorizontalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<WeaponCountEdit, WeaponAlignmentDTO>, WeaponAlignmentDTO>, HasValidation {
+public class WeaponCountEdit extends HorizontalLayout implements HasValue<AbstractField.ComponentValueChangeEvent<WeaponCountEdit, WeaponAlignmentCountDTO>, WeaponAlignmentCountDTO>, HasValidation {
 
     @Nonnull
-    private final Binder<WeaponAlignmentDTO> binder = new Binder<>(WeaponAlignmentDTO.class);
+    private final Binder<WeaponAlignmentCountDTO> binder = new Binder<>(WeaponAlignmentCountDTO.class);
 
     @Nonnull
     private final NumericField amountField = new NumericField();
@@ -29,23 +29,23 @@ public class WeaponCountEdit extends HorizontalLayout implements HasValue<Abstra
 
         final Label name = new Label();
         final ReadOnlyHasValue<String> moduleNameReadOnly = new ReadOnlyHasValue<>(name::setText);
-        binder.forField(moduleNameReadOnly).bind(WeaponAlignmentDTO::getWeaponName, null);
+        binder.forField(moduleNameReadOnly).bind(WeaponAlignmentCountDTO::getWeaponName, null);
 
         final Label description = new Label();
         final ReadOnlyHasValue<String> moduleDescriptionReadOnly = new ReadOnlyHasValue<>(description::setText);
-        binder.forField(moduleDescriptionReadOnly).bind(WeaponAlignmentDTO::getWeaponDescription, null);
+        binder.forField(moduleDescriptionReadOnly).bind(WeaponAlignmentCountDTO::getWeaponDescription, null);
 
-        binder.forField(amountField).bind(WeaponAlignmentDTO::getCount, WeaponAlignmentDTO::setCount);
+        binder.forField(amountField).bind(WeaponAlignmentCountDTO::getCount, WeaponAlignmentCountDTO::setCount);
 
         amountField.addClassName("numeric-before-amount");
         add(amountField, name, description);
     }
 
     @Override
-    public void setValue(@Nonnull final WeaponAlignmentDTO weaponAlignmentDTO) {
-        Preconditions.checkNotNull(weaponAlignmentDTO, "moduleCountWrapper shouldn't be null!");
+    public void setValue(@Nonnull final WeaponAlignmentCountDTO weaponAlignmentCountDTO) {
+        Preconditions.checkNotNull(weaponAlignmentCountDTO, "moduleCountWrapper shouldn't be null!");
 
-        binder.setBean(weaponAlignmentDTO);
+        binder.setBean(weaponAlignmentCountDTO);
     }
 
     /**
@@ -55,8 +55,8 @@ public class WeaponCountEdit extends HorizontalLayout implements HasValue<Abstra
      */
     @Nonnull
     @Override
-    public WeaponAlignmentDTO getValue() {
-        WeaponAlignmentDTO bean = binder.getBean();
+    public WeaponAlignmentCountDTO getValue() {
+        WeaponAlignmentCountDTO bean = binder.getBean();
         if (bean == null) {
             throw new NotifySBUserException("this shouldn't be empty - check it");
         }
@@ -64,9 +64,9 @@ public class WeaponCountEdit extends HorizontalLayout implements HasValue<Abstra
     }
 
     @Override
-    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<WeaponCountEdit, WeaponAlignmentDTO>> listener) {
+    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<WeaponCountEdit, WeaponAlignmentCountDTO>> listener) {
         return binder.addValueChangeListener(event -> {
-            final AbstractField.ComponentValueChangeEvent<WeaponCountEdit, WeaponAlignmentDTO> changeEvent =
+            final AbstractField.ComponentValueChangeEvent<WeaponCountEdit, WeaponAlignmentCountDTO> changeEvent =
                     new AbstractField.ComponentValueChangeEvent<>(this, this, getValue(), false);
             listener.valueChanged(changeEvent);
         });

@@ -6,12 +6,10 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
-import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
-import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.gui.vaadin.MainView;
 import de.yuga.spacebattle.gui.vaadin.combined.spacecrafts.FleetDashboardDisplay;
 import de.yuga.spacebattle.gui.vaadin.combined.spacecrafts.FleetLayout;
@@ -40,13 +38,7 @@ public class FleetMainView extends SBPageSubjectSelectorStatsLayout<Fleet> {
     private final EventBus.UIEventBus uiEventBus;
 
     @Nonnull
-    private User user;
-
-    @Nonnull
     private final UserService userService;
-
-    @Nonnull
-    private final PlanetService planetService;
 
     @Nonnull
     private final FleetService fleetService;
@@ -62,26 +54,19 @@ public class FleetMainView extends SBPageSubjectSelectorStatsLayout<Fleet> {
 
     @Autowired
     public FleetMainView(@Nonnull final UserService userService,
-                         @Nonnull final PlanetService planetService,
                          @Nonnull final FleetService fleetService,
                          @Nonnull final EventBus.UIEventBus uiEventBus) {
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
-        Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         Preconditions.checkNotNull(uiEventBus, "uiEventBus shouldn't be null!");
 
         this.uiEventBus = uiEventBus;
         this.uiEventBus.subscribe(this);
         this.userService = userService;
-        this.planetService = planetService;
         this.fleetService = fleetService;
-        User loggedIn = userService.getLoggedInUser();
-        if (loggedIn == null) {
-            throw new NotifySBUserException("You shouldn't see this.");
-        }
-        this.user = loggedIn;
+        final User loggedIn = userService.getLoggedInUser();
         fleetDashboardDisplay = new FleetDashboardDisplay();
-        final List<Fleet> allFleetsForUser = fleetService.findAllFleetsBy(user);
+        final List<Fleet> allFleetsForUser = fleetService.findAllFleetsBy(loggedIn);
         if (!allFleetsForUser.isEmpty()) {
             fleet = allFleetsForUser.get(0);
         }
@@ -129,7 +114,8 @@ public class FleetMainView extends SBPageSubjectSelectorStatsLayout<Fleet> {
 
     @Override
     protected void createSubjectSelectorMenu() {
-        List<Fleet> fleetsBy = fleetService.findAllFleetsBy(user);
+        final User loggedInUser = userService.getLoggedInUser();
+        List<Fleet> fleetsBy = fleetService.findAllFleetsBy(loggedInUser);
         fleetsBy.forEach(fleet -> {
             final Tab fleetTab = new Tab(fleet.getName());
             addSubjectForTabOfSubjectMenu(fleetTab, fleet);
@@ -159,7 +145,8 @@ public class FleetMainView extends SBPageSubjectSelectorStatsLayout<Fleet> {
 
     @Override
     protected void updateSubjectMenu() {
-        List<Fleet> fleetsBy = fleetService.findAllFleetsBy(user);
+        final User loggedInUser = userService.getLoggedInUser();
+        List<Fleet> fleetsBy = fleetService.findAllFleetsBy(loggedInUser);
         subjectSelectorMenu.getChildren().forEach(component -> {
             Tab tab = (Tab) component;
             Fleet subject = getSubjectForTabOfSubjectMenu(tab);

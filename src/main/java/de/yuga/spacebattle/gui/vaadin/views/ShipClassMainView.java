@@ -73,9 +73,6 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
     private final EventBus.UIEventBus uiEventBus;
 
     @Nonnull
-    private final User user;
-
-    @Nonnull
     private final UserService userService;
 
     @Nonnull
@@ -118,12 +115,7 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
         this.shipClassService = shipClassService;
         this.hullService = hullService;
         this.moduleService = moduleService;
-        User loggedIn = userService.getLoggedInUser();
-        if (loggedIn == null) {
-            throw new NotifySBUserException("You shouldn't see this.");
-        }
-        this.user = loggedIn;
-
+        final User loggedIn = userService.getLoggedInUser();
         shipClassDisplay = new ShipClassDisplay();
         shipClassEdit = new ShipClassEdit();
         shipClassCreate = new ShipClassCreate();
@@ -144,12 +136,15 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
      * Retrieves the user's current research base for modules and hulls and sets them to them are needed.
      */
     private void updateShipClassCreate() {
+        final User user = userService.getLoggedInUser();
         final List<Hull> allHullByUser = hullService.findAllByUser(user);
         final List<Armor> allArmorByUser = moduleService.findAllArmorByUser(user);
         final List<ElectronicWarfare> allElectronicWarfareByUser = moduleService.findAllElectronicWarfareByUser(user);
         final List<Propulsion> allPropulsionByUser = moduleService.findAllPropulsionByUser(user);
         final List<Sidewall> allSidewallByUser = moduleService.findAllSidewallByUser(user);
         final List<Weapon> allWeaponByUser = moduleService.findAllWeaponByUser(user);
+        final List<AmmunitionModule> allAmmunitionModulesByUser = moduleService.findAllAmmunitionModulesByUser(user);
+        final List<PassiveModule> allPassiveModuleByUser = moduleService.findAllPassiveModuleByUser(user);
 
         final ShipClassCreateDTO shipClassCreateDTO =
                 new ShipClassCreateDTO(user,
@@ -158,6 +153,8 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
                         allPropulsionByUser,
                         allSidewallByUser,
                         allWeaponByUser,
+                        allAmmunitionModulesByUser,
+                        allPassiveModuleByUser,
                         allHullByUser);
         shipClassCreate.setValue(shipClassCreateDTO);
     }
@@ -170,11 +167,14 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
     private void updateShipClassEdit(@Nonnull final ShipClass shipClass) {
         Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
 
+        final User user = userService.getLoggedInUser();
         final List<Armor> allArmorByUser = moduleService.findAllArmorByUser(user);
         final List<ElectronicWarfare> allElectronicWarfareByUser = moduleService.findAllElectronicWarfareByUser(user);
         final List<Propulsion> allPropulsionByUser = moduleService.findAllPropulsionByUser(user);
         final List<Sidewall> allSidewallByUser = moduleService.findAllSidewallByUser(user);
         final List<Weapon> allWeaponByUser = moduleService.findAllWeaponByUser(user);
+        final List<AmmunitionModule> allAmmunitionModulesByUser = moduleService.findAllAmmunitionModulesByUser(user);
+        final List<PassiveModule> allPassiveModuleByUser = moduleService.findAllPassiveModuleByUser(user);
 
         final ShipClassEditDTO shipClassEditDTO = new ShipClassEditDTO(user,
                 allArmorByUser,
@@ -182,6 +182,8 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
                 allPropulsionByUser,
                 allSidewallByUser,
                 allWeaponByUser,
+                allAmmunitionModulesByUser,
+                allPassiveModuleByUser,
                 shipClass);
         shipClassEdit.setValue(shipClassEditDTO);
     }
@@ -203,7 +205,7 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
             if (shipClass == null) {
                 throw new NotifySBUserException("The ship class shouldn't be empty here.");
             }
-            this.shipClass = shipClassService.saveAndFlush(shipClass);
+            this.shipClass = shipClassService.save(shipClass);
             NotificationHelper.notify("Class defined", 3000);
             updateSubjectMenu();
             useSubjectEntry();
@@ -284,8 +286,8 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
         Tab createNewClass = new Tab(CREATE_NEW_CLASS_SUBJECT_TITLE);
         addSubjectForTabOfSubjectMenu(createNewClass, null);
 
-        final List<ShipClass> allByOwner = shipClassService.findAllByOwner(user);
-        allByOwner.sort(new ShipClassComparator());
+        final User user = userService.getLoggedInUser();
+        final List<ShipClass> allByOwner = shipClassService.findAllLatestByOwner(user);
         allByOwner.forEach(shipClassFE -> {
             Tab shipClassFETab = new Tab(shipClassFE.getName());
             addSubjectForTabOfSubjectMenu(shipClassFETab, shipClassFE);
@@ -358,8 +360,8 @@ public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClas
      */
     @Override
     protected void updateSubjectMenu() {
-        final List<ShipClass> allByOwner = shipClassService.findAllByOwner(user);
-        allByOwner.sort(new ShipClassComparator());
+        final User user = userService.getLoggedInUser();
+        final List<ShipClass> allByOwner = shipClassService.findAllLatestByOwner(user);
 
         final List<Tab> toRemove = new ArrayList<>();
         subjectSelectorMenu.getChildren().forEach(component -> {

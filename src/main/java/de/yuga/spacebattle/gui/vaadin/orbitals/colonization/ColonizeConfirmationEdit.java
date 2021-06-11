@@ -9,16 +9,17 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
-import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.colonization.ColonizationCostCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.misc.details.EResourceAmountDTO;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * It simply displays the costs of a colonization task and a button to do the action.
@@ -27,6 +28,9 @@ public class ColonizeConfirmationEdit extends HorizontalLayout {
 
     @Nonnull
     private final UserService userService = ViewHelper.getService(UserService.class);
+
+    @Nonnull
+    private final PlanetService planetService = ViewHelper.getService(PlanetService.class);
 
     @Nonnull
     private final Binder<Planet> binder = new Binder<>();
@@ -38,11 +42,6 @@ public class ColonizeConfirmationEdit extends HorizontalLayout {
     private final Button submit;
 
     public ColonizeConfirmationEdit() {
-        final User loggedInUser = userService.getLoggedInUser();
-        if (loggedInUser == null) {
-            throw new NotifySBUserException("You should hold a login here.");
-        }
-
         final Label costs = new Label();
         final ReadOnlyHasValue<String> costsText = new ReadOnlyHasValue<>(costs::setText);
         binder.forField(costsText)
@@ -81,17 +80,17 @@ public class ColonizeConfirmationEdit extends HorizontalLayout {
         binder.setBean(value);
         if (value != null) {
             final User loggedInUser = userService.getLoggedInUser();
-            if (loggedInUser != null) {
-                if (loggedInUser.getOwnedPlanets().contains(value)) {
-                    submit.setText("It's my, yeah");
-                    return;
-                }
-                final Planet mainPlanet = loggedInUser.getMainPlanet();
-                final EResourceAmountDTO costs = ColonizationCostCalculator.calculateColonizationCost(value);
-                if (mainPlanet.getResourceDeposit().getResourceAmountByType(costs.getResourceType()).compareTo(costs.getAmount()) >= 0) {
-                    submit.setEnabled(true);
-                }
+            final List<Planet> allColonizedBy = planetService.findAllColonizedBy(loggedInUser);
+            if (allColonizedBy.contains(value)) {
+                submit.setText("It's my, yeah");
+                return;
             }
+            final Planet mainPlanet = planetService.findMainPlanet(loggedInUser);
+            final EResourceAmountDTO costs = ColonizationCostCalculator.calculateColonizationCost(value);
+            if (mainPlanet.getResourceDeposit().getResourceAmountByType(costs.getResourceType()).compareTo(costs.getAmount()) >= 0) {
+                submit.setEnabled(true);
+            }
+
         }
     }
 

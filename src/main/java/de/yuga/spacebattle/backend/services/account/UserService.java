@@ -2,23 +2,18 @@ package de.yuga.spacebattle.backend.services.account;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.NotifySBUserException;
-import de.yuga.spacebattle.backend.colonization.ColonizationCostCalculator;
-import de.yuga.spacebattle.backend.entities.ResourceDeposit;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.repositories.account.UserRepository;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
-import de.yuga.spacebattle.gui.vaadin.misc.details.EResourceAmountDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class UserService {
@@ -42,7 +37,12 @@ public class UserService {
         this.researchService = researchService;
     }
 
-    @Nullable
+    /**
+     * Is falsely annotated as non-null but if the user is logged in then the user is logged in.
+     *
+     * @return the logged in user or null
+     */
+    @Nonnull
     public User getLoggedInUser() {
         return login;
     }
@@ -92,6 +92,33 @@ public class UserService {
     }
 
     @Nonnull
+    public User findWithResearches(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
+
+        return Objects.requireNonNull(userRepository.findWithResearchesAndJobs(user));
+    }
+
+    public Map<Research, Integer> getResearchesForUser(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
+
+        return userRepository.getResearchesForUser(user);
+    }
+
+    @Nonnull
+    public Set<StarSystem> getKnownStarSystems(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
+
+        return userRepository.getKnownStarSystems(user);
+    }
+
+    @Nonnull
+    public User getWithKnownStarSystems(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
+
+        return userRepository.findWithKnownStarSystems(user);
+    }
+
+    @Nonnull
     public User save(@Nonnull final User entity) {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
 
@@ -100,16 +127,20 @@ public class UserService {
 
     @Nonnull
     @Deprecated(since = "productive environment")
-    public User addUnlockedResearch(@Nonnull final User entity, @Nonnull final Research research) {
+    public User addUnlockedResearch(@Nonnull final User entity, @Nonnull final Research... researches) {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
-        Preconditions.checkNotNull(research, "research shouldn't be null!");
+        Preconditions.checkNotNull(researches, "researches shouldn't be null!");
 
-        final User user = find(entity).orElse(null);
-        Research research1 = researchService.find(research.getId());
-        if (user == null || research1 == null) {
-            throw new NotifySBUserException("Funny idea...");
+        final User user = findWithResearches(entity);
+        for (Research research : researches) {
+            Integer level = user.getResearches().get(research);
+            if (level == null) {
+                level = 1;
+            } else {
+                level++;
+            }
+            user.getResearches().put(research, level);
         }
-        user.addResearch(research1);
         return this.save(user);
     }
 
@@ -133,20 +164,9 @@ public class UserService {
         return this.save(new User(username, password, email));
     }
 
-    /**
-     * Adds a star system to the user's known systems.
-     *
-     * @param user       the user wh should know the new system
-     * @param starSystem the star system
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public void addToKnownSystems(@Nonnull final User user, @Nonnull final StarSystem starSystem) {
-        final EResourceAmountDTO costs = ColonizationCostCalculator.calculateInformationCost(starSystem);
-        final Planet mainPlanet = user.getMainPlanet();
-        final ResourceDeposit resourceDeposit = mainPlanet.getResourceDeposit();
-        // the costs must be validated by the instance before
-        resourceDeposit.updateResource(costs.getResourceType(), costs.getAmount());
-        user.addKnownStarSystems(starSystem);
-        save(user);
+    public Set<Colonization> getColonizations(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
+
+        return userRepository.getColonizations(user);
     }
 }

@@ -16,6 +16,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.misc.details.EResourceAmountDTO;
 
@@ -28,6 +29,9 @@ public class BuyColonizationDataConfirmationEdit extends HorizontalLayout {
 
     @Nonnull
     private final UserService userService = ViewHelper.getService(UserService.class);
+
+    @Nonnull
+    private final PlanetService planetService = ViewHelper.getService(PlanetService.class);
 
     @Nonnull
     private final Binder<StarSystem> binder = new Binder<>();
@@ -82,13 +86,12 @@ public class BuyColonizationDataConfirmationEdit extends HorizontalLayout {
         binder.setBean(value);
         if (value != null) {
             final User loggedInUser = userService.getLoggedInUser();
-            if (loggedInUser != null) {
-                final Planet mainPlanet = loggedInUser.getMainPlanet();
-                final EResourceAmountDTO costs = ColonizationCostCalculator.calculateInformationCost(value);
-                if (mainPlanet.getResourceDeposit().getResourceAmountByType(costs.getResourceType()).compareTo(costs.getAmount()) >= 0) {
-                    submit.setEnabled(true);
-                }
+            final Planet mainPlanet = planetService.findMainPlanet(loggedInUser);
+            final EResourceAmountDTO costs = ColonizationCostCalculator.calculateInformationCost(value);
+            if (mainPlanet.getResourceDeposit().getResourceAmountByType(costs.getResourceType()).compareTo(costs.getAmount()) >= 0) {
+                submit.setEnabled(true);
             }
+
         }
     }
 

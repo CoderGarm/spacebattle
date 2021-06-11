@@ -18,7 +18,6 @@ public class ModuleValueTypePerFleetVerticalDisplay extends VerticalLayout imple
     private final ModuleValueTypePerFleetDatasource datasource;
 
     public ModuleValueTypePerFleetVerticalDisplay() {
-
         datasource = new ModuleValueTypePerFleetDatasource();
 
         for (int i = 0; i < EModuleType.values().length; i++) {

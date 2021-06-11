@@ -49,10 +49,7 @@ public class ShipClassStatDisplay extends HorizontalLayout implements HasValue<A
             final Map<ShipClass, Integer> shipClassAmountHashMap = new HashMap<>();
             shipClassAmountHashMap.put(shipClass, 1);
             moduleValueTypePerFleetVerticalDisplay.setValue(shipClassAmountHashMap);
-            costsDisplay.addCosts(shipClass.getCosts());
-            if (shipClass.getHull() != null) {
-                costsDisplay.addCosts(shipClass.getHull().getCosts());
-            }
+            costsDisplay.addCosts(shipClass.getCostsOverall());
         } else {
             costsDisplay.clear();
         }

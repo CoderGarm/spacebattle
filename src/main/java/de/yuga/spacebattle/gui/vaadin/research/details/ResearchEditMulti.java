@@ -8,10 +8,12 @@ import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
+import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
 import org.vaadin.spring.events.Event;
@@ -35,6 +37,9 @@ public class ResearchEditMulti extends VerticalLayout implements HasValue<Abstra
 
     @Nonnull
     private final UserService userService = ViewHelper.getService(UserService.class);
+
+    @Nonnull
+    private final PlanetService planetService = ViewHelper.getService(PlanetService.class);
 
     Label title = new Label("Research edit multi");
 
@@ -66,13 +71,10 @@ public class ResearchEditMulti extends VerticalLayout implements HasValue<Abstra
             return;
         }
 
-        User loggedIn = userService.getLoggedInUser();
-        if (loggedIn == null) {
-            throw new NotifySBUserException("nice try!");
-        }
-
-        loggedIn.getResearchInstitute().ifPresent(planet -> {
-            Construction facility = planet.getConstructionByResource(EResourceType.RESEARCH);
+        final User loggedIn = userService.getLoggedInUser();
+        final Planet researchPlanet = planetService.findResearchPlanet(loggedIn);
+        if (researchPlanet != null) {
+            Construction facility = researchPlanet.getConstructionByResource(EResourceType.RESEARCH);
             if (facility == null) {
                 throw new NotifySBUserException("You can't research without a lab.");
             }
@@ -96,7 +98,7 @@ public class ResearchEditMulti extends VerticalLayout implements HasValue<Abstra
                 researchEdit.setValue(new ResearchLevelDTO(research, level));
                 researchEdit.setReadOnly(!facility.getJobs().isEmpty());
             });
-        });
+        }
     }
 
     @Override

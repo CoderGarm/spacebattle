@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -14,7 +15,6 @@ import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
-import de.yuga.spacebattle.backend.validators.base.CustomValidatorFactory;
 import de.yuga.spacebattle.gui.vaadin.NotificationHelper;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ShipClassEditDTO;
@@ -31,6 +31,7 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
 import javax.validation.Validator;
 import java.util.Set;
 
@@ -48,7 +49,7 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass>
     private final Button submit;
 
     @Nonnull
-    private final Validator validator = CustomValidatorFactory.buildCustomValidator();
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     @Nonnull
     private final Binder<ShipClassEditDTO> binder = new Binder<>(ShipClassEditDTO.class);
@@ -66,6 +67,7 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass>
             validateSubmitButton();
         });
 
+        final HorizontalLayout nameLayout = new HorizontalLayout();
         final TextField name = new TextField();
         binder.forField(name)
                 .withValidator((value, context) -> {
@@ -76,6 +78,11 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass>
                 .withValidationStatusHandler(this::openNotification)
                 .asRequired()
                 .bind(ShipClassEditDTO::getName, ShipClassEditDTO::setName);
+
+        final Label markLabel = new Label();
+        final ReadOnlyHasValue<String> markLabelText = new ReadOnlyHasValue<>(markLabel::setText);
+        binder.forField(markLabelText).bind(s -> "Mk " + s.getShipClass().getMark(), null);
+        nameLayout.add(name, markLabel);
 
         final HullDisplay hullDisplay = new HullDisplay();
         final ReadOnlyHasValue<Hull> hullSelectedReadOnly = new ReadOnlyHasValue<>(hullDisplay::update);
@@ -104,7 +111,7 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass>
         final Button delete = new Button("Delete class", event -> this.uiEventBus.publish(this, ESBEvent.SHIP_CLASS_DELETION.name()));
 
         final HorizontalLayout buttonBar = new HorizontalLayout(submit, delete);
-        add(name, hullDisplay, moduleMultiEdit, buttonBar);
+        add(nameLayout, hullDisplay, moduleMultiEdit, buttonBar);
     }
 
     @Override
@@ -135,7 +142,8 @@ public class ShipClassEdit extends ShipClassLayout<ShipClass>
     }
 
     /**
-     * Checks if the ship class bean is valid
+     * Checks if the ship class bean is valid.
+     * todo check if the current selected ship class is equals to its predecessor in all properties
      */
     private void validateSubmitButton() {
         Set<ConstraintViolation<ShipClass>> validate = validator.validate(getShipClass());

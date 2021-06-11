@@ -1,29 +1,20 @@
 package de.yuga.spacebattle.gui.vaadin.validators;
 
 
-import com.vaadin.flow.data.binder.ErrorLevel;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.binder.ValueContext;
+import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AlignedFitting;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Armor;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Sidewall;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
-import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
-import org.apache.commons.lang3.StringUtils;
+import de.yuga.spacebattle.backend.validators.ShipDataValidator;
 
-import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import javax.annotation.Nonnull;
 import java.util.stream.Collectors;
 
 public class ShipDataVaadinValidator implements Validator<ShipClass> {
-
 
     @Override
     public ValidationResult apply(ShipClass value, ValueContext context) {
@@ -34,143 +25,80 @@ public class ShipDataVaadinValidator implements Validator<ShipClass> {
         ALL,
         NAME,
         MODULES,
-        HULL;
+        HULL,
+        ;
     }
 
     public static ValidationResult check(ShipClass shipClass, ShipDataVaadinValidatorField field) {
-        final Map<String, String> errorMessages = new HashMap<>();
-        final ErrorLevel status = ErrorLevel.INFO;
+        final Multimap<String, String> errorMap = ArrayListMultimap.create();
         switch (field) {
             case ALL:
-                return checkAll(shipClass, status, errorMessages);
+                return checkAll(shipClass, errorMap);
             case NAME:
-                return checkName(shipClass, status, errorMessages);
+                return checkName(shipClass, errorMap);
             case MODULES:
-                return checkModules(shipClass, status, errorMessages);
+                return checkModules(shipClass, errorMap);
             case HULL:
-                return checkHull(shipClass, status, errorMessages);
+                return checkHull(shipClass, errorMap);
         }
 
-        return ValidationResult.error("something went wrong");
+        throw new NotifySBUserException("something went wrong while vaadin validation");
     }
 
-    private static ValidationResult checkAll(ShipClass shipClass, ErrorLevel status, Map<String, String> errorMessages) {
-        ErrorLevel statusFlag = ErrorLevel.INFO;
-        checkName(shipClass, status, errorMessages);
-        checkHull(shipClass, status, errorMessages);
-        checkModules(shipClass, status, errorMessages);
-        return getVaadinStyleResult(errorMessages, statusFlag);
+    private static ValidationResult checkHull(@Nonnull final ShipClass shipClass, @Nonnull final Multimap<String, String> errorMap) {
+        Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
+        Preconditions.checkNotNull(errorMap, "errorMap shouldn't be null!");
+
+        ShipDataValidator.checkHull(shipClass, errorMap);
+        return getVaadinStyleResult(errorMap);
     }
 
-    private static ValidationResult checkHull(ShipClass shipClass, ErrorLevel status, Map<String, String> errorMessages) {
-        if (shipClass.getHull() == null) {
-            status = ErrorLevel.ERROR;
-            errorMessages.put("hull", "Hull must not be empty.");
-        }
-        return getVaadinStyleResult(errorMessages, status);
+    private static ValidationResult checkModules(@Nonnull final ShipClass shipClass, @Nonnull final Multimap<String, String> errorMap) {
+        Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
+        Preconditions.checkNotNull(errorMap, "errorMap shouldn't be null!");
+
+        ShipDataValidator.checkModules(shipClass, errorMap);
+        return getVaadinStyleResult(errorMap);
     }
 
-    private static ValidationResult checkName(ShipClass shipClass, ErrorLevel status, Map<String, String> errorMessages) {
+    private static ValidationResult checkName(@Nonnull final ShipClass shipClass, @Nonnull final Multimap<String, String> errorMap) {
+        Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
+        Preconditions.checkNotNull(errorMap, "errorMap shouldn't be null!");
 
-        String name = shipClass.getName();
-        if (StringUtils.isBlank(name)) {
-            status = ErrorLevel.ERROR;
-            errorMessages.put("name", "Name is empty.");
-        } else if (name.length() < 3 || name.length() > 30) {
-            status = ErrorLevel.ERROR;
-            errorMessages.put("name", "Name is to long or to short.");
-        }
-        return getVaadinStyleResult(errorMessages, status);
+        ShipDataValidator.checkName(shipClass, errorMap);
+        return getVaadinStyleResult(errorMap);
     }
 
-    private static ValidationResult checkModules(ShipClass shipClass, ErrorLevel status, Map<String, String> errorMessages) {
-        if (shipClass.getHull() == null) {
-            status = ErrorLevel.ERROR;
-            errorMessages.put("hull", "Hull must not be empty.");
+    private static ValidationResult checkAll(@Nonnull final ShipClass shipClass, @Nonnull final Multimap<String, String> errorMap) {
+        Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
+        Preconditions.checkNotNull(errorMap, "errorMap shouldn't be null!");
+
+        // check if name is valid
+        ShipDataValidator.checkName(shipClass, errorMap);
+        // check if there is at least the mandatory propulsion module
+        ShipDataValidator.checkPropulsion(shipClass, errorMap);
+        // check hull
+        ShipDataValidator.checkHull(shipClass, errorMap);
+        // check if a hull is present
+        ShipDataValidator.checkModules(shipClass, errorMap);
+        // check predecessor
+        ShipDataValidator.checkPredecessor(shipClass, errorMap);
+
+        return getVaadinStyleResult(errorMap);
+    }
+
+    private static ValidationResult getVaadinStyleResult(@Nonnull final Multimap<String, String> errorMap) {
+        Preconditions.checkNotNull(errorMap, "errorMap shouldn't be null!");
+
+        if (!errorMap.isEmpty()) {
+            final String errorMsg = errorMap.entries().stream().map(stringStringEntry -> {
+                final String property = stringStringEntry.getKey();
+                final String errorMessage = stringStringEntry.getValue();
+                return property + ": " + errorMessage + "\n";
+            }).collect(Collectors.joining());
+            return ValidationResult.error(errorMsg);
         } else {
-            // check if there is at least the mandatory propulsion module
-            final Propulsion propulsion = shipClass.getPropulsion();
-            if (propulsion == null) {
-                status = ErrorLevel.ERROR;
-                errorMessages.put("modules", "Needs at least one item.");
-            }
-
-            // checks is capacity is overridden
-            final Armor armor = shipClass.getArmor();
-            final ElectronicWarfare electronicWarfare = shipClass.getElectronicWarfare();
-            final Sidewall sidewall = shipClass.getSidewall();
-
-            int usedCapacity = 0;
-            usedCapacity = addUsedCapacity(usedCapacity, propulsion);
-            usedCapacity = addUsedCapacity(usedCapacity, armor);
-            usedCapacity = addUsedCapacity(usedCapacity, electronicWarfare);
-            usedCapacity = addUsedCapacity(usedCapacity, sidewall);
-
-            int constructionCapacity = shipClass.getHull().getConstructionCapacity();
-            if (usedCapacity > constructionCapacity) {
-                status = ErrorLevel.ERROR;
-                errorMessages.put("ConstructionCapacity", "Capacity is overridden.");
-            }
-
-            final Set<AlignedFitting> fittings = shipClass.getFittings();
-            final Set<AlignedFitting> bowFittings = fittings.stream().filter(f -> EWeaponAlignment.BOW == f.getWeaponAlignment()).collect(Collectors.toSet());
-            int usedCapacityBow = 0;
-            for (AlignedFitting f : bowFittings) {
-                addUsedCapacity(usedCapacityBow, f.getWeapon());
-            }
-            final int constructionCapacityBow = shipClass.getHull().getConstructionCapacityBow();
-            if (usedCapacityBow > constructionCapacityBow) {
-                status = ErrorLevel.ERROR;
-                errorMessages.put("ConstructionCapacity Bow", "Capacity is overridden.");
-            }
-
-            final Set<AlignedFitting> sternFittings = fittings.stream().filter(f -> EWeaponAlignment.STERN == f.getWeaponAlignment()).collect(Collectors.toSet());
-            int usedCapacityStern = 0;
-            for (AlignedFitting f : sternFittings) {
-                addUsedCapacity(usedCapacityStern, f.getWeapon());
-            }
-            final int constructionCapacityStern = shipClass.getHull().getConstructionCapacityStern();
-            if (usedCapacityStern > constructionCapacityStern) {
-                status = ErrorLevel.ERROR;
-                errorMessages.put("ConstructionCapacity Stern", "Capacity is overridden.");
-            }
-
-            final Set<AlignedFitting> broadsideFittings = fittings.stream().filter(f -> EWeaponAlignment.BROADSIDE == f.getWeaponAlignment()).collect(Collectors.toSet());
-            int usedCapacityBroadside = 0;
-            for (AlignedFitting f : broadsideFittings) {
-                addUsedCapacity(usedCapacityBroadside, f.getWeapon());
-            }
-            final int constructionCapacityBroadsides = shipClass.getHull().getConstructionCapacityBroadsides();
-            if (usedCapacityBroadside > constructionCapacityBroadsides) {
-                status = ErrorLevel.ERROR;
-                errorMessages.put("ConstructionCapacity Broadsides", "Capacity is overridden.");
-            }
+            return ValidationResult.ok();
         }
-        return getVaadinStyleResult(errorMessages, status);
-    }
-
-
-    private static ValidationResult getVaadinStyleResult(Map<String, String> errorMessages, ErrorLevel status) {
-
-        return new ValidationResult() {
-            @Override
-            public String getErrorMessage() {
-                return errorMessages.entrySet().stream().map(stringStringEntry -> {
-                    String property = stringStringEntry.getKey();
-                    String errorMessage = stringStringEntry.getValue();
-                    return property + ": " + errorMessage + "\n";
-                }).collect(Collectors.joining());
-            }
-
-            @Override
-            public Optional<ErrorLevel> getErrorLevel() {
-                return Optional.of(status);
-            }
-        };
-    }
-
-    private static int addUsedCapacity(int usedCapacity, @Nullable final BaseModule baseModule) {
-        usedCapacity += baseModule != null ? baseModule.getUseCapacity() : 0;
-        return usedCapacity;
     }
 }

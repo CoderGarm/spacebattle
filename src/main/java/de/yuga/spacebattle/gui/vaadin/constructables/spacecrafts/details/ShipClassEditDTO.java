@@ -4,6 +4,8 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AmmunitionFitting;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import org.apache.commons.lang3.StringUtils;
@@ -22,15 +24,6 @@ public class ShipClassEditDTO {
     @Nonnull
     private final User owner;
 
-    private int id = -1;
-
-    /**
-     * Holds the modules which are possible.
-     * Every integer bigger than 0 means a user selected upgrade and only these ones should be computed.
-     */
-    /*@Nonnull
-    private final Map<Module, Integer> modules = new HashMap<>();
-*/
     @Nonnull
     private final Collection<Armor> possibleArmors = new HashSet<>();
 
@@ -45,6 +38,12 @@ public class ShipClassEditDTO {
 
     @Nonnull
     private final Collection<Weapon> possibleWeapons = new HashSet<>();
+
+    @Nonnull
+    private final Collection<AmmunitionModule> possibleAmmunitionModules = new HashSet<>();
+
+    @Nonnull
+    private final Collection<PassiveModule> possiblePassiveModule = new HashSet<>();
 
     @Nullable
     private Hull hull;
@@ -65,20 +64,36 @@ public class ShipClassEditDTO {
     private Sidewall selectedSidewall;
 
     @Nonnull
-    private Set<AlignedFitting> selectedAlignedFittings = new HashSet<>();
+    private final Set<AlignedFitting> selectedAlignedFittings = new HashSet<>();
 
+    @Nonnull
+    private final Set<AmmunitionFitting> selectedAmmunitionFittings = new HashSet<>();
+
+    @Nonnull
+    private final Set<SupportFitting> selectedSupportFittings = new HashSet<>();
+
+    @Nullable
+    private ShipClass predecessorShipClasses;
+
+    /**
+     * The super for {@link ShipClassCreateDTO}.
+     */
     protected ShipClassEditDTO(@Nonnull final User owner,
                                @Nonnull final List<Armor> allArmorByUser,
                                @Nonnull final List<ElectronicWarfare> allElectronicWarfareByUser,
                                @Nonnull final List<Propulsion> allPropulsionByUser,
                                @Nonnull final List<Sidewall> allSidewallByUser,
-                               @Nonnull final List<Weapon> allWeaponByUser) {
+                               @Nonnull final List<Weapon> allWeaponByUser,
+                               @Nonnull final List<AmmunitionModule> allAmmunitionModulesByUser,
+                               @Nonnull final List<PassiveModule> allPassiveModuleByUser) {
         Preconditions.checkNotNull(owner, "owner shouldn't be null!");
         Preconditions.checkNotNull(allArmorByUser, "allArmorByUser shouldn't be null!");
         Preconditions.checkNotNull(allElectronicWarfareByUser, "allElectronicWarfareByUser shouldn't be null!");
         Preconditions.checkNotNull(allPropulsionByUser, "allPropulsionByUser shouldn't be null!");
         Preconditions.checkNotNull(allSidewallByUser, "allSidewallByUser shouldn't be null!");
         Preconditions.checkNotNull(allWeaponByUser, "allWeaponByUser shouldn't be null!");
+        Preconditions.checkNotNull(allAmmunitionModulesByUser, "allAmmunitionModulesByUser shouldn't be null!");
+        Preconditions.checkNotNull(allPassiveModuleByUser, "allPassiveModuleByUser shouldn't be null!");
 
         this.owner = owner;
         possibleArmors.addAll(allArmorByUser);
@@ -86,6 +101,9 @@ public class ShipClassEditDTO {
         possiblePropulsion.addAll(allPropulsionByUser);
         possibleSidewalls.addAll(allSidewallByUser);
         possibleWeapons.addAll(allWeaponByUser);
+        possibleAmmunitionModules.addAll(allAmmunitionModulesByUser);
+        possiblePassiveModule.addAll(allPassiveModuleByUser);
+        predecessorShipClasses = null;
     }
 
     public ShipClassEditDTO(@Nonnull final User owner,
@@ -94,23 +112,11 @@ public class ShipClassEditDTO {
                             @Nonnull final List<Propulsion> allPropulsionByUser,
                             @Nonnull final List<Sidewall> allSidewallByUser,
                             @Nonnull final List<Weapon> allWeaponByUser,
+                            @Nonnull final List<AmmunitionModule> allAmmunitionModulesByUser,
+                            @Nonnull final List<PassiveModule> allPassiveModuleByUser,
                             @Nonnull final ShipClass shipClass) {
-        Preconditions.checkNotNull(owner, "owner shouldn't be null!");
-        Preconditions.checkNotNull(allArmorByUser, "allArmorByUser shouldn't be null!");
-        Preconditions.checkNotNull(allElectronicWarfareByUser, "allElectronicWarfareByUser shouldn't be null!");
-        Preconditions.checkNotNull(allPropulsionByUser, "allPropulsionByUser shouldn't be null!");
-        Preconditions.checkNotNull(allSidewallByUser, "allSidewallByUser shouldn't be null!");
-        Preconditions.checkNotNull(allWeaponByUser, "allWeaponByUser shouldn't be null!");
-        Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
+        this(owner, allArmorByUser, allElectronicWarfareByUser, allPropulsionByUser, allSidewallByUser, allWeaponByUser, allAmmunitionModulesByUser, allPassiveModuleByUser);
 
-        possibleArmors.addAll(allArmorByUser);
-        possibleElectronicWarfare.addAll(allElectronicWarfareByUser);
-        possiblePropulsion.addAll(allPropulsionByUser);
-        possibleSidewalls.addAll(allSidewallByUser);
-        possibleWeapons.addAll(allWeaponByUser);
-
-        this.id = shipClass.getId();
-        this.owner = owner;
         this.name = shipClass.getName();
         this.hull = shipClass.getHull();
         selectedArmor = shipClass.getArmor();
@@ -118,14 +124,9 @@ public class ShipClassEditDTO {
         selectedPropulsion = shipClass.getPropulsion();
         selectedSidewall = shipClass.getSidewall();
         selectedAlignedFittings.addAll(shipClass.getFittings());
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
+        selectedAmmunitionFittings.addAll(shipClass.getAmmunitionFittings());
+        selectedSupportFittings.addAll(shipClass.getSupportFittings());
+        predecessorShipClasses = shipClass;
     }
 
     @Nonnull
@@ -134,7 +135,6 @@ public class ShipClassEditDTO {
     }
 
     public void resetModules() {
-        id = -1;
         name = null;
         hull = null;
         selectedArmor = null;
@@ -142,6 +142,8 @@ public class ShipClassEditDTO {
         selectedPropulsion = null;
         selectedSidewall = null;
         selectedAlignedFittings.clear();
+        selectedAmmunitionFittings.clear();
+        selectedSupportFittings.clear();
     }
 
     public void setHull(@Nullable Hull hull) {
@@ -162,19 +164,21 @@ public class ShipClassEditDTO {
         this.name = name;
     }
 
+    /**
+     * Creates a ship class to get the ship class from the create view with all the so far setted properties.
+     *
+     * @return the ship class
+     */
     @Nonnull
     public ShipClass getShipClass() {
         final ShipClass shipClass;
         if (StringUtils.isNotBlank(name) && hull != null) {
-            shipClass = new ShipClass(owner, name, hull);
+            shipClass = new ShipClass(owner, name, hull, predecessorShipClasses);
         } else {
             shipClass = new ShipClass();
         }
         if (hull != null) {
             shipClass.setHull(hull);
-        }
-        if (id != -1) {
-            shipClass.setId(id);
         }
         shipClass.setArmor(selectedArmor);
         shipClass.setPropulsion(selectedPropulsion);
@@ -182,6 +186,8 @@ public class ShipClassEditDTO {
         shipClass.setSidewall(selectedSidewall);
         // removing fittings with an amount of zero - this is necessary here to remove a fitting which was added before
         shipClass.setFittings(selectedAlignedFittings.stream().filter(a -> a.getAmount() > 0).collect(Collectors.toSet()));
+        shipClass.setAmmunitionFittings(selectedAmmunitionFittings);
+        shipClass.setSupportFittings(selectedSupportFittings);
         return shipClass;
     }
 
@@ -213,6 +219,8 @@ public class ShipClassEditDTO {
         selectedPropulsion = modules.getSelectedPropulsion();
         selectedSidewall = modules.getSelectedSidewall();
         selectedAlignedFittings.addAll(modules.getSelectedAlignedFittings());
+        selectedAmmunitionFittings.addAll(modules.getSelectedAmmunitionFittings());
+        selectedSupportFittings.addAll(modules.getSelectedSupportFittings());
     }
 
     public ModuleContainerDTO getModules() {
@@ -221,10 +229,14 @@ public class ShipClassEditDTO {
                 new ArrayList<>(possiblePropulsion),
                 new ArrayList<>(possibleSidewalls),
                 new ArrayList<>(possibleWeapons),
+                new ArrayList<>(possibleAmmunitionModules),
+                new ArrayList<>(possiblePassiveModule),
                 selectedArmor,
                 selectedElectronicWarfare,
                 selectedPropulsion,
                 selectedSidewall,
-                selectedAlignedFittings);
+                selectedAlignedFittings,
+                selectedAmmunitionFittings,
+                selectedSupportFittings);
     }
 }

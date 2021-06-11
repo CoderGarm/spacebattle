@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -77,6 +78,13 @@ public class JobService {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
 
         return jobRepository.save(entity);
+    }
+
+    @Nonnull
+    public List<Job> findAllJobsForConstruction(@Nonnull Construction facility) {
+        Preconditions.checkNotNull(facility, "facility shouldn't be null!");
+
+        return jobRepository.findAllJobsForConstruction(facility);
     }
 
     /**
@@ -171,27 +179,28 @@ public class JobService {
         Preconditions.checkNotNull(idPlanet, "idPlanet shouldn't be null!");
         Preconditions.checkNotNull(idBuilding, "idBuilding shouldn't be null!");
 
-        Planet planet = planetService.find(idPlanet);
-        Building building = buildingService.find(idBuilding);
+        final Planet planet = planetService.find(idPlanet);
+        final Building building = buildingService.find(idBuilding);
         if (planet == null || planet.getOwner() == null || building == null) {
             throw new NotifySBUserException("not that way!");
         }
 
-        canUseResearch(planet.getOwner(), building.getUnlockedThrough());
+        final User userWithResearches = userService.findWithResearches(planet.getOwner());
+        canUseResearch(userWithResearches, building.getUnlockedThrough());
 
-        Set<Construction> constructions = planet.getConstructions();
-        Construction existingC = constructions.stream()
+        final Set<Construction> constructions = planet.getConstructions();
+        final Construction existingC = constructions.stream()
                 .filter(construction -> construction.getBuilding().equals(building))
                 .findFirst().orElse(null);
 
-        Constructable constructable = new Constructable(building, existingC != null ? existingC.getLevel() + 1 : 1);
-        Construction facility = planet.getConstructions().stream()
+        final Constructable constructable = new Constructable(building, existingC != null ? existingC.getLevel() + 1 : 1);
+        final Construction facility = planet.getConstructions().stream()
                 .filter(construction -> construction.getBuilding().getResourceType() == EResourceType.CONSTRUCTION)
                 .findFirst().orElse(null);
 
         checkIfFree(facility);
         checkAndBalances(planet, constructable.getJobCosts());
-        Job entity = new Job(planet.getOwner(), facility, constructable);
+        final Job entity = new Job(planet.getOwner(), facility, constructable);
         jobRepository.save(entity);
         return entity;
     }
@@ -211,8 +220,8 @@ public class JobService {
         Preconditions.checkNotNull(idUser, "idUser shouldn't be null!");
         Preconditions.checkNotNull(idResearch, "idResearch shouldn't be null!");
 
-        User user = userService.find(idUser);
-        Research research = researchService.find(idResearch);
+        final User user = userService.find(idUser);
+        final Research research = researchService.find(idResearch);
         if (user == null || research == null) {
             throw new NotifySBUserException("not that way!");
         }
@@ -220,7 +229,7 @@ public class JobService {
 
         int levelCap = research.getLevelCap();
 
-        Map<Research, Integer> researches = user.getResearches();
+        final Map<Research, Integer> researches = user.getResearches();
         int level = 1;
         if (researches.containsKey(research)) {
             level = researches.get(research) + 1;
@@ -228,17 +237,16 @@ public class JobService {
         if (level > levelCap) {
             throw new NotifySBUserException("no way!");
         }
-        Constructable constructable = new Constructable(research, level);
-        Planet planet = user.getResearchInstitute().orElse(null);
-
-        if (planet == null) {
+        final Constructable constructable = new Constructable(research, level);
+        final Planet researchPlanet = planetService.findResearchPlanet(user);
+        if (researchPlanet == null) {
             throw new NotifySBUserException("You need a research facility on at leas one planet.");
         }
 
-        Construction facility = planet.getConstructionByResource(EResourceType.RESEARCH);
+        final Construction facility = researchPlanet.getConstructionByResource(EResourceType.RESEARCH);
         checkIfFree(facility);
 
-        Job entity = new Job(user, facility, constructable);
+        final Job entity = new Job(user, facility, constructable);
         jobRepository.save(entity);
         return entity;
     }

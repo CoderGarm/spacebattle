@@ -3,10 +3,13 @@ package de.yuga.spacebattle.backend.repositories.orbitals;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.enums.EResourceType;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import java.util.List;
 
@@ -28,12 +31,37 @@ public class CustomPlanetRepositoryImpl implements CustomPlanetRepository {
                 .getResultList();
     }
 
+    @Nonnull
     @Override
-    public List<Planet> findAllPlanetsColonizedBy(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
+    public List<Planet> findAllPlanetsColonizedBy(@Nonnull final User owner) {
+        Preconditions.checkNotNull(owner, "owner shouldn't be null!");
 
         return em.createNamedQuery("Planet.getAllOwnedBy", Planet.class)
-                .setParameter("owner", user)
+                .setParameter("owner", owner)
                 .getResultList();
+    }
+
+    @Nullable
+    @Override
+    public Planet findResearchPlanet(@Nonnull final User owner) {
+        Preconditions.checkNotNull(owner, "owner shouldn't be null!");
+
+        try {
+            return em.createNamedQuery("Planet.getPlanetsWithBuildingForResourceType", Planet.class)
+                    .setParameter("owner", owner)
+                    .setParameter("resourceType", EResourceType.RESEARCH)
+                    .getSingleResult();
+        } catch (final NoResultException e) {
+            return null;
+        }
+    }
+
+    @Nonnull
+    @Override
+    public Planet findMainPlanetForUser(@Nonnull final User owner) {
+        Preconditions.checkNotNull(owner, "owner shouldn't be null!");
+
+        return em.createNamedQuery("Planet.getMainPlanet", Planet.class)
+                .setParameter("owner", owner).getResultList().get(0);
     }
 }

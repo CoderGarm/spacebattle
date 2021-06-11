@@ -16,7 +16,8 @@ import java.math.BigDecimal;
 
 @NamedQueries({
         @NamedQuery(name = "Job.getAll", query = "SELECT p FROM Job p"),
-        @NamedQuery(name = "Job.getAllByOwner", query = "SELECT p FROM Job p WHERE p.owner = :owner")
+        @NamedQuery(name = "Job.getAllByOwner", query = "SELECT p FROM Job p WHERE p.owner = :owner"),
+        @NamedQuery(name = "Job.getAllForConstruction", query = "SELECT p FROM Job p WHERE p.facility = :facility")
 })
 @Entity
 @Table(name = "job")

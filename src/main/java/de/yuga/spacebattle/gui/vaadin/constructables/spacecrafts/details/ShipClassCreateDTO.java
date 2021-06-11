@@ -26,8 +26,10 @@ public class ShipClassCreateDTO extends ShipClassEditDTO {
                               @Nonnull final List<Propulsion> allPropulsionByUser,
                               @Nonnull final List<Sidewall> allSidewallByUser,
                               @Nonnull final List<Weapon> allWeaponByUser,
+                              @Nonnull final List<AmmunitionModule> allAmmunitionModulesByUser,
+                              @Nonnull final List<PassiveModule> allPassiveModuleByUser,
                               @Nonnull final List<Hull> allHullByUser) {
-        super(user, allArmorByUser, allElectronicWarfareByUser, allPropulsionByUser, allSidewallByUser, allWeaponByUser);
+        super(user, allArmorByUser, allElectronicWarfareByUser, allPropulsionByUser, allSidewallByUser, allWeaponByUser, allAmmunitionModulesByUser, allPassiveModuleByUser);
         Preconditions.checkNotNull(allHullByUser, "allHullByUser shouldn't be null!");
 
         this.possibleHulls.addAll(allHullByUser);

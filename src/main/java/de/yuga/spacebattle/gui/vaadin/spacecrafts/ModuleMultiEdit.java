@@ -8,6 +8,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.AmmunitionFitting;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.details.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Armor;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
@@ -16,7 +18,9 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModul
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ModuleContainerDTO;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.StarShipSvgHelper;
-import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.WeaponAlignmentDTO;
+import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.AmmunitionModuleCountDTO;
+import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.PassiveModuleCountDTO;
+import de.yuga.spacebattle.gui.vaadin.spacecrafts.details.WeaponAlignmentCountDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +62,12 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
 
     @Nonnull
     private final WeaponAlignmentMultiEdit broadsides = new WeaponAlignmentMultiEdit(EWeaponAlignment.BROADSIDE);
+
+    @Nonnull
+    private final AmmunitionModuleMultiEdit ammunitionModuleMultiEdit = new AmmunitionModuleMultiEdit();
+
+    @Nonnull
+    private final PassiveModuleMultiEdit passiveModuleMultiEdit = new PassiveModuleMultiEdit();
 
     /**
      * The original input data.
@@ -127,7 +137,24 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
             fireChangeEvent();
         });
 
-        add(armorSelection, propulsionSelection, electronicWarfareSelection, sidewallSelection, bow, stern, broadsides);
+        ammunitionModuleMultiEdit.addValueChangeListener(event -> {
+            final Set<AmmunitionFitting> collect = mapAmmunitionFittingDTO(event.getValue());
+            if (moduleCountDTO != null) {
+                moduleCountDTO.addSelectedAmmunitionFittings(collect);
+            }
+            fireChangeEvent();
+        });
+
+        passiveModuleMultiEdit.addValueChangeListener(event -> {
+            final Set<SupportFitting> collect = mapSupportFittingDTO(event.getValue());
+            if (moduleCountDTO != null) {
+                moduleCountDTO.addSelectedSupportFittings(collect);
+            }
+            fireChangeEvent();
+        });
+
+        add(armorSelection, propulsionSelection, electronicWarfareSelection,
+                sidewallSelection, bow, stern, broadsides, ammunitionModuleMultiEdit, passiveModuleMultiEdit);
     }
 
     private void fireChangeEvent() {
@@ -141,13 +168,13 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
     }
 
     private void updateWeaponSlots() {
-        final Set<WeaponAlignmentDTO> bowWeapons = bow.getValue();
-        final Set<WeaponAlignmentDTO> sternWeapons = stern.getValue();
-        final Set<WeaponAlignmentDTO> broadsideWeapons = broadsides.getValue();
+        final Set<WeaponAlignmentCountDTO> bowWeapons = bow.getValue();
+        final Set<WeaponAlignmentCountDTO> sternWeapons = stern.getValue();
+        final Set<WeaponAlignmentCountDTO> broadsideWeapons = broadsides.getValue();
 
-        bowWeapons.stream().map(WeaponAlignmentDTO::getCountNumeric).reduce(Integer::sum).ifPresent(sum -> starShipSvgHelper.calculateBowSlots(3, sum));
-        broadsideWeapons.stream().map(WeaponAlignmentDTO::getCountNumeric).reduce(Integer::sum).ifPresent(sum -> starShipSvgHelper.calculateBroadsideSlots(3, sum));
-        sternWeapons.stream().map(WeaponAlignmentDTO::getCountNumeric).reduce(Integer::sum).ifPresent(sum -> starShipSvgHelper.calculateSternSlots(3, sum));
+        bowWeapons.stream().map(WeaponAlignmentCountDTO::getCountNumeric).reduce(Integer::sum).ifPresent(sum -> starShipSvgHelper.calculateBowSlots(3, sum));
+        broadsideWeapons.stream().map(WeaponAlignmentCountDTO::getCountNumeric).reduce(Integer::sum).ifPresent(sum -> starShipSvgHelper.calculateBroadsideSlots(3, sum));
+        sternWeapons.stream().map(WeaponAlignmentCountDTO::getCountNumeric).reduce(Integer::sum).ifPresent(sum -> starShipSvgHelper.calculateSternSlots(3, sum));
     }
 
     @Override
@@ -191,43 +218,66 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
             sidewallSelection.preselect(sidewall);
         }
 
-        final Set<WeaponAlignmentDTO> bowValue = value.getPossibleWeapons().stream()
+        final Set<WeaponAlignmentCountDTO> bowValue = value.getPossibleWeapons().stream()
                 .filter(a -> a.getAllowedWeaponAlignments().contains(EWeaponAlignment.BOW))
                 .map(a -> {
-                    final AlignedFitting alignedFitting = value.getSelectedAlignedFittings().stream()
+                    final AlignedFitting fitting = value.getSelectedAlignedFittings().stream()
                             .filter(e -> e.getWeapon().equals(a) && EWeaponAlignment.BOW == e.getWeaponAlignment())
                             .findFirst()
                             .orElse(null);
-                    final int amount = alignedFitting != null ? alignedFitting.getAmount() : 0;
-                    return new WeaponAlignmentDTO(a, amount);
+                    final int amount = fitting != null ? fitting.getAmount() : 0;
+                    return new WeaponAlignmentCountDTO(a, amount);
                 }).collect(Collectors.toSet());
 
-        final Set<WeaponAlignmentDTO> sternValue = value.getPossibleWeapons().stream()
+        final Set<WeaponAlignmentCountDTO> sternValue = value.getPossibleWeapons().stream()
                 .filter(a -> a.getAllowedWeaponAlignments().contains(EWeaponAlignment.STERN))
                 .map(a -> {
-                    final AlignedFitting alignedFitting = value.getSelectedAlignedFittings().stream()
+                    final AlignedFitting fitting = value.getSelectedAlignedFittings().stream()
                             .filter(e -> e.getWeapon().equals(a) && EWeaponAlignment.STERN == e.getWeaponAlignment())
                             .findFirst()
                             .orElse(null);
-                    final int amount = alignedFitting != null ? alignedFitting.getAmount() : 0;
-                    return new WeaponAlignmentDTO(a, amount);
+                    final int amount = fitting != null ? fitting.getAmount() : 0;
+                    return new WeaponAlignmentCountDTO(a, amount);
                 }).collect(Collectors.toSet());
 
 
-        final Set<WeaponAlignmentDTO> broadsideValue = value.getPossibleWeapons().stream()
+        final Set<WeaponAlignmentCountDTO> broadsideValue = value.getPossibleWeapons().stream()
                 .filter(a -> a.getAllowedWeaponAlignments().contains(EWeaponAlignment.BROADSIDE))
                 .map(a -> {
-                    final AlignedFitting alignedFitting = value.getSelectedAlignedFittings().stream()
+                    final AlignedFitting fitting = value.getSelectedAlignedFittings().stream()
                             .filter(e -> e.getWeapon().equals(a) && EWeaponAlignment.BROADSIDE == e.getWeaponAlignment())
                             .findFirst()
                             .orElse(null);
-                    final int amount = alignedFitting != null ? alignedFitting.getAmount() : 0;
-                    return new WeaponAlignmentDTO(a, amount);
+                    final int amount = fitting != null ? fitting.getAmount() : 0;
+                    return new WeaponAlignmentCountDTO(a, amount);
                 }).collect(Collectors.toSet());
+
+        final Set<AmmunitionModuleCountDTO> ammunitionValue = value.getPossibleAmmunitionModules().stream()
+                .map(a -> {
+                    final AmmunitionFitting fitting = value.getSelectedAmmunitionFittings().stream()
+                            .filter(e -> e.getAmmunitionModule().equals(a))
+                            .findFirst()
+                            .orElse(null);
+                    final int amount = fitting != null ? fitting.getAmount() : 0;
+                    return new AmmunitionModuleCountDTO(a, amount);
+                }).collect(Collectors.toSet());
+
+        final Set<PassiveModuleCountDTO> supportValue = value.getPossiblePassiveModule().stream()
+                .map(a -> {
+                    final SupportFitting fitting = value.getSelectedSupportFittings().stream()
+                            .filter(e -> e.getPassiveModule().equals(a))
+                            .findFirst()
+                            .orElse(null);
+                    final int amount = fitting != null ? fitting.getAmount() : 0;
+                    return new PassiveModuleCountDTO(a, amount);
+                }).collect(Collectors.toSet());
+
 
         bow.setValue(bowValue);
         stern.setValue(sternValue);
         broadsides.setValue(broadsideValue);
+        ammunitionModuleMultiEdit.setValue(ammunitionValue);
+        passiveModuleMultiEdit.setValue(supportValue);
         updateWeaponSlots();
     }
 
@@ -238,12 +288,17 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
             throw new NotifySBUserException("You should call getValue before setting a value.");
         }
 
-        final Set<WeaponAlignmentDTO> alignedFittings = bow.getValue();
+        final Set<WeaponAlignmentCountDTO> alignedFittings = bow.getValue();
         alignedFittings.addAll(stern.getValue());
         alignedFittings.addAll(broadsides.getValue());
 
         final Set<AlignedFitting> selectedFittings = mapAlignmentDTO(alignedFittings);
+        final Set<AmmunitionFitting> selectedAmmunitionFittings = mapAmmunitionFittingDTO(ammunitionModuleMultiEdit.getValue());
+        final Set<SupportFitting> selectedSupportFittings = mapSupportFittingDTO(passiveModuleMultiEdit.getValue());
+
         moduleCountDTO.setSelectedAlignedFittings(selectedFittings);
+        moduleCountDTO.setSelectedAmmunitionFittings(selectedAmmunitionFittings);
+        moduleCountDTO.setSelectedSupportFittings(selectedSupportFittings);
         return moduleCountDTO;
     }
 
@@ -304,12 +359,30 @@ public class ModuleMultiEdit extends VerticalLayout implements HasValue<Abstract
     }
 
     @Nonnull
-    private Set<AlignedFitting> mapAlignmentDTO(@Nonnull final Set<WeaponAlignmentDTO> value) {
+    private Set<AlignedFitting> mapAlignmentDTO(@Nonnull final Set<WeaponAlignmentCountDTO> value) {
         Preconditions.checkNotNull(value, "value shouldn't be null!");
 
         return value.stream()
                 .filter(a -> a.getSelectedWeaponAlignment() != null)
                 .map(a -> new AlignedFitting(a.getSelectedWeaponAlignment(), a.getWeapon(), a.getCountNumeric()))
+                .collect(Collectors.toSet());
+    }
+
+    @Nonnull
+    private Set<AmmunitionFitting> mapAmmunitionFittingDTO(@Nonnull final Set<AmmunitionModuleCountDTO> value) {
+        Preconditions.checkNotNull(value, "value shouldn't be null!");
+
+        return value.stream()
+                .map(a -> new AmmunitionFitting(a.getAmmunitionModule(), a.getCountNumeric()))
+                .collect(Collectors.toSet());
+    }
+
+    @Nonnull
+    private Set<SupportFitting> mapSupportFittingDTO(@Nonnull final Set<PassiveModuleCountDTO> value) {
+        Preconditions.checkNotNull(value, "value shouldn't be null!");
+
+        return value.stream()
+                .map(a -> new SupportFitting(a.getPassiveModule(), a.getCountNumeric()))
                 .collect(Collectors.toSet());
     }
 

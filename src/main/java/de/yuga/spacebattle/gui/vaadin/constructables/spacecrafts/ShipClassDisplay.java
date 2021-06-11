@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts;
 
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
@@ -18,7 +19,7 @@ public class ShipClassDisplay extends ShipClassLayout<ShipClass> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShipClassDisplay.class);
 
     @Nonnull
-    private final Binder<ShipClass> binderShipClass = new Binder<>(ShipClass.class);
+    private final Binder<ShipClass> binder = new Binder<>(ShipClass.class);
 
 
     public ShipClassDisplay() {
@@ -27,21 +28,27 @@ public class ShipClassDisplay extends ShipClassLayout<ShipClass> {
 
         createHullSvg();
 
+        final HorizontalLayout nameLayout = new HorizontalLayout();
         final Label name = new Label();
         final ReadOnlyHasValue<String> nameReadOnly = new ReadOnlyHasValue<>(name::setText);
-        binderShipClass.forField(nameReadOnly).bind(ShipClass::getName, null);
+        binder.forField(nameReadOnly).bind(ShipClass::getName, null);
 
-        binderShipClass.forField(getShipClassStatDisplay()).bind(shipClass -> shipClass, null);
+        final Label markLabel = new Label();
+        final ReadOnlyHasValue<String> markLabelText = new ReadOnlyHasValue<>(markLabel::setText);
+        binder.forField(markLabelText).bind(s -> "Mk " + s.getMark(), null);
+        nameLayout.add(name, markLabel);
+
+        binder.forField(getShipClassStatDisplay()).bind(shipClass -> shipClass, null);
 
         final HullDisplay hullDisplay = new HullDisplay();
         final ReadOnlyHasValue<Hull> hullReadOnly = new ReadOnlyHasValue<>(hullDisplay::update);
-        binderShipClass.forField(hullReadOnly).bind(ShipClass::getHull, null);
+        binder.forField(hullReadOnly).bind(ShipClass::getHull, null);
 
         final ModuleMultiDisplay moduleMultiDisplay = new ModuleMultiDisplay(starShipSvgHelper);
         final ReadOnlyHasValue<ShipClass> moduleReadOnly = new ReadOnlyHasValue<>(moduleMultiDisplay::setValue);
-        binderShipClass.forField(moduleReadOnly).bind(shipClass -> shipClass, null);
+        binder.forField(moduleReadOnly).bind(shipClass -> shipClass, null);
 
-        add(name, hullDisplay, moduleMultiDisplay);
+        add(nameLayout, hullDisplay, moduleMultiDisplay);
     }
 
 
@@ -52,7 +59,7 @@ public class ShipClassDisplay extends ShipClassLayout<ShipClass> {
      */
     @Override
     public void update(@Nullable final ShipClass shipClass) {
-        binderShipClass.setBean(shipClass);
+        binder.setBean(shipClass);
     }
 
     @Override

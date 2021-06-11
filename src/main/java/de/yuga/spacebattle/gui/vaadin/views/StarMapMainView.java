@@ -6,8 +6,6 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
-import de.yuga.spacebattle.NotifySBUserException;
-import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
@@ -51,9 +49,6 @@ public class StarMapMainView extends SBPageActionSelectorLayout<StarSystemLayout
     private final ColonizationService colonizationService;
 
     @Nonnull
-    private User user;
-
-    @Nonnull
     private final UserService userService;
 
     @Nonnull
@@ -89,11 +84,6 @@ public class StarMapMainView extends SBPageActionSelectorLayout<StarSystemLayout
         this.planetService = planetService;
         this.starSystemService = starSystemService;
         this.colonizationService = colonizationService;
-        User loggedIn = userService.getLoggedInUser();
-        if (loggedIn == null) {
-            throw new NotifySBUserException("You shouldn't see this.");
-        }
-        this.user = loggedIn;
         final Set<StarSystem> starSystems = new HashSet<>(starSystemService.findAll());
         starSystemDisplay = new StarSystemDisplay();
         starSystemOverviewDisplay = new StarSystemOverviewDisplay();

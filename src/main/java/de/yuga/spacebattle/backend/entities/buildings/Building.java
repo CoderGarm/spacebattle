@@ -15,7 +15,8 @@ import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 
 @NamedQueries({
-        @NamedQuery(name = "Building.getAll", query = "SELECT p FROM Building p")
+        @NamedQuery(name = "Building.getAll", query = "SELECT p FROM Building p"),
+        @NamedQuery(name = "Building.getByResourceType", query = "SELECT p FROM Building p WHERE p.resourceType = :resourceType")
 })
 @Entity
 @Table(name = "building")

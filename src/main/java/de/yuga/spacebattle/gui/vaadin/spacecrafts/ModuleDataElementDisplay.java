@@ -18,10 +18,8 @@ public class ModuleDataElementDisplay extends HorizontalLayout {
     @Nonnull
     private final Binder<EModuleValueDTO> binder = new Binder<>(EModuleValueDTO.class);
 
-    @Nullable
-    private EModuleValueDTO wrapper;
-
     public ModuleDataElementDisplay() {
+        // todo define module types or icons for missiles, counter missiles, whatever
         final Image titleImage = new Image();
         final ReadOnlyHasValue<String> titleImageSrc = new ReadOnlyHasValue<>(titleImage::setSrc);
         final ReadOnlyHasValue<String> titleImageAlt = new ReadOnlyHasValue<>(titleImage::setAlt);
@@ -50,6 +48,5 @@ public class ModuleDataElementDisplay extends HorizontalLayout {
     public void update(@Nullable final EModuleValueDTO wrapper) {
 
         binder.readBean(wrapper);
-        this.wrapper = wrapper;
     }
 }

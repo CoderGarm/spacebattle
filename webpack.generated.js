@@ -106,18 +106,18 @@ const themeOptions = {
 let themeName = undefined;
 let themeWatchFolders = undefined;
 if (devMode) {
-    // Current theme name is being extracted from theme-generated.js located in
-    // target/frontend/themes folder
-    themeName = extractThemeName(flowFrontendThemesFolder);
-    const parentThemePaths = findParentThemes(themeName, themeOptions);
-    const currentThemeFolders = projectStaticAssetsFolders
-        .map((folder) => path.resolve(folder, "themes", themeName));
-    // Watch the components folders for component styles update in both
-    // current theme and parent themes. Other folders or CSS files except
-    // 'styles.css' should be referenced from `styles.css` anyway, so no need
-    // to watch them.
-    themeWatchFolders = [...currentThemeFolders, ...parentThemePaths]
-        .map((themeFolder) => path.resolve(themeFolder, "components"));
+  // Current theme name is being extracted from theme-generated.js located in
+  // target/frontend/themes folder
+  themeName = extractThemeName(flowFrontendThemesFolder);
+  const parentThemePaths = findParentThemes(themeName, themeOptions);
+  const currentThemeFolders = projectStaticAssetsFolders
+      .map((folder) => path.resolve(folder, "themes", themeName));
+  // Watch the components folders for component styles update in both
+  // current theme and parent themes. Other folders or CSS files except
+  // 'styles.css' should be referenced from `styles.css` anyway, so no need
+  // to watch them.
+  themeWatchFolders = [...currentThemeFolders, ...parentThemePaths]
+      .map((themeFolder) => path.resolve(themeFolder, "components"));
 }
 
 const processThemeResourcesCallback = (logger) => processThemeResources(themeOptions, logger);
@@ -133,7 +133,7 @@ module.exports = {
   context: frontendFolder,
   entry: {
     bundle: fileNameOfTheFlowGeneratedMainEntryPoint,
-      ...(devMode && {gizmo: devmodeGizmoJS})
+    ...(devMode && {gizmo: devmodeGizmoJS})
   },
 
   output: {
@@ -156,24 +156,24 @@ module.exports = {
   },
 
   devServer: {
-      // webpack-dev-server serves ./ ,  webpack-generated,  and java webapp
-      contentBase: [mavenOutputFolderForFlowBundledFiles, 'src/main/webapp'],
-      after: function (app, server) {
-          app.get(`/stats.json`, function (req, res) {
-              res.json(stats);
-          });
-          app.get(`/stats.hash`, function (req, res) {
-              res.json(stats.hash.toString());
-          });
-          app.get(`/assetsByChunkName`, function (req, res) {
-              res.json(stats.assetsByChunkName);
-          });
-          app.get(`/stop`, function (req, res) {
-              // eslint-disable-next-line no-console
-              console.log("Stopped 'webpack-dev-server'");
-              process.exit(0);
-          });
-      }
+    // webpack-dev-server serves ./ ,  webpack-generated,  and java webapp
+    contentBase: [mavenOutputFolderForFlowBundledFiles, 'src/main/webapp'],
+    after: function (app, server) {
+      app.get(`/stats.json`, function (req, res) {
+        res.json(stats);
+      });
+      app.get(`/stats.hash`, function (req, res) {
+        res.json(stats.hash.toString());
+      });
+      app.get(`/assetsByChunkName`, function (req, res) {
+        res.json(stats.assetsByChunkName);
+      });
+      app.get(`/stop`, function (req, res) {
+        // eslint-disable-next-line no-console
+        console.log("Stopped 'webpack-dev-server'");
+        process.exit(0);
+      });
+    }
   },
 
   module: {

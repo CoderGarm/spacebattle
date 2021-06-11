@@ -13,7 +13,6 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.shared.Registration;
-import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -59,9 +58,6 @@ public class ColonizationDashboardEdit extends ColonizationLayout implements Has
 
     public ColonizationDashboardEdit() {
         final User loggedInUser = userService.getLoggedInUser();
-        if (loggedInUser == null) {
-            throw new NotifySBUserException("You should hold a login here.");
-        }
 
         final HorizontalLayout control = new HorizontalLayout();
 
@@ -176,7 +172,7 @@ public class ColonizationDashboardEdit extends ColonizationLayout implements Has
 
         final ComponentRenderer<Component, StarSystemColonizationDTO> detailRenderer = new ComponentRenderer<>(dto -> {
             // if user already has bought the system data
-            if (loggedInUser.getKnownStarSystems().contains(dto.getStarSystem())) {
+            if (userService.getKnownStarSystems(loggedInUser).contains(dto.getStarSystem())) {
                 final PlanetSelectionGrid planetSelectionGrid = new PlanetSelectionGrid();
                 planetSelectionGrid.setValue(new ColonizationTransportStarSystemDTO(dto.getStarSystem()));
                 planetSelectionGrid.addValueChangeListener(event -> {
@@ -217,17 +213,16 @@ public class ColonizationDashboardEdit extends ColonizationLayout implements Has
 
         universe = value;
         final User loggedInUser = userService.getLoggedInUser();
-        if (loggedInUser != null) {
-            final Set<StarSystem> knownStarSystems = loggedInUser.getKnownStarSystems();
-            final Set<StarSystemColonizationDTO> collect = value.getStarSystems().stream()
-                    .map(starSystem -> new StarSystemColonizationDTO(starSystem, knownStarSystems.contains(starSystem)))
-                    .collect(Collectors.toSet());
 
-            StarSystemColonizationDTO[] dto = new StarSystemColonizationDTO[collect.size() - 1];
-            dto = collect.toArray(dto);
-            grid.setItems(dto);
-            grid.getDataProvider().refreshAll();
-        }
+        final Set<StarSystem> knownStarSystems = userService.getKnownStarSystems(loggedInUser);
+        final Set<StarSystemColonizationDTO> collect = value.getStarSystems().stream()
+                .map(starSystem -> new StarSystemColonizationDTO(starSystem, knownStarSystems.contains(starSystem)))
+                .collect(Collectors.toSet());
+
+        StarSystemColonizationDTO[] dto = new StarSystemColonizationDTO[collect.size() - 1];
+        dto = collect.toArray(dto);
+        grid.setItems(dto);
+        grid.getDataProvider().refreshAll();
     }
 
     @Override

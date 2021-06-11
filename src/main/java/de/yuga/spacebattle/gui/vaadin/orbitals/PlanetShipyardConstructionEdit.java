@@ -15,6 +15,7 @@ import de.yuga.spacebattle.backend.entities.constructables.buildings.Constructio
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.ShipClassCountEdit;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
@@ -26,9 +27,9 @@ import org.vaadin.spring.events.annotation.EventBusListenerMethod;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class PlanetShipyardConstructionEdit extends PlanetLayout<Planet> implements HasValue<AbstractField.ComponentValueChangeEvent<PlanetShipyardConstructionEdit, Planet>, Planet> {
@@ -41,6 +42,9 @@ public class PlanetShipyardConstructionEdit extends PlanetLayout<Planet> impleme
 
     @Nonnull
     private final EventBus.UIEventBus uiEventBus = ViewHelper.getService(EventBus.UIEventBus.class);
+
+    @Nonnull
+    private final ShipClassService shipClassService = ViewHelper.getService(ShipClassService.class);
 
     @Nonnull
     private final Map<ShipClass, ShipClassCountEdit> componentsMap = new HashMap<>();
@@ -171,8 +175,7 @@ public class PlanetShipyardConstructionEdit extends PlanetLayout<Planet> impleme
         if (user == null) {
             throw new NotifySBUserException("You should be logged in here.");
         }
-        final Set<ShipClass> shipClasses = user.getShipClasses();
-
+        final List<ShipClass> shipClasses = shipClassService.findAllLatestByOwner(user);
         shipClasses.forEach(building -> {
             final ShipClassCountEdit shipClassCountEdit;
             if (componentsMap.containsKey(building)) {

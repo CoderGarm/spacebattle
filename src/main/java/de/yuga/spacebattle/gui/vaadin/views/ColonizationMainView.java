@@ -85,19 +85,16 @@ public class ColonizationMainView extends SBPageActionSelectorLayout<Colonizatio
         this.planetService = planetService;
         this.starSystemService = starSystemService;
         this.colonizationService = colonizationService;
-        final User loggedIn = userService.getLoggedInUser();
-        if (loggedIn == null) {
-            throw new NotifySBUserException("You shouldn't see this.");
-        }
-        this.user = loggedIn;
+        final User loggedIn = userService.getWithKnownStarSystems(userService.getLoggedInUser());
+        ;
 
         colonizationEdit = new ColonizationDashboardEdit();
         colonizationTaskDisplay = new ColonizationTaskDashboardDisplay();
         createActionSelectorMenu();
-        refresh();
 
         content = setContent(colonizationEdit);
         content.setHeightFull();
+        refreshAllViews();
 
         colonizationEdit.addValueChangeListener(event -> {
             if (event.getValue() == null) {
@@ -105,20 +102,21 @@ public class ColonizationMainView extends SBPageActionSelectorLayout<Colonizatio
             }
             final StarSystem selectedForBuyingDataStarSystem = event.getValue().getSelectedForBuyingDataStarSystem();
             if (selectedForBuyingDataStarSystem != null) {
-                userService.addToKnownSystems(user, selectedForBuyingDataStarSystem);
+                colonizationService.addToKnownSystems(loggedIn, selectedForBuyingDataStarSystem);
             }
             final Planet colonizationSelection = event.getValue().getColonizationSelection();
             if (colonizationSelection != null) {
-                colonizationService.startColonizingPlanet(user, colonizationSelection);
+                colonizationService.startColonizingPlanet(loggedIn, colonizationSelection);
             }
-            refresh();
+            refreshAllViews();
         });
     }
 
     /**
      * Refreshes all views.
      */
-    private void refresh() {
+    private void refreshAllViews() {
+
         final Set<StarSystem> starSystems = new HashSet<>(starSystemService.findAllUncolonized());
         colonizationEdit.setValue(new ColonizationTransportUniverseDTO(starSystems));
 
@@ -126,6 +124,30 @@ public class ColonizationMainView extends SBPageActionSelectorLayout<Colonizatio
         final List<Colonization> allForUser = colonizationService.findAllForUser(loggedInUser);
         final Set<Colonization> colonizations = new HashSet<>(allForUser);
         colonizationTaskDisplay.setValue(new ColonizationForUserDTO(colonizations));
+
+        final Map<Tab, Boolean> readOnlyMap = new HashMap<>();
+        readOnlyMap.put(getTabForComponentOfActionMenu(colonizationTaskDisplay), !colonizations.isEmpty());
+        updateActionMenuUsability(readOnlyMap);
+    }
+
+    /**
+     * Refreshes the given view.
+     *
+     * @param colonizationLayout the view to refresh
+     */
+    private void refresh(@Nonnull final ColonizationLayout colonizationLayout) {
+        Preconditions.checkNotNull(colonizationLayout, "colonizationLayout shouldn't be null!");
+
+        final Set<Colonization> colonizations = new HashSet<>();
+        if (colonizationLayout instanceof ColonizationDashboardEdit) {
+            final Set<StarSystem> starSystems = new HashSet<>(starSystemService.findAllUncolonized());
+            colonizationEdit.setValue(new ColonizationTransportUniverseDTO(starSystems));
+        } else if (colonizationLayout instanceof ColonizationTaskDashboardDisplay) {
+            final User loggedInUser = userService.refresh();
+            final List<Colonization> allForUser = colonizationService.findAllForUser(loggedInUser);
+            colonizations.addAll(allForUser);
+            colonizationTaskDisplay.setValue(new ColonizationForUserDTO(colonizations));
+        }
 
         final Map<Tab, Boolean> readOnlyMap = new HashMap<>();
         readOnlyMap.put(getTabForComponentOfActionMenu(colonizationTaskDisplay), !colonizations.isEmpty());
@@ -167,6 +189,7 @@ public class ColonizationMainView extends SBPageActionSelectorLayout<Colonizatio
         actionSelectorMenu.addSelectedChangeListener(event -> {
             final Tab selectedTab = event.getSelectedTab();
             final ColonizationLayout componentForTab = getComponentForTabOfActionMenu(selectedTab);
+            refresh(componentForTab);
             content = setContent(componentForTab);
         });
     }

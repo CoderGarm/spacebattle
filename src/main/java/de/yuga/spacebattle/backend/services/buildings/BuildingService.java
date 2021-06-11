@@ -60,4 +60,10 @@ public class BuildingService {
 
         return buildingRepository.save(new Building(name, description, baseValue, resourceType, unlockedThrough));
     }
+
+    public Building findBuildingByType(@Nonnull final EResourceType resourceType) {
+        Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
+
+        return buildingRepository.findBuildingByType(resourceType);
+    }
 }
