@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
  * @param <T>
  */
 @CssImport("./styles/views/main/details/SBPageTopLevelLayout.css")
-public abstract class SBPageSubjectSelectorStatsLayout<T> extends FlexLayout {
+public abstract class PageWithSubjectActionTabsAndStats<T> extends FlexLayout {
 
     /**
      * The index of the "do user stuff" section of the view below the two selector menus.
@@ -89,7 +89,7 @@ public abstract class SBPageSubjectSelectorStatsLayout<T> extends FlexLayout {
     @Nonnull
     private final VerticalLayout mainContent = new VerticalLayout();
 
-    public SBPageSubjectSelectorStatsLayout() {
+    public PageWithSubjectActionTabsAndStats() {
         actionSelectorMenu.setId("actionSelectorMenu");
         actionSelectorMenu.setClassName("selector");
         ViewHelper.setWidth(actionSelectorMenu, "100%");
@@ -190,7 +190,7 @@ public abstract class SBPageSubjectSelectorStatsLayout<T> extends FlexLayout {
 
     /**
      * Returns the tab for it's corresponding component.
-     * Via versa for {@link SBPageSubjectSelectorStatsLayout#getComponentForTabOfActionMenu(Tab)}.
+     * Via versa for {@link PageWithSubjectActionTabsAndStats#getComponentForTabOfActionMenu(Tab)}.
      *
      * @param component the component to search for
      * @return the corresponding tab
@@ -282,12 +282,12 @@ public abstract class SBPageSubjectSelectorStatsLayout<T> extends FlexLayout {
     }
 
     /**
-     * Must define all action selectors menu entries and their behavior, {@link SBPageSubjectSelectorStatsLayout#addActionListener()}.
+     * Must define all action selectors menu entries and their behavior, {@link PageWithSubjectActionTabsAndStats#addActionListener()}.
      */
     protected abstract void createActionSelectorMenu();
 
     /**
-     * Must define all initial subject selectors menu entries and their behavior, {@link SBPageSubjectSelectorStatsLayout#addSubjectListener()}.
+     * Must define all initial subject selectors menu entries and their behavior, {@link PageWithSubjectActionTabsAndStats#addSubjectListener()}.
      */
     protected abstract void createSubjectSelectorMenu();
 

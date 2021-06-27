@@ -5,10 +5,10 @@ import com.vaadin.flow.component.HasValue;
 /**
  * Just to fire an event without payload and don't have this inside a method.
  */
-public class SBValueChangeEvent implements HasValue.ValueChangeEvent<SBValueChangeEvent> {
+public class SimpleValueChangeEvent implements HasValue.ValueChangeEvent<SimpleValueChangeEvent> {
 
     @Override
-    public HasValue<?, SBValueChangeEvent> getHasValue() {
+    public HasValue<?, SimpleValueChangeEvent> getHasValue() {
         return null;
     }
 
@@ -18,12 +18,12 @@ public class SBValueChangeEvent implements HasValue.ValueChangeEvent<SBValueChan
     }
 
     @Override
-    public SBValueChangeEvent getOldValue() {
+    public SimpleValueChangeEvent getOldValue() {
         return null;
     }
 
     @Override
-    public SBValueChangeEvent getValue() {
+    public SimpleValueChangeEvent getValue() {
         return null;
     }
 }

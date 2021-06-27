@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.gui.vaadin.misc;
+package de.yuga.spacebattle.gui.vaadin.misc.dialog;
 
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.Component;
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import static de.yuga.spacebattle.gui.vaadin.misc.SBDialog.Position.INITIAL_POSITION;
+import static de.yuga.spacebattle.gui.vaadin.misc.dialog.BaseDialog.Position.INITIAL_POSITION;
 
 /**
  * Non-modal dialog with a close button and a content free headline.
@@ -28,9 +28,9 @@ import static de.yuga.spacebattle.gui.vaadin.misc.SBDialog.Position.INITIAL_POSI
  * - positionable
  */
 @CssImport("./styles/views/main/details/sb-dialog.css")
-public class SBDialog extends Dialog {
+public class BaseDialog extends Dialog {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SBDialog.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseDialog.class);
 
     @Nonnull
     protected final Button close;
@@ -50,7 +50,7 @@ public class SBDialog extends Dialog {
      * Stores the last position of <code>this</code>.
      */
     @Nullable
-    private SBDialog.Position lastPosition;
+    private BaseDialog.Position lastPosition;
 
     /**
      * Container to display the content.
@@ -58,7 +58,7 @@ public class SBDialog extends Dialog {
     @Nonnull
     private final Div contentArea = new Div();
 
-    public SBDialog(@Nonnull final Component content) {
+    public BaseDialog(@Nonnull final Component content) {
         Preconditions.checkNotNull(content, "content shouldn't be null!");
 
         setDraggable(true);
@@ -122,7 +122,7 @@ public class SBDialog extends Dialog {
      *
      * @param position the position to open html-top-left-based
      */
-    public void open(@Nullable final SBDialog.Position position) {
+    public void open(@Nullable final BaseDialog.Position position) {
         open();
         setPosition(lastPosition != null ? lastPosition : (position != null ? position : INITIAL_POSITION));
     }

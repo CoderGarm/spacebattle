@@ -18,7 +18,7 @@ import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.gui.vaadin.MainView;
 import de.yuga.spacebattle.gui.vaadin.constructables.buildings.ConstructBuildingEdit;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
-import de.yuga.spacebattle.gui.vaadin.misc.SBPageSubjectSelectorStatsLayout;
+import de.yuga.spacebattle.gui.vaadin.misc.PageWithSubjectActionTabsAndStats;
 import de.yuga.spacebattle.gui.vaadin.misc.StatsLayout;
 import de.yuga.spacebattle.gui.vaadin.orbitals.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ import static de.yuga.spacebattle.gui.vaadin.events.ESBEvent.ORBITAL_CONSTRUCTIO
 @UIScope
 @Route(value = PlanetMainView.ROUTE, layout = MainView.class)
 @RouteAlias(value = PlanetMainView.ROUTE, layout = MainView.class)
-public class PlanetMainView extends SBPageSubjectSelectorStatsLayout<Planet> {
+public class PlanetMainView extends PageWithSubjectActionTabsAndStats<Planet> {
 
     @Nonnull
     public static final String ROUTE = "planets";

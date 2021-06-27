@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.gui.vaadin.misc.details;
+package de.yuga.spacebattle.gui.vaadin.misc.dialog;
 
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.ClickEvent;
@@ -7,19 +7,18 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.shared.Registration;
-import de.yuga.spacebattle.gui.vaadin.misc.SBDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 
 /**
- * Confirmation dialog with the same properties of {@link SBDialog}.
+ * Confirmation dialog with the same properties of {@link BaseDialog}.
  * The submit button is disabled per definition.
  */
-public class SBConfirmationDialog extends SBDialog {
+public class ConfirmationDialog extends BaseDialog {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SBConfirmationDialog.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfirmationDialog.class);
 
     @Nonnull
     private final Button submit;
@@ -27,7 +26,7 @@ public class SBConfirmationDialog extends SBDialog {
     @Nonnull
     private final Button cancel;
 
-    public SBConfirmationDialog(@Nonnull Component content) {
+    public ConfirmationDialog(@Nonnull Component content) {
         super(content);
 
         final Div buttonBar = new Div();

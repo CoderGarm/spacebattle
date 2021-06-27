@@ -9,7 +9,7 @@ import com.vaadin.flow.router.BeforeLeaveEvent;
 import com.vaadin.flow.router.BeforeLeaveObserver;
 import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.gui.vaadin.misc.details.SBValueChangeEvent;
+import de.yuga.spacebattle.gui.vaadin.misc.details.SimpleValueChangeEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public class FleetSplitEdit extends VerticalLayout implements BeforeLeaveObserve
     private final HorizontalLayout content = new HorizontalLayout();
 
     @Nullable
-    private ValueChangeListener<SBValueChangeEvent> valueChangeListener;
+    private ValueChangeListener<SimpleValueChangeEvent> valueChangeListener;
 
     /**
      * Holds every registered listener for this and it's children component. But you have to register them manually.
@@ -55,7 +55,7 @@ public class FleetSplitEdit extends VerticalLayout implements BeforeLeaveObserve
 
         Registration valueChangeListener = splitEdit.addValueChangeListener(event -> {
             if (this.valueChangeListener != null) {
-                this.valueChangeListener.valueChanged(new SBValueChangeEvent());
+                this.valueChangeListener.valueChanged(new SimpleValueChangeEvent());
             }
         });
         registrationList.add(valueChangeListener);
@@ -67,12 +67,12 @@ public class FleetSplitEdit extends VerticalLayout implements BeforeLeaveObserve
         return splitEdit.getValue();
     }
 
-    public Registration addValueChangeListener(@Nonnull final ValueChangeListener<SBValueChangeEvent> listener) {
+    public Registration addValueChangeListener(@Nonnull final ValueChangeListener<SimpleValueChangeEvent> listener) {
         Preconditions.checkNotNull(listener, "listener shouldn't be null!");
 
         valueChangeListener = listener;
         Registration valueChangeListenerR = splitEdit.addValueChangeListener(event -> {
-            valueChangeListener.valueChanged(new SBValueChangeEvent());
+            valueChangeListener.valueChanged(new SimpleValueChangeEvent());
         });
         registrationList.add(valueChangeListenerR);
         return new Registration() {

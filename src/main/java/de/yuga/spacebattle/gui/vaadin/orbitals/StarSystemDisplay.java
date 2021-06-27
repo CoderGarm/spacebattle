@@ -26,8 +26,8 @@ import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.gui.vaadin.NotificationHelper;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
 import de.yuga.spacebattle.gui.vaadin.combined.spacecrafts.details.FleetMoveMergeSplitEdit;
-import de.yuga.spacebattle.gui.vaadin.misc.SBDialog;
-import de.yuga.spacebattle.gui.vaadin.misc.details.SBConfirmationDialog;
+import de.yuga.spacebattle.gui.vaadin.misc.dialog.BaseDialog;
+import de.yuga.spacebattle.gui.vaadin.misc.dialog.ConfirmationDialog;
 import de.yuga.spacebattle.gui.vaadin.orbitals.details.OrbitCoordinatesHorizontalDisplay;
 import de.yuga.spacebattle.gui.vaadin.orbitals.details.PlanetDisplay;
 import de.yuga.spacebattle.gui.vaadin.orbitals.starmap.ViewBoxDefinition;
@@ -40,7 +40,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.yuga.spacebattle.gui.vaadin.misc.SBDialog.Position.INITIAL_TOP_LEFT;
+import static de.yuga.spacebattle.gui.vaadin.misc.dialog.BaseDialog.Position.INITIAL_TOP_LEFT;
 import static de.yuga.spacebattle.gui.vaadin.orbitals.starmap.ViewBoxDefinition.*;
 
 /**
@@ -95,7 +95,7 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
      * Holds every created dialog by the identifier of the dialog's subject.
      */
     @Nonnull
-    private final Map<String, SBDialog> openDialogs = new HashMap<>();
+    private final Map<String, BaseDialog> openDialogs = new HashMap<>();
 
     /**
      * Holds every registered listener for this and it's children component. But you have to register them manually.
@@ -136,7 +136,7 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
      */
     public void closeDialogs() {
         removeRegisteredListeners();
-        openDialogs.values().forEach(SBDialog::close);
+        openDialogs.values().forEach(BaseDialog::close);
         openDialogs.clear();
     }
 
@@ -231,18 +231,18 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
                 final Planet planet = planetDisplay.getValue();
                 viewBoxDefinition.updateSvgElement(element);
 
-                SBDialog sbDialog = openDialogs.get(id);
-                if (sbDialog != null) {
-                    ((PlanetDisplay) sbDialog.getContent()).setValue(planet);
-                    if (!sbDialog.isOpened()) {
-                        sbDialog.open(INITIAL_TOP_LEFT);
+                BaseDialog baseDialog = openDialogs.get(id);
+                if (baseDialog != null) {
+                    ((PlanetDisplay) baseDialog.getContent()).setValue(planet);
+                    if (!baseDialog.isOpened()) {
+                        baseDialog.open(INITIAL_TOP_LEFT);
                     }
                 } else {
                     final PlanetDisplay fleetDisplay = new PlanetDisplay();
                     fleetDisplay.setValue(planet);
-                    sbDialog = new SBDialog(fleetDisplay);
-                    sbDialog.open(INITIAL_TOP_LEFT);
-                    openDialogs.put(id, sbDialog);
+                    baseDialog = new BaseDialog(fleetDisplay);
+                    baseDialog.open(INITIAL_TOP_LEFT);
+                    openDialogs.put(id, baseDialog);
                 }
             } else if (id.startsWith(FLEET_SELECTOR_ID_PREFIX) || id.startsWith(FLEET_TEXT_ID)) {
                 final Fleet fleet = fleetMap.get(id);
@@ -323,7 +323,7 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
         Preconditions.checkNotNull(element, "element shouldn't be null!");
 
-        SBConfirmationDialog sbDialog = (SBConfirmationDialog) openDialogs.get(id);
+        ConfirmationDialog sbDialog = (ConfirmationDialog) openDialogs.get(id);
         if (sbDialog != null) {
             ((FleetMoveMergeSplitEdit) sbDialog.getContent()).setValueFleetDisplayAndSplit(fleet);
             ((FleetMoveMergeSplitEdit) sbDialog.getContent()).setValueMoveDisplay(moveDTO);
@@ -336,7 +336,7 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
             fleetMoveMergeSplitEdit.setValueFleetDisplayAndSplit(fleet);
             fleetMoveMergeSplitEdit.setValueMoveDisplay(moveDTO);
             fleetMoveMergeSplitEdit.setValueFleetMergeEdit(allFleetsInOrbit);
-            sbDialog = new SBConfirmationDialog(fleetMoveMergeSplitEdit);
+            sbDialog = new ConfirmationDialog(fleetMoveMergeSplitEdit);
             sbDialog.setWidth("550px");
             sbDialog.open(INITIAL_TOP_LEFT);
             openDialogs.put(id, sbDialog);
@@ -401,9 +401,9 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
                     NotificationHelper.notify("move accepted", 3000);
 
                     // remove fleet in motion from all constructed dialogs
-                    openDialogs.values().forEach(sbDialog1 -> {
-                        if (sbDialog1.getContent() instanceof FleetMoveMergeSplitEdit) {
-                            final FleetMoveMergeSplitEdit content = (FleetMoveMergeSplitEdit) sbDialog1.getContent();
+                    openDialogs.values().forEach(baseDialog1 -> {
+                        if (baseDialog1.getContent() instanceof FleetMoveMergeSplitEdit) {
+                            final FleetMoveMergeSplitEdit content = (FleetMoveMergeSplitEdit) baseDialog1.getContent();
                             final Set<Fleet> fleetsToMerge1 = content.getFleetsToMerge();
                             fleetsToMerge1.remove(fleetInMotion);
                             content.setValueFleetMergeEdit(fleetsToMerge1);
@@ -434,7 +434,7 @@ public class StarSystemDisplay extends StarSystemLayout implements HasValue<Abst
             });
             registrationList.add(cancelListener);
 
-            final SBConfirmationDialog finalSbDialog = sbDialog;
+            final ConfirmationDialog finalSbDialog = sbDialog;
             final Registration changeListener = fleetMoveMergeSplitEdit.addChangeListener(event1 -> {
                 finalSbDialog.enableSubmitButton(fleetMoveMergeSplitEdit.isActionPossible());
             });

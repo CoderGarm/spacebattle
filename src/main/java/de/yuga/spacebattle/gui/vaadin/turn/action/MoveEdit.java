@@ -11,7 +11,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ReadOnlyHasValue;
 import com.vaadin.flow.shared.Registration;
-import de.yuga.spacebattle.gui.vaadin.misc.details.SBValueChangeEvent;
+import de.yuga.spacebattle.gui.vaadin.misc.details.SimpleValueChangeEvent;
 import de.yuga.spacebattle.gui.vaadin.orbitals.details.PlanetDisplay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ public class MoveEdit extends VerticalLayout implements HasValue<AbstractField.C
     private final Binder<MoveDTO> binder = new Binder<>(MoveDTO.class);
 
     @Nullable
-    private ValueChangeListener<SBValueChangeEvent> valueChangeListener;
+    private ValueChangeListener<SimpleValueChangeEvent> valueChangeListener;
 
     @Nonnull
     private final Button cancelFlight;
@@ -68,7 +68,7 @@ public class MoveEdit extends VerticalLayout implements HasValue<AbstractField.C
             if (valueChangeListener == null) {
                 return;
             }
-            valueChangeListener.valueChanged(new SBValueChangeEvent());
+            valueChangeListener.valueChanged(new SimpleValueChangeEvent());
         });
 
         cancelFlight.setEnabled(false);
@@ -88,7 +88,7 @@ public class MoveEdit extends VerticalLayout implements HasValue<AbstractField.C
         if (valueChangeListener == null) {
             return;
         }
-        valueChangeListener.valueChanged(new SBValueChangeEvent());
+        valueChangeListener.valueChanged(new SimpleValueChangeEvent());
     }
 
     @Nullable
@@ -103,7 +103,7 @@ public class MoveEdit extends VerticalLayout implements HasValue<AbstractField.C
         return null;
     }
 
-    public Registration addChangeListener(@Nonnull final ValueChangeListener<SBValueChangeEvent> listener) {
+    public Registration addChangeListener(@Nonnull final ValueChangeListener<SimpleValueChangeEvent> listener) {
         Preconditions.checkNotNull(listener, "listener shouldn't be null!");
 
         valueChangeListener = listener;

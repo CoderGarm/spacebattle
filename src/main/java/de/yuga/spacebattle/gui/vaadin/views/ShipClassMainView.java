@@ -26,7 +26,7 @@ import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.ShipClassLayout
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ShipClassCreateDTO;
 import de.yuga.spacebattle.gui.vaadin.constructables.spacecrafts.details.ShipClassEditDTO;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
-import de.yuga.spacebattle.gui.vaadin.misc.SBPageSubjectSelectorStatsLayout;
+import de.yuga.spacebattle.gui.vaadin.misc.PageWithSubjectActionTabsAndStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 @CssImport("./styles/views/main/details/module-display.css")
 @Route(value = ShipClassMainView.ROUTE, layout = MainView.class)
 @RouteAlias(value = ShipClassMainView.ROUTE, layout = MainView.class)
-public class ShipClassMainView extends SBPageSubjectSelectorStatsLayout<ShipClass> {
+public class ShipClassMainView extends PageWithSubjectActionTabsAndStats<ShipClass> {
 
     @Nonnull
     public static final String ROUTE = "shipClass";

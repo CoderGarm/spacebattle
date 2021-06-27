@@ -11,7 +11,7 @@ import com.vaadin.flow.spring.annotation.UIScope;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.gui.vaadin.MainView;
-import de.yuga.spacebattle.gui.vaadin.misc.SBPageActionSelectorLayout;
+import de.yuga.spacebattle.gui.vaadin.misc.PageWithActionTabs;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -26,7 +26,7 @@ import java.util.Map;
 @Route(value = UserView.ROUTE, layout = MainView.class)
 @CssImport("./styles/views/account/user-view.css")
 @RouteAlias(value = UserView.ROUTE, layout = MainView.class)
-public class UserView extends SBPageActionSelectorLayout<VerticalLayout> {
+public class UserView extends PageWithActionTabs<VerticalLayout> {
 
     public static final String ROUTE = "user";
 

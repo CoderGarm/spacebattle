@@ -13,7 +13,7 @@ import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.gui.vaadin.MainView;
 import de.yuga.spacebattle.gui.vaadin.events.ESBEvent;
-import de.yuga.spacebattle.gui.vaadin.misc.SBPageActionSelectorLayout;
+import de.yuga.spacebattle.gui.vaadin.misc.PageWithActionTabs;
 import de.yuga.spacebattle.gui.vaadin.orbitals.StarSystemDisplay;
 import de.yuga.spacebattle.gui.vaadin.orbitals.StarSystemLayout;
 import de.yuga.spacebattle.gui.vaadin.orbitals.StarSystemOverviewDisplay;
@@ -35,7 +35,7 @@ import java.util.Set;
 @UIScope
 @Route(value = StarMapMainView.ROUTE, layout = MainView.class)
 @RouteAlias(value = StarMapMainView.ROUTE, layout = MainView.class)
-public class StarMapMainView extends SBPageActionSelectorLayout<StarSystemLayout> implements BeforeLeaveObserver, BeforeEnterObserver {
+public class StarMapMainView extends PageWithActionTabs<StarSystemLayout> implements BeforeLeaveObserver, BeforeEnterObserver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StarMapMainView.class);
 

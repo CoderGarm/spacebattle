@@ -16,7 +16,7 @@ import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.gui.vaadin.MainView;
-import de.yuga.spacebattle.gui.vaadin.misc.SBPageActionSelectorLayout;
+import de.yuga.spacebattle.gui.vaadin.misc.PageWithActionTabs;
 import de.yuga.spacebattle.gui.vaadin.orbitals.colonization.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ import java.util.*;
 @UIScope
 @Route(value = ColonizationMainView.ROUTE, layout = MainView.class)
 @RouteAlias(value = ColonizationMainView.ROUTE, layout = MainView.class)
-public class ColonizationMainView extends SBPageActionSelectorLayout<ColonizationLayout> {
+public class ColonizationMainView extends PageWithActionTabs<ColonizationLayout> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ColonizationMainView.class);
 

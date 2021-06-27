@@ -2,6 +2,7 @@ package de.yuga.spacebattle.gui.vaadin.misc;
 
 import com.google.common.base.Preconditions;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -10,6 +11,7 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import de.yuga.spacebattle.NotifySBUserException;
 import de.yuga.spacebattle.gui.vaadin.ViewHelper;
+import de.yuga.spacebattle.gui.vaadin.misc.details.StatsDrawer;
 import de.yuga.spacebattle.gui.vaadin.views.ResearchMainView;
 
 import javax.annotation.Nonnull;
@@ -18,7 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Main layout for pages without a statistics section.
+ * Main layout for pages with a statistics section.
+ * Every usages must extending an abstract class which is implementing {@link StatsLayout<  SUBJECT_TYPE  >}.
  * <p>
  * This will define the structure to automatically use a statistics panel,
  * a subject selector menu for ever usable entity and
@@ -29,14 +32,22 @@ import java.util.Map;
  * There are several methods which should be used and overridden.
  * <p>
  * In a perfect world all these methods should be self-explanatory, but if not, submit a pull request.
+ *
+ * @param <SUBJECT_TYPE>
  */
 @CssImport("./styles/views/main/details/SBPageTopLevelLayout.css")
-public abstract class SBPageActionSelectorLayout<GenericLayout extends Component> extends FlexLayout {
+public abstract class PageWithActionTabsAndStats<SUBJECT_TYPE> extends FlexLayout {
 
     /**
      * The index of the "do user stuff" section of the view below the two selector menus.
      */
     private final static int INDEX_CONTENT = 1;
+
+    /**
+     * The component which displays the statistics component.
+     */
+    @Nonnull
+    private final StatsDrawer statsDrawer = new StatsDrawer();
 
     /**
      * The "do user stuff" section. Next to it there are the menus and the statistics.
@@ -54,7 +65,7 @@ public abstract class SBPageActionSelectorLayout<GenericLayout extends Component
      * This map holds the specific component to their corresponding action tab.
      */
     @Nonnull
-    public final Map<Tab, GenericLayout> actionSelectorPages = new HashMap<>();
+    public final Map<Tab, StatsLayout<SUBJECT_TYPE>> actionSelectorPages = new HashMap<>();
 
     /**
      * The canvas which displays all the stuff above.
@@ -62,31 +73,43 @@ public abstract class SBPageActionSelectorLayout<GenericLayout extends Component
     @Nonnull
     private final VerticalLayout mainContent = new VerticalLayout();
 
-    public SBPageActionSelectorLayout() {
+    public PageWithActionTabsAndStats() {
         actionSelectorMenu.setId("actionSelectorMenu");
         actionSelectorMenu.setClassName("selector");
         ViewHelper.setWidth(actionSelectorMenu, "100%");
 
         mainContent.add(actionSelectorMenu);
 
-        setHeightFull();
-        setWidthFull();
+        setHeight("100%");
         setFlexDirection(FlexDirection.ROW);
 
         mainContent.addComponentAtIndex(INDEX_CONTENT, content);
-        ViewHelper.setWidth(mainContent, "100%");
-        add(mainContent);
+        ViewHelper.setWidth(mainContent, "75%");
+        ViewHelper.setWidth(statsDrawer, "20%");
+        add(mainContent, statsDrawer);
+    }
+
+    /**
+     * Sets the statistics section to the statistics canvas.
+     *
+     * @param content the component to set
+     */
+    private void setDrawer(@Nullable final Component content) {
+        statsDrawer.update(content);
     }
 
     /**
      * Sets the full content to display including the statistics section.
      *
-     * @param content the content to set
+     * @param content  the content to set
+     * @param <LAYOUT> the type definition which must be used
      */
-    public GenericLayout setContent(GenericLayout content) {
+    public <LAYOUT extends StatsLayout<SUBJECT_TYPE>> LAYOUT setContent(LAYOUT content) {
         mainContent.remove(this.content);
-        this.content = content;
+        this.content = (Component) content;
+        ViewHelper.setWidth((HasSize) this.content, "100%");
         mainContent.addComponentAtIndex(INDEX_CONTENT, this.content);
+        setDrawer(content.getStatisticsComponent());
         return content;
     }
 
@@ -97,7 +120,7 @@ public abstract class SBPageActionSelectorLayout<GenericLayout extends Component
      * @param tab       the selector's tab
      * @param component the tab's component
      */
-    public void addComponentForTabOfActionMenu(@Nonnull final Tab tab, @Nonnull final GenericLayout component) {
+    public void addComponentForTabOfActionMenu(@Nonnull final Tab tab, @Nonnull final StatsLayout<SUBJECT_TYPE> component) {
         Preconditions.checkNotNull(tab, "tab shouldn't be null!");
         Preconditions.checkNotNull(component, "component shouldn't be null!");
 
@@ -115,9 +138,9 @@ public abstract class SBPageActionSelectorLayout<GenericLayout extends Component
      * @return the corresponding component
      */
     @Nonnull
-    public GenericLayout getComponentForTabOfActionMenu(@Nonnull final Tab tab) {
+    public StatsLayout<SUBJECT_TYPE> getComponentForTabOfActionMenu(@Nonnull final Tab tab) {
         Preconditions.checkNotNull(tab, "tab shouldn't be null!");
-        final GenericLayout statsLayout = actionSelectorPages.get(tab);
+        final StatsLayout<SUBJECT_TYPE> statsLayout = actionSelectorPages.get(tab);
         if (statsLayout == null) {
             throw new NotifySBUserException("You should talk to the administrator about that.");
         }
@@ -126,31 +149,24 @@ public abstract class SBPageActionSelectorLayout<GenericLayout extends Component
 
     /**
      * Returns the tab for it's corresponding component.
-     * Via versa for {@link SBPageActionSelectorLayout#getComponentForTabOfActionMenu(Tab)}.
+     * Via versa for {@link PageWithActionTabsAndStats#getComponentForTabOfActionMenu(Tab)}.
      *
      * @param component the component to search for
      * @return the corresponding tab
      */
     @Nonnull
-    public Tab getTabForComponentOfActionMenu(@Nonnull final GenericLayout component) {
+    public Tab getTabForComponentOfActionMenu(@Nonnull final StatsLayout<SUBJECT_TYPE> component) {
         Preconditions.checkNotNull(component, "component shouldn't be null!");
 
-        final Tab tab = actionSelectorPages.keySet().stream().filter(tabA -> actionSelectorPages.get(tabA) == component).findFirst().orElse(null);
+        Tab tab = actionSelectorPages.keySet().stream().filter(tabA -> actionSelectorPages.get(tabA) == component).findFirst().orElse(null);
         if (tab == null) {
             throw new NotifySBUserException("If there is a component, there must be a tab. Say this to the admin!");
         }
         return tab;
     }
 
-    public void selectTabOfActionMenu(@Nonnull final GenericLayout component) {
-        Preconditions.checkNotNull(component, "component shouldn't be null!");
-
-        final int i = actionSelectorMenu.indexOf(getTabForComponentOfActionMenu(component));
-        actionSelectorMenu.setSelectedIndex(i);
-    }
-
     /**
-     * Must define all action selectors menu entries and their behavior, {@link SBPageActionSelectorLayout#addActionListener()}.
+     * Must define all action selectors menu entries and their behavior, {@link PageWithActionTabsAndStats#addActionListener()}.
      */
     protected abstract void createActionSelectorMenu();
 
@@ -158,7 +174,7 @@ public abstract class SBPageActionSelectorLayout<GenericLayout extends Component
      * Must define the usability of the action tab.
      * Leave blank if no disabling of action selector's tabs is needed.
      */
-    protected abstract void updateActionMenuUsability(@Nullable final Map<Tab, Boolean> readOnlyMap);
+    protected abstract void updateActionMenuUsability(@Nullable final Map<Tab, Boolean[]> readOnlyMap);
 
     /**
      * Must define the behavior of <code>every</code> action tab.

@@ -14,8 +14,8 @@ import com.vaadin.flow.shared.Registration;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.gui.vaadin.combined.spacecrafts.details.fleetsplit.FleetSplitDTO;
 import de.yuga.spacebattle.gui.vaadin.combined.spacecrafts.details.fleetsplit.FleetSplitEdit;
-import de.yuga.spacebattle.gui.vaadin.misc.SBDialog;
-import de.yuga.spacebattle.gui.vaadin.misc.details.SBValueChangeEvent;
+import de.yuga.spacebattle.gui.vaadin.misc.details.SimpleValueChangeEvent;
+import de.yuga.spacebattle.gui.vaadin.misc.dialog.BaseDialog;
 import de.yuga.spacebattle.gui.vaadin.turn.action.MoveDTO;
 import de.yuga.spacebattle.gui.vaadin.turn.action.MoveEdit;
 import org.slf4j.Logger;
@@ -58,7 +58,7 @@ public class FleetMoveMergeSplitEdit extends VerticalLayout implements BeforeLea
     private final Details fleetSplitDetails = new Details();
 
     @Nonnull
-    private final List<SBDialog> openDialogs = new ArrayList<>();
+    private final List<BaseDialog> openDialogs = new ArrayList<>();
 
     /**
      * Holds every registered listener for this and it's children component. But you have to register them manually.
@@ -110,7 +110,7 @@ public class FleetMoveMergeSplitEdit extends VerticalLayout implements BeforeLea
      * Closes and deletes all dialogs.
      */
     public void closeDialogs() {
-        openDialogs.forEach(SBDialog::close);
+        openDialogs.forEach(BaseDialog::close);
         openDialogs.clear();
         registrationList.forEach(Registration::remove);
     }
@@ -271,12 +271,12 @@ public class FleetMoveMergeSplitEdit extends VerticalLayout implements BeforeLea
     }
 
     /**
-     * Adds listeners to all changeable components and sends a {@link SBValueChangeEvent} if something was clicked.
+     * Adds listeners to all changeable components and sends a {@link SimpleValueChangeEvent} if something was clicked.
      *
      * @param listener the listener to add
      * @return the registration to remove the listener
      */
-    public Registration addChangeListener(@Nonnull final ValueChangeListener<SBValueChangeEvent> listener) {
+    public Registration addChangeListener(@Nonnull final ValueChangeListener<SimpleValueChangeEvent> listener) {
         Preconditions.checkNotNull(listener, "listener shouldn't be null!");
 
         final Registration r1 = moveEdit.addChangeListener(listener);
