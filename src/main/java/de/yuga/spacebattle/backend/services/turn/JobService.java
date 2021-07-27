@@ -2,18 +2,18 @@ package de.yuga.spacebattle.backend.services.turn;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
-import de.yuga.spacebattle.NotifySBUserException;
+import de.yuga.spacebattle.NotifyUserException;
+import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.Constructable;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
-import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Job;
+import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.enums.ECollectableType;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.turn.JobRepository;
@@ -22,6 +22,7 @@ import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -94,14 +95,13 @@ public class JobService {
      *
      * @param entity the job to delete
      */
-    //@Transactional todo test and remove or comment in
     public void delete(@Nullable final Job entity) {
         if (entity == null || entity.getId() < 1) {
             return;
         }
         final Job doDelete = jobRepository.findById(entity.getId()).orElse(null);
         if (doDelete == null) {
-            throw new NotifySBUserException("no job to delete"); // fail first for development
+            throw new NotifyUserException("no job to delete"); // fail first for development
         }
 
         if (doDelete.getJobDoneAtZero() > 0 && EResourceType.RESEARCH != doDelete.getConstructable().getResourceType()) {
@@ -114,8 +114,8 @@ public class JobService {
             for (final EResourceType resourceType : EResourceType.values()) {
                 // must be added again because payback and not thanks for the tip
                 if (EResourceType.POPULATION == resourceType) {
-                    final CrewRequirementDTO crewRequirementDTO = jobCosts.getCrewRequirement().toggleToDepositMode();
-                    resourceDeposit.updatePopulation(crewRequirementDTO);
+                    final CrewRequirement crewRequirement = jobCosts.getCrewRequirement().toggleToDepositMode();
+                    resourceDeposit.updatePopulation(crewRequirement);
                 } else {
                     resourceDeposit.updateResource(resourceType, jobCosts.getResourceAmountByType(resourceType));
                 }
@@ -139,37 +139,16 @@ public class JobService {
         Preconditions.checkArgument(EDepositType.COSTS == costs.getSubType(), "costs must be flagged as costs!");
 
         final ResourceDeposit debitorDeposit = planet.getResourceDeposit();
-        if (!debitorDeposit.isPayingPossible(costs)) {
-            throw new NotifySBUserException("This job is to expensive!");
+        final PayingPossibleResult result = debitorDeposit.isPayingPossible(costs);
+        if (!result.isValid()) {
+            throw new NotifyWebUserException("This job is to expensive!", result);
+            /* vaadin workflow
+            final String joinedResult = String.join(", ", result.getResult());
+            throw new NotifyWebUserException("This job is to expensive! Problematic points: '" + joinedResult + "'.");
+            */
         }
-
-        for (final EResourceType resourceType : EResourceType.values()) {
-            if (EResourceType.POPULATION == resourceType) {
-                debitorDeposit.getCrewRequirement().updateCrew(costs.getCrewRequirement());
-            } else if (ECollectableType.COLLECTABLE == resourceType.getCollectableType()) {
-                final long debit = costs.getResourceAmountByType(resourceType) * -1;
-                debitorDeposit.updateResource(resourceType, debit);
-            }
-        }
+        debitorDeposit.pay(costs);
     }
-
-    /**
-     * Checks if the user can build that.
-     *
-     * @param user     the use who want to build the building
-     * @param research the building to build
-     */
-    private void canUseResearch(@Nonnull final User user, @Nullable final Research research) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-
-        if (research != null) {
-            Set<Research> researches = user.getResearches().keySet();
-            if (!researches.contains(research)) {
-                throw new NotifySBUserException("You can't do that");
-            }
-        }
-    }
-
 
     /**
      * Creates a entity by {@link Building#getId()} and {@link Planet#getId()}.
@@ -186,11 +165,11 @@ public class JobService {
         final Planet planet = planetService.find(idPlanet);
         final Building building = buildingService.find(idBuilding);
         if (planet == null || planet.getOwner() == null || building == null) {
-            throw new NotifySBUserException("not that way!");
+            throw new NotifyUserException("not that way!");
         }
-
-        final User userWithResearches = userService.findWithResearches(planet.getOwner());
-        canUseResearch(userWithResearches, building.getUnlockedThrough());
+        if (!userService.isResearchUnlocked(planet.getOwner(), building.getUnlockedThrough())) {
+            throw new NotifyUserException("You can't do that - first you have to research the '" + building.getUnlockedThrough().getName() + "' research.");
+        }
 
         final Set<Construction> constructions = planet.getConstructions();
         final Construction existingC = constructions.stream()
@@ -206,6 +185,7 @@ public class JobService {
         checkAndBalances(planet, constructable.getJobCosts());
         final Job entity = new Job(planet, facility, constructable);
         save(entity);
+        planetService.save(planet);
         return entity;
     }
 
@@ -216,35 +196,27 @@ public class JobService {
      * <p>
      * The research is mapped to the planet with the lowest ID and a research facility.
      *
-     * @param idUser     the planet where the entity should be executed
-     * @param idResearch the research which should be researches
+     * @param user     the planet where the entity should be executed
+     * @param research the research which should be researches
      * @return the created entity
      */
-    public Job createResearchJob(@Nonnull final Integer idUser, @Nonnull final Integer idResearch) {
-        Preconditions.checkNotNull(idUser, "idUser shouldn't be null!");
-        Preconditions.checkNotNull(idResearch, "idResearch shouldn't be null!");
+    public Job createResearchJob(@Nonnull final User user, @Nonnull final Research research) {
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
+        Preconditions.checkNotNull(research, "research shouldn't be null!");
 
-        final User user = userService.find(idUser);
-        final Research research = researchService.find(idResearch);
-        if (user == null || research == null) {
-            throw new NotifySBUserException("not that way!");
+        if (userService.isResearchUnlocked(user, research)) {
+            throw new NotifyWebUserException("You can't do that - you already have the '" + research.getName() + "' research.");
         }
-        canUseResearch(user, research.getUnlockedThrough());
 
         int levelCap = research.getLevelCap();
-
-        final Map<Research, Integer> researches = user.getResearches();
-        int level = 1;
-        if (researches.containsKey(research)) {
-            level = researches.get(research) + 1;
-        }
+        int level = userService.getLevelForResearch(user, research) + 1;
         if (level > levelCap) {
-            throw new NotifySBUserException("no way!");
+            throw new NotifyWebUserException("no way!");
         }
         final Constructable constructable = new Constructable(research, level);
         final Planet researchPlanet = planetService.findResearchPlanet(user);
         if (researchPlanet == null) {
-            throw new NotifySBUserException("You need a research facility on at leas one planet.");
+            throw new NotifyWebUserException("You need a research facility on at leas one planet.");
         }
 
         final Construction facility = researchPlanet.getConstructionByResource(EResourceType.RESEARCH)
@@ -276,7 +248,7 @@ public class JobService {
         Planet planet = planetService.find(idPlanet);
         ShipClass shipClass = shipClassService.find(idShipClass);
         if (planet == null || planet.getOwner() == null || shipClass == null) {
-            throw new NotifySBUserException("not that way!");
+            throw new NotifyUserException("not that way!");
         }
 
         Constructable constructable = new Constructable(shipClass, amount);
@@ -288,6 +260,7 @@ public class JobService {
         checkAndBalances(planet, constructable.getJobCosts());
         Job entity = new Job(planet, facility, constructable);
         jobRepository.save(entity);
+        planetService.save(planet);
         return entity;
     }
 
@@ -298,10 +271,10 @@ public class JobService {
      */
     private void checkIfFree(@Nullable final Construction facility) {
         if (facility == null) {
-            throw new NotifySBUserException("not here, buddy!");
+            throw new NotifyUserException("not here, buddy!");
         }
         if (!facility.getJobs().isEmpty()) {
-            throw new NotifySBUserException("Job in progress");
+            throw new NotifyUserException("Job in progress");
         }
     }
 
@@ -311,7 +284,7 @@ public class JobService {
 
         final User owner = planet.getOwner();
         if (owner == null) {
-            throw new NotifySBUserException("You should own this planet, buddy.");
+            throw new NotifyUserException("You should own this planet, buddy.");
         }
 
         final Construction facility = planet.getConstructions().stream()
@@ -327,6 +300,12 @@ public class JobService {
         Set<Job> newJobs = constructableSet.stream().map(constructable -> new Job(planet, facility, constructable)).collect(Collectors.toSet());
 
         Iterable<Job> jobIterable = jobRepository.saveAll(newJobs);
+        planetService.save(planet);
         return Sets.newHashSet(jobIterable);
+    }
+
+    @Nonnull
+    public List<Job> findAllJobsByPlanet(final int idPlanet) {
+        return jobRepository.findAllJobsByPlanet(idPlanet);
     }
 }

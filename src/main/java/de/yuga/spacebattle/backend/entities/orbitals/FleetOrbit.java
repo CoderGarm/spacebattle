@@ -5,67 +5,65 @@ import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.Embeddable;
+import javax.persistence.Embedded;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 
 @Embeddable
 public class FleetOrbit {
 
-    @Nonnull
+    /**
+     * If the system is null the orbit is placed in the universe.<br>
+     * Otherwise, the inertial system of the orbit is the defined system.
+     */
+    @Nullable
     @ManyToOne
     @JoinColumn(name = "idStarSystem", referencedColumnName = "idStarSystem")
     private StarSystem system;
 
+    /**
+     * The orbit could be null if the fleet is currently on a local movement.
+     */
     @Nullable
-    @OneToOne
-    @JoinColumn(name = "idPlanet", referencedColumnName = "idPlanet")
-    private Planet planet;
+    @Embedded
+    private Orbit orbit;
 
     public FleetOrbit() {
     }
 
-    public FleetOrbit(@Nonnull final Planet planet) {
-        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
-
-        this.system = planet.getSystem();
-        this.planet = planet;
-    }
-
     /**
-     * If the orbit defined a sojourn not in a planetary orbit but in a star system.
+     * The constructor.
      *
-     * @param system
+     * @param orbit  the necessary orbit
+     * @param system the system, if null the orbit is placed in the universe
      */
-    public FleetOrbit(@Nonnull final StarSystem system) {
-        Preconditions.checkNotNull(system, "system shouldn't be null!");
-
+    public FleetOrbit(@Nullable final Orbit orbit, @Nullable final StarSystem system) {
+        this.orbit = orbit;
         this.system = system;
     }
 
-    @Nonnull
+    public FleetOrbit(@Nonnull final FleetOrbit orbit) {
+        Preconditions.checkNotNull(orbit, "orbit shouldn't be null!");
+
+        this.orbit = orbit.getOrbit() != null ? orbit.getOrbit().clone() : null;
+        this.system = orbit.getSystem();
+    }
+
+    @Nullable
     public StarSystem getSystem() {
         return system;
     }
 
-    public void setSystem(@Nonnull StarSystem system) {
-        this.system = system;
-    }
-
     @Nullable
-    public Planet getPlanet() {
-        return planet;
-    }
-
-    public void setPlanet(@Nullable Planet planet) {
-        this.planet = planet;
+    public Orbit getOrbit() {
+        return orbit;
     }
 
     /**
      * In case of starting a movement but stay in the system, the planet has to be null.
      */
     public void leavePlanet() {
-        this.planet = null;
+        this.orbit = null;
     }
 
     @Override
@@ -75,15 +73,14 @@ public class FleetOrbit {
 
         FleetOrbit that = (FleetOrbit) o;
 
-        if (!system.equals(that.system)) return false;
-        return planet != null ? planet.equals(that.planet) : that.planet == null;
+        if (system != null ? !system.equals(that.system) : that.system != null) return false;
+        return orbit != null ? orbit.equals(that.orbit) : that.orbit == null;
     }
 
     @Override
     public int hashCode() {
-        int result = system.hashCode();
-        result = 31 * result + (planet != null ? planet.hashCode() : 0);
+        int result = system != null ? system.hashCode() : 0;
+        result = 31 * result + (orbit != null ? orbit.hashCode() : 0);
         return result;
     }
-
 }

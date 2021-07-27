@@ -1,23 +1,23 @@
 package de.yuga.spacebattle.backend.services.account;
 
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PasswordConverterTest {
 
-    public static final String[] testString1 = {"password", "c0067d4af4e87f00dbac63b6156828237059172d1bbeac67427345d6a9fda484"};
+    public static final String[] testString1 = {"password", "e9a75486736a550af4fea861e2378305c4a555a05094dee1dca2f68afea49cc3a50e8de6ea131ea521311f4d6fb054a146e8282f8e35ff2e6368c1a62e909716"};
 
     private PasswordConverter testObject;
 
-    @BeforeClass
+    @BeforeEach
     public void beforeClass() {
         testObject = new PasswordConverter();
     }
 
-    @AfterClass
+    @AfterEach
     public void afterClass() {
         testObject = null;
     }

@@ -27,6 +27,9 @@ public class Tick extends AbstractEntityKey {
     @NotNull
     private final LocalDateTime tickStarts = LocalDateTime.now();
 
+    /**
+     * The timestamp of the end of the calculation.
+     */
     @Nullable
     private LocalDateTime tickEnds;
 

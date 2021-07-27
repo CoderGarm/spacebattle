@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.backend.entities.constructables.buildings;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifySBUserException;
+import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -14,7 +14,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 @NamedQueries({
-        @NamedQuery(name = "Construction.getAll", query = "SELECT a FROM Construction a")
+        @NamedQuery(name = "Construction.getAll", query = "SELECT a FROM Construction a"),
+        @NamedQuery(name = "Construction.getAllByPlanet", query = "SELECT a FROM Construction a WHERE a.planet.id = :idPlanet"),
 })
 @Entity
 @Table(name = "construction",
@@ -68,7 +69,7 @@ public class Construction extends AbstractEntityKey {
 
     public void setLevel(final int level) {
         if (level <= this.level) {
-            throw new NotifySBUserException("You cannot reduce the level of a construction");
+            throw new NotifyUserException("You cannot reduce the level of a construction");
         }
         this.level = level;
     }
@@ -92,8 +93,6 @@ public class Construction extends AbstractEntityKey {
 
     @Override
     public int hashCode() {
-        int result = planet.hashCode();
-        result = 31 * result + building.hashCode();
-        return result;
+        return id * 31;
     }
 }

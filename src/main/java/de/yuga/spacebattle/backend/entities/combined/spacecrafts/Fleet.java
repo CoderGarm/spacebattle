@@ -2,17 +2,26 @@ package de.yuga.spacebattle.backend.entities.combined.spacecrafts;
 
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifySBUserException;
+import de.yuga.spacebattle.NotifyUserException;
+import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
+import de.yuga.spacebattle.backend.combat.dto.CounterMissileWeaponry;
+import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EModuleType;
+import de.yuga.spacebattle.backend.enums.EWeaponType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,8 +33,16 @@ import java.util.stream.Collectors;
 
 @NamedQueries({
         @NamedQuery(name = "Fleet.getAll", query = "SELECT f FROM Fleet f"),
+        @NamedQuery(name = "Fleet.getAllWithoutMovement", query = "SELECT f FROM Fleet f WHERE f.move IS NULL"),
+        @NamedQuery(name = "Fleet.getAllFleetsWithInterstellarMovement", query = "SELECT f FROM Fleet f WHERE f.move IS NOT NULL AND f.move.originOrbit.system <> f.move.destinationOrbit.system"),
         @NamedQuery(name = "Fleet.getAllByUser", query = "SELECT f FROM Fleet f WHERE f.owner = :owner"),
-        @NamedQuery(name = "Fleet.checkShipInUse", query = "SELECT COUNT(f) FROM Fleet f LEFT JOIN f.ships s WHERE s.shipClass.id =:idShipClass")
+        @NamedQuery(name = "Fleet.getAllByUserAndSystem", query = "SELECT f FROM Fleet f WHERE f.owner.id = :idOwner AND f.orbit.system.id = :idStarSystem"),
+        @NamedQuery(name = "Fleet.checkShipInUse", query = "SELECT COUNT(f) FROM Fleet f LEFT JOIN f.ships s WHERE s.shipClass.id =:idShipClass"),
+        @NamedQuery(name = "Fleet.getAllForPlanet", query = "SELECT f FROM Fleet f LEFT JOIN f.move  " +
+                " WHERE (f.orbit.system = :system AND f.orbit.orbit.xCoordinate = :xCoordinate  AND f.orbit.orbit.yCoordinate = :yCoordinate) " +
+                " OR ( f.move.originOrbit.system = :system AND  f.move.originOrbit.orbit.xCoordinate = :xCoordinate AND f.move.originOrbit.orbit.yCoordinate = :yCoordinate) " +
+                " OR (f.move.destinationOrbit.system = :system AND f.move.destinationOrbit.orbit.xCoordinate = :xCoordinate AND f.move.destinationOrbit.orbit.yCoordinate = :yCoordinate)"
+        ),
 })
 @Entity
 @Table(name = "fleet")
@@ -33,7 +50,7 @@ import java.util.stream.Collectors;
 public class Fleet extends AbstractEntityKey {
 
     @Nonnull
-    @NotNull(message = "Fleet must have a name")
+    @NotNull
     private String name;
 
     @Nonnull
@@ -45,10 +62,7 @@ public class Fleet extends AbstractEntityKey {
     @Nonnull
     @NotNull
     @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
-    @JoinTable(name = "fleetComposition",
-            joinColumns = @JoinColumn(name = "idFleet"),
-            inverseJoinColumns = @JoinColumn(name = "idWarShip"),
-            uniqueConstraints = @UniqueConstraint(name = "fleetComposition_UC", columnNames = {"idFleet", "idWarShip"}))
+    @JoinColumn(name = "idFleet")
     private final Set<WarShip> ships = new HashSet<>();
 
     @Nonnull
@@ -60,10 +74,13 @@ public class Fleet extends AbstractEntityKey {
      * The current location of this fleet. <br>
      * <br>
      * If null, then this is in hyper space.<br>
-     * The planet could be null if the fleet is on a local movement.
+     * The orbit.orbit could be null if the fleet is on a local movement.
      */
     @Nullable
     @Embedded
+    @AttributeOverride(name = "orbit.xCoordinate", column = @Column(name = "xCoordinateLocation", columnDefinition = "decimal(19, 0)"))
+    @AttributeOverride(name = "orbit.yCoordinate", column = @Column(name = "yCoordinateLocation", columnDefinition = "decimal(19, 0)"))
+    @AssociationOverride(name = "system", joinColumns = @JoinColumn(name = "idStarSystemLocation"))
     private FleetOrbit orbit;
 
     /**
@@ -126,12 +143,13 @@ public class Fleet extends AbstractEntityKey {
     public Set<WarShip> separateShips(@Nonnull final Map<ShipClass, Integer> splitFleet) {
         Preconditions.checkNotNull(splitFleet, "splitFleet shouldn't be null!");
 
+        // todo separate ships in ui
         final Map<ShipClass, Integer> shipsByClass = getShipsByClass();
         // check if enough ships are present
         splitFleet.forEach((shipClass, amountToSeparate) -> {
             final Integer availableAmount = shipsByClass.get(shipClass);
             if (availableAmount < amountToSeparate) {
-                throw new NotifySBUserException("There are not enough ships in the fleet do split them in that way.");
+                throw new NotifyUserException("There are not enough ships in the fleet do split them in that way.");
             }
         });
         // separate ships
@@ -150,6 +168,12 @@ public class Fleet extends AbstractEntityKey {
         Preconditions.checkNotNull(warShips, "warShips shouldn't be null!");
 
         ships.addAll(warShips);
+    }
+
+    public void removeShips(@Nonnull final Set<WarShip> warShips) {
+        Preconditions.checkNotNull(warShips, "warShips shouldn't be null!");
+
+        ships.removeAll(warShips);
     }
 
     @Nonnull
@@ -193,31 +217,16 @@ public class Fleet extends AbstractEntityKey {
      * @return <code>true</code> if this fleet is in a planetary orbit, <code>false</code> otherwise
      */
     public boolean isInPlanetaryOrbit() {
-        return orbit != null && orbit.getPlanet() != null;
+        return orbit != null && orbit.getSystem() != null && orbit.getOrbit() != null;
     }
 
     /**
-     * Returns the range units which can be passed per turn based on the slowest ship.
+     * Checks if all ships of the fleet are capable of driving faster than light.
      *
-     * @return the maximal FTL speed
+     * @return <code>true</code> if the fleet can drive faster than light, <code>false</code> otherwise
      */
-    public BigDecimal getRangePerTick(@Nonnull final EModuleType eModuleType) {
-        Preconditions.checkNotNull(eModuleType, "eModuleType shouldn't be null!");
-        Preconditions.checkArgument((eModuleType == EModuleType.FTLPROPULSION || eModuleType == EModuleType.PROPULSION),
-                "EModuleType must be kind of propulsion.");
-
-        final List<Integer> speeds = new ArrayList<>();
-        final Set<ShipClass> shipClasses = ships.stream().map(WarShip::getShipClass).collect(Collectors.toSet());
-        for (ShipClass sc : shipClasses) {
-            final Propulsion propulsion = sc.getPropulsion();
-            if (propulsion == null || (EModuleType.FTLPROPULSION == eModuleType && !propulsion.isFtlCapable())) {
-                // if no propulsion present or ftl is used and no ftl is present
-                return BigDecimal.ZERO;
-            }
-            speeds.add(propulsion.getEffectValue());
-        }
-        Collections.sort(speeds);
-        return new BigDecimal(speeds.get(0));
+    public boolean isFTLCapable() {
+        return ships.stream().map(WarShip::getShipClass).allMatch(ShipClass::isFTLCapable);
     }
 
     @Override
@@ -233,5 +242,194 @@ public class Fleet extends AbstractEntityKey {
     @Override
     public int hashCode() {
         return id * 31;
+    }
+
+    /**
+     * Returns the range units which can be passed per turn based on the slowest ship.
+     *
+     * @return the maximal distance which could be passed in a tick
+     */
+    public BigDecimal getRangePerTick(@Nonnull final EModuleType eModuleType) {
+        Preconditions.checkNotNull(eModuleType, "eModuleType shouldn't be null!");
+        Preconditions.checkArgument((eModuleType == EModuleType.FTLPROPULSION || eModuleType == EModuleType.PROPULSION),
+                "EModuleType must be kind of propulsion.");
+
+        final List<Integer> speeds = new ArrayList<>();
+        final Set<ShipClass> shipClasses = ships.stream().map(WarShip::getShipClass).collect(Collectors.toSet());
+        for (ShipClass sc : shipClasses) {
+            final double propulsionSupportFactor = sc.getSupportFittings().stream()
+                    .filter(s -> eModuleType == s.getPassiveModule().getSupportType().getModifiedProperty())
+                    .findAny().stream()
+                    .map(SupportFitting::getAbsoluteValueAsFactor).reduce(0D, Double::sum);
+
+            final Propulsion propulsion = sc.getPropulsion();
+            if (propulsion == null || (EModuleType.FTLPROPULSION == eModuleType && !propulsion.isFtlCapable())) {
+                // if no propulsion present or ftl is used and no ftl is present
+                return BigDecimal.ZERO;
+            }
+            // calculate effect of support modules
+            final BigDecimal factor = BigDecimal.ONE.add(new BigDecimal(propulsionSupportFactor));
+            final BigDecimal effectValue = new BigDecimal(propulsion.getEffectValue());
+            speeds.add(effectValue.multiply(factor, ResourceDeposit.MATH_CONTEXT_INTEGER).intValue());
+        }
+        Collections.sort(speeds);
+        return new BigDecimal(speeds.get(0));
+    }
+
+    /**
+     * Returns the range which can be covered by this missile in a combat round.
+     *
+     * @return the distance which will be covered under drive, in meter
+     */
+    public BigDecimal getRangePerCombatRound() {
+        final BigDecimal rangePerTick = getRangePerTick(EModuleType.PROPULSION);
+        int endurance = CombatRound.COMBAT_ROUND_DURATION;
+        int acceleration = rangePerTick.intValue();
+        return NavigationCalculator.getRangeByTimeAndAcceleration(endurance, acceleration);
+    }
+
+    /**
+     * Returns the maximum weapon range of the fleet.
+     *
+     * @return the maximum weapon range
+     */
+    public BigDecimal getMaximumWeaponRange() {
+        final List<ShipClass> shipClassesByWeaponRange = this.getShipsByClass().keySet().stream()
+                .sorted((o1, o2) -> {
+                    final BigDecimal maximumWeaponRangeO1 = o1.getMaximumWeaponRange();
+                    final BigDecimal maximumWeaponRangeO2 = o2.getMaximumWeaponRange();
+                    return maximumWeaponRangeO1.compareTo(maximumWeaponRangeO2);
+                }).collect(Collectors.toList());
+        return shipClassesByWeaponRange.get(shipClassesByWeaponRange.size() - 1).getMaximumWeaponRange();
+    }
+
+    /**
+     * Returns the maximum weapon range of the fleet.
+     *
+     * @param weaponType the weapon type as filter
+     * @return the maximum weapon range
+     */
+    public BigDecimal getMaximumWeaponRangePerType(@Nonnull final EWeaponType weaponType) {
+        Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
+
+        final List<ShipClass> shipClassesByWeaponRange = this.getShipsByClass().keySet().stream()
+                .sorted((o1, o2) -> {
+                    final BigDecimal maximumWeaponRangeO1 = o1.getMaximumWeaponRangePerType(weaponType);
+                    final BigDecimal maximumWeaponRangeO2 = o2.getMaximumWeaponRangePerType(weaponType);
+                    return maximumWeaponRangeO1.compareTo(maximumWeaponRangeO2);
+                }).collect(Collectors.toList());
+        return shipClassesByWeaponRange.get(shipClassesByWeaponRange.size() - 1).getMaximumWeaponRangePerType(weaponType);
+    }
+
+    /**
+     * Returns the damage which can be applied by this fleet to the given range in meter.
+     *
+     * @param lowerBound the lower boundary
+     * @param upperBound the upper boundary
+     * @return the damage value
+     */
+    public long getDamagePerRange(@Nonnull final BigDecimal lowerBound, @Nonnull final BigDecimal upperBound) {
+        Preconditions.checkNotNull(lowerBound, "lowerBound shouldn't be null!");
+        Preconditions.checkNotNull(upperBound, "upperBound shouldn't be null!");
+
+        return getShipsByClass().entrySet().stream().map(entry -> {
+            final ShipClass shipClass = entry.getKey();
+            final Integer amount = entry.getValue();
+            final long dmgPerRange = shipClass.getDamagePerRange(lowerBound, upperBound);
+            return dmgPerRange * amount;
+        }).mapToLong(Long::longValue).sum();
+    }
+
+    public long getDamagePerRangePerType(@Nonnull final BigDecimal lowerBound, @Nonnull final BigDecimal upperBound, @Nonnull final EWeaponType weaponType) {
+        Preconditions.checkNotNull(lowerBound, "lowerBound shouldn't be null!");
+        Preconditions.checkNotNull(upperBound, "upperBound shouldn't be null!");
+        Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
+
+        return getShipsByClass().entrySet().stream().map(entry -> {
+            final ShipClass shipClass = entry.getKey();
+            final Integer amount = entry.getValue();
+            final long dmgPerRange = shipClass.getDamagePerRangePerWeaponType(lowerBound, upperBound, weaponType);
+            return dmgPerRange * amount;
+        }).mapToLong(Long::longValue).sum();
+    }
+
+    /**
+     * Returns the range of the fleets electronic countermeasures.
+     *
+     * @return the eloka range
+     */
+    public int getElokaRange() {
+        final OptionalInt max = getShipsByClass().keySet().stream()
+                .filter(shipClass -> shipClass.getElectronicWarfare() != null)
+                .map(shipClass -> {
+                    final ElectronicWarfare eloka = shipClass.getElectronicWarfare();
+                    assert eloka != null;
+                    return eloka.getEffectiveRange();
+                }).mapToInt(Integer::intValue).max();
+        if (max.isPresent()) {
+            return max.getAsInt();
+        }
+        return 0;
+    }
+
+    /**
+     * Returns the effect value of the fleets electronic countermeasures.
+     *
+     * @return the eloka range
+     */
+    public int getElokaEffectValue() {
+        return getShipsByClass().keySet().stream()
+                .filter(shipClass -> shipClass.getElectronicWarfare() != null)
+                .map(shipClass -> {
+                    final ElectronicWarfare eloka = shipClass.getElectronicWarfare();
+                    assert eloka != null;
+                    return eloka.getEffectValue();
+                }).mapToInt(Integer::intValue).sum();
+    }
+
+    /**
+     * Returns the range of the fleets counter missile weaponry.
+     *
+     * @return the counter missile range
+     */
+    public long getCounterMissileRange() {
+        final List<EWeaponType> counterTypes = List.of(EWeaponType.COUNTER_MISSILE, EWeaponType.POINT_DEFENSE);
+        final OptionalLong max = getShipsByClass().keySet().stream()
+                .map(ShipClass::getFittings)
+                .filter(fittings -> !fittings.isEmpty())
+                .map(fittings -> {
+                    final AlignedFitting alignedFitting = fittings.stream().filter(fitting -> counterTypes.contains(fitting.getWeaponType())).findAny().orElse(null);
+                    if (alignedFitting != null) {
+                        final Weapon weapon = alignedFitting.getWeapon();
+                        if (weapon != null) {
+                            return weapon.getDamageProjectionRange();
+                        }
+                        final Launcher launcher = alignedFitting.getLauncher();
+                        if (launcher != null) {
+                            return launcher.getAmmunitionModule().getMissile().getMissileRange();
+                        }
+                    }
+                    return 0;
+                }).mapToLong(Number::longValue).max();
+        if (max.isPresent()) {
+            return max.getAsLong();
+        }
+        return 0;
+    }
+
+    /**
+     * Returns all anti missile weapons of this fleet.
+     *
+     * @return the anti missile weapons
+     */
+    public CounterMissileWeaponry getCounterMissileWeaponry() {
+        final List<EWeaponType> counterTypes = List.of(EWeaponType.COUNTER_MISSILE, EWeaponType.POINT_DEFENSE);
+        final List<AlignedFitting> alignedFittings = getShipsByClass().keySet().stream()
+                .map(ShipClass::getFittings)
+                .filter(fittings -> !fittings.isEmpty())
+                .map(fittings -> fittings.stream().filter(fitting -> counterTypes.contains(fitting.getWeaponType())).findAny().orElse(null))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        return new CounterMissileWeaponry(alignedFittings);
     }
 }

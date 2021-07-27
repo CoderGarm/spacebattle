@@ -70,6 +70,15 @@ public class SupportFitting {
         return 100 + passiveModule.getCalculationType().getMultiplier() * passiveModule.getEffectValue() * amount;
     }
 
+    /**
+     * Calculates and returns the bonus which is provided by these support fitting.
+     *
+     * @return the bonus
+     */
+    public double getEffectValue() {
+        return passiveModule.getCalculationType().getMultiplier() * passiveModule.getEffectValue() * amount;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.backend.services.turn;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifySBUserException;
+import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.calculator.resource.PopulationControlCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceControlCalculator;
 import de.yuga.spacebattle.backend.entities.Constructable;
@@ -11,7 +11,9 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
+import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
@@ -24,7 +26,10 @@ import de.yuga.spacebattle.backend.repositories.turn.TickRepository;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
+import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
+import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,9 +50,8 @@ public class TickService {
     @Nonnull
     private static final Logger LOGGER = LoggerFactory.getLogger(TickService.class);
 
-
     @Nonnull
-    private final TickRepository tickC;
+    private final TickRepository tickRepository;
 
     @Nonnull
     private final JobService jobService;
@@ -70,16 +74,28 @@ public class TickService {
     @Nonnull
     private final ColonizationService colonizationService;
 
+    @Nonnull
+    private final WarShipService warShipService;
+
+    @Nonnull
+    private final BattleReportService battleReportService;
+
+    @Nonnull
+    private final BattleService battleService;
+
     @Autowired
-    public TickService(@Nonnull final TickRepository tickC,
+    public TickService(@Nonnull final TickRepository tickRepository,
                        @Nonnull final JobService jobService,
                        @Nonnull final PlanetService planetService,
                        @Nonnull final MoveService moveService,
                        @Nonnull final FleetService fleetService,
                        @Nonnull final ConstructionService constructionService,
                        @Nonnull final UserService userService,
-                       @Nonnull final ColonizationService colonizationService) {
-        Preconditions.checkNotNull(tickC, "tickC shouldn't be null!");
+                       @Nonnull final ColonizationService colonizationService,
+                       @Nonnull final WarShipService warShipService,
+                       @Nonnull final BattleReportService battleReportService,
+                       @Nonnull final BattleService battleService) {
+        Preconditions.checkNotNull(tickRepository, "tickRepository shouldn't be null!");
         Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
         Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         Preconditions.checkNotNull(moveService, "moveService shouldn't be null!");
@@ -87,8 +103,10 @@ public class TickService {
         Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
+        Preconditions.checkNotNull(battleReportService, "fightingReportService shouldn't be null!");
+        Preconditions.checkNotNull(battleService, "battleService shouldn't be null!");
 
-        this.tickC = tickC;
+        this.tickRepository = tickRepository;
         this.jobService = jobService;
         this.planetService = planetService;
         this.moveService = moveService;
@@ -96,6 +114,9 @@ public class TickService {
         this.constructionService = constructionService;
         this.userService = userService;
         this.colonizationService = colonizationService;
+        this.warShipService = warShipService;
+        this.battleReportService = battleReportService;
+        this.battleService = battleService;
     }
 
     //@Scheduled(cron = "* */1 * * * *")
@@ -107,40 +128,41 @@ public class TickService {
 
     @Nonnull
     public List<Tick> findAll() {
-        return tickC.findAllTicks();
+        return tickRepository.findAllTicks();
     }
 
     @Nullable
     public Tick find(@Nonnull final Integer idHull) {
         Preconditions.checkNotNull(idHull, "idHull shouldn't be null!");
 
-        return tickC.findById(idHull).orElse(null);
+        return tickRepository.findById(idHull).orElse(null);
     }
 
     @Nullable
     public Tick getLatest() {
-        return tickC.getLatest();
+        return tickRepository.getLatest();
     }
 
+    @Nonnull
     @Transactional(rollbackFor = Exception.class)
     public Tick doTick() {
-        final Tick entity = new Tick();
-        final List<Planet> planets = planetService.findAllColonized();
-        for (final Planet p : planets) {
-            tick(p);
-        }
-        final List<Move> movements = moveService.findAll();
-        for (final Move m : movements) {
-            boolean isDone = move(m);
-            if (isDone) {
-                final Fleet fleet = m.getFleet();
-                fleet.setMove(null);
-                fleetService.save(fleet);
-            } else {
-                moveService.save(m);
-            }
-        }
+        Tick today = new Tick();
 
+        today = tickRepository.save(today);
+        //battleService.runBattles(today);
+
+        tickPlanets();
+        tickMovements();
+        tickColonizations();
+
+        today.setTickEnds(LocalDateTime.now());
+        return tickRepository.save(today);
+    }
+
+    /**
+     * Runs the tick for all colonizations.
+     */
+    private void tickColonizations() {
         final List<Colonization> colonizations = colonizationService.findAll();
         for (final Colonization colonization : colonizations) {
             int doneAtZero = colonization.getDoneAtZero();
@@ -154,9 +176,33 @@ public class TickService {
                 colonizationService.save(colonization);
             }
         }
+    }
 
-        entity.setTickEnds(LocalDateTime.now());
-        return tickC.save(entity);
+    /**
+     * Runs the tick for all movements.
+     */
+    private void tickMovements() {
+        final List<Move> movements = moveService.findAll();
+        for (final Move m : movements) {
+            boolean isDone = move(m);
+            if (isDone) {
+                final Fleet fleet = m.getFleet();
+                fleet.setMove(null);
+                fleetService.save(fleet);
+            } else {
+                moveService.save(m);
+            }
+        }
+    }
+
+    /**
+     * Runs the tick for all planets.
+     */
+    private void tickPlanets() {
+        final List<Planet> planets = planetService.findAllColonized();
+        for (final Planet p : planets) {
+            tick(p);
+        }
     }
 
     /**
@@ -176,14 +222,12 @@ public class TickService {
             return false;
         }
 
-        final FleetOrbit targetOrbit = move.getTargetOrbit();
-        final Planet targetPlanet = targetOrbit.getPlanet();
-        if (targetPlanet == null) {
-            throw new NotifySBUserException("A movement must always have a designated target.");
-        }
+        final FleetOrbit targetOrbit = move.getDestinationOrbit();
+        final StarSystem targetSystem = targetOrbit.getSystem();
+        final Orbit orbit = targetOrbit.getOrbit();
 
         final Fleet fleet = move.getFleet();
-        fleet.setOrbit(new FleetOrbit(targetPlanet));
+        fleet.setOrbit(new FleetOrbit(orbit, targetSystem));
         return true;
     }
 
@@ -218,7 +262,7 @@ public class TickService {
                         final Research research = constructable.getResearch();
                         targetLevel = constructable.getTargetLevel();
                         if (research == null || targetLevel == null) {
-                            throw new NotifySBUserException("Oh fuck, this should not happen while research whatever!");
+                            throw new NotifyUserException("Oh fuck, this should not happen while research whatever!");
                         }
                         owner.getResearches().put(research, targetLevel);
                         userService.save(owner);
@@ -228,7 +272,7 @@ public class TickService {
                         final Building building = constructable.getBuilding();
                         targetLevel = constructable.getTargetLevel();
                         if (building == null || targetLevel == null) {
-                            throw new NotifySBUserException("Oh fuck, this should not happen while constructing buildings!");
+                            throw new NotifyUserException("Oh fuck, this should not happen while constructing buildings!");
                         }
                         Construction workInProgress = constructions.stream()
                                 .filter(c -> c.getBuilding().equals(building)).findFirst().orElse(null);
@@ -244,16 +288,16 @@ public class TickService {
                         final ShipClass shipClass = constructable.getShipClass();
                         final Integer amountShips = constructable.getAmountShips();
                         if (shipClass == null || amountShips == null || amountShips == 0) {
-                            throw new NotifySBUserException("This should never happen while build a fleet!");
+                            throw new NotifyUserException("This should never happen while build a fleet!");
                         }
-                        final Fleet fleet = new Fleet("Fresh Build @ " + planet.getName(), owner, new FleetOrbit(planet));
+                        final Fleet fleet = fleetService.save(new Fleet("Fresh Build @ " + planet.getName(), owner, new FleetOrbit(planet.getOrbit(), planet.getSystem())));
                         final Set<WarShip> newFleetComposition = new HashSet<>();
                         for (int i = 0; i <= amountShips; i++) {
                             final String randomName = generateRandomName();
-                            newFleetComposition.add(new WarShip(randomName, planet, fleet, shipClass));
+                            final WarShip warShip = new WarShip(randomName, planet, fleet, shipClass);
+                            newFleetComposition.add(warShip);
                         }
-                        fleet.updateShips(newFleetComposition);
-                        fleetService.save(fleet);
+                        warShipService.saveAll(newFleetComposition);
                         break;
                 }
                 toDelete.add(job);
@@ -282,6 +326,7 @@ public class TickService {
             case VIABLE:
                 // do school
                 PopulationControlCalculator.educatePopulation(planet);
+                planetService.save(planet);
                 // do birth
                 PopulationControlCalculator.populatePlanet(planet);
                 break;
@@ -299,9 +344,11 @@ public class TickService {
                 }
                 break;
         }
+        planetService.save(planet);
     }
 
     private String generateRandomName() {
+        // todo create name list
         int leftLimit = 97; // letter 'a'
         int rightLimit = 122; // letter 'z'
         int targetStringLength = 10;

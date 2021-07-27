@@ -33,11 +33,17 @@ public class CustomPlanetRepositoryImpl implements CustomPlanetRepository {
 
     @Nonnull
     @Override
-    public List<Planet> findAllPlanetsColonizedBy(@Nonnull final User owner) {
+    public List<Planet> findAllPlanetsColonizedByUser(@Nonnull final User owner) {
         Preconditions.checkNotNull(owner, "owner shouldn't be null!");
 
+        return findAllPlanetsColonizedByID(owner.getId());
+    }
+
+    @Nonnull
+    @Override
+    public List<Planet> findAllPlanetsColonizedByID(final int idUser) {
         return em.createNamedQuery("Planet.getAllOwnedBy", Planet.class)
-                .setParameter("owner", owner)
+                .setParameter("idOwner", idUser)
                 .getResultList();
     }
 
@@ -58,10 +64,24 @@ public class CustomPlanetRepositoryImpl implements CustomPlanetRepository {
 
     @Nonnull
     @Override
-    public Planet findMainPlanetForUser(@Nonnull final User owner) {
-        Preconditions.checkNotNull(owner, "owner shouldn't be null!");
-
+    public Planet findMainPlanetForUser(final int idUser) {
         return em.createNamedQuery("Planet.getMainPlanet", Planet.class)
-                .setParameter("owner", owner).getResultList().get(0);
+                .setParameter("idUser", idUser)
+                .setMaxResults(1)
+                .getSingleResult();
+    }
+
+    @Nullable
+    @Override
+    public Planet findByCoordinates(final int idStarSystem, final int xCoordinate, final int yCoordinate) {
+        try {
+            return em.createNamedQuery("Planet.getByCoordinates", Planet.class)
+                    .setParameter("idStarSystem", idStarSystem)
+                    .setParameter("xCoordinate", xCoordinate)
+                    .setParameter("yCoordinate", yCoordinate)
+                    .getSingleResult();
+        } catch (final NoResultException e) {
+            return null;
+        }
     }
 }

@@ -1,8 +1,8 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.modules;
 
-import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
+import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -14,7 +14,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "armor")
 @AttributeOverride(name = "id", column = @Column(name = "idArmor"))
-public class Armor extends BaseModule {
+public class Armor extends BaseModuleWithEffectValue {
 
     public Armor() {
     }
@@ -25,7 +25,7 @@ public class Armor extends BaseModule {
                  final int useCapacity,
                  final int effectValue,
                  final int techLevel,
-                 @Nonnull final CrewRequirementDTO crewRequirement) {
+                 @Nonnull final CrewRequirement crewRequirement) {
         super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement);
     }
 }

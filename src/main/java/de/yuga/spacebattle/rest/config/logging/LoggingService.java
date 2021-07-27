@@ -1,0 +1,135 @@
+package de.yuga.spacebattle.rest.config.logging;
+
+import com.google.common.base.Preconditions;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonIOException;
+import de.yuga.spacebattle.rest.api.EndpointDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+
+@Service
+public class LoggingService {
+
+    @Nonnull
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoggingService.class);
+
+    public void logRequest(@Nonnull final HttpServletRequest httpServletRequest,
+                           @Nullable final Object body) {
+        Preconditions.checkNotNull(httpServletRequest, "httpServletRequest shouldn't be null!");
+
+        String requestURI = httpServletRequest.getRequestURI();
+        if (!requestURI.contains(EndpointDefinition.BASE_ENDPOINT)) {
+            // just to ignore everything which is not part of the base rest endpoint
+            return;
+        }
+        String method = httpServletRequest.getMethod();
+        String host = httpServletRequest.getRequestURL().toString();
+        StringBuilder sb = new StringBuilder();
+
+        // creating a should-be-unique ID for a pair of request and response
+        int correlationID = httpServletRequest.hashCode();
+        sb.append("\n" + "[" + correlationID + "] < " + method + " " + host);
+        httpServletRequest.setAttribute("correlationID", correlationID);
+        sb.append("\n");
+        Map<String, String> parametersMap = buildParametersMap(httpServletRequest);
+        parametersMap.forEach((header, argument) -> sb.append("\n" + header + ": " + argument));
+
+        Map<String, String> headersMap = buildHeadersMap(httpServletRequest);
+        headersMap.forEach((header, argument) -> sb.append("\n" + header + ": " + argument));
+        sb.append("\n");
+        writeBodyToLogString(body, sb);
+
+        LOGGER.info(sb.toString() + "\n");
+    }
+
+    public void logResponse(@Nonnull final HttpServletRequest httpServletRequest,
+                            @Nonnull final HttpServletResponse httpServletResponse,
+                            @Nullable final Object body) {
+        Preconditions.checkNotNull(httpServletRequest, "httpServletRequest shouldn't be null!");
+        Preconditions.checkNotNull(httpServletResponse, "httpServletResponse shouldn't be null!");
+
+        String requestURI = httpServletRequest.getRequestURI();
+        if (!requestURI.contains(EndpointDefinition.BASE_ENDPOINT)) {
+            // just to ignore everything which is not part of the base rest endpoint
+            return;
+        }
+        String method = httpServletRequest.getMethod();
+        String host = httpServletRequest.getRequestURL().toString();
+
+        // fetching correlation ID to identify the response for a unique request
+        Integer correlationID = (Integer) httpServletRequest.getAttribute("correlationID");
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n" + "[" + correlationID + "] > " + method + " " + host);
+
+        Map<String, String> headersMap = buildHeadersMap(httpServletResponse);
+        headersMap.forEach((header, argument) -> sb.append("\n" + header + ": " + argument));
+        sb.append("\n");
+        writeBodyToLogString(body, sb);
+
+        LOGGER.info(sb.toString());
+    }
+
+    private void writeBodyToLogString(@Nullable final Object body,
+                                      @Nonnull final StringBuilder stringBuilder) {
+        Preconditions.checkNotNull(stringBuilder, "stringBuilder shouldn't be null!");
+
+        if (body != null) {
+            try {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                String jsonInString = gson.toJson(body);
+                stringBuilder.append("\n" + jsonInString);
+            } catch (final JsonIOException e) {
+                stringBuilder.append("\nException while parsing body: " + e.getMessage());
+            }
+        }
+    }
+
+    private Map<String, String> buildParametersMap(@Nonnull final HttpServletRequest httpServletRequest) {
+        Preconditions.checkNotNull(httpServletRequest, "httpServletRequest shouldn't be null!");
+
+        Map<String, String> resultMap = new HashMap<>();
+        Enumeration<String> parameterNames = httpServletRequest.getParameterNames();
+
+        while (parameterNames.hasMoreElements()) {
+            String key = parameterNames.nextElement();
+            String value = httpServletRequest.getParameter(key);
+            resultMap.put(key, value);
+        }
+
+        return resultMap;
+    }
+
+    private Map<String, String> buildHeadersMap(@Nonnull final HttpServletRequest request) {
+        Preconditions.checkNotNull(request, "request shouldn't be null!");
+
+        Map<String, String> map = new HashMap<>();
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String key = headerNames.nextElement();
+            String value = request.getHeader(key);
+            map.put(key, value);
+        }
+
+        return map;
+    }
+
+    private Map<String, String> buildHeadersMap(@Nonnull final HttpServletResponse response) {
+        Map<String, String> map = new HashMap<>();
+        Collection<String> headerNames = response.getHeaderNames();
+        for (String header : headerNames) {
+            map.put(header, response.getHeader(header));
+        }
+        return map;
+    }
+}

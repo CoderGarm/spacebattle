@@ -9,7 +9,7 @@ import java.util.Arrays;
 /**
  * Describes the level of education.
  */
-public enum EEducationType {
+public enum EEducationType implements HasIconName {
 
     /**
      * no explicit education
@@ -76,6 +76,7 @@ public enum EEducationType {
     }
 
     @Nonnull
+    @Override
     public String getIconName() {
         return iconName;
     }

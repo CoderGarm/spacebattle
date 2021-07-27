@@ -1,12 +1,12 @@
 package de.yuga.spacebattle.backend.entities.turn;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifySBUserException;
+import de.yuga.spacebattle.NotifyUserException;
+import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
-import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
@@ -18,7 +18,7 @@ import javax.validation.constraints.NotNull;
 })
 @Entity
 @Table(name = "move")
-@Check(constraints = "startIdPlanet != targetIdPlanet")
+@Check(constraints = "xCoordinateOrigin != xCoordinateDestination && yCoordinateOrigin != yCoordinateDestination")
 @AttributeOverride(name = "id", column = @Column(name = "idMove"))
 public class Move extends AbstractEntityKey {
 
@@ -37,42 +37,61 @@ public class Move extends AbstractEntityKey {
     @Nonnull
     @NotNull
     @Embedded
-    @AssociationOverrides({
-            @AssociationOverride(name = "system", joinColumns = @JoinColumn(name = "startIdStarsystem")),
-            @AssociationOverride(name = "planet", joinColumns = @JoinColumn(name = "startIdPlanet"))
-    })
-    private FleetOrbit startOrbit;
+    @AttributeOverride(name = "orbit.xCoordinate", column = @Column(name = "xCoordinateOrigin", columnDefinition = "decimal(19, 0)"))
+    @AttributeOverride(name = "orbit.yCoordinate", column = @Column(name = "yCoordinateOrigin", columnDefinition = "decimal(19, 0)"))
+    @AssociationOverride(name = "system", joinColumns = @JoinColumn(name = "idStarSystemOrigin"))
+    private FleetOrbit originOrbit;
 
     @Nonnull
     @NotNull
     @Embedded
-    @AssociationOverrides({
-            @AssociationOverride(name = "system", joinColumns = @JoinColumn(name = "targetIdStarsystem")),
-            @AssociationOverride(name = "planet", joinColumns = @JoinColumn(name = "targetIdPlanet"))
-    })
-    private FleetOrbit targetOrbit;
+    @AttributeOverride(name = "orbit.xCoordinate", column = @Column(name = "xCoordinateDestination", columnDefinition = "decimal(19, 0)"))
+    @AttributeOverride(name = "orbit.yCoordinate", column = @Column(name = "yCoordinateDestination", columnDefinition = "decimal(19, 0)"))
+    @AssociationOverride(name = "system", joinColumns = @JoinColumn(name = "idStarSystemDestination"))
+    private FleetOrbit destinationOrbit;
 
     /**
      * Principle: Countdown to zero -> job done.
      */
     private int moveDoneAtZero;
 
+    /**
+     * The original duration without modification;
+     */
+    @Column(updatable = false)
+    private int originalDuration;
+
     public Move() {
     }
 
     public Move(@Nonnull final Fleet fleet,
-                @Nonnull final Planet origin,
-                @Nonnull final Planet target,
-                final int moveDoneAtZero) {
+                @Nonnull final FleetOrbit destination) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
-        Preconditions.checkNotNull(target, "target shouldn't be null!");
-        Preconditions.checkArgument(fleet.getOrbit() != null, "The fleet must have an orbit currently");
+        Preconditions.checkNotNull(destination, "destination shouldn't be null!");
+        Preconditions.checkState(fleet.getOrbit() != null, "The fleet must have an orbit currently");
 
         this.owner = fleet.getOwner();
         this.fleet = fleet;
-        this.startOrbit = new FleetOrbit(origin);
-        this.targetOrbit = new FleetOrbit(target);
-        this.moveDoneAtZero = moveDoneAtZero;
+        this.originOrbit = new FleetOrbit(fleet.getOrbit());
+        this.destinationOrbit = destination;
+        this.moveDoneAtZero = DistanceCalculator.calculateTimeToTravel(fleet, destination);
+        this.originalDuration = this.moveDoneAtZero;
+    }
+
+    public Move(@Nonnull final Fleet fleet,
+                @Nonnull final FleetOrbit destination,
+                final int calculateTimeToTravel,
+                final int originalDuration) {
+        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+        Preconditions.checkNotNull(destination, "destination shouldn't be null!");
+        Preconditions.checkState(fleet.getOrbit() != null, "The fleet must have an orbit currently");
+
+        this.owner = fleet.getOwner();
+        this.fleet = fleet;
+        this.originOrbit = new FleetOrbit(fleet.getOrbit());
+        this.destinationOrbit = destination;
+        this.moveDoneAtZero = calculateTimeToTravel;
+        this.originalDuration = originalDuration;
     }
 
     @Nonnull
@@ -91,26 +110,18 @@ public class Move extends AbstractEntityKey {
         return fleet;
     }
 
-    public void setFleet(@Nonnull Fleet fleet) {
+    public void setFleet(@Nonnull final Fleet fleet) {
         this.fleet = fleet;
     }
 
     @Nonnull
-    public FleetOrbit getStartOrbit() {
-        return startOrbit;
-    }
-
-    public void setStartOrbit(@Nonnull final FleetOrbit startOrbit) {
-        this.startOrbit = startOrbit;
+    public FleetOrbit getOriginOrbit() {
+        return originOrbit;
     }
 
     @Nonnull
-    public FleetOrbit getTargetOrbit() {
-        return targetOrbit;
-    }
-
-    public void setTargetOrbit(@Nonnull final FleetOrbit targetOrbit) {
-        this.targetOrbit = targetOrbit;
+    public FleetOrbit getDestinationOrbit() {
+        return destinationOrbit;
     }
 
     public int getMoveDoneAtZero() {
@@ -119,9 +130,13 @@ public class Move extends AbstractEntityKey {
 
     public void setMoveDoneAtZero(final int moveDoneAtZero) {
         if (moveDoneAtZero >= this.moveDoneAtZero) {
-            throw new NotifySBUserException("You cannot increase the traffic time until you have warp scrambler");
+            throw new NotifyUserException("You cannot increase the traffic time until you have warp scrambler");
         }
         this.moveDoneAtZero = moveDoneAtZero;
+    }
+
+    public int getOriginalDuration() {
+        return originalDuration;
     }
 
     /**
@@ -130,7 +145,7 @@ public class Move extends AbstractEntityKey {
      * @return <code>true</code> if this move is between stars, <code>false</code> otherwise
      */
     public boolean isSystemTravel() {
-        if (startOrbit.getSystem().equals(targetOrbit.getSystem())) {
+        if (originOrbit.getSystem().equals(destinationOrbit.getSystem())) {
             return false;
         }
         return true;
@@ -144,15 +159,15 @@ public class Move extends AbstractEntityKey {
         Move move = (Move) o;
 
         if (!fleet.equals(move.fleet)) return false;
-        if (!startOrbit.equals(move.startOrbit)) return false;
-        return targetOrbit.equals(move.targetOrbit);
+        if (!originOrbit.equals(move.originOrbit)) return false;
+        return destinationOrbit.equals(move.destinationOrbit);
     }
 
     @Override
     public int hashCode() {
         int result = fleet.hashCode();
-        result = 31 * result + startOrbit.hashCode();
-        result = 31 * result + targetOrbit.hashCode();
+        result = 31 * result + originOrbit.hashCode();
+        result = 31 * result + destinationOrbit.hashCode();
         return result;
     }
 }

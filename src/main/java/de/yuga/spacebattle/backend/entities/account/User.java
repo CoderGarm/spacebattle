@@ -10,13 +10,16 @@ import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Job;
+import de.yuga.spacebattle.backend.services.account.PasswordConverter;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,13 +28,16 @@ import java.util.Set;
 
 @NamedQueries({
         @NamedQuery(name = "User.getAll", query = "SELECT u FROM User u"),
-        @NamedQuery(name = "User.findByUsernameAndEmail", query = "SELECT u FROM User u WHERE UPPER(u.username) = :username AND UPPER(u.email) = :email"),
-        @NamedQuery(name = "User.login", query = "SELECT u FROM User u LEFT JOIN FETCH u.ownedPlanets p LEFT JOIN FETCH u.alliance a LEFT JOIN FETCH u.researches r WHERE UPPER(u.username) = :username AND UPPER(u.password) = :password"),
-        @NamedQuery(name = "User.getWithResearchesAndJobs", query = "SELECT u FROM User u LEFT JOIN FETCH u.researches r LEFT JOIN FETCH u.jobs j WHERE u = :user"),
-        @NamedQuery(name = "User.getWithResearches", query = "SELECT u FROM User u LEFT JOIN FETCH u.researches r WHERE u = :user"),
-        @NamedQuery(name = "User.getWithKnownStarSystems", query = "SELECT u FROM User u LEFT JOIN FETCH u.knownStarSystems r WHERE u = :user"),
+        @NamedQuery(name = "User.findByLikeUsername", query = "SELECT u FROM User u WHERE UPPER(u.username) LIKE UPPER(:username)"),
+        @NamedQuery(name = "User.findByUsernameAndEmail", query = "SELECT u FROM User u WHERE UPPER(u.username) = UPPER(:username) AND UPPER(u.email) = UPPER(:email)"),
+        @NamedQuery(name = "User.login", query = "SELECT u FROM User u LEFT JOIN FETCH u.ownedPlanets p LEFT JOIN FETCH u.alliance a LEFT JOIN FETCH u.researches r WHERE UPPER(u.username) = :username AND UPPER(u.password) = UPPER(:password)"),
+        @NamedQuery(name = "User.getWithResearchesAndJobs", query = "SELECT u FROM User u LEFT JOIN FETCH u.researches r LEFT JOIN FETCH u.jobs j WHERE u.id = :idUser"),
+        @NamedQuery(name = "User.getWithResearches", query = "SELECT u FROM User u LEFT JOIN FETCH u.researches r WHERE u.id = :idUser"),
+        @NamedQuery(name = "User.getWithKnownStarSystems", query = "SELECT u FROM User u LEFT JOIN FETCH u.knownStarSystems r WHERE u.id = :idUser"),
         @NamedQuery(name = "User.getColonizations", query = "SELECT u FROM User u LEFT JOIN FETCH u.colonizations r WHERE u = :user"),
-        @NamedQuery(name = "User.checkParameter", query = "SELECT u FROM User u WHERE UPPER(u.username) = :username OR UPPER(u.email) = :email"),
+        @NamedQuery(name = "User.findByUsernameExact", query = "SELECT u.id FROM User u WHERE UPPER(u.username) = UPPER(:username)"),
+        @NamedQuery(name = "User.findByEMailExact", query = "SELECT u.id FROM User u WHERE UPPER(u.email) = UPPER(:email)"),
+        @NamedQuery(name = "User.findByUsername", query = "SELECT u FROM User u WHERE UPPER(u.username) = UPPER(:username)")
 })
 @Entity
 @Table(name = "user",
@@ -43,20 +49,22 @@ import java.util.Set;
 public class User extends AbstractEntityKey {
 
     @Nonnull
-    @NotNull(message = "username must not be null")
-    @Size(min = 1, max = 30)
+    @NotNull
+    @Pattern(regexp = "[a-zA-Z0-9]{3,30}", message = "must contain of 3 to 30 characters of numbers or letters")
+    @Size(min = 3, max = 30)
     @Column(unique = true)
     private String username;
 
     @Nonnull
-    @NotNull(message = "password must not be null")
-    @Size(min = 1, max = 50)
-    //@Convert(converter = PasswordConverter.class)
+    @NotNull
+    @Pattern(regexp = "((?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,30})", message = "must contain of 8 to 30 characters of numbers, letters, capital letters and special characters")
+    @Convert(converter = PasswordConverter.class)
     private String password;
 
     @Nonnull
-    @NotNull(message = "eMail must not be null")
-    @Size(min = 1, max = 50)
+    @NotNull
+    @Email
+    @Size(min = 3, max = 50)
     private String email;
 
     @Nullable
@@ -65,7 +73,7 @@ public class User extends AbstractEntityKey {
     private Alliance alliance;
 
     @Nonnull
-    @NotNull(message = "ownedPlanets must not be null")
+    @NotNull
     @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, mappedBy = "owner")
     private final Set<Planet> ownedPlanets = new HashSet<>();
 
@@ -120,6 +128,9 @@ public class User extends AbstractEntityKey {
     @Nonnull
     @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, mappedBy = "user")
     private final Set<Colonization> colonizations = new HashSet<>();
+
+    @Transient
+    private final String avatar = "https://mir-s3-cdn-cf.behance.net/project_modules/disp/ce54bf11889067.562541ef7cde4.png";
 
     public User() {
     }
@@ -212,6 +223,10 @@ public class User extends AbstractEntityKey {
         return knownStarSystems;
     }
 
+    public String getAvatar() {
+        return avatar;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -226,4 +241,5 @@ public class User extends AbstractEntityKey {
     public int hashCode() {
         return username != null ? username.hashCode() : 0;
     }
+
 }

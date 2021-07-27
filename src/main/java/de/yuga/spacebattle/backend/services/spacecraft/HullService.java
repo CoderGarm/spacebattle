@@ -1,8 +1,8 @@
 package de.yuga.spacebattle.backend.services.spacecraft;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.enums.EHullType;
@@ -44,20 +44,11 @@ public class HullService {
         return hullRepository.findById(idHull).orElse(null);
     }
 
-    /**
-     * Creates a new hull.
-     *
-     * @param name                 the hull's name
-     * @param level                the hull's level - may be not necessary
-     * @param constructionCapacity the construction capacity which can be filles with stuff
-     * @param description          the description
-     * @param unlockedThrough      the research which unlocks this hull
-     * @return the new hull
-     */
     @Nonnull
     @Deprecated(since = "productive environment")
+    @SuppressWarnings("DeprecatedIsStillUsed")
     public Hull createHull(@Nonnull final String name,
-                           final int level,
+                           final int overallConstructionCapacity,
                            final int constructionCapacity,
                            final int constructionCapacityBow,
                            final int constructionCapacityStern,
@@ -65,14 +56,14 @@ public class HullService {
                            @Nonnull final String description,
                            @Nonnull final Research unlockedThrough,
                            @Nonnull final EHullType hullType,
-                           @Nonnull final CrewRequirementDTO crewRequirement) {
+                           @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
         Preconditions.checkNotNull(hullType, "hullType shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        return hullRepository.save(new Hull(name, level, constructionCapacity, constructionCapacityBow, constructionCapacityStern, constructionCapacityBroadsides, description, unlockedThrough, hullType, crewRequirement));
+        return hullRepository.save(new Hull(name, overallConstructionCapacity, constructionCapacity, constructionCapacityBow, constructionCapacityStern, constructionCapacityBroadsides, description, unlockedThrough, hullType, crewRequirement));
     }
 
     public Hull save(@Nonnull final Hull entity) {

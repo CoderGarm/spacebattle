@@ -2,9 +2,8 @@ package de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
+import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
-import de.yuga.spacebattle.backend.entities.HasNameAndDescription;
-import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
@@ -18,19 +17,19 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @MappedSuperclass
-public class BaseModule extends AbstractEntityKey implements HasNameAndDescription {
+public class BaseModule extends AbstractEntityKey {
 
     @Nonnull
-    @NotNull(message = "name should not be null")
+    @NotNull
     @Size(min = 3, max = 30, message = "name should not be null")
     private String name;
 
     @Nonnull
-    @NotNull(message = "description should not be null")
+    @NotNull
     private String description;
 
     @Nonnull
-    @NotNull(message = "everything costs something")
+    @NotNull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "idCosts", updatable = false)
     private final ResourceDeposit costs = ResourceDepositInitializerCalculator.initializeResourceDeposit(BaseModule.class, EDepositType.COSTS);
@@ -41,13 +40,12 @@ public class BaseModule extends AbstractEntityKey implements HasNameAndDescripti
     @JoinColumn(name = "idResearch")
     private Research unlockedThrough;
 
-    @NotNull(message = "useCapacity should not be null")
-    private int useCapacity;
-
     /**
-     * The basic value for this module's effect, e.g. it's attack value or shield value.
+     * The capacity represents the capacity in metric tons which will be occupied if build in.<br>
+     * This capacity includes all 'opportunity costs' to use a module, from crew quarters up to toilets, from screens and displays up to seats and impact cages.
      */
-    private int effectValue;
+    @NotNull
+    private int useCapacity;
 
     /**
      * The tech level is necessary to allow the user to filter.
@@ -61,9 +59,8 @@ public class BaseModule extends AbstractEntityKey implements HasNameAndDescripti
                       @Nonnull final String description,
                       @Nonnull final Research unlockedThrough,
                       final int useCapacity,
-                      final int effectValue,
                       final int techLevel,
-                      @Nonnull final CrewRequirementDTO crewRequirement) {
+                      @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
@@ -73,19 +70,16 @@ public class BaseModule extends AbstractEntityKey implements HasNameAndDescripti
         this.description = description;
         this.unlockedThrough = unlockedThrough;
         this.useCapacity = useCapacity;
-        this.effectValue = effectValue;
         this.techLevel = techLevel;
         this.costs.setCrewRequirement(crewRequirement);
     }
 
     @Nonnull
-    @Override
     public String getName() {
         return name;
     }
 
     @Nonnull
-    @Override
     public String getDescription() {
         return description;
     }
@@ -102,10 +96,6 @@ public class BaseModule extends AbstractEntityKey implements HasNameAndDescripti
 
     public int getUseCapacity() {
         return useCapacity;
-    }
-
-    public int getEffectValue() {
-        return effectValue;
     }
 
     public int getTechLevel() {

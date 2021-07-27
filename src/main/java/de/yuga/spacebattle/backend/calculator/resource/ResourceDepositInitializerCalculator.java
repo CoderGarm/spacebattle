@@ -1,12 +1,15 @@
 package de.yuga.spacebattle.backend.calculator.resource;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifySBUserException;
+import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.MissileMotor;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Warhead;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
@@ -18,7 +21,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Should create resource deposits - think before live because of balacing issues.
+ * Should create resource deposits - think before live because of balancing issues.
  */
 public class ResourceDepositInitializerCalculator {
 
@@ -30,7 +33,7 @@ public class ResourceDepositInitializerCalculator {
      * Needs a heavy revision for productive run. Must be balanced.
      *
      * @param clazz   the assigned class
-     * @param subType the sub type
+     * @param subType the sub-type
      * @return the resource deposit
      */
     public static ResourceDeposit initializeResourceDeposit(@Nonnull final Class<?> clazz,
@@ -42,16 +45,17 @@ public class ResourceDepositInitializerCalculator {
         if (clazz.isAssignableFrom(Planet.class) || clazz.isAssignableFrom(Colonization.class)) {
             // continue - just for the sake of completeness
             if (EDepositType.DEPOSITS != subType) {
-                throw new NotifySBUserException("Initialization of deposit not possible for '" + subType + "'.");
+                throw new NotifyUserException("Initialization of deposit not possible for '" + subType + "'.");
             }
         } else if (clazz.isAssignableFrom(Building.class) || clazz.isAssignableFrom(Research.class)) {
             overrideResources.add(EResourceType.ORBITAL_CONSTRUCTION);
             overrideResources.add(EResourceType.CONSTRUCTION);
-        } else if (clazz.isAssignableFrom(BaseModule.class) || clazz.isAssignableFrom(Hull.class)) {
+        } else if (clazz.isAssignableFrom(BaseModuleWithEffectValue.class) || clazz.isAssignableFrom(Hull.class) ||
+                clazz.isAssignableFrom(Missile.class) || clazz.isAssignableFrom(MissileMotor.class) || clazz.isAssignableFrom(Warhead.class)) {
             overrideResources.add(EResourceType.CONSTRUCTION);
             overrideResources.add(EResourceType.RESEARCH);
         } else {
-            throw new NotifySBUserException("Initialization of resources not possible for class '" + clazz.getName() + "'.");
+            throw new NotifyUserException("Initialization of resources not possible for class '" + clazz.getName() + "'.");
         }
 
         final ResourceDeposit resourceDeposit = new ResourceDeposit(subType);

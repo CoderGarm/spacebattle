@@ -9,7 +9,7 @@ import de.yuga.spacebattle.backend.entities.constructables.buildings.Constructio
 import de.yuga.spacebattle.backend.entities.turn.resources.MiningFactors;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
-import de.yuga.spacebattle.backend.enums.EPlanetType;
+import de.yuga.spacebattle.backend.enums.EPlanetClassType;
 import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 
@@ -27,10 +27,11 @@ import java.util.stream.Collectors;
 @NamedQueries({
         @NamedQuery(name = "Planet.getAll", query = "SELECT p FROM Planet p"),
         @NamedQuery(name = "Planet.getAllOwned", query = "SELECT p FROM Planet p WHERE p.owner IS NOT NULL"),
-        @NamedQuery(name = "Planet.getAllOwnedBy", query = "SELECT p FROM Planet p WHERE p.owner = :owner ORDER BY p.colonizedAt"),
+        @NamedQuery(name = "Planet.getAllOwnedBy", query = "SELECT p FROM Planet p WHERE p.owner.id = :idOwner ORDER BY p.colonizedAt"),
         @NamedQuery(name = "Planet.getPlanetsWithBuildingsForResourceType",
                 query = "SELECT p FROM Planet p LEFT JOIN FETCH p.constructions c WHERE p.owner = :owner AND c.building.productionType.productionTarget = :resourceType"),
-        @NamedQuery(name = "Planet.getMainPlanet", query = "SELECT p FROM Planet p WHERE p.owner = :owner GROUP BY p.colonizedAt"),
+        @NamedQuery(name = "Planet.getMainPlanet", query = "SELECT p FROM Planet p WHERE p.owner.id = :idUser GROUP BY p.colonizedAt"),
+        @NamedQuery(name = "Planet.getByCoordinates", query = "SELECT p FROM Planet p WHERE p.system.id = :idStarSystem AND p.orbit.xCoordinate = :xCoordinate AND p.orbit.yCoordinate = :yCoordinate"),
 })
 @Entity
 @Table(name = "planet",
@@ -45,7 +46,7 @@ public class Planet extends AbstractEntityKey {
     private User owner;
 
     @Nonnull
-    @NotNull(message = "name must not be null")
+    @NotNull
     @Size(min = 1, max = 30)
     private String name;
 
@@ -83,7 +84,7 @@ public class Planet extends AbstractEntityKey {
 
     @Nonnull
     @Transient
-    private final EPlanetType planetType = EPlanetType.PLANET;
+    private final EPlanetClassType planetType = EPlanetClassType.PLANET;
 
     public Planet() {
     }
@@ -155,7 +156,7 @@ public class Planet extends AbstractEntityKey {
     }
 
     @Nonnull
-    public EPlanetType getPlanetType() {
+    public EPlanetClassType getPlanetType() {
         return planetType;
     }
 

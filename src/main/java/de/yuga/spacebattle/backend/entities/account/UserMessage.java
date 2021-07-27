@@ -2,8 +2,6 @@ package de.yuga.spacebattle.backend.entities.account;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -11,70 +9,56 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-/**
- * Entity for a UserMessage.
- */
 @Entity
 @Table(name = "userMessage")
 @AttributeOverride(name = "id", column = @Column(name = "idUserMessage"))
 public class UserMessage extends AbstractEntityKey {
 
     @Nonnull
-    @NotNull(message = "idUserSender should not be null")
+    @NotNull
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "idMessageThread")
+    private MessageThread messageThread;
+
+    @Nonnull
+    @NotNull
     @ManyToOne(optional = false)
     @JoinColumn(name = "idUserSender")
-    private User userSender;
+    private User sender;
 
     @Nonnull
-    @NotNull(message = "idUserReceiver should not be null")
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "idUserReceiver")
-    private User userReceiver;
-
-    @Nonnull
-    @NotNull(message = "subject should not be null")
-    private String subject;
-
-    @Nonnull
-    @Nullable
+    @NotNull
     private String message;
 
     @Nonnull
-    @NotNull(message = "sentAt should not be null")
+    @NotNull
     private LocalDateTime sentAt;
 
     @Nullable
     private LocalDateTime receivedAt;
 
-    /**
-     * Default constructor.
-     */
     public UserMessage() {
     }
 
-    /**
-     * Create a new Message with the current user as sender.
-     * @param userSender {@link User}
-     */
-    public UserMessage(User userSender) {
-        Preconditions.checkNotNull(userSender);
+    public UserMessage(@Nonnull final MessageThread messageThread, @Nonnull final User sender, @Nonnull final String message) {
+        Preconditions.checkNotNull(messageThread, "messageThread shouldn't be null!");
+        Preconditions.checkNotNull(sender, "sender shouldn't be null!");
+        Preconditions.checkNotNull(message, "message shouldn't be null!");
 
-        this.userSender = userSender;
+        this.messageThread = messageThread;
+        this.sender = sender;
+        this.message = message;
+        this.sentAt = LocalDateTime.now();
     }
 
     @Nonnull
-    public User getUserSender() {
-        return userSender;
+    public MessageThread getMessageThread() {
+        return messageThread;
     }
 
     @Nonnull
-    public User getUserReceiver() {
-        return userReceiver;
-    }
-
-    @Nonnull
-    public String getSubject() {
-        return subject;
+    public User getSender() {
+        return sender;
     }
 
     @Nonnull
@@ -96,26 +80,6 @@ public class UserMessage extends AbstractEntityKey {
         return this.receivedAt == null;
     }
 
-    public void setUserReceiver(@Nonnull User userReceiver) {
-        Preconditions.checkNotNull(userReceiver);
-
-        this.userReceiver = userReceiver;
-    }
-
-    public void setSubject(@Nonnull String subject) {
-        Preconditions.checkNotNull(subject);
-
-        this.subject = subject;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public void setSentAt() {
-        this.sentAt = LocalDateTime.now();
-    }
-
     public void setReceivedAt() {
         if (this.receivedAt == null) {
             this.receivedAt = LocalDateTime.now();
@@ -125,16 +89,15 @@ public class UserMessage extends AbstractEntityKey {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof UserMessage)) return false;
 
         UserMessage that = (UserMessage) o;
 
-        return new EqualsBuilder().append(id, that.id).isEquals();
+        return id == that.id;
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(id).toHashCode();
+        return 31 * id;
     }
 }

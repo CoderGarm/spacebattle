@@ -2,9 +2,8 @@ package de.yuga.spacebattle.backend.entities.buildings;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
+import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
-import de.yuga.spacebattle.backend.entities.HasNameAndDescription;
-import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EBuildingType;
@@ -26,7 +25,7 @@ import java.math.BigDecimal;
 @AttributeOverride(name = "id", column = @Column(name = "idBuilding"))
 // todo check constraint for productionType.productionCategory and refinementSequence
 // todo check constraint for productionType.productionCategory == PRODUCE and productionType.productionTarget == POPULATION must have baseValue with single digit only
-public class Building extends AbstractEntityKey implements HasNameAndDescription {
+public class Building extends AbstractEntityKey {
 
     @Nonnull
     @Size(min = 1, max = 30)
@@ -76,7 +75,7 @@ public class Building extends AbstractEntityKey implements HasNameAndDescription
                     @Nonnull final String description,
                     final int baseValue,
                     @Nonnull final ProductionType productionType,
-                    @Nonnull final CrewRequirementDTO crewRequirement,
+                    @Nonnull final CrewRequirement crewRequirement,
                     @Nonnull final Research unlockedThrough) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
@@ -93,13 +92,11 @@ public class Building extends AbstractEntityKey implements HasNameAndDescription
     }
 
     @Nonnull
-    @Override
     public String getName() {
         return name;
     }
 
     @Nonnull
-    @Override
     public String getDescription() {
         return description;
     }

@@ -1,18 +1,18 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.modules;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
+import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.enums.EAlignmentType;
-import de.yuga.spacebattle.backend.enums.EDamageType;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
+import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,32 +22,36 @@ import java.util.Set;
 })
 @Entity
 @Table(name = "weapon")
+@Check(constraints = "weaponType = 'BEAM' || weaponType = 'POINT_DEFENSE'")
 @AttributeOverride(name = "id", column = @Column(name = "idWeapon"))
-public class Weapon extends BaseModule {
+public class Weapon extends BaseModuleWithEffectValue {
 
     /**
-     * Defines the range of this weapon.
+     * Defines the range of this weapon in meter.
      */
-    private int effectiveRange;
+    @Column(nullable = false, columnDefinition = "decimal(19, 0)")
+    private BigDecimal damageProjectionRange;
 
     /**
-     * Defines the capability of this weapon to penetrate the shield.
-     * The means the maneuver capability to find a gap in the tank to fire into it, for instance.
+     * The amount of damage emitters.<br>
+     * <p>
+     * In case of a laser cluster it is normally eight and an emitter have a reload time of 16 seconds.<br>
+     * In case of an auto-cannon it is only one emitter present.<br>
+     * <br>
+     * The emitters will fire every combat round and will represent a chance to destroy an incoming missile.
+     * </p>
+     * <br>
+     * <p>
+     * If this weapon is a graser or a laser it can destroy missiles, too, but then it should have only one emitter.
+     * </p>
      */
-    @Nullable
-    @Column(columnDefinition = "decimal(19, 5)")
-    private Double sideWallPenetration;
+    private int amountDamageEmitter;
 
     /**
-     * The way of damage projection.
+     * Defines the main use-case for this weapon.
      */
     @Nonnull
-    @NotNull(message = "The damageType must not be null.")
-    @Enumerated(EnumType.STRING)
-    private EDamageType damageType;
-
-    @Nonnull
-    @NotNull(message = "The weaponType must not be null.")
+    @NotNull
     @Enumerated(EnumType.STRING)
     private EWeaponType weaponType;
 
@@ -59,55 +63,37 @@ public class Weapon extends BaseModule {
     @Enumerated(EnumType.STRING)
     private EAlignmentType alignmentType;
 
-    /**
-     * An empty ammunition module means that the weapon needs no ammunition.
-     */
-    @Nullable
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "idAmmunitionModule")
-    private AmmunitionModule ammunitionModule;
-
     public Weapon() {
     }
 
     public Weapon(@Nonnull final String name,
                   @Nonnull final String description,
                   @Nonnull final Research unlockedThrough,
-                  @Nullable final AmmunitionModule ammunitionModule,
                   final int useCapacity,
                   final int effectValue,
                   final int techLevel,
-                  final int effectiveRange,
-                  @Nullable final Double sideWallPenetration,
-                  @Nonnull final EDamageType damageType,
+                  @Nonnull final BigDecimal damageProjectionRange,
+                  final int amountDamageEmitter,
                   @Nonnull final EWeaponType weaponType,
                   @Nonnull final EAlignmentType alignmentType,
-                  @Nonnull final CrewRequirementDTO crewRequirement) {
+                  @Nonnull final CrewRequirement crewRequirement) {
         super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement);
-        Preconditions.checkNotNull(damageType, "eDamageType shouldn't be null!");
+        Preconditions.checkNotNull(damageProjectionRange, "damageProjectionRange shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "eWeaponType shouldn't be null!");
         Preconditions.checkNotNull(alignmentType, "alignmentType shouldn't be null!");
 
-        this.effectiveRange = effectiveRange;
-        this.sideWallPenetration = sideWallPenetration;
-        this.damageType = damageType;
+        this.damageProjectionRange = damageProjectionRange;
+        this.amountDamageEmitter = amountDamageEmitter;
         this.weaponType = weaponType;
-        this.ammunitionModule = ammunitionModule;
         this.alignmentType = alignmentType;
     }
 
-    public int getEffectiveRange() {
-        return effectiveRange;
+    public BigDecimal getDamageProjectionRange() {
+        return damageProjectionRange;
     }
 
-    @Nullable
-    public Double getSideWallPenetration() {
-        return sideWallPenetration;
-    }
-
-    @Nonnull
-    public EDamageType getDamageType() {
-        return damageType;
+    public int getAmountDamageEmitter() {
+        return amountDamageEmitter;
     }
 
     @Nonnull
@@ -116,12 +102,17 @@ public class Weapon extends BaseModule {
     }
 
     @Nonnull
+    public EAlignmentType getAlignmentType() {
+        return alignmentType;
+    }
+
+    @Nonnull
     public Set<EWeaponAlignment> getAllowedWeaponAlignments() {
         final Set<EWeaponAlignment> allowedWeaponAlignments = new HashSet<>();
-        if (EAlignmentType.HUNTING_ALIGNMENT == alignmentType) {
+        if (EAlignmentType.CHASE_ALIGNMENT == alignmentType) {
             allowedWeaponAlignments.add(EWeaponAlignment.BOW);
         }
-        if (EAlignmentType.HUNTING_ALIGNMENT == alignmentType) {
+        if (EAlignmentType.CHASE_ALIGNMENT == alignmentType) {
             allowedWeaponAlignments.add(EWeaponAlignment.STERN);
         }
         if (EAlignmentType.BATTLE_ALIGNMENT == alignmentType) {
@@ -129,10 +120,5 @@ public class Weapon extends BaseModule {
 
         }
         return allowedWeaponAlignments;
-    }
-
-    @Nullable
-    public AmmunitionModule getAmmunitionModule() {
-        return ammunitionModule;
     }
 }

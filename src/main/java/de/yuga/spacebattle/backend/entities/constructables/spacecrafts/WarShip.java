@@ -31,7 +31,7 @@ public class WarShip extends AbstractEntityKey {
     @Nonnull
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "idFleet", updatable = false)
+    @JoinColumn(name = "idFleet")
     private Fleet fleet;
 
     @Nonnull
@@ -39,7 +39,6 @@ public class WarShip extends AbstractEntityKey {
     @ManyToOne
     @JoinColumn(name = "idShipClass", updatable = false)
     private ShipClass shipClass;
-
 
     public WarShip() {
     }

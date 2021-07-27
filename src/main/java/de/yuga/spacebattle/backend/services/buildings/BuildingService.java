@@ -1,9 +1,9 @@
 package de.yuga.spacebattle.backend.services.buildings;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
-import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.enums.EDepositType;
@@ -70,7 +70,7 @@ public class BuildingService {
 
         final Map<EEducationType, Long> crewRequirement = new HashMap<>();
         crewRequirement.put(educationType, amountOfWorkers);
-        return buildingRepository.save(new Building(name, description, baseValue, productionType, new CrewRequirementDTO(crewRequirement, EDepositType.COSTS), unlockedThrough));
+        return buildingRepository.save(new Building(name, description, baseValue, productionType, new CrewRequirement(crewRequirement, EDepositType.COSTS), unlockedThrough));
     }
 
     public Building findBuildingByProductionType(@Nonnull final EResourceType productionType) {

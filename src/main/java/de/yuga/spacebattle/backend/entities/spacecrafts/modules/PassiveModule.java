@@ -1,8 +1,8 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.modules;
 
-import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
+import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.enums.ECalculationType;
 import de.yuga.spacebattle.backend.enums.ESupportType;
 
@@ -17,7 +17,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "passiveModule")
 @AttributeOverride(name = "id", column = @Column(name = "idPassiveModule"))
-public class PassiveModule extends BaseModule {
+public class PassiveModule extends BaseModuleWithEffectValue {
 
     /**
      * Defines what kind of property is supported.
@@ -25,10 +25,10 @@ public class PassiveModule extends BaseModule {
     @Nonnull
     @NotNull
     @Enumerated(EnumType.STRING)
-    private ESupportType supportType;
+    private ESupportType supportType; // todo improve support specification - what will be increased/decreased?
 
     /**
-     * Defines if the support an increase or a decrease of the property.
+     * Defines if the support is increasing or decreasing the property.
      */
     @Nonnull
     @NotNull
@@ -46,7 +46,7 @@ public class PassiveModule extends BaseModule {
                          final int techLevel,
                          @Nonnull final ESupportType supportType,
                          @Nonnull final ECalculationType calculationType,
-                         @Nonnull final CrewRequirementDTO crewRequirement) {
+                         @Nonnull final CrewRequirement crewRequirement) {
         super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement);
 
         this.supportType = supportType;

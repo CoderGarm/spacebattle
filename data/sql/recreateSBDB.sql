@@ -1,11 +1,23 @@
 
     alter table alignedFitting 
        drop 
+       foreign key FKkhnl9hmtdgol96bsu6d5csqxg;
+
+    alter table alignedFitting 
+       drop 
        foreign key FKt6aos80sh8332mepbkuwmo98i;
 
     alter table alignedFitting 
        drop 
        foreign key FKgdp5e1ylgswr29e2d5b7uhib;
+
+    alter table allowedMissiles 
+       drop 
+       foreign key FKhp9tc55hay9lojn6swpo6q4kv;
+
+    alter table allowedMissiles 
+       drop 
+       foreign key FK1dns3uxovqh388wtp38xk3l8p;
 
     alter table ammunitionFitting 
        drop 
@@ -30,6 +42,14 @@
     alter table armor 
        drop 
        foreign key FKrb3h67mjdni459t4j1y8b7sw5;
+
+    alter table battleReport 
+       drop 
+       foreign key FKr6smkmpvrxxus80181d1gwekl;
+
+    alter table battleReport 
+       drop 
+       foreign key FKktnc29kf1wrmrnbihghs9gmdp;
 
     alter table building 
        drop 
@@ -73,11 +93,7 @@
 
     alter table fleet 
        drop 
-       foreign key FKh6yguwrqsu1kah359o77c1b8h;
-
-    alter table fleet 
-       drop 
-       foreign key FKtv4xu7x5k69o40m38jmf2lip;
+       foreign key FK7p0cvm6ul1v1w1vqcljs63i61;
 
     alter table fleet 
        drop 
@@ -86,14 +102,6 @@
     alter table fleet 
        drop 
        foreign key FKckq55cmimjpois3mst803atuy;
-
-    alter table fleetComposition 
-       drop 
-       foreign key FK9v3ldmrdaym225uw9487vw2ek;
-
-    alter table fleetComposition 
-       drop 
-       foreign key FKfk2nrx1fso8buadj6v4sw1j04;
 
     alter table hull 
        drop 
@@ -135,9 +143,73 @@
        drop 
        foreign key FKtjhh901to46le5kkmsybuwdbb;
 
+    alter table launcher 
+       drop 
+       foreign key FKpxevsicliklfnl6mycvl75sv9;
+
+    alter table launcher 
+       drop 
+       foreign key FKdesag5bovcaxav76r4ln2occl;
+
+    alter table launcher 
+       drop 
+       foreign key FKekm6qvnxv0b0y293v8h0ayjhm;
+
+    alter table lossRole 
+       drop 
+       foreign key FK1vibi3ssk79l85twyhbb7go47;
+
+    alter table lossRole 
+       drop 
+       foreign key FK8h7svfuglblma48qsswn540qi;
+
+    alter table lossRole 
+       drop 
+       foreign key FKht8txlbmvrw4o3y42jpa6t4e4;
+
+    alter table messageThread 
+       drop 
+       foreign key FK1d5qqscr6uidy4lithqwkfcsb;
+
+    alter table messageThread 
+       drop 
+       foreign key FKlcfh5cw1nqv8howd22b9emwbf;
+
     alter table miningFactorsComposition 
        drop 
        foreign key FK7pw467msglkrl51uo8uu6v6l6;
+
+    alter table missile 
+       drop 
+       foreign key FKdhk8trxq7c36hid883mj4p7us;
+
+    alter table missile 
+       drop 
+       foreign key FK2y4rvixlct3ljky430p3bmwad;
+
+    alter table missile 
+       drop 
+       foreign key FK6hqn2wt7gk1myp1ew4i29r3ss;
+
+    alter table missile 
+       drop 
+       foreign key FKhgp8bhvbmvaefgws7b1t0km7k;
+
+    alter table missileMotor 
+       drop 
+       foreign key FK6q2owmplw15x287lnle7mdeae;
+
+    alter table missileMotors 
+       drop 
+       foreign key FKqkfi44aomg87boaduno2fg3oi;
+
+    alter table missileMotors 
+       drop 
+       foreign key FKtqaarx478fl1pb7q6snbay2g1;
+
+    alter table move 
+       drop 
+       foreign key FKmcefsl29wdpj7xqe9790o0mch;
 
     alter table move 
        drop 
@@ -145,23 +217,19 @@
 
     alter table move 
        drop 
+       foreign key FK1y6v1eof54uci3p3b6mduv6sr;
+
+    alter table move 
+       drop 
        foreign key FKm0l3o2yx8pq8hu2bww8maoa98;
 
-    alter table move 
+    alter table participatingUsers 
        drop 
-       foreign key FKa1bs79m293x3ok5ose0jli0r9;
+       foreign key FK5dp3ok6qf3ohs6s1s7f11k34h;
 
-    alter table move 
+    alter table participatingUsers 
        drop 
-       foreign key FK66wwxap7hrv54faje90tmrbb0;
-
-    alter table move 
-       drop 
-       foreign key FKfhqgwhapcw4i2ydno4u1qlq77;
-
-    alter table move 
-       drop 
-       foreign key FKr8obp03f86v1f41icg4xro1rl;
+       foreign key FKlreg972gg0pgmmoudxk12sy3g;
 
     alter table passiveModule 
        drop 
@@ -269,11 +337,15 @@
 
     alter table userMessage 
        drop 
-       foreign key FK5mctsyrt040xp1wgghtk6lxxr;
+       foreign key FKgo5irmd79mx2cg76wtaoaxbxa;
 
     alter table userMessage 
        drop 
        foreign key FK6xs6p78lala5xtd4eoe4xxrnv;
+
+    alter table warhead 
+       drop 
+       foreign key FK4m9pxktw6iywf5aecc1n0xm4f;
 
     alter table warShip 
        drop 
@@ -295,19 +367,19 @@
        drop 
        foreign key FKo22n18dgjpraqosj7nkamrnvb;
 
-    alter table weapon 
-       drop 
-       foreign key FKpteqae0l9alndx95maj9fkhvj;
-
     drop table if exists alignedFitting;
 
     drop table if exists alliance;
+
+    drop table if exists allowedMissiles;
 
     drop table if exists ammunitionFitting;
 
     drop table if exists ammunitionModule;
 
     drop table if exists armor;
+
+    drop table if exists battleReport;
 
     drop table if exists building;
 
@@ -319,8 +391,6 @@
 
     drop table if exists fleet;
 
-    drop table if exists fleetComposition;
-
     drop table if exists hull;
 
     drop table if exists humanResources;
@@ -329,11 +399,25 @@
 
     drop table if exists knownStarSystem;
 
+    drop table if exists launcher;
+
+    drop table if exists lossRole;
+
+    drop table if exists messageThread;
+
     drop table if exists miningFactors;
 
     drop table if exists miningFactorsComposition;
 
+    drop table if exists missile;
+
+    drop table if exists missileMotor;
+
+    drop table if exists missileMotors;
+
     drop table if exists move;
+
+    drop table if exists participatingUsers;
 
     drop table if exists passiveModule;
 
@@ -363,6 +447,8 @@
 
     drop table if exists userMessage;
 
+    drop table if exists warhead;
+
     drop table if exists warShip;
 
     drop table if exists weapon;
@@ -370,6 +456,7 @@
     create table alignedFitting (
        idShipClass integer not null,
         amount integer not null,
+        idLauncher integer,
         idWeapon integer,
         weaponAlignment varchar(255)
     ) engine=InnoDB;
@@ -381,6 +468,12 @@
         primary key (idAlliance)
     ) engine=InnoDB;
 
+    create table allowedMissiles (
+       idLauncher integer not null,
+        idMissile integer not null,
+        primary key (idLauncher, idMissile)
+    ) engine=InnoDB;
+
     create table ammunitionFitting (
        idShipClass integer not null,
         idAmmunitionModule integer,
@@ -390,10 +483,10 @@
     create table ammunitionModule (
        idAmmunitionModule integer not null auto_increment,
         description varchar(255) not null,
-        effectValue integer not null,
         name varchar(30) not null,
         techLevel integer not null,
         useCapacity integer not null,
+        effectValue integer not null,
         idCosts integer not null,
         idResearch integer not null,
         primary key (idAmmunitionModule)
@@ -402,13 +495,22 @@
     create table armor (
        idArmor integer not null auto_increment,
         description varchar(255) not null,
-        effectValue integer not null,
         name varchar(30) not null,
         techLevel integer not null,
         useCapacity integer not null,
+        effectValue integer not null,
         idCosts integer not null,
         idResearch integer not null,
         primary key (idArmor)
+    ) engine=InnoDB;
+
+    create table battleReport (
+       idBattleReport integer not null auto_increment,
+        xCoordinate decimal(19, 0),
+        yCoordinate decimal(19, 0),
+        idStarSystem integer,
+        idTick integer not null,
+        primary key (idBattleReport)
     ) engine=InnoDB;
 
     create table building (
@@ -445,10 +547,11 @@
     create table electronicWarfare (
        idElectronicWarfare integer not null auto_increment,
         description varchar(255) not null,
-        effectValue integer not null,
         name varchar(30) not null,
         techLevel integer not null,
         useCapacity integer not null,
+        effectValue integer not null,
+        effectiveRange integer not null,
         idCosts integer not null,
         idResearch integer not null,
         primary key (idElectronicWarfare)
@@ -457,18 +560,13 @@
     create table fleet (
        idFleet integer not null auto_increment,
         name varchar(255) not null,
+        xCoordinateLocation decimal(19,0),
+        yCoordinateLocation decimal(19,0),
         idMove integer,
-        idPlanet integer,
-        idStarSystem integer,
+        idStarSystemLocation integer,
         idOwner integer not null,
         idResourceDeposit integer,
         primary key (idFleet)
-    ) engine=InnoDB;
-
-    create table fleetComposition (
-       idFleet integer not null,
-        idWarShip integer not null,
-        primary key (idFleet, idWarShip)
     ) engine=InnoDB;
 
     create table hull (
@@ -479,11 +577,12 @@
         constructionCapacityStern integer not null,
         description varchar(255) not null,
         hullType varchar(255) not null,
-        level integer not null,
         name varchar(30) not null,
+        overallConstructionCapacity integer not null,
         idCosts integer,
         idResearch integer not null,
-        primary key (idHull)
+        primary key (idHull),
+        check (overallConstructionCapacity >= constructionCapacity + constructionCapacityBow + constructionCapacityStern + constructionCapacityBroadsides)
     ) engine=InnoDB;
 
     create table humanResources (
@@ -514,6 +613,35 @@
         primary key (idOwner, idStarSystem)
     ) engine=InnoDB;
 
+    create table launcher (
+       idLauncher integer not null auto_increment,
+        description varchar(255) not null,
+        name varchar(30) not null,
+        techLevel integer not null,
+        useCapacity integer not null,
+        alignmentType varchar(255) not null,
+        weaponType varchar(255) not null,
+        idCosts integer not null,
+        idResearch integer not null,
+        idAmmunitionModule integer not null,
+        primary key (idLauncher),
+        check (weaponType = 'MISSILE' || weaponType = 'COUNTER_MISSILE')
+    ) engine=InnoDB;
+
+    create table lossRole (
+       idBattleReport integer not null,
+        idOwner integer,
+        idShipClass integer,
+        warShipName varchar(255)
+    ) engine=InnoDB;
+
+    create table messageThread (
+       idMessageThread integer not null auto_increment,
+        idUserOne integer not null,
+        idUserTwo integer not null,
+        primary key (idMessageThread)
+    ) engine=InnoDB;
+
     create table miningFactors (
        idMiningFactors integer not null auto_increment,
         primary key (idMiningFactors)
@@ -526,26 +654,64 @@
         primary key (idMiningFactors, resourceType)
     ) engine=InnoDB;
 
+    create table missile (
+       idMissile integer not null auto_increment,
+        elokaResistance integer not null,
+        motorCapacity integer not null,
+        typeName varchar(255) not null,
+        warheadCapacity integer not null,
+        idAmmunitionModule integer not null,
+        idCosts integer not null,
+        idResearch integer not null,
+        idWarhead integer,
+        primary key (idMissile)
+    ) engine=InnoDB;
+
+    create table missileMotor (
+       idMissileMotor integer not null auto_increment,
+        acceleration integer not null,
+        endurance integer not null,
+        maneuverability integer not null,
+        typeName varchar(255) not null,
+        useCapacity integer not null,
+        idCosts integer not null,
+        primary key (idMissileMotor)
+    ) engine=InnoDB;
+
+    create table missileMotors (
+       idMissile integer not null,
+        idMissileMotor integer not null
+    ) engine=InnoDB;
+
     create table move (
        idMove integer not null auto_increment,
+        xCoordinateDestination decimal(19, 0),
+        yCoordinateDestination decimal(19, 0),
         moveDoneAtZero integer not null,
+        xCoordinateOrigin decimal(19, 0),
+        yCoordinateOrigin decimal(19, 0),
+        originalDuration integer,
+        idStarSystemDestination integer,
         idFleet integer not null,
+        idStarSystemOrigin integer,
         idUser integer not null,
-        startIdPlanet integer,
-        startIdStarsystem integer,
-        targetIdPlanet integer,
-        targetIdStarsystem integer,
         primary key (idMove),
-        check (startIdPlanet != targetIdPlanet)
+        check (xCoordinateOrigin != xCoordinateDestination && yCoordinateOrigin != yCoordinateDestination)
+    ) engine=InnoDB;
+
+    create table participatingUsers (
+       idBattleReport integer not null,
+        idUser integer not null,
+        primary key (idBattleReport, idUser)
     ) engine=InnoDB;
 
     create table passiveModule (
        idPassiveModule integer not null auto_increment,
         description varchar(255) not null,
-        effectValue integer not null,
         name varchar(30) not null,
         techLevel integer not null,
         useCapacity integer not null,
+        effectValue integer not null,
         calculationType varchar(255) not null,
         supportType varchar(255) not null,
         idCosts integer not null,
@@ -557,8 +723,8 @@
        idPlanet integer not null auto_increment,
         colonizedAt datetime(6),
         name varchar(30) not null,
-        xCoordinate integer not null,
-        yCoordinate integer not null,
+        xCoordinate decimal(19, 0),
+        yCoordinate decimal(19, 0),
         idMiningFactors integer not null,
         idOwner integer,
         idResourceDeposit integer,
@@ -569,10 +735,10 @@
     create table propulsion (
        idPropulsion integer not null auto_increment,
         description varchar(255) not null,
-        effectValue integer not null,
         name varchar(30) not null,
         techLevel integer not null,
         useCapacity integer not null,
+        effectValue integer not null,
         ftlCapable bit not null,
         idCosts integer not null,
         idResearch integer not null,
@@ -620,10 +786,10 @@
     create table sidewall (
        idSidewall integer not null auto_increment,
         description varchar(255) not null,
-        effectValue integer not null,
         name varchar(30) not null,
         techLevel integer not null,
         useCapacity integer not null,
+        effectValue integer not null,
         idCosts integer not null,
         idResearch integer not null,
         primary key (idSidewall)
@@ -632,8 +798,8 @@
     create table starSystem (
        idStarSystem integer not null auto_increment,
         name varchar(255) not null,
-        xCoordinate integer not null,
-        yCoordinate integer not null,
+        xCoordinate decimal(19, 0),
+        yCoordinate decimal(19, 0),
         primary key (idStarSystem)
     ) engine=InnoDB;
 
@@ -660,7 +826,7 @@
     create table user (
        idUser integer not null auto_increment,
         email varchar(50) not null,
-        password varchar(50) not null,
+        password varchar(255) not null,
         username varchar(30) not null,
         idAlliance integer,
         primary key (idUser)
@@ -668,13 +834,23 @@
 
     create table userMessage (
        idUserMessage integer not null auto_increment,
-        message varchar(255),
+        message varchar(255) not null,
         receivedAt datetime(6),
         sentAt datetime(6) not null,
-        subject varchar(255) not null,
-        idUserReceiver integer not null,
+        idMessageThread integer not null,
         idUserSender integer not null,
         primary key (idUserMessage)
+    ) engine=InnoDB;
+
+    create table warhead (
+       idWarhead integer not null auto_increment,
+        damageProjectionRange integer not null,
+        damageValue integer not null,
+        typeName varchar(255) not null,
+        useCapacity integer not null,
+        warheadType varchar(255) not null,
+        idCosts integer not null,
+        primary key (idWarhead)
     ) engine=InnoDB;
 
     create table warShip (
@@ -689,19 +865,18 @@
     create table weapon (
        idWeapon integer not null auto_increment,
         description varchar(255) not null,
-        effectValue integer not null,
         name varchar(30) not null,
         techLevel integer not null,
         useCapacity integer not null,
+        effectValue integer not null,
         alignmentType varchar(255) not null,
-        damageType varchar(255) not null,
-        effectiveRange integer not null,
-        sideWallPenetration decimal(19, 5),
+        amountDamageEmitter integer not null,
+        damageProjectionRange integer not null,
         weaponType varchar(255) not null,
         idCosts integer not null,
         idResearch integer not null,
-        idAmmunitionModule integer,
-        primary key (idWeapon)
+        primary key (idWeapon),
+        check (weaponType = 'BEAM' || weaponType = 'POINT_DEFENSE')
     ) engine=InnoDB;
 
     alter table alliance 
@@ -716,8 +891,11 @@
     alter table fleet 
        add constraint UK_duhimx7ydhmssl7vqp5w29yx0 unique (idMove);
 
-    alter table fleetComposition 
-       add constraint UK_9aa4dwwkuicd7n10h7jn471am unique (idWarShip);
+    alter table messageThread 
+       add constraint messageThread_UC unique (idUserOne, idUserTwo);
+
+    alter table missile 
+       add constraint UK_6gmi4lb4vkqblb63obx2991f unique (idAmmunitionModule);
 
     alter table planet 
        add constraint PLANET_UK unique (idStarSystem, idPlanet, xCoordinate, yCoordinate);
@@ -738,6 +916,11 @@
        add constraint UK_sb8bbouer5wak8vyiiy4pf2bx unique (username);
 
     alter table alignedFitting 
+       add constraint FKkhnl9hmtdgol96bsu6d5csqxg 
+       foreign key (idLauncher) 
+       references launcher (idLauncher);
+
+    alter table alignedFitting 
        add constraint FKt6aos80sh8332mepbkuwmo98i 
        foreign key (idWeapon) 
        references weapon (idWeapon);
@@ -746,6 +929,16 @@
        add constraint FKgdp5e1ylgswr29e2d5b7uhib 
        foreign key (idShipClass) 
        references shipClass (idShipClass);
+
+    alter table allowedMissiles 
+       add constraint FKhp9tc55hay9lojn6swpo6q4kv 
+       foreign key (idMissile) 
+       references missile (idMissile);
+
+    alter table allowedMissiles 
+       add constraint FK1dns3uxovqh388wtp38xk3l8p 
+       foreign key (idLauncher) 
+       references launcher (idLauncher);
 
     alter table ammunitionFitting 
        add constraint FKmj2nxtrg5h9np8ugn7jre0v4f 
@@ -776,6 +969,16 @@
        add constraint FKrb3h67mjdni459t4j1y8b7sw5 
        foreign key (idResearch) 
        references research (idResearch);
+
+    alter table battleReport 
+       add constraint FKr6smkmpvrxxus80181d1gwekl 
+       foreign key (idStarSystem) 
+       references starSystem (idStarSystem);
+
+    alter table battleReport 
+       add constraint FKktnc29kf1wrmrnbihghs9gmdp 
+       foreign key (idTick) 
+       references tick (idTick);
 
     alter table building 
        add constraint FK5vart3g8xv4gkgagwxxwyiuqi 
@@ -828,13 +1031,8 @@
        references move (idMove);
 
     alter table fleet 
-       add constraint FKh6yguwrqsu1kah359o77c1b8h 
-       foreign key (idPlanet) 
-       references planet (idPlanet);
-
-    alter table fleet 
-       add constraint FKtv4xu7x5k69o40m38jmf2lip 
-       foreign key (idStarSystem) 
+       add constraint FK7p0cvm6ul1v1w1vqcljs63i61 
+       foreign key (idStarSystemLocation) 
        references starSystem (idStarSystem);
 
     alter table fleet 
@@ -846,16 +1044,6 @@
        add constraint FKckq55cmimjpois3mst803atuy 
        foreign key (idResourceDeposit) 
        references resourceDeposit (idResourceDeposit);
-
-    alter table fleetComposition 
-       add constraint FK9v3ldmrdaym225uw9487vw2ek 
-       foreign key (idWarShip) 
-       references warShip (idWarShip);
-
-    alter table fleetComposition 
-       add constraint FKfk2nrx1fso8buadj6v4sw1j04 
-       foreign key (idFleet) 
-       references fleet (idFleet);
 
     alter table hull 
        add constraint FK65udyybp7syxvga5evxn8olhc 
@@ -907,10 +1095,90 @@
        foreign key (idOwner) 
        references user (idUser);
 
+    alter table launcher 
+       add constraint FKpxevsicliklfnl6mycvl75sv9 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
+
+    alter table launcher 
+       add constraint FKdesag5bovcaxav76r4ln2occl 
+       foreign key (idResearch) 
+       references research (idResearch);
+
+    alter table launcher 
+       add constraint FKekm6qvnxv0b0y293v8h0ayjhm 
+       foreign key (idAmmunitionModule) 
+       references ammunitionModule (idAmmunitionModule);
+
+    alter table lossRole 
+       add constraint FK1vibi3ssk79l85twyhbb7go47 
+       foreign key (idOwner) 
+       references user (idUser);
+
+    alter table lossRole 
+       add constraint FK8h7svfuglblma48qsswn540qi 
+       foreign key (idShipClass) 
+       references shipClass (idShipClass);
+
+    alter table lossRole 
+       add constraint FKht8txlbmvrw4o3y42jpa6t4e4 
+       foreign key (idBattleReport) 
+       references battleReport (idBattleReport);
+
+    alter table messageThread 
+       add constraint FK1d5qqscr6uidy4lithqwkfcsb 
+       foreign key (idUserOne) 
+       references user (idUser);
+
+    alter table messageThread 
+       add constraint FKlcfh5cw1nqv8howd22b9emwbf 
+       foreign key (idUserTwo) 
+       references user (idUser);
+
     alter table miningFactorsComposition 
        add constraint FK7pw467msglkrl51uo8uu6v6l6 
        foreign key (idMiningFactors) 
        references miningFactors (idMiningFactors);
+
+    alter table missile 
+       add constraint FKdhk8trxq7c36hid883mj4p7us 
+       foreign key (idAmmunitionModule) 
+       references ammunitionModule (idAmmunitionModule);
+
+    alter table missile 
+       add constraint FK2y4rvixlct3ljky430p3bmwad 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
+
+    alter table missile 
+       add constraint FK6hqn2wt7gk1myp1ew4i29r3ss 
+       foreign key (idResearch) 
+       references research (idResearch);
+
+    alter table missile 
+       add constraint FKhgp8bhvbmvaefgws7b1t0km7k 
+       foreign key (idWarhead) 
+       references warhead (idWarhead);
+
+    alter table missileMotor 
+       add constraint FK6q2owmplw15x287lnle7mdeae 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
+
+    alter table missileMotors 
+       add constraint FKqkfi44aomg87boaduno2fg3oi 
+       foreign key (idMissileMotor) 
+       references missileMotor (idMissileMotor);
+
+    alter table missileMotors 
+       add constraint FKtqaarx478fl1pb7q6snbay2g1 
+       foreign key (idMissile) 
+       references missile (idMissile);
+
+    alter table move 
+       add constraint FKmcefsl29wdpj7xqe9790o0mch 
+       foreign key (idStarSystemDestination) 
+       references starSystem (idStarSystem);
 
     alter table move 
        add constraint FKg65nht3m74odamnrqiv1cdyl6 
@@ -918,29 +1186,24 @@
        references fleet (idFleet);
 
     alter table move 
+       add constraint FK1y6v1eof54uci3p3b6mduv6sr 
+       foreign key (idStarSystemOrigin) 
+       references starSystem (idStarSystem);
+
+    alter table move 
        add constraint FKm0l3o2yx8pq8hu2bww8maoa98 
        foreign key (idUser) 
        references user (idUser);
 
-    alter table move 
-       add constraint FKa1bs79m293x3ok5ose0jli0r9 
-       foreign key (startIdPlanet) 
-       references planet (idPlanet);
+    alter table participatingUsers 
+       add constraint FK5dp3ok6qf3ohs6s1s7f11k34h 
+       foreign key (idUser) 
+       references user (idUser);
 
-    alter table move 
-       add constraint FK66wwxap7hrv54faje90tmrbb0 
-       foreign key (startIdStarsystem) 
-       references starSystem (idStarSystem);
-
-    alter table move 
-       add constraint FKfhqgwhapcw4i2ydno4u1qlq77 
-       foreign key (targetIdPlanet) 
-       references planet (idPlanet);
-
-    alter table move 
-       add constraint FKr8obp03f86v1f41icg4xro1rl 
-       foreign key (targetIdStarsystem) 
-       references starSystem (idStarSystem);
+    alter table participatingUsers 
+       add constraint FKlreg972gg0pgmmoudxk12sy3g 
+       foreign key (idBattleReport) 
+       references battleReport (idBattleReport);
 
     alter table passiveModule 
        add constraint FKrr0cmtk4xqkbtajq5s17apmsu 
@@ -1073,14 +1336,19 @@
        references alliance (idAlliance);
 
     alter table userMessage 
-       add constraint FK5mctsyrt040xp1wgghtk6lxxr 
-       foreign key (idUserReceiver) 
-       references user (idUser);
+       add constraint FKgo5irmd79mx2cg76wtaoaxbxa 
+       foreign key (idMessageThread) 
+       references messageThread (idMessageThread);
 
     alter table userMessage 
        add constraint FK6xs6p78lala5xtd4eoe4xxrnv 
        foreign key (idUserSender) 
        references user (idUser);
+
+    alter table warhead 
+       add constraint FK4m9pxktw6iywf5aecc1n0xm4f 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
 
     alter table warShip 
        add constraint FK3kovfkp6003a62x5ff41h44hw 
@@ -1106,8 +1374,3 @@
        add constraint FKo22n18dgjpraqosj7nkamrnvb 
        foreign key (idResearch) 
        references research (idResearch);
-
-    alter table weapon 
-       add constraint FKpteqae0l9alndx95maj9fkhvj 
-       foreign key (idAmmunitionModule) 
-       references ammunitionModule (idAmmunitionModule);

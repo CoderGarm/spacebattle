@@ -1,0 +1,55 @@
+package de.yuga.spacebattle.rest.dto.spacecrafts.details;
+
+import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.rest.dto.spacecrafts.modules.AmmunitionModule;
+import io.swagger.annotations.ApiModelProperty;
+
+import javax.annotation.Nonnull;
+
+/**
+ * The ammunition fitting represents an ammunition module and their amount.
+ */
+public class AmmunitionFitting {
+
+    /**
+     * The ammunition module.
+     */
+    @Nonnull
+    @ApiModelProperty(required = true, value = "The ammunition module.")
+    private AmmunitionModule ammunitionModule;
+
+    /**
+     * The amount of this weapon with the given {@link AmmunitionModule}.
+     */
+    @ApiModelProperty(required = true, value = "The amount of ammunition modules.")
+    private int amount;
+
+    public AmmunitionFitting() {
+    }
+
+    public AmmunitionFitting(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting ammunitionFitting) {
+        Preconditions.checkNotNull(ammunitionFitting, "ammunitionFitting shouldn't be null!");
+
+        this.ammunitionModule = new de.yuga.spacebattle.rest.dto.spacecrafts.modules.AmmunitionModule(ammunitionFitting.getAmmunitionModule());
+        this.amount = ammunitionFitting.getAmount();
+    }
+
+    @Nonnull
+    public AmmunitionModule getAmmunitionModule() {
+        return ammunitionModule;
+    }
+
+    public void setAmmunitionModule(@Nonnull AmmunitionModule ammunitionModule) {
+        Preconditions.checkNotNull(ammunitionModule, "ammunitionModule shouldn't be null!");
+
+        this.ammunitionModule = ammunitionModule;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public void setAmount(int amount) {
+        this.amount = amount;
+    }
+}

@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 
 import javax.annotation.Nonnull;
 
-public enum EModuleType {
+public enum EModuleType implements HasIconName {
 
     WEAPON("Attack", "attack"),
     ARMOR("Armor", "armor"),
@@ -35,6 +35,7 @@ public enum EModuleType {
 
 
     @Nonnull
+    @Override
     public String getIconName() {
         return iconName;
     }

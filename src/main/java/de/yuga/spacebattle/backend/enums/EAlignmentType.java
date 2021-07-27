@@ -9,7 +9,7 @@ public enum EAlignmentType {
      * If it is aligned to the bow or the stern.
      * These aligned weapons are mainly used in a hunt.
      */
-    HUNTING_ALIGNMENT,
+    CHASE_ALIGNMENT,
 
     /**
      * If it is aligned to the broad sides.

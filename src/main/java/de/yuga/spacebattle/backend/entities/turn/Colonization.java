@@ -1,10 +1,10 @@
 package de.yuga.spacebattle.backend.entities.turn;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifySBUserException;
+import de.yuga.spacebattle.NotifyUserException;
+import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
@@ -18,7 +18,7 @@ import javax.validation.constraints.NotNull;
  */
 @NamedQueries({
         @NamedQuery(name = "Colonization.getAll", query = "SELECT p FROM Colonization p"),
-        @NamedQuery(name = "Colonization.getAllForUser", query = "SELECT p FROM Colonization p WHERE p.user = :user")
+        @NamedQuery(name = "Colonization.getAllForUser", query = "SELECT p FROM Colonization p WHERE p.user.id = :idUser")
 })
 @Entity
 @Table(name = "colonization")
@@ -54,7 +54,7 @@ public class Colonization extends AbstractEntityKey {
 
     public Colonization(@Nonnull final User user,
                         @Nonnull final Planet target,
-                        @Nonnull final CrewRequirementDTO crewRequirement,
+                        @Nonnull final CrewRequirement crewRequirement,
                         final int doneAtZero) {
         Preconditions.checkNotNull(user, "fleet shouldn't be null!");
         Preconditions.checkNotNull(target, "target shouldn't be null!");
@@ -62,7 +62,7 @@ public class Colonization extends AbstractEntityKey {
         this.user = user;
         this.target = target;
         this.doneAtZero = doneAtZero;
-        // do the switch because this are costs up to here but the running colonization knows all the people as deposit
+        // do the switch because these are costs up to here but the running colonization knows all the people as deposit
         this.costs.updatePopulation(crewRequirement.toggleToDepositMode());
     }
 
@@ -92,7 +92,7 @@ public class Colonization extends AbstractEntityKey {
 
     public void setDoneAtZero(final int moveDoneAtZero) {
         if (moveDoneAtZero >= this.doneAtZero) {
-            throw new NotifySBUserException("You cannot increase the traffic time until you have warp scrambler");
+            throw new NotifyUserException("You cannot increase the traffic time until you have warp scrambler");
         }
         this.doneAtZero = moveDoneAtZero;
     }

@@ -2,7 +2,7 @@ package de.yuga.spacebattle.backend.entities;
 
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifySBUserException;
+import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.researches.Research;
@@ -21,12 +21,15 @@ import java.math.BigDecimal;
 /**
  * Represents the payload of a job.
  *
- * <code>What</code> is at work and <code>how much</code>.
+ * <code>What</code> is at work and <code>how much</code> will be constructed.
  * The parent {@link Job} contains the information about the <code>where</code> and <code>for whom</code>.
  */
 @Embeddable
 public class Constructable {
 
+    /**
+     * The resource type which must be invested to construct <code>this</code>.
+     */
     @Nonnull
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -133,11 +136,12 @@ public class Constructable {
             return resources;
         }
 
-        if (shipClass != null) {
+        if (shipClass != null && amountShips != null) {
             if (shipClass.getHull() == null) {
-                throw new NotifySBUserException("You need a hull for your ship, really!");
+                throw new NotifyUserException("You need a hull for your ship, really!");
             }
-            return shipClass.getCostsOverall();
+            final ResourceDeposit costsOverall = shipClass.getCostsOverall();
+            return JobCostsCalculator.getCostsForLevel(costsOverall, amountShips);
         }
 
         if (building != null && targetLevel != null) {
@@ -146,7 +150,7 @@ public class Constructable {
             return JobCostsCalculator.getCostsForLevel(costs, targetLevel);
         }
 
-        throw new NotifySBUserException("You have tried something interesting. May be you should talk to an admin.");
+        throw new NotifyUserException("You have tried something interesting. May be you should talk to an admin.");
     }
 
 

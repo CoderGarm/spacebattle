@@ -1,14 +1,14 @@
 package de.yuga.spacebattle.backend.services.account;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifySBUserException;
+import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.entities.account.UserMessage;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
-import de.yuga.spacebattle.backend.repositories.account.UserMessageRepository;
 import de.yuga.spacebattle.backend.repositories.account.UserRepository;
+import de.yuga.spacebattle.rest.config.security.WebUserDetails;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,30 +22,14 @@ public class UserService {
     @Nonnull
     private final UserRepository userRepository;
 
-    @Nonnull
-    private final UserMessageRepository userMessageRepository;
-
     @Nullable
     private User login;
 
     @Autowired
-    public UserService(@Nonnull final UserRepository userRepository,
-                       @Nonnull final UserMessageRepository userMessageRepository) {
+    public UserService(@Nonnull final UserRepository userRepository) {
         Preconditions.checkNotNull(userRepository, "userRepository shouldn't be null!");
-        Preconditions.checkNotNull(userMessageRepository, "userMessageRepository should not be null");
 
         this.userRepository = userRepository;
-        this.userMessageRepository = userMessageRepository;
-    }
-
-    /**
-     * Is falsely annotated as non-null but if the user is logged in then the user is logged in.
-     *
-     * @return the logged in user or null
-     */
-    @Nonnull
-    public User getLoggedInUser() {
-        return login;
     }
 
     /**
@@ -56,7 +40,7 @@ public class UserService {
     @Nonnull
     public User refresh() {
         if (login == null) {
-            throw new NotifySBUserException("you should be logged in, think about that.");
+            throw new NotifyUserException("you should be logged in, think about that.");
         }
         return find(login).orElse(login);
     }
@@ -93,30 +77,45 @@ public class UserService {
     }
 
     @Nonnull
-    public User findWithResearches(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-
-        return Objects.requireNonNull(userRepository.findWithResearchesAndJobs(user));
+    public User findWithResearches(final int idUser) {
+        return Objects.requireNonNull(userRepository.findWithResearchesAndJobs(idUser));
     }
 
+    @Nonnull
     public Map<Research, Integer> getResearchesForUser(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
 
-        return userRepository.getResearchesForUser(user);
+        return userRepository.getResearchesForUser(user.getId());
+    }
+
+    @Nonnull
+    public Map<Research, Integer> getResearchesForUser(final int idUser) {
+        return userRepository.getResearchesForUser(idUser);
+    }
+
+    @Nonnull
+    public Set<StarSystem> getKnownStarSystems(final int idUser) {
+        return userRepository.getKnownStarSystems(idUser);
     }
 
     @Nonnull
     public Set<StarSystem> getKnownStarSystems(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
 
-        return userRepository.getKnownStarSystems(user);
+        return userRepository.getKnownStarSystems(user.getId());
     }
 
-    @Nonnull
+
+    @Nullable
+    public User getWithKnownStarSystems(final int idUser) {
+        return userRepository.findWithKnownStarSystems(idUser);
+    }
+
+    @Nullable
     public User getWithKnownStarSystems(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
 
-        return userRepository.findWithKnownStarSystems(user);
+        return userRepository.findWithKnownStarSystems(user.getId());
     }
 
     @Nonnull
@@ -132,7 +131,7 @@ public class UserService {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
         Preconditions.checkNotNull(researches, "researches shouldn't be null!");
 
-        final User user = findWithResearches(entity);
+        final User user = findWithResearches(entity.getId());
         for (Research research : researches) {
             Integer level = user.getResearches().get(research);
             if (level == null) {
@@ -155,6 +154,7 @@ public class UserService {
     }
 
     @Nonnull
+    @Deprecated(since = "productive")
     public User createUser(@Nonnull final String username,
                            @Nonnull final String password,
                            @Nonnull final String email) {
@@ -171,44 +171,93 @@ public class UserService {
         return userRepository.getColonizations(user);
     }
 
-    /**
-     * Returns all sent messages of the current logged in user.
-     *
-     * @return empty if no user is logged in or no messages were sent.
-     */
-    public List<UserMessage> getAllSentMessages() {
-        return userMessageRepository.findByUserSender(login);
+    @Nullable
+    public User getWithResearches(final int idUser) {
+        return userRepository.getWithResearches(idUser);
     }
 
     /**
-     * Returns all received messages of the current logged in user.
+     * Checks is a user has the specific research already unlocked.
      *
-     * @return empty if no user is logged in or no messages were received.
+     * @param user     the user
+     * @param research the research
+     * @return <code>true</code> if the user already has this research unlocked, <code>false</code> otherwise
      */
-    public List<UserMessage> getAllReceivedMessages() {
-        return userMessageRepository.findByUserReceiver(login);
+    public boolean isResearchUnlocked(@Nonnull final User user, @Nonnull final Research research) {
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
+        Preconditions.checkNotNull(research, "research shouldn't be null!");
+
+        return userRepository.isResearchUnlocked(user, research);
     }
 
     /**
-     * Saves a {@link UserMessage}.
+     * Fetches the current level of a given research by this user.
      *
-     * @param msg the msg
+     * @param user     the user
+     * @param research the research
+     * @return the current level
      */
-    public void saveUserMessage(@Nonnull UserMessage msg) {
-        Preconditions.checkNotNull(msg, "UserMessage should not be null");
-        Preconditions.checkNotNull(msg.getUserReceiver(), "userReceiver should not be null");
-        Preconditions.checkNotNull(msg.getSubject(), "subject should not be null");
-        msg.setSentAt();
-        userMessageRepository.save(msg);
+    public int getLevelForResearch(@Nonnull final User user, @Nonnull final Research research) {
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
+        Preconditions.checkNotNull(research, "research shouldn't be null!");
+
+        return userRepository.getLevelForResearch(user, research);
+    }
+
+    @Nonnull
+    public List<User> findLikeUsername(@Nullable final String username) {
+        if (StringUtils.isEmpty(username)) {
+            return new ArrayList<>();
+        }
+        return userRepository.findLikeUsername(username);
+    }
+
+    @Nonnull
+    public Optional<WebUserDetails> findByUsername(@Nullable final String username) {
+        if (StringUtils.isEmpty(username)) {
+            return Optional.empty();
+        }
+        final User byUsername = userRepository.findByUsername(username);
+        if (byUsername == null) {
+            return Optional.empty();
+        }
+        return Optional.of(new WebUserDetails(byUsername));
     }
 
     /**
-     * Updates a {@link UserMessage}.
+     * Deletes an user by it's ID.
      *
-     * @param msg the msg
+     * @param idUser the valid id
+     * @return <code>true</code> if the user does not exist.
      */
-    public void updateUserMessage(@Nonnull UserMessage msg) {
-        Preconditions.checkNotNull(msg, "UserMessage should not be null");
-        userMessageRepository.save(msg);
+    public boolean delete(final int idUser) {
+        Preconditions.checkArgument(idUser > 1, "idUser must be valid!");
+
+        userRepository.deleteById(idUser);
+        return userRepository.existsById(idUser);
+    }
+
+    /**
+     * Checks if the username is already in use.
+     *
+     * @param username the username to check
+     * @return <code>true</code> if the username is blocked, <code>false</code> otherwise
+     */
+    public boolean existsUsername(@Nonnull final String username) {
+        Preconditions.checkNotNull(username, "username shouldn't be null!");
+
+        return userRepository.existsUsername(username);
+    }
+
+    /**
+     * Checks if the eMail address is already in use.
+     *
+     * @param email the eMail to check
+     * @return <code>true</code> if the eMail address is blocked, <code>false</code> otherwise
+     */
+    public boolean existsEMail(@Nonnull final String email) {
+        Preconditions.checkNotNull(email, "email shouldn't be null!");
+
+        return userRepository.existsEMail(email);
     }
 }

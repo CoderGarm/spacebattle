@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 
 import javax.annotation.Nonnull;
 
-public enum EBuildingType {
+public enum EBuildingType implements HasIconName {
 
     BUILDING("Generic Building", "building"),
     ;
@@ -31,6 +31,7 @@ public enum EBuildingType {
 
 
     @Nonnull
+    @Override
     public String getIconName() {
         return iconName;
     }

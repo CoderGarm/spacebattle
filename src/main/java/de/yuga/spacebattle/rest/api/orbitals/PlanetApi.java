@@ -1,0 +1,216 @@
+package de.yuga.spacebattle.rest.api.orbitals;
+
+import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.turn.Job;
+import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.services.buildings.BuildingService;
+import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
+import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.backend.services.turn.JobService;
+import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstructionOrder;
+import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstructionSelection;
+import de.yuga.spacebattle.rest.dto.error.FrontendError;
+import de.yuga.spacebattle.rest.dto.orbitals.Orbit;
+import de.yuga.spacebattle.rest.dto.orbitals.Planet;
+import de.yuga.spacebattle.rest.dto.orbitals.PlanetList;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Nonnull;
+import javax.annotation.security.RolesAllowed;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
+
+@Api(tags = "PlanetApi")
+@RolesAllowed("ROLE_USER") // todo how to add direct roles
+@RestController
+@RequestMapping("/" + PRIVATE_BASE_ENDPOINT + "/" + PlanetApi.ENDPOINT + "/")
+public class PlanetApi {
+
+    @Nonnull
+    public static final String ENDPOINT = "planet";
+    private static final String GROUND_CONSTRUCTION_POSSIBLE_ENDPOINT = "groundConstructionPossible";
+    private static final String GROUND_BUILD_IT_ENDPOINT = "groundConstructionBuild";
+    private static final String SHIPYARD_POSSIBLE_ENDPOINT = "shipyardConstructionPossible";
+    private static final String SHIPYARD_BUILD_IT_ENDPOINT = "shipyardConstructionBuild";
+    private static final String GET_PLANET_BY_COORDINATES_ENDPOINT = "byCoord";
+
+    @Nonnull
+    private final PlanetService planetService;
+
+    @Nonnull
+    private final BuildingService buildingService;
+
+    @Nonnull
+    private final JobService jobService;
+
+    @Nonnull
+    private final ShipClassService shipClassService;
+
+    @Autowired
+    public PlanetApi(@Nonnull final PlanetService planetService,
+                     @Nonnull final BuildingService buildingService,
+                     @Nonnull final JobService jobService,
+                     @Nonnull final ShipClassService shipClassService) {
+        Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
+        Preconditions.checkNotNull(buildingService, "buildingService shouldn't be null!");
+        Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
+        Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
+
+        this.planetService = planetService;
+        this.buildingService = buildingService;
+        this.jobService = jobService;
+        this.shipClassService = shipClassService;
+    }
+
+    @GetMapping(value = "{idUser}")
+    @ApiOperation(value = "Get all planets which are colonized by a user.", nickname = "getPlanetByUsers")
+    @Operation(
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PlanetList.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getPlanets(@PathVariable("idUser") final int idUser) {
+        final List<de.yuga.spacebattle.backend.entities.orbitals.Planet> all = planetService.findAllColonizedBy(idUser);
+        return ResponseEntity.ok(new PlanetList(all));
+    }
+
+    @GetMapping(value = GROUND_CONSTRUCTION_POSSIBLE_ENDPOINT + "/{idPlanet}")
+    @ApiOperation(value = "Asks if a building could be build on this planet.", nickname = "isConstructionPossibleOnPlanet")
+    @Operation(
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "you can build something or not",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> isConstructionPossible(@PathVariable("idPlanet") final int idPlanet) {
+        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetService.find(idPlanet);
+        if (planet == null) {
+            return ResponseEntity.ok(false);
+        }
+        final boolean buildingPossible = planet.getConstructionByResource(EResourceType.CONSTRUCTION).stream().anyMatch(c -> c.getJobs().isEmpty());
+        if (buildingPossible) {
+            return ResponseEntity.ok(true);
+        } else {
+            return ResponseEntity.ok(false);
+        }
+    }
+
+    @GetMapping(value = GROUND_BUILD_IT_ENDPOINT + "/{idPlanet}/{idBuilding}")
+    @ApiOperation(value = "Starts a construction on this planet.", nickname = "buildBuilding")
+    @Operation(
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successfully started",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> buildConstruction(@PathVariable("idPlanet") final int idPlanet, @PathVariable("idBuilding") final int idBuilding) {
+        final Job job = jobService.createConstructionYardJob(idPlanet, idBuilding);
+        if (job != null) {
+            return ResponseEntity.ok(true);
+        }
+        return ResponseEntity.ok(false);
+
+    }
+
+    @GetMapping(value = SHIPYARD_POSSIBLE_ENDPOINT + "/{idPlanet}")
+    @ApiOperation(value = "Asks if a ship could be build on this planet.", nickname = "isShipyardJobPossibleOnPlanet")
+    @Operation(
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "you can build something or not",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> isShipyardJobPossibleOnPlanet(@PathVariable("idPlanet") final int idPlanet) {
+        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetService.find(idPlanet);
+        if (planet == null) {
+            return ResponseEntity.ok(false);
+        }
+        final boolean buildingPossible = planet.getConstructionByResource(EResourceType.ORBITAL_CONSTRUCTION).stream().anyMatch(c -> c.getJobs().isEmpty());
+        if (buildingPossible) {
+            return ResponseEntity.ok(true);
+        } else {
+            return ResponseEntity.ok(false);
+        }
+    }
+
+    @PostMapping(value = SHIPYARD_BUILD_IT_ENDPOINT)
+    @ApiOperation(value = "Starts a construction on this planet.", nickname = "buildShip")
+    @Operation(
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successfully started",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> buildShip(@RequestBody final ShipyardConstructionOrder shipyardConstructionOrder) {
+        Preconditions.checkNotNull(shipyardConstructionOrder, "shipyardConstructionOrder shouldn't be null!");
+
+        final int idPlanet = shipyardConstructionOrder.getIdPlanet();
+        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetService.find(idPlanet);
+        if (planet == null) {
+            throw new NotifyWebUserException("There is no planet, sorry");
+        }
+        final List<ShipyardConstructionSelection> shipJobPayload = shipyardConstructionOrder.getShipJobPayload();
+        final List<Integer> idShipClasses = shipJobPayload.stream().map(ShipyardConstructionSelection::getIdShipClass).collect(Collectors.toList());
+
+        final List<ShipClass> foundClasses = shipClassService.find(idShipClasses);
+        final Map<Integer, ShipClass> foundClassesByID = foundClasses.stream().collect(Collectors.toMap(AbstractEntityKey::getId, sc -> sc));
+
+        final Map<ShipClass, Integer> jobLoad = shipJobPayload.stream()
+                .collect(Collectors.toMap(entry -> foundClassesByID.get(entry.getIdShipClass()), ShipyardConstructionSelection::getAmount));
+
+        final Set<Job> shipyardJobs = jobService.createShipyardJob(planet, jobLoad);
+        if (!shipyardJobs.isEmpty()) {
+            return ResponseEntity.ok(true);
+        }
+        return ResponseEntity.ok(false);
+    }
+
+    @PostMapping(value = GET_PLANET_BY_COORDINATES_ENDPOINT + "/{idStarSystem}")
+    @ApiOperation(value = "Gets a planet which is matching to the given coordinates.", nickname = "getPlanetByCoordinates")
+    @Operation(
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successfully started",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Planet.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getPlanetByCoordinates(@RequestBody @Nonnull final Orbit orbit, @PathVariable("idStarSystem") final int idStarSystem) {
+        PreconditionWebHelper.checkNotNull(orbit, "The given orbit shouldn't be empty!");
+
+        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetService.findByCoordinates(idStarSystem, orbit.getxCoordinate().intValue(), orbit.getyCoordinate().intValue());
+        if (planet != null) {
+            return ResponseEntity.ok(new Planet(planet));
+        }
+        return ResponseEntity.ok().build();
+
+    }
+}

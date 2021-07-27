@@ -8,8 +8,12 @@ import java.util.List;
 
 public interface CustomJobRepository {
 
+    @Nonnull
     List<Job> findAllJobs();
 
     @Nonnull
     List<Job> findAllJobsForConstruction(@Nonnull final Construction facility);
+
+    @Nonnull
+    List<Job> findAllJobsByPlanet(final int idPlanet);
 }

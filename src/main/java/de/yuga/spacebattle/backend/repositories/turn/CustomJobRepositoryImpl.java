@@ -16,6 +16,7 @@ public class CustomJobRepositoryImpl implements CustomJobRepository {
     @PersistenceContext
     private EntityManager em;
 
+    @Nonnull
     @Override
     public List<Job> findAllJobs() {
         return em.createNamedQuery("Job.getAll", Job.class).getResultList();
@@ -29,5 +30,12 @@ public class CustomJobRepositoryImpl implements CustomJobRepository {
         return em.createNamedQuery("Job.getAllForConstruction", Job.class)
                 .setParameter("facility", facility)
                 .getResultList();
+    }
+
+    @Nonnull
+    @Override
+    public List<Job> findAllJobsByPlanet(final int idPlanet) {
+        return em.createNamedQuery("Job.getAllForPlanet", Job.class)
+                .setParameter("idPlanet", idPlanet).getResultList();
     }
 }

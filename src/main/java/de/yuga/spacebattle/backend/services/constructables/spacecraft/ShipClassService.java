@@ -5,16 +5,23 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClassComparator;
 import de.yuga.spacebattle.backend.repositories.spacecraft.ShipClassRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class ShipClassService {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(ShipClassService.class);
 
     @Nonnull
     private final ShipClassRepository shipClassRepository;
@@ -102,6 +109,22 @@ public class ShipClassService {
     }
 
     /**
+     * Marks a ship class as deleted.
+     *
+     * @param idShipClass the class to mark as deleted
+     */
+    public void delete(final int idUser, final int idShipClass) {
+        final ShipClass shipClass = find(idShipClass);
+        if (shipClass != null) {
+            if (shipClass.getOwner().getId() == idUser) {
+                delete(shipClass);
+            } else {
+                LOGGER.info("Deleting ship class not possible while user is not the owner idUser '{}' for idShipClass '{}'", idUser, idShipClass);
+            }
+        }
+    }
+
+    /**
      * A {@link ShipClass} must be deleted with the deletion marker because it is necessary to leave the entities
      * existent to use deleted ship fittings in existing fleets.
      *
@@ -118,5 +141,27 @@ public class ShipClassService {
             runner = runner.getPredecessor();
         }
         shipClassRepository.saveAll(toDelete);
+    }
+
+    @Nonnull
+    public List<ShipClass> find(@Nonnull final Collection<Integer> idShipClasses) {
+        Preconditions.checkNotNull(idShipClasses, "idShipClasses shouldn't be null!");
+
+        final Iterable<ShipClass> allById = shipClassRepository.findAllById(idShipClasses);
+        return StreamSupport.stream(allById.spliterator(), false).collect(Collectors.toList());
+    }
+
+    /**
+     * Checks if the given class name is known for the user.<br>
+     * The name must be between 3 and 30 characters.
+     *
+     * @param idOwner   the owner's id
+     * @param className the class name to check
+     * @return <code>true</code> if there are ship classes for this owner and name present, <code>false</code> otherwise
+     */
+    public boolean checkIfClassNameIsFree(final int idOwner, @Nonnull final String className) {
+        Preconditions.checkNotNull(className, "className shouldn't be null!");
+
+        return shipClassRepository.checkIfClassNameIsFree(idOwner, className);
     }
 }

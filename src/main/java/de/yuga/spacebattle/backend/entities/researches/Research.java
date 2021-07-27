@@ -4,9 +4,9 @@ package de.yuga.spacebattle.backend.entities.researches;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
-import de.yuga.spacebattle.backend.entities.HasNameAndDescription;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
@@ -72,6 +72,10 @@ public class Research extends AbstractEntityKey {
     @Nonnull
     @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
     private final Set<ElectronicWarfare> unlocksElectronicWarfare = new HashSet<>();
+
+    @Nonnull
+    @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
+    private final Set<Missile> unlocksMissiles = new HashSet<>();
 
     public Research() {
     }
@@ -143,26 +147,14 @@ public class Research extends AbstractEntityKey {
         return unlocksElectronicWarfare;
     }
 
+    @Nonnull
+    public Set<Missile> getUnlocksMissiles() {
+        return unlocksMissiles;
+    }
+
     @Nullable
     public Research getUnlockedThrough() {
         return unlockedThrough;
-    }
-
-    /**
-     * Returns all the unlocked things by name and description.
-     *
-     * @return the unlocked stuff
-     */
-    public Set<HasNameAndDescription> getUnlocks() {
-        final Set<HasNameAndDescription> nameAndDescriptions = new HashSet<>();
-        nameAndDescriptions.addAll(getUnlocksBuildings());
-        nameAndDescriptions.addAll(getUnlocksHulls());
-        nameAndDescriptions.addAll(getUnlocksArmor());
-        nameAndDescriptions.addAll(getUnlocksElectronicWarfare());
-        nameAndDescriptions.addAll(getUnlocksPropulsion());
-        nameAndDescriptions.addAll(getUnlocksSidewall());
-        nameAndDescriptions.addAll(getUnlocksWeapons());
-        return nameAndDescriptions;
     }
 
     @Override

@@ -21,19 +21,19 @@ import java.util.Set;
 public class Alliance extends AbstractEntityKey {
 
     @Nonnull
-    @NotNull(message = "name must not be null")
+    @NotNull
     @Size(min = 1, max = 30)
     @Column(unique = true)
     private String name;
 
     @Nonnull
-    @NotNull(message = "code must not be null")
+    @NotNull
     @Size(min = 1, max = 30)
     @Column(unique = true)
     private String code;
 
     @Nonnull
-    @NotNull(message = "members must not be null")
+    @NotNull
     @OneToMany(mappedBy = "alliance", fetch = FetchType.EAGER)
     private final Set<User> members = new HashSet<>();
 
@@ -74,5 +74,20 @@ public class Alliance extends AbstractEntityKey {
     @Nonnull
     public Set<User> getMembers() {
         return members;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Alliance)) return false;
+
+        Alliance alliance = (Alliance) o;
+
+        return id == alliance.getId();
+    }
+
+    @Override
+    public int hashCode() {
+        return 37 * id;
     }
 }

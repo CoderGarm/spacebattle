@@ -1,15 +1,16 @@
 package de.yuga.spacebattle.backend.services.turn;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifySBUserException;
+import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
+import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
-import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
+import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EEducationType;
@@ -18,7 +19,8 @@ import de.yuga.spacebattle.backend.repositories.turn.ColonizationRepository;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
-import de.yuga.spacebattle.gui.vaadin.turn.resource.ResourceCostAmountDTO;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import de.yuga.spacebattle.rest.dto.turn.resources.ResourceAmount;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,7 +84,12 @@ public class ColonizationService {
     public List<Colonization> findAllForUser(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
 
-        return repository.findAllForUser(user);
+        return repository.findAllForUser(user.getId());
+    }
+
+    @Nonnull
+    public List<Colonization> findAllForUser(final int idUser) {
+        return repository.findAllForUser(idUser);
     }
 
     @Nullable
@@ -110,21 +117,24 @@ public class ColonizationService {
      *
      * @param user       the user who starts the colonization
      * @param toColonize the planet to colonize
+     * @return the created colonization
      */
     @Transactional(rollbackFor = Exception.class)
-    public void startColonizingPlanet(@Nonnull final User user, @Nonnull final Planet toColonize) {
+    public Colonization startColonizingPlanet(@Nonnull final User user, @Nonnull final Planet toColonize) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
         Preconditions.checkNotNull(toColonize, "toColonize shouldn't be null!");
 
-        final ResourceCostAmountDTO costs = ColonizationCostCalculator.calculateColonizationCost(toColonize);
+        final ResourceAmount costs = ColonizationCostCalculator.calculateColonizationCost(toColonize);
         final Planet mainPlanet = planetService.findMainPlanet(user);
         final ResourceDeposit debitorDeposit = mainPlanet.getResourceDeposit();
-        // the costs must be validated by the instance before
-        if (debitorDeposit.getResourceAmountByType(costs.getResourceType()) >= costs.getAmount()) {
-            debitorDeposit.updateResource(costs.getResourceType(), costs.getAmount());
-        } else {
-            throw new NotifySBUserException("Unfortunately you have not enough credits on your home planet.");
+
+        final ResourceDeposit c = new ResourceDeposit(EDepositType.COSTS);
+        c.setAbsoluteResourceValue(costs.getRealResourceType(), costs.getAmount());
+        final PayingPossibleResult payingPossible = debitorDeposit.isPayingPossible(c);
+        if (!payingPossible.isValid()) {
+            throw new NotifyWebUserException("This colonization is to expensive.", payingPossible);
         }
+        debitorDeposit.updateResource(costs.getRealResourceType(), costs.getAmount());
         final Map<EEducationType, Long> requiredCrew = new HashMap<>();
         requiredCrew.put(EEducationType.NONE, 200L);
         requiredCrew.put(EEducationType.MILITARY_MK_I, 50L);
@@ -132,18 +142,19 @@ public class ColonizationService {
         requiredCrew.put(EEducationType.CIVIL_MK_I, 100L);
         requiredCrew.put(EEducationType.CIVIL_MK_II, 200L);
         requiredCrew.put(EEducationType.CIVIL_MK_III, 500L);
-        final CrewRequirementDTO crewRequirement = new CrewRequirementDTO(requiredCrew, EDepositType.COSTS);
+        final CrewRequirement crewRequirement = new CrewRequirement(requiredCrew, EDepositType.COSTS);
 
-        if (debitorDeposit.getCrewRequirement().isReducingPopulationPossible(crewRequirement)) {
+        if (debitorDeposit.isReducingPopulationPossible(crewRequirement)) {
             debitorDeposit.updatePopulation(crewRequirement);
         } else {
-            throw new NotifySBUserException("Unfortunately you have not enough population on your home planet.");
+            throw new NotifyUserException("Unfortunately you have not enough population on your home planet.");
         }
 
         final Colonization colonization = new Colonization(user, toColonize, crewRequirement, 10);
         save(colonization);
         planetService.save(mainPlanet);
         userService.save(user);
+        return colonization;
     }
 
     /**
@@ -161,7 +172,7 @@ public class ColonizationService {
         final Planet planet = colonization.getTarget();
         planet.setOwner(owner);
         final ResourceDeposit creditorDeposit = planet.getResourceDeposit();
-        final CrewRequirementDTO requiredCrew = colonization.getCosts().getCrewRequirement();
+        final CrewRequirement requiredCrew = colonization.getCosts().getCrewRequirement();
         creditorDeposit.updatePopulation(requiredCrew);
         final Building constructionYard = buildingService.findBuildingByProductionType(EResourceType.CONSTRUCTION);
         final Construction constructedConstructionYard = new Construction(planet, constructionYard, 1);
@@ -180,12 +191,38 @@ public class ColonizationService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void addToKnownSystems(@Nonnull final User user, @Nonnull final StarSystem starSystem) {
-        final ResourceCostAmountDTO costs = ColonizationCostCalculator.calculateInformationCost(starSystem);
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
+        Preconditions.checkNotNull(starSystem, "starSystem shouldn't be null!");
+
+        final ResourceAmount costs = ColonizationCostCalculator.calculateInformationCost(starSystem);
         final Planet mainPlanet = planetService.findMainPlanet(user);
         final ResourceDeposit resourceDeposit = mainPlanet.getResourceDeposit();
-        // the costs must be validated by the instance before
-        resourceDeposit.updateResource(costs.getResourceType(), costs.getAmount());
+
+        PayingPossibleResult payingPossibleResult = validateCostsForSystemInformation(mainPlanet, starSystem);
+        if (!payingPossibleResult.isValid()) {
+            throw new NotifyWebUserException("Buying this systems information is to expensive for you.", payingPossibleResult);
+        }
+
+        resourceDeposit.updateResource(costs.getRealResourceType(), costs.getAmount());
         user.addKnownStarSystems(starSystem);
         userService.save(user);
+    }
+
+    /**
+     * Checks if the main planet of the user can pay the rent.
+     *
+     * @param mainPlanet the main planet of the user
+     * @param starSystem the star system to buy information for
+     * @return <code>true</code> if paying is possible, <code>false</code> otherwise
+     */
+    public PayingPossibleResult validateCostsForSystemInformation(@Nonnull final Planet mainPlanet, @Nonnull final StarSystem starSystem) {
+        Preconditions.checkNotNull(mainPlanet, "mainPlanet shouldn't be null!");
+        Preconditions.checkNotNull(starSystem, "starSystem shouldn't be null!");
+
+        final ResourceAmount costs = ColonizationCostCalculator.calculateInformationCost(starSystem);
+        final ResourceDeposit resourceDeposit = mainPlanet.getResourceDeposit();
+        ResourceDeposit c = new ResourceDeposit(EDepositType.COSTS);
+        c.setAbsoluteResourceValue(costs.getRealResourceType(), costs.getAmount());
+        return resourceDeposit.isPayingPossible(c);
     }
 }

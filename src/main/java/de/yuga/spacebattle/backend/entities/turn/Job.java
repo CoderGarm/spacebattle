@@ -1,8 +1,7 @@
 package de.yuga.spacebattle.backend.entities.turn;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifySBUserException;
-import de.yuga.spacebattle.backend.calculator.resource.ResourceControlCalculator;
+import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.Constructable;
 import de.yuga.spacebattle.backend.entities.account.User;
@@ -14,13 +13,12 @@ import org.hibernate.annotations.Check;
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 @NamedQueries({
         @NamedQuery(name = "Job.getAll", query = "SELECT p FROM Job p"),
         @NamedQuery(name = "Job.getAllByOwner", query = "SELECT p FROM Job p WHERE p.owner = :owner"),
-        @NamedQuery(name = "Job.getAllForConstruction", query = "SELECT p FROM Job p WHERE p.facility = :facility")
+        @NamedQuery(name = "Job.getAllForConstruction", query = "SELECT p FROM Job p WHERE p.facility = :facility"),
+        @NamedQuery(name = "Job.getAllForPlanet", query = "SELECT p FROM Job p WHERE p.facility.planet.id = :idPlanet")
 })
 @Entity
 @Table(name = "job")
@@ -77,17 +75,7 @@ public class Job extends AbstractEntityKey {
         this.owner = planet.getOwner();
         this.facility = facility;
         this.constructable = constructable;
-        this.jobDoneAtZero = calculateRemainingTicks();
-    }
-
-    private int calculateRemainingTicks() {
-        final long resourceAmountByType = constructable.getJobCosts().getResourceAmountByType(constructable.getResourceType());
-        final Planet planet = facility.getPlanet();
-        final Long tickOutputForResourceType = ResourceControlCalculator.getTickOutput(planet, constructable.getResourceType());
-        if (tickOutputForResourceType == null) {
-            throw new NotifySBUserException("Talk to the admin, your building was probably destroyed!");
-        }
-        return new BigDecimal(resourceAmountByType).divide(new BigDecimal(tickOutputForResourceType), 0, RoundingMode.UP).intValue();
+        this.jobDoneAtZero = JobCostsCalculator.calculateRemainingTicks(facility, constructable);
     }
 
     @Nonnull

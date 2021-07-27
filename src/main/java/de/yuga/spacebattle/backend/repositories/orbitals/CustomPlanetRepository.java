@@ -9,16 +9,24 @@ import java.util.List;
 
 public interface CustomPlanetRepository {
 
+    @Nonnull
     List<Planet> findAllPlanets();
 
+    @Nonnull
     List<Planet> findAllOwnedPlanets();
 
     @Nonnull
-    List<Planet> findAllPlanetsColonizedBy(@Nonnull final User owner);
+    List<Planet> findAllPlanetsColonizedByUser(@Nonnull final User owner);
+
+    @Nonnull
+    List<Planet> findAllPlanetsColonizedByID(final int idUser);
 
     @Nullable
     Planet findResearchPlanet(@Nonnull final User owner);
 
     @Nonnull
-    Planet findMainPlanetForUser(@Nonnull final User owner);
+    Planet findMainPlanetForUser(final int idUser);
+
+    @Nullable
+    Planet findByCoordinates(final int idStarSystem, final int xCoordinate, final int yCoordinate);
 }

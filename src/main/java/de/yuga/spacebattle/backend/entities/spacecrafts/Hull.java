@@ -2,16 +2,16 @@ package de.yuga.spacebattle.backend.entities.spacecrafts;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
+import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
-import de.yuga.spacebattle.backend.entities.HasNameAndDescription;
-import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EHullType;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
+import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -24,21 +24,22 @@ import javax.validation.constraints.Size;
 })
 @Entity
 @Table(name = "hull")
+@Check(constraints = "overallConstructionCapacity >= constructionCapacity + constructionCapacityBow + constructionCapacityStern + constructionCapacityBroadsides")
 @AttributeOverride(name = "id", column = @Column(name = "idHull"))
-public class Hull extends AbstractEntityKey implements HasNameAndDescription {
+public class Hull extends AbstractEntityKey {
 
     @Nonnull
-    @NotNull(message = "name must not be null")
+    @NotNull
     @Size(min = 1, max = 30)
     private String name;
 
     /**
-     * The level represents the size of a ship, bigger levels represents bigger hulls.
+     * The overall CC represents the size of a hull in metric tons.
      */
-    private int level;
+    private int overallConstructionCapacity;
 
     /**
-     * This is used by all other {@link BaseModule}s which has no {@link EWeaponAlignment}.
+     * This is used by all other {@link BaseModuleWithEffectValue}s which has no {@link EWeaponAlignment}.
      */
     private int constructionCapacity;
 
@@ -63,7 +64,7 @@ public class Hull extends AbstractEntityKey implements HasNameAndDescription {
     private final ResourceDeposit costs = ResourceDepositInitializerCalculator.initializeResourceDeposit(Hull.class, EDepositType.COSTS);
 
     @Nonnull
-    @NotNull(message = "description must not be null")
+    @NotNull
     private String description;
 
     @Nonnull
@@ -82,7 +83,7 @@ public class Hull extends AbstractEntityKey implements HasNameAndDescription {
     }
 
     public Hull(@Nonnull final String name,
-                final int level,
+                final int overallConstructionCapacity,
                 final int constructionCapacity,
                 final int constructionCapacityBow,
                 final int constructionCapacityStern,
@@ -90,7 +91,7 @@ public class Hull extends AbstractEntityKey implements HasNameAndDescription {
                 @Nonnull final String description,
                 @Nonnull final Research unlockedThrough,
                 @Nonnull final EHullType hullType,
-                @Nonnull final CrewRequirementDTO crewRequirement) {
+                @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
@@ -98,7 +99,7 @@ public class Hull extends AbstractEntityKey implements HasNameAndDescription {
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
         this.name = name;
-        this.level = level;
+        this.overallConstructionCapacity = overallConstructionCapacity;
         this.constructionCapacity = constructionCapacity;
         this.constructionCapacityBow = constructionCapacityBow;
         this.constructionCapacityStern = constructionCapacityStern;
@@ -110,13 +111,12 @@ public class Hull extends AbstractEntityKey implements HasNameAndDescription {
     }
 
     @Nonnull
-    @Override
     public String getName() {
         return name;
     }
 
-    public int getLevel() {
-        return level;
+    public int getOverallConstructionCapacity() {
+        return overallConstructionCapacity;
     }
 
     public int getConstructionCapacity() {
@@ -141,7 +141,6 @@ public class Hull extends AbstractEntityKey implements HasNameAndDescription {
     }
 
     @Nonnull
-    @Override
     public String getDescription() {
         return description + " hull type: " + hullType.getDescription();
     }

@@ -124,7 +124,7 @@ public class ShipDataValidator implements ConstraintValidator<ShipValidator, Shi
 
             int constructionCapacity = hull.getConstructionCapacity();
             if (usedCapacity > constructionCapacity) {
-                errorMap.put("ConstructionCapacity", "Capacity is overridden.");
+                errorMap.put("ConstructionCapacity", "Capacity is exceeded.");
             }
 
             final Set<AlignedFitting> fittings = shipClass.getFittings();
@@ -132,30 +132,33 @@ public class ShipDataValidator implements ConstraintValidator<ShipValidator, Shi
             int usedCapacityBow = 0;
             for (AlignedFitting f : bowFittings) {
                 addUsedCapacity(usedCapacityBow, f.getWeapon());
+                addUsedCapacity(usedCapacityBow, f.getLauncher());
             }
             final int constructionCapacityBow = hull.getConstructionCapacityBow();
             if (usedCapacityBow > constructionCapacityBow) {
-                errorMap.put("ConstructionCapacity Bow", "Capacity is overridden.");
+                errorMap.put("ConstructionCapacity Bow", "Capacity is exceeded.");
             }
 
             final Set<AlignedFitting> sternFittings = fittings.stream().filter(f -> EWeaponAlignment.STERN == f.getWeaponAlignment()).collect(Collectors.toSet());
             int usedCapacityStern = 0;
             for (AlignedFitting f : sternFittings) {
                 addUsedCapacity(usedCapacityStern, f.getWeapon());
+                addUsedCapacity(usedCapacityStern, f.getLauncher());
             }
             final int constructionCapacityStern = hull.getConstructionCapacityStern();
             if (usedCapacityStern > constructionCapacityStern) {
-                errorMap.put("ConstructionCapacity Stern", "Capacity is overridden.");
+                errorMap.put("ConstructionCapacity Stern", "Capacity is exceeded.");
             }
 
             final Set<AlignedFitting> broadsideFittings = fittings.stream().filter(f -> EWeaponAlignment.BROADSIDE == f.getWeaponAlignment()).collect(Collectors.toSet());
             int usedCapacityBroadside = 0;
             for (AlignedFitting f : broadsideFittings) {
                 addUsedCapacity(usedCapacityBroadside, f.getWeapon());
+                addUsedCapacity(usedCapacityBroadside, f.getLauncher());
             }
             final int constructionCapacityBroadsides = hull.getConstructionCapacityBroadsides();
             if (usedCapacityBroadside > constructionCapacityBroadsides) {
-                errorMap.put("ConstructionCapacity Broadsides", "Capacity is overridden.");
+                errorMap.put("ConstructionCapacity Broadsides", "Capacity is exceeded.");
             }
         }
     }
@@ -178,8 +181,8 @@ public class ShipDataValidator implements ConstraintValidator<ShipValidator, Shi
         }
     }
 
-    private static int addUsedCapacity(int usedCapacity, @Nullable final BaseModule baseModule) {
-        usedCapacity += baseModule != null ? baseModule.getUseCapacity() : 0;
+    private static int addUsedCapacity(int usedCapacity, @Nullable final BaseModule baseModuleWithEffectValue) {
+        usedCapacity += baseModuleWithEffectValue != null ? baseModuleWithEffectValue.getUseCapacity() : 0;
         return usedCapacity;
     }
 

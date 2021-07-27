@@ -22,13 +22,4 @@ public class AbstractEntityKey implements Serializable {
     public int getId() {
         return id;
     }
-
-    /**
-     * Heavily fucked up method. Use it only if you have no other way.
-     *
-     * @param id the id
-     */
-    public void setId(final int id) {
-        this.id = id;
-    }
 }

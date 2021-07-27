@@ -1,8 +1,8 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.modules;
 
-import de.yuga.spacebattle.backend.entities.crew.CrewRequirementDTO;
+import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -18,7 +18,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "propulsion")
 @AttributeOverride(name = "id", column = @Column(name = "idPropulsion"))
-public class Propulsion extends BaseModule {
+public class Propulsion extends BaseModuleWithEffectValue {
 
     /**
      * If this propulsion module provides the ability to travel faster than light.
@@ -36,7 +36,7 @@ public class Propulsion extends BaseModule {
                       final int effectValue,
                       final int techLevel,
                       final boolean ftlCapable,
-                      @Nonnull final CrewRequirementDTO crewRequirement) {
+                      @Nonnull final CrewRequirement crewRequirement) {
         super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement);
         this.ftlCapable = ftlCapable;
     }

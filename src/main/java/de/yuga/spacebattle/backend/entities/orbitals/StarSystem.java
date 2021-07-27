@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.entities.orbitals;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.enums.EStarClassType;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -38,11 +39,17 @@ public class StarSystem extends AbstractEntityKey {
     @Nonnull
     @Size(max = 20)
     @OneToMany(mappedBy = "system", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    // todo remove eager if vaadin is replaced
     private final Set<Planet> planets = new HashSet<>();
 
     @Nonnull
     @OneToMany(mappedBy = "orbit.system", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    // todo remove eager if vaadin is replaced
     private Set<Fleet> fleets = new HashSet<>();
+
+    @Nonnull
+    @Transient
+    private final EStarClassType starClassType = EStarClassType.CLASS_G3;
 
     public StarSystem() {
     }
@@ -87,6 +94,11 @@ public class StarSystem extends AbstractEntityKey {
         this.orbit = orbit;
     }
 
+    @Nonnull
+    public EStarClassType getStarClassType() {
+        return starClassType;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -94,7 +106,7 @@ public class StarSystem extends AbstractEntityKey {
 
         StarSystem that = (StarSystem) o;
 
-        return orbit.equals(that.orbit);
+        return orbit.equals(that.orbit); // todo change it, it's stupid but true
     }
 
     @Override

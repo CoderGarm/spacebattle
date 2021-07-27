@@ -11,6 +11,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class StarSystemService {
@@ -27,6 +28,12 @@ public class StarSystemService {
     @Nonnull
     public List<StarSystem> findAll() {
         return starsystemRepository.findAllStarSystems();
+    }
+
+    @Nonnull
+    public List<StarSystem> findByIds(List<Integer> fleetIDs) {
+        final Iterable<StarSystem> allById = starsystemRepository.findAllById(fleetIDs);
+        return StreamSupport.stream(allById.spliterator(), false).collect(Collectors.toList());
     }
 
     @Nonnull
@@ -49,11 +56,9 @@ public class StarSystemService {
     @Nonnull
     @Deprecated(since = "productive environment")
     public StarSystem createStarSystem(@Nonnull final String name,
-                                       @Nonnull final Integer xCoordinate,
-                                       @Nonnull final Integer yCoordinate) {
+                                       final int xCoordinate,
+                                       final int yCoordinate) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
-        Preconditions.checkNotNull(xCoordinate, "xCoordinate shouldn't be null!");
-        Preconditions.checkNotNull(yCoordinate, "yCoordinate shouldn't be null!");
 
         return starsystemRepository.save(new StarSystem(name, new Orbit(xCoordinate, yCoordinate)));
     }

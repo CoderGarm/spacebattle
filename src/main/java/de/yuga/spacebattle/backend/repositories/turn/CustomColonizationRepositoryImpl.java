@@ -1,11 +1,8 @@
 package de.yuga.spacebattle.backend.repositories.turn;
 
-import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
@@ -22,11 +19,9 @@ public class CustomColonizationRepositoryImpl implements CustomColonizationRepos
     }
 
     @Override
-    public List<Colonization> findAllForUser(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-
+    public List<Colonization> findAllForUser(final int idUser) {
         return em.createNamedQuery("Colonization.getAllForUser", Colonization.class)
-                .setParameter("user", user)
+                .setParameter("idUser", idUser)
                 .getResultList();
     }
 }

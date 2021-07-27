@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 /**
  * This indicated what a type of ship is this hull for.
  */
-public enum EHullType {
+public enum EHullType implements HasIconName {
 
     // Warships
     LAC("LAC", false, false, "fighter", "light attack craft (11 to 21 thousand tons, no hyper capability)"),
@@ -74,6 +74,7 @@ public enum EHullType {
     }
 
     @Nonnull
+    @Override
     public String getIconName() {
         return iconName;
     }

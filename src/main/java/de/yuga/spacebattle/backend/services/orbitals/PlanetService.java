@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class PlanetService {
@@ -31,6 +33,12 @@ public class PlanetService {
     }
 
     @Nonnull
+    public List<Planet> findByIds(List<Integer> fleetIDs) {
+        final Iterable<Planet> allById = planetRepository.findAllById(fleetIDs);
+        return StreamSupport.stream(allById.spliterator(), false).collect(Collectors.toList());
+    }
+
+    @Nonnull
     public List<Planet> findAllColonized() {
         return planetRepository.findAllOwnedPlanets();
     }
@@ -39,7 +47,12 @@ public class PlanetService {
     public List<Planet> findAllColonizedBy(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
 
-        return planetRepository.findAllPlanetsColonizedBy(user);
+        return planetRepository.findAllPlanetsColonizedByUser(user);
+    }
+
+    @Nonnull
+    public List<Planet> findAllColonizedBy(final int idUser) {
+        return planetRepository.findAllPlanetsColonizedByID(idUser);
     }
 
     @Nullable
@@ -53,13 +66,16 @@ public class PlanetService {
     public Planet findMainPlanet(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
 
-        return planetRepository.findMainPlanetForUser(user);
+        return planetRepository.findMainPlanetForUser(user.getId());
+    }
+
+    @Nonnull
+    public Planet findMainPlanet(final int idUser) {
+        return planetRepository.findMainPlanetForUser(idUser);
     }
 
     @Nullable
-    public Planet find(@Nonnull final Integer idPlanet) {
-        Preconditions.checkNotNull(idPlanet, "idPlanet shouldn't be null!");
-
+    public Planet find(final int idPlanet) {
         return planetRepository.findById(idPlanet).orElse(null);
     }
 
@@ -84,12 +100,10 @@ public class PlanetService {
     @Deprecated(since = "productive environment")
     public Planet createPlanet(@Nonnull final String name,
                                @Nonnull final StarSystem system,
-                               @Nonnull final Integer xCoordinate,
-                               @Nonnull final Integer yCoordinate) {
+                               final int xCoordinate,
+                               final int yCoordinate) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(system, "system shouldn't be null!");
-        Preconditions.checkNotNull(xCoordinate, "xCoordinate shouldn't be null!");
-        Preconditions.checkNotNull(yCoordinate, "yCoordinate shouldn't be null!");
 
         return planetRepository.save(new Planet(null, name, system, new Orbit(xCoordinate, yCoordinate)));
     }
@@ -111,5 +125,10 @@ public class PlanetService {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
 
         return planetRepository.save(entity);
+    }
+
+    public Planet findByCoordinates(final int idStarSystem, final int xCoordinate, final int yCoordinate) {
+
+        return planetRepository.findByCoordinates(idStarSystem, xCoordinate, yCoordinate);
     }
 }

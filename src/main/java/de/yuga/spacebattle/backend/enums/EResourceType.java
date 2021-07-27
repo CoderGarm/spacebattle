@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 import static de.yuga.spacebattle.backend.enums.ECollectableType.*;
 
-public enum EResourceType {
+public enum EResourceType implements HasIconName {
 
     CONSTRUCTION(FORFEITABLE, "Construction Point", "Construction Points", "construction"),
     ORBITAL_CONSTRUCTION(FORFEITABLE, "Shipyard Construction Point", "Shipyard Construction Points", "orbitalconstruction"),
@@ -62,6 +62,7 @@ public enum EResourceType {
     }
 
     @Nonnull
+    @Override
     public String getIconName() {
         return iconName;
     }

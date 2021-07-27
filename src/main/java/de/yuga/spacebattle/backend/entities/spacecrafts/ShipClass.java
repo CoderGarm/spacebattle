@@ -4,13 +4,11 @@ package de.yuga.spacebattle.backend.entities.spacecrafts;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Armor;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Sidewall;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.validators.ShipValidator;
@@ -22,6 +20,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -30,7 +29,8 @@ import java.util.stream.Collectors;
 @NamedQueries({
         @NamedQuery(name = "ShipClass.getAll", query = "SELECT a FROM ShipClass a WHERE a.isDeleted = false"),
         @NamedQuery(name = "ShipClass.getAllByOwner", query = "SELECT a FROM ShipClass a WHERE a.owner = :owner AND a.isDeleted = false"),
-        @NamedQuery(name = "ShipClass.getAllLatestByOwner", query = "SELECT a FROM ShipClass a WHERE a.owner = :owner AND a.successor IS NULL AND a.isDeleted = false")
+        @NamedQuery(name = "ShipClass.getAllLatestByOwner", query = "SELECT a FROM ShipClass a WHERE a.owner = :owner AND a.successor IS NULL AND a.isDeleted = false"),
+        @NamedQuery(name = "ShipClass.checkIfNameIsFree", query = "SELECT COUNT(a) FROM ShipClass a WHERE a.owner.id = :idOwner AND UPPER(a.name) = UPPER(:className)"),
 })
 @Entity
 @Table(name = "shipClass")
@@ -39,27 +39,27 @@ import java.util.stream.Collectors;
 public class ShipClass extends AbstractEntityKey {
 
     @Nonnull
-    @NotNull(message = "owner should not be null")
+    @NotNull
     @ManyToOne(optional = false)
     @JoinColumn(name = "idOwner")
     private User owner;
 
     /**
-     * Must not unique or unique for user because at least the ships in a ancestry row could have the same names.
+     * Must not unique or unique for user because at least the ships in an ancestry row could have the same names.
      */
     @Nonnull
-    @NotNull(message = "name should not be null")
+    @NotNull
     @Size(min = 3, max = 30, message = "name should be between 3 and 30 characters long")
     private String name;
 
     @Nullable
-    @NotNull(message = "hull should not be null")
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "idHull", updatable = false)
     private Hull hull;
 
     @Nullable
-    @NotNull(message = "propulsion must not be null")
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "idPropulsion")
     private Propulsion propulsion;
@@ -190,10 +190,17 @@ public class ShipClass extends AbstractEntityKey {
         if (sidewall != null) {
             updateCosts(clonedDeposit, supportTypeToModule, sidewall.getCosts());
         }
-        fittings.forEach(s -> {
-            int amount = s.getAmount();
+        fittings.forEach(fitting -> {
+            int amount = fitting.getAmount();
             for (; amount >= 0; amount--) {
-                updateCosts(clonedDeposit, supportTypeToModule, s.getWeapon().getCosts());
+                final Weapon weapon = fitting.getWeapon();
+                final Launcher launcher = fitting.getLauncher();
+                if (weapon != null) {
+                    updateCosts(clonedDeposit, supportTypeToModule, weapon.getCosts());
+                }
+                if (launcher != null) {
+                    updateCosts(clonedDeposit, supportTypeToModule, launcher.getCosts());
+                }
             }
         });
         ammunitionFittings.forEach(s -> {
@@ -249,7 +256,7 @@ public class ShipClass extends AbstractEntityKey {
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
 
         return fittings.stream()
-                .filter(e -> weaponType == e.getWeapon().getWeaponType())
+                .filter(e -> weaponType == e.getWeaponType())
                 .collect(Collectors.toSet());
     }
 
@@ -260,7 +267,7 @@ public class ShipClass extends AbstractEntityKey {
         Preconditions.checkNotNull(weaponAlignment, "weaponAlignment shouldn't be null!");
 
         return fittings.stream()
-                .filter(e -> weaponType == e.getWeapon().getWeaponType() && weaponAlignment == e.getWeaponAlignment())
+                .filter(e -> weaponType == e.getWeaponType() && weaponAlignment == e.getWeaponAlignment())
                 .collect(Collectors.toSet());
     }
 
@@ -483,6 +490,122 @@ public class ShipClass extends AbstractEntityKey {
         isDeleted = deleted;
     }
 
+    /**
+     * Checks if the class is capable of faster than light flights.
+     *
+     * @return <code>true</code> if the class can drive faster than light, <code>false</code> otherwise
+     */
+    public boolean isFTLCapable() {
+        if (propulsion == null) {
+            return false;
+        }
+        return propulsion.isFtlCapable();
+    }
+
+    @Nullable
+    public ElectronicWarfare getElectronicWarfare() {
+        return electronicWarfare;
+    }
+
+    public void setElectronicWarfare(@Nullable ElectronicWarfare electronicWarfare) {
+        this.electronicWarfare = electronicWarfare;
+    }
+
+    /**
+     * Returns the maximum weapon range of the ship class.
+     *
+     * @return the maximum weapon range
+     */
+    public BigDecimal getMaximumWeaponRange() {
+
+        final List<BigDecimal> sortedRanged = fittings.stream()
+                .map(fitting -> {
+                    BigDecimal damageProjectionRange = BigDecimal.ZERO;
+                    final Weapon weapon = fitting.getWeapon();
+                    if (weapon != null) {
+                        damageProjectionRange = weapon.getDamageProjectionRange();
+                    }
+                    final Launcher launcher = fitting.getLauncher();
+                    if (launcher != null) {
+                        final Missile missile = launcher.getAmmunitionModule().getMissile();
+                        damageProjectionRange = missile.getMissileRange();
+                    }
+                    return damageProjectionRange;
+                })
+                .sorted(BigDecimal::compareTo).collect(Collectors.toList());
+        if (sortedRanged.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        return sortedRanged.get(sortedRanged.size() - 1);
+    }
+
+    /**
+     * Returns the maximum weapon range of the ship class.
+     *
+     * @param weaponType the weapon type to filter
+     * @return the maximum weapon range
+     */
+    public BigDecimal getMaximumWeaponRangePerType(@Nonnull final EWeaponType weaponType) {
+        Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
+
+        final List<BigDecimal> sortedRanged = fittings.stream()
+                .filter(fitting -> weaponType == fitting.getWeaponType())
+                .map(fitting -> {
+                    BigDecimal damageProjectionRange = BigDecimal.ZERO;
+                    final Weapon weapon = fitting.getWeapon();
+                    if (weapon != null) {
+                        damageProjectionRange = weapon.getDamageProjectionRange();
+                    }
+                    final Launcher launcher = fitting.getLauncher();
+                    if (launcher != null) {
+                        final Missile missile = launcher.getAmmunitionModule().getMissile();
+                        damageProjectionRange = missile.getMissileRange();
+                    }
+                    return damageProjectionRange;
+                })
+                .sorted(BigDecimal::compareTo).collect(Collectors.toList());
+        if (sortedRanged.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        return sortedRanged.get(sortedRanged.size() - 1);
+    }
+
+    /**
+     * Returns the damage which can be applied by this class to the given range in meter.
+     *
+     * @param lowerBound the lower boundary
+     * @param upperBound the upper boundary
+     * @return the damage value
+     */
+    public long getDamagePerRange(@Nonnull final BigDecimal lowerBound, @Nonnull final BigDecimal upperBound) {
+        Preconditions.checkNotNull(lowerBound, "lowerBound shouldn't be null!");
+        Preconditions.checkNotNull(upperBound, "upperBound shouldn't be null!");
+
+        return fittings.stream()
+                .map(fitting -> fitting.getDamagePerRange(lowerBound, upperBound))
+                .mapToLong(Long::longValue).sum();
+    }
+
+    /**
+     * Returns the damage which can be applied by this class to the given range in meter.
+     *
+     * @param lowerBound the lower boundary
+     * @param upperBound the upper boundary
+     * @return the damage value
+     */
+    public long getDamagePerRangePerWeaponType(@Nonnull final BigDecimal lowerBound,
+                                               @Nonnull final BigDecimal upperBound,
+                                               @Nonnull final EWeaponType weaponType) {
+        Preconditions.checkNotNull(lowerBound, "lowerBound shouldn't be null!");
+        Preconditions.checkNotNull(upperBound, "upperBound shouldn't be null!");
+        Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
+
+        return fittings.stream()
+                .filter(fitting -> weaponType == fitting.getWeaponType())
+                .map(fitting -> fitting.getDamagePerRange(lowerBound, upperBound))
+                .mapToLong(Long::longValue).sum();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -495,14 +618,5 @@ public class ShipClass extends AbstractEntityKey {
     @Override
     public int hashCode() {
         return 31 * id;
-    }
-
-    @Nullable
-    public ElectronicWarfare getElectronicWarfare() {
-        return electronicWarfare;
-    }
-
-    public void setElectronicWarfare(@Nullable ElectronicWarfare electronicWarfare) {
-        this.electronicWarfare = electronicWarfare;
     }
 }

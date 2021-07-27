@@ -1,0 +1,31 @@
+package de.yuga.spacebattle.rest.dto.turn.resources;
+
+import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.enums.EResourceType;
+import io.swagger.annotations.ApiModelProperty;
+
+import javax.annotation.Nonnull;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class MiningFactors {
+
+    @Nonnull
+    @ApiModelProperty(required = true, value = "The factor by resource type.")
+    private final List<ResourceAmount> resources;
+
+    public MiningFactors(@Nonnull final de.yuga.spacebattle.backend.entities.turn.resources.MiningFactors miningFactors) {
+        Preconditions.checkNotNull(miningFactors, "miningFactors shouldn't be null!");
+
+        this.resources = Arrays.stream(EResourceType.values()).map(eResourceType -> {
+            final long resourceAmountByType = miningFactors.getResourceAmountByType(eResourceType);
+            return new ResourceAmount(eResourceType, resourceAmountByType);
+        }).collect(Collectors.toList());
+    }
+
+    @Nonnull
+    public List<ResourceAmount> getResources() {
+        return resources;
+    }
+}

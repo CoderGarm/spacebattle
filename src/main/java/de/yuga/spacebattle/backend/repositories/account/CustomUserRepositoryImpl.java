@@ -13,9 +13,9 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import javax.persistence.Query;
+import java.math.BigInteger;
+import java.util.*;
 
 @Service
 public class CustomUserRepositoryImpl implements CustomUserRepository {
@@ -36,11 +36,10 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
         Preconditions.checkNotNull(password, "password shouldn't be null!");
 
         try {
-            final User u = em.createNamedQuery("User.login", User.class)
-                    .setParameter("username", StringUtils.upperCase(username))
-                    .setParameter("password", StringUtils.upperCase(password))
+            return em.createNamedQuery("User.login", User.class)
+                    .setParameter("username", username)
+                    .setParameter("password", password)
                     .getSingleResult();
-            return u;
         } catch (final NoResultException e) {
             return null;
         }
@@ -54,8 +53,8 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
 
         try {
             return em.createNamedQuery("User.findByUsernameAndEmail", User.class)
-                    .setParameter("username", StringUtils.upperCase(username))
-                    .setParameter("email", StringUtils.upperCase(email))
+                    .setParameter("username", username)
+                    .setParameter("email", email)
                     .getSingleResult();
         } catch (final NoResultException e) {
             return null;
@@ -64,41 +63,49 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
 
     @Nonnull
     @Override
-    public User findWithResearchesAndJobs(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-
+    public User findWithResearchesAndJobs(final int idUser) {
         return em.createNamedQuery("User.getWithResearchesAndJobs", User.class)
-                .setParameter("user", user)
+                .setParameter("idUser", idUser)
+                .getSingleResult();
+    }
+
+    @Nullable
+    @Override
+    public User findWithKnownStarSystems(final int idUser) {
+        return em.createNamedQuery("User.getWithKnownStarSystems", User.class)
+                .setParameter("idUser", idUser)
                 .getSingleResult();
     }
 
     @Nonnull
     @Override
-    public User findWithKnownStarSystems(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
+    public Map<Research, Integer> getResearchesForUser(final int idUser) {
+        try {
+            return em.createNamedQuery("User.getWithResearches", User.class)
+                    .setParameter("idUser", idUser)
+                    .getSingleResult().getResearches();
+        } catch (final NoResultException e) {
+            return new HashMap<>();
+        }
+    }
 
-        return em.createNamedQuery("User.getWithKnownStarSystems", User.class)
-                .setParameter("user", user)
-                .getSingleResult();
+    @Nullable
+    @Override
+    public User getWithResearches(final int idUser) {
+        try {
+            return em.createNamedQuery("User.getWithResearches", User.class)
+                    .setParameter("idUser", idUser)
+                    .getSingleResult();
+        } catch (final NoResultException e) {
+            return null;
+        }
     }
 
     @Nonnull
     @Override
-    public Map<Research, Integer> getResearchesForUser(@Nonnull User user) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-
-        return em.createNamedQuery("User.getWithResearches", User.class)
-                .setParameter("user", user)
-                .getSingleResult().getResearches();
-    }
-
-    @Nonnull
-    @Override
-    public Set<StarSystem> getKnownStarSystems(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-
+    public Set<StarSystem> getKnownStarSystems(int idUser) {
         return em.createNamedQuery("User.getWithKnownStarSystems", User.class)
-                .setParameter("user", user)
+                .setParameter("idUser", idUser)
                 .getSingleResult().getKnownStarSystems();
     }
 
@@ -108,5 +115,75 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
         return em.createNamedQuery("User.getColonizations", User.class)
                 .setParameter("user", user)
                 .getSingleResult().getColonizations();
+    }
+
+    @Override
+    public boolean isResearchUnlocked(@Nonnull User user, @Nonnull Research research) {
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
+        Preconditions.checkNotNull(research, "research shouldn't be null!");
+
+        // cannot execute namedNative query because spring fuck up
+        final Query nativeQuery = em.createNativeQuery("SELECT COUNT(ur.idResearch) FROM unlockedResearch ur WHERE ur.idUser = :idUser AND ur.idResearch = :idResearch");
+        final Object singleResult = nativeQuery.setParameter("idUser", user.getId())
+                .setParameter("idResearch", research.getId())
+                .getSingleResult();
+        return ((BigInteger) singleResult).intValue() > 0;
+    }
+
+    @Override
+    public int getLevelForResearch(@Nonnull final User user, @Nonnull final Research research) {
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
+        Preconditions.checkNotNull(research, "research shouldn't be null!");
+
+        // cannot execute namedNative query because spring fuck up
+        final Query nativeQuery = em.createNativeQuery("SELECT ur.level FROM unlockedResearch ur WHERE ur.idUser = :idUser AND ur.idResearch = :idResearch");
+        final Object singleResult;
+        try {
+            singleResult = nativeQuery.setParameter("idUser", user.getId())
+                    .setParameter("idResearch", research.getId())
+                    .getSingleResult();
+        } catch (final NoResultException e) {
+            return 0;
+        }
+        return ((BigInteger) singleResult).intValue();
+    }
+
+    @Nonnull
+    @Override
+    public List<User> findLikeUsername(@Nullable final String username) {
+        if (StringUtils.isEmpty(username)) {
+            return new ArrayList<>();
+        }
+        return em.createNamedQuery("User.findByLikeUsername", User.class)
+                .setParameter("username", username + "%").getResultList();
+    }
+
+    @Override
+    public boolean existsUsername(@Nonnull final String username) {
+        Preconditions.checkNotNull(username, "username shouldn't be null!");
+
+        return !em.createNamedQuery("User.findByUsernameExact", Integer.class)
+                .setParameter("username", username).getResultList().isEmpty();
+    }
+
+    @Override
+    public boolean existsEMail(@Nonnull final String eMail) {
+        Preconditions.checkNotNull(eMail, "eMail shouldn't be null!");
+
+        return !em.createNamedQuery("User.findByEMailExact", Integer.class)
+                .setParameter("email", eMail).getResultList().isEmpty();
+    }
+
+    @Nullable
+    @Override
+    public User findByUsername(@Nonnull final String username) {
+        Preconditions.checkNotNull(username, "username shouldn't be null!");
+
+        try {
+            return em.createNamedQuery("User.findByUsername", User.class)
+                    .setParameter("username", username.toUpperCase()).getSingleResult();
+        } catch (final NoResultException e) {
+            return null;
+        }
     }
 }
