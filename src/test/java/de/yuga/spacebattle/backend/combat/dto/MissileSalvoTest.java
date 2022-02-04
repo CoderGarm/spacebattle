@@ -236,7 +236,7 @@ class MissileSalvoTest {
         ReflectionTestUtils.setField(testObject, "position", positionMock);
         ReflectionTestUtils.setField(testObject, "missileSalvoHealthState", missileSalvoHealthStateMock);
 
-        final BigDecimal distance = BigDecimal.TEN;
+        final BigDecimal distance = BigDecimal.ONE;
         final long counterMissileRange = 5;
         // mock methods
         when(cageMock.getCurrentStateByFleet(targetMock)).thenReturn(fleetRoundStateMock);
