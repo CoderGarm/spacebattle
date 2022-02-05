@@ -208,13 +208,17 @@ public class CombatHandler {
         Preconditions.checkNotNull(actor, "actor shouldn't be null!");
         Preconditions.checkNotNull(target, "target shouldn't be null!");
 
-        final Orbit actorPos = cage.getCurrentStateByFleet(actor).getPosition();
+        final FleetRoundState actorState = cage.getCurrentStateByFleet(actor);
+        final Orbit actorPos = actorState.getPosition();
         final Orbit targetPos = cage.getCurrentStateByFleet(target).getPosition();
         final BigDecimal distance = actorPos.getDistance(targetPos);
         final BigDecimal maximumMissileRangeOne = actor.getMaximumWeaponRangePerType(EWeaponType.MISSILE);
         // todo real distance-to-chance-to-hit calculation
         if (distance.compareTo(maximumMissileRangeOne) <= 0) {
-            cage.addToFlyingMissileSalvos(new MissileSalvo(cage, actor, target));
+            final boolean hasShotsLeft = actorState.getFleetHealthState().hasShotsLeft();
+            if (hasShotsLeft) {
+                cage.addToFlyingMissileSalvos(new MissileSalvo(cage, actor, target));
+            }
         }
     }
 }

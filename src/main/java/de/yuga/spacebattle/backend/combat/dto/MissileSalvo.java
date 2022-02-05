@@ -6,22 +6,24 @@ import de.yuga.spacebattle.backend.calculator.BattleCalculator;
 import de.yuga.spacebattle.backend.combat.BattleStaticLogger;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
-import de.yuga.spacebattle.backend.combat.round.CombatRound;
-import de.yuga.spacebattle.backend.combat.round.FleetHealthState;
-import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
-import de.yuga.spacebattle.backend.combat.round.MissileSalvoHealthState;
+import de.yuga.spacebattle.backend.combat.round.*;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
 import de.yuga.spacebattle.backend.enums.ECombatPhase.ECombatSubPhase;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Represents a salvo of missiles.
@@ -120,24 +122,38 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
         this.combatSubPhase = ECombatSubPhase.MISSILE_FIRE_PHASE;
         this.cage = cage;
         combatRound = cage.getCurrentCombatRound();
-        this.position = cage.getCurrentStateByFleet(actor).getPosition().clone();
+        final FleetRoundState actorState = cage.getCurrentStateByFleet(actor);
+        this.position = actorState.getPosition().clone();
         this.lastPosition = position;
         this.actor = actor;
         this.target = target;
         this.targetPosition = cage.getCurrentStateByFleet(target).getPosition().clone();
         this.initialDistance = position.getDistance(targetPosition).abs();
         final Map<Missile, Integer> amountByType = new HashMap<>();
-        actor.getShipsByClass().forEach((shipClass, amountOfShips) -> {
-            final Set<AlignedFitting> missileFittings = shipClass.getFittingByType(EWeaponType.MISSILE);
-            missileFittings.stream()
-                    .filter(alignedFitting -> alignedFitting.getLauncher() != null)
-                    .forEach(alignedFitting -> {
-                        final Missile missile = alignedFitting.getLauncher().getAmmunitionModule().getMissile();
-                        // todo reduce amount by fired missiles
-                        final int amountOfMissiles = alignedFitting.getAmount();
-                        // setting missiles to the salvo
-                        amountByType.merge(missile, amountOfMissiles * amountOfShips, Integer::sum);
-                    });
+
+        final Map<WarShip, WarshipHealthState> warshipHealthStates = actorState.getFleetHealthState().getWarshipHealthStates();
+        warshipHealthStates.values().stream().filter(WarshipHealthState::isFightingCapable).forEach(w -> {
+            final List<AlignedFitting> missiles = w.getActiveFittings().entrySet().stream()
+                    // filter active fittings
+                    .filter(Map.Entry::getValue)
+                    .map(Map.Entry::getKey)
+                    .filter(a -> a.getWeaponType() == EWeaponType.MISSILE)
+                    .collect(Collectors.toList());
+            missiles.stream().filter(a -> a.getLauncher() != null).forEach(alignedFitting -> {
+                final Launcher launcher = alignedFitting.getLauncher();
+                final int amountOfLauncher = alignedFitting.getAmount();
+                final Missile missile = launcher.getAmmunitionModule().getMissile();
+                final MissileAmmunitionState missileAmmunitionState = w.getMissileAmmunitionState();
+                final int remainingShots = missileAmmunitionState.getRemainingShots(missile);
+                // setting missiles to the salvo
+                if (remainingShots >= amountOfLauncher) {
+                    amountByType.merge(missile, amountOfLauncher, Integer::sum);
+                    missileAmmunitionState.reduce(missile, amountOfLauncher);
+                } else {
+                    amountByType.merge(missile, remainingShots, Integer::sum);
+                    missileAmmunitionState.reduce(missile, remainingShots);
+                }
+            });
         });
         this.missileSalvoHealthState = new MissileSalvoHealthState(amountByType);
         calculateRangePerCombatRound();

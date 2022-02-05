@@ -60,6 +60,9 @@ public class WarshipHealthState implements Cloneable {
     @Nonnull
     private final List<HitLog> hitLog = new ArrayList<>();
 
+    @Nonnull
+    private MissileAmmunitionState missileAmmunitionState;
+
     public WarshipHealthState(@Nonnull final WarShip warShip) {
         Preconditions.checkNotNull(warShip, "warShip shouldn't be null!");
 
@@ -71,6 +74,7 @@ public class WarshipHealthState implements Cloneable {
         propulsionState = shipClass.getPropulsion() != null ? shipClass.getPropulsion().getEffectValue() : 0;
         elokaState = shipClass.getElectronicWarfare() != null ? shipClass.getElectronicWarfare().getEffectValue() : 0;
         shipClass.getFittings().forEach(fitting -> activeFittings.put(fitting, true));
+        this.missileAmmunitionState = new MissileAmmunitionState(warShip);
         BattleStaticLogger.logEnterBattleField(this);
     }
 
@@ -133,6 +137,7 @@ public class WarshipHealthState implements Cloneable {
             //noinspection BoxingBoxedValue
             clone.activeFittings = activeFittings.entrySet().stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, e -> Boolean.valueOf(e.getValue())));
+            clone.missileAmmunitionState = missileAmmunitionState.clone();
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
@@ -231,6 +236,16 @@ public class WarshipHealthState implements Cloneable {
             state -= damageValue;
         }
         return state;
+    }
+
+    @Nonnull
+    public Map<AlignedFitting, Boolean> getActiveFittings() {
+        return activeFittings;
+    }
+
+    @Nonnull
+    public MissileAmmunitionState getMissileAmmunitionState() {
+        return missileAmmunitionState;
     }
 
     public String asString() {
