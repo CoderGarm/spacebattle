@@ -3,7 +3,6 @@ package de.yuga.spacebattle.backend.entities.orbitals;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
-import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -112,17 +111,16 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
 
         BigDecimal i = BigDecimal.ONE;
         switch (movementType) {
-            case STAY:
-                // todo LOGGER.info("This should be implemented if we are in the space without any acting force by Newton III.");
-                return new Orbit(this);
-            case GO_TIGHT:
+            case REDUCE_DISTANCE:
                 i = i.negate();
                 break;
-            case GO_WIDE:
+            case INCREASE_DISTANCE:
                 // noop
                 break;
             default:
-                throw new NotifyWebUserException("Unexpected value: " + movementType + " - Calculate the movement is not possible.");
+            case HOLD_DISTANCE:
+                // todo LOGGER.info("This should be implemented if we are in the space without any acting force by Newton III.");
+                return new Orbit(this);
         }
         final BigDecimal xDecimal = new BigDecimal(xCoordinate);
         final BigDecimal yDecimal = new BigDecimal(yCoordinate);

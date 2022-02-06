@@ -23,6 +23,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static de.yuga.spacebattle.backend.combat.enums.EMovementType.*;
 
 /**
  * The combat handler will handle every combat related round for the {@link #cage}.<br>
@@ -64,10 +67,8 @@ public class CombatHandler {
         final Orbit positionTwo = currentStateTwo.getPosition();
 
         // detect movement motivation
-        final FleetDamageProjectionPerRange fleetDamageOne = getFleetDamageProjectionPerRange(fleetOne, currentStateOne);
-        final FleetDamageProjectionPerRange fleetDamageTwo = getFleetDamageProjectionPerRange(fleetTwo, currentStateTwo);
-        final EMovementType movementTypeOne = detectMovementType(positionOne, positionTwo, fleetDamageOne, fleetDamageTwo);
-        final EMovementType movementTypeTwo = detectMovementType(positionTwo, positionOne, fleetDamageTwo, fleetDamageOne);
+        final EMovementType movementTypeOne = detectMovementType(fleetOne, fleetTwo);
+        final EMovementType movementTypeTwo = detectMovementType(fleetTwo, fleetOne);
 
         // calculate movements destinations
         final Orbit destinationOne = NavigationCalculator.getDestinationOrbitOfFleetForTargetAtSubLightSpeed(fleetOne, movementTypeOne, positionOne, positionTwo);
@@ -77,10 +78,10 @@ public class CombatHandler {
         currentStateOne.determineMovementInitiative();
         currentStateTwo.determineMovementInitiative();
         // here should the magic happen: if the first acting fleet yaws to fire the latter acting fleet can yaw the sidewall between both or something like that
-        // todo currently, the first fleet will act first
         new MovementAction(cage, fleetOne, movementTypeOne, positionOne, destinationOne, positionTwo);
         new MovementAction(cage, fleetTwo, movementTypeTwo, positionTwo, destinationTwo, positionOne);
         // execute movement
+        // todo currently, the first fleet will act first
         positionOne.moveTo(destinationOne);
         positionTwo.moveTo(destinationTwo);
     }
@@ -115,42 +116,60 @@ public class CombatHandler {
      * @return the movement type for the next round for fleet one
      */
     @VisibleForTesting
-    protected EMovementType detectMovementType(@Nonnull final Orbit actorPosition,
-                                               @Nonnull final Orbit targetPosition,
-                                               @Nonnull final FleetDamageProjectionPerRange actorInfo,
-                                               @Nonnull final FleetDamageProjectionPerRange targetInfo) {
-        Preconditions.checkNotNull(actorPosition, "actorPosition shouldn't be null!");
-        Preconditions.checkNotNull(targetPosition, "targetPosition shouldn't be null!");
-        Preconditions.checkNotNull(actorInfo, "actorInfo shouldn't be null!");
-        Preconditions.checkNotNull(targetInfo, "targetInfo shouldn't be null!");
+    protected EMovementType detectMovementType(@Nonnull final Fleet actor,
+                                               @Nonnull final Fleet target) {
+        Preconditions.checkNotNull(actor, "actor shouldn't be null!");
+        Preconditions.checkNotNull(target, "target shouldn't be null!");
 
-        final BigDecimal orbitalDistance = DistanceCalculator.getOrbitalDistance(actorPosition, targetPosition);
+        final Fleet fleetOne = cage.getFleetOne();
+        final Fleet fleetTwo = cage.getFleetTwo();
+
+        final FleetRoundState actorsState = cage.getCurrentStateByFleet(fleetOne);
+        final FleetRoundState targetsState = cage.getCurrentStateByFleet(fleetTwo);
+
+        final Orbit actorPosition = actorsState.getPosition();
+        final Orbit targetPosition = targetsState.getPosition();
+
+        final FleetDamageProjectionPerRange actorInfo = getFleetDamageProjectionPerRange(fleetOne, actorsState);
+        final FleetDamageProjectionPerRange targetInfo = getFleetDamageProjectionPerRange(fleetTwo, targetsState);
+
+        final BigDecimal distance = DistanceCalculator.getOrbitalDistance(actorPosition, targetPosition);
         final BigDecimal bestDamageRangeAgentOnResponder = actorInfo.getDistanceWithBestDamageAgainst(targetInfo);
 
-        final EMovementType offensiveMovementType;
-        final int offensiveCompare = bestDamageRangeAgentOnResponder.compareTo(orbitalDistance);
+        EMovementType actorsMovementType;
+        final int offensiveCompare = bestDamageRangeAgentOnResponder.compareTo(distance);
         if (offensiveCompare < 0) {
-            offensiveMovementType = EMovementType.GO_TIGHT;
+            actorsMovementType = REDUCE_DISTANCE;
         } else if (offensiveCompare > 0) {
-            offensiveMovementType = EMovementType.GO_WIDE;
+            actorsMovementType = INCREASE_DISTANCE;
         } else {
-            offensiveMovementType = EMovementType.STAY;
+            actorsMovementType = HOLD_DISTANCE;
+        }
+
+        final List<BeamVolley> volleysHittingThisRound = cage.getFlyingBeamVolleysAgainst(actor);
+        final List<MissileSalvo> salvosHittingThisRound = cage.getFlyingMissileSalvosAgainst(actor).stream().filter(s -> {
+            final BigDecimal currentDistance = actorPosition.getDistance(s.getPosition());
+            final BigDecimal rangePerCombatRound = s.getRangePerCombatRound();
+            final int toTravel = DistanceCalculator.getCombatRoundsToTravel(currentDistance, rangePerCombatRound);
+            return toTravel <= 0;
+        }).collect(Collectors.toList());
+        if (!salvosHittingThisRound.isEmpty() || !volleysHittingThisRound.isEmpty()) {
+            actorsMovementType = SIDEWALL_PROTECTION;
         }
 
         /*
-        //todo do not ignore the evasive movement because of the lack of a weight mechanism
-        final BigDecimal bestDamageRangeResponderOnAgent = targetInfo.getDistanceWithBestDamageAgainst(actorInfo);
-        final EMovementType evasiveMovementType;
-        final int evasionCompare = orbitalDistance.compareTo(bestDamageRangeResponderOnAgent);
-        if (evasionCompare < 0) {
-            evasiveMovementType = EMovementType.GO_TIGHT;
-        } else if (evasionCompare > 0) {
-            evasiveMovementType = EMovementType.GO_WIDE;
-        } else {
-            evasiveMovementType = EMovementType.STAY;
+        todo
+            weapons for movement type by damage potential
+            check distance and decide by damage potential per movement type and per incoming damage
+         */
+
+        final boolean isInGoodRangeAndNoDefensiveMovement = actorsMovementType == INCREASE_DISTANCE || actorsMovementType == HOLD_DISTANCE;
+        if (isInGoodRangeAndNoDefensiveMovement) {
+            actorsMovementType = OFFENSIVE_ROLL;
         }
-        */
-        return offensiveMovementType;
+
+        actorsState.setMovementType(actorsMovementType);
+        return actorsMovementType;
     }
 
     /**
@@ -222,12 +241,16 @@ public class CombatHandler {
         Preconditions.checkNotNull(actor, "actor shouldn't be null!");
         Preconditions.checkNotNull(target, "target shouldn't be null!");
 
-        final Orbit actorPos = cage.getCurrentStateByFleet(actor).getPosition();
+        final FleetRoundState actorsState = cage.getCurrentStateByFleet(actor);
+        final Orbit actorPos = actorsState.getPosition();
         final Orbit targetPos = cage.getCurrentStateByFleet(target).getPosition();
         final BigDecimal distance = actorPos.getDistance(targetPos);
 
+        final EMovementType actorsMovementType = actorsState.getMovementType();
         final BigDecimal maximumBeamRangeOne = actor.getMaximumWeaponRangePerType(EWeaponType.BEAM);
-        if (distance.compareTo(maximumBeamRangeOne) <= 0) {
+        final boolean isInRange = distance.compareTo(maximumBeamRangeOne) <= 0;
+        // todo check that movement matches to weapons - also in missiles and in movement type detection
+        if (isInRange && actorsState.hasWeaponsForAlignment(EWeaponType.BEAM)) {
             cage.addToFlyingBeamVolleys(new BeamVolley(cage, actor, target));
         }
     }
@@ -243,14 +266,15 @@ public class CombatHandler {
         Preconditions.checkNotNull(actor, "actor shouldn't be null!");
         Preconditions.checkNotNull(target, "target shouldn't be null!");
 
-        final FleetRoundState actorState = cage.getCurrentStateByFleet(actor);
-        final Orbit actorPos = actorState.getPosition();
+        final FleetRoundState actorsState = cage.getCurrentStateByFleet(actor);
+        final Orbit actorPos = actorsState.getPosition();
         final Orbit targetPos = cage.getCurrentStateByFleet(target).getPosition();
         final BigDecimal distance = actorPos.getDistance(targetPos);
         final BigDecimal maximumMissileRangeOne = actor.getMaximumWeaponRangePerType(EWeaponType.MISSILE);
         // todo real distance-to-chance-to-hit calculation
-        if (distance.compareTo(maximumMissileRangeOne) <= 0) {
-            final boolean hasShotsLeft = actorState.getFleetHealthState().hasShotsLeft();
+        final boolean isInRange = distance.compareTo(maximumMissileRangeOne) <= 0;
+        if (isInRange && actorsState.hasWeaponsForAlignment(EWeaponType.MISSILE)) {
+            final boolean hasShotsLeft = actorsState.getFleetHealthState().hasShotsLeft();
             if (hasShotsLeft) {
                 cage.addToFlyingMissileSalvos(new MissileSalvo(cage, actor, target));
             }

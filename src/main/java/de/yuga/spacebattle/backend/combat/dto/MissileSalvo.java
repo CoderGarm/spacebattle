@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.combat.dto;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.BattleCalculator;
+import de.yuga.spacebattle.backend.combat.enums.EDamageResult;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.combat.round.*;
@@ -10,19 +11,22 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
 import de.yuga.spacebattle.backend.enums.ECombatPhase.ECombatSubPhase;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
+import static de.yuga.spacebattle.backend.combat.enums.EDamageResult.BURST_ON_SIDEWALL;
+import static de.yuga.spacebattle.backend.combat.enums.EDamageResult.DAMAGE_APPLIED;
+import static de.yuga.spacebattle.backend.combat.enums.EMovementType.SIDEWALL_PROTECTION;
 
 /**
  * Represents a salvo of missiles.
@@ -112,6 +116,12 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
     @Nonnull
     private final Map<WarShip, List<Long>> appliedDamage = new HashMap<>();
 
+    /**
+     * The result of this salvo.
+     */
+    @Nullable
+    private EDamageResult result;
+
     public MissileSalvo(@Nonnull final Cage cage,
                         @Nonnull final Fleet actor,
                         @Nonnull final Fleet target) {
@@ -130,29 +140,31 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
         this.initialDistance = position.getDistance(targetPosition).abs();
         final Map<Missile, Integer> amountByType = new HashMap<>();
 
+        final EMovementType actorsMovementType = actorState.getMovementType();
         final Map<WarShip, WarshipHealthState> warshipHealthStates = actorState.getFleetHealthState().getWarshipHealthStates();
         warshipHealthStates.values().stream().filter(WarshipHealthState::isFightingCapable).forEach(w -> {
-            final List<AlignedFitting> missiles = w.getFittings().entrySet().stream()
+            w.getFittings().entrySet().stream()
                     // filter active fittings
                     .filter(Map.Entry::getValue)
                     .map(Map.Entry::getKey)
                     .filter(a -> a.getWeaponType() == EWeaponType.MISSILE)
-                    .collect(Collectors.toList());
-            missiles.stream().filter(a -> a.getLauncher() != null).forEach(alignedFitting -> {
-                final Launcher launcher = alignedFitting.getLauncher();
-                final int amountOfLauncher = alignedFitting.getAmount();
-                final Missile missile = launcher.getAmmunitionModule().getMissile();
-                final MissileAmmunitionState missileAmmunitionState = w.getMissileAmmunitionState();
-                final int remainingShots = missileAmmunitionState.getRemainingShots(missile);
-                // setting missiles to the salvo
-                if (remainingShots >= amountOfLauncher) {
-                    amountByType.merge(missile, amountOfLauncher, Integer::sum);
-                    missileAmmunitionState.reduce(missile, amountOfLauncher);
-                } else {
-                    amountByType.merge(missile, remainingShots, Integer::sum);
-                    missileAmmunitionState.reduce(missile, remainingShots);
-                }
-            });
+                    .filter(a -> a.getLauncher() != null)
+                    .filter(f -> f.getWeaponAlignment().isAssignableFromMovementType(actorsMovementType))
+                    .forEach(alignedFitting -> {
+                        final Launcher launcher = alignedFitting.getLauncher();
+                        final int amountOfLauncher = alignedFitting.getAmount();
+                        final Missile missile = launcher.getAmmunitionModule().getMissile();
+                        final MissileAmmunitionState missileAmmunitionState = w.getMissileAmmunitionState();
+                        final int remainingShots = missileAmmunitionState.getRemainingShots(missile);
+                        // setting missiles to the salvo
+                        if (remainingShots >= amountOfLauncher) {
+                            amountByType.merge(missile, amountOfLauncher, Integer::sum);
+                            missileAmmunitionState.reduce(missile, amountOfLauncher);
+                        } else {
+                            amountByType.merge(missile, remainingShots, Integer::sum);
+                            missileAmmunitionState.reduce(missile, remainingShots);
+                        }
+                    });
         });
         this.missileSalvoHealthState = new MissileSalvoHealthState(amountByType);
         calculateRangePerCombatRound();
@@ -323,7 +335,7 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
             distance = distanceToTarget;
             isInDetonationRange = true;
         }
-        final Orbit newPos = position.move(EMovementType.GO_TIGHT, distance, targetPosition);
+        final Orbit newPos = position.move(EMovementType.REDUCE_DISTANCE, distance, targetPosition);
         lastPosition = position.clone();
         position.moveTo(newPos);
         historize();
@@ -335,23 +347,28 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
      */
     public void detonate() {
         this.combatSubPhase = ECombatSubPhase.MISSILE_FIRE_INCOMING_PHASE;
-        final FleetRoundState currentTargetState = cage.getCurrentStateByFleet(target);
-        final FleetHealthState targetHealthState = currentTargetState.getFleetHealthState();
-        missileSalvoHealthState.getCurrentAmountByType().forEach((missile, missileAmount) -> {
-            final long applicableDamage = missile.getWarhead().getDamageValue();
-            for (int i = 1; i <= missileAmount; i++) {
-                final WarShip targetedWarShip = cage.getRandomActiveWarShipOfFleet(target);
-                if (targetedWarShip == null) {
-                    // noop - no targets left
-                    return;
+        final FleetRoundState targetsState = cage.getCurrentStateByFleet(target);
+        if (SIDEWALL_PROTECTION != targetsState.getMovementType()) {
+            result = BURST_ON_SIDEWALL;
+        } else {
+            final FleetHealthState targetHealthState = targetsState.getFleetHealthState();
+            missileSalvoHealthState.getCurrentAmountByType().forEach((missile, missileAmount) -> {
+                final long applicableDamage = missile.getWarhead().getDamageValue();
+                for (int i = 1; i <= missileAmount; i++) {
+                    final WarShip targetedWarShip = cage.getRandomActiveWarShipOfFleet(target);
+                    if (targetedWarShip == null) {
+                        // noop - no targets left
+                        return;
+                    }
+                    targetHealthState.applyDamage(targetedWarShip, applicableDamage, this).ifPresent(warShip -> {
+                        final List<Long> alreadyAppliedDamages = appliedDamage.computeIfAbsent(warShip, k -> new ArrayList<>());
+                        alreadyAppliedDamages.add(applicableDamage);
+                        appliedDamage.put(warShip, alreadyAppliedDamages);
+                    });
                 }
-                targetHealthState.applyDamage(targetedWarShip, applicableDamage, this).ifPresent(warShip -> {
-                    final List<Long> alreadyAppliedDamages = appliedDamage.computeIfAbsent(warShip, k -> new ArrayList<>());
-                    alreadyAppliedDamages.add(applicableDamage);
-                    appliedDamage.put(warShip, alreadyAppliedDamages);
-                });
-            }
-        });
+            });
+            result = DAMAGE_APPLIED;
+        }
         missileSalvoHealthState.getCurrentAmountByType().clear();
         historize();
     }
@@ -431,5 +448,10 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
     @Nonnull
     public Map<WarShip, List<Long>> getAppliedDamage() {
         return appliedDamage;
+    }
+
+    @Nullable
+    public EDamageResult getResult() {
+        return result;
     }
 }

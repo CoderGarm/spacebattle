@@ -284,12 +284,12 @@ class MissileSalvoTest {
         when(fleetRoundStateMock.getPosition()).thenReturn(targetsPositionMock);
         when(targetsPositionMock.clone()).thenReturn(targetsPositionMock);
         when(positionMock.getDistance(targetsPositionMock)).thenReturn(distanceToTarget);
-        when(positionMock.move(EMovementType.GO_TIGHT, distanceToTarget, targetsPositionMock)).thenReturn(newPosFake);
+        when(positionMock.move(EMovementType.REDUCE_DISTANCE, distanceToTarget, targetsPositionMock)).thenReturn(newPosFake);
         when(positionMock.clone()).thenReturn(positionMock);
         // test method
         testObject.handleMovement();
         // check expectation
-        verify(positionMock).move(EMovementType.GO_TIGHT, distanceToTarget, targetsPositionMock);
+        verify(positionMock).move(EMovementType.REDUCE_DISTANCE, distanceToTarget, targetsPositionMock);
         verify(positionMock).clone();
         final Orbit resultLastPosition = (Orbit) ReflectionTestUtils.getField(testObject, "lastPosition");
         assertEquals(positionMock, resultLastPosition);

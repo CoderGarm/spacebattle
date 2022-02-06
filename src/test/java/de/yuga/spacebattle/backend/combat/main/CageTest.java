@@ -165,7 +165,7 @@ class CageTest extends BaseTestCase {
         final Fleet fleet = testObject.getParticipatingFleets().get(0);
         final Orbit orbit = Orbit.getCenterOrbit();
         // test method - constructor calls historizing in testObject
-        final MovementAction movementAction = new MovementAction(testObject, fleet, EMovementType.STAY, orbit, orbit, orbit);
+        final MovementAction movementAction = new MovementAction(testObject, fleet, EMovementType.HOLD_DISTANCE, orbit, orbit, orbit);
         final UUID uuidMA = UUID.fromString(movementAction.getUuid().toString());
 
         final MissileSalvo missileSalvo = new MissileSalvo(testObject, fleet, fleet);

@@ -191,7 +191,7 @@ public class Cage implements Future<Cage> {
 
         /* todo implement forced battle end at condition
          */
-        if (currentCombatRound.getNo() > 10000) {
+        if (currentCombatRound.getNo() > 3000) {
             System.out.println("#" + currentCombatRound.getNo() + " BATTLE FORCED DONE");
             forceDone = true;
         }
@@ -220,12 +220,12 @@ public class Cage implements Future<Cage> {
         roundStates.removeAll(fleetRoundStatesToArchive);
 
         final List<MissileSalvo> missileSalvosToArchive2 = flyingMissileSalvos.stream()
-                .filter(ma -> !ma.isActive())
+                .filter(ma -> !ma.isActive() || ma.getResult() != null)
                 .collect(Collectors.toList());
         flyingMissileSalvos.removeAll(missileSalvosToArchive2);
 
         final List<BeamVolley> beamVolleysToArchive = flyingBeamVolleys.stream()
-                .filter(ma -> ma.getCombatRound().getNo() < noOfNoReturn)
+                .filter(ma -> ma.getCombatRound().getNo() < noOfNoReturn || ma.getResult() != null)
                 .collect(Collectors.toList());
         flyingBeamVolleys.removeAll(beamVolleysToArchive);
     }
@@ -311,6 +311,20 @@ public class Cage implements Future<Cage> {
                 });
     }
 
+    @Nonnull
+    public List<MissileSalvo> getFlyingMissileSalvosAgainst(@Nonnull final Fleet target) {
+        Preconditions.checkNotNull(target, "target shouldn't be null!");
+
+        return flyingMissileSalvos.stream().filter(s -> s.getTarget().equals(target)).collect(Collectors.toList());
+    }
+
+    @Nonnull
+    public List<BeamVolley> getFlyingBeamVolleysAgainst(@Nonnull final Fleet target) {
+        Preconditions.checkNotNull(target, "target shouldn't be null!");
+
+        return flyingBeamVolleys.stream().filter(s -> s.getTarget().equals(target)).collect(Collectors.toList());
+    }
+
     /**
      * Returns a randomly selected warship of the targeted fleet.
      *
@@ -384,10 +398,14 @@ public class Cage implements Future<Cage> {
     }
 
     public void addToFlyingMissileSalvos(@Nonnull final MissileSalvo missileSalvo) {
+        Preconditions.checkNotNull(missileSalvo, "missileSalvo shouldn't be null!");
+
         flyingMissileSalvos.add(missileSalvo);
     }
 
     public void addToFlyingBeamVolleys(@Nonnull final BeamVolley beamVolley) {
+        Preconditions.checkNotNull(beamVolley, "beamVolley shouldn't be null!");
+
         flyingBeamVolleys.add(beamVolley);
     }
 

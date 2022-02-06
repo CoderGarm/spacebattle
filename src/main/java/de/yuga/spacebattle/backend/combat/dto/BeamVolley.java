@@ -2,6 +2,8 @@ package de.yuga.spacebattle.backend.combat.dto;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
+import de.yuga.spacebattle.backend.combat.enums.EDamageResult;
+import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.combat.round.BeamState;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
@@ -14,11 +16,16 @@ import de.yuga.spacebattle.backend.enums.ECombatPhase.ECombatSubPhase;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static de.yuga.spacebattle.backend.combat.enums.EDamageResult.BURST_ON_SIDEWALL;
+import static de.yuga.spacebattle.backend.combat.enums.EDamageResult.DAMAGE_APPLIED;
+import static de.yuga.spacebattle.backend.combat.enums.EMovementType.SIDEWALL_PROTECTION;
 
 /**
  * Represents a salvo of direct hit weapons.
@@ -71,6 +78,12 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
     private final List<BeamState> firedShots = new ArrayList<>();
 
     /**
+     * The result of this salvo.
+     */
+    @Nullable
+    private EDamageResult result;
+
+    /**
      * Creates a volley of all direct beam weapons.
      *
      * @param cage   the cage
@@ -89,9 +102,11 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
         this.cage = cage;
         this.actor = actor;
         this.target = target;
-        this.distance = cage.getCurrentStateByFleet(actor).getPosition().getDistance(cage.getCurrentStateByFleet(target).getPosition());
+        final FleetRoundState actorsState = cage.getCurrentStateByFleet(actor);
+        this.distance = actorsState.getPosition().getDistance(cage.getCurrentStateByFleet(target).getPosition());
 
-        cage.getCurrentStateByFleet(actor)
+        final EMovementType actorsMovementType = actorsState.getMovementType();
+        actorsState
                 .getFleetHealthState()
                 .getWarshipHealthStates()
                 .values().forEach(warshipHealthState -> {
@@ -103,6 +118,7 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
                     }
                     warshipHealthState.getActiveFittingsByWeaponType(EWeaponType.BEAM).stream()
                             .filter(b -> b.getWeapon() != null)
+                            .filter(f -> f.getWeaponAlignment().isAssignableFromMovementType(actorsMovementType))
                             .forEach(alignedFitting -> {
                                 final Weapon weapon = alignedFitting.getWeapon();
                                 final int amountDamageEmitter = weapon.getAmountDamageEmitter();
@@ -128,20 +144,24 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
      */
     public void applyDamage() {
         this.combatSubPhase = ECombatSubPhase.BEAM_FIRE_INCOMING_PHASE;
-        final FleetRoundState targetState = cage.getCurrentStateByFleet(target);
-        final FleetHealthState targetHealthState = targetState.getFleetHealthState();
-
-        firedShots.forEach(beamState -> {
-            final BigDecimal chanceToHit = beamState.getChanceToHit();
-            // chance to hit is here pars pro toto for every hit
-            final long applicableDamage = chanceToHit.multiply(BigDecimal.valueOf(beamState.getDamageValue()), DistanceCalculator.MATH_CONTEXT_MORE_PRECISION).longValue();
-            final WarShip targetedWarship = beamState.getTarget();
-            targetHealthState.applyDamage(targetedWarship, applicableDamage, this).ifPresent(warShip -> {
-                final List<Long> alreadyAppliedDamages = appliedDamage.computeIfAbsent(warShip, k -> new ArrayList<>());
-                alreadyAppliedDamages.add(applicableDamage);
-                appliedDamage.put(warShip, alreadyAppliedDamages);
+        final FleetRoundState targetsState = cage.getCurrentStateByFleet(target);
+        if (SIDEWALL_PROTECTION != targetsState.getMovementType()) {
+            result = BURST_ON_SIDEWALL;
+        } else {
+            final FleetHealthState targetHealthState = targetsState.getFleetHealthState();
+            firedShots.forEach(beamState -> {
+                final BigDecimal chanceToHit = beamState.getChanceToHit();
+                // chance to hit is here pars pro toto for every hit
+                final long applicableDamage = chanceToHit.multiply(BigDecimal.valueOf(beamState.getDamageValue()), DistanceCalculator.MATH_CONTEXT_MORE_PRECISION).longValue();
+                final WarShip targetedWarship = beamState.getTarget();
+                targetHealthState.applyDamage(targetedWarship, applicableDamage, this).ifPresent(warShip -> {
+                    final List<Long> alreadyAppliedDamages = appliedDamage.computeIfAbsent(warShip, k -> new ArrayList<>());
+                    alreadyAppliedDamages.add(applicableDamage);
+                    appliedDamage.put(warShip, alreadyAppliedDamages);
+                });
             });
-        });
+            result = DAMAGE_APPLIED;
+        }
         historize();
     }
 
@@ -172,6 +192,11 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
     @Nonnull
     public Map<WarShip, List<Long>> getAppliedDamage() {
         return appliedDamage;
+    }
+
+    @Nullable
+    public EDamageResult getResult() {
+        return result;
     }
 
     @Override

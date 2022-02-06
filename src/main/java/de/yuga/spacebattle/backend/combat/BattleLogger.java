@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.combat;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.combat.dto.*;
+import de.yuga.spacebattle.backend.combat.enums.EDamageResult;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
@@ -248,9 +249,10 @@ public class BattleLogger {
         final CombatRound combatRound = volley.getCombatRound();
         final Fleet actor = volley.getActor();
         final Fleet target = volley.getTarget();
+        final EDamageResult result = volley.getResult();
 
         final StringBuilder sb = new StringBuilder();
-        final String msg = "#" + combatRound.getNo() + " missile salvo " + volley.getUuid() + " from " + actor.getName() + " attacks " + target.getName() + "\n";
+        final String msg = "#" + combatRound.getNo() + " missile salvo " + volley.getUuid() + " from " + actor.getName() + " attacks " + target.getName() + " and " + result + "\n";
         sb.append(msg);
         hitLogs.forEach(hitLog -> generateHitLogMessage(hitLog, sb));
         hitLogs.stream()
@@ -266,9 +268,10 @@ public class BattleLogger {
         final Fleet actor = volley.getActor();
         final Fleet target = volley.getTarget();
         final BigDecimal distance = volley.getDistance();
+        final EDamageResult result = volley.getResult();
 
         final StringBuilder sb = new StringBuilder();
-        final String msg = "#" + combatRound.getNo() + " beam volley " + volley.getUuid() + " from " + actor.getName() + " attacks " + target.getName() + " hits over " + DistanceCalculator.getDistanceAsStringWithUnit(distance) + "\n";
+        final String msg = "#" + combatRound.getNo() + " beam volley " + volley.getUuid() + " from " + actor.getName() + " attacks " + target.getName() + " hits over " + DistanceCalculator.getDistanceAsStringWithUnit(distance) + " and " + result + "\n";
         sb.append(msg);
         hitLogs.forEach(hitLog -> generateHitLogMessage(hitLog, sb));
         hitLogs.stream()

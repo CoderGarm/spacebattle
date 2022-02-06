@@ -2,15 +2,20 @@ package de.yuga.spacebattle.backend.combat.round;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.dto.Historizable;
+import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import static de.yuga.spacebattle.backend.combat.enums.EMovementType.SIDEWALL_PROTECTION;
 
 public class FleetRoundState extends Historizable<FleetRoundState> implements Cloneable {
 
@@ -50,6 +55,12 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
      */
     private int movementInitiative;
 
+    /**
+     * The movement type which is currently active.
+     */
+    @Nullable
+    private EMovementType movementType;
+
     public FleetRoundState(@Nonnull final Cage cage,
                            @Nonnull final Fleet fleet,
                            @Nonnull final Orbit position) {
@@ -75,6 +86,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         this.fleet = state.getFleet();
         this.position = state.getPosition().clone();
         this.fleetHealthState = state.getFleetHealthState();
+        this.movementType = state.getMovementType();
         historize();
     }
 
@@ -108,6 +120,15 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
     @Nonnull
     public Fleet getFleet() {
         return fleet;
+    }
+
+    @Nullable
+    public EMovementType getMovementType() {
+        return movementType;
+    }
+
+    public void setMovementType(@Nullable final EMovementType movementType) {
+        this.movementType = movementType;
     }
 
     /**
@@ -192,5 +213,27 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         clone.position = position.clone();
         clone.fleetHealthState = fleetHealthState.clone();
         return clone;
+    }
+
+    /**
+     * Checks if the fleet has any weapons for the given movement type.
+     *
+     * @param weaponType the weapon type which needs to have the correct alignment
+     * @return <code>true</code> if there are any weapons which can fire, <code>false</code> otherwise
+     */
+    public boolean hasWeaponsForAlignment(@Nonnull final EWeaponType weaponType) {
+        Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
+
+        if (SIDEWALL_PROTECTION == movementType) {
+            return false;
+        }
+        return fleetHealthState.getWarshipHealthStates().values().stream()
+                .filter(WarshipHealthState::isFightingCapable)
+                .anyMatch(w -> w.getFittings().entrySet().stream()
+                        // filter active fittings
+                        .filter(Map.Entry::getValue)
+                        .map(Map.Entry::getKey)
+                        .filter(a -> a.getWeaponType() == weaponType)
+                        .anyMatch(f -> f.getWeaponAlignment().isAssignableFromMovementType(movementType)));
     }
 }
