@@ -3,7 +3,6 @@ package de.yuga.spacebattle.backend.combat.dto;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.BattleCalculator;
-import de.yuga.spacebattle.backend.combat.BattleStaticLogger;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.combat.round.*;
@@ -159,7 +158,6 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
         calculateRangePerCombatRound();
         calculateAttackRange();
         final int sum = amountByType.values().stream().mapToInt(Integer::intValue).sum();
-        BattleStaticLogger.logMissileRelease(combatRound, position, actor, target, initialDistance, sum);
         historize();
     }
 
@@ -228,7 +226,6 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
             int lostCounter = 0;
             for (int i = 1; i <= amount; i++) {
                 final boolean isLost = BattleCalculator.calculateElokaImpact(elokaResistance, elokaEffectValue);
-                BattleStaticLogger.elokaHits(combatRound, missile, distance, isLost);
                 if (isLost) {
                     // detect losses
                     lostCounter++;
@@ -243,7 +240,6 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
             // removing lost missiles from salvo
             final Integer oldValue = missileSalvoHealthState.getCurrentAmountByType().get(missile);
             final int newValue = oldValue - lostAmount;
-            BattleStaticLogger.logElokaHitMissile(combatRound, actor, target, missile, lostAmount, newValue);
             missileSalvoHealthState.setNewMissileAmounts(missile, newValue, oldValue);
         });
 
@@ -290,7 +286,6 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
             // removing lost missiles from salvo
             final Integer oldValue = missileSalvoHealthState.getCurrentAmountByType().get(missile);
             final int newValue = oldValue - lostAmount;
-            BattleStaticLogger.logCounterMissileHitMissile(combatRound, actor, missile, lostAmount, newValue);
             missileSalvoHealthState.setNewMissileAmounts(missile, newValue, oldValue);
         });
 
@@ -331,7 +326,6 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
         final Orbit newPos = position.move(EMovementType.GO_TIGHT, distance, targetPosition);
         lastPosition = position.clone();
         position.moveTo(newPos);
-        BattleStaticLogger.logHandleMissileMovementS(this);
         historize();
     }
 
@@ -345,9 +339,13 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
         final FleetHealthState targetHealthState = currentTargetState.getFleetHealthState();
         missileSalvoHealthState.getCurrentAmountByType().forEach((missile, missileAmount) -> {
             final long applicableDamage = missile.getWarhead().getDamageValue();
-            BattleStaticLogger.logMissileDetonation(getCombatRound(), actor, target, missile, missileAmount);
             for (int i = 1; i <= missileAmount; i++) {
-                targetHealthState.applyDamage(applicableDamage, this).ifPresent(warShip -> {
+                final WarShip targetedWarShip = cage.getRandomActiveWarShipOfFleet(target);
+                if (targetedWarShip == null) {
+                    // noop - no targets left
+                    return;
+                }
+                targetHealthState.applyDamage(targetedWarShip, applicableDamage, this).ifPresent(warShip -> {
                     final List<Long> alreadyAppliedDamages = appliedDamage.computeIfAbsent(warShip, k -> new ArrayList<>());
                     alreadyAppliedDamages.add(applicableDamage);
                     appliedDamage.put(warShip, alreadyAppliedDamages);

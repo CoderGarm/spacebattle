@@ -1,14 +1,15 @@
 package de.yuga.spacebattle.backend.combat.dto;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.combat.BattleStaticLogger;
+import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.combat.main.Cage;
+import de.yuga.spacebattle.backend.combat.round.BeamState;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.FleetHealthState;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
-import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
 import de.yuga.spacebattle.backend.enums.ECombatPhase.ECombatSubPhase;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Represents a salvo of direct hit weapons.
@@ -67,6 +67,9 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
     @Nonnull
     private final Map<WarShip, List<Long>> appliedDamage = new HashMap<>();
 
+    @Nonnull
+    private final List<BeamState> firedShots = new ArrayList<>();
+
     /**
      * Creates a volley of all direct beam weapons.
      *
@@ -87,10 +90,30 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
         this.actor = actor;
         this.target = target;
         this.distance = cage.getCurrentStateByFleet(actor).getPosition().getDistance(cage.getCurrentStateByFleet(target).getPosition());
-        final Map<ShipClass, Integer> amountPerShipsClass = actor.getShipsByClass();
-        amountPerShipsClass.forEach((shipClass, amount) -> {
-            BattleStaticLogger.logBeamVolleyRelease(combatRound, actor, shipClass, amount);
-        });
+
+        cage.getCurrentStateByFleet(actor)
+                .getFleetHealthState()
+                .getWarshipHealthStates()
+                .values().forEach(warshipHealthState -> {
+                    // every ship shoots against another one and concentrates fire
+                    final WarShip targetedWarShip = cage.getRandomActiveWarShipOfFleet(target);
+                    if (targetedWarShip == null) {
+                        // noop - no targets left
+                        return;
+                    }
+                    warshipHealthState.getActiveFittingsByWeaponType(EWeaponType.BEAM).stream()
+                            .filter(b -> b.getWeapon() != null)
+                            .forEach(alignedFitting -> {
+                                final Weapon weapon = alignedFitting.getWeapon();
+                                final int amountDamageEmitter = weapon.getAmountDamageEmitter();
+                                final long applicableDamage = weapon.getEffectValue();
+                                for (int i = 1; i <= amountDamageEmitter; i++) {
+                                    // todo implement chance to hit for beans - currently it is 100 %
+                                    firedShots.add(new BeamState(warshipHealthState.getWarShip(), targetedWarShip, applicableDamage, BigDecimal.ONE));
+                                }
+                            });
+                });
+
         historize();
     }
 
@@ -108,32 +131,16 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
         final FleetRoundState targetState = cage.getCurrentStateByFleet(target);
         final FleetHealthState targetHealthState = targetState.getFleetHealthState();
 
-        // todo implement change to hit
-
-        final Map<ShipClass, Integer> amountPerShipsClass = new HashMap<>(actor.getShipsByClass());
-        final Map<ShipClass, Long> damagePerShipClass = amountPerShipsClass.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> {
-                    final BigDecimal subtract = distance.subtract(BigDecimal.TEN);
-                    final BigDecimal add = distance.add(BigDecimal.TEN);
-                    return e.getKey().getDamagePerRangePerWeaponType(subtract, add, EWeaponType.BEAM);
-                }));
-        // removing all classes which cannot apply damage
-        final List<ShipClass> withoutApplicableDamage = damagePerShipClass.entrySet().stream().filter(e -> e.getValue() <= 0).map(Map.Entry::getKey).collect(Collectors.toList());
-        withoutApplicableDamage.forEach(damagePerShipClass.keySet()::remove);
-        withoutApplicableDamage.forEach(amountPerShipsClass.keySet()::remove);
-
-        amountPerShipsClass.forEach((shipClass, amount) -> {
-            // todo every volley hits - chance to hit
-            final long applicableDamage = damagePerShipClass.get(shipClass);
-            BattleStaticLogger.logBeamVolleyHit(combatRound, actor, target, shipClass, applicableDamage);
-            // todo apply damage weapon by weapon
-            for (int i = 1; i <= amount; i++) {
-                targetHealthState.applyDamage(applicableDamage, this).ifPresent(warShip -> {
-                    final List<Long> alreadyAppliedDamages = appliedDamage.computeIfAbsent(warShip, k -> new ArrayList<>());
-                    alreadyAppliedDamages.add(applicableDamage);
-                    appliedDamage.put(warShip, alreadyAppliedDamages);
-                });
-            }
+        firedShots.forEach(beamState -> {
+            final BigDecimal chanceToHit = beamState.getChanceToHit();
+            // chance to hit is here pars pro toto for every hit
+            final long applicableDamage = chanceToHit.multiply(BigDecimal.valueOf(beamState.getDamageValue()), DistanceCalculator.MATH_CONTEXT_MORE_PRECISION).longValue();
+            final WarShip targetedWarship = beamState.getTarget();
+            targetHealthState.applyDamage(targetedWarship, applicableDamage, this).ifPresent(warShip -> {
+                final List<Long> alreadyAppliedDamages = appliedDamage.computeIfAbsent(warShip, k -> new ArrayList<>());
+                alreadyAppliedDamages.add(applicableDamage);
+                appliedDamage.put(warShip, alreadyAppliedDamages);
+            });
         });
         historize();
     }

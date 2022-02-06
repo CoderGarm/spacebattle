@@ -4,26 +4,26 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.Quadrant;
-import de.yuga.spacebattle.backend.combat.BattleStaticLogger;
 import de.yuga.spacebattle.backend.combat.dto.*;
 import de.yuga.spacebattle.backend.combat.main.handler.CombatHandler;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.FleetHealthState;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
+import de.yuga.spacebattle.backend.combat.round.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.Map;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -137,7 +137,6 @@ public class Cage implements Future<Cage> {
             final long fightingCount = isFightingCapableStates.stream().filter(aBoolean -> aBoolean).count();
             isDone = fightingCount <= 1;
         }
-        BattleStaticLogger.logCombatRoundDone(getCurrentCombatRound(), isDone);
         return isDone;
     }
 
@@ -179,30 +178,12 @@ public class Cage implements Future<Cage> {
     @VisibleForTesting
     protected void executeCombatRound() {
         final CombatRound currentCombatRound = getCurrentCombatRound();
-
-        BattleStaticLogger.logMessageWithPretendingCombatRoundS(currentCombatRound, "");
-        BattleStaticLogger.logMessageWithPretendingCombatRoundS(currentCombatRound, "start combat round ");
-        BattleStaticLogger.logMessageWithPretendingCombatRoundS(currentCombatRound, "");
-        BattleStaticLogger.logMessageWithPretendingCombatRoundS(currentCombatRound, " movement phase");
-
         combatHandler.handleMovementPhase();
-
-        BattleStaticLogger.logMessageWithPretendingCombatRoundS(currentCombatRound, " missile movement phase");
-
         combatHandler.handleMissilePhase();
-
-        BattleStaticLogger.logMessageWithPretendingCombatRoundS(currentCombatRound, " incoming weapons fire phase");
-
         combatHandler.handleIncomingWeaponFirePhase();
-
-        BattleStaticLogger.logMessageWithPretendingCombatRoundS(currentCombatRound, " fire weapons phase");
-
         combatHandler.handleFireWeaponPhase();
 
-        BattleStaticLogger.logMessageWithPretendingCombatRoundS(currentCombatRound, " round done");
-        BattleStaticLogger.logMessageWithPretendingCombatRoundS(currentCombatRound, "");
-
-        if (currentCombatRound.getNo() % 1000 == 0) {
+        if (currentCombatRound.getNo() % 500 == 0) {
             System.out.println("#" + currentCombatRound.getNo());
             final BigDecimal distance = getCurrentStateByFleet(fleetOne).getPosition().getDistance(getCurrentStateByFleet(fleetTwo).getPosition());
             System.out.println(DistanceCalculator.getDistanceAsStringWithUnit(distance));
@@ -210,7 +191,7 @@ public class Cage implements Future<Cage> {
 
         /* todo implement forced battle end at condition
          */
-        if (currentCombatRound.getNo() > 100000) {
+        if (currentCombatRound.getNo() > 10000) {
             System.out.println("#" + currentCombatRound.getNo() + " BATTLE FORCED DONE");
             forceDone = true;
         }
@@ -307,7 +288,6 @@ public class Cage implements Future<Cage> {
         } else {
             initialCageDiameter = INITIAL_CAGE_DIAMETER;
         }
-        BattleStaticLogger.startBattleAtDistance(initialCageDiameter);
         return initialCageDiameter;
     }
 
@@ -329,6 +309,28 @@ public class Cage implements Future<Cage> {
                     LOGGER.info("There is no fleet state for idFleet '" + fleet.getId() + "'.");
                     return new NotifyWebUserException("No state present - please call the administrator.");
                 });
+    }
+
+    /**
+     * Returns a randomly selected warship of the targeted fleet.
+     *
+     * @param target the fleet to select from
+     * @return the chosen one
+     */
+    @Nullable
+    public WarShip getRandomActiveWarShipOfFleet(@Nonnull final Fleet target) {
+        Preconditions.checkNotNull(target, "target shouldn't be null!");
+
+        final Map<WarShip, WarshipHealthState> warshipHealthStates = getCurrentStateByFleet(target).getFleetHealthState().getWarshipHealthStates();
+
+        if (warshipHealthStates.isEmpty()) {
+            return null;
+        }
+        int numberOfAttackedShip = 0;
+        if (warshipHealthStates.size() > 1) {
+            numberOfAttackedShip = ThreadLocalRandom.current().nextInt(0, warshipHealthStates.size() - 1);
+        }
+        return new ArrayList<>(warshipHealthStates.keySet()).get(numberOfAttackedShip);
     }
 
     @Nonnull

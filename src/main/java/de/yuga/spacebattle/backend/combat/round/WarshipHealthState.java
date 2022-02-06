@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.combat.round;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.combat.BattleStaticLogger;
 import de.yuga.spacebattle.backend.combat.dto.Historizable;
 import de.yuga.spacebattle.backend.combat.dto.HitLog;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
@@ -80,7 +79,6 @@ public class WarshipHealthState implements Cloneable {
         elokaState = shipClass.getElectronicWarfare() != null ? shipClass.getElectronicWarfare().getEffectValue() : 0;
         shipClass.getFittings().forEach(fitting -> fittings.put(fitting, true));
         this.missileAmmunitionState = new MissileAmmunitionState(warShip);
-        BattleStaticLogger.logEnterBattleField(this);
     }
 
     @Nonnull
@@ -231,8 +229,15 @@ public class WarshipHealthState implements Cloneable {
     }
 
     @Nonnull
-    private List<AlignedFitting> getActiveFittings() {
+    public List<AlignedFitting> getActiveFittings() {
         return fittings.entrySet().stream().filter(Map.Entry::getValue).map(Map.Entry::getKey).collect(Collectors.toList());
+    }
+
+    @Nonnull
+    public List<AlignedFitting> getActiveFittingsByWeaponType(@Nonnull final EWeaponType weaponType) {
+        Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
+
+        return fittings.entrySet().stream().filter(Map.Entry::getValue).filter(e -> e.getKey().getWeaponType() == weaponType).map(Map.Entry::getKey).collect(Collectors.toList());
     }
 
     @Override
@@ -290,27 +295,22 @@ public class WarshipHealthState implements Cloneable {
                         }
                     }
                 }
-                BattleStaticLogger.logHit(this, damageValue, hullState, attackedPart, isAlive(), isFightingCapable());
                 hitLog.add(new HitLog(damageDealer, this, damageValue, hullState, attackedPart, isAlive(), isFightingCapable()));
                 break;
             case ARMOR:
                 armorState = applyDamageToHitArea(armorState, damageValue, attackedPart, damageDealer);
-                BattleStaticLogger.logHit(this, damageValue, armorState, attackedPart, isAlive(), isFightingCapable());
                 hitLog.add(new HitLog(damageDealer, this, damageValue, armorState, attackedPart, isAlive(), isFightingCapable()));
                 break;
             case SIDEWALL:
                 sidewallState = applyDamageToHitArea(sidewallState, damageValue, attackedPart, damageDealer);
-                BattleStaticLogger.logHit(this, damageValue, sidewallState, attackedPart, isAlive(), isFightingCapable());
                 hitLog.add(new HitLog(damageDealer, this, damageValue, sidewallState, attackedPart, isAlive(), isFightingCapable()));
                 break;
             case PROPULSION:
                 propulsionState = applyDamageToHitArea(propulsionState, damageValue, attackedPart, damageDealer);
-                BattleStaticLogger.logHit(this, damageValue, propulsionState, attackedPart, isAlive(), isFightingCapable());
                 hitLog.add(new HitLog(damageDealer, this, damageValue, propulsionState, attackedPart, isAlive(), isFightingCapable()));
                 break;
             case ELOKA:
                 elokaState = applyDamageToHitArea(elokaState, damageValue, attackedPart, damageDealer);
-                BattleStaticLogger.logHit(this, damageValue, elokaState, attackedPart, isAlive(), isFightingCapable());
                 hitLog.add(new HitLog(damageDealer, this, damageValue, elokaState, attackedPart, isAlive(), isFightingCapable()));
                 break;
         }

@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.combat.round;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.combat.BattleStaticLogger;
 import de.yuga.spacebattle.backend.combat.dto.Historizable;
 import de.yuga.spacebattle.backend.combat.dto.HitLog;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
@@ -10,6 +9,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
@@ -80,12 +80,16 @@ public class FleetHealthState implements Cloneable {
      * <br>
      * If this ship is destroyed
      *
+     * @param target       the targeted ship
      * @param damageValue  the damage to apply
      * @param damageDealer the source of the damage
      * @return the attacked war ship
      */
     @Nonnull
-    public Optional<WarShip> applyDamage(final long damageValue, @Nonnull final Historizable<? extends Cloneable> damageDealer) {
+    public Optional<WarShip> applyDamage(@Nonnull final WarShip target,
+                                         final long damageValue,
+                                         @Nonnull final Historizable<? extends Cloneable> damageDealer) {
+        Preconditions.checkNotNull(target, "target shouldn't be null!");
         Preconditions.checkState(damageValue >= 0, "The damage to apply should be positive.");
         Preconditions.checkNotNull(damageDealer, "damageDealer shouldn't be null!");
 
@@ -93,19 +97,32 @@ public class FleetHealthState implements Cloneable {
             return Optional.empty();
         }
 
+        final WarshipHealthState warshipHealthState = warshipHealthStates.get(target);
+        if (warshipHealthState != null && warshipHealthState.isFightingCapable()) {
+            warshipHealthState.applyDamage(damageValue, damageDealer);
+        } else {
+            final WarShip secondTargetedWarship = getRandomSecondTarget();
+            return applyDamage(secondTargetedWarship, damageValue, damageDealer);
+        }
+        cleanUp();
+        return Optional.of(warshipHealthState.getWarShip());
+    }
+
+    /**
+     * Returns a randomly selected second target if the given one if not available.
+     *
+     * @return a target to attack
+     */
+    @Nullable
+    private WarShip getRandomSecondTarget() {
+        if (warshipHealthStates.isEmpty()) {
+            return null;
+        }
         int numberOfAttackedShip = 0;
         if (warshipHealthStates.size() > 1) {
             numberOfAttackedShip = ThreadLocalRandom.current().nextInt(0, warshipHealthStates.size() - 1);
         }
-        final WarShip warShip = new ArrayList<>(warshipHealthStates.keySet()).get(numberOfAttackedShip);
-        final WarshipHealthState warshipHealthState = warshipHealthStates.get(warShip);
-        if (warshipHealthState.isFightingCapable()) {
-            warshipHealthState.applyDamage(damageValue, damageDealer);
-        } else {
-            return applyDamage(damageValue, damageDealer);
-        }
-        cleanUp();
-        return Optional.of(warshipHealthState.getWarShip());
+        return new ArrayList<>(warshipHealthStates.keySet()).get(numberOfAttackedShip);
     }
 
     /**
@@ -116,7 +133,6 @@ public class FleetHealthState implements Cloneable {
                 .filter(e -> !e.getValue().isFightingCapable())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         losses.forEach((warShip, warshipHealthState) -> {
-            BattleStaticLogger.logLoss(warShip);
             warshipHealthStates.remove(warShip);
             this.losses.put(warShip, warshipHealthState);
         });

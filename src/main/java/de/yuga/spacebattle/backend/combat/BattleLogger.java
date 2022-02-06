@@ -83,9 +83,6 @@ public class BattleLogger {
         final List<BeamVolley> allBeamVolleys = battleResult.getBeamVolleys();
         final List<MissileSalvo> allMissileSalvos = battleResult.getMissileSalvos();
 
-        final Map<ECombatPhase.ECombatSubPhase, List<MissileSalvo>> collect = allMissileSalvos.stream()
-                .collect(Collectors.groupingBy(MissileSalvo::getCombatSubPhase, Collectors.mapping(Function.identity(), Collectors.toList())));
-
         final Map<CombatRound, List<FleetRoundState>> statesByRound = allRoundStates.stream()
                 .collect(Collectors.groupingBy(FleetRoundState::getCombatRound,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
@@ -270,10 +267,8 @@ public class BattleLogger {
         final Fleet target = volley.getTarget();
         final BigDecimal distance = volley.getDistance();
 
-        final int amount = volley.getAppliedDamage().keySet().size();
-
         final StringBuilder sb = new StringBuilder();
-        final String msg = "#" + combatRound.getNo() + " beam volley " + volley.getUuid() + " from " + actor.getName() + " attacks " + target.getName() + " with " + amount + " hits over " + DistanceCalculator.getDistanceAsStringWithUnit(distance) + "\n";
+        final String msg = "#" + combatRound.getNo() + " beam volley " + volley.getUuid() + " from " + actor.getName() + " attacks " + target.getName() + " hits over " + DistanceCalculator.getDistanceAsStringWithUnit(distance) + "\n";
         sb.append(msg);
         hitLogs.forEach(hitLog -> generateHitLogMessage(hitLog, sb));
         hitLogs.stream()

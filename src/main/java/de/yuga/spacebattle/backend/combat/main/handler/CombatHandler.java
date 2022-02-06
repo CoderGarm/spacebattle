@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
-import de.yuga.spacebattle.backend.combat.BattleStaticLogger;
 import de.yuga.spacebattle.backend.combat.dto.BeamVolley;
 import de.yuga.spacebattle.backend.combat.dto.FleetDamageProjectionPerRange;
 import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
@@ -81,10 +80,6 @@ public class CombatHandler {
         // todo currently, the first fleet will act first
         new MovementAction(cage, fleetOne, movementTypeOne, positionOne, destinationOne, positionTwo);
         new MovementAction(cage, fleetTwo, movementTypeTwo, positionTwo, destinationTwo, positionOne);
-
-        BattleStaticLogger.logMovement(cage.getCurrentCombatRound(), fleetOne, positionOne, destinationOne);
-        BattleStaticLogger.logMovement(cage.getCurrentCombatRound(), fleetTwo, positionTwo, destinationTwo);
-
         // execute movement
         positionOne.moveTo(destinationOne);
         positionTwo.moveTo(destinationTwo);

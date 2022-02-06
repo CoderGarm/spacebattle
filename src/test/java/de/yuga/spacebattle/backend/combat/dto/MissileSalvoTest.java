@@ -152,16 +152,17 @@ class MissileSalvoTest {
         when(cageMock.getCurrentStateByFleet(target)).thenReturn(fleetRoundStateMock);
         when(fleetRoundStateMock.getFleetHealthState()).thenReturn(targetHealthStateMock);
         when(missileSalvoHealthStateMock.getCurrentAmountByType()).thenReturn(currentMissiles);
-        when(targetHealthStateMock.applyDamage(111, testObject)).thenReturn(Optional.of(warShip));
-        when(targetHealthStateMock.applyDamage(222, testObject)).thenReturn(Optional.of(warShip));
+        when(targetHealthStateMock.applyDamage(warShip, 111, testObject)).thenReturn(Optional.of(warShip));
+        when(targetHealthStateMock.applyDamage(warShip, 222, testObject)).thenReturn(Optional.of(warShip));
+        when(cageMock.getRandomActiveWarShipOfFleet(target)).thenReturn(warShip);
         // test method
         testObject.detonate();
         // check expectation
         verify(cageMock).getCurrentStateByFleet(target);
         verify(fleetRoundStateMock).getFleetHealthState();
         verify(missileSalvoHealthStateMock, times(2)).getCurrentAmountByType();
-        verify(targetHealthStateMock).applyDamage(111, testObject);
-        verify(targetHealthStateMock).applyDamage(222, testObject);
+        verify(targetHealthStateMock).applyDamage(warShip, 111, testObject);
+        verify(targetHealthStateMock).applyDamage(warShip, 222, testObject);
         verify(cageMock).addHistorizable(testObject);
         final Map<WarShip, List<Long>> result = testObject.getAppliedDamage();
         assertNotNull(result);

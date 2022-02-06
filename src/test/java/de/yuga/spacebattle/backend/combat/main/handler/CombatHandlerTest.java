@@ -3,8 +3,11 @@ package de.yuga.spacebattle.backend.combat.main.handler;
 import de.yuga.spacebattle.backend.combat.dto.BeamVolley;
 import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
 import de.yuga.spacebattle.backend.combat.main.Cage;
+import de.yuga.spacebattle.backend.combat.round.FleetHealthState;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
+import de.yuga.spacebattle.backend.combat.round.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +16,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static de.yuga.spacebattle.TestDataProviderUtils.cage;
 import static org.junit.jupiter.api.Assertions.*;
@@ -134,16 +138,22 @@ class CombatHandlerTest {
         final Fleet target = cage.getFleetTwo();
 
         final Cage cageMock = mock(Cage.class);
-        final FleetRoundState roundStateOneMock = mock(FleetRoundState.class);
-        final FleetRoundState roundStateTwoMock = mock(FleetRoundState.class);
+        final FleetRoundState roundStateActorMock = mock(FleetRoundState.class);
+        final FleetHealthState fleetHealthStateActorMock = mock(FleetHealthState.class);
+        final WarShip firingShipMock = mock(WarShip.class);
+        final WarshipHealthState firingWarshipHealthStateMock = mock(WarshipHealthState.class);
+
+        final FleetRoundState roundStateTargetMock = mock(FleetRoundState.class);
         final Orbit position = Orbit.getCenterOrbit();
         ReflectionTestUtils.setField(testObject, "cage", cageMock);
         ReflectionTestUtils.setField(cageMock, "flyingBeamVolleys", new ArrayList<>());
         // mock methods
-        when(cageMock.getCurrentStateByFleet(actor)).thenReturn(roundStateOneMock);
-        when(roundStateOneMock.getPosition()).thenReturn(position);
-        when(cageMock.getCurrentStateByFleet(target)).thenReturn(roundStateTwoMock);
-        when(roundStateTwoMock.getPosition()).thenReturn(position);
+        when(cageMock.getCurrentStateByFleet(actor)).thenReturn(roundStateActorMock);
+        when(roundStateActorMock.getPosition()).thenReturn(position);
+        when(cageMock.getCurrentStateByFleet(target)).thenReturn(roundStateTargetMock);
+        when(roundStateActorMock.getFleetHealthState()).thenReturn(fleetHealthStateActorMock);
+        when(fleetHealthStateActorMock.getWarshipHealthStates()).thenReturn(Map.of(firingShipMock, firingWarshipHealthStateMock));
+        when(roundStateTargetMock.getPosition()).thenReturn(position);
         doCallRealMethod().when(cageMock).addToFlyingBeamVolleys(any());
         doCallRealMethod().when(cageMock).getFlyingBeamVolleys();
         // test method
@@ -164,17 +174,23 @@ class CombatHandlerTest {
         final Fleet actor = cage.getFleetOne();
         final Fleet target = cage.getFleetTwo();
         final Cage cageMock = mock(Cage.class);
-        final FleetRoundState roundStateOneMock = mock(FleetRoundState.class);
-        final FleetRoundState roundStateTwoMock = mock(FleetRoundState.class);
+        final FleetRoundState roundStateActorMock = mock(FleetRoundState.class);
+        final FleetHealthState fleetHealthStateActorMock = mock(FleetHealthState.class);
+        final WarShip firingShipMock = mock(WarShip.class);
+        final WarshipHealthState firingWarshipHealthStateMock = mock(WarshipHealthState.class);
+        final FleetRoundState roundStateTargetMock = mock(FleetRoundState.class);
 
         final Orbit position = Orbit.getCenterOrbit();
         ReflectionTestUtils.setField(testObject, "cage", cageMock);
         ReflectionTestUtils.setField(cageMock, "flyingMissileSalvos", new ArrayList<>());
         // mock methods
-        when(cageMock.getCurrentStateByFleet(actor)).thenReturn(roundStateOneMock);
-        when(roundStateOneMock.getPosition()).thenReturn(position);
-        when(cageMock.getCurrentStateByFleet(target)).thenReturn(roundStateTwoMock);
-        when(roundStateTwoMock.getPosition()).thenReturn(position);
+        when(cageMock.getCurrentStateByFleet(actor)).thenReturn(roundStateActorMock);
+        when(roundStateActorMock.getFleetHealthState()).thenReturn(fleetHealthStateActorMock);
+        when(fleetHealthStateActorMock.getWarshipHealthStates()).thenReturn(Map.of(firingShipMock, firingWarshipHealthStateMock));
+        when(roundStateActorMock.getPosition()).thenReturn(position);
+        when(cageMock.getCurrentStateByFleet(target)).thenReturn(roundStateTargetMock);
+        when(roundStateTargetMock.getPosition()).thenReturn(position);
+        when(fleetHealthStateActorMock.hasShotsLeft()).thenReturn(true);
         doCallRealMethod().when(cageMock).addToFlyingMissileSalvos(any());
         doCallRealMethod().when(cageMock).getFlyingMissileSalvos();
         // test method
