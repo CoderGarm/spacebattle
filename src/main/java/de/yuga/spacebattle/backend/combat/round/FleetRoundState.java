@@ -5,8 +5,12 @@ import de.yuga.spacebattle.backend.combat.dto.Historizable;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
+import de.yuga.spacebattle.backend.enums.EWeaponType;
 
 import javax.annotation.Nonnull;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class FleetRoundState extends Historizable<FleetRoundState> implements Cloneable {
 
@@ -123,6 +127,62 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
     public void historize() {
         //noinspection RedundantCast
         cage.addHistorizable((FleetRoundState) this);
+    }
+
+
+    /**
+     * Returns the maximum weapon range of the fleet.
+     *
+     * @return the maximum weapon range
+     */
+    public BigDecimal getMaximumWeaponRange() {
+        final List<WarshipHealthState> warshipHealthStatesByWeaponRange = fleetHealthState.getWarshipHealthStates().values().stream()
+                .sorted((o1, o2) -> {
+                    final BigDecimal maximumWeaponRangeO1 = o1.getMaximumWeaponRange();
+                    final BigDecimal maximumWeaponRangeO2 = o2.getMaximumWeaponRange();
+                    return maximumWeaponRangeO1.compareTo(maximumWeaponRangeO2);
+                }).collect(Collectors.toList());
+        return warshipHealthStatesByWeaponRange.get(warshipHealthStatesByWeaponRange.size() - 1).getMaximumWeaponRange();
+    }
+
+    /**
+     * Returns the maximum weapon range of the fleet.
+     *
+     * @param weaponType the weapon type as filter
+     * @return the maximum weapon range
+     */
+    public BigDecimal getMaximumWeaponRangePerType(@Nonnull final EWeaponType weaponType) {
+        Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
+
+        final List<WarshipHealthState> warshipHealthStatesByWeaponRange = fleetHealthState.getWarshipHealthStates().values().stream()
+                .sorted((o1, o2) -> {
+                    final BigDecimal maximumWeaponRangeO1 = o1.getMaximumWeaponRangePerType(weaponType);
+                    final BigDecimal maximumWeaponRangeO2 = o2.getMaximumWeaponRangePerType(weaponType);
+                    return maximumWeaponRangeO1.compareTo(maximumWeaponRangeO2);
+                }).collect(Collectors.toList());
+        return warshipHealthStatesByWeaponRange.get(warshipHealthStatesByWeaponRange.size() - 1).getMaximumWeaponRangePerType(weaponType);
+    }
+
+    /**
+     * Returns the damage which can be applied by this fleet to the given range in meter.
+     *
+     * @param lowerBound the lower boundary
+     * @param upperBound the upper boundary
+     * @return the damage value
+     */
+    public long getDamagePerRange(@Nonnull final BigDecimal lowerBound, @Nonnull final BigDecimal upperBound) {
+        Preconditions.checkNotNull(lowerBound, "lowerBound shouldn't be null!");
+        Preconditions.checkNotNull(upperBound, "upperBound shouldn't be null!");
+
+        return fleetHealthState.getWarshipHealthStates().values().stream()
+                .map(warshipHealthState -> warshipHealthState.getDamagePerRange(lowerBound, upperBound))
+                .mapToLong(Long::longValue).sum();
+    }
+
+    public long getMaximumDamage() {
+        return fleetHealthState.getWarshipHealthStates().values().stream()
+                .map(WarshipHealthState::getMaximumDamage)
+                .mapToLong(Long::longValue).sum();
     }
 
     @Override

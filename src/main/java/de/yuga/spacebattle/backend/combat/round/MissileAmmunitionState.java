@@ -34,7 +34,6 @@ public class MissileAmmunitionState implements Cloneable {
             final int ammoPerModule = ammunitionModule.getEffectValue();
             final Missile missile = ammunitionModule.getMissile();
             shotsPerMissile.merge(missile, amountOfLaunchers * ammoPerModule, Integer::sum);
-            //shotsPerMissile.put(missile, amountOfLaunchers * ammoPerModule);
         });
     }
 

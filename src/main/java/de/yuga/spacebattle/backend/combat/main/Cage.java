@@ -20,12 +20,10 @@ import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -75,12 +73,6 @@ public class Cage implements Future<Cage> {
     @Nonnull
     private final List<Fleet> participatingFleets;
 
-    /**
-     * The damage projection by range for every involved fleet.
-     */
-    @Nonnull
-    private final Map<Fleet, FleetDamageProjectionPerRange> fleetDamageProjectionPerRangeByFleet;
-
     @Nonnull
     private final List<MissileSalvo> flyingMissileSalvos = new ArrayList<>();
 
@@ -114,9 +106,6 @@ public class Cage implements Future<Cage> {
         currentCombatRound = new CombatRound();
         this.fleetClash = fleetClash;
         this.participatingFleets = fleetClash.getParticipatingFleets();
-        this.fleetDamageProjectionPerRangeByFleet = participatingFleets.stream()
-                .map(FleetDamageProjectionPerRange::new)
-                .collect(Collectors.toMap(FleetDamageProjectionPerRange::getFleet, Function.identity()));
 
         // todo guessing that there are onl two participants which are foes
         fleetOne = participatingFleets.get(0);
@@ -242,6 +231,7 @@ public class Cage implements Future<Cage> {
         final CombatRound currentCombatRound = getCurrentCombatRound();
         final int noOfNoReturn = currentCombatRound.getNo() - 2;
 
+        // todo check if there are more then two rounds in it
         final List<FleetRoundState> fleetRoundStatesToArchive = roundStates.stream()
                 .filter(ma -> ma.getCombatRound().getNo() < noOfNoReturn)
                 .collect(Collectors.toList());
@@ -271,6 +261,7 @@ public class Cage implements Future<Cage> {
         final FleetRoundState stateOne = getCurrentStateByFleet(fleetOne);
         final FleetRoundState stateTwo = getCurrentStateByFleet(fleetTwo);
         currentCombatRound.next();
+        // just historizing the state
         new FleetRoundState(this, stateOne);
         new FleetRoundState(this, stateTwo);
 
@@ -338,19 +329,6 @@ public class Cage implements Future<Cage> {
                     LOGGER.info("There is no fleet state for idFleet '" + fleet.getId() + "'.");
                     return new NotifyWebUserException("No state present - please call the administrator.");
                 });
-    }
-
-    /**
-     * Returns the damage projection ability of this fleet.
-     *
-     * @param fleet the fleet which should be described
-     * @return the damage projection over the range
-     */
-    @Nonnull
-    public FleetDamageProjectionPerRange getFleetDamageProjectionPerRange(@Nonnull final Fleet fleet) {
-        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
-
-        return fleetDamageProjectionPerRangeByFleet.get(fleet);
     }
 
     @Nonnull

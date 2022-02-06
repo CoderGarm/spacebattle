@@ -21,7 +21,9 @@ import de.yuga.spacebattle.backend.enums.EWeaponType;
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The combat handler will handle every combat related round for the {@link #cage}.<br>
@@ -32,6 +34,13 @@ public class CombatHandler {
 
     @Nonnull
     private final Cage cage;
+
+    /**
+     * This indicates if any weapon damage were applied.
+     */
+    private boolean actionHappened = false;
+
+    private final Map<Fleet, FleetDamageProjectionPerRange> fleetDamages = new HashMap<>();
 
     public CombatHandler(@Nonnull final Cage cage) {
         Preconditions.checkNotNull(cage, "cage shouldn't be null!");
@@ -56,8 +65,8 @@ public class CombatHandler {
         final Orbit positionTwo = currentStateTwo.getPosition();
 
         // detect movement motivation
-        final FleetDamageProjectionPerRange fleetDamageOne = cage.getFleetDamageProjectionPerRange(fleetOne);
-        final FleetDamageProjectionPerRange fleetDamageTwo = cage.getFleetDamageProjectionPerRange(fleetOne);
+        final FleetDamageProjectionPerRange fleetDamageOne = getFleetDamageProjectionPerRange(fleetOne, currentStateOne);
+        final FleetDamageProjectionPerRange fleetDamageTwo = getFleetDamageProjectionPerRange(fleetTwo, currentStateTwo);
         final EMovementType movementTypeOne = detectMovementType(positionOne, positionTwo, fleetDamageOne, fleetDamageTwo);
         final EMovementType movementTypeTwo = detectMovementType(positionTwo, positionOne, fleetDamageTwo, fleetDamageOne);
 
@@ -79,6 +88,30 @@ public class CombatHandler {
         // execute movement
         positionOne.moveTo(destinationOne);
         positionTwo.moveTo(destinationTwo);
+    }
+
+    /**
+     * Returns or creates the damage projection for the fleet depending on their current state.<br>
+     * If no damage were applied in the last round, the state hasn't changed and can be reused.
+     *
+     * @param fleet      the fleet to get the damage projection for
+     * @param roundState the current fleets state
+     * @return the damage projection
+     */
+    @Nonnull
+    private FleetDamageProjectionPerRange getFleetDamageProjectionPerRange(@Nonnull final Fleet fleet, @Nonnull final FleetRoundState roundState) {
+        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+        Preconditions.checkNotNull(roundState, "roundState shouldn't be null!");
+
+        FleetDamageProjectionPerRange projectionPerRange = fleetDamages.get(fleet);
+        if (projectionPerRange == null) {
+            projectionPerRange = new FleetDamageProjectionPerRange(roundState);
+            fleetDamages.put(fleet, projectionPerRange);
+        } else if (actionHappened) {
+            projectionPerRange = new FleetDamageProjectionPerRange(roundState);
+            fleetDamages.put(fleet, projectionPerRange);
+        }
+        return projectionPerRange;
     }
 
     /**
@@ -138,6 +171,7 @@ public class CombatHandler {
      * Handles the incoming weapon fire phase.
      */
     public void handleIncomingWeaponFirePhase() {
+        actionHappened = false;
         handleMissileDamage();
         handleDirectWeaponDamage();
     }
@@ -150,6 +184,9 @@ public class CombatHandler {
     protected void handleDirectWeaponDamage() {
         final List<BeamVolley> flyingBeamVolleys = cage.getFlyingBeamVolleys();
         new ArrayList<>(flyingBeamVolleys).forEach(BeamVolley::applyDamage);
+        if (!flyingBeamVolleys.isEmpty()) {
+            actionHappened = true;
+        }
     }
 
     /**
@@ -160,6 +197,9 @@ public class CombatHandler {
     protected void handleMissileDamage() {
         final List<MissileSalvo> flyingMissileSalvos = cage.getFlyingMissileSalvos();
         new ArrayList<>(flyingMissileSalvos).stream().filter(MissileSalvo::isInDetonationRange).forEach(MissileSalvo::detonate);
+        if (!flyingMissileSalvos.isEmpty()) {
+            actionHappened = true;
+        }
     }
 
     /**

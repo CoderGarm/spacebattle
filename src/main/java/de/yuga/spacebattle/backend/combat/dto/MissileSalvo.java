@@ -133,7 +133,7 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
 
         final Map<WarShip, WarshipHealthState> warshipHealthStates = actorState.getFleetHealthState().getWarshipHealthStates();
         warshipHealthStates.values().stream().filter(WarshipHealthState::isFightingCapable).forEach(w -> {
-            final List<AlignedFitting> missiles = w.getActiveFittings().entrySet().stream()
+            final List<AlignedFitting> missiles = w.getFittings().entrySet().stream()
                     // filter active fittings
                     .filter(Map.Entry::getValue)
                     .map(Map.Entry::getKey)

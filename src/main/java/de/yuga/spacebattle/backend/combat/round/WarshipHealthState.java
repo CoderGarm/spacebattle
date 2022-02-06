@@ -6,11 +6,16 @@ import de.yuga.spacebattle.backend.combat.dto.Historizable;
 import de.yuga.spacebattle.backend.combat.dto.HitLog;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
 import de.yuga.spacebattle.backend.enums.EHitArea;
+import de.yuga.spacebattle.backend.enums.EWeaponType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,7 +60,7 @@ public class WarshipHealthState implements Cloneable {
      * The activity state per weapon system. The value indicates if the weapon is active (<code>true</code>) or not.
      */
     @Nonnull
-    private Map<AlignedFitting, Boolean> activeFittings = new HashMap<>();
+    private Map<AlignedFitting, Boolean> fittings = new HashMap<>();
 
     @Nonnull
     private final List<HitLog> hitLog = new ArrayList<>();
@@ -73,7 +78,7 @@ public class WarshipHealthState implements Cloneable {
         sidewallState = shipClass.getSidewall() != null ? shipClass.getSidewall().getEffectValue() : 0;
         propulsionState = shipClass.getPropulsion() != null ? shipClass.getPropulsion().getEffectValue() : 0;
         elokaState = shipClass.getElectronicWarfare() != null ? shipClass.getElectronicWarfare().getEffectValue() : 0;
-        shipClass.getFittings().forEach(fitting -> activeFittings.put(fitting, true));
+        shipClass.getFittings().forEach(fitting -> fittings.put(fitting, true));
         this.missileAmmunitionState = new MissileAmmunitionState(warShip);
         BattleStaticLogger.logEnterBattleField(this);
     }
@@ -102,7 +107,7 @@ public class WarshipHealthState implements Cloneable {
             return false;
         }
         if (armorState <= 0 || sidewallState <= 0 || propulsionState <= 0 || elokaState <= 0) return false;
-        for (Boolean aBoolean : activeFittings.values()) {
+        for (Boolean aBoolean : fittings.values()) {
             if (aBoolean) {
                 return true;
             }
@@ -130,12 +135,112 @@ public class WarshipHealthState implements Cloneable {
         return warShip.hashCode();
     }
 
+
+    /**
+     * Returns the maximum weapon range of the ship class.
+     *
+     * @return the maximum weapon range
+     */
+    public BigDecimal getMaximumWeaponRange() {
+
+        final List<AlignedFitting> fittings = getActiveFittings();
+        final List<BigDecimal> sortedRanged = fittings.stream()
+                .map(fitting -> {
+                    BigDecimal damageProjectionRange = BigDecimal.ZERO;
+                    final Weapon weapon = fitting.getWeapon();
+                    if (weapon != null) {
+                        damageProjectionRange = weapon.getDamageProjectionRange();
+                    }
+                    final Launcher launcher = fitting.getLauncher();
+                    if (launcher != null) {
+                        final Missile missile = launcher.getAmmunitionModule().getMissile();
+                        damageProjectionRange = missile.getMissileRange();
+                    }
+                    return damageProjectionRange;
+                })
+                .sorted(BigDecimal::compareTo).collect(Collectors.toList());
+        if (sortedRanged.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        return sortedRanged.get(sortedRanged.size() - 1);
+    }
+
+    /**
+     * Returns the maximum weapon range of the ship class.
+     *
+     * @param weaponType the weapon type to filter
+     * @return the maximum weapon range
+     */
+    public BigDecimal getMaximumWeaponRangePerType(@Nonnull final EWeaponType weaponType) {
+        Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
+
+        final List<AlignedFitting> fittings = getActiveFittings();
+        final List<BigDecimal> sortedRanged = fittings.stream()
+                .filter(fitting -> weaponType == fitting.getWeaponType())
+                .map(fitting -> {
+                    BigDecimal damageProjectionRange = BigDecimal.ZERO;
+                    final Weapon weapon = fitting.getWeapon();
+                    if (weapon != null) {
+                        damageProjectionRange = weapon.getDamageProjectionRange();
+                    }
+                    final Launcher launcher = fitting.getLauncher();
+                    if (launcher != null) {
+                        final Missile missile = launcher.getAmmunitionModule().getMissile();
+                        damageProjectionRange = missile.getMissileRange();
+                    }
+                    return damageProjectionRange;
+                })
+                .sorted(BigDecimal::compareTo).collect(Collectors.toList());
+        if (sortedRanged.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        return sortedRanged.get(sortedRanged.size() - 1);
+    }
+
+    /**
+     * Returns the damage which can be applied by this class to the given range in meter.
+     *
+     * @param lowerBound the lower boundary
+     * @param upperBound the upper boundary
+     * @return the damage value
+     */
+    public long getDamagePerRange(@Nonnull final BigDecimal lowerBound, @Nonnull final BigDecimal upperBound) {
+        Preconditions.checkNotNull(lowerBound, "lowerBound shouldn't be null!");
+        Preconditions.checkNotNull(upperBound, "upperBound shouldn't be null!");
+
+        final List<AlignedFitting> fittings = getActiveFittings();
+        return fittings.stream()
+                .map(fitting -> fitting.getDamagePerRange(lowerBound, upperBound))
+                .mapToLong(Long::longValue).sum();
+    }
+
+    public long getMaximumDamage() {
+        final List<AlignedFitting> fittings = getActiveFittings();
+        return fittings.stream().map(fitting -> {
+            long damageValue = 0;
+            final int amount = fitting.getAmount();
+            final Weapon weapon = fitting.getWeapon();
+            final Launcher launcher = fitting.getLauncher();
+            if (launcher != null) {
+                damageValue = launcher.getAmmunitionModule().getMissile().getWarhead().getDamageValue();
+            } else if (weapon != null) {
+                damageValue = weapon.getEffectValue();
+            }
+            return damageValue * amount;
+        }).mapToLong(Long::longValue).sum();
+    }
+
+    @Nonnull
+    private List<AlignedFitting> getActiveFittings() {
+        return fittings.entrySet().stream().filter(Map.Entry::getValue).map(Map.Entry::getKey).collect(Collectors.toList());
+    }
+
     @Override
     public WarshipHealthState clone() {
         try {
             final WarshipHealthState clone = (WarshipHealthState) super.clone();
             //noinspection BoxingBoxedValue
-            clone.activeFittings = activeFittings.entrySet().stream()
+            clone.fittings = fittings.entrySet().stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, e -> Boolean.valueOf(e.getValue())));
             clone.missileAmmunitionState = missileAmmunitionState.clone();
             return clone;
@@ -175,12 +280,12 @@ public class WarshipHealthState implements Cloneable {
                 hullState = applyDamageToHitArea(hullState, damageValue, attackedPart, damageDealer);
                 final int chanceForInternalHit = ThreadLocalRandom.current().nextInt(0, 100);
                 if (chanceForInternalHit > 0 && chanceForInternalHit <= 7) {
-                    final List<AlignedFitting> fittings = new ArrayList<>(activeFittings.keySet());
+                    final List<AlignedFitting> fittings = new ArrayList<>(this.fittings.keySet());
                     for (AlignedFitting alignedFitting : fittings) {
-                        final boolean activityState = activeFittings.get(alignedFitting);
+                        final boolean activityState = this.fittings.get(alignedFitting);
                         if (activityState) {
                             // destroy a fitting and stop
-                            activeFittings.put(alignedFitting, false);
+                            this.fittings.put(alignedFitting, false);
                             break;
                         }
                     }
@@ -239,8 +344,8 @@ public class WarshipHealthState implements Cloneable {
     }
 
     @Nonnull
-    public Map<AlignedFitting, Boolean> getActiveFittings() {
-        return activeFittings;
+    public Map<AlignedFitting, Boolean> getFittings() {
+        return fittings;
     }
 
     @Nonnull
@@ -255,7 +360,7 @@ public class WarshipHealthState implements Cloneable {
                 ", sidewall: " + sidewallState +
                 ", propulsion: " + propulsionState +
                 ", eloka: " + elokaState +
-                ", activeFittings: " + activeFittings.values().stream().filter(aBoolean -> aBoolean).count() +
+                ", activeFittings: " + fittings.values().stream().filter(aBoolean -> aBoolean).count() +
                 ", isAlive: " + isAlive() +
                 ", isFightingCapable: " + isFightingCapable() +
                 '}';

@@ -3,7 +3,6 @@ package de.yuga.spacebattle.backend.combat.main;
 import de.yuga.spacebattle.BaseTestCase;
 import de.yuga.spacebattle.TestDataProviderUtils;
 import de.yuga.spacebattle.backend.combat.dto.BeamVolley;
-import de.yuga.spacebattle.backend.combat.dto.FleetDamageProjectionPerRange;
 import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
 import de.yuga.spacebattle.backend.combat.dto.MovementAction;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
@@ -50,7 +49,6 @@ class CageTest extends BaseTestCase {
         final List<Fleet> participatingFleets = (List<Fleet>) ReflectionTestUtils.getField(testObject, "participatingFleets");
         assertNotNull(participatingFleets);
         assertEquals(roundStates.size(), participatingFleets.size());
-        participatingFleets.forEach(fleet -> assertNotNull(testObject.getFleetDamageProjectionPerRange(fleet)));
         // test method
         final boolean isDone = testObject.isDone();
         // check expectation
@@ -156,15 +154,6 @@ class CageTest extends BaseTestCase {
     void testGetCurrentStateByFleet() {
         // test method
         final FleetRoundState result = testObject.getCurrentStateByFleet(testObject.getParticipatingFleets().get(0));
-        // check expectation
-        assertNotNull(result);
-        assertSame(testObject.getParticipatingFleets().get(0), result.getFleet());
-    }
-
-    @Test
-    void testGetFleetDamageProjectionPerRange() {
-        // test method
-        final FleetDamageProjectionPerRange result = testObject.getFleetDamageProjectionPerRange(testObject.getParticipatingFleets().get(0));
         // check expectation
         assertNotNull(result);
         assertSame(testObject.getParticipatingFleets().get(0), result.getFleet());
