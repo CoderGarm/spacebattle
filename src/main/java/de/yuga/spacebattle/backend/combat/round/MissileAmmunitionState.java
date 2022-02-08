@@ -78,6 +78,17 @@ public class MissileAmmunitionState implements Cloneable {
         return shotsPerMissile.values().stream().mapToInt(Integer::intValue).sum() > 0;
     }
 
+    /**
+     * Returns if there are shots left for the missile type.
+     *
+     * @return <code>true</code> if there are missiles remaining, <code>false</code> otherwise
+     */
+    public boolean hasShotsLeft(@Nonnull final Missile missile) {
+        Preconditions.checkNotNull(missile, "missile shouldn't be null!");
+
+        return shotsPerMissile.getOrDefault(missile, 0) > 0;
+    }
+
     @Override
     public MissileAmmunitionState clone() {
         try {

@@ -49,7 +49,7 @@ public enum EWeaponAlignment {
             case EVASION_MOVEMENT:
                 return this == STERN;
             case HOLD_DISTANCE:
-                // todo ugly hack - every weapon is allowed - find solution
+                // every weapon is allowed because of free movement
                 return true;
             default:
             case SIDEWALL_PROTECTION:

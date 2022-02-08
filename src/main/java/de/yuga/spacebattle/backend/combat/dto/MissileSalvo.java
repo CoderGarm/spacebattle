@@ -169,7 +169,6 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
         this.missileSalvoHealthState = new MissileSalvoHealthState(amountByType);
         calculateRangePerCombatRound();
         calculateAttackRange();
-        final int sum = amountByType.values().stream().mapToInt(Integer::intValue).sum();
         historize();
     }
 

@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.combat.round;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.combat.dto.Historizable;
 import de.yuga.spacebattle.backend.combat.dto.HitLog;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
@@ -152,7 +153,9 @@ public class WarshipHealthState implements Cloneable {
                     final Launcher launcher = fitting.getLauncher();
                     if (launcher != null) {
                         final Missile missile = launcher.getAmmunitionModule().getMissile();
-                        damageProjectionRange = missile.getMissileRange();
+                        if (missileAmmunitionState.hasShotsLeft(missile)) {
+                            damageProjectionRange = missile.getMissileRange();
+                        }
                     }
                     return damageProjectionRange;
                 })
@@ -184,7 +187,9 @@ public class WarshipHealthState implements Cloneable {
                     final Launcher launcher = fitting.getLauncher();
                     if (launcher != null) {
                         final Missile missile = launcher.getAmmunitionModule().getMissile();
-                        damageProjectionRange = missile.getMissileRange();
+                        if (missileAmmunitionState.hasShotsLeft(missile)) {
+                            damageProjectionRange = missile.getMissileRange();
+                        }
                     }
                     return damageProjectionRange;
                 })
@@ -202,14 +207,14 @@ public class WarshipHealthState implements Cloneable {
      * @param upperBound the upper boundary
      * @return the damage value
      */
-    public long getDamagePerRange(@Nonnull final BigDecimal lowerBound, @Nonnull final BigDecimal upperBound) {
+    public List<DamagePerRangeAndAlignment> getDamagePerRange(@Nonnull final BigDecimal lowerBound, @Nonnull final BigDecimal upperBound) {
         Preconditions.checkNotNull(lowerBound, "lowerBound shouldn't be null!");
         Preconditions.checkNotNull(upperBound, "upperBound shouldn't be null!");
 
         final List<AlignedFitting> fittings = getActiveFittings();
         return fittings.stream()
                 .map(fitting -> fitting.getDamagePerRange(lowerBound, upperBound))
-                .mapToLong(Long::longValue).sum();
+                .collect(Collectors.toList());
     }
 
     public long getMaximumDamage() {

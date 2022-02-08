@@ -15,6 +15,7 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
 import de.yuga.spacebattle.backend.enums.ECombatPhase.ECombatSubPhase;
+import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 
 import javax.annotation.Nonnull;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.combat.enums.EMovementType.*;
+import static de.yuga.spacebattle.backend.enums.EWeaponAlignment.BROADSIDE;
 
 /**
  * The combat handler will handle every combat related round for the {@link #cage}.<br>
@@ -165,7 +167,12 @@ public class CombatHandler {
 
         final boolean isInGoodRangeAndNoDefensiveMovement = actorsMovementType == INCREASE_DISTANCE || actorsMovementType == HOLD_DISTANCE;
         if (isInGoodRangeAndNoDefensiveMovement) {
-            actorsMovementType = OFFENSIVE_ROLL;
+            final EWeaponAlignment alignmentWithBestDamageForRange = actorInfo.getAlignmentWithBestDamageForRange(distance);
+            if (BROADSIDE == alignmentWithBestDamageForRange) {
+                actorsMovementType = OFFENSIVE_ROLL;
+            } else {
+                actorsMovementType = HOLD_DISTANCE;
+            }
         }
 
         actorsState.setMovementType(actorsMovementType);
@@ -277,6 +284,7 @@ public class CombatHandler {
             final boolean hasShotsLeft = actorsState.getFleetHealthState().hasShotsLeft();
             if (hasShotsLeft) {
                 cage.addToFlyingMissileSalvos(new MissileSalvo(cage, actor, target));
+                actionHappened = true;
             }
         }
     }

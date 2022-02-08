@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
 import de.yuga.spacebattle.backend.combat.dto.CounterMissileWeaponry;
+import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.account.User;
@@ -321,26 +322,9 @@ public class Fleet extends AbstractEntityKey {
         return shipClassesByWeaponRange.get(shipClassesByWeaponRange.size() - 1).getMaximumWeaponRangePerType(weaponType);
     }
 
-    /**
-     * Returns the damage which can be applied by this fleet to the given range in meter.
-     *
-     * @param lowerBound the lower boundary
-     * @param upperBound the upper boundary
-     * @return the damage value
-     */
-    public long getDamagePerRange(@Nonnull final BigDecimal lowerBound, @Nonnull final BigDecimal upperBound) {
-        Preconditions.checkNotNull(lowerBound, "lowerBound shouldn't be null!");
-        Preconditions.checkNotNull(upperBound, "upperBound shouldn't be null!");
-
-        return getShipsByClass().entrySet().stream().map(entry -> {
-            final ShipClass shipClass = entry.getKey();
-            final Integer amount = entry.getValue();
-            final long dmgPerRange = shipClass.getDamagePerRange(lowerBound, upperBound);
-            return dmgPerRange * amount;
-        }).mapToLong(Long::longValue).sum();
-    }
-
-    public long getDamagePerRangePerType(@Nonnull final BigDecimal lowerBound, @Nonnull final BigDecimal upperBound, @Nonnull final EWeaponType weaponType) {
+    public List<DamagePerRangeAndAlignment> getDamagePerRangePerType(@Nonnull final BigDecimal lowerBound,
+                                                                     @Nonnull final BigDecimal upperBound,
+                                                                     @Nonnull final EWeaponType weaponType) {
         Preconditions.checkNotNull(lowerBound, "lowerBound shouldn't be null!");
         Preconditions.checkNotNull(upperBound, "upperBound shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
@@ -348,9 +332,9 @@ public class Fleet extends AbstractEntityKey {
         return getShipsByClass().entrySet().stream().map(entry -> {
             final ShipClass shipClass = entry.getKey();
             final Integer amount = entry.getValue();
-            final long dmgPerRange = shipClass.getDamagePerRangePerWeaponType(lowerBound, upperBound, weaponType);
-            return dmgPerRange * amount;
-        }).mapToLong(Long::longValue).sum();
+            final List<DamagePerRangeAndAlignment> damagePerRangePerWeaponType = shipClass.getDamagePerRangePerWeaponType(lowerBound, upperBound, weaponType);
+            return damagePerRangePerWeaponType.stream().map(d -> d.multiplyDamage(amount)).collect(Collectors.toList());
+        }).flatMap(Collection::stream).collect(Collectors.toList());
     }
 
     /**

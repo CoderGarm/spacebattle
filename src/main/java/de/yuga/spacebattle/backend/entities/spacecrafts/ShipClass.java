@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.entities.spacecrafts;
 
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
@@ -577,13 +578,13 @@ public class ShipClass extends AbstractEntityKey {
      * @param upperBound the upper boundary
      * @return the damage value
      */
-    public long getDamagePerRange(@Nonnull final BigDecimal lowerBound, @Nonnull final BigDecimal upperBound) {
+    public List<DamagePerRangeAndAlignment> getDamagePerRange(@Nonnull final BigDecimal lowerBound, @Nonnull final BigDecimal upperBound) {
         Preconditions.checkNotNull(lowerBound, "lowerBound shouldn't be null!");
         Preconditions.checkNotNull(upperBound, "upperBound shouldn't be null!");
 
         return fittings.stream()
                 .map(fitting -> fitting.getDamagePerRange(lowerBound, upperBound))
-                .mapToLong(Long::longValue).sum();
+                .collect(Collectors.toList());
     }
 
     /**
@@ -593,9 +594,9 @@ public class ShipClass extends AbstractEntityKey {
      * @param upperBound the upper boundary
      * @return the damage value
      */
-    public long getDamagePerRangePerWeaponType(@Nonnull final BigDecimal lowerBound,
-                                               @Nonnull final BigDecimal upperBound,
-                                               @Nonnull final EWeaponType weaponType) {
+    public List<DamagePerRangeAndAlignment> getDamagePerRangePerWeaponType(@Nonnull final BigDecimal lowerBound,
+                                                                           @Nonnull final BigDecimal upperBound,
+                                                                           @Nonnull final EWeaponType weaponType) {
         Preconditions.checkNotNull(lowerBound, "lowerBound shouldn't be null!");
         Preconditions.checkNotNull(upperBound, "upperBound shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
@@ -603,7 +604,7 @@ public class ShipClass extends AbstractEntityKey {
         return fittings.stream()
                 .filter(fitting -> weaponType == fitting.getWeaponType())
                 .map(fitting -> fitting.getDamagePerRange(lowerBound, upperBound))
-                .mapToLong(Long::longValue).sum();
+                .collect(Collectors.toList());
     }
 
     @Override

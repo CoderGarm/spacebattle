@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.combat.round;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.combat.dto.Historizable;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
@@ -11,6 +12,7 @@ import de.yuga.spacebattle.backend.enums.EWeaponType;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -191,13 +193,14 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
      * @param upperBound the upper boundary
      * @return the damage value
      */
-    public long getDamagePerRange(@Nonnull final BigDecimal lowerBound, @Nonnull final BigDecimal upperBound) {
+    public List<DamagePerRangeAndAlignment> getDamagePerRange(@Nonnull final BigDecimal lowerBound, @Nonnull final BigDecimal upperBound) {
         Preconditions.checkNotNull(lowerBound, "lowerBound shouldn't be null!");
         Preconditions.checkNotNull(upperBound, "upperBound shouldn't be null!");
 
         return fleetHealthState.getWarshipHealthStates().values().stream()
                 .map(warshipHealthState -> warshipHealthState.getDamagePerRange(lowerBound, upperBound))
-                .mapToLong(Long::longValue).sum();
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 
     public long getMaximumDamage() {

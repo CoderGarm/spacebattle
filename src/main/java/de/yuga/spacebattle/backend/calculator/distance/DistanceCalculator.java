@@ -20,7 +20,7 @@ import java.math.RoundingMode;
 public class DistanceCalculator {
 
     public final static MathContext MATH_CONTEXT_TO_INTEGER_DOWN = new MathContext(0, RoundingMode.DOWN);
-    public final static MathContext MATH_CONTEXT_MORE_PRECISION = new MathContext(4, RoundingMode.DOWN);
+    public final static MathContext MATH_CONTEXT_MORE_PRECISION = new MathContext(15, RoundingMode.DOWN);
 
     /**
      * Returns the amount of digits.

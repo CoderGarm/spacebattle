@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.details;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
@@ -121,15 +122,16 @@ public class AlignedFitting {
      * @param upperBound the upper boundary
      * @return the damage value
      */
-    public long getDamagePerRange(final BigDecimal lowerBound, final BigDecimal upperBound) {
+    public DamagePerRangeAndAlignment getDamagePerRange(final BigDecimal lowerBound, final BigDecimal upperBound) {
 
         BigDecimal damageProjectionRange;
+        long damageValue = 0;
         if (weapon != null) {
             damageProjectionRange = weapon.getDamageProjectionRange();
             final int compareToLower = damageProjectionRange.compareTo(lowerBound);
             final int compareToUpper = upperBound.compareTo(damageProjectionRange);
             if (compareToLower >= 0 && compareToUpper <= 0) {
-                return (long) weapon.getEffectValue() * amount;
+                damageValue = (long) weapon.getEffectValue() * amount;
             }
         }
         if (launcher != null) {
@@ -138,10 +140,10 @@ public class AlignedFitting {
             final int compareToLower = damageProjectionRange.compareTo(lowerBound);
             final int compareToUpper = upperBound.compareTo(damageProjectionRange);
             if (compareToLower >= 0 && compareToUpper <= 0) {
-                return (long) missile.getWarhead().getDamageValue() * amount;
+                damageValue = missile.getWarhead().getDamageValue() * amount;
             }
         }
-        return 0L;
+        return new DamagePerRangeAndAlignment(lowerBound, upperBound, damageValue, weaponAlignment);
     }
 
     @Override

@@ -145,7 +145,7 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
     public void applyDamage() {
         this.combatSubPhase = ECombatSubPhase.BEAM_FIRE_INCOMING_PHASE;
         final FleetRoundState targetsState = cage.getCurrentStateByFleet(target);
-        if (SIDEWALL_PROTECTION != targetsState.getMovementType()) {
+        if (targetsState.getMovementType() != null && SIDEWALL_PROTECTION != targetsState.getMovementType()) {
             result = BURST_ON_SIDEWALL;
         } else {
             final FleetHealthState targetHealthState = targetsState.getFleetHealthState();
