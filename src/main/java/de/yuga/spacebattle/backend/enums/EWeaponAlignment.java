@@ -46,13 +46,12 @@ public enum EWeaponAlignment {
             case REDUCE_DISTANCE:
                 return this == BOW;
             case INCREASE_DISTANCE:
-            case EVASION_MOVEMENT:
                 return this == STERN;
             case HOLD_DISTANCE:
                 // every weapon is allowed because of free movement
                 return true;
             default:
-            case SIDEWALL_PROTECTION:
+            case IMPELLER_WEDGE_PROTECTION:
                 return false;
         }
     }

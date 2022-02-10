@@ -6,45 +6,42 @@ package de.yuga.spacebattle.backend.combat.enums;
 public enum EMovementType {
 
     /**
-     * possibly changes the distance to the opponent
-     * normal ability to fire weapon systems
-     * normal chance of being hit
-     * evasion movement
+     * possibly changes the distance to the opponent<br>
+     * normal ability to fire weapon systems<br>
+     * normal chance of being hit<br>
      */
     REDUCE_DISTANCE,
     /**
-     * possibly changes the distance to the opponent
-     * normal ability to fire weapon systems
-     * normal chance of being hit
-     * evasion movement
+     * possibly changes the distance to the opponent<br>
+     * normal ability to fire weapon systems<br>
+     * normal chance of being hit<br>
      */
     INCREASE_DISTANCE,
     /**
-     * possibly changes the distance to the opponent
-     * normal ability to fire weapon systems
-     * normal chance of being hit
-     * evasion movement
+     * possibly changes the distance to the opponent<br>
+     * normal ability to fire weapon systems<br>
+     * normal chance of being hit<br>
      */
     HOLD_DISTANCE,
     /**
+     * keeps the last course and speed<br>
+     * rolls and yaws the ships to put the impeller wedge between the incoming weapons and themselves<br>
+     * reduced ability to fire weapon systems nearly to zero<br>
+     * reduced chance of being hit nearly to zero<br>
+     */
+    IMPELLER_WEDGE_PROTECTION,
+    /**
+     * keeps the last course and speed<br>
+     * rolls and yaws the ships to put the most effective weapon systems towards the foe<br>
+     * increases ability to fire weapon systems to maximum<br>
+     * increases chance of being hit to maximum<br>
+     */
+    OFFENSIVE_ROLL,
+    /**
+     * evade to hyper limit and jump
      * possibly changes the distance to the opponent
      * reduced ability to fire weapon systems
      * reduced chance of being hit
-     * sidewall protection
      */
-    EVASION_MOVEMENT,
-    /**
-     * keeps the last course and speed
-     * rolls and yaws the ships to put the sidewall between the incoming weapons and themselves
-     * reduced ability to fire weapon systems nearly to zero
-     * reduced chance of being hit nearly to zero
-     */
-    SIDEWALL_PROTECTION,
-    /**
-     * keeps the last course and speed
-     * rolls and yaws the ships to put the most effective weapon systems towards the foe
-     * increases ability to fire weapon systems to maximum
-     * increases chance of being hit to maximum
-     */
-    OFFENSIVE_ROLL;
+    EVASION_MOVEMENT; // todo jump out of system? calculate "could be caught" and break up fight earlier?
 }

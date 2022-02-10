@@ -147,20 +147,20 @@ This will specify that the fleet will try to escape from the battlefield or will
     - possibly changes the distance to the opponent
     - normal ability to fire weapon systems
     - normal chance of being hit
-4. evasion movement
-    - possibly changes the distance to the opponent
-    - reduced ability to fire weapon systems
-    - reduced chance of being hit
-5. sidewall protection
+4. wedge protection
     - keeps the last course and speed
     - rolls and yaws the ships to put the sidewall between the incoming weapons and themselves
     - reduced ability to fire weapon systems nearly to zero
     - reduced chance of being hit nearly to zero
-6. offensive roll
+5. offensive roll
     - keeps the last course and speed
     - rolls and yaws the ships to put the most effective weapon systems towards the foe
     - increases ability to fire weapon systems to maximum
     - increases chance of being hit to maximum
+6. evasion movement
+    - possibly changes the distance to the opponent
+    - reduced ability to fire weapon systems
+    - reduced chance of being hit
 
 ### Decision-making
 

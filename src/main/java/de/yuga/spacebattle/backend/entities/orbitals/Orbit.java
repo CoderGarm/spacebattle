@@ -112,6 +112,7 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
         BigDecimal i = BigDecimal.ONE;
         switch (movementType) {
             case REDUCE_DISTANCE:
+            case EVASION_MOVEMENT:
                 i = i.negate();
                 break;
             case INCREASE_DISTANCE:
@@ -120,7 +121,7 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
             default:
             case HOLD_DISTANCE:
                 // todo LOGGER.info("This should be implemented if we are in the space without any acting force by Newton III.");
-                return new Orbit(this);
+                return this.clone();
         }
         final BigDecimal xDecimal = new BigDecimal(xCoordinate);
         final BigDecimal yDecimal = new BigDecimal(yCoordinate);

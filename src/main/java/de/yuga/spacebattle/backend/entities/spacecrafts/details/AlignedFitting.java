@@ -122,16 +122,19 @@ public class AlignedFitting {
      * @param upperBound the upper boundary
      * @return the damage value
      */
+    @Nullable
     public DamagePerRangeAndAlignment getDamagePerRange(final BigDecimal lowerBound, final BigDecimal upperBound) {
 
         BigDecimal damageProjectionRange;
         long damageValue = 0;
+        EWeaponType weaponType = null;
         if (weapon != null) {
             damageProjectionRange = weapon.getDamageProjectionRange();
             final int compareToLower = damageProjectionRange.compareTo(lowerBound);
             final int compareToUpper = upperBound.compareTo(damageProjectionRange);
             if (compareToLower >= 0 && compareToUpper <= 0) {
                 damageValue = (long) weapon.getEffectValue() * amount;
+                weaponType = EWeaponType.BEAM;
             }
         }
         if (launcher != null) {
@@ -141,9 +144,13 @@ public class AlignedFitting {
             final int compareToUpper = upperBound.compareTo(damageProjectionRange);
             if (compareToLower >= 0 && compareToUpper <= 0) {
                 damageValue = missile.getWarhead().getDamageValue() * amount;
+                weaponType = EWeaponType.MISSILE;
             }
         }
-        return new DamagePerRangeAndAlignment(lowerBound, upperBound, damageValue, weaponAlignment);
+        if (weaponType == null || damageValue == 0) {
+            return null;
+        }
+        return new DamagePerRangeAndAlignment(lowerBound, upperBound, damageValue, weaponAlignment, weaponType);
     }
 
     @Override

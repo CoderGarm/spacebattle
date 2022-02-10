@@ -26,7 +26,7 @@ import java.util.Map;
 
 import static de.yuga.spacebattle.backend.combat.enums.EDamageResult.BURST_ON_SIDEWALL;
 import static de.yuga.spacebattle.backend.combat.enums.EDamageResult.DAMAGE_APPLIED;
-import static de.yuga.spacebattle.backend.combat.enums.EMovementType.SIDEWALL_PROTECTION;
+import static de.yuga.spacebattle.backend.combat.enums.EMovementType.IMPELLER_WEDGE_PROTECTION;
 
 /**
  * Represents a salvo of missiles.
@@ -347,7 +347,7 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
     public void detonate() {
         this.combatSubPhase = ECombatSubPhase.MISSILE_FIRE_INCOMING_PHASE;
         final FleetRoundState targetsState = cage.getCurrentStateByFleet(target);
-        if (SIDEWALL_PROTECTION != targetsState.getMovementType()) {
+        if (IMPELLER_WEDGE_PROTECTION != targetsState.getMovementType()) {
             result = BURST_ON_SIDEWALL;
         } else {
             final FleetHealthState targetHealthState = targetsState.getFleetHealthState();

@@ -4,10 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
-import de.yuga.spacebattle.backend.combat.dto.BeamVolley;
-import de.yuga.spacebattle.backend.combat.dto.FleetDamageProjectionPerRange;
-import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
-import de.yuga.spacebattle.backend.combat.dto.MovementAction;
+import de.yuga.spacebattle.backend.combat.dto.*;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
@@ -135,19 +132,35 @@ public class CombatHandler {
         final FleetDamageProjectionPerRange actorInfo = getFleetDamageProjectionPerRange(fleetOne, actorsState);
         final FleetDamageProjectionPerRange targetInfo = getFleetDamageProjectionPerRange(fleetTwo, targetsState);
 
-        final BigDecimal distance = DistanceCalculator.getOrbitalDistance(actorPosition, targetPosition);
-        final BigDecimal bestDamageRangeAgentOnResponder = actorInfo.getDistanceWithBestDamageAgainst(targetInfo);
+        final BigDecimal distance = actorPosition.getDistance(targetPosition);
+        final RangeDefinition bestDamageRange = actorInfo.getDistanceWithBestDamageAgainst(targetInfo);
+        if (bestDamageRange == null) {
+            // if nothing is returned, the fleet should evade until hyperspace todo how?
+            actorsState.setMovementType(EVASION_MOVEMENT);
+            return EVASION_MOVEMENT;
+        }
 
+        // calculate offensive movement
+        final boolean inRange = bestDamageRange.isInRange(distance);
+        if (inRange) {
+            final EWeaponAlignment alignmentWithBestDamageForRange = actorInfo.getAlignmentWithBestDamageForRange(distance);
+            final EWeaponAlignment alignmentForBeam = actorInfo.canAttackAtRangeAndWeaponType(distance, EWeaponType.BEAM);
+            final EWeaponAlignment alignmentForMissile = actorInfo.canAttackAtRangeAndWeaponType(distance, EWeaponType.MISSILE);
+            // todo decide if weapon firing is better than movement - if not the same
+        }
+
+        // calculate movement
         EMovementType actorsMovementType;
-        final int offensiveCompare = bestDamageRangeAgentOnResponder.compareTo(distance);
+        final int offensiveCompare = bestDamageRange.getMaxRange().compareTo(distance);
         if (offensiveCompare < 0) {
             actorsMovementType = REDUCE_DISTANCE;
         } else if (offensiveCompare > 0) {
             actorsMovementType = INCREASE_DISTANCE;
         } else {
-            actorsMovementType = HOLD_DISTANCE;
+            actorsMovementType = HOLD_DISTANCE; // todo hold only later reached - find way to fire missiles inbetween
         }
 
+        // calculate defensive movement
         final List<BeamVolley> volleysHittingThisRound = cage.getFlyingBeamVolleysAgainst(actor);
         final List<MissileSalvo> salvosHittingThisRound = cage.getFlyingMissileSalvosAgainst(actor).stream().filter(s -> {
             final BigDecimal currentDistance = actorPosition.getDistance(s.getPosition());
@@ -156,23 +169,10 @@ public class CombatHandler {
             return toTravel <= 0;
         }).collect(Collectors.toList());
         if (!salvosHittingThisRound.isEmpty() || !volleysHittingThisRound.isEmpty()) {
-            actorsMovementType = SIDEWALL_PROTECTION;
-        }
-
-        /*
-        todo
-            weapons for movement type by damage potential
-            check distance and decide by damage potential per movement type and per incoming damage
-         */
-
-        final boolean isInGoodRangeAndNoDefensiveMovement = actorsMovementType == INCREASE_DISTANCE || actorsMovementType == HOLD_DISTANCE;
-        if (isInGoodRangeAndNoDefensiveMovement) {
-            final EWeaponAlignment alignmentWithBestDamageForRange = actorInfo.getAlignmentWithBestDamageForRange(distance);
-            if (BROADSIDE == alignmentWithBestDamageForRange) {
-                actorsMovementType = OFFENSIVE_ROLL;
-            } else {
-                actorsMovementType = HOLD_DISTANCE;
-            }
+            // todo improve decision making by calculating incoming damage vs shields
+            final boolean canAttackWithBroadside = actorInfo.canAttackAtRangeOnSide(distance, BROADSIDE);
+            // on incoming fire - do not show the skirt or let crossing the T
+            actorsMovementType = !canAttackWithBroadside ? IMPELLER_WEDGE_PROTECTION : OFFENSIVE_ROLL;
         }
 
         actorsState.setMovementType(actorsMovementType);
@@ -253,11 +253,12 @@ public class CombatHandler {
         final Orbit targetPos = cage.getCurrentStateByFleet(target).getPosition();
         final BigDecimal distance = actorPos.getDistance(targetPos);
 
-        final EMovementType actorsMovementType = actorsState.getMovementType();
         final BigDecimal maximumBeamRangeOne = actor.getMaximumWeaponRangePerType(EWeaponType.BEAM);
         final boolean isInRange = distance.compareTo(maximumBeamRangeOne) <= 0;
         // todo check that movement matches to weapons - also in missiles and in movement type detection
         if (isInRange && actorsState.hasWeaponsForAlignment(EWeaponType.BEAM)) {
+            final EMovementType actorsMovementType = actorsState.getMovementType();
+            // todo decide which alignment can fire
             cage.addToFlyingBeamVolleys(new BeamVolley(cage, actor, target));
         }
     }
@@ -283,6 +284,8 @@ public class CombatHandler {
         if (isInRange && actorsState.hasWeaponsForAlignment(EWeaponType.MISSILE)) {
             final boolean hasShotsLeft = actorsState.getFleetHealthState().hasShotsLeft();
             if (hasShotsLeft) {
+                final EMovementType actorsMovementType = actorsState.getMovementType();
+                // todo decide which alignment can fire
                 cage.addToFlyingMissileSalvos(new MissileSalvo(cage, actor, target));
                 actionHappened = true;
             }

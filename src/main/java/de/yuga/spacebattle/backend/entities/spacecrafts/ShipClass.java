@@ -20,10 +20,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -584,6 +581,7 @@ public class ShipClass extends AbstractEntityKey {
 
         return fittings.stream()
                 .map(fitting -> fitting.getDamagePerRange(lowerBound, upperBound))
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
@@ -604,6 +602,7 @@ public class ShipClass extends AbstractEntityKey {
         return fittings.stream()
                 .filter(fitting -> weaponType == fitting.getWeaponType())
                 .map(fitting -> fitting.getDamagePerRange(lowerBound, upperBound))
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 

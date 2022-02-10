@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static de.yuga.spacebattle.backend.combat.enums.EMovementType.SIDEWALL_PROTECTION;
+import static de.yuga.spacebattle.backend.combat.enums.EMovementType.IMPELLER_WEDGE_PROTECTION;
 
 public class FleetRoundState extends Historizable<FleetRoundState> implements Cloneable {
 
@@ -158,6 +158,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
      *
      * @return the maximum weapon range
      */
+    @Nonnull
     public BigDecimal getMaximumWeaponRange() {
         final List<WarshipHealthState> warshipHealthStatesByWeaponRange = fleetHealthState.getWarshipHealthStates().values().stream()
                 .sorted((o1, o2) -> {
@@ -227,7 +228,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
     public boolean hasWeaponsForAlignment(@Nonnull final EWeaponType weaponType) {
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
 
-        if (SIDEWALL_PROTECTION == movementType) {
+        if (IMPELLER_WEDGE_PROTECTION == movementType) {
             return false;
         }
         return fleetHealthState.getWarshipHealthStates().values().stream()

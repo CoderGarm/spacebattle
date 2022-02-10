@@ -1,5 +1,8 @@
 package de.yuga.spacebattle.backend.combat.dto;
 
+import com.google.common.base.Preconditions;
+
+import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 
 /**
@@ -44,7 +47,9 @@ public class DamageProjectionPerRange {
      * @param distance the given range
      * @return <code>true</code> if the distance is inside the boundaries, <code>false</code> otherwise
      */
-    public boolean isInRange(final BigDecimal distance) {
+    public boolean isInRange(@Nonnull final BigDecimal distance) {
+        Preconditions.checkNotNull(distance, "distance shouldn't be null!");
+
         final int compareToMin = minRange.compareTo(distance);
         final int compareToMax = maxRange.compareTo(distance);
         return compareToMin <= 0 && compareToMax >= 0;

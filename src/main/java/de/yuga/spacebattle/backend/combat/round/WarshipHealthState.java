@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.combat.round;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.FittingUtils;
 import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.combat.dto.Historizable;
 import de.yuga.spacebattle.backend.combat.dto.HitLog;
@@ -16,10 +17,7 @@ import de.yuga.spacebattle.backend.enums.EWeaponType;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -213,24 +211,28 @@ public class WarshipHealthState implements Cloneable {
 
         final List<AlignedFitting> fittings = getActiveFittings();
         return fittings.stream()
+                .filter(FittingUtils.OFFENSIVE_FITTING)
                 .map(fitting -> fitting.getDamagePerRange(lowerBound, upperBound))
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
     public long getMaximumDamage() {
         final List<AlignedFitting> fittings = getActiveFittings();
-        return fittings.stream().map(fitting -> {
-            long damageValue = 0;
-            final int amount = fitting.getAmount();
-            final Weapon weapon = fitting.getWeapon();
-            final Launcher launcher = fitting.getLauncher();
-            if (launcher != null) {
-                damageValue = launcher.getAmmunitionModule().getMissile().getWarhead().getDamageValue();
-            } else if (weapon != null) {
-                damageValue = weapon.getEffectValue();
-            }
-            return damageValue * amount;
-        }).mapToLong(Long::longValue).sum();
+        return fittings.stream()
+                .filter(FittingUtils.OFFENSIVE_FITTING)
+                .map(fitting -> {
+                    long damageValue = 0;
+                    final int amount = fitting.getAmount();
+                    final Weapon weapon = fitting.getWeapon();
+                    final Launcher launcher = fitting.getLauncher();
+                    if (launcher != null) {
+                        damageValue = launcher.getAmmunitionModule().getMissile().getWarhead().getDamageValue();
+                    } else if (weapon != null) {
+                        damageValue = weapon.getEffectValue();
+                    }
+                    return damageValue * amount;
+                }).mapToLong(Long::longValue).sum();
     }
 
     @Nonnull
