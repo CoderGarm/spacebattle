@@ -122,7 +122,7 @@ public class HttpSecurityConfiguration {
             );
         }
 
-        // Used by spring security if CORS is enabled - todo try it
+        // Used by spring security if CORS is enabled
         //@Bean
         public CorsFilter corsFilter() {
             UrlBasedCorsConfigurationSource source =

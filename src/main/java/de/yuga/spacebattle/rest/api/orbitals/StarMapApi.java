@@ -28,7 +28,7 @@ import java.util.List;
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 
 @Api(tags = "StarMapApi")
-@RolesAllowed("ROLE_USER") // todo how to add direct roles
+@RolesAllowed("ROLE_USER")
 @RestController
 @RequestMapping("/" + PRIVATE_BASE_ENDPOINT + "/" + StarMapApi.ENDPOINT + "/")
 public class StarMapApi {

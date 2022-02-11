@@ -27,7 +27,7 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 import static de.yuga.spacebattle.rest.api.turn.AdminApi.ENDPOINT;
 
 @Api(tags = "AdminApi")
-@RolesAllowed("ROLE_USER") // todo how to add direct roles -> set admin role
+@RolesAllowed("ROLE_USER") // todo set admin role
 @RestController
 @RequestMapping("/" + PRIVATE_BASE_ENDPOINT + "/" + ENDPOINT + "/")
 public class AdminApi {

@@ -28,7 +28,7 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 import static de.yuga.spacebattle.rest.api.turn.JobApi.ENDPOINT;
 
 @Api(tags = "JobApi")
-@RolesAllowed("ROLE_USER") // todo how to add direct roles
+@RolesAllowed("ROLE_USER")
 @RestController
 @RequestMapping("/" + PRIVATE_BASE_ENDPOINT + "/" + ENDPOINT + "/")
 public class JobApi {

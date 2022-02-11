@@ -435,7 +435,7 @@ public class MasterOfTheUniverseService {
         LOGGER.info("Researches populated");
 
         Fleet f1 = createFleet(u1, p11, "Argonaut Home Fleet");
-        Fleet f2 = createFleet(u2, p11, "111er Home Fleet"); // todo set up in p21
+        Fleet f2 = createFleet(u2, p11, "111er Home Fleet");
         LOGGER.info("Fleets created");
 
         warShipService.save(new WarShip("Hotspur", p11, f1, as3));

@@ -32,9 +32,6 @@ public class JwtTokenUtil {
     @Nonnull
     public static final String SECRET_KEY_PLAINTEXT = "iRoh6iezajaeru";
 
-    /**
-     * todo make private key secret usable from cert
-     */
     @Nonnull
     public final String SECRET_KEY_BASE64_ENCODED;
 

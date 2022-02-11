@@ -39,12 +39,10 @@ public class StarSystem extends AbstractEntityKey {
     @Nonnull
     @Size(max = 20)
     @OneToMany(mappedBy = "system", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
-    // todo remove eager if vaadin is replaced
     private final Set<Planet> planets = new HashSet<>();
 
     @Nonnull
     @OneToMany(mappedBy = "orbit.system", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
-    // todo remove eager if vaadin is replaced
     private Set<Fleet> fleets = new HashSet<>();
 
     @Nonnull
@@ -106,7 +104,7 @@ public class StarSystem extends AbstractEntityKey {
 
         StarSystem that = (StarSystem) o;
 
-        return orbit.equals(that.orbit); // todo change it, it's stupid but true
+        return id == that.id;
     }
 
     @Override

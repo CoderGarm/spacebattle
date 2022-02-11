@@ -63,7 +63,7 @@ public class PopulationControlCalculator {
         // sum up all the output of the producing and capacity buildings
         final BigDecimal r = constructionsProducing.stream().map(TickOutputCalculator::getTickOutputByLevelForPopulation).reduce(BigDecimal.ZERO, BigDecimal::add);
         if (r.compareTo(BigDecimal.ONE) > 0) {
-            // todo how to make sure that r is below 1?
+            // how to make sure that r is below 1?
             throw new NotifyUserException("chef, you have to repair that!");
         }
 

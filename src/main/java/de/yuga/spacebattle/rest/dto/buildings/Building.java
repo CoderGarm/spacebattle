@@ -31,7 +31,7 @@ public class Building {
     private int baseValue;
 
     /**
-     * The increasement of value for the next level. todo
+     * The increasement of value for the next level.
      */
     @ApiModelProperty(required = true, value = "The modification factor per level.")
     private double increasingFactorPerLevel;

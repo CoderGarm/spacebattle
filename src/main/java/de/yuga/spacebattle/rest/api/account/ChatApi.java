@@ -29,7 +29,7 @@ import java.util.List;
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 
 @Api(tags = "ChatApi")
-@RolesAllowed("ROLE_USER") // todo how to add direct roles
+@RolesAllowed("ROLE_USER")
 @RestController
 @RequestMapping("/" + PRIVATE_BASE_ENDPOINT + "/" + ChatApi.ENDPOINT + "/")
 public class ChatApi {

@@ -33,7 +33,7 @@ import java.util.Map;
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 
 @Api(tags = "ResearchApi")
-@RolesAllowed("ROLE_USER") // todo how to add direct roles
+@RolesAllowed("ROLE_USER")
 @RestController
 @RequestMapping("/" + PRIVATE_BASE_ENDPOINT + "/" + ResearchApi.ENDPOINT + "/")
 public class ResearchApi {
