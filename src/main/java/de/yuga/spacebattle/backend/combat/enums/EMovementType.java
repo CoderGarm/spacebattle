@@ -1,5 +1,11 @@
 package de.yuga.spacebattle.backend.combat.enums;
 
+import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
+
+import javax.annotation.Nonnull;
+import java.util.Arrays;
+
 /**
  * Compare to @see <a href="kampfsystem.md#movement types">Combat System - Movement Types</a>
  */
@@ -44,4 +50,11 @@ public enum EMovementType {
      * reduced chance of being hit
      */
     EVASION_MOVEMENT; // todo jump out of system? calculate "could be caught" and break up fight earlier?
+
+    @Nonnull
+    public static EMovementType getMovementFromAlignment(@Nonnull final EWeaponAlignment weaponAlignment) {
+        Preconditions.checkNotNull(weaponAlignment, "weaponAlignment shouldn't be null!");
+
+        return Arrays.stream(EMovementType.values()).filter(weaponAlignment::isAssignableFromMovementType).findFirst().orElse(HOLD_DISTANCE);
+    }
 }

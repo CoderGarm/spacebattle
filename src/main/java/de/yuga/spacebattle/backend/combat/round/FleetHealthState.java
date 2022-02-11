@@ -1,8 +1,8 @@
 package de.yuga.spacebattle.backend.combat.round;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.combat.dto.Historizable;
-import de.yuga.spacebattle.backend.combat.dto.HitLog;
+import de.yuga.spacebattle.backend.combat.dto.*;
+import de.yuga.spacebattle.backend.combat.enums.EDamageImpact;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -10,8 +10,10 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -168,6 +170,39 @@ public class FleetHealthState implements Cloneable {
      */
     public boolean hasShotsLeft() {
         return warshipHealthStates.values().stream().anyMatch(w -> w.getMissileAmmunitionState().hasShotsLeft());
+    }
+
+    /**
+     * Estimates the likely losses which can be expected by the given damage input.
+     *
+     * @param missileSalvos the hitting missiles
+     * @param beamVolleys   the hitting beams
+     * @return the estimation of losses in relation to the current fleet
+     */
+    public EDamageImpact estimateLosses(@Nonnull final List<MissileSalvo> missileSalvos, @Nonnull final List<BeamVolley> beamVolleys) {
+        Preconditions.checkNotNull(missileSalvos, "missileSalvos shouldn't be null!");
+        Preconditions.checkNotNull(beamVolleys, "beamVolleys shouldn't be null!");
+
+        final List<ApplicableDamage> damages = beamVolleys.stream().map(BeamVolley::getApplicableDamage).flatMap(Collection::stream).collect(Collectors.toList());
+        damages.addAll(missileSalvos.stream().map(MissileSalvo::getApplicableDamage).flatMap(Collection::stream).collect(Collectors.toList()));
+        final BigDecimal fullDamagePotential = damages.stream().map(a -> BigDecimal.valueOf(a.getEffectiveDamage())).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        final Map<WarShip, Integer> defensiveByShip = warshipHealthStates.values().stream()
+                .collect(Collectors.toMap(WarshipHealthState::getWarShip, w -> w.getArmorState() + w.getSidewallState()));
+
+        final List<WarShip> destroyed = new ArrayList<>();
+        final AtomicReference<BigDecimal> atomicReference = new AtomicReference<>(fullDamagePotential);
+        defensiveByShip.forEach((warShip, defenseValue) -> {
+            final BigDecimal attack = atomicReference.get();
+            final BigDecimal def = BigDecimal.valueOf(defenseValue);
+            if (def.compareTo(attack) <= 0) {
+                destroyed.add(warShip);
+            }
+            final BigDecimal leftDamage = attack.subtract(def);
+            atomicReference.set(leftDamage);
+        });
+
+        return EDamageImpact.getImpactByLossRatio(destroyed.size(), defensiveByShip.keySet().size());
     }
 
     @Override

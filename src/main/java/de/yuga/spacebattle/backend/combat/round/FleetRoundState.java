@@ -129,7 +129,9 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         return movementType;
     }
 
-    public void setMovementType(@Nullable final EMovementType movementType) {
+    public void setMovementType(@Nonnull final EMovementType movementType) {
+        Preconditions.checkNotNull(movementType, "movementType shouldn't be null!");
+
         this.movementType = movementType;
     }
 

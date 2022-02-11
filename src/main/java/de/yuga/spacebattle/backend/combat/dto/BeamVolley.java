@@ -22,8 +22,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import static de.yuga.spacebattle.backend.combat.enums.EDamageResult.BURST_ON_SIDEWALL;
+import static de.yuga.spacebattle.backend.combat.enums.EDamageResult.BURST_ON_IMPELLER_WEDGE;
 import static de.yuga.spacebattle.backend.combat.enums.EDamageResult.DAMAGE_APPLIED;
 import static de.yuga.spacebattle.backend.combat.enums.EMovementType.IMPELLER_WEDGE_PROTECTION;
 
@@ -145,8 +146,8 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
     public void applyDamage() {
         this.combatSubPhase = ECombatSubPhase.BEAM_FIRE_INCOMING_PHASE;
         final FleetRoundState targetsState = cage.getCurrentStateByFleet(target);
-        if (targetsState.getMovementType() != null && IMPELLER_WEDGE_PROTECTION != targetsState.getMovementType()) {
-            result = BURST_ON_SIDEWALL;
+        if (IMPELLER_WEDGE_PROTECTION == targetsState.getMovementType()) {
+            result = BURST_ON_IMPELLER_WEDGE;
         } else {
             final FleetHealthState targetHealthState = targetsState.getFleetHealthState();
             firedShots.forEach(beamState -> {
@@ -204,5 +205,15 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
         final BeamVolley clone = (BeamVolley) super.clone();
         clone.combatRound = combatRound.clone();
         return clone;
+    }
+
+    /**
+     * Returns the possible damage which can be applied by this volley.
+     *
+     * @return the damage potential
+     */
+    @Nonnull
+    public List<ApplicableDamage> getApplicableDamage() {
+        return firedShots.stream().map(ApplicableDamage::new).collect(Collectors.toList());
     }
 }

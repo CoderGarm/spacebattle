@@ -172,27 +172,53 @@ public class Cage implements Future<Cage> {
         }
     }
 
+    private boolean logIt = false;
+
+    private void log(String msg, final Long start, final Long end) {
+        if (logIt) {
+            if (start != null && end != null) {
+                final long duration = (end - start)/* / 1000*/;
+                System.out.println("\t" + msg + "\t\t - duration: " + duration);
+            } else {
+                System.out.println("\t" + msg);
+            }
+        }
+    }
+
     /**
      * Runs the combat round completely.
      */
     @VisibleForTesting
     protected void executeCombatRound() {
         final CombatRound currentCombatRound = getCurrentCombatRound();
+        log("#" + currentCombatRound + " new round", null, null);
+        long start = System.currentTimeMillis();
         combatHandler.handleMovementPhase();
+        long end = System.currentTimeMillis();
+        log("movement", start, end);
+        start = System.currentTimeMillis();
         combatHandler.handleMissilePhase();
+        end = System.currentTimeMillis();
+        log("missile", start, end);
+        start = System.currentTimeMillis();
         combatHandler.handleIncomingWeaponFirePhase();
+        end = System.currentTimeMillis();
+        log("incoming fire", start, end);
+        start = System.currentTimeMillis();
         combatHandler.handleFireWeaponPhase();
+        end = System.currentTimeMillis();
+        log("fire weapon", start, end);
 
-        if (currentCombatRound.getNo() % 500 == 0) {
-            System.out.println("#" + currentCombatRound.getNo());
-            final BigDecimal distance = getCurrentStateByFleet(fleetOne).getPosition().getDistance(getCurrentStateByFleet(fleetTwo).getPosition());
-            System.out.println(DistanceCalculator.getDistanceAsStringWithUnit(distance));
+        start = System.currentTimeMillis();
+        final int no = currentCombatRound.getNo();
+        if (no > 2000) {
+            //logIt = true;
         }
 
         /* todo implement forced battle end at condition
          */
-        if (currentCombatRound.getNo() > 3000) {
-            System.out.println("#" + currentCombatRound.getNo() + " BATTLE FORCED DONE");
+        if (no > 2500) {
+            System.out.println("#" + no + " BATTLE FORCED DONE");
             forceDone = true;
         }
 
@@ -201,6 +227,12 @@ public class Cage implements Future<Cage> {
         } else {
             // state the last round results
             participatingFleets.forEach(fleet -> getCurrentStateByFleet(fleet).historize());
+        }
+        end = System.currentTimeMillis();
+        log("tidy up", start, end);
+        if (no % 500 == 0) {
+            final BigDecimal distance = getCurrentStateByFleet(fleetOne).getPosition().getDistance(getCurrentStateByFleet(fleetTwo).getPosition());
+            System.out.println("#" + no + "\t\t - " + DistanceCalculator.getDistanceAsStringWithUnit(distance));
         }
     }
 
@@ -311,13 +343,31 @@ public class Cage implements Future<Cage> {
                 });
     }
 
+    /**
+     * Returns all salvos which will hit this round against the given target.
+     *
+     * @param target the target
+     * @return all salvos which will hit this round
+     */
     @Nonnull
     public List<MissileSalvo> getFlyingMissileSalvosAgainst(@Nonnull final Fleet target) {
         Preconditions.checkNotNull(target, "target shouldn't be null!");
 
-        return flyingMissileSalvos.stream().filter(s -> s.getTarget().equals(target)).collect(Collectors.toList());
+        final Orbit actorPosition = getCurrentStateByFleet(target).getPosition();
+        return flyingMissileSalvos.stream().filter(s -> s.getTarget().equals(target)).filter(s -> {
+            final BigDecimal currentDistance = actorPosition.getDistance(s.getPosition());
+            final BigDecimal rangePerCombatRound = s.getRangePerCombatRound();
+            final int toTravel = DistanceCalculator.getCombatRoundsToTravel(currentDistance, rangePerCombatRound);
+            return toTravel <= 0;
+        }).collect(Collectors.toList());
     }
 
+    /**
+     * Returns all volleys which will hit this round against the given target.
+     *
+     * @param target the target
+     * @return all volleys which will hit this round
+     */
     @Nonnull
     public List<BeamVolley> getFlyingBeamVolleysAgainst(@Nonnull final Fleet target) {
         Preconditions.checkNotNull(target, "target shouldn't be null!");

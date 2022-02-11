@@ -19,12 +19,10 @@ import de.yuga.spacebattle.backend.enums.EWeaponType;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import static de.yuga.spacebattle.backend.combat.enums.EDamageResult.BURST_ON_SIDEWALL;
+import static de.yuga.spacebattle.backend.combat.enums.EDamageResult.BURST_ON_IMPELLER_WEDGE;
 import static de.yuga.spacebattle.backend.combat.enums.EDamageResult.DAMAGE_APPLIED;
 import static de.yuga.spacebattle.backend.combat.enums.EMovementType.IMPELLER_WEDGE_PROTECTION;
 
@@ -347,8 +345,8 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
     public void detonate() {
         this.combatSubPhase = ECombatSubPhase.MISSILE_FIRE_INCOMING_PHASE;
         final FleetRoundState targetsState = cage.getCurrentStateByFleet(target);
-        if (IMPELLER_WEDGE_PROTECTION != targetsState.getMovementType()) {
-            result = BURST_ON_SIDEWALL;
+        if (IMPELLER_WEDGE_PROTECTION == targetsState.getMovementType()) {
+            result = BURST_ON_IMPELLER_WEDGE;
         } else {
             final FleetHealthState targetHealthState = targetsState.getFleetHealthState();
             missileSalvoHealthState.getCurrentAmountByType().forEach((missile, missileAmount) -> {
@@ -452,5 +450,21 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
     @Nullable
     public EDamageResult getResult() {
         return result;
+    }
+
+    /**
+     * Returns the possible damage which can be applied by this volley.
+     *
+     * @return the damage potential
+     */
+    @Nonnull
+    public List<ApplicableDamage> getApplicableDamage() {
+        return missileSalvoHealthState.getCurrentAmountByType().entrySet().stream().map(e -> {
+            final List<ApplicableDamage> result = new ArrayList<>();
+            for (int i = 1; i <= e.getValue(); i++) {
+                result.add(new ApplicableDamage(e.getKey()));
+            }
+            return result;
+        }).flatMap(Collection::stream).collect(Collectors.toList());
     }
 }

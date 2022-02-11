@@ -372,4 +372,24 @@ public class WarshipHealthState implements Cloneable {
                 ", isFightingCapable: " + isFightingCapable() +
                 '}';
     }
+
+    public int getHullState() {
+        return hullState;
+    }
+
+    public int getArmorState() {
+        return armorState;
+    }
+
+    public int getSidewallState() {
+        return sidewallState;
+    }
+
+    public int getPropulsionState() {
+        return propulsionState;
+    }
+
+    public int getElokaState() {
+        return elokaState;
+    }
 }
