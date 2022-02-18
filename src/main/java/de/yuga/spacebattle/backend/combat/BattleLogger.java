@@ -309,7 +309,8 @@ public class BattleLogger {
         final Orbit destination = ma.getDestination();
         final Orbit realDestination = ma.getRealDestination();
         final String distanceAsString = DistanceCalculator.getDistanceAsStringWithUnit(destination.getDistance(realDestination));
-        final String msg = "#" + combatRound.getNo() + " " + actor.getName() + " moves from " + origin + " to " + destination + ", current distance " + distanceAsString + " with the plan to " + movementType;
+        final String moveDist = DistanceCalculator.getDistanceAsStringWithUnit(origin.getDistance(destination));
+        final String msg = "#" + combatRound.getNo() + " " + actor.getName() + " moves about " + moveDist + ", current distance " + distanceAsString + " with the plan to " + movementType;
         write(msg);
     }
 

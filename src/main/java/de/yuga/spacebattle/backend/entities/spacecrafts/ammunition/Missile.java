@@ -212,7 +212,8 @@ public class Missile extends AbstractEntityKey {
         getMissileMotors().forEach(missileMotor -> {
             int endurance = missileMotor.getEndurance();
             int acceleration = missileMotor.getAcceleration();
-            range.set(range.get().add(NavigationCalculator.getRangeByTimeAndAcceleration(endurance, acceleration)));
+            final int meterPerSecondSquaredFromG = NavigationCalculator.getMeterPerSecondSquaredFromG(acceleration);
+            range.set(range.get().add(NavigationCalculator.getRangeByTimeAndAcceleration(endurance, meterPerSecondSquaredFromG)));
         });
         return range.get();
     }
@@ -227,7 +228,8 @@ public class Missile extends AbstractEntityKey {
         missileMotors.forEach(missileMotor -> {
             int endurance = CombatRound.COMBAT_ROUND_DURATION;
             int acceleration = missileMotor.getAcceleration();
-            range.set(range.get().add(NavigationCalculator.getRangeByTimeAndAcceleration(endurance, acceleration)));
+            final int meterPerSecondSquaredFromG = NavigationCalculator.getMeterPerSecondSquaredFromG(acceleration);
+            range.set(range.get().add(NavigationCalculator.getRangeByTimeAndAcceleration(endurance, meterPerSecondSquaredFromG)));
         });
         return range.get();
     }

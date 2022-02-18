@@ -1,22 +1,25 @@
 package de.yuga.spacebattle.backend.combat.round;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.combat.dto.CounterMissileWeaponry;
 import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.combat.dto.Historizable;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
+import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static de.yuga.spacebattle.backend.calculator.FittingUtils.DEFENSIVE_FITTING;
 import static de.yuga.spacebattle.backend.combat.enums.EMovementType.IMPELLER_WEDGE_PROTECTION;
 
 public class FleetRoundState extends Historizable<FleetRoundState> implements Cloneable {
@@ -162,7 +165,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
      */
     @Nonnull
     public BigDecimal getMaximumWeaponRange() {
-        final List<WarshipHealthState> warshipHealthStatesByWeaponRange = fleetHealthState.getWarshipHealthStates().values().stream()
+        final List<WarshipHealthState> warshipHealthStatesByWeaponRange = getFightingWarShips()
                 .sorted((o1, o2) -> {
                     final BigDecimal maximumWeaponRangeO1 = o1.getMaximumWeaponRange();
                     final BigDecimal maximumWeaponRangeO2 = o2.getMaximumWeaponRange();
@@ -180,7 +183,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
     public BigDecimal getMaximumWeaponRangePerType(@Nonnull final EWeaponType weaponType) {
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
 
-        final List<WarshipHealthState> warshipHealthStatesByWeaponRange = fleetHealthState.getWarshipHealthStates().values().stream()
+        final List<WarshipHealthState> warshipHealthStatesByWeaponRange = getFightingWarShips()
                 .sorted((o1, o2) -> {
                     final BigDecimal maximumWeaponRangeO1 = o1.getMaximumWeaponRangePerType(weaponType);
                     final BigDecimal maximumWeaponRangeO2 = o2.getMaximumWeaponRangePerType(weaponType);
@@ -200,14 +203,14 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         Preconditions.checkNotNull(lowerBound, "lowerBound shouldn't be null!");
         Preconditions.checkNotNull(upperBound, "upperBound shouldn't be null!");
 
-        return fleetHealthState.getWarshipHealthStates().values().stream()
+        return getFightingWarShips()
                 .map(warshipHealthState -> warshipHealthState.getDamagePerRange(lowerBound, upperBound))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
 
     public long getMaximumDamage() {
-        return fleetHealthState.getWarshipHealthStates().values().stream()
+        return getFightingWarShips()
                 .map(WarshipHealthState::getMaximumDamage)
                 .mapToLong(Long::longValue).sum();
     }
@@ -233,13 +236,74 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         if (IMPELLER_WEDGE_PROTECTION == movementType) {
             return false;
         }
-        return fleetHealthState.getWarshipHealthStates().values().stream()
-                .filter(WarshipHealthState::isFightingCapable)
+        return getFightingWarShips()
                 .anyMatch(w -> w.getFittings().entrySet().stream()
                         // filter active fittings
                         .filter(Map.Entry::getValue)
                         .map(Map.Entry::getKey)
                         .filter(a -> a.getWeaponType() == weaponType)
                         .anyMatch(f -> f.getWeaponAlignment().isAssignableFromMovementType(movementType)));
+    }
+
+    /**
+     * Returns the range of the fleets counter missile weaponry.
+     *
+     * @return the range
+     */
+    @Nonnull
+    public BigDecimal getCounterMissileRange() {
+        return getFightingWarShips()
+                .map(WarshipHealthState::getCounterMissileRange)
+                .max(Comparator.naturalOrder())
+                .orElse(BigDecimal.ZERO);
+    }
+
+    /**
+     * Returns the effect value of the fleets electronic countermeasures.
+     *
+     * @return the eloka range
+     */
+    public int getElokaEffectValue() {
+        return getFightingWarShips()
+                .map(WarshipHealthState::getElokaState)
+                .mapToInt(Integer::intValue)
+                .sum();
+    }
+
+    @Nonnull
+    private Stream<WarshipHealthState> getFightingWarShips() {
+        return fleetHealthState.getWarshipHealthStates().values().stream()
+                .filter(WarshipHealthState::isFightingCapable);
+    }
+
+    /**
+     * Returns all anti missile weapons of this fleet.
+     *
+     * @return the anti missile weapons
+     */
+    @Nonnull
+    public CounterMissileWeaponry getCounterMissileWeaponry() {
+        final List<AlignedFitting> alignedFittings = getFightingWarShips()
+                .map(WarshipHealthState::getActiveFittings)
+                .filter(fittings -> !fittings.isEmpty())
+                .map(fittings -> fittings.stream().filter(DEFENSIVE_FITTING).findAny().orElse(null))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        return new CounterMissileWeaponry(alignedFittings);
+    }
+
+    /**
+     * Returns the range of the fleets electronic countermeasures.
+     *
+     * @return the eloka range
+     */
+    @Nonnull
+    public BigDecimal getElokaRange() {
+        return getFightingWarShips()
+                .map(shipClass -> {
+                    final ElectronicWarfare eloka = shipClass.getModule(ElectronicWarfare.class);
+                    return eloka != null ? BigDecimal.valueOf(eloka.getEffectiveRange()) : BigDecimal.ZERO;
+                }).max(Comparator.naturalOrder())
+                .orElse(BigDecimal.ZERO);
     }
 }

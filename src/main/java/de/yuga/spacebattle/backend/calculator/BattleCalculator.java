@@ -30,7 +30,8 @@ public class BattleCalculator {
         missile.getMissileMotors().forEach(missileMotor -> {
             int endurance = missileMotor.getEndurance();
             int acceleration = missileMotor.getAcceleration();
-            range.set(range.get().add(NavigationCalculator.getRangeByTimeAndAcceleration(endurance, acceleration)));
+            final int meterPerSecondSquaredFromG = NavigationCalculator.getMeterPerSecondSquaredFromG(acceleration);
+            range.set(range.get().add(NavigationCalculator.getRangeByTimeAndAcceleration(endurance, meterPerSecondSquaredFromG)));
         });
         return range.get();
     }
@@ -45,22 +46,14 @@ public class BattleCalculator {
      */
     public static boolean calculateElokaImpact(final int elokaResistance, final int elokaEffectValue) {
 
-        // elokaResistance / elokaEffectValue = quotient
-        // 15 / 500 = 0,03
-        // 500 / 15 = 33,33
-        final BigDecimal quotient = new BigDecimal(elokaResistance).divide(new BigDecimal(elokaEffectValue), MATH_CONTEXT);
-        if (quotient.compareTo(BigDecimal.ONE) > 0) {
-            // if the eloka resistance is heavily overweight, it wins over the effect value
-            return false;
-        }
-        final BigDecimal randomPercentage = BigDecimal.valueOf(ThreadLocalRandom.current().nextDouble(0, 100));
-        //noinspection RedundantIfStatement
-        if (randomPercentage.compareTo(quotient) < 0) {
-            // if the fortune will support the resistance, it wins
-            return false;
-        }
-        // the fortune is besides the electronic warfare
-        return true;
+        final double chanceToEvade = elokaResistance / 100D;
+        final double evade = ThreadLocalRandom.current().nextDouble(0, 1);
+        boolean hasEvaded = evade <= chanceToEvade;
+
+        final double chanceToHit = elokaEffectValue / 100D;
+        final double hit = ThreadLocalRandom.current().nextDouble(0, 1);
+        boolean hasHit = hit <= chanceToHit;
+        return hasHit && !hasEvaded;
     }
 
     /**

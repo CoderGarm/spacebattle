@@ -32,12 +32,12 @@ public enum EEducationType implements HasIconName {
     CIVIL_MK_III(true, EEducationType.CIVIL_MK_II, "civilIII"),
 
     /**
-     * military Mk I is a teams rank
+     * military Mk I is a teams rank // todo display as enlisted
      */
     MILITARY_MK_I(true, EEducationType.CIVIL_MK_II, "soldier"),
 
     /**
-     * military Mk II is a officers rank
+     * military Mk II is a officers rank // todo display as officer
      */
     MILITARY_MK_II(true, EEducationType.CIVIL_MK_III, "officer"),
     ;

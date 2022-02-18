@@ -220,7 +220,7 @@ class MissileSalvoTest {
     void testHandleCounterMissilePhase() {
         // prepare stuff
         final Cage cageMock = mock(Cage.class);
-        final FleetRoundState fleetRoundStateMock = mock(FleetRoundState.class);
+        final FleetRoundState targetsStateMock = mock(FleetRoundState.class);
         final MissileSalvoHealthState missileSalvoHealthStateMock = mock(MissileSalvoHealthState.class);
         final Orbit positionMock = mock(Orbit.class);
         final Fleet targetMock = mock(Fleet.class);
@@ -238,14 +238,14 @@ class MissileSalvoTest {
         ReflectionTestUtils.setField(testObject, "missileSalvoHealthState", missileSalvoHealthStateMock);
 
         final BigDecimal distance = BigDecimal.ONE;
-        final long counterMissileRange = 5;
+        final BigDecimal counterMissileRange = BigDecimal.valueOf(5);
         // mock methods
-        when(cageMock.getCurrentStateByFleet(targetMock)).thenReturn(fleetRoundStateMock);
+        when(cageMock.getCurrentStateByFleet(targetMock)).thenReturn(targetsStateMock);
         when(targetMock.getCounterMissileWeaponry()).thenReturn(counterMissileWeaponryMock);
         when(counterMissileWeaponryMock.calculateDestroyedMissiles(any(), anyInt())).thenReturn(1);
         when(missileSalvoHealthStateMock.getCurrentAmountByType()).thenReturn(currentMissiles);
         when(positionMock.getDistance(any())).thenReturn(distance);
-        when(targetMock.getCounterMissileRange()).thenReturn(counterMissileRange);
+        when(targetsStateMock.getCounterMissileRange()).thenReturn(counterMissileRange);
         when(missileSalvoHealthStateMock.isActive()).thenReturn(false);
         // test method
         testObject.handleCounterMissilePhase();

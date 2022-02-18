@@ -34,16 +34,6 @@ class CombatHandlerTest {
     }
 
     @Test
-    void testHandleMovementPhase() {
-        // todo create useful productive code before
-    }
-
-    @Test
-    void testDetectMovementType() {
-        // todo create useful productive code before
-    }
-
-    @Test
     void testHandleMissilePhase() {
         // prepare stuff
         final Cage cageMock = mock(Cage.class);

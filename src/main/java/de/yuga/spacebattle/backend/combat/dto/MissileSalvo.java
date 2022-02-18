@@ -140,30 +140,28 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
 
         final EMovementType actorsMovementType = actorState.getMovementType();
         final Map<WarShip, WarshipHealthState> warshipHealthStates = actorState.getFleetHealthState().getWarshipHealthStates();
-        warshipHealthStates.values().stream().filter(WarshipHealthState::isFightingCapable).forEach(w -> {
-            w.getFittings().entrySet().stream()
-                    // filter active fittings
-                    .filter(Map.Entry::getValue)
-                    .map(Map.Entry::getKey)
-                    .filter(a -> a.getWeaponType() == EWeaponType.MISSILE)
-                    .filter(a -> a.getLauncher() != null)
-                    .filter(f -> f.getWeaponAlignment().isAssignableFromMovementType(actorsMovementType))
-                    .forEach(alignedFitting -> {
-                        final Launcher launcher = alignedFitting.getLauncher();
-                        final int amountOfLauncher = alignedFitting.getAmount();
-                        final Missile missile = launcher.getAmmunitionModule().getMissile();
-                        final MissileAmmunitionState missileAmmunitionState = w.getMissileAmmunitionState();
-                        final int remainingShots = missileAmmunitionState.getRemainingShots(missile);
-                        // setting missiles to the salvo
-                        if (remainingShots >= amountOfLauncher) {
-                            amountByType.merge(missile, amountOfLauncher, Integer::sum);
-                            missileAmmunitionState.reduce(missile, amountOfLauncher);
-                        } else {
-                            amountByType.merge(missile, remainingShots, Integer::sum);
-                            missileAmmunitionState.reduce(missile, remainingShots);
-                        }
-                    });
-        });
+        warshipHealthStates.values().stream().filter(WarshipHealthState::isFightingCapable).forEach(w -> w.getFittings().entrySet().stream()
+                // filter active fittings
+                .filter(Map.Entry::getValue)
+                .map(Map.Entry::getKey)
+                .filter(a -> a.getWeaponType() == EWeaponType.MISSILE)
+                .filter(a -> a.getLauncher() != null)
+                .filter(f -> f.getWeaponAlignment().isAssignableFromMovementType(actorsMovementType))
+                .forEach(alignedFitting -> {
+                    final Launcher launcher = alignedFitting.getLauncher();
+                    final int amountOfLauncher = alignedFitting.getAmount();
+                    final Missile missile = launcher.getAmmunitionModule().getMissile();
+                    final MissileAmmunitionState missileAmmunitionState = w.getMissileAmmunitionState();
+                    final int remainingShots = missileAmmunitionState.getRemainingShots(missile);
+                    // setting missiles to the salvo
+                    if (remainingShots >= amountOfLauncher) {
+                        amountByType.merge(missile, amountOfLauncher, Integer::sum);
+                        missileAmmunitionState.reduce(missile, amountOfLauncher);
+                    } else {
+                        amountByType.merge(missile, remainingShots, Integer::sum);
+                        missileAmmunitionState.reduce(missile, remainingShots);
+                    }
+                }));
         this.missileSalvoHealthState = new MissileSalvoHealthState(amountByType);
         calculateRangePerCombatRound();
         calculateAttackRange();
@@ -219,16 +217,16 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
     @VisibleForTesting
     protected void handleElokaPhase() {
         this.combatSubPhase = ECombatSubPhase.ELOKA_PHASE;
-        final FleetRoundState targetsCurrentStateByFleet = cage.getCurrentStateByFleet(target);
-        final Orbit targetsPosition = targetsCurrentStateByFleet.getPosition();
-        final int elokaRange = target.getElokaRange();
+        final FleetRoundState targetsState = cage.getCurrentStateByFleet(target);
+        final Orbit targetsPosition = targetsState.getPosition();
+        final BigDecimal elokaRange = targetsState.getElokaRange();
         final BigDecimal distance = position.getDistance(targetsPosition);
-        if (BigDecimal.valueOf(elokaRange).compareTo(distance) <= 0) {
+        if (elokaRange.compareTo(distance) <= 0) {
             // noop if eloka is not in range
             return;
         }
 
-        final int elokaEffectValue = target.getElokaEffectValue();
+        final int elokaEffectValue = targetsState.getElokaEffectValue();
         final Map<Missile, Integer> lostByType = new HashMap<>();
         missileSalvoHealthState.getCurrentAmountByType().forEach((missile, amount) -> {
             final int elokaResistance = missile.getElokaResistance();
@@ -273,17 +271,17 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
     @VisibleForTesting
     protected void handleCounterMissilePhase() {
         this.combatSubPhase = ECombatSubPhase.COUNTER_MISSILE_PHASE;
-        final FleetRoundState targetsCurrentStateByFleet = cage.getCurrentStateByFleet(target);
-        final Orbit targetsPosition = targetsCurrentStateByFleet.getPosition();
-        final long counterMissileRange = target.getCounterMissileRange();
+        final FleetRoundState targetsState = cage.getCurrentStateByFleet(target);
+        final Orbit targetsPosition = targetsState.getPosition();
+        final BigDecimal counterMissileRange = targetsState.getCounterMissileRange();
         final BigDecimal distance = position.getDistance(targetsPosition);
-        if (BigDecimal.valueOf(counterMissileRange).compareTo(distance) <= 0) {
-            // noop if eloka is not in range
+        if (counterMissileRange.compareTo(distance) <= 0) {
+            // noop if counter missile is not in range
             return;
         }
 
         final Map<Missile, Integer> lostByType = new HashMap<>();
-        final CounterMissileWeaponry counterMissileWeaponry = target.getCounterMissileWeaponry();
+        final CounterMissileWeaponry counterMissileWeaponry = targetsState.getCounterMissileWeaponry();
         missileSalvoHealthState.getCurrentAmountByType().forEach((missile, amount) -> {
             final int lostCounter = counterMissileWeaponry.calculateDestroyedMissiles(missile, amount);
             if (lostCounter > 0) {

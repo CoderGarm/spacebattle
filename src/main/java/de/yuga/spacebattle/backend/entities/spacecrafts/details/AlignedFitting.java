@@ -168,4 +168,21 @@ public class AlignedFitting {
     public int hashCode() {
         return new HashCodeBuilder(17, 37).append(weaponAlignment).append(weapon).append(launcher).toHashCode();
     }
+
+    /**
+     * Returns the range.
+     *
+     * @return the range
+     */
+    @Nonnull
+    public BigDecimal getRange() {
+        BigDecimal range = BigDecimal.ZERO;
+        if (weapon != null) {
+            range = weapon.getDamageProjectionRange();
+        }
+        if (launcher != null) {
+            range = launcher.getAmmunitionModule().getMissile().getMissileRange();
+        }
+        return range;
+    }
 }

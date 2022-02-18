@@ -15,9 +15,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
@@ -31,6 +29,8 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static de.yuga.spacebattle.backend.calculator.FittingUtils.DEFENSIVE_FITTING;
 
 @NamedQueries({
         @NamedQuery(name = "Fleet.getAll", query = "SELECT f FROM Fleet f"),
@@ -372,46 +372,15 @@ public class Fleet extends AbstractEntityKey {
     }
 
     /**
-     * Returns the range of the fleets counter missile weaponry.
-     *
-     * @return the counter missile range
-     */
-    public long getCounterMissileRange() {
-        final List<EWeaponType> counterTypes = List.of(EWeaponType.COUNTER_MISSILE, EWeaponType.POINT_DEFENSE);
-        final OptionalLong max = getShipsByClass().keySet().stream()
-                .map(ShipClass::getFittings)
-                .filter(fittings -> !fittings.isEmpty())
-                .map(fittings -> {
-                    final AlignedFitting alignedFitting = fittings.stream().filter(fitting -> counterTypes.contains(fitting.getWeaponType())).findAny().orElse(null);
-                    if (alignedFitting != null) {
-                        final Weapon weapon = alignedFitting.getWeapon();
-                        if (weapon != null) {
-                            return weapon.getDamageProjectionRange();
-                        }
-                        final Launcher launcher = alignedFitting.getLauncher();
-                        if (launcher != null) {
-                            return launcher.getAmmunitionModule().getMissile().getMissileRange();
-                        }
-                    }
-                    return 0;
-                }).mapToLong(Number::longValue).max();
-        if (max.isPresent()) {
-            return max.getAsLong();
-        }
-        return 0;
-    }
-
-    /**
      * Returns all anti missile weapons of this fleet.
      *
      * @return the anti missile weapons
      */
     public CounterMissileWeaponry getCounterMissileWeaponry() {
-        final List<EWeaponType> counterTypes = List.of(EWeaponType.COUNTER_MISSILE, EWeaponType.POINT_DEFENSE);
         final List<AlignedFitting> alignedFittings = getShipsByClass().keySet().stream()
                 .map(ShipClass::getFittings)
                 .filter(fittings -> !fittings.isEmpty())
-                .map(fittings -> fittings.stream().filter(fitting -> counterTypes.contains(fitting.getWeaponType())).findAny().orElse(null))
+                .map(fittings -> fittings.stream().filter(DEFENSIVE_FITTING).findAny().orElse(null))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         return new CounterMissileWeaponry(alignedFittings);

@@ -9,8 +9,8 @@ import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.enums.EHitArea;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 
@@ -20,6 +20,8 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+
+import static de.yuga.spacebattle.backend.calculator.FittingUtils.DEFENSIVE_FITTING;
 
 public class WarshipHealthState implements Cloneable {
 
@@ -64,6 +66,9 @@ public class WarshipHealthState implements Cloneable {
     private final List<HitLog> hitLog = new ArrayList<>();
 
     @Nonnull
+    private final List<BaseModuleWithEffectValue> modules = new ArrayList<>();
+
+    @Nonnull
     private MissileAmmunitionState missileAmmunitionState;
 
     public WarshipHealthState(@Nonnull final WarShip warShip) {
@@ -71,13 +76,23 @@ public class WarshipHealthState implements Cloneable {
 
         this.warShip = warShip;
         final ShipClass shipClass = warShip.getShipClass();
-        armorState = shipClass.getArmor() != null ? shipClass.getArmor().getEffectValue() : 0;
+        final Armor armor = shipClass.getArmor();
+        final Sidewall sidewall = shipClass.getSidewall();
+        final Propulsion propulsion = shipClass.getPropulsion();
+        final ElectronicWarfare electronicWarfare = shipClass.getElectronicWarfare();
+        armorState = armor != null ? armor.getEffectValue() : 0;
         hullState = armorState;
-        sidewallState = shipClass.getSidewall() != null ? shipClass.getSidewall().getEffectValue() : 0;
-        propulsionState = shipClass.getPropulsion() != null ? shipClass.getPropulsion().getEffectValue() : 0;
-        elokaState = shipClass.getElectronicWarfare() != null ? shipClass.getElectronicWarfare().getEffectValue() : 0;
+        sidewallState = sidewall != null ? sidewall.getEffectValue() : 0;
+        propulsionState = propulsion != null ? propulsion.getEffectValue() : 0;
+        elokaState = electronicWarfare != null ? electronicWarfare.getEffectValue() : 0;
         shipClass.getFittings().forEach(fitting -> fittings.put(fitting, true));
         this.missileAmmunitionState = new MissileAmmunitionState(warShip);
+        this.modules.add(armor);
+        this.modules.add(sidewall);
+        this.modules.add(propulsion);
+        this.modules.add(electronicWarfare);
+
+
     }
 
     @Nonnull
@@ -391,5 +406,29 @@ public class WarshipHealthState implements Cloneable {
 
     public int getElokaState() {
         return elokaState;
+    }
+
+    /**
+     * Returns the range of the fleets counter missile weaponry.
+     *
+     * @return the range
+     */
+    @Nonnull
+    public BigDecimal getCounterMissileRange() {
+        return getActiveFittings().stream()
+                .filter(DEFENSIVE_FITTING)
+                .map(AlignedFitting::getRange)
+                .max(Comparator.naturalOrder())
+                .orElse(BigDecimal.ZERO);
+    }
+
+    @Nullable
+    @SuppressWarnings("TypeParameterHidesVisibleType")
+    public <Module extends BaseModuleWithEffectValue> Module getModule(@Nonnull final Class<Module> module) {
+        Preconditions.checkNotNull(module, "module shouldn't be null!");
+
+        //noinspection unchecked
+        return (Module) modules.stream().filter(m -> m.getClass().isAssignableFrom(module)).findAny().orElse(null);
+
     }
 }

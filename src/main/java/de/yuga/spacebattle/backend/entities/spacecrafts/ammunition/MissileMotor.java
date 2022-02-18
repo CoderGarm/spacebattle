@@ -27,7 +27,7 @@ public class MissileMotor extends AbstractEntityKey {
     private int endurance;
 
     /**
-     * The acceleration in m/s² which is set if using the engine.
+     * The acceleration in gravity earth which is set if using the engine.
      */
     @Column(nullable = false)
     private int acceleration;
