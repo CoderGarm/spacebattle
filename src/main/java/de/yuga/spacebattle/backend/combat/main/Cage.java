@@ -21,6 +21,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
@@ -418,10 +419,17 @@ public class Cage implements Future<Cage> {
 
         if (historizable instanceof MovementAction) {
             final MovementAction movementAction = (MovementAction) historizable;
-            final boolean isKnown = historyMovement.stream().anyMatch(m -> m.getActor().equals(movementAction.getActor()) && m.getMovementType() == movementAction.getMovementType());
-            if (!isKnown) {
-                historyMovement.add(movementAction.clone());
-            }
+            historyMovement.stream()
+                    // sorting to get last entry
+                    .max(Comparator.comparing(MovementAction::getCombatRound))
+                    .ifPresentOrElse(m -> {
+                        final boolean sameActor = m.getActor().equals(movementAction.getActor());
+                        final boolean sameMovement = m.getMovementType() == movementAction.getMovementType();
+                        final boolean isKnown = sameActor && sameMovement;
+                        if (!isKnown) {
+                            historyMovement.add(movementAction.clone());
+                        }
+                    }, () -> historyMovement.add(movementAction.clone()));
         } else if (historizable instanceof MissileSalvo) {
             historyOfMissileSalvos.add(((MissileSalvo) historizable).clone());
         } else if (historizable instanceof BeamVolley) {

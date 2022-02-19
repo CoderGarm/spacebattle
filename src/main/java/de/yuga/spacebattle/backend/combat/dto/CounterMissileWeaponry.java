@@ -20,15 +20,18 @@ public class CounterMissileWeaponry {
      * The map represents the ability of this anti missile volley - key is the maneuverability, the value is the amount of shots
      */
     @Nonnull
-    final Map<Integer, Integer> antiMissileCapacity;
+    final Map<Integer, Integer> antiMissileCapacity = new HashMap<>();
 
     public CounterMissileWeaponry(@Nonnull final List<AlignedFitting> alignedFittings) {
         Preconditions.checkNotNull(alignedFittings, "alignedFittings shouldn't be null!");
 
-        final List<CounterWeaponry> counterMissileWeaponry = alignedFittings.stream().map(CounterWeaponry::new)
-                .collect(Collectors.toList());
-        this.antiMissileCapacity = counterMissileWeaponry.stream()
-                .collect(Collectors.toMap(CounterWeaponry::getManeuverability, CounterWeaponry::getAmountOfDamageProjectors));
+        alignedFittings.stream().map(CounterWeaponry::new)
+                .collect(Collectors.groupingBy(CounterWeaponry::getManeuverability,
+                        Collectors.mapping(CounterWeaponry::getAmountOfDamageProjectors, Collectors.toList())))
+                .forEach((maneuverability, amountOfShotsList) -> {
+                    final int summedShots = amountOfShotsList.stream().mapToInt(Integer::intValue).sum();
+                    this.antiMissileCapacity.merge(maneuverability, summedShots, Integer::sum);
+                });
     }
 
     /**
