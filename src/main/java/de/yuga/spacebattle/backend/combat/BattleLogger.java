@@ -111,17 +111,20 @@ public class BattleLogger {
 
             final List<HitLog> hitLogsOfCombatRound = fleetRoundStates.stream()
                     .collect(Collectors.toMap(Function.identity(), f -> f.getFleetHealthState().getHitLogs()))
-                    .values().stream()
+                    .values()
+                    .stream()
                     .map(Map::values)
                     .flatMap(Collection::stream)
                     .flatMap(Collection::stream)
+                    // filter all hit logs from other rounds away - necessary because the fleet round states object character
+                    .filter(hitLog -> hitLog.getCombatRound().compareTo(combatRound) == 0)
                     .collect(Collectors.toList());
 
             final List<BeamVolley> beamVolleys = beamVolleyByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
             final List<MissileSalvo> missileSalvos = missileSalvosByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
             final List<MovementAction> movementActions = movementsByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
 
-            final boolean someThingHappens = !movementActions.isEmpty() && !hitLogsOfCombatRound.isEmpty() && !beamVolleys.isEmpty() && !missileSalvos.isEmpty();
+            final boolean someThingHappens = !movementActions.isEmpty() || !hitLogsOfCombatRound.isEmpty() || !beamVolleys.isEmpty() || !missileSalvos.isEmpty();
             if (someThingHappens) {
                 logMessageWithPretendingCombatRound(combatRound, "Combat round in result");
             }
@@ -193,11 +196,11 @@ public class BattleLogger {
             String pos = "";
             final StarSystem system = clashOrbit.getSystem();
             if (system != null) {
-                pos += system.getName();
+                pos += "system " + system.getName();
             }
             final Orbit orbit = clashOrbit.getOrbit();
-            if (orbit != null) {
-                pos += " " + orbit;
+            if (StringUtils.isBlank(pos) && orbit != null) {
+                pos += " orbital coordinates " + orbit;
             }
             sb.append("Losses of battle at " + pos + "\n");
         }

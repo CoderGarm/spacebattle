@@ -419,17 +419,29 @@ public class Cage implements Future<Cage> {
 
         if (historizable instanceof MovementAction) {
             final MovementAction movementAction = (MovementAction) historizable;
-            historyMovement.stream()
-                    // sorting to get last entry
-                    .max(Comparator.comparing(MovementAction::getCombatRound))
-                    .ifPresentOrElse(m -> {
+            final MovementAction latestMatchingEntry = historyMovement.stream()
+                    .filter(m -> {
                         final boolean sameActor = m.getActor().equals(movementAction.getActor());
                         final boolean sameMovement = m.getMovementType() == movementAction.getMovementType();
                         final boolean isKnown = sameActor && sameMovement;
-                        if (!isKnown) {
-                            historyMovement.add(movementAction.clone());
-                        }
-                    }, () -> historyMovement.add(movementAction.clone()));
+                        return isKnown;
+                    })
+                    .max(Comparator.comparing(MovementAction::getCombatRound))
+                    .orElse(null);
+
+            if (latestMatchingEntry == null) {
+                // just write, it's probably the first entry for the filter
+                historyMovement.add(movementAction.clone());
+                return;
+            }
+
+            // search for an entry between the latest matching and the current one - it means that there was a movement change in between
+            historyMovement.stream()
+                    .filter(m -> m.getActor().equals(movementAction.getActor()))
+                    .filter(m -> m.getCombatRound().compareTo(latestMatchingEntry.getCombatRound()) > 0)
+                    .findAny()
+                    .ifPresent(m -> historyMovement.add(movementAction.clone()));
+
         } else if (historizable instanceof MissileSalvo) {
             historyOfMissileSalvos.add(((MissileSalvo) historizable).clone());
         } else if (historizable instanceof BeamVolley) {

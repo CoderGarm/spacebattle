@@ -1,10 +1,12 @@
 package de.yuga.spacebattle.backend.combat.dto;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.WarshipHealthState;
 import de.yuga.spacebattle.backend.enums.EHitArea;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public class HitLog extends Historizable<HitLog> implements Cloneable {
 
@@ -81,5 +83,17 @@ public class HitLog extends Historizable<HitLog> implements Cloneable {
         clone.damageDealer = damageDealer instanceof BeamVolley ? ((BeamVolley) damageDealer).clone() : ((MissileSalvo) damageDealer).clone();
         clone.warshipHealthState = warshipHealthState.clone();
         return clone;
+    }
+
+    @Nonnull
+    public CombatRound getCombatRound() {
+        CombatRound round = null;
+        if (damageDealer instanceof BeamVolley) {
+            round = ((BeamVolley) damageDealer).getCombatRound();
+        }
+        if (damageDealer instanceof MissileSalvo) {
+            round = ((MissileSalvo) damageDealer).getCombatRound();
+        }
+        return Objects.requireNonNull(round, "Hell no, this will not happen!");
     }
 }
