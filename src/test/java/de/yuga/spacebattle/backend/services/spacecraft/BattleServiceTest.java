@@ -13,8 +13,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@Disabled("not needed for unit or integration testing")
 @SpringBootTestProfile
+@Disabled("not needed for unit or integration testing")
 public class BattleServiceTest {
 
     @Autowired

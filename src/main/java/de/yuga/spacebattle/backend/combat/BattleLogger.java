@@ -104,30 +104,35 @@ public class BattleLogger {
         final Iterator<CombatRound> it = combatRounds.iterator();
         while (it.hasNext()) {
             final CombatRound combatRound = it.next();
-            logMessageWithPretendingCombatRound(combatRound, "Combat round in result");
 
             final List<ECombatPhase> combatPhases = Arrays.stream(ECombatPhase.values()).collect(Collectors.toList());
+
+            final List<FleetRoundState> fleetRoundStates = statesByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
+
+            final List<HitLog> hitLogsOfCombatRound = fleetRoundStates.stream()
+                    .collect(Collectors.toMap(Function.identity(), f -> f.getFleetHealthState().getHitLogs()))
+                    .values().stream()
+                    .map(Map::values)
+                    .flatMap(Collection::stream)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList());
+
+            final List<BeamVolley> beamVolleys = beamVolleyByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
+            final List<MissileSalvo> missileSalvos = missileSalvosByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
+            final List<MovementAction> movementActions = movementsByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
+
+            final boolean someThingHappens = !movementActions.isEmpty() && !hitLogsOfCombatRound.isEmpty() && !beamVolleys.isEmpty() && !missileSalvos.isEmpty();
+            if (someThingHappens) {
+                logMessageWithPretendingCombatRound(combatRound, "Combat round in result");
+            }
             for (final ECombatPhase combatPhase : combatPhases) {
-
-                final List<FleetRoundState> fleetRoundStates = statesByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
-
-                final List<HitLog> hitLogsOfCombatRound = fleetRoundStates.stream()
-                        .collect(Collectors.toMap(Function.identity(), f -> f.getFleetHealthState().getHitLogs()))
-                        .values().stream()
-                        .map(Map::values)
-                        .flatMap(Collection::stream)
-                        .flatMap(Collection::stream)
-                        .collect(Collectors.toList());
-
-                final List<BeamVolley> beamVolleys = beamVolleyByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
-                final List<MissileSalvo> missileSalvos = missileSalvosByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
-
                 final List<ECombatPhase.ECombatSubPhase> combatSubPhases = ECombatPhase.ECombatSubPhase.getByCombatPhase(combatPhase);
                 for (final ECombatPhase.ECombatSubPhase combatSubPhase : combatSubPhases) {
-                    logMessageWithPretendingCombatRound(combatRound, combatSubPhase.getTitle());
+                    if (someThingHappens) {
+                        logMessageWithPretendingCombatRound(combatRound, combatSubPhase.getTitle());
+                    }
                     switch (combatSubPhase) {
                         case MOVEMENT_PHASE:
-                            final List<MovementAction> movementActions = movementsByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
                             movementActions.forEach(this::logMovement);
                             break;
                         case ELOKA_PHASE:
@@ -173,7 +178,9 @@ public class BattleLogger {
                     }
                 }
             }
-            logCombatRoundState(combatRound, !it.hasNext());
+            if (someThingHappens) {
+                logCombatRoundState(combatRound, !it.hasNext());
+            }
         }
         logLosses(losses, fleetClash);
         closeAndWrite();

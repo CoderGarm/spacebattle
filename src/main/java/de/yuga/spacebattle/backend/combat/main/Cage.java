@@ -417,7 +417,11 @@ public class Cage implements Future<Cage> {
         Preconditions.checkNotNull(historizable, "historizable shouldn't be null!");
 
         if (historizable instanceof MovementAction) {
-            historyMovement.add(((MovementAction) historizable).clone());
+            final MovementAction movementAction = (MovementAction) historizable;
+            final boolean isKnown = historyMovement.stream().anyMatch(m -> m.getActor().equals(movementAction.getActor()) && m.getMovementType() == movementAction.getMovementType());
+            if (!isKnown) {
+                historyMovement.add(movementAction.clone());
+            }
         } else if (historizable instanceof MissileSalvo) {
             historyOfMissileSalvos.add(((MissileSalvo) historizable).clone());
         } else if (historizable instanceof BeamVolley) {
