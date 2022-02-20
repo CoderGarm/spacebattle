@@ -136,17 +136,29 @@ public class BattleLogger {
                     }
                     switch (combatSubPhase) {
                         case MOVEMENT_PHASE:
+                            /**
+                             * {@link de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction}
+                             */
                             movementActions.forEach(this::logMovement);
                             break;
                         case ELOKA_PHASE:
+                            /**
+                             * {@link de.yuga.spacebattle.backend.entities.turn.battle.combat.CounterMissileHit}
+                             */
                             final List<MissileSalvo> destroyedWhileEloka = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
                             destroyedWhileEloka.forEach(this::logElokaHitMissile);
                             break;
                         case COUNTER_MISSILE_PHASE:
+                            /**
+                             * {@link de.yuga.spacebattle.backend.entities.turn.battle.combat.CounterMissileHit}
+                             */
                             final List<MissileSalvo> destroyedWhileCounter = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
                             destroyedWhileCounter.forEach(this::logCounterMissileHitMissile);
                             break;
                         case MISSILE_MOVEMENT_PHASE:
+                            /**
+                             * {@link de.yuga.spacebattle.backend.entities.turn.battle.combat.MissileMovement}
+                             */
                             final List<MissileSalvo> missileMovement = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
                             missileMovement.forEach(this::logHandleMissileMovement);
                             break;
@@ -218,6 +230,7 @@ public class BattleLogger {
         write(msg);
     }
 
+    @SuppressWarnings("unused")
     private void logMessage(final String msg) {
         write(msg);
     }
@@ -316,8 +329,8 @@ public class BattleLogger {
         final Fleet actor = ma.getActor();
         final EMovementType movementType = ma.getMovementType();
         final Orbit origin = ma.getOrigin();
-        final Orbit destination = ma.getDestination();
-        final Orbit realDestination = ma.getRealDestination();
+        final Orbit destination = ma.getInterimDestination();
+        final Orbit realDestination = ma.getDestination();
         final String distanceAsString = DistanceCalculator.getDistanceAsStringWithUnit(destination.getDistance(realDestination));
         final String moveDist = DistanceCalculator.getDistanceAsStringWithUnit(origin.getDistance(destination));
         final String msg = "#" + combatRound.getNo() + " " + actor.getName() + " moves about " + moveDist + ", current distance " + distanceAsString + " with the plan to " + movementType;

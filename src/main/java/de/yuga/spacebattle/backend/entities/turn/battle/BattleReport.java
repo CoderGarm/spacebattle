@@ -8,6 +8,8 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
+import de.yuga.spacebattle.backend.entities.turn.battle.combat.CounterMissileHit;
+import de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -39,7 +41,7 @@ public class BattleReport extends AbstractEntityKey {
     @Nonnull
     @NotNull
     @Embedded
-    private FleetOrbit orbit;
+    private FleetOrbit venue;
 
     /**
      * The users which has played a role in this battle.
@@ -59,6 +61,40 @@ public class BattleReport extends AbstractEntityKey {
     @CollectionTable(name = "lossRole", joinColumns = @JoinColumn(name = "idBattleReport"))
     private final List<LossRole> lossRole = new ArrayList<>();
 
+
+    /**
+     * The protagonists - and the antagonists.
+     */
+    @Nonnull
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "participatingFleets",
+            joinColumns = @JoinColumn(name = "idBattleReport", referencedColumnName = "idBattleReport"),
+            inverseJoinColumns = @JoinColumn(name = "idFleet", referencedColumnName = "idFleet")
+    )
+    private final Set<Fleet> participatingFleets = new HashSet<>();
+
+    /**
+     * The movements which were done in this clash.
+     */
+    @Nonnull
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "movements",
+            joinColumns = @JoinColumn(name = "idBattleReport", referencedColumnName = "idBattleReport"),
+            inverseJoinColumns = @JoinColumn(name = "idMovementAction", referencedColumnName = "idMovementAction")
+    )
+    private final Set<MovementAction> movements = new HashSet<>();
+
+    /**
+     * The hits against missile salvos.
+     */
+    @Nonnull
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "counterMissileHits",
+            joinColumns = @JoinColumn(name = "idBattleReport", referencedColumnName = "idBattleReport"),
+            inverseJoinColumns = @JoinColumn(name = "idCounterMissileHit", referencedColumnName = "idCounterMissileHit")
+    )
+    private final Set<CounterMissileHit> counterMissileHits = new HashSet<>();
+
     public BattleReport() {
     }
 
@@ -67,7 +103,7 @@ public class BattleReport extends AbstractEntityKey {
         Preconditions.checkNotNull(battleResult, "fightingResult shouldn't be null!");
 
         this.tick = tick;
-        this.orbit = battleResult.getFleetClash().getOrbit();
+        this.venue = battleResult.getFleetClash().getOrbit();
         this.lossRole.addAll(battleResult.getLosses().stream().map(LossRole::new).collect(Collectors.toList()));
         this.participatingUsers.addAll(battleResult.getFleetClash().getParticipatingFleets().stream().map(Fleet::getOwner).collect(Collectors.toSet()));
     }
@@ -78,8 +114,8 @@ public class BattleReport extends AbstractEntityKey {
     }
 
     @Nonnull
-    public FleetOrbit getOrbit() {
-        return orbit;
+    public FleetOrbit getVenue() {
+        return venue;
     }
 
     @Nonnull

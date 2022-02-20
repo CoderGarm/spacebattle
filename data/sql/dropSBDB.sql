@@ -45,11 +45,11 @@
 
     alter table battleReport 
        drop 
-       foreign key FKr6smkmpvrxxus80181d1gwekl;
+       foreign key FKktnc29kf1wrmrnbihghs9gmdp;
 
     alter table battleReport 
        drop 
-       foreign key FKktnc29kf1wrmrnbihghs9gmdp;
+       foreign key FKr6smkmpvrxxus80181d1gwekl;
 
     alter table building 
        drop 
@@ -79,6 +79,26 @@
        drop 
        foreign key FKg139setxu2ng9hj6h7sgpyb9s;
 
+    alter table counterMissileHit 
+       drop 
+       foreign key FKdc9r09hg3me03436ahneu2r65;
+
+    alter table counterMissileHit 
+       drop 
+       foreign key FKksbgg1bvbgqrostw7xkhdo2lb;
+
+    alter table counterMissileHit 
+       drop 
+       foreign key FKln1su9jkv2gcayljhc8x4vgem;
+
+    alter table counterMissileHits 
+       drop 
+       foreign key FK3iy5c5p8yauo6g7lx2egjlg5g;
+
+    alter table counterMissileHits 
+       drop 
+       foreign key FKcu6xd18vice5w5lmh1no2dk36;
+
     alter table electronicWarfare 
        drop 
        foreign key FKccj76id0r5pq3p7f4viriwdqf;
@@ -102,6 +122,10 @@
     alter table fleet 
        drop 
        foreign key FKckq55cmimjpois3mst803atuy;
+
+    alter table hitLog 
+       drop 
+       foreign key FK1pcr16gjbto8vd5g7v8hq14hw;
 
     alter table hull 
        drop 
@@ -207,6 +231,14 @@
        drop 
        foreign key FKtqaarx478fl1pb7q6snbay2g1;
 
+    alter table missileMovement 
+       drop 
+       foreign key FK31pwab7jyqugac58td2yh50ju;
+
+    alter table missileMovement 
+       drop 
+       foreign key FKl9frhygmvi1n5d3sjchn19wrx;
+
     alter table move 
        drop 
        foreign key FKmcefsl29wdpj7xqe9790o0mch;
@@ -222,6 +254,34 @@
     alter table move 
        drop 
        foreign key FKm0l3o2yx8pq8hu2bww8maoa98;
+
+    alter table movementAction 
+       drop 
+       foreign key FK2fc6fy40a1twi3bedin6c2sr1;
+
+    alter table movements 
+       drop 
+       foreign key FKpljg47apoflkmchnqybr5dgo4;
+
+    alter table movements 
+       drop 
+       foreign key FKc7f68cuqp4mrdoe69kgs41hea;
+
+    alter table orderedHitLog 
+       drop 
+       foreign key FKt4eji1de3lte0yql6naypaj9t;
+
+    alter table orderedHitLog 
+       drop 
+       foreign key FKtbchtybhbygepe1yjf9mu0lwf;
+
+    alter table participatingFleets 
+       drop 
+       foreign key FKayayypcvevpaihludw9p2jcdh;
+
+    alter table participatingFleets 
+       drop 
+       foreign key FKbp90ne9mn2vhmh9m7kinwjxki;
 
     alter table participatingUsers 
        drop 
@@ -307,6 +367,14 @@
        drop 
        foreign key FKnqevjdq10urslieg5r3peb5m3;
 
+    alter table shipKillerHit 
+       drop 
+       foreign key FKi72vdedsqsrgj93k3k80ei5sk;
+
+    alter table shipKillerHit 
+       drop 
+       foreign key FK1d72qr1uwk27axl1yck2b2ux1;
+
     alter table sidewall 
        drop 
        foreign key FKlo0i3byallqh89wd535yrbs3l;
@@ -387,9 +455,15 @@
 
     drop table if exists construction;
 
+    drop table if exists counterMissileHit;
+
+    drop table if exists counterMissileHits;
+
     drop table if exists electronicWarfare;
 
     drop table if exists fleet;
+
+    drop table if exists hitLog;
 
     drop table if exists hull;
 
@@ -415,7 +489,17 @@
 
     drop table if exists missileMotors;
 
+    drop table if exists missileMovement;
+
     drop table if exists move;
+
+    drop table if exists movementAction;
+
+    drop table if exists movements;
+
+    drop table if exists orderedHitLog;
+
+    drop table if exists participatingFleets;
 
     drop table if exists participatingUsers;
 
@@ -432,6 +516,8 @@
     drop table if exists resourcesDepositComposition;
 
     drop table if exists shipClass;
+
+    drop table if exists shipKillerHit;
 
     drop table if exists sidewall;
 

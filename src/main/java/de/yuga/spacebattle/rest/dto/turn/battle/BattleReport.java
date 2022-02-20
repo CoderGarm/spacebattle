@@ -50,7 +50,7 @@ public class BattleReport {
 
         this.idBattleReport = battleReport.getId();
         this.tick = new de.yuga.spacebattle.rest.dto.turn.Tick(battleReport.getTick());
-        this.orbit = new FleetOrbit(battleReport.getOrbit());
+        this.orbit = new FleetOrbit(battleReport.getVenue());
         this.lossRole.addAll(battleReport.getLossRole().stream().map(de.yuga.spacebattle.rest.dto.turn.battle.LossRole::new).collect(Collectors.toList()));
         this.participatingUsers.addAll(battleReport.getParticipatingUsers().stream().map(UserJson::new).collect(Collectors.toSet()));
     }

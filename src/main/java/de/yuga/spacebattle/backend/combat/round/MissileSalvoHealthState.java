@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.combat.round;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.dto.Historizable;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
+import de.yuga.spacebattle.backend.enums.ECombatPhase.ECombatSubPhase;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
@@ -26,7 +27,7 @@ public class MissileSalvoHealthState extends Historizable<MissileSalvoHealthStat
     private Map<Missile, Integer> currentAmountByType;
 
     /**
-     * The composition of the salvo by missile type and amount.
+     * The losses of this salvo during a {@link ECombatSubPhase} by missile type and amount.
      */
     @Nonnull
     private Map<Missile, Integer> lossesByType;

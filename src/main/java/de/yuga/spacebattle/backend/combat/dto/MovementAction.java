@@ -53,34 +53,34 @@ public class MovementAction extends Historizable<MovementAction> implements Clon
      * The next step to the targeted position.
      */
     @Nonnull
-    private Orbit destination;
+    private Orbit interimDestination;
 
     /**
      * The point of the targeted position.
      */
     @Nonnull
-    private Orbit realDestination;
+    private Orbit destination;
 
     public MovementAction(@Nonnull final Cage cage,
                           @Nonnull final Fleet actor,
                           @Nonnull final EMovementType movementType,
                           @Nonnull final Orbit origin,
-                          @Nonnull final Orbit destination,
-                          @Nonnull final Orbit realDestination) {
+                          @Nonnull final Orbit interimDestination,
+                          @Nonnull final Orbit destination) {
         Preconditions.checkNotNull(cage, "cage shouldn't be null!");
         Preconditions.checkNotNull(actor, "actor shouldn't be null!");
         Preconditions.checkNotNull(movementType, "movementType shouldn't be null!");
         Preconditions.checkNotNull(origin, "origin shouldn't be null!");
+        Preconditions.checkNotNull(interimDestination, "interimDestination shouldn't be null!");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
-        Preconditions.checkNotNull(realDestination, "realDestination shouldn't be null!");
 
         this.cage = cage;
         this.combatRound = cage.getCurrentCombatRound();
         this.actor = actor;
         this.movementType = movementType;
         this.origin = origin;
+        this.interimDestination = interimDestination;
         this.destination = destination;
-        this.realDestination = realDestination;
         historize();
     }
 
@@ -110,13 +110,13 @@ public class MovementAction extends Historizable<MovementAction> implements Clon
     }
 
     @Nonnull
-    public Orbit getDestination() {
-        return destination;
+    public Orbit getInterimDestination() {
+        return interimDestination;
     }
 
     @Nonnull
-    public Orbit getRealDestination() {
-        return realDestination;
+    public Orbit getDestination() {
+        return destination;
     }
 
     @Override
@@ -124,8 +124,8 @@ public class MovementAction extends Historizable<MovementAction> implements Clon
         final MovementAction clone = (MovementAction) super.clone();
         clone.combatRound = combatRound.clone();
         clone.origin = origin.clone();
+        clone.interimDestination = interimDestination.clone();
         clone.destination = destination.clone();
-        clone.realDestination = realDestination.clone();
         return clone;
     }
 }
