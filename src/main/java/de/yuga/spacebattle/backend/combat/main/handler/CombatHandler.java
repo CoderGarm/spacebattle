@@ -155,7 +155,7 @@ public class CombatHandler {
             // calculate movement
             final BigDecimal minRange = bestDamageRange.getMinRange();
             final int minRangeCompare = minRange.compareTo(distance);
-            if (minRangeCompare < 0) {
+            if (minRangeCompare > 0) {
                 actorsMovementType = INCREASE_DISTANCE;
             }
 

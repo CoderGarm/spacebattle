@@ -271,7 +271,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
     }
 
     @Nonnull
-    private Stream<WarshipHealthState> getFightingWarShips() {
+    public Stream<WarshipHealthState> getFightingWarShips() {
         return fleetHealthState.getWarshipHealthStates().values().stream()
                 .filter(WarshipHealthState::isFightingCapable);
     }

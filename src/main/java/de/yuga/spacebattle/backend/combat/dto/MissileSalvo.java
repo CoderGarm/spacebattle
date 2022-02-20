@@ -139,29 +139,33 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
         final Map<Missile, Integer> amountByType = new HashMap<>();
 
         final EMovementType actorsMovementType = actorState.getMovementType();
-        final Map<WarShip, WarshipHealthState> warshipHealthStates = actorState.getFleetHealthState().getWarshipHealthStates();
-        warshipHealthStates.values().stream().filter(WarshipHealthState::isFightingCapable).forEach(w -> w.getFittings().entrySet().stream()
-                // filter active fittings
-                .filter(Map.Entry::getValue)
-                .map(Map.Entry::getKey)
-                .filter(a -> a.getWeaponType() == EWeaponType.MISSILE)
-                .filter(a -> a.getLauncher() != null)
-                .filter(f -> f.getWeaponAlignment().isAssignableFromMovementType(actorsMovementType))
-                .forEach(alignedFitting -> {
-                    final Launcher launcher = alignedFitting.getLauncher();
-                    final int amountOfLauncher = alignedFitting.getAmount();
-                    final Missile missile = launcher.getAmmunitionModule().getMissile();
-                    final MissileAmmunitionState missileAmmunitionState = w.getMissileAmmunitionState();
-                    final int remainingShots = missileAmmunitionState.getRemainingShots(missile);
-                    // setting missiles to the salvo
-                    if (remainingShots >= amountOfLauncher) {
-                        amountByType.merge(missile, amountOfLauncher, Integer::sum);
-                        missileAmmunitionState.reduce(missile, amountOfLauncher);
-                    } else {
-                        amountByType.merge(missile, remainingShots, Integer::sum);
-                        missileAmmunitionState.reduce(missile, remainingShots);
-                    }
-                }));
+        actorState.getFightingWarShips()
+                .filter(WarshipHealthState::isFightingCapable)
+                .forEach(w -> w.getFittings().entrySet().stream()
+                        // filter active fittings
+                        .filter(Map.Entry::getValue)
+                        .map(Map.Entry::getKey)
+                        .filter(a -> a.getWeaponType() == EWeaponType.MISSILE)
+                        .filter(a -> a.getLauncher() != null)
+                        .filter(f -> f.getWeaponAlignment().isAssignableFromMovementType(actorsMovementType))
+                        .forEach(alignedFitting -> {
+                            final Launcher launcher = alignedFitting.getLauncher();
+                            final int amountOfLauncher = alignedFitting.getAmount();
+                            final Missile missile = launcher.getAmmunitionModule().getMissile();
+                            final MissileAmmunitionState missileAmmunitionState = w.getMissileAmmunitionState();
+                            final int remainingShots = missileAmmunitionState.getRemainingShots(missile);
+                            if (remainingShots <= 0) {
+                                return;
+                            }
+                            // setting missiles to the salvo
+                            if (remainingShots >= amountOfLauncher) {
+                                amountByType.merge(missile, amountOfLauncher, Integer::sum);
+                                missileAmmunitionState.reduce(missile, amountOfLauncher);
+                            } else {
+                                amountByType.merge(missile, remainingShots, Integer::sum);
+                                missileAmmunitionState.reduce(missile, remainingShots);
+                            }
+                        }));
         this.missileSalvoHealthState = new MissileSalvoHealthState(amountByType);
         calculateRangePerCombatRound();
         calculateAttackRange();
