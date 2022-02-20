@@ -10,6 +10,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.CounterMissileHit;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction;
+import de.yuga.spacebattle.backend.entities.turn.battle.combat.ReleasedVolley;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -94,6 +95,14 @@ public class BattleReport extends AbstractEntityKey {
             inverseJoinColumns = @JoinColumn(name = "idCounterMissileHit", referencedColumnName = "idCounterMissileHit")
     )
     private final Set<CounterMissileHit> counterMissileHits = new HashSet<>();
+
+    @Nonnull
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "releasesVolleys",
+            joinColumns = @JoinColumn(name = "idBattleReport", referencedColumnName = "idBattleReport"),
+            inverseJoinColumns = @JoinColumn(name = "idReleasedVolley", referencedColumnName = "idReleasedVolley")
+    )
+    private final Set<ReleasedVolley> releasesVolleys = new HashSet<>();
 
     public BattleReport() {
     }

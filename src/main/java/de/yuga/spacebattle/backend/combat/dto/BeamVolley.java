@@ -67,7 +67,7 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
     /**
      * The distance of this shot.
      */
-    private final BigDecimal distance;
+    private final BigDecimal initialDistance;
 
     /**
      * The damage and the targets which were affected by the damage.
@@ -104,7 +104,7 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
         this.actor = actor;
         this.target = target;
         final FleetRoundState actorsState = cage.getCurrentStateByFleet(actor);
-        this.distance = actorsState.getPosition().getDistance(cage.getCurrentStateByFleet(target).getPosition());
+        this.initialDistance = actorsState.getPosition().getDistance(cage.getCurrentStateByFleet(target).getPosition());
 
         final EMovementType actorsMovementType = actorsState.getMovementType();
         actorsState
@@ -181,8 +181,13 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
         return target;
     }
 
-    public BigDecimal getDistance() {
-        return distance;
+    public BigDecimal getInitialDistance() {
+        return initialDistance;
+    }
+
+    @Nonnull
+    public List<BeamState> getFiredShots() {
+        return firedShots;
     }
 
     @Nonnull

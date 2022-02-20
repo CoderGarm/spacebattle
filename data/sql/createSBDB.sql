@@ -377,6 +377,24 @@
         primary key (idPropulsion)
     ) engine=InnoDB;
 
+    create table releasedVolley (
+       idReleasedVolley integer not null auto_increment,
+        combatPhase varchar(255) not null,
+        combatRound integer not null,
+        amountOfShots integer not null,
+        damageDealer varchar(255) not null,
+        initialDistance decimal(19, 0) not null,
+        idActor integer not null,
+        idTarget integer not null,
+        primary key (idReleasedVolley)
+    ) engine=InnoDB;
+
+    create table releasesVolleys (
+       idBattleReport integer not null,
+        idReleasedVolley integer not null,
+        primary key (idBattleReport, idReleasedVolley)
+    ) engine=InnoDB;
+
     create table research (
        idResearch integer not null auto_increment,
         description varchar(255),
@@ -564,6 +582,15 @@
 
     alter table planet 
        add constraint PLANET_UK unique (idStarSystem, idPlanet, xCoordinate, yCoordinate);
+
+    alter table releasedVolley 
+       add constraint UK_sm9xvdslhicb1oom8qfcwwjpx unique (idActor);
+
+    alter table releasedVolley 
+       add constraint UK_my0cg0uh901inf34xrpb0vd8k unique (idTarget);
+
+    alter table releasesVolleys 
+       add constraint UK_hsr966dv9qpnj1i7nhg3nlbc6 unique (idReleasedVolley);
 
     alter table shipClass 
        add constraint UK_4sgs4ew920mkttyjueq19n70q unique (idPredecessor);
@@ -990,6 +1017,26 @@
        add constraint FK7rr2gvpcbjjhl9tuxe6c50v5q 
        foreign key (idResearch) 
        references research (idResearch);
+
+    alter table releasedVolley 
+       add constraint FK5phx9tuf726udgmc3oba1t80o 
+       foreign key (idActor) 
+       references fleet (idFleet);
+
+    alter table releasedVolley 
+       add constraint FKox4m8c517vryrxaijolfco99m 
+       foreign key (idTarget) 
+       references fleet (idFleet);
+
+    alter table releasesVolleys 
+       add constraint FKr0o8twcmeayvg09p39p71ktpf 
+       foreign key (idReleasedVolley) 
+       references releasedVolley (idReleasedVolley);
+
+    alter table releasesVolleys 
+       add constraint FKn08s5o12up3n1n85d1vnhrk4y 
+       foreign key (idBattleReport) 
+       references battleReport (idBattleReport);
 
     alter table research 
        add constraint FKni50te130dndarqgicsq3svhb 

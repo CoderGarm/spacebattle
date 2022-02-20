@@ -189,10 +189,16 @@ public class BattleLogger {
                             detonatedMissiles.forEach(missileSalvo -> logMissileDetonation(missileSalvo, hitLogByMissileSalvo.computeIfAbsent(missileSalvo, k -> new ArrayList<>())));
                             break;
                         case BEAM_FIRE_PHASE:
+                            /**
+                             * {@link de.yuga.spacebattle.backend.entities.turn.battle.combat.ReleasedVolley}
+                             */
                             final List<BeamVolley> releasedBeamVolleys = beamVolleys.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
                             releasedBeamVolleys.forEach(this::logBeamVolleyRelease);
                             break;
                         case MISSILE_FIRE_PHASE:
+                            /**
+                             * {@link de.yuga.spacebattle.backend.entities.turn.battle.combat.ReleasedVolley}
+                             */
                             final List<MissileSalvo> releasedMissileSalvos = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
                             releasedMissileSalvos.forEach(this::logMissileRelease);
                             break;
@@ -270,7 +276,9 @@ public class BattleLogger {
         final CombatRound combatRound = volley.getCombatRound();
         final Fleet actor = volley.getActor();
         final Fleet target = volley.getTarget();
-        final String msg = "#" + combatRound.getNo() + " release beam volley " + volley.getUuid() + " from " + actor.getName() + " attacks " + target.getName();
+        final int amount = volley.getFiredShots().size();
+        final String distanceString = DistanceCalculator.getDistanceAsStringWithUnit(volley.getInitialDistance());
+        final String msg = "#" + combatRound.getNo() + " release beam volley " + volley.getUuid() + " from " + actor.getName() + " attacks " + target.getName() + " with " + amount + " missiles over " + distanceString;
         write(msg);
     }
 
@@ -296,7 +304,7 @@ public class BattleLogger {
         final CombatRound combatRound = volley.getCombatRound();
         final Fleet actor = volley.getActor();
         final Fleet target = volley.getTarget();
-        final BigDecimal distance = volley.getDistance();
+        final BigDecimal distance = volley.getInitialDistance();
         final EDamageResult result = volley.getResult();
 
         final StringBuilder sb = new StringBuilder();

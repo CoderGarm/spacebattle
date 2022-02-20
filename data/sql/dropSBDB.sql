@@ -323,6 +323,22 @@
        drop 
        foreign key FK7rr2gvpcbjjhl9tuxe6c50v5q;
 
+    alter table releasedVolley 
+       drop 
+       foreign key FK5phx9tuf726udgmc3oba1t80o;
+
+    alter table releasedVolley 
+       drop 
+       foreign key FKox4m8c517vryrxaijolfco99m;
+
+    alter table releasesVolleys 
+       drop 
+       foreign key FKr0o8twcmeayvg09p39p71ktpf;
+
+    alter table releasesVolleys 
+       drop 
+       foreign key FKn08s5o12up3n1n85d1vnhrk4y;
+
     alter table research 
        drop 
        foreign key FKni50te130dndarqgicsq3svhb;
@@ -508,6 +524,10 @@
     drop table if exists planet;
 
     drop table if exists propulsion;
+
+    drop table if exists releasedVolley;
+
+    drop table if exists releasesVolleys;
 
     drop table if exists research;
 

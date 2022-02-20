@@ -38,9 +38,7 @@ public class CounterMissileHit extends CombatRoundKey {
     /**
      * The leftover amount of missiles of the given type in the salvo.
      */
-    @NotNull
-    @Nonnull
-    private Integer remainingMissiles;
+    private int remainingMissiles;
 
     /**
      * The UUID of the attacked {@link MissileSalvo}.
@@ -53,9 +51,7 @@ public class CounterMissileHit extends CombatRoundKey {
     /**
      * The amount of destroyed missiles.
      */
-    @NotNull
-    @Nonnull
-    private Integer destroyedMissiles;
+    private int destroyedMissiles;
 
     /**
      * The attacked missile type as part of the salvo.

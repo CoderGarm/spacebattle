@@ -46,16 +46,12 @@ public class MissileMovement extends CombatRoundKey {
     /**
      * The amount of missiles in this salvo.
      */
-    @NotNull
-    @Nonnull
-    private Integer missileAmount;
+    private int missileAmount;
 
     /**
      * The amount of rounds which have to be passed before in range for a hit.
      */
-    @NotNull
-    @Nonnull
-    private Integer roundsToTravel;
+    private int roundsToTravel;
 
     /**
      * The current position of the salvo.
