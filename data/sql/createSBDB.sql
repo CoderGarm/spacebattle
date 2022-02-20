@@ -52,6 +52,7 @@
 
     create table battleReport (
        idBattleReport integer not null auto_increment,
+        lastRound integer not null,
         xCoordinate decimal(19, 0),
         yCoordinate decimal(19, 0),
         idTick integer not null,
@@ -208,11 +209,14 @@
         check (weaponType = 'MISSILE' || weaponType = 'COUNTER_MISSILE')
     ) engine=InnoDB;
 
-    create table lossRole (
-       idBattleReport integer not null,
+    create table lossesByHit (
+       idShipKillerHit integer not null,
+        idFleet integer,
         idOwner integer,
         idShipClass integer,
-        warShipName varchar(255)
+        warShipName varchar(255),
+        idHitLog integer not null,
+        primary key (idShipKillerHit, idHitLog)
     ) engine=InnoDB;
 
     create table messageThread (
@@ -281,6 +285,12 @@
         primary key (idMissileMovement)
     ) engine=InnoDB;
 
+    create table missileMovements (
+       idBattleReport integer not null,
+        idMissileMovement integer not null,
+        primary key (idBattleReport, idMissileMovement)
+    ) engine=InnoDB;
+
     create table move (
        idMove integer not null auto_increment,
         xCoordinateDestination decimal(19, 0),
@@ -312,7 +322,7 @@
         primary key (idMovementAction)
     ) engine=InnoDB;
 
-    create table movements (
+    create table movementActions (
        idBattleReport integer not null,
         idMovementAction integer not null,
         primary key (idBattleReport, idMovementAction)
@@ -320,9 +330,9 @@
 
     create table orderedHitLog (
        idShipKillerHit integer not null,
-        orderNo integer,
         idHitLog integer not null,
-        primary key (idShipKillerHit, idHitLog)
+        orderNo integer not null,
+        primary key (idShipKillerHit, orderNo)
     ) engine=InnoDB;
 
     create table participatingFleets (
@@ -384,6 +394,7 @@
         amountOfShots integer not null,
         damageDealer varchar(255) not null,
         initialDistance decimal(19, 0) not null,
+        weaponType varchar(255) not null,
         idActor integer not null,
         idTarget integer not null,
         primary key (idReleasedVolley)
@@ -443,6 +454,12 @@
         idActor integer not null,
         idTarget integer not null,
         primary key (idShipKillerHit)
+    ) engine=InnoDB;
+
+    create table shipKillerHits (
+       idBattleReport integer not null,
+        idShipKillerHit integer not null,
+        primary key (idBattleReport, idShipKillerHit)
     ) engine=InnoDB;
 
     create table sidewall (
@@ -550,15 +567,6 @@
     alter table construction 
        add constraint CONSTRUCTION_UK unique (idPlanet, idBuilding);
 
-    alter table counterMissileHit 
-       add constraint UK_dqt0wnamsftcucw10i8ifvlyv unique (idActor);
-
-    alter table counterMissileHit 
-       add constraint UK_o78f8fwj48nduoid576hkgihf unique (idMissile);
-
-    alter table counterMissileHit 
-       add constraint UK_r1tq5n99bgjobdy38vac9obv2 unique (idTarget);
-
     alter table counterMissileHits 
        add constraint UK_5t1h6fs2csdnofihl1lsysbf9 unique (idCounterMissileHit);
 
@@ -571,23 +579,17 @@
     alter table missile 
        add constraint UK_6gmi4lb4vkqblb63obx2991f unique (idAmmunitionModule);
 
-    alter table missileMovement 
-       add constraint UK_e0213mn48is1uxurudg5e96pt unique (idActor);
+    alter table missileMovements 
+       add constraint UK_7i21tt2alyj9dggioukympy2t unique (idMissileMovement);
 
-    alter table missileMovement 
-       add constraint UK_kj1dcj8wsl8yg7s12fmb6luuc unique (idTarget);
+    alter table movementActions 
+       add constraint UK_k7lndwnt1rxmmjj2xslfrkuv unique (idMovementAction);
 
-    alter table movements 
-       add constraint UK_tkq99ngudfu8ifwxd7urtcu1k unique (idMovementAction);
+    alter table orderedHitLog 
+       add constraint UK_mpoyl8losmb1ep0fxewrpbuf3 unique (idHitLog);
 
     alter table planet 
        add constraint PLANET_UK unique (idStarSystem, idPlanet, xCoordinate, yCoordinate);
-
-    alter table releasedVolley 
-       add constraint UK_sm9xvdslhicb1oom8qfcwwjpx unique (idActor);
-
-    alter table releasedVolley 
-       add constraint UK_my0cg0uh901inf34xrpb0vd8k unique (idTarget);
 
     alter table releasesVolleys 
        add constraint UK_hsr966dv9qpnj1i7nhg3nlbc6 unique (idReleasedVolley);
@@ -598,11 +600,8 @@
     alter table shipClass 
        add constraint UK_kqyh4et3r89d2iy3w2sggpt90 unique (idSuccessor);
 
-    alter table shipKillerHit 
-       add constraint UK_b5cdvvaddmii57r6vco8rm18a unique (idActor);
-
-    alter table shipKillerHit 
-       add constraint UK_rsc0ya5vrh7pa33fs2bmqeiof unique (idTarget);
+    alter table shipKillerHits 
+       add constraint UK_nd3dfq3yjyhaauawah5lm5mj2 unique (idShipKillerHit);
 
     alter table starSystem 
        add constraint COORDINATE_UK unique (xCoordinate, yCoordinate);
@@ -838,20 +837,30 @@
        foreign key (idAmmunitionModule) 
        references ammunitionModule (idAmmunitionModule);
 
-    alter table lossRole 
-       add constraint FK1vibi3ssk79l85twyhbb7go47 
+    alter table lossesByHit 
+       add constraint FK8gwd5wcrghospusbhcyoffbpq 
+       foreign key (idFleet) 
+       references fleet (idFleet);
+
+    alter table lossesByHit 
+       add constraint FKmxpfhc6uuo325u2u81tb2k2g0 
        foreign key (idOwner) 
        references user (idUser);
 
-    alter table lossRole 
-       add constraint FK8h7svfuglblma48qsswn540qi 
+    alter table lossesByHit 
+       add constraint FK85p90t72v9he3a1iw7y0fhn05 
        foreign key (idShipClass) 
        references shipClass (idShipClass);
 
-    alter table lossRole 
-       add constraint FKht8txlbmvrw4o3y42jpa6t4e4 
-       foreign key (idBattleReport) 
-       references battleReport (idBattleReport);
+    alter table lossesByHit 
+       add constraint FKhtcg0ctdj5ie6fbabo8puvteu 
+       foreign key (idHitLog) 
+       references hitLog (idHitLog);
+
+    alter table lossesByHit 
+       add constraint FK3o0d6nae9i5n6v33ake9fyvs8 
+       foreign key (idShipKillerHit) 
+       references shipKillerHit (idShipKillerHit);
 
     alter table messageThread 
        add constraint FK1d5qqscr6uidy4lithqwkfcsb 
@@ -913,6 +922,16 @@
        foreign key (idTarget) 
        references fleet (idFleet);
 
+    alter table missileMovements 
+       add constraint FKa4ut542bvmk335w8ldma12g22 
+       foreign key (idMissileMovement) 
+       references missileMovement (idMissileMovement);
+
+    alter table missileMovements 
+       add constraint FK4hmoghg3bi28t2pmfi3ea626u 
+       foreign key (idBattleReport) 
+       references battleReport (idBattleReport);
+
     alter table move 
        add constraint FKmcefsl29wdpj7xqe9790o0mch 
        foreign key (idStarSystemDestination) 
@@ -938,13 +957,13 @@
        foreign key (idActor) 
        references fleet (idFleet);
 
-    alter table movements 
-       add constraint FKpljg47apoflkmchnqybr5dgo4 
+    alter table movementActions 
+       add constraint FKlsfd21vc6bericbiwv6huwo 
        foreign key (idMovementAction) 
        references movementAction (idMovementAction);
 
-    alter table movements 
-       add constraint FKc7f68cuqp4mrdoe69kgs41hea 
+    alter table movementActions 
+       add constraint FKjkre459vr8w45a9wxhrtofsfa 
        foreign key (idBattleReport) 
        references battleReport (idBattleReport);
 
@@ -1102,6 +1121,16 @@
        add constraint FK1d72qr1uwk27axl1yck2b2ux1 
        foreign key (idTarget) 
        references fleet (idFleet);
+
+    alter table shipKillerHits 
+       add constraint FKmaalns2ubmv8018dgku4bv0qs 
+       foreign key (idShipKillerHit) 
+       references shipKillerHit (idShipKillerHit);
+
+    alter table shipKillerHits 
+       add constraint FKsyea27u0x8dmybnb4r1qfsug0 
+       foreign key (idBattleReport) 
+       references battleReport (idBattleReport);
 
     alter table sidewall 
        add constraint FKlo0i3byallqh89wd535yrbs3l 

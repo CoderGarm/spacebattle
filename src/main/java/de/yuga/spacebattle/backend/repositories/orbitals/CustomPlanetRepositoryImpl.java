@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import java.math.BigInteger;
 import java.util.List;
 
 @Service
@@ -77,8 +78,8 @@ public class CustomPlanetRepositoryImpl implements CustomPlanetRepository {
         try {
             return em.createNamedQuery("Planet.getByCoordinates", Planet.class)
                     .setParameter("idStarSystem", idStarSystem)
-                    .setParameter("xCoordinate", xCoordinate)
-                    .setParameter("yCoordinate", yCoordinate)
+                    .setParameter("xCoordinate", BigInteger.valueOf(xCoordinate))
+                    .setParameter("yCoordinate", BigInteger.valueOf(yCoordinate))
                     .getSingleResult();
         } catch (final NoResultException e) {
             return null;

@@ -34,4 +34,16 @@ public class CustomBattleReportRepositoryImpl implements CustomBattleReportRepos
             return null;
         }
     }
+
+    @Nonnull
+    @Override
+    public List<BattleReport> findReportsWithUserWithPaging(final int idUser, final int page, final int size) {
+        final int startPosition = page * size;
+        final int endPosition = page * size + size;
+        return em.createNamedQuery("BattleReport.findLatestWithUser", BattleReport.class)
+                .setParameter("idUser", idUser)
+                .setFirstResult(startPosition)
+                .setMaxResults(endPosition)
+                .getResultList();
+    }
 }

@@ -85,7 +85,6 @@ public class BattleService {
             throw new NotifyWebUserException(e.getMessage());
         }
 
-
         battleReportService.saveAll(reports);
     }
 

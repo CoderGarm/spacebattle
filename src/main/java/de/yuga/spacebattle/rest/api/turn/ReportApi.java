@@ -5,7 +5,7 @@ import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.battle.BattleReport;
-import de.yuga.spacebattle.rest.dto.turn.battle.BattleReportList;
+import de.yuga.spacebattle.rest.dto.turn.battle.collections.BattleReportList;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,8 +53,8 @@ public class ReportApi {
         this.battleReportService = battleReportService;
     }
 
-    @GetMapping(value = FIGHTING_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Get all fighting reports for the user.", nickname = "getAllReportsWithUser")
+    @GetMapping(value = FIGHTING_ENDPOINT + "/{idUser}/{page}/{size}")
+    @ApiOperation(value = "Get all fighting reports for the user.", nickname = "getReportsWithUserWithPaging")
     @Operation(
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -64,8 +64,10 @@ public class ReportApi {
             }
     )
     @ResponseBody
-    public ResponseEntity<?> getAllReportsWithUser(@PathVariable("idUser") final int idUser) {
-        final List<de.yuga.spacebattle.backend.entities.turn.battle.BattleReport> battleReportsWithUser = battleReportService.findAllWithUser(idUser);
+    public ResponseEntity<?> getReportsWithUserWithPaging(@PathVariable("idUser") final int idUser,
+                                                          @PathVariable("page") final int page,
+                                                          @PathVariable("size") final int size) {
+        final List<de.yuga.spacebattle.backend.entities.turn.battle.BattleReport> battleReportsWithUser = battleReportService.findReportsWithUserWithPaging(idUser, page, size);
         return ResponseEntity.ok(new BattleReportList(battleReportsWithUser));
     }
 

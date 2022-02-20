@@ -61,4 +61,8 @@ public class BattleReportService {
     public BattleReport findLatestWithUser(final int idUser) {
         return battleReportRepository.findLatestWithUser(idUser);
     }
+
+    public List<BattleReport> findReportsWithUserWithPaging(final int idUser, final int page, final int size) {
+        return battleReportRepository.findReportsWithUserWithPaging(idUser, page, size);
+    }
 }

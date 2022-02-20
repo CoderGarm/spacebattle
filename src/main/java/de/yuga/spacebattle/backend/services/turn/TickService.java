@@ -149,11 +149,11 @@ public class TickService {
         Tick today = new Tick();
 
         today = tickRepository.save(today);
-        //battleService.runBattles(today);
 
         tickPlanets();
         tickMovements();
         tickColonizations();
+        battleService.runBattles(today);
 
         today.setTickEnds(LocalDateTime.now());
         return tickRepository.save(today);

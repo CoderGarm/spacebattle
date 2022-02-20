@@ -1,9 +1,10 @@
 package de.yuga.spacebattle.backend.entities.turn.battle.combat;
 
-import de.yuga.spacebattle.backend.combat.round.CombatRound;
+import de.yuga.spacebattle.backend.combat.dto.BeamVolley;
+import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
 import de.yuga.spacebattle.backend.converter.UUIDConverter;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.backend.enums.ECombatPhase;
+import de.yuga.spacebattle.backend.enums.EWeaponType;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -16,21 +17,15 @@ import java.util.UUID;
 @AttributeOverride(name = "id", column = @Column(name = "idReleasedVolley"))
 public class ReleasedVolley extends CombatRoundKey {
 
-    /**
-     * The source of the electronic warfare.
-     */
     @NotNull
     @Nonnull
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "idActor", nullable = false, updatable = false)
     private Fleet actor;
 
-    /**
-     * The owner of the attacked salvo.
-     */
     @NotNull
     @Nonnull
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "idTarget", nullable = false, updatable = false)
     private Fleet target;
 
@@ -41,6 +36,11 @@ public class ReleasedVolley extends CombatRoundKey {
     @Nonnull
     @Convert(converter = UUIDConverter.class)
     private UUID damageDealer;
+
+    @NotNull
+    @Nonnull
+    @Enumerated(EnumType.STRING)
+    private EWeaponType weaponType;
 
     /**
      * The amount of missiles in this salvo.
@@ -56,16 +56,57 @@ public class ReleasedVolley extends CombatRoundKey {
     private BigDecimal initialDistance;
 
 
-    public ReleasedVolley(@Nonnull final CombatRound combatRound,
-                          @Nonnull final Fleet actor,
-                          @Nonnull final Fleet target,
-                          @Nonnull final UUID movingMissileSalvo,
-                          @Nonnull final Integer missileAmount) {
-        super(combatRound, ECombatPhase.ECombatSubPhase.MISSILE_MOVEMENT_PHASE);
-
-    }
-
     public ReleasedVolley() {
     }
 
+    public ReleasedVolley(@Nonnull final BeamVolley volley) {
+        super(volley.getCombatRound(), volley.getCombatSubPhase());
+
+        this.weaponType = EWeaponType.BEAM;
+        this.actor = volley.getActor();
+        this.target = volley.getTarget();
+        this.damageDealer = volley.getUuid();
+        this.amountOfShots = volley.getFiredShots().size();
+        this.initialDistance = volley.getInitialDistance();
+    }
+
+    public ReleasedVolley(@Nonnull final MissileSalvo volley) {
+        super(volley.getCombatRound(), volley.getCombatSubPhase());
+
+        this.weaponType = EWeaponType.MISSILE;
+        this.actor = volley.getActor();
+        this.target = volley.getTarget();
+        this.damageDealer = volley.getUuid();
+        this.amountOfShots = volley.getMissileSalvoHealthState().getCurrentAmountByType().values().stream().mapToInt(Integer::intValue).sum();
+        this.initialDistance = volley.getInitialDistance();
+    }
+
+    @Nonnull
+    public Fleet getActor() {
+        return actor;
+    }
+
+    @Nonnull
+    public Fleet getTarget() {
+        return target;
+    }
+
+    @Nonnull
+    public UUID getDamageDealer() {
+        return damageDealer;
+    }
+
+    @Nonnull
+    public EWeaponType getWeaponType() {
+        return weaponType;
+    }
+
+    public int getAmountOfShots() {
+        return amountOfShots;
+    }
+
+    @Nonnull
+    public BigDecimal getInitialDistance() {
+        return initialDistance;
+    }
 }

@@ -1,10 +1,8 @@
 package de.yuga.spacebattle.backend.entities.turn.battle.combat;
 
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
-import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
-import de.yuga.spacebattle.backend.enums.ECombatPhase;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -63,14 +61,38 @@ public class MovementAction extends CombatRoundKey {
     public MovementAction() {
     }
 
-    public MovementAction(@Nonnull final CombatRound combatRound,
-                          @Nonnull final Fleet actor,
-                          @Nonnull final EMovementType movementType,
-                          @Nonnull final Orbit origin,
-                          @Nonnull final Orbit interimDestination,
-                          @Nonnull final Orbit destination) {
-        super(combatRound, ECombatPhase.ECombatSubPhase.MOVEMENT_PHASE);
+    public MovementAction(@Nonnull final de.yuga.spacebattle.backend.combat.dto.MovementAction movementAction) {
+        super(movementAction.getCombatRound(), movementAction.getCombatPhase());
 
+        this.actor = movementAction.getActor();
+        this.movementType = movementAction.getMovementType();
+        this.origin = movementAction.getOrigin().clone();
+        this.interimDestination = movementAction.getInterimDestination().clone();
+        this.destination = movementAction.getDestination().clone();
     }
 
+    @Nonnull
+    public Fleet getActor() {
+        return actor;
+    }
+
+    @Nonnull
+    public EMovementType getMovementType() {
+        return movementType;
+    }
+
+    @Nonnull
+    public Orbit getOrigin() {
+        return origin;
+    }
+
+    @Nonnull
+    public Orbit getInterimDestination() {
+        return interimDestination;
+    }
+
+    @Nonnull
+    public Orbit getDestination() {
+        return destination;
+    }
 }

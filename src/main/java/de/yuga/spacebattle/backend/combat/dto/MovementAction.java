@@ -95,6 +95,11 @@ public class MovementAction extends Historizable<MovementAction> implements Clon
     }
 
     @Nonnull
+    public ECombatPhase.ECombatSubPhase getCombatPhase() {
+        return combatPhase;
+    }
+
+    @Nonnull
     public Fleet getActor() {
         return actor;
     }

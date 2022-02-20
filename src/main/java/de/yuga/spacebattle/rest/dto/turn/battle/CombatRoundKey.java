@@ -1,0 +1,69 @@
+package de.yuga.spacebattle.rest.dto.turn.battle;
+
+import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.enums.ECombatPhase;
+import io.swagger.annotations.ApiModelProperty;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+public class CombatRoundKey {
+
+    @ApiModelProperty(required = true, value = "The id of the parent.")
+    private int id;
+
+    /**
+     * The current combat round.<br>
+     * A volley of direct weapons will hit in the same weapon.
+     */
+    @Nullable
+    @ApiModelProperty(required = true, value = "The combat round in which this action happens.")
+    private CombatRound combatRound;
+
+    /**
+     * The current phase.
+     */
+    @Nullable
+    @ApiModelProperty(required = true, value = "The combat phase in which this action happens.")
+    private ECombatPhase.ECombatSubPhase combatPhase;
+
+    public CombatRoundKey(final int id,
+                          @Nonnull final de.yuga.spacebattle.backend.combat.round.CombatRound combatRound,
+                          @Nonnull final ECombatPhase.ECombatSubPhase combatPhase) {
+        Preconditions.checkNotNull(combatRound, "combatRound shouldn't be null!");
+        Preconditions.checkNotNull(combatPhase, "combatPhase shouldn't be null!");
+
+        this.id = id;
+        this.combatRound = new CombatRound(combatRound);
+        this.combatPhase = combatPhase;
+    }
+
+    public CombatRoundKey() {
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(final int id) {
+        this.id = id;
+    }
+
+    @Nullable
+    public CombatRound getCombatRound() {
+        return combatRound;
+    }
+
+    @Nullable
+    public ECombatPhase.ECombatSubPhase getCombatPhase() {
+        return combatPhase;
+    }
+
+    public void setCombatRound(@Nullable final CombatRound combatRound) {
+        this.combatRound = combatRound;
+    }
+
+    public void setCombatPhase(@Nullable final ECombatPhase.ECombatSubPhase combatPhase) {
+        this.combatPhase = combatPhase;
+    }
+}

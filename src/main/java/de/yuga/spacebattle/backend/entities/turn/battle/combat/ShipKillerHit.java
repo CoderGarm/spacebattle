@@ -1,18 +1,21 @@
 package de.yuga.spacebattle.backend.entities.turn.battle.combat;
 
+import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.combat.dto.BeamVolley;
+import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
 import de.yuga.spacebattle.backend.combat.enums.EDamageResult;
-import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.converter.UUIDConverter;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.turn.battle.LossRole;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "shipKillerHit")
@@ -24,7 +27,7 @@ public class ShipKillerHit extends CombatRoundKey {
      */
     @NotNull
     @Nonnull
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "idActor", nullable = false, updatable = false)
     private Fleet actor;
 
@@ -33,7 +36,7 @@ public class ShipKillerHit extends CombatRoundKey {
      */
     @NotNull
     @Nonnull
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "idTarget", nullable = false, updatable = false)
     private Fleet target;
 
@@ -65,19 +68,113 @@ public class ShipKillerHit extends CombatRoundKey {
      * A hit log is linked with its order number. The order defines the sequence of occurrence.
      */
     @Nonnull
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OrderColumn(name = "orderNo")
+    @JoinTable(name = "orderedHitLog",
+            joinColumns = @JoinColumn(name = "idShipKillerHit"),
+            inverseJoinColumns = @JoinColumn(name = "idHitLog"))
+    private final List<HitLog> hitLogs = new ArrayList<>();
+
+    /**
+     * If the hit results in a destroyed ship, this will be logged here.
+     */
+    @Nonnull
     @ElementCollection(fetch = FetchType.EAGER)
-    @MapKeyJoinColumn(name = "idHitLog", referencedColumnName = "idHitLog")
-    @Column(name = "orderNo")
-    @CollectionTable(name = "orderedHitLog", joinColumns = @JoinColumn(name = "idShipKillerHit"))
-    private final Map<HitLog, Integer> hitLogByOrderNo = new HashMap<>();
-
-    public ShipKillerHit(@Nonnull final CombatRound combatRound,
-                         @Nonnull final ECombatPhase.ECombatSubPhase combatPhase) {
-        super(combatRound, combatPhase);
-
-
-    }
+    @MapKeyJoinColumn(name = "idHitLog", referencedColumnName = "idHitLog", updatable = false)
+    @CollectionTable(name = "lossesByHit", joinColumns = @JoinColumn(name = "idShipKillerHit"))
+    private final Map<HitLog, LossRole> lossesByHit = new HashMap<>();
 
     public ShipKillerHit() {
+    }
+
+    public ShipKillerHit(@Nonnull final BeamVolley volley,
+                         @Nonnull final List<de.yuga.spacebattle.backend.combat.dto.HitLog> hitLogs) {
+        super(volley.getCombatRound(), volley.getCombatSubPhase());
+        Preconditions.checkNotNull(hitLogs, "hitLogs shouldn't be null!");
+        Preconditions.checkState(volley.getResult() != null, "volley result shouldn't be null!");
+
+        this.actor = volley.getActor();
+        this.target = volley.getTarget();
+        this.damageDealer = volley.getUuid();
+        this.distance = volley.getInitialDistance();
+        this.result = volley.getResult();
+
+        final Map<de.yuga.spacebattle.backend.combat.dto.HitLog, LossRole> lossesByHitLog = hitLogs.stream()
+                .filter(hitLog -> !hitLog.isAlive() || !hitLog.isFightingCapable())
+                .collect(Collectors.toMap(Function.identity(), h -> new LossRole(h.getWarshipHealthState().getWarShip())));
+
+        generateHitLogs(volley.getUuid(), hitLogs, lossesByHitLog, volley.getCombatSubPhase());
+    }
+
+    public ShipKillerHit(@Nonnull final MissileSalvo volley, @Nonnull final List<de.yuga.spacebattle.backend.combat.dto.HitLog> hitLogs) {
+        super(volley.getCombatRound(), volley.getCombatSubPhase());
+        Preconditions.checkNotNull(hitLogs, "hitLogs shouldn't be null!");
+        Preconditions.checkState(volley.getResult() != null, "volley result shouldn't be null!");
+
+        this.actor = volley.getActor();
+        this.target = volley.getTarget();
+        this.damageDealer = volley.getUuid();
+        this.distance = volley.getInitialDistance();
+        this.result = volley.getResult();
+
+        final Map<de.yuga.spacebattle.backend.combat.dto.HitLog, LossRole> lossesByHitLog = hitLogs.stream()
+                .filter(hitLog -> !hitLog.isAlive() || !hitLog.isFightingCapable())
+                .collect(Collectors.toMap(Function.identity(), h -> new LossRole(h.getWarshipHealthState().getWarShip())));
+
+        generateHitLogs(volley.getUuid(), hitLogs, lossesByHitLog, volley.getCombatSubPhase());
+    }
+
+    private void generateHitLogs(@Nonnull final UUID damageDealerId,
+                                 @Nonnull final List<de.yuga.spacebattle.backend.combat.dto.HitLog> hitLogs,
+                                 @Nonnull final Map<de.yuga.spacebattle.backend.combat.dto.HitLog, LossRole> lossesByHitLog,
+                                 @Nonnull final ECombatPhase.ECombatSubPhase combatSubPhase) {
+        Preconditions.checkNotNull(damageDealerId, "damageDealerId shouldn't be null!");
+        Preconditions.checkNotNull(hitLogs, "hitLogs shouldn't be null!");
+        Preconditions.checkNotNull(lossesByHitLog, "lossesByHitLog shouldn't be null!");
+        Preconditions.checkNotNull(combatSubPhase, "combatSubPhase shouldn't be null!");
+
+        for (de.yuga.spacebattle.backend.combat.dto.HitLog h : hitLogs) {
+            final HitLog hitLog = new HitLog(damageDealerId, h, combatSubPhase);
+            this.hitLogs.add(hitLog);
+            final LossRole lossRole = lossesByHitLog.get(h);
+            if (lossRole != null) {
+                lossesByHit.put(hitLog, lossRole);
+            }
+        }
+    }
+
+    @Nonnull
+    public Fleet getActor() {
+        return actor;
+    }
+
+    @Nonnull
+    public Fleet getTarget() {
+        return target;
+    }
+
+    @Nonnull
+    public UUID getDamageDealer() {
+        return damageDealer;
+    }
+
+    @Nonnull
+    public BigDecimal getDistance() {
+        return distance;
+    }
+
+    @Nonnull
+    public EDamageResult getResult() {
+        return result;
+    }
+
+    @Nonnull
+    public List<HitLog> getHitLogs() {
+        return hitLogs;
+    }
+
+    @Nonnull
+    public Map<HitLog, LossRole> getLossesByHit() {
+        return lossesByHit;
     }
 }

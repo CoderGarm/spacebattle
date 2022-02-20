@@ -1,11 +1,10 @@
 package de.yuga.spacebattle.backend.entities.turn.battle.combat;
 
+import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
-import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.converter.UUIDConverter;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
-import de.yuga.spacebattle.backend.enums.ECombatPhase;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -22,7 +21,7 @@ public class CounterMissileHit extends CombatRoundKey {
      */
     @NotNull
     @Nonnull
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "idActor", nullable = false, updatable = false)
     private Fleet actor;
 
@@ -31,7 +30,7 @@ public class CounterMissileHit extends CombatRoundKey {
      */
     @NotNull
     @Nonnull
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "idTarget", nullable = false, updatable = false)
     private Fleet target;
 
@@ -58,23 +57,50 @@ public class CounterMissileHit extends CombatRoundKey {
      */
     @NotNull
     @Nonnull
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "idMissile", nullable = false, updatable = false)
     private Missile missile;
-
-    public CounterMissileHit(@Nonnull final CombatRound combatRound,
-                             @Nonnull final ECombatPhase.ECombatSubPhase combatPhase,
-                             @Nonnull final Integer remainingMissiles,
-                             @Nonnull final Fleet actor,
-                             @Nonnull final Fleet target,
-                             @Nonnull final UUID attackedMissileSalvo,
-                             @Nonnull final Integer destroyedMissiles,
-                             @Nonnull final Missile missile) {
-        super(combatRound, combatPhase);
-
-    }
 
     public CounterMissileHit() {
     }
 
+    public CounterMissileHit(@Nonnull final MissileSalvo volley, @Nonnull final Missile missile, final int remainingMissiles, final int destroyedMissiles) {
+        super(volley.getCombatRound(), volley.getCombatSubPhase());
+        Preconditions.checkNotNull(missile, "missile shouldn't be null!");
+
+        this.actor = volley.getActor();
+        this.target = volley.getTarget();
+        this.attackedMissileSalvo = volley.getUuid();
+        this.missile = missile;
+        this.remainingMissiles = remainingMissiles;
+        this.destroyedMissiles = destroyedMissiles;
+    }
+
+    @Nonnull
+    public Fleet getActor() {
+        return actor;
+    }
+
+    @Nonnull
+    public Fleet getTarget() {
+        return target;
+    }
+
+    public int getRemainingMissiles() {
+        return remainingMissiles;
+    }
+
+    @Nonnull
+    public UUID getAttackedMissileSalvo() {
+        return attackedMissileSalvo;
+    }
+
+    public int getDestroyedMissiles() {
+        return destroyedMissiles;
+    }
+
+    @Nonnull
+    public Missile getMissile() {
+        return missile;
+    }
 }

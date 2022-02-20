@@ -1,6 +1,7 @@
-package de.yuga.spacebattle.rest.dto.turn.battle;
+package de.yuga.spacebattle.rest.dto.turn.battle.collections;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.rest.dto.turn.battle.BattleReport;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;

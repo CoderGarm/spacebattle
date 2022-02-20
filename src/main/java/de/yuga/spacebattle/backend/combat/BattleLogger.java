@@ -136,36 +136,21 @@ public class BattleLogger {
                     }
                     switch (combatSubPhase) {
                         case MOVEMENT_PHASE:
-                            /**
-                             * {@link de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction}
-                             */
                             movementActions.forEach(this::logMovement);
                             break;
                         case ELOKA_PHASE:
-                            /**
-                             * {@link de.yuga.spacebattle.backend.entities.turn.battle.combat.CounterMissileHit}
-                             */
                             final List<MissileSalvo> destroyedWhileEloka = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
                             destroyedWhileEloka.forEach(this::logElokaHitMissile);
                             break;
                         case COUNTER_MISSILE_PHASE:
-                            /**
-                             * {@link de.yuga.spacebattle.backend.entities.turn.battle.combat.CounterMissileHit}
-                             */
                             final List<MissileSalvo> destroyedWhileCounter = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
                             destroyedWhileCounter.forEach(this::logCounterMissileHitMissile);
                             break;
                         case MISSILE_MOVEMENT_PHASE:
-                            /**
-                             * {@link de.yuga.spacebattle.backend.entities.turn.battle.combat.MissileMovement}
-                             */
                             final List<MissileSalvo> missileMovement = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
                             missileMovement.forEach(this::logHandleMissileMovement);
                             break;
                         case BEAM_FIRE_INCOMING_PHASE:
-                            /**
-                             * {@link de.yuga.spacebattle.backend.entities.turn.battle.combat.ShipKillerHit}
-                             */
                             final List<BeamVolley> appliedBeams = beamVolleys.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
                             final Map<BeamVolley, List<HitLog>> hitLogByBeamVolley = appliedBeams.stream()
                                     .map(volley -> hitLogsOfCombatRound.stream().filter(hitLog -> hitLog.getDamageDealer().equals(volley)).collect(Collectors.toList()))
@@ -176,9 +161,6 @@ public class BattleLogger {
                             appliedBeams.forEach(beamVolley -> logBeamVolleyHit(beamVolley, hitLogByBeamVolley.computeIfAbsent(beamVolley, k -> new ArrayList<>())));
                             break;
                         case MISSILE_FIRE_INCOMING_PHASE:
-                            /**
-                             * {@link de.yuga.spacebattle.backend.entities.turn.battle.combat.ShipKillerHit}
-                             */
                             final List<MissileSalvo> detonatedMissiles = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
                             final Map<MissileSalvo, List<HitLog>> hitLogByMissileSalvo = detonatedMissiles.stream()
                                     .map(volley -> hitLogsOfCombatRound.stream().filter(hitLog -> hitLog.getDamageDealer().equals(volley)).collect(Collectors.toList()))
@@ -189,16 +171,10 @@ public class BattleLogger {
                             detonatedMissiles.forEach(missileSalvo -> logMissileDetonation(missileSalvo, hitLogByMissileSalvo.computeIfAbsent(missileSalvo, k -> new ArrayList<>())));
                             break;
                         case BEAM_FIRE_PHASE:
-                            /**
-                             * {@link de.yuga.spacebattle.backend.entities.turn.battle.combat.ReleasedVolley}
-                             */
                             final List<BeamVolley> releasedBeamVolleys = beamVolleys.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
                             releasedBeamVolleys.forEach(this::logBeamVolleyRelease);
                             break;
                         case MISSILE_FIRE_PHASE:
-                            /**
-                             * {@link de.yuga.spacebattle.backend.entities.turn.battle.combat.ReleasedVolley}
-                             */
                             final List<MissileSalvo> releasedMissileSalvos = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
                             releasedMissileSalvos.forEach(this::logMissileRelease);
                             break;

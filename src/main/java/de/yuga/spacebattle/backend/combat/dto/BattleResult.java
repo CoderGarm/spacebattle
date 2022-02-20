@@ -50,18 +50,6 @@ public class BattleResult {
         this.missileSalvos = historyOfMissileSalvos;
 
         this.roundStates.forEach(fleetRoundState -> this.losses.addAll(fleetRoundState.getFleetHealthState().getLosses().keySet()));
-        /*
-        this.roundStates.stream()
-                .collect(Collectors.groupingBy(FleetRoundState::getFleet, Collectors.mapping(Function.identity(), Collectors.toList()))).forEach((fleet, statesByFleet) -> {
-                    final List<FleetRoundState> fleetRoundStates = statesByFleet.stream()
-                            .sorted(Comparator.comparing(FleetRoundState::getCombatRound))
-                            .collect(Collectors.toList());
-                    if (!fleetRoundStates.isEmpty()) {
-                        final FleetRoundState fleetRoundState = fleetRoundStates.get(fleetRoundStates.size() - 1);
-                        final Map<WarShip, WarshipHealthState> losses = fleetRoundState.getFleetHealthState().getLosses();
-                        this.losses.addAll(losses.keySet());
-                    }
-                });*/
     }
 
     @Nonnull

@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.entities.turn.battle;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 
@@ -20,6 +21,11 @@ public class LossRole {
     @ManyToOne
     @JoinColumn(name = "idOwner")
     private User owner;
+
+    @Nonnull
+    @ManyToOne
+    @JoinColumn(name = "idFleet")
+    private Fleet fleet;
 
     /**
      * Just the name of the lost ship.<br>
@@ -44,6 +50,7 @@ public class LossRole {
         Preconditions.checkNotNull(warShip, "warShip shouldn't be null!");
 
         this.owner = warShip.getShipClass().getOwner();
+        this.fleet = warShip.getFleet();
         this.warShipName = warShip.getName();
         this.shipClass = warShip.getShipClass();
     }
@@ -51,6 +58,11 @@ public class LossRole {
     @Nonnull
     public User getOwner() {
         return owner;
+    }
+
+    @Nonnull
+    public Fleet getFleet() {
+        return fleet;
     }
 
     @Nonnull

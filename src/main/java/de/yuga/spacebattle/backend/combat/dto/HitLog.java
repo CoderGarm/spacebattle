@@ -10,9 +10,15 @@ import java.util.Objects;
 
 public class HitLog extends Historizable<HitLog> implements Cloneable {
 
+    /**
+     * The damage dealer.
+     */
     @Nonnull
     private Historizable<? extends Cloneable> damageDealer;
 
+    /**
+     * The attacked ship and its state.
+     */
     @Nonnull
     private WarshipHealthState warshipHealthState;
 

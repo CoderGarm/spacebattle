@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.dto.turn.battle;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -15,6 +16,10 @@ public class LossRole {
     @Nonnull
     @ApiModelProperty(required = true, value = "The user which is affected by the loss.")
     private final UserJson owner;
+
+    @Nonnull
+    @ApiModelProperty(required = true, value = "The fleet which was the war ships home.")
+    private Fleet fleet;
 
     /**
      * Just the name of the lost ship.<br>
@@ -36,6 +41,7 @@ public class LossRole {
         Preconditions.checkNotNull(lossRole, "lossRole shouldn't be null!");
 
         this.owner = new UserJson(lossRole.getShipClass().getOwner());
+        this.fleet = new Fleet(lossRole.getFleet());
         this.warShipName = lossRole.getWarShipName();
         this.shipClass = new ShipClass(lossRole.getShipClass());
     }
@@ -43,6 +49,15 @@ public class LossRole {
     @Nonnull
     public UserJson getOwner() {
         return owner;
+    }
+
+    @Nonnull
+    public Fleet getFleet() {
+        return fleet;
+    }
+
+    public void setFleet(@Nonnull final Fleet fleet) {
+        this.fleet = fleet;
     }
 
     @Nonnull

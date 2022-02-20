@@ -13,7 +13,7 @@ public class CombatRound implements Cloneable, Comparable<CombatRound> {
     private int no;
 
     public CombatRound() {
-        this.no = 0;
+        this.no = 1;
     }
 
     /**

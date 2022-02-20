@@ -1,15 +1,15 @@
 package de.yuga.spacebattle.backend.entities.turn.battle.combat;
 
+import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
-import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.converter.UUIDConverter;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
-import de.yuga.spacebattle.backend.enums.ECombatPhase;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
@@ -22,7 +22,7 @@ public class MissileMovement extends CombatRoundKey {
      */
     @NotNull
     @Nonnull
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "idActor", nullable = false, updatable = false)
     private Fleet actor;
 
@@ -31,7 +31,7 @@ public class MissileMovement extends CombatRoundKey {
      */
     @NotNull
     @Nonnull
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "idTarget", nullable = false, updatable = false)
     private Fleet target;
 
@@ -78,17 +78,59 @@ public class MissileMovement extends CombatRoundKey {
     @AttributeOverride(name = "yCoordinate", column = @Column(name = "yCoordTarget", columnDefinition = "decimal(19, 0)"))
     private Orbit targetPosition;
 
-
-    public MissileMovement(@Nonnull final CombatRound combatRound,
-                           @Nonnull final Fleet actor,
-                           @Nonnull final Fleet target,
-                           @Nonnull final UUID movingMissileSalvo,
-                           @Nonnull final Integer missileAmount) {
-        super(combatRound, ECombatPhase.ECombatSubPhase.MISSILE_MOVEMENT_PHASE);
-
-    }
-
     public MissileMovement() {
     }
 
+    public MissileMovement(@Nonnull final MissileSalvo volley) {
+        super(volley.getCombatRound(), volley.getCombatSubPhase());
+
+        this.actor = volley.getActor();
+        this.target = volley.getTarget();
+        this.movingMissileSalvo = volley.getUuid();
+        this.position = volley.getPosition().clone();
+        this.lastPosition = volley.getLastPosition().clone();
+        this.missileAmount = volley.getMissileSalvoHealthState().getCurrentAmountByType().values().stream().mapToInt(Integer::intValue).sum();
+        this.targetPosition = volley.getTargetPosition().clone();
+        final BigDecimal currentDistance = targetPosition.getDistance(position);
+        final BigDecimal rangePerCombatRound = volley.getRangePerCombatRound();
+        this.roundsToTravel = DistanceCalculator.getCombatRoundsToTravel(currentDistance, rangePerCombatRound);
+    }
+
+    @Nonnull
+    public Fleet getActor() {
+        return actor;
+    }
+
+    @Nonnull
+    public Fleet getTarget() {
+        return target;
+    }
+
+    @Nonnull
+    public UUID getMovingMissileSalvo() {
+        return movingMissileSalvo;
+    }
+
+    public int getMissileAmount() {
+        return missileAmount;
+    }
+
+    public int getRoundsToTravel() {
+        return roundsToTravel;
+    }
+
+    @Nonnull
+    public Orbit getPosition() {
+        return position;
+    }
+
+    @Nonnull
+    public Orbit getLastPosition() {
+        return lastPosition;
+    }
+
+    @Nonnull
+    public Orbit getTargetPosition() {
+        return targetPosition;
+    }
 }

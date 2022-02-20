@@ -179,17 +179,25 @@
        drop 
        foreign key FKekm6qvnxv0b0y293v8h0ayjhm;
 
-    alter table lossRole 
+    alter table lossesByHit 
        drop 
-       foreign key FK1vibi3ssk79l85twyhbb7go47;
+       foreign key FK8gwd5wcrghospusbhcyoffbpq;
 
-    alter table lossRole 
+    alter table lossesByHit 
        drop 
-       foreign key FK8h7svfuglblma48qsswn540qi;
+       foreign key FKmxpfhc6uuo325u2u81tb2k2g0;
 
-    alter table lossRole 
+    alter table lossesByHit 
        drop 
-       foreign key FKht8txlbmvrw4o3y42jpa6t4e4;
+       foreign key FK85p90t72v9he3a1iw7y0fhn05;
+
+    alter table lossesByHit 
+       drop 
+       foreign key FKhtcg0ctdj5ie6fbabo8puvteu;
+
+    alter table lossesByHit 
+       drop 
+       foreign key FK3o0d6nae9i5n6v33ake9fyvs8;
 
     alter table messageThread 
        drop 
@@ -239,6 +247,14 @@
        drop 
        foreign key FKl9frhygmvi1n5d3sjchn19wrx;
 
+    alter table missileMovements 
+       drop 
+       foreign key FKa4ut542bvmk335w8ldma12g22;
+
+    alter table missileMovements 
+       drop 
+       foreign key FK4hmoghg3bi28t2pmfi3ea626u;
+
     alter table move 
        drop 
        foreign key FKmcefsl29wdpj7xqe9790o0mch;
@@ -259,13 +275,13 @@
        drop 
        foreign key FK2fc6fy40a1twi3bedin6c2sr1;
 
-    alter table movements 
+    alter table movementActions 
        drop 
-       foreign key FKpljg47apoflkmchnqybr5dgo4;
+       foreign key FKlsfd21vc6bericbiwv6huwo;
 
-    alter table movements 
+    alter table movementActions 
        drop 
-       foreign key FKc7f68cuqp4mrdoe69kgs41hea;
+       foreign key FKjkre459vr8w45a9wxhrtofsfa;
 
     alter table orderedHitLog 
        drop 
@@ -391,6 +407,14 @@
        drop 
        foreign key FK1d72qr1uwk27axl1yck2b2ux1;
 
+    alter table shipKillerHits 
+       drop 
+       foreign key FKmaalns2ubmv8018dgku4bv0qs;
+
+    alter table shipKillerHits 
+       drop 
+       foreign key FKsyea27u0x8dmybnb4r1qfsug0;
+
     alter table sidewall 
        drop 
        foreign key FKlo0i3byallqh89wd535yrbs3l;
@@ -491,7 +515,7 @@
 
     drop table if exists launcher;
 
-    drop table if exists lossRole;
+    drop table if exists lossesByHit;
 
     drop table if exists messageThread;
 
@@ -507,11 +531,13 @@
 
     drop table if exists missileMovement;
 
+    drop table if exists missileMovements;
+
     drop table if exists move;
 
     drop table if exists movementAction;
 
-    drop table if exists movements;
+    drop table if exists movementActions;
 
     drop table if exists orderedHitLog;
 
@@ -538,6 +564,8 @@
     drop table if exists shipClass;
 
     drop table if exists shipKillerHit;
+
+    drop table if exists shipKillerHits;
 
     drop table if exists sidewall;
 

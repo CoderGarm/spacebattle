@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.entities.turn.battle.combat;
 
-import de.yuga.spacebattle.backend.combat.round.CombatRound;
+import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.combat.round.WarshipHealthState;
 import de.yuga.spacebattle.backend.converter.UUIDConverter;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
@@ -35,7 +36,7 @@ public class HitLog extends CombatRoundKey {
     private WarShip warShip;
 
     /**
-     * The string representation
+     * The string representation of the target's health state.
      */
     @NotNull
     @Nonnull
@@ -70,13 +71,59 @@ public class HitLog extends CombatRoundKey {
      */
     private boolean isFightingCapable;
 
-    public HitLog(@Nonnull final CombatRound combatRound,
-                  @Nonnull final ECombatPhase.ECombatSubPhase combatPhase) {
-        super(combatRound, combatPhase);
-
-    }
-
     public HitLog() {
     }
 
+    public HitLog(@Nonnull final UUID damageDealerId,
+                  @Nonnull final de.yuga.spacebattle.backend.combat.dto.HitLog hitLog,
+                  @Nonnull final ECombatPhase.ECombatSubPhase combatSubPhase) {
+        super(hitLog.getCombatRound(), combatSubPhase);
+        Preconditions.checkNotNull(damageDealerId, "damageDealerId shouldn't be null!");
+
+        this.damageDealer = damageDealerId;
+        final WarshipHealthState warshipHealthState = hitLog.getWarshipHealthState();
+        this.warShip = warshipHealthState.getWarShip();
+        this.damageValue = hitLog.getDamageValue();
+        this.state = hitLog.getState();
+        this.attackedPart = hitLog.getAttackedPart();
+        this.isAlive = hitLog.isAlive();
+        this.isFightingCapable = hitLog.isFightingCapable();
+        this.warshipHealthState = warshipHealthState.asString();
+    }
+
+    @Nonnull
+    public UUID getDamageDealer() {
+        return damageDealer;
+    }
+
+    @Nonnull
+    public WarShip getWarShip() {
+        return warShip;
+    }
+
+    @Nonnull
+    public String getWarshipHealthState() {
+        return warshipHealthState;
+    }
+
+    public long getDamageValue() {
+        return damageValue;
+    }
+
+    public int getState() {
+        return state;
+    }
+
+    @Nonnull
+    public EHitArea getAttackedPart() {
+        return attackedPart;
+    }
+
+    public boolean isAlive() {
+        return isAlive;
+    }
+
+    public boolean isFightingCapable() {
+        return isFightingCapable;
+    }
 }
