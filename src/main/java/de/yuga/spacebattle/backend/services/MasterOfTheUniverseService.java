@@ -164,8 +164,6 @@ public class MasterOfTheUniverseService {
             return;
         }
         createInitialDataPayload();
-        all = userService.findAll();
-        ResponseEntity.status(HttpStatus.OK).body(all);
     }
 
     /**

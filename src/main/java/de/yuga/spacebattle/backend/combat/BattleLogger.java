@@ -60,7 +60,7 @@ public class BattleLogger {
             bw.newLine();
         } catch (IOException e) {
             e.printStackTrace();
-            throw new NotifyWebUserException("Universe is going down");
+            throw new NotifyWebUserException("Universe is going down " + e.getMessage());
         }
     }
 

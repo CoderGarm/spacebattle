@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.services.spacecraft;
 import de.yuga.spacebattle.SpringBootTestProfile;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
+import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
 import org.junit.jupiter.api.Disabled;
@@ -18,6 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class BattleServiceTest {
 
     @Autowired
+    private MasterOfTheUniverseService masterOfTheUniverseService;
+
+    @Autowired
     private TickService tickService;
 
     @Autowired
@@ -30,7 +34,8 @@ public class BattleServiceTest {
     public void testRunBattles() {
         Tick latest = tickService.getLatest();
         if (latest == null) {
-            latest = tickService.doTick();
+            masterOfTheUniverseService.createInitialData();
+            latest = tickService.getLatest();
         }
         battleService.runBattles(latest);
 
