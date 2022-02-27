@@ -3,13 +3,13 @@ package de.yuga.spacebattle.backend.entities.turn.battle.combat;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
 import de.yuga.spacebattle.backend.converter.UUIDConverter;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
@@ -65,8 +65,8 @@ public class MissileMovement extends CombatRoundKey {
      */
     @NotNull
     @Nonnull
-    @AttributeOverride(name = "xCoordinate", column = @Column(name = "xCoordLast", columnDefinition = "decimal(19, 0)"))
-    @AttributeOverride(name = "yCoordinate", column = @Column(name = "yCoordLast", columnDefinition = "decimal(19, 0)"))
+    @AttributeOverride(name = "xCoordinate", column = @Column(name = "xCoordLast"))
+    @AttributeOverride(name = "yCoordinate", column = @Column(name = "yCoordLast"))
     private Orbit lastPosition;
 
     /**
@@ -74,8 +74,8 @@ public class MissileMovement extends CombatRoundKey {
      */
     @NotNull
     @Nonnull
-    @AttributeOverride(name = "xCoordinate", column = @Column(name = "xCoordTarget", columnDefinition = "decimal(19, 0)"))
-    @AttributeOverride(name = "yCoordinate", column = @Column(name = "yCoordTarget", columnDefinition = "decimal(19, 0)"))
+    @AttributeOverride(name = "xCoordinate", column = @Column(name = "xCoordTarget"))
+    @AttributeOverride(name = "yCoordinate", column = @Column(name = "yCoordTarget"))
     private Orbit targetPosition;
 
     public MissileMovement() {
@@ -91,8 +91,8 @@ public class MissileMovement extends CombatRoundKey {
         this.lastPosition = volley.getLastPosition().clone();
         this.missileAmount = volley.getMissileSalvoHealthState().getCurrentAmountByType().values().stream().mapToInt(Integer::intValue).sum();
         this.targetPosition = volley.getTargetPosition().clone();
-        final BigDecimal currentDistance = targetPosition.getDistance(position);
-        final BigDecimal rangePerCombatRound = volley.getRangePerCombatRound();
+        final Distance currentDistance = targetPosition.getDistance(position);
+        final Distance rangePerCombatRound = volley.getRangePerCombatRound();
         this.roundsToTravel = DistanceCalculator.getCombatRoundsToTravel(currentDistance, rangePerCombatRound);
     }
 

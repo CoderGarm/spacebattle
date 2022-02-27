@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.backend.services.account;
+package de.yuga.spacebattle.backend.converter;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.NotifyUserException;

@@ -5,6 +5,8 @@ import de.yuga.spacebattle.backend.calculator.FittingUtils;
 import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.combat.dto.Historizable;
 import de.yuga.spacebattle.backend.combat.dto.HitLog;
+import de.yuga.spacebattle.backend.combat.dto.RangeDefinition;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
@@ -16,7 +18,6 @@ import de.yuga.spacebattle.backend.enums.EWeaponType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -153,12 +154,12 @@ public class WarshipHealthState implements Cloneable {
      *
      * @return the maximum weapon range
      */
-    public BigDecimal getMaximumWeaponRange() {
+    public Distance getMaximumWeaponRange() {
 
         final List<AlignedFitting> fittings = getActiveFittings();
-        final List<BigDecimal> sortedRanged = fittings.stream()
+        final List<Distance> sortedRanged = fittings.stream()
                 .map(fitting -> {
-                    BigDecimal damageProjectionRange = BigDecimal.ZERO;
+                    Distance damageProjectionRange = Distance.ZERO;
                     final Weapon weapon = fitting.getWeapon();
                     if (weapon != null) {
                         damageProjectionRange = weapon.getDamageProjectionRange();
@@ -167,14 +168,14 @@ public class WarshipHealthState implements Cloneable {
                     if (launcher != null) {
                         final Missile missile = launcher.getAmmunitionModule().getMissile();
                         if (missileAmmunitionState.hasShotsLeft(missile)) {
-                            damageProjectionRange = missile.getMissileRange();
+                            damageProjectionRange = missile.getMaximumMissileRange();
                         }
                     }
                     return damageProjectionRange;
                 })
-                .sorted(BigDecimal::compareTo).collect(Collectors.toList());
+                .sorted(Distance::compareTo).collect(Collectors.toList());
         if (sortedRanged.isEmpty()) {
-            return BigDecimal.ZERO;
+            return Distance.ZERO;
         }
         return sortedRanged.get(sortedRanged.size() - 1);
     }
@@ -185,14 +186,14 @@ public class WarshipHealthState implements Cloneable {
      * @param weaponType the weapon type to filter
      * @return the maximum weapon range
      */
-    public BigDecimal getMaximumWeaponRangePerType(@Nonnull final EWeaponType weaponType) {
+    public Distance getMaximumWeaponRangePerType(@Nonnull final EWeaponType weaponType) {
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
 
         final List<AlignedFitting> fittings = getActiveFittings();
-        final List<BigDecimal> sortedRanged = fittings.stream()
+        final List<Distance> sortedRanged = fittings.stream()
                 .filter(fitting -> weaponType == fitting.getWeaponType())
                 .map(fitting -> {
-                    BigDecimal damageProjectionRange = BigDecimal.ZERO;
+                    Distance damageProjectionRange = Distance.ZERO;
                     final Weapon weapon = fitting.getWeapon();
                     if (weapon != null) {
                         damageProjectionRange = weapon.getDamageProjectionRange();
@@ -201,14 +202,14 @@ public class WarshipHealthState implements Cloneable {
                     if (launcher != null) {
                         final Missile missile = launcher.getAmmunitionModule().getMissile();
                         if (missileAmmunitionState.hasShotsLeft(missile)) {
-                            damageProjectionRange = missile.getMissileRange();
+                            damageProjectionRange = missile.getMaximumMissileRange();
                         }
                     }
                     return damageProjectionRange;
                 })
-                .sorted(BigDecimal::compareTo).collect(Collectors.toList());
+                .sorted(Distance::compareTo).collect(Collectors.toList());
         if (sortedRanged.isEmpty()) {
-            return BigDecimal.ZERO;
+            return Distance.ZERO;
         }
         return sortedRanged.get(sortedRanged.size() - 1);
     }
@@ -216,18 +217,16 @@ public class WarshipHealthState implements Cloneable {
     /**
      * Returns the damage which can be applied by this class to the given range in meter.
      *
-     * @param lowerBound the lower boundary
-     * @param upperBound the upper boundary
+     * @param boundaries the boundaries
      * @return the damage value
      */
-    public List<DamagePerRangeAndAlignment> getDamagePerRange(@Nonnull final BigDecimal lowerBound, @Nonnull final BigDecimal upperBound) {
-        Preconditions.checkNotNull(lowerBound, "lowerBound shouldn't be null!");
-        Preconditions.checkNotNull(upperBound, "upperBound shouldn't be null!");
+    public List<DamagePerRangeAndAlignment> getDamagePerRange(@Nonnull final RangeDefinition boundaries) {
+        Preconditions.checkNotNull(boundaries, "boundaries shouldn't be null!");
 
         final List<AlignedFitting> fittings = getActiveFittings();
         return fittings.stream()
                 .filter(FittingUtils.OFFENSIVE_FITTING)
-                .map(fitting -> fitting.getDamagePerRange(lowerBound, upperBound))
+                .map(fitting -> fitting.getDamagePerRange(boundaries))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
@@ -414,12 +413,12 @@ public class WarshipHealthState implements Cloneable {
      * @return the range
      */
     @Nonnull
-    public BigDecimal getCounterMissileRange() {
+    public Distance getCounterMissileRange() {
         return getActiveFittings().stream()
                 .filter(DEFENSIVE_FITTING)
                 .map(AlignedFitting::getRange)
                 .max(Comparator.naturalOrder())
-                .orElse(BigDecimal.ZERO);
+                .orElse(Distance.ZERO);
     }
 
     @Nullable

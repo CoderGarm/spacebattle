@@ -4,8 +4,10 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.dto.CounterMissileWeaponry;
 import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.combat.dto.Historizable;
+import de.yuga.spacebattle.backend.combat.dto.RangeDefinition;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
@@ -14,7 +16,6 @@ import de.yuga.spacebattle.backend.enums.EWeaponType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -76,7 +77,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         this.cage = cage;
         this.combatRound = cage.getCurrentCombatRound();
         this.fleet = fleet;
-        this.position = position;
+        this.position = position.clone();
         this.fleetHealthState = new FleetHealthState(fleet);
         historize();
     }
@@ -164,14 +165,8 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
      * @return the maximum weapon range
      */
     @Nonnull
-    public BigDecimal getMaximumWeaponRange() {
-        final List<WarshipHealthState> warshipHealthStatesByWeaponRange = getFightingWarShips()
-                .sorted((o1, o2) -> {
-                    final BigDecimal maximumWeaponRangeO1 = o1.getMaximumWeaponRange();
-                    final BigDecimal maximumWeaponRangeO2 = o2.getMaximumWeaponRange();
-                    return maximumWeaponRangeO1.compareTo(maximumWeaponRangeO2);
-                }).collect(Collectors.toList());
-        return warshipHealthStatesByWeaponRange.get(warshipHealthStatesByWeaponRange.size() - 1).getMaximumWeaponRange();
+    public Distance getMaximumWeaponRange() {
+        return getFightingWarShips().map(WarshipHealthState::getMaximumWeaponRange).max(Distance::compareTo).orElse(Distance.ZERO);
     }
 
     /**
@@ -180,39 +175,27 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
      * @param weaponType the weapon type as filter
      * @return the maximum weapon range
      */
-    public BigDecimal getMaximumWeaponRangePerType(@Nonnull final EWeaponType weaponType) {
+    @Nonnull
+    public Distance getMaximumWeaponRangePerType(@Nonnull final EWeaponType weaponType) {
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
 
-        final List<WarshipHealthState> warshipHealthStatesByWeaponRange = getFightingWarShips()
-                .sorted((o1, o2) -> {
-                    final BigDecimal maximumWeaponRangeO1 = o1.getMaximumWeaponRangePerType(weaponType);
-                    final BigDecimal maximumWeaponRangeO2 = o2.getMaximumWeaponRangePerType(weaponType);
-                    return maximumWeaponRangeO1.compareTo(maximumWeaponRangeO2);
-                }).collect(Collectors.toList());
-        return warshipHealthStatesByWeaponRange.get(warshipHealthStatesByWeaponRange.size() - 1).getMaximumWeaponRangePerType(weaponType);
+        return getFightingWarShips().map(w -> w.getMaximumWeaponRangePerType(weaponType)).max(Distance::compareTo).orElse(Distance.ZERO);
     }
 
     /**
      * Returns the damage which can be applied by this fleet to the given range in meter.
      *
-     * @param lowerBound the lower boundary
-     * @param upperBound the upper boundary
+     * @param boundaries the boundaries
      * @return the damage value
      */
-    public List<DamagePerRangeAndAlignment> getDamagePerRange(@Nonnull final BigDecimal lowerBound, @Nonnull final BigDecimal upperBound) {
-        Preconditions.checkNotNull(lowerBound, "lowerBound shouldn't be null!");
-        Preconditions.checkNotNull(upperBound, "upperBound shouldn't be null!");
+    @Nonnull
+    public List<DamagePerRangeAndAlignment> getDamagePerRange(@Nonnull final RangeDefinition boundaries) {
+        Preconditions.checkNotNull(boundaries, "boundaries shouldn't be null!");
 
         return getFightingWarShips()
-                .map(warshipHealthState -> warshipHealthState.getDamagePerRange(lowerBound, upperBound))
+                .map(warshipHealthState -> warshipHealthState.getDamagePerRange(boundaries))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
-    }
-
-    public long getMaximumDamage() {
-        return getFightingWarShips()
-                .map(WarshipHealthState::getMaximumDamage)
-                .mapToLong(Long::longValue).sum();
     }
 
     @Override
@@ -251,11 +234,11 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
      * @return the range
      */
     @Nonnull
-    public BigDecimal getCounterMissileRange() {
+    public Distance getCounterMissileRange() {
         return getFightingWarShips()
                 .map(WarshipHealthState::getCounterMissileRange)
                 .max(Comparator.naturalOrder())
-                .orElse(BigDecimal.ZERO);
+                .orElse(Distance.ZERO);
     }
 
     /**
@@ -298,12 +281,12 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
      * @return the eloka range
      */
     @Nonnull
-    public BigDecimal getElokaRange() {
+    public Distance getElokaRange() {
         return getFightingWarShips()
                 .map(shipClass -> {
                     final ElectronicWarfare eloka = shipClass.getModule(ElectronicWarfare.class);
-                    return eloka != null ? BigDecimal.valueOf(eloka.getEffectiveRange()) : BigDecimal.ZERO;
+                    return eloka != null ? eloka.getEffectiveRange() : Distance.ZERO;
                 }).max(Comparator.naturalOrder())
-                .orElse(BigDecimal.ZERO);
+                .orElse(Distance.ZERO);
     }
 }

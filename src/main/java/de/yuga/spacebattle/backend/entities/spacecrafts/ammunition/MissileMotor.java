@@ -2,6 +2,8 @@ package de.yuga.spacebattle.backend.entities.spacecrafts.ammunition;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
+import de.yuga.spacebattle.backend.converter.AccelerationConverter;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
@@ -29,8 +31,10 @@ public class MissileMotor extends AbstractEntityKey {
     /**
      * The acceleration in gravity earth which is set if using the engine.
      */
-    @Column(nullable = false)
-    private int acceleration;
+    @Nonnull
+    @NotNull
+    @Convert(converter = AccelerationConverter.class)
+    private Acceleration acceleration;
 
     /**
      * Defines the capability of this weapon to penetrate the shield. todo
@@ -53,10 +57,11 @@ public class MissileMotor extends AbstractEntityKey {
 
     public MissileMotor(@Nonnull final String typeName,
                         final int endurance,
-                        final int acceleration,
+                        @Nonnull final Acceleration acceleration,
                         final int maneuverability,
                         final int useCapacity) {
         Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
+        Preconditions.checkNotNull(acceleration, "acceleration shouldn't be null!");
 
         this.typeName = typeName;
         this.endurance = endurance;
@@ -74,7 +79,7 @@ public class MissileMotor extends AbstractEntityKey {
         return endurance;
     }
 
-    public int getAcceleration() {
+    public Acceleration getAcceleration() {
         return acceleration;
     }
 

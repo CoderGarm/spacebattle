@@ -9,6 +9,7 @@ import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.combat.round.FleetHealthState;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
@@ -131,7 +132,7 @@ public class CombatHandler {
         final FleetDamageProjectionPerRange actorInfo = getFleetDamageProjectionPerRange(actor, actorsState);
         final FleetDamageProjectionPerRange targetInfo = getFleetDamageProjectionPerRange(target, targetsState);
 
-        final BigDecimal distance = actorPosition.getDistance(targetPosition);
+        final Distance distance = actorPosition.getDistance(targetPosition);
         final RangeDefinition bestDamageRange = actorInfo.getDistanceWithBestDamageAgainst(targetInfo);
         if (bestDamageRange == null) {
             // if nothing is returned, the fleet should evade until hyperspace
@@ -141,7 +142,7 @@ public class CombatHandler {
 
         EMovementType actorsMovementType = null;
         // calculate offensive movement
-        final boolean inRange = bestDamageRange.isInRange(distance);
+        final boolean inRange = bestDamageRange.isInRange(distance.getCoordinateInMetric(bestDamageRange.getDistanceMetric()));
         final EWeaponAlignment alignmentWithBestDamageForRange = actorInfo.getAlignmentWithBestDamageForRange(distance);
         if (inRange) {
             if (alignmentWithBestDamageForRange == null) {
@@ -154,13 +155,13 @@ public class CombatHandler {
         } else {
             // calculate movement
             final BigDecimal minRange = bestDamageRange.getMinRange();
-            final int minRangeCompare = minRange.compareTo(distance);
+            final int minRangeCompare = minRange.compareTo(distance.getCoordinateInMetric(bestDamageRange.getDistanceMetric()));
             if (minRangeCompare > 0) {
                 actorsMovementType = INCREASE_DISTANCE;
             }
 
             final BigDecimal maxRange = bestDamageRange.getMaxRange();
-            final int maxRangeCompare = maxRange.compareTo(distance);
+            final int maxRangeCompare = maxRange.compareTo(distance.getCoordinateInMetric(bestDamageRange.getDistanceMetric()));
             if (maxRangeCompare < 0) {
                 actorsMovementType = REDUCE_DISTANCE;
             }
@@ -270,9 +271,9 @@ public class CombatHandler {
         final FleetRoundState actorsState = cage.getCurrentStateByFleet(actor);
         final Orbit actorPos = actorsState.getPosition();
         final Orbit targetPos = cage.getCurrentStateByFleet(target).getPosition();
-        final BigDecimal distance = actorPos.getDistance(targetPos);
+        final Distance distance = actorPos.getDistance(targetPos);
 
-        final BigDecimal maximumBeamRangeOne = actor.getMaximumWeaponRangePerType(EWeaponType.BEAM);
+        final Distance maximumBeamRangeOne = actor.getMaximumWeaponRangePerType(EWeaponType.BEAM);
         final boolean isInRange = distance.compareTo(maximumBeamRangeOne) <= 0;
         // todo check that movement matches to weapons - also in missiles and in movement type detection
         if (isInRange && actorsState.hasWeaponsForAlignment(EWeaponType.BEAM)) {
@@ -296,8 +297,8 @@ public class CombatHandler {
         final FleetRoundState actorsState = cage.getCurrentStateByFleet(actor);
         final Orbit actorPos = actorsState.getPosition();
         final Orbit targetPos = cage.getCurrentStateByFleet(target).getPosition();
-        final BigDecimal distance = actorPos.getDistance(targetPos);
-        final BigDecimal actorsMaximumMissileRange = actor.getMaximumWeaponRangePerType(EWeaponType.MISSILE);
+        final Distance distance = actorPos.getDistance(targetPos);
+        final Distance actorsMaximumMissileRange = actor.getMaximumWeaponRangePerType(EWeaponType.MISSILE);
         // todo real distance-to-chance-to-hit calculation
         final boolean isInRange = distance.compareTo(actorsMaximumMissileRange) <= 0;
         if (isInRange && actorsState.hasWeaponsForAlignment(EWeaponType.MISSILE)) {

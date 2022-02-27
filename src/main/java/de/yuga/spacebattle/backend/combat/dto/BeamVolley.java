@@ -9,6 +9,7 @@ import de.yuga.spacebattle.backend.combat.round.BeamState;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.FleetHealthState;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
@@ -67,7 +68,8 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
     /**
      * The distance of this shot.
      */
-    private final BigDecimal initialDistance;
+    @Nonnull
+    private final Distance initialDistance;
 
     /**
      * The damage and the targets which were affected by the damage.
@@ -181,7 +183,8 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
         return target;
     }
 
-    public BigDecimal getInitialDistance() {
+    @Nonnull
+    public Distance getInitialDistance() {
         return initialDistance;
     }
 

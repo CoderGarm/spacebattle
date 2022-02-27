@@ -3,10 +3,11 @@ package de.yuga.spacebattle.backend.entities.combined.spacecrafts;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.NotifyUserException;
-import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
 import de.yuga.spacebattle.backend.combat.dto.CounterMissileWeaponry;
 import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
-import de.yuga.spacebattle.backend.combat.round.CombatRound;
+import de.yuga.spacebattle.backend.combat.dto.RangeDefinition;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
@@ -18,6 +19,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfar
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
@@ -79,8 +81,8 @@ public class Fleet extends AbstractEntityKey {
      */
     @Nullable
     @Embedded
-    @AttributeOverride(name = "orbit.xCoordinate", column = @Column(name = "xCoordinateLocation", columnDefinition = "decimal(19, 0)"))
-    @AttributeOverride(name = "orbit.yCoordinate", column = @Column(name = "yCoordinateLocation", columnDefinition = "decimal(19, 0)"))
+    @AttributeOverride(name = "orbit.xCoordinate", column = @Column(name = "xCoordinateLocation"))
+    @AttributeOverride(name = "orbit.yCoordinate", column = @Column(name = "yCoordinateLocation"))
     @AssociationOverride(name = "system", joinColumns = @JoinColumn(name = "idStarSystemLocation"))
     private FleetOrbit orbit;
 
@@ -250,7 +252,7 @@ public class Fleet extends AbstractEntityKey {
      *
      * @return the maximal distance which could be passed in a tick
      */
-    public BigDecimal getRangePerTick(@Nonnull final EModuleType eModuleType) {
+    public Acceleration getAccelerationFor(@Nonnull final EModuleType eModuleType) {
         Preconditions.checkNotNull(eModuleType, "eModuleType shouldn't be null!");
         Preconditions.checkArgument((eModuleType == EModuleType.FTLPROPULSION || eModuleType == EModuleType.PROPULSION),
                 "EModuleType must be kind of propulsion.");
@@ -266,7 +268,7 @@ public class Fleet extends AbstractEntityKey {
             final Propulsion propulsion = sc.getPropulsion();
             if (propulsion == null || (EModuleType.FTLPROPULSION == eModuleType && !propulsion.isFtlCapable())) {
                 // if no propulsion present or ftl is used and no ftl is present
-                return BigDecimal.ZERO;
+                return Acceleration.ZERO;
             }
             // calculate effect of support modules
             final BigDecimal factor = BigDecimal.ONE.add(new BigDecimal(propulsionSupportFactor));
@@ -274,19 +276,7 @@ public class Fleet extends AbstractEntityKey {
             speeds.add(effectValue.multiply(factor, ResourceDeposit.MATH_CONTEXT_INTEGER).intValue());
         }
         Collections.sort(speeds);
-        return new BigDecimal(speeds.get(0));
-    }
-
-    /**
-     * Returns the range which can be covered by this missile in a combat round.
-     *
-     * @return the distance which will be covered under drive, in meter
-     */
-    public BigDecimal getRangePerCombatRound() {
-        final BigDecimal rangePerTick = getRangePerTick(EModuleType.PROPULSION);
-        int endurance = CombatRound.COMBAT_ROUND_DURATION;
-        int acceleration = rangePerTick.intValue();
-        return NavigationCalculator.getRangeByTimeAndAcceleration(endurance, acceleration);
+        return new Acceleration(new BigDecimal(speeds.get(0)), EAccelerationMetric.G);
     }
 
     /**
@@ -294,14 +284,11 @@ public class Fleet extends AbstractEntityKey {
      *
      * @return the maximum weapon range
      */
-    public BigDecimal getMaximumWeaponRange() {
-        final List<ShipClass> shipClassesByWeaponRange = this.getShipsByClass().keySet().stream()
-                .sorted((o1, o2) -> {
-                    final BigDecimal maximumWeaponRangeO1 = o1.getMaximumWeaponRange();
-                    final BigDecimal maximumWeaponRangeO2 = o2.getMaximumWeaponRange();
-                    return maximumWeaponRangeO1.compareTo(maximumWeaponRangeO2);
-                }).collect(Collectors.toList());
-        return shipClassesByWeaponRange.get(shipClassesByWeaponRange.size() - 1).getMaximumWeaponRange();
+    public Distance getMaximumWeaponRange() {
+        return this.getShipsByClass().keySet().stream()
+                .map(ShipClass::getMaximumWeaponRange)
+                .max(Distance::compareTo)
+                .orElse(Distance.ZERO);
     }
 
     /**
@@ -310,29 +297,24 @@ public class Fleet extends AbstractEntityKey {
      * @param weaponType the weapon type as filter
      * @return the maximum weapon range
      */
-    public BigDecimal getMaximumWeaponRangePerType(@Nonnull final EWeaponType weaponType) {
+    public Distance getMaximumWeaponRangePerType(@Nonnull final EWeaponType weaponType) {
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
 
-        final List<ShipClass> shipClassesByWeaponRange = this.getShipsByClass().keySet().stream()
-                .sorted((o1, o2) -> {
-                    final BigDecimal maximumWeaponRangeO1 = o1.getMaximumWeaponRangePerType(weaponType);
-                    final BigDecimal maximumWeaponRangeO2 = o2.getMaximumWeaponRangePerType(weaponType);
-                    return maximumWeaponRangeO1.compareTo(maximumWeaponRangeO2);
-                }).collect(Collectors.toList());
-        return shipClassesByWeaponRange.get(shipClassesByWeaponRange.size() - 1).getMaximumWeaponRangePerType(weaponType);
+        return this.getShipsByClass().keySet().stream()
+                .map(shipClass -> shipClass.getMaximumWeaponRangePerType(weaponType))
+                .max(Distance::compareTo)
+                .orElse(Distance.ZERO);
     }
 
-    public List<DamagePerRangeAndAlignment> getDamagePerRangePerType(@Nonnull final BigDecimal lowerBound,
-                                                                     @Nonnull final BigDecimal upperBound,
+    public List<DamagePerRangeAndAlignment> getDamagePerRangePerType(@Nonnull final RangeDefinition boundaries,
                                                                      @Nonnull final EWeaponType weaponType) {
-        Preconditions.checkNotNull(lowerBound, "lowerBound shouldn't be null!");
-        Preconditions.checkNotNull(upperBound, "upperBound shouldn't be null!");
+        Preconditions.checkNotNull(boundaries, "boundaries shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
 
         return getShipsByClass().entrySet().stream().map(entry -> {
             final ShipClass shipClass = entry.getKey();
             final Integer amount = entry.getValue();
-            final List<DamagePerRangeAndAlignment> damagePerRangePerWeaponType = shipClass.getDamagePerRangePerWeaponType(lowerBound, upperBound, weaponType);
+            final List<DamagePerRangeAndAlignment> damagePerRangePerWeaponType = shipClass.getDamagePerRangePerWeaponType(boundaries, weaponType);
             return damagePerRangePerWeaponType.stream().map(d -> d.multiplyDamage(amount)).collect(Collectors.toList());
         }).flatMap(Collection::stream).collect(Collectors.toList());
     }
@@ -342,18 +324,15 @@ public class Fleet extends AbstractEntityKey {
      *
      * @return the eloka range
      */
-    public int getElokaRange() {
-        final OptionalInt max = getShipsByClass().keySet().stream()
+    public Distance getElokaRange() {
+        return getShipsByClass().keySet().stream()
                 .filter(shipClass -> shipClass.getElectronicWarfare() != null)
                 .map(shipClass -> {
                     final ElectronicWarfare eloka = shipClass.getElectronicWarfare();
                     assert eloka != null;
                     return eloka.getEffectiveRange();
-                }).mapToInt(Integer::intValue).max();
-        if (max.isPresent()) {
-            return max.getAsInt();
-        }
-        return 0;
+                }).max(Distance::compareTo).orElse(Distance.ZERO);
+
     }
 
     /**

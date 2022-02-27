@@ -2,14 +2,15 @@ package de.yuga.spacebattle.backend.entities.turn.battle.combat;
 
 import de.yuga.spacebattle.backend.combat.dto.BeamVolley;
 import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
+import de.yuga.spacebattle.backend.converter.DistanceConverter;
 import de.yuga.spacebattle.backend.converter.UUIDConverter;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
@@ -52,8 +53,8 @@ public class ReleasedVolley extends CombatRoundKey {
      */
     @NotNull
     @Nonnull
-    @Column(nullable = false, columnDefinition = "decimal(19, 0)")
-    private BigDecimal initialDistance;
+    @Convert(converter = DistanceConverter.class)
+    private Distance initialDistance;
 
 
     public ReleasedVolley() {
@@ -106,7 +107,7 @@ public class ReleasedVolley extends CombatRoundKey {
     }
 
     @Nonnull
-    public BigDecimal getInitialDistance() {
+    public Distance getInitialDistance() {
         return initialDistance;
     }
 }

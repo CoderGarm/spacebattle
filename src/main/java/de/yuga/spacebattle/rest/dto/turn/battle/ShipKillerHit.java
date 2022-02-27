@@ -3,12 +3,12 @@ package de.yuga.spacebattle.rest.dto.turn.battle;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.enums.EDamageResult;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,7 +33,7 @@ public class ShipKillerHit {
 
     @Nullable
     @ApiModelProperty(required = true, value = "The distance of this shot.")
-    private BigDecimal distance;
+    private Distance distance;
 
     @Nullable
     @ApiModelProperty(required = true, value = "The result of this salvo.")
@@ -100,11 +100,11 @@ public class ShipKillerHit {
     }
 
     @Nullable
-    public BigDecimal getDistance() {
+    public Distance getDistance() {
         return distance;
     }
 
-    public void setDistance(@Nullable final BigDecimal distance) {
+    public void setDistance(@Nullable final Distance distance) {
         this.distance = distance;
     }
 

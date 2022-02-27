@@ -9,6 +9,7 @@ import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.combat.round.MissileSalvoHealthState;
 import de.yuga.spacebattle.backend.combat.round.WarshipHealthState;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
@@ -16,6 +17,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
+import de.yuga.spacebattle.backend.enums.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.EHitArea;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.apache.commons.io.FileUtils;
@@ -27,7 +29,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -109,11 +110,7 @@ public class BattleLogger {
 
             final List<FleetRoundState> fleetRoundStates = statesByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
 
-            final List<HitLog> hitLogsOfCombatRound = fleetRoundStates.stream()
-                    .collect(Collectors.toMap(Function.identity(), f -> f.getFleetHealthState().getHitLogs()))
-                    .values()
-                    .stream()
-                    .map(Map::values)
+            final List<HitLog> hitLogsOfCombatRound = fleetRoundStates.stream().map(f -> f.getFleetHealthState().getHitLogs().values())
                     .flatMap(Collection::stream)
                     .flatMap(Collection::stream)
                     // filter all hit logs from other rounds away - necessary because the fleet round states object character
@@ -229,10 +226,10 @@ public class BattleLogger {
         final Orbit newPos = volley.getPosition();
         final int amount = volley.getMissileSalvoHealthState().getCurrentAmountByType().values().stream().mapToInt(Integer::intValue).sum();
         final Orbit targetPosition = volley.getTargetPosition();
-        final BigDecimal currentDistance = targetPosition.getDistance(newPos);
-        final BigDecimal rangePerCombatRound = volley.getRangePerCombatRound();
+        final Distance currentDistance = targetPosition.getDistance(newPos);
+        final Distance rangePerCombatRound = volley.getRangePerCombatRound();
         final int toTravel = DistanceCalculator.getCombatRoundsToTravel(currentDistance, rangePerCombatRound);
-        final String distanceAsString = DistanceCalculator.getDistanceAsStringWithUnit(currentDistance);
+        final String distanceAsString = DistanceCalculator.getDistanceAsStringWithUnit(currentDistance.getCoordinateInMetric(EDistanceMetric.M));
         final String msg = "#" + combatRound.getNo() + " missile salvo " + volley.getUuid() + " of " + actor.getName() + " containing of " + amount + " and still have to travel " + toTravel + " ticks over " + distanceAsString + ".";
         write(msg);
     }
@@ -241,7 +238,7 @@ public class BattleLogger {
         final CombatRound combatRound = volley.getCombatRound();
         final Fleet actor = volley.getActor();
         final Fleet target = volley.getTarget();
-        final String distanceString = DistanceCalculator.getDistanceAsStringWithUnit(volley.getInitialDistance());
+        final String distanceString = DistanceCalculator.getDistanceAsStringWithUnit(volley.getInitialDistance().getCoordinateInMetric(EDistanceMetric.M));
         final Map<Missile, Integer> currentAmountByType = volley.getMissileSalvoHealthState().getCurrentAmountByType();
         final int amount = currentAmountByType.values().stream().mapToInt(Integer::intValue).sum();
         final String msg = "#" + combatRound.getNo() + " release missile salvo " + volley.getUuid() + " from " + actor.getName() + " against " + target.getName() + " with " + amount + " missiles over " + distanceString;
@@ -253,7 +250,7 @@ public class BattleLogger {
         final Fleet actor = volley.getActor();
         final Fleet target = volley.getTarget();
         final int amount = volley.getFiredShots().size();
-        final String distanceString = DistanceCalculator.getDistanceAsStringWithUnit(volley.getInitialDistance());
+        final String distanceString = DistanceCalculator.getDistanceAsStringWithUnit(volley.getInitialDistance().getCoordinateInMetric(EDistanceMetric.M));
         final String msg = "#" + combatRound.getNo() + " release beam volley " + volley.getUuid() + " from " + actor.getName() + " attacks " + target.getName() + " with " + amount + " missiles over " + distanceString;
         write(msg);
     }
@@ -280,11 +277,11 @@ public class BattleLogger {
         final CombatRound combatRound = volley.getCombatRound();
         final Fleet actor = volley.getActor();
         final Fleet target = volley.getTarget();
-        final BigDecimal distance = volley.getInitialDistance();
+        final Distance distance = volley.getInitialDistance();
         final EDamageResult result = volley.getResult();
 
         final StringBuilder sb = new StringBuilder();
-        final String msg = "#" + combatRound.getNo() + " beam volley " + volley.getUuid() + " from " + actor.getName() + " attacks " + target.getName() + " hits over " + DistanceCalculator.getDistanceAsStringWithUnit(distance) + " and " + result + "\n";
+        final String msg = "#" + combatRound.getNo() + " beam volley " + volley.getUuid() + " from " + actor.getName() + " attacks " + target.getName() + " hits over " + DistanceCalculator.getDistanceAsStringWithUnit(distance.getCoordinateInMetric(EDistanceMetric.M)) + " and " + result + "\n";
         sb.append(msg);
         hitLogs.forEach(hitLog -> generateHitLogMessage(hitLog, sb));
         hitLogs.stream()
@@ -321,8 +318,8 @@ public class BattleLogger {
         final Orbit origin = ma.getOrigin();
         final Orbit destination = ma.getInterimDestination();
         final Orbit realDestination = ma.getDestination();
-        final String distanceAsString = DistanceCalculator.getDistanceAsStringWithUnit(destination.getDistance(realDestination));
-        final String moveDist = DistanceCalculator.getDistanceAsStringWithUnit(origin.getDistance(destination));
+        final String distanceAsString = DistanceCalculator.getDistanceAsStringWithUnit(destination.getDistance(realDestination).getCoordinateInMetric(EDistanceMetric.M));
+        final String moveDist = DistanceCalculator.getDistanceAsStringWithUnit(origin.getDistance(destination).getCoordinateInMetric(EDistanceMetric.M));
         final String msg = "#" + combatRound.getNo() + " " + actor.getName() + " moves about " + moveDist + ", current distance " + distanceAsString + " with the plan to " + movementType;
         write(msg);
     }

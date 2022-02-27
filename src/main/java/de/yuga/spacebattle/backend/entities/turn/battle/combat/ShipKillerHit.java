@@ -4,7 +4,9 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.dto.BeamVolley;
 import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
 import de.yuga.spacebattle.backend.combat.enums.EDamageResult;
+import de.yuga.spacebattle.backend.converter.DistanceConverter;
 import de.yuga.spacebattle.backend.converter.UUIDConverter;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.turn.battle.LossRole;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
@@ -12,7 +14,6 @@ import de.yuga.spacebattle.backend.enums.ECombatPhase;
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -53,8 +54,8 @@ public class ShipKillerHit extends CombatRoundKey {
      */
     @NotNull
     @Nonnull
-    @Column(nullable = false, columnDefinition = "decimal(19, 0)")
-    private BigDecimal distance;
+    @Convert(converter = DistanceConverter.class)
+    private Distance distance;
 
     /**
      * The result of this salvo.
@@ -159,7 +160,7 @@ public class ShipKillerHit extends CombatRoundKey {
     }
 
     @Nonnull
-    public BigDecimal getDistance() {
+    public Distance getDistance() {
         return distance;
     }
 

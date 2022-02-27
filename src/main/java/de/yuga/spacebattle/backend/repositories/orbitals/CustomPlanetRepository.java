@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.backend.repositories.orbitals;
 
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 
@@ -28,5 +29,5 @@ public interface CustomPlanetRepository {
     Planet findMainPlanetForUser(final int idUser);
 
     @Nullable
-    Planet findByCoordinates(final int idStarSystem, final int xCoordinate, final int yCoordinate);
+    Planet findByCoordinates(final int idStarSystem, final Distance xCoordinate, final Distance yCoordinate);
 }

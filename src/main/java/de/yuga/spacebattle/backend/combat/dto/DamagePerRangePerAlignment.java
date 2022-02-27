@@ -1,6 +1,8 @@
 package de.yuga.spacebattle.backend.combat.dto;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.enums.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 
 import javax.annotation.Nonnull;
@@ -60,12 +62,19 @@ public class DamagePerRangePerAlignment {
         Preconditions.checkNotNull(two, "two shouldn't be null!");
         Preconditions.checkState(one.getDamagePerAlignment().equals(two.getDamagePerAlignment()), "the given damage potentials must be equals");
 
-        final BigDecimal minRangeOne = one.getRangeDefinition().getMinRange();
-        final BigDecimal minRangeTwo = two.getRangeDefinition().getMinRange();
+        final EDistanceMetric metricOne = one.getRangeDefinition().getDistanceMetric();
+        final EDistanceMetric metricTwo = two.getRangeDefinition().getDistanceMetric();
+        final EDistanceMetric biggerMetric = metricOne.getDigitCount() > metricTwo.getDigitCount() ? metricOne : metricTwo;
 
-        final BigDecimal maxRangeOne = one.getRangeDefinition().getMaxRange();
-        final BigDecimal maxRangeTwo = two.getRangeDefinition().getMaxRange();
-        final RangeDefinition rangeDefinition = new RangeDefinition(minRangeOne.min(minRangeTwo), maxRangeOne.max(maxRangeTwo));
+        final Distance minRangeOne = new Distance(one.getRangeDefinition().getMinRange(), metricOne);
+        final Distance minRangeTwo = new Distance(two.getRangeDefinition().getMinRange(), metricTwo);
+
+        final Distance maxRangeOne = new Distance(one.getRangeDefinition().getMaxRange(), metricOne);
+        final Distance maxRangeTwo = new Distance(two.getRangeDefinition().getMaxRange(), metricTwo);
+
+        final BigDecimal minRangeInMetric = minRangeOne.min(minRangeTwo).getCoordinateInMetric(biggerMetric);
+        final BigDecimal maxRangeInMetric = maxRangeOne.max(maxRangeTwo).getCoordinateInMetric(biggerMetric);
+        final RangeDefinition rangeDefinition = new RangeDefinition(minRangeInMetric, maxRangeInMetric, biggerMetric);
 
         final Map<EWeaponAlignment, Long> damagePerAlignment = new HashMap<>();
         one.getDamagePerAlignment().forEach((alignment, damageValue) -> damagePerAlignment.merge(alignment, damageValue, Long::sum));
@@ -92,10 +101,10 @@ public class DamagePerRangePerAlignment {
      * @param distance the given range
      * @return <code>true</code> if the distance is inside the boundaries, <code>false</code> otherwise
      */
-    public boolean isInRange(@Nonnull final BigDecimal distance) {
+    public boolean isInRange(@Nonnull final Distance distance) {
         Preconditions.checkNotNull(distance, "distance shouldn't be null!");
 
-        return rangeDefinition.isInRange(distance);
+        return rangeDefinition.isInRange(distance.getCoordinateInMetric(rangeDefinition.getDistanceMetric()));
     }
 
     /**

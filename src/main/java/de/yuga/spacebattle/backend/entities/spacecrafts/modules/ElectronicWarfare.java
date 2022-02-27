@@ -1,6 +1,9 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.modules;
 
+import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.converter.DistanceConverter;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 
@@ -19,8 +22,9 @@ public class ElectronicWarfare extends BaseModuleWithEffectValue {
     /**
      * Defines the range of this eloka in meter.
      */
-    @Column(nullable = false)
-    private int effectiveRange;
+    @Nonnull
+    @Convert(converter = DistanceConverter.class)
+    private Distance effectiveRange;
 
     public ElectronicWarfare() {
     }
@@ -30,15 +34,16 @@ public class ElectronicWarfare extends BaseModuleWithEffectValue {
                              @Nonnull final Research unlockedThrough,
                              final int useCapacity,
                              final int effectValue,
-                             final int effectiveRange,
+                             @Nonnull final Distance effectiveRange,
                              final int techLevel,
                              @Nonnull final CrewRequirement crewRequirement) {
         super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement);
+        Preconditions.checkNotNull(effectiveRange, "effectiveRange shouldn't be null!");
 
         this.effectiveRange = effectiveRange;
     }
 
-    public int getEffectiveRange() {
+    public Distance getEffectiveRange() {
         return effectiveRange;
     }
 }

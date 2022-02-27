@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services.orbitals;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -105,7 +106,7 @@ public class PlanetService {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(system, "system shouldn't be null!");
 
-        return planetRepository.save(new Planet(null, name, system, new Orbit(xCoordinate, yCoordinate)));
+        return planetRepository.save(new Planet(null, name, system, new Orbit(new Distance(xCoordinate, Planet.PLANET_STANDARD_METRIC), new Distance(yCoordinate, Planet.PLANET_STANDARD_METRIC))));
     }
 
     @Nonnull
@@ -127,7 +128,8 @@ public class PlanetService {
         return planetRepository.save(entity);
     }
 
-    public Planet findByCoordinates(final int idStarSystem, final int xCoordinate, final int yCoordinate) {
+    @Nullable
+    public Planet findByCoordinates(final int idStarSystem, final Distance xCoordinate, final Distance yCoordinate) {
 
         return planetRepository.findByCoordinates(idStarSystem, xCoordinate, yCoordinate);
     }

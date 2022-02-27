@@ -1,0 +1,18 @@
+<component name="ProjectRunConfigurationManager">
+    <configuration default="false" name="BattleServiceTest.testRunBattles" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
+        <module name="spacebattle"/>
+        <extension name="coverage">
+            <pattern>
+                <option name="PATTERN" value="de.yuga.spacebattle.backend.services.spacecraft.*"/>
+                <option name="ENABLED" value="true"/>
+            </pattern>
+        </extension>
+        <option name="PACKAGE_NAME" value="de.yuga.spacebattle.backend.services.spacecraft"/>
+        <option name="MAIN_CLASS_NAME" value="de.yuga.spacebattle.backend.services.spacecraft.BattleServiceTest"/>
+        <option name="METHOD_NAME" value="testRunBattles"/>
+        <option name="TEST_OBJECT" value="method"/>
+        <method v="2">
+            <option name="Make" enabled="true"/>
+        </method>
+    </configuration>
+</component>

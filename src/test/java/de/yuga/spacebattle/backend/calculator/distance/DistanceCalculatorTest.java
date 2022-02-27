@@ -1,9 +1,11 @@
 package de.yuga.spacebattle.backend.calculator.distance;
 
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.enums.EDistanceMetric;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import org.junit.jupiter.params.provider.Arguments;
@@ -16,6 +18,7 @@ import java.util.stream.Stream;
 import static de.yuga.spacebattle.TestDataProviderUtils.*;
 import static de.yuga.spacebattle.backend.calculator.distance.Quadrant.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class DistanceCalculatorTest {
 
@@ -144,9 +147,9 @@ public class DistanceCalculatorTest {
     private static Stream<Arguments> testCreateByRadiusAndQuadrant() {
         return Stream.of(
                 Arguments.of(bd(1), Q1, Orbit.getCenterOrbit()),
-                Arguments.of(bd(19.23), Q2, new Orbit(-13, 13)),
-                Arguments.of(bd(24.11), Q3, new Orbit(-17, -17)),
-                Arguments.of(bd(99999221), Q4, new Orbit(70710127, -70710127))
+                Arguments.of(bd(19.23), Q2, new Orbit(new Distance(-13, EDistanceMetric.M), new Distance(13, EDistanceMetric.M))),
+                Arguments.of(bd(24.11), Q3, new Orbit(new Distance(-17, EDistanceMetric.M), new Distance(-17, EDistanceMetric.M))),
+                Arguments.of(bd(99999221), Q4, new Orbit(new Distance(70710127, EDistanceMetric.M), new Distance(-70710127, EDistanceMetric.M)))
         );
     }
 
@@ -157,18 +160,26 @@ public class DistanceCalculatorTest {
         final BigDecimal radius = (BigDecimal) args[0];
         final Quadrant quadrant = (Quadrant) args[1];
         final Orbit expectation = (Orbit) args[2];
-        final Orbit result = DistanceCalculator.createByRadiusAndQuadrant(radius, quadrant);
+        final Orbit result = DistanceCalculator.createByRadiusAndQuadrant(radius, quadrant, EDistanceMetric.M);
         assertEquals(expectation, result);
     }
 
     private static Stream<Arguments> testGetOrbitalDistance() {
         return Stream.of(
                 Arguments.of(Orbit.getCenterOrbit(), Orbit.getCenterOrbit(), bd(0)),
-                Arguments.of(new Orbit(0, 0), new Orbit(0, 0), bd(0)),
-                Arguments.of(new Orbit(1, 1), new Orbit(-1, -1), bd(2.828)),
-                Arguments.of(new Orbit(2, 2), new Orbit(2, 2), bd(0)),
-                Arguments.of(new Orbit(-13, 13), new Orbit(bi(1), bi(-17)), bd(33.1)),
-                Arguments.of(new Orbit(bd("-643634643513"), bd("675765667")), new Orbit(-17, -17), bd("6.436E+11"))
+                Arguments.of(Orbit.getCenterOrbit(), Orbit.getCenterOrbit(), bd(0)),
+                Arguments.of(new Orbit(new Distance(1, EDistanceMetric.M), new Distance(1, EDistanceMetric.M)),
+                        new Orbit(new Distance(-1, EDistanceMetric.M), new Distance(-1, EDistanceMetric.M)),
+                        new Distance(bd(2.828), EDistanceMetric.M)),
+                Arguments.of(new Orbit(new Distance(2, EDistanceMetric.M), new Distance(2, EDistanceMetric.M)),
+                        new Orbit(new Distance(2, EDistanceMetric.M), new Distance(2, EDistanceMetric.M)),
+                        new Distance(bd(0), EDistanceMetric.M)),
+                Arguments.of(new Orbit(new Distance(-13, EDistanceMetric.M), new Distance(13, EDistanceMetric.M)),
+                        new Orbit(new Distance(1, EDistanceMetric.M), new Distance(-17, EDistanceMetric.M)),
+                        new Distance(bd(33.1), EDistanceMetric.M)),
+                Arguments.of(new Orbit(new Distance(bd("-643634643513"), EDistanceMetric.M), new Distance(bd("675765667"), EDistanceMetric.M)),
+                        new Orbit(new Distance(-17, EDistanceMetric.M), new Distance(-17, EDistanceMetric.M)),
+                        new Distance(bd("6.436E+11"), EDistanceMetric.M))
         );
     }
 
@@ -178,8 +189,8 @@ public class DistanceCalculatorTest {
         final Object[] args = accessor.toArray();
         final Orbit one = (Orbit) args[0];
         final Orbit two = (Orbit) args[1];
-        final BigDecimal expectation = (BigDecimal) args[2];
-        final BigDecimal result = DistanceCalculator.getOrbitalDistance(one, two);
+        final Distance expectation = (Distance) args[2];
+        final Distance result = DistanceCalculator.getOrbitalDistance(one, two);
         assertEquals(0, expectation.compareTo(result));
     }
 
@@ -194,13 +205,6 @@ public class DistanceCalculatorTest {
         );
     }
 
-    private static BigDecimal bd(final double x) {
-        return BigDecimal.valueOf(x);
-    }
-
-    private static BigDecimal bd(final String x) {
-        return new BigDecimal(x);
-    }
 
     @ParameterizedTest
     @MethodSource("testGetDistance")
@@ -239,34 +243,26 @@ public class DistanceCalculatorTest {
         final Object[] args = accessor.toArray();
         final BigDecimal a = (BigDecimal) args[0];
         final String expectation = (String) args[1];
-        final String result = DistanceCalculator.getDistanceAsStringWithUnit(a);
+        final String result = a.toString();
         assertEquals(expectation, result);
-    }
-
-    private static BigInteger bi(final long x) {
-        return BigInteger.valueOf(x);
-    }
-
-    private static BigInteger bi(final String x) {
-        return new BigInteger(x);
     }
 
     private static Stream<Arguments> testGetDistanceAsStringWithUnitBigInteger() {
         return Stream.of(
-                Arguments.of(bi(1), "1 m"),
-                Arguments.of(bi(2), "2 m"),
-                Arguments.of(bi(1000), "1 km"),
-                Arguments.of(bi(299792458), "1 ls"),
-                Arguments.of(bi("17987547480"), "1 lm"),
-                Arguments.of(bi("149597870700"), "1 AU"),
-                Arguments.of(bi("1079252848800"), "1 lh"),
-                Arguments.of(bi("25902068371200"), "1 ld"),
-                Arguments.of(bi("9454254955488000"), "0.3063 pc"),
-                Arguments.of(bi("30856776000000000"), "1 pc"),
-                Arguments.of(bi("1495978707000"), "1.386 lh"),
-                Arguments.of(bi("10792528488000"), "0.4166 ld"),
-                Arguments.of(bi("259020683712000"), "0.008394 pc"),
-                Arguments.of(bi("308567760000000000"), "10 pc")
+                Arguments.of(bd(1), "1 m"),
+                Arguments.of(bd(2), "2 m"),
+                Arguments.of(bd(1000), "1 km"),
+                Arguments.of(bd(299792458), "1 ls"),
+                Arguments.of(bd("17987547480"), "1 lm"),
+                Arguments.of(bd("149597870700"), "1 AU"),
+                Arguments.of(bd("1079252848800"), "1 lh"),
+                Arguments.of(bd("25902068371200"), "1 ld"),
+                Arguments.of(bd("9454254955488000"), "0.3063 pc"),
+                Arguments.of(bd("30856776000000000"), "1 pc"),
+                Arguments.of(bd("1495978707000"), "1.386 lh"),
+                Arguments.of(bd("10792528488000"), "0.4166 ld"),
+                Arguments.of(bd("259020683712000"), "0.008394 pc"),
+                Arguments.of(bd("308567760000000000"), "10 pc")
         );
     }
 
@@ -274,9 +270,29 @@ public class DistanceCalculatorTest {
     @MethodSource("testGetDistanceAsStringWithUnitBigInteger")
     void testGetDistanceAsStringWithUnitBigInteger(ArgumentsAccessor accessor) {
         final Object[] args = accessor.toArray();
-        final BigInteger a = (BigInteger) args[0];
+        final BigDecimal a = (BigDecimal) args[0];
         final String expectation = (String) args[1];
-        final String result = DistanceCalculator.getDistanceAsStringWithUnit(a);
+        final String result = a.toString();
+        assertEquals(expectation, result);
+    }
+
+    private static Stream<Arguments> scalingProvider() {
+        return Stream.of(
+                Arguments.of(new Distance(BigDecimal.valueOf(1300), EDistanceMetric.LS), Distance.valueOf("1300 LS")),
+                Arguments.of(new Distance(BigDecimal.valueOf(-1300), EDistanceMetric.LS), Distance.valueOf("-1300 LS")),
+                Arguments.of(new Distance(BigDecimal.valueOf(2.605185), EDistanceMetric.AU), Distance.valueOf("389730127 KM")),
+                Arguments.of(Distance.valueOf("47.414849487074682006498619613044098741738707758486270904541015625 LS"), Distance.valueOf("14214614 KM")),
+                Arguments.of(Distance.valueOf("0.455467960302086778612619613044098741738707758486270904541015625 LS"), Distance.valueOf("136545860 M")),
+                Arguments.of(Distance.valueOf("0.4554679603020867786126196 LS"), Distance.valueOf("136545860 M"))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("scalingProvider")
+    void testConvertToScape(final Distance distance, final Distance expectation) {
+
+        final Distance result = DistanceCalculator.convertToScale(distance);
+        assertNotNull(result);
         assertEquals(expectation, result);
     }
 }

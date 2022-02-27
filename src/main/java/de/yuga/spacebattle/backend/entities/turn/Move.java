@@ -37,16 +37,16 @@ public class Move extends AbstractEntityKey {
     @Nonnull
     @NotNull
     @Embedded
-    @AttributeOverride(name = "orbit.xCoordinate", column = @Column(name = "xCoordinateOrigin", columnDefinition = "decimal(19, 0)"))
-    @AttributeOverride(name = "orbit.yCoordinate", column = @Column(name = "yCoordinateOrigin", columnDefinition = "decimal(19, 0)"))
+    @AttributeOverride(name = "orbit.xCoordinate", column = @Column(name = "xCoordinateOrigin"))
+    @AttributeOverride(name = "orbit.yCoordinate", column = @Column(name = "yCoordinateOrigin"))
     @AssociationOverride(name = "system", joinColumns = @JoinColumn(name = "idStarSystemOrigin"))
     private FleetOrbit originOrbit;
 
     @Nonnull
     @NotNull
     @Embedded
-    @AttributeOverride(name = "orbit.xCoordinate", column = @Column(name = "xCoordinateDestination", columnDefinition = "decimal(19, 0)"))
-    @AttributeOverride(name = "orbit.yCoordinate", column = @Column(name = "yCoordinateDestination", columnDefinition = "decimal(19, 0)"))
+    @AttributeOverride(name = "orbit.xCoordinate", column = @Column(name = "xCoordinateDestination"))
+    @AttributeOverride(name = "orbit.yCoordinate", column = @Column(name = "yCoordinateDestination"))
     @AssociationOverride(name = "system", joinColumns = @JoinColumn(name = "idStarSystemDestination"))
     private FleetOrbit destinationOrbit;
 

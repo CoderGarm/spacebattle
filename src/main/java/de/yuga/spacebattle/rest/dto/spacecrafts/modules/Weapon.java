@@ -1,13 +1,13 @@
 package de.yuga.spacebattle.rest.dto.spacecrafts.modules;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics.BaseModule;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.annotation.Nonnull;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,8 +20,9 @@ public class Weapon {
     /**
      * Defines the range of this weapon.
      */
+    @Nonnull
     @ApiModelProperty(required = true, value = "The effective range of this weapon.")
-    private BigDecimal effectiveRange;
+    private Distance effectiveRange;
 
     @Nonnull
     @ApiModelProperty(required = true, value = "The way how the damage will be projected.")
@@ -55,11 +56,11 @@ public class Weapon {
         this.baseModule = baseModule;
     }
 
-    public BigDecimal getEffectiveRange() {
+    public Distance getEffectiveRange() {
         return effectiveRange;
     }
 
-    public void setEffectiveRange(BigDecimal effectiveRange) {
+    public void setEffectiveRange(Distance effectiveRange) {
         this.effectiveRange = effectiveRange;
     }
 

@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.rest.dto.spacecrafts.ammunition;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.annotation.Nonnull;
@@ -23,8 +24,9 @@ public class MissileMotor {
     /**
      * The acceleration in m/s² which is set if using the engine.
      */
+    @Nonnull
     @ApiModelProperty(required = true, value = "The acceleration of this engine in ms².")
-    private int acceleration;
+    private Acceleration acceleration;
 
     /**
      * Defines the capability of this weapon to penetrate the shield.
@@ -77,11 +79,12 @@ public class MissileMotor {
         this.endurance = endurance;
     }
 
-    public int getAcceleration() {
+    @Nonnull
+    public Acceleration getAcceleration() {
         return acceleration;
     }
 
-    public void setAcceleration(int acceleration) {
+    public void setAcceleration(Acceleration acceleration) {
         this.acceleration = acceleration;
     }
 

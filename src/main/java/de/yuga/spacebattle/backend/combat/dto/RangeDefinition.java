@@ -1,6 +1,8 @@
 package de.yuga.spacebattle.backend.combat.dto;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.enums.EDistanceMetric;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -21,12 +23,17 @@ public class RangeDefinition implements Comparable<RangeDefinition> {
     @Nonnull
     private final BigDecimal maxRange;
 
-    public RangeDefinition(@Nonnull final BigDecimal minRange, @Nonnull final BigDecimal maxRange) {
+    @Nonnull
+    private final EDistanceMetric distanceMetric;
+
+    public RangeDefinition(@Nonnull final BigDecimal minRange, @Nonnull final BigDecimal maxRange, @Nonnull final EDistanceMetric distanceMetric) {
         Preconditions.checkNotNull(minRange, "minRange shouldn't be null!");
         Preconditions.checkNotNull(maxRange, "maxRange shouldn't be null!");
+        Preconditions.checkNotNull(distanceMetric, "distanceMetric shouldn't be null!");
 
         this.minRange = minRange;
         this.maxRange = maxRange;
+        this.distanceMetric = distanceMetric;
     }
 
     /**
@@ -52,7 +59,22 @@ public class RangeDefinition implements Comparable<RangeDefinition> {
     public boolean isInRange(@Nonnull final RangeDefinition rangeDefinition) {
         Preconditions.checkNotNull(rangeDefinition, "rangeDefinition shouldn't be null!");
 
-        return isInRange(rangeDefinition.getMinRange()) && isInRange(rangeDefinition.getMaxRange());
+        final Distance minRangeThat = new Distance(rangeDefinition.getMinRange(), distanceMetric);
+        final Distance maxRangeThat = new Distance(rangeDefinition.getMaxRange(), distanceMetric);
+
+        return isInRange(minRangeThat.getCoordinate()) && isInRange(maxRangeThat.getCoordinate());
+    }
+
+    /**
+     * States if the given distance is bigger or equal the max range.
+     *
+     * @param distance the given range
+     * @return <code>true</code> if the distance is bigger or equal the max range, <code>false</code> otherwise
+     */
+    public boolean isInRange(@Nonnull final Distance distance) {
+        Preconditions.checkNotNull(distance, "distance shouldn't be null!");
+
+        return maxRange.compareTo(distance.getCoordinateInMetric(distanceMetric)) <= 0;
     }
 
     /**
@@ -64,10 +86,10 @@ public class RangeDefinition implements Comparable<RangeDefinition> {
     public boolean isChainingRange(@Nonnull final RangeDefinition rangeDefinition) {
         Preconditions.checkNotNull(rangeDefinition, "rangeDefinition shouldn't be null!");
 
-        final BigDecimal minRangeThat = rangeDefinition.getMinRange();
-        final BigDecimal maxRangeThat = rangeDefinition.getMaxRange();
+        final Distance minRangeThat = new Distance(rangeDefinition.getMinRange(), distanceMetric);
+        final Distance maxRangeThat = new Distance(rangeDefinition.getMaxRange(), distanceMetric);
 
-        return isInRange(minRangeThat) || isInRange(maxRangeThat);
+        return isInRange(minRangeThat.getCoordinate()) || isInRange(maxRangeThat.getCoordinate());
     }
 
     @Nonnull
@@ -80,6 +102,16 @@ public class RangeDefinition implements Comparable<RangeDefinition> {
         return maxRange;
     }
 
+    @Nonnull
+    public EDistanceMetric getDistanceMetric() {
+        return distanceMetric;
+    }
+
+    @Override
+    public String toString() {
+        return "minRange: " + minRange + ", maxRange: " + maxRange + ", metric: " + distanceMetric;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -88,12 +120,12 @@ public class RangeDefinition implements Comparable<RangeDefinition> {
 
         final RangeDefinition that = (RangeDefinition) o;
 
-        return new EqualsBuilder().append(minRange, that.minRange).append(maxRange, that.maxRange).isEquals();
+        return new EqualsBuilder().append(minRange, that.minRange).append(maxRange, that.maxRange).append(distanceMetric, that.distanceMetric).isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(minRange).append(maxRange).toHashCode();
+        return new HashCodeBuilder(17, 37).append(minRange).append(maxRange).append(distanceMetric).toHashCode();
     }
 
     @Override

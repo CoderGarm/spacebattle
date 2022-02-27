@@ -2,8 +2,10 @@ package de.yuga.spacebattle.backend.converter;
 
 import javax.annotation.Nullable;
 import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 import java.util.UUID;
 
+@Converter
 public class UUIDConverter implements AttributeConverter<UUID, String> {
 
     @Override

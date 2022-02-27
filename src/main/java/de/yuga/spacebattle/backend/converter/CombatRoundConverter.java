@@ -4,7 +4,9 @@ import de.yuga.spacebattle.backend.combat.round.CombatRound;
 
 import javax.annotation.Nullable;
 import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
+@Converter
 public class CombatRoundConverter implements AttributeConverter<CombatRound, Integer> {
 
     @Override

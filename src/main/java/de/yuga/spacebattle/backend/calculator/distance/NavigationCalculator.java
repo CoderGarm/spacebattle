@@ -3,8 +3,12 @@ package de.yuga.spacebattle.backend.calculator.distance;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
+import de.yuga.spacebattle.backend.enums.EAccelerationMetric;
+import de.yuga.spacebattle.backend.enums.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 
 import javax.annotation.Nonnull;
@@ -38,11 +42,14 @@ public class NavigationCalculator {
      * Calculates the distance for the given time and acceleration.
      *
      * @param time         the endurance of the acceleration in s
-     * @param acceleration the acceleration in m/s²
+     * @param acceleration the acceleration
      */
-    public static BigDecimal getRangeByTimeAndAcceleration(final int time, final int acceleration) {
+    public static Distance getRangeByTimeAndAcceleration(final int time, @Nonnull final Acceleration acceleration) {
         final double squaredTime = Math.pow(time, 2);
-        return new BigDecimal("0.5").multiply(new BigDecimal(acceleration)).multiply(new BigDecimal(squaredTime), MATH_CONTEXT_MORE_PRECISION);
+        final BigDecimal range = new BigDecimal("0.5")
+                .multiply(acceleration.convertToMetric(EAccelerationMetric.MS2))
+                .multiply(new BigDecimal(squaredTime), MATH_CONTEXT_MORE_PRECISION);
+        return new Distance(range, EDistanceMetric.M);
     }
 
     /**
@@ -65,10 +72,8 @@ public class NavigationCalculator {
         Preconditions.checkNotNull(direction, "direction shouldn't be null!");
 
         // todo change to physical reliability
-        //final BigDecimal rangePerCombatRound = agent.getRangePerCombatRound();
-        final BigDecimal accelerationInGravityEarth = agent.getRangePerTick(EModuleType.PROPULSION);
-        final int meterPerSecondSquaredFromG = NavigationCalculator.getMeterPerSecondSquaredFromG(accelerationInGravityEarth.intValue());
-        final BigDecimal rangeByTimeAndAcceleration = NavigationCalculator.getRangeByTimeAndAcceleration(CombatRound.COMBAT_ROUND_DURATION, meterPerSecondSquaredFromG);
+        final Acceleration accelerationInGravityEarth = agent.getAccelerationFor(EModuleType.PROPULSION);
+        final Distance rangeByTimeAndAcceleration = NavigationCalculator.getRangeByTimeAndAcceleration(CombatRound.COMBAT_ROUND_DURATION, accelerationInGravityEarth);
         return agentsPosition.move(movementType, rangeByTimeAndAcceleration, direction);
     }
 }

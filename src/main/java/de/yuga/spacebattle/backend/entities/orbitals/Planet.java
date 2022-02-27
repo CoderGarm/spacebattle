@@ -8,10 +8,7 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.turn.resources.MiningFactors;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.enums.EDepositType;
-import de.yuga.spacebattle.backend.enums.EPlanetClassType;
-import de.yuga.spacebattle.backend.enums.EProductionCategory;
-import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.enums.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -39,6 +36,10 @@ import java.util.stream.Collectors;
         @UniqueConstraint(name = "PLANET_UK", columnNames = {"idStarSystem", "idPlanet", "xCoordinate", "yCoordinate"}))
 @AttributeOverride(name = "id", column = @Column(name = "idPlanet"))
 public class Planet extends AbstractEntityKey {
+
+    @Nonnull
+    @Transient
+    public static final EDistanceMetric PLANET_STANDARD_METRIC = EDistanceMetric.LS;
 
     @Nullable
     @ManyToOne(cascade = {CascadeType.MERGE})

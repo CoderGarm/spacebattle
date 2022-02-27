@@ -20,6 +20,11 @@ import java.time.format.DateTimeFormatterBuilder;
 @AttributeOverride(name = "id", column = @Column(name = "idTick"))
 public class Tick extends AbstractEntityKey {
 
+    /**
+     * The tick duration in seconds.
+     */
+    public static final int TICK_DURATION = 604800;
+
     @Nonnull
     private final static DateTimeFormatter tickFormatter = new DateTimeFormatterBuilder().appendPattern("yyyy MM dd").toFormatter();
 

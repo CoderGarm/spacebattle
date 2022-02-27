@@ -1,11 +1,11 @@
 package de.yuga.spacebattle.rest.dto.spacecrafts.ammunition;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.enums.EWarheadType;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.annotation.Nonnull;
-import java.math.BigDecimal;
 
 public class Warhead {
 
@@ -22,8 +22,9 @@ public class Warhead {
     /**
      * Defines the range of this weapon in meter.
      */
+    @Nonnull
     @ApiModelProperty(required = true, value = "The effective range of this warhead.")
-    private BigDecimal damageProjectionRange;
+    private Distance damageProjectionRange;
 
     /**
      * The way of damage projection.
@@ -74,11 +75,12 @@ public class Warhead {
         this.damageValue = damageValue;
     }
 
-    public BigDecimal getDamageProjectionRange() {
+    @Nonnull
+    public Distance getDamageProjectionRange() {
         return damageProjectionRange;
     }
 
-    public void setDamageProjectionRange(BigDecimal damageProjectionRange) {
+    public void setDamageProjectionRange(@Nonnull final Distance damageProjectionRange) {
         this.damageProjectionRange = damageProjectionRange;
     }
 

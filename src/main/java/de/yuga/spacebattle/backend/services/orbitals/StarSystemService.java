@@ -1,9 +1,11 @@
 package de.yuga.spacebattle.backend.services.orbitals;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
+import de.yuga.spacebattle.backend.enums.EDistanceMetric;
 import de.yuga.spacebattle.backend.repositories.orbitals.StarSystemRepository;
 import org.springframework.stereotype.Service;
 
@@ -60,7 +62,7 @@ public class StarSystemService {
                                        final int yCoordinate) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
 
-        return starsystemRepository.save(new StarSystem(name, new Orbit(xCoordinate, yCoordinate)));
+        return starsystemRepository.save(new StarSystem(name, new Orbit(new Distance(xCoordinate, StarSystem.STAR_SYSTEM_STANDARD_METRIC), new Distance(yCoordinate, EDistanceMetric.LY))));
     }
 
     @Nonnull

@@ -153,7 +153,7 @@ public class TickService {
         tickPlanets();
         tickMovements();
         tickColonizations();
-        battleService.runBattles(today);
+        //battleService.runBattles(today);
 
         today.setTickEnds(LocalDateTime.now());
         return tickRepository.save(today);

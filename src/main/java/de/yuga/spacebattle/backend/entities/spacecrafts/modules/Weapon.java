@@ -1,7 +1,9 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.modules;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.converter.DistanceConverter;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.enums.EAlignmentType;
@@ -12,7 +14,6 @@ import org.hibernate.annotations.Check;
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,8 +30,9 @@ public class Weapon extends BaseModuleWithEffectValue {
     /**
      * Defines the range of this weapon in meter.
      */
-    @Column(nullable = false, columnDefinition = "decimal(19, 0)")
-    private BigDecimal damageProjectionRange;
+    @Nonnull
+    @Convert(converter = DistanceConverter.class)
+    private Distance damageProjectionRange;
 
     /**
      * The amount of damage emitters.<br>
@@ -72,7 +74,7 @@ public class Weapon extends BaseModuleWithEffectValue {
                   final int useCapacity,
                   final int effectValue,
                   final int techLevel,
-                  @Nonnull final BigDecimal damageProjectionRange,
+                  @Nonnull final Distance damageProjectionRange,
                   final int amountDamageEmitter,
                   @Nonnull final EWeaponType weaponType,
                   @Nonnull final EAlignmentType alignmentType,
@@ -88,7 +90,8 @@ public class Weapon extends BaseModuleWithEffectValue {
         this.alignmentType = alignmentType;
     }
 
-    public BigDecimal getDamageProjectionRange() {
+    @Nonnull
+    public Distance getDamageProjectionRange() {
         return damageProjectionRange;
     }
 

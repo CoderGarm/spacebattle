@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.combat.enums.EDamageResult;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.combat.round.*;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
@@ -18,7 +19,6 @@ import de.yuga.spacebattle.backend.enums.EWeaponType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -83,7 +83,7 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
     /**
      * The initial distance of this shot.
      */
-    private final BigDecimal initialDistance;
+    private final Distance initialDistance;
 
     /**
      * The composition of the salvo by missile type, amount and it's current state.
@@ -95,13 +95,13 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
      * The distance which can be covered per combat round.
      */
     @Nonnull
-    private BigDecimal rangePerCombatRound = BigDecimal.ZERO;
+    private Distance rangePerCombatRound = Distance.ZERO;
 
     /**
      * The distance in which the damage can be applied to the target.
      */
     @Nonnull
-    private BigDecimal longestOffensiveRange = BigDecimal.ZERO;
+    private Distance longestOffensiveRange = Distance.ZERO;
 
     /**
      * If the salvo is inside detonation range and should not move.
@@ -135,7 +135,7 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
         this.actor = actor;
         this.target = target;
         this.targetPosition = cage.getCurrentStateByFleet(target).getPosition().clone();
-        this.initialDistance = position.getDistance(targetPosition).abs();
+        this.initialDistance = position.getDistance(targetPosition);
         final Map<Missile, Integer> amountByType = new HashMap<>();
 
         final EMovementType actorsMovementType = actorState.getMovementType();
@@ -196,9 +196,9 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
      */
     private void calculateRangePerCombatRound() {
         if (missileSalvoHealthState.isActive()) {
-            rangePerCombatRound = missileSalvoHealthState.getRangePerCombatRound().abs();
+            rangePerCombatRound = missileSalvoHealthState.getRangePerCombatRound();
         } else {
-            rangePerCombatRound = BigDecimal.ZERO;
+            rangePerCombatRound = Distance.ZERO;
         }
     }
 
@@ -207,9 +207,9 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
      */
     private void calculateAttackRange() {
         if (missileSalvoHealthState.isActive()) {
-            longestOffensiveRange = missileSalvoHealthState.getAttackRange().abs();
+            longestOffensiveRange = missileSalvoHealthState.getAttackRange();
         } else {
-            longestOffensiveRange = BigDecimal.ZERO;
+            longestOffensiveRange = Distance.ZERO;
         }
     }
 
@@ -223,8 +223,8 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
         this.combatSubPhase = ECombatSubPhase.ELOKA_PHASE;
         final FleetRoundState targetsState = cage.getCurrentStateByFleet(target);
         final Orbit targetsPosition = targetsState.getPosition();
-        final BigDecimal elokaRange = targetsState.getElokaRange();
-        final BigDecimal distance = position.getDistance(targetsPosition);
+        final Distance elokaRange = targetsState.getElokaRange();
+        final Distance distance = position.getDistance(targetsPosition);
         if (elokaRange.compareTo(distance) <= 0) {
             // noop if eloka is not in range
             return;
@@ -277,8 +277,8 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
         this.combatSubPhase = ECombatSubPhase.COUNTER_MISSILE_PHASE;
         final FleetRoundState targetsState = cage.getCurrentStateByFleet(target);
         final Orbit targetsPosition = targetsState.getPosition();
-        final BigDecimal counterMissileRange = targetsState.getCounterMissileRange();
-        final BigDecimal distance = position.getDistance(targetsPosition);
+        final Distance counterMissileRange = targetsState.getCounterMissileRange();
+        final Distance distance = position.getDistance(targetsPosition);
         if (counterMissileRange.compareTo(distance) <= 0) {
             // noop if counter missile is not in range
             return;
@@ -318,14 +318,14 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
         }
         final FleetRoundState targetsCurrentStateByFleet = cage.getCurrentStateByFleet(target);
         targetPosition = targetsCurrentStateByFleet.getPosition().clone();
-        final BigDecimal distanceToTarget = position.getDistance(targetPosition).abs();
+        final Distance distanceToTarget = position.getDistance(targetPosition);
         if (distanceToTarget.compareTo(longestOffensiveRange) <= 0) {
             isInDetonationRange = true;
             return;
         }
 
-        final BigDecimal minimalDistanceToAttack = distanceToTarget.subtract(longestOffensiveRange).abs();
-        final BigDecimal distance;
+        final Distance minimalDistanceToAttack = distanceToTarget.subtract(longestOffensiveRange);
+        final Distance distance;
         if (minimalDistanceToAttack.compareTo(rangePerCombatRound) > 0) {
             // use complete movement to track the target
             distance = rangePerCombatRound;
@@ -377,12 +377,12 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
     }
 
     @Nonnull
-    public BigDecimal getRangePerCombatRound() {
+    public Distance getRangePerCombatRound() {
         return rangePerCombatRound;
     }
 
     @Nonnull
-    public BigDecimal getLongestOffensiveRange() {
+    public Distance getLongestOffensiveRange() {
         return longestOffensiveRange;
     }
 
@@ -435,7 +435,7 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
         return target;
     }
 
-    public BigDecimal getInitialDistance() {
+    public Distance getInitialDistance() {
         return initialDistance;
     }
 

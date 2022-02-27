@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.entities.account;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.converter.PasswordConverter;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
@@ -10,7 +11,6 @@ import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Job;
-import de.yuga.spacebattle.backend.services.account.PasswordConverter;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 

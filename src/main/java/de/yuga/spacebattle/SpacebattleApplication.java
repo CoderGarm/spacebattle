@@ -2,6 +2,8 @@ package de.yuga.spacebattle;
 
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.TypeResolver;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.boot.SpringApplication;
@@ -93,6 +95,8 @@ public class SpacebattleApplication {
         final List<Class<?>> jsonDtoClasses = findTransferObjects();
         final ResolvedType firstResolvedType = typeResolver.resolve(jsonDtoClasses.get(0));
         jsonDtoClasses.remove(jsonDtoClasses.get(0));
+        jsonDtoClasses.add(Distance.class);
+        jsonDtoClasses.add(Acceleration.class);
         final List<ResolvedType> resolvedTypes = jsonDtoClasses.stream().map(e -> typeResolver.resolve(e)).collect(Collectors.toList());
         final ResolvedType[] remainingResolvedTypes = resolvedTypes.toArray(new ResolvedType[]{});
         return new Docket(DocumentationType.OAS_30)

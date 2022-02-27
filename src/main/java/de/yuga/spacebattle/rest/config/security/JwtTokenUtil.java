@@ -1,9 +1,9 @@
 package de.yuga.spacebattle.rest.config.security;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.converter.PasswordConverter;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.enums.EWebUserRole;
-import de.yuga.spacebattle.backend.services.account.PasswordConverter;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

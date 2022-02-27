@@ -6,17 +6,18 @@ import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.FleetHealthState;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.combat.round.MissileSalvoHealthState;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
+import de.yuga.spacebattle.backend.enums.EDistanceMetric;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
 
 import static de.yuga.spacebattle.TestDataProviderUtils.*;
@@ -42,12 +43,12 @@ class MissileSalvoTest {
         assertSame(ECombatPhase.ECombatSubPhase.MISSILE_FIRE_PHASE, testObject.getCombatSubPhase());
         final MissileSalvoHealthState missileSalvoHealthState = testObject.getMissileSalvoHealthState();
         assertNotNull(missileSalvoHealthState);
-        final BigDecimal initialDistance = testObject.getInitialDistance();
-        assertEquals(new BigDecimal("8.032E+8"), initialDistance);
-        final BigDecimal rangePerCombatRound = testObject.getRangePerCombatRound();
-        assertEquals(new BigDecimal("81140000"), rangePerCombatRound);
-        final BigDecimal longestOffensiveRange = testObject.getLongestOffensiveRange();
-        assertEquals(new BigDecimal("50000"), longestOffensiveRange);
+        final Distance initialDistance = testObject.getInitialDistance();
+        assertEquals(new Distance(new BigDecimal("8.032E+8"), EDistanceMetric.M), initialDistance);
+        final Distance rangePerCombatRound = testObject.getRangePerCombatRound();
+        assertEquals(new Distance(81140000, EDistanceMetric.M), rangePerCombatRound);
+        final Distance longestOffensiveRange = testObject.getLongestOffensiveRange();
+        assertEquals(new Distance(50000, EDistanceMetric.M), longestOffensiveRange);
     }
 
     @Test
@@ -122,7 +123,7 @@ class MissileSalvoTest {
         ReflectionTestUtils.setField(testObject, "cage", cageMock);
         final FleetRoundState frsMock = mock(FleetRoundState.class);
         when(cageMock.getCurrentStateByFleet(target)).thenReturn(frsMock);
-        when(frsMock.getPosition()).thenReturn(new Orbit(50000, 50000));
+        when(frsMock.getPosition()).thenReturn(new Orbit(new Distance(50000, EDistanceMetric.M), new Distance(50000, EDistanceMetric.M)));
         // test method
         testObject.handleMovement();
         // check expectation
@@ -194,8 +195,8 @@ class MissileSalvoTest {
         ReflectionTestUtils.setField(testObject, "position", positionMock);
         ReflectionTestUtils.setField(testObject, "missileSalvoHealthState", missileSalvoHealthStateMock);
 
-        final BigDecimal distance = BigDecimal.ONE;
-        final int elokaRange = 2;
+        final Distance distance = new Distance(1, EDistanceMetric.M);
+        final Distance elokaRange = new Distance(2, EDistanceMetric.M);
         final int elokaEffectValue = 500;
         // mock methods
         when(cageMock.getCurrentStateByFleet(targetMock)).thenReturn(fleetRoundStateMock);
@@ -237,8 +238,8 @@ class MissileSalvoTest {
         ReflectionTestUtils.setField(testObject, "position", positionMock);
         ReflectionTestUtils.setField(testObject, "missileSalvoHealthState", missileSalvoHealthStateMock);
 
-        final BigDecimal distance = BigDecimal.ONE;
-        final BigDecimal counterMissileRange = BigDecimal.valueOf(5);
+        final Distance distance = new Distance(1, EDistanceMetric.M);
+        final Distance counterMissileRange = new Distance(5, EDistanceMetric.M);
         // mock methods
         when(cageMock.getCurrentStateByFleet(targetMock)).thenReturn(targetsStateMock);
         when(targetMock.getCounterMissileWeaponry()).thenReturn(counterMissileWeaponryMock);
@@ -253,8 +254,8 @@ class MissileSalvoTest {
         verify(cageMock).getCurrentStateByFleet(targetMock);
         verify(missileSalvoHealthStateMock, atLeast(1)).getCurrentAmountByType();
         verify(missileSalvoHealthStateMock, atLeast(1)).setNewMissileAmounts(any(), anyInt(), any());
-        assertEquals(BigDecimal.ZERO, testObject.getRangePerCombatRound());
-        assertEquals(BigDecimal.ZERO, testObject.getLongestOffensiveRange());
+        assertEquals(Distance.ZERO, testObject.getRangePerCombatRound());
+        assertEquals(Distance.ZERO, testObject.getLongestOffensiveRange());
         verify(cageMock).addHistorizable(testObject);
         assertSame(ECombatPhase.ECombatSubPhase.COUNTER_MISSILE_PHASE, testObject.getCombatSubPhase());
     }
@@ -271,15 +272,15 @@ class MissileSalvoTest {
         ReflectionTestUtils.setField(testObject, "position", positionMock);
         ReflectionTestUtils.setField(testObject, "longestOffensiveRange", BigDecimal.ONE);
 
-        final BigDecimal distanceToTarget = BigDecimal.TEN;
+        final Distance distanceToTarget = new Distance(10, EDistanceMetric.M);
         final BigDecimal rangePerCombatRound = (BigDecimal) ReflectionTestUtils.getField(testObject, "rangePerCombatRound");
         assertNotNull(rangePerCombatRound);
         final Orbit newPosFake = Orbit.getCenterOrbit();
         // mock methods
-        when(positionMock.getXCoordinate()).thenReturn(BigInteger.ZERO);
-        when(positionMock.getYCoordinate()).thenReturn(BigInteger.ZERO);
-        when(targetsPositionMock.getXCoordinate()).thenReturn(BigInteger.valueOf(5000));
-        when(targetsPositionMock.getYCoordinate()).thenReturn(BigInteger.valueOf(5000));
+        when(positionMock.getXCoordinate()).thenReturn(Distance.ZERO);
+        when(positionMock.getYCoordinate()).thenReturn(Distance.ZERO);
+        when(targetsPositionMock.getXCoordinate()).thenReturn(new Distance(5000, EDistanceMetric.M));
+        when(targetsPositionMock.getYCoordinate()).thenReturn(new Distance(5000, EDistanceMetric.M));
         when(cageMock.getCurrentStateByFleet(target)).thenReturn(fleetRoundStateMock);
         when(fleetRoundStateMock.getPosition()).thenReturn(targetsPositionMock);
         when(targetsPositionMock.clone()).thenReturn(targetsPositionMock);

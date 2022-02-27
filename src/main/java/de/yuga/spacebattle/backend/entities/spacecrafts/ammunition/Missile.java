@@ -4,6 +4,8 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule;
@@ -14,10 +16,10 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -76,6 +78,13 @@ public class Missile extends AbstractEntityKey {
     @OneToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "idAmmunitionModule")
     private AmmunitionModule ammunitionModule;
+
+    /**
+     * Quick performance
+     */
+    @Nullable
+    @Transient
+    private Distance maxRange = null;
 
     public Missile() {
     }
@@ -207,15 +216,22 @@ public class Missile extends AbstractEntityKey {
      *
      * @return the distance which will be covered under drive, in meter
      */
-    public BigDecimal getMissileRange() {
-        final AtomicReference<BigDecimal> range = new AtomicReference<>(BigDecimal.ZERO);
+    @Nonnull
+    public Distance getMaximumMissileRange() {
+        if (maxRange != null) {
+            return maxRange;
+        }
+        final AtomicReference<Distance> range = new AtomicReference<>(Distance.ZERO);
         getMissileMotors().forEach(missileMotor -> {
-            int endurance = missileMotor.getEndurance();
-            int acceleration = missileMotor.getAcceleration();
-            final int meterPerSecondSquaredFromG = NavigationCalculator.getMeterPerSecondSquaredFromG(acceleration);
-            range.set(range.get().add(NavigationCalculator.getRangeByTimeAndAcceleration(endurance, meterPerSecondSquaredFromG)));
+            final int endurance = missileMotor.getEndurance();
+            final Acceleration acceleration = missileMotor.getAcceleration();
+            final Distance currentDistance = range.get();
+            final Distance additionalRange = NavigationCalculator.getRangeByTimeAndAcceleration(endurance, acceleration);
+            additionalRange.convertToMetric(currentDistance.getDistanceMetric());
+            range.set(currentDistance.add(additionalRange));
         });
-        return range.get();
+        this.maxRange = range.get();
+        return maxRange;
     }
 
     /**
@@ -223,13 +239,16 @@ public class Missile extends AbstractEntityKey {
      *
      * @return the distance which will be covered under drive, in meter
      */
-    public BigDecimal getRangePerCombatRound() {
-        final AtomicReference<BigDecimal> range = new AtomicReference<>(BigDecimal.ZERO);
+    @Nonnull
+    public Distance getRangePerCombatRound() {
+        final AtomicReference<Distance> range = new AtomicReference<>(Distance.ZERO);
         missileMotors.forEach(missileMotor -> {
-            int endurance = CombatRound.COMBAT_ROUND_DURATION;
-            int acceleration = missileMotor.getAcceleration();
-            final int meterPerSecondSquaredFromG = NavigationCalculator.getMeterPerSecondSquaredFromG(acceleration);
-            range.set(range.get().add(NavigationCalculator.getRangeByTimeAndAcceleration(endurance, meterPerSecondSquaredFromG)));
+            final int endurance = CombatRound.COMBAT_ROUND_DURATION;
+            final Acceleration acceleration = missileMotor.getAcceleration();
+            final Distance currentRange = range.get();
+            final Distance additionalRange = NavigationCalculator.getRangeByTimeAndAcceleration(endurance, acceleration);
+            additionalRange.convertToMetric(currentRange.getDistanceMetric());
+            range.set(currentRange.add(additionalRange));
         });
         return range.get();
     }

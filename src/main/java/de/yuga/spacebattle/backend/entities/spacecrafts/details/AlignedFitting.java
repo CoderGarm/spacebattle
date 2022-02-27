@@ -2,6 +2,8 @@ package de.yuga.spacebattle.backend.entities.spacecrafts.details;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
+import de.yuga.spacebattle.backend.combat.dto.RangeDefinition;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
@@ -16,7 +18,6 @@ import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
 
 /**
  * The aligned fitting represents a weapon system and the alignment, where the weapon is placed.
@@ -118,39 +119,37 @@ public class AlignedFitting {
     /**
      * Returns the damage which can be projected by this fitting to the given range in meter.
      *
-     * @param lowerBound the lower boundary
-     * @param upperBound the upper boundary
+     * @param boundaries the boundaries
      * @return the damage value
      */
     @Nullable
-    public DamagePerRangeAndAlignment getDamagePerRange(final BigDecimal lowerBound, final BigDecimal upperBound) {
+    public DamagePerRangeAndAlignment getDamagePerRange(@Nonnull final RangeDefinition boundaries) {
+        Preconditions.checkNotNull(boundaries, "boundaries shouldn't be null!");
 
-        BigDecimal damageProjectionRange;
+        Distance damageProjectionRange;
         long damageValue = 0;
         EWeaponType weaponType = null;
+        boolean isInRange = false;
         if (weapon != null) {
             damageProjectionRange = weapon.getDamageProjectionRange();
-            final int compareToLower = damageProjectionRange.compareTo(lowerBound);
-            final int compareToUpper = upperBound.compareTo(damageProjectionRange);
-            if (compareToLower >= 0 && compareToUpper <= 0) {
-                damageValue = (long) weapon.getEffectValue() * amount;
-                weaponType = EWeaponType.BEAM;
-            }
+            isInRange = boundaries.isInRange(damageProjectionRange);
+
+            damageValue = (long) weapon.getEffectValue() * amount;
+            weaponType = EWeaponType.BEAM;
+
         }
         if (launcher != null) {
             final Missile missile = launcher.getAmmunitionModule().getMissile();
-            damageProjectionRange = missile.getMissileRange();
-            final int compareToLower = damageProjectionRange.compareTo(lowerBound);
-            final int compareToUpper = upperBound.compareTo(damageProjectionRange);
-            if (compareToLower >= 0 && compareToUpper <= 0) {
-                damageValue = missile.getWarhead().getDamageValue() * amount;
-                weaponType = EWeaponType.MISSILE;
-            }
+            damageProjectionRange = missile.getMaximumMissileRange();
+            isInRange = boundaries.isInRange(damageProjectionRange);
+
+            damageValue = missile.getWarhead().getDamageValue() * amount;
+            weaponType = EWeaponType.MISSILE;
         }
-        if (weaponType == null || damageValue == 0) {
+        if (!isInRange || damageValue == 0) {
             return null;
         }
-        return new DamagePerRangeAndAlignment(lowerBound, upperBound, damageValue, weaponAlignment, weaponType);
+        return new DamagePerRangeAndAlignment(boundaries, damageValue, weaponAlignment, weaponType);
     }
 
     @Override
@@ -175,13 +174,13 @@ public class AlignedFitting {
      * @return the range
      */
     @Nonnull
-    public BigDecimal getRange() {
-        BigDecimal range = BigDecimal.ZERO;
+    public Distance getRange() {
+        Distance range = Distance.ZERO;
         if (weapon != null) {
             range = weapon.getDamageProjectionRange();
         }
         if (launcher != null) {
-            range = launcher.getAmmunitionModule().getMissile().getMissileRange();
+            range = launcher.getAmmunitionModule().getMissile().getMaximumMissileRange();
         }
         return range;
     }

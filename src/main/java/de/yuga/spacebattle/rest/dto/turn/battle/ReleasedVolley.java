@@ -1,13 +1,13 @@
 package de.yuga.spacebattle.rest.dto.turn.battle;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.math.BigDecimal;
 import java.util.UUID;
 
 public class ReleasedVolley {
@@ -37,7 +37,7 @@ public class ReleasedVolley {
 
     @Nullable
     @ApiModelProperty(required = true, value = "The distance of this shot.")
-    private BigDecimal initialDistance;
+    private Distance initialDistance;
 
 
     public ReleasedVolley(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.ReleasedVolley input) {
@@ -106,11 +106,11 @@ public class ReleasedVolley {
     }
 
     @Nullable
-    public BigDecimal getInitialDistance() {
+    public Distance getInitialDistance() {
         return initialDistance;
     }
 
-    public void setInitialDistance(@Nullable final BigDecimal initialDistance) {
+    public void setInitialDistance(@Nullable final Distance initialDistance) {
         this.initialDistance = initialDistance;
     }
 }

@@ -2,11 +2,11 @@ package de.yuga.spacebattle.backend.combat.round;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.dto.Historizable;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.enums.ECombatPhase.ECombatSubPhase;
 
 import javax.annotation.Nonnull;
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,11 +70,11 @@ public class MissileSalvoHealthState extends Historizable<MissileSalvoHealthStat
      * @return the warheads range
      */
     @Nonnull
-    public BigDecimal getAttackRange() {
+    public Distance getAttackRange() {
         if (!isActive()) {
-            return BigDecimal.ZERO;
+            return Distance.ZERO;
         }
-        final List<BigDecimal> damageProjectionRanges = currentAmountByType.keySet().stream()
+        final List<Distance> damageProjectionRanges = currentAmountByType.keySet().stream()
                 .map(missile -> missile.getWarhead().getDamageProjectionRange())
                 .sorted()
                 .collect(Collectors.toList());
@@ -86,11 +86,11 @@ public class MissileSalvoHealthState extends Historizable<MissileSalvoHealthStat
      * This calculates and sets the range per round.<br>
      * Could be useful if the salvo is reduced to the slower missile types.
      */
-    public BigDecimal getRangePerCombatRound() {
+    public Distance getRangePerCombatRound() {
         if (!isActive()) {
-            return BigDecimal.ZERO;
+            return Distance.ZERO;
         }
-        final List<BigDecimal> rangesPerCombatRoundAsc = currentAmountByType.keySet().stream()
+        final List<Distance> rangesPerCombatRoundAsc = currentAmountByType.keySet().stream()
                 .map(Missile::getRangePerCombatRound)
                 .sorted()
                 .collect(Collectors.toList());

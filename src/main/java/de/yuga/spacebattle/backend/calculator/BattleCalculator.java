@@ -2,6 +2,8 @@ package de.yuga.spacebattle.backend.calculator;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 
 import javax.annotation.Nonnull;
@@ -23,15 +25,14 @@ public class BattleCalculator {
      *
      * @param missile the missile
      */
-    public static BigDecimal getMissileRange(@Nonnull final Missile missile) {
+    public static Distance getMissileRange(@Nonnull final Missile missile) {
         Preconditions.checkNotNull(missile, "missile shouldn't be null!");
 
-        final AtomicReference<BigDecimal> range = new AtomicReference<>(BigDecimal.ZERO);
+        final AtomicReference<Distance> range = new AtomicReference<>(Distance.ZERO);
         missile.getMissileMotors().forEach(missileMotor -> {
             int endurance = missileMotor.getEndurance();
-            int acceleration = missileMotor.getAcceleration();
-            final int meterPerSecondSquaredFromG = NavigationCalculator.getMeterPerSecondSquaredFromG(acceleration);
-            range.set(range.get().add(NavigationCalculator.getRangeByTimeAndAcceleration(endurance, meterPerSecondSquaredFromG)));
+            final Acceleration acceleration = missileMotor.getAcceleration();
+            range.set(range.get().add(NavigationCalculator.getRangeByTimeAndAcceleration(endurance, acceleration)));
         });
         return range.get();
     }

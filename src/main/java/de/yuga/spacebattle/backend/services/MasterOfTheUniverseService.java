@@ -1,8 +1,9 @@
 package de.yuga.spacebattle.backend.services;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
@@ -236,7 +237,8 @@ public class MasterOfTheUniverseService {
             max = (int) (xCoordinate + maximumDifference);
         }
         int yCoordinate = getCoordinateWithInnerBound(innerCircle, min, max);
-        return new Orbit(xCoordinate, yCoordinate);
+        final EDistanceMetric distanceMetric = planetaryOrbit ? Planet.PLANET_STANDARD_METRIC : StarSystem.STAR_SYSTEM_STANDARD_METRIC;
+        return new Orbit(new Distance(xCoordinate, distanceMetric), new Distance(yCoordinate, distanceMetric));
     }
 
     /**
@@ -394,23 +396,23 @@ public class MasterOfTheUniverseService {
         Armor armor = moduleService.createArmor("Armor Mk I", "An armor", unlockArmor, 5, 3000, 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         Propulsion propulsion = moduleService.createPropulsion("Speed Mk I", "A drive", unlockPropulsion, 5, 500, 1, false, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         Propulsion propulsionFTL = moduleService.createPropulsion("FTL Speed Mk I", "A FTL drive", unlockFTLPropulsion, 10, 500, 1, true, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        ElectronicWarfare electronicWarfare = moduleService.createElectronicWarfare("Scanner Mk I", "A scanner", unlockElectronicWarfare, 5, 100, 800000000, 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        ElectronicWarfare electronicWarfare = moduleService.createElectronicWarfare("Scanner Mk I", "A scanner", unlockElectronicWarfare, 5, 100, new Distance(2.669, EDistanceMetric.LS), 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         Sidewall sidewall = moduleService.createSidewall("Shield Mk I", "A shield", unlockShield, 5, 15000, 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
 
         AmmunitionModule shipKillerAmmunition = moduleService.createAmmunitionModule("Rocket Ammunition", "A bunch of rockets.", unlocksRocketAmmunition, 5, 10, 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        MissileMotor shipKillerMotor = moduleService.createMissileMotor("Ship Killer Motor Mk I", 180, NavigationCalculator.getMeterPerSecondSquaredFromG(46000), 20, 100);
-        Warhead nuclearShipKillerWarHead = moduleService.createWarhead("Nuclear ship killer war head", 1000, BigDecimal.valueOf(50000), EWarheadType.EXPLOSION, 100);
+        MissileMotor shipKillerMotor = moduleService.createMissileMotor("Ship Killer Motor Mk I", 180, new Acceleration(46000, EAccelerationMetric.G), 20, 100);
+        Warhead nuclearShipKillerWarHead = moduleService.createWarhead("Nuclear ship killer war head", 1000, new Distance(0.00017, EDistanceMetric.LS), EWarheadType.EXPLOSION, 100);
         Missile shipKillerMissile = moduleService.createMissile("Nuclear ship killer missile Mk I", 100, 100, 100, nuclearShipKillerWarHead, List.of(shipKillerMotor), unlockMissiles, shipKillerAmmunition);
         Launcher shipKillerLauncher = moduleService.createLauncher("Ship killer launcher Mk I", "The launcher for ship killers", unlockMissiles, shipKillerAmmunition, 100, 1, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(shipKillerMissile));
 
         AmmunitionModule counterRocketAmmunition = moduleService.createAmmunitionModule("Counter Rocket Ammunition", "Another bunch of rockets.", unlocksCounterRocketAmmunition, 5, 10, 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        MissileMotor counterMissileMotor = moduleService.createMissileMotor("Counter Motor Mk I", 30, NavigationCalculator.getMeterPerSecondSquaredFromG(96000), 80, 10);
-        Warhead counterWarHead = moduleService.createWarhead("Counter war head", 1, BigDecimal.ZERO, EWarheadType.COUNTER_MISSILE, 10);
+        MissileMotor counterMissileMotor = moduleService.createMissileMotor("Counter Motor Mk I", 30, new Acceleration(96000, EAccelerationMetric.G), 80, 10);
+        Warhead counterWarHead = moduleService.createWarhead("Counter war head", 1, Distance.ZERO, EWarheadType.COUNTER_MISSILE, 10);
         Missile counterMissile = moduleService.createMissile("Counter missile Mk I", 10, 10, 10, counterWarHead, List.of(counterMissileMotor), unlockCounterMissiles, counterRocketAmmunition);
         Launcher counterMissileLauncher = moduleService.createLauncher("Counter missile launcher Mk I", "The launcher for counter missiles", unlockCounterMissiles, counterRocketAmmunition, 100, 1, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
 
-        Weapon laserWeapon = moduleService.createWeapon("Laser Mk I", "A laser", unlockLaser, 5, 1000, 1, BigDecimal.valueOf(400000000), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        Weapon pointDefense = moduleService.createWeapon("Point Defense Mk I", "A point defense", unlockPointDefense, 5, 1, 1, BigDecimal.valueOf(400000000), 1, EWeaponType.POINT_DEFENSE, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Weapon laserWeapon = moduleService.createWeapon("Laser Mk I", "A laser", unlockLaser, 5, 1000, 1, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Weapon pointDefense = moduleService.createWeapon("Point Defense Mk I", "A point defense", unlockPointDefense, 5, 1, 1, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.POINT_DEFENSE, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS));
 
         PassiveModule passiveModule = moduleService.createPassiveModule("Improves armor", "Increases the amount of armor", unlockPassive, ESupportType.ARMOR, ECalculationType.ADD, 5, 10, 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         LOGGER.info("Modules created");

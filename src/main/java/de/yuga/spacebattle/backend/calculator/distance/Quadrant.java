@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 
 import javax.annotation.Nonnull;
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -66,8 +66,8 @@ public enum Quadrant {
     public static Quadrant getByOrbit(@Nonnull final Orbit orbit) {
         Preconditions.checkNotNull(orbit, "orbit shouldn't be null!");
 
-        final BigInteger xCoordinate = orbit.getXCoordinate();
-        final BigInteger yCoordinate = orbit.getYCoordinate();
+        final BigDecimal xCoordinate = orbit.getXCoordinate().getCoordinate();
+        final BigDecimal yCoordinate = orbit.getYCoordinate().getCoordinate();
 
         int signumX = xCoordinate.signum();
         int signumY = yCoordinate.signum();

@@ -2,6 +2,8 @@ package de.yuga.spacebattle.backend.entities.spacecrafts.ammunition;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
+import de.yuga.spacebattle.backend.converter.DistanceConverter;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
@@ -10,7 +12,6 @@ import de.yuga.spacebattle.backend.enums.EWarheadType;
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "warhead")
@@ -28,8 +29,8 @@ public class Warhead extends AbstractEntityKey {
     /**
      * Defines the range of this weapon in meter.
      */
-    @Column(nullable = false, columnDefinition = "decimal (19, 0)")
-    private BigDecimal damageProjectionRange;
+    @Convert(converter = DistanceConverter.class)
+    private Distance damageProjectionRange;
 
     /**
      * The way of damage projection.
@@ -53,7 +54,7 @@ public class Warhead extends AbstractEntityKey {
 
     public Warhead(@Nonnull final String typeName,
                    final int damageValue,
-                   @Nonnull final BigDecimal damageProjectionRange,
+                   @Nonnull final Distance damageProjectionRange,
                    @Nonnull final EWarheadType warheadType,
                    final int useCapacity) {
         Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
@@ -76,7 +77,7 @@ public class Warhead extends AbstractEntityKey {
         return damageValue;
     }
 
-    public BigDecimal getDamageProjectionRange() {
+    public Distance getDamageProjectionRange() {
         return damageProjectionRange;
     }
 

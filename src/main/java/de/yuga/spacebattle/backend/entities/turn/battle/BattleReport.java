@@ -238,11 +238,7 @@ public class BattleReport extends AbstractEntityKey {
 
             final List<FleetRoundState> fleetRoundStates = statesByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
 
-            final List<HitLog> hitLogsOfCombatRound = fleetRoundStates.stream()
-                    .collect(Collectors.toMap(Function.identity(), f -> f.getFleetHealthState().getHitLogs()))
-                    .values()
-                    .stream()
-                    .map(Map::values)
+            final List<HitLog> hitLogsOfCombatRound = fleetRoundStates.stream().map(f -> f.getFleetHealthState().getHitLogs().values())
                     .flatMap(Collection::stream)
                     .flatMap(Collection::stream)
                     // filter all hit logs from other rounds away - necessary because the fleet round states object character

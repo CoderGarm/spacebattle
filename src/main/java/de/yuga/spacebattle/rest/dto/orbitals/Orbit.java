@@ -1,10 +1,10 @@
 package de.yuga.spacebattle.rest.dto.orbitals;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.annotation.Nonnull;
-import java.math.BigInteger;
 
 public class Orbit {
 
@@ -12,13 +12,13 @@ public class Orbit {
      * Just to position the system.
      */
     @ApiModelProperty(required = true, value = "The x-coordinate of this orbit.")
-    private BigInteger xCoordinate;
+    private Distance xCoordinate;
 
     /**
      * Just to position the system.
      */
     @ApiModelProperty(required = true, value = "The y-coordinate of this orbit.")
-    private BigInteger yCoordinate;
+    private Distance yCoordinate;
 
     public Orbit() {
     }
@@ -30,11 +30,11 @@ public class Orbit {
         this.yCoordinate = orbit.getYCoordinate();
     }
 
-    public BigInteger getxCoordinate() {
+    public Distance getxCoordinate() {
         return xCoordinate;
     }
 
-    public BigInteger getyCoordinate() {
+    public Distance getyCoordinate() {
         return yCoordinate;
     }
 }

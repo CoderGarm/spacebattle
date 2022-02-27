@@ -44,8 +44,8 @@ public class MovementAction extends CombatRoundKey {
     @NotNull
     @Nonnull
     @Embedded
-    @AttributeOverride(name = "xCoordinate", column = @Column(name = "xCoordInterimDestination", columnDefinition = "decimal(19, 0)"))
-    @AttributeOverride(name = "yCoordinate", column = @Column(name = "yCoordInterimDestination", columnDefinition = "decimal(19, 0)"))
+    @AttributeOverride(name = "xCoordinate", column = @Column(name = "xCoordInterimDestination"))
+    @AttributeOverride(name = "yCoordinate", column = @Column(name = "yCoordInterimDestination"))
     private Orbit interimDestination;
 
     /**
@@ -54,8 +54,8 @@ public class MovementAction extends CombatRoundKey {
     @NotNull
     @Nonnull
     @Embedded
-    @AttributeOverride(name = "xCoordinate", column = @Column(name = "xCoordDestination", columnDefinition = "decimal(19, 0)"))
-    @AttributeOverride(name = "yCoordinate", column = @Column(name = "yCoordDestination", columnDefinition = "decimal(19, 0)"))
+    @AttributeOverride(name = "xCoordinate", column = @Column(name = "xCoordDestination"))
+    @AttributeOverride(name = "yCoordinate", column = @Column(name = "yCoordDestination"))
     private Orbit destination;
 
     public MovementAction() {

@@ -15,6 +15,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("deprecation")
 public class UserServiceTest extends BaseTestCase {
 
     @Mock

@@ -3,9 +3,11 @@ package de.yuga.spacebattle.backend.combat.dto;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.combat.round.BeamState;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
+import de.yuga.spacebattle.backend.enums.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +28,7 @@ class BeamVolleyTest {
     Fleet target;
 
     private BeamVolley testObject;
-    private final static BigDecimal DISTANCE = BigDecimal.valueOf(10000);
+    private final static Distance DISTANCE = new Distance(10000, EDistanceMetric.M);
 
     @BeforeEach
     void setUp() {
@@ -47,7 +49,8 @@ class BeamVolleyTest {
         ReflectionTestUtils.setField(testObject, "firedShots", List.of(beamState));
         ReflectionTestUtils.setField(testObject, "distance", BigDecimal.TEN);
         assertSame(ECombatPhase.ECombatSubPhase.BEAM_FIRE_PHASE, testObject.getCombatSubPhase());
-        final List<DamagePerRangeAndAlignment> damagePerRangePerType = testObject.getActor().getDamagePerRangePerType(DISTANCE, DISTANCE, EWeaponType.BEAM);
+        final RangeDefinition rangeDefinition = new RangeDefinition(DISTANCE.getCoordinate(), DISTANCE.getCoordinate(), EDistanceMetric.M);
+        final List<DamagePerRangeAndAlignment> damagePerRangePerType = testObject.getActor().getDamagePerRangePerType(rangeDefinition, EWeaponType.BEAM);
         assertFalse(damagePerRangePerType.isEmpty());
         assertTrue(testObject.getAppliedDamage().isEmpty());
         // test method

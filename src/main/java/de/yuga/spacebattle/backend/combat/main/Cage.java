@@ -10,9 +10,11 @@ import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.FleetHealthState;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.combat.round.WarshipHealthState;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
+import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,10 +22,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -178,7 +177,7 @@ public class Cage implements Future<Cage> {
     private void log(String msg, final Long start, final Long end) {
         if (logIt) {
             if (start != null && end != null) {
-                final long duration = (end - start)/* / 1000*/;
+                final long duration = (end - start);
                 System.out.println("\t" + msg + "\t\t - duration: " + duration);
             } else {
                 System.out.println("\t" + msg);
@@ -192,7 +191,7 @@ public class Cage implements Future<Cage> {
     @VisibleForTesting
     protected void executeCombatRound() {
         final CombatRound currentCombatRound = getCurrentCombatRound();
-        log("#" + currentCombatRound + " new round", null, null);
+        log("#" + currentCombatRound + " new round " + Calendar.getInstance(Locale.GERMANY).getTime(), null, null);
         long start = System.currentTimeMillis();
         combatHandler.handleMovementPhase();
         long end = System.currentTimeMillis();
@@ -218,7 +217,7 @@ public class Cage implements Future<Cage> {
 
         /* todo implement forced battle end at condition
          */
-        if (no > 2500) {
+        if (no >= 2500) {
             System.out.println("#" + no + " BATTLE FORCED DONE");
             forceDone = true;
         }
@@ -232,8 +231,8 @@ public class Cage implements Future<Cage> {
         end = System.currentTimeMillis();
         log("tidy up", start, end);
         if (no % 500 == 0) {
-            final BigDecimal distance = getCurrentStateByFleet(fleetOne).getPosition().getDistance(getCurrentStateByFleet(fleetTwo).getPosition());
-            System.out.println("#" + no + "\t\t - " + DistanceCalculator.getDistanceAsStringWithUnit(distance));
+            final Distance distance = getCurrentStateByFleet(fleetOne).getPosition().getDistance(getCurrentStateByFleet(fleetTwo).getPosition());
+            System.out.println("#" + no + "\t\t - " + distance.toString());
         }
     }
 
@@ -289,8 +288,8 @@ public class Cage implements Future<Cage> {
     private void initiateCombat() {
         final BigDecimal initialCageDiameter = getInitialCageDiameter();
         final BigDecimal initialCageRadius = initialCageDiameter.divide(BigDecimal.valueOf(2), DistanceCalculator.MATH_CONTEXT_TO_INTEGER_DOWN);
-        final Orbit fleetOneStartingOrbit = DistanceCalculator.createByRadiusAndQuadrant(initialCageRadius, Quadrant.Q1);
-        final Orbit fleetTwoStartingOrbit = DistanceCalculator.createByRadiusAndQuadrant(initialCageRadius, Quadrant.Q3);
+        final Orbit fleetOneStartingOrbit = DistanceCalculator.createByRadiusAndQuadrant(initialCageRadius, Quadrant.Q1, Planet.PLANET_STANDARD_METRIC);
+        final Orbit fleetTwoStartingOrbit = DistanceCalculator.createByRadiusAndQuadrant(initialCageRadius, Quadrant.Q3, Planet.PLANET_STANDARD_METRIC);
 
         roundStates.add(new FleetRoundState(this, fleetOne, fleetOneStartingOrbit));
         roundStates.add(new FleetRoundState(this, fleetTwo, fleetTwoStartingOrbit));
@@ -312,12 +311,13 @@ public class Cage implements Future<Cage> {
      * @return the diameter
      */
     private BigDecimal getInitialCageDiameter() {
-        final BigDecimal f1 = fleetOne.getMaximumWeaponRange();
-        final BigDecimal f2 = fleetTwo.getMaximumWeaponRange();
+        final Distance f1 = fleetOne.getMaximumWeaponRange();
+        final Distance f2 = fleetTwo.getMaximumWeaponRange();
         final BigDecimal initialCageDiameter;
         if (INITIAL_CAGE_DIAMETER.compareTo(BigDecimal.ZERO) == 0) {
             final int compareTo = f1.compareTo(f2);
-            initialCageDiameter = (compareTo < 0 ? f1 : f2).multiply(INITIAL_CAGE_DIAMETER_MULTIPLIER);
+            final BigDecimal coordinateInMetric = (compareTo < 0 ? f1 : f2).getCoordinateInMetric(Planet.PLANET_STANDARD_METRIC);
+            initialCageDiameter = coordinateInMetric.multiply(INITIAL_CAGE_DIAMETER_MULTIPLIER);
         } else {
             initialCageDiameter = INITIAL_CAGE_DIAMETER;
         }
@@ -356,8 +356,8 @@ public class Cage implements Future<Cage> {
 
         final Orbit actorPosition = getCurrentStateByFleet(target).getPosition();
         return flyingMissileSalvos.stream().filter(s -> s.getTarget().equals(target)).filter(s -> {
-            final BigDecimal currentDistance = actorPosition.getDistance(s.getPosition());
-            final BigDecimal rangePerCombatRound = s.getRangePerCombatRound();
+            final Distance currentDistance = actorPosition.getDistance(s.getPosition());
+            final Distance rangePerCombatRound = s.getRangePerCombatRound();
             final int toTravel = DistanceCalculator.getCombatRoundsToTravel(currentDistance, rangePerCombatRound);
             return toTravel <= 0;
         }).collect(Collectors.toList());
@@ -419,29 +419,16 @@ public class Cage implements Future<Cage> {
 
         if (historizable instanceof MovementAction) {
             final MovementAction movementAction = (MovementAction) historizable;
-            final MovementAction latestMatchingEntry = historyMovement.stream()
-                    .filter(m -> {
-                        final boolean sameActor = m.getActor().equals(movementAction.getActor());
-                        final boolean sameMovement = m.getMovementType() == movementAction.getMovementType();
-                        final boolean isKnown = sameActor && sameMovement;
-                        return isKnown;
-                    })
-                    .max(Comparator.comparing(MovementAction::getCombatRound))
-                    .orElse(null);
 
-            if (latestMatchingEntry == null) {
+            final MovementAction latest = historyMovement.stream()
+                    .filter(m -> m.getActor().equals(movementAction.getActor()))
+                    .max(Comparator.comparing(MovementAction::getCombatRound))
+                    .filter(m -> m.getMovementType() == movementAction.getMovementType())
+                    .stream().findFirst().orElse(null);
+            if (latest == null) {
                 // just write, it's probably the first entry for the filter
                 historyMovement.add(movementAction.clone());
-                return;
             }
-
-            // search for an entry between the latest matching and the current one - it means that there was a movement change in between
-            historyMovement.stream()
-                    .filter(m -> m.getActor().equals(movementAction.getActor()))
-                    .filter(m -> m.getCombatRound().compareTo(latestMatchingEntry.getCombatRound()) > 0)
-                    .findAny()
-                    .ifPresent(m -> historyMovement.add(movementAction.clone()));
-
         } else if (historizable instanceof MissileSalvo) {
             historyOfMissileSalvos.add(((MissileSalvo) historizable).clone());
         } else if (historizable instanceof BeamVolley) {

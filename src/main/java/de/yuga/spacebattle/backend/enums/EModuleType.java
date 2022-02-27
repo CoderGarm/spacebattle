@@ -9,7 +9,15 @@ public enum EModuleType implements HasIconName {
     WEAPON("Attack", "attack"),
     ARMOR("Armor", "armor"),
     SHIELD("Shield", "shield"),
+
+    /**
+     * As coordinates are in light seconds it has the native metric of {@link EDistanceMetric#LS}.
+     */
     PROPULSION("Propulsion", "propulsion"),
+
+    /**
+     * As coordinates are in light seconds it has the native metric of {@link EDistanceMetric#LY}.
+     */
     FTLPROPULSION("FTLPropulsion", "ftlpropulsion"),
     ELECTRONIC_WARFARE("Electronic warfare", "scanner");
 

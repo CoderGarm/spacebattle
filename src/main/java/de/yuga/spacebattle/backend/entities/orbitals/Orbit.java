@@ -3,14 +3,16 @@ package de.yuga.spacebattle.backend.entities.orbitals;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
+import de.yuga.spacebattle.backend.converter.DistanceConverter;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.enums.EDistanceMetric;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
-import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Embeddable;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 
 @Embeddable
 public class Orbit implements Comparable<Orbit>, Cloneable {
@@ -18,26 +20,21 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
     /**
      * Just to position the system.
      */
-    @Column(columnDefinition = "decimal(19, 0)")
-    private BigInteger xCoordinate;
+    @Convert(converter = DistanceConverter.class)
+    private Distance xCoordinate;
 
     /**
      * Just to position the system.
      */
-    @Column(columnDefinition = "decimal(19, 0)")
-    private BigInteger yCoordinate;
+    @Convert(converter = DistanceConverter.class)
+    private Distance yCoordinate;
 
     public Orbit() {
     }
 
-    public Orbit(final BigInteger xCoordinate, final BigInteger yCoordinate) {
-        this.xCoordinate = xCoordinate;
-        this.yCoordinate = yCoordinate;
-    }
-
-    public Orbit(final int xCoordinate, final int yCoordinate) {
-        this.xCoordinate = BigInteger.valueOf(xCoordinate);
-        this.yCoordinate = BigInteger.valueOf(yCoordinate);
+    public Orbit(final Distance xCoordinate, final Distance yCoordinate) {
+        this.xCoordinate = xCoordinate.clone();
+        this.yCoordinate = yCoordinate.clone();
     }
 
     public Orbit(@Nonnull final de.yuga.spacebattle.rest.dto.orbitals.Orbit orbit) {
@@ -47,38 +44,12 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
         this.yCoordinate = orbit.getyCoordinate();
     }
 
-    public Orbit(@Nonnull final Orbit orbit) {
-        Preconditions.checkNotNull(orbit, "orbit shouldn't be null!");
-
-        this.xCoordinate = orbit.getXCoordinate();
-        this.yCoordinate = orbit.getYCoordinate();
-    }
-
-    /**
-     * For convenience. BigDecimal will be scaled down.
-     */
-    public Orbit(@Nonnull final BigDecimal xCoordinate, @Nonnull final BigDecimal yCoordinate) {
-        Preconditions.checkNotNull(xCoordinate, "xCoordinate shouldn't be null!");
-        Preconditions.checkNotNull(yCoordinate, "yCoordinate shouldn't be null!");
-
-        this.xCoordinate = xCoordinate.toBigInteger();
-        this.yCoordinate = yCoordinate.toBigInteger();
-    }
-
-    public BigInteger getXCoordinate() {
+    public Distance getXCoordinate() {
         return xCoordinate;
     }
 
-    public void setXCoordinate(BigInteger xCoordinate) {
-        this.xCoordinate = xCoordinate;
-    }
-
-    public BigInteger getYCoordinate() {
+    public Distance getYCoordinate() {
         return yCoordinate;
-    }
-
-    public void setYCoordinate(BigInteger yCoordinate) {
-        this.yCoordinate = yCoordinate;
     }
 
     /**
@@ -88,7 +59,7 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
      * @return the distance in range units
      */
     @Nonnull
-    public BigDecimal getDistance(@Nonnull final Orbit targetOrbit) {
+    public Distance getDistance(@Nonnull final Orbit targetOrbit) {
         Preconditions.checkNotNull(targetOrbit, "targetOrbit shouldn't be null!");
 
         return DistanceCalculator.getOrbitalDistance(this, targetOrbit);
@@ -103,7 +74,7 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
      * @return the resulting position
      */
     public Orbit move(@Nonnull final EMovementType movementType,
-                      @Nonnull final BigDecimal distance,
+                      @Nonnull final Distance distance,
                       @Nonnull final Orbit direction) {
         Preconditions.checkNotNull(movementType, "movementType shouldn't be null!");
         Preconditions.checkNotNull(distance, "distance shouldn't be null!");
@@ -123,19 +94,17 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
                 // todo LOGGER.info("This should be implemented if we are in the space without any acting force by Newton III.");
                 return this.clone();
         }
-        final BigDecimal xDecimal = new BigDecimal(xCoordinate);
-        final BigDecimal yDecimal = new BigDecimal(yCoordinate);
 
-        final BigDecimal distanceScalar = i.multiply(distance);
-        final BigDecimal xDirection = xDecimal.subtract(new BigDecimal(direction.getXCoordinate()));
-        final BigDecimal yDirection = yDecimal.subtract(new BigDecimal(direction.getYCoordinate()));
-        final BigDecimal unitDirection = DistanceCalculator.getDistance(xDirection, yDirection);
-        final BigDecimal einheitsX = xDirection.divide(unitDirection, DistanceCalculator.MATH_CONTEXT_MORE_PRECISION);
-        final BigDecimal einheitsY = yDirection.divide(unitDirection, DistanceCalculator.MATH_CONTEXT_MORE_PRECISION);
-
-        final BigDecimal x = xDecimal.add(distanceScalar.multiply(einheitsX));
-        final BigDecimal y = yDecimal.add(distanceScalar.multiply(einheitsY));
-        return new Orbit(x, y);
+        final EDistanceMetric distanceMetric = getXCoordinate().getDistanceMetric();
+        final BigDecimal distanceScalar = i.multiply(distance.getCoordinateInMetric(distanceMetric));
+        final Distance xC = xCoordinate.subtract(direction.getXCoordinate());
+        final Distance yC = yCoordinate.subtract(direction.getYCoordinate());
+        final BigDecimal uC = DistanceCalculator.getDistance(xC.getCoordinate(), yC.getCoordinate());
+        final BigDecimal eXC = xC.getCoordinate().divide(uC, DistanceCalculator.MATH_CONTEXT_MORE_PRECISION);
+        final BigDecimal eYC = yC.getCoordinate().divide(uC, DistanceCalculator.MATH_CONTEXT_MORE_PRECISION);
+        final Distance x1 = xCoordinate.add(new Distance(distanceScalar.multiply(eXC), distanceMetric));
+        final Distance y1 = yCoordinate.add(new Distance(distanceScalar.multiply(eYC), distanceMetric));
+        return new Orbit(x1, y1);
     }
 
     /**
@@ -144,9 +113,9 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
      * @param xCoordinate the new x
      * @param yCoordinate the new y
      */
-    public void moveTo(final BigInteger xCoordinate, final BigInteger yCoordinate) {
-        this.xCoordinate = xCoordinate;
-        this.yCoordinate = yCoordinate;
+    public void moveTo(final Distance xCoordinate, final Distance yCoordinate) {
+        this.xCoordinate = xCoordinate.clone();
+        this.yCoordinate = yCoordinate.clone();
     }
 
     /**
@@ -188,11 +157,11 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
         a negative integer, zero, or a positive integer as
         the first argument is less than, equal to, or greater than the second.
         */
-        final BigInteger o1X = this.getXCoordinate();
-        final BigInteger o2X = o.getXCoordinate();
+        final Distance o1X = this.getXCoordinate();
+        final Distance o2X = o.getXCoordinate();
 
-        final BigInteger o1Y = this.getYCoordinate();
-        final BigInteger o2Y = o.getYCoordinate();
+        final Distance o1Y = this.getYCoordinate();
+        final Distance o2Y = o.getYCoordinate();
 
         if (o1X.compareTo(o2X) < 0) {
             return -1;
@@ -207,20 +176,20 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
     }
 
     public static Orbit getCenterOrbit() {
-        return new Orbit(BigInteger.ZERO, BigInteger.ZERO);
+        return new Orbit(Distance.ZERO, Distance.ZERO);
     }
 
     @Override
     public String toString() {
-        return " x: " + DistanceCalculator.getDistanceAsStringWithUnit(xCoordinate) + ", y: " + DistanceCalculator.getDistanceAsStringWithUnit(yCoordinate);
+        return " x: " + xCoordinate.toString() + ", y: " + yCoordinate.toString();
     }
 
     @Override
     public Orbit clone() {
         try {
             final Orbit clone = (Orbit) super.clone();
-            clone.xCoordinate = new BigInteger(xCoordinate.toString());
-            clone.yCoordinate = new BigInteger(yCoordinate.toString());
+            clone.xCoordinate = xCoordinate.clone();
+            clone.yCoordinate = yCoordinate.clone();
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();

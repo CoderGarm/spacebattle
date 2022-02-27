@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.entities.orbitals;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.enums.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.EStarClassType;
 
 import javax.annotation.Nonnull;
@@ -23,6 +24,10 @@ import java.util.Set;
         uniqueConstraints = @UniqueConstraint(name = "COORDINATE_UK", columnNames = {"xCoordinate", "yCoordinate"}))
 @AttributeOverride(name = "id", column = @Column(name = "idStarSystem"))
 public class StarSystem extends AbstractEntityKey {
+
+    @Nonnull
+    @Transient
+    public static final EDistanceMetric STAR_SYSTEM_STANDARD_METRIC = EDistanceMetric.LY;
 
     @Nonnull
     @NotNull

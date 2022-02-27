@@ -3,11 +3,15 @@ package de.yuga.spacebattle.backend.calculator.distance;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.NotifyUserException;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
+import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
-import de.yuga.spacebattle.backend.enums.ELengthDefinition;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
+import de.yuga.spacebattle.backend.enums.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.EStarClassType;
 
@@ -16,11 +20,16 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class DistanceCalculator {
 
     public final static MathContext MATH_CONTEXT_TO_INTEGER_DOWN = new MathContext(0, RoundingMode.DOWN);
-    public final static MathContext MATH_CONTEXT_MORE_PRECISION = new MathContext(15, RoundingMode.DOWN);
+    public final static MathContext MATH_CONTEXT_MORE_PRECISION = new MathContext(10, RoundingMode.DOWN);
+    public final static MathContext MATH_CONTEXT_REALISTIC_PRECISION = new MathContext(8, RoundingMode.HALF_UP);
 
     /**
      * Returns the amount of digits.
@@ -90,24 +99,18 @@ public class DistanceCalculator {
         Preconditions.checkNotNull(origin, "origin shouldn't be null!");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
 
-        BigDecimal duration = BigDecimal.ZERO;
-
-
+        int ticksToTravel = 0;
         final StarSystem originSystem = origin.getSystem();
         final StarSystem destinationSystem = destination.getSystem();
         if (originSystem != null && destinationSystem != null) {
-            final BigDecimal subLightDurationToHyperLimit = getSubLightDurationToHyperLimit(fleet, origin, destination);
-            duration = duration.add(subLightDurationToHyperLimit);
-            final BigDecimal ftlDuration = getFTLDuration(fleet, originSystem.getOrbit(), destinationSystem.getOrbit());
-            duration = duration.add(ftlDuration);
-            final BigDecimal subLightDurationFromHyperLimit = getSubLightDurationFromHyperLimit(fleet, destination);
-            duration = duration.add(subLightDurationFromHyperLimit);
+            ticksToTravel += getSubLightDurationToHyperLimit(fleet, origin, destination);
+            final int ftlDuration = getFTLDuration(fleet, originSystem.getOrbit(), destinationSystem.getOrbit());
+            ticksToTravel += ftlDuration;
+            ticksToTravel += getSubLightDurationFromHyperLimit(fleet, destination);
         } else if (origin.getOrbit() != null && destination.getOrbit() != null) {
-            final BigDecimal subLightDuration = getSubLightDuration(fleet, origin.getOrbit(), destination.getOrbit());
-            duration = duration.add(subLightDuration);
+            ticksToTravel += getSubLightDuration(fleet, origin.getOrbit(), destination.getOrbit());
         }
 
-        final int ticksToTravel = duration.intValue();
         if (ticksToTravel == 0) {
             return 1;
         } else if (ticksToTravel < 0) {
@@ -123,9 +126,8 @@ public class DistanceCalculator {
      * @param destination the destination of the fleet
      * @return the time to travel from the current position of the fleet to the hyper limit
      */
-    @Nonnull
     @VisibleForTesting
-    private static BigDecimal getSubLightDurationFromHyperLimit(@Nonnull final Fleet fleet, @Nonnull final FleetOrbit destination) {
+    private static int getSubLightDurationFromHyperLimit(@Nonnull final Fleet fleet, @Nonnull final FleetOrbit destination) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
         Preconditions.checkArgument(destination.getSystem() != null, "destination system shouldn't be null!");
@@ -134,9 +136,9 @@ public class DistanceCalculator {
 
         final Quadrant quadrant = Quadrant.getByOrbit(destination.getOrbit());
         final EStarClassType starClassType = destination.getSystem().getStarClassType();
-        final double radiusOfHyperLimit = starClassType.getLightMinutesToHyperLimit() * 100;
+        final double radiusOfHyperLimit = starClassType.getLightMinutesToHyperLimit();
 
-        final Orbit positionOnHyperLimit = createByRadiusAndQuadrant(new BigDecimal(radiusOfHyperLimit), quadrant);
+        final Orbit positionOnHyperLimit = createByRadiusAndQuadrant(new BigDecimal(radiusOfHyperLimit), quadrant, Planet.PLANET_STANDARD_METRIC);
         // todo currently there are fixed entry points into a system - this must be changed
         return getSubLightDuration(fleet, positionOnHyperLimit, destination.getOrbit());
     }
@@ -148,10 +150,9 @@ public class DistanceCalculator {
      * @param fleet the fleet which wants to travel
      * @return the time to travel from the current position of the fleet to the hyper limit
      */
-    @Nonnull
-    private static BigDecimal getSubLightDurationToHyperLimit(@Nonnull final Fleet fleet,
-                                                              @Nonnull final FleetOrbit origin,
-                                                              @Nonnull final FleetOrbit destination) {
+    private static int getSubLightDurationToHyperLimit(@Nonnull final Fleet fleet,
+                                                       @Nonnull final FleetOrbit origin,
+                                                       @Nonnull final FleetOrbit destination) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
         Preconditions.checkNotNull(origin, "origin shouldn't be null!");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
@@ -163,14 +164,14 @@ public class DistanceCalculator {
         final boolean outOfSystem = originSystem == null || destinationSystem == null;
         final boolean noPositionSpecified = originOrbit == null;
         if (outOfSystem || originSystem.equals(destinationSystem) || noPositionSpecified) {
-            return BigDecimal.ZERO;
+            return 0;
         }
 
         final Quadrant quadrant = Quadrant.getByOrbit(originOrbit);
         final EStarClassType starClassType = originSystem.getStarClassType();
-        final double radiusOfHyperLimit = starClassType.getLightMinutesToHyperLimit() * 100;
+        final double radiusOfHyperLimit = starClassType.getLightMinutesToHyperLimit();
 
-        final Orbit positionOnHyperLimit = createByRadiusAndQuadrant(new BigDecimal(radiusOfHyperLimit), quadrant);
+        final Orbit positionOnHyperLimit = createByRadiusAndQuadrant(new BigDecimal(radiusOfHyperLimit), quadrant, Planet.PLANET_STANDARD_METRIC);
         return getSubLightDuration(fleet, originOrbit, positionOnHyperLimit);
     }
 
@@ -182,8 +183,12 @@ public class DistanceCalculator {
      * @return the orbit
      */
     @Nonnull
-    public static Orbit createByRadiusAndQuadrant(final BigDecimal radius, @Nonnull final Quadrant quadrant) {
+    public static Orbit createByRadiusAndQuadrant(@Nonnull final BigDecimal radius,
+                                                  @Nonnull final Quadrant quadrant,
+                                                  @Nonnull final EDistanceMetric metric) {
+        Preconditions.checkNotNull(radius, "radius shouldn't be null!");
         Preconditions.checkNotNull(quadrant, "quadrant shouldn't be null!");
+        Preconditions.checkNotNull(metric, "metric shouldn't be null!");
 
         //X=r⋅cos(φ),Y=r⋅sin(φ)
         final double toRadians = Math.toRadians(quadrant.getPhi());
@@ -191,7 +196,7 @@ public class DistanceCalculator {
         final double sinPhi = Math.sin(toRadians);
         final BigDecimal xCoord = radius.multiply(new BigDecimal(cosPhi));
         final BigDecimal yCoord = radius.multiply(new BigDecimal(sinPhi));
-        return new Orbit(xCoord, yCoord);
+        return new Orbit(new Distance(xCoord, metric), new Distance(yCoord, metric));
     }
 
     /**
@@ -202,17 +207,17 @@ public class DistanceCalculator {
      * @param destination the destination
      * @return the time to travel in ticks
      */
-    @Nonnull
-    private static BigDecimal getSubLightDuration(@Nonnull final Fleet fleet,
-                                                  @Nonnull final Orbit origin,
-                                                  @Nonnull final Orbit destination) {
+    private static int getSubLightDuration(@Nonnull final Fleet fleet,
+                                           @Nonnull final Orbit origin,
+                                           @Nonnull final Orbit destination) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
         Preconditions.checkNotNull(origin, "origin shouldn't be null!");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
 
-        final BigDecimal distance = origin.getDistance(destination);
-        final BigDecimal subLightRangePerTick = fleet.getRangePerTick(EModuleType.PROPULSION);
-        return distance.divide(subLightRangePerTick, 1, RoundingMode.UP);
+        final Distance distance = origin.getDistance(destination);
+        final Acceleration subLightAcceleration = fleet.getAccelerationFor(EModuleType.PROPULSION);
+        final Distance subLightRangePerTick = NavigationCalculator.getRangeByTimeAndAcceleration(Tick.TICK_DURATION, subLightAcceleration);
+        return distance.getCoordinate().divide(subLightRangePerTick.getCoordinateInMetric(distance.getDistanceMetric()), MATH_CONTEXT_REALISTIC_PRECISION).intValue();
     }
 
     /**
@@ -223,17 +228,17 @@ public class DistanceCalculator {
      * @param destination the destination
      * @return the time to travel in ticks
      */
-    @Nonnull
-    private static BigDecimal getFTLDuration(@Nonnull final Fleet fleet,
-                                             @Nonnull final Orbit origin,
-                                             @Nonnull final Orbit destination) {
+    private static int getFTLDuration(@Nonnull final Fleet fleet,
+                                      @Nonnull final Orbit origin,
+                                      @Nonnull final Orbit destination) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
         Preconditions.checkNotNull(origin, "origin shouldn't be null!");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
 
-        final BigDecimal distance = origin.getDistance(destination);
-        final BigDecimal ftlRangePerTick = fleet.getRangePerTick(EModuleType.FTLPROPULSION);
-        return distance.divide(ftlRangePerTick, 1, RoundingMode.UP);
+        final Distance distance = origin.getDistance(destination);
+        final Acceleration ftlAcceleration = fleet.getAccelerationFor(EModuleType.FTLPROPULSION);
+        final Distance subLightRangePerTick = NavigationCalculator.getRangeByTimeAndAcceleration(Tick.TICK_DURATION, ftlAcceleration);
+        return distance.getCoordinate().divide(subLightRangePerTick.getCoordinateInMetric(distance.getDistanceMetric()), MATH_CONTEXT_REALISTIC_PRECISION).intValue();
     }
 
     /**
@@ -244,17 +249,17 @@ public class DistanceCalculator {
      * @return the distance
      */
     @Nonnull
-    public static BigDecimal getOrbitalDistance(@Nonnull final Orbit orbit1, @Nonnull final Orbit orbit2) {
+    public static Distance getOrbitalDistance(@Nonnull final Orbit orbit1, @Nonnull final Orbit orbit2) {
         Preconditions.checkNotNull(orbit1, "orbit1 shouldn't be null!");
         Preconditions.checkNotNull(orbit2, "orbit2 shouldn't be null!");
 
-        final BigDecimal x1 = new BigDecimal(orbit1.getXCoordinate());
-        final BigDecimal y1 = new BigDecimal(orbit1.getYCoordinate());
+        final BigDecimal x1 = orbit1.getXCoordinate().getCoordinate();
+        final BigDecimal y1 = orbit1.getYCoordinate().getCoordinate();
 
-        final BigDecimal x2 = new BigDecimal(orbit2.getXCoordinate());
-        final BigDecimal y2 = new BigDecimal(orbit2.getYCoordinate());
+        final BigDecimal x2 = orbit2.getXCoordinate().getCoordinateInMetric(orbit1.getXCoordinate().getDistanceMetric());
+        final BigDecimal y2 = orbit2.getYCoordinate().getCoordinateInMetric(orbit1.getYCoordinate().getDistanceMetric());
 
-        return getDistance(x2.subtract(x1), y2.subtract(y1));
+        return new Distance(getDistance(x2.subtract(x1), y2.subtract(y1)), orbit1.getXCoordinate().getDistanceMetric());
     }
 
     /**
@@ -281,24 +286,9 @@ public class DistanceCalculator {
     public static String getDistanceAsStringWithUnit(@Nonnull final BigDecimal value) {
         Preconditions.checkNotNull(value, "value shouldn't be null!");
 
-        final ELengthDefinition lengthDefinition = ELengthDefinition.getBy(value);
-        final BigInteger divisor = lengthDefinition.getDivisor();
-        return value.divide(new BigDecimal(divisor), DistanceCalculator.MATH_CONTEXT_MORE_PRECISION) + " " + lengthDefinition.getUnit();
-    }
-
-    /**
-     * Transforms the given value into a suitable length with unit.
-     *
-     * @param value the value
-     * @return a string like '0.3 lm' for o point three light minutes
-     */
-    @Nonnull
-    public static String getDistanceAsStringWithUnit(@Nonnull final BigInteger value) {
-        Preconditions.checkNotNull(value, "value shouldn't be null!");
-
-        final ELengthDefinition lengthDefinition = ELengthDefinition.getBy(value);
-        final BigInteger divisor = lengthDefinition.getDivisor();
-        return new BigDecimal(value).divide(new BigDecimal(divisor), DistanceCalculator.MATH_CONTEXT_MORE_PRECISION) + " " + lengthDefinition.getUnit();
+        final EDistanceMetric lengthDefinition = EDistanceMetric.getBy(value);
+        final BigDecimal divisor = lengthDefinition.getDivisor();
+        return value.divide(divisor, MATH_CONTEXT_MORE_PRECISION).setScale(2, RoundingMode.HALF_UP) + " " + lengthDefinition.getUnit();
     }
 
     /**
@@ -308,10 +298,44 @@ public class DistanceCalculator {
      * @param rangePerCombatRound the range per round
      * @return the amount of rounds
      */
-    public static int getCombatRoundsToTravel(@Nonnull final BigDecimal distance, @Nonnull final BigDecimal rangePerCombatRound) {
+    public static int getCombatRoundsToTravel(@Nonnull final Distance distance, @Nonnull final Distance rangePerCombatRound) {
         Preconditions.checkNotNull(distance, "distance shouldn't be null!");
         Preconditions.checkNotNull(rangePerCombatRound, "rangePerCombatRound shouldn't be null!");
 
-        return distance.divide(rangePerCombatRound, DistanceCalculator.MATH_CONTEXT_MORE_PRECISION).intValue();
+        final BigDecimal distanceInMetric = distance.getCoordinateInMetric(EDistanceMetric.M);
+        final BigDecimal rangeInMetric = rangePerCombatRound.getCoordinateInMetric(EDistanceMetric.M);
+        return distanceInMetric.divide(rangeInMetric, MATH_CONTEXT_REALISTIC_PRECISION).intValue();
+    }
+
+    /**
+     * Transforms the given value into a suitable length with unit.
+     *
+     * @param value the value
+     * @return a string like '0.3 lm' for o point three light minutes
+     */
+    @Nonnull
+    public static Distance convertToScale(@Nonnull final Distance value) {
+        Preconditions.checkNotNull(value, "value shouldn't be null!");
+
+        final Distance clone = value.clone();
+        final BigDecimal coordinate = value.getCoordinate();
+        final int scale = coordinate.scale();
+        if (scale == 0) {
+            return clone;
+        }
+        final Map<EDistanceMetric, BigDecimal> collect = Arrays.stream(EDistanceMetric.values())
+                .filter(metric -> metric.getDigitCount() <= value.getDistanceMetric().getDigitCount())
+                .collect(Collectors.toMap(Function.identity(), value::getCoordinateInMetric));
+
+        collect.entrySet().stream().min((o1, o2) -> {
+            final int scale1 = o1.getValue().scale();
+            final int scale2 = o2.getValue().scale();
+            if (scale < scale1 && scale < scale2 || scale1 < 0 || scale2 < 0) {
+                return -1;
+            }
+            return Integer.compare(scale1, scale2);
+        }).ifPresent(e -> clone.convertToMetricWithScale(e.getKey(), e.getKey().getScale()));
+
+        return clone;
     }
 }

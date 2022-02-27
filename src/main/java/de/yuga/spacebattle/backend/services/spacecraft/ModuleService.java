@@ -3,6 +3,8 @@ package de.yuga.spacebattle.backend.services.spacecraft;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
@@ -18,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -142,12 +143,13 @@ public class ModuleService {
                                                      @Nonnull final Research unlockedThrough,
                                                      final int useCapacity,
                                                      final int value,
-                                                     final int effectiveRange,
+                                                     @Nonnull final Distance effectiveRange,
                                                      final int techLevel,
                                                      @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
+        Preconditions.checkNotNull(effectiveRange, "effectiveRange shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
         return electronicWarfareRepository.save(new ElectronicWarfare(name, description, unlockedThrough, useCapacity, value, effectiveRange, techLevel, crewRequirement));
@@ -200,7 +202,7 @@ public class ModuleService {
                                final int useCapacity,
                                final int value,
                                final int techLevel,
-                               @Nonnull final BigDecimal damageProjectionRange,
+                               @Nonnull final Distance damageProjectionRange,
                                final int amountDamageEmitter,
                                @Nonnull final EWeaponType weaponType,
                                @Nonnull final EAlignmentType alignmentType,
@@ -244,10 +246,11 @@ public class ModuleService {
     @Deprecated(since = "productive environment")
     public MissileMotor createMissileMotor(@Nonnull final String typeName,
                                            final int endurance,
-                                           final int acceleration,
+                                           @Nonnull final Acceleration acceleration,
                                            final int maneuverability,
                                            final int useCapacity) {
         Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
+        Preconditions.checkNotNull(acceleration, "acceleration shouldn't be null!");
 
         return missileMotorRepository.save(new MissileMotor(typeName, endurance, acceleration, maneuverability, useCapacity));
     }
@@ -256,7 +259,7 @@ public class ModuleService {
     @Deprecated(since = "productive environment")
     public Warhead createWarhead(@Nonnull final String typeName,
                                  final int effectValue,
-                                 @Nonnull final BigDecimal damageProjectionRange,
+                                 @Nonnull final Distance damageProjectionRange,
                                  @Nonnull final EWarheadType warheadType,
                                  final int useCapacity) {
         Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");

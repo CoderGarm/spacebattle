@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.repositories.orbitals;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.EResourceType;
@@ -11,7 +12,6 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import java.math.BigInteger;
 import java.util.List;
 
 @Service
@@ -74,12 +74,12 @@ public class CustomPlanetRepositoryImpl implements CustomPlanetRepository {
 
     @Nullable
     @Override
-    public Planet findByCoordinates(final int idStarSystem, final int xCoordinate, final int yCoordinate) {
+    public Planet findByCoordinates(final int idStarSystem, final Distance xCoordinate, final Distance yCoordinate) {
         try {
             return em.createNamedQuery("Planet.getByCoordinates", Planet.class)
                     .setParameter("idStarSystem", idStarSystem)
-                    .setParameter("xCoordinate", BigInteger.valueOf(xCoordinate))
-                    .setParameter("yCoordinate", BigInteger.valueOf(yCoordinate))
+                    .setParameter("xCoordinate", new Distance(xCoordinate.getCoordinate(), xCoordinate.getDistanceMetric()))
+                    .setParameter("yCoordinate", new Distance(yCoordinate.getCoordinate(), yCoordinate.getDistanceMetric()))
                     .getSingleResult();
         } catch (final NoResultException e) {
             return null;

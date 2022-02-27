@@ -7,6 +7,7 @@ import com.google.gson.JsonIOException;
 import de.yuga.spacebattle.rest.api.EndpointDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -24,9 +25,21 @@ public class LoggingService {
     @Nonnull
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingService.class);
 
+    private final boolean logLevel;
+
+    public LoggingService(@Nonnull @Value("${logging.rest.calls}:'false'") final String logLevel) {
+        Preconditions.checkNotNull(logLevel, "logLevel shouldn't be null!");
+
+        this.logLevel = Boolean.parseBoolean(logLevel);
+    }
+
     public void logRequest(@Nonnull final HttpServletRequest httpServletRequest,
                            @Nullable final Object body) {
         Preconditions.checkNotNull(httpServletRequest, "httpServletRequest shouldn't be null!");
+
+        if (!logLevel) {
+            return;
+        }
 
         String requestURI = httpServletRequest.getRequestURI();
         if (!requestURI.contains(EndpointDefinition.BASE_ENDPOINT)) {
@@ -58,6 +71,10 @@ public class LoggingService {
                             @Nullable final Object body) {
         Preconditions.checkNotNull(httpServletRequest, "httpServletRequest shouldn't be null!");
         Preconditions.checkNotNull(httpServletResponse, "httpServletResponse shouldn't be null!");
+
+        if (!logLevel) {
+            return;
+        }
 
         String requestURI = httpServletRequest.getRequestURI();
         if (!requestURI.contains(EndpointDefinition.BASE_ENDPOINT)) {

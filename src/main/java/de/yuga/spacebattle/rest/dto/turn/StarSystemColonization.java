@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.rest.dto.orbitals.StarSystem;
@@ -17,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static de.yuga.spacebattle.backend.entities.orbitals.StarSystem.STAR_SYSTEM_STANDARD_METRIC;
+
 public class StarSystemColonization {
 
     @Nonnull
@@ -25,7 +28,7 @@ public class StarSystemColonization {
 
     @Nonnull
     @ApiModelProperty(required = true, value = "The star system with its distance to all known systems by id.")
-    private final Map<Integer, Long> distanceMap;
+    private final Map<Integer, Distance> distanceMap;
 
     @Nonnull
     @ApiModelProperty(required = true, value = "The costs to buy the colonization information about the system.")
@@ -50,7 +53,7 @@ public class StarSystemColonization {
         this.distanceMap = knownSystems
                 .stream()
                 .collect(Collectors.toMap(AbstractEntityKey::getId,
-                        sys -> DistanceCalculator.getOrbitalDistance(starSystem.getOrbit(), sys.getOrbit()).longValue()));
+                        sys -> DistanceCalculator.getOrbitalDistance(starSystem.getOrbit(), sys.getOrbit()).convertToMetric(STAR_SYSTEM_STANDARD_METRIC)));
 
         costsToBuyColonizationInformation = setColoInformationCosts(starSystem);
         setColonizationCosts(starSystem);
@@ -85,7 +88,7 @@ public class StarSystemColonization {
     }
 
     @Nonnull
-    public Map<Integer, Long> getDistanceMap() {
+    public Map<Integer, Distance> getDistanceMap() {
         return distanceMap;
     }
 

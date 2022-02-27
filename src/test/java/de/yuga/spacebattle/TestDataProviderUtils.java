@@ -1,10 +1,11 @@
 package de.yuga.spacebattle;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
 import de.yuga.spacebattle.backend.combat.dto.FleetClash;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
@@ -66,12 +67,12 @@ public class TestDataProviderUtils {
 
     @Nonnull
     public static Orbit orbit(final int x, final int y) {
-        return new Orbit(x, y);
+        return new Orbit(new Distance(x, EDistanceMetric.M), new Distance(y, EDistanceMetric.M));
     }
 
     @Nonnull
     public static StarSystem system(final int x, final int y) {
-        final StarSystem sys = new StarSystem("anotherRandom", new Orbit(x, y));
+        final StarSystem sys = new StarSystem("anotherRandom", new Orbit(new Distance(x, EDistanceMetric.M), new Distance(y, EDistanceMetric.M)));
         setId(sys);
         return sys;
     }
@@ -95,8 +96,8 @@ public class TestDataProviderUtils {
     @Nonnull
     public static Missile missile(final int damageValue) {
         AmmunitionModule shipKillerAmmunition = createAmmunitionModule("Rocket Ammunition", "A bunch of rockets.", 5, 10, 1, new CrewRequirement(militaryCrew(), EDepositType.COSTS));
-        MissileMotor shipKillerMotor = createMissileMotor("Ship Killer Motor Mk I", 180, NavigationCalculator.getMeterPerSecondSquaredFromG(46000), 20, 100);
-        Warhead nuclearShipKillerWarHead = createWarhead("Nuclear ship killer war head", damageValue, BigDecimal.valueOf(50000), EWarheadType.EXPLOSION, 100);
+        MissileMotor shipKillerMotor = createMissileMotor("Ship Killer Motor Mk I", 180, acc(46000, EAccelerationMetric.G), 20, 100);
+        Warhead nuclearShipKillerWarHead = createWarhead("Nuclear ship killer war head", damageValue, dis(50000, EDistanceMetric.M), EWarheadType.EXPLOSION, 100);
         Missile shipKillerMissile = createMissile("Nuclear ship killer missile Mk I", 100, 100, 10, nuclearShipKillerWarHead, List.of(shipKillerMotor), shipKillerAmmunition);
         ReflectionTestUtils.setField(shipKillerAmmunition, "missile", shipKillerMissile);
         return shipKillerMissile;
@@ -118,6 +119,31 @@ public class TestDataProviderUtils {
     }
 
     @Nonnull
+    public static Distance dis(final BigDecimal value, EDistanceMetric metric) {
+        return new Distance(value, metric);
+    }
+
+    @Nonnull
+    public static Distance dis(final int value, EDistanceMetric metric) {
+        return new Distance(value, metric);
+    }
+
+    @Nonnull
+    public static Acceleration acc(final BigDecimal value, EAccelerationMetric metric) {
+        return new Acceleration(value, metric);
+    }
+
+    @Nonnull
+    public static Acceleration acc(final double value, EAccelerationMetric metric) {
+        return new Acceleration(value, metric);
+    }
+
+    @Nonnull
+    public static Acceleration acc(final int value, EAccelerationMetric metric) {
+        return new Acceleration(value, metric);
+    }
+
+    @Nonnull
     public static ShipClass shipClass(final int effectFTLValue) {
         final User user = user();
 
@@ -126,25 +152,25 @@ public class TestDataProviderUtils {
         Armor armor = createArmor("Armor Mk I", "An armor", 5, 3000, 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         //Propulsion propulsion = createPropulsion("Speed Mk I", "A drive", 5, 500, 1, false, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         Propulsion propulsionFTL = createPropulsion("FTL Speed Mk I", "A FTL drive", 10, effectFTLValue, 1, true, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        ElectronicWarfare electronicWarfare = createElectronicWarfare("Scanner Mk I", "A scanner", 5, 1000, 1000000, 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        ElectronicWarfare electronicWarfare = createElectronicWarfare("Scanner Mk I", "A scanner", 5, 1000, dis(1000000, EDistanceMetric.M), 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         Sidewall sidewall = createSidewall("Shield Mk I", "A shield", 5, 15000, 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
 
         AmmunitionModule shipKillerAmmunition = createAmmunitionModule("Rocket Ammunition", "A bunch of rockets.", 5, 10, 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        MissileMotor shipKillerMotor = createMissileMotor("Ship Killer Motor Mk I", 180, NavigationCalculator.getMeterPerSecondSquaredFromG(46000), 20, 100);
-        Warhead nuclearShipKillerWarHead = createWarhead("Nuclear ship killer war head", 1000, BigDecimal.valueOf(50000), EWarheadType.EXPLOSION, 100);
+        MissileMotor shipKillerMotor = createMissileMotor("Ship Killer Motor Mk I", 180, acc(46000, EAccelerationMetric.G), 20, 100);
+        Warhead nuclearShipKillerWarHead = createWarhead("Nuclear ship killer war head", 1000, dis(50000, EDistanceMetric.M), EWarheadType.EXPLOSION, 100);
         Missile shipKillerMissile = createMissile("Nuclear ship killer missile Mk I", 100, 100, 10, nuclearShipKillerWarHead, List.of(shipKillerMotor), shipKillerAmmunition);
         ReflectionTestUtils.setField(shipKillerAmmunition, "missile", shipKillerMissile);
         Launcher shipKillerLauncher = createLauncher("Ship killer launcher Mk I", "The launcher for ship killers", shipKillerAmmunition, 100, 1, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(shipKillerMissile));
 
         AmmunitionModule counterRocketAmmunition = createAmmunitionModule("Counter Rocket Ammunition", "Another bunch of rockets.", 5, 10, 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        MissileMotor counterMissileMotor = createMissileMotor("Counter Motor Mk I", 5, NavigationCalculator.getMeterPerSecondSquaredFromG(96000), 80, 10);
-        Warhead counterWarHead = createWarhead("Counter war head", 1, BigDecimal.ZERO, EWarheadType.COUNTER_MISSILE, 10);
+        MissileMotor counterMissileMotor = createMissileMotor("Counter Motor Mk I", 5, acc(96000, EAccelerationMetric.G), 80, 10);
+        Warhead counterWarHead = createWarhead("Counter war head", 1, Distance.ZERO, EWarheadType.COUNTER_MISSILE, 10);
         Missile counterMissile = createMissile("Counter missile Mk I", 10, 10, 10, counterWarHead, List.of(counterMissileMotor), counterRocketAmmunition);
         ReflectionTestUtils.setField(counterRocketAmmunition, "missile", counterMissile);
         Launcher counterMissileLauncher = createLauncher("Counter missile launcher Mk I", "The launcher for counter missiles", counterRocketAmmunition, 100, 1, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
 
-        Weapon laserWeapon = createWeapon("Laser Mk I", "A laser", 5, 10, 1, BigDecimal.valueOf(400000), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        Weapon pointDefense = createWeapon("Point Defense Mk I", "A point defense", 5, 1, 1, BigDecimal.valueOf(50000), 1, EWeaponType.POINT_DEFENSE, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Weapon laserWeapon = createWeapon("Laser Mk I", "A laser", 5, 10, 1, dis(400000, EDistanceMetric.M), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Weapon pointDefense = createWeapon("Point Defense Mk I", "A point defense", 5, 1, 1, dis(50000, EDistanceMetric.M), 1, EWeaponType.POINT_DEFENSE, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS));
 
         PassiveModule passiveModule = createPassiveModule("Improves armor", "Increases the amount of armor", ESupportType.ARMOR, ECalculationType.ADD, 5, 10, 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
 
@@ -232,7 +258,7 @@ public class TestDataProviderUtils {
                                                             @Nonnull final String description,
                                                             final int useCapacity,
                                                             final int value,
-                                                            final int effectiveRange,
+                                                            @Nonnull final Distance effectiveRange,
                                                             final int techLevel,
                                                             @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
@@ -266,7 +292,7 @@ public class TestDataProviderUtils {
                                       final int useCapacity,
                                       final int value,
                                       final int techLevel,
-                                      @Nonnull final BigDecimal damageProjectionRange,
+                                      @Nonnull final Distance damageProjectionRange,
                                       final int amountDamageEmitter,
                                       @Nonnull final EWeaponType weaponType,
                                       @Nonnull final EAlignmentType alignmentType,
@@ -309,10 +335,11 @@ public class TestDataProviderUtils {
     @Nonnull
     public static MissileMotor createMissileMotor(@Nonnull final String typeName,
                                                   final int endurance,
-                                                  final int acceleration,
+                                                  @Nonnull final Acceleration acceleration,
                                                   final int maneuverability,
                                                   final int useCapacity) {
         Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
+        Preconditions.checkNotNull(acceleration, "acceleration shouldn't be null!");
 
         final MissileMotor missileMotor = new MissileMotor(typeName, endurance, acceleration, maneuverability, useCapacity);
         setId(missileMotor);
@@ -322,7 +349,7 @@ public class TestDataProviderUtils {
     @Nonnull
     public static Warhead createWarhead(@Nonnull final String typeName,
                                         final int effectValue,
-                                        @Nonnull final BigDecimal damageProjectionRange,
+                                        @Nonnull final Distance damageProjectionRange,
                                         @Nonnull final EWarheadType warheadType,
                                         final int useCapacity) {
         Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
@@ -401,5 +428,15 @@ public class TestDataProviderUtils {
         final AmmunitionModule ammunitionModule = new AmmunitionModule(name, description, research(), useCapacity, value, techLevel, crewRequirement);
         setId(ammunitionModule);
         return ammunitionModule;
+    }
+
+    @Nonnull
+    public static BigDecimal bd(final double x) {
+        return BigDecimal.valueOf(x);
+    }
+
+    @Nonnull
+    public static BigDecimal bd(final String x) {
+        return new BigDecimal(x);
     }
 }
