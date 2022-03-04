@@ -251,7 +251,7 @@ public class BattleLogger {
         final Fleet target = volley.getTarget();
         final int amount = volley.getFiredShots().size();
         final String distanceString = DistanceCalculator.getDistanceAsStringWithUnit(volley.getInitialDistance().getCoordinateInMetric(EDistanceMetric.M));
-        final String msg = "#" + combatRound.getNo() + " release beam volley " + volley.getUuid() + " from " + actor.getName() + " attacks " + target.getName() + " with " + amount + " missiles over " + distanceString;
+        final String msg = "#" + combatRound.getNo() + " release beam volley " + volley.getUuid() + " from " + actor.getName() + " attacks " + target.getName() + " with " + amount + " shots over " + distanceString;
         write(msg);
     }
 

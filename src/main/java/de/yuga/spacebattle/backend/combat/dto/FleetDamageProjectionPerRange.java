@@ -5,7 +5,6 @@ import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.enums.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
-import de.yuga.spacebattle.backend.enums.EWeaponType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -25,14 +24,14 @@ public class FleetDamageProjectionPerRange {
     @Nonnull
     private final Distance maximumWeaponRange;
 
+    @Nullable
+    private DamagePerRangePerAlignment rangeWithBestDamage;
+
     /**
-     * The damage output of the fleet which should be sorted by range, increasing per {@link #RANGE_STEP}.
+     * The damage output of the fleet pr range and alignment.
      */
     @Nonnull
-    private final List<DamagePerRangeAndAlignment> damageProjectionPerRanges = new ArrayList<>();
-
-    @Nullable
-    private RangeDefinition rangeWithBestDamage;
+    private final List<DamagePerRangePerAlignment> damagePotential = new ArrayList<>();
 
     public FleetDamageProjectionPerRange(@Nonnull final FleetRoundState roundState) {
         Preconditions.checkNotNull(roundState, "roundState shouldn't be null!");
@@ -43,13 +42,33 @@ public class FleetDamageProjectionPerRange {
             return;
         }
 
+        final List<DamagePerRangeAndAlignment> damageProjectionPerRanges = new ArrayList<>();
+
         final EDistanceMetric distanceMetric = maximumWeaponRange.getDistanceMetric();
         final BigDecimal coordinateInMetric = RANGE_STEP.getCoordinateInMetric(distanceMetric);
+
         for (BigDecimal range = BigDecimal.ZERO; range.compareTo(maximumWeaponRange.getCoordinate()) <= 0; ) {
             final BigDecimal lowerBound = range;
             range = range.add(coordinateInMetric);
             damageProjectionPerRanges.addAll(roundState.getDamagePerRange(new RangeDefinition(lowerBound, range, distanceMetric)));
         }
+        damageProjectionPerRanges.stream()
+                .collect(Collectors.groupingBy(DamagePerRangeAndAlignment::getRangeDefinition,
+                        Collectors.mapping(Function.identity(), Collectors.toList()))).entrySet().stream()
+                .map(e -> new DamagePerRangePerAlignment(e.getKey(), e.getValue()))
+                .sorted(Comparator.comparing(DamagePerRangePerAlignment::getRangeDefinition))
+                .forEach(outer -> {
+                    final DamagePerRangePerAlignment chainingBase = damagePotential.stream()
+                            .filter(merged -> merged.isRangeChainingAndDamageEquals(outer))
+                            .findFirst()
+                            .orElse(null);
+                    if (chainingBase == null) {
+                        damagePotential.add(outer);
+                    } else {
+                        damagePotential.remove(chainingBase);
+                        damagePotential.add(DamagePerRangePerAlignment.merge(chainingBase, outer));
+                    }
+                });
     }
 
     @Nonnull
@@ -57,21 +76,32 @@ public class FleetDamageProjectionPerRange {
         return maximumWeaponRange;
     }
 
-    @Nonnull
-    public List<DamagePerRangeAndAlignment> getDamageProjectionPerRanges() {
-        return damageProjectionPerRanges;
-    }
-
     /**
-     * Calculates the possible damage for the given firing range.
+     * Calculates the possible damage output for the given firing range and the alignment.
      *
-     * @param range the range which has the damage applied to
-     * @return the damage value
+     * @param range     the range which has the damage applied to
+     * @param alignment the alignment
+     * @return the damage potential
      */
-    public long getDamageProjectionAtRanges(@Nonnull final Distance range) {
+    @Nullable
+    public DamageProjectionPerRange getDamageProjectionAtRangeAndAlignment(@Nonnull final Distance range, @Nonnull final EWeaponAlignment alignment) {
         Preconditions.checkNotNull(range, "range shouldn't be null!");
+        Preconditions.checkNotNull(alignment, "alignment shouldn't be null!");
 
-        return damageProjectionPerRanges.stream().filter(d -> d.isInRange(range)).mapToLong(DamagePerRangeAndAlignment::getDamageValue).sum();
+        final List<DamagePerRangeAndAlignment> damages = damagePotential.stream()
+                .map(d -> d.getDamagesPerRangeByAlignments(range, alignment))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+
+        final Optional<RangeDefinition> min = damages.stream().min(Comparator.comparing(o -> o.getRangeDefinition().getMinRange())).map(DamagePerRangeAndAlignment::getRangeDefinition);
+        final Optional<RangeDefinition> max = damages.stream().max(Comparator.comparing(o -> o.getRangeDefinition().getMaxRange())).map(DamagePerRangeAndAlignment::getRangeDefinition);
+        if (min.isPresent()) {
+            final Distance minRange = min.get().getMinRange();
+            final Distance maxRange = max.get().getMaxRange();
+            final long sum = damages.stream().mapToLong(DamagePerRangeAndAlignment::getDamageValue).sum();
+            return new DamageProjectionPerRange(minRange, maxRange, sum);
+        }
+        return null;
     }
 
     /**
@@ -84,11 +114,13 @@ public class FleetDamageProjectionPerRange {
     public EWeaponAlignment getAlignmentWithBestDamageForRange(@Nonnull final Distance range) {
         Preconditions.checkNotNull(range, "range shouldn't be null!");
 
-        final Map<EWeaponAlignment, Long> damagePerAlignment = getDamageAtRangeByAlignment(range);
-        if (damagePerAlignment.isEmpty()) {
+        final List<DamagePerRangePerAlignment> collect = damagePotential.stream().filter(d -> d.isInRange(range)).collect(Collectors.toList());
+        if (collect.isEmpty()) {
             return null;
         }
-        return Collections.max(damagePerAlignment.entrySet(), Comparator.comparingLong(Map.Entry::getValue)).getKey();
+        final DamagePerRangePerAlignment max = Collections.max(collect, Comparator.comparingLong(d -> d.getMaximumPotentialDamage().getDamageValue()));
+        final Map<EWeaponAlignment, Long> damagePerAlignment = max.getDamagePerAlignment();
+        return Collections.max(damagePerAlignment.entrySet(), Map.Entry.comparingByValue()).getKey();
     }
 
     /**
@@ -102,46 +134,7 @@ public class FleetDamageProjectionPerRange {
         Preconditions.checkNotNull(range, "range shouldn't be null!");
         Preconditions.checkNotNull(alignment, "alignment shouldn't be null!");
 
-        return damageProjectionPerRanges.stream().anyMatch(d -> d.getWeaponAlignment() == alignment && d.isInRange(range));
-    }
-
-    /**
-     * Checks if the fleet can attack at the given range by the given weaponType.
-     *
-     * @param range      the range
-     * @param weaponType the weaponType
-     * @return the alignment which is suitable for best damage application
-     */
-    @Nullable
-    public EWeaponAlignment canAttackAtRangeAndWeaponType(@Nonnull final Distance range, @Nonnull final EWeaponType weaponType) {
-        Preconditions.checkNotNull(range, "range shouldn't be null!");
-        Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
-
-        final List<DamagePerRangeAndAlignment> damages = damageProjectionPerRanges.stream()
-                .filter(d -> d.getWeaponType() == weaponType && d.isInRange(range))
-                .collect(Collectors.toList());
-        if (damages.isEmpty()) {
-            return null;
-        }
-        return Collections.max(damages, Comparator.comparingLong(DamagePerRangeAndAlignment::getDamageValue)).getWeaponAlignment();
-    }
-
-    /**
-     * Returns the damage per alignment at the given range.
-     *
-     * @param range the range
-     * @return the damage per alignment
-     */
-    @Nonnull
-    public Map<EWeaponAlignment, Long> getDamageAtRangeByAlignment(@Nonnull final Distance range) {
-        Preconditions.checkNotNull(range, "range shouldn't be null!");
-
-        return damageProjectionPerRanges.stream()
-                .filter(d -> d.isInRange(range))
-                .collect(Collectors.groupingBy(DamagePerRangeAndAlignment::getWeaponAlignment,
-                        Collectors.mapping(Function.identity(), Collectors.toList()))).entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey,
-                        e -> e.getValue().stream().mapToLong(DamagePerRangeAndAlignment::getDamageValue).sum()));
+        return damagePotential.stream().anyMatch(d -> d.getDamagePerAlignment().containsKey(alignment) && d.isInRange(range));
     }
 
     /**
@@ -151,110 +144,42 @@ public class FleetDamageProjectionPerRange {
      * @return the best combat distance
      */
     @Nullable
-    public RangeDefinition getDistanceWithBestDamageAgainst(@Nonnull final FleetDamageProjectionPerRange foe) {
+    public DamagePerRangePerAlignment getDistanceWithBestDamageAgainst(@Nonnull final FleetDamageProjectionPerRange foe) {
         Preconditions.checkNotNull(foe, "foe shouldn't be null!");
 
         if (rangeWithBestDamage != null) {
             return rangeWithBestDamage;
         }
 
-        final List<DamageDifferenceAtRange> bestRanges = new ArrayList<>();
-        int counter = 0;
-        final EDistanceMetric distanceMetric = maximumWeaponRange.getDistanceMetric();
-        for (BigDecimal range = BigDecimal.ZERO; range.compareTo(maximumWeaponRange.getCoordinate()) <= 0; ) {
-            final DamagePerRangeAndAlignment self = damageProjectionPerRanges.get(counter);
-            final DamagePerRangeAndAlignment other = foe.getDamageProjectionPerRanges().get(counter);
+        final List<DamagePerRangePerAlignment> damagesPerRangeSelf = getDamagesPerRange();
+        final List<DamagePerRangePerAlignment> damagesPerRangeFoe = foe.getDamagesPerRange();
+        // todo compare dmg difference and show result
+        final List<DamagePerRangePerAlignment> bestRanges = damagesPerRangeSelf.stream()
+                .filter(self -> damagesPerRangeFoe.stream()
+                        .filter(dmgFoe -> self.getMaximumPotentialDamage().getDamageValue() > dmgFoe.getMaximumPotentialDamage().getDamageValue())
+                        .findFirst()
+                        .orElse(null) != null)
+                .collect(Collectors.toList());
 
-            final long dmgAtRangeSelf = self.getDamageValue();
-            final long dmgAtRangeOther = other.getDamageValue();
-            if (dmgAtRangeSelf > dmgAtRangeOther) {
-                final BigDecimal rangeAddStep = range.add(RANGE_STEP.getCoordinateInMetric(distanceMetric));
-                final long damageDifference = dmgAtRangeSelf - dmgAtRangeOther;
-                bestRanges.add(new DamageDifferenceAtRange(range, rangeAddStep, distanceMetric, damageDifference));
-            }
-            range = range.add(RANGE_STEP.getCoordinateInMetric(distanceMetric));
-        }
         if (!bestRanges.isEmpty()) {
             // if there is a clear damage diff - return the range with the biggest
-            final List<DamageDifferenceAtRange> bestRangesSorted = bestRanges.stream()
-                    .sorted(Comparator.comparingLong(DamageDifferenceAtRange::getDamageDifference))
-                    .collect(Collectors.toList());
-            // todo properly do the same like at the pure damage calculation
-            rangeWithBestDamage = !bestRangesSorted.isEmpty() ? bestRangesSorted.get(bestRangesSorted.size() - 1).getRangeDefinition() : null;
+            rangeWithBestDamage = Collections.max(bestRanges, Comparator.comparingLong(d -> d.getMaximumPotentialDamage().getDamageValue()));
         } else {
-            final DamagePerRangePerAlignment max = getRangeWithMaxDamage();
             // if there is no diff in damage per range - return range with the biggest damage
-            rangeWithBestDamage = max != null ? max.getRangeDefinition() : null;
+            if (!damagesPerRangeSelf.isEmpty()) {
+                rangeWithBestDamage = Collections.max(damagesPerRangeSelf, Comparator.comparingLong(d -> d.getMaximumPotentialDamage().getDamageValue()));
+            }
         }
         return rangeWithBestDamage;
     }
 
     /**
-     * Calculates the range with the biggest damage potential.
+     * Calculates the damage potential per range and alignment.
      *
-     * @return the highest damage potential
+     * @return the damage potentials
      */
-    @Nullable
-    private DamagePerRangePerAlignment getRangeWithMaxDamage() {
-        final Map<RangeDefinition, List<DamagePerRangeAndAlignment>> damagesPerRange = damageProjectionPerRanges.stream()
-                .collect(Collectors.groupingBy(DamagePerRangeAndAlignment::getRangeDefinition,
-                        Collectors.mapping(Function.identity(), Collectors.toList())));
-
-        if (damagesPerRange.isEmpty()) {
-            return null;
-        }
-        final List<DamagePerRangePerAlignment> damagesPerRangePerAlignment = damagesPerRange.entrySet().stream()
-                .map(e -> new DamagePerRangePerAlignment(e.getKey(), e.getValue()))
-                .sorted(Comparator.comparing(DamagePerRangePerAlignment::getRangeDefinition))
-                .collect(Collectors.toList());
-
-        final List<DamagePerRangePerAlignment> mergedDamages = new ArrayList<>();
-        for (DamagePerRangePerAlignment outer : damagesPerRangePerAlignment) {
-            final DamagePerRangePerAlignment chainingBase = mergedDamages.stream()
-                    .filter(merged -> merged.isRangeChainingAndDamageEquals(outer))
-                    .findFirst()
-                    .orElse(null);
-            if (chainingBase == null) {
-                mergedDamages.add(outer);
-            } else {
-                mergedDamages.remove(chainingBase);
-                mergedDamages.add(DamagePerRangePerAlignment.merge(chainingBase, outer));
-            }
-        }
-        return Collections.max(mergedDamages, Comparator.comparingLong(DamagePerRangePerAlignment::getMaximumPotentialDamage));
-    }
-
-    private static class DamageDifferenceAtRange implements Comparable<DamageDifferenceAtRange> {
-
-        @Nonnull
-        private final RangeDefinition rangeDefinition;
-
-        private final long damageDifference;
-
-        private DamageDifferenceAtRange(@Nonnull final BigDecimal minRange,
-                                        @Nonnull final BigDecimal maxRange,
-                                        @Nonnull final EDistanceMetric distanceMetric,
-                                        final long damageDifference) {
-            Preconditions.checkNotNull(minRange, "minRange shouldn't be null!");
-            Preconditions.checkNotNull(maxRange, "maxRange shouldn't be null!");
-            Preconditions.checkNotNull(distanceMetric, "distanceMetric shouldn't be null!");
-
-            this.rangeDefinition = new RangeDefinition(minRange, maxRange, distanceMetric);
-            this.damageDifference = damageDifference;
-        }
-
-        @Nonnull
-        public RangeDefinition getRangeDefinition() {
-            return rangeDefinition;
-        }
-
-        public long getDamageDifference() {
-            return damageDifference;
-        }
-
-        @Override
-        public int compareTo(DamageDifferenceAtRange o) {
-            return Long.compare(o.getDamageDifference(), getDamageDifference());
-        }
+    @Nonnull
+    public List<DamagePerRangePerAlignment> getDamagesPerRange() {
+        return damagePotential;
     }
 }

@@ -394,8 +394,8 @@ public class MasterOfTheUniverseService {
         militaryCrew.put(EEducationType.MILITARY_MK_II, 10L);
 
         Armor armor = moduleService.createArmor("Armor Mk I", "An armor", unlockArmor, 5, 3000, 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        Propulsion propulsion = moduleService.createPropulsion("Speed Mk I", "A drive", unlockPropulsion, 5, 500, 1, false, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        Propulsion propulsionFTL = moduleService.createPropulsion("FTL Speed Mk I", "A FTL drive", unlockFTLPropulsion, 10, 500, 1, true, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Propulsion propulsion = moduleService.createPropulsion("Speed Mk I", "A drive", unlockPropulsion, 5, 500, 1, EHyperBand.NONE, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Propulsion propulsionFTL = moduleService.createPropulsion("FTL Speed Mk I", "A FTL drive", unlockFTLPropulsion, 10, 500, 1, EHyperBand.Delta, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         ElectronicWarfare electronicWarfare = moduleService.createElectronicWarfare("Scanner Mk I", "A scanner", unlockElectronicWarfare, 5, 100, new Distance(2.669, EDistanceMetric.LS), 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         Sidewall sidewall = moduleService.createSidewall("Shield Mk I", "A shield", unlockShield, 5, 15000, 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
 

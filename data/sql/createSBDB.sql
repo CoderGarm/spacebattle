@@ -381,7 +381,7 @@
         techLevel integer not null,
         useCapacity integer not null,
         effectValue integer not null,
-        ftlCapable bit not null,
+        hyperBand varchar(255),
         idCosts integer not null,
         idResearch integer not null,
         primary key (idPropulsion)

@@ -19,7 +19,6 @@ import de.yuga.spacebattle.backend.enums.EWeaponType;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -133,8 +132,8 @@ public class CombatHandler {
         final FleetDamageProjectionPerRange targetInfo = getFleetDamageProjectionPerRange(target, targetsState);
 
         final Distance distance = actorPosition.getDistance(targetPosition);
-        final RangeDefinition bestDamageRange = actorInfo.getDistanceWithBestDamageAgainst(targetInfo);
-        if (bestDamageRange == null) {
+        final DamagePerRangePerAlignment bestDamagePotential = actorInfo.getDistanceWithBestDamageAgainst(targetInfo);
+        if (bestDamagePotential == null) {
             // if nothing is returned, the fleet should evade until hyperspace
             actorsState.setMovementType(EVASION_MOVEMENT);
             return EVASION_MOVEMENT;
@@ -142,28 +141,40 @@ public class CombatHandler {
 
         EMovementType actorsMovementType = null;
         // calculate offensive movement
-        final boolean inRange = bestDamageRange.isInRange(distance.getCoordinateInMetric(bestDamageRange.getDistanceMetric()));
-        final EWeaponAlignment alignmentWithBestDamageForRange = actorInfo.getAlignmentWithBestDamageForRange(distance);
-        if (inRange) {
-            if (alignmentWithBestDamageForRange == null) {
-                // evade if no weaponry left
-                return EVASION_MOVEMENT;
-            } else {
-                // if in range, just fire
-                actorsMovementType = HOLD_DISTANCE;//EMovementType.getMovementFromAlignment(alignmentWithBestDamageForRange);
-            }
+        final boolean inBestDamageRange = bestDamagePotential.isInRange(distance);
+        if (inBestDamageRange) {
+            // if in range, just fire
+            actorsMovementType = HOLD_DISTANCE; // todo specify best alignment more precisely - by movement plan?
+
         } else {
             // calculate movement
-            final BigDecimal minRange = bestDamageRange.getMinRange();
-            final int minRangeCompare = minRange.compareTo(distance.getCoordinateInMetric(bestDamageRange.getDistanceMetric()));
+            final RangeDefinition rangeDefinition = bestDamagePotential.getRangeDefinition();
+            final Distance minRange = rangeDefinition.getMinRange();
+            final int minRangeCompare = minRange.compareTo(distance);
             if (minRangeCompare > 0) {
                 actorsMovementType = INCREASE_DISTANCE;
             }
 
-            final BigDecimal maxRange = bestDamageRange.getMaxRange();
-            final int maxRangeCompare = maxRange.compareTo(distance.getCoordinateInMetric(bestDamageRange.getDistanceMetric()));
+            final Distance maxRange = rangeDefinition.getMaxRange();
+            final int maxRangeCompare = maxRange.compareTo(distance);
             if (maxRangeCompare < 0) {
                 actorsMovementType = REDUCE_DISTANCE;
+            }
+
+            final DamageProjectionPerRange maximumPotentialDamage = bestDamagePotential.getMaximumPotentialDamage();
+            final EWeaponAlignment alignmentWithBestDamageForRange = actorInfo.getAlignmentWithBestDamageForRange(distance);
+            if (alignmentWithBestDamageForRange != null) {
+                // damaging the enemy possible
+                final DamageProjectionPerRange damageAtRange = actorInfo.getDamageProjectionAtRangeAndAlignment(distance, alignmentWithBestDamageForRange);
+                if (damageAtRange != null) {
+                    final long dmgQuote = maximumPotentialDamage.getDamageValue() / damageAtRange.getDamageValue();
+                    if (dmgQuote > 0.5) { // todo why should roll and fight? fire salvo to test counter measures?
+                        final boolean movementMatchesDamageApplication = alignmentWithBestDamageForRange.isAssignableFromMovementType(actorsMovementType);
+                        if (!movementMatchesDamageApplication) {
+                            actorsMovementType = HOLD_DISTANCE; // todo specify best alignment more precisely - by movement plan?
+                        }
+                    }
+                }
             }
         }
 

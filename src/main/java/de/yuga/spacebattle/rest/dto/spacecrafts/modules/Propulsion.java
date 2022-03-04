@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.dto.spacecrafts.modules;
 
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.enums.EHyperBand;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics.BaseModule;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -16,8 +17,9 @@ public class Propulsion {
     /**
      * If this propulsion module provides the ability to travel faster than light.
      */
+    @Nonnull
     @ApiModelProperty(required = true, value = "If this propulsion module if for faster then light.")
-    private boolean ftlCapable = false;
+    private EHyperBand ftlCapable;
 
     public Propulsion() {
 
@@ -27,7 +29,7 @@ public class Propulsion {
         Preconditions.checkNotNull(propulsion, "propulsion shouldn't be null!");
 
         this.baseModule = new BaseModule(propulsion);
-        this.ftlCapable = propulsion.isFtlCapable();
+        this.ftlCapable = propulsion.getHyperBand();
     }
 
     @Nonnull
@@ -35,7 +37,8 @@ public class Propulsion {
         return baseModule;
     }
 
-    public boolean isFtlCapable() {
+    @Nonnull
+    public EHyperBand getFtlCapable() {
         return ftlCapable;
     }
 }

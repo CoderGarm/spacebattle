@@ -1,8 +1,10 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.modules;
 
+import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
+import de.yuga.spacebattle.backend.enums.EHyperBand;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -23,7 +25,9 @@ public class Propulsion extends BaseModuleWithEffectValue {
     /**
      * If this propulsion module provides the ability to travel faster than light.
      */
-    private boolean ftlCapable = false;
+    @Nonnull
+    @Enumerated(EnumType.STRING)
+    private EHyperBand hyperBand;
 
     public Propulsion() {
 
@@ -35,13 +39,20 @@ public class Propulsion extends BaseModuleWithEffectValue {
                       final int useCapacity,
                       final int effectValue,
                       final int techLevel,
-                      final boolean ftlCapable,
+                      @Nonnull final EHyperBand hyperBand,
                       @Nonnull final CrewRequirement crewRequirement) {
         super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement);
-        this.ftlCapable = ftlCapable;
+        Preconditions.checkNotNull(hyperBand, "hyperBand shouldn't be null!");
+
+        this.hyperBand = hyperBand;
+    }
+
+    @Nonnull
+    public EHyperBand getHyperBand() {
+        return hyperBand;
     }
 
     public boolean isFtlCapable() {
-        return ftlCapable;
+        return hyperBand != EHyperBand.NONE;
     }
 }

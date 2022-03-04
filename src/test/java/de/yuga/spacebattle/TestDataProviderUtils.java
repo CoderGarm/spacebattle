@@ -66,20 +66,20 @@ public class TestDataProviderUtils {
     }
 
     @Nonnull
-    public static Orbit orbit(final int x, final int y) {
-        return new Orbit(new Distance(x, EDistanceMetric.M), new Distance(y, EDistanceMetric.M));
+    public static Orbit orbit(final int x, final int y, final EDistanceMetric metric) {
+        return new Orbit(new Distance(x, metric), new Distance(y, metric));
     }
 
     @Nonnull
     public static StarSystem system(final int x, final int y) {
-        final StarSystem sys = new StarSystem("anotherRandom", new Orbit(new Distance(x, EDistanceMetric.M), new Distance(y, EDistanceMetric.M)));
+        final StarSystem sys = new StarSystem("anotherRandom", new Orbit(new Distance(x, StarSystem.STAR_SYSTEM_STANDARD_METRIC), new Distance(y, StarSystem.STAR_SYSTEM_STANDARD_METRIC)));
         setId(sys);
         return sys;
     }
 
     @Nonnull
     public static Planet planet(final int x, final int y) {
-        final Orbit random = orbit(0, 0);
+        final Orbit random = orbit(0, 0, Planet.PLANET_STANDARD_METRIC);
         final StarSystem sys = system(x, y);
         setId(sys);
         final Planet planet = new Planet(null, "name1", sys, random);
@@ -124,13 +124,18 @@ public class TestDataProviderUtils {
     }
 
     @Nonnull
+    public static Distance dis(final String value) {
+        return Distance.valueOf(value);
+    }
+
+    @Nonnull
     public static Distance dis(final int value, EDistanceMetric metric) {
         return new Distance(value, metric);
     }
 
     @Nonnull
-    public static Acceleration acc(final BigDecimal value, EAccelerationMetric metric) {
-        return new Acceleration(value, metric);
+    public static Acceleration acc(final BigDecimal value, final EAccelerationMetric metric, final EHyperBand hyperBand) {
+        return new Acceleration(value, metric, hyperBand);
     }
 
     @Nonnull
@@ -150,8 +155,8 @@ public class TestDataProviderUtils {
         Map<EEducationType, Long> militaryCrew = militaryCrew();
 
         Armor armor = createArmor("Armor Mk I", "An armor", 5, 3000, 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        //Propulsion propulsion = createPropulsion("Speed Mk I", "A drive", 5, 500, 1, false, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        Propulsion propulsionFTL = createPropulsion("FTL Speed Mk I", "A FTL drive", 10, effectFTLValue, 1, true, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        //Propulsion propulsion = createPropulsion("Speed Mk I", "A drive", 5, 500, 1, EHyperBand.NONE, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Propulsion propulsionFTL = createPropulsion("FTL Speed Mk I", "A FTL drive", 10, effectFTLValue, 1, EHyperBand.Delta, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         ElectronicWarfare electronicWarfare = createElectronicWarfare("Scanner Mk I", "A scanner", 5, 1000, dis(1000000, EDistanceMetric.M), 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         Sidewall sidewall = createSidewall("Shield Mk I", "A shield", 5, 15000, 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
 
@@ -385,13 +390,14 @@ public class TestDataProviderUtils {
                                               final int useCapacity,
                                               final int value,
                                               final int level,
-                                              final boolean ftlCapable,
+                                              @Nonnull final EHyperBand hyperBand,
                                               @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
+        Preconditions.checkNotNull(hyperBand, "hyperBand shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        final Propulsion propulsion = new Propulsion(name, description, research(), useCapacity, value, level, ftlCapable, crewRequirement);
+        final Propulsion propulsion = new Propulsion(name, description, research(), useCapacity, value, level, hyperBand, crewRequirement);
         setId(propulsion);
         return propulsion;
     }

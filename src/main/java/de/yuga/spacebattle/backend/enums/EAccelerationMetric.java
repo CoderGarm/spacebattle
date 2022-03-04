@@ -10,25 +10,26 @@ import java.util.Arrays;
 
 public enum EAccelerationMetric {
     MS2(BigDecimal.ONE, "m/s²"),
-    G(new BigDecimal("9.81"), "g");
+    G(new BigDecimal("9.81"), "g"),
+    C(new BigDecimal("299792458"), "c");
 
     /**
      * The value which is needed to divide the original value to get the result in the basic unit {@link EAccelerationMetric#MS2}.
      */
-    final BigDecimal divisor;
+    final BigDecimal meterEquivalent;
 
     @Nonnull
     final String unit;
 
-    EAccelerationMetric(final BigDecimal divisor, @Nonnull final String unit) {
+    EAccelerationMetric(final BigDecimal meterEquivalent, @Nonnull final String unit) {
         Preconditions.checkNotNull(unit, "unit shouldn't be null!");
 
-        this.divisor = divisor;
+        this.meterEquivalent = meterEquivalent;
         this.unit = unit;
     }
 
-    public BigDecimal getDivisor() {
-        return divisor;
+    public BigDecimal getMeterEquivalent() {
+        return meterEquivalent;
     }
 
     @Nonnull
@@ -54,6 +55,6 @@ public enum EAccelerationMetric {
     public BigDecimal getConversionFactor(@Nonnull final EAccelerationMetric targetMetric) {
         Preconditions.checkNotNull(targetMetric, "targetMetric shouldn't be null!");
 
-        return divisor.divide(targetMetric.getDivisor(), DistanceCalculator.MATH_CONTEXT_REALISTIC_PRECISION);
+        return meterEquivalent.divide(targetMetric.getMeterEquivalent(), DistanceCalculator.MATH_CONTEXT_REALISTIC_PRECISION);
     }
 }

@@ -7,9 +7,11 @@ import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DamagePerRangePerAlignment {
 
@@ -25,12 +27,16 @@ public class DamagePerRangePerAlignment {
     @Nonnull
     private final Map<EWeaponAlignment, Long> damagePerAlignment = new HashMap<>();
 
+    @Nonnull
+    private List<DamagePerRangeAndAlignment> damagesPerRangeAndAlignments = new ArrayList<>();
+
     public DamagePerRangePerAlignment(@Nonnull final RangeDefinition rangeDefinition,
                                       @Nonnull final List<DamagePerRangeAndAlignment> damagesPerRangeAndAlignments) {
         Preconditions.checkNotNull(rangeDefinition, "rangeDefinition shouldn't be null!");
         Preconditions.checkNotNull(damagesPerRangeAndAlignments, "damagesPerRangeAndAlignments shouldn't be null!");
 
         this.rangeDefinition = rangeDefinition;
+        this.damagesPerRangeAndAlignments = damagesPerRangeAndAlignments;
         damagesPerRangeAndAlignments.stream()
                 .filter(d -> d.getRangeDefinition().equals(rangeDefinition))
                 .forEach(damagePerRangeAndAlignment -> {
@@ -66,11 +72,11 @@ public class DamagePerRangePerAlignment {
         final EDistanceMetric metricTwo = two.getRangeDefinition().getDistanceMetric();
         final EDistanceMetric biggerMetric = metricOne.getDigitCount() > metricTwo.getDigitCount() ? metricOne : metricTwo;
 
-        final Distance minRangeOne = new Distance(one.getRangeDefinition().getMinRange(), metricOne);
-        final Distance minRangeTwo = new Distance(two.getRangeDefinition().getMinRange(), metricTwo);
+        final Distance minRangeOne = one.getRangeDefinition().getMinRange();
+        final Distance minRangeTwo = two.getRangeDefinition().getMinRange();
 
-        final Distance maxRangeOne = new Distance(one.getRangeDefinition().getMaxRange(), metricOne);
-        final Distance maxRangeTwo = new Distance(two.getRangeDefinition().getMaxRange(), metricTwo);
+        final Distance maxRangeOne = one.getRangeDefinition().getMaxRange();
+        final Distance maxRangeTwo = two.getRangeDefinition().getMaxRange();
 
         final BigDecimal minRangeInMetric = minRangeOne.min(minRangeTwo).getCoordinateInMetric(biggerMetric);
         final BigDecimal maxRangeInMetric = maxRangeOne.max(maxRangeTwo).getCoordinateInMetric(biggerMetric);
@@ -91,8 +97,17 @@ public class DamagePerRangePerAlignment {
         return damagePerAlignment;
     }
 
-    public long getMaximumPotentialDamage() {
-        return damagePerAlignment.values().stream().mapToLong(Long::longValue).sum();
+    @Nonnull
+    public List<DamagePerRangeAndAlignment> getDamagesPerRangeByAlignments(@Nonnull final Distance range, @Nonnull final EWeaponAlignment alignment) {
+        Preconditions.checkNotNull(range, "range shouldn't be null!");
+        Preconditions.checkNotNull(alignment, "alignment shouldn't be null!");
+
+        return damagesPerRangeAndAlignments.stream().filter(d -> d.getWeaponAlignment() == alignment && d.isInRange(range)).collect(Collectors.toList());
+    }
+
+    @Nonnull
+    public DamageProjectionPerRange getMaximumPotentialDamage() {
+        return new DamageProjectionPerRange(rangeDefinition, damagePerAlignment.values().stream().mapToLong(Long::longValue).sum());
     }
 
     /**

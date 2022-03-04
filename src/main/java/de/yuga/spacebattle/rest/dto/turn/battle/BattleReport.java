@@ -26,7 +26,7 @@ public class BattleReport {
 
     @Nonnull
     @ApiModelProperty(required = true, value = "The last round in this battle.")
-    private CombatRound lastRound;
+    private final CombatRound lastRound;
 
     /**
      * The place to be.

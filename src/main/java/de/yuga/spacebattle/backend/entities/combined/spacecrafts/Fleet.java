@@ -19,10 +19,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfar
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.enums.EAccelerationMetric;
-import de.yuga.spacebattle.backend.enums.EDepositType;
-import de.yuga.spacebattle.backend.enums.EModuleType;
-import de.yuga.spacebattle.backend.enums.EWeaponType;
+import de.yuga.spacebattle.backend.enums.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -259,6 +256,7 @@ public class Fleet extends AbstractEntityKey {
 
         final List<Integer> speeds = new ArrayList<>();
         final Set<ShipClass> shipClasses = ships.stream().map(WarShip::getShipClass).collect(Collectors.toSet());
+        EHyperBand hyperBand = EHyperBand.NONE;
         for (ShipClass sc : shipClasses) {
             final double propulsionSupportFactor = sc.getSupportFittings().stream()
                     .filter(s -> eModuleType == s.getPassiveModule().getSupportType().getModifiedProperty())
@@ -273,10 +271,13 @@ public class Fleet extends AbstractEntityKey {
             // calculate effect of support modules
             final BigDecimal factor = BigDecimal.ONE.add(new BigDecimal(propulsionSupportFactor));
             final BigDecimal effectValue = new BigDecimal(propulsion.getEffectValue());
+            // if the prop's hyper band is lower than use this
+            hyperBand = propulsion.getHyperBand().ordinal() >= hyperBand.ordinal() ? propulsion.getHyperBand() : hyperBand;
             speeds.add(effectValue.multiply(factor, ResourceDeposit.MATH_CONTEXT_INTEGER).intValue());
         }
         Collections.sort(speeds);
-        return new Acceleration(new BigDecimal(speeds.get(0)), EAccelerationMetric.G);
+        final EAccelerationMetric accelerationMetric = eModuleType == EModuleType.PROPULSION ? EAccelerationMetric.G : EAccelerationMetric.C;
+        return new Acceleration(new BigDecimal(speeds.get(0)), accelerationMetric, hyperBand);
     }
 
     /**

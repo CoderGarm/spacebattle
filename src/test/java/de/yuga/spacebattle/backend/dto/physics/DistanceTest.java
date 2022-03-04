@@ -3,14 +3,12 @@ package de.yuga.spacebattle.backend.dto.physics;
 import de.yuga.spacebattle.backend.enums.EDistanceMetric;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.math.BigDecimal;
 import java.util.stream.Stream;
 
-import static de.yuga.spacebattle.TestDataProviderUtils.bd;
 import static de.yuga.spacebattle.TestDataProviderUtils.dis;
 import static de.yuga.spacebattle.backend.enums.EDistanceMetric.KM;
 import static de.yuga.spacebattle.backend.enums.EDistanceMetric.M;
@@ -50,62 +48,28 @@ class DistanceTest {
         assertEquals(first, second);
     }
 
-
-    private static Stream<Arguments> testGetDistanceAsStringWithUnitBigDecimal() {
-        return Stream.of(
-                Arguments.of(bd(1), "1.0 m"),
-                Arguments.of(bd(2), "2.0 m"),
-                Arguments.of(bd(1000), "1.0 km"),
-                Arguments.of(bd(299792458), "1 ls"),
-                Arguments.of(bd("17987547480"), "1 lm"),
-                Arguments.of(bd("149597870700"), "1 AU"),
-                Arguments.of(bd("1079252848800"), "1 lh"),
-                Arguments.of(bd("25902068371200"), "1 ld"),
-                Arguments.of(bd("9454254955488000"), "0.3063 pc"),
-                Arguments.of(bd("30856776000000000"), "1 pc"),
-                Arguments.of(bd("1495978707000"), "1.386 lh"),
-                Arguments.of(bd("10792528488000"), "0.4166 ld"),
-                Arguments.of(bd("259020683712000"), "0.008394 pc"),
-                Arguments.of(bd("308567760000000000"), "10 pc")
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("testGetDistanceAsStringWithUnitBigDecimal")
-    void testGetDistanceAsStringWithUnitBigDecimal(ArgumentsAccessor accessor) {
-        final Object[] args = accessor.toArray();
-        final BigDecimal a = (BigDecimal) args[0];
-        final String expectation = (String) args[1];
-        final String result = a.toString();
-        assertEquals(expectation, result);
-    }
-
     private static Stream<Arguments> testGetDistanceAsStringWithUnitBigInteger() {
         return Stream.of(
-                Arguments.of(bd(1), "1 m"),
-                Arguments.of(bd(2), "2 m"),
-                Arguments.of(bd(1000), "1 km"),
-                Arguments.of(bd(299792458), "1 ls"),
-                Arguments.of(bd("17987547480"), "1 lm"),
-                Arguments.of(bd("149597870700"), "1 AU"),
-                Arguments.of(bd("1079252848800"), "1 lh"),
-                Arguments.of(bd("25902068371200"), "1 ld"),
-                Arguments.of(bd("9454254955488000"), "0.3063 pc"),
-                Arguments.of(bd("30856776000000000"), "1 pc"),
-                Arguments.of(bd("1495978707000"), "1.386 lh"),
-                Arguments.of(bd("10792528488000"), "0.4166 ld"),
-                Arguments.of(bd("259020683712000"), "0.008394 pc"),
-                Arguments.of(bd("308567760000000000"), "10 pc")
+                Arguments.of(dis(1, M), dis("1 M")),
+                Arguments.of(dis(2, M), dis("2 M")),
+                Arguments.of(dis(1000, M), dis("1 KM")),
+                Arguments.of(dis(299792458, M), dis("1 LS")),
+                Arguments.of(dis("17987547480 M"), dis("1 LM")),
+                Arguments.of(dis("149597870700 M"), dis("1 AU")),
+                Arguments.of(dis("1079252848800 M"), dis("1 LH")),
+                Arguments.of(dis("25902068371200 M"), dis("1 LD")),
+                Arguments.of(dis("9454254955488000 M"), dis("0.3063915365867315 PC")),
+                Arguments.of(dis("30856776000000000 M"), dis("1 PC")),
+                Arguments.of(dis("1495978707000 M"), dis("1.386 LH")),
+                Arguments.of(dis("10792528488000 M"), dis("0.41667 LD")),
+                Arguments.of(dis("259020683712000 M"), dis("0.008394 PC")),
+                Arguments.of(dis("308567760000000000 M"), dis("10 PC"))
         );
     }
 
     @ParameterizedTest
     @MethodSource("testGetDistanceAsStringWithUnitBigInteger")
-    void testGetDistanceAsStringWithUnitBigInteger(ArgumentsAccessor accessor) {
-        final Object[] args = accessor.toArray();
-        final BigDecimal a = (BigDecimal) args[0];
-        final String expectation = (String) args[1];
-        final String result = a.toString();
-        assertEquals(expectation, result);
+    void testGetDistanceAsStringWithUnitBigInteger(final Distance result, final Distance expectation) {
+        assertThat(expectation, Matchers.comparesEqualTo(result));
     }
 }

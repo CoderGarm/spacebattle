@@ -59,10 +59,10 @@ public class RangeDefinition implements Comparable<RangeDefinition> {
     public boolean isInRange(@Nonnull final RangeDefinition rangeDefinition) {
         Preconditions.checkNotNull(rangeDefinition, "rangeDefinition shouldn't be null!");
 
-        final Distance minRangeThat = new Distance(rangeDefinition.getMinRange(), distanceMetric);
-        final Distance maxRangeThat = new Distance(rangeDefinition.getMaxRange(), distanceMetric);
+        final Distance minRangeThat = rangeDefinition.getMinRange();
+        final Distance maxRangeThat = rangeDefinition.getMaxRange();
 
-        return isInRange(minRangeThat.getCoordinate()) && isInRange(maxRangeThat.getCoordinate());
+        return isInRange(minRangeThat) && isInRange(maxRangeThat);
     }
 
     /**
@@ -86,20 +86,20 @@ public class RangeDefinition implements Comparable<RangeDefinition> {
     public boolean isChainingRange(@Nonnull final RangeDefinition rangeDefinition) {
         Preconditions.checkNotNull(rangeDefinition, "rangeDefinition shouldn't be null!");
 
-        final Distance minRangeThat = new Distance(rangeDefinition.getMinRange(), distanceMetric);
-        final Distance maxRangeThat = new Distance(rangeDefinition.getMaxRange(), distanceMetric);
+        final Distance minRangeThat = rangeDefinition.getMinRange();
+        final Distance maxRangeThat = rangeDefinition.getMaxRange();
 
-        return isInRange(minRangeThat.getCoordinate()) || isInRange(maxRangeThat.getCoordinate());
+        return isInRange(minRangeThat) || isInRange(maxRangeThat);
     }
 
     @Nonnull
-    public BigDecimal getMinRange() {
-        return minRange;
+    public Distance getMinRange() {
+        return new Distance(minRange, distanceMetric);
     }
 
     @Nonnull
-    public BigDecimal getMaxRange() {
-        return maxRange;
+    public Distance getMaxRange() {
+        return new Distance(maxRange, distanceMetric);
     }
 
     @Nonnull
@@ -132,6 +132,6 @@ public class RangeDefinition implements Comparable<RangeDefinition> {
     public int compareTo(@Nonnull final RangeDefinition o) {
         Preconditions.checkNotNull(o, "o shouldn't be null!");
 
-        return maxRange.compareTo(o.getMaxRange());
+        return getMaxRange().compareTo(o.getMaxRange());
     }
 }

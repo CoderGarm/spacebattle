@@ -418,17 +418,7 @@ public class Cage implements Future<Cage> {
         Preconditions.checkNotNull(historizable, "historizable shouldn't be null!");
 
         if (historizable instanceof MovementAction) {
-            final MovementAction movementAction = (MovementAction) historizable;
-
-            final MovementAction latest = historyMovement.stream()
-                    .filter(m -> m.getActor().equals(movementAction.getActor()))
-                    .max(Comparator.comparing(MovementAction::getCombatRound))
-                    .filter(m -> m.getMovementType() == movementAction.getMovementType())
-                    .stream().findFirst().orElse(null);
-            if (latest == null) {
-                // just write, it's probably the first entry for the filter
-                historyMovement.add(movementAction.clone());
-            }
+            historyMovement.add(((MovementAction) historizable).clone());
         } else if (historizable instanceof MissileSalvo) {
             historyOfMissileSalvos.add(((MissileSalvo) historizable).clone());
         } else if (historizable instanceof BeamVolley) {

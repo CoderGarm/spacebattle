@@ -25,7 +25,7 @@ public enum EDistanceMetric {
     /**
      * The value which is needed to divide the original value to get the result in the basic unit {@link EDistanceMetric#M}.
      */
-    final BigDecimal divisor;
+    final BigDecimal meterEquivalent;
 
     /**
      * The amount of digits which is needed to fill a full length unit.
@@ -40,17 +40,17 @@ public enum EDistanceMetric {
     @Nonnull
     final String unit;
 
-    EDistanceMetric(final BigDecimal divisor, final int digitCount, final int scale, @Nonnull final String unit) {
+    EDistanceMetric(final BigDecimal meterEquivalent, final int digitCount, final int scale, @Nonnull final String unit) {
         Preconditions.checkNotNull(unit, "unit shouldn't be null!");
 
-        this.divisor = divisor;
+        this.meterEquivalent = meterEquivalent;
         this.digitCount = digitCount;
         this.scale = scale;
         this.unit = unit;
     }
 
-    public BigDecimal getDivisor() {
-        return divisor;
+    public BigDecimal getMeterEquivalent() {
+        return meterEquivalent;
     }
 
     @Nonnull
@@ -110,6 +110,6 @@ public enum EDistanceMetric {
     public BigDecimal getConversionFactor(@Nonnull final EDistanceMetric targetMetric) {
         Preconditions.checkNotNull(targetMetric, "targetMetric shouldn't be null!");
 
-        return divisor.divide(targetMetric.getDivisor(), DistanceCalculator.MATH_CONTEXT_REALISTIC_PRECISION);
+        return meterEquivalent.divide(targetMetric.getMeterEquivalent(), DistanceCalculator.MATH_CONTEXT_REALISTIC_PRECISION);
     }
 }

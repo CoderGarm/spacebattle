@@ -25,6 +25,11 @@ public class NavigationCalculator {
      */
     private static final BigDecimal GRAVITATION_EARTH = new BigDecimal("0.98");
 
+    /**
+     * The maximum percentage of the speed of light which can be reached by a star ship.
+     */
+    private static final BigDecimal MAX_PERCENTAGE_SPEED_OF_LIGHT = BigDecimal.valueOf(0.75);
+
     private NavigationCalculator() {
     }
 
@@ -41,11 +46,56 @@ public class NavigationCalculator {
     /**
      * Calculates the distance for the given time and acceleration.
      *
-     * @param time         the endurance of the acceleration in s
+     * @param endurance    the endurance of the acceleration in s
      * @param acceleration the acceleration
      */
-    public static Distance getRangeByTimeAndAcceleration(final int time, @Nonnull final Acceleration acceleration) {
-        final double squaredTime = Math.pow(time, 2);
+    @Nonnull
+    public static Distance getRangeByTimeAndAcceleration(final int endurance, @Nonnull final Acceleration acceleration) {
+        Preconditions.checkNotNull(acceleration, "acceleration shouldn't be null!");
+
+        final double effectiveCWarship = acceleration.getHyperBand().getEffectiveCWarship();
+        return getRange(endurance, acceleration, EDistanceMetric.LS.getMeterEquivalent().multiply(BigDecimal.valueOf(effectiveCWarship), DistanceCalculator.MATH_CONTEXT_REALISTIC_PRECISION));
+    }
+
+    @Nonnull
+    private static Distance getRange(final int endurance, final @Nonnull Acceleration acceleration, @Nonnull final BigDecimal speedOfLightInMeterPerSecond) {
+        Preconditions.checkNotNull(acceleration, "acceleration shouldn't be null!");
+        Preconditions.checkNotNull(speedOfLightInMeterPerSecond, "speedOfLightInMeterPerSecond shouldn't be null!");
+
+        //v = s / t
+        //s = 0,5 · a · t²
+        //v = a · t
+        //s = 0,5 · v · t
+        final BigDecimal maxSpeedInMpS = speedOfLightInMeterPerSecond.multiply(MAX_PERCENTAGE_SPEED_OF_LIGHT, DistanceCalculator.MATH_CONTEXT_REALISTIC_PRECISION);
+        final BigDecimal accelerationInMpSSquared = acceleration.convertToMetric(EAccelerationMetric.MS2);
+        final int timeToMaxSpeed = maxSpeedInMpS.divide(accelerationInMpSSquared, DistanceCalculator.MATH_CONTEXT_REALISTIC_PRECISION).intValue();
+        final int timeOfFullSpeed = endurance - timeToMaxSpeed * 2;
+        // acceleration to max speed
+        final Distance accelerationDistance = getDistanceByTimeAndAcceleration(timeToMaxSpeed, acceleration);
+        // travel with max speed
+        Distance fullThrottleDistance = Distance.ZERO;
+        if (timeOfFullSpeed >= 0) {
+            final BigDecimal distanceOfFullThrottle = BigDecimal.valueOf(timeOfFullSpeed).multiply(maxSpeedInMpS, DistanceCalculator.MATH_CONTEXT_MORE_PRECISION);
+            fullThrottleDistance = new Distance(distanceOfFullThrottle, EDistanceMetric.M);
+        }
+        // slow down to destination "end of time"
+        final Distance slowDownDistance = getDistanceByTimeAndAcceleration(timeToMaxSpeed, acceleration);
+
+        return accelerationDistance.add(fullThrottleDistance).add(slowDownDistance);
+    }
+
+    /**
+     * Calculates the distance for the given time and acceleration.
+     *
+     * @param endurance    the endurance of the acceleration in s
+     * @param acceleration the acceleration
+     */
+    @Nonnull
+    private static Distance getDistanceByTimeAndAcceleration(final int endurance, @Nonnull final Acceleration acceleration) {
+        Preconditions.checkNotNull(acceleration, "acceleration shouldn't be null!");
+
+        //s = 0,5 · v · t
+        final double squaredTime = Math.pow(endurance, 2);
         final BigDecimal range = new BigDecimal("0.5")
                 .multiply(acceleration.convertToMetric(EAccelerationMetric.MS2))
                 .multiply(new BigDecimal(squaredTime), MATH_CONTEXT_MORE_PRECISION);

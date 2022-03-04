@@ -1,10 +1,8 @@
 package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
-import de.yuga.spacebattle.rest.dto.turn.battle.BattleReport;
 import de.yuga.spacebattle.rest.dto.turn.battle.collections.BattleReportList;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,31 +23,25 @@ import java.util.List;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 
-@Api(tags = "ReportApi")
+@Api(tags = "BattleReportApi")
 @RolesAllowed("ROLE_USER")
 @RestController
-@RequestMapping("/" + PRIVATE_BASE_ENDPOINT + "/" + ReportApi.ENDPOINT + "/")
-public class ReportApi {
+@RequestMapping("/" + PRIVATE_BASE_ENDPOINT + "/" + BattleReportApi.ENDPOINT + "/")
+public class BattleReportApi {
 
     @Nonnull
     public static final String ENDPOINT = "report";
     public static final String FIGHTING_ENDPOINT = "battle";
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(ReportApi.class);
-
-    @Nonnull
-    private final TickService tickController;
+    private final static Logger LOGGER = LoggerFactory.getLogger(BattleReportApi.class);
 
     @Nonnull
     private final BattleReportService battleReportService;
 
     @Autowired
-    public ReportApi(@Nonnull final TickService tickController,
-                     @Nonnull BattleReportService battleReportService) {
-        Preconditions.checkNotNull(tickController, "tickC shouldn't be null!");
+    public BattleReportApi(@Nonnull final BattleReportService battleReportService) {
         Preconditions.checkNotNull(battleReportService, "fightingReportService shouldn't be null!");
 
-        this.tickController = tickController;
         this.battleReportService = battleReportService;
     }
 
@@ -69,21 +61,5 @@ public class ReportApi {
                                                           @PathVariable("size") final int size) {
         final List<de.yuga.spacebattle.backend.entities.turn.battle.BattleReport> battleReportsWithUser = battleReportService.findReportsWithUserWithPaging(idUser, page, size);
         return ResponseEntity.ok(new BattleReportList(battleReportsWithUser));
-    }
-
-    @GetMapping(value = FIGHTING_ENDPOINT + "/latest/{idUser}")
-    @ApiOperation(value = "Get all fighting reports for the user.", nickname = "getLatestReportsWithUser")
-    @Operation(
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BattleReport.class))),
-                    @ApiResponse(responseCode = "400", description = "an error occurred",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
-            }
-    )
-    @ResponseBody
-    public ResponseEntity<?> getLatestReportsWithUser(@PathVariable("idUser") final int idUser) {
-        final de.yuga.spacebattle.backend.entities.turn.battle.BattleReport latestBattleReportsWithUser = battleReportService.findLatestWithUser(idUser);
-        return ResponseEntity.ok(new BattleReport(latestBattleReportsWithUser));
     }
 }

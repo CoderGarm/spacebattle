@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.EAccelerationMetric;
+import de.yuga.spacebattle.backend.enums.EHyperBand;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 
 public class Acceleration implements Cloneable, Comparable<Acceleration> {
 
@@ -26,27 +26,29 @@ public class Acceleration implements Cloneable, Comparable<Acceleration> {
     @ApiModelProperty(required = true, value = "The metric of this acceleration.")
     private final EAccelerationMetric accelerationMetric;
 
-    public Acceleration(@Nonnull final BigInteger accelerationValue, @Nonnull final EAccelerationMetric accelerationMetric) {
-        Preconditions.checkNotNull(accelerationValue, "coordinate shouldn't be null!");
-        Preconditions.checkNotNull(accelerationMetric, "lengthDefinition shouldn't be null!");
-
-        this.accelerationValue = new BigDecimal(accelerationValue);
-        this.accelerationMetric = accelerationMetric;
-    }
+    @Nonnull
+    @JsonProperty
+    @ApiModelProperty(required = true, value = "The hyper band which can be reached.")
+    private final EHyperBand hyperBand;
 
     public Acceleration(final int accelerationValue, @Nonnull final EAccelerationMetric accelerationMetric) {
         Preconditions.checkNotNull(accelerationMetric, "lengthDefinition shouldn't be null!");
 
         this.accelerationValue = BigDecimal.valueOf(accelerationValue);
         this.accelerationMetric = accelerationMetric;
+        this.hyperBand = EHyperBand.NONE;
     }
 
-    public Acceleration(@Nonnull final BigDecimal accelerationValue, @Nonnull final EAccelerationMetric accelerationMetric) {
+    public Acceleration(@Nonnull final BigDecimal accelerationValue,
+                        @Nonnull final EAccelerationMetric accelerationMetric,
+                        @Nonnull final EHyperBand hyperBand) {
         Preconditions.checkNotNull(accelerationValue, "coordinate shouldn't be null!");
         Preconditions.checkNotNull(accelerationMetric, "lengthDefinition shouldn't be null!");
+        Preconditions.checkNotNull(hyperBand, "hyperBand shouldn't be null!");
 
         this.accelerationValue = accelerationValue;
         this.accelerationMetric = accelerationMetric;
+        this.hyperBand = hyperBand;
     }
 
     public Acceleration(final double accelerationValue, @Nonnull final EAccelerationMetric accelerationMetric) {
@@ -54,6 +56,7 @@ public class Acceleration implements Cloneable, Comparable<Acceleration> {
 
         this.accelerationValue = BigDecimal.valueOf(accelerationValue);
         this.accelerationMetric = accelerationMetric;
+        this.hyperBand = EHyperBand.NONE;
     }
 
     @Nonnull
@@ -62,7 +65,13 @@ public class Acceleration implements Cloneable, Comparable<Acceleration> {
         Preconditions.checkNotNull(fromDb, "fromDb shouldn't be null!");
 
         final String[] split = fromDb.trim().split("\\s");
-        return new Acceleration(new BigDecimal(split[0]), EAccelerationMetric.getByName(split[1]));
+        return new Acceleration(new BigDecimal(split[0]), EAccelerationMetric.getByName(split[1]), EHyperBand.getByName(split[2]));
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public EHyperBand getHyperBand() {
+        return hyperBand;
     }
 
     @Nonnull
@@ -88,7 +97,7 @@ public class Acceleration implements Cloneable, Comparable<Acceleration> {
     @Nonnull
     @JsonIgnore
     public String asString() {
-        return accelerationValue + " " + accelerationMetric;
+        return accelerationValue + " " + accelerationMetric + " " + hyperBand;
     }
 
     @Override

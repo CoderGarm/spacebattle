@@ -10,6 +10,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -73,6 +74,7 @@ public class Distance implements Cloneable, Comparable<Distance> {
         return new Distance(new BigDecimal(split[0]), EDistanceMetric.getByName(split[1]));
     }
 
+    @JsonIgnore
     @Override
     public String toString() {
         final Distance distance = DistanceCalculator.convertToScale(this);
@@ -91,6 +93,7 @@ public class Distance implements Cloneable, Comparable<Distance> {
         return coordinate.multiply(factor, DistanceCalculator.MATH_CONTEXT_MORE_PRECISION);
     }
 
+    @JsonIgnore
     public Distance convertToMetric(@Nonnull final EDistanceMetric targetMetric) {
         Preconditions.checkNotNull(targetMetric, "targetMetric shouldn't be null!");
 
@@ -99,12 +102,21 @@ public class Distance implements Cloneable, Comparable<Distance> {
         return this;
     }
 
-    public Distance convertToMetricWithScale(@Nonnull final EDistanceMetric targetMetric, final int scale) {
+    @JsonIgnore
+    public Distance convertToMetricWithScale(@Nonnull final EDistanceMetric targetMetric) {
         Preconditions.checkNotNull(targetMetric, "targetMetric shouldn't be null!");
 
-        this.coordinate = getCoordinateInMetric(targetMetric).setScale(scale, RoundingMode.HALF_UP);
+        this.coordinate = getCoordinateInMetric(targetMetric).setScale(targetMetric.getScale(), RoundingMode.HALF_UP);
         this.distanceMetric = targetMetric;
         return this;
+    }
+
+    @JsonIgnore
+    public Distance getInMetricWithScale(@Nonnull final EDistanceMetric targetMetric) {
+        Preconditions.checkNotNull(targetMetric, "targetMetric shouldn't be null!");
+
+        final BigDecimal coordinate = getCoordinateInMetric(targetMetric).setScale(targetMetric.getScale(), RoundingMode.HALF_UP);
+        return new Distance(coordinate, targetMetric);
     }
 
     @Override
@@ -116,8 +128,8 @@ public class Distance implements Cloneable, Comparable<Distance> {
 
         final Distance distance = (Distance) o;
 
-        final int compareTo = coordinate.compareTo(distance.coordinate);
-        return new EqualsBuilder().append(compareTo, 0).append(distanceMetric, distance.distanceMetric).isEquals();
+        final int compareTo = compareTo(distance);
+        return new EqualsBuilder().append(compareTo, 0).isEquals();
     }
 
     @Override
@@ -141,10 +153,49 @@ public class Distance implements Cloneable, Comparable<Distance> {
 
     @Override
     @JsonIgnore
-    public int compareTo(@Nonnull final Distance o) {
-        Preconditions.checkNotNull(o, "o shouldn't be null!");
+    public int compareTo(@Nonnull final Distance that) {
+        Preconditions.checkNotNull(that, "that shouldn't be null!");
 
-        return coordinate.compareTo(o.getCoordinateInMetric(distanceMetric));
+        final Distance thisDistance = getInMetricWithScale(distanceMetric);
+        final Distance thatDistance = that.getInMetricWithScale(distanceMetric);
+
+        final Integer thisRelevantScale = getRelevantDecimalPlaces(thisDistance.getCoordinate());
+        final Integer thatRelevantScale = getRelevantDecimalPlaces(thatDistance.getCoordinate());
+        Integer relevantScale = null;
+        if (thisRelevantScale != null && thatRelevantScale != null) {
+            relevantScale = Math.max(thisRelevantScale, thatRelevantScale);
+        } else if (thisRelevantScale != null) {
+            relevantScale = thisRelevantScale;
+        } else if (thatRelevantScale != null) {
+            relevantScale = thatRelevantScale;
+        }
+
+        if (relevantScale != null) {
+            final BigDecimal thisC = thisDistance.getCoordinate().setScale(relevantScale, RoundingMode.HALF_UP);
+            final BigDecimal thatC = thatDistance.getCoordinate().setScale(relevantScale, RoundingMode.HALF_UP);
+            return thisC.compareTo(thatC);
+        }
+        return thisDistance.getCoordinate().compareTo(thatDistance.getCoordinate());
+    }
+
+    /**
+     * Returns the index of the first zero after the decimal point.
+     *
+     * @param value the value to check
+     * @return the index of the first zero after the decimal point - or null if all places are relevant
+     */
+    @Nullable
+    private Integer getRelevantDecimalPlaces(@Nonnull final BigDecimal value) {
+        Integer relevantScale = null;
+        final String thisToString = value.toString();
+        if (thisToString.contains(".")) {
+            final String[] thisCoord = thisToString.split("\\.");
+            final String decimalPlaces = thisCoord[1];
+            if (decimalPlaces.contains("0")) {
+                relevantScale = decimalPlaces.indexOf("0");
+            }
+        }
+        return relevantScale;
     }
 
     @Nonnull

@@ -1,44 +1,42 @@
 package de.yuga.spacebattle.backend.combat.dto;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.enums.EDistanceMetric;
 
 import javax.annotation.Nonnull;
-import java.math.BigDecimal;
 
 /**
- * Holds the information about a range and the applicable damage
- * for that range absolutely and relative to the complete projectable damage to a fleet.
+ * Holds the information about a range and the applicable damage for that range.
  */
 public class DamageProjectionPerRange {
 
     /**
      * The minimal range from where the damage can be projected.
      */
-    private final BigDecimal minRange;
-
-    /**
-     * The maximal range from where the damage can be projected.
-     */
-    private final BigDecimal maxRange;
+    @Nonnull
+    private final RangeDefinition range;
 
     /**
      * The damage per salvo in absolute units.
      */
-    private final long absoluteEffectiveDamage;
+    private final long damageValue;
 
-    /**
-     * The damage per salvo relative to the total amount of damage which can be applied over all ranges.
-     */
-    private final long relativeEffectiveDamage;
+    public DamageProjectionPerRange(@Nonnull final RangeDefinition range,
+                                    final long damageValue) {
+        Preconditions.checkNotNull(range, "range shouldn't be null!");
 
-    public DamageProjectionPerRange(final BigDecimal minRange,
-                                    final BigDecimal maxRange,
-                                    final long absoluteEffectiveDamage,
-                                    final long relativeEffectiveDamage) {
-        this.minRange = minRange;
-        this.maxRange = maxRange;
-        this.absoluteEffectiveDamage = absoluteEffectiveDamage;
-        this.relativeEffectiveDamage = relativeEffectiveDamage;
+        this.range = range;
+        this.damageValue = damageValue;
+    }
+
+    public DamageProjectionPerRange(@Nonnull final Distance minRange, @Nonnull final Distance maxRange, final long damageValue) {
+        Preconditions.checkNotNull(minRange, "minRange shouldn't be null!");
+        Preconditions.checkNotNull(maxRange, "maxRange shouldn't be null!");
+
+        final EDistanceMetric distanceMetric = minRange.getDistanceMetric();
+        this.range = new RangeDefinition(minRange.getCoordinate(), maxRange.getCoordinateInMetric(distanceMetric), distanceMetric);
+        this.damageValue = damageValue;
     }
 
     /**
@@ -47,27 +45,18 @@ public class DamageProjectionPerRange {
      * @param distance the given range
      * @return <code>true</code> if the distance is inside the boundaries, <code>false</code> otherwise
      */
-    public boolean isInRange(@Nonnull final BigDecimal distance) {
+    public boolean isInRange(@Nonnull final Distance distance) {
         Preconditions.checkNotNull(distance, "distance shouldn't be null!");
 
-        final int compareToMin = minRange.compareTo(distance);
-        final int compareToMax = maxRange.compareTo(distance);
-        return compareToMin <= 0 && compareToMax >= 0;
+        return range.isInRange(distance);
     }
 
-    public BigDecimal getMinRange() {
-        return minRange;
+    @Nonnull
+    public RangeDefinition getRange() {
+        return range;
     }
 
-    public BigDecimal getMaxRange() {
-        return maxRange;
-    }
-
-    public long getAbsoluteEffectiveDamage() {
-        return absoluteEffectiveDamage;
-    }
-
-    public long getRelativeEffectiveDamage() {
-        return relativeEffectiveDamage;
+    public long getDamageValue() {
+        return damageValue;
     }
 }

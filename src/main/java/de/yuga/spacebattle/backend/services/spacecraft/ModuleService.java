@@ -296,14 +296,15 @@ public class ModuleService {
                                        final int useCapacity,
                                        final int value,
                                        final int level,
-                                       final boolean ftlCapable,
+                                       @Nonnull final EHyperBand hyperBand,
                                        @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
+        Preconditions.checkNotNull(hyperBand, "hyperBand shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        return propulsionRepository.save(new Propulsion(name, description, unlockedThrough, useCapacity, value, level, ftlCapable, crewRequirement));
+        return propulsionRepository.save(new Propulsion(name, description, unlockedThrough, useCapacity, value, level, hyperBand, crewRequirement));
     }
 
     @Nonnull
