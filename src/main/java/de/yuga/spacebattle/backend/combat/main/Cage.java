@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.Quadrant;
+import de.yuga.spacebattle.backend.calculator.resource.CoursePlot;
 import de.yuga.spacebattle.backend.combat.dto.*;
 import de.yuga.spacebattle.backend.combat.main.handler.CombatHandler;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
@@ -26,6 +27,8 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
+import static de.yuga.spacebattle.backend.enums.physics.EDistanceMetric.LS;
+
 /**
  * The cage is the fighting area for a {@link FleetClash} and will handle the complete combat phase on its own.
  */
@@ -37,14 +40,22 @@ public class Cage implements Future<Cage> {
     /**
      * The multiplier for defining the initial cage diameter by the maximum fleet's weapon ranges.
      */
-    private static final BigDecimal INITIAL_CAGE_DIAMETER_MULTIPLIER = BigDecimal.valueOf(1.1);
+    private static final BigDecimal INITIAL_CAGE_DIAMETER_MULTIPLIER = BigDecimal.valueOf(2);
 
     /**
      * If zero, then the multiplier will be chosen for calculation.
      */
     private static final BigDecimal INITIAL_CAGE_DIAMETER = BigDecimal.valueOf(0);
 
+    /**
+     * The current combat round.
+     */
     private final CombatRound currentCombatRound;
+
+    /**
+     * This indicates if any weapon damage were applied or if something important happened and makes it necessary to recalculating combat stuff.
+     */
+    private boolean actionHappened = false;
 
     /**
      * The clash.
@@ -107,7 +118,7 @@ public class Cage implements Future<Cage> {
         this.fleetClash = fleetClash;
         this.participatingFleets = fleetClash.getParticipatingFleets();
 
-        // todo guessing that there are onl two participants which are foes
+        // todo guessing that there are only two participants which are foes
         fleetOne = participatingFleets.get(0);
         fleetTwo = participatingFleets.get(1);
 
@@ -130,12 +141,28 @@ public class Cage implements Future<Cage> {
     public boolean isDone() {
         final boolean isDone;
         if (forceDone) {
+            System.out.println("forced battle end");
             isDone = true;
         } else {
             final List<FleetRoundState> currentRoundStates = participatingFleets.stream().map(this::getCurrentStateByFleet).collect(Collectors.toList());
             final List<Boolean> isFightingCapableStates = currentRoundStates.stream().map(FleetRoundState::getFleetHealthState).map(FleetHealthState::isFightingCapable).collect(Collectors.toList());
             final long fightingCount = isFightingCapableStates.stream().filter(aBoolean -> aBoolean).count();
             isDone = fightingCount <= 1;
+            if (isDone) {
+                System.out.println("fighting count <= 1");
+            }
+
+            // todo remove this
+            final CombatRound nextRound = currentCombatRound.clone();
+            nextRound.next();
+            final boolean nextRoundNotPresent = currentRoundStates.stream().anyMatch(roundState -> {
+                final CoursePlot coursePlot = roundState.getCoursePlot();
+                return !coursePlot.isFreshPlotWithoutAnyMovement() && coursePlot.hasPlotExceeded();
+            });
+            if (nextRoundNotPresent) {
+                System.out.println("\nbattle proudly presents by counting stuff\n");
+                return true;
+            }
         }
         return isDone;
     }
@@ -172,16 +199,21 @@ public class Cage implements Future<Cage> {
         }
     }
 
-    private boolean logIt = false;
+
+    private boolean logTimeStampForCombatPhases = false;
 
     private void log(String msg, final Long start, final Long end) {
-        if (logIt) {
-            if (start != null && end != null) {
-                final long duration = (end - start);
-                System.out.println("\t" + msg + "\t\t - duration: " + duration);
-            } else {
-                System.out.println("\t" + msg);
-            }
+        if (logTimeStampForCombatPhases) {
+            logMessage(msg, start, end);
+        }
+    }
+
+    public static void logMessage(String msg, final Long start, final Long end) {
+        if (start != null && end != null) {
+            final double duration = (double) (end - start) / 1000;
+            System.out.println("\t" + msg + "\t\t - duration: " + duration + " seconds");
+        } else {
+            System.out.println("\t" + msg);
         }
     }
 
@@ -217,7 +249,7 @@ public class Cage implements Future<Cage> {
 
         /* todo implement forced battle end at condition
          */
-        if (no >= 2500) {
+        if (no >= 1000) {
             System.out.println("#" + no + " BATTLE FORCED DONE");
             forceDone = true;
         }
@@ -230,9 +262,9 @@ public class Cage implements Future<Cage> {
         }
         end = System.currentTimeMillis();
         log("tidy up", start, end);
-        if (no % 500 == 0) {
+        if (no % 10 == 0) {
             final Distance distance = getCurrentStateByFleet(fleetOne).getPosition().getDistance(getCurrentStateByFleet(fleetTwo).getPosition());
-            System.out.println("#" + no + "\t\t - " + distance.toString());
+            System.out.println("#" + no + "\t\t - " + distance.getCoordinateInMetric(LS) + " LS");
         }
     }
 
@@ -244,7 +276,6 @@ public class Cage implements Future<Cage> {
         final CombatRound currentCombatRound = getCurrentCombatRound();
         final int noOfNoReturn = currentCombatRound.getNo() - 2;
 
-        // todo check if there are more then two rounds in it
         final List<FleetRoundState> fleetRoundStatesToArchive = roundStates.stream()
                 .filter(ma -> ma.getCombatRound().getNo() < noOfNoReturn)
                 .collect(Collectors.toList());
@@ -287,7 +318,8 @@ public class Cage implements Future<Cage> {
      */
     private void initiateCombat() {
         final BigDecimal initialCageDiameter = getInitialCageDiameter();
-        final BigDecimal initialCageRadius = initialCageDiameter.divide(BigDecimal.valueOf(2), DistanceCalculator.MATH_CONTEXT_TO_INTEGER_DOWN);
+        final BigDecimal initialCageRadius = initialCageDiameter.divide(BigDecimal.valueOf(2), DistanceCalculator.MC);
+        System.out.println("Initial cage radius: " + initialCageRadius + " LS");
         final Orbit fleetOneStartingOrbit = DistanceCalculator.createByRadiusAndQuadrant(initialCageRadius, Quadrant.Q1, Planet.PLANET_STANDARD_METRIC);
         final Orbit fleetTwoStartingOrbit = DistanceCalculator.createByRadiusAndQuadrant(initialCageRadius, Quadrant.Q3, Planet.PLANET_STANDARD_METRIC);
 
@@ -306,6 +338,19 @@ public class Cage implements Future<Cage> {
     }
 
     /**
+     * Returns if something important happened and makes it necessary to recalculating combat stuff.
+     *
+     * @return if the recalculation of combat stuff is necessary
+     */
+    public boolean isActionHappened() {
+        return actionHappened;
+    }
+
+    public void setActionHappened(final boolean actionHappened) {
+        this.actionHappened = actionHappened;
+    }
+
+    /**
      * Returns the initial diameter of the cage.
      *
      * @return the diameter
@@ -315,9 +360,10 @@ public class Cage implements Future<Cage> {
         final Distance f2 = fleetTwo.getMaximumWeaponRange();
         final BigDecimal initialCageDiameter;
         if (INITIAL_CAGE_DIAMETER.compareTo(BigDecimal.ZERO) == 0) {
-            final int compareTo = f1.compareTo(f2);
-            final BigDecimal coordinateInMetric = (compareTo < 0 ? f1 : f2).getCoordinateInMetric(Planet.PLANET_STANDARD_METRIC);
-            initialCageDiameter = coordinateInMetric.multiply(INITIAL_CAGE_DIAMETER_MULTIPLIER);
+            final Distance min = f1.min(f2);
+            System.out.println("Weapon range: " + min.getCoordinateInMetric(LS) + " LS");
+            final BigDecimal coordinateInMetric = min.getCoordinateInMetric(Planet.PLANET_STANDARD_METRIC);
+            initialCageDiameter = coordinateInMetric.multiply(INITIAL_CAGE_DIAMETER_MULTIPLIER, DistanceCalculator.MC);
         } else {
             initialCageDiameter = INITIAL_CAGE_DIAMETER;
         }
@@ -471,7 +517,12 @@ public class Cage implements Future<Cage> {
     }
 
     @Nonnull
+    public FleetClash getFleetClash() {
+        return fleetClash;
+    }
+
+    @Nonnull
     public BattleResult getBattleResult() {
-        return new BattleResult(fleetClash, historyOfRounds, historyMovement, historyOfBeamSalvos, historyOfMissileSalvos);
+        return new BattleResult(this);
     }
 }

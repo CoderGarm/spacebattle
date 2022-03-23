@@ -2,7 +2,7 @@ package de.yuga.spacebattle.backend.combat.dto;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
-import de.yuga.spacebattle.backend.enums.EDistanceMetric;
+import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 
 import javax.annotation.Nonnull;
 

@@ -2,10 +2,10 @@ package de.yuga.spacebattle.backend.entities.turn.resources;
 
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.enums.*;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -212,7 +212,7 @@ public class ResourceDeposit extends AbstractEntityKey {
             value = amount;
         }
         if (value < 0) {
-            throw new NotifyUserException("No, you cannot do that.");
+            throw new NotifyWebUserException("No, you cannot do that.");
         }
         this.resources.put(resourceType, value);
     }
@@ -311,7 +311,7 @@ public class ResourceDeposit extends AbstractEntityKey {
         Preconditions.checkNotNull(educationType, "educationType shouldn't be null!");
 
         if (amount < 0) {
-            throw new NotifyUserException("Not below zero, as I told you!");
+            throw new NotifyWebUserException("Not below zero, as I told you!");
         }
         humanResources.put(educationType, amount);
     }

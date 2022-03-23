@@ -1,13 +1,13 @@
 package de.yuga.spacebattle.backend.entities.turn;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -92,7 +92,7 @@ public class Colonization extends AbstractEntityKey {
 
     public void setDoneAtZero(final int moveDoneAtZero) {
         if (moveDoneAtZero >= this.doneAtZero) {
-            throw new NotifyUserException("You cannot increase the traffic time until you have warp scrambler");
+            throw new NotifyWebUserException("You cannot increase the traffic time until you have warp scrambler");
         }
         this.doneAtZero = moveDoneAtZero;
     }

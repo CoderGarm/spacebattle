@@ -1,40 +1,15 @@
 package de.yuga.spacebattle.backend.calculator;
 
-import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
-import de.yuga.spacebattle.backend.dto.physics.Acceleration;
-import de.yuga.spacebattle.backend.dto.physics.Distance;
-import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
-
-import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class BattleCalculator {
 
     private final static MathContext MATH_CONTEXT = new MathContext(4, RoundingMode.DOWN);
 
     private BattleCalculator() {
-    }
-
-    /**
-     * Calculates the missile range in m.
-     *
-     * @param missile the missile
-     */
-    public static Distance getMissileRange(@Nonnull final Missile missile) {
-        Preconditions.checkNotNull(missile, "missile shouldn't be null!");
-
-        final AtomicReference<Distance> range = new AtomicReference<>(Distance.ZERO);
-        missile.getMissileMotors().forEach(missileMotor -> {
-            int endurance = missileMotor.getEndurance();
-            final Acceleration acceleration = missileMotor.getAcceleration();
-            range.set(range.get().add(NavigationCalculator.getRangeByTimeAndAcceleration(endurance, acceleration)));
-        });
-        return range.get();
     }
 
     /**

@@ -5,7 +5,7 @@ import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
-import de.yuga.spacebattle.backend.enums.EDistanceMetric;
+import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.repositories.orbitals.StarSystemRepository;
 import org.springframework.stereotype.Service;
 

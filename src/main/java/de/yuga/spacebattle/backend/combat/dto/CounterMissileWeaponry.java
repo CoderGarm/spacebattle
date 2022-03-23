@@ -49,7 +49,7 @@ public class CounterMissileWeaponry {
 
         int hits = 0;
         if (isAntiMissileCapacityLeft()) {
-            final int maneuverabilityResistance = missile.getMissileMotors().get(0).getManeuverability();
+            final int maneuverabilityResistance = missile.getMissileMotor().getManeuverability();
             final Map<Integer, Integer> usedShots = new HashMap<>();
             int amountOfMissiles = initialAmountOfMissiles;
             for (final Integer maneuverability : antiMissileCapacity.keySet()) {
@@ -129,7 +129,7 @@ public class CounterMissileWeaponry {
             }
             final Launcher launcher = alignedFitting.getLauncher();
             if (launcher != null) {
-                this.maneuverability = launcher.getAmmunitionModule().getMissile().getMissileMotors().get(0).getManeuverability();
+                this.maneuverability = launcher.getAmmunitionModule().getMissile().getMissileMotor().getManeuverability();
                 this.amountOfDamageProjectors = weaponAmount;
             }
         }

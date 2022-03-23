@@ -2,7 +2,6 @@ package de.yuga.spacebattle.backend.entities;
 
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.researches.Research;
@@ -11,6 +10,7 @@ import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -138,7 +138,7 @@ public class Constructable {
 
         if (shipClass != null && amountShips != null) {
             if (shipClass.getHull() == null) {
-                throw new NotifyUserException("You need a hull for your ship, really!");
+                throw new NotifyWebUserException("You need a hull for your ship, really!");
             }
             final ResourceDeposit costsOverall = shipClass.getCostsOverall();
             return JobCostsCalculator.getCostsForLevel(costsOverall, amountShips);
@@ -150,7 +150,7 @@ public class Constructable {
             return JobCostsCalculator.getCostsForLevel(costs, targetLevel);
         }
 
-        throw new NotifyUserException("You have tried something interesting. May be you should talk to an admin.");
+        throw new NotifyWebUserException("You have tried something interesting. May be you should talk to an admin.");
     }
 
 

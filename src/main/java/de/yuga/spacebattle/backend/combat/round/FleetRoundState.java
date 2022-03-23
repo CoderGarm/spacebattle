@@ -1,27 +1,42 @@
 package de.yuga.spacebattle.backend.combat.round;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.resource.CourseOrderElement;
+import de.yuga.spacebattle.backend.calculator.resource.CoursePlot;
 import de.yuga.spacebattle.backend.combat.dto.CounterMissileWeaponry;
 import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.combat.dto.Historizable;
 import de.yuga.spacebattle.backend.combat.dto.RangeDefinition;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
+import de.yuga.spacebattle.backend.dto.physics.Direction;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
+import de.yuga.spacebattle.backend.enums.EModuleType;
+import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
+import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
+import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
+import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
+import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static de.yuga.spacebattle.backend.calculator.FittingUtils.DEFENSIVE_FITTING;
 import static de.yuga.spacebattle.backend.combat.enums.EMovementType.IMPELLER_WEDGE_PROTECTION;
+import static de.yuga.spacebattle.backend.combat.round.CombatRound.COMBAT_ROUND;
 
 public class FleetRoundState extends Historizable<FleetRoundState> implements Cloneable {
 
@@ -49,6 +64,12 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
     @Nonnull
     private Orbit position;
 
+    @Nonnull
+    private Velocity velocity;
+
+    @Nonnull
+    private Direction direction;
+
     /**
      * The health state for the fleet of this round.
      */
@@ -67,6 +88,9 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
     @Nullable
     private EMovementType movementType;
 
+    @Nonnull
+    private CoursePlot coursePlot;
+
     public FleetRoundState(@Nonnull final Cage cage,
                            @Nonnull final Fleet fleet,
                            @Nonnull final Orbit position) {
@@ -79,6 +103,9 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         this.fleet = fleet;
         this.position = position.clone();
         this.fleetHealthState = new FleetHealthState(fleet);
+        this.coursePlot = new CoursePlot(cage, fleet, position);
+        this.velocity = coursePlot.getAgentsVelocity();
+        this.direction = coursePlot.getCurrentDirection();
         historize();
     }
 
@@ -93,6 +120,9 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         this.position = state.getPosition().clone();
         this.fleetHealthState = state.getFleetHealthState();
         this.movementType = state.getMovementType();
+        this.coursePlot = state.getCoursePlot();
+        this.velocity = coursePlot.getAgentsVelocity();
+        this.direction = coursePlot.getCurrentDirection();
         historize();
     }
 
@@ -115,6 +145,10 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
 
     @Nonnull
     public Orbit getPosition() {
+        final CourseOrderElement courseElement = coursePlot.getCourseElement(cage.getCurrentCombatRound());
+        if (courseElement != null) {
+            return courseElement.getPosition();
+        }
         return position;
     }
 
@@ -133,10 +167,37 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         return movementType;
     }
 
+    @Nonnull
+    public CoursePlot getCoursePlot() {
+        return coursePlot;
+    }
+
     public void setMovementType(@Nonnull final EMovementType movementType) {
         Preconditions.checkNotNull(movementType, "movementType shouldn't be null!");
 
         this.movementType = movementType;
+    }
+
+    public void setPosition(@Nonnull final Orbit position) {
+        this.position = position;
+    }
+
+    @Nonnull
+    public Velocity getVelocity() {
+        return velocity;
+    }
+
+    public void setVelocity(@Nonnull final Velocity velocity) {
+        this.velocity = velocity;
+    }
+
+    @Nonnull
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public void setDirection(@Nonnull final Direction direction) {
+        this.direction = direction;
     }
 
     /**
@@ -158,6 +219,35 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         cage.addHistorizable((FleetRoundState) this);
     }
 
+    /**
+     * Returns the possible distance which can be passed in one combat round towards a given direction.
+     *
+     * @param direction the direction
+     * @return the distance which can be passed in the given direction
+     */
+    public Distance getMobilityForDirection(@Nonnull final Direction direction) {
+        Preconditions.checkNotNull(direction, "direction shouldn't be null!");
+
+        return getMobilityForDirection(direction, 1);
+    }
+
+    /**
+     * Returns the possible distance which can be passed in n combat round towards a given direction.
+     *
+     * @param direction            the direction
+     * @param amountOfCombatRounds the amount of combat rounds -> n
+     * @return the distance which can be passed in the given direction
+     */
+    public Distance getMobilityForDirection(@Nonnull final Direction direction, final int amountOfCombatRounds) {
+        Preconditions.checkNotNull(direction, "direction shouldn't be null!");
+
+        final Direction agentsDirection = getDirection();
+        final BigDecimal alignmentFactor = agentsDirection.getAlignmentFactor(direction);
+
+        final Velocity velocity = getVelocity().getByAlignmentFactor(alignmentFactor);
+        final Acceleration acceleration = getAccelerationFor(EModuleType.PROPULSION);
+        return acceleration.getDistanceByTime(COMBAT_ROUND.multiply(amountOfCombatRounds), velocity, EDistanceMetric.LS);
+    }
 
     /**
      * Returns the maximum weapon range of the fleet.
@@ -198,12 +288,26 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Returns the damage which can be applied by this fleet over all ranges.
+     *
+     * @return the damage value
+     */
+    @Nonnull
+    public List<DamagePerRangeAndAlignment> getDamagePerRangeAndAlignments() {
+        return getFightingWarShips()
+                .map(WarshipHealthState::getDamagePerRanges)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
+
     @Override
     public FleetRoundState clone() {
         final FleetRoundState clone = (FleetRoundState) super.clone();
         clone.combatRound = combatRound.clone();
         clone.position = position.clone();
         clone.fleetHealthState = fleetHealthState.clone();
+        clone.coursePlot = coursePlot.clone();
         return clone;
     }
 
@@ -226,6 +330,28 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
                         .map(Map.Entry::getKey)
                         .filter(a -> a.getWeaponType() == weaponType)
                         .anyMatch(f -> f.getWeaponAlignment().isAssignableFromMovementType(movementType)));
+    }
+
+    /**
+     * Checks if the fleet has any weapons for the given movement type.
+     *
+     * @param weaponType the weapon type which needs to have the correct alignment
+     * @return <code>true</code> if there are any weapons which can fire, <code>false</code> otherwise
+     */
+    public boolean hasWeaponsForAlignment(@Nonnull final Set<EWeaponAlignment> applicableAlignments, @Nonnull final EWeaponType weaponType) {
+        Preconditions.checkNotNull(applicableAlignments, "applicableAlignments shouldn't be null!");
+        Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
+
+        if (IMPELLER_WEDGE_PROTECTION == movementType) {
+            return false;
+        }
+        return getFightingWarShips()
+                .anyMatch(w -> w.getFittings().entrySet().stream()
+                        // filter active fittings
+                        .filter(Map.Entry::getValue)
+                        .map(Map.Entry::getKey)
+                        .filter(a -> a.getWeaponType() == weaponType)
+                        .anyMatch(f -> applicableAlignments.contains(f.getWeaponAlignment())));
     }
 
     /**
@@ -288,5 +414,38 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
                     return eloka != null ? eloka.getEffectiveRange() : Distance.ZERO;
                 }).max(Comparator.naturalOrder())
                 .orElse(Distance.ZERO);
+    }
+
+    /**
+     * Returns the range units which can be passed per turn based on the slowest ship.
+     *
+     * @return the maximal distance which could be passed in a tick
+     */
+    public Acceleration getAccelerationFor(@Nonnull final EModuleType eModuleType) {
+        Preconditions.checkNotNull(eModuleType, "eModuleType shouldn't be null!");
+        Preconditions.checkArgument((eModuleType == EModuleType.FTLPROPULSION || eModuleType == EModuleType.PROPULSION),
+                "EModuleType must be kind of propulsion.");
+
+        final Integer minAcceleration = getFightingWarShips()
+                .map(s -> s.getModule(Propulsion.class))
+                .filter(Objects::nonNull)
+                .map(BaseModuleWithEffectValue::getEffectValue)
+                .min(Integer::compareTo)
+                .orElse(0);
+
+        final EAccelerationMetric accelerationMetric = eModuleType == EModuleType.PROPULSION ? EAccelerationMetric.G : EAccelerationMetric.C;
+        // todo set hyper band for ftl
+        return new Acceleration(BigDecimal.valueOf(minAcceleration), accelerationMetric, EHyperBand.NONE);
+    }
+
+    @Nonnull
+    public Velocity getMaxVelocity(@Nonnull final EModuleType propulsion) {
+        Preconditions.checkNotNull(propulsion, "propulsion shouldn't be null!");
+        Preconditions.checkArgument(propulsion == EModuleType.PROPULSION || propulsion == EModuleType.FTLPROPULSION, "propulsion must be propulsion type!");
+
+        final Acceleration acceleration = getAccelerationFor(propulsion);
+        final EHyperBand hyperBand = acceleration.getHyperBand();
+        final BigDecimal vesselTopSpeed = hyperBand.getEffectiveTopSpeed();
+        return new Velocity(vesselTopSpeed, EDistanceMetric.M, ETimeMetric.SECOND);
     }
 }

@@ -18,6 +18,7 @@ import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 
 /**
  * The aligned fitting represents a weapon system and the alignment, where the weapon is placed.
@@ -150,6 +151,33 @@ public class AlignedFitting {
             return null;
         }
         return new DamagePerRangeAndAlignment(boundaries, damageValue, weaponAlignment, weaponType);
+    }
+
+    @Nonnull
+    public DamagePerRangeAndAlignment getDamagePerRange() {
+        Distance damageProjectionRange = null;
+        long damageValue = 0;
+        EWeaponType weaponType = null;
+        if (weapon != null) {
+            damageProjectionRange = weapon.getDamageProjectionRange();
+
+            damageValue = (long) weapon.getEffectValue() * amount;
+            weaponType = EWeaponType.BEAM;
+
+        }
+        if (launcher != null) {
+            final Missile missile = launcher.getAmmunitionModule().getMissile();
+            damageProjectionRange = missile.getMaximumMissileRange();
+
+            damageValue = missile.getWarhead().getDamageValue() * amount;
+            weaponType = EWeaponType.MISSILE;
+        }
+        assert weaponType != null : "If the weapon type is null, then the item wasn't configured properly";
+        return new DamagePerRangeAndAlignment(
+                new RangeDefinition(BigDecimal.ZERO, damageProjectionRange.getCoordinate(), damageProjectionRange.getDistanceMetric()),
+                damageValue,
+                weaponAlignment,
+                weaponType);
     }
 
     @Override

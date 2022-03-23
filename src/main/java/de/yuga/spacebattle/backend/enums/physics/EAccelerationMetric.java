@@ -1,8 +1,8 @@
-package de.yuga.spacebattle.backend.enums;
+package de.yuga.spacebattle.backend.enums.physics;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
@@ -43,7 +43,7 @@ public enum EAccelerationMetric {
 
         return Arrays.stream(EAccelerationMetric.values()).filter(l -> l.name().equals(metric))
                 .findFirst()
-                .orElseThrow(() -> new NotifyUserException("There was no match for a acceleration definition possible by searching for '" + metric + "'."));
+                .orElseThrow(() -> new NotifyWebUserException("There was no match for a acceleration definition possible by searching for '" + metric + "'."));
     }
 
     /**
@@ -55,6 +55,6 @@ public enum EAccelerationMetric {
     public BigDecimal getConversionFactor(@Nonnull final EAccelerationMetric targetMetric) {
         Preconditions.checkNotNull(targetMetric, "targetMetric shouldn't be null!");
 
-        return meterEquivalent.divide(targetMetric.getMeterEquivalent(), DistanceCalculator.MATH_CONTEXT_REALISTIC_PRECISION);
+        return meterEquivalent.divide(targetMetric.getMeterEquivalent(), DistanceCalculator.MC);
     }
 }

@@ -23,7 +23,7 @@ public class Tick extends AbstractEntityKey {
     /**
      * The tick duration in seconds.
      */
-    public static final int TICK_DURATION = 604800;
+    public static final int TICK_DURATION_IN_SECONDS = 604800;
 
     @Nonnull
     private final static DateTimeFormatter tickFormatter = new DateTimeFormatterBuilder().appendPattern("yyyy MM dd").toFormatter();
@@ -54,9 +54,15 @@ public class Tick extends AbstractEntityKey {
         return id == tick.id;
     }
 
+
     @Override
     public int hashCode() {
         return 31 * id;
+    }
+
+    @Override
+    public String toString() {
+        return "Tick #" + id;
     }
 
     @Nullable

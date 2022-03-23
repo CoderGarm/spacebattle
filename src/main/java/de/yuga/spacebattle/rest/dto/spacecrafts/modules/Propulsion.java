@@ -2,7 +2,7 @@ package de.yuga.spacebattle.rest.dto.spacecrafts.modules;
 
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.enums.EHyperBand;
+import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics.BaseModule;
 import io.swagger.annotations.ApiModelProperty;
 

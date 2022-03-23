@@ -1,20 +1,24 @@
 package de.yuga.spacebattle.backend.calculator.distance;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.combat.enums.EMovementType;
-import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.physics.Time;
+import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
-import de.yuga.spacebattle.backend.enums.EAccelerationMetric;
-import de.yuga.spacebattle.backend.enums.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.EModuleType;
+import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
+import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
+import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
+import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+
+import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC;
 
 public class NavigationCalculator {
 
@@ -23,107 +27,98 @@ public class NavigationCalculator {
     /**
      * The gravitation earth constant value
      */
-    private static final BigDecimal GRAVITATION_EARTH = new BigDecimal("0.98");
+    public static final BigDecimal GRAVITATION_EARTH = new BigDecimal("0.98");
 
     /**
      * The maximum percentage of the speed of light which can be reached by a star ship.
      */
-    private static final BigDecimal MAX_PERCENTAGE_SPEED_OF_LIGHT = BigDecimal.valueOf(0.75);
+    public static final BigDecimal MAX_PERCENTAGE_SPEED_OF_LIGHT = BigDecimal.valueOf(0.8);
 
     private NavigationCalculator() {
     }
 
     /**
-     * Converts the amount of g (gravitation earth) to meter per square second.
+     * Calculates the needed time to lay back the given distance.<br>
+     * The speed at the end of the journey is defined the given percentage value of the top speed.<br>
+     * <br>
+     * The calculation method is as easy as it seems:<br>
+     * The mass point will accelerate at its best to the half of the distance.<br>
+     * If it reaches the top speed before halfway, it will travel at top speed to the half of the distance.<br>
+     * Then the mass point will slow down to the given percentage of top speed.<br>
+     * <br>
+     * The term 'halfway' refers to the half of the distance which has to be travelled.<br>
      *
-     * @param g times gravitation earth
-     * @return the value in meter per square second
+     * @param propulsionType               the prop type
+     * @param targetedPercentageOfTopSpeed the percentage of top speed which should be left over at the end of the journey
+     * @param fleet                        the fleet which travels
+     * @param distance                     the distance which has to be laid back
+     * @return the amount of time which are needed for this distance, perhaps in seconds
      */
-    public static int getMeterPerSecondSquaredFromG(final int g) {
-        return new BigDecimal(g).multiply(GRAVITATION_EARTH, MATH_CONTEXT_MORE_PRECISION).intValue();
-    }
+    public static int getDurationForTargetedEndSpeed(@Nonnull final EModuleType propulsionType,
+                                                     final int targetedPercentageOfTopSpeed,
+                                                     @Nonnull final Fleet fleet,
+                                                     @Nonnull final Distance distance) {
+        Preconditions.checkNotNull(propulsionType, "propulsionType shouldn't be null!");
+        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+        Preconditions.checkNotNull(distance, "distance shouldn't be null!");
+        Preconditions.checkArgument(propulsionType == EModuleType.PROPULSION || propulsionType == EModuleType.FTLPROPULSION, "propulsionType must be a propulsion!");
+        Preconditions.checkArgument(!(targetedPercentageOfTopSpeed > 100 || targetedPercentageOfTopSpeed < 0), "haha, good try. But no!");
 
-    /**
-     * Calculates the distance for the given time and acceleration.
-     *
-     * @param endurance    the endurance of the acceleration in s
-     * @param acceleration the acceleration
-     */
-    @Nonnull
-    public static Distance getRangeByTimeAndAcceleration(final int endurance, @Nonnull final Acceleration acceleration) {
-        Preconditions.checkNotNull(acceleration, "acceleration shouldn't be null!");
+        // Stage 1: preparation
+        // v = s / t
+        // s = 0,5 · a · t²
+        // v = a · t
+        // s = 0,5 · v · t
+        final Acceleration acceleration = fleet.getAccelerationFor(propulsionType);
+        final EHyperBand hyperBand = acceleration.getHyperBand();
+        final BigDecimal vesselTopSpeed = hyperBand.getEffectiveTopSpeed();
 
-        final double effectiveCWarship = acceleration.getHyperBand().getEffectiveCWarship();
-        return getRange(endurance, acceleration, EDistanceMetric.LS.getMeterEquivalent().multiply(BigDecimal.valueOf(effectiveCWarship), DistanceCalculator.MATH_CONTEXT_REALISTIC_PRECISION));
-    }
+        // calculate acceleration to top speed
+        final BigDecimal accelerationValue = acceleration.convertToMetric(EAccelerationMetric.MS2);
+        final BigDecimal timeToTopSpeed = vesselTopSpeed.divide(accelerationValue, MC);
 
-    @Nonnull
-    private static Distance getRange(final int endurance, final @Nonnull Acceleration acceleration, @Nonnull final BigDecimal speedOfLightInMeterPerSecond) {
-        Preconditions.checkNotNull(acceleration, "acceleration shouldn't be null!");
-        Preconditions.checkNotNull(speedOfLightInMeterPerSecond, "speedOfLightInMeterPerSecond shouldn't be null!");
+        // Stage 2: calculate time to halfway distance
+        // s = 0,5 · a · t²
+        // t = sqrt(  s / (0,5 * a) )
+        final EDistanceMetric distanceMetric = EDistanceMetric.M;
+        final BigDecimal halfwayDistanceInMetric = distance.getCoordinateInMetric(distanceMetric).divide(BigDecimal.valueOf(2), MC);
+        final BigDecimal timeToHalfwaySquared = halfwayDistanceInMetric.divide(new BigDecimal("0.5").multiply(accelerationValue), MC);
+        final BigDecimal timeToHalfwayDistance = timeToHalfwaySquared.sqrt(MC);
 
-        //v = s / t
-        //s = 0,5 · a · t²
-        //v = a · t
-        //s = 0,5 · v · t
-        final BigDecimal maxSpeedInMpS = speedOfLightInMeterPerSecond.multiply(MAX_PERCENTAGE_SPEED_OF_LIGHT, DistanceCalculator.MATH_CONTEXT_REALISTIC_PRECISION);
-        final BigDecimal accelerationInMpSSquared = acceleration.convertToMetric(EAccelerationMetric.MS2);
-        final int timeToMaxSpeed = maxSpeedInMpS.divide(accelerationInMpSSquared, DistanceCalculator.MATH_CONTEXT_REALISTIC_PRECISION).intValue();
-        final int timeOfFullSpeed = endurance - timeToMaxSpeed * 2;
-        // acceleration to max speed
-        final Distance accelerationDistance = getDistanceByTimeAndAcceleration(timeToMaxSpeed, acceleration);
-        // travel with max speed
-        Distance fullThrottleDistance = Distance.ZERO;
-        if (timeOfFullSpeed >= 0) {
-            final BigDecimal distanceOfFullThrottle = BigDecimal.valueOf(timeOfFullSpeed).multiply(maxSpeedInMpS, DistanceCalculator.MATH_CONTEXT_MORE_PRECISION);
-            fullThrottleDistance = new Distance(distanceOfFullThrottle, EDistanceMetric.M);
+        final BigDecimal timeToHalfway;
+        final BigDecimal speedAtHalfway;
+        if (timeToHalfwayDistance.compareTo(timeToTopSpeed) > 0) {
+            // timeToHalfwayDistance > timeToTopSpeed - by avoiding speed of light issues
+            // accelerate only to top speed time and travel
+            final Distance distanceToTopSpeed = acceleration.getDistanceByTime(new Time(timeToTopSpeed, ETimeMetric.SECOND), Velocity.ZERO, EDistanceMetric.M);
+            final Distance halfway = new Distance(halfwayDistanceInMetric, distanceMetric);
+            final Distance distanceToTravelWithTopSpeed = halfway.subtract(distanceToTopSpeed);
+            // calc time to travel at top speed
+            // t = s / v
+            final BigDecimal travelTimeAtTopSpeed = distanceToTravelWithTopSpeed.getCoordinateInMetric(distanceMetric).divide(vesselTopSpeed, MC);
+            speedAtHalfway = vesselTopSpeed;
+            timeToHalfway = travelTimeAtTopSpeed.add(timeToTopSpeed);
+        } else {
+            // effective case: timeToHalfwayDistance <= timeToTopSpeed
+            // accelerate only to half distance time
+            // v = a * t
+            speedAtHalfway = accelerationValue.multiply(timeToHalfwayDistance, MC);
+            timeToHalfway = timeToHalfwayDistance;
         }
-        // slow down to destination "end of time"
-        final Distance slowDownDistance = getDistanceByTimeAndAcceleration(timeToMaxSpeed, acceleration);
 
-        return accelerationDistance.add(fullThrottleDistance).add(slowDownDistance);
-    }
+        // Stage 3: Slow down to targeted speed
+        final String percentageString = ((double) targetedPercentageOfTopSpeed / 100) + "";
+        final BigDecimal targetedVesselEndSpeed = vesselTopSpeed.multiply(new BigDecimal(percentageString), MC);
+        final BigDecimal speedToSlowDownFrom = speedAtHalfway.compareTo(targetedVesselEndSpeed) > 0 ? speedAtHalfway.subtract(targetedVesselEndSpeed) : speedAtHalfway;
+        // t = v / a
+        final BigDecimal timeToSlowDown = speedToSlowDownFrom.divide(accelerationValue, MC);
 
-    /**
-     * Calculates the distance for the given time and acceleration.
-     *
-     * @param endurance    the endurance of the acceleration in s
-     * @param acceleration the acceleration
-     */
-    @Nonnull
-    private static Distance getDistanceByTimeAndAcceleration(final int endurance, @Nonnull final Acceleration acceleration) {
-        Preconditions.checkNotNull(acceleration, "acceleration shouldn't be null!");
-
-        //s = 0,5 · v · t
-        final double squaredTime = Math.pow(endurance, 2);
-        final BigDecimal range = new BigDecimal("0.5")
-                .multiply(acceleration.convertToMetric(EAccelerationMetric.MS2))
-                .multiply(new BigDecimal(squaredTime), MATH_CONTEXT_MORE_PRECISION);
-        return new Distance(range, EDistanceMetric.M);
-    }
-
-    /**
-     * Calculates the destination orbit of the fleet to move towards the direction.<br>
-     * <b>This does not include any physical laws.</b><br>
-     *
-     * @param agent          the fleet which is on the way
-     * @param movementType   the plan, go towards the direction, or stay away from it
-     * @param agentsPosition the current position of the agent
-     * @param direction      the direction
-     * @return the calculated destination of this turn
-     */
-    public static Orbit getDestinationOrbitOfFleetForTargetAtSubLightSpeed(@Nonnull final Fleet agent,
-                                                                           @Nonnull final EMovementType movementType,
-                                                                           @Nonnull final Orbit agentsPosition,
-                                                                           @Nonnull final Orbit direction) {
-        Preconditions.checkNotNull(agent, "agent shouldn't be null!");
-        Preconditions.checkNotNull(movementType, "movementType shouldn't be null!");
-        Preconditions.checkNotNull(agentsPosition, "agentsPosition shouldn't be null!");
-        Preconditions.checkNotNull(direction, "direction shouldn't be null!");
-
-        // todo change to physical reliability
-        final Acceleration accelerationInGravityEarth = agent.getAccelerationFor(EModuleType.PROPULSION);
-        final Distance rangeByTimeAndAcceleration = NavigationCalculator.getRangeByTimeAndAcceleration(CombatRound.COMBAT_ROUND_DURATION, accelerationInGravityEarth);
-        return agentsPosition.move(movementType, rangeByTimeAndAcceleration, direction);
+        // must be in seconds
+        final BigDecimal travelTime = timeToHalfway.add(timeToSlowDown);
+        // guessing that the duration will not exceed 85 years
+        if (travelTime.compareTo(new BigDecimal(Integer.MAX_VALUE)) > 0) {
+            throw new NotifyWebUserException("Oh dear, this journey is to hard for us.");
+        }
+        return travelTime.intValue();
     }
 }

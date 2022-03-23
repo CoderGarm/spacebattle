@@ -238,17 +238,19 @@
         primary key (idMiningFactors, resourceType)
     ) engine=InnoDB;
 
-    create table missile (
-       idMissile integer not null auto_increment,
-        elokaResistance integer not null,
-        motorCapacity integer not null,
-        typeName varchar(255) not null,
-        warheadCapacity integer not null,
-        idAmmunitionModule integer not null,
-        idCosts integer not null,
-        idResearch integer not null,
-        idWarhead integer,
-        primary key (idMissile)
+    create table missile(
+                            idMissile          integer      not null auto_increment,
+                            elokaResistance    integer      not null,
+                            motorAmount        integer      not null,
+                            motorCapacity      integer      not null,
+                            typeName           varchar(255) not null,
+                            warheadCapacity    integer      not null,
+                            idAmmunitionModule integer      not null,
+                            idCosts            integer      not null,
+                            idMissileMotor     integer      not null,
+                            idResearch         integer      not null,
+                            idWarhead          integer,
+                            primary key (idMissile)
     ) engine=InnoDB;
 
     create table missileMotor (
@@ -260,11 +262,6 @@
         useCapacity integer not null,
         idCosts integer not null,
         primary key (idMissileMotor)
-    ) engine=InnoDB;
-
-    create table missileMotors (
-       idMissile integer not null,
-        idMissileMotor integer not null
     ) engine=InnoDB;
 
     create table missileMovement (
@@ -877,40 +874,35 @@
        foreign key (idMiningFactors) 
        references miningFactors (idMiningFactors);
 
-    alter table missile 
-       add constraint FKdhk8trxq7c36hid883mj4p7us 
-       foreign key (idAmmunitionModule) 
-       references ammunitionModule (idAmmunitionModule);
+    alter table missile
+        add constraint FKdhk8trxq7c36hid883mj4p7us
+            foreign key (idAmmunitionModule)
+                references ammunitionModule (idAmmunitionModule);
 
-    alter table missile 
-       add constraint FK2y4rvixlct3ljky430p3bmwad 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
+    alter table missile
+        add constraint FK2y4rvixlct3ljky430p3bmwad
+            foreign key (idCosts)
+                references resourceDeposit (idResourceDeposit);
 
-    alter table missile 
-       add constraint FK6hqn2wt7gk1myp1ew4i29r3ss 
-       foreign key (idResearch) 
-       references research (idResearch);
+    alter table missile
+        add constraint FK1ledmeodyggj4capnumuak58u
+            foreign key (idMissileMotor)
+                references missileMotor (idMissileMotor);
 
-    alter table missile 
-       add constraint FKhgp8bhvbmvaefgws7b1t0km7k 
-       foreign key (idWarhead) 
-       references warhead (idWarhead);
+    alter table missile
+        add constraint FK6hqn2wt7gk1myp1ew4i29r3ss
+            foreign key (idResearch)
+                references research (idResearch);
+
+    alter table missile
+        add constraint FKhgp8bhvbmvaefgws7b1t0km7k
+            foreign key (idWarhead)
+                references warhead (idWarhead);
 
     alter table missileMotor 
        add constraint FK6q2owmplw15x287lnle7mdeae 
        foreign key (idCosts) 
        references resourceDeposit (idResourceDeposit);
-
-    alter table missileMotors 
-       add constraint FKqkfi44aomg87boaduno2fg3oi 
-       foreign key (idMissileMotor) 
-       references missileMotor (idMissileMotor);
-
-    alter table missileMotors 
-       add constraint FKtqaarx478fl1pb7q6snbay2g1 
-       foreign key (idMissile) 
-       references missile (idMissile);
 
     alter table missileMovement 
        add constraint FK31pwab7jyqugac58td2yh50ju 

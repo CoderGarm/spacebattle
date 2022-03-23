@@ -12,6 +12,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.MissileMotor;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Warhead;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.enums.*;
+import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
 import de.yuga.spacebattle.backend.repositories.spacecraft.MissileMotorRepository;
 import de.yuga.spacebattle.backend.repositories.spacecraft.MissileRepository;
 import de.yuga.spacebattle.backend.repositories.spacecraft.WarheadRepository;

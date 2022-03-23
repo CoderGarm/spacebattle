@@ -1,17 +1,20 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.ammunition;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.physics.Time;
+import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
+import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -19,9 +22,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Entity
 @Table(name = "missile")
@@ -50,13 +51,14 @@ public class Missile extends AbstractEntityKey {
     private Warhead warhead;
 
     @Nonnull
-    @Size(min = 1, max = 3)
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "missileMotors",
-            joinColumns = @JoinColumn(name = "idMissile", referencedColumnName = "idMissile"),
-            inverseJoinColumns = @JoinColumn(name = "idMissileMotor", referencedColumnName = "idMissileMotor")
-    )
-    private List<MissileMotor> missileMotors;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "idMissileMotor")
+    private MissileMotor missileMotor;
+
+    /**
+     * The amounts of {@link #missileMotor} which are installed on the missile.
+     */
+    private int motorAmount;
 
     @Nonnull
     @NotNull
@@ -108,7 +110,8 @@ public class Missile extends AbstractEntityKey {
         this.motorCapacity = motorCapacity;
         this.elokaResistance = elokaResistance;
         this.warhead = warhead;
-        this.missileMotors = missileMotors;
+        this.missileMotor = missileMotors.get(0);
+        this.motorAmount = missileMotors.size(); // todo repair the methods away from list - to lazy currently
         this.unlockedThrough = unlockedThrough;
         this.ammunitionModule = ammunitionModule;
     }
@@ -136,8 +139,12 @@ public class Missile extends AbstractEntityKey {
     }
 
     @Nonnull
-    public List<MissileMotor> getMissileMotors() {
-        return missileMotors;
+    public MissileMotor getMissileMotor() {
+        return missileMotor;
+    }
+
+    public int getMotorAmount() {
+        return motorAmount;
     }
 
     /**
@@ -161,7 +168,9 @@ public class Missile extends AbstractEntityKey {
 
         updateCosts(clonedDeposit, costs);
         updateCosts(clonedDeposit, warhead.getCosts());
-        missileMotors.forEach(s -> updateCosts(clonedDeposit, s.getCosts()));
+        for (int i = 1; i <= motorAmount; i++) {
+            updateCosts(clonedDeposit, missileMotor.getCosts());
+        }
         return clonedDeposit;
     }
 
@@ -221,16 +230,10 @@ public class Missile extends AbstractEntityKey {
         if (maxRange != null) {
             return maxRange;
         }
-        final AtomicReference<Distance> range = new AtomicReference<>(Distance.ZERO);
-        getMissileMotors().forEach(missileMotor -> {
-            final int endurance = missileMotor.getEndurance();
-            final Acceleration acceleration = missileMotor.getAcceleration();
-            final Distance currentDistance = range.get();
-            final Distance additionalRange = NavigationCalculator.getRangeByTimeAndAcceleration(endurance, acceleration);
-            additionalRange.convertToMetric(currentDistance.getDistanceMetric());
-            range.set(currentDistance.add(additionalRange));
-        });
-        this.maxRange = range.get();
+
+        final int endurance = missileMotor.getEndurance() * motorAmount;
+        final Acceleration acceleration = missileMotor.getAcceleration();
+        maxRange = acceleration.getDistanceByTime(new Time(endurance, ETimeMetric.SECOND), Velocity.ZERO, EDistanceMetric.LS);
         return maxRange;
     }
 
@@ -241,15 +244,8 @@ public class Missile extends AbstractEntityKey {
      */
     @Nonnull
     public Distance getRangePerCombatRound() {
-        final AtomicReference<Distance> range = new AtomicReference<>(Distance.ZERO);
-        missileMotors.forEach(missileMotor -> {
-            final int endurance = CombatRound.COMBAT_ROUND_DURATION;
-            final Acceleration acceleration = missileMotor.getAcceleration();
-            final Distance currentRange = range.get();
-            final Distance additionalRange = NavigationCalculator.getRangeByTimeAndAcceleration(endurance, acceleration);
-            additionalRange.convertToMetric(currentRange.getDistanceMetric());
-            range.set(currentRange.add(additionalRange));
-        });
-        return range.get();
+        final int endurance = CombatRound.COMBAT_ROUND_DURATION;
+        final Acceleration acceleration = missileMotor.getAcceleration();
+        return acceleration.getDistanceByTime(new Time(endurance, ETimeMetric.SECOND), Velocity.ZERO, EDistanceMetric.LS);
     }
 }

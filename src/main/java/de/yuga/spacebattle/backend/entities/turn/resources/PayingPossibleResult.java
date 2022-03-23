@@ -1,9 +1,9 @@
 package de.yuga.spacebattle.backend.entities.turn.resources;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class PayingPossibleResult {
         } else if (problematicType instanceof EEducationType) {
             educationTypes.add((EEducationType) problematicType);
         } else {
-            throw new NotifyUserException("No, this is not an validation result!");
+            throw new NotifyWebUserException("No, this is not an validation result!");
         }
     }
 

@@ -2,12 +2,12 @@ package de.yuga.spacebattle.backend.entities.combined.spacecrafts;
 
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.combat.dto.CounterMissileWeaponry;
 import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.combat.dto.RangeDefinition;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
@@ -19,7 +19,14 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfar
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.enums.*;
+import de.yuga.spacebattle.backend.enums.EDepositType;
+import de.yuga.spacebattle.backend.enums.EModuleType;
+import de.yuga.spacebattle.backend.enums.EWeaponType;
+import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
+import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
+import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
+import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -149,7 +156,7 @@ public class Fleet extends AbstractEntityKey {
         splitFleet.forEach((shipClass, amountToSeparate) -> {
             final Integer availableAmount = shipsByClass.get(shipClass);
             if (availableAmount < amountToSeparate) {
-                throw new NotifyUserException("There are not enough ships in the fleet do split them in that way.");
+                throw new NotifyWebUserException("There are not enough ships in the fleet do split them in that way.");
             }
         });
         // separate ships
@@ -277,6 +284,7 @@ public class Fleet extends AbstractEntityKey {
         }
         Collections.sort(speeds);
         final EAccelerationMetric accelerationMetric = eModuleType == EModuleType.PROPULSION ? EAccelerationMetric.G : EAccelerationMetric.C;
+        hyperBand = eModuleType == EModuleType.FTLPROPULSION ? hyperBand : EHyperBand.NONE;
         return new Acceleration(new BigDecimal(speeds.get(0)), accelerationMetric, hyperBand);
     }
 
@@ -364,5 +372,16 @@ public class Fleet extends AbstractEntityKey {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         return new CounterMissileWeaponry(alignedFittings);
+    }
+
+    @Nonnull
+    public Velocity getMaxVelocity(@Nonnull final EModuleType propulsion) {
+        Preconditions.checkNotNull(propulsion, "propulsion shouldn't be null!");
+        Preconditions.checkArgument(propulsion == EModuleType.PROPULSION || propulsion == EModuleType.FTLPROPULSION, "propulsion must be propulsion type!");
+
+        final Acceleration acceleration = getAccelerationFor(propulsion);
+        final EHyperBand hyperBand = acceleration.getHyperBand();
+        final BigDecimal vesselTopSpeed = hyperBand.getEffectiveTopSpeed();
+        return new Velocity(vesselTopSpeed, EDistanceMetric.M, ETimeMetric.SECOND);
     }
 }

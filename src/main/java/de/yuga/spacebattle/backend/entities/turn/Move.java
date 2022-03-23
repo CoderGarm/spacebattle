@@ -1,12 +1,12 @@
 package de.yuga.spacebattle.backend.entities.turn;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
@@ -130,7 +130,7 @@ public class Move extends AbstractEntityKey {
 
     public void setMoveDoneAtZero(final int moveDoneAtZero) {
         if (moveDoneAtZero >= this.moveDoneAtZero) {
-            throw new NotifyUserException("You cannot increase the traffic time until you have warp scrambler");
+            throw new NotifyWebUserException("You cannot increase the traffic time until you have warp scrambler");
         }
         this.moveDoneAtZero = moveDoneAtZero;
     }

@@ -3,8 +3,8 @@ package de.yuga.spacebattle.backend.entities.orbitals;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.backend.enums.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.EStarClassType;
+import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;

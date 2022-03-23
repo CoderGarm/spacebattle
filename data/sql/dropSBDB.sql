@@ -208,36 +208,32 @@
        foreign key FKlcfh5cw1nqv8howd22b9emwbf;
 
     alter table miningFactorsComposition 
-       drop 
-       foreign key FK7pw467msglkrl51uo8uu6v6l6;
+       drop
+    foreign key FK7pw467msglkrl51uo8uu6v6l6;
 
-    alter table missile 
-       drop 
-       foreign key FKdhk8trxq7c36hid883mj4p7us;
+    alter table missile
+    drop
+    foreign key FKdhk8trxq7c36hid883mj4p7us;
 
-    alter table missile 
-       drop 
-       foreign key FK2y4rvixlct3ljky430p3bmwad;
+    alter table missile
+    drop
+    foreign key FK2y4rvixlct3ljky430p3bmwad;
 
-    alter table missile 
-       drop 
-       foreign key FK6hqn2wt7gk1myp1ew4i29r3ss;
+    alter table missile
+    drop
+    foreign key FK1ledmeodyggj4capnumuak58u;
 
-    alter table missile 
-       drop 
-       foreign key FKhgp8bhvbmvaefgws7b1t0km7k;
+    alter table missile
+    drop
+    foreign key FK6hqn2wt7gk1myp1ew4i29r3ss;
+
+    alter table missile
+    drop
+    foreign key FKhgp8bhvbmvaefgws7b1t0km7k;
 
     alter table missileMotor 
        drop 
        foreign key FK6q2owmplw15x287lnle7mdeae;
-
-    alter table missileMotors 
-       drop 
-       foreign key FKqkfi44aomg87boaduno2fg3oi;
-
-    alter table missileMotors 
-       drop 
-       foreign key FKtqaarx478fl1pb7q6snbay2g1;
 
     alter table missileMovement 
        drop 
@@ -526,8 +522,6 @@
     drop table if exists missile;
 
     drop table if exists missileMotor;
-
-    drop table if exists missileMotors;
 
     drop table if exists missileMovement;
 

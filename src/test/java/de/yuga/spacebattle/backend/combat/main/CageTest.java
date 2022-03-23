@@ -12,11 +12,13 @@ import de.yuga.spacebattle.backend.combat.round.FleetHealthState;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
+import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -168,7 +170,7 @@ class CageTest extends BaseTestCase {
         final MovementAction movementAction = new MovementAction(testObject, fleet, EMovementType.HOLD_DISTANCE, orbit, orbit, orbit);
         final UUID uuidMA = UUID.fromString(movementAction.getUuid().toString());
 
-        final MissileSalvo missileSalvo = new MissileSalvo(testObject, fleet, fleet);
+        final MissileSalvo missileSalvo = new MissileSalvo(testObject, fleet, fleet, Set.of(EWeaponAlignment.BROADSIDE, EWeaponAlignment.BOW, EWeaponAlignment.STERN));
         final UUID uuidMS = UUID.fromString(missileSalvo.getUuid().toString());
 
         final BeamVolley beamVolley = new BeamVolley(testObject, fleet, fleet);

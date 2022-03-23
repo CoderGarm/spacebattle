@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.services.turn;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.account.User;
@@ -147,7 +146,7 @@ public class ColonizationService {
         if (debitorDeposit.isReducingPopulationPossible(crewRequirement)) {
             debitorDeposit.updatePopulation(crewRequirement);
         } else {
-            throw new NotifyUserException("Unfortunately you have not enough population on your home planet.");
+            throw new NotifyWebUserException("Unfortunately you have not enough population on your home planet.");
         }
 
         final Colonization colonization = new Colonization(user, toColonize, crewRequirement, 10);

@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.services.combined.spacecraft;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.combat.dto.FleetClash;
 import de.yuga.spacebattle.backend.entities.account.User;
@@ -53,7 +52,7 @@ public class FleetService {
 
         final FleetOrbit orbit = baseFleet.getOrbit();
         if (fleetsToMerge.stream().anyMatch(fleetToMerge -> !orbit.equals(fleetToMerge.getOrbit()))) {
-            throw new NotifyUserException("That's not possible, no.");
+            throw new NotifyWebUserException("That's not possible, no.");
         }
         fleetsToMerge.stream().filter(fl -> !fl.getShips().isEmpty()).forEach(fleet2 -> {
             final Set<WarShip> ships = fleet2.getShips();
@@ -115,7 +114,7 @@ public class FleetService {
         final Orbit startOrbitOrbit = startOrbit.getOrbit();
 
         if (targetOrbitOrbit == null || startOrbitOrbit == null) {
-            throw new NotifyUserException("A movement must always have a beginning and a designated target.");
+            throw new NotifyWebUserException("A movement must always have a beginning and a designated target.");
         }
         if (targetSystem == null || startSystem == null) {
             throw new NotifyWebUserException("Sorry, but you can only cancel flights inside of a star system");

@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.services.turn;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.calculator.resource.PopulationControlCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceControlCalculator;
 import de.yuga.spacebattle.backend.entities.Constructable;
@@ -30,6 +29,7 @@ import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipSer
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
 import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,13 +147,18 @@ public class TickService {
     @Transactional(rollbackFor = Exception.class)
     public Tick doTick() {
         Tick today = new Tick();
-
         today = tickRepository.save(today);
-
+        LOGGER.info("Today is " + today);
+        final String start = "Start ticking";
+        LOGGER.info(start + " planets.");
         tickPlanets();
+        LOGGER.info(start + " movements.");
         tickMovements();
+        LOGGER.info(start + " colonization.");
         tickColonizations();
-        //battleService.runBattles(today);
+        LOGGER.info(start + " battles.");
+        battleService.runBattles(today);
+        LOGGER.info("Tick done.");
 
         today.setTickEnds(LocalDateTime.now());
         return tickRepository.save(today);
@@ -262,7 +267,7 @@ public class TickService {
                         final Research research = constructable.getResearch();
                         targetLevel = constructable.getTargetLevel();
                         if (research == null || targetLevel == null) {
-                            throw new NotifyUserException("Oh fuck, this should not happen while research whatever!");
+                            throw new NotifyWebUserException("Oh fuck, this should not happen while research whatever!");
                         }
                         owner.getResearches().put(research, targetLevel);
                         userService.save(owner);
@@ -272,7 +277,7 @@ public class TickService {
                         final Building building = constructable.getBuilding();
                         targetLevel = constructable.getTargetLevel();
                         if (building == null || targetLevel == null) {
-                            throw new NotifyUserException("Oh fuck, this should not happen while constructing buildings!");
+                            throw new NotifyWebUserException("Oh fuck, this should not happen while constructing buildings!");
                         }
                         Construction workInProgress = constructions.stream()
                                 .filter(c -> c.getBuilding().equals(building)).findFirst().orElse(null);
@@ -288,7 +293,7 @@ public class TickService {
                         final ShipClass shipClass = constructable.getShipClass();
                         final Integer amountShips = constructable.getAmountShips();
                         if (shipClass == null || amountShips == null || amountShips == 0) {
-                            throw new NotifyUserException("This should never happen while build a fleet!");
+                            throw new NotifyWebUserException("This should never happen while build a fleet!");
                         }
                         final Fleet fleet = fleetService.save(new Fleet("Fresh Build @ " + planet.getName(), owner, new FleetOrbit(planet.getOrbit(), planet.getSystem())));
                         final Set<WarShip> newFleetComposition = new HashSet<>();

@@ -72,6 +72,8 @@ public class WarshipHealthState implements Cloneable {
     @Nonnull
     private MissileAmmunitionState missileAmmunitionState;
 
+    // todo amend support fittings which are completely left!
+
     public WarshipHealthState(@Nonnull final WarShip warShip) {
         Preconditions.checkNotNull(warShip, "warShip shouldn't be null!");
 
@@ -220,14 +222,42 @@ public class WarshipHealthState implements Cloneable {
      * @param boundaries the boundaries
      * @return the damage value
      */
+    @Nonnull
     public List<DamagePerRangeAndAlignment> getDamagePerRange(@Nonnull final RangeDefinition boundaries) {
         Preconditions.checkNotNull(boundaries, "boundaries shouldn't be null!");
 
         final List<AlignedFitting> fittings = getActiveFittings();
         return fittings.stream()
                 .filter(FittingUtils.OFFENSIVE_FITTING)
+                .filter(f -> {
+                    if (f.getLauncher() != null) {
+                        final Launcher launcher = f.getLauncher();
+                        return missileAmmunitionState.hasShotsLeft(launcher.getAmmunitionModule().getMissile());
+                    }
+                    return true;
+                })
                 .map(fitting -> fitting.getDamagePerRange(boundaries))
                 .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns the damage which can be applied by this class over all ranges.
+     *
+     * @return the damage value
+     */
+    public List<DamagePerRangeAndAlignment> getDamagePerRanges() {
+        final List<AlignedFitting> fittings = getActiveFittings();
+        return fittings.stream()
+                .filter(FittingUtils.OFFENSIVE_FITTING)
+                .filter(f -> {
+                    if (f.getLauncher() != null) {
+                        final Launcher launcher = f.getLauncher();
+                        return missileAmmunitionState.hasShotsLeft(launcher.getAmmunitionModule().getMissile());
+                    }
+                    return true;
+                })
+                .map(AlignedFitting::getDamagePerRange)
                 .collect(Collectors.toList());
     }
 
@@ -241,7 +271,9 @@ public class WarshipHealthState implements Cloneable {
                     final Weapon weapon = fitting.getWeapon();
                     final Launcher launcher = fitting.getLauncher();
                     if (launcher != null) {
-                        damageValue = launcher.getAmmunitionModule().getMissile().getWarhead().getDamageValue();
+                        if (missileAmmunitionState.hasShotsLeft(launcher.getAmmunitionModule().getMissile())) {
+                            damageValue = launcher.getAmmunitionModule().getMissile().getWarhead().getDamageValue();
+                        }
                     } else if (weapon != null) {
                         damageValue = weapon.getEffectValue();
                     }

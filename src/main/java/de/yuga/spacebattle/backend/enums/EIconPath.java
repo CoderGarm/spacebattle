@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.backend.enums;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifyUserException;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 
@@ -63,7 +63,7 @@ public enum EIconPath {
         } else if (isForEnum instanceof EStarClassType) {
             directory = STAR.getPath();
         } else {
-            throw new NotifyUserException("Nope, not this, not here!");
+            throw new NotifyWebUserException("Nope, not this, not here!");
         }
 
         return directory;
@@ -93,7 +93,7 @@ public enum EIconPath {
         } else if (isForEnum instanceof EStarClassType) {
             directory = STAR.getPath();
         } else {
-            throw new NotifyUserException("Nope, not this, not here!");
+            throw new NotifyWebUserException("Nope, not this, not here!");
         }
 
         return directory + resolution + icon + DELIMITER + EIconType.COLOR.getComplement() + FILE_EXTENSION_SEPARATOR + FILE_EXTENSION;

@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.enums;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 
 import javax.annotation.Nonnull;
 

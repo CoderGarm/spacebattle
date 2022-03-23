@@ -1,12 +1,12 @@
 package de.yuga.spacebattle.backend.services.account;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.repositories.account.UserRepository;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.config.security.WebUserDetails;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ public class UserService {
     @Nonnull
     public User refresh() {
         if (login == null) {
-            throw new NotifyUserException("you should be logged in, think about that.");
+            throw new NotifyWebUserException("you should be logged in, think about that.");
         }
         return find(login).orElse(login);
     }

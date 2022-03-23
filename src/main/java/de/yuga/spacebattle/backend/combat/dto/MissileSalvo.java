@@ -15,6 +15,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
 import de.yuga.spacebattle.backend.enums.ECombatPhase.ECombatSubPhase;
+import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 
 import javax.annotation.Nonnull;
@@ -122,7 +123,8 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
 
     public MissileSalvo(@Nonnull final Cage cage,
                         @Nonnull final Fleet actor,
-                        @Nonnull final Fleet target) {
+                        @Nonnull final Fleet target,
+                        @Nonnull final Set<EWeaponAlignment> applicableAlignments) {
         Preconditions.checkNotNull(cage, "cage shouldn't be null!");
         Preconditions.checkNotNull(target, "target shouldn't be null!");
 
@@ -138,7 +140,6 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
         this.initialDistance = position.getDistance(targetPosition);
         final Map<Missile, Integer> amountByType = new HashMap<>();
 
-        final EMovementType actorsMovementType = actorState.getMovementType();
         actorState.getFightingWarShips()
                 .filter(WarshipHealthState::isFightingCapable)
                 .forEach(w -> w.getFittings().entrySet().stream()
@@ -147,7 +148,7 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
                         .map(Map.Entry::getKey)
                         .filter(a -> a.getWeaponType() == EWeaponType.MISSILE)
                         .filter(a -> a.getLauncher() != null)
-                        .filter(f -> f.getWeaponAlignment().isAssignableFromMovementType(actorsMovementType))
+                        .filter(f -> applicableAlignments.contains(f.getWeaponAlignment()))
                         .forEach(alignedFitting -> {
                             final Launcher launcher = alignedFitting.getLauncher();
                             final int amountOfLauncher = alignedFitting.getAmount();

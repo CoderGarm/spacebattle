@@ -2,15 +2,12 @@ package de.yuga.spacebattle.backend.combat.dto;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
-import de.yuga.spacebattle.backend.enums.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
+import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class DamagePerRangePerAlignment {
@@ -37,13 +34,11 @@ public class DamagePerRangePerAlignment {
 
         this.rangeDefinition = rangeDefinition;
         this.damagesPerRangeAndAlignments = damagesPerRangeAndAlignments;
-        damagesPerRangeAndAlignments.stream()
-                .filter(d -> d.getRangeDefinition().equals(rangeDefinition))
-                .forEach(damagePerRangeAndAlignment -> {
-                    final EWeaponAlignment alignment = damagePerRangeAndAlignment.getWeaponAlignment();
-                    final long damageValue = damagePerRangeAndAlignment.getDamageValue();
-                    damagePerAlignment.merge(alignment, damageValue, Long::sum);
-                });
+        damagesPerRangeAndAlignments.forEach(damagePerRangeAndAlignment -> {
+            final EWeaponAlignment alignment = damagePerRangeAndAlignment.getWeaponAlignment();
+            final long damageValue = damagePerRangeAndAlignment.getDamageValue();
+            damagePerAlignment.merge(alignment, damageValue, Long::sum);
+        });
     }
 
     public DamagePerRangePerAlignment(@Nonnull final RangeDefinition rangeDefinition, @Nonnull final Map<EWeaponAlignment, Long> damagePerAlignment) {
@@ -144,5 +139,16 @@ public class DamagePerRangePerAlignment {
         Preconditions.checkNotNull(that, "that shouldn't be null!");
 
         return rangeDefinition.isInRange(that.getRangeDefinition()) && damagePerAlignment.equals(that.getDamagePerAlignment());
+    }
+
+    public static class MaxRangeComparator implements Comparator<DamagePerRangePerAlignment> {
+
+        @Override
+        public int compare(@Nonnull final DamagePerRangePerAlignment o1, @Nonnull final DamagePerRangePerAlignment o2) {
+            Preconditions.checkNotNull(o1, "o1 shouldn't be null!");
+            Preconditions.checkNotNull(o2, "o2 shouldn't be null!");
+
+            return o1.getRangeDefinition().getMaxRange().compareTo(o2.getRangeDefinition().getMaxRange());
+        }
     }
 }

@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.backend.converter;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifyUserException;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,7 +27,7 @@ public class PasswordConverter implements AttributeConverter<String, String>, Pa
     @Override
     public String convertToDatabaseColumn(@Nullable final String password) {
         if (StringUtils.isBlank(password)) {
-            throw new NotifyUserException("Nothing to hash here.");
+            throw new NotifyWebUserException("Nothing to hash here.");
         }
         return new DigestUtils("SHA3-512").digestAsHex(password);
     }

@@ -1,11 +1,11 @@
 package de.yuga.spacebattle.backend.entities.constructables.buildings;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Job;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -69,7 +69,7 @@ public class Construction extends AbstractEntityKey {
 
     public void setLevel(final int level) {
         if (level <= this.level) {
-            throw new NotifyUserException("You cannot reduce the level of a construction");
+            throw new NotifyWebUserException("You cannot reduce the level of a construction");
         }
         this.level = level;
     }

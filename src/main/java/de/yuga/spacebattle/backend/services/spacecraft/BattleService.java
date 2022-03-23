@@ -67,15 +67,8 @@ public class BattleService {
             });
             futures.add(future);
         }
-        //noinspection rawtypes
-        final CompletableFuture[] completableFutures = new CompletableFuture[futures.size()];
-        for (int i = 0; i <= futures.size() - 1; i++) {
-            completableFutures[i] = futures.get(i);
-        }
-        final CompletableFuture<Void> combinedFuture = CompletableFuture.allOf(completableFutures);
         try {
             // runs the fight
-            combinedFuture.get();
             for (CompletableFuture<Cage> f : futures) {
                 final Cage cage = f.get();
                 reports.add(processFightingResult(today, cage.getBattleResult()));

@@ -3,8 +3,10 @@ package de.yuga.spacebattle.backend.dto.physics;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.enums.EAccelerationMetric;
-import de.yuga.spacebattle.backend.enums.EHyperBand;
+import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
+import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
+import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
+import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -19,17 +21,20 @@ public class Acceleration implements Cloneable, Comparable<Acceleration> {
     @Nonnull
     @JsonProperty
     @ApiModelProperty(required = true, value = "The value of this acceleration.")
-    private final BigDecimal accelerationValue;
+    private BigDecimal accelerationValue;
 
     @Nonnull
     @JsonProperty
     @ApiModelProperty(required = true, value = "The metric of this acceleration.")
-    private final EAccelerationMetric accelerationMetric;
+    private EAccelerationMetric accelerationMetric;
 
     @Nonnull
     @JsonProperty
     @ApiModelProperty(required = true, value = "The hyper band which can be reached.")
-    private final EHyperBand hyperBand;
+    private EHyperBand hyperBand;
+
+    public Acceleration() {
+    }
 
     public Acceleration(final int accelerationValue, @Nonnull final EAccelerationMetric accelerationMetric) {
         Preconditions.checkNotNull(accelerationMetric, "lengthDefinition shouldn't be null!");
@@ -115,6 +120,37 @@ public class Acceleration implements Cloneable, Comparable<Acceleration> {
         }
         final BigDecimal factor = accelerationMetric.getConversionFactor(targetMetric);
         return accelerationValue.multiply(factor);
+    }
+
+    /**
+     * Calculates the distance which is laid back at the given acceleration by time and the starting velocity.
+     *
+     * @param duration     the acceleration endurance
+     * @param targetMetric the scale for the result
+     * @return the laid back distance
+     */
+    @Nonnull
+    @JsonIgnore
+    public Distance getDistanceByTime(@Nonnull final Time duration,
+                                      @Nonnull final Velocity velocity,
+                                      @Nonnull final EDistanceMetric targetMetric) {
+        Preconditions.checkNotNull(targetMetric, "targetMetric shouldn't be null!");
+        Preconditions.checkNotNull(velocity, "velocity shouldn't be null!");
+
+        // s = 0,5 · a · t² + v · t
+        final BigDecimal time = duration.getCoordinateInMetric(ETimeMetric.SECOND);
+        final BigDecimal distanceFromAccelerationValue = BigDecimal.valueOf(0.5)
+                .multiply(getCoordinateInMetric(EAccelerationMetric.MS2))
+                .multiply(time.pow(2));
+        final BigDecimal distanceFromVelocity = velocity.getCoordinateInMetric(EDistanceMetric.M, ETimeMetric.SECOND).multiply(time);
+        final BigDecimal sum = distanceFromAccelerationValue.add(distanceFromVelocity);
+        return new Distance(sum, EDistanceMetric.M).convertToMetric(targetMetric);
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public Acceleration negate() {
+        return new Acceleration(accelerationValue.negate(), accelerationMetric, hyperBand);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.calculator.resource;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -10,6 +9,7 @@ import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.ERefinementSequence;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
@@ -64,7 +64,7 @@ public class PopulationControlCalculator {
         final BigDecimal r = constructionsProducing.stream().map(TickOutputCalculator::getTickOutputByLevelForPopulation).reduce(BigDecimal.ZERO, BigDecimal::add);
         if (r.compareTo(BigDecimal.ONE) > 0) {
             // how to make sure that r is below 1?
-            throw new NotifyUserException("chef, you have to repair that!");
+            throw new NotifyWebUserException("chef, you have to repair that!");
         }
 
         final BigDecimal K = constructionsCapacity.stream().map(TickOutputCalculator::getTickOutputByLevelForPopulation).reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -214,7 +214,7 @@ public class PopulationControlCalculator {
         resourceDeposit.setAbsolutePopulation(to, newToAmount);
         resourceDeposit.setAbsolutePopulation(from, newFromAmount);
         if (resourceDeposit.getCrewRequirement().getSumOfPopulation() != sumOfPopulationBeforeEducation) {
-            throw new NotifyUserException("Oh, this should not happen while educating people.");
+            throw new NotifyWebUserException("Oh, this should not happen while educating people.");
         }
     }
 

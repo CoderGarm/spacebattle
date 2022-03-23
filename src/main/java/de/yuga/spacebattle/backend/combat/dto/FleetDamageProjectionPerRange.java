@@ -3,23 +3,15 @@ package de.yuga.spacebattle.backend.combat.dto;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
-import de.yuga.spacebattle.backend.enums.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class FleetDamageProjectionPerRange {
-
-    /**
-     * The range boundary width in meter.<br>
-     * Currently, it should be set to 1.000 km.
-     */
-    private static final Distance RANGE_STEP = new Distance(1000000, EDistanceMetric.M);
 
     @Nonnull
     private final Distance maximumWeaponRange;
@@ -42,33 +34,36 @@ public class FleetDamageProjectionPerRange {
             return;
         }
 
-        final List<DamagePerRangeAndAlignment> damageProjectionPerRanges = new ArrayList<>();
+        final List<DamagePerRangeAndAlignment> damageProjectionPerRanges = roundState.getDamagePerRangeAndAlignments();
+        getChainedRangeDefinitions(damageProjectionPerRanges).forEach(rangeDefinition -> {
+            final List<DamagePerRangeAndAlignment> inRange = damageProjectionPerRanges.stream()
+                    .filter(d -> d.getRangeDefinition().isInRange(rangeDefinition))
+                    .collect(Collectors.toList());
+            damagePotential.add(new DamagePerRangePerAlignment(rangeDefinition, inRange));
+        });
+    }
 
-        final EDistanceMetric distanceMetric = maximumWeaponRange.getDistanceMetric();
-        final BigDecimal coordinateInMetric = RANGE_STEP.getCoordinateInMetric(distanceMetric);
+    @Nonnull
+    private List<RangeDefinition> getChainedRangeDefinitions(@Nonnull final List<DamagePerRangeAndAlignment> damageProjectionPerRanges) {
+        Preconditions.checkNotNull(damageProjectionPerRanges, "damageProjectionPerRanges shouldn't be null!");
 
-        for (BigDecimal range = BigDecimal.ZERO; range.compareTo(maximumWeaponRange.getCoordinate()) <= 0; ) {
-            final BigDecimal lowerBound = range;
-            range = range.add(coordinateInMetric);
-            damageProjectionPerRanges.addAll(roundState.getDamagePerRange(new RangeDefinition(lowerBound, range, distanceMetric)));
+        final Set<RangeDefinition> rangeDefinitions = damageProjectionPerRanges.stream().map(DamagePerRangeAndAlignment::getRangeDefinition).collect(Collectors.toSet());
+        final List<RangeDefinition> sortedRanges = rangeDefinitions.stream().sorted(new RangeDefinition.MaxRangeComparator()).collect(Collectors.toList());
+        final List<RangeDefinition> result = new ArrayList<>();
+
+        for (RangeDefinition r : sortedRanges) {
+            if (result.isEmpty()) {
+                result.add(r);
+                continue;
+            }
+            final RangeDefinition last = result.get(result.size() - 1);
+            final BigDecimal lastCoord = last.getMaxRange().getCoordinateInMetric(r.getDistanceMetric());
+            final BigDecimal thisCoord = r.getMaxRange().getCoordinate();
+            final RangeDefinition next = new RangeDefinition(lastCoord, thisCoord, r.getDistanceMetric());
+            result.add(next);
         }
-        damageProjectionPerRanges.stream()
-                .collect(Collectors.groupingBy(DamagePerRangeAndAlignment::getRangeDefinition,
-                        Collectors.mapping(Function.identity(), Collectors.toList()))).entrySet().stream()
-                .map(e -> new DamagePerRangePerAlignment(e.getKey(), e.getValue()))
-                .sorted(Comparator.comparing(DamagePerRangePerAlignment::getRangeDefinition))
-                .forEach(outer -> {
-                    final DamagePerRangePerAlignment chainingBase = damagePotential.stream()
-                            .filter(merged -> merged.isRangeChainingAndDamageEquals(outer))
-                            .findFirst()
-                            .orElse(null);
-                    if (chainingBase == null) {
-                        damagePotential.add(outer);
-                    } else {
-                        damagePotential.remove(chainingBase);
-                        damagePotential.add(DamagePerRangePerAlignment.merge(chainingBase, outer));
-                    }
-                });
+
+        return result;
     }
 
     @Nonnull

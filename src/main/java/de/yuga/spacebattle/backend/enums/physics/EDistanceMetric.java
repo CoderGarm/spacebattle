@@ -1,12 +1,14 @@
-package de.yuga.spacebattle.backend.enums;
+package de.yuga.spacebattle.backend.enums.physics;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.Arrays;
 
 public enum EDistanceMetric {
@@ -18,7 +20,7 @@ public enum EDistanceMetric {
     AU(new BigDecimal("149597870700"), 12, 6, "au"),
     LH(new BigDecimal("1079252848800"), 13, 7, "lh"),
     LD(new BigDecimal("25902068371200"), 14, 8, "ld"),
-    LY(new BigDecimal("9454254955488000"), 16, 10, "ly"),
+    LY(new BigDecimal("9454254955480800"), 16, 10, "ly"),
     PC(new BigDecimal("30856776000000000"), 17, 11, "pc"),
     ;
 
@@ -72,7 +74,7 @@ public enum EDistanceMetric {
 
         return Arrays.stream(EDistanceMetric.values()).filter(l -> l.name().equals(metric))
                 .findFirst()
-                .orElseThrow(() -> new NotifyUserException("There was no match for a length definition possible by searching for '" + metric + "'."));
+                .orElseThrow(() -> new NotifyWebUserException("There was no match for a length definition possible by searching for '" + metric + "'."));
     }
 
     @Nonnull
@@ -110,6 +112,8 @@ public enum EDistanceMetric {
     public BigDecimal getConversionFactor(@Nonnull final EDistanceMetric targetMetric) {
         Preconditions.checkNotNull(targetMetric, "targetMetric shouldn't be null!");
 
-        return meterEquivalent.divide(targetMetric.getMeterEquivalent(), DistanceCalculator.MATH_CONTEXT_REALISTIC_PRECISION);
+        final BigDecimal targetMetricMeterEquivalent = targetMetric.getMeterEquivalent();
+        final int targetMetricScale = targetMetric.getScale();
+        return meterEquivalent.divide(targetMetricMeterEquivalent, new MathContext(targetMetricScale, RoundingMode.HALF_UP));
     }
 }

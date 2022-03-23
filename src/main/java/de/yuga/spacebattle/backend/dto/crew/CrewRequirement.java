@@ -1,9 +1,9 @@
 package de.yuga.spacebattle.backend.dto.crew;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EEducationType;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -63,7 +63,7 @@ public class CrewRequirement {
      */
     private void validateAmountsHard(@Nonnull Map<EEducationType, Long> crewRequirement) {
         crewRequirement.values().stream().filter(integer -> integer < 0).findAny().ifPresent(e -> {
-            throw new NotifyUserException("You cannot reduce the amount of people below zero!");
+            throw new NotifyWebUserException("You cannot reduce the amount of people below zero!");
         });
     }
 

@@ -4,8 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.dto.FleetClash;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
-import de.yuga.spacebattle.backend.dto.physics.Acceleration;
-import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.physics.*;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
@@ -24,6 +23,10 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFittin
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.enums.*;
+import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
+import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
+import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
+import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.annotation.Nonnull;
@@ -67,6 +70,11 @@ public class TestDataProviderUtils {
 
     @Nonnull
     public static Orbit orbit(final int x, final int y, final EDistanceMetric metric) {
+        return new Orbit(new Distance(x, metric), new Distance(y, metric));
+    }
+
+    @Nonnull
+    public static Orbit orbit(final BigDecimal x, final BigDecimal y, final EDistanceMetric metric) {
         return new Orbit(new Distance(x, metric), new Distance(y, metric));
     }
 
@@ -144,8 +152,60 @@ public class TestDataProviderUtils {
     }
 
     @Nonnull
+    public static Time time(final int coordinate, final ETimeMetric timeMetric) {
+        return new Time(coordinate, timeMetric);
+    }
+
+    @Nonnull
+    public static Velocity vel(final int coordinate, final EDistanceMetric distanceMetric, final ETimeMetric timeMetric) {
+        return new Velocity(coordinate, distanceMetric, timeMetric);
+    }
+
+    @Nonnull
     public static Acceleration acc(final int value, EAccelerationMetric metric) {
         return new Acceleration(value, metric);
+    }
+
+    /**
+     * Returns directions for<br>
+     * <ul>
+     * <li> "up" </li>
+     * <li> "down" </li>
+     * <li> "right" </li>
+     * <li> "left" </li>
+     * <li> "upper right" </li>
+     * <li> "upper left" </li>
+     * </ul>
+     */
+    @Nonnull
+    public static Direction dir(@Nonnull final String direction) {
+        Preconditions.checkNotNull(direction, "direction shouldn't be null!");
+
+        final Orbit destination;
+        switch (direction) {
+            case "up":
+                destination = new Orbit(BigDecimal.ZERO, BigDecimal.ONE, EDistanceMetric.M);
+                break;
+            case "down":
+                destination = new Orbit(BigDecimal.ZERO, BigDecimal.ONE.negate(), EDistanceMetric.M);
+                break;
+            case "right":
+                destination = new Orbit(BigDecimal.ONE, BigDecimal.ZERO, EDistanceMetric.M);
+                break;
+            case "left":
+                destination = new Orbit(BigDecimal.ONE.negate(), BigDecimal.ZERO, EDistanceMetric.M);
+                break;
+            case "upper right":
+                destination = new Orbit(BigDecimal.ONE, BigDecimal.ONE, EDistanceMetric.M);
+                break;
+            case "upper left":
+                destination = new Orbit(BigDecimal.ONE.negate(), BigDecimal.ONE, EDistanceMetric.M);
+                break;
+            default:
+                return Direction.ZERO;
+        }
+
+        return new Direction(Orbit.getCenterOrbit(), destination);
     }
 
     @Nonnull
@@ -156,7 +216,7 @@ public class TestDataProviderUtils {
 
         Armor armor = createArmor("Armor Mk I", "An armor", 5, 3000, 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         //Propulsion propulsion = createPropulsion("Speed Mk I", "A drive", 5, 500, 1, EHyperBand.NONE, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        Propulsion propulsionFTL = createPropulsion("FTL Speed Mk I", "A FTL drive", 10, effectFTLValue, 1, EHyperBand.Delta, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Propulsion propulsionFTL = createPropulsion("FTL Speed Mk I", "A FTL drive", 10, effectFTLValue, 1, EHyperBand.DELTA, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         ElectronicWarfare electronicWarfare = createElectronicWarfare("Scanner Mk I", "A scanner", 5, 1000, dis(1000000, EDistanceMetric.M), 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         Sidewall sidewall = createSidewall("Shield Mk I", "A shield", 5, 15000, 1, new CrewRequirement(militaryCrew, EDepositType.COSTS));
 

@@ -30,9 +30,10 @@ public class BattleReportService {
     }
 
     @Nullable
-    public BattleReport find(@Nonnull final Integer idMove) {
-        Preconditions.checkNotNull(idMove, "idMove shouldn't be null!");
-        return battleReportRepository.findById(idMove).orElse(null);
+    public BattleReport find(@Nonnull final Integer idBattleReport) {
+        Preconditions.checkNotNull(idBattleReport, "idBattleReport shouldn't be null!");
+
+        return battleReportRepository.findById(idBattleReport).orElse(null);
     }
 
     public BattleReport save(@Nonnull final BattleReport entity) {

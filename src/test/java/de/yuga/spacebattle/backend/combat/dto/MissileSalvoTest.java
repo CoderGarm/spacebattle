@@ -12,7 +12,8 @@ import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
-import de.yuga.spacebattle.backend.enums.EDistanceMetric;
+import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
+import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -35,7 +36,7 @@ class MissileSalvoTest {
         final Cage cage = cage();
         final Fleet actor = cage.getParticipatingFleets().get(0);
         target = cage.getParticipatingFleets().get(1);
-        testObject = new MissileSalvo(cage, actor, target);
+        testObject = new MissileSalvo(cage, actor, target, Set.of(EWeaponAlignment.BROADSIDE, EWeaponAlignment.BOW, EWeaponAlignment.STERN));
     }
 
     @Test

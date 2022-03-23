@@ -4,8 +4,8 @@ import com.google.common.base.Preconditions;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Missile {
 
@@ -31,7 +31,7 @@ public class Missile {
 
     @Nonnull
     @ApiModelProperty(required = true, value = "The implemented engine of this missile.")
-    private List<MissileMotor> missileMotors;
+    private final List<MissileMotor> missileMotors = new ArrayList<>();
 
     public Missile() {
     }
@@ -45,7 +45,9 @@ public class Missile {
         this.motorCapacity = missile.getMotorCapacity();
         this.elokaResistance = missile.getElokaResistance();
         this.warhead = new Warhead(missile.getWarhead());
-        this.missileMotors = missile.getMissileMotors().stream().map(MissileMotor::new).collect(Collectors.toList());
+        for (int i = 1; i <= missile.getMotorAmount(); i++) {
+            this.missileMotors.add(new MissileMotor(missile.getMissileMotor()));
+        }
     }
 
 
@@ -105,6 +107,6 @@ public class Missile {
     }
 
     public void setMissileMotors(@Nonnull List<MissileMotor> missileMotors) {
-        this.missileMotors = missileMotors;
+        this.missileMotors.addAll(missileMotors);
     }
 }

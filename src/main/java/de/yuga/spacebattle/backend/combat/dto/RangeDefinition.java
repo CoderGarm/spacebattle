@@ -2,14 +2,15 @@ package de.yuga.spacebattle.backend.combat.dto;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
-import de.yuga.spacebattle.backend.enums.EDistanceMetric;
+import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
+import java.util.Comparator;
 
-public class RangeDefinition implements Comparable<RangeDefinition> {
+public class RangeDefinition {
 
     /**
      * The minimal range from where the damage can be projected.
@@ -60,9 +61,12 @@ public class RangeDefinition implements Comparable<RangeDefinition> {
         Preconditions.checkNotNull(rangeDefinition, "rangeDefinition shouldn't be null!");
 
         final Distance minRangeThat = rangeDefinition.getMinRange();
-        final Distance maxRangeThat = rangeDefinition.getMaxRange();
+        final boolean insideMin = new Distance(minRange, distanceMetric).compareTo(minRangeThat) <= 0;
 
-        return isInRange(minRangeThat) && isInRange(maxRangeThat);
+        final Distance maxRangeThat = rangeDefinition.getMaxRange();
+        final boolean insideMax = new Distance(maxRange, distanceMetric).compareTo(maxRangeThat) >= 0;
+
+        return insideMin && insideMax;
     }
 
     /**
@@ -128,10 +132,14 @@ public class RangeDefinition implements Comparable<RangeDefinition> {
         return new HashCodeBuilder(17, 37).append(minRange).append(maxRange).append(distanceMetric).toHashCode();
     }
 
-    @Override
-    public int compareTo(@Nonnull final RangeDefinition o) {
-        Preconditions.checkNotNull(o, "o shouldn't be null!");
+    public static class MaxRangeComparator implements Comparator<RangeDefinition> {
 
-        return getMaxRange().compareTo(o.getMaxRange());
+        @Override
+        public int compare(@Nonnull final RangeDefinition o1, @Nonnull final RangeDefinition o2) {
+            Preconditions.checkNotNull(o1, "o1 shouldn't be null!");
+            Preconditions.checkNotNull(o2, "o2 shouldn't be null!");
+
+            return o1.getMaxRange().compareTo(o2.getMaxRange());
+        }
     }
 }

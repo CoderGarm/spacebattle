@@ -256,12 +256,9 @@ public class BattleReport extends AbstractEntityKey {
                             addMovementAction(movementActions);
                             break;
                         case ELOKA_PHASE:
+                        case COUNTER_MISSILE_PHASE:
                             final List<MissileSalvo> destroyedWhileEloka = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
                             destroyedWhileEloka.forEach(this::addCounterMissileHitMissile);
-                            break;
-                        case COUNTER_MISSILE_PHASE:
-                            final List<MissileSalvo> destroyedWhileCounter = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
-                            destroyedWhileCounter.forEach(this::addCounterMissileHitMissile);
                             break;
                         case MISSILE_MOVEMENT_PHASE:
                             final List<MissileSalvo> missileMovement = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());

@@ -1,8 +1,17 @@
 package de.yuga.spacebattle.backend.enums;
 
+import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
+import de.yuga.spacebattle.backend.dto.physics.Direction;
+import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
+import org.apache.commons.lang3.Range;
+import org.springframework.data.util.Pair;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Defines the alignment of a weapon or counter weapon.
@@ -13,13 +22,13 @@ public enum EWeaponAlignment {
      * If it is aligned to the front.
      * These aligned weapons are mainly used in a hunt.
      */
-    BOW,
+    BOW(Pair.of(330D, 30D)),
 
     /**
      * If it is aligned to the back.
      * These aligned weapons are mainly used if the ship is fleeing.
      */
-    STERN,
+    STERN(Pair.of(150D, 210D)),
 
     /**
      * If it is aligned to the broad sides.
@@ -27,7 +36,62 @@ public enum EWeaponAlignment {
      * <p>
      * Note that this alignment indicates that a such aligned weapon must be doubled by design.
      */
-    BROADSIDE;
+    BROADSIDE(Pair.of(30D, 150D), Pair.of(210D, 330D));
+
+    /**
+     * The angle from first thing to second thing which can be swept by the given alignment.<br>
+     * Everything in between can be reached.
+     */
+    @Nonnull
+    private final Pair<Double, Double>[] angle;
+
+    @SafeVarargs
+    EWeaponAlignment(@Nonnull final Pair<Double, Double>... angle) {
+        Preconditions.checkNotNull(angle, "angle shouldn't be null!");
+
+        this.angle = angle;
+    }
+
+    /**
+     * Returns the alignments which could be used for the given geometric constellation.
+     *
+     * @param base            the base position
+     * @param baseDirection   the direction of the bases' position
+     * @param targetsPosition the targets position
+     * @return the amount of alignments which can be watch to the targets position
+     */
+    @Nonnull
+    public static Set<EWeaponAlignment> getApplicableAlignments(@Nonnull final Orbit base,
+                                                                @Nonnull final Direction baseDirection,
+                                                                @Nonnull final Orbit targetsPosition) {
+        Preconditions.checkNotNull(base, "base shouldn't be null!");
+        Preconditions.checkNotNull(baseDirection, "baseDirection shouldn't be null!");
+        Preconditions.checkNotNull(targetsPosition, "targetsPosition shouldn't be null!");
+
+        final Direction direction = new Direction(base, targetsPosition);
+        final double angle = baseDirection.getAngleBetween(direction);
+        return Arrays.stream(EWeaponAlignment.values()).filter(a ->
+                Arrays.stream(a.angle).anyMatch(p -> {
+                    if (angle < -360 || angle > 360) {
+                        // if any wildcard angle is returned - the direct angle between could not be determined - everything is possible
+                        return true;
+                    }
+
+                    final Double first = p.getFirst();
+                    final Double second = p.getSecond();
+
+                    if (second < first) {
+                        // special case for the bow angle
+                        final Range<Double> toZero = Range.between(second, 0D);
+                        final Range<Double> fromZero = Range.between(0D, first);
+                        return toZero.contains(angle) && fromZero.contains(angle);
+                    }
+
+                    return angle >= first && angle <= second;
+                })
+        ).collect(Collectors.toSet());
+
+    }
 
     /**
      * Checks if a given movement type matches with a weapons alignment.

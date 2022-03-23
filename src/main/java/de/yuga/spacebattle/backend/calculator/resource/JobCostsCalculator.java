@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.calculator.resource;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.Constructable;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
@@ -10,6 +9,7 @@ import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
@@ -70,7 +70,7 @@ public class JobCostsCalculator {
         final Planet planet = facility.getPlanet();
         final Long tickOutputForResourceType = ResourceControlCalculator.getTickOutput(planet, constructable.getResourceType());
         if (tickOutputForResourceType == null) {
-            throw new NotifyUserException("Talk to the admin, your building was probably destroyed!");
+            throw new NotifyWebUserException("Talk to the admin, your building was probably destroyed!");
         }
         return new BigDecimal(resourceAmountByType).divide(new BigDecimal(tickOutputForResourceType), 0, RoundingMode.UP).intValue();
     }

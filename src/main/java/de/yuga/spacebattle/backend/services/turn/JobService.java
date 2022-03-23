@@ -2,7 +2,6 @@ package de.yuga.spacebattle.backend.services.turn;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
-import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.Constructable;
 import de.yuga.spacebattle.backend.entities.account.User;
@@ -101,7 +100,7 @@ public class JobService {
         }
         final Job doDelete = jobRepository.findById(entity.getId()).orElse(null);
         if (doDelete == null) {
-            throw new NotifyUserException("no job to delete"); // fail first for development
+            throw new NotifyWebUserException("no job to delete"); // fail first for development
         }
 
         if (doDelete.getJobDoneAtZero() > 0 && EResourceType.RESEARCH != doDelete.getConstructable().getResourceType()) {
@@ -138,16 +137,13 @@ public class JobService {
         Preconditions.checkNotNull(costs, "costs shouldn't be null!");
         Preconditions.checkArgument(EDepositType.COSTS == costs.getSubType(), "costs must be flagged as costs!");
 
-        final ResourceDeposit debitorDeposit = planet.getResourceDeposit();
-        final PayingPossibleResult result = debitorDeposit.isPayingPossible(costs);
+        final ResourceDeposit debtorDeposit = planet.getResourceDeposit();
+        final PayingPossibleResult result = debtorDeposit.isPayingPossible(costs);
         if (!result.isValid()) {
+            // new propagation idea for "no, this not"
             throw new NotifyWebUserException("This job is to expensive!", result);
-            /* vaadin workflow
-            final String joinedResult = String.join(", ", result.getResult());
-            throw new NotifyWebUserException("This job is to expensive! Problematic points: '" + joinedResult + "'.");
-            */
         }
-        debitorDeposit.pay(costs);
+        debtorDeposit.pay(costs);
     }
 
     /**
@@ -165,10 +161,10 @@ public class JobService {
         final Planet planet = planetService.find(idPlanet);
         final Building building = buildingService.find(idBuilding);
         if (planet == null || planet.getOwner() == null || building == null) {
-            throw new NotifyUserException("not that way!");
+            throw new NotifyWebUserException("not that way!");
         }
         if (!userService.isResearchUnlocked(planet.getOwner(), building.getUnlockedThrough())) {
-            throw new NotifyUserException("You can't do that - first you have to research the '" + building.getUnlockedThrough().getName() + "' research.");
+            throw new NotifyWebUserException("You can't do that - first you have to research the '" + building.getUnlockedThrough().getName() + "' research.");
         }
 
         final Set<Construction> constructions = planet.getConstructions();
@@ -248,7 +244,7 @@ public class JobService {
         Planet planet = planetService.find(idPlanet);
         ShipClass shipClass = shipClassService.find(idShipClass);
         if (planet == null || planet.getOwner() == null || shipClass == null) {
-            throw new NotifyUserException("not that way!");
+            throw new NotifyWebUserException("not that way!");
         }
 
         Constructable constructable = new Constructable(shipClass, amount);
@@ -271,10 +267,10 @@ public class JobService {
      */
     private void checkIfFree(@Nullable final Construction facility) {
         if (facility == null) {
-            throw new NotifyUserException("not here, buddy!");
+            throw new NotifyWebUserException("not here, buddy!");
         }
         if (!facility.getJobs().isEmpty()) {
-            throw new NotifyUserException("Job in progress");
+            throw new NotifyWebUserException("Job in progress");
         }
     }
 
@@ -284,7 +280,7 @@ public class JobService {
 
         final User owner = planet.getOwner();
         if (owner == null) {
-            throw new NotifyUserException("You should own this planet, buddy.");
+            throw new NotifyWebUserException("You should own this planet, buddy.");
         }
 
         final Construction facility = planet.getConstructions().stream()

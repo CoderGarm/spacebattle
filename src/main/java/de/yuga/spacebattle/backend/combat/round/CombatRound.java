@@ -1,11 +1,16 @@
 package de.yuga.spacebattle.backend.combat.round;
 
+import de.yuga.spacebattle.backend.dto.physics.Time;
+import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
+
 public class CombatRound implements Cloneable, Comparable<CombatRound> {
 
     /**
      * The duration of a combat round in seconds.
      */
     public static final int COMBAT_ROUND_DURATION = 60;
+
+    public static final Time COMBAT_ROUND = new Time(CombatRound.COMBAT_ROUND_DURATION, ETimeMetric.SECOND);
 
     /**
      * The battle round number.
@@ -34,6 +39,10 @@ public class CombatRound implements Cloneable, Comparable<CombatRound> {
      */
     public void next() {
         this.no++;
+    }
+
+    public void previous() {
+        this.no--;
     }
 
     @Override

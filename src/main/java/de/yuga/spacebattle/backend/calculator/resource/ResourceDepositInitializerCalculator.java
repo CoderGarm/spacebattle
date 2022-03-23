@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.calculator.resource;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.NotifyUserException;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
@@ -14,6 +13,7 @@ import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public class ResourceDepositInitializerCalculator {
         if (clazz.isAssignableFrom(Planet.class) || clazz.isAssignableFrom(Colonization.class)) {
             // continue - just for the sake of completeness
             if (EDepositType.DEPOSITS != subType) {
-                throw new NotifyUserException("Initialization of deposit not possible for '" + subType + "'.");
+                throw new NotifyWebUserException("Initialization of deposit not possible for '" + subType + "'.");
             }
         } else if (clazz.isAssignableFrom(Building.class) || clazz.isAssignableFrom(Research.class)) {
             overrideResources.add(EResourceType.ORBITAL_CONSTRUCTION);
@@ -55,7 +55,7 @@ public class ResourceDepositInitializerCalculator {
             overrideResources.add(EResourceType.CONSTRUCTION);
             overrideResources.add(EResourceType.RESEARCH);
         } else {
-            throw new NotifyUserException("Initialization of resources not possible for class '" + clazz.getName() + "'.");
+            throw new NotifyWebUserException("Initialization of resources not possible for class '" + clazz.getName() + "'.");
         }
 
         final ResourceDeposit resourceDeposit = new ResourceDeposit(subType);
