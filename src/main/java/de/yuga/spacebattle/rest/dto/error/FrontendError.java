@@ -3,11 +3,10 @@ package de.yuga.spacebattle.rest.dto.error;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.validation.ConstraintViolation;
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -16,16 +15,15 @@ import java.util.Set;
  * Just the general response for an json-error.
  * Think about registering new classes in {@link de.yuga.spacebattle.SpacebattleApplication#api()}.
  */
+@Schema(description = ".")
 public class FrontendError {
 
     @Nonnull
-    @NotNull
-    @ApiModelProperty(value = "The Error message.")
+    @Schema(description = "The Error message.")
     private final String message;
 
     @Nonnull
-    @NotNull
-    @ApiModelProperty(value = "If it's not empty, some validation shows violations.")
+    @Schema(description = "If it's not empty, some validation shows violations.")
     private final List<ValidationResult> validationResults = new ArrayList<>();
 
     public FrontendError(@Nonnull final NotifyWebUserException exception) {

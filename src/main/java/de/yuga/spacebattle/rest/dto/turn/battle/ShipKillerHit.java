@@ -5,48 +5,48 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.enums.EDamageResult;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
+@Schema(description = ".")
 public class ShipKillerHit {
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The round and phase information.")
+    @Schema(required = true, description = "The round and phase information.")
     private CombatRoundKey combatRoundKey;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The fleet which acts.")
+    @Schema(required = true, description = "The fleet which acts.")
     private Fleet actor;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The fleet which is targeted.")
+    @Schema(required = true, description = "The fleet which is targeted.")
     private Fleet target;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The UUID of the damage dealer.")
+    @Schema(required = true, description = "The UUID of the damage dealer.")
     private UUID damageDealer;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The distance of this shot.")
+    @Schema(required = true, description = "The distance of this shot.")
     private Distance distance;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The result of this salvo.")
+    @Schema(required = true, description = "The result of this salvo.")
     private EDamageResult result;
 
     @Nonnull
     @JsonProperty
-    @ApiModelProperty(required = true, value = "A hit log list.")
+    @Schema(required = true, description = "A hit log list.")
     private final List<HitLog> hitLogs = new ArrayList<>();
 
     @Nonnull
     @JsonProperty
-    @ApiModelProperty(required = true, value = "If the hit results in a destroyed ship, this will be logged here. By the id of the hit log.")
+    @Schema(required = true, description = "If the hit results in a destroyed ship, this will be logged here. By the id of the hit log.")
     private final Map<Integer, LossRole> lossesByHit = new HashMap<>();
 
     public ShipKillerHit(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.ShipKillerHit input) {

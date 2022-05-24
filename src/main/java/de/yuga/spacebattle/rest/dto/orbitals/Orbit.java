@@ -1,23 +1,28 @@
 package de.yuga.spacebattle.rest.dto.orbitals;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
+@Schema(description = ".")
 public class Orbit {
 
     /**
      * Just to position the system.
      */
-    @ApiModelProperty(required = true, value = "The x-coordinate of this orbit.")
+    @JsonProperty
+    @Schema(required = true, description = "The x-coordinate of this orbit.")
     private Distance xCoordinate;
 
     /**
      * Just to position the system.
      */
-    @ApiModelProperty(required = true, value = "The y-coordinate of this orbit.")
+    @JsonProperty
+    @Schema(required = true, description = "The y-coordinate of this orbit.")
     private Distance yCoordinate;
 
     public Orbit() {
@@ -30,10 +35,12 @@ public class Orbit {
         this.yCoordinate = orbit.getYCoordinate();
     }
 
+    @JsonIgnore
     public Distance getxCoordinate() {
         return xCoordinate;
     }
 
+    @JsonIgnore
     public Distance getyCoordinate() {
         return yCoordinate;
     }

@@ -8,66 +8,67 @@ import de.yuga.spacebattle.rest.dto.account.UserJson;
 import de.yuga.spacebattle.rest.dto.buildings.Building;
 import de.yuga.spacebattle.rest.dto.constructables.buildings.Construction;
 import de.yuga.spacebattle.rest.dto.enums.EResourceType;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+@Schema(description = ".")
 public class Job {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The owner.")
+    @Schema(required = true, description = "The owner.")
     private UserJson user;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The facility.")
+    @Schema(required = true, description = "The facility.")
     private Construction facility;
 
-    @ApiModelProperty(required = true, value = "The left duration of this job.")
+    @Schema(required = true, description = "The left duration of this job.")
     private long ticksLeft;
 
     /**
      * The resource type which must be invested to run the job.
      */
     @Nonnull
-    @ApiModelProperty(required = true, value = "The type of costs.")
+    @Schema(required = true, description = "The type of costs.")
     private EResourceType resourceType;
 
     @JsonProperty
-    @ApiModelProperty(required = true, value = "Is this a building job build.")
+    @Schema(required = true, description = "Is this a building job build.")
     private boolean isBuildingJob;
 
     @JsonProperty
-    @ApiModelProperty(required = true, value = "Is this a shipyard job.")
+    @Schema(required = true, description = "Is this a shipyard job.")
     private boolean isShipyardJob;
 
     @JsonProperty
-    @ApiModelProperty(required = true, value = "Is this a research job.")
+    @Schema(required = true, description = "Is this a research job.")
     private boolean isResearchJob;
 
     @Nullable
     @JsonProperty
-    @ApiModelProperty("If this if a research job.")
+    @Schema(description = "If this if a research job.")
     private String researchTarget;
 
     @Nullable
     @JsonProperty
-    @ApiModelProperty("If this if a building job.")
+    @Schema(description = "If this if a building job.")
     private Building buildingTarget;
 
     @Nullable
     @JsonProperty
-    @ApiModelProperty("The targeted level if it is a research or building.")
+    @Schema(description = "The targeted level if it is a research or building.")
     private Integer targetLevel;
 
     @Nullable
     @JsonProperty
-    @ApiModelProperty("If this if a shipyard job.")
+    @Schema(description = "If this if a shipyard job.")
     private String shipYardTarget;
 
     @Nullable
     @JsonProperty
-    @ApiModelProperty("The targeted amount of ships in case of an shipyard job..")
+    @Schema(description = "The targeted amount of ships in case of an shipyard job..")
     private Integer amountShips;
 
     public Job() {

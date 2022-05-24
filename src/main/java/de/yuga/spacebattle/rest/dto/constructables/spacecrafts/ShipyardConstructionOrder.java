@@ -1,19 +1,20 @@
 package de.yuga.spacebattle.rest.dto.constructables.spacecrafts;
 
 import com.google.common.base.Preconditions;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
+@Schema(description = ".")
 public class ShipyardConstructionOrder {
 
-    @ApiModelProperty(required = true, value = "The planet which should run the job.")
+    @Schema(required = true, description = "The planet which should run the job.")
     private Integer idPlanet;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The job to run - key must be the idShipClass, value must be the amount.")
+    @Schema(required = true, description = "The job to run - key must be the idShipClass, value must be the amount.")
     private final List<ShipyardConstructionSelection> shipJobPayload = new ArrayList<>();
 
     public ShipyardConstructionOrder() {

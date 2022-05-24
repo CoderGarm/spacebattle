@@ -14,13 +14,12 @@ import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.researches.ResearchLevel;
-import de.yuga.spacebattle.rest.dto.researches.ResearchLevelList;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,14 +27,16 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 
-@Api(tags = "ResearchApi")
+@Tag(name = "ResearchApi")
 @RolesAllowed("ROLE_USER")
 @RestController
-@RequestMapping("/" + PRIVATE_BASE_ENDPOINT + "/" + ResearchApi.ENDPOINT + "/")
+@RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ResearchApi.ENDPOINT + "/")
 public class ResearchApi {
 
     @Nonnull
@@ -73,11 +74,12 @@ public class ResearchApi {
     }
 
     @GetMapping(value = BY_USER_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Get all already researched researches for the user.", nickname = "getResearchByUser")
-    @Operation(
+    @Operation(summary = "Get all already researched researches for the user.", operationId = "getResearchByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResearchLevelList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = ResearchLevel.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
@@ -85,12 +87,20 @@ public class ResearchApi {
     public ResponseEntity<?> getResearchByUser(@PathVariable("idUser") final int idUser) {
 
         final Map<Research, Integer> researchesForUser = userService.getResearchesForUser(idUser);
-        return ResponseEntity.ok(new ResearchLevelList(researchesForUser));
+        final List<ResearchLevel> researchLevels = researchesForUser.entrySet()
+                .stream().map(entry -> new ResearchLevel(entry.getKey(), entry.getValue())).collect(Collectors.toList());
+        return ResponseEntity.ok(researchLevels);
     }
 
     @PostMapping(value = BY_USER_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Starts a research job for the user.", nickname = "startResearchByUser")
-    @Operation(
+    @Operation(summary = "Starts a research job for the user.", operationId = "startResearchByUser",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ResearchLevel.class)
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = de.yuga.spacebattle.rest.dto.turn.Job.class))),
@@ -113,11 +123,12 @@ public class ResearchApi {
     }
 
     @GetMapping(value = AVAILABLE_BY_USER_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Get all available researches for the user.", nickname = "getAvailableResearchByUser")
-    @Operation(
+    @Operation(summary = "Get all available researches for the user.", operationId = "getAvailableResearchByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResearchLevelList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = ResearchLevel.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
@@ -129,12 +140,13 @@ public class ResearchApi {
             throw new NotifyWebUserException("No user found for id '" + idUser + "'");
         }
         final Map<Research, Integer> researchesForUser = researchService.getUnlockableResearches(user);
-        return ResponseEntity.ok(new ResearchLevelList(researchesForUser));
+        final List<ResearchLevel> researchLevels = researchesForUser.entrySet()
+                .stream().map(entry -> new ResearchLevel(entry.getKey(), entry.getValue())).collect(Collectors.toList());
+        return ResponseEntity.ok(researchLevels);
     }
 
     @GetMapping(value = RESEARCH_POSSIBLE_FOR_USER_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Checks if a research job is possible for the user.", nickname = "researchPossibleForUser")
-    @Operation(
+    @Operation(summary = "Checks if a research job is possible for the user.", operationId = "researchPossibleForUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),

@@ -2,26 +2,27 @@ package de.yuga.spacebattle.rest.dto.spacecrafts.details;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.AmmunitionModule;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
 /**
  * The ammunition fitting represents an ammunition module and their amount.
  */
+@Schema(description = ".")
 public class AmmunitionFitting {
 
     /**
      * The ammunition module.
      */
     @Nonnull
-    @ApiModelProperty(required = true, value = "The ammunition module.")
+    @Schema(required = true, description = "The ammunition module.")
     private AmmunitionModule ammunitionModule;
 
     /**
      * The amount of this weapon with the given {@link AmmunitionModule}.
      */
-    @ApiModelProperty(required = true, value = "The amount of ammunition modules.")
+    @Schema(required = true, description = "The amount of ammunition modules.")
     private int amount;
 
     public AmmunitionFitting() {

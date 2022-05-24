@@ -9,7 +9,7 @@ import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.rest.dto.orbitals.StarSystem;
 import de.yuga.spacebattle.rest.dto.turn.resources.ResourceAmount;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -20,26 +20,27 @@ import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.entities.orbitals.StarSystem.STAR_SYSTEM_STANDARD_METRIC;
 
+@Schema(description = ".")
 public class StarSystemColonization {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The star system to select for colonization.")
+    @Schema(required = true, description = "The star system to select for colonization.")
     private final StarSystem starSystem;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The star system with its distance to all known systems by id.")
+    @Schema(required = true, description = "The star system with its distance to all known systems by id.")
     private final Map<Integer, Distance> distanceMap;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The costs to buy the colonization information about the system.")
+    @Schema(required = true, description = "The costs to buy the colonization information about the system.")
     private final String costsToBuyColonizationInformation;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The costs to colonize the planet by idPlanet.")
+    @Schema(required = true, description = "The costs to colonize the planet by idPlanet.")
     private final Map<Integer, String> costsToColonization = new HashMap<>();
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The costs to colonize the planet by idPlanet.")
+    @Schema(required = true, description = "The costs to colonize the planet by idPlanet.")
     private final Map<Integer, Colonization> colonizationsByPlanet;
 
     public StarSystemColonization(@Nonnull final de.yuga.spacebattle.backend.entities.orbitals.StarSystem starSystem,

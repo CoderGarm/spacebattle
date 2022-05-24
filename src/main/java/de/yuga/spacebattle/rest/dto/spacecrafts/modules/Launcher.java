@@ -5,39 +5,40 @@ import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics.BaseModule;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Schema(description = ".")
 public class Launcher {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The basic values of this module.")
+    @Schema(required = true, description = "The basic values of this module.")
     private BaseModule baseModule;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The way how the damage will be projected.")
+    @Schema(required = true, description = "The way how the damage will be projected.")
     private EWeaponType weaponType;
 
     /**
      * Holds the information about the alignment ability.
      */
     @Nonnull
-    @ApiModelProperty(required = true, value = "The possible mount points of this weapon.")
+    @Schema(required = true, description = "The possible mount points of this weapon.")
     private List<EWeaponAlignment> alignmentTypes;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The bunch of allowed missiles for this launcher.")
+    @Schema(required = true, description = "The bunch of allowed missiles for this launcher.")
     private List<de.yuga.spacebattle.rest.dto.spacecrafts.ammunition.Missile> allowedMissiles = new ArrayList<>();
 
     /**
      * An empty ammunition module means that the weapon needs no ammunition.
      */
     @Nonnull
-    @ApiModelProperty(required = true, value = "The ammunition for this launcher.")
+    @Schema(required = true, description = "The ammunition for this launcher.")
     private AmmunitionModule ammunitionModule;
 
     public Launcher() {

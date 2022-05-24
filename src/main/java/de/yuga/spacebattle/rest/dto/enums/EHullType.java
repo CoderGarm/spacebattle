@@ -2,31 +2,30 @@ package de.yuga.spacebattle.rest.dto.enums;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
 /**
  * This indicated what a type of ship is this hull for.
  */
-@ApiModel(parent = HasIcon.class)
+@Schema
 public class EHullType extends HasIcon {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The hulls type.")
+    @Schema(required = true, description = "The hulls type.")
     private final String type;
 
     @JsonProperty
-    @ApiModelProperty(required = true, value = "If the hull is a pod layer.")
+    @Schema(required = true, description = "If the hull is a pod layer.")
     private final boolean podLayer;
 
     @JsonProperty
-    @ApiModelProperty(required = true, value = "If the hull is an auxiliary ship.")
+    @Schema(required = true, description = "If the hull is an auxiliary ship.")
     private final boolean auxiliaryShip;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The hulls description.")
+    @Schema(required = true, description = "The hulls description.")
     private final String description;
 
     public EHullType() {

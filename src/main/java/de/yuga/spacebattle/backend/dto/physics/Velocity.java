@@ -6,7 +6,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -26,17 +26,17 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
 
     @Nonnull
     @JsonProperty
-    @ApiModelProperty(required = true, value = "The value of this distance.")
+    @Schema(required = true, description = "The value of this distance.")
     private BigDecimal coordinate;
 
     @Nonnull
     @JsonProperty
-    @ApiModelProperty(required = true, value = "The metric of the distance unit of this velocity.")
+    @Schema(required = true, description = "The metric of the distance unit of this velocity.")
     private EDistanceMetric distanceMetric;
 
     @Nonnull
     @JsonProperty
-    @ApiModelProperty(required = true, value = "The metric of the time unit of this velocity.")
+    @Schema(required = true, description = "The metric of the time unit of this velocity.")
     private ETimeMetric timeMetric;
 
     public Velocity() {

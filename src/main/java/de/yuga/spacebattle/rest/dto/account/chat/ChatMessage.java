@@ -3,33 +3,34 @@ package de.yuga.spacebattle.rest.dto.account.chat;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.UserMessage;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@Schema(description = ".")
 public class ChatMessage {
 
     @Nullable
-    @ApiModelProperty("The id of this message.")
+    @Schema(description = "The id of this message.")
     private Integer idUserMessage;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The message's sender.")
+    @Schema(required = true, description = "The message's sender.")
     private UserJson sender;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The message itself") // todo escape
+    @Schema(required = true, description = "The message itself") // todo escape
     private String message;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The timestamp on which the message was sent.")
+    @Schema(required = true, description = "The timestamp on which the message was sent.")
     private LocalDateTime sentAt;
 
     @Nullable
-    @ApiModelProperty("The timestamp on which the message was read.")
+    @Schema(description = "The timestamp on which the message was read.")
     private LocalDateTime receivedAt;
 
     public ChatMessage() {

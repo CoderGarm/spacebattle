@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -16,18 +16,19 @@ import java.math.RoundingMode;
 
 import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC;
 
+@Schema(description = ".")
 public class Distance implements Cloneable, Comparable<Distance> {
 
     public static final Distance ZERO = new Distance(0, EDistanceMetric.LS);
 
     @Nonnull
     @JsonProperty
-    @ApiModelProperty(required = true, value = "The value of this distance.")
+    @Schema(required = true, description = "The value of this distance.")
     private BigDecimal coordinate;
 
     @Nonnull
     @JsonProperty
-    @ApiModelProperty(required = true, value = "The metric of this distance.")
+    @Schema(required = true, description = "The metric of this distance.")
     private EDistanceMetric distanceMetric;
 
     public Distance() {

@@ -3,47 +3,48 @@ package de.yuga.spacebattle.rest.dto.turn.battle;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.EHitArea;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.WarShip;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
+@Schema(description = ".")
 public class HitLog {
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The round and phase information.")
+    @Schema(required = true, description = "The round and phase information.")
     private de.yuga.spacebattle.rest.dto.turn.battle.CombatRoundKey combatRoundKey;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The UUID of the damage dealer.")
+    @Schema(required = true, description = "The UUID of the damage dealer.")
     private UUID damageDealer;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The attacked warship.")
+    @Schema(required = true, description = "The attacked warship.")
     private de.yuga.spacebattle.rest.dto.constructables.spacecrafts.WarShip warShip;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The string representation of the target's health state.")
+    @Schema(required = true, description = "The string representation of the target's health state.")
     private String warshipHealthState;
 
-    @ApiModelProperty(required = true, value = "The applied damage.")
+    @Schema(required = true, description = "The applied damage.")
     private long damageValue;
 
-    @ApiModelProperty(required = true, value = "The remaining hit points of the attacked part of the ship.")
+    @Schema(required = true, description = "The remaining hit points of the attacked part of the ship.")
     private int state;
 
     /**
      * The attacked part of the ship.
      */
     @Nullable
-    @ApiModelProperty(required = true, value = "The attacked part of the ship.")
+    @Schema(required = true, description = "The attacked part of the ship.")
     private EHitArea attackedPart;
 
-    @ApiModelProperty(required = true, value = "If the ship is alive after damage.")
+    @Schema(required = true, description = "If the ship is alive after damage.")
     private boolean isAlive;
 
-    @ApiModelProperty(required = true, value = "If the ship is capable of staying in the battle after damage.")
+    @Schema(required = true, description = "If the ship is capable of staying in the battle after damage.")
     private boolean isFightingCapable;
 
     public HitLog(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.HitLog input) {

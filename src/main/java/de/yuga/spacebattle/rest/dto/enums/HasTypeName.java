@@ -1,14 +1,14 @@
 package de.yuga.spacebattle.rest.dto.enums;
 
 import com.google.common.base.Preconditions;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
 public class HasTypeName {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The type name of this  transformed enum.")
+    @Schema(required = true, description = "The type name of this  transformed enum.")
     private final String typeName;
 
     public HasTypeName() {

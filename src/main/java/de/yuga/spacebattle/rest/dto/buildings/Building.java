@@ -5,56 +5,57 @@ import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.rest.dto.enums.ERefinementSequence;
 import de.yuga.spacebattle.rest.dto.enums.EResourceType;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+@Schema(description = ".")
 public class Building {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The ID.")
+    @Schema(required = true, description = "The ID.")
     private Integer idBuilding;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The name of this building.")
+    @Schema(required = true, description = "The name of this building.")
     private String name;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The description.")
+    @Schema(required = true, description = "The description.")
     private String description;
 
     /**
      * The basic effect value at level 1.
      */
-    @ApiModelProperty(required = true, value = "The production amount at first level.")
+    @Schema(required = true, description = "The production amount at first level.")
     private int baseValue;
 
     /**
      * The increasement of value for the next level.
      */
-    @ApiModelProperty(required = true, value = "The modification factor per level.")
+    @Schema(required = true, description = "The modification factor per level.")
     private double increasingFactorPerLevel;
 
     /**
      * What this building is working on.
      */
     @Nonnull
-    @ApiModelProperty(required = true, value = "The subject of this building.")
+    @Schema(required = true, description = "The subject of this building.")
     private EResourceType productionTarget;
 
     /**
      * What is the task of this building.
      */
     @Nonnull
-    @ApiModelProperty(required = true, value = "The action this building is for.")
+    @Schema(required = true, description = "The action this building is for.")
     private EProductionCategory productionCategory;
 
     /**
      * In case of an refinement task - here is the workflow.
      */
     @Nullable
-    @ApiModelProperty("In case of a refinement building - this is the defines sequence.")
+    @Schema(description = "In case of a refinement building - this is the defines sequence.")
     private ERefinementSequence refinementSequence;
 
     public Building() {

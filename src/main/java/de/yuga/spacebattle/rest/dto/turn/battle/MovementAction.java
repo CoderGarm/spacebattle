@@ -4,35 +4,36 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.rest.dto.orbitals.Orbit;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+@Schema(description = ".")
 public class MovementAction {
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The round and phase information.")
+    @Schema(required = true, description = "The round and phase information.")
     private de.yuga.spacebattle.rest.dto.turn.battle.CombatRoundKey combatRoundKey;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The fleet which acts.")
+    @Schema(required = true, description = "The fleet which acts.")
     private de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet actor;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The selected movement option for this action.")
+    @Schema(required = true, description = "The selected movement option for this action.")
     private EMovementType movementType;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The starting position for this movement.")
+    @Schema(required = true, description = "The starting position for this movement.")
     private de.yuga.spacebattle.rest.dto.orbitals.Orbit origin;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The next step to the targeted position.")
+    @Schema(required = true, description = "The next step to the targeted position.")
     private de.yuga.spacebattle.rest.dto.orbitals.Orbit interimDestination;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The point of the targeted position.")
+    @Schema(required = true, description = "The point of the targeted position.")
     private de.yuga.spacebattle.rest.dto.orbitals.Orbit destination;
 
     public MovementAction(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction input) {

@@ -4,25 +4,26 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.ECalculationType;
 import de.yuga.spacebattle.backend.enums.ESupportType;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics.BaseModule;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
+@Schema(description = ".")
 public class PassiveModule {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The basic values of this module.")
+    @Schema(required = true, description = "The basic values of this module.")
     private BaseModule baseModule;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "What type of property is supported.")
+    @Schema(required = true, description = "What type of property is supported.")
     private ESupportType supportType;
 
     /**
      * Defines if the support an increase or a decrease of the property.
      */
     @Nonnull
-    @ApiModelProperty(required = true, value = "If the support is increasing or decreasing.")
+    @Schema(required = true, description = "If the support is increasing or decreasing.")
     private ECalculationType calculationType;
 
     public PassiveModule() {

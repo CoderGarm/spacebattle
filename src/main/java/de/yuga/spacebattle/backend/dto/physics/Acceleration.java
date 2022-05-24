@@ -7,7 +7,7 @@ import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
 import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -20,17 +20,17 @@ public class Acceleration implements Cloneable, Comparable<Acceleration> {
 
     @Nonnull
     @JsonProperty
-    @ApiModelProperty(required = true, value = "The value of this acceleration.")
+    @Schema(required = true, description = "The value of this acceleration.")
     private BigDecimal accelerationValue;
 
     @Nonnull
     @JsonProperty
-    @ApiModelProperty(required = true, value = "The metric of this acceleration.")
+    @Schema(required = true, description = "The metric of this acceleration.")
     private EAccelerationMetric accelerationMetric;
 
     @Nonnull
     @JsonProperty
-    @ApiModelProperty(required = true, value = "The hyper band which can be reached.")
+    @Schema(required = true, description = "The hyper band which can be reached.")
     private EHyperBand hyperBand;
 
     public Acceleration() {

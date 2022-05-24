@@ -2,34 +2,35 @@ package de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 
+@Schema(description = ".")
 public class BaseModule {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The id of this module.")
+    @Schema(required = true, description = "The id of this module.")
     private int idModule;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The name of this module.")
+    @Schema(required = true, description = "The name of this module.")
     private String name;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The description of this module.")
+    @Schema(required = true, description = "The description of this module.")
     private String description;
 
-    @ApiModelProperty(required = true, value = "The capacity usage of this module.")
+    @Schema(required = true, description = "The capacity usage of this module.")
     private int useCapacity;
 
     @Nullable
-    @ApiModelProperty(value = "The base effect value of this module.")
+    @Schema(description = "The base effect value of this module.")
     private Integer effectValue;
 
-    @ApiModelProperty(required = true, value = "The level of this module.")
+    @Schema(required = true, description = "The level of this module.")
     private int techLevel;
 
     protected BaseModule() {

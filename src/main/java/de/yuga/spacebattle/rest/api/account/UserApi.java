@@ -6,17 +6,17 @@ import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
-import de.yuga.spacebattle.rest.dto.account.UserJsonList;
 import de.yuga.spacebattle.rest.dto.account.UserReq;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,16 +26,15 @@ import javax.annotation.security.RolesAllowed;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 
-@Api(tags = "UserApi")
+@Tag(name = "UserApi")
 @RolesAllowed("ROLE_USER")
 @RestController
-@RequestMapping("/" + PRIVATE_BASE_ENDPOINT + "/" + UserApi.ENDPOINT + "/")
+@RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + UserApi.ENDPOINT + "/")
 public class UserApi {
 
     @Nonnull
@@ -55,27 +54,23 @@ public class UserApi {
     }
 
     @GetMapping
-    @ApiOperation(value = "Get the list of users", nickname = "getAllUsers")
-    @Operation(
+    @Operation(summary = "Get the list of users", operationId = "getAllUsers",
             description = "Get the list of users registered in the system",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    //array = @ArraySchema(arraySchema = @Schema(implementation = UserJson.class)), commented out because of not working
-                                    schema = @Schema(implementation = UserJsonList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = UserJson.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> findAll() {
-        final List<User> userList = service.findAll();
-        final List<UserJson> userJsons = userList.stream().map(UserJson::new).collect(Collectors.toList());
-        return ResponseEntity.ok(userJsons);
+        return ResponseEntity.ok(service.findAll().stream().map(UserJson::new).collect(Collectors.toList()));
     }
 
     @GetMapping(value = "{idUser}")
-    @ApiOperation(value = "Get a single user by it's idUser", nickname = "getSingleUser")
-    @Operation(
+    @Operation(summary = "Get a single user by it's idUser", operationId = "getSingleUser",
             description = "Returns a user which is  registered in the system",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -94,9 +89,15 @@ public class UserApi {
     }
 
     @PutMapping
-    @ApiOperation(value = "Updates a single user", nickname = "updateUser")
-    @Operation(
+    @Operation(summary = "Updates a single user", operationId = "updateUser",
             description = "Updates and returns a user which is now registered in the system. Every changed field except the idUser will be updated. The user id must be present.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UserReq.class)
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserJson.class))),
@@ -124,8 +125,7 @@ public class UserApi {
     }
 
     @DeleteMapping(value = "/{idUser}")
-    @ApiOperation(value = "Deletes a single user", nickname = "deleteUser")
-    @Operation(
+    @Operation(summary = "Deletes a single user", operationId = "deleteUser",
             description = "Deletes a user which is not any longer registered in the system",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful"),
@@ -133,24 +133,25 @@ public class UserApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> delete(@PathVariable("idUser") @Nonnull final Integer idUser) {
+    @ResponseStatus(HttpStatus.OK)
+    public void delete(@PathVariable("idUser") @Nonnull final Integer idUser) {
         PreconditionWebHelper.checkNotNull(idUser, "The idUser shouldn't be null!");
         PreconditionWebHelper.checkArgument(idUser < -1 || idUser == 0, "The idUser must be valid");
 
         boolean delete = service.delete(idUser);
-        if (delete) {
-            return ResponseEntity.ok().build();
+        if (!delete) {
+            throw new NotifyWebUserException("User wasn't deleted for idUser '" + idUser + "'.");
         }
-        throw new NotifyWebUserException("User wasn't deleted for idUser '" + idUser + "'.");
     }
 
     @GetMapping(value = "byNameLike/{username}")
-    @ApiOperation(value = "Get a single user by it's idUser", nickname = "getUsersByLikeUserName")
-    @Operation(
+    @Operation(summary = "Get a single user by it's idUser", operationId = "getUsersByLikeUserName",
             description = "Returns a list of users which usernames matches the search string",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserJsonList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = UserJson.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
@@ -159,7 +160,6 @@ public class UserApi {
         if (StringUtils.isBlank(username)) {
             return ResponseEntity.ok().build();
         }
-        final List<User> foundUsers = service.findLikeUsername(username);
-        return ResponseEntity.ok(new UserJsonList(foundUsers));
+        return ResponseEntity.ok(service.findLikeUsername(username).stream().map(UserJson::new).collect(Collectors.toList()));
     }
 }

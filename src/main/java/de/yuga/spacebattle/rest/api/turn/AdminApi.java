@@ -4,12 +4,11 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.Tick;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +25,10 @@ import javax.annotation.security.RolesAllowed;
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 import static de.yuga.spacebattle.rest.api.turn.AdminApi.ENDPOINT;
 
-@Api(tags = "AdminApi")
+@Tag(name = "AdminApi")
 @RolesAllowed("ROLE_USER") // todo set admin role
 @RestController
-@RequestMapping("/" + PRIVATE_BASE_ENDPOINT + "/" + ENDPOINT + "/")
+@RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ENDPOINT + "/")
 public class AdminApi {
 
     @Nonnull
@@ -48,8 +47,7 @@ public class AdminApi {
     }
 
     @GetMapping(value = "/doTick")
-    @ApiOperation(value = "Get the current tick.", nickname = "doTick")
-    @Operation(
+    @Operation(summary = "Get the current tick.", operationId = "doTick",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Tick.class))),

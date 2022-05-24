@@ -3,39 +3,40 @@ package de.yuga.spacebattle.rest.dto.orbitals;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.EPlanetClassType;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 
+@Schema(description = ".")
 public class Planet {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The ID of this planet.")
+    @Schema(required = true, description = "The ID of this planet.")
     private Integer idPlanet;
 
     @Nullable
-    @ApiModelProperty("The owner of this planet, if already colonized.")
+    @Schema(description = "The owner of this planet, if already colonized.")
     private UserJson owner;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The name of this planet.")
+    @Schema(required = true, description = "The name of this planet.")
     private String name;
 
-    @ApiModelProperty(required = true, value = "The star system ID which this planet is part of.")
+    @Schema(required = true, description = "The star system ID which this planet is part of.")
     private int idStarSystem;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The orbit inside of the parent system.")
+    @Schema(required = true, description = "The orbit inside of the parent system.")
     private Orbit orbit;
 
     @Nullable
-    @ApiModelProperty("The timestamp when this planet was colonized first.")
+    @Schema(description = "The timestamp when this planet was colonized first.")
     private LocalDateTime colonizedAt;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The planet's class.")
+    @Schema(required = true, description = "The planet's class.")
     private de.yuga.spacebattle.rest.dto.enums.EPlanetClassType planetType = new de.yuga.spacebattle.rest.dto.enums.EPlanetClassType(EPlanetClassType.PLANET);
 
     public Planet() {

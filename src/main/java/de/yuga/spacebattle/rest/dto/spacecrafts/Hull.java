@@ -2,41 +2,42 @@ package de.yuga.spacebattle.rest.dto.spacecrafts;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.enums.EHullType;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
+@Schema(description = ".")
 public class Hull {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The id of this hull.")
+    @Schema(required = true, description = "The id of this hull.")
     private int idHull;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The name of this hull.")
+    @Schema(required = true, description = "The name of this hull.")
     private String name;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The description of the hull.")
+    @Schema(required = true, description = "The description of the hull.")
     private String description;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The hull type.")
+    @Schema(required = true, description = "The hull type.")
     private EHullType hullType;
 
-    @ApiModelProperty(required = true, value = "The overall construction capacity as displacement like in the wet navies.")
+    @Schema(required = true, description = "The overall construction capacity as displacement like in the wet navies.")
     private int overallConstructionCapacity;
 
-    @ApiModelProperty(required = true, value = "The unaligned construction capacity.")
+    @Schema(required = true, description = "The unaligned construction capacity.")
     private int constructionCapacity;
 
-    @ApiModelProperty(required = true, value = "The bow-aligned construction capacity.")
+    @Schema(required = true, description = "The bow-aligned construction capacity.")
     private int constructionCapacityBow;
 
-    @ApiModelProperty(required = true, value = "The stern-aligned construction capacity.")
+    @Schema(required = true, description = "The stern-aligned construction capacity.")
     private int constructionCapacityStern;
 
-    @ApiModelProperty(required = true, value = "The broadside-aligned construction capacity.")
+    @Schema(required = true, description = "The broadside-aligned construction capacity.")
     private int constructionCapacityBroadsides;
 
     public Hull() {

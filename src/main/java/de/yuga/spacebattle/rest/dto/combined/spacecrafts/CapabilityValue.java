@@ -2,23 +2,21 @@ package de.yuga.spacebattle.rest.dto.combined.spacecrafts;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.enums.EModuleType;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.Map;
 
-/**
- * A container to display an effective value for a module type.
- */
+@Schema(description = ".")
 public class CapabilityValue {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The value's type.")
+    @Schema(required = true, description = "The value's type.")
     private final EModuleType moduleType;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The value.")
+    @Schema(required = true, description = "The value.")
     private final BigDecimal value;
 
     public CapabilityValue(@Nonnull final de.yuga.spacebattle.backend.enums.EModuleType moduleType, @Nonnull final BigDecimal value) {

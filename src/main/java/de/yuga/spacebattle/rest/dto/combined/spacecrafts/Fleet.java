@@ -7,7 +7,7 @@ import de.yuga.spacebattle.rest.dto.account.UserJson;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.rest.dto.orbitals.FleetOrbit;
 import de.yuga.spacebattle.rest.dto.turn.Move;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -15,22 +15,23 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Schema(description = ".")
 public class Fleet {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The id.")
+    @Schema(required = true, description = "The id.")
     private Integer idFleet;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The name of the fleet")
+    @Schema(required = true, description = "The name of the fleet")
     private String name;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The owner of the fleet")
+    @Schema(required = true, description = "The owner of the fleet")
     private UserJson owner;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The fleet's individual war ships.")
+    @Schema(required = true, description = "The fleet's individual war ships.")
     private Set<WarShip> ships = new HashSet<>();
 
     /**
@@ -40,7 +41,7 @@ public class Fleet {
      * The planet could be null if the fleet is on a local movement.
      */
     @Nullable
-    @ApiModelProperty("The current location of this fleet.\n" +
+    @Schema(description = "The current location of this fleet.\n" +
             "     \n" +
             "     If null, then this is in hyper space.\n" +
             "     The planet could be null if the fleet is on a local movement.")
@@ -50,15 +51,15 @@ public class Fleet {
      * The move includes the origin and the destination if the start is different from the current {@link #orbit}.
      */
     @Nullable
-    @ApiModelProperty("The fleet's current moving.")
+    @Schema(description = "The fleet's current moving.")
     private Move move;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The effect value per module type.")
+    @Schema(required = true, description = "The effect value per module type.")
     private FleetCapabilities fleetCapabilities;
 
     @JsonProperty
-    @ApiModelProperty(required = true, value = "If the fleet can run interstellar movements.")
+    @Schema(required = true, description = "If the fleet can run interstellar movements.")
     private boolean isFTLCapable;
 
     public Fleet() {

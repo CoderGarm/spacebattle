@@ -1,19 +1,18 @@
 package de.yuga.spacebattle.rest.dto.enums;
 
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
 /**
  * This enum dedicates if a {@link ResourceDeposit} must be calculated as deposit for a planet or as costs.
  */
-@ApiModel(parent = HasTypeName.class)
+@Schema(description = ".")
 public class EDepositType extends HasTypeName {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The calculation type.")
+    @Schema(required = true, description = "The calculation type.")
     private final ECalculationType calculationType;
 
     public EDepositType() {

@@ -2,42 +2,43 @@ package de.yuga.spacebattle.rest.dto.spacecrafts.ammunition;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
+@Schema(description = ".")
 public class MissileMotor {
 
-    @ApiModelProperty(required = true, value = "The id of this MissileMotor.")
+    @Schema(required = true, description = "The id of this MissileMotor.")
     private int idMissileMotor;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The type name of this engine.")
+    @Schema(required = true, description = "The type name of this engine.")
     private String typeName;
 
     /**
      * The duration which the missile engine can fire and accelerate the missile in seconds.
      */
-    @ApiModelProperty(required = true, value = "The endurance of this engine.")
+    @Schema(required = true, description = "The endurance of this engine.")
     private int endurance;
 
     /**
      * The acceleration in m/s² which is set if using the engine.
      */
     @Nonnull
-    @ApiModelProperty(required = true, value = "The acceleration of this engine in ms².")
+    @Schema(required = true, description = "The acceleration of this engine in ms².")
     private Acceleration acceleration;
 
     /**
      * Defines the capability of this weapon to penetrate the shield.
      * The means the maneuver capability to find a gap in the tank to fire into it, for instance.
      */
-    @ApiModelProperty(required = true,
-            value = "Defines the capability of this weapon to penetrate the shield.\n" +
+    @Schema(required = true,
+            description = "Defines the capability of this weapon to penetrate the shield.\n" +
                     " The means the maneuver capability to find a gap in the tank to fire into it, for instance.")
     private double maneuverability;
 
-    @ApiModelProperty(required = true, value = "The capacity usage of this module.")
+    @Schema(required = true, description = "The capacity usage of this module.")
     private int useCapacity;
 
     public MissileMotor() {

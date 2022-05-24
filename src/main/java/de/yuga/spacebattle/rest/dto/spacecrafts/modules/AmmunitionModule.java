@@ -4,18 +4,19 @@ package de.yuga.spacebattle.rest.dto.spacecrafts.modules;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics.BaseModule;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
+@Schema(description = ".")
 public class AmmunitionModule {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The basic values of this module.")
+    @Schema(required = true, description = "The basic values of this module.")
     private BaseModule baseModule;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The basic values of this module.")
+    @Schema(required = true, description = "The basic values of this module.")
     private Missile missile;
 
     public AmmunitionModule() {

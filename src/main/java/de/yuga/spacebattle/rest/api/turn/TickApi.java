@@ -5,13 +5,12 @@ import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.Tick;
-import de.yuga.spacebattle.rest.dto.turn.TickList;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,15 +21,15 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
-import java.util.List;
+import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 import static de.yuga.spacebattle.rest.api.turn.AdminApi.ENDPOINT;
 
-@Api(tags = "TickApi")
+@Tag(name = "TickApi")
 @RolesAllowed("ROLE_USER")
 @RestController
-@RequestMapping("/" + PRIVATE_BASE_ENDPOINT + "/" + ENDPOINT + "/")
+@RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ENDPOINT + "/")
 public class TickApi {
 
     @Nonnull
@@ -49,8 +48,7 @@ public class TickApi {
     }
 
     @GetMapping(value = "current")
-    @ApiOperation(value = "Get the current tick.", nickname = "getCurrentTick")
-    @Operation(
+    @Operation(summary = "Get the current tick.", operationId = "getCurrentTick",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Tick.class))),
@@ -66,24 +64,23 @@ public class TickApi {
     }
 
     @GetMapping(value = "all")
-    @ApiOperation(value = "Get all ticks.", nickname = "getAllTicks")
-    @Operation(
+    @Operation(summary = "Get all ticks.", operationId = "getAllTicks",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TickList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Tick.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     @ResponseBody
     public ResponseEntity<?> getAllTicks() {
-        final List<de.yuga.spacebattle.backend.entities.turn.Tick> all = tickService.findAll();
-        return ResponseEntity.ok(new TickList(all));
+        return ResponseEntity.ok(tickService.findAll().stream().map(Tick::new).collect(Collectors.toList()));
     }
 
     @GetMapping("/{idTick}")
-    @ApiOperation(value = "Get the current tick.", nickname = "getTick")
-    @Operation(
+    @Operation(summary = "Get the current tick.", operationId = "getTick",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Tick.class))),

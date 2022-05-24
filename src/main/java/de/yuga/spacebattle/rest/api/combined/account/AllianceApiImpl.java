@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.gui.impl.combined.account;
+package de.yuga.spacebattle.rest.api.combined.account;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 //@RestController
-//@RequestMapping(value = "/rest/sb/alliance")
+//@RequestMapping(value = value = "/rest/sb/alliance")
 public class AllianceApiImpl {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(AllianceApiImpl.class);

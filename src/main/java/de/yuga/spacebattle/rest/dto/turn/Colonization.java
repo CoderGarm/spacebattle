@@ -4,28 +4,29 @@ package de.yuga.spacebattle.rest.dto.turn;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
 import de.yuga.spacebattle.rest.dto.orbitals.Planet;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
+@Schema(description = ".")
 public class Colonization {
 
-    @ApiModelProperty(required = true, value = "The id of the colonization.")
+    @Schema(required = true, description = "The id of the colonization.")
     private final int idColonization;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The user who runs the colonization.")
+    @Schema(required = true, description = "The user who runs the colonization.")
     private final UserJson user;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The planet which is the target of the colonization.")
+    @Schema(required = true, description = "The planet which is the target of the colonization.")
     private final Planet target;
 
     /**
      * Principle: Countdown ticks to zero -> job done.
      * It's about full ticks
      */
-    @ApiModelProperty(required = true, value = "The amount of ticks to complete colonization.")
+    @Schema(required = true, description = "The amount of ticks to complete colonization.")
     private final int doneAtZero;
 
     public Colonization(@Nonnull final de.yuga.spacebattle.backend.entities.turn.Colonization colonization) {

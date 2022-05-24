@@ -2,20 +2,19 @@ package de.yuga.spacebattle.rest.dto.enums;
 
 import de.yuga.spacebattle.backend.enums.EIconPath;
 import de.yuga.spacebattle.backend.enums.HasIconName;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
-@ApiModel(parent = HasTypeName.class)
+@Schema(description = ".")
 public class HasIcon extends HasTypeName {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The icon name for this resource.")
+    @Schema(required = true, description = "The icon name for this resource.")
     private final String iconName;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The folder name for resources.")
+    @Schema(required = true, description = "The folder name for resources.")
     private final String folder;
 
     public HasIcon() {

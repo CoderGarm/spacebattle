@@ -5,13 +5,14 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.rest.dto.enums.EDepositType;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Schema(description = ".")
 public class ResourceDeposit {
 
     /**
@@ -19,18 +20,18 @@ public class ResourceDeposit {
      * <b>Attention:</b> The {@link EResourceType#POPULATION} is something special.
      */
     @Nonnull
-    @ApiModelProperty(required = true, value = "The amount of resources by their type.")
+    @Schema(required = true, description = "The amount of resources by their type.")
     private final List<ResourceAmount> resources;
 
     /**
      * Everything about the population.
      */
     @Nonnull
-    @ApiModelProperty(required = true, value = "The amount of human resources by their type.")
+    @Schema(required = true, description = "The amount of human resources by their type.")
     private final List<HumanResourceAmount> humanResources;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The type of the deposit - costs or a real deposit.")
+    @Schema(required = true, description = "The type of the deposit - costs or a real deposit.")
     private final EDepositType subType;
 
     public ResourceDeposit(@Nonnull final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit resourceDeposit) {

@@ -3,46 +3,47 @@ package de.yuga.spacebattle.rest.dto.turn.battle;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.rest.dto.orbitals.Orbit;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
+@Schema(description = ".")
 public class MissileMovement {
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The round and phase information.")
+    @Schema(required = true, description = "The round and phase information.")
     private de.yuga.spacebattle.rest.dto.turn.battle.CombatRoundKey combatRoundKey;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The fleet which acts.")
+    @Schema(required = true, description = "The fleet which acts.")
     private de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet actor;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The fleet which is targeted.")
+    @Schema(required = true, description = "The fleet which is targeted.")
     private de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet target;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The UUID of the moving missile salvo.")
+    @Schema(required = true, description = "The UUID of the moving missile salvo.")
     private UUID movingMissileSalvo;
 
-    @ApiModelProperty(required = true, value = "The amount of missiles in this salvo.")
+    @Schema(required = true, description = "The amount of missiles in this salvo.")
     private int missileAmount;
 
-    @ApiModelProperty(required = true, value = "The amount of rounds which have to be passed before in range for a hit.")
+    @Schema(required = true, description = "The amount of rounds which have to be passed before in range for a hit.")
     private int roundsToTravel;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The current position of the salvo.")
+    @Schema(required = true, description = "The current position of the salvo.")
     private de.yuga.spacebattle.rest.dto.orbitals.Orbit position;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The position of the salvo in the last round.")
+    @Schema(required = true, description = "The position of the salvo in the last round.")
     private de.yuga.spacebattle.rest.dto.orbitals.Orbit lastPosition;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The current position of the target.")
+    @Schema(required = true, description = "The current position of the target.")
     private de.yuga.spacebattle.rest.dto.orbitals.Orbit targetPosition;
 
     public MissileMovement(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.MissileMovement input) {

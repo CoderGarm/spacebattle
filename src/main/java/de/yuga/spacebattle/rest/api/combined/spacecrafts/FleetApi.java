@@ -10,16 +10,18 @@ import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
-import de.yuga.spacebattle.rest.dto.combined.spacecrafts.*;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetDistributionPerUser;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMerge;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMove;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.Move;
-import de.yuga.spacebattle.rest.dto.turn.MoveList;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,10 +35,10 @@ import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 
-@Api(tags = "FleetApi")
+@Tag(name = "FleetApi")
 @RolesAllowed("ROLE_USER")
 @RestController
-@RequestMapping("/" + PRIVATE_BASE_ENDPOINT + "/" + FleetApi.ENDPOINT + "/")
+@RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + FleetApi.ENDPOINT + "/")
 public class FleetApi {
 
     @Nonnull
@@ -75,11 +77,12 @@ public class FleetApi {
     }
 
     @GetMapping(value = FLEET_PER_SYSTEM_ENDPOINT + "/{idStarSystem}")
-    @ApiOperation(value = "Get all fleets inside of a star system.", nickname = "getFleetsBySystem")
-    @Operation(
+    @Operation(summary = "Get all fleets inside of a star system.", operationId = "getFleetsBySystem",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FleetList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Fleet.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
@@ -90,32 +93,32 @@ public class FleetApi {
         if (starSystem == null) {
             throw new NotifyWebUserException("There should be a star system, you searches for.");
         }
-        final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> fleets = starSystem.getFleets();
-        return ResponseEntity.ok(new FleetList(fleets));
+        return ResponseEntity.ok(starSystem.getFleets().stream().map(Fleet::new).collect(Collectors.toList()));
     }
 
     @GetMapping(value = INTERSTELLAR_MOVEMENT_ENDPOINT)
-    @ApiOperation(value = "Get all fleets inside of a star system.", nickname = "getInterstellarMovingFleets")
-    @Operation(
+    @Operation(summary = "Get all fleets inside of a star system.", operationId = "getInterstellarMovingFleets",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FleetList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Fleet.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getInterstellarMovingFleets() {
 
-        final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> fleets = fleetService.findAllFleetsWithInterstellarMovement();
-        return ResponseEntity.ok(new FleetList(fleets));
+        return ResponseEntity.ok(fleetService.findAllFleetsWithInterstellarMovement().stream().map(Fleet::new).collect(Collectors.toList()));
     }
 
     @GetMapping(value = FLEET_PER_SYSTEM_ENDPOINT + "/{idStarSystem}/" + FLEET_PER_USER_ENDPOINT + "/{idOwner}")
-    @ApiOperation(value = "Get all fleets inside of a star system for a specific user.", nickname = "getFleetsBySystemAndOwner")
-    @Operation(
+    @Operation(summary = "Get all fleets inside of a star system for a specific user.", operationId = "getFleetsBySystemAndOwner",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FleetList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Fleet.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
@@ -123,16 +126,16 @@ public class FleetApi {
     public ResponseEntity<?> getFleetsBySystemAndOwner(@PathVariable("idStarSystem") final int idStarSystem,
                                                        @PathVariable("idOwner") final int idOwner) {
 
-        final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> fleets = fleetService.findAllFleetsBy(idStarSystem, idOwner);
-        return ResponseEntity.ok(new FleetList(fleets));
+        return ResponseEntity.ok(fleetService.findAllFleetsBy(idStarSystem, idOwner).stream().map(Fleet::new).collect(Collectors.toList()));
     }
 
     @GetMapping(value = FLEET_PER_USER_PER_SYSTEM_ENDPOINT)
-    @ApiOperation(value = "Get all the star systems which are holding fleets with the fleet's owner.", nickname = "getFleetDistribution")
-    @Operation(
+    @Operation(summary = "Get all the star systems which are holding fleets with the fleet's owner.", operationId = "getFleetDistribution",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FleetDistributionPerUserList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = FleetDistributionPerUser.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
@@ -157,11 +160,12 @@ public class FleetApi {
     }
 
     @GetMapping(value = FLEET_PER_USER_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Get all fleets of an owner.", nickname = "getFleetsForUser")
-    @Operation(
+    @Operation(summary = "Get all fleets of an owner.", operationId = "getFleetsForUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FleetList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Fleet.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
@@ -170,15 +174,20 @@ public class FleetApi {
 
         final User user = userService.find(idUser);
         if (user != null) {
-            final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> allFleetsByUser = fleetService.findAllFleetsByUser(user);
-            return ResponseEntity.ok(new FleetList(allFleetsByUser));
+            return ResponseEntity.ok(fleetService.findAllFleetsByUser(user).stream().map(Fleet::new).collect(Collectors.toList()));
         }
         throw new NotifyWebUserException("No user found.");
     }
 
     @PostMapping(value = MERGE_FLEET_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Merge two fleets of an owner.", nickname = "mergeFleets")
-    @Operation(
+    @Operation(summary = "Merge two fleets of an owner.", operationId = "mergeFleets",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = FleetMerge.class)
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Fleet.class))),
@@ -204,8 +213,14 @@ public class FleetApi {
     }
 
     @PostMapping(value = MOVE_FLEET_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Moves a fleet to another celestial.", nickname = "moveFleet")
-    @Operation(
+    @Operation(summary = "Moves a fleet to another celestial.", operationId = "moveFleet",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = FleetMove.class)
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Fleet.class))),
@@ -224,11 +239,19 @@ public class FleetApi {
     }
 
     @PostMapping(value = MOVE_FLEETS_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Moves a fleet to another celestial.", nickname = "moveFleets")
-    @Operation(
+    @Operation(summary = "Moves a fleet to another celestial.", operationId = "moveFleets",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = FleetMove.class))
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FleetList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Fleet.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
@@ -238,13 +261,18 @@ public class FleetApi {
 
         // todo validate interstellar flights with propulsion
         final List<de.yuga.spacebattle.backend.entities.turn.Move> plannedMoves = getMultiMove(idUser, moves);
-        final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> inMotion = fleetService.moveFleets(plannedMoves);
-        return ResponseEntity.ok(new FleetList(inMotion));
+        return ResponseEntity.ok(fleetService.moveFleets(plannedMoves).stream().map(Fleet::new).collect(Collectors.toList()));
     }
 
     @PostMapping(value = PLAN_MOVE_FLEET_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Plan a movement of a fleet to another celestial.", nickname = "planMovement")
-    @Operation(
+    @Operation(summary = "Plan a movement of a fleet to another celestial.", operationId = "planMovement",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = FleetMove.class)
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Move.class))),
@@ -260,11 +288,19 @@ public class FleetApi {
     }
 
     @PostMapping(value = PLAN_MOVES_FLEET_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Plan a movement of a fleet to another celestial.", nickname = "planMovements")
-    @Operation(
+    @Operation(summary = "Plan a movement of a fleet to another celestial.", operationId = "planMovements",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = FleetMove.class))
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = MoveList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Move.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
@@ -274,12 +310,16 @@ public class FleetApi {
 
         // todo validate interstellar flights with propulsion
         final List<de.yuga.spacebattle.backend.entities.turn.Move> plannedMoves = getMultiMove(idUser, moves);
-        return ResponseEntity.ok(new MoveList(plannedMoves));
+        return ResponseEntity.ok(plannedMoves.stream().map(Move::new).collect(Collectors.toList()));
     }
 
     @PutMapping(value = CANCEL_MOVE_FLEET_ENDPOINT + "/{idUser}/{idFleet}")
-    @ApiOperation(value = "Cancels a movement of a fleet and creates the way back.", nickname = "cancelMovement")
-    @Operation(
+    @Operation(summary = "Cancels a movement of a fleet and creates the way back.", operationId = "cancelMovement",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Fleet.class))),

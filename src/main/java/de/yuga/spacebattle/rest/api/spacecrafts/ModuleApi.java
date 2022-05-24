@@ -5,16 +5,15 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.spacecraft.HullService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
-import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
-import de.yuga.spacebattle.rest.dto.spacecrafts.HullList;
+import de.yuga.spacebattle.rest.dto.spacecrafts.Hull;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.*;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,13 +24,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 
-@Api(tags = ModuleApi.API)
+@Tag(name = ModuleApi.API)
 @RolesAllowed("ROLE_USER")
 @RestController
-@RequestMapping("/" + PRIVATE_BASE_ENDPOINT + "/" + ModuleApi.ENDPOINT + "/")
+@RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ModuleApi.ENDPOINT + "/")
 public class ModuleApi {
 
     public static final String API = "ModuleApi";
@@ -69,165 +70,154 @@ public class ModuleApi {
     }
 
     @GetMapping(value = ARMOR_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Get all unlocked armors for the owner .", nickname = "getArmorsByUser")
-    @Operation(
+    @Operation(summary = "Get all unlocked armors for the owner .", operationId = "getArmorsByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ArmorList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Armor.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getArmorsByUser(@PathVariable("idUser") final int idUser) {
         final User owner = userService.findWithResearches(idUser);
-        if (owner == null) {
-            throw new NotifyWebUserException("There should be a questioned user.");
-        }
 
-        return ResponseEntity.ok(new ArmorList(moduleService.findAllArmorByUser(owner)));
+        return ResponseEntity.ok(moduleService.findAllArmorByUser(owner).stream().map(Armor::new).collect(Collectors.toList()));
     }
 
     @GetMapping(value = WEAPON_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Get all unlocked weapons for the owner .", nickname = "getWeaponsByUser")
-    @Operation(
+    @Operation(summary = "Get all unlocked weapons for the owner .", operationId = "getWeaponsByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = WeaponList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Weapon.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getWeaponsByUser(@PathVariable("idUser") final int idUser) {
         final User owner = userService.findWithResearches(idUser);
-        return ResponseEntity.ok(new WeaponList(moduleService.findAllWeaponByUser(owner)));
+        final List<de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon> allWeaponByUser = moduleService.findAllWeaponByUser(owner);
+        final List<de.yuga.spacebattle.rest.dto.spacecrafts.modules.Weapon> weaponList = allWeaponByUser.stream().map(de.yuga.spacebattle.rest.dto.spacecrafts.modules.Weapon::new).collect(Collectors.toList());
+        return ResponseEntity.ok(weaponList);
     }
 
     @GetMapping(value = LAUNCHER_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Get all unlocked weapons for the owner .", nickname = "getLaunchersByUser")
-    @Operation(
+    @Operation(summary = "Get all unlocked weapons for the owner .", operationId = "getLaunchersByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = LauncherList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Launcher.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getLaunchersByUser(@PathVariable("idUser") final int idUser) {
         final User owner = userService.findWithResearches(idUser);
-        return ResponseEntity.ok(new LauncherList(moduleService.findAllLauncherByUser(owner)));
+        return ResponseEntity.ok(moduleService.findAllLauncherByUser(owner).stream().map(Launcher::new).collect(Collectors.toList()));
     }
 
     @GetMapping(value = SIDEWALL_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Get all unlocked sidewalls for the owner .", nickname = "getSidewallsByUser")
-    @Operation(
+    @Operation(summary = "Get all unlocked sidewalls for the owner .", operationId = "getSidewallsByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = SidewallList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Sidewall.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getSidewallsByUser(@PathVariable("idUser") final int idUser) {
         final User owner = userService.findWithResearches(idUser);
-        if (owner == null) {
-            throw new NotifyWebUserException("There should be a questioned user.");
-        }
-
-        return ResponseEntity.ok(new SidewallList(moduleService.findAllSidewallByUser(owner)));
+        return ResponseEntity.ok(moduleService.findAllSidewallByUser(owner).stream().map(Sidewall::new).collect(Collectors.toList()));
     }
 
     @GetMapping(value = PROPULSION_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Get all unlocked propulsions for the owner .", nickname = "getPropulsionsByUser")
-    @Operation(
+    @Operation(summary = "Get all unlocked propulsions for the owner .", operationId = "getPropulsionsByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PropulsionList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Propulsion.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getPropulsionsByUser(@PathVariable("idUser") final int idUser) {
         final User owner = userService.findWithResearches(idUser);
-        if (owner == null) {
-            throw new NotifyWebUserException("There should be a questioned user.");
-        }
 
-        return ResponseEntity.ok(new PropulsionList(moduleService.findAllPropulsionByUser(owner)));
+        return ResponseEntity.ok(moduleService.findAllPropulsionByUser(owner).stream().map(Propulsion::new).collect(Collectors.toList()));
     }
 
     @GetMapping(value = HULL_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Get all unlocked hulls for the owner .", nickname = "getHullsByUser")
-    @Operation(
+    @Operation(summary = "Get all unlocked hulls for the owner .", operationId = "getHullsByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = HullList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Hull.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getHullsByUser(@PathVariable("idUser") final int idUser) {
         final User owner = userService.findWithResearches(idUser);
-        if (owner == null) {
-            throw new NotifyWebUserException("There should be a questioned user.");
-        }
 
-        return ResponseEntity.ok(new HullList(hullService.findAllByUser(owner)));
+        return ResponseEntity.ok(hullService.findAllByUser(owner).stream().map(Hull::new).collect(Collectors.toList()));
     }
 
     @GetMapping(value = ELOKA_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Get all unlocked electronic warfare for the owner .", nickname = "getElectronicWarfareByUser")
-    @Operation(
+    @Operation(summary = "Get all unlocked electronic warfare for the owner .", operationId = "getElectronicWarfareByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ElectronicWarfareList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = ElectronicWarfare.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getElectronicWarfaresByUser(@PathVariable("idUser") final int idUser) {
         final User owner = userService.findWithResearches(idUser);
-        if (owner == null) {
-            throw new NotifyWebUserException("There should be a questioned user.");
-        }
 
-        return ResponseEntity.ok(new ElectronicWarfareList(moduleService.findAllElectronicWarfareByUser(owner)));
+        return ResponseEntity.ok(moduleService.findAllElectronicWarfareByUser(owner).stream().map(ElectronicWarfare::new).collect(Collectors.toList()));
     }
 
     @GetMapping(value = PASSIVE_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Get all unlocked passive modules for the owner .", nickname = "getPassiveModulesByUser")
-    @Operation(
+    @Operation(summary = "Get all unlocked passive modules for the owner .", operationId = "getPassiveModulesByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PassiveModuleList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = PassiveModule.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getPassiveModulesByUser(@PathVariable("idUser") final int idUser) {
         final User owner = userService.findWithResearches(idUser);
-        if (owner == null) {
-            throw new NotifyWebUserException("There should be a questioned user.");
-        }
 
-        return ResponseEntity.ok(new PassiveModuleList(moduleService.findAllPassiveModuleByUser(owner)));
+        return ResponseEntity.ok(moduleService.findAllPassiveModuleByUser(owner).stream().map(PassiveModule::new).collect(Collectors.toList()));
     }
 
     @GetMapping(value = AMMUNITION_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Get all unlocked ammunition modules for the owner .", nickname = "getAmmunitionModulesByUser")
-    @Operation(
+    @Operation(summary = "Get all unlocked ammunition modules for the owner .", operationId = "getAmmunitionModulesByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = AmmunitionModuleList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = AmmunitionModule.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getAmmunitionModulesByUser(@PathVariable("idUser") final int idUser) {
         final User owner = userService.findWithResearches(idUser);
-        if (owner == null) {
-            throw new NotifyWebUserException("There should be a questioned user.");
-        }
 
-        return ResponseEntity.ok(new AmmunitionModuleList(moduleService.findAllAmmunitionModulesByUser(owner)));
+        return ResponseEntity.ok(moduleService.findAllAmmunitionModulesByUser(owner).stream().map(AmmunitionModule::new).collect(Collectors.toList()));
     }
 }

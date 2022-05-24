@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.Launcher;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.Weapon;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -12,27 +12,28 @@ import javax.annotation.Nullable;
 /**
  * The aligned fitting represents a weapon system and the alignment, where the weapon is placed.
  */
+@Schema(description = ".")
 public class AlignedFitting {
 
     /**
      * The placement.
      */
     @Nonnull
-    @ApiModelProperty(required = true, value = "The used mount point of this fitting.")
+    @Schema(required = true, description = "The used mount point of this fitting.")
     private EWeaponAlignment weaponAlignment;
 
     /**
      * The possible direct weapon.
      */
     @Nullable
-    @ApiModelProperty(value = "The mounted direct weapon.")
+    @Schema(description = "The mounted direct weapon.")
     private Weapon weapon;
 
     /**
      * The possible missile launcher.
      */
     @Nullable
-    @ApiModelProperty(value = "The mounted launcher.")
+    @Schema(description = "The mounted launcher.")
     private Launcher launcher;
 
     /**
@@ -40,7 +41,7 @@ public class AlignedFitting {
      * <p>
      * Note that a {@link EWeaponAlignment#BROADSIDE} aligned fit needs to be doubled.
      */
-    @ApiModelProperty(required = true, value = "The amount of mounted weapons.")
+    @Schema(required = true, description = "The amount of mounted weapons.")
     private int amount;
 
     public AlignedFitting() {

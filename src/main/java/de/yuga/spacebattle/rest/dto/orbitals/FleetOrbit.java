@@ -1,19 +1,20 @@
 package de.yuga.spacebattle.rest.dto.orbitals;
 
 import com.google.common.base.Preconditions;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+@Schema(description = ".")
 public class FleetOrbit {
 
     @Nullable
-    @ApiModelProperty("The star system which defines the inertial system of the orbit. If undefined the orbit lives in the universe.")
+    @Schema(description = "The star system which defines the inertial system of the orbit. If undefined the orbit lives in the universe.")
     private StarSystem system;
 
     @Nullable
-    @ApiModelProperty("The orbit inside the inertial system defined by the star system.")
+    @Schema(description = "The orbit inside the inertial system defined by the star system.")
     private Orbit orbit;
 
     public FleetOrbit() {

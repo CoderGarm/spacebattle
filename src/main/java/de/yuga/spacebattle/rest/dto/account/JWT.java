@@ -3,29 +3,30 @@ package de.yuga.spacebattle.rest.dto.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.enums.EWebUserRole;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
+@Schema(description = ".")
 public class JWT {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The access token to authenticate every request against the backend.")
+    @Schema(required = true, description = "The access token to authenticate every request against the backend.")
     private String accessToken;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The access token to authenticate every request against the backend.")
+    @Schema(required = true, description = "The access token to authenticate every request against the backend.")
     private String refreshToken;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The user's name.")
+    @Schema(required = true, description = "The user's name.")
     private String username;
 
-    @ApiModelProperty(required = true, value = "The user's ID.")
+    @Schema(required = true, description = "The user's ID.")
     private int idUser;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The user's role.")
+    @Schema(required = true, description = "The user's role.")
     private EWebUserRole role;
 
     public JWT() {

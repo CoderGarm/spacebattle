@@ -1,17 +1,16 @@
 package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
-import de.yuga.spacebattle.rest.dto.turn.JobList;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import de.yuga.spacebattle.rest.dto.turn.Job;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,15 +21,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
-import java.util.List;
+import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 import static de.yuga.spacebattle.rest.api.turn.JobApi.ENDPOINT;
 
-@Api(tags = "JobApi")
+@Tag(name = "JobApi")
 @RolesAllowed("ROLE_USER")
 @RestController
-@RequestMapping("/" + PRIVATE_BASE_ENDPOINT + "/" + ENDPOINT + "/")
+@RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ENDPOINT + "/")
 public class JobApi {
 
     @Nonnull
@@ -53,17 +52,17 @@ public class JobApi {
     }
 
     @GetMapping(value = JOB_RUNNING_AT_PLANET_ENDPOINT + "/{idPlanet}")
-    @ApiOperation(value = "Get all jobs which are running on this planet.", nickname = "getJobsOnPlanet")
-    @Operation(
+    @Operation(summary = "Get all jobs which are running on this planet.", operationId = "getJobsOnPlanet",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = JobList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Job.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getJobsOnPlanet(@PathVariable("idPlanet") final int idPlanet) {
-        final List<Job> allOnPlanet = jobService.findAllJobsByPlanet(idPlanet);
-        return ResponseEntity.ok(new JobList(allOnPlanet));
+        return ResponseEntity.ok(jobService.findAllJobsByPlanet(idPlanet).stream().map(Job::new).collect(Collectors.toList()));
     }
 }

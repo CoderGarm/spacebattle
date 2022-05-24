@@ -2,33 +2,34 @@ package de.yuga.spacebattle.rest.dto.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.orbitals.FleetOrbit;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
+@Schema(description = ".")
 public class Move {
 
-    @ApiModelProperty(required = true, value = "The fleet which is in motion.")
+    @Schema(required = true, description = "The fleet which is in motion.")
     private int idFleetInMotion;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The departure of this movement.")
+    @Schema(required = true, description = "The departure of this movement.")
     private FleetOrbit startOrbit;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The destination of this movement.")
+    @Schema(required = true, description = "The destination of this movement.")
     private FleetOrbit targetOrbit;
 
     /**
      * Principle: Countdown to zero -> job done.
      */
-    @ApiModelProperty(required = true, value = "The current left over duration of this movement.")
+    @Schema(required = true, description = "The current left over duration of this movement.")
     private int moveDoneAtZero;
 
     /**
      * Principle: Countdown to zero -> job done.
      */
-    @ApiModelProperty(required = true, value = "The original duration of this movement.")
+    @Schema(required = true, description = "The original duration of this movement.")
     private int originalDuration;
 
     public Move() {

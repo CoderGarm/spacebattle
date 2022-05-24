@@ -3,26 +3,27 @@ package de.yuga.spacebattle.rest.dto.constructables.spacecrafts;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.orbitals.Planet;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
+@Schema(description = ".")
 public class WarShip {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The name of this individual ship.")
+    @Schema(required = true, description = "The name of this individual ship.")
     private String name;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The birthplace of this ship.")
+    @Schema(required = true, description = "The birthplace of this ship.")
     private Planet shipyard;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The fleet which this ship is part of.")
+    @Schema(required = true, description = "The fleet which this ship is part of.")
     private int idFleet;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The ship class which this ship is a type of.")
+    @Schema(required = true, description = "The ship class which this ship is a type of.")
     private ShipClass shipClass;
 
     public WarShip() {

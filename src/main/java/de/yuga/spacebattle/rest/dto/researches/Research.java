@@ -2,25 +2,26 @@ package de.yuga.spacebattle.rest.dto.researches;
 
 
 import com.google.common.base.Preconditions;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
+@Schema(description = ".")
 public class Research {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The id of this research.")
+    @Schema(required = true, description = "The id of this research.")
     private int idResearch;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The name of this research.")
+    @Schema(required = true, description = "The name of this research.")
     private String name;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The description of this research.")
+    @Schema(required = true, description = "The description of this research.")
     private String description;
 
-    @ApiModelProperty(required = true, value = "The maximum level of this research.")
+    @Schema(required = true, description = "The maximum level of this research.")
     private int levelCap;
 
     public Research() {

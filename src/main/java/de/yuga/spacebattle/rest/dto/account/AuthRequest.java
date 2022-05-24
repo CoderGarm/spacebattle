@@ -1,9 +1,12 @@
 package de.yuga.spacebattle.rest.dto.account;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import javax.annotation.Nonnull;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
+@Schema(description = ".")
 public class AuthRequest {
 
     @Nonnull

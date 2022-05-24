@@ -1,17 +1,18 @@
 package de.yuga.spacebattle.rest.dto.combined.spacecrafts;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
+@Schema(description = ".")
 public class FleetMerge {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The fleet which must be merged.")
+    @Schema(required = true, description = "The fleet which must be merged.")
     private Integer idFleetToMerge;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The fleet which is the target of the merge.")
+    @Schema(required = true, description = "The fleet which is the target of the merge.")
     private Integer idFleetMergeTarget;
 
     @Nonnull

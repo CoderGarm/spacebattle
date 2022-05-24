@@ -23,20 +23,6 @@ public class SpacebattleApplicationTests {
     private final static String separator = System.getProperty("file.separator");
 
     /**
-     * Run this test to generate the swagger definition of the rest api.
-     */
-    @Test
-    @Disabled("open api spec is used")
-    public void generateSwagger() throws Exception {
-        MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
-        mockMvc.perform(MockMvcRequestBuilders.get("/v2/api-docs").accept(MediaType.APPLICATION_JSON))
-                .andDo((result) -> {
-                    FileUtils.writeStringToFile(new File(tmpdir + separator + "swagger.json"), result.getResponse().getContentAsString());
-                });
-
-    }
-
-    /**
      * Run this test to generate the open api definition of the rest api.
      */
     @Test

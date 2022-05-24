@@ -1,23 +1,24 @@
 package de.yuga.spacebattle.rest.dto.combined.spacecrafts;
 
 import de.yuga.spacebattle.rest.dto.orbitals.Orbit;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+@Schema(description = ".")
 public class FleetMove {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The fleet which must be moved.")
+    @Schema(required = true, description = "The fleet which must be moved.")
     private int idFleetToMove;
 
     @Nullable
-    @ApiModelProperty(value = "The orbit which is the target of the movement.")
+    @Schema(description = "The orbit which is the target of the movement.")
     private Orbit destinationOrbit;
 
     @Nullable
-    @ApiModelProperty(value = "The system which is the target of the movement.")
+    @Schema(description = "The system which is the target of the movement.")
     private Integer idDestinationSystem;
 
     @Nonnull

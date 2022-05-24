@@ -16,13 +16,12 @@ import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstruct
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.orbitals.Orbit;
 import de.yuga.spacebattle.rest.dto.orbitals.Planet;
-import de.yuga.spacebattle.rest.dto.orbitals.PlanetList;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -37,10 +36,10 @@ import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 
-@Api(tags = "PlanetApi")
+@Tag(name = "PlanetApi")
 @RolesAllowed("ROLE_USER")
 @RestController
-@RequestMapping("/" + PRIVATE_BASE_ENDPOINT + "/" + PlanetApi.ENDPOINT + "/")
+@RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + PlanetApi.ENDPOINT + "/")
 public class PlanetApi {
 
     @Nonnull
@@ -80,23 +79,25 @@ public class PlanetApi {
     }
 
     @GetMapping(value = "{idUser}")
-    @ApiOperation(value = "Get all planets which are colonized by a user.", nickname = "getPlanetByUsers")
-    @Operation(
+    @Operation(summary = "Get all planets which are colonized by a user.", operationId = "getPlanetByUsers",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PlanetList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(
+                                            schema = @Schema(implementation = Planet.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getPlanets(@PathVariable("idUser") final int idUser) {
         final List<de.yuga.spacebattle.backend.entities.orbitals.Planet> all = planetService.findAllColonizedBy(idUser);
-        return ResponseEntity.ok(new PlanetList(all));
+        final List<Planet> planets = all.stream().map(Planet::new).collect(Collectors.toList());
+        return ResponseEntity.ok(planets);
     }
 
     @GetMapping(value = GROUND_CONSTRUCTION_POSSIBLE_ENDPOINT + "/{idPlanet}")
-    @ApiOperation(value = "Asks if a building could be build on this planet.", nickname = "isConstructionPossibleOnPlanet")
-    @Operation(
+    @Operation(summary = "Asks if a building could be build on this planet.", operationId = "isConstructionPossibleOnPlanet",
             responses = {
                     @ApiResponse(responseCode = "200", description = "you can build something or not",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
@@ -118,8 +119,7 @@ public class PlanetApi {
     }
 
     @GetMapping(value = GROUND_BUILD_IT_ENDPOINT + "/{idPlanet}/{idBuilding}")
-    @ApiOperation(value = "Starts a construction on this planet.", nickname = "buildBuilding")
-    @Operation(
+    @Operation(summary = "Starts a construction on this planet.", operationId = "buildBuilding",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successfully started",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
@@ -137,8 +137,7 @@ public class PlanetApi {
     }
 
     @GetMapping(value = SHIPYARD_POSSIBLE_ENDPOINT + "/{idPlanet}")
-    @ApiOperation(value = "Asks if a ship could be build on this planet.", nickname = "isShipyardJobPossibleOnPlanet")
-    @Operation(
+    @Operation(summary = "Asks if a ship could be build on this planet.", operationId = "isShipyardJobPossibleOnPlanet",
             responses = {
                     @ApiResponse(responseCode = "200", description = "you can build something or not",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
@@ -160,8 +159,14 @@ public class PlanetApi {
     }
 
     @PostMapping(value = SHIPYARD_BUILD_IT_ENDPOINT)
-    @ApiOperation(value = "Starts a construction on this planet.", nickname = "buildShip")
-    @Operation(
+    @Operation(summary = "Starts a construction on this planet.", operationId = "buildShip",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ShipyardConstructionOrder.class)
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successfully started",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
@@ -194,8 +199,14 @@ public class PlanetApi {
     }
 
     @PostMapping(value = GET_PLANET_BY_COORDINATES_ENDPOINT + "/{idStarSystem}")
-    @ApiOperation(value = "Gets a planet which is matching to the given coordinates.", nickname = "getPlanetByCoordinates")
-    @Operation(
+    @Operation(summary = "Gets a planet which is matching to the given coordinates.", operationId = "getPlanetByCoordinates",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = Orbit.class)
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successfully started",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Planet.class))),

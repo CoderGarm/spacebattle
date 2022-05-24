@@ -2,26 +2,27 @@ package de.yuga.spacebattle.rest.dto.spacecrafts.details;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.PassiveModule;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
 /**
  * The support fitting represents a passive module and their amount.
  */
+@Schema(description = ".")
 public class SupportFitting {
 
     /**
      * The support module.
      */
     @Nonnull
-    @ApiModelProperty(required = true, value = "The passive module of this fitting")
+    @Schema(required = true, description = "The passive module of this fitting")
     private PassiveModule passiveModule;
 
     /**
      * The amount of this weapon with the given {@link PassiveModule}.
      */
-    @ApiModelProperty(required = true, value = "The amount of passive modules in this fitting")
+    @Schema(required = true, description = "The amount of passive modules in this fitting")
     private int amount;
 
     public SupportFitting() {

@@ -1,21 +1,20 @@
 package de.yuga.spacebattle.rest.dto.enums;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
-@ApiModel(parent = HasIcon.class)
+@Schema(description = ".")
 public class EStarClassType extends HasIcon {
 
     /**
      * Spectral class	Limit in light minutes
      */
     @Nonnull
-    @ApiModelProperty(required = true, value = "The spectral class.")
+    @Schema(required = true, description = "The spectral class.")
     private final String spectralClass;
 
-    @ApiModelProperty(required = true, value = "The hyper limit in light minutes..")
+    @Schema(required = true, description = "The hyper limit in light minutes..")
     private final double lightMinutesToHyperLimit;
 
     public EStarClassType() {

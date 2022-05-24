@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -19,12 +19,12 @@ public class Time implements Cloneable, Comparable<Time> {
 
     @Nonnull
     @JsonProperty
-    @ApiModelProperty(required = true, value = "The value of this distance.")
+    @Schema(required = true, description = "The value of this distance.")
     private BigDecimal coordinate;
 
     @Nonnull
     @JsonProperty
-    @ApiModelProperty(required = true, value = "The metric of this time.")
+    @Schema(required = true, description = "The metric of this time.")
     private ETimeMetric timeMetric;
 
     public Time() {

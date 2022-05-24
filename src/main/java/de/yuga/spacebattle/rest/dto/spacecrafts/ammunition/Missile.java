@@ -1,36 +1,37 @@
 package de.yuga.spacebattle.rest.dto.spacecrafts.ammunition;
 
 import com.google.common.base.Preconditions;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
+@Schema(description = ".")
 public class Missile {
 
-    @ApiModelProperty(required = true, value = "The id of this Missile.")
+    @Schema(required = true, description = "The id of this Missile.")
     private int idMissile;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The type name of this missile.")
+    @Schema(required = true, description = "The type name of this missile.")
     private String typeName;
 
-    @ApiModelProperty(required = true, value = "The warhead capacity of this missile.")
+    @Schema(required = true, description = "The warhead capacity of this missile.")
     private int warheadCapacity;
 
-    @ApiModelProperty(required = true, value = "The engine capacity of this missile.")
+    @Schema(required = true, description = "The engine capacity of this missile.")
     private int motorCapacity;
 
-    @ApiModelProperty(required = true, value = "The engine capacity of this missile.")
+    @Schema(required = true, description = "The engine capacity of this missile.")
     private int elokaResistance;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The warhead of this missile.")
+    @Schema(required = true, description = "The warhead of this missile.")
     private de.yuga.spacebattle.rest.dto.spacecrafts.ammunition.Warhead warhead;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The implemented engine of this missile.")
+    @Schema(required = true, description = "The implemented engine of this missile.")
     private final List<MissileMotor> missileMotors = new ArrayList<>();
 
     public Missile() {

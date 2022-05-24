@@ -11,12 +11,11 @@ import de.yuga.spacebattle.rest.dto.account.JWT;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
 import de.yuga.spacebattle.rest.dto.account.UserReq;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +39,9 @@ import java.util.Set;
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PUBLIC_BASE_ENDPOINT;
 import static de.yuga.spacebattle.rest.api.account.AuthApi.ENDPOINT;
 
-@Api(tags = "AuthApi")
+@Tag(name = "AuthApi")
 @RestController
-@RequestMapping("/" + PUBLIC_BASE_ENDPOINT + "/" + ENDPOINT + "/")
+@RequestMapping(value = "/" + PUBLIC_BASE_ENDPOINT + "/" + ENDPOINT + "/")
 public class AuthApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthApi.class);
@@ -76,9 +75,15 @@ public class AuthApi {
     }
 
     @PostMapping("/login")
-    @ApiOperation(value = "Does a login", nickname = "login")
-    @Operation(
+    @Operation(summary = "Does a login", operationId = "login",
             description = "Takes parameters and tries to create a valid login from it.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = AuthRequest.class)
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = JWT.class))),
@@ -116,9 +121,8 @@ public class AuthApi {
         }
     }
 
-    @GetMapping("/refresh")
-    @ApiOperation(value = "Does a refresh of the access token", nickname = "refresh")
-    @Operation(
+    @GetMapping(value = "/refresh")
+    @Operation(summary = "Does a refresh of the access token", operationId = "refresh",
             description = "Takes the refresh token and tries to create a valid login from it.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -144,9 +148,15 @@ public class AuthApi {
     }
 
     @PostMapping("/create")
-    @ApiOperation(value = "Creates a single user", nickname = "createUser")
-    @Operation(
+    @Operation(summary = "Creates a single user", operationId = "createUser",
             description = "Creates and returns a user which is now registered in the system",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UserReq.class)
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserJson.class))),

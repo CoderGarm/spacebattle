@@ -1,13 +1,14 @@
 package de.yuga.spacebattle.rest.dto.constructables.spacecrafts;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(description = ".")
 public class ShipyardConstructionSelection {
 
-    @ApiModelProperty(required = true, value = "The ship class which should be produced.")
+    @Schema(required = true, description = "The ship class which should be produced.")
     private Integer idShipClass;
 
-    @ApiModelProperty(required = true, value = "The amount of the ship class which should be produced.")
+    @Schema(required = true, description = "The amount of the ship class which should be produced.")
     private Integer amount;
 
     public ShipyardConstructionSelection() {

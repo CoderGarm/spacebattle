@@ -1,10 +1,10 @@
 package de.yuga.spacebattle.rest.dto.enums;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
-@ApiModel(parent = HasIcon.class)
+@Schema(description = ".")
 public class EPlanetClassType extends HasIcon {
 
     @Nonnull

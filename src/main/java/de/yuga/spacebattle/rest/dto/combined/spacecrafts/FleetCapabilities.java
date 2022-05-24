@@ -12,7 +12,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModul
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.ESupportType;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -21,13 +21,11 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * A container to display the effective value for a module type.
- */
+@Schema(description = ".")
 public class FleetCapabilities {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The effect value per module type.")
+    @Schema(required = true, description = "The effect value per module type.")
     private final List<CapabilityValue> capabilities = new ArrayList<>();
 
     @JsonIgnore

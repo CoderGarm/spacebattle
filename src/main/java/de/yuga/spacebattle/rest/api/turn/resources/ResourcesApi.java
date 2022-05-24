@@ -2,7 +2,6 @@ package de.yuga.spacebattle.rest.api.turn.resources;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
-import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
@@ -12,17 +11,17 @@ import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.dto.constructables.buildings.PlannedConstruction;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstructionSelection;
-import de.yuga.spacebattle.rest.dto.enums.EResourceTypeList;
+import de.yuga.spacebattle.rest.dto.enums.EResourceType;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass;
 import de.yuga.spacebattle.rest.dto.turn.resources.MiningFactors;
 import de.yuga.spacebattle.rest.dto.turn.resources.ResourceDeposit;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,10 +35,10 @@ import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 
-@Api(tags = "ResourcesApi")
+@Tag(name = "ResourcesApi")
 @RolesAllowed("ROLE_USER")
 @RestController
-@RequestMapping("/" + PRIVATE_BASE_ENDPOINT + "/" + ResourcesApi.ENDPOINT + "/")
+@RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ResourcesApi.ENDPOINT + "/")
 public class ResourcesApi {
 
     @Nonnull
@@ -92,23 +91,22 @@ public class ResourcesApi {
     }
 
     @GetMapping(value = RESOURCE_TYPES_ENDPOINT)
-    @ApiOperation(value = "Get all EResourceTypes.", nickname = "getEResourceTypes")
-    @Operation(
+    @Operation(summary = "Get all EResourceTypes.", operationId = "getEResourceTypes",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = EResourceTypeList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = EResourceType.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getEResourceTypes() {
-        final List<EResourceType> eResourceTypes = Arrays.stream(EResourceType.values()).collect(Collectors.toList());
-        return ResponseEntity.ok(new EResourceTypeList(eResourceTypes));
+        return ResponseEntity.ok(Arrays.stream(de.yuga.spacebattle.backend.enums.EResourceType.values()).map(EResourceType::new).collect(Collectors.toList()));
     }
 
     @GetMapping(value = MINING_FACTORS_ENDPOINT + "/{idPlanet}")
-    @ApiOperation(value = "Get the mining factors of the planet.", nickname = "getMiningFactors")
-    @Operation(
+    @Operation(summary = "Get the mining factors of the planet.", operationId = "getMiningFactors",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = MiningFactors.class))),
@@ -126,8 +124,7 @@ public class ResourcesApi {
 
 
     @GetMapping(value = RESOURCE_DEPOSIT_ENDPOINT + "/{idPlanet}")
-    @ApiOperation(value = "Get all EResourceTypes.", nickname = "getResourceDeposit")
-    @Operation(
+    @Operation(summary = "Get all EResourceTypes.", operationId = "getResourceDeposit",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceDeposit.class))),
@@ -144,8 +141,14 @@ public class ResourcesApi {
     }
 
     @PostMapping(value = COSTS_ENDPOINT)
-    @ApiOperation(value = "Get the costs of the given construction.", nickname = "getBuildingCosts")
-    @Operation(
+    @Operation(summary = "Get the costs of the given construction.", operationId = "getBuildingCosts",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PlannedConstruction.class)
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceDeposit.class))),
@@ -167,8 +170,14 @@ public class ResourcesApi {
     }
 
     @PostMapping(value = SHIPYARD_ORDER_COSTS_ENDPOINT)
-    @ApiOperation(value = "Get the costs of the given shipyard order.", nickname = "getShipyardOrderCosts")
-    @Operation(
+    @Operation(summary = "Get the costs of the given shipyard order.", operationId = "getShipyardOrderCosts",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = ShipyardConstructionSelection.class))
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceDeposit.class))),
@@ -188,8 +197,14 @@ public class ResourcesApi {
     }
 
     @PostMapping(value = SHIP_CLASS_COSTS_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Get the costs of the given shipyard order.", nickname = "getShipClassCosts")
-    @Operation(
+    @Operation(summary = "Get the costs of the given shipyard order.", operationId = "getShipClassCosts",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ShipClass.class)
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceDeposit.class))),

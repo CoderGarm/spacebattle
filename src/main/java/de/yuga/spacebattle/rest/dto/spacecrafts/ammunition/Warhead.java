@@ -3,37 +3,38 @@ package de.yuga.spacebattle.rest.dto.spacecrafts.ammunition;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.enums.EWarheadType;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
+@Schema(description = ".")
 public class Warhead {
 
-    @ApiModelProperty(required = true, value = "The id of this warhead.")
+    @Schema(required = true, description = "The id of this warhead.")
     private int idWarhead;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The type name of this warhead.")
+    @Schema(required = true, description = "The type name of this warhead.")
     private String typeName;
 
-    @ApiModelProperty(required = true, value = "The projected damage of this warhead.")
+    @Schema(required = true, description = "The projected damage of this warhead.")
     private long damageValue;
 
     /**
      * Defines the range of this weapon in meter.
      */
     @Nonnull
-    @ApiModelProperty(required = true, value = "The effective range of this warhead.")
+    @Schema(required = true, description = "The effective range of this warhead.")
     private Distance damageProjectionRange;
 
     /**
      * The way of damage projection.
      */
     @Nonnull
-    @ApiModelProperty(required = true, value = "The warhead type.")
+    @Schema(required = true, description = "The warhead type.")
     private EWarheadType warheadType;
 
-    @ApiModelProperty(required = true, value = "The used capacity of this warhead.")
+    @Schema(required = true, description = "The used capacity of this warhead.")
     private int useCapacity;
 
     public Warhead() {

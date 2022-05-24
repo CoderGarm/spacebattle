@@ -2,14 +2,15 @@ package de.yuga.spacebattle.rest.dto.turn.battle;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+@Schema(description = ".")
 public class CombatRoundKey {
 
-    @ApiModelProperty(required = true, value = "The id of the parent.")
+    @Schema(required = true, description = "The id of the parent.")
     private int id;
 
     /**
@@ -17,14 +18,14 @@ public class CombatRoundKey {
      * A volley of direct weapons will hit in the same weapon.
      */
     @Nullable
-    @ApiModelProperty(required = true, value = "The combat round in which this action happens.")
+    @Schema(required = true, description = "The combat round in which this action happens.")
     private CombatRound combatRound;
 
     /**
      * The current phase.
      */
     @Nullable
-    @ApiModelProperty(required = true, value = "The combat phase in which this action happens.")
+    @Schema(required = true, description = "The combat phase in which this action happens.")
     private ECombatPhase.ECombatSubPhase combatPhase;
 
     public CombatRoundKey(final int id,

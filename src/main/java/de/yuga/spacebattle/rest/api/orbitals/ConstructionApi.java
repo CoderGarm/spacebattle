@@ -2,21 +2,19 @@ package de.yuga.spacebattle.rest.api.orbitals;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
-import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
-import de.yuga.spacebattle.rest.dto.constructables.buildings.ConstructionList;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,17 +25,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 
-@Api(tags = "ConstructionApi")
+@Tag(name = "ConstructionApi")
 @RolesAllowed("ROLE_USER")
 @RestController
-@RequestMapping("/" + PRIVATE_BASE_ENDPOINT + "/" + ConstructionApi.ENDPOINT + "/")
+@RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ConstructionApi.ENDPOINT + "/")
 public class ConstructionApi {
 
     @Nonnull
@@ -71,11 +68,12 @@ public class ConstructionApi {
     }
 
     @GetMapping(value = CONSTRUCTABLE + "/{idPlanet}")
-    @ApiOperation(value = "Get all constructions for a planets which could be build.", nickname = "getPossibleConstructionsByPlanet")
-    @Operation(
+    @Operation(summary = "Get all constructions for a planets which could be build.", operationId = "getPossibleConstructionsByPlanet",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ConstructionList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = de.yuga.spacebattle.rest.dto.constructables.buildings.Construction.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
@@ -94,21 +92,21 @@ public class ConstructionApi {
                 .map(e -> new de.yuga.spacebattle.rest.dto.constructables.buildings.Construction(e.getKey(), e.getValue()))
                 .collect(Collectors.toSet());
 
-        return ResponseEntity.ok(new ConstructionList(possibleConstructions));
+        return ResponseEntity.ok(possibleConstructions);
     }
 
     @GetMapping(value = "{idPlanet}")
-    @ApiOperation(value = "Get all constructions on a planets.", nickname = "getConstructionsByPlanet")
-    @Operation(
+    @Operation(summary = "Get all constructions on a planets.", operationId = "getConstructionsByPlanet",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ConstructionList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = de.yuga.spacebattle.rest.dto.constructables.buildings.Construction.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getConstructions(@PathVariable("idPlanet") final int idPlanet) {
-        final List<Construction> all = constructionService.findAllConstructionsOnPlanet(idPlanet);
-        return ResponseEntity.ok(new ConstructionList(all));
+        return ResponseEntity.ok(constructionService.findAllConstructionsOnPlanet(idPlanet).stream().map(de.yuga.spacebattle.rest.dto.constructables.buildings.Construction::new).collect(Collectors.toList()));
     }
 }

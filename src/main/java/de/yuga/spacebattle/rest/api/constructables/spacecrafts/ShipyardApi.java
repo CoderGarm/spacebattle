@@ -9,19 +9,17 @@ import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassC
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
-import de.yuga.spacebattle.rest.dto.enums.EHullTypesList;
-import de.yuga.spacebattle.rest.dto.enums.EModuleTypeList;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass;
-import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClassList;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,10 +36,10 @@ import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 
-@Api(tags = "ShipyardApi")
+@Tag(name = "ShipyardApi")
 @RolesAllowed("ROLE_USER")
 @RestController
-@RequestMapping("/" + PRIVATE_BASE_ENDPOINT + "/" + ShipyardApi.ENDPOINT + "/")
+@RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ShipyardApi.ENDPOINT + "/")
 public class ShipyardApi {
 
     @Nonnull
@@ -83,11 +81,12 @@ public class ShipyardApi {
     }
 
     @GetMapping(value = SHIP_CLASS_FOR_USER_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Get all active ship classes for the owner .", nickname = "getShipClassesByUser")
-    @Operation(
+    @Operation(summary = "Get all active ship classes for the owner .", operationId = "getShipClassesByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ShipClassList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = ShipClass.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
@@ -98,12 +97,12 @@ public class ShipyardApi {
             throw new NotifyWebUserException("There should be a questioned user.");
         }
         final List<de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass> allLatestByOwner = shipClassService.findAllLatestByOwner(owner);
-        return ResponseEntity.ok(new ShipClassList(allLatestByOwner));
+        final List<ShipClass> shipClasses = allLatestByOwner.stream().map(ShipClass::new).collect(Collectors.toList());
+        return ResponseEntity.ok(shipClasses);
     }
 
     @PostMapping(value = SHIP_CLASS_FOR_USER_ENDPOINT + "/{idUser}")
-    @ApiOperation(value = "Get all active ship classes for the owner .", nickname = "setShipClass")
-    @Operation(
+    @Operation(summary = "Get all active ship classes for the owner .", operationId = "setShipClass",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ShipClass.class))),
@@ -125,53 +124,51 @@ public class ShipyardApi {
     }
 
     @DeleteMapping(value = SHIP_CLASS_FOR_USER_ENDPOINT + "/{idUser}/{idShipClass}")
-    @ApiOperation(value = "Marks a ship classes as deleted.", nickname = "deleteShipClass")
-    @Operation(
+    @Operation(summary = "Marks a ship classes as deleted.", operationId = "deleteShipClass",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful"),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> deleteShipClass(@PathVariable("idUser") final int idUser, @PathVariable("idShipClass") final int idShipClass) {
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteShipClass(@PathVariable("idUser") final int idUser, @PathVariable("idShipClass") final int idShipClass) {
 
         shipClassService.delete(idUser, idShipClass);
-        return ResponseEntity.ok().build();
     }
 
     @GetMapping(value = E_HULL_TYPE)
-    @ApiOperation(value = "Get all EHullType.", nickname = "getEHullTypes")
-    @Operation(
+    @Operation(summary = "Get all EHullType.", operationId = "getEHullTypes",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = EHullTypesList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = de.yuga.spacebattle.rest.dto.enums.EHullType.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getEHullTypes() {
-        final List<EHullType> eResourceTypes = Arrays.stream(EHullType.values()).collect(Collectors.toList());
-        return ResponseEntity.ok(new EHullTypesList(eResourceTypes));
+        return ResponseEntity.ok(Arrays.stream(EHullType.values()).map(de.yuga.spacebattle.rest.dto.enums.EHullType::new).collect(Collectors.toList()));
     }
 
     @GetMapping(value = E_MODULE_TYPE)
-    @ApiOperation(value = "Get all EModuleType.", nickname = "getEModuleTypes")
-    @Operation(
+    @Operation(summary = "Get all EModuleType.", operationId = "getEModuleTypes",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = EModuleTypeList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = de.yuga.spacebattle.rest.dto.enums.EModuleType.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getEModuleTypes() {
-        final List<EModuleType> eResourceTypes = Arrays.stream(EModuleType.values()).collect(Collectors.toList());
-        return ResponseEntity.ok(new EModuleTypeList(eResourceTypes));
+        return ResponseEntity.ok(Arrays.stream(EModuleType.values()).map(de.yuga.spacebattle.rest.dto.enums.EModuleType::new).collect(Collectors.toList()));
     }
 
     @GetMapping(value = SHIP_CLASS_FOR_USER_ENDPOINT + "/{idUser}/{className}")
-    @ApiOperation(value = "Checks if the name for a ship class is free for new classes only.", nickname = "checkClassName")
-    @Operation(
+    @Operation(summary = "Checks if the name for a ship class is free for new classes only.", operationId = "checkClassName",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),

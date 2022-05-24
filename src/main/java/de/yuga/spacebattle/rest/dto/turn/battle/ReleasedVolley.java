@@ -4,39 +4,40 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
+@Schema(description = ".")
 public class ReleasedVolley {
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The round and phase information.")
+    @Schema(required = true, description = "The round and phase information.")
     private CombatRoundKey combatRoundKey;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The fleet which acts.")
+    @Schema(required = true, description = "The fleet which acts.")
     private Fleet actor;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The fleet which is targeted.")
+    @Schema(required = true, description = "The fleet which is targeted.")
     private Fleet target;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The UUID of the damage dealer.")
+    @Schema(required = true, description = "The UUID of the damage dealer.")
     private UUID damageDealer;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The type of the damage dealer.")
+    @Schema(required = true, description = "The type of the damage dealer.")
     private EWeaponType weaponType;
 
-    @ApiModelProperty(required = true, value = "The amount of missiles in this salvo.")
+    @Schema(required = true, description = "The amount of missiles in this salvo.")
     private int amountOfShots;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The distance of this shot.")
+    @Schema(required = true, description = "The distance of this shot.")
     private Distance initialDistance;
 
 

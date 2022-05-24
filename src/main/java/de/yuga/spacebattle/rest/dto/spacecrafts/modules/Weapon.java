@@ -5,34 +5,35 @@ import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics.BaseModule;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
+@Schema(description = ".")
 public class Weapon {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The basic values of this module.")
+    @Schema(required = true, description = "The basic values of this module.")
     private BaseModule baseModule;
 
     /**
      * Defines the range of this weapon.
      */
     @Nonnull
-    @ApiModelProperty(required = true, value = "The effective range of this weapon.")
+    @Schema(required = true, description = "The effective range of this weapon.")
     private Distance effectiveRange;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The way how the damage will be projected.")
+    @Schema(required = true, description = "The way how the damage will be projected.")
     private EWeaponType weaponType;
 
     /**
      * Holds the information about the alignment ability.
      */
     @Nonnull
-    @ApiModelProperty(required = true, value = "The possible mount points of this weapon.")
+    @Schema(required = true, description = "The possible mount points of this weapon.")
     private List<EWeaponAlignment> alignmentTypes;
 
     public Weapon() {

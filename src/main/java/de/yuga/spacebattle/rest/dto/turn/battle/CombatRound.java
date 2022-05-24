@@ -1,16 +1,17 @@
 package de.yuga.spacebattle.rest.dto.turn.battle;
 
 import com.google.common.base.Preconditions;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
+@Schema(description = ".")
 public class CombatRound {
 
     /**
      * The battle round number.
      */
-    @ApiModelProperty(required = true, value = "The combat round number.")
+    @Schema(required = true, description = "The combat round number.")
     private int no;
 
     public CombatRound(@Nonnull final de.yuga.spacebattle.backend.combat.round.CombatRound combatRound) {

@@ -1,33 +1,34 @@
 package de.yuga.spacebattle.rest.dto.orbitals;
 
 import com.google.common.base.Preconditions;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Schema(description = ".")
 public class StarSystem {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The ID of this star system.")
+    @Schema(required = true, description = "The ID of this star system.")
     private Integer idStarSystem;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The name of this star system.")
+    @Schema(required = true, description = "The name of this star system.")
     private String name;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The orbit of this star system.")
+    @Schema(required = true, description = "The orbit of this star system.")
     private Orbit orbit;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The stellar class of the star of this system.")
+    @Schema(required = true, description = "The stellar class of the star of this system.")
     private de.yuga.spacebattle.rest.dto.enums.EStarClassType starClassType;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The bunch of planets as part of the system.")
+    @Schema(required = true, description = "The bunch of planets as part of the system.")
     private final List<Planet> planets = new ArrayList<>();
 
     public StarSystem() {

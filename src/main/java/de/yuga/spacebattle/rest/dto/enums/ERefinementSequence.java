@@ -3,7 +3,7 @@ package de.yuga.spacebattle.rest.dto.enums;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.enums.EProductionCategory;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
@@ -13,24 +13,25 @@ import javax.annotation.Nonnull;
  * <b>Attention:</b> It is currently not planned to do something else than education.<br>
  * Don't wonder is this is the only stuff here.
  */
+@Schema(description = ".")
 public class ERefinementSequence {
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The refinement sequence type name.")
+    @Schema(required = true, description = "The refinement sequence type name.")
     private final String typeName;
 
     /**
      * What goes in.
      */
     @Nonnull
-    @ApiModelProperty(required = true, value = "The educt or start of the sequence.")
+    @Schema(required = true, description = "The educt or start of the sequence.")
     private final EEducationType educt;
 
     /**
      * What goes out.
      */
     @Nonnull
-    @ApiModelProperty(required = true, value = "The product or result of the sequence.")
+    @Schema(required = true, description = "The product or result of the sequence.")
     private final EEducationType product;
 
     public ERefinementSequence() {

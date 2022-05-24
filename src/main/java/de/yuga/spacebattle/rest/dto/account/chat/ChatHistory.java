@@ -3,7 +3,7 @@ package de.yuga.spacebattle.rest.dto.account.chat;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.MessageThread;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -11,22 +11,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Schema(description = ".")
 public class ChatHistory {
 
     @Nullable
-    @ApiModelProperty("The id of this chat history")
+    @Schema(description = "The id of this chat history")
     private Integer idChatHistory;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "One of the involved users.")
+    @Schema(required = true, description = "One of the involved users.")
     private UserJson userOne;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The other involved user.")
+    @Schema(required = true, description = "The other involved user.")
     private UserJson userTwo;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The amount of messages.")
+    @Schema(required = true, description = "The amount of messages.")
     private final List<ChatMessage> messages = new ArrayList<>();
 
     public ChatHistory() {

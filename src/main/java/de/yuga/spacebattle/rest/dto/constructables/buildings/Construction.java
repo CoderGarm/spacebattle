@@ -2,25 +2,26 @@ package de.yuga.spacebattle.rest.dto.constructables.buildings;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.buildings.Building;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+@Schema(description = ".")
 public class Construction {
 
     /**
      * If this is null, the information about the entity must be fetched.
      */
     @Nullable
-    @ApiModelProperty(required = true, value = "The ID of this construction.")
+    @Schema(required = true, description = "The ID of this construction.")
     private Integer idConstruction;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The building which is the base of this construction.")
+    @Schema(required = true, description = "The building which is the base of this construction.")
     private Building building;
 
-    @ApiModelProperty(required = true, value = "The level of this construction.")
+    @Schema(required = true, description = "The level of this construction.")
     private int level;
 
     public Construction() {

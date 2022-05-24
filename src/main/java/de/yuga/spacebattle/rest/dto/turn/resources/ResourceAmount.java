@@ -3,10 +3,11 @@ package de.yuga.spacebattle.rest.dto.turn.resources;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.enums.EResourceType;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
+@Schema(description = ".")
 public class ResourceAmount {
 
     @Nonnull
@@ -14,10 +15,10 @@ public class ResourceAmount {
     private final de.yuga.spacebattle.backend.enums.EResourceType realResourceType;
 
     @Nonnull
-    @ApiModelProperty(required = true, value = "The resource type.")
+    @Schema(required = true, description = "The resource type.")
     private final EResourceType resourceType;
 
-    @ApiModelProperty(required = true, value = "The amount for the resource.")
+    @Schema(required = true, description = "The amount for the resource.")
     private final long amount;
 
     public ResourceAmount(@Nonnull final de.yuga.spacebattle.backend.enums.EResourceType realResourceType, final long amount) {

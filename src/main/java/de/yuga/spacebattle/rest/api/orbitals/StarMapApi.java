@@ -6,13 +6,12 @@ import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.orbitals.StarSystem;
-import de.yuga.spacebattle.rest.dto.orbitals.StarSystemList;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,13 +23,14 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 
-@Api(tags = "StarMapApi")
+@Tag(name = "StarMapApi")
 @RolesAllowed("ROLE_USER")
 @RestController
-@RequestMapping("/" + PRIVATE_BASE_ENDPOINT + "/" + StarMapApi.ENDPOINT + "/")
+@RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + StarMapApi.ENDPOINT + "/")
 public class StarMapApi {
 
     @Nonnull
@@ -54,23 +54,24 @@ public class StarMapApi {
     }
 
     @GetMapping(STAR_SYSTEMS_ENDPOINT)
-    @ApiOperation(value = "Get all star systems", nickname = "getStarSystems")
-    @Operation(
+    @Operation(summary = "Get all star systems", operationId = "getStarSystems",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = StarSystemList.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = StarSystem.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getStarSystems() {
         final List<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> all = starSystemService.findAll();
-        return ResponseEntity.ok(new StarSystemList(all));
+        final List<StarSystem> starSystems = all.stream().map(StarSystem::new).collect(Collectors.toList());
+        return ResponseEntity.ok(starSystems);
     }
 
     @GetMapping(STAR_SYSTEMS_ENDPOINT + "/{idStarSystem}")
-    @ApiOperation(value = "Get all planets of this system", nickname = "getStarSystem")
-    @Operation(
+    @Operation(summary = "Get all planets of this system", operationId = "getStarSystem",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = StarSystem.class))),

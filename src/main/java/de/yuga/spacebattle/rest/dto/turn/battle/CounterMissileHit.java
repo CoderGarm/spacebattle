@@ -3,38 +3,39 @@ package de.yuga.spacebattle.rest.dto.turn.battle;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ammunition.Missile;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
+@Schema(description = ".")
 public class CounterMissileHit {
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The round and phase information.")
+    @Schema(required = true, description = "The round and phase information.")
     private de.yuga.spacebattle.rest.dto.turn.battle.CombatRoundKey combatRoundKey;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The fleet which acts.")
+    @Schema(required = true, description = "The fleet which acts.")
     private de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet actor;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The fleet which is targeted.")
+    @Schema(required = true, description = "The fleet which is targeted.")
     private de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet target;
 
-    @ApiModelProperty(required = true, value = "The leftover amount of missiles of the given type in the salvo.")
+    @Schema(required = true, description = "The leftover amount of missiles of the given type in the salvo.")
     private int remainingMissiles;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The UUID of the attacked missile salvo.")
+    @Schema(required = true, description = "The UUID of the attacked missile salvo.")
     private UUID attackedMissileSalvo;
 
-    @ApiModelProperty(required = true, value = "The amount of destroyed missiles.")
+    @Schema(required = true, description = "The amount of destroyed missiles.")
     private int destroyedMissiles;
 
     @Nullable
-    @ApiModelProperty(required = true, value = "The attacked missile type as part of the salvo.")
+    @Schema(required = true, description = "The attacked missile type as part of the salvo.")
     private de.yuga.spacebattle.rest.dto.spacecrafts.ammunition.Missile missile;
 
     public CounterMissileHit(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.CounterMissileHit input) {

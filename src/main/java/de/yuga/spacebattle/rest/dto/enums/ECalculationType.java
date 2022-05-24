@@ -1,17 +1,16 @@
 package de.yuga.spacebattle.rest.dto.enums;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 
 /**
  * Defines if a value in a calculation will be in- or decreased.
  */
-@ApiModel(parent = HasTypeName.class)
+@Schema(description = ".")
 public class ECalculationType extends HasTypeName {
 
-    @ApiModelProperty(required = true, value = "The calculation type multiplier - to add or subtract with 1 or -1.")
+    @Schema(required = true, description = "The calculation type multiplier - to add or subtract with 1 or -1.")
     private final int multiplier;
 
     public ECalculationType() {
