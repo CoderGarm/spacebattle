@@ -288,6 +288,7 @@ public class ShipClassCreationService {
      * @param shipyardConstructionOrder the order
      * @return the order costs
      */
+    @Nonnull
     public ResourceDeposit getCosts(@Nonnull final List<ShipyardConstructionSelection> shipyardConstructionOrder) {
         Preconditions.checkNotNull(shipyardConstructionOrder, "shipyardConstructionOrder shouldn't be null!");
 
@@ -321,6 +322,7 @@ public class ShipClassCreationService {
      * @param idUser    the owner
      * @return the costs
      */
+    @Nonnull
     public ResourceDeposit getCosts(@Nonnull final de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass shipClass, final int idUser) {
         Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
 

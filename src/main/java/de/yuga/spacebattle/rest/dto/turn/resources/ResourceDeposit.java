@@ -20,12 +20,9 @@ public class ResourceDeposit {
      * <b>Attention:</b> The {@link EResourceType#POPULATION} is something special.
      */
     @Nonnull
-    @Schema(required = true, description = "The amount of resources by their type.")
+    @Schema(required = true, description = "The amount of stored resources by their type.")
     private final List<ResourceAmount> resources;
 
-    /**
-     * Everything about the population.
-     */
     @Nonnull
     @Schema(required = true, description = "The amount of human resources by their type.")
     private final List<HumanResourceAmount> humanResources;

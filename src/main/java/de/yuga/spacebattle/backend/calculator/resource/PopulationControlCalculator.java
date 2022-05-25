@@ -224,7 +224,7 @@ public class PopulationControlCalculator {
      * @param constructionsByResource the constructions to map
      * @return the mapped constructions
      */
-    private static Map<EProductionCategory, List<Construction>> getConstructionsMappedByProductionCategory(Set<Construction> constructionsByResource) {
+    public static Map<EProductionCategory, List<Construction>> getConstructionsMappedByProductionCategory(Set<Construction> constructionsByResource) {
         return constructionsByResource.stream()
                 .collect(Collectors.groupingBy(c -> c.getBuilding().getProductionType().getProductionCategory(),
                         Collectors.mapping(Function.identity(), Collectors.toList())));

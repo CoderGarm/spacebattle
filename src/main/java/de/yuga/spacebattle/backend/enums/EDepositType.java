@@ -14,13 +14,17 @@ public enum EDepositType {
     /**
      * These defining the stockpile of whatever.
      */
-    DEPOSITS(ECalculationType.ADD),
+    DEPOSITS(ECalculationType.NONE),
 
     /**
      * These defining the costs of whatever.
      */
     COSTS(ECalculationType.SUBTRACT),
-    ;
+
+    /**
+     * The income per tick of whatever.
+     */
+    INCOME(ECalculationType.ADD);;
 
     @Nonnull
     private final ECalculationType calculationType;

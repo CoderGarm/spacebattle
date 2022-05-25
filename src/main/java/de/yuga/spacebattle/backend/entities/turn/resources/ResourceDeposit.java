@@ -13,10 +13,8 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.enums.EDepositType.COSTS;
 import static de.yuga.spacebattle.backend.enums.EResourceType.POPULATION;
@@ -217,6 +215,16 @@ public class ResourceDeposit extends AbstractEntityKey {
         this.resources.put(resourceType, value);
     }
 
+    public Set<EResourceType> getForfeitableResource() {
+        return resources.entrySet().stream()
+                .filter(e -> {
+                    final EResourceType key = e.getKey();
+                    final Long value = e.getValue();
+                    return key.getCollectableType() == ECollectableType.FORFEITABLE && value != null && value > 0;
+                })
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+    }
 
     /**
      * Sets an absolute value to the resource type. There is no validation inside so it can be below zero.<br>

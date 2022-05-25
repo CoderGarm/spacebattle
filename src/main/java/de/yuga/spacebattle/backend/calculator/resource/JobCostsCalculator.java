@@ -1,19 +1,18 @@
 package de.yuga.spacebattle.backend.calculator.resource;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.Constructable;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
-import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
-import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Calculator for the job relates costs stuff.
@@ -56,7 +55,8 @@ public class JobCostsCalculator {
     }
 
     /**
-     * Calculates the tick amount which must be worked on this constructable.
+     * Calculates the tick amount which must be worked on this constructable.<br>
+     * Takes all forfeit resources into account.
      *
      * @param facility      the facility which will produce it
      * @param constructable what will be produced
@@ -66,12 +66,19 @@ public class JobCostsCalculator {
         Preconditions.checkNotNull(facility, "facility shouldn't be null!");
         Preconditions.checkNotNull(constructable, "constructable shouldn't be null!");
 
-        final long resourceAmountByType = constructable.getJobCosts().getResourceAmountByType(constructable.getResourceType());
-        final Planet planet = facility.getPlanet();
-        final Long tickOutputForResourceType = ResourceControlCalculator.getTickOutput(planet, constructable.getResourceType());
-        if (tickOutputForResourceType == null) {
-            throw new NotifyWebUserException("Talk to the admin, your building was probably destroyed!");
-        }
-        return new BigDecimal(resourceAmountByType).divide(new BigDecimal(tickOutputForResourceType), 0, RoundingMode.UP).intValue();
+        final ResourceDeposit costs = constructable.getJobCosts();
+        final AtomicInteger ticksNeeded = new AtomicInteger(0);
+        final ResourceDeposit ticklyIncome = facility.getPlanet().getTicklyIncome();
+
+        costs.getForfeitableResource().forEach(r -> {
+            final long cost = costs.getResourceAmountByType(r);
+            final long income = ticklyIncome.getResourceAmountByType(r);
+
+            final int ticks = BigDecimal.valueOf(cost).divide(BigDecimal.valueOf(income), DistanceCalculator.MC).intValue();
+            if (ticksNeeded.get() < ticks) {
+                ticksNeeded.set(ticks);
+            }
+        });
+        return ticksNeeded.get();
     }
 }

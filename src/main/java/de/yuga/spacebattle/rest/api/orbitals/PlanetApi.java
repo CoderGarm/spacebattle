@@ -119,7 +119,7 @@ public class PlanetApi {
     }
 
     @GetMapping(value = GROUND_BUILD_IT_ENDPOINT + "/{idPlanet}/{idBuilding}")
-    @Operation(summary = "Starts a construction on this planet.", operationId = "buildBuilding",
+    @Operation(summary = "Starts a construction on this planet.", operationId = "buildConstruction",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successfully started",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),

@@ -22,7 +22,10 @@ import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @NamedQueries({
@@ -225,5 +228,28 @@ public class Planet extends AbstractEntityKey {
         return getConstructionByResource(EResourceType.POPULATION).stream()
                 .filter(c -> EProductionCategory.CAPACITY == c.getBuilding().getProductionType().getProductionCategory())
                 .map(TickOutputCalculator::getTickOutputByLevelForPopulation).reduce(BigDecimal.ZERO, BigDecimal::add).longValue();
+    }
+
+    @Nonnull
+    public ResourceDeposit getTicklyIncome() {
+
+        final ResourceDeposit income = new ResourceDeposit(EDepositType.INCOME);
+        final Map<EResourceType, List<Construction>> resourceConstructionsByType = getConstructions().stream()
+                .collect(Collectors.groupingBy(c -> c.getBuilding().getProductionTarget(),
+                        Collectors.mapping(Function.identity(), Collectors.toList())));
+
+        // pop must be present
+        resourceConstructionsByType.remove(EResourceType.POPULATION);
+
+        resourceConstructionsByType.forEach((eResourceType, constructions) -> {
+            final BigDecimal ticklyIncome = constructions.stream().map(c ->
+                    BigDecimal.valueOf(c.getBuilding().getBaseValue())
+                            .multiply(c.getBuilding().getIncreasingFactorPerLevel())
+                            .multiply(BigDecimal.valueOf(c.getLevel()))
+            ).reduce(BigDecimal.ZERO, BigDecimal::add);
+            income.setAbsoluteResourceValue(eResourceType, ticklyIncome.longValue());
+        });
+
+        return income;
     }
 }

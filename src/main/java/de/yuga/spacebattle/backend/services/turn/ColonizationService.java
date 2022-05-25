@@ -194,6 +194,7 @@ public class ColonizationService {
         Preconditions.checkNotNull(starSystem, "starSystem shouldn't be null!");
 
         final ResourceAmount costs = ColonizationCostCalculator.calculateInformationCost(starSystem);
+        final User withKnownStarSystems = userService.getWithKnownStarSystems(user);
         final Planet mainPlanet = planetService.findMainPlanet(user);
         final ResourceDeposit resourceDeposit = mainPlanet.getResourceDeposit();
 
@@ -203,8 +204,9 @@ public class ColonizationService {
         }
 
         resourceDeposit.updateResource(costs.getRealResourceType(), costs.getAmount());
-        user.addKnownStarSystems(starSystem);
-        userService.save(user);
+        assert withKnownStarSystems != null;
+        withKnownStarSystems.addKnownStarSystems(starSystem);
+        userService.save(withKnownStarSystems);
     }
 
     /**

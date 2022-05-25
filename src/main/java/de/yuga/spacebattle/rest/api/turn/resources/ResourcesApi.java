@@ -46,6 +46,7 @@ public class ResourcesApi {
     private static final String RESOURCE_TYPES_ENDPOINT = "types";
     private static final String MINING_FACTORS_ENDPOINT = "miningFactors";
     private static final String RESOURCE_DEPOSIT_ENDPOINT = "resourceDeposit";
+    private static final String INCOME_ENDPOINT = "income";
     private static final String COSTS_ENDPOINT = "costs";
     private static final String SHIPYARD_ORDER_COSTS_ENDPOINT = "costsShipyard";
     private static final String SHIP_CLASS_COSTS_ENDPOINT = "costsShipClass";
@@ -118,8 +119,7 @@ public class ResourcesApi {
 
         final Planet planet = planetService.find(idPlanet);
         PreconditionWebHelper.checkNotNull(planet, "planet shouldn't be null!");
-        final de.yuga.spacebattle.backend.entities.turn.resources.MiningFactors miningFactors = planet.getMiningFactors();
-        return ResponseEntity.ok(new MiningFactors(miningFactors));
+        return ResponseEntity.ok(new MiningFactors(planet.getMiningFactors()));
     }
 
 
@@ -136,8 +136,23 @@ public class ResourcesApi {
 
         final Planet planet = planetService.find(idPlanet);
         PreconditionWebHelper.checkNotNull(planet, "planet shouldn't be null!");
-        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit resourceDeposit = planet.getResourceDeposit();
-        return ResponseEntity.ok(new ResourceDeposit(resourceDeposit));
+        return ResponseEntity.ok(new ResourceDeposit(planet.getResourceDeposit()));
+    }
+
+    @GetMapping(value = INCOME_ENDPOINT + "/{idPlanet}")
+    @Operation(summary = "Get all incomes by EResourceTypes.", operationId = "getPlanetaryIncome",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceDeposit.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getPlanetaryIncome(@PathVariable("idPlanet") final int idPlanet) {
+
+        final Planet planet = planetService.find(idPlanet);
+        PreconditionWebHelper.checkNotNull(planet, "planet shouldn't be null!");
+        return ResponseEntity.ok(new ResourceDeposit(planet.getTicklyIncome()));
     }
 
     @PostMapping(value = COSTS_ENDPOINT)
@@ -188,12 +203,7 @@ public class ResourcesApi {
     public ResponseEntity<?> getShipyardOrderCosts(@RequestBody @Nonnull final List<ShipyardConstructionSelection> shipyardConstructionOrder) {
         PreconditionWebHelper.checkNotNull(shipyardConstructionOrder, "Maybe there should be something like a request?!");
 
-        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit costs = shipClassCreationService.getCosts(shipyardConstructionOrder);
-        if (costs != null) {
-            return ResponseEntity.ok(new ResourceDeposit(costs));
-        } else {
-            return ResponseEntity.ok().build();
-        }
+        return ResponseEntity.ok(new ResourceDeposit(shipClassCreationService.getCosts(shipyardConstructionOrder)));
     }
 
     @PostMapping(value = SHIP_CLASS_COSTS_ENDPOINT + "/{idUser}")
@@ -215,11 +225,6 @@ public class ResourcesApi {
     public ResponseEntity<?> getShipClassCosts(@RequestBody @Nonnull final ShipClass shipClass, @PathVariable("idUser") final int idUser) {
         PreconditionWebHelper.checkNotNull(shipClass, "Maybe there should be something like a request?!");
 
-        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit costs = shipClassCreationService.getCosts(shipClass, idUser);
-        if (costs != null) {
-            return ResponseEntity.ok(new ResourceDeposit(costs));
-        } else {
-            return ResponseEntity.ok().build();
-        }
+        return ResponseEntity.ok(new ResourceDeposit(shipClassCreationService.getCosts(shipClass, idUser)));
     }
 }
