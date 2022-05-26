@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 public class WebUserDetails implements UserDetails {
 
@@ -28,8 +28,8 @@ public class WebUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // todo create valid user roles
-        return Set.of(new WebUserRole(EWebUserRole.USER));
+        final EWebUserRole userRole = user.getUserRole();
+        return userRole.getAllowedRoles().stream().map(WebUserRole::new).collect(Collectors.toSet());
     }
 
     @Override

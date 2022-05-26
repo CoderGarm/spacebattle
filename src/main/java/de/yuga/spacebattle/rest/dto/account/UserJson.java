@@ -3,7 +3,6 @@ package de.yuga.spacebattle.rest.dto.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.SpacebattleApplication;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -33,7 +32,7 @@ public class UserJson {
 
     @Nonnull
     @Schema(required = true, description = "The user's role.")
-    private final String role = EWebUserRole.USER.getName();
+    private String role;
 
     public UserJson() {
     }
@@ -44,6 +43,7 @@ public class UserJson {
         this.idUser = user.getId();
         this.username = user.getUsername();
         this.idAlliance = user.getAlliance() != null ? user.getAlliance().getId() : null;
+        this.role = user.getUserRole().getName();
     }
 
     @Nullable

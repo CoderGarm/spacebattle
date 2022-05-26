@@ -22,13 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
 
-import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
+import static de.yuga.spacebattle.rest.api.EndpointDefinition.ADMIN_BASE_ENDPOINT;
 import static de.yuga.spacebattle.rest.api.turn.AdminApi.ENDPOINT;
 
 @Tag(name = "AdminApi")
-@RolesAllowed("ROLE_USER") // todo set admin role
+@RolesAllowed("ADMIN")
 @RestController
-@RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ENDPOINT + "/")
+@RequestMapping(value = "/" + ADMIN_BASE_ENDPOINT + "/" + ENDPOINT + "/")
 public class AdminApi {
 
     @Nonnull

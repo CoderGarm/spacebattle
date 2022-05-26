@@ -227,40 +227,43 @@
     ) engine=InnoDB;
 
     create table miningFactors (
-       idMiningFactors integer not null auto_increment,
-        primary key (idMiningFactors)
+                                   idMiningFactors integer not null auto_increment,
+                                   primary key (idMiningFactors)
     ) engine=InnoDB;
 
-    create table miningFactorsComposition (
-       idMiningFactors integer not null,
-        amount decimal(19, 0),
-        resourceType varchar(50) not null,
+    create table miningFactorsComposition
+    (
+        idMiningFactors integer     not null,
+        amount          decimal(19, 0),
+        resourceType    varchar(50) not null,
         primary key (idMiningFactors, resourceType)
     ) engine=InnoDB;
 
-    create table missile(
-                            idMissile          integer      not null auto_increment,
-                            elokaResistance    integer      not null,
-                            motorAmount        integer      not null,
-                            motorCapacity      integer      not null,
-                            typeName           varchar(255) not null,
-                            warheadCapacity    integer      not null,
-                            idAmmunitionModule integer      not null,
-                            idCosts            integer      not null,
-                            idMissileMotor     integer      not null,
-                            idResearch         integer      not null,
-                            idWarhead          integer,
-                            primary key (idMissile)
+    create table missile
+    (
+        idMissile          integer      not null auto_increment,
+        elokaResistance    integer      not null,
+        motorAmount        integer      not null,
+        motorCapacity      integer      not null,
+        typeName           varchar(255) not null,
+        warheadCapacity    integer      not null,
+        idAmmunitionModule integer      not null,
+        idCosts            integer      not null,
+        idMissileMotor     integer      not null,
+        idResearch         integer      not null,
+        idWarhead          integer,
+        primary key (idMissile)
     ) engine=InnoDB;
 
-    create table missileMotor (
-       idMissileMotor integer not null auto_increment,
-        acceleration varchar(255) not null,
-        endurance integer not null,
-        maneuverability integer not null,
-        typeName varchar(255) not null,
-        useCapacity integer not null,
-        idCosts integer not null,
+    create table missileMotor
+    (
+        idMissileMotor  integer      not null auto_increment,
+        acceleration    varchar(255) not null,
+        endurance       integer      not null,
+        maneuverability integer      not null,
+        typeName        varchar(255) not null,
+        useCapacity     integer      not null,
+        idCosts         integer      not null,
         primary key (idMissileMotor)
     ) engine=InnoDB;
 
@@ -499,11 +502,13 @@
         primary key (idUser, idResearch)
     ) engine=InnoDB;
 
-    create table user (
-       idUser integer not null auto_increment,
-        email varchar(50) not null,
-        password varchar(255) not null,
-        username varchar(30) not null,
+    create table user
+    (
+        idUser     integer      not null auto_increment,
+        email      varchar(50)  not null,
+        password   varchar(255) not null,
+        userRole   varchar(255),
+        username   varchar(30)  not null,
         idAlliance integer,
         primary key (idUser)
     ) engine=InnoDB;
@@ -864,15 +869,15 @@
        foreign key (idUserOne) 
        references user (idUser);
 
-    alter table messageThread 
-       add constraint FKlcfh5cw1nqv8howd22b9emwbf 
-       foreign key (idUserTwo) 
-       references user (idUser);
+    alter table messageThread
+        add constraint FKlcfh5cw1nqv8howd22b9emwbf
+            foreign key (idUserTwo)
+                references user (idUser);
 
-    alter table miningFactorsComposition 
-       add constraint FK7pw467msglkrl51uo8uu6v6l6 
-       foreign key (idMiningFactors) 
-       references miningFactors (idMiningFactors);
+    alter table miningFactorsComposition
+        add constraint FK7pw467msglkrl51uo8uu6v6l6
+            foreign key (idMiningFactors)
+                references miningFactors (idMiningFactors);
 
     alter table missile
         add constraint FKdhk8trxq7c36hid883mj4p7us
@@ -899,15 +904,15 @@
             foreign key (idWarhead)
                 references warhead (idWarhead);
 
-    alter table missileMotor 
-       add constraint FK6q2owmplw15x287lnle7mdeae 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
+    alter table missileMotor
+        add constraint FK6q2owmplw15x287lnle7mdeae
+            foreign key (idCosts)
+                references resourceDeposit (idResourceDeposit);
 
-    alter table missileMovement 
-       add constraint FK31pwab7jyqugac58td2yh50ju 
-       foreign key (idActor) 
-       references fleet (idFleet);
+    alter table missileMovement
+        add constraint FK31pwab7jyqugac58td2yh50ju
+            foreign key (idActor)
+                references fleet (idFleet);
 
     alter table missileMovement 
        add constraint FKl9frhygmvi1n5d3sjchn19wrx 

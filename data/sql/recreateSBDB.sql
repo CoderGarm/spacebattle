@@ -199,16 +199,16 @@
        drop 
        foreign key FK3o0d6nae9i5n6v33ake9fyvs8;
 
-    alter table messageThread 
-       drop 
-       foreign key FK1d5qqscr6uidy4lithqwkfcsb;
+    alter table messageThread
+    drop
+    foreign key FK1d5qqscr6uidy4lithqwkfcsb;
 
-    alter table messageThread 
-       drop 
-       foreign key FKlcfh5cw1nqv8howd22b9emwbf;
+    alter table messageThread
+    drop
+    foreign key FKlcfh5cw1nqv8howd22b9emwbf;
 
-    alter table miningFactorsComposition 
-       drop
+    alter table miningFactorsComposition
+    drop
     foreign key FK7pw467msglkrl51uo8uu6v6l6;
 
     alter table missile
@@ -231,13 +231,13 @@
     drop
     foreign key FKhgp8bhvbmvaefgws7b1t0km7k;
 
-    alter table missileMotor 
-       drop 
-       foreign key FK6q2owmplw15x287lnle7mdeae;
+    alter table missileMotor
+    drop
+    foreign key FK6q2owmplw15x287lnle7mdeae;
 
-    alter table missileMovement 
-       drop 
-       foreign key FK31pwab7jyqugac58td2yh50ju;
+    alter table missileMovement
+    drop
+    foreign key FK31pwab7jyqugac58td2yh50ju;
 
     alter table missileMovement 
        drop 
@@ -809,14 +809,15 @@
     ) engine=InnoDB;
 
     create table miningFactors (
-       idMiningFactors integer not null auto_increment,
-        primary key (idMiningFactors)
+                                   idMiningFactors integer not null auto_increment,
+                                   primary key (idMiningFactors)
     ) engine=InnoDB;
 
-    create table miningFactorsComposition (
-       idMiningFactors integer not null,
-        amount decimal(19, 0),
-        resourceType varchar(50) not null,
+    create table miningFactorsComposition
+    (
+        idMiningFactors integer     not null,
+        amount          decimal(19, 0),
+        resourceType    varchar(50) not null,
         primary key (idMiningFactors, resourceType)
     ) engine=InnoDB;
 
@@ -836,13 +837,14 @@
         primary key (idMissile)
     ) engine=InnoDB;
 
-    create table missileMotor (
-       idMissileMotor integer not null auto_increment,
-        acceleration varchar(255) not null,
-        endurance integer not null,
-        maneuverability integer not null,
-        typeName varchar(255) not null,
-        useCapacity integer not null,
+    create table missileMotor
+    (
+        idMissileMotor  integer      not null auto_increment,
+        acceleration    varchar(255) not null,
+        endurance       integer      not null,
+        maneuverability integer      not null,
+        typeName        varchar(255) not null,
+        useCapacity     integer      not null,
         idCosts integer not null,
         primary key (idMissileMotor)
     ) engine=InnoDB;
@@ -1082,11 +1084,13 @@
         primary key (idUser, idResearch)
     ) engine=InnoDB;
 
-    create table user (
-       idUser integer not null auto_increment,
-        email varchar(50) not null,
-        password varchar(255) not null,
-        username varchar(30) not null,
+    create table user
+    (
+        idUser     integer      not null auto_increment,
+        email      varchar(50)  not null,
+        password   varchar(255) not null,
+        userRole   varchar(255),
+        username   varchar(30)  not null,
         idAlliance integer,
         primary key (idUser)
     ) engine=InnoDB;
@@ -1447,15 +1451,15 @@
        foreign key (idUserOne) 
        references user (idUser);
 
-    alter table messageThread 
-       add constraint FKlcfh5cw1nqv8howd22b9emwbf 
-       foreign key (idUserTwo) 
-       references user (idUser);
+    alter table messageThread
+        add constraint FKlcfh5cw1nqv8howd22b9emwbf
+            foreign key (idUserTwo)
+                references user (idUser);
 
-    alter table miningFactorsComposition 
-       add constraint FK7pw467msglkrl51uo8uu6v6l6 
-       foreign key (idMiningFactors) 
-       references miningFactors (idMiningFactors);
+    alter table miningFactorsComposition
+        add constraint FK7pw467msglkrl51uo8uu6v6l6
+            foreign key (idMiningFactors)
+                references miningFactors (idMiningFactors);
 
     alter table missile
         add constraint FKdhk8trxq7c36hid883mj4p7us
@@ -1482,15 +1486,15 @@
             foreign key (idWarhead)
                 references warhead (idWarhead);
 
-    alter table missileMotor 
-       add constraint FK6q2owmplw15x287lnle7mdeae 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
+    alter table missileMotor
+        add constraint FK6q2owmplw15x287lnle7mdeae
+            foreign key (idCosts)
+                references resourceDeposit (idResourceDeposit);
 
-    alter table missileMovement 
-       add constraint FK31pwab7jyqugac58td2yh50ju 
-       foreign key (idActor) 
-       references fleet (idFleet);
+    alter table missileMovement
+        add constraint FK31pwab7jyqugac58td2yh50ju
+            foreign key (idActor)
+                references fleet (idFleet);
 
     alter table missileMovement 
        add constraint FKl9frhygmvi1n5d3sjchn19wrx 

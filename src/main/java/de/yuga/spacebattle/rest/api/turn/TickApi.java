@@ -24,10 +24,10 @@ import javax.annotation.security.RolesAllowed;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
-import static de.yuga.spacebattle.rest.api.turn.AdminApi.ENDPOINT;
+import static de.yuga.spacebattle.rest.api.turn.TickApi.ENDPOINT;
 
 @Tag(name = "TickApi")
-@RolesAllowed("ROLE_USER")
+@RolesAllowed({"USER"})
 @RestController
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ENDPOINT + "/")
 public class TickApi {

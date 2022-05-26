@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 
 @Tag(name = "ConstructionApi")
-@RolesAllowed("ROLE_USER")
+@RolesAllowed("USER")
 @RestController
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ConstructionApi.ENDPOINT + "/")
 public class ConstructionApi {

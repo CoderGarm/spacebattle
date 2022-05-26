@@ -3,7 +3,6 @@ package de.yuga.spacebattle.rest.config.security;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.converter.PasswordConverter;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -61,13 +60,13 @@ public class JwtTokenUtil {
     public boolean validate(@Nonnull final String token) {
         Preconditions.checkNotNull(token, "token shouldn't be null!");
 
-        SecretKeySpec secretKeySpec = new SecretKeySpec(SECRET_KEY_PLAINTEXT.getBytes(), HS_256.getJcaName());
+        final SecretKeySpec secretKeySpec = new SecretKeySpec(SECRET_KEY_PLAINTEXT.getBytes(), HS_256.getJcaName());
 
-        String[] chunks = token.split("\\.");
-        String tokenWithoutSignature = chunks[0] + "." + chunks[1];
-        String signature = chunks[2];
+        final String[] chunks = token.split("\\.");
+        final String tokenWithoutSignature = chunks[0] + "." + chunks[1];
+        final String signature = chunks[2];
 
-        DefaultJwtSignatureValidator validator = new DefaultJwtSignatureValidator(HS_256, secretKeySpec);
+        final DefaultJwtSignatureValidator validator = new DefaultJwtSignatureValidator(HS_256, secretKeySpec);
 
         if (!validator.isValid(tokenWithoutSignature, signature)) {
             LOGGER.info("Could not verify JWT token integrity!");
@@ -125,7 +124,7 @@ public class JwtTokenUtil {
 
         Claims claims = Jwts.claims().setSubject(user.getUsername());
         claims.put(USER_ID_CLAIM, user.getId());
-        claims.put(ROLE_CLAIM, EWebUserRole.USER);
+        claims.put(ROLE_CLAIM, user.getUserRole().getName());
 
         return Jwts.builder()
                 .setClaims(claims)

@@ -41,7 +41,7 @@ public class JWT {
         this.idUser = user.getId();
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
-        this.role = EWebUserRole.USER;
+        this.role = user.getUserRole();
     }
 
     @Nonnull

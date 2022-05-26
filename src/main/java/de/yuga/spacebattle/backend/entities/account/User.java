@@ -11,6 +11,7 @@ import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Job;
+import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 
@@ -54,6 +55,10 @@ public class User extends AbstractEntityKey {
     @Size(min = 3, max = 30)
     @Column(unique = true)
     private String username;
+
+    @Nonnull
+    @Enumerated(EnumType.STRING)
+    private final EWebUserRole userRole = EWebUserRole.USER;
 
     @Nonnull
     @NotNull
@@ -150,6 +155,11 @@ public class User extends AbstractEntityKey {
     @Nonnull
     public String getUsername() {
         return username;
+    }
+
+    @Nonnull
+    public EWebUserRole getUserRole() {
+        return userRole;
     }
 
     public void setUsername(@Nonnull final String username) {

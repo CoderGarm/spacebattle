@@ -14,9 +14,10 @@ public class WebUserRole implements GrantedAuthority {
     public WebUserRole(@Nonnull final EWebUserRole webUserRole) {
         Preconditions.checkNotNull(webUserRole, "webUserRole shouldn't be null!");
 
-        authority = webUserRole.getName();
+        authority = "ROLE_" + webUserRole.getName();
     }
 
+    @Nonnull
     @Override
     public String getAuthority() {
         return authority;

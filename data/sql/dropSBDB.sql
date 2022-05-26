@@ -199,16 +199,16 @@
        drop 
        foreign key FK3o0d6nae9i5n6v33ake9fyvs8;
 
-    alter table messageThread 
-       drop 
-       foreign key FK1d5qqscr6uidy4lithqwkfcsb;
+    alter table messageThread
+    drop
+    foreign key FK1d5qqscr6uidy4lithqwkfcsb;
 
-    alter table messageThread 
-       drop 
-       foreign key FKlcfh5cw1nqv8howd22b9emwbf;
+    alter table messageThread
+    drop
+    foreign key FKlcfh5cw1nqv8howd22b9emwbf;
 
-    alter table miningFactorsComposition 
-       drop
+    alter table miningFactorsComposition
+    drop
     foreign key FK7pw467msglkrl51uo8uu6v6l6;
 
     alter table missile
@@ -231,13 +231,13 @@
     drop
     foreign key FKhgp8bhvbmvaefgws7b1t0km7k;
 
-    alter table missileMotor 
-       drop 
-       foreign key FK6q2owmplw15x287lnle7mdeae;
+    alter table missileMotor
+    drop
+    foreign key FK6q2owmplw15x287lnle7mdeae;
 
-    alter table missileMovement 
-       drop 
-       foreign key FK31pwab7jyqugac58td2yh50ju;
+    alter table missileMovement
+    drop
+    foreign key FK31pwab7jyqugac58td2yh50ju;
 
     alter table missileMovement 
        drop 

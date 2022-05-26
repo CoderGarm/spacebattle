@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 
 @Tag(name = "ColonizationApi")
-@RolesAllowed("ROLE_USER")
+@RolesAllowed("USER")
 @RestController
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ColonizationApi.ENDPOINT + "/")
 public class ColonizationApi {
