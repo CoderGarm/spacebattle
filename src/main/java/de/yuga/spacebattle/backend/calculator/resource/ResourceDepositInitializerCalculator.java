@@ -8,6 +8,8 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.MissileMotor;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Warhead;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
@@ -47,11 +49,13 @@ public class ResourceDepositInitializerCalculator {
             if (EDepositType.DEPOSITS != subType) {
                 throw new NotifyWebUserException("Initialization of deposit not possible for '" + subType + "'.");
             }
-        } else if (clazz.isAssignableFrom(Building.class) || clazz.isAssignableFrom(Research.class)) {
+        } else if (clazz.isAssignableFrom(Research.class)) {
             overrideResources.add(EResourceType.ORBITAL_CONSTRUCTION);
             overrideResources.add(EResourceType.CONSTRUCTION);
-        } else if (clazz.isAssignableFrom(BaseModuleWithEffectValue.class) || clazz.isAssignableFrom(Hull.class) ||
-                clazz.isAssignableFrom(Missile.class) || clazz.isAssignableFrom(MissileMotor.class) || clazz.isAssignableFrom(Warhead.class)) {
+        } else if (clazz.isAssignableFrom(Building.class)) { // todo how to balance resources on admin page?
+            overrideResources.add(EResourceType.ORBITAL_CONSTRUCTION);
+            overrideResources.add(EResourceType.RESEARCH);
+        } else if (isOrbitalConstruction(clazz)) {
             overrideResources.add(EResourceType.CONSTRUCTION);
             overrideResources.add(EResourceType.RESEARCH);
         } else {
@@ -77,5 +81,17 @@ public class ResourceDepositInitializerCalculator {
             resourceDeposit.setAbsoluteResourceValue(type, rand);
         }
         return resourceDeposit;
+    }
+
+    private static boolean isOrbitalConstruction(@Nonnull final Class<?> clazz) {
+        Preconditions.checkNotNull(clazz, "clazz shouldn't be null!");
+
+        return clazz.isAssignableFrom(BaseModuleWithEffectValue.class)
+                || clazz.isAssignableFrom(Hull.class)
+                || clazz.isAssignableFrom(Missile.class)
+                || clazz.isAssignableFrom(MissileMotor.class)
+                || clazz.isAssignableFrom(Warhead.class)
+                || clazz.isAssignableFrom(Weapon.class)
+                || clazz.isAssignableFrom(Launcher.class);
     }
 }
