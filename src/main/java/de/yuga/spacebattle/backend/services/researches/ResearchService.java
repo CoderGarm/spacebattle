@@ -6,14 +6,13 @@ import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.researches.ResearchRepository;
+import de.yuga.spacebattle.rest.dto.researches.ResearchTree;
+import de.yuga.spacebattle.rest.dto.researches.ResearchTreeElement;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +30,52 @@ public class ResearchService {
     @Nonnull
     public List<Research> findAll() {
         return researchRepository.findAll();
+    }
+
+    @Nonnull
+    public ResearchTree getResearchTree() {
+        final List<de.yuga.spacebattle.backend.dto.research.ResearchTreeElement> treeElements = findAllAsTuple();
+        final Set<Integer> idResearches = treeElements.stream().map(de.yuga.spacebattle.backend.dto.research.ResearchTreeElement::getIdResearch).collect(Collectors.toSet());
+        final List<de.yuga.spacebattle.rest.dto.researches.Research> researches = getResearchesAsDTOById(idResearches);
+
+        final Map<Integer, ResearchTreeElement> treeLinkedElementByIdResearch = new HashMap<>();
+        // fill up the unlocks und create elements
+        for (final de.yuga.spacebattle.backend.dto.research.ResearchTreeElement treeElement : treeElements) {
+            final int idResearch = treeElement.getIdResearch();
+            final Integer idUnlockedBy = treeElement.getIdUnlockedBy();
+            if (idUnlockedBy != null) {
+                final ResearchTreeElement element = treeLinkedElementByIdResearch.getOrDefault(idUnlockedBy, new ResearchTreeElement(idUnlockedBy));
+                element.setIdUnlocks(idResearch);
+                treeLinkedElementByIdResearch.put(idUnlockedBy, element);
+            } else {
+                treeLinkedElementByIdResearch.put(idResearch, new ResearchTreeElement(idResearch));
+            }
+        }
+        // fill up reverse unlocked by
+        final Map<Integer, ResearchTreeElement> avoidConcurrentModification = new HashMap<>();
+        for (final ResearchTreeElement treeElement : treeLinkedElementByIdResearch.values()) {
+            final Integer idUnlocks = treeElement.getIdUnlocks();
+            if (idUnlocks != null) {
+                final ResearchTreeElement researchTreeElement = treeLinkedElementByIdResearch.getOrDefault(idUnlocks, new ResearchTreeElement(idUnlocks));
+                researchTreeElement.setIdUnlockedBy(treeElement.getIdResearch());
+                avoidConcurrentModification.put(idUnlocks, researchTreeElement);
+            }
+        }
+        treeLinkedElementByIdResearch.putAll(avoidConcurrentModification);
+
+        return new ResearchTree(treeLinkedElementByIdResearch.values(), researches);
+    }
+
+    @Nonnull
+    protected List<de.yuga.spacebattle.backend.dto.research.ResearchTreeElement> findAllAsTuple() {
+        return researchRepository.findAllAsTuple();
+    }
+
+    @Nonnull
+    protected List<de.yuga.spacebattle.rest.dto.researches.Research> getResearchesAsDTOById(@Nonnull final Collection<Integer> idResearches) {
+        Preconditions.checkNotNull(idResearches, "idResearches shouldn't be null!");
+
+        return researchRepository.getResearchesAsDTOById(new ArrayList<>(idResearches));
     }
 
     @Nullable

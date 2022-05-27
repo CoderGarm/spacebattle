@@ -19,7 +19,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 @NamedQueries({
-        @NamedQuery(name = "Research.getAll", query = "SELECT p FROM Research p")
+        @NamedQuery(name = "Research.getAll",
+                query = "SELECT p FROM Research p"),
+        @NamedQuery(name = "Research.getTreeAsTuple",
+                query = "SELECT new de.yuga.spacebattle.backend.dto.research.ResearchTreeElement(p.id, p.unlockedThrough.id) FROM Research p"),
+        @NamedQuery(name = "Research.getResearchesAsDTOById",
+                query = "SELECT new de.yuga.spacebattle.rest.dto.researches.Research(p.id, p.name, p.description, p.levelCap) FROM Research p WHERE p.id IN (:idResearches)")
 })
 @Entity
 @Table(name = "research")

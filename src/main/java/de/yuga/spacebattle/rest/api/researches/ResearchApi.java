@@ -14,6 +14,7 @@ import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.researches.ResearchLevel;
+import de.yuga.spacebattle.rest.dto.researches.ResearchTree;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -43,6 +44,7 @@ public class ResearchApi {
     public static final String ENDPOINT = "research";
     private static final String BY_USER_ENDPOINT = "byUser";
     private static final String AVAILABLE_BY_USER_ENDPOINT = "availableByUser";
+    private static final String TREE_ENDPOINT = "tree";
     private static final String RESEARCH_POSSIBLE_FOR_USER_ENDPOINT = "possibleForUser";
 
     @Nonnull
@@ -143,6 +145,19 @@ public class ResearchApi {
         final List<ResearchLevel> researchLevels = researchesForUser.entrySet()
                 .stream().map(entry -> new ResearchLevel(entry.getKey(), entry.getValue())).collect(Collectors.toList());
         return ResponseEntity.ok(researchLevels);
+    }
+
+    @GetMapping(value = TREE_ENDPOINT)
+    @Operation(summary = "Get all researches with their unlocking research.", operationId = "getTree",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResearchTree.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getTree() {
+        return ResponseEntity.ok(researchService.getResearchTree());
     }
 
     @GetMapping(value = RESEARCH_POSSIBLE_FOR_USER_ENDPOINT + "/{idUser}")

@@ -27,6 +27,13 @@ public class Research {
     public Research() {
     }
 
+    public Research(final int idResearch, @Nonnull final String name, @Nonnull final String description, final int levelCap) {
+        this.idResearch = idResearch;
+        this.name = name;
+        this.description = description;
+        this.levelCap = levelCap;
+    }
+
     public Research(@Nonnull final de.yuga.spacebattle.backend.entities.researches.Research research) {
         Preconditions.checkNotNull(research, "research shouldn't be null!");
 
