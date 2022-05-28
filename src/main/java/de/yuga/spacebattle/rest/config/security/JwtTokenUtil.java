@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.converter.PasswordConverter;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -117,6 +118,33 @@ public class JwtTokenUtil {
             LOGGER.info(e.getMessage());
             return null;
         }
+    }
+
+    public int getIdUserFromAccessToken(@Nonnull String token) {
+        Preconditions.checkNotNull(token, "token shouldn't be null!");
+
+        token = JwtTokenUtil.getTokenFromHeaderField(token);
+
+        try {
+            final Claims claims = Jwts.parser()
+                    .setSigningKey(SECRET_KEY_BASE64_ENCODED)
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims.get(USER_ID_CLAIM, Integer.class);
+        } catch (final Exception e) {
+            LOGGER.info(e.getMessage());
+            throw new NotifyWebUserException("You did not exist, sorry!");
+        }
+    }
+
+    /**
+     * Separates the 'Bearer: ' from the tokens payload.
+     *
+     * @param headerParamValue the header value
+     * @return the payload of the token
+     */
+    public static String getTokenFromHeaderField(@Nonnull final String headerParamValue) {
+        return headerParamValue.contains(" ") ? headerParamValue.split(" ")[1].trim() : headerParamValue;
     }
 
     public String generateAccessToken(@Nonnull final User user) {

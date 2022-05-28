@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.services.account;
 
 import de.yuga.spacebattle.BaseTestCase;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import de.yuga.spacebattle.backend.repositories.account.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -127,11 +128,11 @@ public class UserServiceTest extends BaseTestCase {
         final String username = "user";
         final String password = "password";
         final String email = "email";
-        final User user = new User(username, password, email);
+        final User user = new User(username, password, email, EWebUserRole.USER);
         // prepare mocks
         when(userRepositoryMock.save(user)).thenReturn(user);
         // test method
-        final User result = testObject.createUser(username, password, email);
+        final User result = testObject.createUser(username, password, email, EWebUserRole.USER);
         // check expectation
         assertNotNull(result);
         assertEquals(result, user);

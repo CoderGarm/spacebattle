@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.dto.account;
 
 import de.yuga.spacebattle.SpacebattleApplication;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -66,6 +67,6 @@ public class UserReq {
     }
 
     public User transform() {
-        return new User(username, password, email);
+        return new User(username, password, email, EWebUserRole.USER);
     }
 }

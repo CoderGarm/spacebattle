@@ -58,7 +58,7 @@ public class User extends AbstractEntityKey {
 
     @Nonnull
     @Enumerated(EnumType.STRING)
-    private final EWebUserRole userRole = EWebUserRole.USER;
+    private EWebUserRole userRole;
 
     @Nonnull
     @NotNull
@@ -142,15 +142,19 @@ public class User extends AbstractEntityKey {
 
     public User(@Nonnull final String username,
                 @Nonnull final String password,
-                @Nonnull final String email) {
+                @Nonnull final String email,
+                @Nonnull final EWebUserRole role) {
         Preconditions.checkNotNull(username, "username shouldn't be null!");
         Preconditions.checkNotNull(password, "password shouldn't be null!");
         Preconditions.checkNotNull(email, "email shouldn't be null!");
+        Preconditions.checkNotNull(role, "role shouldn't be null!");
 
         this.username = username;
         this.password = password;
         this.email = email;
+        this.userRole = role;
     }
+
 
     @Nonnull
     public String getUsername() {

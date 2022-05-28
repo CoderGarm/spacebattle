@@ -5,18 +5,22 @@ import de.yuga.spacebattle.backend.entities.account.MessageThread;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.services.account.MessageThreadService;
 import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import de.yuga.spacebattle.rest.config.security.JwtTokenUtil;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
 import de.yuga.spacebattle.rest.dto.account.chat.ChatHistory;
 import de.yuga.spacebattle.rest.dto.account.chat.ChatMessage;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,15 +45,21 @@ public class ChatApi {
     private final UserService userService;
 
     @Nonnull
+    private final JwtTokenUtil tokenUtil;
+
+    @Nonnull
     private final MessageThreadService messageThreadService;
 
     @Autowired
     public ChatApi(@Nonnull final UserService userService,
+                   @Nonnull final JwtTokenUtil tokenUtil,
                    @Nonnull final MessageThreadService messageThreadService) {
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
+        Preconditions.checkNotNull(tokenUtil, "tokenUtil shouldn't be null!");
         Preconditions.checkNotNull(messageThreadService, "messageThreadService shouldn't be null!");
 
         this.userService = userService;
+        this.tokenUtil = tokenUtil;
         this.messageThreadService = messageThreadService;
     }
 
@@ -63,7 +73,14 @@ public class ChatApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getChatByUsers(@PathVariable("idUserOne") final int idUserOne, @PathVariable("idUserTwo") final int idUserTwo) {
+    public ResponseEntity<?> getChatByUsers(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
+                                            @PathVariable("idUserOne") final int idUserOne,
+                                            @PathVariable("idUserTwo") final int idUserTwo) {
+
+        final int idUserByToken = tokenUtil.getIdUserFromAccessToken(token);
+        if (idUserByToken != idUserOne && idUserByToken != idUserTwo) {
+            throw new NotifyWebUserException("Hell, nice try but no!");
+        }
 
         final MessageThread messagesBetween = messageThreadService.findMessagesBetween(idUserOne, idUserTwo);
         if (messagesBetween != null) {
@@ -84,7 +101,13 @@ public class ChatApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getChatByUsers(@PathVariable("idUser") final int idUser) {
+    public ResponseEntity<?> getChatByUsers(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
+                                            @PathVariable("idUser") final int idUser) {
+
+        final int idUserByToken = tokenUtil.getIdUserFromAccessToken(token);
+        if (idUserByToken != idUser) {
+            throw new NotifyWebUserException("Hell, nice try but no, never!");
+        }
 
         final List<MessageThread> threadsWithUser = messageThreadService.findThreadsWithUser(idUser);
         if (!threadsWithUser.isEmpty()) {
@@ -110,13 +133,17 @@ public class ChatApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> createMessageThread(@RequestBody @Nonnull final ChatHistory chatHistory) {
+    public ResponseEntity<?> createMessageThread(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
+                                                 @RequestBody @Nonnull final ChatHistory chatHistory) {
         Preconditions.checkNotNull(chatHistory, "chatHistory shouldn't be null!");
 
         final List<ChatMessage> messages = chatHistory.getMessages();
         if (messages.size() != 1) {
             throw new NotifyWebUserException("This is not possible - there is already an active chat.");
         }
+
+        final int idUserByToken = tokenUtil.getIdUserFromAccessToken(token);
+
         final ChatMessage chatMessage = messages.get(0);
         final String message = chatMessage.getMessage();
 
@@ -125,6 +152,10 @@ public class ChatApi {
         final int idUserTwo = chatHistory.getUserTwo().getIdUser();
         // detect the sender
         final int idReceiver = idUserSender != idUserOne ? idUserOne : idUserTwo;
+
+        if (idUserByToken != idUserSender && idUserByToken != idReceiver) {
+            throw new NotifyWebUserException("You should not pretend to be someone other!");
+        }
 
         final User sender = userService.find(idUserSender);
         final User receiver = userService.find(idReceiver);
@@ -150,8 +181,12 @@ public class ChatApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> sendChatMessage(@RequestBody @Nonnull final ChatMessage message) {
+    public ResponseEntity<?> sendChatMessage(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
+                                             @RequestBody @Nonnull final ChatMessage message) {
         Preconditions.checkNotNull(message, "message shouldn't be null!");
+
+        final Integer idUserByToken = tokenUtil.getIdUserFromAccessToken(token);
+        PreconditionWebHelper.checkNotNull(idUserByToken, "sendChatMessage, idUserByToken shouldn't be null!");
 
         final String chatMessage = message.getMessage();
         final UserJson senderJ = message.getSender();
@@ -159,7 +194,11 @@ public class ChatApi {
         if (idUserMessage == null) {
             throw new NotifyWebUserException("You should try to send the first message another way - please contact the administrator!");
         }
-        final User sender = userService.find(senderJ.getIdUser());
+        final Integer idUserSender = senderJ.getIdUser();
+        if (!idUserByToken.equals(idUserSender)) {
+            throw new NotifyWebUserException("You should not pretend to be someone other if you try to write a message!");
+        }
+        final User sender = userService.find(idUserSender);
         final MessageThread messageThread = messageThreadService.sendChatMessage(idUserMessage, sender, chatMessage);
         if (messageThread != null) {
             return ResponseEntity.ok(new ChatHistory(messageThread));

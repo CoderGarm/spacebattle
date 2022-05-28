@@ -37,11 +37,10 @@ import javax.validation.Validator;
 import java.util.Set;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PUBLIC_BASE_ENDPOINT;
-import static de.yuga.spacebattle.rest.api.account.AuthApi.ENDPOINT;
 
 @Tag(name = "AuthApi")
 @RestController
-@RequestMapping(value = "/" + PUBLIC_BASE_ENDPOINT + "/" + ENDPOINT + "/")
+@RequestMapping(value = "/" + PUBLIC_BASE_ENDPOINT + "/" + AuthApi.ENDPOINT + "/")
 public class AuthApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthApi.class);

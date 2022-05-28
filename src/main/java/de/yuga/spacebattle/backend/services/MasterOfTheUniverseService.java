@@ -5,6 +5,9 @@ import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.forum.Forum;
+import de.yuga.spacebattle.backend.entities.account.forum.ForumMessage;
+import de.yuga.spacebattle.backend.entities.account.forum.ForumThread;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
@@ -30,6 +33,7 @@ import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
+import de.yuga.spacebattle.backend.services.account.ForumService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.combined.account.AllianceService;
@@ -115,6 +119,9 @@ public class MasterOfTheUniverseService {
     @Nonnull
     private final WarShipService warShipService;
 
+    @Nonnull
+    private final ForumService forumService;
+
     @Autowired
     public MasterOfTheUniverseService(@Nonnull final TickService tickService,
                                       @Nonnull final UserService userService,
@@ -128,7 +135,8 @@ public class MasterOfTheUniverseService {
                                       @Nonnull final ResearchService researchService,
                                       @Nonnull final ConstructionService constructionService,
                                       @Nonnull final FleetService fleetService,
-                                      @Nonnull final WarShipService warShipService) {
+                                      @Nonnull final WarShipService warShipService,
+                                      @Nonnull final ForumService forumService) {
         Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");
@@ -142,6 +150,7 @@ public class MasterOfTheUniverseService {
         Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
         Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         Preconditions.checkNotNull(warShipService, "warShipService shouldn't be null!");
+        Preconditions.checkNotNull(forumService, "forumService shouldn't be null!");
 
         this.tickService = tickService;
         this.userService = userService;
@@ -156,6 +165,7 @@ public class MasterOfTheUniverseService {
         this.constructionService = constructionService;
         this.fleetService = fleetService;
         this.warShipService = warShipService;
+        this.forumService = forumService;
     }
 
     /**
@@ -177,7 +187,7 @@ public class MasterOfTheUniverseService {
      * @param max the upper bound
      * @return the random number
      */
-    public int getRandomInt(final int min, final int max) {
+    private int getRandomInt(final int min, final int max) {
         return (int) ((Math.random() * (max - min)) + min);
     }
 
@@ -188,7 +198,7 @@ public class MasterOfTheUniverseService {
      * @param max the upper bound
      * @return the random number
      */
-    public double getRandomDouble(final double min, final double max) {
+    private double getRandomDouble(final double min, final double max) {
         return ((Math.random() * (max - min)) + min);
     }
 
@@ -275,7 +285,7 @@ public class MasterOfTheUniverseService {
      * Generates up to 100 new star systems with planets.
      */
     @Transactional
-    public void createMorePopularizedStarSystems() {
+    protected void createMorePopularizedStarSystems() {
         final List<StarSystem> allSystems = starsystemService.findAll();
         final Set<Orbit> knownOrbits = allSystems.stream().map(StarSystem::getOrbit).collect(Collectors.toSet());
 
@@ -307,14 +317,48 @@ public class MasterOfTheUniverseService {
         LOGGER.info("New star systems populated");
     }
 
+    void createForums() {
+        final List<Alliance> alliances = allianceService.findAll();
+
+        final List<Forum> toStore = new ArrayList<>();
+        final Forum mainUsersForum = new Forum(EWebUserRole.USER, "Users forum", "A Forum for all users.");
+        toStore.add(mainUsersForum);
+        final Forum adminsForum = new Forum(EWebUserRole.ADMIN, "Admins forum", "A forum for the game admins.");
+        toStore.add(adminsForum);
+        final List<Forum> allianceForums = alliances.stream()
+                .map(alliance -> new Forum(alliance, alliance.getCode() + " Forum", "The " + alliance.getName() + "'s forum."))
+                .collect(Collectors.toList());
+        toStore.addAll(allianceForums);
+
+        forumService.saveAll(toStore);
+
+        final List<User> users = userService.findAll();
+
+        final List<Forum> forums = forumService.findAll();
+        forums.forEach(forum -> {
+            final User user = users.stream().filter(forum::isUserAllowed).findFirst().orElse(null);
+            assert user != null : "The user should be present!";
+
+            final ForumThread forumThread = new ForumThread(forum, "Thread in " + forum.getTitle(), "Description in " + forum.getDescription());
+            final ForumThread save = forumService.save(forumThread);
+            final ForumMessage forumMessage = new ForumMessage(save, user, "Hello World!");
+            forumService.save(forumMessage);
+        });
+
+
+        LOGGER.info("Forums created");
+    }
+
     @SuppressWarnings({"deprecation", "unused"})
     void createInitialDataPayload() {
         Alliance a1 = allianceService.createAlliance("Argonauten", "A");
         Alliance a2 = allianceService.createAlliance("111er", "111er");
         LOGGER.info("Alliances created");
 
-        final User u1 = userService.createUser("Flashkid", "12457aA!", "mail");
-        final User u2 = userService.createUser("Yufiel", "12457aA!", "mail2");
+        createForums();
+
+        final User u1 = userService.createUser("Flashkid", "12457aA!", "mail", EWebUserRole.ADMIN);
+        final User u2 = userService.createUser("Yufiel", "12457aA!", "mail2", EWebUserRole.USER);
         LOGGER.info("Users created");
 
         u1.setAlliance(a1);

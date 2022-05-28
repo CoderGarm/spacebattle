@@ -23,12 +23,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.ADMIN_BASE_ENDPOINT;
-import static de.yuga.spacebattle.rest.api.turn.AdminApi.ENDPOINT;
 
 @Tag(name = "AdminApi")
 @RolesAllowed("ADMIN")
 @RestController
-@RequestMapping(value = "/" + ADMIN_BASE_ENDPOINT + "/" + ENDPOINT + "/")
+@RequestMapping(value = "/" + ADMIN_BASE_ENDPOINT + "/" + AdminApi.ENDPOINT + "/")
 public class AdminApi {
 
     @Nonnull

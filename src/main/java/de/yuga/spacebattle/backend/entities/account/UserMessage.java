@@ -28,6 +28,7 @@ public class UserMessage extends AbstractEntityKey {
 
     @Nonnull
     @NotNull
+    @Column(columnDefinition = "varchar(10000)")
     private String message;
 
     @Nonnull

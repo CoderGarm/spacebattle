@@ -24,12 +24,11 @@ import javax.annotation.security.RolesAllowed;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
-import static de.yuga.spacebattle.rest.api.turn.JobApi.ENDPOINT;
 
 @Tag(name = "JobApi")
 @RolesAllowed("USER")
 @RestController
-@RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ENDPOINT + "/")
+@RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + JobApi.ENDPOINT + "/")
 public class JobApi {
 
     @Nonnull

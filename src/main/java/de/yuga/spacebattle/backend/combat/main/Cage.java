@@ -259,6 +259,7 @@ public class Cage implements Future<Cage> {
         } else {
             // state the last round results
             participatingFleets.forEach(fleet -> getCurrentStateByFleet(fleet).historize());
+            // todo create the last combat round with the resulting setup
         }
         end = System.currentTimeMillis();
         log("tidy up", start, end);

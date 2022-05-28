@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.rest.dto.constructables.spacecrafts;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.orbitals.Planet;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass;
@@ -9,6 +10,10 @@ import javax.annotation.Nonnull;
 
 @Schema(description = ".")
 public class WarShip {
+
+    @JsonProperty
+    @Schema(required = true, description = "The id of the ship.")
+    private int idWarship;
 
     @Nonnull
     @Schema(required = true, description = "The name of this individual ship.")
@@ -32,10 +37,15 @@ public class WarShip {
     public WarShip(@Nonnull final de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip warShip) {
         Preconditions.checkNotNull(warShip, "warShip shouldn't be null!");
 
+        this.idWarship = warShip.getId();
         this.name = warShip.getName();
         this.shipyard = new de.yuga.spacebattle.rest.dto.orbitals.Planet(warShip.getShipyard());
         this.idFleet = warShip.getFleet().getId();
         this.shipClass = new de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass(warShip.getShipClass());
+    }
+
+    public int getIdWarship() {
+        return idWarship;
     }
 
     @Nonnull

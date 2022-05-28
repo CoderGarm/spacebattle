@@ -5,6 +5,7 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
+import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import de.yuga.spacebattle.backend.repositories.account.UserRepository;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.config.security.WebUserDetails;
@@ -157,12 +158,14 @@ public class UserService {
     @Deprecated(since = "productive")
     public User createUser(@Nonnull final String username,
                            @Nonnull final String password,
-                           @Nonnull final String email) {
+                           @Nonnull final String email,
+                           @Nonnull final EWebUserRole role) {
         Preconditions.checkNotNull(username, "username shouldn't be null!");
         Preconditions.checkNotNull(password, "password shouldn't be null!");
         Preconditions.checkNotNull(email, "email shouldn't be null!");
+        Preconditions.checkNotNull(role, "role shouldn't be null!");
 
-        return this.save(new User(username, password, email));
+        return this.save(new User(username, password, email, role));
     }
 
     public Set<Colonization> getColonizations(@Nonnull final User user) {
