@@ -55,7 +55,7 @@ public class Forum extends AbstractEntityKey {
 
     @Nonnull
     @OneToMany
-    @JoinColumn(name = "idForumThread")
+    @JoinColumn(name = "idForum")
     private final Set<ForumThread> threads = new HashSet<>();
 
     public Forum() {

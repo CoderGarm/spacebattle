@@ -27,10 +27,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @NamedQueries({
-        @NamedQuery(name = "BattleReport.findAllWithUser",
-                query = "SELECT r FROM BattleReport r LEFT JOIN r.participatingUsers u ON (u.id = :idUser)"),
-        @NamedQuery(name = "BattleReport.findLatestWithUser",
-                query = "SELECT r FROM BattleReport r LEFT JOIN r.participatingUsers u ON (u.id = :idUser) ORDER BY r.tick.id DESC"),
+        @NamedQuery(name = "BattleReport.findByIdWithAllData",
+                query = "SELECT r FROM BattleReport r LEFT JOIN r.participatingUsers u ON (u.id = :idUser) WHERE r.id = :idBattleReport"),
+        @NamedQuery(name = "BattleReport.countAllWithUser",
+                query = "SELECT COUNT(r) FROM BattleReport r LEFT JOIN r.participatingUsers u ON (u.id = :idUser)"),
 })
 @Entity
 @Table(name = "battleReport")

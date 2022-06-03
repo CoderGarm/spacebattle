@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -178,6 +179,24 @@ public class FleetService {
     @Nonnull
     public List<Fleet> findAllFleets() {
         return fleetRepository.findAllFleets();
+    }
+
+    /**
+     * Removes all fleets without warships.
+     *
+     * @param fleets the fleets to check and possibly remove
+     */
+    public void deleteFleetsWithoutShips(@Nonnull final List<Fleet> fleets) {
+        Preconditions.checkNotNull(fleets, "fleets shouldn't be null!");
+
+        final List<Fleet> toRemove = new ArrayList<>();
+        final Iterable<Fleet> allById = fleetRepository.findAllById(fleets.stream().map(Fleet::getId).collect(Collectors.toList()));
+        allById.forEach(fleet -> {
+            if (fleet.getShips().isEmpty()) {
+                toRemove.add(fleet);
+            }
+        });
+        fleetRepository.deleteAll(toRemove.stream().map(Fleet::getId).collect(Collectors.toSet()));
     }
 
     @Nonnull

@@ -1,14 +1,14 @@
 package de.yuga.spacebattle.rest.api;
 
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
-import de.yuga.spacebattle.rest.config.RestControllerResponseExceptionHandler;
+import de.yuga.spacebattle.rest.config.RestControllerExceptionHandler;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.annotation.Nonnull;
 
 /**
  * Just a bunch of helper methods to validate arguments and in case of a violation a {@link NotifyWebUserException} will be thrown.
- * This exception will be caught by {@link RestControllerResponseExceptionHandler} and transformed into a rest response.
+ * This exception will be caught by {@link RestControllerExceptionHandler} and transformed into a rest response.
  */
 public class PreconditionWebHelper {
 

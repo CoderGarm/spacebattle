@@ -34,4 +34,11 @@ public class CustomForumMessageRepositoryImpl implements CustomForumMessageRepos
                 .setMaxResults(endPosition)
                 .getResultList();
     }
+
+    @Override
+    public int countMessagesInThreadById(final int idForumThread) {
+        return em.createNamedQuery("ForumMessage.countMessagesInThreadById", Long.class)
+                .setParameter("idForumThread", idForumThread)
+                .getSingleResult().intValue();
+    }
 }

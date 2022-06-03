@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
@@ -179,5 +181,38 @@ public class AuthApi {
             return ResponseEntity.ok(new UserJson(saved));
         }
         throw new NotifyWebUserException("User could not be created", validate);
+    }
+
+    @PostMapping("/checkUsername/{userName}")
+    @Operation(summary = "Checks if a username already exists.", operationId = "checkUsername",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> checkUsername(@PathVariable("userName") @Nullable final String userName) {
+        if (StringUtils.isBlank(userName) || service.existsUsername(userName)) {
+            return ResponseEntity.ok(false);
+        }
+        return ResponseEntity.ok(true);
+    }
+
+    @PostMapping("/checkEmail/{eMail}")
+    @Operation(summary = "Checks if a eMail already exists.", operationId = "checkEmail",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> checkEmail(@PathVariable("eMail") @Nullable final String eMail) {
+        if (StringUtils.isBlank(eMail) || service.existsEMail(eMail)) {
+            return ResponseEntity.ok(false);
+        }
+        return ResponseEntity.ok(true);
+
     }
 }

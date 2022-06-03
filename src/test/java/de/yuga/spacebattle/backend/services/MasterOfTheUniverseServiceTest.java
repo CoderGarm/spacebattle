@@ -54,4 +54,12 @@ public class MasterOfTheUniverseServiceTest {
             forumService.save(forumMessage);
         });
     }
+
+    @Test
+    void createThread() {
+        final Forum forum = forumService.findForumById(1);
+        assertNotNull(forum);
+        final ForumThread forumThread = new ForumThread(forum, "Thread in " + forum.getTitle(), "Description in " + forum.getDescription());
+        forumService.save(forumThread);
+    }
 }

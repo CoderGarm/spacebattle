@@ -124,59 +124,55 @@
     ) engine=InnoDB;
 
     create table fleet (
-                           idFleet              integer      not null auto_increment,
-                           name                 varchar(255) not null,
-                           xCoordinateLocation  varchar(255),
-                           yCoordinateLocation  varchar(255),
-                           idMove               integer,
-                           idStarSystemLocation integer,
-                           idOwner              integer      not null,
-                           idResourceDeposit    integer,
-                           primary key (idFleet)
+       idFleet integer not null auto_increment,
+        name varchar(255) not null,
+        xCoordinateLocation varchar(255),
+        yCoordinateLocation varchar(255),
+        idMove integer,
+        idStarSystemLocation integer,
+        idOwner integer not null,
+        idResourceDeposit integer,
+        primary key (idFleet)
     ) engine=InnoDB;
 
-    create table forum
-    (
-        idForum     integer      not null auto_increment,
-        createdAt   datetime(6) not null,
+    create table forum (
+       idForum integer not null auto_increment,
+        createdAt datetime(6) not null,
         description varchar(255) not null,
-        role        varchar(255),
-        title       varchar(255) not null,
-        idAlliance  integer,
+        role varchar(255),
+        title varchar(255) not null,
+        idAlliance integer,
         primary key (idForum),
         check (idAlliance IS NOT NULL || role IS NOT NULL)
     ) engine=InnoDB;
 
-    create table forumMessage
-    (
-        idForumMessage integer        not null auto_increment,
-        message        varchar(10000) not null,
-        sentAt         datetime(6) not null,
-        idUserAuthor   integer        not null,
-        idForumThread  integer        not null,
+    create table forumMessage (
+       idForumMessage integer not null auto_increment,
+        message varchar(10000) not null,
+        sentAt datetime(6) not null,
+        idUserAuthor integer not null,
+        idForumThread integer not null,
         primary key (idForumMessage)
     ) engine=InnoDB;
 
-    create table forumThread
-    (
-        idForumThread integer      not null auto_increment,
-        createdAt     datetime(6) not null,
-        description   varchar(255) not null,
-        title         varchar(255) not null,
-        idForum       integer      not null,
+    create table forumThread (
+       idForumThread integer not null auto_increment,
+        createdAt datetime(6) not null,
+        description varchar(255) not null,
+        title varchar(255) not null,
+        idForum integer not null,
         primary key (idForumThread)
     ) engine=InnoDB;
 
-    create table hitLog
-    (
-        idHitLog           integer      not null auto_increment,
-        combatPhase        varchar(255) not null,
-        combatRound        integer      not null,
-        attackedPart       varchar(255) not null,
-        damageDealer       varchar(255) not null,
-        damageValue        bigint       not null,
-        isAlive            bit          not null,
-        isFightingCapable  bit          not null,
+    create table hitLog (
+       idHitLog integer not null auto_increment,
+        combatPhase varchar(255) not null,
+        combatRound integer not null,
+        attackedPart varchar(255) not null,
+        damageDealer varchar(255) not null,
+        damageValue bigint not null,
+        isAlive bit not null,
+        isFightingCapable bit not null,
         state integer not null,
         warshipHealthState varchar(500) not null,
         idTarget integer not null,
@@ -253,62 +249,57 @@
     ) engine=InnoDB;
 
     create table messageThread (
-                                   idMessageThread integer not null auto_increment,
-                                   idUserOne       integer not null,
-                                   idUserTwo       integer not null,
-                                   primary key (idMessageThread)
+       idMessageThread integer not null auto_increment,
+        idUserOne integer not null,
+        idUserTwo integer not null,
+        primary key (idMessageThread)
     ) engine=InnoDB;
 
-    create table miningFactors
-    (
-        idMiningFactors integer not null auto_increment,
+    create table miningFactors (
+       idMiningFactors integer not null auto_increment,
         primary key (idMiningFactors)
     ) engine=InnoDB;
 
-    create table miningFactorsComposition
-    (
-        idMiningFactors integer     not null,
-        amount          decimal(19, 0),
-        resourceType    varchar(50) not null,
+    create table miningFactorsComposition (
+       idMiningFactors integer not null,
+        amount decimal(19, 0),
+        resourceType varchar(50) not null,
         primary key (idMiningFactors, resourceType)
     ) engine=InnoDB;
 
-    create table missile
-    (
-        idMissile          integer      not null auto_increment,
-        elokaResistance    integer      not null,
-        motorAmount        integer      not null,
-        motorCapacity      integer      not null,
-        typeName           varchar(255) not null,
-        warheadCapacity    integer      not null,
-        idAmmunitionModule integer      not null,
-        idCosts            integer      not null,
-        idMissileMotor     integer      not null,
-        idResearch         integer      not null,
-        idWarhead          integer,
+    create table missile (
+       idMissile integer not null auto_increment,
+        elokaResistance integer not null,
+        motorAmount integer not null,
+        motorCapacity integer not null,
+        typeName varchar(255) not null,
+        warheadCapacity integer not null,
+        idAmmunitionModule integer not null,
+        idCosts integer not null,
+        idMissileMotor integer not null,
+        idResearch integer not null,
+        idWarhead integer,
         primary key (idMissile)
     ) engine=InnoDB;
 
-    create table missileMotor
-    (
-        idMissileMotor  integer      not null auto_increment,
-        acceleration    varchar(255) not null,
-        endurance       integer      not null,
-        maneuverability integer      not null,
-        typeName        varchar(255) not null,
-        useCapacity     integer      not null,
-        idCosts         integer      not null,
+    create table missileMotor (
+       idMissileMotor integer not null auto_increment,
+        acceleration varchar(255) not null,
+        endurance integer not null,
+        maneuverability integer not null,
+        typeName varchar(255) not null,
+        useCapacity integer not null,
+        idCosts integer not null,
         primary key (idMissileMotor)
     ) engine=InnoDB;
 
-    create table missileMovement
-    (
-        idMissileMovement  integer      not null auto_increment,
-        combatPhase        varchar(255) not null,
-        combatRound        integer      not null,
-        xCoordLast         varchar(255),
-        yCoordLast         varchar(255),
-        missileAmount      integer      not null,
+    create table missileMovement (
+       idMissileMovement integer not null auto_increment,
+        combatPhase varchar(255) not null,
+        combatRound integer not null,
+        xCoordLast varchar(255),
+        yCoordLast varchar(255),
+        missileAmount integer not null,
         movingMissileSalvo varchar(255) not null,
         xCoordinate varchar(255),
         yCoordinate varchar(255),
@@ -524,39 +515,36 @@
     ) engine=InnoDB;
 
     create table tick (
-                          idTick integer not null auto_increment,
-                          tickEnds datetime(6),
-                          tickStarts datetime(6) not null,
-                          primary key (idTick)
+       idTick integer not null auto_increment,
+        tickEnds datetime(6),
+        tickStarts datetime(6) not null,
+        primary key (idTick)
     ) engine=InnoDB;
 
-    create table unlockedResearch
-    (
-        idUser     integer not null,
-        level      integer,
+    create table unlockedResearch (
+       idUser integer not null,
+        level integer,
         idResearch integer not null,
         primary key (idUser, idResearch)
     ) engine=InnoDB;
 
-    create table user
-    (
-        idUser     integer      not null auto_increment,
-        email      varchar(50)  not null,
-        password   varchar(255) not null,
-        userRole   varchar(255),
-        username   varchar(30)  not null,
+    create table user (
+       idUser integer not null auto_increment,
+        email varchar(50) not null,
+        password varchar(255) not null,
+        userRole varchar(255),
+        username varchar(30) not null,
         idAlliance integer,
         primary key (idUser)
     ) engine=InnoDB;
 
-    create table userMessage
-    (
-        idUserMessage   integer        not null auto_increment,
-        message         varchar(10000) not null,
-        receivedAt      datetime(6),
-        sentAt          datetime(6) not null,
-        idMessageThread integer        not null,
-        idUserSender    integer        not null,
+    create table userMessage (
+       idUserMessage integer not null auto_increment,
+        message varchar(10000) not null,
+        receivedAt datetime(6),
+        sentAt datetime(6) not null,
+        idMessageThread integer not null,
+        idUserSender integer not null,
         primary key (idUserMessage)
     ) engine=InnoDB;
 
@@ -796,50 +784,45 @@
        foreign key (idStarSystemLocation) 
        references starSystem (idStarSystem);
 
-    alter table fleet
-        add constraint FKjo66qwgl0a9bba5x7xq23fvok
-            foreign key (idOwner)
-                references user (idUser);
+    alter table fleet 
+       add constraint FKjo66qwgl0a9bba5x7xq23fvok 
+       foreign key (idOwner) 
+       references user (idUser);
 
-    alter table fleet
-        add constraint FKckq55cmimjpois3mst803atuy
-            foreign key (idResourceDeposit)
-                references resourceDeposit (idResourceDeposit);
+    alter table fleet 
+       add constraint FKckq55cmimjpois3mst803atuy 
+       foreign key (idResourceDeposit) 
+       references resourceDeposit (idResourceDeposit);
 
-    alter table forum
-        add constraint FKbd3cwb6yurr6utojembdwjiy1
-            foreign key (idAlliance)
-                references alliance (idAlliance);
+    alter table forum 
+       add constraint FKbd3cwb6yurr6utojembdwjiy1 
+       foreign key (idAlliance) 
+       references alliance (idAlliance);
 
-    alter table forumMessage
-        add constraint FKibroa7vxdgc63xasj1kcwrg4w
-            foreign key (idUserAuthor)
-                references user (idUser);
+    alter table forumMessage 
+       add constraint FKibroa7vxdgc63xasj1kcwrg4w 
+       foreign key (idUserAuthor) 
+       references user (idUser);
 
-    alter table forumMessage
-        add constraint FKh1a5uic7c3sdd84skyccc126q
-            foreign key (idForumThread)
-                references forumThread (idForumThread);
+    alter table forumMessage 
+       add constraint FKh1a5uic7c3sdd84skyccc126q 
+       foreign key (idForumThread) 
+       references forumThread (idForumThread);
 
-    alter table forumThread
-        add constraint FKbqtbt77ebauj9krlwc3ak31us
-            foreign key (idForum)
-                references forum (idForum);
+    alter table forumThread 
+       add constraint FKbqtbt77ebauj9krlwc3ak31us 
+       foreign key (idForum) 
+       references forum (idForum);
 
-    alter table forumThread
-        add constraint FK44duini9lv2ufpd293v593st5
-            foreign key (idForumThread)
-                references forum (idForum);
+    alter table hitLog 
+       add constraint FK1pcr16gjbto8vd5g7v8hq14hw 
+       foreign key (idTarget) 
+       references warShip (idWarShip);
 
-    alter table hitLog
-        add constraint FK1pcr16gjbto8vd5g7v8hq14hw
-            foreign key (idTarget)
-                references warShip (idWarShip);
-
-    alter table hull
-        add constraint FK65udyybp7syxvga5evxn8olhc
-            foreign key (idCosts)
-                references resourceDeposit (idResourceDeposit);
+    alter table hull 
+       add constraint FK65udyybp7syxvga5evxn8olhc 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
 
     alter table hull 
        add constraint FK4hpf1pawl0wynjx9kdg74opea 
@@ -921,70 +904,70 @@
        foreign key (idHitLog) 
        references hitLog (idHitLog);
 
-    alter table lossesByHit
-        add constraint FK3o0d6nae9i5n6v33ake9fyvs8
-            foreign key (idShipKillerHit)
-                references shipKillerHit (idShipKillerHit);
+    alter table lossesByHit 
+       add constraint FK3o0d6nae9i5n6v33ake9fyvs8 
+       foreign key (idShipKillerHit) 
+       references shipKillerHit (idShipKillerHit);
 
-    alter table messageThread
-        add constraint FK1d5qqscr6uidy4lithqwkfcsb
-            foreign key (idUserOne)
-                references user (idUser);
+    alter table messageThread 
+       add constraint FK1d5qqscr6uidy4lithqwkfcsb 
+       foreign key (idUserOne) 
+       references user (idUser);
 
-    alter table messageThread
-        add constraint FKlcfh5cw1nqv8howd22b9emwbf
-            foreign key (idUserTwo)
-                references user (idUser);
+    alter table messageThread 
+       add constraint FKlcfh5cw1nqv8howd22b9emwbf 
+       foreign key (idUserTwo) 
+       references user (idUser);
 
-    alter table miningFactorsComposition
-        add constraint FK7pw467msglkrl51uo8uu6v6l6
-            foreign key (idMiningFactors)
-                references miningFactors (idMiningFactors);
+    alter table miningFactorsComposition 
+       add constraint FK7pw467msglkrl51uo8uu6v6l6 
+       foreign key (idMiningFactors) 
+       references miningFactors (idMiningFactors);
 
-    alter table missile
-        add constraint FKdhk8trxq7c36hid883mj4p7us
-            foreign key (idAmmunitionModule)
-                references ammunitionModule (idAmmunitionModule);
+    alter table missile 
+       add constraint FKdhk8trxq7c36hid883mj4p7us 
+       foreign key (idAmmunitionModule) 
+       references ammunitionModule (idAmmunitionModule);
 
-    alter table missile
-        add constraint FK2y4rvixlct3ljky430p3bmwad
-            foreign key (idCosts)
-                references resourceDeposit (idResourceDeposit);
+    alter table missile 
+       add constraint FK2y4rvixlct3ljky430p3bmwad 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
 
-    alter table missile
-        add constraint FK1ledmeodyggj4capnumuak58u
-            foreign key (idMissileMotor)
-                references missileMotor (idMissileMotor);
+    alter table missile 
+       add constraint FK1ledmeodyggj4capnumuak58u 
+       foreign key (idMissileMotor) 
+       references missileMotor (idMissileMotor);
 
-    alter table missile
-        add constraint FK6hqn2wt7gk1myp1ew4i29r3ss
-            foreign key (idResearch)
-                references research (idResearch);
+    alter table missile 
+       add constraint FK6hqn2wt7gk1myp1ew4i29r3ss 
+       foreign key (idResearch) 
+       references research (idResearch);
 
-    alter table missile
-        add constraint FKhgp8bhvbmvaefgws7b1t0km7k
-            foreign key (idWarhead)
-                references warhead (idWarhead);
+    alter table missile 
+       add constraint FKhgp8bhvbmvaefgws7b1t0km7k 
+       foreign key (idWarhead) 
+       references warhead (idWarhead);
 
-    alter table missileMotor
-        add constraint FK6q2owmplw15x287lnle7mdeae
-            foreign key (idCosts)
-                references resourceDeposit (idResourceDeposit);
+    alter table missileMotor 
+       add constraint FK6q2owmplw15x287lnle7mdeae 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
 
-    alter table missileMovement
-        add constraint FK31pwab7jyqugac58td2yh50ju
-            foreign key (idActor)
-                references fleet (idFleet);
+    alter table missileMovement 
+       add constraint FK31pwab7jyqugac58td2yh50ju 
+       foreign key (idActor) 
+       references fleet (idFleet);
 
-    alter table missileMovement
-        add constraint FKl9frhygmvi1n5d3sjchn19wrx
-            foreign key (idTarget)
-                references fleet (idFleet);
+    alter table missileMovement 
+       add constraint FKl9frhygmvi1n5d3sjchn19wrx 
+       foreign key (idTarget) 
+       references fleet (idFleet);
 
-    alter table missileMovements
-        add constraint FKa4ut542bvmk335w8ldma12g22
-            foreign key (idMissileMovement)
-                references missileMovement (idMissileMovement);
+    alter table missileMovements 
+       add constraint FKa4ut542bvmk335w8ldma12g22 
+       foreign key (idMissileMovement) 
+       references missileMovement (idMissileMovement);
 
     alter table missileMovements 
        add constraint FK4hmoghg3bi28t2pmfi3ea626u 

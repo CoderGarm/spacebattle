@@ -15,7 +15,7 @@ import java.util.Set;
 
 @NamedQueries({
         @NamedQuery(name = "ForumThread.findAllIdThreadForForums",
-                query = "SELECT new de.yuga.spacebattle.backend.dto.forum.IdToId(t.forum.id, t.id) FROM ForumThread t WHERE t.forum.id IN (:idForums)")
+                query = "SELECT new de.yuga.spacebattle.backend.dto.forum.IdToId(t.forum.id, t.id) FROM ForumThread t WHERE t.forum.id IN (:idForums)"),
 })
 @Entity
 @Table(name = "forumThread")

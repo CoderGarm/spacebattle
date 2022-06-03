@@ -113,4 +113,7 @@ public class ForumService {
         return StreamSupport.stream(forums.spliterator(), false).collect(Collectors.toList());
     }
 
+    public int countMessagesInForumThread(final int idForumThread) {
+        return forumMessageRepository.countMessagesInThreadById(idForumThread);
+    }
 }

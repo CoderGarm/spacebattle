@@ -5,6 +5,7 @@ import de.yuga.spacebattle.backend.combat.BattleLogger;
 import de.yuga.spacebattle.backend.combat.dto.BattleResult;
 import de.yuga.spacebattle.backend.combat.dto.FleetClash;
 import de.yuga.spacebattle.backend.combat.main.Cage;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -84,10 +86,10 @@ public class BattleService {
     private BattleReport processFightingResult(@Nonnull final Tick latest, @Nonnull final BattleResult battleResult) {
         Preconditions.checkNotNull(latest, "latest shouldn't be null!");
         Preconditions.checkNotNull(battleResult, "fightingResult shouldn't be null!");
-
-        // todo realise results
-        //final Set<WarShip> losses = fightingResult.getLosses();
-        //warShipService.deleteAll(losses);
+        
+        final Set<WarShip> losses = battleResult.getLosses();
+        warShipService.deleteAll(losses);
+        fleetService.deleteFleetsWithoutShips(battleResult.getFleetClash().getParticipatingFleets());
 
         battleLogger.logBattleResult(battleResult);
 

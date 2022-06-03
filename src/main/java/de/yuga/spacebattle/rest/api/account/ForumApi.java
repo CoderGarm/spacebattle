@@ -43,6 +43,7 @@ public class ForumApi {
 
     private static final String FORUMS_FOR_USER = "forumsForUser";
     private static final String FORUM_THREAD = "threadById";
+    private static final String FORUM_THREAD_COUNT = "threadById/count";
     private static final String CREATE_FORUM_THREAD = "createThread";
     private static final String CREATE_FORUM_THREAD_MESSAGE = "createThreadMessage";
     private static final String BY_FORUM = "byForum";
@@ -209,6 +210,21 @@ public class ForumApi {
         return ResponseEntity.ok(forumMessages);
     }
 
+    @GetMapping(FORUM_THREAD_COUNT + "/{idForumThread}")
+    @Operation(summary = "Get a list of forums which the given user is allowed to access.", operationId = "countMessagesInThread",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Integer.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> countMessagesInThread(@PathVariable("idForumThread") final int idForumThread) {
+
+        final Integer amount = forumService.countMessagesInForumThread(idForumThread);
+        return ResponseEntity.ok(amount);
+    }
+
     @Nonnull
     private User validateAccessToForum(@Nullable final Integer idUser, @Nullable final de.yuga.spacebattle.backend.entities.account.forum.Forum forum) {
         PreconditionWebHelper.checkNotNull(idUser, "The user id did not exist!");
@@ -244,7 +260,6 @@ public class ForumApi {
         final User user = validateAccessToForum(idUser, forum);
 
         assert forum != null : "asserted in validation";
-        // todo warum failed das?
         final de.yuga.spacebattle.backend.entities.account.forum.ForumThread forumThread = forumService.save(new de.yuga.spacebattle.backend.entities.account.forum.ForumThread(forum, createForumThread));
         final String firstMessage = createForumThread.getFirstMessage();
         if (StringUtils.isNotBlank(firstMessage)) {

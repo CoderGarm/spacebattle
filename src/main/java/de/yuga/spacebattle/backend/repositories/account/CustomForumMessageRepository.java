@@ -13,4 +13,6 @@ public interface CustomForumMessageRepository {
 
     @Nonnull
     List<ForumMessage> findReportsWithUserWithPaging(int idForumThread, int page, int size);
+
+    int countMessagesInThreadById(int idForumThread);
 }

@@ -28,7 +28,7 @@ public class ColonizationCostCalculator {
     public static ResourceAmount calculateInformationCost(@Nonnull final StarSystem starSystem) {
         Preconditions.checkNotNull(starSystem, "starSystem shouldn't be null!");
 
-        final Set<Planet> planets = starSystem.getPlanets();
+        final Set<Planet> planets = starSystem.getPlanets(); // todo change to increasing costs by lower amount of unknown planets
         final BigDecimal cost = BigDecimal.TEN.multiply(new BigDecimal(planets.size()));
         return new ResourceAmount(EResourceType.CREDITS, cost.longValue());
     }
@@ -42,7 +42,7 @@ public class ColonizationCostCalculator {
     public static ResourceAmount calculateColonizationCost(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
 
-        final long creditsFactors = planet.getMiningFactors().getResourceAmountByType(EResourceType.CREDITS);
+        final long creditsFactors = planet.getMiningFactors().getResourceAmountByType(EResourceType.CREDITS); // todo change to distance to home planet
         final BigDecimal cost = BigDecimal.TEN.multiply(new BigDecimal(creditsFactors), ResourceDeposit.MATH_CONTEXT_INTEGER);
         return new ResourceAmount(EResourceType.CREDITS, cost.longValue());
     }

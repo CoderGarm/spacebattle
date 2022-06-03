@@ -26,6 +26,12 @@ public class FrontendError {
     @Schema(description = "If it's not empty, some validation shows violations.")
     private final List<ValidationResult> validationResults = new ArrayList<>();
 
+    public FrontendError(@Nonnull final String message) {
+        Preconditions.checkNotNull(message, "message shouldn't be null!");
+
+        this.message = message;
+    }
+
     public FrontendError(@Nonnull final NotifyWebUserException exception) {
         Preconditions.checkNotNull(exception, "exception shouldn't be null!");
 

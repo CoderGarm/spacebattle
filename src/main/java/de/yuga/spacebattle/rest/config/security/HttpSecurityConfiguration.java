@@ -92,7 +92,9 @@ public class HttpSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 //  this must be changed in order to break jwt refresh loops if the role does not allow the operation
                 .exceptionHandling()
                 .authenticationEntryPoint((request, response, ex) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage()))
-                .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), new AntPathRequestMatcher("/api/**"));
+                .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), new AntPathRequestMatcher("/api/**"))
+                .accessDeniedHandler((request, response, ex) -> response.sendError(HttpServletResponse.SC_FORBIDDEN, ex.getMessage()))
+                .defaultAccessDeniedHandlerFor((request, response, ex) -> response.sendError(HttpServletResponse.SC_FORBIDDEN), new AntPathRequestMatcher("/api/**"));
     }
 }
 

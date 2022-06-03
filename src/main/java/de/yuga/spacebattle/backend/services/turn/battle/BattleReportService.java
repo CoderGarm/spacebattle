@@ -3,10 +3,12 @@ package de.yuga.spacebattle.backend.services.turn.battle;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
 import de.yuga.spacebattle.backend.repositories.turn.battle.BattleReportRepository;
+import de.yuga.spacebattle.rest.dto.turn.battle.BattleReportStatistics;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -55,15 +57,16 @@ public class BattleReportService {
         return StreamSupport.stream(fightingReports.spliterator(), false).collect(Collectors.toList());
     }
 
-    public List<BattleReport> findAllWithUser(final int idUser) {
-        return battleReportRepository.findAllWithUser(idUser);
+    public int countAllWithUser(final int idUser) {
+        return battleReportRepository.countAllWithUser(idUser);
     }
 
-    public BattleReport findLatestWithUser(final int idUser) {
-        return battleReportRepository.findLatestWithUser(idUser);
+    @Nullable
+    public BattleReport findByIdWithAllData(final int idUser, final int idBattleReport) {
+        return battleReportRepository.findByIdWithAllData(idUser, idBattleReport);
     }
 
-    public List<BattleReport> findReportsWithUserWithPaging(final int idUser, final int page, final int size) {
-        return battleReportRepository.findReportsWithUserWithPaging(idUser, page, size);
+    public Collection<BattleReportStatistics> findReportBasicInformationByPaging(final int idUser, final int page, final int size) {
+        return battleReportRepository.findReportBasicInformationByPaging(idUser, page, size);
     }
 }
