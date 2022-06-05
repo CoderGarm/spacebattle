@@ -1,13 +1,13 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.ammunition;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
 import de.yuga.spacebattle.backend.converter.DistanceConverter;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
-import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.enums.EDepositType;
+import de.yuga.spacebattle.backend.entities.turn.resources.HasCosts;
+import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.EWarheadType;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "warhead")
 @AttributeOverride(name = "id", column = @Column(name = "idWarhead"))
-public class Warhead extends AbstractEntityKey {
+public class Warhead extends HasCosts {
 
     @Nonnull
     @NotNull
@@ -43,20 +43,16 @@ public class Warhead extends AbstractEntityKey {
     @Column(nullable = false)
     private int useCapacity;
 
-    @Nonnull
-    @NotNull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
-    @JoinColumn(name = "idCosts", updatable = false)
-    private final ResourceDeposit costs = ResourceDepositInitializerCalculator.initializeResourceDeposit(Warhead.class, EDepositType.COSTS);
-
     public Warhead() {
     }
 
     public Warhead(@Nonnull final String typeName,
                    final int damageValue,
+                   @Nonnull final ETechLevel techLevel,
                    @Nonnull final Distance damageProjectionRange,
                    @Nonnull final EWarheadType warheadType,
                    final int useCapacity) {
+        super(techLevel, Warhead.class);
         Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
         Preconditions.checkNotNull(damageProjectionRange, "damageProjectionRange shouldn't be null!");
         Preconditions.checkNotNull(warheadType, "warheadType shouldn't be null!");
@@ -90,8 +86,19 @@ public class Warhead extends AbstractEntityKey {
         return useCapacity;
     }
 
-    @Nonnull
-    public ResourceDeposit getCosts() {
-        return costs;
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof Warhead)) return false;
+
+        final Warhead warhead = (Warhead) o;
+
+        return new EqualsBuilder().append(id, warhead.getId()).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(id).toHashCode();
     }
 }

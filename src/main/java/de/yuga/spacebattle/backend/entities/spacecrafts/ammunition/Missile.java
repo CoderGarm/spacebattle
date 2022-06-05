@@ -1,18 +1,18 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.ammunition;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Time;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule;
+import de.yuga.spacebattle.backend.entities.turn.resources.HasCosts;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -27,7 +27,7 @@ import java.util.List;
 @Entity
 @Table(name = "missile")
 @AttributeOverride(name = "id", column = @Column(name = "idMissile"))
-public class Missile extends AbstractEntityKey {
+public class Missile extends HasCosts {
 
     @Nonnull
     @NotNull
@@ -62,12 +62,6 @@ public class Missile extends AbstractEntityKey {
 
     @Nonnull
     @NotNull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
-    @JoinColumn(name = "idCosts", updatable = false)
-    private final ResourceDeposit costs = ResourceDepositInitializerCalculator.initializeResourceDeposit(Missile.class, EDepositType.COSTS);
-
-    @Nonnull
-    @NotNull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "idResearch")
     private Research unlockedThrough;
@@ -95,10 +89,12 @@ public class Missile extends AbstractEntityKey {
                    final int warheadCapacity,
                    final int motorCapacity,
                    final int elokaResistance,
+                   @Nonnull final ETechLevel techLevel,
                    @Nonnull final Warhead warhead,
                    @Nonnull final List<MissileMotor> missileMotors,
                    @Nonnull final Research unlockedThrough,
                    @Nonnull final AmmunitionModule ammunitionModule) {
+        super(techLevel, Missile.class);
         Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
         Preconditions.checkNotNull(warhead, "warhead shouldn't be null!");
         Preconditions.checkNotNull(missileMotors, "missileMotors shouldn't be null!");
@@ -148,16 +144,6 @@ public class Missile extends AbstractEntityKey {
     }
 
     /**
-     * Returns the costs of the pure missile body. Neither the motors nor the warhead are included.
-     *
-     * @return the costs
-     */
-    @Nonnull
-    public ResourceDeposit getCosts() {
-        return costs;
-    }
-
-    /**
      * Will calculate and return the full costs of this missile.
      *
      * @return the total costs
@@ -166,7 +152,7 @@ public class Missile extends AbstractEntityKey {
     public ResourceDeposit getCostsOverall() {
         final ResourceDeposit clonedDeposit = new ResourceDeposit(EDepositType.COSTS);
 
-        updateCosts(clonedDeposit, costs);
+        updateCosts(clonedDeposit, getCosts());
         updateCosts(clonedDeposit, warhead.getCosts());
         for (int i = 1; i <= motorAmount; i++) {
             updateCosts(clonedDeposit, missileMotor.getCosts());

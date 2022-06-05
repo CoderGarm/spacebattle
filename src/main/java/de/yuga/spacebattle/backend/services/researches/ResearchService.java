@@ -5,6 +5,7 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.repositories.researches.ResearchRepository;
 import de.yuga.spacebattle.rest.dto.researches.ResearchTree;
 import de.yuga.spacebattle.rest.dto.researches.ResearchTreeElement;
@@ -144,10 +145,12 @@ public class ResearchService {
     public Research createResearch(@Nonnull final String name,
                                    @Nonnull final String description,
                                    final int levelCap,
+                                   @Nonnull final ETechLevel techLevel,
                                    @Nullable final Research unlockedThrough) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
+        Preconditions.checkNotNull(techLevel, "techLevel shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
 
-        return researchRepository.save(new Research(name, description, levelCap, unlockedThrough));
+        return researchRepository.save(new Research(name, description, levelCap, techLevel, unlockedThrough));
     }
 }

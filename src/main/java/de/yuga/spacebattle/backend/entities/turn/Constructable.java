@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.backend.entities;
+package de.yuga.spacebattle.backend.entities.turn;
 
 
 import com.google.common.base.Preconditions;
@@ -6,7 +6,6 @@ import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
-import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EResourceType;

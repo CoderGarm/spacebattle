@@ -116,7 +116,7 @@ public class ModuleService {
                              @Nonnull final Research unlockedThrough,
                              final int useCapacity,
                              final int value,
-                             final int techLevel,
+                             @Nonnull final ETechLevel techLevel,
                              @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
@@ -145,7 +145,7 @@ public class ModuleService {
                                                      final int useCapacity,
                                                      final int value,
                                                      @Nonnull final Distance effectiveRange,
-                                                     final int techLevel,
+                                                     @Nonnull final ETechLevel techLevel,
                                                      @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
@@ -174,7 +174,7 @@ public class ModuleService {
                                    @Nonnull final Research unlockedThrough,
                                    final int useCapacity,
                                    final int value,
-                                   final int techLevel,
+                                   @Nonnull final ETechLevel techLevel,
                                    @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
@@ -202,7 +202,7 @@ public class ModuleService {
                                @Nonnull final Research unlockedThrough,
                                final int useCapacity,
                                final int value,
-                               final int techLevel,
+                               @Nonnull final ETechLevel techLevel,
                                @Nonnull final Distance damageProjectionRange,
                                final int amountDamageEmitter,
                                @Nonnull final EWeaponType weaponType,
@@ -226,7 +226,7 @@ public class ModuleService {
                                    @Nonnull final Research unlockedThrough,
                                    @Nonnull final AmmunitionModule ammunitionModule,
                                    final int useCapacity,
-                                   final int techLevel,
+                                   @Nonnull final ETechLevel techLevel,
                                    @Nonnull final EAlignmentType alignmentType,
                                    @Nonnull final CrewRequirement crewRequirement,
                                    @Nonnull final EWeaponType weaponType,
@@ -247,27 +247,31 @@ public class ModuleService {
     @Deprecated(since = "productive environment")
     public MissileMotor createMissileMotor(@Nonnull final String typeName,
                                            final int endurance,
+                                           @Nonnull final ETechLevel techLevel,
                                            @Nonnull final Acceleration acceleration,
                                            final int maneuverability,
                                            final int useCapacity) {
         Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
+        Preconditions.checkNotNull(techLevel, "techLevel shouldn't be null!");
         Preconditions.checkNotNull(acceleration, "acceleration shouldn't be null!");
 
-        return missileMotorRepository.save(new MissileMotor(typeName, endurance, acceleration, maneuverability, useCapacity));
+        return missileMotorRepository.save(new MissileMotor(typeName, endurance, techLevel, acceleration, maneuverability, useCapacity));
     }
 
     @Nonnull
     @Deprecated(since = "productive environment")
     public Warhead createWarhead(@Nonnull final String typeName,
                                  final int effectValue,
+                                 @Nonnull final ETechLevel techLevel,
                                  @Nonnull final Distance damageProjectionRange,
                                  @Nonnull final EWarheadType warheadType,
                                  final int useCapacity) {
         Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
+        Preconditions.checkNotNull(techLevel, "techLevel shouldn't be null!");
         Preconditions.checkNotNull(damageProjectionRange, "damageProjectionRange shouldn't be null!");
         Preconditions.checkNotNull(warheadType, "warheadType shouldn't be null!");
 
-        return warheadRepository.save(new Warhead(typeName, effectValue, damageProjectionRange, warheadType, useCapacity));
+        return warheadRepository.save(new Warhead(typeName, effectValue, techLevel, damageProjectionRange, warheadType, useCapacity));
     }
 
     @Nonnull
@@ -276,17 +280,19 @@ public class ModuleService {
                                  final int warheadCapacity,
                                  final int motorCapacity,
                                  final int elokaResistance,
+                                 @Nonnull final ETechLevel techLevel,
                                  @Nonnull Warhead warhead,
                                  @Nonnull List<MissileMotor> missileMotors,
                                  @Nonnull Research unlockedThrough,
                                  @Nonnull final AmmunitionModule ammunitionModule) {
         Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
+        Preconditions.checkNotNull(techLevel, "techLevel shouldn't be null!");
         Preconditions.checkNotNull(warhead, "warhead shouldn't be null!");
         Preconditions.checkNotNull(missileMotors, "missileMotors shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
         Preconditions.checkNotNull(ammunitionModule, "ammunitionModule shouldn't be null!");
 
-        return missileRepository.save(new Missile(typeName, warheadCapacity, motorCapacity, elokaResistance, warhead, missileMotors, unlockedThrough, ammunitionModule));
+        return missileRepository.save(new Missile(typeName, warheadCapacity, motorCapacity, elokaResistance, techLevel, warhead, missileMotors, unlockedThrough, ammunitionModule));
     }
 
     @Nonnull
@@ -296,7 +302,7 @@ public class ModuleService {
                                        @Nonnull final Research unlockedThrough,
                                        final int useCapacity,
                                        final int value,
-                                       final int level,
+                                       @Nonnull final ETechLevel techLevel,
                                        @Nonnull final EHyperBand hyperBand,
                                        @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
@@ -305,7 +311,7 @@ public class ModuleService {
         Preconditions.checkNotNull(hyperBand, "hyperBand shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        return propulsionRepository.save(new Propulsion(name, description, unlockedThrough, useCapacity, value, level, hyperBand, crewRequirement));
+        return propulsionRepository.save(new Propulsion(name, description, unlockedThrough, useCapacity, value, techLevel, hyperBand, crewRequirement));
     }
 
     @Nonnull
@@ -317,7 +323,7 @@ public class ModuleService {
                                              @Nonnull final ECalculationType calculationType,
                                              final int useCapacity,
                                              final int value,
-                                             final int techLevel,
+                                             @Nonnull final ETechLevel techLevel,
                                              @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
@@ -334,7 +340,7 @@ public class ModuleService {
                                                    @Nonnull final Research unlockedThrough,
                                                    final int useCapacity,
                                                    final int value,
-                                                   final int techLevel,
+                                                   @Nonnull final ETechLevel techLevel,
                                                    @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");

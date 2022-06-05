@@ -136,11 +136,11 @@ public class ColonizationService {
         debitorDeposit.updateResource(costs.getRealResourceType(), costs.getAmount());
         final Map<EEducationType, Long> requiredCrew = new HashMap<>();
         requiredCrew.put(EEducationType.NONE, 200L);
-        requiredCrew.put(EEducationType.MILITARY_MK_I, 50L);
-        requiredCrew.put(EEducationType.MILITARY_MK_II, 20L);
-        requiredCrew.put(EEducationType.CIVIL_MK_I, 100L);
-        requiredCrew.put(EEducationType.CIVIL_MK_II, 200L);
-        requiredCrew.put(EEducationType.CIVIL_MK_III, 500L);
+        requiredCrew.put(EEducationType.ENLISTED, 50L);
+        requiredCrew.put(EEducationType.OFFICER, 20L);
+        requiredCrew.put(EEducationType.SCHOOL, 100L);
+        requiredCrew.put(EEducationType.COLLEGE, 200L);
+        requiredCrew.put(EEducationType.UNIVERSITY, 500L);
         final CrewRequirement crewRequirement = new CrewRequirement(requiredCrew, EDepositType.COSTS);
 
         if (debitorDeposit.isReducingPopulationPossible(crewRequirement)) {

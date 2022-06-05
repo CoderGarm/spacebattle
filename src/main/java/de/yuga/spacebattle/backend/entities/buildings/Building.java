@@ -1,14 +1,12 @@
 package de.yuga.spacebattle.backend.entities.buildings;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.entities.turn.resources.HasCosts;
 import de.yuga.spacebattle.backend.enums.EBuildingType;
-import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.enums.ETechLevel;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -25,7 +23,7 @@ import java.math.BigDecimal;
 @AttributeOverride(name = "id", column = @Column(name = "idBuilding"))
 // todo check constraint for productionType.productionCategory and refinementSequence
 // todo check constraint for productionType.productionCategory == PRODUCE and productionType.productionTarget == POPULATION must have baseValue with single digit only
-public class Building extends AbstractEntityKey {
+public class Building extends HasCosts {
 
     @Nonnull
     @Size(min = 1, max = 30)
@@ -54,12 +52,6 @@ public class Building extends AbstractEntityKey {
 
     @Nonnull
     @NotNull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
-    @JoinColumn(name = "idCosts", updatable = false)
-    private final ResourceDeposit costs = ResourceDepositInitializerCalculator.initializeResourceDeposit(Building.class, EDepositType.COSTS);
-
-    @Nonnull
-    @NotNull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "idResearch")
     private Research unlockedThrough;
@@ -74,9 +66,11 @@ public class Building extends AbstractEntityKey {
     public Building(@Nonnull final String name,
                     @Nonnull final String description,
                     final int baseValue,
+                    @Nonnull final ETechLevel techLevel,
                     @Nonnull final ProductionType productionType,
                     @Nonnull final CrewRequirement crewRequirement,
                     @Nonnull final Research unlockedThrough) {
+        super(techLevel, Building.class);
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(productionType, "productionType shouldn't be null!");
@@ -87,7 +81,7 @@ public class Building extends AbstractEntityKey {
         this.description = description;
         this.baseValue = baseValue;
         this.productionType = productionType;
-        this.costs.setCrewRequirement(crewRequirement);
+        this.getCosts().setCrewRequirement(crewRequirement);
         this.unlockedThrough = unlockedThrough;
     }
 
@@ -118,11 +112,6 @@ public class Building extends AbstractEntityKey {
     @Nonnull
     public ProductionType getProductionType() {
         return productionType;
-    }
-
-    @Nonnull
-    public ResourceDeposit getCosts() {
-        return costs;
     }
 
     @Nonnull

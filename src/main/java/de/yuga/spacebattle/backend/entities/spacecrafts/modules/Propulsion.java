@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
+import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
 
 import javax.annotation.Nonnull;
@@ -38,7 +39,7 @@ public class Propulsion extends BaseModuleWithEffectValue {
                       @Nonnull final Research unlockedThrough,
                       final int useCapacity,
                       final int effectValue,
-                      final int techLevel,
+                      @Nonnull final ETechLevel techLevel,
                       @Nonnull final EHyperBand hyperBand,
                       @Nonnull final CrewRequirement crewRequirement) {
         super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement);

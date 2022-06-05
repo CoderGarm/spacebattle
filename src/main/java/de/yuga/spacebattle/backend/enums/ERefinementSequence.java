@@ -13,12 +13,12 @@ import javax.annotation.Nonnull;
  */
 public enum ERefinementSequence {
 
-    EDUCATION_CIVIL_I(EEducationType.NONE, EEducationType.CIVIL_MK_I),
-    EDUCATION_CIVIL_II(EEducationType.CIVIL_MK_I, EEducationType.CIVIL_MK_II),
-    EDUCATION_CIVIL_III(EEducationType.CIVIL_MK_II, EEducationType.CIVIL_MK_III),
+    EDUCATION_CIVIL_I(EEducationType.NONE, EEducationType.SCHOOL),
+    EDUCATION_CIVIL_II(EEducationType.SCHOOL, EEducationType.COLLEGE),
+    EDUCATION_CIVIL_III(EEducationType.COLLEGE, EEducationType.UNIVERSITY),
 
-    EDUCATION_MILITARY_I(EEducationType.CIVIL_MK_II, EEducationType.MILITARY_MK_I),
-    EDUCATION_MILITARY_II(EEducationType.CIVIL_MK_III, EEducationType.MILITARY_MK_II),
+    EDUCATION_MILITARY_I(EEducationType.COLLEGE, EEducationType.ENLISTED),
+    EDUCATION_MILITARY_II(EEducationType.UNIVERSITY, EEducationType.OFFICER),
     ;
 
     /**

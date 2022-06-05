@@ -5,10 +5,7 @@ import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.enums.EDepositType;
-import de.yuga.spacebattle.backend.enums.EEducationType;
-import de.yuga.spacebattle.backend.enums.EProductionCategory;
-import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.repositories.buildings.BuildingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -72,13 +69,13 @@ public class BuildingServiceTest extends BaseTestCase {
         final EResourceType researchType = EResourceType.RESEARCH;
         final Research unlockedThrough = new Research();
         Map<EEducationType, Long> crewRequirement = new HashMap<>();
-        crewRequirement.put(EEducationType.CIVIL_MK_III, 100L);
+        crewRequirement.put(EEducationType.UNIVERSITY, 100L);
         CrewRequirement militaryCrew = new CrewRequirement(crewRequirement, EDepositType.COSTS);
-        final Building expectation = new Building(name, description, baseValue, new ProductionType(researchType, EProductionCategory.PRODUCE, null), militaryCrew, unlockedThrough);
+        final Building expectation = new Building(name, description, baseValue, ETechLevel.TECH_I, new ProductionType(researchType, EProductionCategory.PRODUCE, null), militaryCrew, unlockedThrough);
         // prepare mocks
         when(buildingRepositoryMock.save(expectation)).thenReturn(expectation);
         // test method
-        final Building result = testObject.createBuilding(name, description, baseValue, new ProductionType(researchType, EProductionCategory.PRODUCE, null), EEducationType.CIVIL_MK_III, 100L, unlockedThrough);
+        final Building result = testObject.createBuilding(name, description, baseValue, ETechLevel.TECH_I, new ProductionType(researchType, EProductionCategory.PRODUCE, null), EEducationType.UNIVERSITY, 100L, unlockedThrough);
         // check expectation
         assertNotNull(result);
         assertEquals(result, expectation);

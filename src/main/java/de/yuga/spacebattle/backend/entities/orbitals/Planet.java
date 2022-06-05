@@ -81,7 +81,7 @@ public class Planet extends AbstractEntityKey {
     @Nonnull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "idResourceDeposit", updatable = false)
-    private final ResourceDeposit resourceDeposit = ResourceDepositInitializerCalculator.initializeResourceDeposit(Planet.class, EDepositType.DEPOSITS);
+    private final ResourceDeposit resourceDeposit = ResourceDepositInitializerCalculator.initializeResourceDeposit();
 
     @Nonnull
     @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, mappedBy = "planet")

@@ -3,7 +3,7 @@ package de.yuga.spacebattle.rest.dto.turn;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.Constructable;
+import de.yuga.spacebattle.backend.entities.turn.Constructable;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
 import de.yuga.spacebattle.rest.dto.buildings.Building;
 import de.yuga.spacebattle.rest.dto.constructables.buildings.Construction;

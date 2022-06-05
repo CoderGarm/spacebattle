@@ -9,6 +9,7 @@ import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.repositories.buildings.BuildingRepository;
 import org.springframework.stereotype.Service;
 
@@ -59,18 +60,20 @@ public class BuildingService {
     public Building createBuilding(@Nonnull final String name,
                                    @Nonnull final String description,
                                    final int baseValue,
+                                   @Nonnull final ETechLevel techLevel,
                                    @Nonnull final ProductionType productionType,
                                    @Nonnull final EEducationType educationType,
                                    final long amountOfWorkers,
                                    @Nonnull final Research unlockedThrough) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
+        Preconditions.checkNotNull(techLevel, "techLevel shouldn't be null!");
         Preconditions.checkNotNull(productionType, "productionType shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
 
         final Map<EEducationType, Long> crewRequirement = new HashMap<>();
         crewRequirement.put(educationType, amountOfWorkers);
-        return buildingRepository.save(new Building(name, description, baseValue, productionType, new CrewRequirement(crewRequirement, EDepositType.COSTS), unlockedThrough));
+        return buildingRepository.save(new Building(name, description, baseValue, techLevel, productionType, new CrewRequirement(crewRequirement, EDepositType.COSTS), unlockedThrough));
     }
 
     public Building findBuildingByProductionType(@Nonnull final EResourceType productionType) {

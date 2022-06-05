@@ -178,6 +178,7 @@ public class AuthApi {
             }
             final User entity = userJson.transform();
             final User saved = service.save(entity);
+            // todo colonize planet
             return ResponseEntity.ok(new UserJson(saved));
         }
         throw new NotifyWebUserException("User could not be created", validate);

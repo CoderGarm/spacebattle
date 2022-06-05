@@ -229,11 +229,11 @@
 
     alter table missile 
        drop 
-       foreign key FKdhk8trxq7c36hid883mj4p7us;
+       foreign key FK2y4rvixlct3ljky430p3bmwad;
 
     alter table missile 
        drop 
-       foreign key FK2y4rvixlct3ljky430p3bmwad;
+       foreign key FKdhk8trxq7c36hid883mj4p7us;
 
     alter table missile 
        drop 
@@ -632,9 +632,9 @@
 
     create table ammunitionModule (
        idAmmunitionModule integer not null auto_increment,
+        techLevel varchar(255) not null,
         description varchar(255) not null,
         name varchar(30) not null,
-        techLevel integer not null,
         useCapacity integer not null,
         effectValue integer not null,
         idCosts integer not null,
@@ -644,9 +644,9 @@
 
     create table armor (
        idArmor integer not null auto_increment,
+        techLevel varchar(255) not null,
         description varchar(255) not null,
         name varchar(30) not null,
-        techLevel integer not null,
         useCapacity integer not null,
         effectValue integer not null,
         idCosts integer not null,
@@ -666,6 +666,7 @@
 
     create table building (
        idBuilding integer not null auto_increment,
+        techLevel varchar(255) not null,
         baseValue integer not null,
         description varchar(255),
         increasingFactorPerLevel decimal(19,2),
@@ -716,9 +717,9 @@
 
     create table electronicWarfare (
        idElectronicWarfare integer not null auto_increment,
+        techLevel varchar(255) not null,
         description varchar(255) not null,
         name varchar(30) not null,
-        techLevel integer not null,
         useCapacity integer not null,
         effectValue integer not null,
         effectiveRange varchar(255),
@@ -785,6 +786,7 @@
 
     create table hull (
        idHull integer not null auto_increment,
+        techLevel varchar(255) not null,
         constructionCapacity integer not null,
         constructionCapacityBow integer not null,
         constructionCapacityBroadsides integer not null,
@@ -793,7 +795,7 @@
         hullType varchar(255) not null,
         name varchar(30) not null,
         overallConstructionCapacity integer not null,
-        idCosts integer,
+        idCosts integer not null,
         idResearch integer not null,
         primary key (idHull),
         check (overallConstructionCapacity >= constructionCapacity + constructionCapacityBow + constructionCapacityStern + constructionCapacityBroadsides)
@@ -829,9 +831,9 @@
 
     create table launcher (
        idLauncher integer not null auto_increment,
+        techLevel varchar(255) not null,
         description varchar(255) not null,
         name varchar(30) not null,
-        techLevel integer not null,
         useCapacity integer not null,
         alignmentType varchar(255) not null,
         weaponType varchar(255) not null,
@@ -873,13 +875,14 @@
 
     create table missile (
        idMissile integer not null auto_increment,
+        techLevel varchar(255) not null,
         elokaResistance integer not null,
         motorAmount integer not null,
         motorCapacity integer not null,
         typeName varchar(255) not null,
         warheadCapacity integer not null,
-        idAmmunitionModule integer not null,
         idCosts integer not null,
+        idAmmunitionModule integer not null,
         idMissileMotor integer not null,
         idResearch integer not null,
         idWarhead integer,
@@ -888,6 +891,7 @@
 
     create table missileMotor (
        idMissileMotor integer not null auto_increment,
+        techLevel varchar(255) not null,
         acceleration varchar(255) not null,
         endurance integer not null,
         maneuverability integer not null,
@@ -979,9 +983,9 @@
 
     create table passiveModule (
        idPassiveModule integer not null auto_increment,
+        techLevel varchar(255) not null,
         description varchar(255) not null,
         name varchar(30) not null,
-        techLevel integer not null,
         useCapacity integer not null,
         effectValue integer not null,
         calculationType varchar(255) not null,
@@ -1006,9 +1010,9 @@
 
     create table propulsion (
        idPropulsion integer not null auto_increment,
+        techLevel varchar(255) not null,
         description varchar(255) not null,
         name varchar(30) not null,
-        techLevel integer not null,
         useCapacity integer not null,
         effectValue integer not null,
         hyperBand varchar(255),
@@ -1038,10 +1042,11 @@
 
     create table research (
        idResearch integer not null auto_increment,
+        techLevel varchar(255) not null,
         description varchar(255),
         levelCap integer not null,
         name varchar(30),
-        idCosts integer,
+        idCosts integer not null,
         unlockedThrough integer,
         primary key (idResearch)
     ) engine=InnoDB;
@@ -1094,9 +1099,9 @@
 
     create table sidewall (
        idSidewall integer not null auto_increment,
+        techLevel varchar(255) not null,
         description varchar(255) not null,
         name varchar(30) not null,
-        techLevel integer not null,
         useCapacity integer not null,
         effectValue integer not null,
         idCosts integer not null,
@@ -1154,6 +1159,7 @@
 
     create table warhead (
        idWarhead integer not null auto_increment,
+        techLevel varchar(255) not null,
         damageProjectionRange varchar(255),
         damageValue bigint not null,
         typeName varchar(255) not null,
@@ -1174,9 +1180,9 @@
 
     create table weapon (
        idWeapon integer not null auto_increment,
+        techLevel varchar(255) not null,
         description varchar(255) not null,
         name varchar(30) not null,
-        techLevel integer not null,
         useCapacity integer not null,
         effectValue integer not null,
         alignmentType varchar(255) not null,
@@ -1529,14 +1535,14 @@
        references miningFactors (idMiningFactors);
 
     alter table missile 
-       add constraint FKdhk8trxq7c36hid883mj4p7us 
-       foreign key (idAmmunitionModule) 
-       references ammunitionModule (idAmmunitionModule);
-
-    alter table missile 
        add constraint FK2y4rvixlct3ljky430p3bmwad 
        foreign key (idCosts) 
        references resourceDeposit (idResourceDeposit);
+
+    alter table missile 
+       add constraint FKdhk8trxq7c36hid883mj4p7us 
+       foreign key (idAmmunitionModule) 
+       references ammunitionModule (idAmmunitionModule);
 
     alter table missile 
        add constraint FK1ledmeodyggj4capnumuak58u 

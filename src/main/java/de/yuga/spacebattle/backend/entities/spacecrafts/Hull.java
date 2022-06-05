@@ -1,15 +1,13 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
-import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.enums.EDepositType;
+import de.yuga.spacebattle.backend.entities.turn.resources.HasCosts;
 import de.yuga.spacebattle.backend.enums.EHullType;
+import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import org.hibernate.annotations.Check;
 
@@ -26,7 +24,7 @@ import javax.validation.constraints.Size;
 @Table(name = "hull")
 @Check(constraints = "overallConstructionCapacity >= constructionCapacity + constructionCapacityBow + constructionCapacityStern + constructionCapacityBroadsides")
 @AttributeOverride(name = "id", column = @Column(name = "idHull"))
-public class Hull extends AbstractEntityKey {
+public class Hull extends HasCosts {
 
     @Nonnull
     @NotNull
@@ -59,11 +57,6 @@ public class Hull extends AbstractEntityKey {
     private int constructionCapacityBroadsides;
 
     @Nonnull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
-    @JoinColumn(name = "idCosts", updatable = false)
-    private final ResourceDeposit costs = ResourceDepositInitializerCalculator.initializeResourceDeposit(Hull.class, EDepositType.COSTS);
-
-    @Nonnull
     @NotNull
     private String description;
 
@@ -88,10 +81,12 @@ public class Hull extends AbstractEntityKey {
                 final int constructionCapacityBow,
                 final int constructionCapacityStern,
                 int constructionCapacityBroadsides,
+                @Nonnull final ETechLevel techLevel,
                 @Nonnull final String description,
                 @Nonnull final Research unlockedThrough,
                 @Nonnull final EHullType hullType,
                 @Nonnull final CrewRequirement crewRequirement) {
+        super(techLevel, Hull.class);
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
@@ -107,7 +102,7 @@ public class Hull extends AbstractEntityKey {
         this.description = description;
         this.unlockedThrough = unlockedThrough;
         this.hullType = hullType;
-        this.costs.setCrewRequirement(crewRequirement);
+        this.getCosts().setCrewRequirement(crewRequirement);
     }
 
     @Nonnull
@@ -133,11 +128,6 @@ public class Hull extends AbstractEntityKey {
 
     public int getConstructionCapacityBroadsides() {
         return constructionCapacityBroadsides;
-    }
-
-    @Nonnull
-    public ResourceDeposit getCosts() {
-        return costs;
     }
 
     @Nonnull

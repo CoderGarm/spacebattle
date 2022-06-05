@@ -4,6 +4,7 @@ import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
+import de.yuga.spacebattle.backend.enums.ETechLevel;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -35,7 +36,7 @@ public class AmmunitionModule extends BaseModuleWithEffectValue {
                             @Nonnull final Research unlockedThrough,
                             final int useCapacity,
                             final int effectValue,
-                            final int techLevel,
+                            @Nonnull final ETechLevel techLevel,
                             @Nonnull final CrewRequirement crewRequirement) {
         super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement);
     }

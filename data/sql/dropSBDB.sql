@@ -229,11 +229,11 @@
 
     alter table missile 
        drop 
-       foreign key FKdhk8trxq7c36hid883mj4p7us;
+       foreign key FK2y4rvixlct3ljky430p3bmwad;
 
     alter table missile 
        drop 
-       foreign key FK2y4rvixlct3ljky430p3bmwad;
+       foreign key FKdhk8trxq7c36hid883mj4p7us;
 
     alter table missile 
        drop 

@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics;
 
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.enums.ETechLevel;
 
 import javax.annotation.Nonnull;
 import javax.persistence.MappedSuperclass;
@@ -22,7 +23,7 @@ public class BaseModuleWithEffectValue extends BaseModule {
                                      @Nonnull final Research unlockedThrough,
                                      final int useCapacity,
                                      final int effectValue,
-                                     final int techLevel,
+                                     @Nonnull final ETechLevel techLevel,
                                      @Nonnull final CrewRequirement crewRequirement) {
         super(name, description, unlockedThrough, useCapacity, techLevel, crewRequirement);
 

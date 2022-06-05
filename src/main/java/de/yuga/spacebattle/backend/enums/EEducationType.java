@@ -19,27 +19,27 @@ public enum EEducationType implements HasIconName {
     /**
      * civil Mk I is kind of elementary school
      */
-    CIVIL_MK_I(false, EEducationType.NONE, "civilI"),
+    SCHOOL(false, EEducationType.NONE, "civilI"),
 
     /**
      * civil Mk II is kind of secondary school or untrained workers
      */
-    CIVIL_MK_II(true, EEducationType.CIVIL_MK_I, "civilII"),
+    COLLEGE(true, EEducationType.SCHOOL, "civilII"),
 
     /**
      * civil Mk III is kind of internship, vocational training or a university  education
      */
-    CIVIL_MK_III(true, EEducationType.CIVIL_MK_II, "civilIII"),
+    UNIVERSITY(true, EEducationType.COLLEGE, "civilIII"),
 
     /**
-     * military Mk I is a teams rank // todo display as enlisted
+     * military Mk I is a teams rank
      */
-    MILITARY_MK_I(true, EEducationType.CIVIL_MK_II, "soldier"),
+    ENLISTED(true, EEducationType.COLLEGE, "soldier"),
 
     /**
-     * military Mk II is a officers rank // todo display as officer
+     * military Mk II is a officers rank
      */
-    MILITARY_MK_II(true, EEducationType.CIVIL_MK_III, "officer"),
+    OFFICER(true, EEducationType.UNIVERSITY, "officer"),
     ;
 
     /**

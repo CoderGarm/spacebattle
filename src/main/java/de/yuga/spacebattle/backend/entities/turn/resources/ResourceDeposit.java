@@ -83,6 +83,9 @@ public class ResourceDeposit extends AbstractEntityKey {
     public ResourceDeposit() {
     }
 
+    public ResourceDeposit(final int techLevel) {
+    }
+
     public ResourceDeposit(@Nonnull final ResourceDeposit resourceDeposit) {
         Preconditions.checkNotNull(resourceDeposit, "resourceDeposit shouldn't be null!");
 

@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
+import de.yuga.spacebattle.backend.enums.ETechLevel;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -30,8 +31,9 @@ public class BaseModule {
     @Schema(description = "The base effect value of this module.")
     private Integer effectValue;
 
+    @Nonnull
     @Schema(required = true, description = "The level of this module.")
-    private int techLevel;
+    private ETechLevel techLevel;
 
     protected BaseModule() {
     }
@@ -80,7 +82,8 @@ public class BaseModule {
         return effectValue;
     }
 
-    public int getTechLevel() {
+    @Nonnull
+    public ETechLevel getTechLevel() {
         return techLevel;
     }
 }

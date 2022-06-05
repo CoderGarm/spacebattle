@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
 import de.yuga.spacebattle.backend.enums.EAlignmentType;
+import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 import org.hibernate.annotations.Check;
@@ -64,7 +65,7 @@ public class Launcher extends BaseModule {
                     @Nonnull final Research unlockedThrough,
                     @Nonnull final AmmunitionModule ammunitionModule,
                     final int useCapacity,
-                    final int techLevel,
+                    @Nonnull final ETechLevel techLevel,
                     @Nonnull final EAlignmentType alignmentType,
                     @Nonnull final CrewRequirement crewRequirement,
                     @Nonnull final EWeaponType weaponType,

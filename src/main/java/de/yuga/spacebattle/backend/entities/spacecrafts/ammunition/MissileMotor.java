@@ -1,12 +1,12 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.ammunition;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
 import de.yuga.spacebattle.backend.converter.AccelerationConverter;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
-import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.enums.EDepositType;
+import de.yuga.spacebattle.backend.entities.turn.resources.HasCosts;
+import de.yuga.spacebattle.backend.enums.ETechLevel;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "missileMotor")
 @AttributeOverride(name = "id", column = @Column(name = "idMissileMotor"))
-public class MissileMotor extends AbstractEntityKey {
+public class MissileMotor extends HasCosts {
 
     @Nonnull
     @NotNull
@@ -46,20 +46,16 @@ public class MissileMotor extends AbstractEntityKey {
     @Column(nullable = false)
     private int useCapacity;
 
-    @Nonnull
-    @NotNull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
-    @JoinColumn(name = "idCosts", updatable = false)
-    private final ResourceDeposit costs = ResourceDepositInitializerCalculator.initializeResourceDeposit(MissileMotor.class, EDepositType.COSTS);
-
     public MissileMotor() {
     }
 
     public MissileMotor(@Nonnull final String typeName,
                         final int endurance,
+                        @Nonnull final ETechLevel techLevel,
                         @Nonnull final Acceleration acceleration,
                         final int maneuverability,
                         final int useCapacity) {
+        super(techLevel, MissileMotor.class);
         Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
         Preconditions.checkNotNull(acceleration, "acceleration shouldn't be null!");
 
@@ -91,8 +87,19 @@ public class MissileMotor extends AbstractEntityKey {
         return useCapacity;
     }
 
-    @Nonnull
-    public ResourceDeposit getCosts() {
-        return costs;
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof MissileMotor)) return false;
+
+        final MissileMotor that = (MissileMotor) o;
+
+        return new EqualsBuilder().append(id, that.getId()).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(id).toHashCode();
     }
 }
