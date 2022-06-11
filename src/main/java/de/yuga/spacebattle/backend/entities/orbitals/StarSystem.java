@@ -17,7 +17,9 @@ import java.util.Set;
  * The star system which every action founds a place.
  */
 @NamedQueries({
-        @NamedQuery(name = "StarSystem.getAll", query = "SELECT s FROM StarSystem s")
+        @NamedQuery(name = "StarSystem.getAll", query = "SELECT s FROM StarSystem s"),
+        @NamedQuery(name = "StarSystem.getAllColonizable", query = "SELECT DISTINCT s FROM StarSystem s LEFT JOIN s.planets p WHERE p.owner IS NULL"),
+        @NamedQuery(name = "StarSystem.getAllColonized", query = "SELECT DISTINCT s FROM StarSystem s LEFT JOIN s.planets p WHERE p.owner IS NOT NULL"),
 })
 @Entity
 @Table(name = "starSystem",

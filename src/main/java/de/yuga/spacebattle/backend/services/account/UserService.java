@@ -83,18 +83,6 @@ public class UserService {
     }
 
     @Nonnull
-    public Map<Research, Integer> getResearchesForUser(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-
-        return userRepository.getResearchesForUser(user.getId());
-    }
-
-    @Nonnull
-    public Map<Research, Integer> getResearchesForUser(final int idUser) {
-        return userRepository.getResearchesForUser(idUser);
-    }
-
-    @Nonnull
     public Set<StarSystem> getKnownStarSystems(final int idUser) {
         return userRepository.getKnownStarSystems(idUser);
     }
@@ -126,26 +114,6 @@ public class UserService {
         return userRepository.save(entity);
     }
 
-    @Nonnull
-    @Deprecated(since = "productive environment")
-    public User addUnlockedResearch(@Nonnull final User entity, @Nonnull final Research... researches) {
-        Preconditions.checkNotNull(entity, "entity shouldn't be null!");
-        Preconditions.checkNotNull(researches, "researches shouldn't be null!");
-
-        final User user = findWithResearches(entity.getId());
-        for (Research research : researches) {
-            Integer level = user.getResearches().get(research);
-            if (level == null) {
-                level = 1;
-            } else {
-                level++;
-            }
-            user.getResearches().put(research, level);
-        }
-        return this.save(user);
-    }
-
-
     @Nullable
     public User findByUsernameAndEmail(@Nonnull final String username, @Nonnull final String email) {
         Preconditions.checkNotNull(username, "username shouldn't be null!");
@@ -172,11 +140,6 @@ public class UserService {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
 
         return userRepository.getColonizations(user);
-    }
-
-    @Nullable
-    public User getWithResearches(final int idUser) {
-        return userRepository.getWithResearches(idUser);
     }
 
     /**

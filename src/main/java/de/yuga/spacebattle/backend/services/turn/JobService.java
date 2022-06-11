@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.researches.ActiveResearchTuple;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
@@ -27,9 +28,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -87,6 +86,23 @@ public class JobService {
         Preconditions.checkNotNull(facility, "facility shouldn't be null!");
 
         return jobRepository.findAllJobsForConstruction(facility);
+    }
+
+    public boolean isJobActiveFor(@Nonnull final Research research) {
+        Preconditions.checkNotNull(research, "research shouldn't be null!");
+
+        return jobRepository.isJobActiveFor(research);
+    }
+
+    public List<Research> getResearchesFromActiveJobs(final int idUser) {
+        return jobRepository.getResearchesFromActiveJobs(idUser);
+    }
+
+    @Nonnull
+    public List<ActiveResearchTuple> isJobActiveFor(@Nonnull final List<Research> researches) {
+        Preconditions.checkNotNull(researches, "researches shouldn't be null!");
+
+        return Objects.requireNonNullElse(jobRepository.isJobActiveFor(researches), new ArrayList<>());
     }
 
     /**

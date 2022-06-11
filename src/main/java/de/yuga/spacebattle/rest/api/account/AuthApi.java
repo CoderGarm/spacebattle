@@ -2,7 +2,13 @@ package de.yuga.spacebattle.rest.api.account;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.turn.Colonization;
+import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.backend.services.researches.ResearchService;
+import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.config.security.JwtTokenUtil;
 import de.yuga.spacebattle.rest.config.security.WebUserDetails;
@@ -36,6 +42,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import java.util.List;
 import java.util.Set;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PUBLIC_BASE_ENDPOINT;
@@ -51,7 +58,13 @@ public class AuthApi {
     public static final String ENDPOINT = "auth";
 
     @Nonnull
-    private final UserService service;
+    private final UserService userService;
+
+    @Nonnull
+    private final ResearchService researchService;
+
+    @Nonnull
+    private final ColonizationService colonizationService;
 
     @Nonnull
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
@@ -65,14 +78,19 @@ public class AuthApi {
     @Autowired
     public AuthApi(@Nonnull final AuthenticationManager authenticationManager,
                    @Nonnull final JwtTokenUtil jwtTokenUtil,
-                   @Nonnull final UserService userService) {
+                   @Nonnull final UserService userService,
+                   @Nonnull final ResearchService researchService,
+                   @Nonnull final ColonizationService colonizationService) {
         Preconditions.checkNotNull(authenticationManager, "authenticationManager shouldn't be null!");
         Preconditions.checkNotNull(jwtTokenUtil, "jwtTokenUtil shouldn't be null!");
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
-
+        Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
+        Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
+        this.userService = userService;
+        this.researchService = researchService;
         this.authenticationManager = authenticationManager;
         this.jwtTokenUtil = jwtTokenUtil;
-        this.service = userService;
+        this.colonizationService = colonizationService;
     }
 
     @PostMapping("/login")
@@ -170,15 +188,23 @@ public class AuthApi {
 
         final Set<ConstraintViolation<UserReq>> validate = validator.validate(userJson);
         if (validate.isEmpty()) {
-            if (service.existsEMail(userJson.getEmail())) {
+            if (userService.existsEMail(userJson.getEmail())) {
                 throw new NotifyWebUserException("eMail is already in use.");
             }
-            if (service.existsUsername(userJson.getUsername())) {
+            if (userService.existsUsername(userJson.getUsername())) {
                 throw new NotifyWebUserException("Username is already in use.");
             }
             final User entity = userJson.transform();
-            final User saved = service.save(entity);
-            // todo colonize planet
+            final User saved = userService.save(entity);
+
+            final List<Research> researchesWithoutPrecondition = researchService.getResearchesWithoutPrecondition();
+            researchService.addResearch(saved, researchesWithoutPrecondition);
+
+            final Planet planet = colonizationService.findPlanetForNewUser();
+            MasterOfTheUniverseService.populateNewColonization(planet.getResourceDeposit());
+            final Colonization colonization = new Colonization(saved, planet, planet.getResourceDeposit().getCrewRequirement(), 0);
+            colonizationService.colonizePlanet(colonization);
+
             return ResponseEntity.ok(new UserJson(saved));
         }
         throw new NotifyWebUserException("User could not be created", validate);
@@ -194,7 +220,7 @@ public class AuthApi {
             }
     )
     public ResponseEntity<?> checkUsername(@PathVariable("userName") @Nullable final String userName) {
-        if (StringUtils.isBlank(userName) || service.existsUsername(userName)) {
+        if (StringUtils.isBlank(userName) || userService.existsUsername(userName)) {
             return ResponseEntity.ok(false);
         }
         return ResponseEntity.ok(true);
@@ -210,7 +236,7 @@ public class AuthApi {
             }
     )
     public ResponseEntity<?> checkEmail(@PathVariable("eMail") @Nullable final String eMail) {
-        if (StringUtils.isBlank(eMail) || service.existsEMail(eMail)) {
+        if (StringUtils.isBlank(eMail) || userService.existsEMail(eMail)) {
             return ResponseEntity.ok(false);
         }
         return ResponseEntity.ok(true);

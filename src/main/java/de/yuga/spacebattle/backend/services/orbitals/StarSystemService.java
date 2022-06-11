@@ -3,7 +3,6 @@ package de.yuga.spacebattle.backend.services.orbitals;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
-import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.repositories.orbitals.StarSystemRepository;
@@ -38,9 +37,24 @@ public class StarSystemService {
         return StreamSupport.stream(allById.spliterator(), false).collect(Collectors.toList());
     }
 
+    /**
+     * Returns all system which has at least one free planet.
+     *
+     * @return star systems with uncolonized planets
+     */
     @Nonnull
-    public List<StarSystem> findAllUncolonized() {
-        return findAll().stream().filter(system -> system.getPlanets().stream().anyMatch(Planet::isColonizable)).collect(Collectors.toList());
+    public List<StarSystem> findAllColonizable() {
+        return starsystemRepository.findAllColonizable();
+    }
+
+    /**
+     * Returns all system which has at least one colonized planet.
+     *
+     * @return star systems with uncolonized planets
+     */
+    @Nonnull
+    public List<StarSystem> findAllColonized() {
+        return starsystemRepository.findAllColonized();
     }
 
     @Nullable

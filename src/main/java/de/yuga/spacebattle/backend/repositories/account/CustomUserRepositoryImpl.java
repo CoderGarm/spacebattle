@@ -15,7 +15,9 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class CustomUserRepositoryImpl implements CustomUserRepository {
@@ -75,30 +77,6 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
         return em.createNamedQuery("User.getWithKnownStarSystems", User.class)
                 .setParameter("idUser", idUser)
                 .getSingleResult();
-    }
-
-    @Nonnull
-    @Override
-    public Map<Research, Integer> getResearchesForUser(final int idUser) {
-        try {
-            return em.createNamedQuery("User.getWithResearches", User.class)
-                    .setParameter("idUser", idUser)
-                    .getSingleResult().getResearches();
-        } catch (final NoResultException e) {
-            return new HashMap<>();
-        }
-    }
-
-    @Nullable
-    @Override
-    public User getWithResearches(final int idUser) {
-        try {
-            return em.createNamedQuery("User.getWithResearches", User.class)
-                    .setParameter("idUser", idUser)
-                    .getSingleResult();
-        } catch (final NoResultException e) {
-            return null;
-        }
     }
 
     @Nonnull

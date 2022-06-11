@@ -6,18 +6,14 @@ import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
-import de.yuga.spacebattle.backend.enums.EDepositType;
-import de.yuga.spacebattle.backend.enums.EEducationType;
-import de.yuga.spacebattle.backend.enums.EResourceType;
-import de.yuga.spacebattle.backend.enums.ETechLevel;
+import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.repositories.buildings.BuildingRepository;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class BuildingService {
@@ -80,5 +76,30 @@ public class BuildingService {
         Preconditions.checkNotNull(productionType, "productionType shouldn't be null!");
 
         return buildingRepository.findBuildingByProductionTarget(productionType);
+    }
+
+    @Nonnull
+    public List<Building> findBuildingByTechLevel(@Nonnull final ETechLevel techLevel) {
+        Preconditions.checkNotNull(techLevel, "techLevel shouldn't be null!");
+
+        final List<Building> buildingByTechLevel = buildingRepository.findBuildingByTechLevel(techLevel);
+        return Objects.requireNonNullElse(buildingByTechLevel, new ArrayList<>());
+    }
+
+    /**
+     * Returns the basic buildings for a newly colonized planet.
+     *
+     * @return the buildings
+     */
+    public List<Building> findBasicBuildings() {
+        final Set<ProductionType> basicTypes = new HashSet<>();
+        basicTypes.add(new ProductionType(EResourceType.CONSTRUCTION, EProductionCategory.PRODUCE, null));
+        basicTypes.add(new ProductionType(EResourceType.CREDITS, EProductionCategory.PRODUCE, null));
+        basicTypes.add(new ProductionType(EResourceType.METALORE, EProductionCategory.PRODUCE, null));
+        basicTypes.add(new ProductionType(EResourceType.POPULATION, EProductionCategory.PRODUCE, null));
+        basicTypes.add(new ProductionType(EResourceType.POPULATION, EProductionCategory.CAPACITY, null));
+        basicTypes.add(new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_CIVIL_I));
+
+        return findBuildingByTechLevel(ETechLevel.TECH_I).stream().filter(b -> basicTypes.contains(b.getProductionType())).collect(Collectors.toList());
     }
 }

@@ -5,6 +5,8 @@ import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -16,6 +18,9 @@ import java.util.List;
 
 @Service
 public class CustomPlanetRepositoryImpl implements CustomPlanetRepository {
+
+    @Nonnull
+    private final static Logger LOGGER = LoggerFactory.getLogger(CustomPlanetRepositoryImpl.class);
 
     @PersistenceContext
     private EntityManager em;

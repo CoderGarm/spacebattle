@@ -8,7 +8,6 @@ import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public interface CustomUserRepository {
@@ -34,12 +33,6 @@ public interface CustomUserRepository {
 
     @Nullable
     User findWithKnownStarSystems(int idUser);
-
-    @Nonnull
-    Map<Research, Integer> getResearchesForUser(int idUser);
-
-    @Nullable
-    User getWithResearches(int idUser);
 
     @Nonnull
     Set<StarSystem> getKnownStarSystems(int idUser);

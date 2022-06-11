@@ -4,6 +4,8 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.ERefinementSequence;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -73,13 +75,19 @@ public class ProductionType {
         return refinementSequence;
     }
 
-    @Nonnull
-    public String getRefinementSequenceAsString() {
-        if (refinementSequence == null) {
-            return "";
-        }
-        final Enum<?> educt = refinementSequence.getEduct();
-        final Enum<?> product = refinementSequence.getProduct();
-        return educt.name() + " to " + product.name();
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof ProductionType)) return false;
+
+        final ProductionType that = (ProductionType) o;
+
+        return new EqualsBuilder().append(productionTarget, that.productionTarget).append(productionCategory, that.productionCategory).append(refinementSequence, that.refinementSequence).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(productionTarget).append(productionCategory).append(refinementSequence).toHashCode();
     }
 }

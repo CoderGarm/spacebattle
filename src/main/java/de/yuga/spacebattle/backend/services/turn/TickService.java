@@ -23,6 +23,7 @@ import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
 import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -68,6 +69,9 @@ public class TickService {
     private final UserService userService;
 
     @Nonnull
+    private final ResearchService researchService;
+
+    @Nonnull
     private final ColonizationService colonizationService;
 
     @Nonnull
@@ -87,6 +91,7 @@ public class TickService {
                        @Nonnull final FleetService fleetService,
                        @Nonnull final ConstructionService constructionService,
                        @Nonnull final UserService userService,
+                       @Nonnull final ResearchService researchService,
                        @Nonnull final ColonizationService colonizationService,
                        @Nonnull final WarShipService warShipService,
                        @Nonnull final BattleReportService battleReportService,
@@ -98,6 +103,7 @@ public class TickService {
         Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
+        Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
         Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
         Preconditions.checkNotNull(battleReportService, "fightingReportService shouldn't be null!");
         Preconditions.checkNotNull(battleService, "battleService shouldn't be null!");
@@ -109,6 +115,7 @@ public class TickService {
         this.fleetService = fleetService;
         this.constructionService = constructionService;
         this.userService = userService;
+        this.researchService = researchService;
         this.colonizationService = colonizationService;
         this.warShipService = warShipService;
         this.battleReportService = battleReportService;
@@ -265,8 +272,7 @@ public class TickService {
                         if (research == null || targetLevel == null) {
                             throw new NotifyWebUserException("Oh fuck, this should not happen while research whatever!");
                         }
-                        owner.getResearches().put(research, targetLevel);
-                        userService.save(owner);
+                        researchService.addResearch(owner, List.of(research));
                         break;
                     case CONSTRUCTION:
 

@@ -7,7 +7,7 @@ import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
-import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.researches.ResearchLevel;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Job;
@@ -22,9 +22,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 @NamedQueries({
@@ -34,7 +32,6 @@ import java.util.Set;
         @NamedQuery(name = "User.login", query = "SELECT u FROM User u LEFT JOIN FETCH u.ownedPlanets p LEFT JOIN FETCH u.alliance a LEFT JOIN FETCH u.researches r WHERE UPPER(u.username) = :username AND UPPER(u.password) = UPPER(:password)"),
         @NamedQuery(name = "User.getWithResearchesAndJobs", query = "SELECT u FROM User u LEFT JOIN FETCH u.researches r LEFT JOIN FETCH u.jobs j WHERE u.id = :idUser"),
         @NamedQuery(name = "User.getWithKnownStarSystems", query = "SELECT u FROM User u LEFT JOIN FETCH u.knownStarSystems r WHERE u.id = :idUser"),
-        @NamedQuery(name = "User.getWithResearches", query = "SELECT u FROM User u LEFT JOIN FETCH u.researches r WHERE u.id = :idUser"),
         @NamedQuery(name = "User.getColonizations", query = "SELECT u FROM User u LEFT JOIN FETCH u.colonizations r WHERE u = :user"),
         @NamedQuery(name = "User.findByUsernameExact", query = "SELECT u.id FROM User u WHERE UPPER(u.username) = UPPER(:username)"),
         @NamedQuery(name = "User.findByEMailExact", query = "SELECT u.id FROM User u WHERE UPPER(u.email) = UPPER(:email)"),
@@ -87,11 +84,9 @@ public class User extends AbstractEntityKey {
      */
     @Nonnull
     @NotNull
-    @ElementCollection
-    @MapKeyJoinColumn(name = "idResearch", referencedColumnName = "idResearch")
-    @Column(name = "level")
-    @CollectionTable(name = "unlockedResearch", joinColumns = @JoinColumn(name = "idUser"))
-    private final Map<Research, Integer> researches = new HashMap<>();
+    @OneToMany
+    @JoinColumn(name = "idUser")
+    private final Set<ResearchLevel> researches = new HashSet<>();
 
     /**
      * The currently running jobs for the user.
@@ -155,7 +150,6 @@ public class User extends AbstractEntityKey {
         this.userRole = role;
     }
 
-
     @Nonnull
     public String getUsername() {
         return username;
@@ -209,7 +203,7 @@ public class User extends AbstractEntityKey {
     }
 
     @Nonnull
-    public Map<Research, Integer> getResearches() {
+    public Set<ResearchLevel> getResearches() {
         return researches;
     }
 

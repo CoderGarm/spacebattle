@@ -17,6 +17,8 @@ import javax.validation.constraints.NotNull;
         @NamedQuery(name = "Job.getAll", query = "SELECT p FROM Job p"),
         @NamedQuery(name = "Job.getAllByOwner", query = "SELECT p FROM Job p WHERE p.owner = :owner"),
         @NamedQuery(name = "Job.getAllForConstruction", query = "SELECT p FROM Job p WHERE p.facility = :facility"),
+        @NamedQuery(name = "Job.isPresentForResearch", query = "SELECT CASE WHEN (COUNT(p) > 0)  THEN TRUE ELSE FALSE END FROM Job p WHERE p.constructable.research = :research"),
+        @NamedQuery(name = "Job.isPresentForResearches", query = "SELECT new de.yuga.spacebattle.backend.entities.researches.ActiveResearchTuple(p.constructable.research, CASE WHEN (COUNT(p) > 0)  THEN TRUE ELSE FALSE END) FROM Job p WHERE p.constructable.research IN (:researches)"),
         @NamedQuery(name = "Job.getAllForPlanet", query = "SELECT p FROM Job p WHERE p.facility.planet.id = :idPlanet")
 })
 @Entity

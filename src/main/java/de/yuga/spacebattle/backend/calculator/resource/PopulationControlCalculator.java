@@ -69,7 +69,15 @@ public class PopulationControlCalculator {
 
         final BigDecimal K = constructionsCapacity.stream().map(TickOutputCalculator::getTickOutputByLevelForPopulation).reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        if (N.compareTo(BigDecimal.ZERO) == 0) {
+            // no bum no sum
+            return 0;
+        }
         final BigDecimal increasingFactorByCurrentPopulation = r.multiply(N);
+        if (K.compareTo(BigDecimal.ZERO) == 0) {
+            // if no housing presents, a lot of people must die
+            return increasingFactorByCurrentPopulation.abs().negate().multiply(N, MATH_CONTEXT_INTEGER).longValue();
+        }
         final BigDecimal capacityLimitFactor = BigDecimal.ONE.subtract(N.divide(K, MATH_CONTEXT_MORE_PRECISION));
         // rounding down to long
         return increasingFactorByCurrentPopulation.multiply(capacityLimitFactor, MATH_CONTEXT_INTEGER).longValue();

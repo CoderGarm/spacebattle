@@ -3,9 +3,11 @@ package de.yuga.spacebattle.backend.services.turn;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
+import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
@@ -13,24 +15,35 @@ import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EEducationType;
+import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.turn.ColonizationRepository;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.turn.resources.ResourceAmount;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit.MATH_CONTEXT_MORE_PRECISION;
 
 @Service
 public class ColonizationService {
+
+    @Nonnull
+    private final static Logger LOGGER = LoggerFactory.getLogger(ColonizationService.class);
 
     @Nonnull
     private final ColonizationRepository repository;
@@ -40,6 +53,9 @@ public class ColonizationService {
 
     @Nonnull
     private final PlanetService planetService;
+
+    @Nonnull
+    private final StarSystemService starSystemService;
 
     @Nonnull
     private final BuildingService buildingService;
@@ -53,15 +69,18 @@ public class ColonizationService {
     public ColonizationService(@Nonnull final ColonizationRepository repository,
                                @Nonnull final UserService userService,
                                @Nonnull final PlanetService planetService,
+                               @Nonnull final StarSystemService starSystemService,
                                @Nonnull final BuildingService buildingService) {
         Preconditions.checkNotNull(repository, "colonizationRepository shouldn't be null!");
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
+        Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
         Preconditions.checkNotNull(buildingService, "buildingService shouldn't be null!");
 
         this.repository = repository;
         this.userService = userService;
         this.planetService = planetService;
+        this.starSystemService = starSystemService;
         this.buildingService = buildingService;
     }
 
@@ -157,8 +176,8 @@ public class ColonizationService {
     }
 
     /**
-     * Colonizes a planet for a owner.
-     * Currently this implies that the new owner will get all information about the system without buying it especially.
+     * Colonizes a planet for an owner.
+     * Currently, this implies that the new owner will get all information about the system without buying it especially.
      *
      * @param colonization the running colonization
      * @return the colonized planet
@@ -166,6 +185,7 @@ public class ColonizationService {
     @Transactional(rollbackFor = Exception.class)
     public Planet colonizePlanet(@Nonnull final Colonization colonization) {
         Preconditions.checkNotNull(colonization, "colonization shouldn't be null!");
+        Preconditions.checkState(!(colonization.getDoneAtZero() > 0), "colonization cannot be done if the ship isn't in the orbit!");
 
         final User owner = colonization.getUser();
         final Planet planet = colonization.getTarget();
@@ -173,10 +193,25 @@ public class ColonizationService {
         final ResourceDeposit creditorDeposit = planet.getResourceDeposit();
         final CrewRequirement requiredCrew = colonization.getCosts().getCrewRequirement();
         creditorDeposit.updatePopulation(requiredCrew);
-        final Building constructionYard = buildingService.findBuildingByProductionType(EResourceType.CONSTRUCTION);
-        final Construction constructedConstructionYard = new Construction(planet, constructionYard, 1);
-        // todo add other mandatory buildings: living room and hospital
-        planet.getConstructions().add(constructedConstructionYard);
+
+        final List<Building> basicBuildings = buildingService.findBasicBuildings();
+        basicBuildings.forEach(building -> {
+            final int level;
+            if (EResourceType.POPULATION == building.getProductionTarget() && EProductionCategory.CAPACITY == building.getProductionType().getProductionCategory()) {
+                // calculate which level must a capacity construction have to suit all the people
+                final int baseValue = building.getBaseValue();
+                final BigDecimal increasingFactorPerLevel = BigDecimal.ONE.add(building.getIncreasingFactorPerLevel());
+                final BigDecimal levelTo = new BigDecimal(creditorDeposit.getCrewRequirement().getSumOfPopulation())
+                        .divide(new BigDecimal(baseValue).multiply(increasingFactorPerLevel), MATH_CONTEXT_MORE_PRECISION)
+                        .add(BigDecimal.ONE);
+                // be nice and add two levels - buildings on higher levels are not cheap
+                level = levelTo.intValue() + 2;
+            } else {
+                level = 1;
+            }
+            final Construction constructedConstructionYard = new Construction(planet, building, level);
+            planet.getConstructions().add(constructedConstructionYard);
+        });
         owner.addKnownStarSystems(planet.getSystem());
         userService.save(owner);
         return planetService.save(planet);
@@ -225,5 +260,48 @@ public class ColonizationService {
         ResourceDeposit c = new ResourceDeposit(EDepositType.COSTS);
         c.setAbsoluteResourceValue(costs.getRealResourceType(), costs.getAmount());
         return resourceDeposit.isPayingPossible(c);
+    }
+
+    /**
+     * Tries to find a free planet which is as far as possible located from other colonized systems.
+     *
+     * @return the planet which is as far as possible away from other colonized systems
+     */
+    @Nonnull
+    public Planet findPlanetForNewUser() {
+        final List<StarSystem> allColonized = starSystemService.findAllColonized();
+
+        final List<StarSystem> allColonizable = starSystemService.findAllColonizable();
+        // remove systems which are already colonized
+        allColonizable.removeIf(s -> s.getPlanets().stream().anyMatch(p -> !p.isColonizable()));
+        if (allColonizable.isEmpty()) {
+            LOGGER.warn("THERE ARE NO FREE PLANETS! It would be great if we could create new systems and planets!");
+            throw new NotifyWebUserException("Sorry, but we have to make some more universe - ours is done for now.");
+        }
+
+        final Map<Orbit, StarSystem> colonizableByOrbit = allColonizable.stream().collect(Collectors.toMap(StarSystem::getOrbit, Function.identity()));
+        final Map<Orbit, StarSystem> colonizedByOrbit = allColonized.stream().collect(Collectors.toMap(StarSystem::getOrbit, Function.identity()));
+        final List<OrbitalDistanceMarker> marker = new ArrayList<>();
+        colonizableByOrbit.keySet().forEach(colonizable -> colonizedByOrbit.keySet().forEach(colonized -> marker.add(new OrbitalDistanceMarker(colonizable, colonized))));
+        marker.sort(Comparator.comparing(o -> o.distance));
+
+        final OrbitalDistanceMarker biggestDistance = marker.get(marker.size() - 1);
+        final StarSystem starSystem = colonizableByOrbit.get(biggestDistance.first);
+        final List<Planet> planets = new ArrayList<>(starSystem.getPlanets());
+        final int randomIndex = ThreadLocalRandom.current().nextInt(0, planets.size() - 1);
+        return planets.get(randomIndex);
+    }
+
+    private static class OrbitalDistanceMarker {
+
+        Orbit first;
+        Orbit second;
+        Distance distance;
+
+        public OrbitalDistanceMarker(final Orbit first, final Orbit second) {
+            this.first = first;
+            this.second = second;
+            this.distance = first.getDistance(second);
+        }
     }
 }

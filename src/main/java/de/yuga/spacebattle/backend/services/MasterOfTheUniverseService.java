@@ -12,7 +12,6 @@ import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
@@ -28,6 +27,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
+import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
@@ -46,6 +46,7 @@ import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.spacecraft.HullService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
+import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,11 +57,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit.MATH_CONTEXT_MORE_PRECISION;
 
 /**
  * The master of all. Do do all the dev-stuff which could be removed or placed somewhere else.
@@ -122,6 +120,9 @@ public class MasterOfTheUniverseService {
     @Nonnull
     private final ForumService forumService;
 
+    @Nonnull
+    private final ColonizationService colonizationService;
+
     @Autowired
     public MasterOfTheUniverseService(@Nonnull final TickService tickService,
                                       @Nonnull final UserService userService,
@@ -136,7 +137,8 @@ public class MasterOfTheUniverseService {
                                       @Nonnull final ConstructionService constructionService,
                                       @Nonnull final FleetService fleetService,
                                       @Nonnull final WarShipService warShipService,
-                                      @Nonnull final ForumService forumService) {
+                                      @Nonnull final ForumService forumService,
+                                      @Nonnull final ColonizationService colonizationService) {
         Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");
@@ -151,6 +153,7 @@ public class MasterOfTheUniverseService {
         Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         Preconditions.checkNotNull(warShipService, "warShipService shouldn't be null!");
         Preconditions.checkNotNull(forumService, "forumService shouldn't be null!");
+        Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
 
         this.tickService = tickService;
         this.userService = userService;
@@ -166,6 +169,7 @@ public class MasterOfTheUniverseService {
         this.fleetService = fleetService;
         this.warShipService = warShipService;
         this.forumService = forumService;
+        this.colonizationService = colonizationService;
     }
 
     /**
@@ -420,8 +424,8 @@ public class MasterOfTheUniverseService {
         Building researchB = building("Research Laboratories", "The lab investigates researches.", 10, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.RESEARCH, EProductionCategory.PRODUCE, null), EEducationType.UNIVERSITY, unlocksLaboratory);
         Building bank = building("Market place", "The market makes money.", 10, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.CREDITS, EProductionCategory.PRODUCE, null), EEducationType.COLLEGE, unlocksBank);
         Building metalsWorks = building("Metal works", "Metals for progress.", 10, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.METALORE, EProductionCategory.PRODUCE, null), EEducationType.COLLEGE, unlocksMetals);
-        Building orbitalOres = building("Special orbital ores", "Better metals for more progress.", 10, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.RARE_ELEMENTS, EProductionCategory.PRODUCE, null), EEducationType.UNIVERSITY, unlocksMecur);
-        Building investigations = building("Asynchronous Investigations", "The clock works creates time.", 10, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.HEAVY_METALS, EProductionCategory.PRODUCE, null), EEducationType.UNIVERSITY, unlocksHyperWorks);
+        Building orbitalOres = building("Special orbital ores", "Heavier metals for more progress.", 10, 10, ETechLevel.TECH_II, new ProductionType(EResourceType.RARE_ELEMENTS, EProductionCategory.PRODUCE, null), EEducationType.UNIVERSITY, unlocksMecur);
+        Building investigations = building("Asynchronous Investigations", "Rare elements for the future.", 10, 10, ETechLevel.TECH_III, new ProductionType(EResourceType.HEAVY_METALS, EProductionCategory.PRODUCE, null), EEducationType.UNIVERSITY, unlocksHyperWorks);
 
         Building livingRoom = building("Living room", "Everyone needs a home", 200, 15, ETechLevel.TECH_I, new ProductionType(EResourceType.POPULATION, EProductionCategory.CAPACITY, null), EEducationType.COLLEGE, livingStuff);
         Building hospital = building("Hospital", "Everyone needs a doctor", 1, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.POPULATION, EProductionCategory.PRODUCE, null), EEducationType.UNIVERSITY, livingStuff);
@@ -432,8 +436,8 @@ public class MasterOfTheUniverseService {
         Building militaryAcademy = building("Military Academy", "for the guys which are silent", 100, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_MILITARY_II), EEducationType.OFFICER, livingStuff);
         LOGGER.info("Buildings created");
 
-        colonizePlanet(u1, p11, constructionYard, researchB, bank, metalsWorks, livingRoom, hospital, elementarySchool);
-        colonizePlanet(u2, p21, constructionYard, researchB, bank, metalsWorks, livingRoom, hospital, elementarySchool);
+        colonizePlanet(u1, p11);
+        colonizePlanet(u2, p21);
         LOGGER.info("Planets colonized and populated.");
 
         Map<EEducationType, Long> militaryCrew = new HashMap<>();
@@ -476,8 +480,8 @@ public class MasterOfTheUniverseService {
         ers3 = createFitting(armor, propulsionFTL, electronicWarfare, sidewall, laserWeapon, pointDefense, new Launcher[]{shipKillerLauncher, counterMissileLauncher}, new PassiveModule[]{passiveModule}, new AmmunitionModule[]{shipKillerAmmunition, counterRocketAmmunition}, ers3);
         LOGGER.info("ShipClasses created");
 
-        addUnlockedResearches(u1, livingStuff, unlocksConstructionYard, unlocksShipyard, unlocksLaboratory, unlocksBank, unlocksMetals, unlockLaser, unlockArmor, unlockShield, unlockPropulsion, unlockFTLPropulsion, unlockElectronicWarfare, unlockMissiles, unlockPointDefense, unlockCounterMissiles, unlocksRocketAmmunition, unlocksCounterRocketAmmunition, unlocksPointDefenseAmmunition, unlockPassive, unlockHull1, unlockHull2, unlockHull3);
-        addUnlockedResearches(u2, livingStuff, unlocksConstructionYard, unlocksShipyard, unlocksLaboratory, unlocksBank, unlocksMetals, unlockLaser, unlockArmor, unlockShield, unlockPropulsion, unlockFTLPropulsion, unlockElectronicWarfare, unlockMissiles, unlockPointDefense, unlockCounterMissiles, unlocksRocketAmmunition, unlocksCounterRocketAmmunition, unlocksPointDefenseAmmunition, unlockPassive, unlockHull1, unlockHull2, unlockHull3);
+        addUnlockedResearches(u1);
+        addUnlockedResearches(u2);
         LOGGER.info("Researches populated");
 
         Fleet f1 = createFleet(u1, p11, "Argonaut Home Fleet");
@@ -512,12 +516,11 @@ public class MasterOfTheUniverseService {
     }
 
     @Nonnull
-    private Research research(final String name, final String description, final int levelCap, final ETechLevel techLevel, final Research unlockedBy) {
+    protected Research research(final String name, final String description, final int levelCap, final ETechLevel techLevel, final Research unlockedBy) {
         return researchService.createResearch(name, description, levelCap, techLevel, unlockedBy);
     }
 
     @Nonnull
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     protected Fleet createFleet(User user, Planet planet, String name) {
         FleetOrbit fo1 = new FleetOrbit(planet.getOrbit(), planet.getSystem());
         Fleet f1 = new Fleet(name, user, fo1);
@@ -527,36 +530,24 @@ public class MasterOfTheUniverseService {
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated(since = "productive environment")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    protected Planet colonizePlanet(@Nonnull final User owner, @Nonnull final Planet planet, @Nonnull final Building... buildings) {
-        owner.addKnownStarSystems(planet.getSystem());
-        planet.setOwner(owner);
+    protected Planet colonizePlanet(@Nonnull final User owner, @Nonnull final Planet planet) {
         // first the guys, then the buildings
         final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
+        populateNewColonization(resourceDeposit);
+
+        final Colonization colonization = new Colonization(owner, planet, resourceDeposit.getCrewRequirement(), 0);
+        return colonizationService.colonizePlanet(colonization);
+    }
+
+    public static void populateNewColonization(@Nonnull final ResourceDeposit resourceDeposit) {
+        Preconditions.checkNotNull(resourceDeposit, "resourceDeposit shouldn't be null!");
+
         resourceDeposit.setAbsolutePopulation(EEducationType.NONE, 200);
         resourceDeposit.setAbsolutePopulation(EEducationType.SCHOOL, 200);
         resourceDeposit.setAbsolutePopulation(EEducationType.COLLEGE, 500);
         resourceDeposit.setAbsolutePopulation(EEducationType.UNIVERSITY, 1000);
         resourceDeposit.setAbsolutePopulation(EEducationType.ENLISTED, 50);
         resourceDeposit.setAbsolutePopulation(EEducationType.OFFICER, 20);
-        planetService.save(planet);
-
-        for (final Building building : buildings) {
-            final int level;
-            if (EResourceType.POPULATION == building.getProductionTarget() && EProductionCategory.CAPACITY == building.getProductionType().getProductionCategory()) {
-                // calculate which Level must a capacity construction have to suit all the people
-                final int baseValue = building.getBaseValue();
-                final BigDecimal increasingFactorPerLevel = BigDecimal.ONE.add(building.getIncreasingFactorPerLevel());
-                final BigDecimal levelTo = new BigDecimal(resourceDeposit.getCrewRequirement().getSumOfPopulation())
-                        .divide(new BigDecimal(baseValue).multiply(increasingFactorPerLevel), MATH_CONTEXT_MORE_PRECISION)
-                        .add(BigDecimal.ONE);
-                level = levelTo.intValue();
-            } else {
-                level = 1;
-            }
-            final Construction construction = new Construction(planet, building, level);
-            constructionService.save(construction);
-        }
-        return planet;
     }
 
     @SuppressWarnings("DeprecatedIsStillUsed")
@@ -593,7 +584,8 @@ public class MasterOfTheUniverseService {
 
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated(since = "productive environment")
-    private void addUnlockedResearches(User u1, Research... researches) {
-        userService.addUnlockedResearch(u1, researches);
+    private void addUnlockedResearches(User user) {
+        final List<Research> researchesWithoutPrecondition = researchService.getResearchesWithoutPrecondition();
+        researchService.addResearch(user, researchesWithoutPrecondition);
     }
 }

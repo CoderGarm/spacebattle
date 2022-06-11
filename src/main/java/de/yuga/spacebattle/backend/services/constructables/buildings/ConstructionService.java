@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.researches.ResearchLevel;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.repositories.constructables.buildings.ConstructionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,9 +77,12 @@ public class ConstructionService {
      * @return the list of possible constructions
      */
     @Nonnull
-    public Map<Building, Integer> getUpgradeableConstructions(final Planet planet, Map<Research, Integer> researchesForUser) {
+    public Map<Building, Integer> getUpgradeableConstructions(@Nonnull final Planet planet, @Nonnull final Set<ResearchLevel> researchesForUser) {
+        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+        Preconditions.checkNotNull(researchesForUser, "researchesForUser shouldn't be null!");
 
-        final Set<Building> unlockedBuildings = researchesForUser.keySet().stream()
+        final Set<Building> unlockedBuildings = researchesForUser.stream()
+                .map(ResearchLevel::getResearch)
                 .map(Research::getUnlocksBuildings)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());

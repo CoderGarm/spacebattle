@@ -26,6 +26,13 @@ public class ResearchLevel {
         this.level = level;
     }
 
+    public ResearchLevel(@Nonnull final de.yuga.spacebattle.backend.entities.researches.ResearchLevel researchLevel) {
+        Preconditions.checkNotNull(researchLevel, "researchLevel shouldn't be null!");
+
+        this.research = new Research(researchLevel.getResearch());
+        this.level = researchLevel.getLevel();
+    }
+
     @Nonnull
     public Research getResearch() {
         return research;

@@ -30,6 +30,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
@@ -88,9 +89,8 @@ public class ResearchApi {
     )
     public ResponseEntity<?> getResearchByUser(@PathVariable("idUser") final int idUser) {
 
-        final Map<Research, Integer> researchesForUser = userService.getResearchesForUser(idUser);
-        final List<ResearchLevel> researchLevels = researchesForUser.entrySet()
-                .stream().map(entry -> new ResearchLevel(entry.getKey(), entry.getValue())).collect(Collectors.toList());
+        final Set<de.yuga.spacebattle.backend.entities.researches.ResearchLevel> researchesForUser = researchService.getResearchesForUser(idUser);
+        final List<ResearchLevel> researchLevels = researchesForUser.stream().map(ResearchLevel::new).collect(Collectors.toList());
         return ResponseEntity.ok(researchLevels);
     }
 
@@ -136,14 +136,10 @@ public class ResearchApi {
             }
     )
     public ResponseEntity<?> getAvailableResearchByUser(@PathVariable("idUser") final int idUser) {
-
-        final User user = userService.getWithResearches(idUser);
-        if (user == null) {
-            throw new NotifyWebUserException("No user found for id '" + idUser + "'");
-        }
-        final Map<Research, Integer> researchesForUser = researchService.getUnlockableResearches(user);
-        final List<ResearchLevel> researchLevels = researchesForUser.entrySet()
-                .stream().map(entry -> new ResearchLevel(entry.getKey(), entry.getValue())).collect(Collectors.toList());
+        final List<Research> jobActiveFor = jobService.getResearchesFromActiveJobs(idUser);
+        final Map<Research, Integer> researchesForUser = researchService.getUnlockableResearches(idUser, jobActiveFor);
+        final List<ResearchLevel> researchLevels = researchesForUser.entrySet().stream()
+                .map(entry -> new ResearchLevel(entry.getKey(), entry.getValue())).collect(Collectors.toList());
         return ResponseEntity.ok(researchLevels);
     }
 

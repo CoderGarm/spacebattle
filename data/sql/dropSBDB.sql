@@ -375,6 +375,14 @@
        drop 
        foreign key FKch37eb44iv0ls442yu7usvvtp;
 
+    alter table researchLevels 
+       drop 
+       foreign key FK8c7vw5t1ve4phgpfr6gwt3xj0;
+
+    alter table researchLevels 
+       drop 
+       foreign key FKh9xjvymkiqwygpem46iaj0j3v;
+
     alter table resourcesDepositComposition 
        drop 
        foreign key FK6q26jn3ftmq2x638tsgi0aemy;
@@ -442,14 +450,6 @@
     alter table supportFitting 
        drop 
        foreign key FK2rgk45foa8brx1onuwdxsodtr;
-
-    alter table unlockedResearch 
-       drop 
-       foreign key FKc4x693khs2f17y0jjfb625o51;
-
-    alter table unlockedResearch 
-       drop 
-       foreign key FKigikopnlfckk76o2yo3utm5s9;
 
     alter table user 
        drop 
@@ -573,6 +573,8 @@
 
     drop table if exists research;
 
+    drop table if exists researchLevels;
+
     drop table if exists resourceDeposit;
 
     drop table if exists resourcesDepositComposition;
@@ -590,8 +592,6 @@
     drop table if exists supportFitting;
 
     drop table if exists tick;
-
-    drop table if exists unlockedResearch;
 
     drop table if exists user;
 

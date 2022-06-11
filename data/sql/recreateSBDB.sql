@@ -375,6 +375,14 @@
        drop 
        foreign key FKch37eb44iv0ls442yu7usvvtp;
 
+    alter table researchLevels 
+       drop 
+       foreign key FK8c7vw5t1ve4phgpfr6gwt3xj0;
+
+    alter table researchLevels 
+       drop 
+       foreign key FKh9xjvymkiqwygpem46iaj0j3v;
+
     alter table resourcesDepositComposition 
        drop 
        foreign key FK6q26jn3ftmq2x638tsgi0aemy;
@@ -442,14 +450,6 @@
     alter table supportFitting 
        drop 
        foreign key FK2rgk45foa8brx1onuwdxsodtr;
-
-    alter table unlockedResearch 
-       drop 
-       foreign key FKc4x693khs2f17y0jjfb625o51;
-
-    alter table unlockedResearch 
-       drop 
-       foreign key FKigikopnlfckk76o2yo3utm5s9;
 
     alter table user 
        drop 
@@ -573,6 +573,8 @@
 
     drop table if exists research;
 
+    drop table if exists researchLevels;
+
     drop table if exists resourceDeposit;
 
     drop table if exists resourcesDepositComposition;
@@ -590,8 +592,6 @@
     drop table if exists supportFitting;
 
     drop table if exists tick;
-
-    drop table if exists unlockedResearch;
 
     drop table if exists user;
 
@@ -1051,6 +1051,14 @@
         primary key (idResearch)
     ) engine=InnoDB;
 
+    create table researchLevels (
+       idResearchLevel integer not null auto_increment,
+        level integer not null,
+        idResearch integer not null,
+        idUser integer not null,
+        primary key (idResearchLevel)
+    ) engine=InnoDB;
+
     create table resourceDeposit (
        idResourceDeposit integer not null auto_increment,
         subType varchar(255) not null,
@@ -1128,13 +1136,6 @@
         tickEnds datetime(6),
         tickStarts datetime(6) not null,
         primary key (idTick)
-    ) engine=InnoDB;
-
-    create table unlockedResearch (
-       idUser integer not null,
-        level integer,
-        idResearch integer not null,
-        primary key (idUser, idResearch)
     ) engine=InnoDB;
 
     create table user (
@@ -1719,6 +1720,16 @@
        foreign key (unlockedThrough) 
        references research (idResearch);
 
+    alter table researchLevels 
+       add constraint FK8c7vw5t1ve4phgpfr6gwt3xj0 
+       foreign key (idResearch) 
+       references research (idResearch);
+
+    alter table researchLevels 
+       add constraint FKh9xjvymkiqwygpem46iaj0j3v 
+       foreign key (idUser) 
+       references user (idUser);
+
     alter table resourcesDepositComposition 
        add constraint FK6q26jn3ftmq2x638tsgi0aemy 
        foreign key (idResourceDeposit) 
@@ -1803,16 +1814,6 @@
        add constraint FK2rgk45foa8brx1onuwdxsodtr 
        foreign key (idShipClass) 
        references shipClass (idShipClass);
-
-    alter table unlockedResearch 
-       add constraint FKc4x693khs2f17y0jjfb625o51 
-       foreign key (idResearch) 
-       references research (idResearch);
-
-    alter table unlockedResearch 
-       add constraint FKigikopnlfckk76o2yo3utm5s9 
-       foreign key (idUser) 
-       references user (idUser);
 
     alter table user 
        add constraint FKd0120p7tkvssh9r8hldenpw1w 

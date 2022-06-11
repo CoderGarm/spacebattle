@@ -170,7 +170,7 @@ public class ColonizationApi {
     )
     public ResponseEntity<?> getColonizationStarSystemsForUser(@PathVariable("idUser") final int idUser) {
 
-        final List<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> all = starSystemService.findAllUncolonized();
+        final List<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> all = starSystemService.findAllColonizable();
         final Set<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> knownStarSystems = userService.getKnownStarSystems(idUser);
         final List<de.yuga.spacebattle.backend.entities.turn.Colonization> colonizationsForUser = colonizationService.findAllForUser(idUser);
         return ResponseEntity.ok(StarSystemColonizationListConverter.create(all, knownStarSystems, colonizationsForUser));

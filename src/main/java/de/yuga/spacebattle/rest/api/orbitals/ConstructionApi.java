@@ -3,10 +3,11 @@ package de.yuga.spacebattle.rest.api.orbitals;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
-import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.researches.ResearchLevel;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import io.swagger.v3.oas.annotations.Operation;
@@ -52,18 +53,24 @@ public class ConstructionApi {
     private final UserService userService;
 
     @Nonnull
+    private final ResearchService researchService;
+
+    @Nonnull
     private final PlanetService planetService;
 
     @Autowired
     public ConstructionApi(@Nonnull final ConstructionService constructionService,
                            @Nonnull final UserService userService,
+                           @Nonnull final ResearchService researchService,
                            @Nonnull final PlanetService planetService) {
         Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
+        Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
         Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
 
         this.constructionService = constructionService;
         this.userService = userService;
+        this.researchService = researchService;
         this.planetService = planetService;
     }
 
@@ -84,7 +91,7 @@ public class ConstructionApi {
         if (planet == null || planet.getOwner() == null) {
             throw new NotifyWebUserException("This planet is not colonized");
         }
-        final Map<Research, Integer> researchesForUser = userService.getResearchesForUser(planet.getOwner());
+        final Set<ResearchLevel> researchesForUser = researchService.getResearchesForUser(planet.getOwner().getId());
         final Map<Building, Integer> upgradeableConstructions = constructionService.getUpgradeableConstructions(planet, researchesForUser);
         final Set<de.yuga.spacebattle.rest.dto.constructables.buildings.Construction> possibleConstructions = upgradeableConstructions
                 .entrySet()
