@@ -3,6 +3,7 @@ package de.yuga.spacebattle.rest.api.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.forum.IdToId;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.services.account.ForumService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
@@ -42,6 +43,7 @@ public class ForumApi {
     public static final String ENDPOINT = "forum";
 
     private static final String FORUMS_FOR_USER = "forumsForUser";
+    private static final String ALLIANCE_FORUMS_FOR_USER = "allianceForumsForUser";
     private static final String FORUM_THREAD = "threadById";
     private static final String FORUM_THREAD_COUNT = "threadById/count";
     private static final String CREATE_FORUM_THREAD = "createThread";
@@ -103,6 +105,39 @@ public class ForumApi {
         });
 
         return ResponseEntity.ok(forums);
+    }
+
+    @GetMapping(ALLIANCE_FORUMS_FOR_USER)
+    @Operation(summary = "Get a list of forums which the given user is allowed to access.", operationId = "getAllianceForumForUser",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Forum.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getAllianceForumForUser(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
+
+        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final User user = userService.find(idUser);
+        assert user != null;
+        final Alliance alliance = user.getAlliance();
+        if (alliance == null) {
+            return ResponseEntity.ok().build();
+        }
+
+        final de.yuga.spacebattle.backend.entities.account.forum.Forum forAllowedForUser = forumService.getAllianceForumForUser(alliance);
+        final List<IdToId> threadIdToForum = forumService.findAllIdForumThreadForIdForums(List.of(forAllowedForUser.getId()));
+        final Map<Integer, List<Integer>> idThreadByIdForum = threadIdToForum.stream()
+                .collect(Collectors.groupingBy(IdToId::getIdSelector,
+                        Collectors.mapping(IdToId::getIdPayload, Collectors.toList())));
+
+        final Forum forum = new Forum(forAllowedForUser);
+        final int idForum = forum.getIdForum();
+        final List<Integer> idForumThreads = idThreadByIdForum.getOrDefault(idForum, new ArrayList<>());
+        forum.enrichForumThreads(idForumThreads);
+
+        return ResponseEntity.ok(forum);
     }
 
     @GetMapping(FORUM_THREAD + "/{idForumThread}")

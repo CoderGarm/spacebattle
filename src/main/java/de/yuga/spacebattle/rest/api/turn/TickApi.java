@@ -17,7 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
@@ -55,7 +58,6 @@ public class TickApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    @ResponseBody
     public ResponseEntity<?> getCurrentTick() {
         final de.yuga.spacebattle.backend.entities.turn.Tick latest = tickService.getLatest();
         PreconditionWebHelper.checkNotNull(latest, "There should be at least one tick - please call the admin.");
@@ -73,7 +75,6 @@ public class TickApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    @ResponseBody
     public ResponseEntity<?> getAllTicks() {
         return ResponseEntity.ok(tickService.findAll().stream().map(Tick::new).collect(Collectors.toList()));
     }
@@ -87,7 +88,6 @@ public class TickApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    @ResponseBody
     public ResponseEntity<?> getTick(@PathVariable("idTick") final int idTick) {
         de.yuga.spacebattle.backend.entities.turn.Tick tick = tickService.find(idTick);
         if (tick == null) {

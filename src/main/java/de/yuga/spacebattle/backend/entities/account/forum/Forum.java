@@ -17,6 +17,9 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+@NamedQueries({
+        @NamedQuery(name = "Forum.getAllianceForum", query = "SELECT f FROM Forum f WHERE f.alliance = :alliance"),
+})
 @Entity
 @Table(name = "forum")
 @AttributeOverride(name = "id", column = @Column(name = "idForum"))

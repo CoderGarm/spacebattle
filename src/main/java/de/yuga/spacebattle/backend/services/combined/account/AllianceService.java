@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services.combined.account;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.repositories.combined.account.AllianceRepository;
 import de.yuga.spacebattle.backend.services.account.UserService;
@@ -50,16 +51,41 @@ public class AllianceService {
     }
 
     @Nonnull
-    public Alliance createAlliance(@Nonnull final String name, @Nonnull final String code) {
+    public Alliance createAlliance(@Nonnull final String name, @Nonnull final String code, final User user) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(code, "code shouldn't be null!");
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
 
-        return allianceRepository.save(new Alliance(name, code));
+        return allianceRepository.save(new Alliance(name, code, user));
     }
 
     public void delete(@Nonnull final Alliance entity) {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
 
         allianceRepository.delete(entity);
+    }
+
+    /**
+     * Checks if the username is already in use.
+     *
+     * @param username the username to check
+     * @return <code>true</code> if the username is blocked, <code>false</code> otherwise
+     */
+    public boolean existsAllianceName(@Nonnull final String username) {
+        Preconditions.checkNotNull(username, "username shouldn't be null!");
+
+        return allianceRepository.existsAllianceName(username);
+    }
+
+    /**
+     * Checks if the eMail address is already in use.
+     *
+     * @param email the eMail to check
+     * @return <code>true</code> if the eMail address is blocked, <code>false</code> otherwise
+     */
+    public boolean existsAllianceCode(@Nonnull final String email) {
+        Preconditions.checkNotNull(email, "email shouldn't be null!");
+
+        return allianceRepository.existsAllianceCode(email);
     }
 }

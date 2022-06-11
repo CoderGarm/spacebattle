@@ -22,6 +22,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -131,6 +132,10 @@ public class User extends AbstractEntityKey {
 
     @Transient
     private final String avatar = "https://mir-s3-cdn-cf.behance.net/project_modules/disp/ce54bf11889067.562541ef7cde4.png";
+
+    @Nonnull
+    @NotNull
+    private final LocalDateTime createdAt = LocalDateTime.now();
 
     public User() {
     }

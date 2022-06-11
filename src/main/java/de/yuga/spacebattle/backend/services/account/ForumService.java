@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.account.forum.Forum;
 import de.yuga.spacebattle.backend.entities.account.forum.ForumMessage;
 import de.yuga.spacebattle.backend.entities.account.forum.ForumThread;
+import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.repositories.account.ForumMessageRepository;
 import de.yuga.spacebattle.backend.repositories.account.ForumRepository;
 import de.yuga.spacebattle.backend.repositories.account.ForumThreadRepository;
@@ -115,5 +116,24 @@ public class ForumService {
 
     public int countMessagesInForumThread(final int idForumThread) {
         return forumMessageRepository.countMessagesInThreadById(idForumThread);
+    }
+
+    @Nonnull
+    public Forum getAllianceForumForUser(@Nonnull final Alliance alliance) {
+        Preconditions.checkNotNull(alliance, "alliance shouldn't be null!");
+
+        return forumRepository.getAllianceForumForUser(alliance);
+    }
+
+    public void save(@Nonnull final Forum forum) {
+        Preconditions.checkNotNull(forum, "forum shouldn't be null!");
+
+        forumRepository.save(forum);
+    }
+
+    public void delete(@Nonnull final Forum forum) {
+        Preconditions.checkNotNull(forum, "forum shouldn't be null!");
+
+        forumRepository.delete(forum);
     }
 }

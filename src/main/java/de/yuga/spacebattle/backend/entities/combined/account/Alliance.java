@@ -9,11 +9,14 @@ import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 @NamedQueries({
-        @NamedQuery(name = "Alliance.getAll", query = "SELECT a FROM Alliance a")
+        @NamedQuery(name = "Alliance.getAll", query = "SELECT a FROM Alliance a"),
+        @NamedQuery(name = "Alliance.findByNameExact", query = "SELECT u.id FROM Alliance u WHERE UPPER(u.name) = UPPER(:name)"),
+        @NamedQuery(name = "Alliance.findByCodeExact", query = "SELECT u.id FROM Alliance u WHERE UPPER(u.code) = UPPER(:code)"),
 })
 @Entity
 @Table(name = "alliance")
@@ -37,16 +40,28 @@ public class Alliance extends AbstractEntityKey {
     @OneToMany(mappedBy = "alliance", fetch = FetchType.EAGER)
     private final Set<User> members = new HashSet<>();
 
+    @Nonnull
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "idFounder")
+    private User founder;
+
+    @Nonnull
+    @NotNull
+    private final LocalDateTime createdAt = LocalDateTime.now();
+
     public Alliance() {
     }
 
-    public Alliance(@Nonnull String name,
-                    @Nonnull String code) {
+    public Alliance(@Nonnull final String name, @Nonnull final String code, @Nonnull final User founder) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(code, "code shouldn't be null!");
+        Preconditions.checkNotNull(founder, "founder shouldn't be null!");
 
         this.name = name;
         this.code = code;
+        founder.setAlliance(this);
+        this.founder = founder;
     }
 
     @Nonnull
@@ -74,6 +89,16 @@ public class Alliance extends AbstractEntityKey {
     @Nonnull
     public Set<User> getMembers() {
         return members;
+    }
+
+    @Nonnull
+    public User getFounder() {
+        return founder;
+    }
+
+    @Nonnull
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     @Override

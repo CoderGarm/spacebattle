@@ -10,7 +10,9 @@
     create table alliance (
        idAlliance integer not null auto_increment,
         code varchar(30) not null,
+        createdAt datetime(6) not null,
         name varchar(30) not null,
+        idFounder integer not null,
         primary key (idAlliance)
     ) engine=InnoDB;
 
@@ -536,6 +538,7 @@
 
     create table user (
        idUser integer not null auto_increment,
+        createdAt datetime(6) not null,
         email varchar(50) not null,
         password varchar(255) not null,
         userRole varchar(255),
@@ -660,6 +663,11 @@
        add constraint FKgdp5e1ylgswr29e2d5b7uhib 
        foreign key (idShipClass) 
        references shipClass (idShipClass);
+
+    alter table alliance 
+       add constraint FKqtn90ky0waqf7lslqa7gu66mo 
+       foreign key (idFounder) 
+       references user (idUser);
 
     alter table allowedMissiles 
        add constraint FKhp9tc55hay9lojn6swpo6q4kv 

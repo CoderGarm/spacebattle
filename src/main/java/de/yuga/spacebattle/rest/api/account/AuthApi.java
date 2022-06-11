@@ -240,6 +240,5 @@ public class AuthApi {
             return ResponseEntity.ok(false);
         }
         return ResponseEntity.ok(true);
-
     }
 }

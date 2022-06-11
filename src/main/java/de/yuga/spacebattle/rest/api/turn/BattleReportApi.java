@@ -68,7 +68,6 @@ public class BattleReportApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    @ResponseBody
     public ResponseEntity<?> getReportsAmountWithUser(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
         PreconditionWebHelper.checkNotNull(token, "token shouldn't be null!");
 
@@ -87,7 +86,6 @@ public class BattleReportApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    @ResponseBody
     public ResponseEntity<?> getReportsWithUserWithPaging(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
                                                           @PathVariable("page") final int page,
                                                           @PathVariable("size") final int size) {
@@ -107,7 +105,6 @@ public class BattleReportApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    @ResponseBody
     public ResponseEntity<?> getReportsById(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
                                             @PathVariable("idBattleReport") final int idBattleReport) {
         PreconditionWebHelper.checkNotNull(token, "token shouldn't be null!");

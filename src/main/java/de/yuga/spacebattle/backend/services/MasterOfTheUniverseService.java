@@ -355,13 +355,14 @@ public class MasterOfTheUniverseService {
 
     @SuppressWarnings({"deprecation", "unused"})
     void createInitialDataPayload() {
-        Alliance a1 = allianceService.createAlliance("Argonauten", "A");
-        Alliance a2 = allianceService.createAlliance("111er", "111er");
-        LOGGER.info("Alliances created");
 
         final User u1 = userService.createUser("Flashkid", "12457aA!", "mail", EWebUserRole.ADMIN);
         final User u2 = userService.createUser("Yufiel", "12457aA!", "mail2", EWebUserRole.USER);
         LOGGER.info("Users created");
+
+        Alliance a1 = allianceService.createAlliance("Argonauten", "A", u1);
+        Alliance a2 = allianceService.createAlliance("111er", "111er", u2);
+        LOGGER.info("Alliances created");
 
         u1.setAlliance(a1);
         u2.setAlliance(a2);

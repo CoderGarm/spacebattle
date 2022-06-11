@@ -11,6 +11,10 @@
        drop 
        foreign key FKgdp5e1ylgswr29e2d5b7uhib;
 
+    alter table alliance 
+       drop 
+       foreign key FKqtn90ky0waqf7lslqa7gu66mo;
+
     alter table allowedMissiles 
        drop 
        foreign key FKhp9tc55hay9lojn6swpo6q4kv;
