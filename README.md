@@ -28,3 +28,39 @@ Set up the frontend:
 
 Open the browser at the [start page](http://localhost:4200/#).
 
+## Impressions
+
+First, the game is in a **really early stage**.
+
+There is no balancing in resources and outputs, in amor values and weapon strength.
+Even not in flight speed to distance.
+
+The basic mechanics are implemented and a lot of items are only present.
+
+### Constructions
+
+Next to a lot of other possibilities a 4X game lives from building stuff and using to rule the universe.
+
+So start building constructions on your planet, build fleet, colonize planets and build more fleets.
+
+![Sample Construction](readme-resources/sample-construction.mp4.gif)
+
+### Combats
+
+The Combat System allows you strategic interventions, use your fleet to empower your diplomatic corpse to be a little more direct.
+
+The Repeat-Display allows you to evaluate the performance of your fleet setup and commanding officers.
+
+![Sample Fight](readme-resources/sample-fight.mp4.gif)
+
+### Movement
+
+But in fact, your fleet is nothing if you cannot be present.
+
+Move to a system of your choice.
+
+![Sample Universe Map](readme-resources/sample-universe-map.mp4.gif)
+
+And access a planetary orbit.
+
+![Sample Star Map](readme-resources/sample-star-map.mp4.gif)
