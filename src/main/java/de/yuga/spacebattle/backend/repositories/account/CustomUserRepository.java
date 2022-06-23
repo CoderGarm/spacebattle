@@ -2,7 +2,6 @@ package de.yuga.spacebattle.backend.repositories.account;
 
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
-import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 
 import javax.annotation.Nonnull;
@@ -39,24 +38,6 @@ public interface CustomUserRepository {
 
     @Nonnull
     Set<Colonization> getColonizations(@Nonnull User user);
-
-    /**
-     * Checks is a user has the specific research already unlocked.
-     *
-     * @param user     the user
-     * @param research the research
-     * @return <code>true</code> if the user already has this research unlocked, <code>false</code> otherwise
-     */
-    boolean isResearchUnlocked(@Nonnull User user, @Nonnull Research research);
-
-    /**
-     * Fetches the current level of a given research by this user.
-     *
-     * @param user     the user
-     * @param research the research
-     * @return the current level
-     */
-    int getLevelForResearch(@Nonnull User user, @Nonnull Research research);
 
     /**
      * Searches for all users which has the param as left-search-string.

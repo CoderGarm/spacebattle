@@ -3,7 +3,6 @@ package de.yuga.spacebattle.backend.services.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
-import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import de.yuga.spacebattle.backend.repositories.account.UserRepository;
@@ -140,34 +139,6 @@ public class UserService {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
 
         return userRepository.getColonizations(user);
-    }
-
-    /**
-     * Checks is a user has the specific research already unlocked.
-     *
-     * @param user     the user
-     * @param research the research
-     * @return <code>true</code> if the user already has this research unlocked, <code>false</code> otherwise
-     */
-    public boolean isResearchUnlocked(@Nonnull final User user, @Nonnull final Research research) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-        Preconditions.checkNotNull(research, "research shouldn't be null!");
-
-        return userRepository.isResearchUnlocked(user, research);
-    }
-
-    /**
-     * Fetches the current level of a given research by this user.
-     *
-     * @param user     the user
-     * @param research the research
-     * @return the current level
-     */
-    public int getLevelForResearch(@Nonnull final User user, @Nonnull final Research research) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-        Preconditions.checkNotNull(research, "research shouldn't be null!");
-
-        return userRepository.getLevelForResearch(user, research);
     }
 
     @Nonnull

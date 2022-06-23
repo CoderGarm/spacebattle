@@ -161,6 +161,35 @@ public class ResearchService {
         return Objects.requireNonNullElseGet(researchesWithoutPrecondition, ArrayList::new);
     }
 
+
+    /**
+     * Checks is a user has the specific research already unlocked.
+     *
+     * @param user     the user
+     * @param research the research
+     * @return <code>true</code> if the user already has this research unlocked, <code>false</code> otherwise
+     */
+    public boolean isResearchUnlocked(@Nonnull final User user, @Nonnull final Research research) {
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
+        Preconditions.checkNotNull(research, "research shouldn't be null!");
+
+        return levelRepository.isResearchUnlocked(user.getId(), research.getId());
+    }
+
+    /**
+     * Fetches the current level of a given research by this user.
+     *
+     * @param user     the user
+     * @param research the research
+     * @return the current level
+     */
+    public int getLevelForResearch(@Nonnull final User user, @Nonnull final Research research) {
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
+        Preconditions.checkNotNull(research, "research shouldn't be null!");
+
+        return levelRepository.getLevelForResearch(user.getId(), research.getId());
+    }
+
     /**
      * Creates a new {@link Research}.
      *

@@ -10,5 +10,4 @@ public class CustomResearchLevelRepositoryImpl implements CustomResearchLevelRep
 
     @PersistenceContext
     private EntityManager em;
-
 }

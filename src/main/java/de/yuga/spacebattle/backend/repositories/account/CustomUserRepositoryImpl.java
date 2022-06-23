@@ -3,7 +3,6 @@ package de.yuga.spacebattle.backend.repositories.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
-import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -13,8 +12,6 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -93,37 +90,6 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
         return em.createNamedQuery("User.getColonizations", User.class)
                 .setParameter("user", user)
                 .getSingleResult().getColonizations();
-    }
-
-    @Override
-    public boolean isResearchUnlocked(@Nonnull User user, @Nonnull Research research) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-        Preconditions.checkNotNull(research, "research shouldn't be null!");
-
-        // cannot execute namedNative query because spring fuck up
-        final Query nativeQuery = em.createNativeQuery("SELECT COUNT(ur.idResearch) FROM unlockedResearch ur WHERE ur.idUser = :idUser AND ur.idResearch = :idResearch");
-        final Object singleResult = nativeQuery.setParameter("idUser", user.getId())
-                .setParameter("idResearch", research.getId())
-                .getSingleResult();
-        return ((BigInteger) singleResult).intValue() > 0;
-    }
-
-    @Override
-    public int getLevelForResearch(@Nonnull final User user, @Nonnull final Research research) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-        Preconditions.checkNotNull(research, "research shouldn't be null!");
-
-        // cannot execute namedNative query because spring fuck up
-        final Query nativeQuery = em.createNativeQuery("SELECT ur.level FROM unlockedResearch ur WHERE ur.idUser = :idUser AND ur.idResearch = :idResearch");
-        final Object singleResult;
-        try {
-            singleResult = nativeQuery.setParameter("idUser", user.getId())
-                    .setParameter("idResearch", research.getId())
-                    .getSingleResult();
-        } catch (final NoResultException e) {
-            return 0;
-        }
-        return ((BigInteger) singleResult).intValue();
     }
 
     @Nonnull

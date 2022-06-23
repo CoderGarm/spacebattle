@@ -179,7 +179,7 @@ public class JobService {
         if (planet == null || planet.getOwner() == null || building == null) {
             throw new NotifyWebUserException("not that way!");
         }
-        if (!userService.isResearchUnlocked(planet.getOwner(), building.getUnlockedThrough())) {
+        if (!researchService.isResearchUnlocked(planet.getOwner(), building.getUnlockedThrough())) {
             throw new NotifyWebUserException("You can't do that - first you have to research the '" + building.getUnlockedThrough().getName() + "' research.");
         }
 
@@ -216,12 +216,12 @@ public class JobService {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
         Preconditions.checkNotNull(research, "research shouldn't be null!");
 
-        if (userService.isResearchUnlocked(user, research)) {
+        if (researchService.isResearchUnlocked(user, research)) {
             throw new NotifyWebUserException("You can't do that - you already have the '" + research.getName() + "' research.");
         }
 
         int levelCap = research.getLevelCap();
-        int level = userService.getLevelForResearch(user, research) + 1;
+        int level = researchService.getLevelForResearch(user, research) + 1;
         if (level > levelCap) {
             throw new NotifyWebUserException("no way!");
         }
