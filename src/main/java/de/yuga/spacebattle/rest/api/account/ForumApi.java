@@ -279,7 +279,7 @@ public class ForumApi {
     @Operation(summary = "Get a list of forums which the given user is allowed to access.", operationId = "createForumThread",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ForumThread.class))),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
@@ -300,7 +300,7 @@ public class ForumApi {
         if (StringUtils.isNotBlank(firstMessage)) {
             forumService.save(new de.yuga.spacebattle.backend.entities.account.forum.ForumMessage(forumThread, user, firstMessage));
         }
-        return ResponseEntity.ok(true);
+        return ResponseEntity.ok(new ForumThread(forumThread));
     }
 
     @PutMapping(value = CREATE_FORUM_THREAD_MESSAGE, consumes = MediaType.APPLICATION_JSON_VALUE)
