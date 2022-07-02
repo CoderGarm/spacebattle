@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.services.combined.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
+import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.repositories.combined.account.AllianceRepository;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,11 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class AllianceService {
@@ -51,22 +56,30 @@ public class AllianceService {
     }
 
     @Nonnull
-    public Alliance createAlliance(@Nonnull final String name, @Nonnull final String code, final User user) {
+    public Alliance createAlliance(@Nonnull final String name, @Nonnull final String code, @Nonnull final User founder, @Nullable final User... applicants) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(code, "code shouldn't be null!");
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
+        Preconditions.checkNotNull(founder, "founder shouldn't be null!");
 
-        return allianceRepository.save(new Alliance(name, code, user));
+        final Alliance alliance = new Alliance(name, code, founder);
+        userService.save(founder);
+        if (applicants != null) {
+            alliance.getApplications().addAll(Arrays.stream(applicants).collect(Collectors.toSet()));
+        }
+        return allianceRepository.save(alliance);
     }
 
     public void delete(@Nonnull final Alliance entity) {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
 
+        final List<User> admins = userService.findAllianceAdminByAlliance(entity, EGameUserRole.ALLIANCE_ADMIN);
+        admins.forEach(admin -> admin.removeGameUserRoles(EGameUserRole.ALLIANCE_ADMIN));
+        userService.saveAll(admins);
         allianceRepository.delete(entity);
     }
 
     /**
-     * Checks if the username is already in use.
+     * Checks if the alliance name is already in use.
      *
      * @param username the username to check
      * @return <code>true</code> if the username is blocked, <code>false</code> otherwise
@@ -78,7 +91,7 @@ public class AllianceService {
     }
 
     /**
-     * Checks if the eMail address is already in use.
+     * Checks if the alliance code is already in use.
      *
      * @param email the eMail to check
      * @return <code>true</code> if the eMail address is blocked, <code>false</code> otherwise
@@ -87,5 +100,25 @@ public class AllianceService {
         Preconditions.checkNotNull(email, "email shouldn't be null!");
 
         return allianceRepository.existsAllianceCode(email);
+    }
+
+    @Nonnull
+    public List<Alliance> findAllWithMembers() {
+        return Objects.requireNonNullElse(allianceRepository.findAllWithMembers(), new ArrayList<>());
+    }
+
+    @Nullable
+    public Alliance findWithMembers(final int idAlliance) {
+        return allianceRepository.findWithMembers(idAlliance);
+    }
+
+    @Nullable
+    public Alliance findWithApplications(final int idAlliance) {
+        return allianceRepository.findWithApplications(idAlliance);
+    }
+
+    @Nullable
+    public Alliance hasOpenApplication(final int idUser) {
+        return allianceRepository.hasOpenApplication(idUser);
     }
 }

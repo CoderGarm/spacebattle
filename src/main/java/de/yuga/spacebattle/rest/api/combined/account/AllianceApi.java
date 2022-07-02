@@ -3,12 +3,14 @@ package de.yuga.spacebattle.rest.api.combined.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.account.forum.Forum;
+import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.services.account.ForumService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.combined.account.AllianceService;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
-import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import de.yuga.spacebattle.rest.config.role.AllowedRoles;
 import de.yuga.spacebattle.rest.config.security.JwtTokenUtil;
+import de.yuga.spacebattle.rest.dto.account.UserJson;
 import de.yuga.spacebattle.rest.dto.combined.account.Alliance;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,6 +33,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.security.RolesAllowed;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 
@@ -44,6 +47,7 @@ public class AllianceApi {
 
     @Nonnull
     public static final String ENDPOINT = "alliances";
+    private static final String APPLY_FOR_MEMBERSHIP = "membership";
 
     @Nonnull
     private final AllianceService allianceService;
@@ -86,12 +90,12 @@ public class AllianceApi {
             }
     )
     public ResponseEntity<?> getAlliances() {
-        final List<de.yuga.spacebattle.backend.entities.combined.account.Alliance> all = allianceService.findAll();
-        return ResponseEntity.ok(all.stream().map(Alliance::new));
+        final List<de.yuga.spacebattle.backend.entities.combined.account.Alliance> all = allianceService.findAllWithMembers();
+        return ResponseEntity.ok(all.stream().map(a -> new Alliance(a, a.getMembers().size())));
     }
 
     @GetMapping("/{idAlliance}")
-    @Operation(summary = "Gets an alliances.", operationId = "getAlliance",
+    @Operation(summary = "Gets an alliance.", operationId = "getAlliance",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Alliance.class))),
@@ -100,11 +104,30 @@ public class AllianceApi {
             }
     )
     public ResponseEntity<?> getAlliance(@PathVariable("idAlliance") final int idAlliance) {
-        de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance = allianceService.find(idAlliance);
+        de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance = allianceService.findWithMembers(idAlliance);
         if (alliance == null) {
             return ResponseEntity.ok().build();
         }
-        return ResponseEntity.ok(new Alliance(alliance));
+        return ResponseEntity.ok(new Alliance(alliance, alliance.getMembers().size()));
+    }
+
+    @GetMapping("/members/{idAlliance}")
+    @Operation(summary = "Gets an alliances.", operationId = "getMembers",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = UserJson.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getMembers(@PathVariable("idAlliance") final int idAlliance) {
+        de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance = allianceService.findWithMembers(idAlliance);
+        if (alliance == null) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.ok(alliance.getMembers().stream().map(UserJson::new).collect(Collectors.toList()));
     }
 
     @GetMapping("forUser")
@@ -153,8 +176,9 @@ public class AllianceApi {
         return ResponseEntity.ok(new Alliance(alliance));
     }
 
-    @PutMapping("/{idAlliance}/{idUserToAdd}")
-    @Operation(summary = "Adds a user to an alliances.", operationId = "addUser",
+    @PostMapping(APPLY_FOR_MEMBERSHIP + "/{idUserToAdd}")
+    @AllowedRoles(roles = EGameUserRole.ALLIANCE_ADMIN)
+    @Operation(summary = "Grants the application of a user to an alliances.", operationId = "grantApplication",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
@@ -162,36 +186,118 @@ public class AllianceApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> addUser(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                     @PathVariable("idAlliance") final int idAlliance,
-                                     @PathVariable("idUserToAdd") final int idUserToAdd) {
-        final de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance = checkFounderActionAndGet(token, idAlliance);
-
-        final User toAdd = userService.find(idUserToAdd);
-        Preconditions.checkNotNull(toAdd, "toAdd shouldn't be null!");
-
-        toAdd.setAlliance(alliance);
-        userService.save(toAdd);
-
-        return ResponseEntity.ok(true);
-    }
-
-    private de.yuga.spacebattle.backend.entities.combined.account.Alliance checkFounderActionAndGet(@Nonnull final String token, final int idAlliance) {
-        Preconditions.checkNotNull(token, "token shouldn't be null!");
-
+    public ResponseEntity<?> grantApplication(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
+                                              @PathVariable("idUserToAdd") final int idUserToAdd) {
         final int idUser = tokenUtil.getIdUserFromAccessToken(token);
         final User user = userService.find(idUser);
         PreconditionWebHelper.checkNotNull(user, "user shouldn't be null!");
 
-        final de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance = allianceService.find(idAlliance);
-        if (alliance == null || !alliance.getFounder().equals(user)) {
-            LOGGER.warn("The idUser '" + idUser + "' tries to cheat!");
-            throw new NotifyWebUserException("Nop, this is not permitted.");
-        }
-        return alliance;
+        assert user.getAlliance() != null : "An alliance admin should have an alliance.";
+        final de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance = allianceService.findWithApplications(user.getAlliance().getId());
+        final User applicant = userService.find(idUserToAdd);
+        Preconditions.checkNotNull(applicant, "applicant shouldn't be null!");
+        assert alliance != null : "Yeah, the alliance wasn't deleted in between, hopefully.";
+        alliance.getApplications().remove(applicant);
+        allianceService.save(alliance);
+        applicant.setAlliance(alliance);
+        userService.save(applicant);
+
+        return ResponseEntity.ok(true);
     }
 
-    @DeleteMapping("/{idAlliance}")
+    @DeleteMapping(APPLY_FOR_MEMBERSHIP + "/{idUserToRemove}")
+    @AllowedRoles(roles = EGameUserRole.ALLIANCE_ADMIN)
+    @Operation(summary = "Denies the application of user to an alliances.", operationId = "denyApplication",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> denyApplication(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
+                                             @PathVariable("idUserToRemove") final int idUserToRemove) {
+        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final User user = userService.find(idUser);
+        PreconditionWebHelper.checkNotNull(user, "user shouldn't be null!");
+
+        assert user.getAlliance() != null : "An alliance admin should have an alliance.";
+        final de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance = allianceService.findWithApplications(user.getAlliance().getId());
+        final User applicant = userService.find(idUserToRemove);
+        Preconditions.checkNotNull(applicant, "applicant shouldn't be null!");
+        assert alliance != null : "Yeah, the alliance wasn't deleted in between, hopefully.";
+        alliance.getApplications().remove(applicant);
+        allianceService.save(alliance);
+
+        return ResponseEntity.ok(true);
+    }
+
+    @GetMapping(APPLY_FOR_MEMBERSHIP + "/application")
+    @AllowedRoles(roles = EGameUserRole.ALLIANCE_ADMIN)
+    @Operation(summary = "Fetches the applications of users to the alliance of the ally admin.", operationId = "getApplicationsForMembership",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = UserJson.class)))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getApplicationsForMembership(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
+
+        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final User user = userService.find(idUser);
+        PreconditionWebHelper.checkNotNull(user, "user shouldn't be null!");
+        assert user.getAlliance() != null : "An alliance admin should be member of it.";
+        final de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance = allianceService.findWithApplications(user.getAlliance().getId());
+        assert alliance != null : "We proved, that the alliance exists here.";
+        return ResponseEntity.ok(alliance.getApplications().stream().map(UserJson::new).collect(Collectors.toList()));
+    }
+
+    @GetMapping(APPLY_FOR_MEMBERSHIP + "/isApplicant")
+    @Operation(summary = "Returns where the user has an application to an alliance open.", operationId = "isApplicant",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Alliance.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> isApplicant(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
+
+        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final de.yuga.spacebattle.backend.entities.combined.account.Alliance openApplicationAt = allianceService.hasOpenApplication(idUser);
+        if (openApplicationAt == null) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.ok(new Alliance(openApplicationAt));
+    }
+
+    @PutMapping(APPLY_FOR_MEMBERSHIP + "/{idAlliance}")
+    @Operation(summary = "Starts the application of a user to an alliances.", operationId = "applyForMembership",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> applyForMembership(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
+                                                @PathVariable("idAlliance") final int idAlliance) {
+        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final User applicant = userService.find(idUser);
+        PreconditionWebHelper.checkNotNull(applicant, "applicant shouldn't be null!");
+
+        final de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance = allianceService.findWithApplications(idAlliance);
+        assert alliance != null : "We proved, that the alliance exists here.";
+
+        alliance.getApplications().add(applicant);
+        allianceService.save(alliance);
+
+        return ResponseEntity.ok(true);
+    }
+
+    @DeleteMapping
+    @AllowedRoles(roles = EGameUserRole.ALLIANCE_ADMIN)
     @Operation(summary = "Adds a user to an alliances.", operationId = "deleteAlliance",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -200,11 +306,11 @@ public class AllianceApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> deleteAlliance(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                            @PathVariable("idAlliance") final int idAlliance) {
-        final de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance = checkFounderActionAndGet(token, idAlliance);
-        final Forum allianceForumForUser = forumService.getAllianceForumForUser(alliance);
-        forumService.delete(allianceForumForUser);
+    public ResponseEntity<?> deleteAlliance(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
+        final de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance = getAllianceFromToken(token);
+        assert alliance != null : "An alliance admin should have an alliance.";
+        final Forum allianceForum = forumService.getAllianceForumForUser(alliance);
+        forumService.delete(allianceForum);
         allianceService.delete(alliance);
         return ResponseEntity.ok(true);
     }
@@ -240,5 +346,17 @@ public class AllianceApi {
             return ResponseEntity.ok(false);
         }
         return ResponseEntity.ok(true);
+    }
+
+
+    @Nullable
+    private de.yuga.spacebattle.backend.entities.combined.account.Alliance getAllianceFromToken(@Nonnull final String token) {
+        Preconditions.checkNotNull(token, "token shouldn't be null!");
+
+        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final User user = userService.find(idUser);
+        PreconditionWebHelper.checkNotNull(user, "user shouldn't be null!");
+
+        return user.getAlliance();
     }
 }

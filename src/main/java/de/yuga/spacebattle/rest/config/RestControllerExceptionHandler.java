@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.rest.config;
 
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import de.yuga.spacebattle.rest.config.role.HttpForbiddenException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.annotation.Nonnull;
 import java.util.UUID;
 
 /**
@@ -24,13 +26,13 @@ public class RestControllerExceptionHandler {
 
     @ExceptionHandler(NotifyWebUserException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<FrontendError> handleConversion(NotifyWebUserException ex) {
+    public ResponseEntity<FrontendError> handleConversion(@Nonnull final NotifyWebUserException ex) {
         return new ResponseEntity<>(new FrontendError(ex), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    protected ResponseEntity<FrontendError> handleConversion(Exception ex) {
+    protected ResponseEntity<FrontendError> handleConversion(@Nonnull final Exception ex) {
         final String stacktrace = ExceptionUtils.getStackTrace(ex);
         final UUID uuid = UUID.randomUUID();
         LOGGER.warn(uuid + "\n" + stacktrace);
@@ -39,8 +41,14 @@ public class RestControllerExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    protected ResponseEntity<FrontendError> handleConversion(AccessDeniedException ex) {
-        // todo no distinction between "refresh your token" and "your role does not match" currently not possible - compare HttpSecurityConfiguration#configure comments
+    protected ResponseEntity<FrontendError> handleConversion(@Nonnull final AccessDeniedException ex) {
+        // todo no distinction by spring mechanics between "refresh your token" and "your role does not match" currently not possible - compare HttpSecurityConfiguration#configure comments
         return new ResponseEntity<>(new FrontendError("Denied."), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(HttpForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    protected ResponseEntity<FrontendError> handleConversion(@Nonnull final HttpForbiddenException ex) {
+        return new ResponseEntity<>(new FrontendError("Forbidden."), HttpStatus.FORBIDDEN);
     }
 }

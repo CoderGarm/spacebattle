@@ -1,18 +1,16 @@
 package de.yuga.spacebattle.rest.dto.account;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.SpacebattleApplication;
 import de.yuga.spacebattle.backend.entities.account.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.validation.constraints.Pattern;
-import java.util.Objects;
 
 /**
  * The simplest representation of a user.
- * Think about registering new classes in {@link SpacebattleApplication#api()}.
  */
 @Schema(description = ".")
 public class UserJson {
@@ -22,16 +20,19 @@ public class UserJson {
     private Integer idUser;
 
     @Nullable
+    @JsonProperty
     @Pattern(regexp = "[a-zA-Z0-9]{3,30}", message = "must contain of 3 to 30 characters of numbers or letters")
     @Schema(required = true, description = "The user's name")
     private String username;
 
     @Nullable
+    @JsonProperty
     @Schema(description = "The user's alliance.")
     private Integer idAlliance;
 
-    @Nonnull
-    @Schema(required = true, description = "The user's role.")
+    @Nullable
+    @JsonProperty
+    @Schema(description = "The user's role.")
     private String role;
 
     public UserJson() {
@@ -49,20 +50,5 @@ public class UserJson {
     @Nullable
     public Integer getIdUser() {
         return idUser;
-    }
-
-    @Nonnull
-    public String getUsername() {
-        return Objects.requireNonNull(username);
-    }
-
-    @Nullable
-    public Integer getIdAlliance() {
-        return idAlliance;
-    }
-
-    @Nonnull
-    public String getRole() {
-        return role;
     }
 }

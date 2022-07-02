@@ -40,6 +40,12 @@
         primary key (idAmmunitionModule)
     ) engine=InnoDB;
 
+    create table applications (
+       idAlliance integer not null,
+        idUser integer not null,
+        primary key (idAlliance, idUser)
+    ) engine=InnoDB;
+
     create table armor (
        idArmor integer not null auto_increment,
         techLevel varchar(255) not null,
@@ -540,6 +546,7 @@
        idUser integer not null auto_increment,
         createdAt datetime(6) not null,
         email varchar(50) not null,
+        gameUserRoles varchar(255),
         password varchar(255) not null,
         userRole varchar(255),
         username varchar(30) not null,
@@ -698,6 +705,16 @@
        add constraint FKi9oa4xlh6y6c8nd9e25c8jlbq 
        foreign key (idResearch) 
        references research (idResearch);
+
+    alter table applications 
+       add constraint FKi0rvtwqjg2c06lvk50e4gakfa 
+       foreign key (idUser) 
+       references user (idUser);
+
+    alter table applications 
+       add constraint FKpa65pbe483fu0uj4mwnwahn6w 
+       foreign key (idAlliance) 
+       references alliance (idAlliance);
 
     alter table armor 
        add constraint FK10dhr7h3pkps3d7u22q2pwpgc 

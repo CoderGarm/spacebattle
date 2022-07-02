@@ -39,6 +39,14 @@
        drop 
        foreign key FKi9oa4xlh6y6c8nd9e25c8jlbq;
 
+    alter table applications 
+       drop 
+       foreign key FKi0rvtwqjg2c06lvk50e4gakfa;
+
+    alter table applications 
+       drop 
+       foreign key FKpa65pbe483fu0uj4mwnwahn6w;
+
     alter table armor 
        drop 
        foreign key FK10dhr7h3pkps3d7u22q2pwpgc;
@@ -500,6 +508,8 @@
     drop table if exists ammunitionFitting;
 
     drop table if exists ammunitionModule;
+
+    drop table if exists applications;
 
     drop table if exists armor;
 

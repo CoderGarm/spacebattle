@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.entities.account;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.converter.EGameUserRolesConverter;
 import de.yuga.spacebattle.backend.converter.PasswordConverter;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
@@ -11,6 +12,7 @@ import de.yuga.spacebattle.backend.entities.researches.ResearchLevel;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Job;
+import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
@@ -23,8 +25,10 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @NamedQueries({
         @NamedQuery(name = "User.getAll", query = "SELECT u FROM User u"),
@@ -36,7 +40,8 @@ import java.util.Set;
         @NamedQuery(name = "User.getColonizations", query = "SELECT u FROM User u LEFT JOIN FETCH u.colonizations r WHERE u = :user"),
         @NamedQuery(name = "User.findByUsernameExact", query = "SELECT u.id FROM User u WHERE UPPER(u.username) = UPPER(:username)"),
         @NamedQuery(name = "User.findByEMailExact", query = "SELECT u.id FROM User u WHERE UPPER(u.email) = UPPER(:email)"),
-        @NamedQuery(name = "User.findByUsername", query = "SELECT u FROM User u WHERE UPPER(u.username) = UPPER(:username)")
+        @NamedQuery(name = "User.findByUsername", query = "SELECT u FROM User u WHERE UPPER(u.username) = UPPER(:username)"),
+        @NamedQuery(name = "User.findAllianceAdminByAlliance", query = "SELECT u FROM User u WHERE u.alliance = :alliance AND :gameUserRole IN (u.gameUserRoles)")
 })
 @Entity
 @Table(name = "user",
@@ -59,7 +64,12 @@ public class User extends AbstractEntityKey {
     private EWebUserRole userRole;
 
     @Nonnull
+    @Convert(converter = EGameUserRolesConverter.class)
+    private final Set<EGameUserRole> gameUserRoles = new HashSet<>();
+
+    @Nonnull
     @NotNull
+    @Column(updatable = false) // todo how to change password? Must be kind of a hack at this point. Do not change to "decrypt able" mechanism
     @Pattern(regexp = "((?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,30})", message = "must contain of 8 to 30 characters of numbers, letters, capital letters and special characters")
     @Convert(converter = PasswordConverter.class)
     private String password;
@@ -143,7 +153,8 @@ public class User extends AbstractEntityKey {
     public User(@Nonnull final String username,
                 @Nonnull final String password,
                 @Nonnull final String email,
-                @Nonnull final EWebUserRole role) {
+                @Nonnull final EWebUserRole role,
+                @Nullable final EGameUserRole... gameUserRoles) {
         Preconditions.checkNotNull(username, "username shouldn't be null!");
         Preconditions.checkNotNull(password, "password shouldn't be null!");
         Preconditions.checkNotNull(email, "email shouldn't be null!");
@@ -153,6 +164,9 @@ public class User extends AbstractEntityKey {
         this.password = password;
         this.email = email;
         this.userRole = role;
+        if (gameUserRoles != null) {
+            this.gameUserRoles.addAll(Arrays.stream(gameUserRoles).collect(Collectors.toSet()));
+        }
     }
 
     @Nonnull
@@ -160,15 +174,32 @@ public class User extends AbstractEntityKey {
         return username;
     }
 
+    public void setUsername(@Nonnull final String username) {
+        Preconditions.checkNotNull(username, "username shouldn't be null!");
+
+        this.username = username;
+    }
+
     @Nonnull
     public EWebUserRole getUserRole() {
         return userRole;
     }
 
-    public void setUsername(@Nonnull final String username) {
-        Preconditions.checkNotNull(username, "username shouldn't be null!");
+    @Nonnull
+    public Set<EGameUserRole> getGameUserRoles() {
+        return gameUserRoles;
+    }
 
-        this.username = username;
+    public void addGameUserRoles(@Nonnull final EGameUserRole gameUserRole) {
+        Preconditions.checkNotNull(gameUserRole, "gameUserRole shouldn't be null!");
+
+        this.gameUserRoles.add(gameUserRole);
+    }
+
+    public void removeGameUserRoles(@Nonnull final EGameUserRole gameUserRole) {
+        Preconditions.checkNotNull(gameUserRole, "gameUserRole shouldn't be null!");
+
+        this.gameUserRoles.remove(gameUserRole);
     }
 
     @Nonnull

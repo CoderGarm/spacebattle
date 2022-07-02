@@ -8,7 +8,6 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.repositories.orbitals.PlanetRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -97,7 +96,6 @@ public class PlanetService {
      * @return the new planet
      */
     @Nonnull
-    @Transactional(rollbackFor = Exception.class)
     @Deprecated(since = "productive environment")
     public Planet createPlanet(@Nonnull final String name,
                                @Nonnull final StarSystem system,
@@ -110,7 +108,6 @@ public class PlanetService {
     }
 
     @Nonnull
-    @Transactional(rollbackFor = Exception.class)
     @Deprecated(since = "productive environment")
     public Planet createPlanet(@Nonnull final String name,
                                @Nonnull final StarSystem system,

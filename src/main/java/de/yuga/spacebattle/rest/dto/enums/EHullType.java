@@ -9,7 +9,7 @@ import javax.annotation.Nonnull;
 /**
  * This indicated what a type of ship is this hull for.
  */
-@Schema
+@Schema(description = ".")
 public class EHullType extends HasIcon {
 
     @Nonnull

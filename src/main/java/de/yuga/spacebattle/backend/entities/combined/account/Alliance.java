@@ -4,6 +4,7 @@ package de.yuga.spacebattle.backend.entities.combined.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.enums.EGameUserRole;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -15,8 +16,12 @@ import java.util.Set;
 
 @NamedQueries({
         @NamedQuery(name = "Alliance.getAll", query = "SELECT a FROM Alliance a"),
-        @NamedQuery(name = "Alliance.findByNameExact", query = "SELECT u.id FROM Alliance u WHERE UPPER(u.name) = UPPER(:name)"),
-        @NamedQuery(name = "Alliance.findByCodeExact", query = "SELECT u.id FROM Alliance u WHERE UPPER(u.code) = UPPER(:code)"),
+        @NamedQuery(name = "Alliance.findByNameExact", query = "SELECT a.id FROM Alliance a WHERE UPPER(a.name) = UPPER(:name)"),
+        @NamedQuery(name = "Alliance.findByCodeExact", query = "SELECT a.id FROM Alliance a WHERE UPPER(a.code) = UPPER(:code)"),
+        @NamedQuery(name = "Alliance.findAllWithMembers", query = "SELECT DISTINCT a FROM Alliance a LEFT JOIN FETCH a.members"),
+        @NamedQuery(name = "Alliance.findByIdWithMembers", query = "SELECT a FROM Alliance a LEFT JOIN FETCH a.members WHERE a.id = :idAlliance"),
+        @NamedQuery(name = "Alliance.findByIdWithApplications", query = "SELECT a FROM Alliance a LEFT JOIN FETCH a.applications WHERE a.id = :idAlliance"),
+        @NamedQuery(name = "Alliance.hasOpenApplication", query = "SELECT a FROM Alliance a LEFT JOIN a.applications app WHERE app.id = :idUser"),
 })
 @Entity
 @Table(name = "alliance")
@@ -37,8 +42,15 @@ public class Alliance extends AbstractEntityKey {
 
     @Nonnull
     @NotNull
-    @OneToMany(mappedBy = "alliance", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "alliance")
     private final Set<User> members = new HashSet<>();
+
+    @Nonnull
+    @ManyToMany
+    @JoinTable(name = "applications",
+            joinColumns = @JoinColumn(name = "idAlliance"),
+            inverseJoinColumns = @JoinColumn(name = "idUser"))
+    private final Set<User> applications = new HashSet<>();
 
     @Nonnull
     @NotNull
@@ -53,6 +65,9 @@ public class Alliance extends AbstractEntityKey {
     public Alliance() {
     }
 
+    /**
+     * Please save the founder afterwards!
+     */
     public Alliance(@Nonnull final String name, @Nonnull final String code, @Nonnull final User founder) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(code, "code shouldn't be null!");
@@ -61,7 +76,9 @@ public class Alliance extends AbstractEntityKey {
         this.name = name;
         this.code = code;
         founder.setAlliance(this);
+        founder.addGameUserRoles(EGameUserRole.ALLIANCE_ADMIN);
         this.founder = founder;
+        this.members.add(founder);
     }
 
     @Nonnull
@@ -89,6 +106,11 @@ public class Alliance extends AbstractEntityKey {
     @Nonnull
     public Set<User> getMembers() {
         return members;
+    }
+
+    @Nonnull
+    public Set<User> getApplications() {
+        return applications;
     }
 
     @Nonnull

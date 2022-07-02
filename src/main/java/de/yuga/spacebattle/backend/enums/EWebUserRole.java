@@ -11,7 +11,14 @@ import java.util.Set;
 
 public enum EWebUserRole {
 
+    /**
+     * Simple and plain user - no special roles.
+     */
     USER("USER"),
+
+    /**
+     * The game admin - allowed to do everything from balancing to delete users.
+     */
     ADMIN("ADMIN", USER);
 
     private final String name;
@@ -49,6 +56,6 @@ public enum EWebUserRole {
     public static EWebUserRole getRoleByName(@Nonnull final String eWebUserRole) {
         Preconditions.checkNotNull(eWebUserRole, "eWebUserRole shouldn't be null!");
 
-        return Arrays.stream(EWebUserRole.values()).filter(e -> e.getName().equals(eWebUserRole)).findFirst().get();
+        return Arrays.stream(EWebUserRole.values()).filter(e -> e.getName().equals(eWebUserRole)).findFirst().orElse(null);
     }
 }

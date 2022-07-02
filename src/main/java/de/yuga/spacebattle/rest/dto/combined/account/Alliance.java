@@ -3,13 +3,11 @@ package de.yuga.spacebattle.rest.dto.combined.account;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
-import java.util.Comparator;
-import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 @Schema(description = ".")
 public class Alliance {
@@ -33,9 +31,10 @@ public class Alliance {
     @Schema(required = true, description = "The founder of the alliance.")
     private UserJson founder;
 
+    @Nullable
     @JsonProperty
-    @Schema(required = true, description = "The amount of members")
-    private int membersAmount;
+    @Schema(description = "The amount of members")
+    private Integer membersAmount;
 
     public Alliance() {
     }
@@ -46,7 +45,16 @@ public class Alliance {
         this.idAlliance = alliance.getId();
         this.name = alliance.getName();
         this.code = alliance.getCode();
-        this.founder = new UserJson(alliance.getMembers().stream().sorted(Comparator.comparingInt(AbstractEntityKey::getId)).collect(Collectors.toList()).get(0));
-        this.membersAmount = alliance.getMembers().size();
+        this.founder = new UserJson(alliance.getFounder());
+    }
+
+    public Alliance(@Nonnull final de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance, final int membersAmount) {
+        Preconditions.checkNotNull(alliance, "alliance shouldn't be null!");
+
+        this.idAlliance = alliance.getId();
+        this.name = alliance.getName();
+        this.code = alliance.getCode();
+        this.founder = new UserJson(alliance.getFounder());
+        this.membersAmount = membersAmount;
     }
 }

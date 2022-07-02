@@ -53,7 +53,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
@@ -293,10 +292,11 @@ public class MasterOfTheUniverseService {
         final List<StarSystem> allSystems = starsystemService.findAll();
         final Set<Orbit> knownOrbits = allSystems.stream().map(StarSystem::getOrbit).collect(Collectors.toSet());
 
-        final List<Orbit> newOrbits = new ArrayList<>();
+        final Set<Orbit> created = new HashSet<>();
         for (int i = 0; i < 100; i++) {
-            newOrbits.add(generateSystemPosition());
+            created.add(generateSystemPosition());
         }
+        final List<Orbit> newOrbits = new ArrayList<>(created);
         newOrbits.removeAll(knownOrbits);
         final Set<StarSystem> newStarSystems = newOrbits.stream().map(orbit -> {
             final long timeInMillis = Calendar.getInstance().getTimeInMillis();
@@ -356,11 +356,12 @@ public class MasterOfTheUniverseService {
     @SuppressWarnings({"deprecation", "unused"})
     void createInitialDataPayload() {
 
-        final User u1 = userService.createUser("Flashkid", "12457aA!", "mail", EWebUserRole.ADMIN);
-        final User u2 = userService.createUser("Yufiel", "12457aA!", "mail2", EWebUserRole.USER);
+        final User u1 = userService.createUser("Flashkid", "12457aA!", "mail", EWebUserRole.ADMIN, EGameUserRole.ALLIANCE_ADMIN);
+        final User u2 = userService.createUser("Yufiel", "12457aA!", "mail2", EWebUserRole.USER, EGameUserRole.ALLIANCE_ADMIN);
+        final User u3 = userService.createUser("Applicant", "12457aA!", "mail3", EWebUserRole.USER);
         LOGGER.info("Users created");
 
-        Alliance a1 = allianceService.createAlliance("Argonauten", "A", u1);
+        Alliance a1 = allianceService.createAlliance("Argonauten", "A", u1, u3);
         Alliance a2 = allianceService.createAlliance("111er", "111er", u2);
         LOGGER.info("Alliances created");
 
@@ -437,6 +438,10 @@ public class MasterOfTheUniverseService {
         Building militaryAcademy = building("Military Academy", "for the guys which are silent", 100, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_MILITARY_II), EEducationType.OFFICER, livingStuff);
         LOGGER.info("Buildings created");
 
+        // todo fix creation of elements
+        // todo implement game role
+        // todo implement ally admin screen, application etc.
+
         colonizePlanet(u1, p11);
         colonizePlanet(u2, p21);
         LOGGER.info("Planets colonized and populated.");
@@ -505,14 +510,14 @@ public class MasterOfTheUniverseService {
     }
 
     @Nonnull
-    private Building building(final String name,
-                              final String description,
-                              final int baseValue,
-                              final int amountOfWorkers,
-                              final ETechLevel techLevel,
-                              final ProductionType productionType,
-                              final EEducationType educationType,
-                              final Research unlockedBy) {
+    protected Building building(final String name,
+                                final String description,
+                                final int baseValue,
+                                final int amountOfWorkers,
+                                final ETechLevel techLevel,
+                                final ProductionType productionType,
+                                final EEducationType educationType,
+                                final Research unlockedBy) {
         return buildingService.createBuilding(name, description, baseValue, techLevel, productionType, educationType, amountOfWorkers, unlockedBy);
     }
 
@@ -530,7 +535,6 @@ public class MasterOfTheUniverseService {
 
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated(since = "productive environment")
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     protected Planet colonizePlanet(@Nonnull final User owner, @Nonnull final Planet planet) {
         // first the guys, then the buildings
         final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
@@ -544,6 +548,7 @@ public class MasterOfTheUniverseService {
         Preconditions.checkNotNull(resourceDeposit, "resourceDeposit shouldn't be null!");
 
         resourceDeposit.setAbsolutePopulation(EEducationType.NONE, 200);
+        resourceDeposit.setAbsolutePopulation(EEducationType.NONE, 200);
         resourceDeposit.setAbsolutePopulation(EEducationType.SCHOOL, 200);
         resourceDeposit.setAbsolutePopulation(EEducationType.COLLEGE, 500);
         resourceDeposit.setAbsolutePopulation(EEducationType.UNIVERSITY, 1000);
@@ -553,7 +558,6 @@ public class MasterOfTheUniverseService {
 
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated(since = "productive environment")
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     protected ShipClass createFitting(Armor armor,
                                       Propulsion propulsionFTL,
                                       ElectronicWarfare electronicWarfare,

@@ -1,33 +1,53 @@
 package de.yuga.spacebattle.rest.dto.account;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Set;
 
 @Schema(description = ".")
 public class JWT {
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The access token to authenticate every request against the backend.")
     private String accessToken;
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The access token to authenticate every request against the backend.")
     private String refreshToken;
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The user's name.")
     private String username;
 
+    @JsonProperty
     @Schema(required = true, description = "The user's ID.")
     private int idUser;
 
+    @Nullable
+    @JsonProperty
+    @Schema(description = "The id of the user's alliance.")
+    private Integer idAlliance;
+
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The user's role.")
     private EWebUserRole role;
+
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The user's in-game roles.")
+    private Set<EGameUserRole> gameUserRoles = new HashSet<>();
 
     public JWT() {
     }
@@ -39,52 +59,12 @@ public class JWT {
 
         this.username = user.getUsername();
         this.idUser = user.getId();
+        if (user.getAlliance() != null) {
+            this.idAlliance = user.getAlliance().getId();
+        }
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.role = user.getUserRole();
-    }
-
-    @Nonnull
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(@Nonnull String accessToken) {
-        this.accessToken = accessToken;
-    }
-
-    @Nonnull
-    public String getRefreshToken() {
-        return refreshToken;
-    }
-
-    public void setRefreshToken(@Nonnull String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
-
-    @Nonnull
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(@Nonnull String username) {
-        this.username = username;
-    }
-
-    public int getIdUser() {
-        return idUser;
-    }
-
-    public void setIdUser(int idUser) {
-        this.idUser = idUser;
-    }
-
-    @Nonnull
-    public EWebUserRole getRole() {
-        return role;
-    }
-
-    public void setRole(@Nonnull EWebUserRole role) {
-        this.role = role;
+        this.gameUserRoles = user.getGameUserRoles();
     }
 }

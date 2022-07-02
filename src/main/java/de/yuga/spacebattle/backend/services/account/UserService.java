@@ -2,8 +2,10 @@ package de.yuga.spacebattle.backend.services.account;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
+import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import de.yuga.spacebattle.backend.repositories.account.UserRepository;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -126,13 +128,14 @@ public class UserService {
     public User createUser(@Nonnull final String username,
                            @Nonnull final String password,
                            @Nonnull final String email,
-                           @Nonnull final EWebUserRole role) {
+                           @Nonnull final EWebUserRole role,
+                           @Nullable final EGameUserRole... gameUserRoles) {
         Preconditions.checkNotNull(username, "username shouldn't be null!");
         Preconditions.checkNotNull(password, "password shouldn't be null!");
         Preconditions.checkNotNull(email, "email shouldn't be null!");
         Preconditions.checkNotNull(role, "role shouldn't be null!");
 
-        return this.save(new User(username, password, email, role));
+        return this.save(new User(username, password, email, role, gameUserRoles));
     }
 
     public Set<Colonization> getColonizations(@Nonnull final User user) {
@@ -196,5 +199,19 @@ public class UserService {
         Preconditions.checkNotNull(email, "email shouldn't be null!");
 
         return userRepository.existsEMail(email);
+    }
+
+    @Nonnull
+    public List<User> findAllianceAdminByAlliance(@Nonnull final Alliance alliance, @Nonnull final EGameUserRole gameUserRole) {
+        Preconditions.checkNotNull(alliance, "alliance shouldn't be null!");
+        Preconditions.checkNotNull(gameUserRole, "gameUserRole shouldn't be null!");
+
+        return Objects.requireNonNullElse(userRepository.findAllianceAdminByAlliance(alliance, gameUserRole), new ArrayList<>());
+    }
+
+    public void saveAll(@Nonnull final List<User> users) {
+        Preconditions.checkNotNull(users, "users shouldn't be null!");
+
+        userRepository.saveAll(users);
     }
 }
