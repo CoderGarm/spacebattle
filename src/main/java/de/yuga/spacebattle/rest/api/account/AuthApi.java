@@ -9,13 +9,11 @@ import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
+import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.config.security.JwtTokenUtil;
 import de.yuga.spacebattle.rest.config.security.WebUserDetails;
-import de.yuga.spacebattle.rest.dto.account.AuthRequest;
-import de.yuga.spacebattle.rest.dto.account.JWT;
-import de.yuga.spacebattle.rest.dto.account.UserJson;
-import de.yuga.spacebattle.rest.dto.account.UserReq;
+import de.yuga.spacebattle.rest.dto.account.*;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -42,6 +40,9 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -163,6 +164,40 @@ public class AuthApi {
             return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, accessToken).body(new JWT(user, accessToken, newRefreshToken));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @PostMapping(value = "/changePassword")
+    @Operation(summary = "Triggers a password change.", operationId = "changePassword",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> changePassword(@RequestBody @Nonnull ChangePassword changePassword) {
+        PreconditionWebHelper.checkNotNull(changePassword, "changePassword shouldn't be null!");
+
+        final boolean changePasswordSuccessful = writeChangePasswordRequest(changePassword);
+        return ResponseEntity.ok(changePasswordSuccessful);
+    }
+
+    private boolean writeChangePasswordRequest(@Nonnull final ChangePassword changePassword) {
+        Preconditions.checkNotNull(changePassword, "changePassword shouldn't be null!");
+
+        final WebUserDetails toModify = userService.findByUsername(changePassword.getUsername()).orElse(null);
+        PreconditionWebHelper.checkNotNull(toModify, "toModify shouldn't be null!");
+        final boolean eMailEquals = toModify.getUser().getEmail().equals(changePassword.geteMail());
+        PreconditionWebHelper.checkArgument(!eMailEquals, "There was something wrong, guy!");
+
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter("/changePassword/" + changePassword.getUsername()));
+            writer.write(changePassword.geteMail());
+            writer.close();
+            return true;
+        } catch (IOException e) {
+            return false;
         }
     }
 
