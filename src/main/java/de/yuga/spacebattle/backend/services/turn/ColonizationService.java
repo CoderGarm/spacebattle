@@ -288,6 +288,9 @@ public class ColonizationService {
         final OrbitalDistanceMarker biggestDistance = marker.get(marker.size() - 1);
         final StarSystem starSystem = colonizableByOrbit.get(biggestDistance.first);
         final List<Planet> planets = new ArrayList<>(starSystem.getPlanets());
+        if (planets.size() == 1) {
+            return planets.get(0);
+        }
         final int randomIndex = ThreadLocalRandom.current().nextInt(0, planets.size() - 1);
         return planets.get(randomIndex);
     }

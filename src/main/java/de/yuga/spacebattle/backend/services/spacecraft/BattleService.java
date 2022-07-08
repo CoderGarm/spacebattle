@@ -14,6 +14,7 @@ import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -30,7 +31,7 @@ public class BattleService {
     private final static Logger LOGGER = LoggerFactory.getLogger(BattleService.class);
 
     @Nonnull
-    private final static BattleLogger battleLogger = new BattleLogger(LOGGER);
+    private final BattleLogger battleLogger;
 
     @Nonnull
     private final FleetService fleetService;
@@ -41,16 +42,20 @@ public class BattleService {
     @Nonnull
     private final WarShipService warShipService;
 
+    @Autowired
     public BattleService(@Nonnull final FleetService fleetService,
                          @Nonnull final BattleReportService battleReportService,
-                         @Nonnull final WarShipService warShipService) {
+                         @Nonnull final WarShipService warShipService,
+                         @Nonnull final BattleLogger battleLogger) {
         Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         Preconditions.checkNotNull(battleReportService, "battleReportService shouldn't be null!");
         Preconditions.checkNotNull(warShipService, "warShipService shouldn't be null!");
+        Preconditions.checkNotNull(battleLogger, "battleLogger shouldn't be null!");
 
         this.fleetService = fleetService;
         this.battleReportService = battleReportService;
         this.warShipService = warShipService;
+        this.battleLogger = battleLogger;
     }
 
     public void runBattles(@Nonnull final Tick today) {
@@ -86,7 +91,7 @@ public class BattleService {
     private BattleReport processFightingResult(@Nonnull final Tick latest, @Nonnull final BattleResult battleResult) {
         Preconditions.checkNotNull(latest, "latest shouldn't be null!");
         Preconditions.checkNotNull(battleResult, "fightingResult shouldn't be null!");
-        
+
         final Set<WarShip> losses = battleResult.getLosses();
         warShipService.deleteAll(losses);
         fleetService.deleteFleetsWithoutShips(battleResult.getFleetClash().getParticipatingFleets());

@@ -67,7 +67,8 @@ public class SpacebattleApplication {
                         .license(new License()
                                 .name("Apache 2.0")
                                 .url("https://www.apache.org/licenses/LICENSE-2.0")))
-                .addServersItem(new Server().url("http://localhost:8080"))
+                .addServersItem(new Server().description("dev").url("http://localhost:8080"))
+                .addServersItem(new Server().description("qat").url("http://65.109.16.233:8081"))
                 /*.externalDocs(new ExternalDocumentation()
                         .description("SpringShop Wiki Documentation")
                         .url("https://springshop.wiki.github.org/docs"))*/

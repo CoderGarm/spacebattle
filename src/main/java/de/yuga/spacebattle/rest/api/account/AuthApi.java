@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
@@ -68,6 +69,9 @@ public class AuthApi {
     private final ColonizationService colonizationService;
 
     @Nonnull
+    private final PlanetService planetService;
+
+    @Nonnull
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     @Nonnull
@@ -81,17 +85,21 @@ public class AuthApi {
                    @Nonnull final JwtTokenUtil jwtTokenUtil,
                    @Nonnull final UserService userService,
                    @Nonnull final ResearchService researchService,
-                   @Nonnull final ColonizationService colonizationService) {
+                   @Nonnull final ColonizationService colonizationService,
+                   @Nonnull final PlanetService planetService) {
         Preconditions.checkNotNull(authenticationManager, "authenticationManager shouldn't be null!");
         Preconditions.checkNotNull(jwtTokenUtil, "jwtTokenUtil shouldn't be null!");
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
         Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
+        Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
+
         this.userService = userService;
         this.researchService = researchService;
         this.authenticationManager = authenticationManager;
         this.jwtTokenUtil = jwtTokenUtil;
         this.colonizationService = colonizationService;
+        this.planetService = planetService;
     }
 
     @PostMapping("/login")
@@ -237,6 +245,7 @@ public class AuthApi {
 
             final Planet planet = colonizationService.findPlanetForNewUser();
             MasterOfTheUniverseService.populateNewColonization(planet.getResourceDeposit());
+            planetService.save(planet);
             final Colonization colonization = new Colonization(saved, planet, planet.getResourceDeposit().getCrewRequirement(), 0);
             colonizationService.colonizePlanet(colonization);
 

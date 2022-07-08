@@ -24,6 +24,10 @@ import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -37,17 +41,22 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
+@Service
 public class BattleLogger {
 
-    private final Logger LOGGER;
+    @Nonnull
+    private final static Logger LOGGER = LoggerFactory.getLogger(BattleLogger.class);
+
+    private final boolean logBattleResult;
 
     @Nullable
     private BufferedWriter bw;
 
-    public BattleLogger(@Nonnull final Logger LOGGER) {
-        Preconditions.checkNotNull(LOGGER, "LOGGER shouldn't be null!");
+    @Autowired
+    public BattleLogger(@Nonnull @Value("${logging.battle-log.write}:'true'") final String logBattleResult) {
+        Preconditions.checkNotNull(logBattleResult, "logBattleResult shouldn't be null!");
 
-        this.LOGGER = LOGGER;
+        this.logBattleResult = Boolean.parseBoolean(logBattleResult);
         openStream();
     }
 
@@ -91,6 +100,10 @@ public class BattleLogger {
 
     public void logBattleResult(@Nonnull final BattleResult battleResult) {
         Preconditions.checkNotNull(battleResult, "battleResult shouldn't be null!");
+
+        if (!logBattleResult) {
+            return;
+        }
 
         final Cage cage = battleResult.getCage();
         final FleetClash fleetClash = battleResult.getFleetClash();
