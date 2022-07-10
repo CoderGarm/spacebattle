@@ -5,7 +5,6 @@ import de.yuga.spacebattle.backend.entities.account.MessageThread;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.services.account.MessageThreadService;
 import de.yuga.spacebattle.backend.services.account.UserService;
-import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.config.security.JwtTokenUtil;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
@@ -147,8 +146,11 @@ public class ChatApi {
         final ChatMessage chatMessage = messages.get(0);
         final String message = chatMessage.getMessage();
 
+        //noinspection ConstantConditions
         final int idUserSender = chatMessage.getSender().getIdUser();
+        //noinspection ConstantConditions
         final int idUserOne = chatHistory.getUserOne().getIdUser();
+        //noinspection ConstantConditions
         final int idUserTwo = chatHistory.getUserTwo().getIdUser();
         // detect the sender
         final int idReceiver = idUserSender != idUserOne ? idUserOne : idUserTwo;
@@ -160,6 +162,7 @@ public class ChatApi {
         final User sender = userService.find(idUserSender);
         final User receiver = userService.find(idReceiver);
 
+        //noinspection ConstantConditions
         final MessageThread messageThread = messageThreadService.createChatMessage(sender, receiver, message);
         return ResponseEntity.ok(new ChatHistory(messageThread));
     }
@@ -185,8 +188,7 @@ public class ChatApi {
                                              @RequestBody @Nonnull final ChatMessage message) {
         Preconditions.checkNotNull(message, "message shouldn't be null!");
 
-        final Integer idUserByToken = tokenUtil.getIdUserFromAccessToken(token);
-        PreconditionWebHelper.checkNotNull(idUserByToken, "sendChatMessage, idUserByToken shouldn't be null!");
+        final int idUserByToken = tokenUtil.getIdUserFromAccessToken(token);
 
         final String chatMessage = message.getMessage();
         final UserJson senderJ = message.getSender();
@@ -194,8 +196,8 @@ public class ChatApi {
         if (idUserMessage == null) {
             throw new NotifyWebUserException("You should try to send the first message another way - please contact the administrator!");
         }
-        final Integer idUserSender = senderJ.getIdUser();
-        if (!idUserByToken.equals(idUserSender)) {
+        final int idUserSender = senderJ.getIdUser();
+        if (idUserByToken != idUserSender) {
             throw new NotifyWebUserException("You should not pretend to be someone other if you try to write a message!");
         }
         final User sender = userService.find(idUserSender);
@@ -205,5 +207,25 @@ public class ChatApi {
         } else {
             throw new NotifyWebUserException("An error has occurred while sending a message - please contact the administrator!");
         }
+    }
+
+    @PutMapping("/markMessageRead/{idChatMessage}")
+    @Operation(summary = "Creates a chat message", operationId = "markMessageRead",
+            description = "Creates a chat message",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> markMessageRead(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
+                                             @PathVariable("idChatMessage") final int idUserMessage) {
+
+        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+
+        messageThreadService.markMessageReadIfForUser(idUserMessage, idUser);
+        return ResponseEntity.ok(true);
+
     }
 }

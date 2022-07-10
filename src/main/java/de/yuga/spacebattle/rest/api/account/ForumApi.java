@@ -152,8 +152,7 @@ public class ForumApi {
     public ResponseEntity<?> getForumThreadById(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
                                                 @PathVariable("idForumThread") final int idForumThread) {
 
-        final Integer idUser = tokenUtil.getIdUserFromAccessToken(token);
-        PreconditionWebHelper.checkNotNull(idUser, "idUser shouldn't be null!");
+        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
 
         final de.yuga.spacebattle.backend.entities.account.forum.ForumThread forumThread = forumService.findForumThread(idForumThread);
         if (forumThread != null) {
@@ -288,8 +287,7 @@ public class ForumApi {
                                                @RequestBody @Nonnull final CreateForumThread createForumThread) {
         PreconditionWebHelper.checkNotNull(createForumThread, "createForumThread shouldn't be null!");
 
-        final Integer idUser = tokenUtil.getIdUserFromAccessToken(token);
-        PreconditionWebHelper.checkNotNull(idUser, "idUser shouldn't be null!");
+        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
 
         final de.yuga.spacebattle.backend.entities.account.forum.Forum forum = forumService.findForumById(createForumThread.getIdForum());
         final User user = validateAccessToForum(idUser, forum);
@@ -316,8 +314,7 @@ public class ForumApi {
                                                  @RequestBody @Nonnull final CreateForumThreadMessage threadMessage) {
         PreconditionWebHelper.checkNotNull(threadMessage, "threadMessage shouldn't be null!");
 
-        final Integer idUser = tokenUtil.getIdUserFromAccessToken(token);
-        PreconditionWebHelper.checkNotNull(idUser, "idUser shouldn't be null!");
+        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
 
         final de.yuga.spacebattle.backend.entities.account.forum.ForumThread forumThread = forumService.findForumThread(threadMessage.getIdForumThread());
         PreconditionWebHelper.checkNotNull(forumThread, "forumThread shouldn't be null!");

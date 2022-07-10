@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Schema(description = ".")
 public class ChatMessage {
@@ -51,19 +50,19 @@ public class ChatMessage {
         return idUserMessage;
     }
 
-    @Nonnull
+    @Nullable
     public UserJson getSender() {
-        return Objects.requireNonNull(sender);
+        return sender;
     }
 
-    @Nonnull
+    @Nullable
     public String getMessage() {
-        return Objects.requireNonNull(message);
+        return message;
     }
 
-    @Nonnull
+    @Nullable
     public LocalDateTime getSentAt() {
-        return Objects.requireNonNull(sentAt);
+        return sentAt;
     }
 
     @Nullable

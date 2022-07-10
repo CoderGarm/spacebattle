@@ -9,6 +9,10 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
+@NamedQueries({
+        @NamedQuery(name = "UserMessage.getByIdIfUserIsReceiver",
+                query = "SELECT msg FROM UserMessage  msg WHERE msg.id = :idUserMessage AND msg.sender.id <> :idUser AND (msg.messageThread.userOne.id = :idUser OR msg.messageThread.userTwo.id = :idUser)")
+})
 @Entity
 @Table(name = "userMessage")
 @AttributeOverride(name = "id", column = @Column(name = "idUserMessage"))

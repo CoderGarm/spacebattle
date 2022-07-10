@@ -5,14 +5,13 @@ import de.yuga.spacebattle.backend.entities.account.MessageThread;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.account.UserMessage;
 import de.yuga.spacebattle.backend.repositories.account.MessageThreadRepository;
+import de.yuga.spacebattle.backend.repositories.account.UserMessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class MessageThreadService {
@@ -20,11 +19,17 @@ public class MessageThreadService {
     @Nonnull
     private final MessageThreadRepository messageThreadRepository;
 
+    @Nonnull
+    private final UserMessageRepository userMessageRepository;
+
     @Autowired
-    public MessageThreadService(@Nonnull final MessageThreadRepository messageThreadRepository) {
+    public MessageThreadService(@Nonnull final MessageThreadRepository messageThreadRepository,
+                                @Nonnull final UserMessageRepository userMessageRepository) {
         Preconditions.checkNotNull(messageThreadRepository, "userMessageRepository should not be null");
+        Preconditions.checkNotNull(userMessageRepository, "userMessageRepository shouldn't be null!");
 
         this.messageThreadRepository = messageThreadRepository;
+        this.userMessageRepository = userMessageRepository;
     }
 
     /**
@@ -37,14 +42,7 @@ public class MessageThreadService {
         Preconditions.checkNotNull(user1, "user1 shouldn't be null!");
         Preconditions.checkNotNull(user2, "user2 shouldn't be null!");
 
-        final MessageThread messageThread = messageThreadRepository.findMessagesBetween(user1.getId(), user2.getId());
-        if (messageThread == null) {
-            return null;
-        }
-        final Set<UserMessage> unreadMessages = messageThread.getMessages().stream().filter(UserMessage::isUnRead).collect(Collectors.toSet());
-        unreadMessages.forEach(UserMessage::setReceivedAt);
-        save(messageThread);
-        return messageThread;
+        return messageThreadRepository.findMessagesBetween(user1.getId(), user2.getId());
     }
 
     /**
@@ -62,20 +60,13 @@ public class MessageThreadService {
     }
 
     /**
-     * Returns all received messages of the current logged in user and marks them as read.
+     * Returns all received messages between two users.
      *
      * @return empty if no user is logged in or no messages were received.
      */
     @Nullable
     public MessageThread findMessagesBetween(final int idUser1, final int idUser2) {
-        final MessageThread messageThread = messageThreadRepository.findMessagesBetween(idUser1, idUser2);
-        if (messageThread == null) {
-            return null;
-        }
-        final Set<UserMessage> unreadMessages = messageThread.getMessages().stream().filter(UserMessage::isUnRead).collect(Collectors.toSet());
-        unreadMessages.forEach(UserMessage::setReceivedAt);
-        save(messageThread);
-        return messageThread;
+        return messageThreadRepository.findMessagesBetween(idUser1, idUser2);
     }
 
     /**
@@ -129,5 +120,19 @@ public class MessageThreadService {
         final UserMessage userMessage = new UserMessage(anywayUsed, sender, message);
         anywayUsed.addMessage(userMessage);
         return save(anywayUsed);
+    }
+
+    /**
+     * Marks a given user message as read if the user is the receiver of the message.
+     *
+     * @param idUserMessage the id of the message
+     * @param idUser        the is of the receiver
+     */
+    public void markMessageReadIfForUser(final int idUserMessage, final int idUser) {
+        userMessageRepository.getByIdIfUserIsReceiver(idUserMessage, idUser)
+                .ifPresent(msg -> {
+                    msg.setReceivedAt();
+                    userMessageRepository.save(msg);
+                });
     }
 }
