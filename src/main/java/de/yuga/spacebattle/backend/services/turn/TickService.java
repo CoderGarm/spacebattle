@@ -123,8 +123,8 @@ public class TickService {
         this.battleService = battleService;
     }
 
-    @Scheduled(cron = "0 0 24 * * *", zone = "Europe/Berlin")
-    private void doIt() {
+    @Scheduled(cron = "0 0 0 * * *", zone = "Europe/Berlin")
+    protected void doIt() {
         LOGGER.info("Tick scheduled");
         this.doTick();
         LOGGER.info("Tick has processed!");
