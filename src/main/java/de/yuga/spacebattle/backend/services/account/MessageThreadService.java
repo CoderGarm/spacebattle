@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class MessageThreadService {
@@ -110,13 +111,8 @@ public class MessageThreadService {
         Preconditions.checkNotNull(message, "message shouldn't be null!");
 
         // todo escape message
-        final MessageThread anywayUsed;
         final MessageThread messagesBetween = findMessagesBetween(sender, receiver);
-        if (messagesBetween != null) {
-            anywayUsed = messagesBetween;
-        } else {
-            anywayUsed = new MessageThread(sender, receiver);
-        }
+        final MessageThread anywayUsed = Objects.requireNonNullElseGet(messagesBetween, () -> new MessageThread(sender, receiver));
         final UserMessage userMessage = new UserMessage(anywayUsed, sender, message);
         anywayUsed.addMessage(userMessage);
         return save(anywayUsed);
@@ -134,5 +130,26 @@ public class MessageThreadService {
                     msg.setReceivedAt();
                     userMessageRepository.save(msg);
                 });
+    }
+
+    /**
+     * Returns if the thread has unread messages.
+     *
+     * @param idReceiver      the reader
+     * @param idMessageThread the thread
+     * @return <code>true</code> if the thread has unread messages, <code>false</code> otherwise
+     */
+    public boolean hasUnreadMessaged(final int idReceiver, final int idMessageThread) {
+        return userMessageRepository.hasUnreadMessaged(idReceiver, idMessageThread);
+    }
+
+    /**
+     * Returns if the user has unread messages.
+     *
+     * @param idUser the user who asks
+     * @return <code>true</code> if the user has unread messages, <code>false</code> otherwise
+     */
+    public boolean hasUserUnreadMessaged(final int idUser) {
+        return userMessageRepository.hasUserUnreadMessaged(idUser);
     }
 }

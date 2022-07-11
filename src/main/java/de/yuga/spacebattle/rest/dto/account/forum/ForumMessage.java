@@ -26,6 +26,10 @@ public class ForumMessage extends AbstractEntityKey {
     private final int idAuthor;
 
     @JsonProperty
+    @Schema(required = true, description = "The username of the author.")
+    private final String author;
+
+    @JsonProperty
     @Schema(required = true, description = "The message itself.")
     private final String message;
 
@@ -39,6 +43,7 @@ public class ForumMessage extends AbstractEntityKey {
         this.idForumMessage = message.getId();
         this.idForumThread = message.getForumThread().getId();
         this.idAuthor = message.getAuthor().getId();
+        this.author = message.getAuthor().getUsername();
         this.message = message.getMessage();
         this.sentAt = message.getSentAt();
     }

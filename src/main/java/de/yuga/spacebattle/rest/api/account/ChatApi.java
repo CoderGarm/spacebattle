@@ -62,9 +62,9 @@ public class ChatApi {
         this.messageThreadService = messageThreadService;
     }
 
-    @GetMapping(value = "{idUserOne}/{idUserTwo}")
-    @Operation(summary = "Get the chat history of the users and marks them as read", operationId = "getChatByUsers",
-            description = "Get the chat between the users and marks them as read",
+    @GetMapping(value = "{idUser}")
+    @Operation(summary = "Get the chat history of the users.", operationId = "getChatByUsers",
+            description = "Get the chat between the users.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ChatHistory.class))),
@@ -73,22 +73,17 @@ public class ChatApi {
             }
     )
     public ResponseEntity<?> getChatByUsers(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                            @PathVariable("idUserOne") final int idUserOne,
-                                            @PathVariable("idUserTwo") final int idUserTwo) {
+                                            @PathVariable("idUser") final int idUser) {
 
         final int idUserByToken = tokenUtil.getIdUserFromAccessToken(token);
-        if (idUserByToken != idUserOne && idUserByToken != idUserTwo) {
-            throw new NotifyWebUserException("Hell, nice try but no!");
-        }
-
-        final MessageThread messagesBetween = messageThreadService.findMessagesBetween(idUserOne, idUserTwo);
+        final MessageThread messagesBetween = messageThreadService.findMessagesBetween(idUserByToken, idUser);
         if (messagesBetween != null) {
             return ResponseEntity.ok(new ChatHistory(messagesBetween));
         }
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping(value = "{idUser}")
+    @GetMapping
     @Operation(summary = "Get all active chats of the user without the messages", operationId = "getChatByUser",
             description = "Get all active chats of the user without the messages",
             responses = {
@@ -100,19 +95,47 @@ public class ChatApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getChatByUsers(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                            @PathVariable("idUser") final int idUser) {
+    public ResponseEntity<?> getChatByUser(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
 
         final int idUserByToken = tokenUtil.getIdUserFromAccessToken(token);
-        if (idUserByToken != idUser) {
-            throw new NotifyWebUserException("Hell, nice try but no, never!");
-        }
-
-        final List<MessageThread> threadsWithUser = messageThreadService.findThreadsWithUser(idUser);
+        final List<MessageThread> threadsWithUser = messageThreadService.findThreadsWithUser(idUserByToken);
         if (!threadsWithUser.isEmpty()) {
             return ResponseEntity.ok(threadsWithUser.stream().map(ChatHistory::new).collect(Collectors.toList()));
         }
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/hasUnread/{idChatHistory}")
+    @Operation(summary = "Returns if the chat has unread messages.", operationId = "hasUnread",
+            description = "Returns if the chat has unread messages.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> hasUnread(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
+                                       @PathVariable("idChatHistory") final int idChatHistory) {
+        final int idReceiver = tokenUtil.getIdUserFromAccessToken(token);
+        final boolean hasUnread = messageThreadService.hasUnreadMessaged(idReceiver, idChatHistory);
+        return ResponseEntity.ok(hasUnread);
+    }
+
+    @GetMapping("/hasUserUnread")
+    @Operation(summary = "Returns if the user has unread messages.", operationId = "hasUserUnread",
+            description = "Returns if the user has unread messages.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> hasUserUnread(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
+        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final boolean hasUnread = messageThreadService.hasUserUnreadMessaged(idUser);
+        return ResponseEntity.ok(hasUnread);
     }
 
     @PostMapping("/createMessageThread")

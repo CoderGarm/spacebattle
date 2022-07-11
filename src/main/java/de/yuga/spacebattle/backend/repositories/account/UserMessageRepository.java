@@ -13,4 +13,11 @@ public interface UserMessageRepository extends CrudRepository<UserMessage, Integ
     @Nonnull
     @Query(name = "UserMessage.getByIdIfUserIsReceiver")
     Optional<UserMessage> getByIdIfUserIsReceiver(@Param("idUserMessage") final int idUserMessage, @Param("idUser") final int idUser);
+
+
+    @Query("SELECT CASE WHEN (COUNT(msg) > 0) THEN TRUE ELSE FALSE END FROM UserMessage msg WHERE msg.messageThread.id = :idMessageThread AND msg.sender.id <> :idReceiver AND msg.receivedAt IS NULL")
+    boolean hasUnreadMessaged(@Param("idReceiver") final int idReceiver, @Param("idMessageThread") final int idMessageThread);
+
+    @Query("SELECT CASE WHEN (COUNT(msg) > 0) THEN TRUE ELSE FALSE END FROM UserMessage msg WHERE msg.sender.id <> :idReceiver AND msg.receivedAt IS NULL")
+    boolean hasUserUnreadMessaged(@Param("idReceiver") final int idReceiver);
 }
