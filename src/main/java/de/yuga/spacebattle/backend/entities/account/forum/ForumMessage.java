@@ -48,7 +48,9 @@ public class ForumMessage extends AbstractEntityKey {
     public ForumMessage() {
     }
 
-    public ForumMessage(@Nonnull final ForumThread forumThread, @Nonnull final User author, @Nonnull final String message) {
+    public ForumMessage(@Nonnull final ForumThread forumThread,
+                        @Nonnull final User author,
+                        @Nonnull final String message) {
         Preconditions.checkNotNull(forumThread, "messageThread shouldn't be null!");
         Preconditions.checkNotNull(author, "author shouldn't be null!");
         Preconditions.checkNotNull(message, "message shouldn't be null!");

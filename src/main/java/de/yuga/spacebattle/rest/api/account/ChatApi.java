@@ -105,39 +105,6 @@ public class ChatApi {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/hasUnread/{idChatHistory}")
-    @Operation(summary = "Returns if the chat has unread messages.", operationId = "hasUnread",
-            description = "Returns if the chat has unread messages.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
-                    @ApiResponse(responseCode = "400", description = "an error occurred",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
-            }
-    )
-    public ResponseEntity<?> hasUnread(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                       @PathVariable("idChatHistory") final int idChatHistory) {
-        final int idReceiver = tokenUtil.getIdUserFromAccessToken(token);
-        final boolean hasUnread = messageThreadService.hasUnreadMessaged(idReceiver, idChatHistory);
-        return ResponseEntity.ok(hasUnread);
-    }
-
-    @GetMapping("/hasUserUnread")
-    @Operation(summary = "Returns if the user has unread messages.", operationId = "hasUserUnread",
-            description = "Returns if the user has unread messages.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
-                    @ApiResponse(responseCode = "400", description = "an error occurred",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
-            }
-    )
-    public ResponseEntity<?> hasUserUnread(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
-        final boolean hasUnread = messageThreadService.hasUserUnreadMessaged(idUser);
-        return ResponseEntity.ok(hasUnread);
-    }
-
     @PostMapping("/createMessageThread")
     @Operation(summary = "Creates a chat message thread", operationId = "createChatMessageThread",
             description = "Creates a chat message thread",
@@ -232,6 +199,39 @@ public class ChatApi {
         }
     }
 
+    @GetMapping("/hasUnread/{idChatHistory}")
+    @Operation(summary = "Returns if the chat has unread messages.", operationId = "hasUnread",
+            description = "Returns if the chat has unread messages.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> hasUnread(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
+                                       @PathVariable("idChatHistory") final int idChatHistory) {
+        final int idReceiver = tokenUtil.getIdUserFromAccessToken(token);
+        final boolean hasUnread = messageThreadService.hasUnreadMessaged(idReceiver, idChatHistory);
+        return ResponseEntity.ok(hasUnread);
+    }
+
+    @GetMapping("/hasUserUnread")
+    @Operation(summary = "Returns if the user has unread messages.", operationId = "hasUserUnread",
+            description = "Returns if the user has unread messages.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> hasUserUnread(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
+        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final boolean hasUnread = messageThreadService.hasUserUnreadMessaged(idUser);
+        return ResponseEntity.ok(hasUnread);
+    }
+
     @PutMapping("/markMessageRead/{idChatMessage}")
     @Operation(summary = "Creates a chat message", operationId = "markMessageRead",
             description = "Creates a chat message",
@@ -249,6 +249,5 @@ public class ChatApi {
 
         messageThreadService.markMessageReadIfForUser(idUserMessage, idUser);
         return ResponseEntity.ok(true);
-
     }
 }

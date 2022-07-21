@@ -323,4 +323,92 @@ public class ForumApi {
         forumService.save(new de.yuga.spacebattle.backend.entities.account.forum.ForumMessage(forumThread, user, threadMessage.getMessage()));
         return ResponseEntity.ok(true);
     }
+
+    @GetMapping("/isMessageUnread/{idForumThread}/{idForumMessage}")
+    @Operation(summary = "Returns if the chat has unread messages.", operationId = "isMessageUnread",
+            description = "Returns if the chat has unread messages.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> isMessageUnread(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
+                                             @PathVariable("idForumThread") final int idForumThread,
+                                             @PathVariable("idForumMessage") final int idForumMessage) {
+        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final boolean hasUnread = forumService.isMessageUnread(idForumThread, idForumMessage, idUser);
+        return ResponseEntity.ok(hasUnread);
+    }
+
+    @GetMapping("/hasThreadUnread/{idForumThread}")
+    @Operation(summary = "Returns if the chat has unread messages.", operationId = "hasThreadUnread",
+            description = "Returns if the chat has unread messages.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> hasThreadUnread(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
+                                             @PathVariable("idForumThread") final int idForumThread) {
+        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final boolean hasUnread = forumService.hasThreadUnread(idForumThread, idUser);
+        return ResponseEntity.ok(hasUnread);
+    }
+
+    @GetMapping("/hasForumUnread/{idForum}")
+    @Operation(summary = "Returns if the chat has unread messages.", operationId = "hasForumUnread",
+            description = "Returns if the chat has unread messages.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> hasForumUnread(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
+                                            @PathVariable("idForum") final int idForum) {
+        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final boolean hasUnread = forumService.hasForumUnread(idForum, idUser);
+        return ResponseEntity.ok(hasUnread);
+    }
+
+    @GetMapping("/hasUserUnreadMessages")
+    @Operation(summary = "Returns if the chat has unread messages.", operationId = "hasUserUnreadMessages",
+            description = "Returns if the chat has unread messages.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> hasUserUnreadMessages(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
+        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final boolean hasUnread = forumService.hasUserUnread(idUser);
+        return ResponseEntity.ok(hasUnread);
+    }
+
+    @PutMapping("/markForumMessageRead/{idForum}/{idForumThread}/{idForumMessage}")
+    @Operation(summary = "Creates a chat message", operationId = "markForumMessageRead",
+            description = "Creates a chat message",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> markForumMessageRead(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
+                                                  @PathVariable("idForum") final int idForum,
+                                                  @PathVariable("idForumThread") final int idForumThread,
+                                                  @PathVariable("idForumMessage") final int idForumMessage) {
+
+        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        forumService.markMessageRead(idForum, idForumThread, idForumMessage, idUser);
+        return ResponseEntity.ok(true);
+    }
 }
