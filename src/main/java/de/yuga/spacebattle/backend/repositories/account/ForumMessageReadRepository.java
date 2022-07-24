@@ -1,9 +1,13 @@
 package de.yuga.spacebattle.backend.repositories.account;
 
 import de.yuga.spacebattle.backend.entities.account.forum.ForumMessageRead;
+import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
+import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+
+import java.util.Set;
 
 public interface ForumMessageReadRepository extends PagingAndSortingRepository<ForumMessageRead, Integer>, CustomForumMessageReadRepository {
 
@@ -56,8 +60,14 @@ public interface ForumMessageReadRepository extends PagingAndSortingRepository<F
      * @param idUser the user
      * @return <code>false</code> if all messages of all forums were read, <code>true</code> otherwise
      */
-    @Query("SELECT CASE WHEN (COUNT(r) <> (SELECT COUNT(m) FROM ForumMessage m)) THEN TRUE ELSE FALSE END FROM ForumMessageRead r " +
+    @Query("SELECT CASE WHEN (COUNT(r) <> (" +
+            "   SELECT COUNT(m) " +
+            "   FROM Forum f " +
+            "   LEFT JOIN ForumThread t ON (t.forum.id = f.id) " +
+            "   LEFT JOIN ForumMessage m ON (m.forumThread.id = t.id) " +
+            "   WHERE (f.alliance IS NULL OR f.alliance = :alliance) " +
+            "   OR ((f.role IS NULL AND f.alliance IS NULL) OR f.role IN (:userRoles))" +
+            ")) THEN TRUE ELSE FALSE END FROM ForumMessageRead r " +
             "WHERE r.user.id = :idUser")
-    boolean hasUserUnread(@Param("idUser") final int idUser);
-
+    boolean hasUserUnread(@Param("idUser") final int idUser, @Param("userRoles") final Set<EWebUserRole> userRoles, @Param("alliance") final Alliance alliance);
 }

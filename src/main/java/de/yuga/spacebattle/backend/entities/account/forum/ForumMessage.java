@@ -71,6 +71,12 @@ public class ForumMessage extends AbstractEntityKey {
         return author;
     }
 
+    public void setMessage(@Nonnull final String message) {
+        Preconditions.checkNotNull(message, "message shouldn't be null!");
+
+        this.message = message;
+    }
+
     @Nonnull
     public String getMessage() {
         return message;

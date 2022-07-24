@@ -139,8 +139,8 @@ public class MessageThreadService {
      * @param idMessageThread the thread
      * @return <code>true</code> if the thread has unread messages, <code>false</code> otherwise
      */
-    public boolean hasUnreadMessaged(final int idReceiver, final int idMessageThread) {
-        return userMessageRepository.hasUnreadMessaged(idReceiver, idMessageThread);
+    public boolean hasUnreadMessages(final int idReceiver, final int idMessageThread) {
+        return userMessageRepository.hasUnreadMessages(idReceiver, idMessageThread);
     }
 
     /**
@@ -149,7 +149,7 @@ public class MessageThreadService {
      * @param idUser the user who asks
      * @return <code>true</code> if the user has unread messages, <code>false</code> otherwise
      */
-    public boolean hasUserUnreadMessaged(final int idUser) {
-        return userMessageRepository.hasUserUnreadMessaged(idUser);
+    public boolean hasUserUnreadMessages(final int idUser) {
+        return userMessageRepository.hasUserUnreadMessages(idUser);
     }
 }

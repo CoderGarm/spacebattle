@@ -182,11 +182,13 @@ public class ForumService {
     /**
      * Returns if the specific user has unread forum messages.
      *
-     * @param idUser the user
+     * @param user the user
      * @return <code>false</code> if all messages of all forums were read, <code>true</code> otherwise
      */
-    public boolean hasUserUnread(final int idUser) {
-        return messageReadRepository.hasUserUnread(idUser);
+    public boolean hasUserUnread(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
+
+        return messageReadRepository.hasUserUnread(user.getId(), user.getUserRole().getAllowedRoles(), user.getAlliance());
     }
 
     public void markMessageRead(final int idForum,
@@ -198,5 +200,10 @@ public class ForumService {
             final ForumMessageRead forumMessageRead = messageReadRepository.create(idForum, idForumThread, idForumMessage, idUser);
             messageReadRepository.save(forumMessageRead);
         }
+    }
+
+    @Nullable
+    public ForumMessage findMessage(final int idForumMessage) {
+        return forumMessageRepository.findById(idForumMessage).orElse(null);
     }
 }

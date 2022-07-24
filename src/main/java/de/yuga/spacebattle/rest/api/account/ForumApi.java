@@ -48,6 +48,7 @@ public class ForumApi {
     private static final String FORUM_THREAD_COUNT = "threadById/count";
     private static final String CREATE_FORUM_THREAD = "createThread";
     private static final String CREATE_FORUM_THREAD_MESSAGE = "createThreadMessage";
+    private static final String EDIT_FORUM_THREAD_MESSAGE = "editThreadMessage";
     private static final String BY_FORUM = "byForum";
 
     @Nonnull
@@ -324,6 +325,33 @@ public class ForumApi {
         return ResponseEntity.ok(true);
     }
 
+    @PostMapping(value = EDIT_FORUM_THREAD_MESSAGE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get a list of forums which the given user is allowed to access.", operationId = "editThreadMessage",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> editThreadMessage(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
+                                               @RequestBody @Nonnull final ForumMessage threadMessage) {
+        PreconditionWebHelper.checkNotNull(threadMessage, "threadMessage shouldn't be null!");
+
+        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+
+        final de.yuga.spacebattle.backend.entities.account.forum.ForumMessage msg = forumService.findMessage(threadMessage.getIdForumMessage());
+        PreconditionWebHelper.checkNotNull(msg, "msg shouldn't be null!");
+        validateAccessToForum(idUser, msg.getForumThread().getForum());
+        if (msg.getAuthor().getId() != idUser) {
+            throw new NotifyWebUserException("Yes but no!");
+        }
+        msg.setMessage(threadMessage.getMessage());
+
+        forumService.save(msg);
+        return ResponseEntity.ok(true);
+    }
+
     @GetMapping("/isMessageUnread/{idForumThread}/{idForumMessage}")
     @Operation(summary = "Returns if the chat has unread messages.", operationId = "isMessageUnread",
             description = "Returns if the chat has unread messages.",
@@ -388,7 +416,10 @@ public class ForumApi {
     )
     public ResponseEntity<?> hasUserUnreadMessages(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
         final int idUser = tokenUtil.getIdUserFromAccessToken(token);
-        final boolean hasUnread = forumService.hasUserUnread(idUser);
+        final User user = userService.find(idUser);
+        PreconditionWebHelper.checkNotNull(user, "user shouldn't be null!");
+
+        final boolean hasUnread = forumService.hasUserUnread(user);
         return ResponseEntity.ok(hasUnread);
     }
 

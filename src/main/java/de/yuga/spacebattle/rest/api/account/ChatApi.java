@@ -212,7 +212,7 @@ public class ChatApi {
     public ResponseEntity<?> hasUnread(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
                                        @PathVariable("idChatHistory") final int idChatHistory) {
         final int idReceiver = tokenUtil.getIdUserFromAccessToken(token);
-        final boolean hasUnread = messageThreadService.hasUnreadMessaged(idReceiver, idChatHistory);
+        final boolean hasUnread = messageThreadService.hasUnreadMessages(idReceiver, idChatHistory);
         return ResponseEntity.ok(hasUnread);
     }
 
@@ -228,7 +228,7 @@ public class ChatApi {
     )
     public ResponseEntity<?> hasUserUnread(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
         final int idUser = tokenUtil.getIdUserFromAccessToken(token);
-        final boolean hasUnread = messageThreadService.hasUserUnreadMessaged(idUser);
+        final boolean hasUnread = messageThreadService.hasUserUnreadMessages(idUser);
         return ResponseEntity.ok(hasUnread);
     }
 
