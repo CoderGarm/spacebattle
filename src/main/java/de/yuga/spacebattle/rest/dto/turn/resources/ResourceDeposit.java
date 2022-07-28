@@ -21,15 +21,18 @@ public class ResourceDeposit {
      */
     @Nonnull
     @Schema(required = true, description = "The amount of stored resources by their type.")
-    private final List<ResourceAmount> resources;
+    private List<ResourceAmount> resources;
 
     @Nonnull
     @Schema(required = true, description = "The amount of human resources by their type.")
-    private final List<HumanResourceAmount> humanResources;
+    private List<HumanResourceAmount> humanResources;
 
     @Nonnull
     @Schema(required = true, description = "The type of the deposit - costs or a real deposit.")
-    private final EDepositType subType;
+    private EDepositType subType;
+
+    public ResourceDeposit() {
+    }
 
     public ResourceDeposit(@Nonnull final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit resourceDeposit) {
         Preconditions.checkNotNull(resourceDeposit, "resourceDeposit shouldn't be null!");

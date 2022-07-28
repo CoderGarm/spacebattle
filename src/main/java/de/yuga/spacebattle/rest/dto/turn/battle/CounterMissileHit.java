@@ -38,16 +38,21 @@ public class CounterMissileHit {
     @Schema(required = true, description = "The attacked missile type as part of the salvo.")
     private de.yuga.spacebattle.rest.dto.spacecrafts.ammunition.Missile missile;
 
-    public CounterMissileHit(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.CounterMissileHit input) {
+    public CounterMissileHit() {
+    }
+
+    public CounterMissileHit(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.CounterMissileHit input,
+                             @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(input, "input shouldn't be null!");
 
         this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound(), input.getCombatPhase());
-        this.actor = new Fleet(input.getActor());
-        this.target = new Fleet(input.getTarget());
+        this.actor = new Fleet(input.getActor(), languageCode);
+        this.target = new Fleet(input.getTarget(), languageCode);
         this.remainingMissiles = input.getRemainingMissiles();
         this.attackedMissileSalvo = input.getAttackedMissileSalvo();
         this.destroyedMissiles = input.getDestroyedMissiles();
-        this.missile = new Missile(input.getMissile());
+        this.missile = new Missile(input.getMissile(), languageCode);
     }
 
     @Nullable

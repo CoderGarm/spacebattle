@@ -18,11 +18,14 @@ public class FleetDistributionPerUser {
 
     @Nonnull
     @Schema(required = true, description = "The system which includes the fleets.")
-    private final StarSystem starSystem;
+    private StarSystem starSystem;
 
     @Nonnull
     @Schema(required = true, description = "The owner of the fleets in the system.")
     private final List<UserJson> users = new ArrayList<>();
+
+    public FleetDistributionPerUser() {
+    }
 
     public FleetDistributionPerUser(@Nonnull final Map.Entry<de.yuga.spacebattle.backend.entities.orbitals.StarSystem, Set<User>> entry) {
         Preconditions.checkNotNull(entry, "entry shouldn't be null!");

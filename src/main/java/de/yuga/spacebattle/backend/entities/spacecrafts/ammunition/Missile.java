@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Time;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
+import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule;
 import de.yuga.spacebattle.backend.entities.turn.resources.HasCosts;
@@ -28,10 +29,6 @@ import java.util.List;
 @Table(name = "missile")
 @AttributeOverride(name = "id", column = @Column(name = "idMissile"))
 public class Missile extends HasCosts {
-
-    @Nonnull
-    @NotNull
-    private String typeName;
 
     @Column(nullable = false)
     private int warheadCapacity; // todo validate warhead capacity
@@ -85,7 +82,8 @@ public class Missile extends HasCosts {
     public Missile() {
     }
 
-    public Missile(@Nonnull final String typeName,
+    public Missile(@Nonnull final String name,
+                   @Nonnull final String description,
                    final int warheadCapacity,
                    final int motorCapacity,
                    final int elokaResistance,
@@ -94,14 +92,12 @@ public class Missile extends HasCosts {
                    @Nonnull final List<MissileMotor> missileMotors,
                    @Nonnull final Research unlockedThrough,
                    @Nonnull final AmmunitionModule ammunitionModule) {
-        super(techLevel, Missile.class);
-        Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
+        super(new Translation("en", name), new Translation("en", description), techLevel, Missile.class);
         Preconditions.checkNotNull(warhead, "warhead shouldn't be null!");
         Preconditions.checkNotNull(missileMotors, "missileMotors shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
         Preconditions.checkNotNull(ammunitionModule, "ammunitionModule shouldn't be null!");
 
-        this.typeName = typeName;
         this.warheadCapacity = warheadCapacity;
         this.motorCapacity = motorCapacity;
         this.elokaResistance = elokaResistance;
@@ -110,11 +106,6 @@ public class Missile extends HasCosts {
         this.motorAmount = missileMotors.size(); // todo repair the methods away from list - to lazy currently
         this.unlockedThrough = unlockedThrough;
         this.ammunitionModule = ammunitionModule;
-    }
-
-    @Nonnull
-    public String getTypeName() {
-        return typeName;
     }
 
     public int getWarheadCapacity() {

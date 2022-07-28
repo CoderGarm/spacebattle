@@ -52,7 +52,7 @@ public class Building {
     private EProductionCategory productionCategory;
 
     /**
-     * In case of an refinement task - here is the workflow.
+     * In case of a refinement task - here is the workflow.
      */
     @Nullable
     @Schema(description = "In case of a refinement building - this is the defines sequence.")
@@ -61,12 +61,14 @@ public class Building {
     public Building() {
     }
 
-    public Building(@Nonnull final de.yuga.spacebattle.backend.entities.buildings.Building building) {
+    public Building(@Nonnull final de.yuga.spacebattle.backend.entities.buildings.Building building,
+                    @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(building, "building shouldn't be null!");
 
         idBuilding = building.getId();
-        name = building.getName();
-        description = building.getDescription();
+        name = building.getName(languageCode);
+        description = building.getDescription(languageCode);
         baseValue = building.getBaseValue();
         increasingFactorPerLevel = building.getIncreasingFactorPerLevel().doubleValue();
         final ProductionType productionType = building.getProductionType();

@@ -26,10 +26,12 @@ public class Propulsion {
 
     }
 
-    public Propulsion(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion propulsion) {
+    public Propulsion(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion propulsion,
+                      @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(propulsion, "propulsion shouldn't be null!");
 
-        this.baseModule = new BaseModule(propulsion);
+        this.baseModule = new BaseModule(propulsion, languageCode);
         this.ftlCapable = propulsion.getHyperBand();
     }
 

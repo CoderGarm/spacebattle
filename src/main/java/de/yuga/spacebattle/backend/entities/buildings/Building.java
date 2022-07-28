@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.entities.buildings;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
+import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.resources.HasCosts;
 import de.yuga.spacebattle.backend.enums.EBuildingType;
@@ -11,7 +12,6 @@ import de.yuga.spacebattle.backend.enums.ETechLevel;
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 
 @NamedQueries({
@@ -24,13 +24,6 @@ import java.math.BigDecimal;
 // todo check constraint for productionType.productionCategory and refinementSequence
 // todo check constraint for productionType.productionCategory == PRODUCE and productionType.productionTarget == POPULATION must have baseValue with single digit only
 public class Building extends HasCosts {
-
-    @Nonnull
-    @Size(min = 1, max = 30)
-    private String name;
-
-    @Nonnull
-    private String description;
 
     /**
      * The basic effect value at level 1.
@@ -70,29 +63,17 @@ public class Building extends HasCosts {
                     @Nonnull final ProductionType productionType,
                     @Nonnull final CrewRequirement crewRequirement,
                     @Nonnull final Research unlockedThrough) {
-        super(techLevel, Building.class);
+        super(new Translation("en", name), new Translation("en", description), techLevel, Building.class);
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(productionType, "productionType shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
 
-        this.name = name;
-        this.description = description;
         this.baseValue = baseValue;
         this.productionType = productionType;
         this.getCosts().setCrewRequirement(crewRequirement);
         this.unlockedThrough = unlockedThrough;
-    }
-
-    @Nonnull
-    public String getName() {
-        return name;
-    }
-
-    @Nonnull
-    public String getDescription() {
-        return description;
     }
 
     public int getBaseValue() {

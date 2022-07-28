@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
+import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,7 +37,7 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 @RolesAllowed("USER")
 @RestController
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ConstructionApi.ENDPOINT + "/")
-public class ConstructionApi {
+public class ConstructionApi extends BaseApi {
 
     @Nonnull
     public static final String ENDPOINT = "construction";
@@ -96,7 +97,7 @@ public class ConstructionApi {
         final Set<de.yuga.spacebattle.rest.dto.constructables.buildings.Construction> possibleConstructions = upgradeableConstructions
                 .entrySet()
                 .stream()
-                .map(e -> new de.yuga.spacebattle.rest.dto.constructables.buildings.Construction(e.getKey(), e.getValue()))
+                .map(e -> new de.yuga.spacebattle.rest.dto.constructables.buildings.Construction(e.getKey(), e.getValue(), getPreferredLanguage()))
                 .collect(Collectors.toSet());
 
         return ResponseEntity.ok(possibleConstructions);
@@ -114,6 +115,8 @@ public class ConstructionApi {
             }
     )
     public ResponseEntity<?> getConstructions(@PathVariable("idPlanet") final int idPlanet) {
-        return ResponseEntity.ok(constructionService.findAllConstructionsOnPlanet(idPlanet).stream().map(de.yuga.spacebattle.rest.dto.constructables.buildings.Construction::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(constructionService.findAllConstructionsOnPlanet(idPlanet).stream()
+                .map(c -> new de.yuga.spacebattle.rest.dto.constructables.buildings.Construction(c, getPreferredLanguage()))
+                .collect(Collectors.toList()));
     }
 }

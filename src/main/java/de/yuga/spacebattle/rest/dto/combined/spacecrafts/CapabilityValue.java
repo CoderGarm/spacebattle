@@ -13,11 +13,14 @@ public class CapabilityValue {
 
     @Nonnull
     @Schema(required = true, description = "The value's type.")
-    private final EModuleType moduleType;
+    private EModuleType moduleType;
 
     @Nonnull
     @Schema(required = true, description = "The value.")
-    private final BigDecimal value;
+    private BigDecimal value;
+
+    public CapabilityValue() {
+    }
 
     public CapabilityValue(@Nonnull final de.yuga.spacebattle.backend.enums.EModuleType moduleType, @Nonnull final BigDecimal value) {
         Preconditions.checkNotNull(moduleType, "moduleType shouldn't be null!");

@@ -12,14 +12,17 @@ public class ResourceAmount {
 
     @Nonnull
     @JsonIgnore
-    private final de.yuga.spacebattle.backend.enums.EResourceType realResourceType;
+    private de.yuga.spacebattle.backend.enums.EResourceType realResourceType;
 
     @Nonnull
     @Schema(required = true, description = "The resource type.")
-    private final EResourceType resourceType;
+    private EResourceType resourceType;
 
     @Schema(required = true, description = "The amount for the resource.")
-    private final long amount;
+    private long amount;
+
+    public ResourceAmount() {
+    }
 
     public ResourceAmount(@Nonnull final de.yuga.spacebattle.backend.enums.EResourceType realResourceType, final long amount) {
         Preconditions.checkNotNull(realResourceType, "resourceType shouldn't be null!");

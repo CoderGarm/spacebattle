@@ -40,13 +40,17 @@ public class ReleasedVolley {
     @Schema(required = true, description = "The distance of this shot.")
     private Distance initialDistance;
 
+    public ReleasedVolley() {
+    }
 
-    public ReleasedVolley(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.ReleasedVolley input) {
+    public ReleasedVolley(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.ReleasedVolley input,
+                          @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(input, "input shouldn't be null!");
 
         this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound(), input.getCombatPhase());
-        this.actor = new Fleet(input.getActor());
-        this.target = new Fleet(input.getTarget());
+        this.actor = new Fleet(input.getActor(), languageCode);
+        this.target = new Fleet(input.getTarget(), languageCode);
         this.damageDealer = input.getDamageDealer();
         this.weaponType = input.getWeaponType();
         this.amountOfShots = input.getAmountOfShots();

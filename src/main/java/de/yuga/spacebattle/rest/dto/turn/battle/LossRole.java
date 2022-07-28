@@ -16,7 +16,7 @@ public class LossRole {
 
     @Nonnull
     @Schema(required = true, description = "The user which is affected by the loss.")
-    private final UserJson owner;
+    private UserJson owner;
 
     @Nonnull
     @Schema(required = true, description = "The fleet which was the war ships home.")
@@ -28,7 +28,7 @@ public class LossRole {
      */
     @Nonnull
     @Schema(required = true, description = "The name of the war ship which was destroyed.")
-    private final String warShipName;
+    private String warShipName;
 
     /**
      * The type of the loss.<br>
@@ -36,15 +36,20 @@ public class LossRole {
      */
     @Nonnull
     @Schema(required = true, description = "The class of the war ship which was destroyed.")
-    private final ShipClass shipClass;
+    private ShipClass shipClass;
 
-    public LossRole(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.LossRole lossRole) {
+    public LossRole() {
+    }
+
+    public LossRole(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.LossRole lossRole,
+                    @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(lossRole, "lossRole shouldn't be null!");
 
         this.owner = new UserJson(lossRole.getShipClass().getOwner());
-        this.fleet = new Fleet(lossRole.getFleet());
+        this.fleet = new Fleet(lossRole.getFleet(), languageCode);
         this.warShipName = lossRole.getWarShipName();
-        this.shipClass = new ShipClass(lossRole.getShipClass());
+        this.shipClass = new ShipClass(lossRole.getShipClass(), languageCode);
     }
 
     @Nonnull

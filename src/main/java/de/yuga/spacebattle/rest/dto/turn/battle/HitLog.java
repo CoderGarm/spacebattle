@@ -47,12 +47,17 @@ public class HitLog {
     @Schema(required = true, description = "If the ship is capable of staying in the battle after damage.")
     private boolean isFightingCapable;
 
-    public HitLog(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.HitLog input) {
+    public HitLog() {
+    }
+
+    public HitLog(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.HitLog input,
+                  @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(input, "input shouldn't be null!");
 
         this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound(), input.getCombatPhase());
         this.damageDealer = input.getDamageDealer();
-        this.warShip = new WarShip(input.getWarShip());
+        this.warShip = new WarShip(input.getWarShip(), languageCode);
         this.warshipHealthState = input.getWarshipHealthState();
         this.damageValue = input.getDamageValue();
         this.state = input.getState();

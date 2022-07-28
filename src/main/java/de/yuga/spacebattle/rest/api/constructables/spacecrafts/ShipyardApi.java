@@ -8,12 +8,11 @@ import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassCreationService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
+import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
-import de.yuga.spacebattle.rest.config.security.JwtTokenUtil;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,7 +20,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -43,15 +41,12 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 @RolesAllowed("USER")
 @RestController
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ShipyardApi.ENDPOINT + "/")
-public class ShipyardApi {
+public class ShipyardApi extends BaseApi {
 
     @Nonnull
     public static final String ENDPOINT = "shipyard";
     private static final String E_HULL_TYPE = "hullType";
     private static final String E_MODULE_TYPE = "moduleType";
-
-    @Nonnull
-    private final JwtTokenUtil tokenUtil;
 
     @Nonnull
     private final JobService jobService;
@@ -69,18 +64,15 @@ public class ShipyardApi {
     private final Validator validator;
 
     @Autowired
-    public ShipyardApi(@Nonnull final JwtTokenUtil tokenUtil,
-                       @Nonnull final JobService jobService,
+    public ShipyardApi(@Nonnull final JobService jobService,
                        @Nonnull final ShipClassService shipClassService,
                        @Nonnull final UserService userService,
                        @Nonnull final ShipClassCreationService shipClassCreationService) {
-        Preconditions.checkNotNull(tokenUtil, "tokenUtil shouldn't be null!");
         Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
         Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         Preconditions.checkNotNull(shipClassCreationService, "shipClassCreationService shouldn't be null!");
 
-        this.tokenUtil = tokenUtil;
         this.jobService = jobService;
         this.shipClassService = shipClassService;
         this.userService = userService;
@@ -99,14 +91,14 @@ public class ShipyardApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getShipClassesByUser(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+    public ResponseEntity<?> getShipClassesByUser() {
+        final int idUser = getIdUser();
         final User owner = userService.find(idUser);
         if (owner == null) {
             throw new NotifyWebUserException("There should be a questioned user.");
         }
         final List<de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass> allLatestByOwner = shipClassService.findAllLatestByOwner(owner);
-        final List<ShipClass> shipClasses = allLatestByOwner.stream().map(ShipClass::new).collect(Collectors.toList());
+        final List<ShipClass> shipClasses = allLatestByOwner.stream().map(s -> new ShipClass(s, getPreferredLanguage())).collect(Collectors.toList());
         return ResponseEntity.ok(shipClasses);
     }
 
@@ -119,9 +111,9 @@ public class ShipyardApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> setShipClass(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token, @RequestBody ShipClass shipClass) {
+    public ResponseEntity<?> setShipClass(@RequestBody ShipClass shipClass) {
 
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final int idUser = getIdUser();
         if (shipClass == null) {
             throw new NotifyWebUserException("There should be a ship class provided.");
         }
@@ -130,7 +122,7 @@ public class ShipyardApi {
         if (!validate.isEmpty()) {
             throw new NotifyWebUserException("The provided class is not valid.", validate);
         }
-        return ResponseEntity.ok(new ShipClass(shipClassCreationService.mapAndCreateShipClass(shipClass, idUser)));
+        return ResponseEntity.ok(new ShipClass(shipClassCreationService.mapAndCreateShipClass(shipClass, idUser), getPreferredLanguage()));
     }
 
     @DeleteMapping(value = "/{idShipClass}")
@@ -142,8 +134,8 @@ public class ShipyardApi {
             }
     )
     @ResponseStatus(HttpStatus.OK)
-    public void deleteShipClass(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token, @PathVariable("idShipClass") final int idShipClass) {
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+    public void deleteShipClass(@PathVariable("idShipClass") final int idShipClass) {
+        final int idUser = getIdUser();
         shipClassService.delete(idUser, idShipClass);
     }
 
@@ -156,13 +148,13 @@ public class ShipyardApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> checkClassName(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                            @PathVariable("className") final String className) {
+    public ResponseEntity<?> checkClassName(
+            @PathVariable("className") final String className) {
 
         if (StringUtils.isBlank(className) || className.trim().length() < 3 || className.trim().length() > 30) {
             throw new NotifyWebUserException("The name of the class did not suit the requirements.");
         }
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final int idUser = getIdUser();
         return ResponseEntity.ok(shipClassService.checkIfClassNameIsFree(idUser, className));
     }
 

@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.entities.spacecrafts;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
+import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
@@ -14,7 +15,6 @@ import org.hibernate.annotations.Check;
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 @NamedQueries({
         @NamedQuery(name = "Hull.getAll", query = "SELECT a FROM Hull a"),
@@ -25,11 +25,6 @@ import javax.validation.constraints.Size;
 @Check(constraints = "overallConstructionCapacity >= constructionCapacity + constructionCapacityBow + constructionCapacityStern + constructionCapacityBroadsides")
 @AttributeOverride(name = "id", column = @Column(name = "idHull"))
 public class Hull extends HasCosts {
-
-    @Nonnull
-    @NotNull
-    @Size(min = 1, max = 30)
-    private String name;
 
     /**
      * The overall CC represents the size of a hull in metric tons.
@@ -58,10 +53,6 @@ public class Hull extends HasCosts {
 
     @Nonnull
     @NotNull
-    private String description;
-
-    @Nonnull
-    @NotNull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "idResearch")
     private Research unlockedThrough;
@@ -86,28 +77,21 @@ public class Hull extends HasCosts {
                 @Nonnull final Research unlockedThrough,
                 @Nonnull final EHullType hullType,
                 @Nonnull final CrewRequirement crewRequirement) {
-        super(techLevel, Hull.class);
+        super(new Translation("en", name), new Translation("en", description), techLevel, Hull.class);
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
         Preconditions.checkNotNull(hullType, "hullType shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        this.name = name;
         this.overallConstructionCapacity = overallConstructionCapacity;
         this.constructionCapacity = constructionCapacity;
         this.constructionCapacityBow = constructionCapacityBow;
         this.constructionCapacityStern = constructionCapacityStern;
         this.constructionCapacityBroadsides = constructionCapacityBroadsides;
-        this.description = description;
         this.unlockedThrough = unlockedThrough;
         this.hullType = hullType;
         this.getCosts().setCrewRequirement(crewRequirement);
-    }
-
-    @Nonnull
-    public String getName() {
-        return name;
     }
 
     public int getOverallConstructionCapacity() {
@@ -128,11 +112,6 @@ public class Hull extends HasCosts {
 
     public int getConstructionCapacityBroadsides() {
         return constructionCapacityBroadsides;
-    }
-
-    @Nonnull
-    public String getDescription() {
-        return description + " hull type: " + hullType.getDescription();
     }
 
     @Nonnull

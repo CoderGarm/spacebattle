@@ -12,15 +12,18 @@ import java.time.LocalDateTime;
 public class Tick {
 
     @Schema(required = true, description = "The number of this tick.")
-    private final int tickNo;
+    private int tickNo;
 
     @Nonnull
     @Schema(required = true, description = "The start timestamp of this tick.")
-    private final LocalDateTime tickStarts;
+    private LocalDateTime tickStarts;
 
     @Nullable
     @Schema(description = "The end timestamp of this tick.")
-    private final LocalDateTime tickEnds;
+    private LocalDateTime tickEnds;
+
+    public Tick() {
+    }
 
     public Tick(@Nonnull final de.yuga.spacebattle.backend.entities.turn.Tick tick) {
         Preconditions.checkNotNull(tick, "tick shouldn't be null!");

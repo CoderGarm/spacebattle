@@ -44,14 +44,18 @@ public class Launcher {
     public Launcher() {
     }
 
-    public Launcher(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher launcher) {
+    public Launcher(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher launcher,
+                    @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(launcher, "launcher shouldn't be null!");
 
-        this.baseModule = new BaseModule(launcher);
+        this.baseModule = new BaseModule(launcher, languageCode);
         this.weaponType = launcher.getWeaponType();
-        this.ammunitionModule = new AmmunitionModule(launcher.getAmmunitionModule());
+        this.ammunitionModule = new AmmunitionModule(launcher.getAmmunitionModule(), languageCode);
         this.alignmentTypes = new ArrayList<>(launcher.getAllowedWeaponAlignments());
-        this.allowedMissiles = launcher.getAllowedMissiles().stream().map(de.yuga.spacebattle.rest.dto.spacecrafts.ammunition.Missile::new).collect(Collectors.toList());
+        this.allowedMissiles = launcher.getAllowedMissiles().stream()
+                .map(m -> new de.yuga.spacebattle.rest.dto.spacecrafts.ammunition.Missile(m, languageCode))
+                .collect(Collectors.toList());
     }
 
     @Nonnull

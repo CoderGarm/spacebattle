@@ -27,16 +27,14 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 
 /**
- * This aspect intercepts each method which is annotated with the allowed roles annotation.
+ * This aspect intercepts each method which is annotated with the allowed roles' annotation.
  * <p>
  * The method prevents access to the method when the current user has not the permission to access.
- *
- * @author Thomas Hunziker
  */
 @Aspect
 @Order(Ordered.LOWEST_PRECEDENCE - 100)
 @Component
-public class EndpointPermissionHandler {
+public class EndpointPermissionInterceptor {
 
     @Nonnull
     private final JwtTokenUtil tokenUtil;
@@ -45,7 +43,7 @@ public class EndpointPermissionHandler {
     private final UserService userService;
 
     @Autowired
-    public EndpointPermissionHandler(@Nonnull final JwtTokenUtil tokenUtil, @Nonnull final UserService userService) {
+    public EndpointPermissionInterceptor(@Nonnull final JwtTokenUtil tokenUtil, @Nonnull final UserService userService) {
         Preconditions.checkNotNull(tokenUtil, "tokenUtil shouldn't be null!");
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
 

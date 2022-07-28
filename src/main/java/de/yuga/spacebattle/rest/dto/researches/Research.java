@@ -34,12 +34,14 @@ public class Research {
         this.levelCap = levelCap;
     }
 
-    public Research(@Nonnull final de.yuga.spacebattle.backend.entities.researches.Research research) {
+    public Research(@Nonnull final de.yuga.spacebattle.backend.entities.researches.Research research,
+                    @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(research, "research shouldn't be null!");
 
         this.idResearch = research.getId();
-        this.name = research.getName();
-        this.description = research.getDescription();
+        this.name = research.getName(languageCode);
+        this.description = research.getDescription(languageCode);
         this.levelCap = research.getLevelCap();
     }
 

@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
+import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
@@ -39,7 +40,7 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 @RolesAllowed("USER")
 @RestController
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + FleetApi.ENDPOINT + "/")
-public class FleetApi {
+public class FleetApi extends BaseApi {
 
     @Nonnull
     public static final String ENDPOINT = "fleet";
@@ -93,7 +94,7 @@ public class FleetApi {
         if (starSystem == null) {
             throw new NotifyWebUserException("There should be a star system, you searches for.");
         }
-        return ResponseEntity.ok(starSystem.getFleets().stream().map(Fleet::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(starSystem.getFleets().stream().map(f -> new Fleet(f, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = INTERSTELLAR_MOVEMENT_ENDPOINT)
@@ -109,7 +110,7 @@ public class FleetApi {
     )
     public ResponseEntity<?> getInterstellarMovingFleets() {
 
-        return ResponseEntity.ok(fleetService.findAllFleetsWithInterstellarMovement().stream().map(Fleet::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(fleetService.findAllFleetsWithInterstellarMovement().stream().map(f -> new Fleet(f, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = FLEET_PER_SYSTEM_ENDPOINT + "/{idStarSystem}/" + FLEET_PER_USER_ENDPOINT + "/{idOwner}")
@@ -126,7 +127,7 @@ public class FleetApi {
     public ResponseEntity<?> getFleetsBySystemAndOwner(@PathVariable("idStarSystem") final int idStarSystem,
                                                        @PathVariable("idOwner") final int idOwner) {
 
-        return ResponseEntity.ok(fleetService.findAllFleetsBy(idStarSystem, idOwner).stream().map(Fleet::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(fleetService.findAllFleetsBy(idStarSystem, idOwner).stream().map(f -> new Fleet(f, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = FLEET_PER_USER_PER_SYSTEM_ENDPOINT)
@@ -174,7 +175,7 @@ public class FleetApi {
 
         final User user = userService.find(idUser);
         if (user != null) {
-            return ResponseEntity.ok(fleetService.findAllFleetsByUser(user).stream().map(Fleet::new).collect(Collectors.toList()));
+            return ResponseEntity.ok(fleetService.findAllFleetsByUser(user).stream().map(f -> new Fleet(f, getPreferredLanguage())).collect(Collectors.toList()));
         }
         throw new NotifyWebUserException("No user found.");
     }
@@ -209,7 +210,7 @@ public class FleetApi {
         final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> hashSet = fleetList.stream().filter(fl -> fl.getId() != merge.getIdFleetMergeTarget()).collect(Collectors.toSet());
         final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetService.mergeFleets(fleetSubject, hashSet);
 
-        return ResponseEntity.ok(new Fleet(fleet));
+        return ResponseEntity.ok(new Fleet(fleet, getPreferredLanguage()));
     }
 
     @PostMapping(value = MOVE_FLEET_ENDPOINT + "/{idUser}")
@@ -235,7 +236,7 @@ public class FleetApi {
         final List<de.yuga.spacebattle.backend.entities.turn.Move> plannedMoves = new ArrayList<>();
         plannedMoves.add(m);
         List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> inMotion = fleetService.moveFleets(plannedMoves);
-        return ResponseEntity.ok(new Fleet(inMotion.get(0)));
+        return ResponseEntity.ok(new Fleet(inMotion.get(0), getPreferredLanguage()));
     }
 
     @PostMapping(value = MOVE_FLEETS_ENDPOINT + "/{idUser}")
@@ -261,7 +262,7 @@ public class FleetApi {
 
         // todo validate interstellar flights with propulsion
         final List<de.yuga.spacebattle.backend.entities.turn.Move> plannedMoves = getMultiMove(idUser, moves);
-        return ResponseEntity.ok(fleetService.moveFleets(plannedMoves).stream().map(Fleet::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(fleetService.moveFleets(plannedMoves).stream().map(f -> new Fleet(f, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
     @PostMapping(value = PLAN_MOVE_FLEET_ENDPOINT + "/{idUser}")
@@ -329,7 +330,7 @@ public class FleetApi {
     )
     public ResponseEntity<?> getFleetsForUser(@PathVariable("idUser") final int idUser, @PathVariable("idFleet") final int idFleet) {
         final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet cancelFlight = fleetService.cancelFlight(idUser, idFleet);
-        return ResponseEntity.ok(new Fleet(cancelFlight));
+        return ResponseEntity.ok(new Fleet(cancelFlight, getPreferredLanguage()));
     }
 
     /**

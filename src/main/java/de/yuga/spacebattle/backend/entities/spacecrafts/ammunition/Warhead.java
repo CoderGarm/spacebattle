@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.entities.spacecrafts.ammunition;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.converter.DistanceConverter;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.turn.resources.HasCosts;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.EWarheadType;
@@ -17,11 +18,6 @@ import javax.validation.constraints.NotNull;
 @Table(name = "warhead")
 @AttributeOverride(name = "id", column = @Column(name = "idWarhead"))
 public class Warhead extends HasCosts {
-
-    @Nonnull
-    @NotNull
-    @Column(nullable = false)
-    private String typeName;
 
     @Column(nullable = false)
     private long damageValue;
@@ -46,27 +42,21 @@ public class Warhead extends HasCosts {
     public Warhead() {
     }
 
-    public Warhead(@Nonnull final String typeName,
+    public Warhead(@Nonnull final String name,
+                   @Nonnull final String description,
                    final int damageValue,
                    @Nonnull final ETechLevel techLevel,
                    @Nonnull final Distance damageProjectionRange,
                    @Nonnull final EWarheadType warheadType,
                    final int useCapacity) {
-        super(techLevel, Warhead.class);
-        Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
+        super(new Translation("en", name), new Translation("en", description), techLevel, Warhead.class);
         Preconditions.checkNotNull(damageProjectionRange, "damageProjectionRange shouldn't be null!");
         Preconditions.checkNotNull(warheadType, "warheadType shouldn't be null!");
 
-        this.typeName = typeName;
         this.damageValue = damageValue;
         this.damageProjectionRange = damageProjectionRange;
         this.warheadType = warheadType;
         this.useCapacity = useCapacity;
-    }
-
-    @Nonnull
-    public String getTypeName() {
-        return typeName;
     }
 
     public long getDamageValue() {

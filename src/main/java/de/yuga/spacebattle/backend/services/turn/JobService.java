@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
+import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.ActiveResearchTuple;
 import de.yuga.spacebattle.backend.entities.researches.Research;
@@ -106,7 +107,7 @@ public class JobService {
     }
 
     /**
-     * Returns the job cost if they were payed - no costs and no costs back for researches!
+     * Returns the job cost if they were paied - no costs and no costs back for researches!
      *
      * @param entity the job to delete
      */
@@ -180,7 +181,7 @@ public class JobService {
             throw new NotifyWebUserException("not that way!");
         }
         if (!researchService.isResearchUnlocked(planet.getOwner(), building.getUnlockedThrough())) {
-            throw new NotifyWebUserException("You can't do that - first you have to research the '" + building.getUnlockedThrough().getName() + "' research.");
+            throw new NotifyWebUserException("You can't do that - first you have to research the '" + building.getUnlockedThrough().getName(Translation.DEFAULT_LANGUAGE) + "' research.");
         }
 
         final Set<Construction> constructions = planet.getConstructions();
@@ -217,7 +218,7 @@ public class JobService {
         Preconditions.checkNotNull(research, "research shouldn't be null!");
 
         if (researchService.isResearchUnlocked(user, research)) {
-            throw new NotifyWebUserException("You can't do that - you already have the '" + research.getName() + "' research.");
+            throw new NotifyWebUserException("You can't do that - you already have the '" + research.getName(Translation.DEFAULT_LANGUAGE) + "' research.");
         }
 
         int levelCap = research.getLevelCap();

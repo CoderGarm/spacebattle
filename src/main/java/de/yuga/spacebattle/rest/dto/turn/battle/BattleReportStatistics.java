@@ -14,17 +14,17 @@ public class BattleReportStatistics {
 
     @JsonProperty
     @Schema(required = true, description = "The database id of the report.")
-    private final int idBattleReport;
+    private int idBattleReport;
 
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The tick where the action happened.")
-    private final Tick tick;
+    private Tick tick;
 
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The last round in this battle.")
-    private final CombatRound lastRound;
+    private CombatRound lastRound;
 
     /**
      * The place to be.
@@ -32,7 +32,10 @@ public class BattleReportStatistics {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The place where the action happened.")
-    private final FleetOrbit orbit;
+    private FleetOrbit orbit;
+
+    public BattleReportStatistics() {
+    }
 
     public BattleReportStatistics(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.BattleReport battleReport) {
         Preconditions.checkNotNull(battleReport, "battleReport shouldn't be null!");

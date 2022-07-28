@@ -28,6 +28,7 @@ public class CombatRoundKey {
     @Schema(required = true, description = "The combat phase in which this action happens.")
     private ECombatPhase.ECombatSubPhase combatPhase;
 
+
     public CombatRoundKey(final int id,
                           @Nonnull final de.yuga.spacebattle.backend.combat.round.CombatRound combatRound,
                           @Nonnull final ECombatPhase.ECombatSubPhase combatPhase) {

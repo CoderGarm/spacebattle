@@ -246,37 +246,42 @@ public class ModuleService {
     @Nonnull
     @Deprecated(since = "productive environment")
     public MissileMotor createMissileMotor(@Nonnull final String typeName,
+                                           @Nonnull final String description,
                                            final int endurance,
                                            @Nonnull final ETechLevel techLevel,
                                            @Nonnull final Acceleration acceleration,
                                            final int maneuverability,
                                            final int useCapacity) {
         Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
+        Preconditions.checkNotNull(description, "description must not be empty");
         Preconditions.checkNotNull(techLevel, "techLevel shouldn't be null!");
         Preconditions.checkNotNull(acceleration, "acceleration shouldn't be null!");
 
-        return missileMotorRepository.save(new MissileMotor(typeName, endurance, techLevel, acceleration, maneuverability, useCapacity));
+        return missileMotorRepository.save(new MissileMotor(typeName, description, endurance, techLevel, acceleration, maneuverability, useCapacity));
     }
 
     @Nonnull
     @Deprecated(since = "productive environment")
-    public Warhead createWarhead(@Nonnull final String typeName,
+    public Warhead createWarhead(@Nonnull final String name,
+                                 @Nonnull final String description,
                                  final int effectValue,
                                  @Nonnull final ETechLevel techLevel,
                                  @Nonnull final Distance damageProjectionRange,
                                  @Nonnull final EWarheadType warheadType,
                                  final int useCapacity) {
-        Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
+        Preconditions.checkNotNull(name, "name shouldn't be null!");
+        Preconditions.checkNotNull(description, "description must not be empty");
         Preconditions.checkNotNull(techLevel, "techLevel shouldn't be null!");
         Preconditions.checkNotNull(damageProjectionRange, "damageProjectionRange shouldn't be null!");
         Preconditions.checkNotNull(warheadType, "warheadType shouldn't be null!");
 
-        return warheadRepository.save(new Warhead(typeName, effectValue, techLevel, damageProjectionRange, warheadType, useCapacity));
+        return warheadRepository.save(new Warhead(name, description, effectValue, techLevel, damageProjectionRange, warheadType, useCapacity));
     }
 
     @Nonnull
     @Deprecated(since = "productive environment")
-    public Missile createMissile(@Nonnull String typeName,
+    public Missile createMissile(@Nonnull final String typeName,
+                                 @Nonnull final String description,
                                  final int warheadCapacity,
                                  final int motorCapacity,
                                  final int elokaResistance,
@@ -286,13 +291,14 @@ public class ModuleService {
                                  @Nonnull Research unlockedThrough,
                                  @Nonnull final AmmunitionModule ammunitionModule) {
         Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
+        Preconditions.checkNotNull(description, "description must not be empty");
         Preconditions.checkNotNull(techLevel, "techLevel shouldn't be null!");
         Preconditions.checkNotNull(warhead, "warhead shouldn't be null!");
         Preconditions.checkNotNull(missileMotors, "missileMotors shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
         Preconditions.checkNotNull(ammunitionModule, "ammunitionModule shouldn't be null!");
 
-        return missileRepository.save(new Missile(typeName, warheadCapacity, motorCapacity, elokaResistance, techLevel, warhead, missileMotors, unlockedThrough, ammunitionModule));
+        return missileRepository.save(new Missile(typeName, description, warheadCapacity, motorCapacity, elokaResistance, techLevel, warhead, missileMotors, unlockedThrough, ammunitionModule));
     }
 
     @Nonnull

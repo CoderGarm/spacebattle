@@ -43,12 +43,14 @@ public class Hull {
     public Hull() {
     }
 
-    public Hull(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.Hull hull) {
+    public Hull(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.Hull hull,
+                @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(hull, "hull shouldn't be null!");
 
         this.idHull = hull.getId();
-        this.name = hull.getName();
-        this.description = hull.getDescription();
+        this.name = hull.getName(languageCode);
+        this.description = hull.getDescription(languageCode);
         this.hullType = new EHullType(hull.getHullType());
         this.overallConstructionCapacity = hull.getOverallConstructionCapacity();
         this.constructionCapacity = hull.getConstructionCapacity();

@@ -20,7 +20,7 @@ public class BattleReport {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The basic info about the battle.")
-    private final BattleReportStatistics battleReportStatistics;
+    private BattleReportStatistics battleReportStatistics;
 
     /**
      * The users which has played a role in this battle.
@@ -65,17 +65,22 @@ public class BattleReport {
     @Schema(required = true, description = "All hits of ship killer weapons during this combat.")
     private final Set<ShipKillerHit> shipKillerHits = new HashSet<>();
 
-    public BattleReport(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.BattleReport battleReport) {
+    public BattleReport() {
+    }
+
+    public BattleReport(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.BattleReport battleReport,
+                        @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(battleReport, "battleReport shouldn't be null!");
 
         this.battleReportStatistics = new BattleReportStatistics(battleReport);
         this.participatingUsers.addAll(battleReport.getParticipatingUsers().stream().map(UserJson::new).collect(Collectors.toSet()));
-        this.participatingFleets.addAll(battleReport.getParticipatingFleets().stream().map(Fleet::new).collect(Collectors.toList()));
-        this.lossRole.addAll(battleReport.getLossRole().stream().map(LossRole::new).collect(Collectors.toList()));
-        this.movementActions.addAll(battleReport.getMovementActions().stream().map(MovementAction::new).collect(Collectors.toList()));
-        this.counterMissileHits.addAll(battleReport.getCounterMissileHits().stream().map(CounterMissileHit::new).collect(Collectors.toList()));
-        this.releasedVolleys.addAll(battleReport.getReleasedVolleys().stream().map(ReleasedVolley::new).collect(Collectors.toList()));
-        this.missileMovements.addAll(battleReport.getMissileMovements().stream().map(MissileMovement::new).collect(Collectors.toList()));
-        this.shipKillerHits.addAll(battleReport.getShipKillerHits().stream().map(ShipKillerHit::new).collect(Collectors.toList()));
+        this.participatingFleets.addAll(battleReport.getParticipatingFleets().stream().map(f -> new Fleet(f, languageCode)).collect(Collectors.toList()));
+        this.lossRole.addAll(battleReport.getLossRole().stream().map(l -> new LossRole(l, languageCode)).collect(Collectors.toList()));
+        this.movementActions.addAll(battleReport.getMovementActions().stream().map(m -> new MovementAction(m, languageCode)).collect(Collectors.toList()));
+        this.counterMissileHits.addAll(battleReport.getCounterMissileHits().stream().map(c -> new CounterMissileHit(c, languageCode)).collect(Collectors.toList()));
+        this.releasedVolleys.addAll(battleReport.getReleasedVolleys().stream().map(r -> new ReleasedVolley(r, languageCode)).collect(Collectors.toList()));
+        this.missileMovements.addAll(battleReport.getMissileMovements().stream().map(m -> new MissileMovement(m, languageCode)).collect(Collectors.toList()));
+        this.shipKillerHits.addAll(battleReport.getShipKillerHits().stream().map(s -> new ShipKillerHit(s, languageCode)).collect(Collectors.toList()));
     }
 }

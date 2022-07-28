@@ -15,73 +15,97 @@
        drop 
        foreign key FKqtn90ky0waqf7lslqa7gu66mo;
 
-    alter table allowedMissiles 
-       drop 
-       foreign key FKhp9tc55hay9lojn6swpo6q4kv;
+    alter table allowedMissiles
+    drop
+    foreign key FKhp9tc55hay9lojn6swpo6q4kv;
 
-    alter table allowedMissiles 
-       drop 
-       foreign key FK1dns3uxovqh388wtp38xk3l8p;
+    alter table allowedMissiles
+    drop
+    foreign key FK1dns3uxovqh388wtp38xk3l8p;
 
-    alter table ammunitionFitting 
-       drop 
-       foreign key FKmj2nxtrg5h9np8ugn7jre0v4f;
+    alter table ammunitionFitting
+    drop
+    foreign key FKmj2nxtrg5h9np8ugn7jre0v4f;
 
-    alter table ammunitionFitting 
-       drop 
-       foreign key FKij9xicbw7lepyy25ixl7dr25q;
+    alter table ammunitionFitting
+    drop
+    foreign key FKij9xicbw7lepyy25ixl7dr25q;
 
-    alter table ammunitionModule 
-       drop 
-       foreign key FKtc1t67bo67jgxojnt1r8w1hr3;
+    alter table ammunitionModule
+    drop
+    foreign key FKtc1t67bo67jgxojnt1r8w1hr3;
 
-    alter table ammunitionModule 
-       drop 
-       foreign key FKi9oa4xlh6y6c8nd9e25c8jlbq;
+    alter table ammunitionModule
+    drop
+    foreign key FKivsjmyi7f7aym46q08qh71k1i;
 
-    alter table applications 
-       drop 
-       foreign key FKi0rvtwqjg2c06lvk50e4gakfa;
+    alter table ammunitionModule
+    drop
+    foreign key FK9jn8385qcftsln9aiemohys6x;
 
-    alter table applications 
-       drop 
-       foreign key FKpa65pbe483fu0uj4mwnwahn6w;
+    alter table ammunitionModule
+    drop
+    foreign key FKi9oa4xlh6y6c8nd9e25c8jlbq;
 
-    alter table armor 
-       drop 
-       foreign key FK10dhr7h3pkps3d7u22q2pwpgc;
+    alter table applications
+    drop
+    foreign key FKi0rvtwqjg2c06lvk50e4gakfa;
 
-    alter table armor 
-       drop 
-       foreign key FKrb3h67mjdni459t4j1y8b7sw5;
+    alter table applications
+    drop
+    foreign key FKpa65pbe483fu0uj4mwnwahn6w;
 
-    alter table battleReport 
-       drop 
-       foreign key FKktnc29kf1wrmrnbihghs9gmdp;
+    alter table armor
+    drop
+    foreign key FK10dhr7h3pkps3d7u22q2pwpgc;
 
-    alter table battleReport 
-       drop 
-       foreign key FKr6smkmpvrxxus80181d1gwekl;
+    alter table armor
+    drop
+    foreign key FK843wjkvvkloflykng3p5xanqf;
 
-    alter table building 
-       drop 
-       foreign key FK5vart3g8xv4gkgagwxxwyiuqi;
+    alter table armor
+    drop
+    foreign key FKj95rgrpe0e0kldkrdk61180vb;
 
-    alter table building 
-       drop 
-       foreign key FKbp0gn3eiexsa5p6s20md9yfi7;
+    alter table armor
+    drop
+    foreign key FKrb3h67mjdni459t4j1y8b7sw5;
 
-    alter table colonization 
-       drop 
-       foreign key FK6kxulldcu79b6d6ecjr7pvpyw;
+    alter table battleReport
+    drop
+    foreign key FKktnc29kf1wrmrnbihghs9gmdp;
 
-    alter table colonization 
-       drop 
-       foreign key FKb2jrbwdwy0j8t2tggwtbf64ty;
+    alter table battleReport
+    drop
+    foreign key FKr6smkmpvrxxus80181d1gwekl;
 
-    alter table colonization 
-       drop 
-       foreign key FKrfuwalj6y19xvtebuy1q05pbt;
+    alter table building
+    drop
+    foreign key FK5vart3g8xv4gkgagwxxwyiuqi;
+
+    alter table building
+    drop
+    foreign key FK9jureiokh5eus3dq46euhltxo;
+
+    alter table building
+    drop
+    foreign key FKmqi7vubpnykxhu53hy5e7qri2;
+
+    alter table building
+    drop
+    foreign key FKbp0gn3eiexsa5p6s20md9yfi7;
+
+    alter table colonization
+    drop
+    foreign key FK6kxulldcu79b6d6ecjr7pvpyw;
+
+    alter table colonization
+    drop
+    foreign key FKb2jrbwdwy0j8t2tggwtbf64ty;
+
+    alter table colonization
+    drop
+    foreign key FKrfuwalj6y19xvtebuy1q05pbt;
 
     alter table construction 
        drop 
@@ -95,125 +119,165 @@
        drop 
        foreign key FKdc9r09hg3me03436ahneu2r65;
 
-    alter table counterMissileHit 
-       drop 
-       foreign key FKksbgg1bvbgqrostw7xkhdo2lb;
+    alter table counterMissileHit
+    drop
+    foreign key FKksbgg1bvbgqrostw7xkhdo2lb;
 
-    alter table counterMissileHit 
-       drop 
-       foreign key FKln1su9jkv2gcayljhc8x4vgem;
+    alter table counterMissileHit
+    drop
+    foreign key FKln1su9jkv2gcayljhc8x4vgem;
 
-    alter table counterMissileHits 
-       drop 
-       foreign key FK3iy5c5p8yauo6g7lx2egjlg5g;
+    alter table counterMissileHits
+    drop
+    foreign key FK3iy5c5p8yauo6g7lx2egjlg5g;
 
-    alter table counterMissileHits 
-       drop 
-       foreign key FKcu6xd18vice5w5lmh1no2dk36;
+    alter table counterMissileHits
+    drop
+    foreign key FKcu6xd18vice5w5lmh1no2dk36;
 
-    alter table electronicWarfare 
-       drop 
-       foreign key FKccj76id0r5pq3p7f4viriwdqf;
+    alter table electronicWarfare
+    drop
+    foreign key FKccj76id0r5pq3p7f4viriwdqf;
 
-    alter table electronicWarfare 
-       drop 
-       foreign key FKhr2adrrpeb3vshv11ajrgnkd7;
+    alter table electronicWarfare
+    drop
+    foreign key FKi180vaq7gab8jy3r99bawdic5;
 
-    alter table fleet 
-       drop 
-       foreign key FK5yy9whqh6562iaxuym0wrkjeq;
+    alter table electronicWarfare
+    drop
+    foreign key FKgehovt9s2xat817l0enflo5nq;
 
-    alter table fleet 
-       drop 
-       foreign key FK7p0cvm6ul1v1w1vqcljs63i61;
+    alter table electronicWarfare
+    drop
+    foreign key FKhr2adrrpeb3vshv11ajrgnkd7;
 
-    alter table fleet 
-       drop 
-       foreign key FKjo66qwgl0a9bba5x7xq23fvok;
+    alter table fleet
+    drop
+    foreign key FK5yy9whqh6562iaxuym0wrkjeq;
 
-    alter table fleet 
-       drop 
-       foreign key FKckq55cmimjpois3mst803atuy;
+    alter table fleet
+    drop
+    foreign key FK7p0cvm6ul1v1w1vqcljs63i61;
 
-    alter table forum 
-       drop 
-       foreign key FKbd3cwb6yurr6utojembdwjiy1;
+    alter table fleet
+    drop
+    foreign key FKjo66qwgl0a9bba5x7xq23fvok;
 
-    alter table forumMessage 
-       drop 
-       foreign key FKibroa7vxdgc63xasj1kcwrg4w;
+    alter table fleet
+    drop
+    foreign key FKckq55cmimjpois3mst803atuy;
 
-    alter table forumMessage 
-       drop 
-       foreign key FKh1a5uic7c3sdd84skyccc126q;
+    alter table forum
+    drop
+    foreign key FKbd3cwb6yurr6utojembdwjiy1;
 
-    alter table forumThread 
-       drop 
-       foreign key FKbqtbt77ebauj9krlwc3ak31us;
+    alter table forumMessage
+    drop
+    foreign key FKibroa7vxdgc63xasj1kcwrg4w;
 
-    alter table hitLog 
-       drop 
-       foreign key FK1pcr16gjbto8vd5g7v8hq14hw;
+    alter table forumMessage
+    drop
+    foreign key FKh1a5uic7c3sdd84skyccc126q;
 
-    alter table hull 
-       drop 
-       foreign key FK65udyybp7syxvga5evxn8olhc;
+    alter table forumMessageRead
+    drop
+    foreign key FK12uxerbm5t8a7shn88fvvalbu;
 
-    alter table hull 
-       drop 
-       foreign key FK4hpf1pawl0wynjx9kdg74opea;
+    alter table forumMessageRead
+    drop
+    foreign key FKnf5e4g437o3l3hdg2ei0ywwe0;
 
-    alter table humanResources 
-       drop 
-       foreign key FKh3v7ra6rwylc7sofs1is80fb8;
+    alter table forumMessageRead
+    drop
+    foreign key FKtcsdm5ruogje2vjsy4oeok3md;
 
-    alter table job 
-       drop 
-       foreign key FK7otfjvk4vhy0gt0m3hnyam6au;
+    alter table forumMessageRead
+    drop
+    foreign key FK2xe08nytb3qnnfmf906ynapx6;
 
-    alter table job 
-       drop 
-       foreign key FKdno72guom99osq9f36eixsd87;
+    alter table forumThread
+    drop
+    foreign key FKbqtbt77ebauj9krlwc3ak31us;
+
+    alter table hitLog
+    drop
+    foreign key FK1pcr16gjbto8vd5g7v8hq14hw;
+
+    alter table hull
+    drop
+    foreign key FK65udyybp7syxvga5evxn8olhc;
+
+    alter table hull
+    drop
+    foreign key FKi1ghgbbrc1j4vovj7v03t0sd5;
+
+    alter table hull
+    drop
+    foreign key FK7g5aas0xko5stotsvyt9hhchw;
+
+    alter table hull
+    drop
+    foreign key FK4hpf1pawl0wynjx9kdg74opea;
+
+    alter table humanResources
+    drop
+    foreign key FKh3v7ra6rwylc7sofs1is80fb8;
+
+    alter table job
+    drop
+    foreign key FK7otfjvk4vhy0gt0m3hnyam6au;
+
+    alter table job
+    drop
+    foreign key FKdno72guom99osq9f36eixsd87;
 
     alter table job 
        drop 
        foreign key FKsevbhc9015r9wmqvojq1dbsen;
 
-    alter table job 
-       drop 
-       foreign key FK4ewa76co5drr08nptgdmax8d6;
+    alter table job
+    drop
+    foreign key FK4ewa76co5drr08nptgdmax8d6;
 
-    alter table job 
-       drop 
-       foreign key FK3urqlpl2jmbxlfk4q88i9i5tb;
+    alter table job
+    drop
+    foreign key FK3urqlpl2jmbxlfk4q88i9i5tb;
 
-    alter table knownStarSystem 
-       drop 
-       foreign key FKayr540k7tyu8v1vuni31u2j17;
+    alter table knownStarSystem
+    drop
+    foreign key FKayr540k7tyu8v1vuni31u2j17;
 
-    alter table knownStarSystem 
-       drop 
-       foreign key FKtjhh901to46le5kkmsybuwdbb;
+    alter table knownStarSystem
+    drop
+    foreign key FKtjhh901to46le5kkmsybuwdbb;
 
-    alter table launcher 
-       drop 
-       foreign key FKpxevsicliklfnl6mycvl75sv9;
+    alter table launcher
+    drop
+    foreign key FKpxevsicliklfnl6mycvl75sv9;
 
-    alter table launcher 
-       drop 
-       foreign key FKdesag5bovcaxav76r4ln2occl;
+    alter table launcher
+    drop
+    foreign key FKn80gj1fyhvn6v5smkbx3b4rhi;
 
-    alter table launcher 
-       drop 
-       foreign key FKekm6qvnxv0b0y293v8h0ayjhm;
+    alter table launcher
+    drop
+    foreign key FKa0tf8xicyfrn906krw65ieop1;
 
-    alter table lossesByHit 
-       drop 
-       foreign key FK8gwd5wcrghospusbhcyoffbpq;
+    alter table launcher
+    drop
+    foreign key FKdesag5bovcaxav76r4ln2occl;
 
-    alter table lossesByHit 
-       drop 
-       foreign key FKmxpfhc6uuo325u2u81tb2k2g0;
+    alter table launcher
+    drop
+    foreign key FKekm6qvnxv0b0y293v8h0ayjhm;
+
+    alter table lossesByHit
+    drop
+    foreign key FK8gwd5wcrghospusbhcyoffbpq;
+
+    alter table lossesByHit
+    drop
+    foreign key FKmxpfhc6uuo325u2u81tb2k2g0;
 
     alter table lossesByHit 
        drop 
@@ -223,61 +287,77 @@
        drop 
        foreign key FKhtcg0ctdj5ie6fbabo8puvteu;
 
-    alter table lossesByHit 
-       drop 
-       foreign key FK3o0d6nae9i5n6v33ake9fyvs8;
+    alter table lossesByHit
+    drop
+    foreign key FK3o0d6nae9i5n6v33ake9fyvs8;
 
-    alter table messageThread 
-       drop 
-       foreign key FK1d5qqscr6uidy4lithqwkfcsb;
+    alter table messageThread
+    drop
+    foreign key FK1d5qqscr6uidy4lithqwkfcsb;
 
-    alter table messageThread 
-       drop 
-       foreign key FKlcfh5cw1nqv8howd22b9emwbf;
+    alter table messageThread
+    drop
+    foreign key FKlcfh5cw1nqv8howd22b9emwbf;
 
-    alter table miningFactorsComposition 
-       drop 
-       foreign key FK7pw467msglkrl51uo8uu6v6l6;
+    alter table miningFactorsComposition
+    drop
+    foreign key FK7pw467msglkrl51uo8uu6v6l6;
 
-    alter table missile 
-       drop 
-       foreign key FK2y4rvixlct3ljky430p3bmwad;
+    alter table missile
+    drop
+    foreign key FK2y4rvixlct3ljky430p3bmwad;
 
-    alter table missile 
-       drop 
-       foreign key FKdhk8trxq7c36hid883mj4p7us;
+    alter table missile
+    drop
+    foreign key FK3sugkdm5phqm3kkdraprgaj87;
 
-    alter table missile 
-       drop 
-       foreign key FK1ledmeodyggj4capnumuak58u;
+    alter table missile
+    drop
+    foreign key FKorhea214ty529liubde204v2y;
 
-    alter table missile 
-       drop 
-       foreign key FK6hqn2wt7gk1myp1ew4i29r3ss;
+    alter table missile
+    drop
+    foreign key FKdhk8trxq7c36hid883mj4p7us;
 
-    alter table missile 
-       drop 
-       foreign key FKhgp8bhvbmvaefgws7b1t0km7k;
+    alter table missile
+    drop
+    foreign key FK1ledmeodyggj4capnumuak58u;
 
-    alter table missileMotor 
-       drop 
-       foreign key FK6q2owmplw15x287lnle7mdeae;
+    alter table missile
+    drop
+    foreign key FK6hqn2wt7gk1myp1ew4i29r3ss;
 
-    alter table missileMovement 
-       drop 
-       foreign key FK31pwab7jyqugac58td2yh50ju;
+    alter table missile
+    drop
+    foreign key FKhgp8bhvbmvaefgws7b1t0km7k;
 
-    alter table missileMovement 
-       drop 
-       foreign key FKl9frhygmvi1n5d3sjchn19wrx;
+    alter table missileMotor
+    drop
+    foreign key FK6q2owmplw15x287lnle7mdeae;
 
-    alter table missileMovements 
-       drop 
-       foreign key FKa4ut542bvmk335w8ldma12g22;
+    alter table missileMotor
+    drop
+    foreign key FKs8aryxvu0dbr41yab1lqy7f54;
 
-    alter table missileMovements 
-       drop 
-       foreign key FK4hmoghg3bi28t2pmfi3ea626u;
+    alter table missileMotor
+    drop
+    foreign key FKkygcap68itcbqkfukqxqhqti8;
+
+    alter table missileMovement
+    drop
+    foreign key FK31pwab7jyqugac58td2yh50ju;
+
+    alter table missileMovement
+    drop
+    foreign key FKl9frhygmvi1n5d3sjchn19wrx;
+
+    alter table missileMovements
+    drop
+    foreign key FKa4ut542bvmk335w8ldma12g22;
+
+    alter table missileMovements
+    drop
+    foreign key FK4hmoghg3bi28t2pmfi3ea626u;
 
     alter table move 
        drop 
@@ -319,85 +399,109 @@
        drop 
        foreign key FKayayypcvevpaihludw9p2jcdh;
 
-    alter table participatingFleets 
-       drop 
-       foreign key FKbp90ne9mn2vhmh9m7kinwjxki;
+    alter table participatingFleets
+    drop
+    foreign key FKbp90ne9mn2vhmh9m7kinwjxki;
 
-    alter table participatingUsers 
-       drop 
-       foreign key FK5dp3ok6qf3ohs6s1s7f11k34h;
+    alter table participatingUsers
+    drop
+    foreign key FK5dp3ok6qf3ohs6s1s7f11k34h;
 
-    alter table participatingUsers 
-       drop 
-       foreign key FKlreg972gg0pgmmoudxk12sy3g;
+    alter table participatingUsers
+    drop
+    foreign key FKlreg972gg0pgmmoudxk12sy3g;
 
-    alter table passiveModule 
-       drop 
-       foreign key FKrr0cmtk4xqkbtajq5s17apmsu;
+    alter table passiveModule
+    drop
+    foreign key FKrr0cmtk4xqkbtajq5s17apmsu;
 
-    alter table passiveModule 
-       drop 
-       foreign key FKdchcy45rswteu33yrgh80m8a9;
+    alter table passiveModule
+    drop
+    foreign key FK3q0uitju15ai7lhv7y7y61549;
 
-    alter table planet 
-       drop 
-       foreign key FK6290orio72djryi0kktbn3esu;
+    alter table passiveModule
+    drop
+    foreign key FK1kqbngjlngfx049m4t1hmyelt;
 
-    alter table planet 
-       drop 
-       foreign key FKobjb6jgxji3jrrgoxy9r30uyc;
+    alter table passiveModule
+    drop
+    foreign key FKdchcy45rswteu33yrgh80m8a9;
 
-    alter table planet 
-       drop 
-       foreign key FK9cd80e9yxwnobejr9twlcknab;
+    alter table planet
+    drop
+    foreign key FK6290orio72djryi0kktbn3esu;
 
-    alter table planet 
-       drop 
-       foreign key FK2qd4p5ry3gaskjau8i2gutj0n;
+    alter table planet
+    drop
+    foreign key FKobjb6jgxji3jrrgoxy9r30uyc;
 
-    alter table propulsion 
-       drop 
-       foreign key FKqjsvyhjc6w21niim4aeptpm85;
+    alter table planet
+    drop
+    foreign key FK9cd80e9yxwnobejr9twlcknab;
 
-    alter table propulsion 
-       drop 
-       foreign key FK7rr2gvpcbjjhl9tuxe6c50v5q;
+    alter table planet
+    drop
+    foreign key FK2qd4p5ry3gaskjau8i2gutj0n;
 
-    alter table releasedVolley 
-       drop 
-       foreign key FK5phx9tuf726udgmc3oba1t80o;
+    alter table propulsion
+    drop
+    foreign key FKqjsvyhjc6w21niim4aeptpm85;
 
-    alter table releasedVolley 
-       drop 
-       foreign key FKox4m8c517vryrxaijolfco99m;
+    alter table propulsion
+    drop
+    foreign key FK1a2sbiyhyhlm5q99g8cs8qdpw;
 
-    alter table releasesVolleys 
-       drop 
-       foreign key FKr0o8twcmeayvg09p39p71ktpf;
+    alter table propulsion
+    drop
+    foreign key FK34jwo45015kmmtttnorlypaa3;
 
-    alter table releasesVolleys 
-       drop 
-       foreign key FKn08s5o12up3n1n85d1vnhrk4y;
+    alter table propulsion
+    drop
+    foreign key FK7rr2gvpcbjjhl9tuxe6c50v5q;
 
-    alter table research 
-       drop 
-       foreign key FKni50te130dndarqgicsq3svhb;
+    alter table releasedVolley
+    drop
+    foreign key FK5phx9tuf726udgmc3oba1t80o;
 
-    alter table research 
-       drop 
-       foreign key FKch37eb44iv0ls442yu7usvvtp;
+    alter table releasedVolley
+    drop
+    foreign key FKox4m8c517vryrxaijolfco99m;
 
-    alter table researchLevels 
-       drop 
-       foreign key FK8c7vw5t1ve4phgpfr6gwt3xj0;
+    alter table releasesVolleys
+    drop
+    foreign key FKr0o8twcmeayvg09p39p71ktpf;
 
-    alter table researchLevels 
-       drop 
-       foreign key FKh9xjvymkiqwygpem46iaj0j3v;
+    alter table releasesVolleys
+    drop
+    foreign key FKn08s5o12up3n1n85d1vnhrk4y;
 
-    alter table resourcesDepositComposition 
-       drop 
-       foreign key FK6q26jn3ftmq2x638tsgi0aemy;
+    alter table research
+    drop
+    foreign key FKni50te130dndarqgicsq3svhb;
+
+    alter table research
+    drop
+    foreign key FK1sxfrsxvrj2iaxi809oirhevj;
+
+    alter table research
+    drop
+    foreign key FKibqicobq7dm63vf792kgmk5wj;
+
+    alter table research
+    drop
+    foreign key FKch37eb44iv0ls442yu7usvvtp;
+
+    alter table researchLevels
+    drop
+    foreign key FK8c7vw5t1ve4phgpfr6gwt3xj0;
+
+    alter table researchLevels
+    drop
+    foreign key FKh9xjvymkiqwygpem46iaj0j3v;
+
+    alter table resourcesDepositComposition
+    drop
+    foreign key FK6q26jn3ftmq2x638tsgi0aemy;
 
     alter table shipClass 
        drop 
@@ -431,73 +535,105 @@
        drop 
        foreign key FKnqevjdq10urslieg5r3peb5m3;
 
-    alter table shipKillerHit 
-       drop 
-       foreign key FKi72vdedsqsrgj93k3k80ei5sk;
+    alter table shipKillerHit
+    drop
+    foreign key FKi72vdedsqsrgj93k3k80ei5sk;
 
-    alter table shipKillerHit 
-       drop 
-       foreign key FK1d72qr1uwk27axl1yck2b2ux1;
+    alter table shipKillerHit
+    drop
+    foreign key FK1d72qr1uwk27axl1yck2b2ux1;
 
-    alter table shipKillerHits 
-       drop 
-       foreign key FKmaalns2ubmv8018dgku4bv0qs;
+    alter table shipKillerHits
+    drop
+    foreign key FKmaalns2ubmv8018dgku4bv0qs;
 
-    alter table shipKillerHits 
-       drop 
-       foreign key FKsyea27u0x8dmybnb4r1qfsug0;
+    alter table shipKillerHits
+    drop
+    foreign key FKsyea27u0x8dmybnb4r1qfsug0;
 
-    alter table sidewall 
-       drop 
-       foreign key FKlo0i3byallqh89wd535yrbs3l;
+    alter table sidewall
+    drop
+    foreign key FKlo0i3byallqh89wd535yrbs3l;
 
-    alter table sidewall 
-       drop 
-       foreign key FK693a9gix6ifpkiop612tghdy0;
+    alter table sidewall
+    drop
+    foreign key FKdx39gsmusm1sai6wdid4s4xmn;
 
-    alter table supportFitting 
-       drop 
-       foreign key FKd2r1r3l1h9iehfvklg6tymj1o;
+    alter table sidewall
+    drop
+    foreign key FKmqieo3lwi46pddbgbhg7dbg4r;
 
-    alter table supportFitting 
-       drop 
-       foreign key FK2rgk45foa8brx1onuwdxsodtr;
+    alter table sidewall
+    drop
+    foreign key FK693a9gix6ifpkiop612tghdy0;
 
-    alter table user 
-       drop 
-       foreign key FKd0120p7tkvssh9r8hldenpw1w;
+    alter table supportFitting
+    drop
+    foreign key FKd2r1r3l1h9iehfvklg6tymj1o;
 
-    alter table userMessage 
-       drop 
-       foreign key FKgo5irmd79mx2cg76wtaoaxbxa;
+    alter table supportFitting
+    drop
+    foreign key FK2rgk45foa8brx1onuwdxsodtr;
 
-    alter table userMessage 
-       drop 
-       foreign key FK6xs6p78lala5xtd4eoe4xxrnv;
+    alter table translationCollection
+    drop
+    foreign key FKgrdmwu4xhrjpi4i9oof3ob2gt;
 
-    alter table warhead 
-       drop 
-       foreign key FK4m9pxktw6iywf5aecc1n0xm4f;
+    alter table translationCollection
+    drop
+    foreign key FKeytw64w0mw10fundphgc4e5f6;
 
-    alter table warShip 
-       drop 
-       foreign key FK3kovfkp6003a62x5ff41h44hw;
+    alter table user
+    drop
+    foreign key FKd0120p7tkvssh9r8hldenpw1w;
 
-    alter table warShip 
-       drop 
-       foreign key FKjr13y2u3qkka7d3npp9omwdoa;
+    alter table userMessage
+    drop
+    foreign key FKgo5irmd79mx2cg76wtaoaxbxa;
 
-    alter table warShip 
-       drop 
-       foreign key FKdywyvdwb0ovbd6oruywo13nyx;
+    alter table userMessage
+    drop
+    foreign key FK6xs6p78lala5xtd4eoe4xxrnv;
 
-    alter table weapon 
-       drop 
-       foreign key FK1rsb3ampiw8yjy8ngrget6ay;
+    alter table warhead
+    drop
+    foreign key FK4m9pxktw6iywf5aecc1n0xm4f;
 
-    alter table weapon 
-       drop 
-       foreign key FKo22n18dgjpraqosj7nkamrnvb;
+    alter table warhead
+    drop
+    foreign key FKjx1sqa9iiinbgfciltxdqp78u;
+
+    alter table warhead
+    drop
+    foreign key FKa939x3f6pjibpdv9k0wxbl3cq;
+
+    alter table warShip
+    drop
+    foreign key FK3kovfkp6003a62x5ff41h44hw;
+
+    alter table warShip
+    drop
+    foreign key FKjr13y2u3qkka7d3npp9omwdoa;
+
+    alter table warShip
+    drop
+    foreign key FKdywyvdwb0ovbd6oruywo13nyx;
+
+    alter table weapon
+    drop
+    foreign key FK1rsb3ampiw8yjy8ngrget6ay;
+
+    alter table weapon
+    drop
+    foreign key FKqx172dx6j907oe0gcxskan5vy;
+
+    alter table weapon
+    drop
+    foreign key FKtrgd2x03dkumgxnryvhon8qm5;
+
+    alter table weapon
+    drop
+    foreign key FKo22n18dgjpraqosj7nkamrnvb;
 
     drop table if exists alignedFitting;
 
@@ -532,6 +668,8 @@
     drop table if exists forum;
 
     drop table if exists forumMessage;
+
+    drop table if exists forumMessageRead;
 
     drop table if exists forumThread;
 
@@ -606,6 +744,12 @@
     drop table if exists supportFitting;
 
     drop table if exists tick;
+
+    drop table if exists translatable;
+
+    drop table if exists translation;
+
+    drop table if exists translationCollection;
 
     drop table if exists user;
 

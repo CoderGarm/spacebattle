@@ -44,11 +44,13 @@ public class MissileMotor {
     public MissileMotor() {
     }
 
-    public MissileMotor(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.MissileMotor missileMotor) {
+    public MissileMotor(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.MissileMotor missileMotor,
+                        @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(missileMotor, "missileMotor shouldn't be null!");
 
         this.idMissileMotor = missileMotor.getId();
-        this.typeName = missileMotor.getTypeName();
+        this.typeName = missileMotor.getName(languageCode);
         this.endurance = missileMotor.getEndurance();
         this.acceleration = missileMotor.getAcceleration();
         this.maneuverability = missileMotor.getManeuverability();

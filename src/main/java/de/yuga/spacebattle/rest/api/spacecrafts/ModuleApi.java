@@ -5,6 +5,7 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.spacecraft.HullService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
+import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.spacecrafts.Hull;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.*;
@@ -33,7 +34,7 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 @RolesAllowed("USER")
 @RestController
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ModuleApi.ENDPOINT + "/")
-public class ModuleApi {
+public class ModuleApi extends BaseApi {
 
     public static final String API = "ModuleApi";
     public static final String ENDPOINT = "modules";
@@ -83,7 +84,7 @@ public class ModuleApi {
     public ResponseEntity<?> getArmorsByUser(@PathVariable("idUser") final int idUser) {
         final User owner = userService.findWithResearches(idUser);
 
-        return ResponseEntity.ok(moduleService.findAllArmorByUser(owner).stream().map(Armor::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(moduleService.findAllArmorByUser(owner).stream().map(a -> new Armor(a, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = WEAPON_ENDPOINT + "/{idUser}")
@@ -100,7 +101,9 @@ public class ModuleApi {
     public ResponseEntity<?> getWeaponsByUser(@PathVariable("idUser") final int idUser) {
         final User owner = userService.findWithResearches(idUser);
         final List<de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon> allWeaponByUser = moduleService.findAllWeaponByUser(owner);
-        final List<de.yuga.spacebattle.rest.dto.spacecrafts.modules.Weapon> weaponList = allWeaponByUser.stream().map(de.yuga.spacebattle.rest.dto.spacecrafts.modules.Weapon::new).collect(Collectors.toList());
+        final List<de.yuga.spacebattle.rest.dto.spacecrafts.modules.Weapon> weaponList = allWeaponByUser.stream()
+                .map(w -> new de.yuga.spacebattle.rest.dto.spacecrafts.modules.Weapon(w, getPreferredLanguage()))
+                .collect(Collectors.toList());
         return ResponseEntity.ok(weaponList);
     }
 
@@ -117,7 +120,7 @@ public class ModuleApi {
     )
     public ResponseEntity<?> getLaunchersByUser(@PathVariable("idUser") final int idUser) {
         final User owner = userService.findWithResearches(idUser);
-        return ResponseEntity.ok(moduleService.findAllLauncherByUser(owner).stream().map(Launcher::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(moduleService.findAllLauncherByUser(owner).stream().map(l -> new Launcher(l, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = SIDEWALL_ENDPOINT + "/{idUser}")
@@ -133,7 +136,7 @@ public class ModuleApi {
     )
     public ResponseEntity<?> getSidewallsByUser(@PathVariable("idUser") final int idUser) {
         final User owner = userService.findWithResearches(idUser);
-        return ResponseEntity.ok(moduleService.findAllSidewallByUser(owner).stream().map(Sidewall::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(moduleService.findAllSidewallByUser(owner).stream().map(s -> new Sidewall(s, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = PROPULSION_ENDPOINT + "/{idUser}")
@@ -150,7 +153,7 @@ public class ModuleApi {
     public ResponseEntity<?> getPropulsionsByUser(@PathVariable("idUser") final int idUser) {
         final User owner = userService.findWithResearches(idUser);
 
-        return ResponseEntity.ok(moduleService.findAllPropulsionByUser(owner).stream().map(Propulsion::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(moduleService.findAllPropulsionByUser(owner).stream().map(p -> new Propulsion(p, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = HULL_ENDPOINT + "/{idUser}")
@@ -167,7 +170,7 @@ public class ModuleApi {
     public ResponseEntity<?> getHullsByUser(@PathVariable("idUser") final int idUser) {
         final User owner = userService.findWithResearches(idUser);
 
-        return ResponseEntity.ok(hullService.findAllByUser(owner).stream().map(Hull::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(hullService.findAllByUser(owner).stream().map(h -> new Hull(h, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = ELOKA_ENDPOINT + "/{idUser}")
@@ -184,7 +187,7 @@ public class ModuleApi {
     public ResponseEntity<?> getElectronicWarfaresByUser(@PathVariable("idUser") final int idUser) {
         final User owner = userService.findWithResearches(idUser);
 
-        return ResponseEntity.ok(moduleService.findAllElectronicWarfareByUser(owner).stream().map(ElectronicWarfare::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(moduleService.findAllElectronicWarfareByUser(owner).stream().map(e -> new ElectronicWarfare(e, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = PASSIVE_ENDPOINT + "/{idUser}")
@@ -201,7 +204,7 @@ public class ModuleApi {
     public ResponseEntity<?> getPassiveModulesByUser(@PathVariable("idUser") final int idUser) {
         final User owner = userService.findWithResearches(idUser);
 
-        return ResponseEntity.ok(moduleService.findAllPassiveModuleByUser(owner).stream().map(PassiveModule::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(moduleService.findAllPassiveModuleByUser(owner).stream().map(p -> new PassiveModule(p, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = AMMUNITION_ENDPOINT + "/{idUser}")
@@ -218,6 +221,6 @@ public class ModuleApi {
     public ResponseEntity<?> getAmmunitionModulesByUser(@PathVariable("idUser") final int idUser) {
         final User owner = userService.findWithResearches(idUser);
 
-        return ResponseEntity.ok(moduleService.findAllAmmunitionModulesByUser(owner).stream().map(AmmunitionModule::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(moduleService.findAllAmmunitionModulesByUser(owner).stream().map(a -> new AmmunitionModule(a, getPreferredLanguage())).collect(Collectors.toList()));
     }
 }

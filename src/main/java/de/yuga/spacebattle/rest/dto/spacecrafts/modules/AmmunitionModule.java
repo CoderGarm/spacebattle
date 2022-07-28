@@ -22,11 +22,13 @@ public class AmmunitionModule {
     public AmmunitionModule() {
     }
 
-    public AmmunitionModule(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule ammunitionModule) {
+    public AmmunitionModule(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule ammunitionModule,
+                            @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(ammunitionModule, "ammunitionModule shouldn't be null!");
 
-        this.baseModule = new BaseModule(ammunitionModule);
-        this.missile = new Missile(ammunitionModule.getMissile());
+        this.baseModule = new BaseModule(ammunitionModule, languageCode);
+        this.missile = new Missile(ammunitionModule.getMissile(), languageCode);
     }
 
     @Nonnull

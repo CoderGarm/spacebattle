@@ -29,11 +29,14 @@ public class CustomResearchRepositoryImpl implements CustomResearchRepository {
 
     @Nonnull
     @Override
-    public List<de.yuga.spacebattle.rest.dto.researches.Research> getResearchesAsDTOById(@Nonnull final List<Integer> idResearches) {
+    public List<de.yuga.spacebattle.rest.dto.researches.Research> getResearchesAsDTOById(@Nonnull final List<Integer> idResearches,
+                                                                                         @Nonnull final String languageCode) {
         Preconditions.checkNotNull(idResearches, "idResearches shouldn't be null!");
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
 
         return em.createNamedQuery("Research.getResearchesAsDTOById", de.yuga.spacebattle.rest.dto.researches.Research.class)
                 .setParameter("idResearches", idResearches)
+                .setParameter("languageCode", languageCode)
                 .getResultList();
     }
 }

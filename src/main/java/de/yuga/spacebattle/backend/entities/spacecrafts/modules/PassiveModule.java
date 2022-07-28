@@ -26,7 +26,7 @@ public class PassiveModule extends BaseModuleWithEffectValue {
     @Nonnull
     @NotNull
     @Enumerated(EnumType.STRING)
-    private ESupportType supportType; // todo improve support specification - what will be increased/decreased?
+    private ESupportType supportType;
 
     /**
      * Defines if the support is increasing or decreasing the property.
@@ -48,7 +48,7 @@ public class PassiveModule extends BaseModuleWithEffectValue {
                          @Nonnull final ESupportType supportType,
                          @Nonnull final ECalculationType calculationType,
                          @Nonnull final CrewRequirement crewRequirement) {
-        super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement);
+        super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement, PassiveModule.class);
 
         this.supportType = supportType;
         this.calculationType = calculationType;

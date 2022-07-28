@@ -80,7 +80,7 @@ public class Weapon extends BaseModuleWithEffectValue {
                   @Nonnull final EWeaponType weaponType,
                   @Nonnull final EAlignmentType alignmentType,
                   @Nonnull final CrewRequirement crewRequirement) {
-        super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement);
+        super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement, Weapon.class);
         Preconditions.checkNotNull(damageProjectionRange, "damageProjectionRange shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "eWeaponType shouldn't be null!");
         Preconditions.checkNotNull(alignmentType, "alignmentType shouldn't be null!");

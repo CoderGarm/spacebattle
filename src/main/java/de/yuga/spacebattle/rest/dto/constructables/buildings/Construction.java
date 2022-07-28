@@ -28,18 +28,22 @@ public class Construction {
     }
 
     public Construction(@Nonnull final de.yuga.spacebattle.backend.entities.buildings.Building building,
-                        final int level) {
+                        final int level,
+                        @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(building, "building shouldn't be null!");
 
-        this.building = new Building(building);
+        this.building = new Building(building, languageCode);
         this.level = level;
     }
 
-    public Construction(@Nonnull final de.yuga.spacebattle.backend.entities.constructables.buildings.Construction construction) {
+    public Construction(@Nonnull final de.yuga.spacebattle.backend.entities.constructables.buildings.Construction construction,
+                        @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(construction, "construction shouldn't be null!");
 
         this.idConstruction = construction.getId();
-        this.building = new Building(construction.getBuilding());
+        this.building = new Building(construction.getBuilding(), languageCode);
         this.level = construction.getLevel();
     }
 

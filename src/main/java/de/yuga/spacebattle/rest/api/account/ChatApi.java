@@ -5,21 +5,19 @@ import de.yuga.spacebattle.backend.entities.account.MessageThread;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.services.account.MessageThreadService;
 import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
-import de.yuga.spacebattle.rest.config.security.JwtTokenUtil;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
 import de.yuga.spacebattle.rest.dto.account.chat.ChatHistory;
 import de.yuga.spacebattle.rest.dto.account.chat.ChatMessage;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +33,7 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 @RolesAllowed("USER")
 @RestController
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ChatApi.ENDPOINT + "/")
-public class ChatApi {
+public class ChatApi extends BaseApi {
 
     @Nonnull
     public static final String ENDPOINT = "chat";
@@ -44,21 +42,15 @@ public class ChatApi {
     private final UserService userService;
 
     @Nonnull
-    private final JwtTokenUtil tokenUtil;
-
-    @Nonnull
     private final MessageThreadService messageThreadService;
 
     @Autowired
     public ChatApi(@Nonnull final UserService userService,
-                   @Nonnull final JwtTokenUtil tokenUtil,
                    @Nonnull final MessageThreadService messageThreadService) {
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
-        Preconditions.checkNotNull(tokenUtil, "tokenUtil shouldn't be null!");
         Preconditions.checkNotNull(messageThreadService, "messageThreadService shouldn't be null!");
 
         this.userService = userService;
-        this.tokenUtil = tokenUtil;
         this.messageThreadService = messageThreadService;
     }
 
@@ -72,10 +64,9 @@ public class ChatApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getChatByUsers(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                            @PathVariable("idUser") final int idUser) {
+    public ResponseEntity<?> getChatByUsers(@PathVariable("idUser") final int idUser) {
 
-        final int idUserByToken = tokenUtil.getIdUserFromAccessToken(token);
+        final int idUserByToken = getIdUser();
         final MessageThread messagesBetween = messageThreadService.findMessagesBetween(idUserByToken, idUser);
         if (messagesBetween != null) {
             return ResponseEntity.ok(new ChatHistory(messagesBetween));
@@ -95,9 +86,9 @@ public class ChatApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getChatByUser(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
+    public ResponseEntity<?> getChatByUser() {
 
-        final int idUserByToken = tokenUtil.getIdUserFromAccessToken(token);
+        final int idUserByToken = getIdUser();
         final List<MessageThread> threadsWithUser = messageThreadService.findThreadsWithUser(idUserByToken);
         if (!threadsWithUser.isEmpty()) {
             return ResponseEntity.ok(threadsWithUser.stream().map(ChatHistory::new).collect(Collectors.toList()));
@@ -122,8 +113,7 @@ public class ChatApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> createMessageThread(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                                 @RequestBody @Nonnull final ChatHistory chatHistory) {
+    public ResponseEntity<?> createMessageThread(@RequestBody @Nonnull final ChatHistory chatHistory) {
         Preconditions.checkNotNull(chatHistory, "chatHistory shouldn't be null!");
 
         final List<ChatMessage> messages = chatHistory.getMessages();
@@ -131,7 +121,7 @@ public class ChatApi {
             throw new NotifyWebUserException("This is not possible - there is already an active chat.");
         }
 
-        final int idUserByToken = tokenUtil.getIdUserFromAccessToken(token);
+        final int idUserByToken = getIdUser();
 
         final ChatMessage chatMessage = messages.get(0);
         final String message = chatMessage.getMessage();
@@ -174,11 +164,10 @@ public class ChatApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> sendChatMessage(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                             @RequestBody @Nonnull final ChatMessage message) {
+    public ResponseEntity<?> sendChatMessage(@RequestBody @Nonnull final ChatMessage message) {
         Preconditions.checkNotNull(message, "message shouldn't be null!");
 
-        final int idUserByToken = tokenUtil.getIdUserFromAccessToken(token);
+        final int idUserByToken = getIdUser();
 
         final String chatMessage = message.getMessage();
         final UserJson senderJ = message.getSender();
@@ -209,9 +198,9 @@ public class ChatApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> hasUnread(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                       @PathVariable("idChatHistory") final int idChatHistory) {
-        final int idReceiver = tokenUtil.getIdUserFromAccessToken(token);
+    public ResponseEntity<?> hasUnread(
+            @PathVariable("idChatHistory") final int idChatHistory) {
+        final int idReceiver = getIdUser();
         final boolean hasUnread = messageThreadService.hasUnreadMessages(idReceiver, idChatHistory);
         return ResponseEntity.ok(hasUnread);
     }
@@ -226,8 +215,8 @@ public class ChatApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> hasUserUnread(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+    public ResponseEntity<?> hasUserUnread() {
+        final int idUser = getIdUser();
         final boolean hasUnread = messageThreadService.hasUserUnreadMessages(idUser);
         return ResponseEntity.ok(hasUnread);
     }
@@ -242,10 +231,9 @@ public class ChatApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> markMessageRead(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                             @PathVariable("idChatMessage") final int idUserMessage) {
+    public ResponseEntity<?> markMessageRead(@PathVariable("idChatMessage") final int idUserMessage) {
 
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final int idUser = getIdUser();
 
         messageThreadService.markMessageReadIfForUser(idUserMessage, idUser);
         return ResponseEntity.ok(true);

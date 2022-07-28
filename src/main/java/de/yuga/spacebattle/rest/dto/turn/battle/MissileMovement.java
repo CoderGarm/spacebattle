@@ -46,12 +46,17 @@ public class MissileMovement {
     @Schema(required = true, description = "The current position of the target.")
     private de.yuga.spacebattle.rest.dto.orbitals.Orbit targetPosition;
 
-    public MissileMovement(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.MissileMovement input) {
+    public MissileMovement() {
+    }
+
+    public MissileMovement(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.MissileMovement input,
+                           @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(input, "input shouldn't be null!");
 
         this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound(), input.getCombatPhase());
-        this.actor = new Fleet(input.getActor());
-        this.target = new Fleet(input.getTarget());
+        this.actor = new Fleet(input.getActor(), languageCode);
+        this.target = new Fleet(input.getTarget(), languageCode);
         this.movingMissileSalvo = input.getMovingMissileSalvo();
         this.missileAmount = input.getMissileAmount();
         this.roundsToTravel = input.getRoundsToTravel();

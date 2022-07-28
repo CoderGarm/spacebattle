@@ -20,6 +20,9 @@ import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.enums.EResourceType.*;
 
+/**
+ * Defines which resource types must not be consumed to create a thing of it's class.
+ */
 public enum EResourceDemand {
 
     BUILDING(Building.class, ORBITAL_CONSTRUCTION, EResourceType.RESEARCH),

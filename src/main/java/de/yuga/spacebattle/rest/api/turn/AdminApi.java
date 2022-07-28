@@ -1,25 +1,35 @@
 package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.i18n.Translatable;
+import de.yuga.spacebattle.backend.entities.i18n.Translation;
+import de.yuga.spacebattle.backend.repositories.i18n.TranslatableRepository;
 import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.rest.api.BaseApi;
+import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.Tick;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.ADMIN_BASE_ENDPOINT;
 
@@ -27,7 +37,7 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.ADMIN_BASE_ENDPOIN
 @RolesAllowed("ADMIN")
 @RestController
 @RequestMapping(value = "/" + ADMIN_BASE_ENDPOINT + "/" + AdminApi.ENDPOINT + "/")
-public class AdminApi {
+public class AdminApi extends BaseApi {
 
     @Nonnull
     public static final String ENDPOINT = "admin";
@@ -37,11 +47,17 @@ public class AdminApi {
     @Nonnull
     private final TickService tickController;
 
+    @Nonnull
+    private final TranslatableRepository translatableRepository;
+
     @Autowired
-    public AdminApi(@Nonnull final TickService tickController) {
+    public AdminApi(@Nonnull final TickService tickController,
+                    @Nonnull final TranslatableRepository translatableRepository) {
         Preconditions.checkNotNull(tickController, "tickC shouldn't be null!");
+        Preconditions.checkNotNull(translatableRepository, "translationRepository must not be empty");
 
         this.tickController = tickController;
+        this.translatableRepository = translatableRepository;
     }
 
     @GetMapping(value = "/doTick")
@@ -57,5 +73,81 @@ public class AdminApi {
         LOGGER.info("Tick initialized");
         final de.yuga.spacebattle.backend.entities.turn.Tick now = tickController.doTick();
         return ResponseEntity.ok(new Tick(now));
+    }
+
+    @GetMapping(value = "/languages")
+    @Operation(summary = "Get the current tick.", operationId = "getPossibleLanguages",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(schema = @Schema(implementation = String.class)))
+                    ),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getPossibleLanguages() {
+        return ResponseEntity.ok(Translation.LOCALES.stream().map(Locale::getLanguage).collect(Collectors.toSet()));
+    }
+
+    @GetMapping(value = "/translations")
+    @Operation(summary = "Get the current tick.", operationId = "getTranslations",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(schema = @Schema(implementation = de.yuga.spacebattle.rest.dto.i18n.Translation.class)))
+                    ),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getTranslations() {
+        final List<Translatable> translatables = translatableRepository.findAll();
+        final Map<Integer, Translatable> translatablesById = translatables.stream().collect(Collectors.toMap(Translatable::getId, Function.identity()));
+        final Map<Integer, List<Translation>> translationsById = translatables.stream().collect(Collectors.toMap(AbstractEntityKey::getId, Translatable::getTranslations));
+        final List<de.yuga.spacebattle.rest.dto.i18n.Translation> translations = translationsById.entrySet().stream().map(e -> {
+            final Integer idTranslatable = e.getKey();
+            final Translatable translatable = translatablesById.get(idTranslatable);
+            final List<Translation> translationList = e.getValue();
+            return translationList.stream()
+                    .map(translation -> new de.yuga.spacebattle.rest.dto.i18n.Translation(translatable, translation))
+                    .collect(Collectors.toList());
+        }).flatMap(Collection::stream).collect(Collectors.toList());
+        return ResponseEntity.ok(translations);
+    }
+
+    @PostMapping(value = "/translations", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get the current tick.", operationId = "updateTranslation",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(schema = @Schema(implementation = de.yuga.spacebattle.rest.dto.i18n.Translation.class)))
+                    ),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> updateTranslation(@RequestBody @Nonnull final List<de.yuga.spacebattle.rest.dto.i18n.Translation> translations) {
+        PreconditionWebHelper.checkNotNull(translations, "translations must not be empty");
+
+        final Set<Integer> idTranslatables = translations.stream().map(de.yuga.spacebattle.rest.dto.i18n.Translation::getIdTranslatable).collect(Collectors.toSet());
+        if (idTranslatables.size() != 1) {
+            throw new NotifyWebUserException("There must be only one translatable changed at a time.");
+        }
+        final Integer idTranslatable = new ArrayList<>(idTranslatables).get(0);
+        final Translatable translatable = translatableRepository.findById(idTranslatable).orElse(null);
+        if (translatable == null) {
+            throw new NotifyWebUserException("Funny that you try to update a translation which is not present.");
+        }
+        translations.forEach(translation -> {
+            final String translationText = translation.getTranslation();
+            final String languageCode = translation.getLanguageCode();
+            if (StringUtils.isNotBlank(translationText) && StringUtils.isNotBlank(languageCode))
+                translatable.updateOrCreate(languageCode, translationText);
+        });
+        final Translatable save = translatableRepository.save(translatable);
+        return ResponseEntity.ok(save.getTranslations().stream()
+                .map(t -> new de.yuga.spacebattle.rest.dto.i18n.Translation(translatable, t))
+                .collect(Collectors.toList()));
     }
 }

@@ -90,30 +90,32 @@ public class ShipClass {
     public ShipClass() {
     }
 
-    public ShipClass(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass shipClass) {
+    public ShipClass(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass shipClass,
+                     @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
 
         this.idShipClass = shipClass.getId();
         this.owner = new UserJson(shipClass.getOwner());
         this.name = shipClass.getName();
         if (shipClass.getHull() != null) {
-            this.hull = new Hull(shipClass.getHull());
+            this.hull = new Hull(shipClass.getHull(), languageCode);
         }
-        fittings.addAll(shipClass.getFittings().stream().map(AlignedFitting::new).collect(Collectors.toList()));
-        supportFittings.addAll(shipClass.getSupportFittings().stream().map(SupportFitting::new).collect(Collectors.toList()));
-        ammunitionFittings.addAll(shipClass.getAmmunitionFittings().stream().map(AmmunitionFitting::new).collect(Collectors.toList()));
+        fittings.addAll(shipClass.getFittings().stream().map(a -> new AlignedFitting(a, languageCode)).collect(Collectors.toList()));
+        supportFittings.addAll(shipClass.getSupportFittings().stream().map(s -> new SupportFitting(s, languageCode)).collect(Collectors.toList()));
+        ammunitionFittings.addAll(shipClass.getAmmunitionFittings().stream().map(a -> new AmmunitionFitting(a, languageCode)).collect(Collectors.toList()));
 
         if (shipClass.getPropulsion() != null) {
-            this.propulsion = new Propulsion(shipClass.getPropulsion());
+            this.propulsion = new Propulsion(shipClass.getPropulsion(), languageCode);
         }
         if (shipClass.getArmor() != null) {
-            this.armor = new Armor(shipClass.getArmor());
+            this.armor = new Armor(shipClass.getArmor(), languageCode);
         }
         if (shipClass.getSidewall() != null) {
-            this.sidewall = new Sidewall(shipClass.getSidewall());
+            this.sidewall = new Sidewall(shipClass.getSidewall(), languageCode);
         }
         if (shipClass.getElectronicWarfare() != null) {
-            this.electronicWarfare = new ElectronicWarfare(shipClass.getElectronicWarfare());
+            this.electronicWarfare = new ElectronicWarfare(shipClass.getElectronicWarfare(), languageCode);
         }
         if (shipClass.getSuccessor() != null) {
             this.idSuccessor = shipClass.getSuccessor().getId();

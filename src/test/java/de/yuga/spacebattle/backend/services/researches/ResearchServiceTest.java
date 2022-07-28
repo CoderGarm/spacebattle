@@ -27,7 +27,7 @@ class ResearchServiceTest {
 
     @Test
     void testGetResearchTree() {
-        final ResearchTree researchTree = researchService.getResearchTree();
+        final ResearchTree researchTree = researchService.getResearchTree("en");
         assertNotNull(researchTree);
         assertFalse(researchTree.getTreeElements().isEmpty());
         assertFalse(researchTree.getResearches().isEmpty());

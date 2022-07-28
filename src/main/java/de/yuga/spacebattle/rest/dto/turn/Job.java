@@ -74,11 +74,13 @@ public class Job {
     public Job() {
     }
 
-    public Job(@Nonnull final de.yuga.spacebattle.backend.entities.turn.Job job) {
+    public Job(@Nonnull final de.yuga.spacebattle.backend.entities.turn.Job job,
+               @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(job, "job shouldn't be null!");
 
         this.user = new UserJson(job.getOwner());
-        this.facility = new Construction(job.getFacility());
+        this.facility = new Construction(job.getFacility(), languageCode);
         this.ticksLeft = job.getJobDoneAtZero();
         final Constructable constructable = job.getConstructable();
         this.resourceType = new EResourceType(constructable.getResourceType());
@@ -86,10 +88,10 @@ public class Job {
         this.isShipyardJob = constructable.getShipClass() != null;
         this.isResearchJob = constructable.getResearch() != null;
         if (isBuildingJob) {
-            this.buildingTarget = new Building(constructable.getBuilding());
+            this.buildingTarget = new Building(constructable.getBuilding(), languageCode);
         }
         if (isResearchJob) {
-            this.researchTarget = constructable.getResearch().getName();
+            this.researchTarget = constructable.getResearch().getName(languageCode);
         }
         if (isShipyardJob) {
             this.shipYardTarget = constructable.getShipClass().getName();

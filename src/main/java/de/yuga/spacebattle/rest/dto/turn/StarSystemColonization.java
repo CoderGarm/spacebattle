@@ -25,15 +25,15 @@ public class StarSystemColonization {
 
     @Nonnull
     @Schema(required = true, description = "The star system to select for colonization.")
-    private final StarSystem starSystem;
+    private StarSystem starSystem;
 
     @Nonnull
     @Schema(required = true, description = "The star system with its distance to all known systems by id.")
-    private final Map<Integer, Distance> distanceMap;
+    private Map<Integer, Distance> distanceMap;
 
     @Nonnull
     @Schema(required = true, description = "The costs to buy the colonization information about the system.")
-    private final String costsToBuyColonizationInformation;
+    private String costsToBuyColonizationInformation;
 
     @Nonnull
     @Schema(required = true, description = "The costs to colonize the planet by idPlanet.")
@@ -41,7 +41,10 @@ public class StarSystemColonization {
 
     @Nonnull
     @Schema(required = true, description = "The costs to colonize the planet by idPlanet.")
-    private final Map<Integer, Colonization> colonizationsByPlanet;
+    private Map<Integer, Colonization> colonizationsByPlanet;
+
+    public StarSystemColonization() {
+    }
 
     public StarSystemColonization(@Nonnull final de.yuga.spacebattle.backend.entities.orbitals.StarSystem starSystem,
                                   @Nonnull final Collection<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> knownSystems,

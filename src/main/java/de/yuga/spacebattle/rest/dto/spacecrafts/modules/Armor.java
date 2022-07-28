@@ -17,10 +17,12 @@ public class Armor {
     public Armor() {
     }
 
-    public Armor(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.Armor armor) {
+    public Armor(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.Armor armor,
+                 @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(armor, "armor shouldn't be null!");
 
-        this.baseModule = new BaseModule(armor);
+        this.baseModule = new BaseModule(armor, languageCode);
     }
 
     @Nonnull

@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
+import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.resources.HasCosts;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
@@ -12,19 +13,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 @MappedSuperclass
 public class BaseModule extends HasCosts {
-
-    @Nonnull
-    @NotNull
-    @Size(min = 3, max = 30, message = "name should not be null")
-    private String name;
-
-    @Nonnull
-    @NotNull
-    private String description;
 
     @Nonnull
     @NotNull
@@ -47,28 +38,15 @@ public class BaseModule extends HasCosts {
                       @Nonnull final Research unlockedThrough,
                       final int useCapacity,
                       @Nonnull final ETechLevel techLevel,
-                      @Nonnull final CrewRequirement crewRequirement) {
-        super(techLevel, BaseModule.class);
-        Preconditions.checkNotNull(name, "name shouldn't be null!");
-        Preconditions.checkNotNull(description, "description shouldn't be null!");
+                      @Nonnull final CrewRequirement crewRequirement,
+                      @Nonnull final Class<?> clazz) {
+        super(new Translation("en", name), new Translation("en", description), techLevel, clazz);
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        this.name = name;
-        this.description = description;
         this.unlockedThrough = unlockedThrough;
         this.useCapacity = useCapacity;
         this.getCosts().setCrewRequirement(crewRequirement);
-    }
-
-    @Nonnull
-    public String getName() {
-        return name;
-    }
-
-    @Nonnull
-    public String getDescription() {
-        return description;
     }
 
     @Nonnull

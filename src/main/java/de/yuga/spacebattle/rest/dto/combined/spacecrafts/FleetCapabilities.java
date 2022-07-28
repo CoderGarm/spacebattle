@@ -29,7 +29,10 @@ public class FleetCapabilities {
     private final List<CapabilityValue> capabilities = new ArrayList<>();
 
     @JsonIgnore
-    private final Map<EModuleType, BigDecimal> effectValueByModuleType;
+    private Map<EModuleType, BigDecimal> effectValueByModuleType;
+
+    public FleetCapabilities() {
+    }
 
     public FleetCapabilities(@Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");

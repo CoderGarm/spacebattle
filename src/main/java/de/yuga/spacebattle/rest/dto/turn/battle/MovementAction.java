@@ -36,11 +36,16 @@ public class MovementAction {
     @Schema(required = true, description = "The point of the targeted position.")
     private de.yuga.spacebattle.rest.dto.orbitals.Orbit destination;
 
-    public MovementAction(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction input) {
+    public MovementAction() {
+    }
+
+    public MovementAction(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction input,
+                          @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(input, "input shouldn't be null!");
 
         this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound(), input.getCombatPhase());
-        this.actor = new Fleet(input.getActor());
+        this.actor = new Fleet(input.getActor(), languageCode);
         this.movementType = input.getMovementType();
         this.origin = new Orbit(input.getOrigin());
         this.interimDestination = new Orbit(input.getInterimDestination());

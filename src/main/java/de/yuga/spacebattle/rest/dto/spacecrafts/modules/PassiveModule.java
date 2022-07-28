@@ -29,10 +29,12 @@ public class PassiveModule {
     public PassiveModule() {
     }
 
-    public PassiveModule(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.PassiveModule passiveModule) {
+    public PassiveModule(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.PassiveModule passiveModule,
+                         @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(passiveModule, "passiveModule shouldn't be null!");
 
-        this.baseModule = new BaseModule(passiveModule);
+        this.baseModule = new BaseModule(passiveModule, languageCode);
         this.supportType = passiveModule.getSupportType();
         this.calculationType = passiveModule.getCalculationType();
     }

@@ -40,11 +40,13 @@ public class Warhead {
     public Warhead() {
     }
 
-    public Warhead(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Warhead warhead) {
+    public Warhead(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Warhead warhead,
+                   @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(warhead, "warhead shouldn't be null!");
 
         this.idWarhead = warhead.getId();
-        this.typeName = warhead.getTypeName();
+        this.typeName = warhead.getName(languageCode);
         this.damageValue = warhead.getDamageValue();
         this.damageProjectionRange = warhead.getDamageProjectionRange();
         this.warheadType = warhead.getWarheadType();

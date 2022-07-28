@@ -14,6 +14,9 @@ public class CombatRound {
     @Schema(required = true, description = "The combat round number.")
     private int no;
 
+    public CombatRound() {
+    }
+
     public CombatRound(@Nonnull final de.yuga.spacebattle.backend.combat.round.CombatRound combatRound) {
         Preconditions.checkNotNull(combatRound, "combatRound shouldn't be null!");
 

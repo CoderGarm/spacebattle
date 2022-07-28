@@ -49,18 +49,23 @@ public class ShipKillerHit {
     @Schema(required = true, description = "If the hit results in a destroyed ship, this will be logged here. By the id of the hit log.")
     private final Map<Integer, LossRole> lossesByHit = new HashMap<>();
 
-    public ShipKillerHit(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.ShipKillerHit input) {
+    public ShipKillerHit() {
+    }
+
+    public ShipKillerHit(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.ShipKillerHit input,
+                         @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(input, "input shouldn't be null!");
 
         this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound(), input.getCombatPhase());
-        this.actor = new Fleet(input.getActor());
-        this.target = new Fleet(input.getTarget());
+        this.actor = new Fleet(input.getActor(), languageCode);
+        this.target = new Fleet(input.getTarget(), languageCode);
         this.damageDealer = input.getDamageDealer();
         this.distance = input.getDistance();
         this.result = input.getResult();
-        this.hitLogs.addAll(input.getHitLogs().stream().map(HitLog::new).collect(Collectors.toList()));
+        this.hitLogs.addAll(input.getHitLogs().stream().map(h -> new HitLog(h, languageCode)).collect(Collectors.toList()));
         this.lossesByHit.putAll(input.getLossesByHit().entrySet().stream()
-                .collect(Collectors.toMap(e -> e.getKey().getId(), e -> new LossRole(e.getValue()))));
+                .collect(Collectors.toMap(e -> e.getKey().getId(), e -> new LossRole(e.getValue(), languageCode))));
     }
 
     @Nullable

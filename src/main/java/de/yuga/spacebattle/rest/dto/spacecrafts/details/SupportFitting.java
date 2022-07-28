@@ -28,10 +28,12 @@ public class SupportFitting {
     public SupportFitting() {
     }
 
-    public SupportFitting(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting supportFitting) {
+    public SupportFitting(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting supportFitting,
+                          @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(supportFitting, "supportFitting shouldn't be null!");
 
-        this.passiveModule = new PassiveModule(supportFitting.getPassiveModule());
+        this.passiveModule = new PassiveModule(supportFitting.getPassiveModule(), languageCode);
         this.amount = supportFitting.getAmount();
     }
 

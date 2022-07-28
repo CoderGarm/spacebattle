@@ -39,13 +39,15 @@ public class Weapon {
     public Weapon() {
     }
 
-    public Weapon(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon weapon) {
+    public Weapon(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon weapon,
+                  @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(weapon, "weapon shouldn't be null!");
 
         this.effectiveRange = weapon.getDamageProjectionRange();
         this.weaponType = weapon.getWeaponType();
         this.alignmentTypes = new ArrayList<>(weapon.getAllowedWeaponAlignments());
-        this.baseModule = new BaseModule(weapon);
+        this.baseModule = new BaseModule(weapon, languageCode);
     }
 
     @Nonnull

@@ -27,6 +27,6 @@ public class Armor extends BaseModuleWithEffectValue {
                  final int effectValue,
                  @Nonnull final ETechLevel techLevel,
                  @Nonnull final CrewRequirement crewRequirement) {
-        super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement);
+        super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement, Armor.class);
     }
 }

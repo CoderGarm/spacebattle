@@ -38,22 +38,26 @@ public class BaseModule {
     protected BaseModule() {
     }
 
-    public BaseModule(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule baseModule) {
+    public BaseModule(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule baseModule,
+                      @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(baseModule, "baseModule shouldn't be null!");
 
         this.idModule = baseModule.getId();
-        this.name = baseModule.getName();
-        this.description = baseModule.getDescription();
+        this.name = baseModule.getName(languageCode);
+        this.description = baseModule.getDescription(languageCode);
         this.useCapacity = baseModule.getUseCapacity();
         this.techLevel = baseModule.getTechLevel();
     }
 
-    public BaseModule(@Nonnull final BaseModuleWithEffectValue baseModuleWithEffectValue) {
+    public BaseModule(@Nonnull final BaseModuleWithEffectValue baseModuleWithEffectValue,
+                      @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(baseModuleWithEffectValue, "baseModuleWithEffectValue shouldn't be null!");
 
         this.idModule = baseModuleWithEffectValue.getId();
-        this.name = baseModuleWithEffectValue.getName();
-        this.description = baseModuleWithEffectValue.getDescription();
+        this.name = baseModuleWithEffectValue.getName(languageCode);
+        this.description = baseModuleWithEffectValue.getDescription(languageCode);
         this.useCapacity = baseModuleWithEffectValue.getUseCapacity();
         this.effectValue = baseModuleWithEffectValue.getEffectValue();
         this.techLevel = baseModuleWithEffectValue.getTechLevel();

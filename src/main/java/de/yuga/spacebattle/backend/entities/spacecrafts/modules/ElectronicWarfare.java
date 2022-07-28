@@ -38,7 +38,7 @@ public class ElectronicWarfare extends BaseModuleWithEffectValue {
                              @Nonnull final Distance effectiveRange,
                              @Nonnull final ETechLevel techLevel,
                              @Nonnull final CrewRequirement crewRequirement) {
-        super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement);
+        super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement, ElectronicWarfare.class);
         Preconditions.checkNotNull(effectiveRange, "effectiveRange shouldn't be null!");
 
         this.effectiveRange = effectiveRange;

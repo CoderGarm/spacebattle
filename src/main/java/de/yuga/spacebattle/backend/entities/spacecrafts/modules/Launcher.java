@@ -70,7 +70,7 @@ public class Launcher extends BaseModule {
                     @Nonnull final CrewRequirement crewRequirement,
                     @Nonnull final EWeaponType weaponType,
                     @Nonnull final Set<Missile> allowedMissiles) {
-        super(name, description, unlockedThrough, useCapacity, techLevel, crewRequirement);
+        super(name, description, unlockedThrough, useCapacity, techLevel, crewRequirement, Launcher.class);
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
         Preconditions.checkNotNull(alignmentType, "alignmentType shouldn't be null!");
 

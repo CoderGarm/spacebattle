@@ -42,7 +42,7 @@ public class Propulsion extends BaseModuleWithEffectValue {
                       @Nonnull final ETechLevel techLevel,
                       @Nonnull final EHyperBand hyperBand,
                       @Nonnull final CrewRequirement crewRequirement) {
-        super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement);
+        super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement, Propulsion.class);
         Preconditions.checkNotNull(hyperBand, "hyperBand shouldn't be null!");
 
         this.hyperBand = hyperBand;

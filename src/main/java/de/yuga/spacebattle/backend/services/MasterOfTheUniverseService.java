@@ -60,7 +60,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * The master of all. Do do all the dev-stuff which could be removed or placed somewhere else.
+ * The master of all. Do all the dev-stuff which could be removed or placed somewhere else.
  */
 @Service
 public class MasterOfTheUniverseService {
@@ -439,8 +439,6 @@ public class MasterOfTheUniverseService {
         LOGGER.info("Buildings created");
 
         // todo fix creation of elements
-        // todo implement game role
-        // todo implement ally admin screen, application etc.
 
         colonizePlanet(u1, p11);
         colonizePlanet(u2, p21);
@@ -457,15 +455,15 @@ public class MasterOfTheUniverseService {
         Sidewall sidewall = moduleService.createSidewall("Shield Mk I", "A shield", unlockShield, 5, 15000, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
 
         AmmunitionModule shipKillerAmmunition = moduleService.createAmmunitionModule("Rocket Ammunition", "A bunch of rockets.", unlocksRocketAmmunition, 5, 10, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        MissileMotor shipKillerMotor = moduleService.createMissileMotor("Ship Killer Motor Mk I", 180, ETechLevel.TECH_I, new Acceleration(46000, EAccelerationMetric.G), 20, 100);
-        Warhead nuclearShipKillerWarHead = moduleService.createWarhead("Nuclear ship killer war head", 1000, ETechLevel.TECH_I, new Distance(0.00017, EDistanceMetric.LS), EWarheadType.EXPLOSION, 100);
-        Missile shipKillerMissile = moduleService.createMissile("Nuclear ship killer missile Mk I", 100, 100, 100, ETechLevel.TECH_I, nuclearShipKillerWarHead, List.of(shipKillerMotor), unlockMissiles, shipKillerAmmunition);
+        MissileMotor shipKillerMotor = moduleService.createMissileMotor("Ship Killer Motor Mk I", "Ship Killer Motor Mk I", 180, ETechLevel.TECH_I, new Acceleration(46000, EAccelerationMetric.G), 20, 100);
+        Warhead nuclearShipKillerWarHead = moduleService.createWarhead("Nuclear ship killer war head", "Nuclear ship killer war head", 1000, ETechLevel.TECH_I, new Distance(0.00017, EDistanceMetric.LS), EWarheadType.EXPLOSION, 100);
+        Missile shipKillerMissile = moduleService.createMissile("Nuclear ship killer missile Mk I", "Nuclear ship killer missile Mk I", 100, 100, 100, ETechLevel.TECH_I, nuclearShipKillerWarHead, List.of(shipKillerMotor), unlockMissiles, shipKillerAmmunition);
         Launcher shipKillerLauncher = moduleService.createLauncher("Ship killer launcher Mk I", "The launcher for ship killers", unlockMissiles, shipKillerAmmunition, 100, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(shipKillerMissile));
 
         AmmunitionModule counterRocketAmmunition = moduleService.createAmmunitionModule("Counter Rocket Ammunition", "Another bunch of rockets.", unlocksCounterRocketAmmunition, 5, 10, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        MissileMotor counterMissileMotor = moduleService.createMissileMotor("Counter Motor Mk I", 30, ETechLevel.TECH_I, new Acceleration(96000, EAccelerationMetric.G), 80, 10);
-        Warhead counterWarHead = moduleService.createWarhead("Counter war head", 1, ETechLevel.TECH_I, Distance.ZERO, EWarheadType.COUNTER_MISSILE, 10);
-        Missile counterMissile = moduleService.createMissile("Counter missile Mk I", 10, 10, 10, ETechLevel.TECH_I, counterWarHead, List.of(counterMissileMotor), unlockCounterMissiles, counterRocketAmmunition);
+        MissileMotor counterMissileMotor = moduleService.createMissileMotor("Counter Motor Mk I", "Counter Motor Mk I", 30, ETechLevel.TECH_I, new Acceleration(96000, EAccelerationMetric.G), 80, 10);
+        Warhead counterWarHead = moduleService.createWarhead("Counter war head", "Counter war head", 1, ETechLevel.TECH_I, Distance.ZERO, EWarheadType.COUNTER_MISSILE, 10);
+        Missile counterMissile = moduleService.createMissile("Counter missile Mk I", "Counter missile Mk I", 10, 10, 10, ETechLevel.TECH_I, counterWarHead, List.of(counterMissileMotor), unlockCounterMissiles, counterRocketAmmunition);
         Launcher counterMissileLauncher = moduleService.createLauncher("Counter missile launcher Mk I", "The launcher for counter missiles", unlockCounterMissiles, counterRocketAmmunition, 100, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
 
         Weapon laserWeapon = moduleService.createWeapon("Laser Mk I", "A laser", unlockLaser, 5, 1000, ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS));

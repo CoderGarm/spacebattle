@@ -13,6 +13,7 @@ import de.yuga.spacebattle.backend.combat.round.WarshipHealthState;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
@@ -393,7 +394,7 @@ public class BattleLogger {
         final StringBuilder sb = new StringBuilder();
         lossesByType.forEach((missile, lostAmount) -> {
             final Integer leftOver = missileSalvoHealthState.getCurrentAmountByType().get(missile);
-            final String msg = "#" + combatRound.getNo() + " " + actor.getName() + " shots down " + volley.getUuid() + " and hits " + lostAmount + " missiles of " + missile.getTypeName() + " - left over " + leftOver + " missiles.";
+            final String msg = "#" + combatRound.getNo() + " " + actor.getName() + " shots down " + volley.getUuid() + " and hits " + lostAmount + " missiles of " + missile.getName(Translation.DEFAULT_LANGUAGE) + " - left over " + leftOver + " missiles.";
             sb.append(msg);
         });
         if (StringUtils.isBlank(sb)) {
@@ -411,7 +412,7 @@ public class BattleLogger {
         final StringBuilder sb = new StringBuilder();
         lossesByType.forEach((missile, lostAmount) -> {
             final Integer leftOver = missileSalvoHealthState.getCurrentAmountByType().get(missile);
-            final String msg = "#" + combatRound.getNo() + " " + actor.getName() + " eloka down " + volley.getUuid() + " and hits " + lostAmount + " missiles of " + missile.getTypeName() + " from " + target.getName() + " - left over " + leftOver + " missiles.";
+            final String msg = "#" + combatRound.getNo() + " " + actor.getName() + " eloka down " + volley.getUuid() + " and hits " + lostAmount + " missiles of " + missile.getName(Translation.DEFAULT_LANGUAGE) + " from " + target.getName() + " - left over " + leftOver + " missiles.";
             sb.append(msg);
         });
         if (StringUtils.isBlank(sb)) {

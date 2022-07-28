@@ -24,8 +24,9 @@ public class BaseModuleWithEffectValue extends BaseModule {
                                      final int useCapacity,
                                      final int effectValue,
                                      @Nonnull final ETechLevel techLevel,
-                                     @Nonnull final CrewRequirement crewRequirement) {
-        super(name, description, unlockedThrough, useCapacity, techLevel, crewRequirement);
+                                     @Nonnull final CrewRequirement crewRequirement,
+                                     @Nonnull final Class<?> clazz) {
+        super(name, description, unlockedThrough, useCapacity, techLevel, crewRequirement, clazz);
 
         this.effectValue = effectValue;
     }

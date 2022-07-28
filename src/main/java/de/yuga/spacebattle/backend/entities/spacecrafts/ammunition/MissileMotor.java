@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.entities.spacecrafts.ammunition;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.converter.AccelerationConverter;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
+import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.turn.resources.HasCosts;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -16,11 +17,6 @@ import javax.validation.constraints.NotNull;
 @Table(name = "missileMotor")
 @AttributeOverride(name = "id", column = @Column(name = "idMissileMotor"))
 public class MissileMotor extends HasCosts {
-
-    @Nonnull
-    @NotNull
-    @Column(nullable = false)
-    private String typeName;
 
     /**
      * The duration which the missile engine can fire and accelerate the missile in seconds.
@@ -49,26 +45,20 @@ public class MissileMotor extends HasCosts {
     public MissileMotor() {
     }
 
-    public MissileMotor(@Nonnull final String typeName,
+    public MissileMotor(@Nonnull final String name,
+                        @Nonnull final String description,
                         final int endurance,
                         @Nonnull final ETechLevel techLevel,
                         @Nonnull final Acceleration acceleration,
                         final int maneuverability,
                         final int useCapacity) {
-        super(techLevel, MissileMotor.class);
-        Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
+        super(new Translation("en", name), new Translation("en", description), techLevel, MissileMotor.class);
         Preconditions.checkNotNull(acceleration, "acceleration shouldn't be null!");
 
-        this.typeName = typeName;
         this.endurance = endurance;
         this.acceleration = acceleration;
         this.maneuverability = maneuverability;
         this.useCapacity = useCapacity;
-    }
-
-    @Nonnull
-    public String getTypeName() {
-        return typeName;
     }
 
     public int getEndurance() {

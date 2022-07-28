@@ -65,7 +65,9 @@ public class Fleet {
     public Fleet() {
     }
 
-    public Fleet(@Nonnull final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet) {
+    public Fleet(@Nonnull final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet,
+                 @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
         this.idFleet = fleet.getId();
@@ -73,7 +75,7 @@ public class Fleet {
         this.name = fleet.getName();
         this.orbit = fleet.getOrbit() != null ? new FleetOrbit(fleet.getOrbit()) : null;
         this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;
-        this.ships.addAll(fleet.getShips().stream().map(WarShip::new).collect(Collectors.toList()));
+        this.ships.addAll(fleet.getShips().stream().map(w -> new WarShip(w, languageCode)).collect(Collectors.toList()));
         this.fleetCapabilities = new FleetCapabilities(fleet);
         this.isFTLCapable = fleet.isFTLCapable();
     }

@@ -14,7 +14,10 @@ public class MiningFactors {
 
     @Nonnull
     @Schema(required = true, description = "The factor by resource type.")
-    private final List<ResourceAmount> resources;
+    private List<ResourceAmount> resources;
+
+    public MiningFactors() {
+    }
 
     public MiningFactors(@Nonnull final de.yuga.spacebattle.backend.entities.turn.resources.MiningFactors miningFactors) {
         Preconditions.checkNotNull(miningFactors, "miningFactors shouldn't be null!");

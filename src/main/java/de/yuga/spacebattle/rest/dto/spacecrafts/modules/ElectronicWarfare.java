@@ -16,10 +16,12 @@ public class ElectronicWarfare {
     public ElectronicWarfare() {
     }
 
-    public ElectronicWarfare(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare electronicWarfare) {
+    public ElectronicWarfare(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare electronicWarfare,
+                             @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(electronicWarfare, "electronicWarfare shouldn't be null!");
 
-        this.baseModule = new BaseModule(electronicWarfare);
+        this.baseModule = new BaseModule(electronicWarfare, languageCode);
     }
 
     @Nonnull

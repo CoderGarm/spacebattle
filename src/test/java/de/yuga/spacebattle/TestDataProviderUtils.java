@@ -407,7 +407,7 @@ public class TestDataProviderUtils {
         Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
         Preconditions.checkNotNull(acceleration, "acceleration shouldn't be null!");
 
-        final MissileMotor missileMotor = new MissileMotor(typeName, endurance, techLevel, acceleration, maneuverability, useCapacity);
+        final MissileMotor missileMotor = new MissileMotor(typeName, "", endurance, techLevel, acceleration, maneuverability, useCapacity);
         setId(missileMotor);
         return missileMotor;
     }
@@ -423,7 +423,7 @@ public class TestDataProviderUtils {
         Preconditions.checkNotNull(damageProjectionRange, "damageProjectionRange shouldn't be null!");
         Preconditions.checkNotNull(warheadType, "warheadType shouldn't be null!");
 
-        final Warhead warhead = new Warhead(typeName, effectValue, techLevel, damageProjectionRange, warheadType, useCapacity);
+        final Warhead warhead = new Warhead(typeName, "", effectValue, techLevel, damageProjectionRange, warheadType, useCapacity);
         setId(warhead);
         return warhead;
     }
@@ -442,7 +442,7 @@ public class TestDataProviderUtils {
         Preconditions.checkNotNull(missileMotors, "missileMotors shouldn't be null!");
         Preconditions.checkNotNull(ammunitionModule, "ammunitionModule shouldn't be null!");
 
-        final Missile missile = new Missile(typeName, warheadCapacity, motorCapacity, elokaResistance, techLevel, warhead, missileMotors, research(), ammunitionModule);
+        final Missile missile = new Missile(typeName, "", warheadCapacity, motorCapacity, elokaResistance, techLevel, warhead, missileMotors, research(), ammunitionModule);
         setId(missile);
         return missile;
     }

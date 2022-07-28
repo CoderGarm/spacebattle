@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.entities.researches;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
+import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
@@ -12,7 +13,6 @@ import de.yuga.spacebattle.backend.enums.ETechLevel;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.*;
-import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,19 +22,15 @@ import java.util.Set;
         @NamedQuery(name = "Research.getTreeAsTuple",
                 query = "SELECT new de.yuga.spacebattle.backend.dto.research.ResearchTreeElement(p.id, p.unlockedThrough.id) FROM Research p"),
         @NamedQuery(name = "Research.getResearchesAsDTOById",
-                query = "SELECT new de.yuga.spacebattle.rest.dto.researches.Research(p.id, p.name, p.description, p.levelCap) FROM Research p WHERE p.id IN (:idResearches)")
+                query = "SELECT new de.yuga.spacebattle.rest.dto.researches.Research(p.id, n.translation, d.translation, p.levelCap) FROM Research p " +
+                        "LEFT JOIN Translation n ON (n.translation = p.name AND n.languageCode = :languageCode) " +
+                        "LEFT JOIN Translation d ON (d.translation = p.name AND d.languageCode = :languageCode) " +
+                        "WHERE p.id IN (:idResearches)")
 })
 @Entity
 @Table(name = "research")
 @AttributeOverride(name = "id", column = @Column(name = "idResearch"))
 public class Research extends HasCosts {
-
-    @Nonnull
-    @Size(min = 1, max = 30)
-    private String name;
-
-    @Nonnull
-    private String description;
 
     private int levelCap;
 
@@ -83,24 +79,12 @@ public class Research extends HasCosts {
                     final int levelCap,
                     @Nonnull final ETechLevel techLevel,
                     @Nullable final Research unlockedThrough) {
-        super(techLevel, Research.class);
+        super(new Translation("en", name), new Translation("en", description), techLevel, Research.class);
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
 
-        this.name = name;
-        this.description = description;
         this.levelCap = levelCap;
         this.unlockedThrough = unlockedThrough;
-    }
-
-    @Nonnull
-    public String getName() {
-        return name;
-    }
-
-    @Nonnull
-    public String getDescription() {
-        return description;
     }
 
     public int getLevelCap() {

@@ -40,10 +40,11 @@ public class ResearchService {
     }
 
     @Nonnull
-    public ResearchTree getResearchTree() {
+    public ResearchTree getResearchTree(@Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         final List<de.yuga.spacebattle.backend.dto.research.ResearchTreeElement> treeElements = findAllAsTuple();
         final Set<Integer> idResearches = treeElements.stream().map(de.yuga.spacebattle.backend.dto.research.ResearchTreeElement::getIdResearch).collect(Collectors.toSet());
-        final List<de.yuga.spacebattle.rest.dto.researches.Research> researches = getResearchesAsDTOById(idResearches);
+        final List<de.yuga.spacebattle.rest.dto.researches.Research> researches = getResearchesAsDTOById(idResearches, languageCode);
 
         final Map<Integer, ResearchTreeElement> treeLinkedElementByIdResearch = new HashMap<>();
         // fill up the unlocks und create elements
@@ -79,10 +80,12 @@ public class ResearchService {
     }
 
     @Nonnull
-    protected List<de.yuga.spacebattle.rest.dto.researches.Research> getResearchesAsDTOById(@Nonnull final Collection<Integer> idResearches) {
+    protected List<de.yuga.spacebattle.rest.dto.researches.Research> getResearchesAsDTOById(@Nonnull final Collection<Integer> idResearches,
+                                                                                            @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(idResearches, "idResearches shouldn't be null!");
 
-        return researchRepository.getResearchesAsDTOById(new ArrayList<>(idResearches));
+        return researchRepository.getResearchesAsDTOById(new ArrayList<>(idResearches), languageCode);
     }
 
     @Nullable

@@ -19,17 +19,22 @@ public class ResearchLevel {
     public ResearchLevel() {
     }
 
-    public ResearchLevel(@Nonnull final de.yuga.spacebattle.backend.entities.researches.Research research, final int level) {
+    public ResearchLevel(@Nonnull final de.yuga.spacebattle.backend.entities.researches.Research research,
+                         final int level,
+                         @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(research, "research shouldn't be null!");
 
-        this.research = new Research(research);
+        this.research = new Research(research, languageCode);
         this.level = level;
     }
 
-    public ResearchLevel(@Nonnull final de.yuga.spacebattle.backend.entities.researches.ResearchLevel researchLevel) {
+    public ResearchLevel(@Nonnull final de.yuga.spacebattle.backend.entities.researches.ResearchLevel researchLevel,
+                         @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(researchLevel, "researchLevel shouldn't be null!");
 
-        this.research = new Research(researchLevel.getResearch());
+        this.research = new Research(researchLevel.getResearch(), languageCode);
         this.level = researchLevel.getLevel();
     }
 

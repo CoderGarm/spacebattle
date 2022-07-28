@@ -28,10 +28,12 @@ public class AmmunitionFitting {
     public AmmunitionFitting() {
     }
 
-    public AmmunitionFitting(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting ammunitionFitting) {
+    public AmmunitionFitting(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting ammunitionFitting,
+                             @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(ammunitionFitting, "ammunitionFitting shouldn't be null!");
 
-        this.ammunitionModule = new de.yuga.spacebattle.rest.dto.spacecrafts.modules.AmmunitionModule(ammunitionFitting.getAmmunitionModule());
+        this.ammunitionModule = new de.yuga.spacebattle.rest.dto.spacecrafts.modules.AmmunitionModule(ammunitionFitting.getAmmunitionModule(), languageCode);
         this.amount = ammunitionFitting.getAmount();
     }
 

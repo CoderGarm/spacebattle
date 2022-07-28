@@ -12,22 +12,25 @@ import javax.annotation.Nonnull;
 public class Colonization {
 
     @Schema(required = true, description = "The id of the colonization.")
-    private final int idColonization;
+    private int idColonization;
 
     @Nonnull
     @Schema(required = true, description = "The user who runs the colonization.")
-    private final UserJson user;
+    private UserJson user;
 
     @Nonnull
     @Schema(required = true, description = "The planet which is the target of the colonization.")
-    private final Planet target;
+    private Planet target;
 
     /**
      * Principle: Countdown ticks to zero -> job done.
      * It's about full ticks
      */
     @Schema(required = true, description = "The amount of ticks to complete colonization.")
-    private final int doneAtZero;
+    private int doneAtZero;
+
+    public Colonization() {
+    }
 
     public Colonization(@Nonnull final de.yuga.spacebattle.backend.entities.turn.Colonization colonization) {
         Preconditions.checkNotNull(colonization, "colonization shouldn't be null!");

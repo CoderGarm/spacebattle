@@ -41,6 +41,9 @@ public class UserReq {
     @Nullable
     private Integer idAlliance;
 
+    public UserReq() {
+    }
+
     @Nullable
     public Integer getIdUser() {
         return idUser;

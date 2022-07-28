@@ -2,26 +2,24 @@ package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
-import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
+import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
-import de.yuga.spacebattle.rest.config.security.JwtTokenUtil;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.battle.BattleReport;
 import de.yuga.spacebattle.rest.dto.turn.battle.BattleReportStatistics;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
@@ -33,7 +31,7 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 @RolesAllowed("USER")
 @RestController
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + BattleReportApi.ENDPOINT + "/")
-public class BattleReportApi {
+public class BattleReportApi extends BaseApi {
 
     @Nonnull
     public static final String ENDPOINT = "report";
@@ -41,22 +39,14 @@ public class BattleReportApi {
     public static final String FIGHTING_BY_ID_ENDPOINT = "battle/byId";
     public static final String FIGHTING_AMOUNT_ENDPOINT = "battle/amount";
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(BattleReportApi.class);
-
     @Nonnull
     private final BattleReportService battleReportService;
 
-    @Nonnull
-    private final JwtTokenUtil jwtTokenUtil;
-
     @Autowired
-    public BattleReportApi(@Nonnull final BattleReportService battleReportService,
-                           @Nonnull final JwtTokenUtil jwtTokenUtil) {
+    public BattleReportApi(@Nonnull final BattleReportService battleReportService) {
         Preconditions.checkNotNull(battleReportService, "fightingReportService shouldn't be null!");
-        Preconditions.checkNotNull(jwtTokenUtil, "jwtTokenUtil shouldn't be null!");
 
         this.battleReportService = battleReportService;
-        this.jwtTokenUtil = jwtTokenUtil;
     }
 
     @GetMapping(value = FIGHTING_AMOUNT_ENDPOINT)
@@ -68,10 +58,9 @@ public class BattleReportApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getReportsAmountWithUser(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
-        PreconditionWebHelper.checkNotNull(token, "token shouldn't be null!");
+    public ResponseEntity<?> getReportsAmountWithUser() {
 
-        final int idUser = jwtTokenUtil.getIdUserFromAccessToken(token);
+        final int idUser = getIdUser();
         return ResponseEntity.ok(battleReportService.countAllWithUser(idUser));
     }
 
@@ -86,12 +75,10 @@ public class BattleReportApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getReportsWithUserWithPaging(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                                          @PathVariable("page") final int page,
+    public ResponseEntity<?> getReportsWithUserWithPaging(@PathVariable("page") final int page,
                                                           @PathVariable("size") final int size) {
-        PreconditionWebHelper.checkNotNull(token, "token shouldn't be null!");
 
-        final int idUser = jwtTokenUtil.getIdUserFromAccessToken(token);
+        final int idUser = getIdUser();
         final Collection<BattleReportStatistics> reports = battleReportService.findReportBasicInformationByPaging(idUser, page, size);
         return ResponseEntity.ok(reports);
     }
@@ -105,15 +92,13 @@ public class BattleReportApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getReportsById(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                            @PathVariable("idBattleReport") final int idBattleReport) {
-        PreconditionWebHelper.checkNotNull(token, "token shouldn't be null!");
+    public ResponseEntity<?> getReportsById(@PathVariable("idBattleReport") final int idBattleReport) {
 
-        final int idUser = jwtTokenUtil.getIdUserFromAccessToken(token);
+        final int idUser = getIdUser();
         final de.yuga.spacebattle.backend.entities.turn.battle.BattleReport battleReport = battleReportService.findByIdWithAllData(idUser, idBattleReport);
         if (battleReport == null) {
             throw new NotifyWebUserException("Nothing there, buddy.");
         }
-        return ResponseEntity.ok(new BattleReport(battleReport));
+        return ResponseEntity.ok(new BattleReport(battleReport, getPreferredLanguage()));
     }
 }

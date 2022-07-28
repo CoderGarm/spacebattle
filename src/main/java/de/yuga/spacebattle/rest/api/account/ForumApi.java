@@ -6,13 +6,12 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.services.account.ForumService;
 import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
-import de.yuga.spacebattle.rest.config.security.JwtTokenUtil;
 import de.yuga.spacebattle.rest.dto.account.forum.*;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,7 +19,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +35,7 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 @RolesAllowed("USER")
 @RestController
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ForumApi.ENDPOINT + "/")
-public class ForumApi {
+public class ForumApi extends BaseApi {
 
     @Nonnull
     public static final String ENDPOINT = "forum";
@@ -57,20 +55,14 @@ public class ForumApi {
     @Nonnull
     private final UserService userService;
 
-    @Nonnull
-    private final JwtTokenUtil tokenUtil;
-
     @Autowired
     public ForumApi(@Nonnull final ForumService forumService,
-                    @Nonnull final UserService userService,
-                    @Nonnull final JwtTokenUtil tokenUtil) {
+                    @Nonnull final UserService userService) {
         Preconditions.checkNotNull(forumService, "forumService shouldn't be null!");
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
-        Preconditions.checkNotNull(tokenUtil, "tokenUtil shouldn't be null!");
 
         this.forumService = forumService;
         this.userService = userService;
-        this.tokenUtil = tokenUtil;
     }
 
     @GetMapping(FORUMS_FOR_USER)
@@ -84,9 +76,9 @@ public class ForumApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getForumsForUser(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
+    public ResponseEntity<?> getForumsForUser() {
 
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final int idUser = getIdUser();
         final User user = userService.find(idUser);
         assert user != null;
         final List<de.yuga.spacebattle.backend.entities.account.forum.Forum> forAllowedForUser = forumService.findForumsAllowedForUser(user);
@@ -117,9 +109,9 @@ public class ForumApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getAllianceForumForUser(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
+    public ResponseEntity<?> getAllianceForumForUser() {
 
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final int idUser = getIdUser();
         final User user = userService.find(idUser);
         assert user != null;
         final Alliance alliance = user.getAlliance();
@@ -150,10 +142,9 @@ public class ForumApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getForumThreadById(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                                @PathVariable("idForumThread") final int idForumThread) {
+    public ResponseEntity<?> getForumThreadById(@PathVariable("idForumThread") final int idForumThread) {
 
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final int idUser = getIdUser();
 
         final de.yuga.spacebattle.backend.entities.account.forum.ForumThread forumThread = forumService.findForumThread(idForumThread);
         if (forumThread != null) {
@@ -178,10 +169,9 @@ public class ForumApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getForumThreadsByForumId(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                                      @PathVariable("idForum") final int idForum) {
+    public ResponseEntity<?> getForumThreadsByForumId(@PathVariable("idForum") final int idForum) {
 
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final int idUser = getIdUser();
         final de.yuga.spacebattle.backend.entities.account.forum.Forum forumById = forumService.findForumById(idForum);
         validateAccessToForum(idUser, forumById);
 
@@ -213,12 +203,11 @@ public class ForumApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getMessagesInThread(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                                 @PathVariable("idForumThread") final int idForumThread,
+    public ResponseEntity<?> getMessagesInThread(@PathVariable("idForumThread") final int idForumThread,
                                                  @PathVariable("page") final int page,
                                                  @PathVariable("size") final int size) {
 
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final int idUser = getIdUser();
 
         final List<de.yuga.spacebattle.backend.entities.account.forum.ForumMessage> messagesInForumThread = forumService.findMessagesInForumThread(idForumThread, page, size)
                 .stream()
@@ -284,11 +273,10 @@ public class ForumApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> createForumThread(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                               @RequestBody @Nonnull final CreateForumThread createForumThread) {
+    public ResponseEntity<?> createForumThread(@RequestBody @Nonnull final CreateForumThread createForumThread) {
         PreconditionWebHelper.checkNotNull(createForumThread, "createForumThread shouldn't be null!");
 
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final int idUser = getIdUser();
 
         final de.yuga.spacebattle.backend.entities.account.forum.Forum forum = forumService.findForumById(createForumThread.getIdForum());
         final User user = validateAccessToForum(idUser, forum);
@@ -311,11 +299,10 @@ public class ForumApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> createThreadMessage(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                                 @RequestBody @Nonnull final CreateForumThreadMessage threadMessage) {
+    public ResponseEntity<?> createThreadMessage(@RequestBody @Nonnull final CreateForumThreadMessage threadMessage) {
         PreconditionWebHelper.checkNotNull(threadMessage, "threadMessage shouldn't be null!");
 
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final int idUser = getIdUser();
 
         final de.yuga.spacebattle.backend.entities.account.forum.ForumThread forumThread = forumService.findForumThread(threadMessage.getIdForumThread());
         PreconditionWebHelper.checkNotNull(forumThread, "forumThread shouldn't be null!");
@@ -334,11 +321,10 @@ public class ForumApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> editThreadMessage(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                               @RequestBody @Nonnull final ForumMessage threadMessage) {
+    public ResponseEntity<?> editThreadMessage(@RequestBody @Nonnull final ForumMessage threadMessage) {
         PreconditionWebHelper.checkNotNull(threadMessage, "threadMessage shouldn't be null!");
 
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final int idUser = getIdUser();
 
         final de.yuga.spacebattle.backend.entities.account.forum.ForumMessage msg = forumService.findMessage(threadMessage.getIdForumMessage());
         PreconditionWebHelper.checkNotNull(msg, "msg shouldn't be null!");
@@ -362,10 +348,9 @@ public class ForumApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> isMessageUnread(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                             @PathVariable("idForumThread") final int idForumThread,
+    public ResponseEntity<?> isMessageUnread(@PathVariable("idForumThread") final int idForumThread,
                                              @PathVariable("idForumMessage") final int idForumMessage) {
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final int idUser = getIdUser();
         final boolean hasUnread = forumService.isMessageUnread(idForumThread, idForumMessage, idUser);
         return ResponseEntity.ok(hasUnread);
     }
@@ -380,9 +365,8 @@ public class ForumApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> hasThreadUnread(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                             @PathVariable("idForumThread") final int idForumThread) {
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+    public ResponseEntity<?> hasThreadUnread(@PathVariable("idForumThread") final int idForumThread) {
+        final int idUser = getIdUser();
         final boolean hasUnread = forumService.hasThreadUnread(idForumThread, idUser);
         return ResponseEntity.ok(hasUnread);
     }
@@ -397,9 +381,9 @@ public class ForumApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> hasForumUnread(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                            @PathVariable("idForum") final int idForum) {
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+    public ResponseEntity<?> hasForumUnread(
+            @PathVariable("idForum") final int idForum) {
+        final int idUser = getIdUser();
         final boolean hasUnread = forumService.hasForumUnread(idForum, idUser);
         return ResponseEntity.ok(hasUnread);
     }
@@ -414,8 +398,8 @@ public class ForumApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> hasUserUnreadMessages(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+    public ResponseEntity<?> hasUserUnreadMessages() {
+        final int idUser = getIdUser();
         final User user = userService.find(idUser);
         PreconditionWebHelper.checkNotNull(user, "user shouldn't be null!");
 
@@ -433,12 +417,11 @@ public class ForumApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> markForumMessageRead(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                                  @PathVariable("idForum") final int idForum,
+    public ResponseEntity<?> markForumMessageRead(@PathVariable("idForum") final int idForum,
                                                   @PathVariable("idForumThread") final int idForumThread,
                                                   @PathVariable("idForumMessage") final int idForumMessage) {
 
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final int idUser = getIdUser();
         forumService.markMessageRead(idForum, idForumThread, idForumMessage, idUser);
         return ResponseEntity.ok(true);
     }

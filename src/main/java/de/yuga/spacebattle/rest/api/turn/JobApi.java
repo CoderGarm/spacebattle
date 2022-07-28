@@ -3,6 +3,7 @@ package de.yuga.spacebattle.rest.api.turn;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
+import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.Job;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +30,7 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 @RolesAllowed("USER")
 @RestController
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + JobApi.ENDPOINT + "/")
-public class JobApi {
+public class JobApi extends BaseApi {
 
     @Nonnull
     public static final String ENDPOINT = "job";
@@ -62,6 +63,8 @@ public class JobApi {
             }
     )
     public ResponseEntity<?> getJobsOnPlanet(@PathVariable("idPlanet") final int idPlanet) {
-        return ResponseEntity.ok(jobService.findAllJobsByPlanet(idPlanet).stream().map(Job::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(jobService.findAllJobsByPlanet(idPlanet).stream()
+                .map(j -> new Job(j, getPreferredLanguage()))
+                .collect(Collectors.toList()));
     }
 }

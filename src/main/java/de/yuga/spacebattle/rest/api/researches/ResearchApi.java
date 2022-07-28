@@ -11,6 +11,7 @@ import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
+import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.researches.ResearchLevel;
@@ -39,7 +40,7 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 @RolesAllowed("USER")
 @RestController
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ResearchApi.ENDPOINT + "/")
-public class ResearchApi {
+public class ResearchApi extends BaseApi {
 
     @Nonnull
     public static final String ENDPOINT = "research";
@@ -90,7 +91,9 @@ public class ResearchApi {
     public ResponseEntity<?> getResearchByUser(@PathVariable("idUser") final int idUser) {
 
         final Set<de.yuga.spacebattle.backend.entities.researches.ResearchLevel> researchesForUser = researchService.getResearchesForUser(idUser);
-        final List<ResearchLevel> researchLevels = researchesForUser.stream().map(ResearchLevel::new).collect(Collectors.toList());
+        final List<ResearchLevel> researchLevels = researchesForUser.stream()
+                .map(r -> new ResearchLevel(r, getPreferredLanguage()))
+                .collect(Collectors.toList());
         return ResponseEntity.ok(researchLevels);
     }
 
@@ -121,7 +124,7 @@ public class ResearchApi {
             throw new NotifyWebUserException("No research was found.");
         }
         final Job researchJob = jobService.createResearchJob(user, research);
-        return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(researchJob));
+        return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(researchJob, getPreferredLanguage()));
     }
 
     @GetMapping(value = AVAILABLE_BY_USER_ENDPOINT + "/{idUser}")
@@ -139,7 +142,7 @@ public class ResearchApi {
         final List<Research> jobActiveFor = jobService.getResearchesFromActiveJobs(idUser);
         final Map<Research, Integer> researchesForUser = researchService.getUnlockableResearches(idUser, jobActiveFor);
         final List<ResearchLevel> researchLevels = researchesForUser.entrySet().stream()
-                .map(entry -> new ResearchLevel(entry.getKey(), entry.getValue())).collect(Collectors.toList());
+                .map(entry -> new ResearchLevel(entry.getKey(), entry.getValue(), getPreferredLanguage())).collect(Collectors.toList());
         return ResponseEntity.ok(researchLevels);
     }
 
@@ -153,7 +156,7 @@ public class ResearchApi {
             }
     )
     public ResponseEntity<?> getTree() {
-        return ResponseEntity.ok(researchService.getResearchTree());
+        return ResponseEntity.ok(researchService.getResearchTree(getPreferredLanguage()));
     }
 
     @GetMapping(value = RESEARCH_POSSIBLE_FOR_USER_ENDPOINT + "/{idUser}")

@@ -37,17 +37,19 @@ public class Missile {
     public Missile() {
     }
 
-    public Missile(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile missile) {
+    public Missile(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile missile,
+                   @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(missile, "missile shouldn't be null!");
 
         this.idMissile = missile.getId();
-        this.typeName = missile.getTypeName();
+        this.typeName = missile.getName(languageCode);
         this.warheadCapacity = missile.getWarheadCapacity();
         this.motorCapacity = missile.getMotorCapacity();
         this.elokaResistance = missile.getElokaResistance();
-        this.warhead = new Warhead(missile.getWarhead());
+        this.warhead = new Warhead(missile.getWarhead(), languageCode);
         for (int i = 1; i <= missile.getMotorAmount(); i++) {
-            this.missileMotors.add(new MissileMotor(missile.getMissileMotor()));
+            this.missileMotors.add(new MissileMotor(missile.getMissileMotor(), languageCode));
         }
     }
 

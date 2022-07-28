@@ -11,10 +11,13 @@ public class HumanResourceAmount {
 
     @Nonnull
     @Schema(required = true, description = "The resource type.")
-    private final EEducationType resourceType;
+    private EEducationType resourceType;
 
     @Schema(required = true, description = "The amount for the resource.")
-    private final long amount;
+    private long amount;
+
+    public HumanResourceAmount() {
+    }
 
     public HumanResourceAmount(@Nonnull final de.yuga.spacebattle.backend.enums.EEducationType eEducationType, final long amount) {
         Preconditions.checkNotNull(eEducationType, "eEducationType shouldn't be null!");

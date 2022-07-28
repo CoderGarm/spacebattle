@@ -47,12 +47,14 @@ public class AlignedFitting {
     public AlignedFitting() {
     }
 
-    public AlignedFitting(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting alignedFitting) {
+    public AlignedFitting(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting alignedFitting,
+                          @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(alignedFitting, "alignedFitting shouldn't be null!");
 
         this.weaponAlignment = alignedFitting.getWeaponAlignment();
-        this.weapon = alignedFitting.getWeapon() != null ? new Weapon(alignedFitting.getWeapon()) : null;
-        this.launcher = alignedFitting.getLauncher() != null ? new Launcher(alignedFitting.getLauncher()) : null;
+        this.weapon = alignedFitting.getWeapon() != null ? new Weapon(alignedFitting.getWeapon(), languageCode) : null;
+        this.launcher = alignedFitting.getLauncher() != null ? new Launcher(alignedFitting.getLauncher(), languageCode) : null;
         this.amount = alignedFitting.getAmount();
     }
 

@@ -7,14 +7,13 @@ import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.services.account.ForumService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.combined.account.AllianceService;
+import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.config.role.AllowedRoles;
-import de.yuga.spacebattle.rest.config.security.JwtTokenUtil;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
 import de.yuga.spacebattle.rest.dto.combined.account.Alliance;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,7 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,7 +39,7 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 @RolesAllowed("USER")
 @RestController
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + AllianceApi.ENDPOINT + "/")
-public class AllianceApi {
+public class AllianceApi extends BaseApi {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(AllianceApi.class);
 
@@ -58,22 +56,16 @@ public class AllianceApi {
     @Nonnull
     private final ForumService forumService;
 
-    @Nonnull
-    private final JwtTokenUtil tokenUtil;
-
     @Autowired
     public AllianceApi(@Nonnull final AllianceService allianceService,
                        @Nonnull final UserService userService,
-                       @Nonnull final ForumService forumService,
-                       @Nonnull final JwtTokenUtil tokenUtil) {
+                       @Nonnull final ForumService forumService) {
         Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
-        Preconditions.checkNotNull(tokenUtil, "tokenUtil shouldn't be null!");
         Preconditions.checkNotNull(forumService, "forumService shouldn't be null!");
 
         this.allianceService = allianceService;
         this.userService = userService;
-        this.tokenUtil = tokenUtil;
         this.forumService = forumService;
     }
 
@@ -139,8 +131,8 @@ public class AllianceApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getAllianceForUser(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+    public ResponseEntity<?> getAllianceForUser() {
+        final int idUser = getIdUser();
         final User user = userService.find(idUser);
         PreconditionWebHelper.checkNotNull(user, "user shouldn't be null!");
 
@@ -160,11 +152,11 @@ public class AllianceApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> createAlliance(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                            @PathVariable("name") final String name,
-                                            @PathVariable("code") final String code) {
+    public ResponseEntity<?> createAlliance(
+            @PathVariable("name") final String name,
+            @PathVariable("code") final String code) {
 
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final int idUser = getIdUser();
         final User user = userService.find(idUser);
         PreconditionWebHelper.checkNotNull(user, "user shouldn't be null!");
 
@@ -186,9 +178,8 @@ public class AllianceApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> grantApplication(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                              @PathVariable("idUserToAdd") final int idUserToAdd) {
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+    public ResponseEntity<?> grantApplication(@PathVariable("idUserToAdd") final int idUserToAdd) {
+        final int idUser = getIdUser();
         final User user = userService.find(idUser);
         PreconditionWebHelper.checkNotNull(user, "user shouldn't be null!");
 
@@ -215,9 +206,8 @@ public class AllianceApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> denyApplication(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                             @PathVariable("idUserToRemove") final int idUserToRemove) {
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+    public ResponseEntity<?> denyApplication(@PathVariable("idUserToRemove") final int idUserToRemove) {
+        final int idUser = getIdUser();
         final User user = userService.find(idUser);
         PreconditionWebHelper.checkNotNull(user, "user shouldn't be null!");
 
@@ -242,9 +232,9 @@ public class AllianceApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getApplicationsForMembership(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
+    public ResponseEntity<?> getApplicationsForMembership() {
 
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final int idUser = getIdUser();
         final User user = userService.find(idUser);
         PreconditionWebHelper.checkNotNull(user, "user shouldn't be null!");
         assert user.getAlliance() != null : "An alliance admin should be member of it.";
@@ -262,9 +252,9 @@ public class AllianceApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> isApplicant(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
+    public ResponseEntity<?> isApplicant() {
 
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+        final int idUser = getIdUser();
         final de.yuga.spacebattle.backend.entities.combined.account.Alliance openApplicationAt = allianceService.hasOpenApplication(idUser);
         if (openApplicationAt == null) {
             return ResponseEntity.ok().build();
@@ -281,9 +271,8 @@ public class AllianceApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> applyForMembership(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token,
-                                                @PathVariable("idAlliance") final int idAlliance) {
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
+    public ResponseEntity<?> applyForMembership(@PathVariable("idAlliance") final int idAlliance) {
+        final int idUser = getIdUser();
         final User applicant = userService.find(idUser);
         PreconditionWebHelper.checkNotNull(applicant, "applicant shouldn't be null!");
 
@@ -306,8 +295,10 @@ public class AllianceApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> deleteAlliance(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) @Nonnull final String token) {
-        final de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance = getAllianceFromToken(token);
+    public ResponseEntity<?> deleteAlliance() {
+        final User user = userService.find(getIdUser());
+        assert user != null : "Yeah if you are an alliance admin, you are present.";
+        final de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance = user.getAlliance();
         assert alliance != null : "An alliance admin should have an alliance.";
         final Forum allianceForum = forumService.getAllianceForumForUser(alliance);
         forumService.delete(allianceForum);
@@ -346,17 +337,5 @@ public class AllianceApi {
             return ResponseEntity.ok(false);
         }
         return ResponseEntity.ok(true);
-    }
-
-
-    @Nullable
-    private de.yuga.spacebattle.backend.entities.combined.account.Alliance getAllianceFromToken(@Nonnull final String token) {
-        Preconditions.checkNotNull(token, "token shouldn't be null!");
-
-        final int idUser = tokenUtil.getIdUserFromAccessToken(token);
-        final User user = userService.find(idUser);
-        PreconditionWebHelper.checkNotNull(user, "user shouldn't be null!");
-
-        return user.getAlliance();
     }
 }
