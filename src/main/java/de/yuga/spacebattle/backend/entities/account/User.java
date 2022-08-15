@@ -81,7 +81,7 @@ public class User extends AbstractEntityKey {
     private String email;
 
     @Nullable
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne
     @JoinColumn(name = "idAlliance")
     private Alliance alliance;
 

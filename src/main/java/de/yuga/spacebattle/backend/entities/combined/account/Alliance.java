@@ -4,7 +4,6 @@ package de.yuga.spacebattle.backend.entities.combined.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.enums.EGameUserRole;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -75,8 +74,6 @@ public class Alliance extends AbstractEntityKey {
 
         this.name = name;
         this.code = code;
-        founder.setAlliance(this);
-        founder.addGameUserRoles(EGameUserRole.ALLIANCE_ADMIN);
         this.founder = founder;
         this.members.add(founder);
     }

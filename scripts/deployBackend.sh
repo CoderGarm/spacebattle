@@ -21,11 +21,3 @@ echo "start server"
 ./startSB.sh
 echo 'deployment finished'
 tail -f /home/karsten/spacebattle.log/spacebattle.log
-
-# old style
-#echo "copy deployment";
-#cp uploadTarget/spacebattle-0.0.1-SNAPSHOT.jar .;
-#echo "stop server";
-# ./stopSB.sh;
-#echo "start server";
-#./startSB.sh

@@ -62,11 +62,14 @@ public class AllianceService {
         Preconditions.checkNotNull(founder, "founder shouldn't be null!");
 
         final Alliance alliance = new Alliance(name, code, founder);
-        userService.save(founder);
         if (applicants != null) {
             alliance.getApplications().addAll(Arrays.stream(applicants).collect(Collectors.toSet()));
         }
-        return allianceRepository.save(alliance);
+        final Alliance saved = allianceRepository.save(alliance);
+        founder.setAlliance(saved);
+        founder.addGameUserRoles(EGameUserRole.ALLIANCE_ADMIN);
+        userService.save(founder);
+        return saved;
     }
 
     public void delete(@Nonnull final Alliance entity) {

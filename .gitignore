@@ -41,3 +41,4 @@ build/
 /tsconfig.json
 /types.d.ts
 /frontend/generated/vaadin.ts
+/derby.log

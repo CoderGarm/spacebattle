@@ -61,7 +61,9 @@ public class CrewRequirement {
      *
      * @param crewRequirement the param to check
      */
-    private void validateAmountsHard(@Nonnull Map<EEducationType, Long> crewRequirement) {
+    private void validateAmountsHard(@Nonnull final Map<EEducationType, Long> crewRequirement) {
+        Preconditions.checkNotNull(crewRequirement, "crewRequirement must not be empty");
+
         crewRequirement.values().stream().filter(integer -> integer < 0).findAny().ifPresent(e -> {
             throw new NotifyWebUserException("You cannot reduce the amount of people below zero!");
         });

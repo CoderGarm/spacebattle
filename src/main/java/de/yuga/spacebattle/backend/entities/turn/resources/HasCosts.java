@@ -22,13 +22,13 @@ public class HasCosts extends AbstractEntityKey {
 
     @Nonnull
     @NotNull
-    @OneToOne(orphanRemoval = true)
+    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "idTranslatableName")
     private Translatable name;
 
     @Nonnull
     @NotNull
-    @OneToOne(orphanRemoval = true)
+    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "idTranslatableDescription")
     private Translatable description;
 

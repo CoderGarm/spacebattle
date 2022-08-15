@@ -72,10 +72,10 @@ public class BuildingService {
         return buildingRepository.save(new Building(name, description, baseValue, techLevel, productionType, new CrewRequirement(crewRequirement, EDepositType.COSTS), unlockedThrough));
     }
 
-    public Building findBuildingByProductionType(@Nonnull final EResourceType productionType) {
+    public List<Building> findBuildingByProductionType(@Nonnull final ProductionType productionType) {
         Preconditions.checkNotNull(productionType, "productionType shouldn't be null!");
 
-        return buildingRepository.findBuildingByProductionTarget(productionType);
+        return buildingRepository.findBuildingsByProductionTarget(productionType);
     }
 
     @Nonnull

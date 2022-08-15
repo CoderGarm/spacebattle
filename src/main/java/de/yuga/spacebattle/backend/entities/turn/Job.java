@@ -106,7 +106,7 @@ public class Job extends AbstractEntityKey {
         this.constructable = constructable;
     }
 
-    public long getJobDoneAtZero() {
+    public int getJobDoneAtZero() {
         return jobDoneAtZero;
     }
 

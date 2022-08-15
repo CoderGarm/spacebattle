@@ -230,28 +230,29 @@ public class AuthApi {
         Preconditions.checkNotNull(userJson, "userJson shouldn't be null!");
 
         final Set<ConstraintViolation<UserReq>> validate = validator.validate(userJson);
-        if (validate.isEmpty()) {
-            if (userService.existsEMail(userJson.getEmail())) {
-                throw new NotifyWebUserException("eMail is already in use.");
-            }
-            if (userService.existsUsername(userJson.getUsername())) {
-                throw new NotifyWebUserException("Username is already in use.");
-            }
-            final User entity = userJson.transform();
-            final User saved = userService.save(entity);
-
-            final List<Research> researchesWithoutPrecondition = researchService.getResearchesWithoutPrecondition();
-            researchService.addResearch(saved, researchesWithoutPrecondition);
-
-            final Planet planet = colonizationService.findPlanetForNewUser();
-            MasterOfTheUniverseService.populateNewColonization(planet.getResourceDeposit());
-            planetService.save(planet);
-            final Colonization colonization = new Colonization(saved, planet, planet.getResourceDeposit().getCrewRequirement(), 0);
-            colonizationService.colonizePlanet(colonization);
-
-            return ResponseEntity.ok(new UserJson(saved));
+        if (!validate.isEmpty()) {
+            throw new NotifyWebUserException("User could not be created", validate);
         }
-        throw new NotifyWebUserException("User could not be created", validate);
+
+        if (userService.existsEMail(userJson.getEmail())) {
+            throw new NotifyWebUserException("eMail is already in use.");
+        }
+        if (userService.existsUsername(userJson.getUsername())) {
+            throw new NotifyWebUserException("Username is already in use.");
+        }
+        final User entity = userJson.transform();
+        final User saved = userService.save(entity);
+
+        final List<Research> researchesWithoutPrecondition = researchService.getResearchesWithoutPrecondition();
+        researchService.addResearch(saved, researchesWithoutPrecondition);
+
+        final Planet planet = colonizationService.findPlanetForNewUser();
+        MasterOfTheUniverseService.populateNewColonization(planet.getResourceDeposit());
+        planetService.save(planet);
+        final Colonization colonization = new Colonization(saved, planet, planet.getResourceDeposit().getCrewRequirement(), 0);
+        colonizationService.colonizePlanet(colonization);
+
+        return ResponseEntity.ok(new UserJson(saved));
     }
 
     @PostMapping("/checkUsername/{userName}")

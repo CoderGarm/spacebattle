@@ -364,11 +364,6 @@ public class MasterOfTheUniverseService {
         Alliance a1 = allianceService.createAlliance("Argonauten", "A", u1, u3);
         Alliance a2 = allianceService.createAlliance("111er", "111er", u2);
         LOGGER.info("Alliances created");
-
-        u1.setAlliance(a1);
-        u2.setAlliance(a2);
-        userService.save(u1);
-        userService.save(u2);
         LOGGER.info("Alliances populated.");
 
         createForums();
@@ -421,13 +416,13 @@ public class MasterOfTheUniverseService {
         Research unlockHull3 = research("Cruiser", "The Cruiser research researches Cruisers.", 1, ETechLevel.TECH_I, unlockHull2);
         LOGGER.info("Researches created");
 
-        Building constructionYard = building("Construction Yard", "The construction yard construct constructions.", 10, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.CONSTRUCTION, EProductionCategory.PRODUCE, null), EEducationType.COLLEGE, unlocksConstructionYard);
-        Building orbitalsConstructionYard = building("Orbitals Construction Yard", "The construction yard construct orbital constructions.", 10, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.ORBITAL_CONSTRUCTION, EProductionCategory.PRODUCE, null), EEducationType.COLLEGE, unlocksShipyard);
-        Building researchB = building("Research Laboratories", "The lab investigates researches.", 10, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.RESEARCH, EProductionCategory.PRODUCE, null), EEducationType.UNIVERSITY, unlocksLaboratory);
-        Building bank = building("Market place", "The market makes money.", 10, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.CREDITS, EProductionCategory.PRODUCE, null), EEducationType.COLLEGE, unlocksBank);
-        Building metalsWorks = building("Metal works", "Metals for progress.", 10, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.METALORE, EProductionCategory.PRODUCE, null), EEducationType.COLLEGE, unlocksMetals);
-        Building orbitalOres = building("Special orbital ores", "Heavier metals for more progress.", 10, 10, ETechLevel.TECH_II, new ProductionType(EResourceType.RARE_ELEMENTS, EProductionCategory.PRODUCE, null), EEducationType.UNIVERSITY, unlocksMecur);
-        Building investigations = building("Asynchronous Investigations", "Rare elements for the future.", 10, 10, ETechLevel.TECH_III, new ProductionType(EResourceType.HEAVY_METALS, EProductionCategory.PRODUCE, null), EEducationType.UNIVERSITY, unlocksHyperWorks);
+        Building constructionYard = building("Construction Yard", "The construction yard construct constructions.", 100, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.CONSTRUCTION, EProductionCategory.PRODUCE, null), EEducationType.COLLEGE, unlocksConstructionYard);
+        Building orbitalsConstructionYard = building("Orbitals Construction Yard", "The construction yard construct orbital constructions.", 100, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.ORBITAL_CONSTRUCTION, EProductionCategory.PRODUCE, null), EEducationType.COLLEGE, unlocksShipyard);
+        Building researchB = building("Research Laboratories", "The lab investigates researches.", 100, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.RESEARCH, EProductionCategory.PRODUCE, null), EEducationType.UNIVERSITY, unlocksLaboratory);
+        Building bank = building("Market place", "The market makes money.", 100, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.CREDITS, EProductionCategory.PRODUCE, null), EEducationType.COLLEGE, unlocksBank);
+        Building metalsWorks = building("Metal works", "Metals for progress.", 100, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.METALORE, EProductionCategory.PRODUCE, null), EEducationType.COLLEGE, unlocksMetals);
+        Building orbitalOres = building("Special orbital ores", "Heavier metals for more progress.", 100, 10, ETechLevel.TECH_II, new ProductionType(EResourceType.RARE_ELEMENTS, EProductionCategory.PRODUCE, null), EEducationType.UNIVERSITY, unlocksMecur);
+        Building investigations = building("Asynchronous Investigations", "Rare elements for the future.", 100, 10, ETechLevel.TECH_III, new ProductionType(EResourceType.HEAVY_METALS, EProductionCategory.PRODUCE, null), EEducationType.UNIVERSITY, unlocksHyperWorks);
 
         Building livingRoom = building("Living room", "Everyone needs a home", 200, 15, ETechLevel.TECH_I, new ProductionType(EResourceType.POPULATION, EProductionCategory.CAPACITY, null), EEducationType.COLLEGE, livingStuff);
         Building hospital = building("Hospital", "Everyone needs a doctor", 1, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.POPULATION, EProductionCategory.PRODUCE, null), EEducationType.UNIVERSITY, livingStuff);
@@ -438,11 +433,9 @@ public class MasterOfTheUniverseService {
         Building militaryAcademy = building("Military Academy", "for the guys which are silent", 100, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_MILITARY_II), EEducationType.OFFICER, livingStuff);
         LOGGER.info("Buildings created");
 
-        // todo fix creation of elements
-
         colonizePlanet(u1, p11);
         colonizePlanet(u2, p21);
-        LOGGER.info("Planets colonized and populated.");
+        LOGGER.info("Planets colonized and populated. Constructions were build.");
 
         Map<EEducationType, Long> militaryCrew = new HashMap<>();
         militaryCrew.put(EEducationType.ENLISTED, 20L);
@@ -489,7 +482,7 @@ public class MasterOfTheUniverseService {
         LOGGER.info("Researches populated");
 
         Fleet f1 = createFleet(u1, p11, "Argonaut Home Fleet");
-        Fleet f2 = createFleet(u2, p11, "111er Home Fleet");
+        Fleet f2 = createFleet(u2, p21, "111er Home Fleet");
         LOGGER.info("Fleets created");
 
         warShipService.save(new WarShip("Hotspur", p11, f1, as3));

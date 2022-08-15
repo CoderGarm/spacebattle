@@ -192,6 +192,7 @@ public class ColonizationService {
         planet.setOwner(owner);
         final ResourceDeposit creditorDeposit = planet.getResourceDeposit();
         final CrewRequirement requiredCrew = colonization.getCosts().getCrewRequirement();
+        // set crew from the ship to the planet
         creditorDeposit.updatePopulation(requiredCrew);
 
         final List<Building> basicBuildings = buildingService.findBasicBuildings();

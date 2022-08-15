@@ -138,7 +138,7 @@ public class ResourceDeposit extends AbstractEntityKey {
      * Checks if paying the costs is possible.
      *
      * @param costs the costs
-     * @return <code>true</code> if it can be payed, <code>false</code> otherwise
+     * @return <code>true</code> if it can be paid, <code>false</code> otherwise
      */
     public PayingPossibleResult isPayingPossible(@Nonnull final ResourceDeposit costs) {
         Preconditions.checkNotNull(costs, "costs shouldn't be null!");
@@ -153,7 +153,7 @@ public class ResourceDeposit extends AbstractEntityKey {
                 }
             } else if (ECollectableType.COLLECTABLE == resourceType.getCollectableType()) {
                 final long debit = costs.getResourceAmountByType(resourceType);
-                if (!isReducingResourcePossible(resourceType, debit)) {
+                if (debit > 0 && !isReducingResourcePossible(resourceType, debit)) {
                     result.addProblem(resourceType);
                 }
             }
@@ -215,7 +215,7 @@ public class ResourceDeposit extends AbstractEntityKey {
         if (value < 0) {
             throw new NotifyWebUserException("No, you cannot do that.");
         }
-        this.resources.put(resourceType, value);
+        resources.put(resourceType, value);
     }
 
     public Set<EResourceType> getForfeitableResource() {
@@ -242,7 +242,7 @@ public class ResourceDeposit extends AbstractEntityKey {
         if (POPULATION == resourceType) {
             return;
         }
-        this.resources.put(resourceType, amount);
+        resources.put(resourceType, amount);
     }
 
     @Nonnull
@@ -274,7 +274,7 @@ public class ResourceDeposit extends AbstractEntityKey {
         Preconditions.checkNotNull(educationType, "educationType shouldn't be null!");
         Preconditions.checkArgument(totalAmount >= 0, "totalAmount shouldn't be negative!");
 
-        this.humanResources.put(educationType, totalAmount);
+        humanResources.put(educationType, totalAmount);
     }
 
 
@@ -403,5 +403,36 @@ public class ResourceDeposit extends AbstractEntityKey {
     @Override
     public int hashCode() {
         return id * 31;
+    }
+
+    public void add(@Nonnull final ResourceDeposit resourceDeposit) {
+        Preconditions.checkNotNull(resourceDeposit, "resourceDeposit must not be empty");
+
+        calculate(resourceDeposit, ECalculationType.ADD);
+    }
+
+    private void calculate(@Nonnull final ResourceDeposit resourceDeposit, @Nonnull final ECalculationType calculationType) {
+        Preconditions.checkNotNull(resourceDeposit, "resourceDeposit must not be empty");
+        Preconditions.checkNotNull(calculationType, "calculationType must not be empty");
+
+        final CrewRequirement crewRequirement = resourceDeposit.getCrewRequirement();
+        Arrays.stream(EEducationType.values()).forEach(educationType -> {
+            final long amount = crewRequirement.getCrewAmountByType(educationType);
+            final long currentAmount = getCrewAmountByType(educationType);
+            final long toSet = currentAmount + calculationType.getMultiplier() * amount;
+            humanResources.put(educationType, toSet >= 0 ? toSet : 0);
+        });
+        Arrays.stream(EResourceType.valuesWithoutPopulation()).forEach(eResourceType -> {
+            final long amount = resourceDeposit.getResourceAmountByType(eResourceType);
+            final long currentAmount = getResourceAmountByType(eResourceType);
+            final long toSet = currentAmount + calculationType.getMultiplier() * amount;
+            resources.put(eResourceType, toSet >= 0 ? toSet : 0);
+        });
+    }
+
+    public void subtract(@Nonnull final ResourceDeposit resourceDeposit) {
+        Preconditions.checkNotNull(resourceDeposit, "resourceDeposit must not be empty");
+
+        calculate(resourceDeposit, ECalculationType.SUBTRACT);
     }
 }

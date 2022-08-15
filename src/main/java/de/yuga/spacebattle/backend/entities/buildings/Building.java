@@ -16,7 +16,12 @@ import java.math.BigDecimal;
 
 @NamedQueries({
         @NamedQuery(name = "Building.getAll", query = "SELECT p FROM Building p"),
-        @NamedQuery(name = "Building.getByResourceType", query = "SELECT p FROM Building p WHERE p.productionType.productionTarget = :productionTarget")
+        @NamedQuery(name = "Building.getByProductionTypeWithoutRefinement",
+                query = "SELECT p FROM Building p WHERE p.productionType.productionTarget = :productionTarget AND p.productionType.productionCategory = :productionCategory " +
+                        "AND p.productionType.refinementSequence IS NULL"),
+        @NamedQuery(name = "Building.getByProductionTypeWithRefinement",
+                query = "SELECT p FROM Building p WHERE p.productionType.productionTarget = :productionTarget AND p.productionType.productionCategory = :productionCategory " +
+                        "AND p.productionType.refinementSequence = :refinementSequence")
 })
 @Entity
 @Table(name = "building")

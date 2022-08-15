@@ -41,7 +41,7 @@ public class Colonization extends AbstractEntityKey {
     @NotNull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "idCosts", updatable = false)
-    private final ResourceDeposit costs = new ResourceDeposit(EDepositType.COSTS);
+    private final ResourceDeposit costs = new ResourceDeposit(EDepositType.DEPOSITS);
 
     /**
      * Principle: Countdown ticks to zero -> job done.

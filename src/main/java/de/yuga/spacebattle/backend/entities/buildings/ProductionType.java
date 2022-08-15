@@ -40,7 +40,7 @@ public class ProductionType {
     private EProductionCategory productionCategory;
 
     /**
-     * In case of an refinement task - here is the workflow.
+     * In case of a refinement task - here is the workflow.
      */
     @Nullable
     @Enumerated(EnumType.STRING)

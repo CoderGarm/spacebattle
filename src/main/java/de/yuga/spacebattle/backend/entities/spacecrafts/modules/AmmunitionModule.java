@@ -24,7 +24,7 @@ public class AmmunitionModule extends BaseModuleWithEffectValue {
      */
     @Nonnull
     @NotNull
-    @OneToOne(mappedBy = "ammunitionModule", optional = false)
+    @OneToOne(mappedBy = "ammunitionModule")
     @JoinColumn(name = "idMissile")
     private Missile missile;
 

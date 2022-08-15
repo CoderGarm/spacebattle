@@ -5,7 +5,6 @@ import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.enums.EResourceType;
-import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
@@ -54,9 +53,6 @@ public class PlanetApi {
     private final PlanetService planetService;
 
     @Nonnull
-    private final BuildingService buildingService;
-
-    @Nonnull
     private final JobService jobService;
 
     @Nonnull
@@ -64,16 +60,13 @@ public class PlanetApi {
 
     @Autowired
     public PlanetApi(@Nonnull final PlanetService planetService,
-                     @Nonnull final BuildingService buildingService,
                      @Nonnull final JobService jobService,
                      @Nonnull final ShipClassService shipClassService) {
         Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
-        Preconditions.checkNotNull(buildingService, "buildingService shouldn't be null!");
         Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
         Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
 
         this.planetService = planetService;
-        this.buildingService = buildingService;
         this.jobService = jobService;
         this.shipClassService = shipClassService;
     }
@@ -110,12 +103,8 @@ public class PlanetApi {
         if (planet == null) {
             return ResponseEntity.ok(false);
         }
-        final boolean buildingPossible = planet.getConstructionByResource(EResourceType.CONSTRUCTION).stream().anyMatch(c -> c.getJobs().isEmpty());
-        if (buildingPossible) {
-            return ResponseEntity.ok(true);
-        } else {
-            return ResponseEntity.ok(false);
-        }
+        final boolean buildingPossible = planet.isConstructionPossible();
+        return ResponseEntity.ok(buildingPossible);
     }
 
     @GetMapping(value = GROUND_BUILD_IT_ENDPOINT + "/{idPlanet}/{idBuilding}")
@@ -129,11 +118,7 @@ public class PlanetApi {
     )
     public ResponseEntity<?> buildConstruction(@PathVariable("idPlanet") final int idPlanet, @PathVariable("idBuilding") final int idBuilding) {
         final Job job = jobService.createConstructionYardJob(idPlanet, idBuilding);
-        if (job != null) {
-            return ResponseEntity.ok(true);
-        }
-        return ResponseEntity.ok(false);
-
+        return ResponseEntity.ok(job != null);
     }
 
     @GetMapping(value = SHIPYARD_POSSIBLE_ENDPOINT + "/{idPlanet}")
@@ -151,11 +136,7 @@ public class PlanetApi {
             return ResponseEntity.ok(false);
         }
         final boolean buildingPossible = planet.getConstructionByResource(EResourceType.ORBITAL_CONSTRUCTION).stream().anyMatch(c -> c.getJobs().isEmpty());
-        if (buildingPossible) {
-            return ResponseEntity.ok(true);
-        } else {
-            return ResponseEntity.ok(false);
-        }
+        return ResponseEntity.ok(buildingPossible);
     }
 
     @PostMapping(value = SHIPYARD_BUILD_IT_ENDPOINT)
@@ -192,10 +173,7 @@ public class PlanetApi {
                 .collect(Collectors.toMap(entry -> foundClassesByID.get(entry.getIdShipClass()), ShipyardConstructionSelection::getAmount));
 
         final Set<Job> shipyardJobs = jobService.createShipyardJob(planet, jobLoad);
-        if (!shipyardJobs.isEmpty()) {
-            return ResponseEntity.ok(true);
-        }
-        return ResponseEntity.ok(false);
+        return ResponseEntity.ok(!shipyardJobs.isEmpty());
     }
 
     @PostMapping(value = GET_PLANET_BY_COORDINATES_ENDPOINT + "/{idStarSystem}")
