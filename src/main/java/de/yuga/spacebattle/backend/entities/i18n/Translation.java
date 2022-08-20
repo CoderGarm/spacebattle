@@ -6,10 +6,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
-import javax.persistence.AttributeOverride;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.util.Arrays;
 import java.util.List;
@@ -44,6 +41,12 @@ public class Translation extends AbstractEntityKey {
 
     @Nonnull
     private String translation;
+
+    @ManyToOne
+    @JoinTable(name = "translationCollection",
+            joinColumns = @JoinColumn(name = "idTranslation"),
+            inverseJoinColumns = @JoinColumn(name = "idTranslatable"))
+    private Translatable translatable;
 
     public Translation() {
     }

@@ -23,8 +23,8 @@ import java.util.Set;
                 query = "SELECT new de.yuga.spacebattle.backend.dto.research.ResearchTreeElement(p.id, p.unlockedThrough.id) FROM Research p"),
         @NamedQuery(name = "Research.getResearchesAsDTOById",
                 query = "SELECT new de.yuga.spacebattle.rest.dto.researches.Research(p.id, n.translation, d.translation, p.levelCap) FROM Research p " +
-                        "LEFT JOIN Translation n ON (n.translation = p.name AND n.languageCode = :languageCode) " +
-                        "LEFT JOIN Translation d ON (d.translation = p.name AND d.languageCode = :languageCode) " +
+                        "LEFT JOIN Translation n ON (n.translatable = p.name AND n.languageCode = :languageCode) " +
+                        "LEFT JOIN Translation d ON (d.translatable = p.description AND d.languageCode = :languageCode) " +
                         "WHERE p.id IN (:idResearches)")
 })
 @Entity
