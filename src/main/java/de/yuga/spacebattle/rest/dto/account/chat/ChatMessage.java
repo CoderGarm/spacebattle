@@ -1,5 +1,9 @@
 package de.yuga.spacebattle.rest.dto.account.chat;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.UserMessage;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
@@ -25,6 +29,8 @@ public class ChatMessage {
     private String message;
 
     @Nullable
+    @JsonSerialize(using = ToStringSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @Schema(required = true, description = "The timestamp on which the message was sent.")
     private LocalDateTime sentAt;
 

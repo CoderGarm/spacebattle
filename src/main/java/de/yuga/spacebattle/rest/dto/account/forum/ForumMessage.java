@@ -1,6 +1,10 @@
 package de.yuga.spacebattle.rest.dto.account.forum;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.google.common.base.Preconditions;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -37,6 +41,8 @@ public class ForumMessage {
     private String message;
 
     @JsonProperty
+    @JsonSerialize(using = ToStringSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @Schema(required = true, description = "The creation timestamp.")
     private LocalDateTime sentAt;
 
