@@ -190,7 +190,11 @@ public class ResearchService {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
         Preconditions.checkNotNull(research, "research shouldn't be null!");
 
-        return levelRepository.getLevelForResearch(user.getId(), research.getId());
+        final ResearchLevel researchLevel = levelRepository.getResearchLevelFor(user.getId(), research.getId());
+        if (researchLevel == null) {
+            return 0;
+        }
+        return researchLevel.getLevel();
     }
 
     /**

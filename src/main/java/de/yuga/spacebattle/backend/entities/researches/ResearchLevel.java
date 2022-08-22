@@ -3,7 +3,6 @@ package de.yuga.spacebattle.backend.entities.researches;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -34,7 +33,7 @@ public class ResearchLevel extends AbstractEntityKey {
     private Research research;
 
     /**
-     * The amount of this weapon with the given {@link EWeaponAlignment}.
+     * The currently reached level.
      */
     @Min(0)
     private int level;
