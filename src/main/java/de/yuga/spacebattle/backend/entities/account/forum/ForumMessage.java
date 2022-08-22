@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
         @NamedQuery(name = "ForumMessage.findAllMessageIdsForThread",
                 query = "SELECT new de.yuga.spacebattle.backend.dto.forum.IdToId(t.forumThread.id, t.id) FROM ForumMessage t WHERE t.forumThread.id IN (:idForumThreads)"),
         @NamedQuery(name = "ForumMessage.findPagedMessages",
-                query = "SELECT r FROM ForumMessage r WHERE r.forumThread.id = :idForumThread ORDER BY r.id DESC"),
+                query = "SELECT r FROM ForumMessage r WHERE r.forumThread.id = :idForumThread ORDER BY r.id ASC"),
         @NamedQuery(name = "ForumMessage.countMessagesInThreadById",
                 query = "SELECT COUNT(t) FROM ForumMessage t WHERE t.forumThread.id = :idForumThread")
 })
