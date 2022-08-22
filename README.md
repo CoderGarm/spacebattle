@@ -4,29 +4,13 @@
 
 Just a simple 4X game which is based on the honorverse created by David Weber.
 
-### System distribution
+## State
 
-This is the backend of the game.
+This is in a very early stage which I would describe as pre-alpha.
 
-The frontend is located in [another repository](https://github.com/CoderGarm/bfh-frontend).
+It can be accessed via http://65.109.16.233/
 
-### Starting the backend for localhost
-
-Set up the database and the application:
-
-1. Check it out, built it, install mariaDB
-2. create the database 'sbdb'
-3. pipe [createSBDB.sql](data/sql/createSBDB.sql) into the db
-4. run the test [createInitialData()](src/test/java/de/yuga/spacebattle/backend/services/MasterOfTheUniverseServiceTest.java)
-5. start the application
-
-Set up the frontend:
-
-1. check it out
-2. install nodeJS and npm
-3. run 'npm start' in base directory
-
-Open the browser at the [start page](http://localhost:4200/#).
+And yeah, currently it's plain http without the s. Don't share secrets!
 
 ## Impressions
 
@@ -36,6 +20,8 @@ There is no balancing in resources and outputs, in amor values and weapon streng
 Even not in flight speed to distance.
 
 The basic mechanics are implemented and a lot of items are only present.
+
+But it looks a bit better now.
 
 ### Constructions
 
@@ -64,3 +50,27 @@ Move to a system of your choice.
 And access a planetary orbit.
 
 ![Sample Star Map](readme-resources/sample-star-map.mp4.gif)
+
+### System distribution
+
+This is the backend of the game.
+
+The frontend is located in [another repository](https://github.com/CoderGarm/bfh-frontend).
+
+### Starting the backend for localhost
+
+Set up the database and the application:
+
+1. Check it out, built it, install mariaDB
+2. create the database 'sbdb'
+3. pipe [createSBDB.sql](data/sql/createSBDB.sql) into the db
+4. run the test [createInitialData()](src/test/java/de/yuga/spacebattle/backend/services/MasterOfTheUniverseServiceTest.java)
+5. start the application
+
+Set up the frontend:
+
+1. check it out
+2. install nodeJS and npm
+3. run 'npm start' in base directory
+
+Open the browser at the [start page](http://localhost:4200/#).
