@@ -406,10 +406,20 @@ public class ModuleService {
     }
 
     @Nonnull
+    public List<AmmunitionModule> findAllAmmunitionModules() {
+        return ammunitionRepository.findAll();
+    }
+
+    @Nonnull
     public List<PassiveModule> findAllPassiveModuleByUser(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
 
         return passiveModuleRepository.findAllByUser(user);
+    }
+
+    @Nonnull
+    public List<PassiveModule> findAllPassiveModule() {
+        return passiveModuleRepository.findAll();
     }
 
     @Nullable
@@ -424,6 +434,11 @@ public class ModuleService {
         return ImmutableList.copyOf(armorRepository.findAllById(moduleIDs));
     }
 
+    @Nonnull
+    public List<Armor> findAllArmors() {
+        return ImmutableList.copyOf(armorRepository.findAll());
+    }
+
     @Nullable
     public Propulsion findPropulsionById(final int idModule) {
         return propulsionRepository.findById(idModule).orElse(null);
@@ -434,6 +449,11 @@ public class ModuleService {
         Preconditions.checkNotNull(moduleIDs, "moduleIDs shouldn't be null!");
 
         return ImmutableList.copyOf(propulsionRepository.findAllById(moduleIDs));
+    }
+
+    @Nonnull
+    public List<Propulsion> findAllPropulsions() {
+        return ImmutableList.copyOf(propulsionRepository.findAll());
     }
 
     @Nullable
@@ -448,6 +468,11 @@ public class ModuleService {
         return ImmutableList.copyOf(electronicWarfareRepository.findAllById(moduleIDs));
     }
 
+    @Nonnull
+    public List<ElectronicWarfare> findAllElectronicWarfare() {
+        return ImmutableList.copyOf(electronicWarfareRepository.findAll());
+    }
+
     @Nullable
     public Sidewall findSidewallById(final int idModule) {
         return sidewallRepository.findById(idModule).orElse(null);
@@ -460,6 +485,11 @@ public class ModuleService {
         return ImmutableList.copyOf(sidewallRepository.findAllById(moduleIDs));
     }
 
+    @Nonnull
+    public List<Sidewall> findAllSidewalls() {
+        return ImmutableList.copyOf(sidewallRepository.findAll());
+    }
+
     @Nullable
     public Weapon findWeaponById(final int idModule) {
         return weaponRepository.findById(idModule).orElse(null);
@@ -470,6 +500,11 @@ public class ModuleService {
         Preconditions.checkNotNull(moduleIDs, "moduleIDs shouldn't be null!");
 
         return ImmutableList.copyOf(weaponRepository.findAllById(moduleIDs));
+    }
+
+    @Nonnull
+    public List<Weapon> findAllWeapons() {
+        return ImmutableList.copyOf(weaponRepository.findAll());
     }
 
     @Nullable
@@ -496,6 +531,11 @@ public class ModuleService {
         return ImmutableList.copyOf(passiveModuleRepository.findAllById(moduleIDs));
     }
 
+    @Nonnull
+    public List<PassiveModule> findAllPassiveModules() {
+        return ImmutableList.copyOf(passiveModuleRepository.findAll());
+    }
+
     @Nullable
     public MissileMotor findMissileMotorById(final int idMissileMotor) {
         return missileMotorRepository.findById(idMissileMotor).orElse(null);
@@ -506,6 +546,11 @@ public class ModuleService {
         Preconditions.checkNotNull(motorIDs, "motorIDs shouldn't be null!");
 
         return ImmutableList.copyOf(missileMotorRepository.findAllById(motorIDs));
+    }
+
+    @Nonnull
+    public List<MissileMotor> findAllMissileMotors() {
+        return ImmutableList.copyOf(missileMotorRepository.findAll());
     }
 
     @Nullable
@@ -520,6 +565,11 @@ public class ModuleService {
         return ImmutableList.copyOf(missileRepository.findAllById(missileIDs));
     }
 
+    @Nonnull
+    public List<Missile> findAllMissiles() {
+        return ImmutableList.copyOf(missileRepository.findAll());
+    }
+
     @Nullable
     public Warhead findWarheadById(final int idWarhead) {
         return warheadRepository.findById(idWarhead).orElse(null);
@@ -532,6 +582,11 @@ public class ModuleService {
         return ImmutableList.copyOf(warheadRepository.findAllById(warheadIDs));
     }
 
+    @Nonnull
+    public List<Warhead> findAllWarheads() {
+        return ImmutableList.copyOf(warheadRepository.findAll());
+    }
+
     @Nullable
     public Launcher findLauncherById(final int idWarhead) {
         return launcherRepository.findById(idWarhead).orElse(null);
@@ -542,5 +597,10 @@ public class ModuleService {
         Preconditions.checkNotNull(launcherIDs, "launcherIDs shouldn't be null!");
 
         return ImmutableList.copyOf(launcherRepository.findAllById(launcherIDs));
+    }
+
+    @Nonnull
+    public List<Launcher> findAllLaunchers() {
+        return ImmutableList.copyOf(launcherRepository.findAll());
     }
 }

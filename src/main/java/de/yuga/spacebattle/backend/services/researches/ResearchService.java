@@ -15,6 +15,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class ResearchService {
@@ -85,7 +86,10 @@ public class ResearchService {
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(idResearches, "idResearches shouldn't be null!");
 
-        return researchRepository.getResearchesAsDTOById(new ArrayList<>(idResearches), languageCode);
+        final Iterable<Research> allById = researchRepository.findAllById(idResearches);
+        return StreamSupport.stream(allById.spliterator(), false)
+                .map(r -> new de.yuga.spacebattle.rest.dto.researches.Research(r, languageCode))
+                .collect(Collectors.toList());
     }
 
     @Nullable

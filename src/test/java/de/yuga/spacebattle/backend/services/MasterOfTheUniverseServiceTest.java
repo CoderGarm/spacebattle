@@ -1,6 +1,6 @@
 package de.yuga.spacebattle.backend.services;
 
-import de.yuga.spacebattle.SpringBootTestProfile;
+import de.yuga.spacebattle.SpringBootProdProfile;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.account.forum.Forum;
 import de.yuga.spacebattle.backend.entities.account.forum.ForumMessage;
@@ -37,8 +37,8 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootProdProfile
 @Disabled("not needed for unit or integration testing")
-@SpringBootTestProfile
 public class MasterOfTheUniverseServiceTest {
 
     @Autowired

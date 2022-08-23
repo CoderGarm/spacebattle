@@ -45,7 +45,6 @@ public interface CustomFleetRepository {
      */
     boolean isShipClassInUse(final int idShipClass);
 
-
     /**
      * Returns all fleets sorted by the owner for every system in which
      *

@@ -111,6 +111,10 @@ public class CustomFleetRepositoryImpl implements CustomFleetRepository {
                 .filter(entry -> {
                     final List<Fleet> fleets = entry.getValue();
                     final Set<User> users = fleets.stream().map(Fleet::getOwner).collect(Collectors.toSet());
+                    if (users.size() != 2) {
+                        // todo implement 3-way combat anyhow
+                        return false;
+                    }
                     final boolean userWithAlliancePresent = users.stream().anyMatch(user -> user.getAlliance() != null);
                     final boolean userWithoutAlliancePresent = users.stream().anyMatch(user -> user.getAlliance() == null);
                     if (userWithAlliancePresent && userWithoutAlliancePresent) {

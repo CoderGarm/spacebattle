@@ -12,6 +12,7 @@ import de.yuga.spacebattle.backend.combat.round.FleetHealthState;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.combat.round.WarshipHealthState;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
@@ -117,6 +118,12 @@ public class Cage implements Future<Cage> {
         currentCombatRound = new CombatRound();
         this.fleetClash = fleetClash;
         this.participatingFleets = fleetClash.getParticipatingFleets();
+
+        final Set<User> users = participatingFleets.stream().map(Fleet::getOwner).collect(Collectors.toSet());
+        if (users.size() != 2) {
+            // todo implement 3-way combat anyhow
+            throw new NotifyWebUserException("Yeah probably you couldn't harm yourself!");
+        }
 
         // todo guessing that there are only two participants which are foes
         fleetOne = participatingFleets.get(0);

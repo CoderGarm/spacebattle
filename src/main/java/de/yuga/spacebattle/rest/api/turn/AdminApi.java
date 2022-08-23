@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.i18n.Translatable;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
-import de.yuga.spacebattle.backend.repositories.i18n.TranslatableRepository;
+import de.yuga.spacebattle.backend.services.i18n.TranslatableService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
@@ -48,16 +48,16 @@ public class AdminApi extends BaseApi {
     private final TickService tickController;
 
     @Nonnull
-    private final TranslatableRepository translatableRepository;
+    private final TranslatableService translatableService;
 
     @Autowired
     public AdminApi(@Nonnull final TickService tickController,
-                    @Nonnull final TranslatableRepository translatableRepository) {
+                    @Nonnull final TranslatableService translatableService) {
         Preconditions.checkNotNull(tickController, "tickC shouldn't be null!");
-        Preconditions.checkNotNull(translatableRepository, "translationRepository must not be empty");
+        Preconditions.checkNotNull(translatableService, "translatableService must not be empty");
 
         this.tickController = tickController;
-        this.translatableRepository = translatableRepository;
+        this.translatableService = translatableService;
     }
 
     @GetMapping(value = "/doTick")
@@ -102,13 +102,13 @@ public class AdminApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getTranslations() {
-        final List<Translatable> translatables = translatableRepository.findAll();
+        final List<Translatable> translatables = translatableService.findAll();
         final Map<Integer, Translatable> translatablesById = translatables.stream().collect(Collectors.toMap(Translatable::getId, Function.identity()));
-        final Map<Integer, List<Translation>> translationsById = translatables.stream().collect(Collectors.toMap(AbstractEntityKey::getId, Translatable::getTranslations));
+        final Map<Integer, Set<Translation>> translationsById = translatables.stream().collect(Collectors.toMap(AbstractEntityKey::getId, Translatable::getTranslations));
         final List<de.yuga.spacebattle.rest.dto.i18n.Translation> translations = translationsById.entrySet().stream().map(e -> {
             final Integer idTranslatable = e.getKey();
             final Translatable translatable = translatablesById.get(idTranslatable);
-            final List<Translation> translationList = e.getValue();
+            final Set<Translation> translationList = e.getValue();
             return translationList.stream()
                     .map(translation -> new de.yuga.spacebattle.rest.dto.i18n.Translation(translatable, translation))
                     .collect(Collectors.toList());
@@ -135,7 +135,7 @@ public class AdminApi extends BaseApi {
             throw new NotifyWebUserException("There must be only one translatable changed at a time.");
         }
         final Integer idTranslatable = new ArrayList<>(idTranslatables).get(0);
-        final Translatable translatable = translatableRepository.findById(idTranslatable).orElse(null);
+        final Translatable translatable = translatableService.findById(idTranslatable);
         if (translatable == null) {
             throw new NotifyWebUserException("Funny that you try to update a translation which is not present.");
         }
@@ -145,7 +145,7 @@ public class AdminApi extends BaseApi {
             if (StringUtils.isNotBlank(translationText) && StringUtils.isNotBlank(languageCode))
                 translatable.updateOrCreate(languageCode, translationText);
         });
-        final Translatable save = translatableRepository.save(translatable);
+        final Translatable save = translatableService.save(translatable);
         return ResponseEntity.ok(save.getTranslations().stream()
                 .map(t -> new de.yuga.spacebattle.rest.dto.i18n.Translation(translatable, t))
                 .collect(Collectors.toList()));

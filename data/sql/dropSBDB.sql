@@ -575,13 +575,9 @@
        drop 
        foreign key FK2rgk45foa8brx1onuwdxsodtr;
 
-    alter table translationCollection 
+    alter table translation 
        drop 
-       foreign key FKgrdmwu4xhrjpi4i9oof3ob2gt;
-
-    alter table translationCollection 
-       drop 
-       foreign key FKeytw64w0mw10fundphgc4e5f6;
+       foreign key FK6y0ph13exuqqae7sowcvxac93;
 
     alter table user 
        drop 
@@ -748,8 +744,6 @@
     drop table if exists translatable;
 
     drop table if exists translation;
-
-    drop table if exists translationCollection;
 
     drop table if exists user;
 

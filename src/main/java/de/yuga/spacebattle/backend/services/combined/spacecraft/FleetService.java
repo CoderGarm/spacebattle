@@ -21,7 +21,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -270,6 +272,29 @@ public class FleetService {
     @Nonnull
     public List<FleetClash> findAllFleetClashes() {
         return fleetRepository.findAllFleetClashes();
+    }
+
+    @Nullable
+    public FleetClash findFleetClashesAtPlanet(@Nonnull final Planet planet) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+        final Set<Fleet> allFleetsByPlanet = fleetRepository.findAllFleetsByPlanet(planet);
+        final Set<User> users = allFleetsByPlanet.stream().map(Fleet::getOwner).collect(Collectors.toSet());
+        if (users.size() != 2) {
+            // todo implement 3-way combat anyhow
+            return null;
+        }
+        final Map<FleetOrbit, List<Fleet>> fleetsByOrbit = allFleetsByPlanet.stream()
+                .collect(Collectors.groupingBy(Fleet::getOrbit, Collectors.mapping(Function.identity(), Collectors.toList())));
+        if (fleetsByOrbit.size() > 1) {
+            throw new NotifyWebUserException("There cannot be more than one orbit for a single planet.");
+        }
+        if (fleetsByOrbit.isEmpty()) {
+            return null;
+        }
+        final List<FleetClash> clashes = new ArrayList<>();
+        fleetsByOrbit.entrySet().forEach(entry -> clashes.add(new FleetClash(entry)));
+        return clashes.get(0);
     }
 
     public void saveAll(@Nonnull final List<Fleet> fleets) {

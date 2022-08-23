@@ -43,9 +43,7 @@ public class Translation extends AbstractEntityKey {
     private String translation;
 
     @ManyToOne
-    @JoinTable(name = "translationCollection",
-            joinColumns = @JoinColumn(name = "idTranslation"),
-            inverseJoinColumns = @JoinColumn(name = "idTranslatable"))
+    @JoinColumn(name = "idTranslatable")
     private Translatable translatable;
 
     public Translation() {
@@ -79,6 +77,10 @@ public class Translation extends AbstractEntityKey {
         Preconditions.checkNotNull(translation, "translation must not be empty");
 
         this.translation = translation;
+    }
+
+    void setTranslatable(final Translatable translatable) {
+        this.translatable = translatable;
     }
 
     @Override

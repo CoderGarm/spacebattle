@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
+import de.yuga.spacebattle.backend.services.account.MessageThreadService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
@@ -45,6 +46,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PUBLIC_BASE_ENDPOINT;
@@ -59,6 +61,23 @@ public class AuthApi {
     @Nonnull
     public static final String ENDPOINT = "auth";
 
+    private static final String NAME_PLACEHOLDER = "NAME_PLACEHOLDER";
+    private static final String WELCOME_MESSAGE = "Hello " + NAME_PLACEHOLDER + ",<br>" +
+            "<br>" +
+            "a happy welcome to the honorverse.<br>" +
+            "<br>" +
+            "I want to purpose that you have a look at the planet you conquered from the pirates.<br>" +
+            "You can replay the battle at the journals section to see the glorious victory of your admirals and crews.<br>" +
+            "<br>" +
+            "In order to improve the conditions for your colonists you should have a look if you can build some houses or hospitals.<br>" +
+            "But keep in mind, you can only house as many persons as you can support.<br>" +
+            "<br>" +
+            "If you noticed, the universe is a hostile place so it could be a good idea to build a shipyard and build ships to control your space.<br>" +
+            "<br>" +
+            "<br>" +
+            "Sincerely and with the best wishes,<br>" +
+            "Flashkid<br>";
+
     @Nonnull
     private final UserService userService;
 
@@ -70,6 +89,12 @@ public class AuthApi {
 
     @Nonnull
     private final PlanetService planetService;
+
+    @Nonnull
+    private final MessageThreadService messageThreadService;
+
+    @Nonnull
+    private final MasterOfTheUniverseService masterOfTheUniverseService;
 
     @Nonnull
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
@@ -86,13 +111,17 @@ public class AuthApi {
                    @Nonnull final UserService userService,
                    @Nonnull final ResearchService researchService,
                    @Nonnull final ColonizationService colonizationService,
-                   @Nonnull final PlanetService planetService) {
+                   @Nonnull final PlanetService planetService,
+                   @Nonnull final MessageThreadService messageThreadService,
+                   @Nonnull final MasterOfTheUniverseService masterOfTheUniverseService) {
         Preconditions.checkNotNull(authenticationManager, "authenticationManager shouldn't be null!");
         Preconditions.checkNotNull(jwtTokenUtil, "jwtTokenUtil shouldn't be null!");
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
         Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
         Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
+        Preconditions.checkNotNull(messageThreadService, "messageThreadService must not be empty");
+        Preconditions.checkNotNull(masterOfTheUniverseService, "masterOfTheUniverseService must not be empty");
 
         this.userService = userService;
         this.researchService = researchService;
@@ -100,6 +129,8 @@ public class AuthApi {
         this.jwtTokenUtil = jwtTokenUtil;
         this.colonizationService = colonizationService;
         this.planetService = planetService;
+        this.messageThreadService = messageThreadService;
+        this.masterOfTheUniverseService = masterOfTheUniverseService;
     }
 
     @PostMapping("/login")
@@ -251,6 +282,16 @@ public class AuthApi {
         planetService.save(planet);
         final Colonization colonization = new Colonization(saved, planet, planet.getResourceDeposit().getCrewRequirement(), 0);
         colonizationService.colonizePlanet(colonization);
+
+        final Optional<WebUserDetails> sender = userService.findByUsername("Flashkid");
+        sender.ifPresent(flash -> {
+            final String replace = WELCOME_MESSAGE.replace(NAME_PLACEHOLDER, saved.getUsername());
+            messageThreadService.createChatMessage(flash.getUser(), saved, replace);
+        });
+
+        masterOfTheUniverseService.createFleetForUser(saved);
+        masterOfTheUniverseService.createOpponentForUser(saved);
+        masterOfTheUniverseService.runBattleForNewUser(saved);
 
         return ResponseEntity.ok(new UserJson(saved));
     }

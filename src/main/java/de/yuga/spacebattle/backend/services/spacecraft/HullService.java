@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class HullService {
@@ -43,6 +45,13 @@ public class HullService {
         Preconditions.checkNotNull(idHull, "idHull shouldn't be null!");
 
         return hullRepository.findById(idHull).orElse(null);
+    }
+
+    @Nonnull
+    public List<Hull> findByHullType(@Nonnull final EHullType hullType) {
+        Preconditions.checkNotNull(hullType, "hullType shouldn't be null!");
+
+        return Objects.requireNonNullElse(hullRepository.findByHullType(hullType), new ArrayList<>());
     }
 
     @Nonnull

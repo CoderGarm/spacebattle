@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.combat.dto.BattleResult;
 import de.yuga.spacebattle.backend.combat.dto.FleetClash;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
@@ -86,6 +87,34 @@ public class BattleService {
         }
 
         battleReportService.saveAll(reports);
+    }
+
+    public void runBattleAtPlanet(@Nonnull final Tick today, @Nonnull final Planet planet) {
+        Preconditions.checkNotNull(today, "today shouldn't be null!");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+
+        final FleetClash fleetClash = fleetService.findFleetClashesAtPlanet(planet);
+        if (fleetClash == null) {
+            return;
+        }
+
+        final CompletableFuture<Cage> future = CompletableFuture.supplyAsync(() -> {
+            final Cage cage = new Cage(fleetClash);
+            cage.handleCombatPhases();
+            return cage;
+        });
+
+        try {
+            // runs the fight
+            final Cage cage = future.get();
+            final BattleReport battleReport = processFightingResult(today, cage.getBattleResult());
+            battleReportService.save(battleReport);
+        } catch (final ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            throw new NotifyWebUserException(e.getMessage());
+        }
+
     }
 
     private BattleReport processFightingResult(@Nonnull final Tick latest, @Nonnull final BattleResult battleResult) {

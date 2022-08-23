@@ -6,8 +6,6 @@ import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.account.forum.Forum;
-import de.yuga.spacebattle.backend.entities.account.forum.ForumMessage;
-import de.yuga.spacebattle.backend.entities.account.forum.ForumThread;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
@@ -27,7 +25,9 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
@@ -41,19 +41,21 @@ import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
+import de.yuga.spacebattle.backend.services.i18n.TranslatableService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
+import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
 import de.yuga.spacebattle.backend.services.spacecraft.HullService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -76,6 +78,15 @@ public class MasterOfTheUniverseService {
      * The radius of a universe center in px which is displayed in the canvas for the universe.
      */
     public static final int UNIVERSE_CENTER_RADIUS = 50;
+
+    public static final String DEFEATED_OPPONENT = "Defeated Opponent";
+
+    private final static Map<EEducationType, Long> militaryCrew = new HashMap<>();
+
+    static {
+        militaryCrew.put(EEducationType.ENLISTED, 20L);
+        militaryCrew.put(EEducationType.OFFICER, 10L);
+    }
 
     @Nonnull
     private final TickService tickService;
@@ -122,6 +133,12 @@ public class MasterOfTheUniverseService {
     @Nonnull
     private final ColonizationService colonizationService;
 
+    @Nonnull
+    private final BattleService battleService;
+
+    @Nonnull
+    private final TranslatableService translatableService;
+
     @Autowired
     public MasterOfTheUniverseService(@Nonnull final TickService tickService,
                                       @Nonnull final UserService userService,
@@ -137,38 +154,26 @@ public class MasterOfTheUniverseService {
                                       @Nonnull final FleetService fleetService,
                                       @Nonnull final WarShipService warShipService,
                                       @Nonnull final ForumService forumService,
-                                      @Nonnull final ColonizationService colonizationService) {
-        Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
-        Preconditions.checkNotNull(userService, "userService shouldn't be null!");
-        Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");
-        Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
-        Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
-        Preconditions.checkNotNull(buildingService, "buildingService shouldn't be null!");
-        Preconditions.checkNotNull(moduleService, "moduleService shouldn't be null!");
-        Preconditions.checkNotNull(hullService, "hullService shouldn't be null!");
-        Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
-        Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
-        Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
-        Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
-        Preconditions.checkNotNull(warShipService, "warShipService shouldn't be null!");
-        Preconditions.checkNotNull(forumService, "forumService shouldn't be null!");
-        Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
-
-        this.tickService = tickService;
-        this.userService = userService;
-        this.allianceService = allianceService;
-        this.starsystemService = starSystemService;
-        this.planetService = planetService;
-        this.buildingService = buildingService;
-        this.moduleService = moduleService;
-        this.hullService = hullService;
-        this.shipClassService = shipClassService;
-        this.researchService = researchService;
-        this.constructionService = constructionService;
-        this.fleetService = fleetService;
-        this.warShipService = warShipService;
-        this.forumService = forumService;
-        this.colonizationService = colonizationService;
+                                      @Nonnull final ColonizationService colonizationService,
+                                      @Nonnull final BattleService battleService,
+                                      @Nonnull final TranslatableService translatableService) {
+        this.tickService = Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
+        this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
+        this.allianceService = Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");
+        this.starsystemService = Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
+        this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
+        this.buildingService = Preconditions.checkNotNull(buildingService, "buildingService shouldn't be null!");
+        this.moduleService = Preconditions.checkNotNull(moduleService, "moduleService shouldn't be null!");
+        this.hullService = Preconditions.checkNotNull(hullService, "hullService shouldn't be null!");
+        this.shipClassService = Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
+        this.researchService = Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
+        this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
+        this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
+        this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService shouldn't be null!");
+        this.forumService = Preconditions.checkNotNull(forumService, "forumService shouldn't be null!");
+        this.colonizationService = Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
+        this.battleService = Preconditions.checkNotNull(battleService, "battleService must not be empty");
+        this.translatableService = Preconditions.checkNotNull(translatableService, "translatableService must not be empty");
     }
 
     /**
@@ -287,7 +292,6 @@ public class MasterOfTheUniverseService {
     /**
      * Generates up to 100 new star systems with planets.
      */
-    @Transactional
     protected void createMorePopularizedStarSystems() {
         final List<StarSystem> allSystems = starsystemService.findAll();
         final Set<Orbit> knownOrbits = allSystems.stream().map(StarSystem::getOrbit).collect(Collectors.toSet());
@@ -325,6 +329,8 @@ public class MasterOfTheUniverseService {
         final List<Alliance> alliances = allianceService.findAll();
 
         final List<Forum> toStore = new ArrayList<>();
+        final Forum techForum = new Forum(EWebUserRole.USER, "Improvements and releases", "To address questions, features, improvements and ideas.");
+        toStore.add(techForum);
         final Forum mainUsersForum = new Forum(EWebUserRole.USER, "Users forum", "A Forum for all users.");
         toStore.add(mainUsersForum);
         final Forum adminsForum = new Forum(EWebUserRole.ADMIN, "Admins forum", "A forum for the game admins.");
@@ -335,7 +341,7 @@ public class MasterOfTheUniverseService {
         toStore.addAll(allianceForums);
 
         forumService.saveAll(toStore);
-
+        /*
         final List<User> users = userService.findAll();
 
         final List<Forum> forums = forumService.findAll();
@@ -348,23 +354,23 @@ public class MasterOfTheUniverseService {
             final ForumMessage forumMessage = new ForumMessage(save, user, "Hello World!");
             forumService.save(forumMessage);
         });
-
-
+        */
         LOGGER.info("Forums created");
     }
 
-    @SuppressWarnings({"deprecation", "unused"})
+    @SuppressWarnings({"deprecation"})
     void createInitialDataPayload() {
 
-        final User u1 = userService.createUser("Flashkid", "12457aA!", "mail", EWebUserRole.ADMIN, EGameUserRole.ALLIANCE_ADMIN);
-        final User u2 = userService.createUser("Yufiel", "12457aA!", "mail2", EWebUserRole.USER, EGameUserRole.ALLIANCE_ADMIN);
-        final User u3 = userService.createUser("Applicant", "12457aA!", "mail3", EWebUserRole.USER);
+        final User flashkid = userService.createUser("Flashkid", "12457aA!", "mail", EWebUserRole.ADMIN, EGameUserRole.ALLIANCE_ADMIN);
+        final User u2 = userService.createUser("Playa", "12457aA!", "mail2", EWebUserRole.USER);
+        final User pirate = userService.createUser(DEFEATED_OPPONENT, "12457aA!", "mail3", EWebUserRole.USER);
         LOGGER.info("Users created");
 
-        Alliance a1 = allianceService.createAlliance("Argonauten", "A", u1, u3);
-        Alliance a2 = allianceService.createAlliance("111er", "111er", u2);
-        LOGGER.info("Alliances created");
-        LOGGER.info("Alliances populated.");
+        // todo create alliance ui
+
+        Alliance a1 = allianceService.createAlliance("Argonauten", "A", flashkid);
+        LOGGER.info("Alliance created");
+        LOGGER.info("Alliance populated.");
 
         createForums();
 
@@ -406,7 +412,6 @@ public class MasterOfTheUniverseService {
         Research unlockFTLPropulsion = research("FTL Speed", "The FTL Speed research researches FTL ...", 1, ETechLevel.TECH_I, null);
         Research unlockElectronicWarfare = research("Electronic Warfare", "The EW research researches electronic warfare.", 1, ETechLevel.TECH_I, null);
         Research unlocksRocketAmmunition = research("Rocket Ammunition", "a bunch of rockets.", 1, ETechLevel.TECH_I, null);
-        Research unlocksPointDefenseAmmunition = research("Point Defense Ammunition", "a bunch of bullets.", 1, ETechLevel.TECH_I, null);
         Research unlocksCounterRocketAmmunition = research("Counter Rocket Ammunition", "another bunch of rockets.", 1, ETechLevel.TECH_I, null);
         Research unlockPassive = research("Armor improvement I", "Improves the armor improvement module", 1, ETechLevel.TECH_I, null);
 
@@ -433,13 +438,9 @@ public class MasterOfTheUniverseService {
         Building militaryAcademy = building("Military Academy", "for the guys which are silent", 100, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_MILITARY_II), EEducationType.OFFICER, livingStuff);
         LOGGER.info("Buildings created");
 
-        colonizePlanet(u1, p11);
+        colonizePlanet(flashkid, p11);
         colonizePlanet(u2, p21);
         LOGGER.info("Planets colonized and populated. Constructions were build.");
-
-        Map<EEducationType, Long> militaryCrew = new HashMap<>();
-        militaryCrew.put(EEducationType.ENLISTED, 20L);
-        militaryCrew.put(EEducationType.OFFICER, 10L);
 
         Armor armor = moduleService.createArmor("Armor Mk I", "An armor", unlockArmor, 5, 3000, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         Propulsion propulsion = moduleService.createPropulsion("Speed Mk I", "A drive", unlockPropulsion, 5, 500, ETechLevel.TECH_I, EHyperBand.NONE, new CrewRequirement(militaryCrew, EDepositType.COSTS));
@@ -465,33 +466,25 @@ public class MasterOfTheUniverseService {
         PassiveModule passiveModule = moduleService.createPassiveModule("Improves armor", "Increases the amount of armor", unlockPassive, ESupportType.ARMOR, ECalculationType.ADD, 5, 10, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         LOGGER.info("Modules created");
 
-        Hull hull1 = hullService.createHull("Corvette vessel", 80000, 50, 15, 15, 35, ETechLevel.TECH_I, "The corvette hull", unlockHull1, EHullType.FG, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        Hull hull2 = hullService.createHull("Frigate vessel", 80000, 100, 35, 35, 55, ETechLevel.TECH_I, "The frigate hull", unlockHull2, EHullType.FG, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        Hull hull3 = hullService.createHull("Cruiser vessel", 80000, 150, 45, 45, 75, ETechLevel.TECH_I, "The cruiser hull", unlockHull3, EHullType.CC, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Hull hull1 = hullService.createHull("Corvette vessel", 4000, 500, 500, 500, 2000, ETechLevel.TECH_I, "The corvette hull", unlockHull1, EHullType.FG, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Hull hull2 = hullService.createHull("Frigate vessel", 5500, 800, 800, 800, 2500, ETechLevel.TECH_I, "The frigate hull", unlockHull2, EHullType.FG, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Hull hull3 = hullService.createHull("Cruiser vessel", 9000, 1200, 1200, 1200, 3500, ETechLevel.TECH_I, "The cruiser hull", unlockHull3, EHullType.CC, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         LOGGER.info("Hulls created");
 
-        ShipClass as3 = new ShipClass(u1, "Argonauts cruiser", hull3, null);
-        as3 = createFitting(armor, propulsionFTL, electronicWarfare, sidewall, laserWeapon, pointDefense, new Launcher[]{shipKillerLauncher, counterMissileLauncher}, new PassiveModule[]{passiveModule}, new AmmunitionModule[]{shipKillerAmmunition, counterRocketAmmunition}, as3);
 
-        ShipClass ers3 = new ShipClass(u2, "111er cruiser", hull3, null);
-        ers3 = createFitting(armor, propulsionFTL, electronicWarfare, sidewall, laserWeapon, pointDefense, new Launcher[]{shipKillerLauncher, counterMissileLauncher}, new PassiveModule[]{passiveModule}, new AmmunitionModule[]{shipKillerAmmunition, counterRocketAmmunition}, ers3);
-        LOGGER.info("ShipClasses created");
+        ShipClass argonautShipClass = new ShipClass(flashkid, "Terrible", hull3, null);
+        createFitting(armor, propulsionFTL, electronicWarfare, sidewall, laserWeapon, pointDefense, new Launcher[]{shipKillerLauncher, counterMissileLauncher}, new PassiveModule[]{passiveModule}, new AmmunitionModule[]{shipKillerAmmunition, counterRocketAmmunition}, argonautShipClass);
+        ShipClass ers3 = new ShipClass(pirate, "Pirate corvette", hull1, null);
+        createPirateFitting(armor, propulsionFTL, electronicWarfare, sidewall, laserWeapon, pointDefense, new Launcher[]{shipKillerLauncher, counterMissileLauncher}, new PassiveModule[]{passiveModule}, new AmmunitionModule[]{shipKillerAmmunition, counterRocketAmmunition}, ers3);
+        LOGGER.info("ShipClass created");
 
-        addUnlockedResearches(u1);
+        addUnlockedResearches(flashkid);
         addUnlockedResearches(u2);
         LOGGER.info("Researches populated");
 
-        Fleet f1 = createFleet(u1, p11, "Argonaut Home Fleet");
-        Fleet f2 = createFleet(u2, p21, "111er Home Fleet");
+        createFleetForUser(flashkid);
+        createFleetForUser(u2);
         LOGGER.info("Fleets created");
-
-        warShipService.save(new WarShip("Hotspur", p11, f1, as3));
-        warShipService.save(new WarShip("Invictus", p11, f1, as3));
-        warShipService.save(new WarShip("Invincible", p11, f1, as3));
-
-        warShipService.save(new WarShip("Argonauts Smasher", p21, f2, ers3));
-        warShipService.save(new WarShip("Wild Fire", p21, f2, ers3));
-        warShipService.save(new WarShip("Thunder Hawk", p21, f2, ers3));
         LOGGER.info("Warships created");
         LOGGER.info("Fleets populated");
 
@@ -549,16 +542,159 @@ public class MasterOfTheUniverseService {
 
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated(since = "productive environment")
-    protected ShipClass createFitting(Armor armor,
-                                      Propulsion propulsionFTL,
-                                      ElectronicWarfare electronicWarfare,
-                                      Sidewall sidewall,
-                                      Weapon laserWeapon,
-                                      Weapon pointDefense,
-                                      Launcher[] missiles,
-                                      PassiveModule[] passiveModules,
-                                      AmmunitionModule[] ammunitionModules,
-                                      ShipClass shipClass) {
+    protected ShipClass createFitting(@Nonnull final Armor armor,
+                                      @Nonnull final Propulsion propulsionFTL,
+                                      @Nonnull final ElectronicWarfare electronicWarfare,
+                                      @Nonnull final Sidewall sidewall,
+                                      @Nonnull final Weapon laserWeapon,
+                                      @Nonnull final Weapon pointDefense,
+                                      @Nonnull final Launcher[] missiles,
+                                      @Nonnull final PassiveModule[] passiveModules,
+                                      @Nonnull final AmmunitionModule[] ammunitionModules,
+                                      @Nonnull final ShipClass shipClass) {
+
+        assert shipClass.getHull() != null : "If this is wrong, then everything is broken!";
+        int cc = shipClass.getHull().getConstructionCapacity();
+        int ccBow = shipClass.getHull().getConstructionCapacityBow();
+        int ccStern = shipClass.getHull().getConstructionCapacityStern();
+        int ccBroadsides = shipClass.getHull().getConstructionCapacityBroadsides();
+
+        cc -= armor.getUseCapacity();
+        cc -= sidewall.getUseCapacity();
+        cc -= propulsionFTL.getUseCapacity();
+        cc -= electronicWarfare.getUseCapacity();
+
+        shipClass.setArmor(armor);
+        shipClass.setSidewall(sidewall);
+        shipClass.setPropulsion(propulsionFTL);
+        shipClass.setElectronicWarfare(electronicWarfare);
+
+        final Set<AlignedFitting> fittings = new HashSet<>();
+        int amountOfLauncherSets = 0;
+        for (final EWeaponAlignment alignment : EWeaponAlignment.values()) {
+
+            int presentCapacity = 0;
+            switch (alignment) {
+                case BROADSIDE:
+                    presentCapacity = ccBroadsides;
+                    break;
+                case BOW:
+                    presentCapacity = ccBow;
+                    break;
+                case STERN:
+                    presentCapacity = ccStern;
+                    break;
+            }
+            final int neededCapacity = laserWeapon.getUseCapacity() + Arrays.stream(missiles).map(Launcher::getUseCapacity).reduce(0, Integer::sum) + pointDefense.getUseCapacity();
+            final int amountOfSets = (presentCapacity / neededCapacity) - 1;
+            for (int i = amountOfSets; i >= 0; i--) {
+                fittings.add(new AlignedFitting(alignment, laserWeapon, 1));
+                Arrays.stream(missiles).forEach(missile -> fittings.add(new AlignedFitting(alignment, missile, 1)));
+                fittings.add(new AlignedFitting(alignment, pointDefense, 1));
+                amountOfLauncherSets++;
+            }
+        }
+
+        shipClass.setFittings(fittings);
+
+        final int neededCapacityForSupport = Arrays.stream(passiveModules).map(PassiveModule::getUseCapacity).reduce(0, Integer::sum);
+        final int amountOfSupportSets = (cc / neededCapacityForSupport) - 1;
+        final Set<SupportFitting> supportFittings = Arrays.stream(passiveModules).map(af -> new SupportFitting(af, amountOfSupportSets)).collect(Collectors.toSet());
+        shipClass.setSupportFittings(supportFittings);
+
+        final int finalCounter = amountOfLauncherSets;
+        final Set<AmmunitionFitting> ammunitionFittings = Arrays.stream(ammunitionModules).map(af -> new AmmunitionFitting(af, finalCounter)).collect(Collectors.toSet());
+        shipClass.setAmmunitionFittings(ammunitionFittings);
+
+        return shipClassService.save(shipClass);
+    }
+
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated(since = "productive environment")
+    private void addUnlockedResearches(User user) {
+        final List<Research> researchesWithoutPrecondition = researchService.getResearchesWithoutPrecondition();
+        researchService.addResearch(user, researchesWithoutPrecondition);
+    }
+
+    public void createFleetForUser(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+
+        // take the best value
+        final List<Armor> armors = sortByValue(moduleService.findAllArmors());
+        final List<ElectronicWarfare> electronicWarfares = sortByValue(moduleService.findAllElectronicWarfare());
+        final List<Sidewall> sidewalls = sortByValue(moduleService.findAllSidewalls());
+
+        final Armor armor = armors.get(armors.size() - 1);
+        final Sidewall sidewall = sidewalls.get(sidewalls.size() - 1);
+        final ElectronicWarfare electronicWarfare = electronicWarfares.get(electronicWarfares.size() - 1);
+
+        // take the one with ftl and best value
+        final List<Propulsion> propulsions = sortByValue(moduleService.findAllPropulsions().stream().filter(Propulsion::isFtlCapable).collect(Collectors.toList()));
+        final Propulsion propulsionFTL = propulsions.get(propulsions.size() - 1);
+
+        final List<Weapon> weapons = moduleService.findAllWeapons();
+        final List<Weapon> allBeams = sortByValue(weapons.stream().filter(w -> w.getWeaponType() == EWeaponType.BEAM).collect(Collectors.toList()));
+        final Weapon bestBeam = allBeams.get(allBeams.size() - 1);
+
+        final List<Weapon> allPDs = sortByValue(weapons.stream().filter(w -> w.getWeaponType() == EWeaponType.POINT_DEFENSE).collect(Collectors.toList()));
+        final Weapon bestPD = allPDs.get(allBeams.size() - 1);
+
+        final List<Launcher> allLaunchers = moduleService.findAllLaunchers();
+        final List<Launcher> shipKillers = allLaunchers.stream().filter(w -> w.getWeaponType() == EWeaponType.MISSILE).collect(Collectors.toList());
+        final Launcher shipKillerLauncher = shipKillers.get(shipKillers.size() - 1);
+        final AmmunitionModule shipKillerAmmunition = shipKillerLauncher.getAmmunitionModule();
+
+        final List<Launcher> counterMissiles = allLaunchers.stream().filter(w -> w.getWeaponType() == EWeaponType.COUNTER_MISSILE).collect(Collectors.toList());
+        final Launcher counterMissileLauncher = counterMissiles.get(counterMissiles.size() - 1);
+        final AmmunitionModule counterRocketAmmunition = counterMissileLauncher.getAmmunitionModule();
+
+        final List<PassiveModule> passiveModules = sortByValue(sortByValue(moduleService.findAllPassiveModules()));
+        final PassiveModule[] passiveModulesA = passiveModules.toArray(PassiveModule[]::new);
+
+        final Hull hull = hullService.findByHullType(EHullType.CC).stream().findFirst().orElseThrow(() -> new NotifyWebUserException("There must be a hull for you, really!"));
+        ShipClass ship = new ShipClass(user, "Indefatigable", hull, null);
+        ship = createFitting(armor, propulsionFTL, electronicWarfare, sidewall, bestBeam, bestPD, new Launcher[]{shipKillerLauncher, counterMissileLauncher}, passiveModulesA, new AmmunitionModule[]{shipKillerAmmunition, counterRocketAmmunition}, ship);
+
+        final Planet homePlanet = planetService.findMainPlanet(user);
+        final Fleet fleet = createFleet(user, homePlanet, "Homefleet");
+
+        warShipService.save(new WarShip("Indefatigable", homePlanet, fleet, ship));
+        warShipService.save(new WarShip("Hotspur", homePlanet, fleet, ship));
+        warShipService.save(new WarShip("Fearless", homePlanet, fleet, ship));
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    public void createOpponentForUser(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+
+        final User opponent = userService.findByUsername(DEFEATED_OPPONENT).get().getUser();
+
+        final Planet homePlanet = planetService.findMainPlanet(user);
+        final Fleet opponentsFleet = createFleet(opponent, homePlanet, "Pirates bane");
+
+        final List<ShipClass> pirateShips = shipClassService.findAllLatestByOwner(opponent);
+        final List<ShipClass> shipClasses = pirateShips.stream()
+                .filter(s -> s.getHull() != null)
+                .filter(s -> s.getHull().getHullType() == EHullType.FG)
+                .sorted(Comparator.comparingInt(o -> o.getHull().getOverallConstructionCapacity()))
+                .collect(Collectors.toList());
+        final ShipClass ship = shipClasses.get(shipClasses.size() - 1);
+
+        warShipService.save(new WarShip("Corsair", homePlanet, opponentsFleet, ship));
+    }
+
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated(since = "productive environment")
+    protected ShipClass createPirateFitting(Armor armor,
+                                            Propulsion propulsionFTL,
+                                            ElectronicWarfare electronicWarfare,
+                                            Sidewall sidewall,
+                                            Weapon laserWeapon,
+                                            Weapon pointDefense,
+                                            Launcher[] missiles,
+                                            PassiveModule[] passiveModules,
+                                            AmmunitionModule[] ammunitionModules,
+                                            ShipClass shipClass) {
         shipClass.setArmor(armor);
         shipClass.setSidewall(sidewall);
         shipClass.setPropulsion(propulsionFTL);
@@ -578,10 +714,17 @@ public class MasterOfTheUniverseService {
         return shipClassService.save(shipClass);
     }
 
-    @SuppressWarnings("DeprecatedIsStillUsed")
-    @Deprecated(since = "productive environment")
-    private void addUnlockedResearches(User user) {
-        final List<Research> researchesWithoutPrecondition = researchService.getResearchesWithoutPrecondition();
-        researchService.addResearch(user, researchesWithoutPrecondition);
+    public void runBattleForNewUser(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+
+        final Tick today = tickService.getLatest();
+        final Planet homePlanet = planetService.findMainPlanet(user);
+        battleService.runBattleAtPlanet(today, homePlanet);
+    }
+
+    private <M extends BaseModuleWithEffectValue> List<M> sortByValue(@Nonnull final List<M> modules) {
+        Preconditions.checkNotNull(modules, "modules must not be empty");
+
+        return modules.stream().sorted(Comparator.comparingInt(BaseModuleWithEffectValue::getEffectValue)).collect(Collectors.toList());
     }
 }

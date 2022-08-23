@@ -9,10 +9,10 @@
 
     create table alliance (
        idAlliance integer not null auto_increment,
-        code varchar(255),
-        createdAt datetime(6),
-        name varchar(255),
-        idFounder integer,
+        code varchar(30) not null,
+        createdAt datetime(6) not null,
+        name varchar(30) not null,
+        idFounder integer not null,
         primary key (idAlliance)
     ) engine=InnoDB;
 
@@ -30,13 +30,13 @@
 
     create table ammunitionModule (
        idAmmunitionModule integer not null auto_increment,
-        techLevel varchar(255),
+        techLevel varchar(255) not null,
         useCapacity integer not null,
         effectValue integer not null,
-        idCosts integer,
-        idTranslatableDescription integer,
-        idTranslatableName integer,
-        idResearch integer,
+        idCosts integer not null,
+        idTranslatableDescription integer not null,
+        idTranslatableName integer not null,
+        idResearch integer not null,
         primary key (idAmmunitionModule)
     ) engine=InnoDB;
 
@@ -48,19 +48,19 @@
 
     create table armor (
        idArmor integer not null auto_increment,
-        techLevel varchar(255),
+        techLevel varchar(255) not null,
         useCapacity integer not null,
         effectValue integer not null,
-        idCosts integer,
-        idTranslatableDescription integer,
-        idTranslatableName integer,
-        idResearch integer,
+        idCosts integer not null,
+        idTranslatableDescription integer not null,
+        idTranslatableName integer not null,
+        idResearch integer not null,
         primary key (idArmor)
     ) engine=InnoDB;
 
     create table battleReport (
        idBattleReport integer not null auto_increment,
-        lastRound integer,
+        lastRound integer not null,
         xCoordinate varchar(255),
         yCoordinate varchar(255),
         idTick integer not null,
@@ -70,23 +70,23 @@
 
     create table building (
        idBuilding integer not null auto_increment,
-        techLevel varchar(255),
+        techLevel varchar(255) not null,
         baseValue integer not null,
         increasingFactorPerLevel decimal(19,2),
         productionCategory varchar(255) not null,
         productionTarget varchar(255) not null,
         refinementSequence varchar(255),
-        idCosts integer,
-        idTranslatableDescription integer,
-        idTranslatableName integer,
-        idResearch integer,
+        idCosts integer not null,
+        idTranslatableDescription integer not null,
+        idTranslatableName integer not null,
+        idResearch integer not null,
         primary key (idBuilding)
     ) engine=InnoDB;
 
     create table colonization (
        idColonization integer not null auto_increment,
         doneAtZero integer not null,
-        idCosts integer,
+        idCosts integer not null,
         idTarget integer not null,
         idUser integer not null,
         primary key (idColonization)
@@ -95,16 +95,16 @@
     create table construction (
        idConstruction integer not null auto_increment,
         level integer not null,
-        idBuilding integer,
-        idPlanet integer,
+        idBuilding integer not null,
+        idPlanet integer not null,
         primary key (idConstruction)
     ) engine=InnoDB;
 
     create table counterMissileHit (
        idCounterMissileHit integer not null auto_increment,
-        combatPhase varchar(255),
-        combatRound integer,
-        attackedMissileSalvo varchar(255),
+        combatPhase varchar(255) not null,
+        combatRound integer not null,
+        attackedMissileSalvo varchar(255) not null,
         destroyedMissiles integer not null,
         remainingMissiles integer not null,
         idActor integer not null,
@@ -121,35 +121,35 @@
 
     create table electronicWarfare (
        idElectronicWarfare integer not null auto_increment,
-        techLevel varchar(255),
+        techLevel varchar(255) not null,
         useCapacity integer not null,
         effectValue integer not null,
         effectiveRange varchar(255),
-        idCosts integer,
-        idTranslatableDescription integer,
-        idTranslatableName integer,
-        idResearch integer,
+        idCosts integer not null,
+        idTranslatableDescription integer not null,
+        idTranslatableName integer not null,
+        idResearch integer not null,
         primary key (idElectronicWarfare)
     ) engine=InnoDB;
 
     create table fleet (
        idFleet integer not null auto_increment,
-        name varchar(255),
+        name varchar(255) not null,
         xCoordinateLocation varchar(255),
         yCoordinateLocation varchar(255),
         idMove integer,
         idStarSystemLocation integer,
-        idOwner integer,
+        idOwner integer not null,
         idResourceDeposit integer,
         primary key (idFleet)
     ) engine=InnoDB;
 
     create table forum (
        idForum integer not null auto_increment,
-        createdAt datetime(6),
-        description varchar(255),
+        createdAt datetime(6) not null,
+        description varchar(255) not null,
         role varchar(255),
-        title varchar(255),
+        title varchar(255) not null,
         idAlliance integer,
         primary key (idForum),
         check (idAlliance IS NOT NULL || role IS NOT NULL)
@@ -157,8 +157,8 @@
 
     create table forumMessage (
        idForumMessage integer not null auto_increment,
-        message varchar(10000),
-        sentAt datetime(6),
+        message varchar(10000) not null,
+        sentAt datetime(6) not null,
         idUserAuthor integer not null,
         idForumThread integer not null,
         primary key (idForumMessage)
@@ -175,41 +175,41 @@
 
     create table forumThread (
        idForumThread integer not null auto_increment,
-        createdAt datetime(6),
-        description varchar(255),
-        title varchar(255),
+        createdAt datetime(6) not null,
+        description varchar(255) not null,
+        title varchar(255) not null,
         idForum integer not null,
         primary key (idForumThread)
     ) engine=InnoDB;
 
     create table hitLog (
        idHitLog integer not null auto_increment,
-        combatPhase varchar(255),
-        combatRound integer,
-        attackedPart varchar(255),
-        damageDealer varchar(255),
+        combatPhase varchar(255) not null,
+        combatRound integer not null,
+        attackedPart varchar(255) not null,
+        damageDealer varchar(255) not null,
         damageValue bigint not null,
         isAlive bit not null,
         isFightingCapable bit not null,
         state integer not null,
-        warshipHealthState varchar(255),
+        warshipHealthState varchar(500) not null,
         idTarget integer not null,
         primary key (idHitLog)
     ) engine=InnoDB;
 
     create table hull (
        idHull integer not null auto_increment,
-        techLevel varchar(255),
+        techLevel varchar(255) not null,
         constructionCapacity integer not null,
         constructionCapacityBow integer not null,
         constructionCapacityBroadsides integer not null,
         constructionCapacityStern integer not null,
-        hullType varchar(255),
+        hullType varchar(255) not null,
         overallConstructionCapacity integer not null,
-        idCosts integer,
-        idTranslatableDescription integer,
-        idTranslatableName integer,
-        idResearch integer,
+        idCosts integer not null,
+        idTranslatableDescription integer not null,
+        idTranslatableName integer not null,
+        idResearch integer not null,
         primary key (idHull),
         check (overallConstructionCapacity >= constructionCapacity + constructionCapacityBow + constructionCapacityStern + constructionCapacityBroadsides)
     ) engine=InnoDB;
@@ -226,12 +226,12 @@
         amountShips integer,
         resourceType varchar(255),
         targetLevel integer,
-        jobDoneAtZero decimal(19, 0),
+        jobDoneAtZero decimal(19, 0) not null,
         idBuilding integer,
         idResearch integer,
         idShipClass integer,
-        idFacility integer,
-        idOwner integer,
+        idFacility integer not null,
+        idOwner integer not null,
         primary key (idJob),
         check ((idBuilding IS NOT NULL AND targetLevel IS NOT NULL) OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) OR (idShipClass IS NOT NULL AND amountShips IS NOT NULL))
     ) engine=InnoDB;
@@ -244,14 +244,14 @@
 
     create table launcher (
        idLauncher integer not null auto_increment,
-        techLevel varchar(255),
+        techLevel varchar(255) not null,
         useCapacity integer not null,
-        alignmentType varchar(255),
-        weaponType varchar(255),
-        idCosts integer,
-        idTranslatableDescription integer,
-        idTranslatableName integer,
-        idResearch integer,
+        alignmentType varchar(255) not null,
+        weaponType varchar(255) not null,
+        idCosts integer not null,
+        idTranslatableDescription integer not null,
+        idTranslatableName integer not null,
+        idResearch integer not null,
         idAmmunitionModule integer not null,
         primary key (idLauncher),
         check (weaponType = 'MISSILE' || weaponType = 'COUNTER_MISSILE')
@@ -288,42 +288,42 @@
 
     create table missile (
        idMissile integer not null auto_increment,
-        techLevel varchar(255),
+        techLevel varchar(255) not null,
         elokaResistance integer not null,
         motorAmount integer not null,
         motorCapacity integer not null,
         warheadCapacity integer not null,
-        idCosts integer,
-        idTranslatableDescription integer,
-        idTranslatableName integer,
+        idCosts integer not null,
+        idTranslatableDescription integer not null,
+        idTranslatableName integer not null,
         idAmmunitionModule integer not null,
         idMissileMotor integer not null,
-        idResearch integer,
+        idResearch integer not null,
         idWarhead integer,
         primary key (idMissile)
     ) engine=InnoDB;
 
     create table missileMotor (
        idMissileMotor integer not null auto_increment,
-        techLevel varchar(255),
-        acceleration varchar(255),
+        techLevel varchar(255) not null,
+        acceleration varchar(255) not null,
         endurance integer not null,
         maneuverability integer not null,
         useCapacity integer not null,
-        idCosts integer,
-        idTranslatableDescription integer,
-        idTranslatableName integer,
+        idCosts integer not null,
+        idTranslatableDescription integer not null,
+        idTranslatableName integer not null,
         primary key (idMissileMotor)
     ) engine=InnoDB;
 
     create table missileMovement (
        idMissileMovement integer not null auto_increment,
-        combatPhase varchar(255),
-        combatRound integer,
+        combatPhase varchar(255) not null,
+        combatRound integer not null,
         xCoordLast varchar(255),
         yCoordLast varchar(255),
         missileAmount integer not null,
-        movingMissileSalvo varchar(255),
+        movingMissileSalvo varchar(255) not null,
         xCoordinate varchar(255),
         yCoordinate varchar(255),
         roundsToTravel integer not null,
@@ -349,22 +349,22 @@
         yCoordinateOrigin varchar(255),
         originalDuration integer,
         idStarSystemDestination integer,
-        idFleet integer,
+        idFleet integer not null,
         idStarSystemOrigin integer,
-        idUser integer,
+        idUser integer not null,
         primary key (idMove),
         check (xCoordinateOrigin != xCoordinateDestination && yCoordinateOrigin != yCoordinateDestination)
     ) engine=InnoDB;
 
     create table movementAction (
        idMovementAction integer not null auto_increment,
-        combatPhase varchar(255),
-        combatRound integer,
+        combatPhase varchar(255) not null,
+        combatRound integer not null,
         xCoordDestination varchar(255),
         yCoordDestination varchar(255),
         xCoordInterimDestination varchar(255),
         yCoordInterimDestination varchar(255),
-        movementType varchar(255),
+        movementType varchar(255) not null,
         xCoordinate varchar(255),
         yCoordinate varchar(255),
         idActor integer not null,
@@ -398,22 +398,22 @@
 
     create table passiveModule (
        idPassiveModule integer not null auto_increment,
-        techLevel varchar(255),
+        techLevel varchar(255) not null,
         useCapacity integer not null,
         effectValue integer not null,
-        calculationType varchar(255),
-        supportType varchar(255),
-        idCosts integer,
-        idTranslatableDescription integer,
-        idTranslatableName integer,
-        idResearch integer,
+        calculationType varchar(255) not null,
+        supportType varchar(255) not null,
+        idCosts integer not null,
+        idTranslatableDescription integer not null,
+        idTranslatableName integer not null,
+        idResearch integer not null,
         primary key (idPassiveModule)
     ) engine=InnoDB;
 
     create table planet (
        idPlanet integer not null auto_increment,
         colonizedAt datetime(6),
-        name varchar(255),
+        name varchar(30) not null,
         xCoordinate varchar(255),
         yCoordinate varchar(255),
         idMiningFactors integer not null,
@@ -425,25 +425,25 @@
 
     create table propulsion (
        idPropulsion integer not null auto_increment,
-        techLevel varchar(255),
+        techLevel varchar(255) not null,
         useCapacity integer not null,
         effectValue integer not null,
         hyperBand varchar(255),
-        idCosts integer,
-        idTranslatableDescription integer,
-        idTranslatableName integer,
-        idResearch integer,
+        idCosts integer not null,
+        idTranslatableDescription integer not null,
+        idTranslatableName integer not null,
+        idResearch integer not null,
         primary key (idPropulsion)
     ) engine=InnoDB;
 
     create table releasedVolley (
        idReleasedVolley integer not null auto_increment,
-        combatPhase varchar(255),
-        combatRound integer,
+        combatPhase varchar(255) not null,
+        combatRound integer not null,
         amountOfShots integer not null,
-        damageDealer varchar(255),
-        initialDistance varchar(255),
-        weaponType varchar(255),
+        damageDealer varchar(255) not null,
+        initialDistance varchar(255) not null,
+        weaponType varchar(255) not null,
         idActor integer not null,
         idTarget integer not null,
         primary key (idReleasedVolley)
@@ -457,11 +457,11 @@
 
     create table research (
        idResearch integer not null auto_increment,
-        techLevel varchar(255),
+        techLevel varchar(255) not null,
         levelCap integer not null,
-        idCosts integer,
-        idTranslatableDescription integer,
-        idTranslatableName integer,
+        idCosts integer not null,
+        idTranslatableDescription integer not null,
+        idTranslatableName integer not null,
         unlockedThrough integer,
         primary key (idResearch)
     ) engine=InnoDB;
@@ -469,14 +469,14 @@
     create table researchLevels (
        idResearchLevel integer not null auto_increment,
         level integer not null,
-        idResearch integer,
-        idUser integer,
+        idResearch integer not null,
+        idUser integer not null,
         primary key (idResearchLevel)
     ) engine=InnoDB;
 
     create table resourceDeposit (
        idResourceDeposit integer not null auto_increment,
-        subType varchar(255),
+        subType varchar(255) not null,
         primary key (idResourceDeposit)
     ) engine=InnoDB;
 
@@ -490,13 +490,13 @@
     create table shipClass (
        idShipClass integer not null auto_increment,
         isDeleted bit not null,
-        name varchar(255),
+        name varchar(30) not null,
         idArmor integer,
         idElectronicWarfare integer,
-        idHull integer,
+        idHull integer not null,
         idOwner integer not null,
         idPredecessor integer,
-        idPropulsion integer,
+        idPropulsion integer not null,
         idSidewall integer,
         idSuccessor integer,
         primary key (idShipClass)
@@ -504,11 +504,11 @@
 
     create table shipKillerHit (
        idShipKillerHit integer not null auto_increment,
-        combatPhase varchar(255),
-        combatRound integer,
-        damageDealer varchar(255),
-        distance varchar(255),
-        result varchar(255),
+        combatPhase varchar(255) not null,
+        combatRound integer not null,
+        damageDealer varchar(255) not null,
+        distance varchar(255) not null,
+        result varchar(255) not null,
         idActor integer not null,
         idTarget integer not null,
         primary key (idShipKillerHit)
@@ -522,19 +522,19 @@
 
     create table sidewall (
        idSidewall integer not null auto_increment,
-        techLevel varchar(255),
+        techLevel varchar(255) not null,
         useCapacity integer not null,
         effectValue integer not null,
-        idCosts integer,
-        idTranslatableDescription integer,
-        idTranslatableName integer,
-        idResearch integer,
+        idCosts integer not null,
+        idTranslatableDescription integer not null,
+        idTranslatableName integer not null,
+        idResearch integer not null,
         primary key (idSidewall)
     ) engine=InnoDB;
 
     create table starSystem (
        idStarSystem integer not null auto_increment,
-        name varchar(255),
+        name varchar(255) not null,
         xCoordinate varchar(255),
         yCoordinate varchar(255),
         primary key (idStarSystem)
@@ -549,47 +549,43 @@
     create table tick (
        idTick integer not null auto_increment,
         tickEnds datetime(6),
-        tickStarts datetime(6),
+        tickStarts datetime(6) not null,
         primary key (idTick)
     ) engine=InnoDB;
 
     create table translatable (
        idTranslatable integer not null auto_increment,
         idParent integer not null,
-        translatableType varchar(255),
-        translationTarget varchar(255),
+        translatableType varchar(255) not null,
+        translationTarget varchar(255) not null,
         primary key (idTranslatable)
     ) engine=InnoDB;
 
     create table translation (
        idTranslation integer not null auto_increment,
-        languageCode varchar(255),
+        languageCode varchar(2),
         translation varchar(255),
+        idTranslatable integer,
         primary key (idTranslation)
-    ) engine=InnoDB;
-
-    create table translationCollection (
-       idTranslatable integer not null,
-        idTranslation integer not null
     ) engine=InnoDB;
 
     create table user (
        idUser integer not null auto_increment,
-        createdAt datetime(6),
-        email varchar(255),
+        createdAt datetime(6) not null,
+        email varchar(50) not null,
         gameUserRoles varchar(255),
-        password varchar(255),
+        password varchar(255) not null,
         userRole varchar(255),
-        username varchar(255),
+        username varchar(30) not null,
         idAlliance integer,
         primary key (idUser)
     ) engine=InnoDB;
 
     create table userMessage (
        idUserMessage integer not null auto_increment,
-        message varchar(10000),
+        message varchar(10000) not null,
         receivedAt datetime(6),
-        sentAt datetime(6),
+        sentAt datetime(6) not null,
         idMessageThread integer not null,
         idUserSender integer not null,
         primary key (idUserMessage)
@@ -597,39 +593,39 @@
 
     create table warhead (
        idWarhead integer not null auto_increment,
-        techLevel varchar(255),
+        techLevel varchar(255) not null,
         damageProjectionRange varchar(255),
         damageValue bigint not null,
         useCapacity integer not null,
-        warheadType varchar(255),
-        idCosts integer,
-        idTranslatableDescription integer,
-        idTranslatableName integer,
+        warheadType varchar(255) not null,
+        idCosts integer not null,
+        idTranslatableDescription integer not null,
+        idTranslatableName integer not null,
         primary key (idWarhead)
     ) engine=InnoDB;
 
     create table warShip (
        idWarShip integer not null auto_increment,
-        name varchar(255),
-        idFleet integer,
-        idShipClass integer,
-        idShipyard integer,
+        name varchar(255) not null,
+        idFleet integer not null,
+        idShipClass integer not null,
+        idShipyard integer not null,
         primary key (idWarShip)
     ) engine=InnoDB;
 
     create table weapon (
        idWeapon integer not null auto_increment,
-        techLevel varchar(255),
+        techLevel varchar(255) not null,
         useCapacity integer not null,
         effectValue integer not null,
-        alignmentType varchar(255),
+        alignmentType varchar(255) not null,
         amountDamageEmitter integer not null,
         damageProjectionRange varchar(255),
-        weaponType varchar(255),
-        idCosts integer,
-        idTranslatableDescription integer,
-        idTranslatableName integer,
-        idResearch integer,
+        weaponType varchar(255) not null,
+        idCosts integer not null,
+        idTranslatableDescription integer not null,
+        idTranslatableName integer not null,
+        idResearch integer not null,
         primary key (idWeapon),
         check (weaponType = 'BEAM' || weaponType = 'POINT_DEFENSE')
     ) engine=InnoDB;
@@ -681,9 +677,6 @@
 
     alter table starSystem 
        add constraint COORDINATE_UK unique (xCoordinate, yCoordinate);
-
-    alter table translationCollection 
-       add constraint UK_dd7cu1at8xry52twepp0lxcw8 unique (idTranslation);
 
     alter table user 
        add constraint EMAIL_UK unique (email);
@@ -1411,13 +1404,8 @@
        foreign key (idShipClass) 
        references shipClass (idShipClass);
 
-    alter table translationCollection 
-       add constraint FKgrdmwu4xhrjpi4i9oof3ob2gt 
-       foreign key (idTranslation) 
-       references translation (idTranslation);
-
-    alter table translationCollection 
-       add constraint FKeytw64w0mw10fundphgc4e5f6 
+    alter table translation 
+       add constraint FK6y0ph13exuqqae7sowcvxac93 
        foreign key (idTranslatable) 
        references translatable (idTranslatable);
 

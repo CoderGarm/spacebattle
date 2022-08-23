@@ -20,12 +20,7 @@ import java.util.Set;
         @NamedQuery(name = "Research.getAll",
                 query = "SELECT p FROM Research p"),
         @NamedQuery(name = "Research.getTreeAsTuple",
-                query = "SELECT new de.yuga.spacebattle.backend.dto.research.ResearchTreeElement(p.id, p.unlockedThrough.id) FROM Research p"),
-        @NamedQuery(name = "Research.getResearchesAsDTOById",
-                query = "SELECT new de.yuga.spacebattle.rest.dto.researches.Research(p, n.translation, d.translation) FROM Research p " +
-                        "LEFT JOIN Translation n ON (n.translatable = p.name AND n.languageCode = :languageCode) " +
-                        "LEFT JOIN Translation d ON (d.translatable = p.description AND d.languageCode = :languageCode) " +
-                        "WHERE p.id IN (:idResearches)")
+                query = "SELECT new de.yuga.spacebattle.backend.dto.research.ResearchTreeElement(p.id, p.unlockedThrough.id) FROM Research p")
 })
 @Entity
 @Table(name = "research")

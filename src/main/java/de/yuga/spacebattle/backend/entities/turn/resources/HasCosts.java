@@ -46,6 +46,12 @@ public class HasCosts extends AbstractEntityKey {
     public HasCosts() {
     }
 
+    @PostPersist
+    public void setParentId() {
+        name.setIdParent(getId());
+        description.setIdParent(getId());
+    }
+
     public HasCosts(@Nonnull final Translation translatableName,
                     @Nonnull final Translation translatableDescription,
                     @Nonnull final ETechLevel techLevel,
@@ -57,9 +63,9 @@ public class HasCosts extends AbstractEntityKey {
         Preconditions.checkNotNull(techLevel, "techLevel shouldn't be null!");
         Preconditions.checkNotNull(clazz, "clazz shouldn't be null!");
 
-        this.name = new Translatable(this, ETranslationTarget.getByClazz(clazz), ETranslatableType.NAME);
+        this.name = new Translatable(ETranslationTarget.getByClazz(clazz), ETranslatableType.NAME);
         this.name.add(translatableName);
-        this.description = new Translatable(this, ETranslationTarget.getByClazz(clazz), ETranslatableType.NAME);
+        this.description = new Translatable(ETranslationTarget.getByClazz(clazz), ETranslatableType.DESCRIPTION);
         this.description.add(translatableDescription);
         this.techLevel = techLevel;
         this.costs = ResourceDepositInitializerCalculator.initializeResourceDeposit(techLevel, EResourceDemand.getByClazz(this.getClass()));

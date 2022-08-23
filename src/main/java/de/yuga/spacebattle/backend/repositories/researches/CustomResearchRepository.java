@@ -12,7 +12,4 @@ public interface CustomResearchRepository {
 
     @Nonnull
     List<de.yuga.spacebattle.backend.dto.research.ResearchTreeElement> findAllAsTuple();
-
-    @Nonnull
-    List<de.yuga.spacebattle.rest.dto.researches.Research> getResearchesAsDTOById(@Nonnull List<Integer> idResearches, @Nonnull String languageCode);
 }
