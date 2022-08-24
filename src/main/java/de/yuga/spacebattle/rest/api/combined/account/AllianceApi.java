@@ -160,8 +160,9 @@ public class AllianceApi extends BaseApi {
         final User user = userService.find(idUser);
         PreconditionWebHelper.checkNotNull(user, "user shouldn't be null!");
 
-        final de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance = new de.yuga.spacebattle.backend.entities.combined.account.Alliance(name, code, user);
-        allianceService.save(alliance);
+        de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance = new de.yuga.spacebattle.backend.entities.combined.account.Alliance(name, code, user);
+        alliance = allianceService.save(alliance);
+        user.setAlliance(alliance);
         userService.save(user);
         final Forum forum = new Forum(alliance, alliance.getName() + "'s forum", "The Forum for the " + alliance.getName());
         forumService.save(forum);

@@ -366,8 +366,6 @@ public class MasterOfTheUniverseService {
         final User pirate = userService.createUser(DEFEATED_OPPONENT, "12457aA!", "mail3", EWebUserRole.USER);
         LOGGER.info("Users created");
 
-        // todo create alliance ui
-
         Alliance a1 = allianceService.createAlliance("Argonauten", "A", flashkid);
         LOGGER.info("Alliance created");
         LOGGER.info("Alliance populated.");

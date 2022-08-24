@@ -30,6 +30,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -289,11 +290,16 @@ public class AuthApi {
             messageThreadService.createChatMessage(flash.getUser(), saved, replace);
         });
 
+        // todo run asynchroniously
+        createOpponentAndFight(saved);
+        return ResponseEntity.ok(new UserJson(saved));
+    }
+
+    @Async("taskExecutor")
+    protected void createOpponentAndFight(final User saved) {
         masterOfTheUniverseService.createFleetForUser(saved);
         masterOfTheUniverseService.createOpponentForUser(saved);
         masterOfTheUniverseService.runBattleForNewUser(saved);
-
-        return ResponseEntity.ok(new UserJson(saved));
     }
 
     @PostMapping("/checkUsername/{userName}")
