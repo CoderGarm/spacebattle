@@ -362,7 +362,7 @@ public class MasterOfTheUniverseService {
     void createInitialDataPayload() {
 
         final User flashkid = userService.createUser("Flashkid", "12457aA!", "mail", EWebUserRole.ADMIN, EGameUserRole.ALLIANCE_ADMIN);
-        final User u2 = userService.createUser("Playa", "12457aA!", "mail2", EWebUserRole.USER);
+        final User other = userService.createUser("Other", "12457aA!", "mail2", EWebUserRole.USER);
         final User pirate = userService.createUser(DEFEATED_OPPONENT, "12457aA!", "mail3", EWebUserRole.USER);
         LOGGER.info("Users created");
 
@@ -437,7 +437,7 @@ public class MasterOfTheUniverseService {
         LOGGER.info("Buildings created");
 
         colonizePlanet(flashkid, p11);
-        colonizePlanet(u2, p21);
+        colonizePlanet(other, p21);
         LOGGER.info("Planets colonized and populated. Constructions were build.");
 
         Armor armor = moduleService.createArmor("Armor Mk I", "An armor", unlockArmor, 5, 3000, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
@@ -477,11 +477,12 @@ public class MasterOfTheUniverseService {
         LOGGER.info("ShipClass created");
 
         addUnlockedResearches(flashkid);
-        addUnlockedResearches(u2);
+        addUnlockedResearches(other);
         LOGGER.info("Researches populated");
 
         createFleetForUser(flashkid);
-        createFleetForUser(u2);
+        createOpponentForUser(flashkid);
+        createFleetForUser(other);
         LOGGER.info("Fleets created");
         LOGGER.info("Warships created");
         LOGGER.info("Fleets populated");

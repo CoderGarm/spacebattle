@@ -29,7 +29,7 @@ Next to a lot of other possibilities a 4X game lives from building stuff and usi
 
 So start building constructions on your planet, build fleet, colonize planets and build more fleets.
 
-![Sample Construction](readme-resources/sample-construction.mp4.gif)
+![Sample Construction](readme-resources/ground-construction.gif)
 
 ### Combats
 
@@ -45,11 +45,20 @@ But in fact, your fleet is nothing if you cannot be present.
 
 Move to a system of your choice.
 
-![Sample Universe Map](readme-resources/sample-universe-map.mp4.gif)
+![Sample Universe Map](readme-resources/interstellar-flight.gif)
 
 And access a planetary orbit.
 
-![Sample Star Map](readme-resources/sample-star-map.mp4.gif)
+![Sample Star Map](readme-resources/stellar-movement.gif)
+
+### Research & Shipyard
+
+To upgrade constructions and technology, some researches must be done.
+
+![Sample Research](readme-resources/research.gif)
+
+Then the shipyard can be used to use the upgrades.
+![Sample Shipyard](readme-resources/shipyard.gif)
 
 ### System distribution
 
