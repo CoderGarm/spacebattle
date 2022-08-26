@@ -3,7 +3,7 @@ package de.yuga.spacebattle.backend.entities.turn.resources;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 

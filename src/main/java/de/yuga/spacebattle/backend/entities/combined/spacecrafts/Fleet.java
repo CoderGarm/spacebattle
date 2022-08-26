@@ -8,9 +8,9 @@ import de.yuga.spacebattle.backend.combat.dto.RangeDefinition;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
@@ -39,22 +39,30 @@ import java.util.stream.Collectors;
 import static de.yuga.spacebattle.backend.calculator.FittingUtils.DEFENSIVE_FITTING;
 
 @NamedQueries({
-        @NamedQuery(name = "Fleet.getAll", query = "SELECT f FROM Fleet f"),
-        @NamedQuery(name = "Fleet.getAllWithoutMovement", query = "SELECT f FROM Fleet f WHERE f.move IS NULL"),
-        @NamedQuery(name = "Fleet.getAllFleetsWithInterstellarMovement", query = "SELECT f FROM Fleet f WHERE f.move IS NOT NULL AND f.move.originOrbit.system <> f.move.destinationOrbit.system"),
-        @NamedQuery(name = "Fleet.getAllByUser", query = "SELECT f FROM Fleet f WHERE f.owner = :owner"),
-        @NamedQuery(name = "Fleet.getAllByUserAndSystem", query = "SELECT f FROM Fleet f WHERE f.owner.id = :idOwner AND f.orbit.system.id = :idStarSystem"),
-        @NamedQuery(name = "Fleet.checkShipInUse", query = "SELECT COUNT(f) FROM Fleet f LEFT JOIN f.ships s WHERE s.shipClass.id =:idShipClass"),
-        @NamedQuery(name = "Fleet.getAllForPlanet", query = "SELECT f FROM Fleet f LEFT JOIN f.move  " +
-                " WHERE (f.orbit.system = :system AND f.orbit.orbit.xCoordinate = :xCoordinate  AND f.orbit.orbit.yCoordinate = :yCoordinate) " +
-                " OR ( f.move.originOrbit.system = :system AND  f.move.originOrbit.orbit.xCoordinate = :xCoordinate AND f.move.originOrbit.orbit.yCoordinate = :yCoordinate) " +
-                " OR (f.move.destinationOrbit.system = :system AND f.move.destinationOrbit.orbit.xCoordinate = :xCoordinate AND f.move.destinationOrbit.orbit.yCoordinate = :yCoordinate)"
+        @NamedQuery(name = "Fleet.getAll",
+                query = "SELECT f FROM Fleet f WHERE f.isDeleted = false"),
+        @NamedQuery(name = "Fleet.getAllWithoutMovement",
+                query = "SELECT f FROM Fleet f WHERE f.move IS NULL AND f.isDeleted = false"),
+        @NamedQuery(name = "Fleet.getAllFleetsWithInterstellarMovement",
+                query = "SELECT f FROM Fleet f WHERE f.move IS NOT NULL AND f.move.originOrbit.system <> f.move.destinationOrbit.system AND  f.isDeleted = false"),
+        @NamedQuery(name = "Fleet.getAllByUser",
+                query = "SELECT f FROM Fleet f WHERE f.owner = :owner AND  f.isDeleted = false"),
+        @NamedQuery(name = "Fleet.getAllByUserAndSystem",
+                query = "SELECT f FROM Fleet f WHERE f.owner.id = :idOwner AND f.orbit.system.id = :idStarSystem AND  f.isDeleted = false"),
+        @NamedQuery(name = "Fleet.checkShipInUse",
+                query = "SELECT COUNT(f) FROM Fleet f LEFT JOIN f.ships s WHERE s.shipClass.id =:idShipClass AND  f.isDeleted = false"),
+        @NamedQuery(name = "Fleet.getAllForPlanet",
+                query = "SELECT f FROM Fleet f LEFT JOIN f.move  " +
+                        " WHERE (f.orbit.system = :system AND f.orbit.orbit.xCoordinate = :xCoordinate  AND f.orbit.orbit.yCoordinate = :yCoordinate) " +
+                        " OR ( f.move.originOrbit.system = :system AND  f.move.originOrbit.orbit.xCoordinate = :xCoordinate AND f.move.originOrbit.orbit.yCoordinate = :yCoordinate) " +
+                        " OR (f.move.destinationOrbit.system = :system AND f.move.destinationOrbit.orbit.xCoordinate = :xCoordinate AND f.move.destinationOrbit.orbit.yCoordinate = :yCoordinate) " +
+                        " AND  f.isDeleted = false"
         ),
 })
 @Entity
 @Table(name = "fleet")
 @AttributeOverride(name = "id", column = @Column(name = "idFleet"))
-public class Fleet extends AbstractEntityKey {
+public class Fleet extends Deletable {
 
     @Nonnull
     @NotNull
@@ -139,6 +147,10 @@ public class Fleet extends AbstractEntityKey {
     @Nonnull
     public Set<WarShip> getShips() {
         return ships;
+    }
+
+    public boolean isAlive() {
+        return getShips().stream().anyMatch(s -> !s.isDeleted());
     }
 
     /**

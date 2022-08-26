@@ -1,8 +1,8 @@
 package de.yuga.spacebattle.backend.entities.orbitals;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.enums.EStarClassType;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 
@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The star system which every action founds a place.
@@ -84,7 +85,7 @@ public class StarSystem extends AbstractEntityKey {
 
     @Nonnull
     public Set<Fleet> getFleets() {
-        return fleets;
+        return fleets.stream().filter(Fleet::isAlive).collect(Collectors.toSet());
     }
 
     public void setFleets(@Nonnull final Set<Fleet> fleets) {

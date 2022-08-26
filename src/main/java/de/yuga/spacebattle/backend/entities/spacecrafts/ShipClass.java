@@ -5,8 +5,8 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.combat.dto.RangeDefinition;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting;
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 @Table(name = "shipClass")
 @AttributeOverride(name = "id", column = @Column(name = "idShipClass"))
 @ShipValidator
-public class ShipClass extends AbstractEntityKey {
+public class ShipClass extends Deletable {
 
     @Nonnull
     @NotNull
@@ -112,11 +112,6 @@ public class ShipClass extends AbstractEntityKey {
     @OneToOne
     @JoinColumn(name = "idSuccessor", unique = true)
     private ShipClass successor;
-
-    /**
-     * Marks if the class is deleted.
-     */
-    private boolean isDeleted = false;
 
     public ShipClass() {
     }
@@ -480,14 +475,6 @@ public class ShipClass extends AbstractEntityKey {
      */
     public boolean hasNoSuccessor() {
         return !hasSuccessor();
-    }
-
-    public boolean isDeleted() {
-        return isDeleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
     }
 
     /**

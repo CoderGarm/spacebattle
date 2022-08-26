@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.rest.api.orbitals;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.enums.EResourceType;

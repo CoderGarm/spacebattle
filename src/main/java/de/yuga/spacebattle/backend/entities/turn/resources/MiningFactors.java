@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.backend.entities.turn.resources;
 
 
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 
 import javax.annotation.Nonnull;

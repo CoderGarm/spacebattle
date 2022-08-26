@@ -2,9 +2,9 @@ package de.yuga.spacebattle.backend.entities.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
+import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import org.hibernate.annotations.Check;

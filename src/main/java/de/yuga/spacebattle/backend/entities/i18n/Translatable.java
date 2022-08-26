@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.backend.entities.i18n;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.enums.ETranslatableType;
 import de.yuga.spacebattle.backend.enums.ETranslationTarget;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;

@@ -1,7 +1,7 @@
 package de.yuga.spacebattle;
 
 import com.google.common.reflect.ClassPath;
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.ReflectionUtils;
 

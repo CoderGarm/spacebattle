@@ -3,7 +3,7 @@ package de.yuga.spacebattle.backend.entities.turn.battle.combat;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.converter.CombatRoundConverter;
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
 
 import javax.annotation.Nonnull;

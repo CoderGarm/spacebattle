@@ -134,11 +134,11 @@ public class ShipClassService {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
 
         final Set<ShipClass> toDelete = new HashSet<>();
-        entity.setDeleted(true);
+        entity.setDeleted();
         toDelete.add(entity);
         ShipClass runner = entity;
         while (runner.getPredecessor() != null) {
-            runner.setDeleted(true);
+            runner.setDeleted();
             toDelete.add(runner);
             runner = runner.getPredecessor();
         }

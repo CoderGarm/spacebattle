@@ -1,8 +1,8 @@
 package de.yuga.spacebattle.backend.entities.constructables.spacecrafts;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 
@@ -11,12 +11,12 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @NamedQueries({
-        @NamedQuery(name = "WarShip.getAll", query = "SELECT a FROM WarShip a")
+        @NamedQuery(name = "WarShip.getAll", query = "SELECT a FROM WarShip a WHERE a.isDeleted = false")
 })
 @Entity
 @Table(name = "warShip")
 @AttributeOverride(name = "id", column = @Column(name = "idWarShip"))
-public class WarShip extends AbstractEntityKey {
+public class WarShip extends Deletable {
 
     @Nonnull
     @NotNull

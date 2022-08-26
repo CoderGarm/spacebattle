@@ -194,11 +194,13 @@ public class FleetService {
         final List<Fleet> toRemove = new ArrayList<>();
         final Iterable<Fleet> allById = fleetRepository.findAllById(fleets.stream().map(Fleet::getId).collect(Collectors.toList()));
         allById.forEach(fleet -> {
-            if (fleet.getShips().isEmpty()) {
+            if (!fleet.isAlive()) {
                 toRemove.add(fleet);
             }
         });
-        fleetRepository.deleteAll(toRemove.stream().map(Fleet::getId).collect(Collectors.toSet()));
+
+        toRemove.forEach(Fleet::setDeleted);
+        fleetRepository.saveAll(toRemove);
     }
 
     @Nonnull
@@ -297,9 +299,10 @@ public class FleetService {
         return clashes.get(0);
     }
 
-    public void saveAll(@Nonnull final List<Fleet> fleets) {
+    public List<Fleet> saveAll(@Nonnull final List<Fleet> fleets) {
         Preconditions.checkNotNull(fleets, "fleets shouldn't be null!");
 
-        fleetRepository.saveAll(fleets);
+        final Iterable<Fleet> saveAll = fleetRepository.saveAll(fleets);
+        return StreamSupport.stream(saveAll.spliterator(), false).collect(Collectors.toList());
     }
 }

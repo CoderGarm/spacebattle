@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.backend.entities;
+package de.yuga.spacebattle.backend.entities.misc;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;

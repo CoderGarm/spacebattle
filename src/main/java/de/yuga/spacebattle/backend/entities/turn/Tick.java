@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.backend.entities.turn;
 
 
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

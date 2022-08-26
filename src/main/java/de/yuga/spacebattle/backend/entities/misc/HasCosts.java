@@ -1,10 +1,10 @@
-package de.yuga.spacebattle.backend.entities.turn.resources;
+package de.yuga.spacebattle.backend.entities.misc;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.i18n.Translatable;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EResourceDemand;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.ETranslatableType;

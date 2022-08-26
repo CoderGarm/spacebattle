@@ -59,12 +59,14 @@ public class WarShipService {
     public void delete(@Nonnull final WarShip warShip) {
         Preconditions.checkNotNull(warShip, "warShip shouldn't be null!");
 
-        warShipRepository.delete(warShip);
+        warShip.setDeleted();
+        warShipRepository.save(warShip);
     }
 
     public void deleteAll(@Nonnull final Collection<WarShip> warShips) {
         Preconditions.checkNotNull(warShips, "warShips shouldn't be null!");
 
+        warShips.forEach(WarShip::setDeleted);
         warShipRepository.deleteAll(warShips);
     }
 }

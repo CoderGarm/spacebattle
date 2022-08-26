@@ -1,8 +1,8 @@
 package de.yuga.spacebattle.backend.entities.constructables.buildings;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
+import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
