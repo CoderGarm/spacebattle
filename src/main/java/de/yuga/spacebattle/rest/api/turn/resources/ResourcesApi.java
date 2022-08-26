@@ -152,7 +152,9 @@ public class ResourcesApi {
 
         final Planet planet = planetService.find(idPlanet);
         PreconditionWebHelper.checkNotNull(planet, "planet shouldn't be null!");
-        return ResponseEntity.ok(new ResourceDeposit(planet.getTicklyIncome()));
+
+        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit ticklyIncome = planet.getTicklyIncome();
+        return ResponseEntity.ok(new ResourceDeposit(ticklyIncome));
     }
 
     @PostMapping(value = COSTS_ENDPOINT)

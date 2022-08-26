@@ -42,7 +42,7 @@ public class ColonizationCostCalculator {
     public static ResourceAmount calculateColonizationCost(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
 
-        final long creditsFactors = planet.getMiningFactors().getResourceAmountByType(EResourceType.CREDITS); // todo change to distance to home planet
+        final long creditsFactors = planet.getMiningFactors().getMiningFactorByType(EResourceType.CREDITS); // todo change to distance to home planet
         final BigDecimal cost = BigDecimal.TEN.multiply(new BigDecimal(creditsFactors), ResourceDeposit.MATH_CONTEXT_INTEGER);
         return new ResourceAmount(EResourceType.CREDITS, cost.longValue());
     }

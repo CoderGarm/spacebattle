@@ -1,18 +1,15 @@
 package de.yuga.spacebattle.backend.entities.orbitals;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.resource.PopulationControlCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
-import de.yuga.spacebattle.backend.calculator.resource.TickOutputCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.turn.resources.MiningFactors;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.enums.EDepositType;
-import de.yuga.spacebattle.backend.enums.EPlanetClassType;
-import de.yuga.spacebattle.backend.enums.EProductionCategory;
-import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
@@ -23,10 +20,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -201,7 +195,7 @@ public class Planet extends AbstractEntityKey {
     }
 
     /**
-     * Checks the the planet is colonizable.
+     * Checks if the planet is colonizable.
      *
      * @return <code>true</code> if the planet is colonizable, <code>false</code> otherwise
      */
@@ -210,28 +204,23 @@ public class Planet extends AbstractEntityKey {
     }
 
     /**
-     * Checks if this planet has a building for this resource type.
+     * There are some strange rules running:<br>
+     * <br>
+     * All resources except {@link EResourceType#POPULATION} are normal, as always.<br>
+     * Applies to the pop:
+     * <ul>
+     *     <li>the amount of population is directly applied as resource type and ...
+     *     <ul>
+     *         <li>if it's below zero ... someone dies per tick</li>
+     *         <li>if it's above zero, it will be the amount of newborns per tick</li>
+     *     </ul>
+     *     </li>
+     *     <li>the education types represents a transition which is defined by the refinement type</li>
+     *     <li><b>except</b> if it's about {@link EEducationType#NONE} ... then it a a transition from the universe to population</li>
+     * </ul>
      *
-     * @param resourceType the resource type
-     * @return <code>true</code> if this planet has a construction for this type, <code>false</code> otherwise
+     * @return the income by tick
      */
-    public boolean hasProductionTarget(@Nonnull final EResourceType resourceType) {
-        Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
-
-        return getConstructions().stream().anyMatch(c -> resourceType == c.getBuilding().getProductionTarget());
-    }
-
-    /**
-     * Returns the population capacity of this planet.
-     *
-     * @return the maximum capacity
-     */
-    public long getPopulationCapacity() {
-        return getConstructionByResource(EResourceType.POPULATION).stream()
-                .filter(c -> EProductionCategory.CAPACITY == c.getBuilding().getProductionType().getProductionCategory())
-                .map(TickOutputCalculator::getTickOutputByLevelForPopulation).reduce(BigDecimal.ZERO, BigDecimal::add).longValue();
-    }
-
     @Nonnull
     public ResourceDeposit getTicklyIncome() {
 
@@ -240,19 +229,40 @@ public class Planet extends AbstractEntityKey {
                 .collect(Collectors.groupingBy(c -> c.getBuilding().getProductionTarget(),
                         Collectors.mapping(Function.identity(), Collectors.toList())));
 
-        // pop must be present
-        resourceConstructionsByType.remove(EResourceType.POPULATION);
+        final List<Construction> populationConstruction = resourceConstructionsByType.getOrDefault(EResourceType.POPULATION, new ArrayList<>());
+        final Map<ERefinementSequence, List<Construction>> constructionsByRefinementSequence = populationConstruction.stream()
+                .filter(c -> c.getBuilding().getProductionType().getProductionCategory() == EProductionCategory.REFINEMENT)
+                .collect(Collectors.groupingBy(c -> c.getBuilding().getProductionType().getRefinementSequence(),
+                        Collectors.mapping(Function.identity(), Collectors.toList())));
 
-        resourceConstructionsByType.forEach((eResourceType, constructions) -> {
-            final BigDecimal ticklyIncome = constructions.stream().map(c ->
-                    BigDecimal.valueOf(c.getBuilding().getBaseValue())
-                            .multiply(c.getBuilding().getIncreasingFactorPerLevel())
-                            .multiply(BigDecimal.valueOf(c.getLevel()))
-            ).reduce(BigDecimal.ZERO, BigDecimal::add);
+        for (final EResourceType eResourceType : EResourceType.valuesWithoutPopulation()) {
+            final List<Construction> constructions = resourceConstructionsByType.getOrDefault(eResourceType, new ArrayList<>());
+            final BigDecimal ticklyIncome = getProductionValuePerTick(constructions);
             income.setAbsoluteResourceValue(eResourceType, ticklyIncome.longValue());
+        }
+
+        constructionsByRefinementSequence.forEach((eRefinementSequence, refinementConstructions) -> {
+            final EEducationType educationType = eRefinementSequence.getProduct();
+            final BigDecimal ticklyIncome = getProductionValuePerTick(refinementConstructions);
+            income.setAbsolutePopulation(educationType, ticklyIncome.longValue());
         });
 
+        final long tickOutputForPopulation = PopulationControlCalculator.getTickOutputForPopulation(this);
+        income.setAbsolutePopulationValue(tickOutputForPopulation);
+        income.setAbsolutePopulation(EEducationType.NONE, tickOutputForPopulation);
+
         return income;
+    }
+
+    @Nonnull
+    private static BigDecimal getProductionValuePerTick(@Nonnull final List<Construction> constructions) {
+        Preconditions.checkNotNull(constructions, "constructions must not be empty");
+
+        return constructions.stream().map(c ->
+                BigDecimal.valueOf(c.getBuilding().getBaseValue())
+                        .multiply(c.getBuilding().getIncreasingFactorPerLevel())
+                        .multiply(BigDecimal.valueOf(c.getLevel()))
+        ).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     /**

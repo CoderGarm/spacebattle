@@ -102,12 +102,19 @@ public class ResourceDeposit extends AbstractEntityKey {
 
     /**
      * Returns the amount of resources by type.<br>
-     * In case of {@link EResourceType#POPULATION} it will return the total available amount of every {@link EEducationType}.
+     * In case of {@link EResourceType#POPULATION} it will return the total available amount of every {@link EEducationType}.<br>
+     * <b>ATTENTION:</b> If an amount for the population is set, it will be returned.<br>
+     * <b>SHOULD</b> only be used to display the increasing or decreasing population on a planet per tick.
      *
      * @param resourceType the resource type
      * @return the amount
      */
     public long getResourceAmountByType(@Nullable final EResourceType resourceType) {
+
+        if (resources.containsKey(resourceType)) {
+            return this.resources.get(resourceType);
+        }
+
         if (POPULATION == resourceType) {
             // just sum up the total of all kinds
             return humanResources.values().stream()
@@ -115,10 +122,11 @@ public class ResourceDeposit extends AbstractEntityKey {
                     .mapToLong(Long::longValue).sum();
 
         }
-        if (resources.containsKey(resourceType)) {
-            return this.resources.get(resourceType);
-        }
         return 0;
+    }
+
+    public boolean isPopulationSet() {
+        return resources.containsKey(POPULATION);
     }
 
     /**
@@ -230,7 +238,7 @@ public class ResourceDeposit extends AbstractEntityKey {
     }
 
     /**
-     * Sets an absolute value to the resource type. There is no validation inside so it can be below zero.<br>
+     * Sets an absolute value to the resource type. There is no validation inside, so it can be below zero.<br>
      * <b>Attention:</b> If it's about a {@link EResourceType#POPULATION} it will be ignored.<br>
      *
      * @param resourceType the resource type
@@ -243,6 +251,18 @@ public class ResourceDeposit extends AbstractEntityKey {
             return;
         }
         resources.put(resourceType, amount);
+    }
+
+    /**
+     * Sets the amount of the resource for {@link EResourceType#POPULATION}.<br>
+     * <br>
+     * Please keep in mind that this should be only used to represent the tickly income
+     * in order to make it clear that the population can decrease if no housing is present.
+     *
+     * @param amount the amount
+     */
+    public void setAbsolutePopulationValue(final long amount) {
+        resources.put(POPULATION, amount);
     }
 
     @Nonnull

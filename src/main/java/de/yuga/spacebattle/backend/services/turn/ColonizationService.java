@@ -2,10 +2,12 @@ package de.yuga.spacebattle.backend.services.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
+import de.yuga.spacebattle.backend.calculator.resource.PopulationControlCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
+import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -153,14 +155,7 @@ public class ColonizationService {
             throw new NotifyWebUserException("This colonization is to expensive.", payingPossible);
         }
         debitorDeposit.updateResource(costs.getRealResourceType(), costs.getAmount());
-        final Map<EEducationType, Long> requiredCrew = new HashMap<>();
-        requiredCrew.put(EEducationType.NONE, 200L);
-        requiredCrew.put(EEducationType.ENLISTED, 50L);
-        requiredCrew.put(EEducationType.OFFICER, 20L);
-        requiredCrew.put(EEducationType.SCHOOL, 100L);
-        requiredCrew.put(EEducationType.COLLEGE, 200L);
-        requiredCrew.put(EEducationType.UNIVERSITY, 500L);
-        final CrewRequirement crewRequirement = new CrewRequirement(requiredCrew, EDepositType.COSTS);
+        final CrewRequirement crewRequirement = getCrewRequirementForColonization();
 
         if (debitorDeposit.isReducingPopulationPossible(crewRequirement)) {
             debitorDeposit.updatePopulation(crewRequirement);
@@ -173,6 +168,18 @@ public class ColonizationService {
         planetService.save(mainPlanet);
         userService.save(user);
         return colonization;
+    }
+
+    @Nonnull
+    private static CrewRequirement getCrewRequirementForColonization() {
+        final Map<EEducationType, Long> requiredCrew = new HashMap<>();
+        requiredCrew.put(EEducationType.NONE, 200L);
+        requiredCrew.put(EEducationType.ENLISTED, 50L);
+        requiredCrew.put(EEducationType.OFFICER, 20L);
+        requiredCrew.put(EEducationType.SCHOOL, 100L);
+        requiredCrew.put(EEducationType.COLLEGE, 200L);
+        requiredCrew.put(EEducationType.UNIVERSITY, 500L);
+        return new CrewRequirement(requiredCrew, EDepositType.COSTS);
     }
 
     /**
@@ -195,18 +202,16 @@ public class ColonizationService {
         // set crew from the ship to the planet
         creditorDeposit.updatePopulation(requiredCrew);
 
+        final long miningFactor = planet.getMiningFactors().getMiningFactorByType(EResourceType.POPULATION);
+
         final List<Building> basicBuildings = buildingService.findBasicBuildings();
         basicBuildings.forEach(building -> {
             final int level;
-            if (EResourceType.POPULATION == building.getProductionTarget() && EProductionCategory.CAPACITY == building.getProductionType().getProductionCategory()) {
+            final ProductionType productionType = building.getProductionType();
+            final boolean idPopulationCapacity = EResourceType.POPULATION == productionType.getProductionTarget() && EProductionCategory.CAPACITY == productionType.getProductionCategory();
+            if (idPopulationCapacity) {
                 // calculate which level must a capacity construction have to suit all the people
-                final int baseValue = building.getBaseValue();
-                final BigDecimal increasingFactorPerLevel = BigDecimal.ONE.add(building.getIncreasingFactorPerLevel());
-                final BigDecimal levelTo = new BigDecimal(creditorDeposit.getCrewRequirement().getSumOfPopulation())
-                        .divide(new BigDecimal(baseValue).multiply(increasingFactorPerLevel), MATH_CONTEXT_MORE_PRECISION)
-                        .add(BigDecimal.ONE);
-                // be nice and add two levels - buildings on higher levels are not cheap
-                level = levelTo.intValue() + 2;
+                level = detectPopCapStartingLevel(creditorDeposit, building, miningFactor);
             } else {
                 level = 1;
             }
@@ -216,6 +221,22 @@ public class ColonizationService {
         owner.addKnownStarSystems(planet.getSystem());
         userService.save(owner);
         return planetService.save(planet);
+    }
+
+    private static int detectPopCapStartingLevel(@Nonnull final ResourceDeposit creditorDeposit, @Nonnull final Building building, final long miningFactor) {
+        Preconditions.checkNotNull(creditorDeposit, "creditorDeposit must not be empty");
+        Preconditions.checkNotNull(building, "building must not be empty");
+
+        final int baseValue = building.getBaseValue();
+        final BigDecimal increasingFactorPerLevel = BigDecimal.ONE.add(building.getIncreasingFactorPerLevel());
+        final long sumOfPopulation = creditorDeposit.getCrewRequirement().getSumOfPopulation();
+
+        final BigDecimal virtualSumOfPops = PopulationControlCalculator.getVirtualAmountOfPops(miningFactor, sumOfPopulation);
+        final BigDecimal levelTo = virtualSumOfPops
+                .divide(new BigDecimal(baseValue).multiply(increasingFactorPerLevel), MATH_CONTEXT_MORE_PRECISION)
+                .add(BigDecimal.ONE);
+        // be nice and add two levels - buildings on higher levels are not cheap
+        return levelTo.intValue() + 2;
     }
 
     /**

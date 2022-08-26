@@ -59,7 +59,7 @@ public class TickOutputCalculator {
         final int baseValue = building.getBaseValue();
         final BigDecimal absoluteOutputAtLevel = new BigDecimal(baseValue).multiply(absoluteIncreasingFactor);
         // calculate planetary mining factor
-        final long miningFactor = planet.getMiningFactors().getResourceAmountByType(productionTarget);
+        final long miningFactor = planet.getMiningFactors().getMiningFactorByType(productionTarget);
         final BigDecimal miningFactorAsPercent = BigDecimal.ONE.add(new BigDecimal(miningFactor).divide(BigDecimal.TEN.movePointRight(1), MATH_CONTEXT_INTEGER));
         // calculate absolute output of planet
         return absoluteOutputAtLevel.multiply(miningFactorAsPercent, MATH_CONTEXT_INTEGER).longValue();
@@ -96,20 +96,15 @@ public class TickOutputCalculator {
         Preconditions.checkArgument(EResourceType.POPULATION == building.getProductionTarget(), " must be population!");
 
         // calculate level-based increasing factor
-        final BigDecimal increasingFactorPerLevel = building.getIncreasingFactorPerLevel();
         BigDecimal increasingFactorAtLevel = BigDecimal.ZERO;
         if (level != 1) {
+            final BigDecimal increasingFactorPerLevel = BigDecimal.ONE.add(building.getIncreasingFactorPerLevel());
             increasingFactorAtLevel = increasingFactorPerLevel.multiply(new BigDecimal(level));
         }
         final BigDecimal absoluteIncreasingFactor = BigDecimal.ONE.add(increasingFactorAtLevel);
         // calculate absolute output of construction
         final BigDecimal baseValue = new BigDecimal(building.getBaseValue());
         final int divisor = building.getProductionType().getProductionCategory().getDivisor();
-        final BigDecimal absoluteOutputAtLevel = baseValue.divide(new BigDecimal(divisor), MATH_CONTEXT_MORE_PRECISION).multiply(absoluteIncreasingFactor);
-        // calculate planetary mining factor
-        final long miningFactor = planet.getMiningFactors().getResourceAmountByType(EResourceType.POPULATION);
-        final BigDecimal miningFactorAsPercent = BigDecimal.ONE.add(new BigDecimal(miningFactor).divide(BigDecimal.TEN.movePointRight(1), MATH_CONTEXT_MORE_PRECISION));
-        // calculate absolute output of planet
-        return absoluteOutputAtLevel.multiply(miningFactorAsPercent);
+        return baseValue.divide(new BigDecimal(divisor), MATH_CONTEXT_MORE_PRECISION).multiply(absoluteIncreasingFactor);
     }
 }

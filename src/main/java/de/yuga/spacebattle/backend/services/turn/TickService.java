@@ -244,7 +244,7 @@ public class TickService {
      * Calculates the tickly output of this planet.
      * This includes the amount of generated resources and the calculations of jobs which could be successfully ended.
      */
-    void tick(@Nonnull final Planet planet) {
+    void tick(@Nonnull Planet planet) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkState(planet.getOwner() != null, "The owner must be set, otherwise there is nothing to do.");
 
@@ -252,6 +252,7 @@ public class TickService {
         for (final EResourceType resourceType : EResourceType.values()) {
             updateResourceDeposit(planet, resourceType);
         }
+        planet = planetService.save(planet);
         for (Construction facility : constructions) {
             final EResourceType resourceType = facility.getBuilding().getProductionTarget();
             final Set<Job> toDelete = new HashSet<>();
@@ -334,7 +335,6 @@ public class TickService {
             case VIABLE:
                 // do school
                 PopulationControlCalculator.educatePopulation(planet);
-                planetService.save(planet);
                 // do birth
                 PopulationControlCalculator.populatePlanet(planet);
                 break;
@@ -352,7 +352,6 @@ public class TickService {
                 }
                 break;
         }
-        planetService.save(planet);
     }
 
     private String generateRandomName() {

@@ -44,30 +44,28 @@ public class PopulationControlCalculator {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
 
         final Set<Construction> constructionsByResource = planet.getConstructionByResource(EResourceType.POPULATION);
-        if (constructionsByResource.isEmpty()) {
-            // nothing to do
-            return 0;
-        }
-
         final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
         final long sumOfPopulation = resourceDeposit.getCrewRequirement().getSumOfPopulation();
         // collecting all possible producing building
         final Map<EProductionCategory, List<Construction>> constructionMap = getConstructionsMappedByProductionCategory(constructionsByResource);
-        final List<Construction> constructionsProducing = constructionMap.computeIfAbsent(EProductionCategory.PRODUCE, k -> new ArrayList<>());
-        final List<Construction> constructionsCapacity = constructionMap.computeIfAbsent(EProductionCategory.CAPACITY, k -> new ArrayList<>());
+        final List<Construction> reproductive = constructionMap.computeIfAbsent(EProductionCategory.PRODUCE, k -> new ArrayList<>());
+        final List<Construction> capacity = constructionMap.computeIfAbsent(EProductionCategory.CAPACITY, k -> new ArrayList<>());
         // for formula compare https://de.wikipedia.org/wiki/Fortpflanzungsstrategie
         // N equals no the total population (ignoring the non-reproductive population)
         // r equals to the maximal birth rate
         // K equals to the capacity
-        final BigDecimal N = new BigDecimal(sumOfPopulation);
+        final long miningFactor = planet.getMiningFactors().getMiningFactorByType(EResourceType.POPULATION);
+        final BigDecimal N = getVirtualAmountOfPops(miningFactor, sumOfPopulation);
         // sum up all the output of the producing and capacity buildings
-        final BigDecimal r = constructionsProducing.stream().map(TickOutputCalculator::getTickOutputByLevelForPopulation).reduce(BigDecimal.ZERO, BigDecimal::add);
+        final BigDecimal r = reproductive.stream().map(TickOutputCalculator::getTickOutputByLevelForPopulation).reduce(BigDecimal.ZERO, BigDecimal::add);
         if (r.compareTo(BigDecimal.ONE) > 0) {
             // how to make sure that r is below 1?
             throw new NotifyWebUserException("chef, you have to repair that!");
         }
 
-        final BigDecimal K = constructionsCapacity.stream().map(TickOutputCalculator::getTickOutputByLevelForPopulation).reduce(BigDecimal.ZERO, BigDecimal::add);
+        final BigDecimal K = capacity.stream()
+                .map(TickOutputCalculator::getTickOutputByLevelForPopulation)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         if (N.compareTo(BigDecimal.ZERO) == 0) {
             // no bum no sum
@@ -81,6 +79,28 @@ public class PopulationControlCalculator {
         final BigDecimal capacityLimitFactor = BigDecimal.ONE.subtract(N.divide(K, MATH_CONTEXT_MORE_PRECISION));
         // rounding down to long
         return increasingFactorByCurrentPopulation.multiply(capacityLimitFactor, MATH_CONTEXT_INTEGER).longValue();
+    }
+
+    /**
+     * Calculates the virtual amount of people on a planet.<br>
+     * The virtual amount is the real amount modified about the possibility of a planet to hold human life.
+     *
+     * @param miningFactor    the population mining factor
+     * @param sumOfPopulation the real amount of people on a planet
+     * @return the virtual amount
+     */
+    @Nonnull
+    public static BigDecimal getVirtualAmountOfPops(final long miningFactor, final long sumOfPopulation) {
+        BigDecimal popModifier = new BigDecimal(miningFactor).divide(BigDecimal.valueOf(100), MATH_CONTEXT_MORE_PRECISION);
+        final int compareTo = popModifier.compareTo(BigDecimal.ONE);
+        if (compareTo < 0) {
+            // bei 0,7 -> 1,3
+            popModifier = BigDecimal.ONE.add(BigDecimal.ONE.subtract(popModifier));
+        } else if (compareTo > 0) {
+            // bei 1,8 -> 0,8
+            popModifier = popModifier.subtract(BigDecimal.ONE);
+        }
+        return new BigDecimal(sumOfPopulation).multiply(popModifier);
     }
 
     /**
