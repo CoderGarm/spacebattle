@@ -156,7 +156,7 @@ public class JwtTokenUtil {
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setExpiration(generateExpirationDate(5))
+                .setExpiration(generateExpirationDate(300))
                 .signWith(HS_256, SECRET_KEY_BASE64_ENCODED)
                 .compact();
     }
