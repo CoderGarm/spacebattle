@@ -4,20 +4,28 @@
 echo '1. archive old deployment'
 echo '2. deploy new stuff'
 
+versionFile="spacebattle/version.txt"
+if [ ! -f "$versionFile" ]; then
+  echo "no version file specified"
+  exit 1
+fi
+
+version="$(cat $versionFile)"
+echo "deploying version $version"
+
 # archive
 date=$(date +%F)
 time=$(date +%T)
-mkdir -p /home/karsten/archive/"$date"/backend/
-cp /home/karsten/spacebattle/spacebattle-0.0.1-SNAPSHOT.jar /home/karsten/archive/"$date"/backend/"$time"_spacebattle-0.0.1-SNAPSHOT.jar
-echo 'backend archived in ' + /home/karsten/archive/"$date"/backend/"$time"_spacebattle-0.0.1-SNAPSHOT.jar.tar.gz
+mkdir -p /home/karsten/archive/"$date"/backend/"$time"/
+mv /home/karsten/spacebattle/spacebattle-*.jar /home/karsten/archive/"$date"/backend/"$time"/spacebattle-*.jar
+echo 'backend archived in ' + /home/karsten/archive/"$date"/backend/"$time"/
 
 # deployment
 echo "start deployment"
 cd /home/karsten/spacebattle/ || exit
 echo "stop server"
 ./stopSB.sh
-cp /home/karsten/uploadTarget/spacebattle-0.0.1-SNAPSHOT.jar /home/karsten/spacebattle/;
+cp /home/karsten/uploadTarget/spacebattle-"$version".jar /home/karsten/spacebattle/
 echo "start server"
 ./startSB.sh
 echo 'deployment finished'
-tail -f /home/karsten/spacebattle.log/spacebattle.log

@@ -9,6 +9,7 @@ import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import de.yuga.spacebattle.rest.dto.ApplicationInfo;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.Tick;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -50,14 +52,33 @@ public class AdminApi extends BaseApi {
     @Nonnull
     private final TranslatableService translatableService;
 
+    @Nonnull
+    private final String applicationVersion;
+
     @Autowired
     public AdminApi(@Nonnull final TickService tickController,
-                    @Nonnull final TranslatableService translatableService) {
+                    @Nonnull final TranslatableService translatableService,
+                    @Nonnull @Value("${sb.version:nope}") final String version) {
         Preconditions.checkNotNull(tickController, "tickC shouldn't be null!");
         Preconditions.checkNotNull(translatableService, "translatableService must not be empty");
+        Preconditions.checkNotNull(version, "version must not be empty");
 
         this.tickController = tickController;
         this.translatableService = translatableService;
+        this.applicationVersion = version;
+    }
+
+    @GetMapping(value = "/version")
+    @Operation(summary = "Get the current application version.", operationId = "getVersion",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApplicationInfo.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getVersion() {
+        return ResponseEntity.ok(new ApplicationInfo(applicationVersion));
     }
 
     @GetMapping(value = "/doTick")
