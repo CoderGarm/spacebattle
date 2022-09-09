@@ -11,6 +11,7 @@ import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.dto.constructables.buildings.PlannedConstruction;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstructionSelection;
+import de.yuga.spacebattle.rest.dto.enums.EEducationType;
 import de.yuga.spacebattle.rest.dto.enums.EResourceType;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass;
@@ -44,6 +45,7 @@ public class ResourcesApi {
     @Nonnull
     public static final String ENDPOINT = "resources";
     private static final String RESOURCE_TYPES_ENDPOINT = "types";
+    private static final String HUMAN_RESOURCE_TYPES_ENDPOINT = "educationTypes";
     private static final String MINING_FACTORS_ENDPOINT = "miningFactors";
     private static final String RESOURCE_DEPOSIT_ENDPOINT = "resourceDeposit";
     private static final String INCOME_ENDPOINT = "income";
@@ -103,7 +105,26 @@ public class ResourcesApi {
             }
     )
     public ResponseEntity<?> getEResourceTypes() {
-        return ResponseEntity.ok(Arrays.stream(de.yuga.spacebattle.backend.enums.EResourceType.values()).map(EResourceType::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(Arrays.stream(de.yuga.spacebattle.backend.enums.EResourceType.values())
+                .map(EResourceType::new)
+                .collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = HUMAN_RESOURCE_TYPES_ENDPOINT)
+    @Operation(summary = "Get all EEducationTypes.", operationId = "getEEducationTypes",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = EEducationType.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getEEducationTypes() {
+        return ResponseEntity.ok(Arrays.stream(de.yuga.spacebattle.backend.enums.EEducationType.values())
+                .map(EEducationType::new)
+                .collect(Collectors.toList()));
     }
 
     @GetMapping(value = MINING_FACTORS_ENDPOINT + "/{idPlanet}")
