@@ -1,6 +1,5 @@
 package de.yuga.spacebattle.rest.dto.turn;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
@@ -8,6 +7,9 @@ import de.yuga.spacebattle.rest.dto.account.UserJson;
 import de.yuga.spacebattle.rest.dto.buildings.Building;
 import de.yuga.spacebattle.rest.dto.constructables.buildings.Construction;
 import de.yuga.spacebattle.rest.dto.enums.EResourceType;
+import de.yuga.spacebattle.rest.dto.orbitals.Planet;
+import de.yuga.spacebattle.rest.dto.researches.Research;
+import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -17,13 +19,21 @@ import javax.annotation.Nullable;
 public class Job {
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The owner.")
     private UserJson user;
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The facility.")
     private Construction facility;
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The planet where the facility is at.")
+    private Planet facilityPlanet;
+
+    @JsonProperty
     @Schema(required = true, description = "The left duration of this job.")
     private long ticksLeft;
 
@@ -31,6 +41,7 @@ public class Job {
      * The resource type which must be invested to run the job.
      */
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The type of costs.")
     private EResourceType resourceType;
 
@@ -48,12 +59,12 @@ public class Job {
 
     @Nullable
     @JsonProperty
-    @Schema(description = "If this if a research job.")
-    private String researchTarget;
+    @Schema(description = "If this is a research job.")
+    private Research researchTarget;
 
     @Nullable
     @JsonProperty
-    @Schema(description = "If this if a building job.")
+    @Schema(description = "If this is a building job.")
     private Building buildingTarget;
 
     @Nullable
@@ -63,8 +74,8 @@ public class Job {
 
     @Nullable
     @JsonProperty
-    @Schema(description = "If this if a shipyard job.")
-    private String shipYardTarget;
+    @Schema(description = "If this is a shipyard job.")
+    private ShipClass shipYardTarget;
 
     @Nullable
     @JsonProperty
@@ -81,6 +92,7 @@ public class Job {
 
         this.user = new UserJson(job.getOwner());
         this.facility = new Construction(job.getFacility(), languageCode);
+        this.facilityPlanet = new Planet(job.getFacility().getPlanet());
         this.ticksLeft = job.getJobDoneAtZero();
         final Constructable constructable = job.getConstructable();
         this.resourceType = new EResourceType(constructable.getResourceType());
@@ -91,72 +103,13 @@ public class Job {
             this.buildingTarget = new Building(constructable.getBuilding(), languageCode);
         }
         if (isResearchJob) {
-            this.researchTarget = constructable.getResearch().getName(languageCode);
+            this.researchTarget = new Research(constructable.getResearch(), languageCode);
         }
         if (isShipyardJob) {
-            this.shipYardTarget = constructable.getShipClass().getName();
+            this.shipYardTarget = new ShipClass(constructable.getShipClass(), languageCode);
 
         }
         this.targetLevel = constructable.getTargetLevel();
         this.amountShips = constructable.getAmountShips();
-    }
-
-    @Nonnull
-    public UserJson getUser() {
-        return user;
-    }
-
-    @Nonnull
-    public Construction getFacility() {
-        return facility;
-    }
-
-    public long getTicksLeft() {
-        return ticksLeft;
-    }
-
-    @Nonnull
-    public EResourceType getResourceType() {
-        return resourceType;
-    }
-
-    @JsonIgnore
-    public boolean isBuildingTarget() {
-        return isBuildingJob;
-    }
-
-    @JsonIgnore
-    public boolean isShipyardJob() {
-        return isShipyardJob;
-    }
-
-    @JsonIgnore
-    public boolean isResearchTarget() {
-        return isResearchJob;
-    }
-
-    @Nullable
-    public String getResearchTarget() {
-        return researchTarget;
-    }
-
-    @Nullable
-    public Building getBuildingTarget() {
-        return buildingTarget;
-    }
-
-    @Nullable
-    public Integer getTargetLevel() {
-        return targetLevel;
-    }
-
-    @Nullable
-    public String getShipYardTarget() {
-        return shipYardTarget;
-    }
-
-    @Nullable
-    public Integer getAmountShips() {
-        return amountShips;
     }
 }
