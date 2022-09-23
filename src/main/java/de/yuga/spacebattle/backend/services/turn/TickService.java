@@ -176,12 +176,12 @@ public class TickService {
         for (final Colonization colonization : colonizations) {
             int doneAtZero = colonization.getDoneAtZero();
             doneAtZero--;
+            colonization.setDoneAtZero(doneAtZero);
 
             if (doneAtZero < 1) {
                 colonizationService.colonizePlanet(colonization);
                 colonizationService.delete(colonization);
             } else {
-                colonization.setDoneAtZero(doneAtZero);
                 colonizationService.save(colonization);
             }
         }
