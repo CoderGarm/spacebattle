@@ -17,7 +17,7 @@ echo "deploying version $version"
 date=$(date +%F)
 time=$(date +%T)
 mkdir -p /home/karsten/archive/"$date"/backend/"$time"/
-mv /home/karsten/spacebattle/spacebattle-*.jar /home/karsten/archive/"$date"/backend/"$time"/spacebattle-*.jar
+mv /home/karsten/spacebattle/spacebattle-*.jar /home/karsten/archive/"$date"/backend/"$time"/
 echo 'backend archived in ' + /home/karsten/archive/"$date"/backend/"$time"/
 
 # deployment

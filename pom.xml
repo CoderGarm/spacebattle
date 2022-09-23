@@ -5,30 +5,31 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.0</version>
+        <version>2.7.4</version>
         <relativePath/>
     </parent>
     <groupId>de.yuga</groupId>
     <artifactId>spacebattle</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
     <name>spacebattle</name>
     <description>spacebattle rework</description>
     <properties>
         <java.version>11</java.version>
-        <jackson.version>2.13.1</jackson.version>
+        <jackson.version>2.13.4</jackson.version>
         <gson.version>2.9.0</gson.version>
         <jaxb-api.version>2.4.0-b180830.0359</jaxb-api.version>
         <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
-        <guava.version>31.0.1-jre</guava.version>
-        <logstash-logback-encoder.version>7.0.1</logstash-logback-encoder.version>
+        <guava.version>31.1-jre</guava.version>
+        <logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
         <jjwt.version>0.9.1</jjwt.version>
         <commons-io.version>2.11.0</commons-io.version>
-        <junit-platform-suite-engine.version>1.8.2</junit-platform-suite-engine.version>
+        <junit-platform-suite-engine.version>1.9.0</junit-platform-suite-engine.version>
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
         <commons-math3.version>3.6.1</commons-math3.version>
         <commons-codec.version>1.15</commons-codec.version>
         <springdoc-openapi.version>1.6.8</springdoc-openapi.version>
+        <springdoc-openapi-core.version>1.1.49</springdoc-openapi-core.version>
     </properties>
 
     <dependencies>
@@ -36,10 +37,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -85,7 +82,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-core</artifactId>
-            <version>1.1.49</version>
+            <version>${springdoc-openapi-core.version}</version>
         </dependency>
 
         <dependency>
@@ -195,6 +192,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${project.parent.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -219,6 +217,7 @@
                     <plugin>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
+                        <version>${project.parent.version}</version>
                         <executions>
                             <execution>
                                 <id>start-spring-boot</id>
