@@ -1,0 +1,1 @@
+alter table forumThread add column lastChanged datetime(6) not null default now();

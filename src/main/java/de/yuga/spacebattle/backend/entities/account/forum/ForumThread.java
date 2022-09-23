@@ -42,6 +42,10 @@ public class ForumThread extends AbstractEntityKey {
 
     @Nonnull
     @NotNull
+    private LocalDateTime lastChanged;
+
+    @Nonnull
+    @NotNull
     @OneToMany
     @JoinColumn(name = "idForumThread")
     private final Set<ForumMessage> messages = new HashSet<>();
@@ -60,6 +64,7 @@ public class ForumThread extends AbstractEntityKey {
         this.title = title;
         this.description = description;
         this.createdAt = LocalDateTime.now();
+        this.lastChanged = createdAt;
     }
 
     public ForumThread(@Nonnull final Forum forum, @Nonnull final CreateForumThread createForumThread) {
@@ -84,6 +89,17 @@ public class ForumThread extends AbstractEntityKey {
     @Nonnull
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public void setLastChanged(@Nonnull final LocalDateTime lastChanged) {
+        Preconditions.checkNotNull(lastChanged, "lastChanged must not be empty");
+
+        this.lastChanged = lastChanged;
+    }
+
+    @Nonnull
+    public LocalDateTime getLastChanged() {
+        return lastChanged;
     }
 
     @Override

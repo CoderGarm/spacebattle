@@ -35,6 +35,8 @@ public class ChatMessage {
     private LocalDateTime sentAt;
 
     @Nullable
+    @JsonSerialize(using = ToStringSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @Schema(description = "The timestamp on which the message was read.")
     private LocalDateTime receivedAt;
 

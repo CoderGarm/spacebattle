@@ -182,13 +182,15 @@ public class ForumApi extends BaseApi {
         final List<Integer> idForumThreads = idThreadByIdForum.getOrDefault(idForum, new ArrayList<>());
         final List<de.yuga.spacebattle.backend.entities.account.forum.ForumThread> forumThreads = forumService.findForumThreads(idForumThreads);
 
-        final List<ForumThread> result = forumThreads.stream().map(forumThread -> {
-            final List<IdToId> messageIdToIds = forumService.getMessageIdsForThread(forumThread.getId());
-            final List<Integer> messageIds = messageIdToIds.stream().map(IdToId::getIdPayload).collect(Collectors.toList());
-            final ForumThread thread = new ForumThread(forumThread);
-            thread.enrichMessageIds(messageIds);
-            return thread;
-        }).collect(Collectors.toList());
+        final List<ForumThread> result = forumThreads.stream()
+                .sorted(Comparator.comparing(de.yuga.spacebattle.backend.entities.account.forum.ForumThread::getLastChanged).reversed())
+                .map(forumThread -> {
+                    final List<IdToId> messageIdToIds = forumService.getMessageIdsForThread(forumThread.getId());
+                    final List<Integer> messageIds = messageIdToIds.stream().map(IdToId::getIdPayload).collect(Collectors.toList());
+                    final ForumThread thread = new ForumThread(forumThread);
+                    thread.enrichMessageIds(messageIds);
+                    return thread;
+                }).collect(Collectors.toList());
         return ResponseEntity.ok(result);
     }
 
@@ -285,7 +287,7 @@ public class ForumApi extends BaseApi {
         final de.yuga.spacebattle.backend.entities.account.forum.ForumThread forumThread = forumService.save(new de.yuga.spacebattle.backend.entities.account.forum.ForumThread(forum, createForumThread));
         final String firstMessage = createForumThread.getFirstMessage();
         if (StringUtils.isNotBlank(firstMessage)) {
-            forumService.save(new de.yuga.spacebattle.backend.entities.account.forum.ForumMessage(forumThread, user, firstMessage));
+            forumService.createForumMessage(forumThread, user, firstMessage);
         }
         return ResponseEntity.ok(new ForumThread(forumThread));
     }
@@ -308,7 +310,7 @@ public class ForumApi extends BaseApi {
         PreconditionWebHelper.checkNotNull(forumThread, "forumThread shouldn't be null!");
         final User user = validateAccessToForum(idUser, forumThread.getForum());
 
-        forumService.save(new de.yuga.spacebattle.backend.entities.account.forum.ForumMessage(forumThread, user, threadMessage.getMessage()));
+        forumService.createForumMessage(forumThread, user, threadMessage.getMessage());
         return ResponseEntity.ok(true);
     }
 

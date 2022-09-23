@@ -78,6 +78,21 @@ public class ForumService {
         return forumThreadRepository.findAllIdThreadForForums(idForums);
     }
 
+    /**
+     * Creates a forum message and sets the last changed timestamp to the corresponding thread.
+     */
+    public void createForumMessage(@Nonnull final ForumThread forumThread,
+                                   @Nonnull final User author,
+                                   @Nonnull final String message) {
+        Preconditions.checkNotNull(forumThread, "messageThread shouldn't be null!");
+        Preconditions.checkNotNull(author, "author shouldn't be null!");
+        Preconditions.checkNotNull(message, "message shouldn't be null!");
+
+        final ForumMessage saved = save(new ForumMessage(forumThread, author, message));
+        forumThread.setLastChanged(saved.getSentAt());
+        save(forumThread);
+    }
+
     @Nullable
     public ForumThread findForumThread(final int idForumThread) {
         return forumThreadRepository.findById(idForumThread).orElse(null);
