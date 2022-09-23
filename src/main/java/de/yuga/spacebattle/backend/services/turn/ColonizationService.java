@@ -192,7 +192,7 @@ public class ColonizationService {
     @Transactional(rollbackFor = Exception.class)
     public Planet colonizePlanet(@Nonnull final Colonization colonization) {
         Preconditions.checkNotNull(colonization, "colonization shouldn't be null!");
-        Preconditions.checkState(!(colonization.getDoneAtZero() > 0), "colonization cannot be done if the ship isn't in the orbit!");
+        Preconditions.checkState(colonization.getDoneAtZero() > 0, "colonization cannot be done if the ship isn't in the orbit!");
 
         final User owner = colonization.getUser();
         final Planet planet = colonization.getTarget();

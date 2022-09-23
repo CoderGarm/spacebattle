@@ -289,8 +289,8 @@ public class TickService {
                             workInProgress.setLevel(targetLevel);
                         } else {
                             workInProgress = new Construction(planet, building, 1);
-                            constructionService.save(workInProgress);
                         }
+                        constructionService.save(workInProgress);
                         break;
                     case ORBITAL_CONSTRUCTION:
 
