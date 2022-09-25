@@ -41,8 +41,12 @@ import static de.yuga.spacebattle.backend.calculator.FittingUtils.DEFENSIVE_FITT
 @NamedQueries({
         @NamedQuery(name = "Fleet.getAll",
                 query = "SELECT f FROM Fleet f WHERE f.isDeleted = false"),
+        @NamedQuery(name = "Fleet.getAllWithMovement",
+                query = "SELECT f FROM Fleet f WHERE f.move IS NOT NULL AND f.owner.id = :idUser AND f.isDeleted = false"),
         @NamedQuery(name = "Fleet.getAllWithoutMovement",
                 query = "SELECT f FROM Fleet f WHERE f.move IS NULL AND f.isDeleted = false"),
+        @NamedQuery(name = "Fleet.getAllWithoutInterstellarMovement",
+                query = "SELECT f FROM Fleet f WHERE f.move.originOrbit.system = f.move.destinationOrbit.system AND f.isDeleted = false"),
         @NamedQuery(name = "Fleet.getAllFleetsWithInterstellarMovement",
                 query = "SELECT f FROM Fleet f WHERE f.move IS NOT NULL AND f.move.originOrbit.system <> f.move.destinationOrbit.system AND  f.isDeleted = false"),
         @NamedQuery(name = "Fleet.getAllByUser",

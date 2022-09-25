@@ -9,6 +9,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
@@ -31,8 +32,26 @@ public class CustomFleetRepositoryImpl implements CustomFleetRepository {
 
     @Nonnull
     @Override
+    @Transactional
+    public Set<Fleet> findAllFleetsWithoutInterstellarMovement() {
+        final List<Fleet> fleets = em.createNamedQuery("Fleet.getAllWithoutInterstellarMovement", Fleet.class).getResultList();
+        final List<Fleet> fleets1 = em.createNamedQuery("Fleet.getAllWithoutMovement", Fleet.class).getResultList();
+        fleets.addAll(fleets1);
+        return new HashSet<>(fleets);
+    }
+
+    @Nonnull
+    @Override
     public List<Fleet> findAllFleetsWithoutMovement() {
         return em.createNamedQuery("Fleet.getAllWithoutMovement", Fleet.class).getResultList();
+    }
+
+    @Nonnull
+    @Override
+    public List<Fleet> findAllFleetsWithMovement(final int idUser) {
+        return em.createNamedQuery("Fleet.getAllWithMovement", Fleet.class)
+                .setParameter("idUser", idUser)
+                .getResultList();
     }
 
     @Nonnull

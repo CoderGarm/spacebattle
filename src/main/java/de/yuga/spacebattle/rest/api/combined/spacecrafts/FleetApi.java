@@ -46,6 +46,7 @@ public class FleetApi extends BaseApi {
     public static final String ENDPOINT = "fleet";
     private static final String FLEET_PER_SYSTEM_ENDPOINT = "inSystem";
     private static final String FLEET_PER_USER_ENDPOINT = "perUser";
+    private static final String MOVING_FLEET_PER_USER_ENDPOINT = "movingPerUser";
     private static final String MERGE_FLEET_ENDPOINT = "merge";
     private static final String MOVE_FLEET_ENDPOINT = "move";
     private static final String MOVE_FLEETS_ENDPOINT = "moveFleets";
@@ -147,11 +148,10 @@ public class FleetApi extends BaseApi {
     )
     public ResponseEntity<?> getFleetDistribution() {
 
-        final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> allFleets = fleetService.findAllFleetsWithoutMovement();
+        final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> allFleets = fleetService.findAllFleetsWithoutInterstellarMovement();
         final Map<StarSystem, Set<User>> userBySystem = allFleets
                 .stream()
                 .filter(fleet -> fleet.getOrbit() != null)
-                .filter(de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet::isFTLCapable)
                 .collect(Collectors.groupingBy(fleet -> {
                             assert fleet.getOrbit() != null;
                             return fleet.getOrbit().getSystem();
@@ -184,6 +184,26 @@ public class FleetApi extends BaseApi {
                     .collect(Collectors.toList()));
         }
         throw new NotifyWebUserException("No user found.");
+    }
+
+    @GetMapping(value = MOVING_FLEET_PER_USER_ENDPOINT)
+    @Operation(summary = "Get all moving fleets of an owner.", operationId = "getMovingFleetsForUser",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Fleet.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getMovingFleetsForUser() {
+
+        final int idUser = getIdUser();
+        return ResponseEntity.ok(fleetService.findAllFleetsWithMovement(idUser).stream()
+                .map(f -> new Fleet(f, getPreferredLanguage()))
+                .collect(Collectors.toList()));
+
     }
 
     @PostMapping(value = MERGE_FLEET_ENDPOINT + "/{idUser}")
