@@ -253,7 +253,7 @@ public class TickService {
             updateResourceDeposit(planet, resourceType);
         }
         planet = planetService.save(planet);
-        for (Construction facility : constructions) {
+        for (final Construction facility : constructions) {
             final EResourceType resourceType = facility.getBuilding().getProductionTarget();
             final Set<Job> toDelete = new HashSet<>();
             final Set<Job> jobs = facility.getJobs();
@@ -263,50 +263,15 @@ public class TickService {
                     continue;
                 }
                 // realize job result if job is done
-                final Constructable constructable = job.getConstructable();
-                final Integer targetLevel;
-                final User owner = planet.getOwner();
                 switch (resourceType) {
                     case RESEARCH:
-
-                        final Research research = constructable.getResearch();
-                        targetLevel = constructable.getTargetLevel();
-                        if (research == null || targetLevel == null) {
-                            throw new NotifyWebUserException("Oh fuck, this should not happen while research whatever!");
-                        }
-                        researchService.addResearch(owner, List.of(research));
+                        tickResearch(planet, job);
                         break;
                     case CONSTRUCTION:
-
-                        final Building building = constructable.getBuilding();
-                        targetLevel = constructable.getTargetLevel();
-                        if (building == null || targetLevel == null) {
-                            throw new NotifyWebUserException("Oh fuck, this should not happen while constructing buildings!");
-                        }
-                        Construction workInProgress = constructions.stream()
-                                .filter(c -> c.getBuilding().equals(building)).findFirst().orElse(null);
-                        if (workInProgress != null) {
-                            workInProgress.setLevel(targetLevel);
-                        } else {
-                            workInProgress = new Construction(planet, building, 1);
-                        }
-                        constructionService.save(workInProgress);
+                        tickConstruction(planet, constructions, toDelete, job);
                         break;
                     case ORBITAL_CONSTRUCTION:
-
-                        final ShipClass shipClass = constructable.getShipClass();
-                        final Integer amountShips = constructable.getAmountShips();
-                        if (shipClass == null || amountShips == null || amountShips == 0) {
-                            throw new NotifyWebUserException("This should never happen while build a fleet!");
-                        }
-                        final Fleet fleet = fleetService.save(new Fleet("Fresh Build @ " + planet.getName(), owner, new FleetOrbit(planet.getOrbit(), planet.getSystem())));
-                        final Set<WarShip> newFleetComposition = new HashSet<>();
-                        for (int i = 0; i <= amountShips; i++) {
-                            final String randomName = generateRandomName();
-                            final WarShip warShip = new WarShip(randomName, planet, fleet, shipClass);
-                            newFleetComposition.add(warShip);
-                        }
-                        warShipService.saveAll(newFleetComposition);
+                        tickShipyard(planet, job);
                         break;
                 }
                 toDelete.add(job);
@@ -314,6 +279,78 @@ public class TickService {
             jobs.removeIf(toDelete::contains);
         }
         planetService.save(planet);
+    }
+
+    private void tickShipyard(@Nonnull final Planet planet, @Nonnull final Job job) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(job, "job must not be empty");
+
+        final User owner = planet.getOwner();
+        if (owner == null) {
+            throw new NotifyWebUserException("There must be a planet's owner.");
+        }
+        final Constructable constructable = job.getConstructable();
+        final ShipClass shipClass = constructable.getShipClass();
+        final Integer amountShips = constructable.getAmountShips();
+        if (shipClass == null || amountShips == null || amountShips == 0) {
+            throw new NotifyWebUserException("This should never happen while build a fleet!");
+        }
+        Fleet fleet = new Fleet("Fresh Build @ " + planet.getName(), owner, new FleetOrbit(planet.getOrbit(), planet.getSystem()));
+        fleet = fleetService.save(fleet);
+        final Set<WarShip> newFleetComposition = new HashSet<>();
+        for (int i = 0; i <= amountShips; i++) {
+            final String randomName = generateRandomName();
+            final WarShip warShip = new WarShip(randomName, planet, fleet, shipClass);
+            newFleetComposition.add(warShip);
+        }
+        warShipService.saveAll(newFleetComposition);
+    }
+
+    private void tickConstruction(@Nonnull final Planet planet,
+                                  @Nonnull final Set<Construction> constructions,
+                                  @Nonnull final Set<Job> toDelete,
+                                  @Nonnull final Job job) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(constructions, "constructions must not be empty");
+        Preconditions.checkNotNull(toDelete, "toDelete must not be empty");
+        Preconditions.checkNotNull(job, "job must not be empty");
+
+        final Constructable constructable = job.getConstructable();
+        final Integer targetLevel = constructable.getTargetLevel();
+        final Building building = constructable.getBuilding();
+        if (building == null || targetLevel == null) {
+            throw new NotifyWebUserException("Oh fuck, this should not happen while constructing buildings!");
+        }
+        Construction workInProgress = constructions.stream()
+                .filter(c -> c.getBuilding().equals(building)).findFirst().orElse(null);
+        if (workInProgress != null) {
+            if (workInProgress.getLevel() == targetLevel) {
+                // just delete the job - the last tick wasn't processed correctly
+                LOGGER.warn("Job already processed: " + job.getForWarnMessage());
+                toDelete.add(job);
+            } else {
+                workInProgress.setLevel(targetLevel);
+            }
+        } else {
+            workInProgress = new Construction(planet, building, 1);
+        }
+        constructionService.save(workInProgress);
+    }
+
+    private void tickResearch(@Nonnull final Planet planet, @Nonnull final Job job) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(job, "job must not be empty");
+
+        final Constructable constructable = job.getConstructable();
+        final User owner = planet.getOwner();
+        if (owner == null) {
+            throw new NotifyWebUserException("There must be a planet's owner.");
+        }
+        final Research research = constructable.getResearch();
+        if (research == null) {
+            throw new NotifyWebUserException("Oh fuck, this should not happen while research whatever!");
+        }
+        researchService.addResearch(owner, List.of(research));
     }
 
     /**

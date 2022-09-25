@@ -3,9 +3,12 @@ package de.yuga.spacebattle.backend.entities.turn;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import org.hibernate.annotations.Check;
 
@@ -130,5 +133,30 @@ public class Job extends AbstractEntityKey {
     @Override
     public int hashCode() {
         return id * 31;
+    }
+
+    public String getForWarnMessage() {
+        String constructableRepresentation = "";
+        final Building building = constructable.getBuilding();
+        if (building != null) {
+            constructableRepresentation = "idBuilding: " + building.getId();
+        }
+        final Research research = constructable.getResearch();
+        if (research != null) {
+            constructableRepresentation = "idResearch: " + research.getId();
+        }
+        final ShipClass shipClass = constructable.getShipClass();
+        if (shipClass != null) {
+            final Integer amountShips = constructable.getAmountShips();
+            constructableRepresentation = amountShips + "x ";
+            constructableRepresentation += "idShipClass: " + shipClass.getId();
+        }
+        return "Job{" +
+                "owner:" + owner.getId() +
+                ", facility:" + facility.getId() +
+                ", constructable: {" + constructableRepresentation + "}" +
+                ", jobDoneAtZero:" + jobDoneAtZero +
+                ", id:" + id +
+                '}';
     }
 }
