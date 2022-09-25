@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
@@ -34,24 +33,19 @@ public class JobApi extends BaseApi {
 
     @Nonnull
     public static final String ENDPOINT = "job";
-    private static final String JOB_RUNNING_AT_PLANET_ENDPOINT = "runningAt";
+    private static final String JOB_RUNNING_AT_ENDPOINT = "runningAt";
 
     @Nonnull
     private final JobService jobService;
 
-    @Nonnull
-    private final PlanetService planetService;
-
     @Autowired
-    public JobApi(@Nonnull final JobService jobService, @Nonnull final PlanetService planetService) {
+    public JobApi(@Nonnull final JobService jobService) {
         Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
-        Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
 
         this.jobService = jobService;
-        this.planetService = planetService;
     }
 
-    @GetMapping(value = JOB_RUNNING_AT_PLANET_ENDPOINT + "/{idPlanet}")
+    @GetMapping(value = JOB_RUNNING_AT_ENDPOINT + "/{idPlanet}")
     @Operation(summary = "Get all jobs which are running on this planet.", operationId = "getJobsOnPlanet",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -64,6 +58,25 @@ public class JobApi extends BaseApi {
     )
     public ResponseEntity<?> getJobsOnPlanet(@PathVariable("idPlanet") final int idPlanet) {
         return ResponseEntity.ok(jobService.findAllJobsByPlanet(idPlanet).stream()
+                .map(j -> new Job(j, getPreferredLanguage()))
+                .collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = JOB_RUNNING_AT_ENDPOINT)
+    @Operation(summary = "Get all jobs which are running for the questioning user.", operationId = "getJobsForEmpire",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Job.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getJobsForEmpire() {
+
+        final int idUser = getIdUser();
+        return ResponseEntity.ok(jobService.findAllJobsForUser(idUser).stream()
                 .map(j -> new Job(j, getPreferredLanguage()))
                 .collect(Collectors.toList()));
     }

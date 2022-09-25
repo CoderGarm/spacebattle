@@ -20,6 +20,9 @@ public interface CustomJobRepository {
     @Nonnull
     List<Job> findAllJobsByPlanet(final int idPlanet);
 
+    @Nonnull
+    List<Job> findAllJobsForUser(final int idUser);
+
     boolean isJobActiveFor(@Nonnull Research research);
 
     @Nullable

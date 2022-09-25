@@ -321,4 +321,9 @@ public class JobService {
     public List<Job> findAllJobsByPlanet(final int idPlanet) {
         return jobRepository.findAllJobsByPlanet(idPlanet);
     }
+
+    @Nonnull
+    public List<Job> findAllJobsForUser(final int idUser) {
+        return jobRepository.findAllJobsForUser(idUser);
+    }
 }

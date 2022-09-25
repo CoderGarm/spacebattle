@@ -42,6 +42,14 @@ public class CustomJobRepositoryImpl implements CustomJobRepository {
                 .setParameter("idPlanet", idPlanet).getResultList();
     }
 
+    @Nonnull
+    @Override
+    public List<Job> findAllJobsForUser(final int idUser) {
+        return em.createNamedQuery("Job.getAllByOwner", Job.class)
+                .setParameter("idUser", idUser)
+                .getResultList();
+    }
+
     @Override
     public boolean isJobActiveFor(@Nonnull final Research research) {
         Preconditions.checkNotNull(research, "research shouldn't be null!");
@@ -60,4 +68,5 @@ public class CustomJobRepositoryImpl implements CustomJobRepository {
                 .setParameter("research", researches)
                 .getResultList();
     }
+
 }
