@@ -106,12 +106,24 @@ public class JobService {
         return Objects.requireNonNullElse(jobRepository.isJobActiveFor(researches), new ArrayList<>());
     }
 
+    public void delete(@Nonnull final Collection<Job> jobs) {
+        Preconditions.checkNotNull(jobs, "jobs must not be empty");
+
+        jobRepository.deleteAll(jobs);
+    }
+
+    public void delete(@Nonnull final Job job) {
+        Preconditions.checkNotNull(job, "job must not be empty");
+
+        jobRepository.delete(job);
+    }
+
     /**
      * Returns the job cost if they were paied - no costs and no costs back for researches!
      *
      * @param entity the job to delete
      */
-    public void delete(@Nullable final Job entity) {
+    public void refundJobAndDelete(@Nullable final Job entity) {
         if (entity == null || entity.getId() < 1) {
             return;
         }

@@ -1,8 +1,10 @@
 package de.yuga.spacebattle.rest.dto.spacecrafts;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetCapabilities;
 import de.yuga.spacebattle.rest.dto.spacecrafts.details.AlignedFitting;
 import de.yuga.spacebattle.rest.dto.spacecrafts.details.AmmunitionFitting;
 import de.yuga.spacebattle.rest.dto.spacecrafts.details.SupportFitting;
@@ -87,6 +89,11 @@ public class ShipClass {
     @Schema(required = true, description = "If this class is deleted.")
     private boolean isDeleted = false;
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The effect values per module type.")
+    private FleetCapabilities shipClassCapabilities;
+
     public ShipClass() {
     }
 
@@ -125,6 +132,7 @@ public class ShipClass {
         }
         this.mark = shipClass.getMark();
         this.isDeleted = shipClass.isDeleted();
+        this.shipClassCapabilities = new FleetCapabilities(shipClass);
     }
 
     @Nullable

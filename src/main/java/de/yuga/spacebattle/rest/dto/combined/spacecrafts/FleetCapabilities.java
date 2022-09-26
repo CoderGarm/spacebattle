@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class FleetCapabilities {
 
     @Nonnull
-    @Schema(required = true, description = "The effect value per module type.")
+    @Schema(required = true, description = "The effect values per module type.")
     private final List<CapabilityValue> capabilities = new ArrayList<>();
 
     @JsonIgnore
@@ -40,6 +40,18 @@ public class FleetCapabilities {
         effectValueByModuleType = Arrays.stream(EModuleType.values())
                 .collect(Collectors.toMap(Function.identity(), value -> BigDecimal.ZERO));
         setValue(fleet.getShipsByClass());
+        final List<CapabilityValue> capabilityValues = effectValueByModuleType.entrySet().stream().map(CapabilityValue::new).collect(Collectors.toList());
+        capabilities.addAll(capabilityValues);
+    }
+
+    public FleetCapabilities(@Nonnull final ShipClass shipClass) {
+        Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
+
+        effectValueByModuleType = Arrays.stream(EModuleType.values())
+                .collect(Collectors.toMap(Function.identity(), value -> BigDecimal.ZERO));
+        final Map<ShipClass, Integer> shipClasses = new HashMap<>();
+        shipClasses.put(shipClass, 1);
+        setValue(shipClasses);
         final List<CapabilityValue> capabilityValues = effectValueByModuleType.entrySet().stream().map(CapabilityValue::new).collect(Collectors.toList());
         capabilities.addAll(capabilityValues);
     }

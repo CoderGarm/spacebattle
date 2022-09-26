@@ -890,6 +890,7 @@
 
     create table fleet (
        idFleet integer not null auto_increment,
+        isDeleted bit not null default false,
         name varchar(255) not null,
         xCoordinateLocation varchar(255),
         yCoordinateLocation varchar(255),
@@ -933,6 +934,7 @@
        idForumThread integer not null auto_increment,
         createdAt datetime(6) not null,
         description varchar(255) not null,
+        lastChanged datetime(6) not null,
         title varchar(255) not null,
         idForum integer not null,
         primary key (idForumThread)
@@ -1245,7 +1247,7 @@
 
     create table shipClass (
        idShipClass integer not null auto_increment,
-        isDeleted bit not null,
+        isDeleted bit not null default false,
         name varchar(30) not null,
         idArmor integer,
         idElectronicWarfare integer,
@@ -1362,6 +1364,7 @@
 
     create table warShip (
        idWarShip integer not null auto_increment,
+        isDeleted bit not null default false,
         name varchar(255) not null,
         idFleet integer not null,
         idShipClass integer not null,

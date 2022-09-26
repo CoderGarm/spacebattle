@@ -12,7 +12,7 @@ public class Deletable extends AbstractEntityKey {
     /**
      * Marks if the class is deleted.
      */
-    @Column(columnDefinition = "false")
+    @Column(columnDefinition = "bit not null default false")
     private boolean isDeleted = false;
 
     public Deletable() {
