@@ -99,7 +99,7 @@ public class ColonizationApi {
         if (p == null) {
             throw new NotifyWebUserException("There must be a planet to colonize, as I said.");
         }
-        final User user = userService.getWithKnownStarSystems(idUser);
+        final User user = userService.findWithKnownStarSystems(idUser);
         if (user == null) {
             throw new NotifyWebUserException("There must be a user who buys the info.");
         }

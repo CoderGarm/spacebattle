@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -298,7 +299,10 @@ public class TickService {
             toDeleteLogging.addAll(toDelete);
         }
         if (!toDeleteLogging.isEmpty()) {
-            final String jobsToDelete = toDeleteLogging.stream().map(String::valueOf).collect(Collectors.joining(", "));
+            final String jobsToDelete = toDeleteLogging.stream()
+                    .map(AbstractEntityKey::getId)
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(", "));
             log(planet, "Removing jobs " + jobsToDelete + ".");
         }
 

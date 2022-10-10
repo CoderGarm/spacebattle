@@ -1,5 +1,7 @@
 package de.yuga.spacebattle.rest.dto.account;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -36,5 +38,14 @@ public class AuthRequest {
     @Nonnull
     public String getPassword() {
         return password;
+    }
+
+    @Override
+    public String toString() {
+        final Gson gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .create();
+        final AuthRequest clone = new AuthRequest(username, "******");
+        return gson.toJson(clone);
     }
 }

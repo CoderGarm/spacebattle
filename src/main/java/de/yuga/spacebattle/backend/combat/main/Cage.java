@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.Quadrant;
 import de.yuga.spacebattle.backend.calculator.resource.CoursePlot;
+import de.yuga.spacebattle.backend.combat.BattleLogger;
 import de.yuga.spacebattle.backend.combat.dto.*;
 import de.yuga.spacebattle.backend.combat.main.handler.CombatHandler;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
@@ -37,6 +38,9 @@ public class Cage implements Future<Cage> {
 
     @Nonnull
     private final static Logger LOGGER = LoggerFactory.getLogger(Cage.class);
+
+    @Nonnull
+    private final BattleLogger battleLogger;
 
     /**
      * The multiplier for defining the initial cage diameter by the maximum fleet's weapon ranges.
@@ -112,11 +116,12 @@ public class Cage implements Future<Cage> {
     @SuppressWarnings({"FieldMayBeFinal", "FieldCanBeLocal"})
     private boolean forceDone = false;
 
-    public Cage(@Nonnull final FleetClash fleetClash) {
+    public Cage(@Nonnull final FleetClash fleetClash, @Nonnull final BattleLogger battleLogger) {
         Preconditions.checkNotNull(fleetClash, "fleetClash shouldn't be null!");
+        Preconditions.checkNotNull(battleLogger, "battleLogger must not be empty");
 
-        currentCombatRound = new CombatRound();
         this.fleetClash = fleetClash;
+        this.battleLogger = battleLogger;
         this.participatingFleets = fleetClash.getParticipatingFleets();
 
         final Set<User> users = participatingFleets.stream().map(Fleet::getOwner).collect(Collectors.toSet());
@@ -129,6 +134,7 @@ public class Cage implements Future<Cage> {
         fleetOne = participatingFleets.get(0);
         fleetTwo = participatingFleets.get(1);
 
+        currentCombatRound = new CombatRound();
         initiateCombat();
         combatHandler = new CombatHandler(this);
     }
@@ -206,23 +212,10 @@ public class Cage implements Future<Cage> {
         }
     }
 
-
-    private boolean logTimeStampForCombatPhases = false;
-
     private void log(String msg, final Long start, final Long end) {
-        if (logTimeStampForCombatPhases) {
-            logMessage(msg, start, end);
-        }
+        battleLogger.logMessage(msg, start, end);
     }
 
-    public static void logMessage(String msg, final Long start, final Long end) {
-        if (start != null && end != null) {
-            final double duration = (double) (end - start) / 1000;
-            System.out.println("\t" + msg + "\t\t - duration: " + duration + " seconds");
-        } else {
-            System.out.println("\t" + msg);
-        }
-    }
 
     /**
      * Runs the combat round completely.
@@ -266,6 +259,7 @@ public class Cage implements Future<Cage> {
         } else {
             // state the last round results
             participatingFleets.forEach(fleet -> getCurrentStateByFleet(fleet).historize());
+            // todo run combat until every missile is gone
             // todo create the last combat round with the resulting setup
         }
         end = System.currentTimeMillis();

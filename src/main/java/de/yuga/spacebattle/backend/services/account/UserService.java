@@ -97,12 +97,12 @@ public class UserService {
 
 
     @Nullable
-    public User getWithKnownStarSystems(final int idUser) {
+    public User findWithKnownStarSystems(final int idUser) {
         return userRepository.findWithKnownStarSystems(idUser);
     }
 
     @Nullable
-    public User getWithKnownStarSystems(@Nonnull final User user) {
+    public User findWithKnownStarSystems(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
 
         return userRepository.findWithKnownStarSystems(user.getId());

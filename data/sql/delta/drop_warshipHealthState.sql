@@ -1,0 +1,1 @@
+alter table hitLog drop column warshipHealthState;

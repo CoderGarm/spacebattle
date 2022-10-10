@@ -10,7 +10,6 @@ import de.yuga.spacebattle.backend.enums.EHitArea;
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.util.UUID;
 
 @Entity
@@ -34,14 +33,6 @@ public class HitLog extends CombatRoundKey {
     @ManyToOne(optional = false)
     @JoinColumn(name = "idTarget", updatable = false, nullable = false)
     private WarShip warShip;
-
-    /**
-     * The string representation of the target's health state.
-     */
-    @NotNull
-    @Nonnull
-    @Size(max = 500)
-    private String warshipHealthState;
 
     /**
      * The applied damage.
@@ -88,7 +79,6 @@ public class HitLog extends CombatRoundKey {
         this.attackedPart = hitLog.getAttackedPart();
         this.isAlive = hitLog.isAlive();
         this.isFightingCapable = hitLog.isFightingCapable();
-        this.warshipHealthState = warshipHealthState.asString();
     }
 
     @Nonnull
@@ -99,11 +89,6 @@ public class HitLog extends CombatRoundKey {
     @Nonnull
     public WarShip getWarShip() {
         return warShip;
-    }
-
-    @Nonnull
-    public String getWarshipHealthState() {
-        return warshipHealthState;
     }
 
     public long getDamageValue() {

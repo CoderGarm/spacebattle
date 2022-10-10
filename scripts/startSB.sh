@@ -21,7 +21,7 @@ java \
 -Dserver.port=8081 \
 -Dspring.datasource.username=sbdbuser \
 -Dspring.datasource.password=JYUiAsUkRQ9xQCeM \
--Dlogging.battle-log.write=false \
+-Dlogging.battle-log.write=true \
 -Dlogging.file.name=/home/karsten/spacebattle/log/spacebattle.log \
 -jar spacebattle-"$version".jar & echo $! > ./pid.file &
 

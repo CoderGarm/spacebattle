@@ -16,7 +16,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static de.yuga.spacebattle.backend.combat.main.Cage.logMessage;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTestProfile
@@ -34,6 +33,15 @@ public class BattleServiceTest {
 
     @Autowired
     private BattleReportService battleReportService;
+
+    private static void logMessage(String msg, final Long start, final Long end) {
+        if (start != null && end != null) {
+            final double duration = (double) (end - start) / 1000;
+            System.out.println("\t" + msg + "\t\t - duration: " + duration + " seconds");
+        } else {
+            System.out.println("\t" + msg);
+        }
+    }
 
     @Test
     public void testRunBattles() {

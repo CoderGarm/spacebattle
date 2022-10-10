@@ -69,7 +69,7 @@ public class BattleService {
         final List<CompletableFuture<Cage>> futures = new ArrayList<>();
         for (FleetClash fleetClash : fleetClashes) {
             final CompletableFuture<Cage> future = CompletableFuture.supplyAsync(() -> {
-                final Cage cage = new Cage(fleetClash);
+                final Cage cage = new Cage(fleetClash, battleLogger);
                 cage.handleCombatPhases();
                 return cage;
             });
@@ -100,7 +100,7 @@ public class BattleService {
         }
 
         final CompletableFuture<Cage> future = CompletableFuture.supplyAsync(() -> {
-            final Cage cage = new Cage(fleetClash);
+            final Cage cage = new Cage(fleetClash, battleLogger);
             cage.handleCombatPhases();
             return cage;
         });
@@ -108,8 +108,7 @@ public class BattleService {
         try {
             // runs the fight
             final Cage cage = future.get();
-            final BattleReport battleReport = processFightingResult(today, cage.getBattleResult());
-            battleReportService.save(battleReport);
+            processFightingResult(today, cage.getBattleResult());
         } catch (final ExecutionException | InterruptedException e) {
             e.printStackTrace();
             throw new NotifyWebUserException(e.getMessage());
@@ -125,8 +124,10 @@ public class BattleService {
         warShipService.deleteAll(losses);
         fleetService.deleteFleetsWithoutShips(battleResult.getFleetClash().getParticipatingFleets());
 
-        battleLogger.logBattleResult(battleResult);
+        BattleReport battleReport = new BattleReport(latest, battleResult);
+        battleReport = battleReportService.save(battleReport);
+        battleLogger.logBattleResult(battleReport, battleResult);
 
-        return new BattleReport(latest, battleResult);
+        return battleReport;
     }
 }

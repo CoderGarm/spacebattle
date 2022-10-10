@@ -24,10 +24,6 @@ public class HitLog {
     @Schema(required = true, description = "The attacked warship.")
     private de.yuga.spacebattle.rest.dto.constructables.spacecrafts.WarShip warShip;
 
-    @Nullable
-    @Schema(required = true, description = "The string representation of the target's health state.")
-    private String warshipHealthState;
-
     @Schema(required = true, description = "The applied damage.")
     private long damageValue;
 
@@ -58,7 +54,6 @@ public class HitLog {
         this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound(), input.getCombatPhase());
         this.damageDealer = input.getDamageDealer();
         this.warShip = new WarShip(input.getWarShip(), languageCode);
-        this.warshipHealthState = input.getWarshipHealthState();
         this.damageValue = input.getDamageValue();
         this.state = input.getState();
         this.attackedPart = input.getAttackedPart();
@@ -91,15 +86,6 @@ public class HitLog {
 
     public void setWarShip(@Nullable final WarShip warShip) {
         this.warShip = warShip;
-    }
-
-    @Nullable
-    public String getWarshipHealthState() {
-        return warshipHealthState;
-    }
-
-    public void setWarshipHealthState(@Nullable final String warshipHealthState) {
-        this.warshipHealthState = warshipHealthState;
     }
 
     public long getDamageValue() {

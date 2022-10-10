@@ -4,7 +4,12 @@ import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
+import de.yuga.spacebattle.rest.AuthRequestAdapter;
+import de.yuga.spacebattle.rest.BattleReportAdapter;
+import de.yuga.spacebattle.rest.LocalDateTimeAdapter;
 import de.yuga.spacebattle.rest.api.EndpointDefinition;
+import de.yuga.spacebattle.rest.dto.account.AuthRequest;
+import de.yuga.spacebattle.rest.dto.turn.battle.BattleReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,20 +19,28 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 @Service
 public class LoggingService {
 
+    public static final Gson GSON = new GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+            .registerTypeAdapter(AuthRequest.class, new AuthRequestAdapter())
+            .registerTypeAdapter(BattleReport.class, new BattleReportAdapter())
+            .setPrettyPrinting()
+            .create();
     @Nonnull
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingService.class);
 
     private final boolean logLevel;
 
-    public LoggingService(@Nonnull @Value("${logging.rest.calls}:'false'") final String logLevel) {
+    public LoggingService(@Nonnull @Value("${logging.rest.calls:false}") final String logLevel) {
         Preconditions.checkNotNull(logLevel, "logLevel shouldn't be null!");
 
         this.logLevel = Boolean.parseBoolean(logLevel);
@@ -103,11 +116,11 @@ public class LoggingService {
 
         if (body != null) {
             try {
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                String jsonInString = gson.toJson(body);
+                String jsonInString = GSON.toJson(body);
                 stringBuilder.append("\n" + jsonInString);
             } catch (final JsonIOException e) {
                 stringBuilder.append("\nException while parsing body: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }

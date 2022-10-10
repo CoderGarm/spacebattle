@@ -18,11 +18,12 @@ import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
+import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
 import de.yuga.spacebattle.backend.enums.EHitArea;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -41,8 +41,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 @Service
+@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class BattleLogger {
 
     @Nonnull
@@ -50,33 +50,51 @@ public class BattleLogger {
 
     private final boolean logBattleResult;
 
-    @Nullable
-    private BufferedWriter bw;
+    private static final String DIR = System.getProperty("java.io.tmpdir");
+
+    private static final String PS = System.getProperty("file.separator");
 
     @Autowired
-    public BattleLogger(@Nonnull @Value("${logging.battle-log.write}:'true'") final String logBattleResult) {
+    public BattleLogger(@Nonnull @Value("${logging.battle-log.write:true}") final String logBattleResult) {
         Preconditions.checkNotNull(logBattleResult, "logBattleResult shouldn't be null!");
 
         this.logBattleResult = Boolean.parseBoolean(logBattleResult);
-        openStream();
     }
 
-    private void openStream() {
+    public void logMessage(String msg, final Long start, final Long end) {
+        if (logBattleResult) {
+            if (start != null && end != null) {
+                final double duration = (double) (end - start) / 1000;
+                LOGGER.info("\t" + msg + "\t\t - duration: " + duration + " seconds");
+            } else {
+                LOGGER.info("\t" + msg);
+            }
+        }
+    }
+
+    private BufferedWriter openStream(@Nonnull final BattleReport battleReport) {
+        Preconditions.checkNotNull(battleReport, "battleReport shouldn't be null!");
+
         try {
-            FileUtils.deleteQuietly(new File("/tmp/battleResult.txt"));
-            final FileWriter fw = new FileWriter("/tmp/battleResult.txt", true);
-            bw = new BufferedWriter(fw);
+            final int id = battleReport.getId();
+            final Tick tick = battleReport.getTick();
+            final String path = DIR + PS + "battleReports" + PS + "tick_" + tick.getId();
+            final boolean mkdirs = new File(path).mkdirs();
+            if (mkdirs) {
+                final FileWriter fw = new FileWriter(path + PS + "battleReport_" + id + ".txt", true);
+                return new BufferedWriter(fw);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             throw new NotifyWebUserException("Universe is going down on open" + e.getMessage());
         }
+        return null;
     }
 
-    private void write(final String msg) {
+    private void write(@Nonnull final BufferedWriter bw, final String msg) {
+        Preconditions.checkNotNull(bw, "bw must not be empty");
+
         try {
-            if (bw == null) {
-                openStream();
-            }
             bw.write(msg);
             bw.newLine();
         } catch (IOException e) {
@@ -85,24 +103,28 @@ public class BattleLogger {
         }
     }
 
-    private void closeAndWrite() {
+    private void closeAndWrite(@Nonnull final BufferedWriter bw) {
+        Preconditions.checkNotNull(bw, "bw must not be empty");
         try {
-            if (bw != null) {
-                bw.close();
-            }
+            bw.close();
         } catch (IOException e) {
             e.printStackTrace();
             throw new NotifyWebUserException("Universe is going down on close " + e.getMessage());
-        } finally {
-            bw = null;
         }
     }
 
 
-    public void logBattleResult(@Nonnull final BattleResult battleResult) {
+    public void logBattleResult(@Nonnull final BattleReport battleReport, @Nonnull final BattleResult battleResult) {
+        Preconditions.checkNotNull(battleReport, "battleReport must not be empty");
         Preconditions.checkNotNull(battleResult, "battleResult shouldn't be null!");
 
         if (!logBattleResult) {
+            return;
+        }
+
+        final BufferedWriter bw = openStream(battleReport);
+        if (bw == null) {
+            LOGGER.info("Battle result could not be logged.");
             return;
         }
 
@@ -150,31 +172,31 @@ public class BattleLogger {
             final List<MissileSalvo> missileSalvos = missileSalvosByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
             final List<MovementAction> movementActions = movementsByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
 
-            final boolean someThingHappens = !movementActions.isEmpty() || !hitLogsOfCombatRound.isEmpty() || !beamVolleys.isEmpty() || !missileSalvos.isEmpty();
-            if (someThingHappens) {
-                logMessageWithPretendingCombatRound(combatRound, "Combat round in result");
+            final boolean somethingHappens = !movementActions.isEmpty() || !hitLogsOfCombatRound.isEmpty() || !beamVolleys.isEmpty() || !missileSalvos.isEmpty();
+            if (somethingHappens) {
+                logMessageWithPretendingCombatRound(bw, combatRound, "Combat round in result");
             }
             for (final ECombatPhase combatPhase : combatPhases) {
                 final List<ECombatPhase.ECombatSubPhase> combatSubPhases = ECombatPhase.ECombatSubPhase.getByCombatPhase(combatPhase);
                 for (final ECombatPhase.ECombatSubPhase combatSubPhase : combatSubPhases) {
-                    if (someThingHappens) {
-                        logMessageWithPretendingCombatRound(combatRound, combatSubPhase.getTitle());
+                    if (somethingHappens) {
+                        logMessageWithPretendingCombatRound(bw, combatRound, combatSubPhase.getTitle());
                     }
                     switch (combatSubPhase) {
                         case MOVEMENT_PHASE:
-                            movementActions.forEach(m -> logMovement(cage, statesByRound, m));
+                            movementActions.forEach(m -> logMovement(bw, cage, statesByRound, m));
                             break;
                         case ELOKA_PHASE:
                             final List<MissileSalvo> destroyedWhileEloka = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
-                            destroyedWhileEloka.forEach(this::logElokaHitMissile);
+                            destroyedWhileEloka.forEach(d -> logElokaHitMissile(bw, d));
                             break;
                         case COUNTER_MISSILE_PHASE:
                             final List<MissileSalvo> destroyedWhileCounter = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
-                            destroyedWhileCounter.forEach(this::logCounterMissileHitMissile);
+                            destroyedWhileCounter.forEach(d -> logCounterMissileHitMissile(bw, d));
                             break;
                         case MISSILE_MOVEMENT_PHASE:
                             final List<MissileSalvo> missileMovement = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
-                            missileMovement.forEach(this::logHandleMissileMovement);
+                            missileMovement.forEach(m -> logHandleMissileMovement(bw, m));
                             break;
                         case BEAM_FIRE_INCOMING_PHASE:
                             final List<BeamVolley> appliedBeams = beamVolleys.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
@@ -184,7 +206,7 @@ public class BattleLogger {
                                     .collect(Collectors.groupingBy(hitLog -> (BeamVolley) hitLog.getDamageDealer(),
                                             Collectors.mapping(Function.identity(), Collectors.toList())));
 
-                            appliedBeams.forEach(beamVolley -> logBeamVolleyHit(beamVolley, hitLogByBeamVolley.computeIfAbsent(beamVolley, k -> new ArrayList<>())));
+                            appliedBeams.forEach(beamVolley -> logBeamVolleyHit(bw, beamVolley, hitLogByBeamVolley.computeIfAbsent(beamVolley, k -> new ArrayList<>())));
                             break;
                         case MISSILE_FIRE_INCOMING_PHASE:
                             final List<MissileSalvo> detonatedMissiles = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
@@ -194,28 +216,28 @@ public class BattleLogger {
                                     .collect(Collectors.groupingBy(hitLog -> (MissileSalvo) hitLog.getDamageDealer(),
                                             Collectors.mapping(Function.identity(), Collectors.toList())));
 
-                            detonatedMissiles.forEach(missileSalvo -> logMissileDetonation(missileSalvo, hitLogByMissileSalvo.computeIfAbsent(missileSalvo, k -> new ArrayList<>())));
+                            detonatedMissiles.forEach(missileSalvo -> logMissileDetonation(bw, missileSalvo, hitLogByMissileSalvo.computeIfAbsent(missileSalvo, k -> new ArrayList<>())));
                             break;
                         case BEAM_FIRE_PHASE:
                             final List<BeamVolley> releasedBeamVolleys = beamVolleys.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
-                            releasedBeamVolleys.forEach(this::logBeamVolleyRelease);
+                            releasedBeamVolleys.forEach(r -> logBeamVolleyRelease(bw, r));
                             break;
                         case MISSILE_FIRE_PHASE:
                             final List<MissileSalvo> releasedMissileSalvos = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
-                            releasedMissileSalvos.forEach(this::logMissileRelease);
+                            releasedMissileSalvos.forEach(r -> logMissileRelease(bw, r));
                             break;
                     }
                 }
             }
-            if (someThingHappens) {
-                logCombatRoundState(combatRound, !it.hasNext());
+            if (somethingHappens) {
+                logCombatRoundState(bw, combatRound, !it.hasNext());
             }
         }
-        logLosses(losses, fleetClash);
-        closeAndWrite();
+        logLosses(bw, losses, fleetClash);
+        closeAndWrite(bw);
     }
 
-    private void logLosses(final Set<WarShip> losses, final FleetClash fleetClash) {
+    private void logLosses(@Nonnull final BufferedWriter bw, final Set<WarShip> losses, final FleetClash fleetClash) {
         final StringBuilder sb = new StringBuilder();
         if (!losses.isEmpty()) {
             final FleetOrbit clashOrbit = fleetClash.getOrbit();
@@ -231,25 +253,25 @@ public class BattleLogger {
             sb.append("Losses of battle at " + pos + "\n");
         }
         losses.forEach(loss -> logLoss(loss, sb));
-        write(sb.toString());
+        write(bw, sb.toString());
     }
 
-    private void logMessageWithPretendingCombatRound(final CombatRound currentCombatRound, final String msg) {
+    private void logMessageWithPretendingCombatRound(@Nonnull final BufferedWriter bw, final CombatRound currentCombatRound, final String msg) {
         final String x = "#" + currentCombatRound.getNo() + ": " + msg;
-        write(x);
+        write(bw, x);
     }
 
-    private void logCombatRoundState(final CombatRound currentCombatRound, final boolean isDone) {
+    private void logCombatRoundState(@Nonnull final BufferedWriter bw, final CombatRound currentCombatRound, final boolean isDone) {
         final String msg = "current round '" + currentCombatRound.getNo() + "' - " + (isDone ? " ends battle " : " goes on");
-        write(msg);
+        write(bw, msg);
     }
 
     @SuppressWarnings("unused")
-    private void logMessage(final String msg) {
-        write(msg);
+    private void logMessage(@Nonnull final BufferedWriter bw, final String msg) {
+        write(bw, msg);
     }
 
-    private void logHandleMissileMovement(final MissileSalvo volley) {
+    private void logHandleMissileMovement(@Nonnull final BufferedWriter bw, final MissileSalvo volley) {
         final CombatRound combatRound = volley.getCombatRound();
         final Fleet actor = volley.getActor();
         final Orbit newPos = volley.getPosition();
@@ -260,10 +282,10 @@ public class BattleLogger {
         final int toTravel = DistanceCalculator.getCombatRoundsToTravel(currentDistance, rangePerCombatRound);
         final String distanceAsString = currentDistance.toString();
         final String msg = "#" + combatRound.getNo() + " missile salvo " + volley.getUuid() + " of " + actor.getName() + " containing of " + amount + " and still have to travel " + toTravel + " ticks over " + distanceAsString + ".";
-        write(msg);
+        write(bw, msg);
     }
 
-    private void logMissileRelease(final MissileSalvo volley) {
+    private void logMissileRelease(@Nonnull final BufferedWriter bw, final MissileSalvo volley) {
         final CombatRound combatRound = volley.getCombatRound();
         final Fleet actor = volley.getActor();
         final Fleet target = volley.getTarget();
@@ -271,20 +293,20 @@ public class BattleLogger {
         final Map<Missile, Integer> currentAmountByType = volley.getMissileSalvoHealthState().getCurrentAmountByType();
         final int amount = currentAmountByType.values().stream().mapToInt(Integer::intValue).sum();
         final String msg = "#" + combatRound.getNo() + " release missile salvo " + volley.getUuid() + " from " + actor.getName() + " against " + target.getName() + " with " + amount + " missiles over " + distanceString;
-        write(msg);
+        write(bw, msg);
     }
 
-    private void logBeamVolleyRelease(final BeamVolley volley) {
+    private void logBeamVolleyRelease(@Nonnull final BufferedWriter bw, final BeamVolley volley) {
         final CombatRound combatRound = volley.getCombatRound();
         final Fleet actor = volley.getActor();
         final Fleet target = volley.getTarget();
         final int amount = volley.getFiredShots().size();
         final String distanceString = volley.getInitialDistance().toString();
         final String msg = "#" + combatRound.getNo() + " release beam volley " + volley.getUuid() + " from " + actor.getName() + " attacks " + target.getName() + " with " + amount + " shots over " + distanceString;
-        write(msg);
+        write(bw, msg);
     }
 
-    private void logMissileDetonation(final MissileSalvo volley, final List<HitLog> hitLogs) {
+    private void logMissileDetonation(@Nonnull final BufferedWriter bw, final MissileSalvo volley, final List<HitLog> hitLogs) {
         final CombatRound combatRound = volley.getCombatRound();
         final Fleet actor = volley.getActor();
         final Fleet target = volley.getTarget();
@@ -299,10 +321,10 @@ public class BattleLogger {
                 .map(HitLog::getWarshipHealthState)
                 .map(WarshipHealthState::getWarShip)
                 .forEach(warShip -> logLoss(warShip, sb));
-        write(sb.toString());
+        write(bw, sb.toString());
     }
 
-    private void logBeamVolleyHit(final BeamVolley volley, final List<HitLog> hitLogs) {
+    private void logBeamVolleyHit(@Nonnull final BufferedWriter bw, final BeamVolley volley, final List<HitLog> hitLogs) {
         final CombatRound combatRound = volley.getCombatRound();
         final Fleet actor = volley.getActor();
         final Fleet target = volley.getTarget();
@@ -318,7 +340,7 @@ public class BattleLogger {
                 .map(HitLog::getWarshipHealthState)
                 .map(WarshipHealthState::getWarShip)
                 .forEach(warShip -> logLoss(warShip, sb));
-        write(sb.toString());
+        write(bw, sb.toString());
     }
 
     private void logLoss(final WarShip warShip, final StringBuilder sb) {
@@ -340,7 +362,7 @@ public class BattleLogger {
 
     }
 
-    private void logMovement(final Cage cage, final Map<CombatRound, List<FleetRoundState>> statesByRound, final MovementAction ma) {
+    private void logMovement(@Nonnull final BufferedWriter bw, final Cage cage, final Map<CombatRound, List<FleetRoundState>> statesByRound, final MovementAction ma) {
         final CombatRound combatRound = ma.getCombatRound();
 
         final List<FleetRoundState> fleetRoundStates = statesByRound.get(combatRound);
@@ -369,7 +391,7 @@ public class BattleLogger {
                 ", distance to destination " + distanceAsString +
                 ", distance to target " + distanceToTargetAsString +
                 " with the plan to " + movementType;
-        write(msg);
+        write(bw, msg);
     }
 
     private static String stringify(Distance distance) {
@@ -386,7 +408,7 @@ public class BattleLogger {
         return coordinateInMetric + " " + distanceMetric;
     }
 
-    private void logCounterMissileHitMissile(final MissileSalvo volley) {
+    private void logCounterMissileHitMissile(@Nonnull final BufferedWriter bw, final MissileSalvo volley) {
         final CombatRound combatRound = volley.getCombatRound();
         final Fleet actor = volley.getActor();
         final MissileSalvoHealthState missileSalvoHealthState = volley.getMissileSalvoHealthState();
@@ -400,10 +422,10 @@ public class BattleLogger {
         if (StringUtils.isBlank(sb)) {
             return;
         }
-        write(sb.toString());
+        write(bw, sb.toString());
     }
 
-    private void logElokaHitMissile(final MissileSalvo volley) {
+    private void logElokaHitMissile(@Nonnull final BufferedWriter bw, final MissileSalvo volley) {
         final CombatRound combatRound = volley.getCombatRound();
         final Fleet actor = volley.getActor();
         final Fleet target = volley.getTarget();
@@ -418,6 +440,6 @@ public class BattleLogger {
         if (StringUtils.isBlank(sb)) {
             return;
         }
-        write(sb.toString());
+        write(bw, sb.toString());
     }
 }

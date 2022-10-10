@@ -194,8 +194,9 @@ public class ColonizationService {
         Preconditions.checkNotNull(colonization, "colonization shouldn't be null!");
         Preconditions.checkState(colonization.getDoneAtZero() == 0, "colonization cannot be done if the ship isn't in the orbit!");
 
-        final User owner = colonization.getUser();
+        final User owner = userService.findWithKnownStarSystems(colonization.getUser());
         final Planet planet = colonization.getTarget();
+        assert owner != null : "When this happens, the end is near.";
         planet.setOwner(owner);
         final ResourceDeposit creditorDeposit = planet.getResourceDeposit();
         final CrewRequirement requiredCrew = colonization.getCosts().getCrewRequirement();
@@ -251,7 +252,7 @@ public class ColonizationService {
         Preconditions.checkNotNull(starSystem, "starSystem shouldn't be null!");
 
         final ResourceAmount costs = ColonizationCostCalculator.calculateInformationCost(starSystem);
-        final User withKnownStarSystems = userService.getWithKnownStarSystems(user);
+        final User withKnownStarSystems = userService.findWithKnownStarSystems(user);
         final Planet mainPlanet = planetService.findMainPlanet(user);
         final ResourceDeposit resourceDeposit = mainPlanet.getResourceDeposit();
 
