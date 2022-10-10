@@ -32,21 +32,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class TickService {
 
     @Nonnull
     private static final Logger LOGGER = LoggerFactory.getLogger(TickService.class);
+
+    @Nonnull
+    private Tick today;
 
     @Nonnull
     private final TickRepository tickRepository;
@@ -83,6 +85,8 @@ public class TickService {
 
     @Nonnull
     private final BattleService battleService;
+
+    private boolean isTicking = false;
 
     @Autowired
     public TickService(@Nonnull final TickRepository tickRepository,
@@ -125,33 +129,21 @@ public class TickService {
 
     @Scheduled(cron = "0 0 0 * * *", zone = "Europe/Berlin")
     protected void doIt() {
-        LOGGER.info("Tick scheduled");
-        this.doTick();
+        // block all rest endpoints while ticking
+        isTicking = true;
+        final long start = Calendar.getInstance().getTimeInMillis();
+        LOGGER.info("Tick scheduled"); // todo logging performance
+        doTick();
         LOGGER.info("Tick has processed!");
+        final long end = Calendar.getInstance().getTimeInMillis();
+        final long duration = (end - start) / 1000;
+        LOGGER.info("{} takes {} seconds", today, duration);
+        isTicking = false;
     }
 
     @Nonnull
-    public List<Tick> findAll() {
-        return tickRepository.findAllTicks();
-    }
-
-    @Nullable
-    public Tick find(@Nonnull final Integer idHull) {
-        Preconditions.checkNotNull(idHull, "idHull shouldn't be null!");
-
-        return tickRepository.findById(idHull).orElse(null);
-    }
-
-    @Nullable
-    public Tick getLatest() {
-        return tickRepository.getLatest();
-    }
-
-    @Nonnull
-    @Transactional(rollbackFor = Exception.class)
     public Tick doTick() {
-        Tick today = new Tick();
-        today = tickRepository.save(today);
+        today = tickRepository.save(new Tick());
         LOGGER.info("Today is " + today);
         final String start = "Start ticking";
         LOGGER.info(start + " planets.");
@@ -204,13 +196,29 @@ public class TickService {
         }
     }
 
+    private void log(@Nonnull final Planet planet, @Nonnull final String msg) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(msg, "msg must not be empty");
+
+        LOGGER.info("[Planet #{}] {}", planet.getId(), msg);
+    }
+
+    private void log(@Nonnull final Planet planet, @Nonnull final Job job, @Nonnull final String msg) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(job, "job must not be empty");
+        Preconditions.checkNotNull(msg, "msg must not be empty");
+
+        LOGGER.info("[Planet #{}] [Job #{}] {}", planet.getId(), job.getId(), msg);
+    }
+
     /**
      * Runs the tick for all planets.
      */
     private void tickPlanets() {
         final List<Planet> planets = planetService.findAllColonized();
         for (final Planet p : planets) {
-            tick(p);
+            log(p, "Start ticking planet");
+            tickPlanet(p);
         }
     }
 
@@ -244,47 +252,65 @@ public class TickService {
      * Calculates the tickly output of this planet.
      * This includes the amount of generated resources and the calculations of jobs which could be successfully ended.
      */
-    void tick(@Nonnull Planet planet) {
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+    void tickPlanet(@Nonnull Planet planet) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkState(planet.getOwner() != null, "The owner must be set, otherwise there is nothing to do.");
 
-        final Set<Construction> constructions = planet.getConstructions();
+        log(planet, "Start updating resources.");
         for (final EResourceType resourceType : EResourceType.values()) {
             updateResourceDeposit(planet, resourceType);
         }
+        log(planet, "Done updating resources");
         planet = planetService.save(planet);
+        final Set<Construction> constructions = planet.getConstructions().stream()
+                .filter(c -> !c.getJobs().isEmpty())
+                .collect(Collectors.toSet());
+
+        final Set<Job> toDeleteLogging = new HashSet<>();
         for (final Construction facility : constructions) {
             final EResourceType resourceType = facility.getBuilding().getProductionTarget();
             final Set<Job> toDelete = new HashSet<>();
             final Set<Job> jobs = facility.getJobs();
             for (final Job job : jobs) {
+                log(planet, job, "Start processing job.");
                 if (!tickJob(job)) {
                     jobService.save(job);
+                    log(planet, job, "Shifting job for tick after " + today + ".");
                     continue;
                 }
-                // realize job result if job is done
+                log(planet, job, "Processing " + resourceType + " job.");
                 switch (resourceType) {
                     case RESEARCH:
                         tickResearch(planet, job);
                         break;
                     case CONSTRUCTION:
-                        tickConstruction(planet, constructions, toDelete, job);
+                        tickConstruction(planet, planet.getConstructions(), toDelete, job);
                         break;
                     case ORBITAL_CONSTRUCTION:
                         tickShipyard(planet, job);
                         break;
                 }
                 toDelete.add(job);
+                log(planet, job, "Done processing job.");
             }
             jobs.removeIf(toDelete::contains);
+            toDeleteLogging.addAll(toDelete);
         }
+        if (!toDeleteLogging.isEmpty()) {
+            final String jobsToDelete = toDeleteLogging.stream().map(String::valueOf).collect(Collectors.joining(", "));
+            log(planet, "Removing jobs " + jobsToDelete + ".");
+        }
+
         planetService.save(planet);
+        log(planet, "Done tick planet.");
     }
 
     private void tickShipyard(@Nonnull final Planet planet, @Nonnull final Job job) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(job, "job must not be empty");
 
+        log(planet, job, "Start processing shipyard job .");
         final User owner = planet.getOwner();
         if (owner == null) {
             throw new NotifyWebUserException("There must be a planet's owner.");
@@ -304,6 +330,7 @@ public class TickService {
             newFleetComposition.add(warShip);
         }
         warShipService.saveAll(newFleetComposition);
+        log(planet, job, "Done processing shipyard job .");
     }
 
     private void tickConstruction(@Nonnull final Planet planet,
@@ -315,6 +342,7 @@ public class TickService {
         Preconditions.checkNotNull(toDelete, "toDelete must not be empty");
         Preconditions.checkNotNull(job, "job must not be empty");
 
+        log(planet, job, "Start processing construction job.");
         final Constructable constructable = job.getConstructable();
         final Integer targetLevel = constructable.getTargetLevel();
         final Building building = constructable.getBuilding();
@@ -335,12 +363,14 @@ public class TickService {
             workInProgress = new Construction(planet, building, 1);
         }
         constructionService.save(workInProgress);
+        log(planet, job, "Done processing construction job.");
     }
 
     private void tickResearch(@Nonnull final Planet planet, @Nonnull final Job job) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(job, "job must not be empty");
 
+        log(planet, job, "Start processing research job.");
         final Constructable constructable = job.getConstructable();
         final User owner = planet.getOwner();
         if (owner == null) {
@@ -351,6 +381,7 @@ public class TickService {
             throw new NotifyWebUserException("Oh fuck, this should not happen while research whatever!");
         }
         researchService.addResearch(owner, List.of(research));
+        log(planet, job, "Done processing research job.");
     }
 
     /**
@@ -415,5 +446,26 @@ public class TickService {
 
         job.tick();
         return job.getJobDoneAtZero() <= 0;
+    }
+
+    @Nonnull
+    public List<Tick> findAll() {
+        return tickRepository.findAllTicks();
+    }
+
+    @Nullable
+    public Tick find(@Nonnull final Integer idHull) {
+        Preconditions.checkNotNull(idHull, "idHull shouldn't be null!");
+
+        return tickRepository.findById(idHull).orElse(null);
+    }
+
+    @Nullable
+    public Tick getLatest() {
+        return tickRepository.getLatest();
+    }
+
+    public boolean isTicking() {
+        return isTicking;
     }
 }

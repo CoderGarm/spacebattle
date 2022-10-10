@@ -69,6 +69,11 @@ public class MasterOfTheUniverseServiceTest {
     private BuildingService buildingService;
 
     @Test
+    void tick() {
+        tickService.doTick();
+    }
+
+    @Test
     public void createInitialData() {
         masterOfTheUniverseService.createInitialData();
     }
