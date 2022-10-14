@@ -130,4 +130,10 @@ public class PlanetService {
 
         return planetRepository.findByCoordinates(idStarSystem, xCoordinate, yCoordinate);
     }
+
+    public void saveAll(@Nonnull final List<Planet> modified) {
+        Preconditions.checkNotNull(modified, "modified must not be empty");
+
+        planetRepository.saveAll(modified);
+    }
 }

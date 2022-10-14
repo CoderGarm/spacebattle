@@ -28,6 +28,7 @@ public class ColonizationCostCalculator {
     public static ResourceAmount calculateInformationCost(@Nonnull final StarSystem starSystem) {
         Preconditions.checkNotNull(starSystem, "starSystem shouldn't be null!");
 
+        // todo display costs of colonization in frontend
         final Set<Planet> planets = starSystem.getPlanets(); // todo change to increasing costs by lower amount of unknown planets
         final BigDecimal cost = BigDecimal.TEN.multiply(new BigDecimal(planets.size()));
         return new ResourceAmount(EResourceType.CREDITS, cost.longValue());

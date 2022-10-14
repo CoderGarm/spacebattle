@@ -68,7 +68,7 @@ public class Building extends HasCosts {
                     @Nonnull final ProductionType productionType,
                     @Nonnull final CrewRequirement crewRequirement,
                     @Nonnull final Research unlockedThrough) {
-        super(new Translation("en", name), new Translation("en", description), techLevel, Building.class);
+        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, Building.class);
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(productionType, "productionType shouldn't be null!");

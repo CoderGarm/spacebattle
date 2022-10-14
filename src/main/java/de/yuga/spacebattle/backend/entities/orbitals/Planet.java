@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
         @NamedQuery(name = "Planet.getAllOwnedBy", query = "SELECT p FROM Planet p WHERE p.owner.id = :idOwner ORDER BY p.colonizedAt"),
         @NamedQuery(name = "Planet.getPlanetsWithBuildingsForResourceType",
                 query = "SELECT p FROM Planet p LEFT JOIN FETCH p.constructions c WHERE p.owner = :owner AND c.building.productionType.productionTarget = :resourceType"),
-        @NamedQuery(name = "Planet.getMainPlanet", query = "SELECT p FROM Planet p WHERE p.owner.id = :idUser GROUP BY p.colonizedAt"),
+        @NamedQuery(name = "Planet.getMainPlanet", query = "SELECT p FROM Planet p WHERE p.owner.id = :idUser AND p.isMain = true"),
         @NamedQuery(name = "Planet.getByCoordinates", query = "SELECT p FROM Planet p WHERE p.system.id = :idStarSystem AND p.orbit.xCoordinate = :xCoordinate AND p.orbit.yCoordinate = :yCoordinate"),
 })
 @Entity
@@ -85,6 +85,12 @@ public class Planet extends AbstractEntityKey {
 
     @Nullable
     private LocalDateTime colonizedAt;
+
+    /**
+     * Marks if the planet is the main of the owner.
+     */
+    @Column(columnDefinition = "bit not null default false")
+    private boolean isMain;
 
     @Nonnull
     @Transient
@@ -157,6 +163,14 @@ public class Planet extends AbstractEntityKey {
     @Nullable
     public LocalDateTime getColonizedAt() {
         return colonizedAt;
+    }
+
+    public boolean isMain() {
+        return isMain;
+    }
+
+    public void toggleMain() {
+        isMain = true;
     }
 
     @Nonnull

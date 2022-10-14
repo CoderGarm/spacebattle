@@ -414,6 +414,7 @@
     create table planet (
        idPlanet integer not null auto_increment,
         colonizedAt datetime(6),
+        isMain bit not null default false,
         name varchar(30) not null,
         xCoordinate varchar(255),
         yCoordinate varchar(255),

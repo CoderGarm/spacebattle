@@ -30,6 +30,7 @@ import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ActiveProfiles("dev")
 @SpringBootProdProfile
 @Disabled("not needed for unit or integration testing")
 public class MasterOfTheUniverseServiceTest {
@@ -98,6 +100,17 @@ public class MasterOfTheUniverseServiceTest {
             final ForumMessage forumMessage = new ForumMessage(save, user, "Hello World!");
             forumService.save(forumMessage);
         });
+    }
+
+    @Test
+    void readMap() {
+        final List<MasterOfTheUniverseService.Coords> coords = masterOfTheUniverseService.readStarSystems();
+        assertNotNull(coords);
+    }
+
+    @Test
+    void transformGalaxy() {
+        masterOfTheUniverseService.transformTheGalaxy();
     }
 
     @Test

@@ -78,7 +78,7 @@ public class Research extends HasCosts {
                     final int levelCap,
                     @Nonnull final ETechLevel techLevel,
                     @Nullable final Research unlockedThrough) {
-        super(new Translation("en", name), new Translation("en", description), techLevel, Research.class);
+        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, Research.class);
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
 

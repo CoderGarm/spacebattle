@@ -34,7 +34,7 @@ public class StarSystem extends AbstractEntityKey {
 
     @Nonnull
     @NotNull
-    @Column(updatable = false)
+    @Column
     private String name;
 
     @Nonnull
@@ -66,6 +66,12 @@ public class StarSystem extends AbstractEntityKey {
 
         this.name = name;
         this.orbit = orbit;
+    }
+
+    public void setName(@Nonnull final String name) {
+        Preconditions.checkNotNull(name, "name must not be empty");
+
+        this.name = name;
     }
 
     @Nonnull

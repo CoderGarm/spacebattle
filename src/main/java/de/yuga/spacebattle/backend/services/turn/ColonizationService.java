@@ -198,6 +198,10 @@ public class ColonizationService {
         final Planet planet = colonization.getTarget();
         assert owner != null : "When this happens, the end is near.";
         planet.setOwner(owner);
+        final List<Planet> allColonizedBy = planetService.findAllColonizedBy(owner);
+        if (allColonizedBy.isEmpty()) {
+            planet.toggleMain();
+        }
         final ResourceDeposit creditorDeposit = planet.getResourceDeposit();
         final CrewRequirement requiredCrew = colonization.getCosts().getCrewRequirement();
         // set crew from the ship to the planet

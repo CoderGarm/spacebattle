@@ -127,7 +127,7 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
                                 final int amountDamageEmitter = weapon.getAmountDamageEmitter();
                                 final long applicableDamage = weapon.getEffectValue();
                                 for (int i = 1; i <= amountDamageEmitter; i++) {
-                                    // todo implement chance to hit for beans - currently it is 100 %
+                                    // todo implement chance to hit for beams - currently it is 100 %
                                     firedShots.add(new BeamState(warshipHealthState.getWarShip(), targetedWarShip, applicableDamage, BigDecimal.ONE));
                                 }
                             });

@@ -950,7 +950,6 @@
         isAlive bit not null,
         isFightingCapable bit not null,
         state integer not null,
-        warshipHealthState varchar(500) not null,
         idTarget integer not null,
         primary key (idHitLog)
     ) engine=InnoDB;
@@ -1171,6 +1170,7 @@
     create table planet (
        idPlanet integer not null auto_increment,
         colonizedAt datetime(6),
+        isMain bit not null default false,
         name varchar(30) not null,
         xCoordinate varchar(255),
         yCoordinate varchar(255),

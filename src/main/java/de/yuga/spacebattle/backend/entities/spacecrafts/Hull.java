@@ -77,7 +77,7 @@ public class Hull extends HasCosts {
                 @Nonnull final Research unlockedThrough,
                 @Nonnull final EHullType hullType,
                 @Nonnull final CrewRequirement crewRequirement) {
-        super(new Translation("en", name), new Translation("en", description), techLevel, Hull.class);
+        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, Hull.class);
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");

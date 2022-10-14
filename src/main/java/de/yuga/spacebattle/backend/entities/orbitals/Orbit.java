@@ -43,8 +43,8 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
     public Orbit(@Nonnull final de.yuga.spacebattle.rest.dto.orbitals.Orbit orbit) {
         Preconditions.checkNotNull(orbit, "orbit shouldn't be null!");
 
-        this.xCoordinate = orbit.getxCoordinate();
-        this.yCoordinate = orbit.getyCoordinate();
+        this.xCoordinate = orbit.getXCoordinate();
+        this.yCoordinate = orbit.getYCoordinate();
     }
 
     public Orbit(@Nonnull final BigDecimal xCoordinate, @Nonnull final BigDecimal yCoordinate, @Nonnull final EDistanceMetric distanceMetric) {

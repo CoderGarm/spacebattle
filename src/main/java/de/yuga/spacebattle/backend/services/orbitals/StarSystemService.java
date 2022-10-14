@@ -94,4 +94,11 @@ public class StarSystemService {
 
         return starsystemRepository.findById(starSystem.getId()).orElse(null);
     }
+
+    @Deprecated(since = "productive environment")
+    public void saveAll(@Nonnull final List<StarSystem> modified) {
+        Preconditions.checkNotNull(modified, "modified must not be empty");
+
+        starsystemRepository.saveAll(modified);
+    }
 }

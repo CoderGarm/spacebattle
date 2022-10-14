@@ -36,12 +36,12 @@ public class Orbit {
     }
 
     @JsonIgnore
-    public Distance getxCoordinate() {
+    public Distance getXCoordinate() {
         return xCoordinate;
     }
 
     @JsonIgnore
-    public Distance getyCoordinate() {
+    public Distance getYCoordinate() {
         return yCoordinate;
     }
 }

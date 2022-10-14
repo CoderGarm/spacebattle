@@ -49,7 +49,7 @@ public class Warhead extends HasCosts {
                    @Nonnull final Distance damageProjectionRange,
                    @Nonnull final EWarheadType warheadType,
                    final int useCapacity) {
-        super(new Translation("en", name), new Translation("en", description), techLevel, Warhead.class);
+        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, Warhead.class);
         Preconditions.checkNotNull(damageProjectionRange, "damageProjectionRange shouldn't be null!");
         Preconditions.checkNotNull(warheadType, "warheadType shouldn't be null!");
 

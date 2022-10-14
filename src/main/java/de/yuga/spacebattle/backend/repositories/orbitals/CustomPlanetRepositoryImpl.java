@@ -73,7 +73,6 @@ public class CustomPlanetRepositoryImpl implements CustomPlanetRepository {
     public Planet findMainPlanetForUser(final int idUser) {
         return em.createNamedQuery("Planet.getMainPlanet", Planet.class)
                 .setParameter("idUser", idUser)
-                .setMaxResults(1)
                 .getSingleResult();
     }
 

@@ -52,7 +52,7 @@ public class MissileMotor extends HasCosts {
                         @Nonnull final Acceleration acceleration,
                         final int maneuverability,
                         final int useCapacity) {
-        super(new Translation("en", name), new Translation("en", description), techLevel, MissileMotor.class);
+        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, MissileMotor.class);
         Preconditions.checkNotNull(acceleration, "acceleration shouldn't be null!");
 
         this.endurance = endurance;
@@ -65,6 +65,7 @@ public class MissileMotor extends HasCosts {
         return endurance;
     }
 
+    @Nonnull
     public Acceleration getAcceleration() {
         return acceleration;
     }

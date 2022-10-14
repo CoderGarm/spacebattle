@@ -12,8 +12,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.io.File;
 
-@Disabled("only for generation of swagger spec needed")
 @SpringBootTestProfile
+@Disabled("only for generation of swagger spec needed")
 public class SpacebattleApplicationTests {
 
     @Autowired

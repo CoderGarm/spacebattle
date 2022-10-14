@@ -1,5 +1,10 @@
 package de.yuga.spacebattle.rest.dto.orbitals;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.EPlanetClassType;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
@@ -20,6 +25,10 @@ public class Planet {
     @Schema(description = "The owner of this planet, if already colonized.")
     private UserJson owner;
 
+    @JsonProperty
+    @Schema(required = true, description = "If this planet is the main planet of the owner.")
+    private boolean isMain;
+
     @Nonnull
     @Schema(required = true, description = "The name of this planet.")
     private String name;
@@ -32,6 +41,8 @@ public class Planet {
     private Orbit orbit;
 
     @Nullable
+    @JsonSerialize(using = ToStringSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @Schema(description = "The timestamp when this planet was colonized first.")
     private LocalDateTime colonizedAt;
 
@@ -53,6 +64,7 @@ public class Planet {
         if (planet.getOwner() != null) {
             this.owner = new UserJson(planet.getOwner());
             this.colonizedAt = planet.getColonizedAt();
+            this.isMain = planet.isMain();
         }
         planetType = new de.yuga.spacebattle.rest.dto.enums.EPlanetClassType(planet.getPlanetType());
     }

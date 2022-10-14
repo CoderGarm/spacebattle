@@ -9,14 +9,13 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * A quadrant enum which will transform the 'computer coordinates' to human readable quadrants.
+ * A quadrant enum which will transform the 'computer coordinates' to human-readable quadrants.
  */
 public enum Quadrant {
     /**
      * mathematical quadrants based on browser coordinates:
      * Q4, Q1
      * Q3, Q2
-     * todo check  angle base
      */
     Q1(1, -1, 45),
     Q2(1, 1, 135),

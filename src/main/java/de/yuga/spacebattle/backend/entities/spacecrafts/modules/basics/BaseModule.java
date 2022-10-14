@@ -40,7 +40,7 @@ public class BaseModule extends HasCosts {
                       @Nonnull final ETechLevel techLevel,
                       @Nonnull final CrewRequirement crewRequirement,
                       @Nonnull final Class<?> clazz) {
-        super(new Translation("en", name), new Translation("en", description), techLevel, clazz);
+        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, clazz);
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 

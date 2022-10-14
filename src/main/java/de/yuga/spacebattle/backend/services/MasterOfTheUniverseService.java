@@ -11,6 +11,8 @@ import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.backend.entities.i18n.Translatable;
+import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -51,20 +53,26 @@ import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static de.yuga.spacebattle.backend.entities.orbitals.StarSystem.STAR_SYSTEM_STANDARD_METRIC;
 
 /**
  * The master of all. Do all the dev-stuff which could be removed or placed somewhere else.
  */
 @Service
+@SuppressWarnings({"deprecation", "DeprecatedIsStillUsed"})
 public class MasterOfTheUniverseService {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(MasterOfTheUniverseService.class);
@@ -182,8 +190,7 @@ public class MasterOfTheUniverseService {
     public void createInitialData() {
         List<User> all = userService.findAll();
         if (!all.isEmpty()) {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The database was already initialized!");
-            return;
+            throw new NotifyWebUserException("The database was already initialized!");
         }
         createInitialDataPayload();
     }
@@ -211,18 +218,6 @@ public class MasterOfTheUniverseService {
     }
 
     /**
-     * Generates a random orbit position for star system where a elliptical placing is not mandatory.
-     * It has an inner boundary to keep a circle around the middle clear.
-     *
-     * @return the orbit
-     */
-    private Orbit generateSystemPosition() {
-        final int min = -999;
-        final int max = 1001;
-        return createOrbit(UNIVERSE_CENTER_RADIUS * 3, min, max, false);
-    }
-
-    /**
      * Generates a random orbit for an elliptical position.
      * It has an inner boundary to keep a circle around the middle clear.
      *
@@ -235,7 +230,7 @@ public class MasterOfTheUniverseService {
     }
 
     /**
-     * Creates an orbit the the given parameters.
+     * Creates an orbit the given parameters.
      *
      * @param innerCircle    the radius in which no position is valid
      * @param min            the minimum boundary
@@ -258,7 +253,7 @@ public class MasterOfTheUniverseService {
             max = (int) (xCoordinate + maximumDifference);
         }
         int yCoordinate = getCoordinateWithInnerBound(innerCircle, min, max);
-        final EDistanceMetric distanceMetric = planetaryOrbit ? Planet.PLANET_STANDARD_METRIC : StarSystem.STAR_SYSTEM_STANDARD_METRIC;
+        final EDistanceMetric distanceMetric = planetaryOrbit ? Planet.PLANET_STANDARD_METRIC : STAR_SYSTEM_STANDARD_METRIC;
         return new Orbit(new Distance(xCoordinate, distanceMetric), new Distance(yCoordinate, distanceMetric));
     }
 
@@ -289,26 +284,15 @@ public class MasterOfTheUniverseService {
         return Math.abs(position) <= Math.abs(boundary);
     }
 
-    /**
-     * Generates up to 100 new star systems with planets.
-     */
-    protected void createMorePopularizedStarSystems() {
-        final List<StarSystem> allSystems = starsystemService.findAll();
-        final Set<Orbit> knownOrbits = allSystems.stream().map(StarSystem::getOrbit).collect(Collectors.toSet());
-
-        final Set<Orbit> created = new HashSet<>();
-        for (int i = 0; i < 100; i++) {
-            created.add(generateSystemPosition());
-        }
-        final List<Orbit> newOrbits = new ArrayList<>(created);
-        newOrbits.removeAll(knownOrbits);
-        final Set<StarSystem> newStarSystems = newOrbits.stream().map(orbit -> {
-            final long timeInMillis = Calendar.getInstance().getTimeInMillis();
-            return starsystemService.createStarSystem("System-" + timeInMillis + newOrbits.indexOf(orbit), orbit);
+    protected void createStarSystems(@Nonnull final List<Coords> coords) {
+        final Set<StarSystem> newStarSystems = coords.stream().map(coord -> {
+            final Orbit orbit = new Orbit(new Distance(coord.x, STAR_SYSTEM_STANDARD_METRIC), new Distance(coord.y, STAR_SYSTEM_STANDARD_METRIC));
+            return starsystemService.createStarSystem(coord.name, orbit);
         }).collect(Collectors.toSet());
         LOGGER.info("New star systems generated");
 
         newStarSystems.forEach(starSystem -> {
+            // todo generate valid names
             final String starSystemName = starSystem.getName();
             final int randomNumber = getRandomInt(0, 5);
             final List<Orbit> newPlanetaryOrbits = new ArrayList<>();
@@ -318,12 +302,43 @@ public class MasterOfTheUniverseService {
                     orbit = generatePlanetaryOrbit();
                 }
                 newPlanetaryOrbits.add(orbit);
-                //noinspection deprecation
                 planetService.createPlanet(starSystemName + "-" + i, starSystem, orbit);
             }
         });
         LOGGER.info("New star systems populated");
     }
+
+    public void transformTheGalaxy() {
+
+        LOGGER.info("Start transforming Galaxy.");
+        final List<Coords> coords = readStarSystems();
+        final List<StarSystem> all = starsystemService.findAll();
+        final List<StarSystem> modified = new ArrayList<>();
+        final List<Planet> modifiedPlanets = new ArrayList<>();
+        final List<Coords> used = new ArrayList<>();
+        for (int i = 0; i < all.size(); i++) {
+            final StarSystem starSystem = all.get(i);
+            final Coords coord = coords.get(i);
+            final Orbit orbit = new Orbit(new Distance(coord.x, STAR_SYSTEM_STANDARD_METRIC), new Distance(coord.y, STAR_SYSTEM_STANDARD_METRIC));
+            starSystem.setOrbit(orbit);
+            starSystem.setName(coord.name);
+            modified.add(starSystem);
+            final List<Planet> planets = new ArrayList<>(starSystem.getPlanets());
+            for (int i1 = 0; i1 < planets.size(); i1++) {
+                final Planet planet = planets.get(i1);
+                planet.setName(starSystem.getName() + "-" + i1);
+                modifiedPlanets.add(planet);
+            }
+            used.add(coord);
+        }
+        coords.removeAll(used);
+        starsystemService.saveAll(modified);
+        planetService.saveAll(modifiedPlanets);
+
+        LOGGER.info("Done transforming Galaxy.");
+        createStarSystems(coords);
+    }
+
 
     void createForums() {
         final List<Alliance> alliances = allianceService.findAll();
@@ -341,53 +356,61 @@ public class MasterOfTheUniverseService {
         toStore.addAll(allianceForums);
 
         forumService.saveAll(toStore);
-        /*
-        final List<User> users = userService.findAll();
-
-        final List<Forum> forums = forumService.findAll();
-        forums.forEach(forum -> {
-            final User user = users.stream().filter(forum::isUserAllowed).findFirst().orElse(null);
-            assert user != null : "The user should be present!";
-
-            final ForumThread forumThread = new ForumThread(forum, "Thread in " + forum.getTitle(), "Description in " + forum.getDescription());
-            final ForumThread save = forumService.save(forumThread);
-            final ForumMessage forumMessage = new ForumMessage(save, user, "Hello World!");
-            forumService.save(forumMessage);
-        });
-        */
         LOGGER.info("Forums created");
     }
 
-    @SuppressWarnings({"deprecation"})
+    List<Coords> readStarSystems() {
+
+        final List<Coords> coordinateWthNames = new ArrayList<>();
+
+        InputStream mapDataStream = null;
+        String line = null;
+        try {
+            mapDataStream = this.getClass().getResourceAsStream("/map-data.csv");
+            Preconditions.checkNotNull(mapDataStream, "mapDataStream must not be empty");
+            final BufferedReader br = new BufferedReader(new InputStreamReader(mapDataStream));
+            while ((line = br.readLine()) != null) {
+                final Coords coordinateWthName = new Coords(line.split(","));
+                coordinateWthNames.add(coordinateWthName);
+            }
+
+        } catch (Exception e) {
+            System.out.println(line);
+            e.printStackTrace();
+        } finally {
+            if (mapDataStream != null) {
+                try {
+                    mapDataStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return coordinateWthNames;
+    }
+
+    @SuppressWarnings({"unused"})
     void createInitialDataPayload() {
 
         final User flashkid = userService.createUser("Flashkid", "12457aA!", "mail", EWebUserRole.ADMIN, EGameUserRole.ALLIANCE_ADMIN);
-        final User other = userService.createUser("Other", "12457aA!", "mail2", EWebUserRole.USER);
         final User pirate = userService.createUser(DEFEATED_OPPONENT, "12457aA!", "mail3", EWebUserRole.USER);
         LOGGER.info("Users created");
 
-        Alliance a1 = allianceService.createAlliance("Argonauten", "A", flashkid);
+        final Alliance a1 = allianceService.createAlliance("Argonauten", "A", flashkid);
         LOGGER.info("Alliance created");
         LOGGER.info("Alliance populated.");
 
         createForums();
 
-        StarSystem s1 = starsystemService.createStarSystem("Argonaut", 150, -75);
-        StarSystem s2 = starsystemService.createStarSystem("111", 150, -150);
+        final List<Coords> coords = readStarSystems();
+        createStarSystems(coords);
+        final List<StarSystem> starSystems = starsystemService.findAll();
+
+        StarSystem s1 = starSystems.stream().filter(s -> s.getName().equals("Manticore")).findFirst().orElseThrow(() -> new NotifyWebUserException("The star systems should be present."));
         LOGGER.info("Star systems created");
 
-        Planet p11 = planetService.createPlanet("Argonauten HQ 1", s1, 1300, -1000);
-        Planet p12 = planetService.createPlanet("Argonauten HQ 2", s1, -1300, 1000);
-        Planet p13 = planetService.createPlanet("Argonauten HQ 3", s1, -500, -600);
-        Planet p14 = planetService.createPlanet("Argonauten HQ 4", s1, 700, 500);
-
-        Planet p21 = planetService.createPlanet("111er HQ 1", s2, 1300, -1000);
-        Planet p22 = planetService.createPlanet("111er HQ 2", s2, -1300, 1000);
-        Planet p23 = planetService.createPlanet("111er HQ 3", s2, -500, -600);
-        Planet p24 = planetService.createPlanet("111er HQ 4", s2, 700, 500);
+        final Planet p11 = new ArrayList<>(s1.getPlanets()).get(0);
         LOGGER.info("Planets created");
-
-        createMorePopularizedStarSystems();
 
         // buildings
         Research livingStuff = research("Eternal live", "How to buy wine.", 1, ETechLevel.TECH_I, null);
@@ -437,7 +460,6 @@ public class MasterOfTheUniverseService {
         LOGGER.info("Buildings created");
 
         colonizePlanet(flashkid, p11);
-        colonizePlanet(other, p21);
         LOGGER.info("Planets colonized and populated. Constructions were build.");
 
         Armor armor = moduleService.createArmor("Armor Mk I", "An armor", unlockArmor, 5, 3000, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
@@ -477,19 +499,37 @@ public class MasterOfTheUniverseService {
         LOGGER.info("ShipClass created");
 
         addUnlockedResearches(flashkid);
-        addUnlockedResearches(other);
         LOGGER.info("Researches populated");
 
         createFleetForUser(flashkid);
         createOpponentForUser(flashkid);
-        createFleetForUser(other);
         LOGGER.info("Fleets created");
         LOGGER.info("Warships created");
         LOGGER.info("Fleets populated");
 
+        amendTranslations();
+        LOGGER.info("Translations amended.");
+
         tickService.doTick();
         LOGGER.info("First tick is done");
         LOGGER.info("All Data created");
+    }
+
+    private void amendTranslations() {
+        final String de = "de";
+        final List<Translatable> all = translatableService.findAll();
+        all.forEach(tr -> {
+            final String inEN = tr.getTranslation(Translation.DEFAULT_LANGUAGE);
+            final String inDe = tr.getTranslation(de);
+            if (StringUtils.isBlank(inDe)) {
+                final String germanTranslation = translatableService.provideTranslation(inEN);
+                if (StringUtils.isBlank(germanTranslation)) {
+                    throw new NotifyWebUserException("Oh this must not happen. There is something missing");
+                }
+                tr.updateOrCreate(de, germanTranslation);
+            }
+        });
+        translatableService.saveAll(all);
     }
 
     @Nonnull
@@ -516,7 +556,6 @@ public class MasterOfTheUniverseService {
         return fleetService.save(f1);
     }
 
-    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated(since = "productive environment")
     protected Planet colonizePlanet(@Nonnull final User owner, @Nonnull final Planet planet) {
         // first the guys, then the buildings
@@ -717,6 +756,9 @@ public class MasterOfTheUniverseService {
         Preconditions.checkNotNull(user, "user must not be empty");
 
         final Tick today = tickService.getLatest();
+        if (today == null) {
+            throw new NotifyWebUserException("There is no today, could be a problem.");
+        }
         final Planet homePlanet = planetService.findMainPlanet(user);
         battleService.runBattleAtPlanet(today, homePlanet);
     }
@@ -725,5 +767,20 @@ public class MasterOfTheUniverseService {
         Preconditions.checkNotNull(modules, "modules must not be empty");
 
         return modules.stream().sorted(Comparator.comparingInt(BaseModuleWithEffectValue::getEffectValue)).collect(Collectors.toList());
+    }
+
+    static class Coords {
+        int x;
+        int y;
+        String name;
+
+        /**
+         * Reads the cartesian coordinates and flips the y-axis in order to display the coords directly to the screen.
+         */
+        public Coords(final String[] split) {
+            this.name = split[0];
+            this.x = Integer.parseInt(split[1].replace("x", "").replaceAll(" ", ""));
+            this.y = Integer.parseInt(split[2].replace("y", "").replaceAll(" ", "")) * -1;
+        }
     }
 }

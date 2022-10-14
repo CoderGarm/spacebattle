@@ -195,7 +195,7 @@ public class PlanetApi {
     public ResponseEntity<?> getPlanetByCoordinates(@RequestBody @Nonnull final Orbit orbit, @PathVariable("idStarSystem") final int idStarSystem) {
         PreconditionWebHelper.checkNotNull(orbit, "The given orbit shouldn't be empty!");
 
-        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetService.findByCoordinates(idStarSystem, orbit.getxCoordinate(), orbit.getyCoordinate());
+        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetService.findByCoordinates(idStarSystem, orbit.getXCoordinate(), orbit.getYCoordinate());
         if (planet != null) {
             return ResponseEntity.ok(new Planet(planet));
         }

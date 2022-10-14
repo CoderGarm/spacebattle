@@ -92,7 +92,7 @@ public class Missile extends HasCosts {
                    @Nonnull final List<MissileMotor> missileMotors,
                    @Nonnull final Research unlockedThrough,
                    @Nonnull final AmmunitionModule ammunitionModule) {
-        super(new Translation("en", name), new Translation("en", description), techLevel, Missile.class);
+        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, Missile.class);
         Preconditions.checkNotNull(warhead, "warhead shouldn't be null!");
         Preconditions.checkNotNull(missileMotors, "missileMotors shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");

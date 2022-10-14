@@ -1,6 +1,7 @@
 package de.yuga.spacebattle;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.combat.BattleLogger;
 import de.yuga.spacebattle.backend.combat.dto.FleetClash;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
@@ -44,7 +45,7 @@ public class TestDataProviderUtils {
         final FleetOrbit fo = new FleetOrbit(pl.getOrbit(), pl.getSystem());
         final Map.Entry<FleetOrbit, List<Fleet>> e = Map.entry(fo, List.of(minimalFleet(), minimalFleet()));
         final FleetClash fleetClash = new FleetClash(e);
-        return new Cage(fleetClash);
+        return new Cage(fleetClash, new BattleLogger("true"));
     }
 
     @Nonnull
