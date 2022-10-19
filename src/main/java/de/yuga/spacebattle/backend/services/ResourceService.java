@@ -83,4 +83,29 @@ public class ResourceService {
         }
         return names;
     }
+
+    public List<String> readPlanetNames() {
+        final String dir = "orbitals";
+        final List<String> shipNames = new ArrayList<>();
+        getFileLineByLine(dir, "Planets", shipNames);
+        return shipNames;
+    }
+
+    @Nonnull
+    public String getRandomPlanetName() {
+        final List<String> strings = readPlanetNames();
+
+        final int i = ThreadLocalRandom.current().nextInt(0, strings.size() - 1);
+        return strings.get(i);
+    }
+
+    @Nonnull
+    public List<String> getRandomPlanetName(final int amount) {
+        final List<String> strings = readPlanetNames();
+        final List<String> names = new ArrayList<>();
+        for (int i = 0; i < amount; i++) {
+            names.add(strings.get(ThreadLocalRandom.current().nextInt(0, strings.size() - 1)));
+        }
+        return names;
+    }
 }

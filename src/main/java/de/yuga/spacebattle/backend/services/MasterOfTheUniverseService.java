@@ -294,9 +294,8 @@ public class MasterOfTheUniverseService {
         LOGGER.info("New star systems generated");
 
         newStarSystems.forEach(starSystem -> {
-            // todo generate valid names
-            final String starSystemName = starSystem.getName();
             final int randomNumber = getRandomInt(0, 5);
+            final List<String> names = resourceService.getRandomPlanetName(randomNumber);
             final List<Orbit> newPlanetaryOrbits = new ArrayList<>();
             for (int i = 0; i <= randomNumber; i++) {
                 Orbit orbit = generatePlanetaryOrbit();
@@ -304,7 +303,7 @@ public class MasterOfTheUniverseService {
                     orbit = generatePlanetaryOrbit();
                 }
                 newPlanetaryOrbits.add(orbit);
-                planetService.createPlanet(starSystemName + "-" + i, starSystem, orbit);
+                planetService.createPlanet(names.get(i), starSystem, orbit);
             }
         });
         LOGGER.info("New star systems populated");
@@ -326,9 +325,10 @@ public class MasterOfTheUniverseService {
             starSystem.setName(coord.name);
             modified.add(starSystem);
             final List<Planet> planets = new ArrayList<>(starSystem.getPlanets());
+            final List<String> names = resourceService.getRandomPlanetName(planets.size());
             for (int i1 = 0; i1 < planets.size(); i1++) {
                 final Planet planet = planets.get(i1);
-                planet.setName(starSystem.getName() + "-" + i1);
+                planet.setName(names.get(i1));
                 modifiedPlanets.add(planet);
             }
             used.add(coord);
@@ -360,7 +360,6 @@ public class MasterOfTheUniverseService {
         forumService.saveAll(toStore);
         LOGGER.info("Forums created");
     }
-
 
 
     @SuppressWarnings({"unused"})

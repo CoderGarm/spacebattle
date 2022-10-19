@@ -59,7 +59,17 @@ public class FandomQueryTest {
             final String join = String.join("\n", categoryMembers);
             TestUtils.writeString(DIR + folder, category, join);
         });
+    }
 
+    @Test
+    void fetchCategoryNames() {
+        final String category = "Planets";
+        final String folder = "";
+
+        System.out.println("Writing '" + category + "'");
+        final List<String> categoryMembers = WIKI.getCategoryMembers(category);
+        final String join = String.join("\n", categoryMembers);
+        TestUtils.writeString(DIR + folder, category, join);
     }
 
     @Test
