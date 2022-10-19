@@ -19,14 +19,13 @@ import de.yuga.spacebattle.backend.entities.turn.*;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.turn.TickRepository;
-import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.backend.services.ResourceService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
-import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +38,10 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -70,9 +72,6 @@ public class TickService {
     private final ConstructionService constructionService;
 
     @Nonnull
-    private final UserService userService;
-
-    @Nonnull
     private final ResearchService researchService;
 
     @Nonnull
@@ -82,10 +81,10 @@ public class TickService {
     private final WarShipService warShipService;
 
     @Nonnull
-    private final BattleReportService battleReportService;
+    private final BattleService battleService;
 
     @Nonnull
-    private final BattleService battleService;
+    private final ResourceService resourceService;
 
     private boolean isTicking = false;
 
@@ -96,36 +95,22 @@ public class TickService {
                        @Nonnull final MoveService moveService,
                        @Nonnull final FleetService fleetService,
                        @Nonnull final ConstructionService constructionService,
-                       @Nonnull final UserService userService,
                        @Nonnull final ResearchService researchService,
                        @Nonnull final ColonizationService colonizationService,
                        @Nonnull final WarShipService warShipService,
-                       @Nonnull final BattleReportService battleReportService,
-                       @Nonnull final BattleService battleService) {
-        Preconditions.checkNotNull(tickRepository, "tickRepository shouldn't be null!");
-        Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
-        Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
-        Preconditions.checkNotNull(moveService, "moveService shouldn't be null!");
-        Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
-        Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
-        Preconditions.checkNotNull(userService, "userService shouldn't be null!");
-        Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
-        Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
-        Preconditions.checkNotNull(battleReportService, "fightingReportService shouldn't be null!");
-        Preconditions.checkNotNull(battleService, "battleService shouldn't be null!");
-
-        this.tickRepository = tickRepository;
-        this.jobService = jobService;
-        this.planetService = planetService;
-        this.moveService = moveService;
-        this.fleetService = fleetService;
-        this.constructionService = constructionService;
-        this.userService = userService;
-        this.researchService = researchService;
-        this.colonizationService = colonizationService;
-        this.warShipService = warShipService;
-        this.battleReportService = battleReportService;
-        this.battleService = battleService;
+                       @Nonnull final BattleService battleService,
+                       @Nonnull final ResourceService resourceService) {
+        this.tickRepository = Preconditions.checkNotNull(tickRepository, "tickRepository shouldn't be null!");
+        this.jobService = Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
+        this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
+        this.moveService = Preconditions.checkNotNull(moveService, "moveService shouldn't be null!");
+        this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
+        this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
+        this.researchService = Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
+        this.colonizationService = Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
+        this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
+        this.battleService = Preconditions.checkNotNull(battleService, "battleService must not be empty");
+        this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
     }
 
     @Scheduled(cron = "0 0 0 * * *", zone = "Europe/Berlin")
@@ -329,7 +314,7 @@ public class TickService {
         fleet = fleetService.save(fleet);
         final Set<WarShip> newFleetComposition = new HashSet<>();
         for (int i = 0; i <= amountShips; i++) {
-            final String randomName = generateRandomName();
+            final String randomName = resourceService.getRandomWarshipName();
             final WarShip warShip = new WarShip(randomName, planet, fleet, shipClass);
             newFleetComposition.add(warShip);
         }
@@ -424,19 +409,6 @@ public class TickService {
                 }
                 break;
         }
-    }
-
-    private String generateRandomName() {
-        // todo create name list
-        int leftLimit = 97; // letter 'a'
-        int rightLimit = 122; // letter 'z'
-        int targetStringLength = 10;
-        Random random = new Random();
-
-        return random.ints(leftLimit, rightLimit + 1)
-                .limit(targetStringLength)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                .toString();
     }
 
     /**

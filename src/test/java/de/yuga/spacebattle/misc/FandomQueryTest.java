@@ -30,6 +30,14 @@ public class FandomQueryTest {
             "Asteroid_Belts", "/belts/"
     );
 
+    private static final Map<String, String> CATEGORIES_FOR_TITLES_ONLY = Map.of(
+            "Naval_Ships_of_Manticore", "/ships/names/",
+            "Naval_Ships_of_Haven", "/ships/names/",
+            "Naval_Ships_of_the_Anderman_Empire", "/ships/names/",
+            "Naval_Ships_of_Silesia", "/ships/names/",
+            "Naval_Ships_of_the_Solarian_League", "/ships/names/"
+    );
+
     private final String DIR = "/home/karsten/Desktop/map/fandom/";
 
     @Test
@@ -44,9 +52,13 @@ public class FandomQueryTest {
     }
 
     @Test
-    void searchPlanetOfSystem() {
-
-        //WIKI.search("")
+    void fetchShipNames() {
+        CATEGORIES_FOR_TITLES_ONLY.forEach((category, folder) -> {
+            System.out.println("Writing '" + category + "'");
+            final List<String> categoryMembers = WIKI.getCategoryMembers(category);
+            final String join = String.join("\n", categoryMembers);
+            TestUtils.writeString(DIR + folder, category, join);
+        });
 
     }
 

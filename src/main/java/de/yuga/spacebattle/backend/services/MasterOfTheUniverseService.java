@@ -59,10 +59,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -147,6 +143,9 @@ public class MasterOfTheUniverseService {
     @Nonnull
     private final TranslatableService translatableService;
 
+    @Nonnull
+    private final ResourceService resourceService;
+
     @Autowired
     public MasterOfTheUniverseService(@Nonnull final TickService tickService,
                                       @Nonnull final UserService userService,
@@ -164,7 +163,8 @@ public class MasterOfTheUniverseService {
                                       @Nonnull final ForumService forumService,
                                       @Nonnull final ColonizationService colonizationService,
                                       @Nonnull final BattleService battleService,
-                                      @Nonnull final TranslatableService translatableService) {
+                                      @Nonnull final TranslatableService translatableService,
+                                      @Nonnull final ResourceService resourceService) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.allianceService = Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");
@@ -182,6 +182,8 @@ public class MasterOfTheUniverseService {
         this.colonizationService = Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
         this.battleService = Preconditions.checkNotNull(battleService, "battleService must not be empty");
         this.translatableService = Preconditions.checkNotNull(translatableService, "translatableService must not be empty");
+        this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
+        ;
     }
 
     /**
@@ -311,7 +313,7 @@ public class MasterOfTheUniverseService {
     public void transformTheGalaxy() {
 
         LOGGER.info("Start transforming Galaxy.");
-        final List<Coords> coords = readStarSystems();
+        final List<Coords> coords = resourceService.readStarSystems();
         final List<StarSystem> all = starsystemService.findAll();
         final List<StarSystem> modified = new ArrayList<>();
         final List<Planet> modifiedPlanets = new ArrayList<>();
@@ -359,35 +361,7 @@ public class MasterOfTheUniverseService {
         LOGGER.info("Forums created");
     }
 
-    List<Coords> readStarSystems() {
 
-        final List<Coords> coordinateWthNames = new ArrayList<>();
-
-        InputStream mapDataStream = null;
-        String line = null;
-        try {
-            mapDataStream = this.getClass().getResourceAsStream("/map-data.csv");
-            Preconditions.checkNotNull(mapDataStream, "mapDataStream must not be empty");
-            final BufferedReader br = new BufferedReader(new InputStreamReader(mapDataStream));
-            while ((line = br.readLine()) != null) {
-                final Coords coordinateWthName = new Coords(line.split(","));
-                coordinateWthNames.add(coordinateWthName);
-            }
-
-        } catch (Exception e) {
-            System.out.println(line);
-            e.printStackTrace();
-        } finally {
-            if (mapDataStream != null) {
-                try {
-                    mapDataStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return coordinateWthNames;
-    }
 
     @SuppressWarnings({"unused"})
     void createInitialDataPayload() {
@@ -402,7 +376,7 @@ public class MasterOfTheUniverseService {
 
         createForums();
 
-        final List<Coords> coords = readStarSystems();
+        final List<Coords> coords = resourceService.readStarSystems();
         createStarSystems(coords);
         final List<StarSystem> starSystems = starsystemService.findAll();
 
@@ -696,9 +670,10 @@ public class MasterOfTheUniverseService {
         final Planet homePlanet = planetService.findMainPlanet(user);
         final Fleet fleet = createFleet(user, homePlanet, "Homefleet");
 
-        warShipService.save(new WarShip("Indefatigable", homePlanet, fleet, ship));
-        warShipService.save(new WarShip("Hotspur", homePlanet, fleet, ship));
-        warShipService.save(new WarShip("Fearless", homePlanet, fleet, ship));
+        final List<String> randomWarshipName = resourceService.getRandomWarshipName(3);
+        warShipService.save(new WarShip(randomWarshipName.get(0), homePlanet, fleet, ship));
+        warShipService.save(new WarShip(randomWarshipName.get(1), homePlanet, fleet, ship));
+        warShipService.save(new WarShip(randomWarshipName.get(2), homePlanet, fleet, ship));
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")

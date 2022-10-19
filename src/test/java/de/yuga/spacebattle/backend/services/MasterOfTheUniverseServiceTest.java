@@ -70,6 +70,9 @@ public class MasterOfTheUniverseServiceTest {
     @Autowired
     private BuildingService buildingService;
 
+    @Autowired
+    private ResourceService resourceService;
+
     @Test
     void tick() {
         tickService.doTick();
@@ -104,7 +107,7 @@ public class MasterOfTheUniverseServiceTest {
 
     @Test
     void readMap() {
-        final List<MasterOfTheUniverseService.Coords> coords = masterOfTheUniverseService.readStarSystems();
+        final List<MasterOfTheUniverseService.Coords> coords = resourceService.readStarSystems();
         assertNotNull(coords);
     }
 
