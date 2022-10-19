@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
+import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstructionOrder;
@@ -39,7 +40,7 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 @RolesAllowed("USER")
 @RestController
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + PlanetApi.ENDPOINT + "/")
-public class PlanetApi {
+public class PlanetApi extends BaseApi {
 
     @Nonnull
     public static final String ENDPOINT = "planet";
@@ -48,6 +49,7 @@ public class PlanetApi {
     private static final String SHIPYARD_POSSIBLE_ENDPOINT = "shipyardConstructionPossible";
     private static final String SHIPYARD_BUILD_IT_ENDPOINT = "shipyardConstructionBuild";
     private static final String GET_PLANET_BY_COORDINATES_ENDPOINT = "byCoord";
+    private static final String GET_MAIN_PLANET = "main";
 
     @Nonnull
     private final PlanetService planetService;
@@ -87,6 +89,21 @@ public class PlanetApi {
         final List<de.yuga.spacebattle.backend.entities.orbitals.Planet> all = planetService.findAllColonizedBy(idUser);
         final List<Planet> planets = all.stream().map(Planet::new).collect(Collectors.toList());
         return ResponseEntity.ok(planets);
+    }
+
+    @GetMapping(value = GET_MAIN_PLANET)
+    @Operation(summary = "Get the main planet of a user.", operationId = "getMainPlanet",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Planet.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getMainPlanet() {
+        final int idUser = getIdUser();
+        final de.yuga.spacebattle.backend.entities.orbitals.Planet mainPlanet = planetService.findMainPlanet(idUser);
+        return ResponseEntity.ok(new Planet(mainPlanet));
     }
 
     @GetMapping(value = GROUND_CONSTRUCTION_POSSIBLE_ENDPOINT + "/{idPlanet}")

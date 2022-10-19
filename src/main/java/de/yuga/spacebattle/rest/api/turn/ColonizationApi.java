@@ -1,12 +1,15 @@
 package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
+import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
@@ -37,7 +40,7 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 @RolesAllowed("USER")
 @RestController
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ColonizationApi.ENDPOINT + "/")
-public class ColonizationApi {
+public class ColonizationApi extends BaseApi {
 
     @Nonnull
     public static final String ENDPOINT = "colonization";
@@ -47,6 +50,7 @@ public class ColonizationApi {
     private static final String ALL_PENDING_COLONIZATIONS_ENDPOINT = "pendingColonizations";
     private static final String HOME_SYSTEM_ENDPOINT = "home";
     private static final String BUY_SYSTEM_INFO_ENDPOINT = "buy";
+    private static final String COSTS_SYSTEM_INFO_ENDPOINT = "costs";
 
     @Nonnull
     private final UserService userService;
@@ -122,7 +126,7 @@ public class ColonizationApi {
             ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = StarSystemColonization.class))),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
@@ -139,7 +143,10 @@ public class ColonizationApi {
             throw new NotifyWebUserException("There must be a system, really.");
         }
         colonizationService.addToKnownSystems(user, system);
-        return ResponseEntity.ok(true);
+        final Set<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> knownStarSystems = userService.getKnownStarSystems(idUser);
+        final List<de.yuga.spacebattle.backend.entities.turn.Colonization> colonizationsForUser = colonizationService.findAllForUser(idUser);
+        final StarSystemColonization result = new StarSystemColonization(system, knownStarSystems, colonizationsForUser);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping(value = HOME_SYSTEM_ENDPOINT + "/{idUser}")
@@ -157,6 +164,24 @@ public class ColonizationApi {
         return ResponseEntity.ok(new StarSystem(mainPlanet.getSystem()));
     }
 
+    @GetMapping(value = COSTS_SYSTEM_INFO_ENDPOINT)
+    @Operation(summary = "Get the costs to colonize the targeted planet.", operationId = "getColonizationCosts",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = de.yuga.spacebattle.rest.dto.turn.resources.ResourceDeposit.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getColonizationCosts(@RequestBody final de.yuga.spacebattle.rest.dto.orbitals.Planet planet) {
+
+        final Planet toColonize = planetService.find(planet.getIdPlanet());
+        PreconditionWebHelper.checkNotNull(toColonize, "toColonize must not be empty");
+
+        final ResourceDeposit resourceDeposit = ColonizationCostCalculator.getColonizationCosts(toColonize);
+        return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.resources.ResourceDeposit(resourceDeposit));
+    }
+
     @GetMapping(value = ALL_SYSTEMS_ENDPOINT + "/{idUser}")
     @Operation(summary = "Get all colonizable systems for a user with their distances to all known systems.", operationId = "getColonizationStarSystemsForUser",
             responses = {
@@ -170,6 +195,7 @@ public class ColonizationApi {
     )
     public ResponseEntity<?> getColonizationStarSystemsForUser(@PathVariable("idUser") final int idUser) {
 
+        // todo response to big
         final List<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> all = starSystemService.findAllColonizable();
         final Set<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> knownStarSystems = userService.getKnownStarSystems(idUser);
         final List<de.yuga.spacebattle.backend.entities.turn.Colonization> colonizationsForUser = colonizationService.findAllForUser(idUser);
@@ -191,9 +217,9 @@ public class ColonizationApi {
 
         final Set<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> knownStarSystems = userService.getKnownStarSystems(idUser);
         final List<de.yuga.spacebattle.backend.entities.turn.Colonization> colonizationsForUser = colonizationService.findAllForUser(idUser);
-        final List<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> all = colonizationsForUser.stream()
+        final Set<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> all = colonizationsForUser.stream()
                 .map(c -> c.getTarget().getSystem())
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
         return ResponseEntity.ok(StarSystemColonizationListConverter.create(all, knownStarSystems, colonizationsForUser));
     }
 

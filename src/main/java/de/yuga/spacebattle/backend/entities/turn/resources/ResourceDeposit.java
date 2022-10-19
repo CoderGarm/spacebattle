@@ -270,7 +270,6 @@ public class ResourceDeposit extends AbstractEntityKey {
         return new CrewRequirement(humanResources, subType);
     }
 
-    @Deprecated(since = "productive")
     public void setCrewRequirement(@Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 

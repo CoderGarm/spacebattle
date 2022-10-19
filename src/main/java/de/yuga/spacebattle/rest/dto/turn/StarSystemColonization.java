@@ -9,6 +9,7 @@ import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.rest.dto.orbitals.StarSystem;
 import de.yuga.spacebattle.rest.dto.turn.resources.ResourceAmount;
+import de.yuga.spacebattle.rest.dto.turn.resources.ResourceDeposit;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -37,7 +38,7 @@ public class StarSystemColonization {
 
     @Nonnull
     @Schema(required = true, description = "The costs to colonize the planet by idPlanet.")
-    private final Map<Integer, String> costsToColonization = new HashMap<>();
+    private final Map<Integer, ResourceDeposit> costsToColonization = new HashMap<>();
 
     @Nonnull
     @Schema(required = true, description = "The costs to colonize the planet by idPlanet.")
@@ -69,10 +70,8 @@ public class StarSystemColonization {
         Preconditions.checkNotNull(starSystem, "starSystem shouldn't be null!");
 
         starSystem.getPlanets().forEach(planet -> {
-            final ResourceAmount costsDTO = ColonizationCostCalculator.calculateColonizationCost(planet);
-            final EResourceType resourceType = costsDTO.getRealResourceType();
-            final Long amountWithDiff = costsDTO.getAmount();
-            costsToColonization.put(planet.getId(), amountWithDiff + " " + resourceType.getPluralName());
+            final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit costs = ColonizationCostCalculator.getColonizationCosts(planet);
+            costsToColonization.put(planet.getId(), new ResourceDeposit(costs));
         });
     }
 
@@ -102,7 +101,7 @@ public class StarSystemColonization {
     }
 
     @Nonnull
-    public Map<Integer, String> getCostsToColonization() {
+    public Map<Integer, ResourceDeposit> getCostsToColonization() {
         return costsToColonization;
     }
 

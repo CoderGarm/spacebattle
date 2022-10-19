@@ -14,51 +14,67 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+/**
+ * <b>Attention:</b> Please be kind, do not create more than necessary traffic.
+ */
 @Disabled("no test")
 public class FandomQueryTest {
 
-    public static final String PLANETS = "/planets/";
-    public static final String SYSTEMS = "/systems/";
+    private static final Wiki WIKI = new Wiki.Builder()
+            .withApiEndpoint(HttpUrl.get("https://honorverse.fandom.com/api.php"))
+            .build();
+
+    private static final Map<String, String> CATEGORIES = Map.of(
+            "Planets", "/planets/",
+            "Systems", "/systems/",
+            "Asteroid_Belts", "/belts/"
+    );
+
     private final String DIR = "/home/karsten/Desktop/map/fandom/";
 
     @Test
-    void fetchFromWiki() {
+    void fetchCategoriesAndTextsFromWiki() {
 
-        final HttpUrl httpUrl = null;
-        /* todo do only fetch when needed
-         * final HttpUrl httpUrl = HttpUrl.get("https://honorverse.fandom.com/api.php");
-         */
-        final Wiki wiki = new Wiki.Builder()
-                .withApiEndpoint(httpUrl)
-                .build();
+        CATEGORIES.forEach((category, folder) -> {
+            System.out.println("Writing '" + category + "'");
+            final List<String> categoryMembers = WIKI.getCategoryMembers(category);
+            final Map<String, String> texts = MQuery.getPageText(WIKI, categoryMembers);
+            texts.forEach((key, value) -> TestUtils.writeString(DIR + folder, key, value));
+        });
+    }
 
-        final List<String> planets = wiki.getCategoryMembers("Planets");
-        final List<String> systems = wiki.getCategoryMembers("Systems");
+    @Test
+    void searchPlanetOfSystem() {
 
+        //WIKI.search("")
 
-        final Map<String, String> planetsText = MQuery.getPageText(wiki, planets);
-        final Map<String, String> systemsText = MQuery.getPageText(wiki, systems);
-
-        planetsText.forEach((key, value) -> TestUtils.writeString(DIR + PLANETS, key, value));
-        systemsText.forEach((key, value) -> TestUtils.writeString(DIR + SYSTEMS, key, value));
-
-        assertNotNull(planets);
-        assertNotNull(systems);
     }
 
     @Test
     void readFiles() {
 
-        final Map<String, String> planets = getContent(DIR, PLANETS);
-        final Map<String, String> systems = getContent(DIR, SYSTEMS);
-
         final List<CoordinateElement> coordinateElements = readStarSystems();
         final Set<String> knownSystemNames = coordinateElements.stream().map(CoordinateElement::getName).collect(Collectors.toSet());
 
-        // todo match names to find knowledge
-
+        CATEGORIES.forEach((category, folder) -> {
+            System.out.println("Reading '" + category + "'");
+            final Map<String, String> texts = getContent(DIR, CATEGORIES.get("Planets"));
+            texts.forEach((name, text) -> {
+                for (final String knownSystemName : knownSystemNames) {
+                    final String[] split = text.split(" ");
+                    for (final String word : split) {
+                        final String sanitized = word.replaceAll("[^A-Za-z]+", "");
+                        if (sanitized.equals(knownSystemName)) {
+                            System.out.println("Found system name: " + knownSystemName + "\n");
+                            System.out.println("In " + category + " text:\n" + text);
+                        }
+                    }
+                }
+            });
+        });
     }
 
+    @SuppressWarnings("SameParameterValue")
     private Map<String, String> getContent(final String dir, final String filename) {
         final File[] files = new File(dir + filename).listFiles();
         assertNotNull(files);

@@ -16,7 +16,6 @@ import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
-import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.turn.ColonizationRepository;
@@ -34,7 +33,10 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -144,24 +146,18 @@ public class ColonizationService {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
         Preconditions.checkNotNull(toColonize, "toColonize shouldn't be null!");
 
-        final ResourceAmount costs = ColonizationCostCalculator.calculateColonizationCost(toColonize);
+        final ResourceDeposit colonizationCosts = ColonizationCostCalculator.getColonizationCosts(toColonize);
+
         final Planet mainPlanet = planetService.findMainPlanet(user);
         final ResourceDeposit debitorDeposit = mainPlanet.getResourceDeposit();
 
-        final ResourceDeposit c = new ResourceDeposit(EDepositType.COSTS);
-        c.setAbsoluteResourceValue(costs.getRealResourceType(), costs.getAmount());
-        final PayingPossibleResult payingPossible = debitorDeposit.isPayingPossible(c);
+        final PayingPossibleResult payingPossible = debitorDeposit.isPayingPossible(colonizationCosts);
         if (!payingPossible.isValid()) {
             throw new NotifyWebUserException("This colonization is to expensive.", payingPossible);
         }
-        debitorDeposit.updateResource(costs.getRealResourceType(), costs.getAmount());
-        final CrewRequirement crewRequirement = getCrewRequirementForColonization();
 
-        if (debitorDeposit.isReducingPopulationPossible(crewRequirement)) {
-            debitorDeposit.updatePopulation(crewRequirement);
-        } else {
-            throw new NotifyWebUserException("Unfortunately you have not enough population on your home planet.");
-        }
+        final CrewRequirement crewRequirement = colonizationCosts.getCrewRequirement();
+        debitorDeposit.pay(colonizationCosts);
 
         final Colonization colonization = new Colonization(user, toColonize, crewRequirement, 10);
         save(colonization);
@@ -170,17 +166,6 @@ public class ColonizationService {
         return colonization;
     }
 
-    @Nonnull
-    private static CrewRequirement getCrewRequirementForColonization() {
-        final Map<EEducationType, Long> requiredCrew = new HashMap<>();
-        requiredCrew.put(EEducationType.NONE, 200L);
-        requiredCrew.put(EEducationType.ENLISTED, 50L);
-        requiredCrew.put(EEducationType.OFFICER, 20L);
-        requiredCrew.put(EEducationType.SCHOOL, 100L);
-        requiredCrew.put(EEducationType.COLLEGE, 200L);
-        requiredCrew.put(EEducationType.UNIVERSITY, 500L);
-        return new CrewRequirement(requiredCrew, EDepositType.COSTS);
-    }
 
     /**
      * Colonizes a planet for an owner.

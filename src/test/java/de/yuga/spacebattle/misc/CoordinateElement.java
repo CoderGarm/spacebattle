@@ -21,7 +21,9 @@ public class CoordinateElement {
     public CoordinateElement(final String[] split) {
         this.id = NOPE;
         this.name = split[0];
-        this.position = new Position(Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+        int x = Integer.parseInt(split[1].replace("x", "").replaceAll(" ", ""));
+        int y = Integer.parseInt(split[2].replace("y", "").replaceAll(" ", "")) * -1;
+        this.position = new Position(x, y);
         this.owner = new Owner();
     }
 
