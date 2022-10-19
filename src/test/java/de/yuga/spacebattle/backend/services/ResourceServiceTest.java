@@ -5,7 +5,7 @@ import org.junit.platform.commons.util.StringUtils;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ResourceServiceTest {
 
@@ -25,5 +25,12 @@ class ResourceServiceTest {
 
         final List<String> results = new ResourceService().getRandomPlanetName(6);
         results.forEach(name -> assertTrue(StringUtils.isNotBlank(name)));
+    }
+
+    @Test
+    void getCoords() {
+        final List<MasterOfTheUniverseService.Coords> result = new ResourceService().readStarSystems();
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
     }
 }

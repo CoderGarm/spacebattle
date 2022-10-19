@@ -10,7 +10,7 @@
     </parent>
     <groupId>de.yuga</groupId>
     <artifactId>spacebattle</artifactId>
-    <version>0.0.3-hotfix-tick</version>
+    <version>0.0.4</version>
     <name>spacebattle</name>
     <description>spacebattle rework</description>
     <properties>

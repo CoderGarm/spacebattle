@@ -20,7 +20,7 @@ public class ResourceService {
 
     public List<MasterOfTheUniverseService.Coords> readStarSystems() {
         final List<String> lst = new ArrayList<>();
-        getFileLineByLine("", "map-data.csv", lst);
+        getFileLineByLine("/", "map-data.csv", lst);
         return lst.stream().map(line -> new MasterOfTheUniverseService.Coords(line.split(","))).collect(Collectors.toList());
     }
 
@@ -41,11 +41,17 @@ public class ResourceService {
         return shipNames;
     }
 
-    private void getFileLineByLine(final String dir, final String fileName, final Collection<String> content) {
+    private void getFileLineByLine(String dir, final String fileName, final Collection<String> content) {
         InputStream inputStream = null;
         String line = null;
         try {
-            inputStream = this.getClass().getResourceAsStream("/" + dir + "/" + fileName);
+            if (!dir.startsWith("/")) {
+                dir = "/" + dir;
+            }
+            if (!dir.endsWith("/")) {
+                dir = dir + "/";
+            }
+            inputStream = this.getClass().getResourceAsStream(dir + fileName);
             Preconditions.checkNotNull(inputStream, "inputStream must not be empty");
             final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             while ((line = br.readLine()) != null) {

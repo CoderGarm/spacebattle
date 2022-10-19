@@ -38,8 +38,8 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ActiveProfiles("dev")
 @SpringBootProdProfile
+@ActiveProfiles("dev")
 @Disabled("not needed for unit or integration testing")
 public class MasterOfTheUniverseServiceTest {
 
@@ -113,7 +113,9 @@ public class MasterOfTheUniverseServiceTest {
 
     @Test
     void transformGalaxy() {
+        System.out.println("Start transforming");
         masterOfTheUniverseService.transformTheGalaxy();
+        System.out.println("Transforming done");
     }
 
     @Test
