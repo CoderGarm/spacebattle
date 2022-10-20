@@ -7,8 +7,12 @@ import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.*;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.buildings.Building;
+import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.backend.entities.i18n.Translatable;
+import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -23,6 +27,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
@@ -33,6 +38,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.TestUtils.setId;
@@ -508,5 +514,37 @@ public class TestDataProviderUtils {
     @Nonnull
     public static BigDecimal bd(final String x) {
         return new BigDecimal(x);
+    }
+
+    public static Building building() {
+        final Building b = new Building();
+        TestUtils.setId(b);
+        final ProductionType productionType = new ProductionType();
+        TestUtils.setFieldValue(productionType, "productionTarget", EResourceType.RESEARCH);
+        TestUtils.setFieldValue(productionType, "productionCategory", EProductionCategory.PRODUCE);
+        TestUtils.setFieldValue(b, "productionType", productionType);
+
+        final ResourceDeposit resourceDeposit = createResourceDeposit();
+        TestUtils.setFieldValue(b, "costs", resourceDeposit);
+        TestUtils.setFieldValue(b, "techLevel", ETechLevel.TECH_I);
+
+        final Translatable name = new Translatable();
+        name.add(new Translation("en", "Construction Yard"));
+        TestUtils.setFieldValue(b, "name", name);
+        return b;
+    }
+
+    public static ResourceDeposit createResourceDeposit() {
+        final EDepositType subType = EDepositType.COSTS;
+        final ResourceDeposit resourceDeposit = new ResourceDeposit(subType);
+        for (final EResourceType type : EResourceType.valuesWithoutPopulation()) {
+            long rand = ThreadLocalRandom.current().nextLong(10, 51);
+            resourceDeposit.setAbsoluteResourceValue(type, rand);
+        }
+        for (final EEducationType eEducationType : EEducationType.values()) {
+            long rand = ThreadLocalRandom.current().nextLong(10, 51);
+            resourceDeposit.setAbsoluteCrewRequirement(eEducationType, rand);
+        }
+        return resourceDeposit;
     }
 }

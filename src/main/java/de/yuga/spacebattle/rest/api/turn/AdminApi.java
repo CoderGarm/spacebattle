@@ -1,16 +1,20 @@
 package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.i18n.Translatable;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.i18n.TranslatableService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.backend.transformer.BuildingCsvTransformer;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.ApplicationInfo;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
+import de.yuga.spacebattle.rest.dto.misc.FileUpload;
 import de.yuga.spacebattle.rest.dto.turn.Tick;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -29,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -53,19 +58,20 @@ public class AdminApi extends BaseApi {
     private final TranslatableService translatableService;
 
     @Nonnull
+    private final BuildingService buildingService;
+
+    @Nonnull
     private final String applicationVersion;
 
     @Autowired
     public AdminApi(@Nonnull final TickService tickController,
                     @Nonnull final TranslatableService translatableService,
+                    @Nonnull final BuildingService buildingService,
                     @Nonnull @Value("${sb.version:nope}") final String version) {
-        Preconditions.checkNotNull(tickController, "tickC shouldn't be null!");
-        Preconditions.checkNotNull(translatableService, "translatableService must not be empty");
-        Preconditions.checkNotNull(version, "version must not be empty");
-
-        this.tickController = tickController;
-        this.translatableService = translatableService;
-        this.applicationVersion = version;
+        this.tickController = Preconditions.checkNotNull(tickController, "tickC shouldn't be null!");
+        this.translatableService = Preconditions.checkNotNull(translatableService, "translatableService must not be empty");
+        this.applicationVersion = Preconditions.checkNotNull(version, "version must not be empty");
+        this.buildingService = Preconditions.checkNotNull(buildingService, "buildingService must not be empty");
     }
 
     @GetMapping(value = "/version")
@@ -170,5 +176,23 @@ public class AdminApi extends BaseApi {
         return ResponseEntity.ok(save.getTranslations().stream()
                 .map(t -> new de.yuga.spacebattle.rest.dto.i18n.Translation(translatable, t))
                 .collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = "/buildings")
+    @Operation(summary = "Get all building data as csv file.", operationId = "getBuildings",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FileUpload.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getBuildings(final HttpServletResponse response) {
+
+        final String preferredLanguage = getPreferredLanguage();
+        final List<Building> all = buildingService.findAll();
+
+        final String content = new BuildingCsvTransformer(false, preferredLanguage).convert(all);
+        return ResponseEntity.ok(new FileUpload("building.csv", content));
     }
 }

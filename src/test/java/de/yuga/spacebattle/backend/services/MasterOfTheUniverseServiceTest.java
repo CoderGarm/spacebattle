@@ -26,6 +26,7 @@ import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.backend.transformer.BuildingCsvTransformer;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static de.yuga.spacebattle.backend.transformer.CSVTransformer.CSV_SEPARATOR;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootProdProfile
@@ -103,6 +105,15 @@ public class MasterOfTheUniverseServiceTest {
             final ForumMessage forumMessage = new ForumMessage(save, user, "Hello World!");
             forumService.save(forumMessage);
         });
+    }
+
+    @Test
+    void convertTest() {
+        final Building b = buildingService.find(1);
+        final String result = new BuildingCsvTransformer("en").convert(b);
+        assertNotNull(result);
+        assertFalse(result.isBlank());
+        assertNotEquals("" + result.charAt(result.length() - 1), CSV_SEPARATOR);
     }
 
     @Test

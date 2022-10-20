@@ -59,7 +59,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -184,19 +183,6 @@ public class MasterOfTheUniverseService {
         this.battleService = Preconditions.checkNotNull(battleService, "battleService must not be empty");
         this.translatableService = Preconditions.checkNotNull(translatableService, "translatableService must not be empty");
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
-    }
-
-    @PostConstruct
-    public void transform() {
-        // todo remove after transform is done
-        LOGGER.info("---------------------------- POST CONSTRUCT ----------------------------");
-        final User user = userService.find(1);
-        final List<Planet> allColonizedBy = planetService.findAllColonizedBy(user);
-        if (user.getUsername().equals("Flashkid") && allColonizedBy.stream().noneMatch(Planet::isMain)) {
-            transformTheGalaxy();
-        } else {
-            LOGGER.info("---------------------------- nothing left to transform ----------------------------");
-        }
     }
 
     /**
