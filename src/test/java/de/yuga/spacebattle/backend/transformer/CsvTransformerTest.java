@@ -15,7 +15,7 @@ class CsvTransformerTest {
     @Test
     void convertTest() {
         final Building b = TestDataProviderUtils.building();
-        final String result = new BuildingCsvTransformer(false, "en").convert(b);
+        final String result = new BuildingCsvTransformer("en").convert(b);
         assertNotNull(result);
         System.out.println(result);
         assertFalse(result.isBlank());
@@ -27,7 +27,7 @@ class CsvTransformerTest {
     @Test
     void convertTestCollection() {
         final List<Building> list = List.of(TestDataProviderUtils.building(), TestDataProviderUtils.building());
-        final String result = new BuildingCsvTransformer(false, "en").convert(list);
+        final String result = new BuildingCsvTransformer("en").convert(list);
         assertNotNull(result);
         System.out.println(result);
         assertFalse(result.isBlank());

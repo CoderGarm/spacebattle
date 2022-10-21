@@ -5,10 +5,14 @@ import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.i18n.Translatable;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.misc.HasCosts;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.i18n.TranslatableService;
+import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
-import de.yuga.spacebattle.backend.transformer.BuildingCsvTransformer;
+import de.yuga.spacebattle.backend.transformer.*;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -33,7 +37,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
-import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -52,6 +55,9 @@ public class AdminApi extends BaseApi {
     private final static Logger LOGGER = LoggerFactory.getLogger(AdminApi.class);
 
     @Nonnull
+    private final String applicationVersion;
+
+    @Nonnull
     private final TickService tickController;
 
     @Nonnull
@@ -61,16 +67,18 @@ public class AdminApi extends BaseApi {
     private final BuildingService buildingService;
 
     @Nonnull
-    private final String applicationVersion;
+    private final ModuleService moduleService;
 
     @Autowired
-    public AdminApi(@Nonnull final TickService tickController,
+    public AdminApi(@Nonnull @Value("${sb.version:nope}") final String version,
+                    @Nonnull final TickService tickController,
                     @Nonnull final TranslatableService translatableService,
                     @Nonnull final BuildingService buildingService,
-                    @Nonnull @Value("${sb.version:nope}") final String version) {
+                    @Nonnull final ModuleService moduleService) {
+        this.applicationVersion = Preconditions.checkNotNull(version, "version must not be empty");
         this.tickController = Preconditions.checkNotNull(tickController, "tickC shouldn't be null!");
         this.translatableService = Preconditions.checkNotNull(translatableService, "translatableService must not be empty");
-        this.applicationVersion = Preconditions.checkNotNull(version, "version must not be empty");
+        this.moduleService = Preconditions.checkNotNull(moduleService, "moduleService must not be empty");
         this.buildingService = Preconditions.checkNotNull(buildingService, "buildingService must not be empty");
     }
 
@@ -187,12 +195,60 @@ public class AdminApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getBuildings(final HttpServletResponse response) {
+    public ResponseEntity<?> getBuildings() {
 
         final String preferredLanguage = getPreferredLanguage();
         final List<Building> all = buildingService.findAll();
-
-        final String content = new BuildingCsvTransformer(false, preferredLanguage).convert(all);
+        final String content = new BuildingCsvTransformer(preferredLanguage).convert(all);
         return ResponseEntity.ok(new FileUpload("building.csv", content));
+    }
+
+    @GetMapping(value = "/modules")
+    @Operation(summary = "Get all modules data as csv files.", operationId = "getModules",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = FileUpload.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getModules() {
+
+        final List<FileUpload> result = new ArrayList<>();
+        final String preferredLanguage = getPreferredLanguage();
+
+        final BaseModuleCsvTransformer bm = new BaseModuleCsvTransformer(preferredLanguage);
+        final HasCostsCsvTransformer hc = new HasCostsCsvTransformer(preferredLanguage);
+        final MissileMotorCsvTransformer mm = new MissileMotorCsvTransformer(preferredLanguage);
+        final BaseModuleWithEffectValueCsvTransformer ev = new BaseModuleWithEffectValueCsvTransformer(preferredLanguage);
+
+        result.add(new FileUpload("warHeads.csv", hc.convert(moduleService.findAllWarheads().stream().map(m -> ((HasCosts) m)).collect(Collectors.toList()))));
+        result.add(new FileUpload("missiles.csv", hc.convert(moduleService.findAllMissiles().stream().map(m -> ((HasCosts) m)).collect(Collectors.toList()))));
+        result.add(new FileUpload("propulsionModules.csv", ev.convert(castEffectValue(moduleService.findAllPropulsions()))));
+        result.add(new FileUpload("sidewallModules,csv", ev.convert(castEffectValue(moduleService.findAllSidewalls()))));
+        result.add(new FileUpload("weaponModules.csv", ev.convert(castEffectValue(moduleService.findAllWeapons()))));
+        result.add(new FileUpload("launcherModules.csv", bm.convert(cast(moduleService.findAllLaunchers()))));
+        result.add(new FileUpload("passiveModules.csv", ev.convert(castEffectValue(moduleService.findAllPassiveModule()))));
+        result.add(new FileUpload("electronicWarfareModules.csv", ev.convert(castEffectValue(moduleService.findAllElectronicWarfare()))));
+        result.add(new FileUpload("ammunitionModules.csv", ev.convert(castEffectValue(moduleService.findAllAmmunitionModules()))));
+        result.add(new FileUpload("armorModules.csv", ev.convert(castEffectValue(moduleService.findAllArmors()))));
+        result.add(new FileUpload("missileMotors.csv", mm.convert(moduleService.findAllMissileMotors())));
+        return ResponseEntity.ok(result);
+    }
+
+    @Nonnull
+    private List<BaseModuleWithEffectValue> castEffectValue(@Nonnull final List<? extends BaseModuleWithEffectValue> list) {
+        Preconditions.checkNotNull(list, "list must not be empty");
+
+        return list.stream().map(m -> (BaseModuleWithEffectValue) m).collect(Collectors.toList());
+    }
+
+    @Nonnull
+    private List<BaseModule> cast(@Nonnull final List<? extends BaseModule> list) {
+        Preconditions.checkNotNull(list, "list must not be empty");
+
+        return list.stream().map(m -> (BaseModule) m).collect(Collectors.toList());
     }
 }

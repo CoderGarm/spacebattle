@@ -11,6 +11,10 @@ public class BuildingCsvTransformer extends CSVTransformer<Building> {
         super(withoutHeader, preferredLanguage);
     }
 
+    public BuildingCsvTransformer(@Nonnull final String preferredLanguage) {
+        super(preferredLanguage);
+    }
+
     @Override
     protected void createHeader() {
         headers.add("idBuilding");
@@ -26,15 +30,11 @@ public class BuildingCsvTransformer extends CSVTransformer<Building> {
         dependencies.add(new ProductionTypeCsvTransformer(true, preferredLanguage));
     }
 
-    public BuildingCsvTransformer(@Nonnull final String preferredLanguage) {
-        super(preferredLanguage);
-    }
-
     @Override
     protected void convertInternally(@Nonnull final Building toTransform) {
         Preconditions.checkNotNull(toTransform, "building must not be empty");
 
-        a(toTransform.getId() + "");
+        a(toTransform.getId());
         a(toTransform.getBaseValue() + "");
         a(toTransform.getIncreasingFactorPerLevel() + "");
         a(((HasCostsCsvTransformer) dependencies.get(0)).convert(toTransform));
