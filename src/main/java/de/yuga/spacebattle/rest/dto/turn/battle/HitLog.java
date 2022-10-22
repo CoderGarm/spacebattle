@@ -53,7 +53,7 @@ public class HitLog {
 
         this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound(), input.getCombatPhase());
         this.damageDealer = input.getDamageDealer();
-        this.warShip = new WarShip(input.getWarShip(), languageCode);
+        this.warShip = new WarShip(input.getWarShip(), null, languageCode);
         this.damageValue = input.getDamageValue();
         this.state = input.getState();
         this.attackedPart = input.getAttackedPart();

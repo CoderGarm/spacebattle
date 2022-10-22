@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
+import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
@@ -37,6 +38,12 @@ public class MissileAmmunitionState implements Cloneable {
         });
     }
 
+    public MissileAmmunitionState(@Nonnull final WarshipHealthState healthState) {
+        Preconditions.checkNotNull(healthState, "healthState must not be empty");
+
+        shotsPerMissile.putAll(healthState.getRemainingShots());
+    }
+
     /**
      * Returns the remaining amount of missiles of the given type in the arsenal of the warship.
      *
@@ -46,8 +53,12 @@ public class MissileAmmunitionState implements Cloneable {
     public int getRemainingShots(@Nonnull final Missile missile) {
         Preconditions.checkNotNull(missile, "missile shouldn't be null!");
 
-        final Integer leftOverShots = shotsPerMissile.get(missile);
-        return leftOverShots == null ? 0 : leftOverShots;
+        return shotsPerMissile.getOrDefault(missile, 0);
+    }
+
+    @Nonnull
+    public Map<Missile, Integer> getRemainingShots() {
+        return shotsPerMissile;
     }
 
     /**

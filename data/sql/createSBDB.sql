@@ -127,6 +127,14 @@
         primary key (idDBPatch)
     ) engine=InnoDB;
 
+    create table activeFittings (
+       idWarshipHealthState integer not null,
+        amount integer not null,
+        idLauncher integer,
+        idWeapon integer,
+        weaponAlignment varchar(255)
+    ) engine=InnoDB;
+
     create table electronicWarfare (
        idElectronicWarfare integer not null auto_increment,
         techLevel varchar(255) not null,
@@ -579,6 +587,13 @@
         primary key (idTranslation)
     ) engine=InnoDB;
 
+    create table remainingShots (
+       idMissile integer not null,
+        amount decimal(19, 0) not null,
+        remainingShots_KEY integer not null,
+        primary key (idMissile, remainingShots_KEY)
+    ) engine=InnoDB;
+
     create table user (
        idUser integer not null auto_increment,
         createdAt datetime(6) not null,
@@ -621,7 +636,19 @@
         idFleet integer not null,
         idShipClass integer not null,
         idShipyard integer not null,
+        idWarshipHealthState integer,
         primary key (idWarShip)
+    ) engine=InnoDB;
+
+    create table warshipHealthState (
+       idWarshipHealthState integer not null auto_increment,
+        armorState integer not null,
+        elokaState integer not null,
+        hullState integer not null,
+        propulsionState integer not null,
+        sidewallState integer not null,
+        idWarship integer,
+        primary key (idWarshipHealthState)
     ) engine=InnoDB;
 
     create table weapon (
@@ -864,6 +891,21 @@
        add constraint FKcu6xd18vice5w5lmh1no2dk36 
        foreign key (idBattleReport) 
        references battleReport (idBattleReport);
+
+    alter table activeFittings
+       add constraint FK8g2ipqwq1getx5n0fmma0unx9 
+       foreign key (idLauncher) 
+       references launcher (idLauncher);
+
+    alter table activeFittings
+       add constraint FK7ek5ao1cpqrnw6fjlkpsl95e5 
+       foreign key (idWeapon) 
+       references weapon (idWeapon);
+
+    alter table activeFittings
+       add constraint FKp98j3powqokonka7fwhqdlw0a 
+       foreign key (idWarshipHealthState) 
+       references warshipHealthState (idWarshipHealthState);
 
     alter table electronicWarfare 
        add constraint FKccj76id0r5pq3p7f4viriwdqf 
@@ -1420,6 +1462,16 @@
        foreign key (idTranslatable) 
        references translatable (idTranslatable);
 
+    alter table remainingShots
+       add constraint FKsucjuvh9f5mahyes6ikkbq8rr 
+       foreign key (remainingShots_KEY)
+       references missile (idMissile);
+
+    alter table remainingShots
+       add constraint FK42u7h8yp1byrq1mqlgwcd2nph 
+       foreign key (idMissile) 
+       references warshipHealthState (idWarshipHealthState);
+
     alter table user 
        add constraint FKd0120p7tkvssh9r8hldenpw1w 
        foreign key (idAlliance) 
@@ -1465,6 +1517,16 @@
        foreign key (idShipyard) 
        references planet (idPlanet);
 
+    alter table warShip 
+       add constraint FK6l9eidjrdstov1is7fb5elahr 
+       foreign key (idWarshipHealthState) 
+       references warshipHealthState (idWarshipHealthState);
+
+    alter table warshipHealthState 
+       add constraint FK8n2fodpdy927lvcfqgsh1ejc8 
+       foreign key (idWarship) 
+       references warShip (idWarShip);
+
     alter table weapon 
        add constraint FK1rsb3ampiw8yjy8ngrget6ay 
        foreign key (idCosts) 
@@ -1486,3 +1548,4 @@
        references research (idResearch);
 
 insert into dbPatch values (null, now(), '0.0.5-1', 'create dbPatch table');
+insert into dbPatch values (null, now(), '0.0.5-2', 'add warship health state');

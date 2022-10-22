@@ -11,7 +11,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 /**
- * The support fitting represents a passive module and their amount.
+ * The support fitting represents a passive module and their amount. They can't be destroyed in a combat.
  */
 @Embeddable
 public class SupportFitting {

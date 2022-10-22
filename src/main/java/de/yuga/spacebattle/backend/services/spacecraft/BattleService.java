@@ -5,13 +5,18 @@ import de.yuga.spacebattle.backend.combat.BattleLogger;
 import de.yuga.spacebattle.backend.combat.dto.BattleResult;
 import de.yuga.spacebattle.backend.combat.dto.FleetClash;
 import de.yuga.spacebattle.backend.combat.main.Cage;
+import de.yuga.spacebattle.backend.combat.round.MissileAmmunitionState;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
+import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
+import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStateService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +24,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class BattleService {
@@ -43,20 +48,20 @@ public class BattleService {
     @Nonnull
     private final WarShipService warShipService;
 
+    @Nonnull
+    private final WarshipHealthStateService warshipHealthStateService;
+
     @Autowired
     public BattleService(@Nonnull final FleetService fleetService,
                          @Nonnull final BattleReportService battleReportService,
                          @Nonnull final WarShipService warShipService,
-                         @Nonnull final BattleLogger battleLogger) {
-        Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
-        Preconditions.checkNotNull(battleReportService, "battleReportService shouldn't be null!");
-        Preconditions.checkNotNull(warShipService, "warShipService shouldn't be null!");
-        Preconditions.checkNotNull(battleLogger, "battleLogger shouldn't be null!");
-
-        this.fleetService = fleetService;
-        this.battleReportService = battleReportService;
-        this.warShipService = warShipService;
-        this.battleLogger = battleLogger;
+                         @Nonnull final BattleLogger battleLogger,
+                         @Nonnull final WarshipHealthStateService warshipHealthStateService) {
+        this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
+        this.battleReportService = Preconditions.checkNotNull(battleReportService, "battleReportService shouldn't be null!");
+        this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService shouldn't be null!");
+        this.battleLogger = Preconditions.checkNotNull(battleLogger, "battleLogger shouldn't be null!");
+        this.warshipHealthStateService = Preconditions.checkNotNull(warshipHealthStateService, "warshipHealthStateService must not be empty");
     }
 
     public void runBattles(@Nonnull final Tick today) {
@@ -93,7 +98,6 @@ public class BattleService {
         Preconditions.checkNotNull(today, "today shouldn't be null!");
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
-
         final FleetClash fleetClash = fleetService.findFleetClashesAtPlanet(planet);
         if (fleetClash == null) {
             return;
@@ -113,21 +117,75 @@ public class BattleService {
             e.printStackTrace();
             throw new NotifyWebUserException(e.getMessage());
         }
-
     }
 
     private BattleReport processFightingResult(@Nonnull final Tick latest, @Nonnull final BattleResult battleResult) {
         Preconditions.checkNotNull(latest, "latest shouldn't be null!");
         Preconditions.checkNotNull(battleResult, "fightingResult shouldn't be null!");
 
+        final List<WarShip> warShips = battleResult.getFleetClash()
+                .getParticipatingFleets().stream()
+                .map(Fleet::getShips)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
         final Set<WarShip> losses = battleResult.getLosses();
+        warShips.removeAll(losses);
         warShipService.deleteAll(losses);
         fleetService.deleteFleetsWithoutShips(battleResult.getFleetClash().getParticipatingFleets());
+
+        final List<de.yuga.spacebattle.backend.combat.round.WarshipHealthState> warshipHealthStates = battleResult.getWarshipHealthStates();
+
+        final Map<WarShip, de.yuga.spacebattle.backend.combat.round.WarshipHealthState> referenceWarships = warShips.stream()
+                .collect(Collectors.toMap(Function.identity(), de.yuga.spacebattle.backend.combat.round.WarshipHealthState::new));
+
+
+        final List<WarshipHealthState> byWarships = warshipHealthStateService.findByWarships(warShips);
+        warshipHealthStateService.deleteALl(byWarships);
+
+        final List<WarshipHealthState> toPersist = warshipHealthStates.stream()
+                .filter(w -> hasChanged(w, referenceWarships.get(w.getWarShip())))
+                .map(WarshipHealthState::new)
+                .collect(Collectors.toList());
+        warshipHealthStateService.saveAll(toPersist);
 
         BattleReport battleReport = new BattleReport(latest, battleResult);
         battleReport = battleReportService.save(battleReport);
         battleLogger.logBattleResult(battleReport, battleResult);
 
         return battleReport;
+    }
+
+    /**
+     * Checks if the health state has a difference from the untouched state of a fresh warship.
+     *
+     * @param toCheck   the object to check if it differs from the reference
+     * @param reference the reference
+     * @return <code>true</code> if there is a relevant difference, <code>false</code> otherwise
+     */
+    private boolean hasChanged(@Nonnull final de.yuga.spacebattle.backend.combat.round.WarshipHealthState toCheck,
+                               @Nonnull final de.yuga.spacebattle.backend.combat.round.WarshipHealthState reference) {
+        Preconditions.checkNotNull(toCheck, "toCheck must not be empty");
+        Preconditions.checkNotNull(reference, "reference must not be empty");
+
+        if (!toCheck.getWarShip().equals(reference.getWarShip())) {
+            throw new NotifyWebUserException("The warship health states can only be checked for the same individual ships.");
+        }
+
+        final boolean differState = !(toCheck.getArmorState() == reference.getArmorState()
+                && toCheck.getElokaState() == reference.getElokaState()
+                && toCheck.getSidewallState() == reference.getSidewallState()
+                && toCheck.getHullState() == reference.getHullState()
+                && toCheck.getPropulsionState() == reference.getPropulsionState());
+
+        final MissileAmmunitionState referenceMissiles = reference.getMissileAmmunitionState();
+        final MissileAmmunitionState toCheckMissiles = toCheck.getMissileAmmunitionState();
+        final boolean differMissiles = referenceMissiles.getRemainingShots().entrySet().stream().anyMatch(ref -> {
+            final Missile missile = ref.getKey();
+            final int refAmount = ref.getValue();
+            final int remainingShots = toCheckMissiles.getRemainingShots(missile);
+            return refAmount != remainingShots;
+        });
+
+        return differState || differMissiles;
     }
 }

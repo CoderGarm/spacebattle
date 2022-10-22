@@ -56,7 +56,7 @@ public class Fleet {
 
     @Nonnull
     @Schema(required = true, description = "The effect value per module type.")
-    private FleetCapabilities fleetCapabilities;
+    private SpacecraftCapabilities spacecraftCapabilities;
 
     @JsonProperty
     @Schema(required = true, description = "If the fleet can run interstellar movements.")
@@ -75,8 +75,8 @@ public class Fleet {
         this.name = fleet.getName();
         this.orbit = fleet.getOrbit() != null ? new FleetOrbit(fleet.getOrbit()) : null;
         this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;
-        this.ships.addAll(fleet.getShips().stream().map(w -> new WarShip(w, languageCode)).collect(Collectors.toList()));
-        this.fleetCapabilities = new FleetCapabilities(fleet);
+        this.ships.addAll(fleet.getShips().stream().map(w -> new WarShip(w, w.getWarshipHealthState(), languageCode)).collect(Collectors.toList()));
+        this.spacecraftCapabilities = new SpacecraftCapabilities(fleet);
         this.isFTLCapable = fleet.isFTLCapable();
     }
 
@@ -135,12 +135,12 @@ public class Fleet {
     }
 
     @Nonnull
-    public FleetCapabilities getFleetCapabilities() {
-        return fleetCapabilities;
+    public SpacecraftCapabilities getFleetCapabilities() {
+        return spacecraftCapabilities;
     }
 
-    public void setFleetCapabilities(@Nonnull FleetCapabilities fleetCapabilities) {
-        this.fleetCapabilities = fleetCapabilities;
+    public void setFleetCapabilities(@Nonnull SpacecraftCapabilities spacecraftCapabilities) {
+        this.spacecraftCapabilities = spacecraftCapabilities;
     }
 
     @JsonIgnore

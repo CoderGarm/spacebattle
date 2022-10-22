@@ -72,8 +72,6 @@ public class WarshipHealthState implements Cloneable {
     @Nonnull
     private MissileAmmunitionState missileAmmunitionState;
 
-    // todo amend support fittings which are completely left!
-
     public WarshipHealthState(@Nonnull final WarShip warShip) {
         Preconditions.checkNotNull(warShip, "warShip shouldn't be null!");
 
@@ -83,19 +81,33 @@ public class WarshipHealthState implements Cloneable {
         final Sidewall sidewall = shipClass.getSidewall();
         final Propulsion propulsion = shipClass.getPropulsion();
         final ElectronicWarfare electronicWarfare = shipClass.getElectronicWarfare();
-        armorState = armor != null ? armor.getEffectValue() : 0;
-        hullState = armorState;
-        sidewallState = sidewall != null ? sidewall.getEffectValue() : 0;
-        propulsionState = propulsion != null ? propulsion.getEffectValue() : 0;
-        elokaState = electronicWarfare != null ? electronicWarfare.getEffectValue() : 0;
-        shipClass.getFittings().forEach(fitting -> fittings.put(fitting, true));
-        this.missileAmmunitionState = new MissileAmmunitionState(warShip);
         this.modules.add(armor);
         this.modules.add(sidewall);
         this.modules.add(propulsion);
         this.modules.add(electronicWarfare);
 
-
+        final de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState healthState = warShip.getWarshipHealthState();
+        if (healthState == null) {
+            armorState = armor != null ? armor.getEffectValue() : 0;
+            hullState = armorState;
+            sidewallState = sidewall != null ? sidewall.getEffectValue() : 0;
+            propulsionState = propulsion != null ? propulsion.getEffectValue() : 0;
+            elokaState = electronicWarfare != null ? electronicWarfare.getEffectValue() : 0;
+            shipClass.getFittings().forEach(fitting -> fittings.put(fitting, true));
+            this.missileAmmunitionState = new MissileAmmunitionState(warShip);
+        } else {
+            armorState = healthState.getArmorState();
+            hullState = healthState.getHullState();
+            sidewallState = healthState.getSidewallState();
+            propulsionState = healthState.getPropulsionState();
+            elokaState = healthState.getElokaState();
+            final Set<AlignedFitting> activeFittings = healthState.getActiveFittings();
+            shipClass.getFittings().forEach(fitting -> {
+                final boolean active = activeFittings.contains(fitting);
+                fittings.put(fitting, active);
+            });
+            this.missileAmmunitionState = new MissileAmmunitionState(healthState);
+        }
     }
 
     @Nonnull

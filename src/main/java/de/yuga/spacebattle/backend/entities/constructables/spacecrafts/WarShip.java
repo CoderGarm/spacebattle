@@ -5,8 +5,10 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
@@ -39,6 +41,14 @@ public class WarShip extends Deletable {
     @ManyToOne
     @JoinColumn(name = "idShipClass", updatable = false)
     private ShipClass shipClass;
+
+    /**
+     * If the health state if not present, there is no change from the ship class, the warship is fully operational.
+     */
+    @Nullable
+    @OneToOne(orphanRemoval = true)
+    @JoinColumn(name = "idWarshipHealthState")
+    private WarshipHealthState warshipHealthState;
 
     public WarShip() {
     }
@@ -82,6 +92,11 @@ public class WarShip extends Deletable {
     @Nonnull
     public ShipClass getShipClass() {
         return shipClass;
+    }
+
+    @Nullable
+    public WarshipHealthState getWarshipHealthState() {
+        return warshipHealthState;
     }
 
     @Override

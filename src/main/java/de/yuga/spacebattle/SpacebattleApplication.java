@@ -77,7 +77,7 @@ public class SpacebattleApplication {
         if (!everyPatchPresent) {
             throw new ManualShutdownException("Not all db patches are applied.", "Please check the databases patches which have to be applied.");
         } else {
-            LOGGER.info("Startup fine");
+            LOGGER.info("All database patches applied.");
         }
     }
 

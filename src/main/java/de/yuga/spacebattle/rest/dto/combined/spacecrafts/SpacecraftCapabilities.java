@@ -22,7 +22,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Schema(description = ".")
-public class FleetCapabilities {
+public class SpacecraftCapabilities {
 
     @Nonnull
     @Schema(required = true, description = "The effect values per module type.")
@@ -31,20 +31,22 @@ public class FleetCapabilities {
     @JsonIgnore
     private Map<EModuleType, BigDecimal> effectValueByModuleType;
 
-    public FleetCapabilities() {
+    public SpacecraftCapabilities() {
     }
 
-    public FleetCapabilities(@Nonnull final Fleet fleet) {
+    public SpacecraftCapabilities(@Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
         effectValueByModuleType = Arrays.stream(EModuleType.values())
                 .collect(Collectors.toMap(Function.identity(), value -> BigDecimal.ZERO));
         setValue(fleet.getShipsByClass());
-        final List<CapabilityValue> capabilityValues = effectValueByModuleType.entrySet().stream().map(CapabilityValue::new).collect(Collectors.toList());
+        final List<CapabilityValue> capabilityValues = effectValueByModuleType.entrySet().stream()
+                .map(CapabilityValue::new)
+                .collect(Collectors.toList());
         capabilities.addAll(capabilityValues);
     }
 
-    public FleetCapabilities(@Nonnull final ShipClass shipClass) {
+    public SpacecraftCapabilities(@Nonnull final ShipClass shipClass) {
         Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
 
         effectValueByModuleType = Arrays.stream(EModuleType.values())
@@ -52,7 +54,21 @@ public class FleetCapabilities {
         final Map<ShipClass, Integer> shipClasses = new HashMap<>();
         shipClasses.put(shipClass, 1);
         setValue(shipClasses);
-        final List<CapabilityValue> capabilityValues = effectValueByModuleType.entrySet().stream().map(CapabilityValue::new).collect(Collectors.toList());
+        final List<CapabilityValue> capabilityValues = effectValueByModuleType.entrySet().stream()
+                .map(CapabilityValue::new)
+                .collect(Collectors.toList());
+        capabilities.addAll(capabilityValues);
+    }
+
+    public SpacecraftCapabilities(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState warshipHealthState) {
+        Preconditions.checkNotNull(warshipHealthState, "warshipHealthState must not be empty");
+
+        effectValueByModuleType = Arrays.stream(EModuleType.values())
+                .collect(Collectors.toMap(Function.identity(), value -> BigDecimal.ZERO));
+
+        final List<CapabilityValue> capabilityValues = effectValueByModuleType.entrySet().stream()
+                .map(CapabilityValue::new)
+                .collect(Collectors.toList());
         capabilities.addAll(capabilityValues);
     }
 
@@ -67,11 +83,38 @@ public class FleetCapabilities {
         return capabilities;
     }
 
-    /**
-     * Will update or clear the display, depending if the param exists.
-     *
-     * @param shipClasses the ship classes to display
-     */
+    @JsonIgnore
+    private void setValue(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState warshipHealthState) {
+        Preconditions.checkNotNull(warshipHealthState, "warshipHealthState shouldn't be null!");
+
+        final ShipClass shipClass = warshipHealthState.getWarShip().getShipClass();
+        final Map<ESupportType, List<SupportFitting>> supportTypeToModule = shipClass.getSupportFittings().stream()
+                .collect(Collectors.groupingBy(c -> c.getPassiveModule().getSupportType(),
+                        Collectors.mapping(Function.identity(), Collectors.toList())));
+
+        final Set<AlignedFitting> fittings = warshipHealthState.getActiveFittings();
+        fittings.forEach(fitting -> {
+            final EModuleType moduleType = EModuleType.WEAPON;
+            final List<SupportFitting> supportFittings = supportTypeToModule.computeIfAbsent(ESupportType.getByValue(moduleType), k -> new ArrayList<>());
+            final EWeaponType weaponType = fitting.getWeaponType();
+            if ((EWeaponType.BEAM == weaponType || EWeaponType.POINT_DEFENSE == weaponType) && fitting.getWeapon() != null) {
+                calculateValueBySupportFitting(fitting.getWeapon(), fitting.getAmount(), supportFittings, moduleType);
+            }
+            if ((EWeaponType.MISSILE == weaponType || EWeaponType.COUNTER_MISSILE == weaponType) && fitting.getLauncher() != null) {
+                calculateValueBySupportFitting(fitting.getLauncher(), fitting.getAmount(), supportFittings, moduleType);
+            }
+        });
+
+        final int armorState = warshipHealthState.getArmorState();
+        addValueByType(armorState, 1, EModuleType.ARMOR);
+        final int elokaState = warshipHealthState.getElokaState();
+        addValueByType(elokaState, 1, EModuleType.ELECTRONIC_WARFARE);
+        final int sidewallState = warshipHealthState.getSidewallState();
+        addValueByType(sidewallState, 1, EModuleType.SHIELD);
+        final int propulsionState = warshipHealthState.getPropulsionState();
+        addValueByType(propulsionState, 1, EModuleType.PROPULSION);
+    }
+
     @JsonIgnore
     private void setValue(@Nonnull final Map<ShipClass, Integer> shipClasses) {
         Preconditions.checkNotNull(shipClasses, "shipClasses shouldn't be null!");
@@ -131,7 +174,6 @@ public class FleetCapabilities {
                 amount--;
             }
         });
-
     }
 
     /**

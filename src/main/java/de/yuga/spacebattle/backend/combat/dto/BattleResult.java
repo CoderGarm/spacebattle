@@ -4,13 +4,11 @@ package de.yuga.spacebattle.backend.combat.dto;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
+import de.yuga.spacebattle.backend.combat.round.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 
 import javax.annotation.Nonnull;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BattleResult {
@@ -23,6 +21,9 @@ public class BattleResult {
 
     @Nonnull
     private final Set<WarShip> losses = new HashSet<>();
+
+    @Nonnull
+    private final List<WarshipHealthState> warshipHealthStates;
 
     @Nonnull
     private final List<FleetRoundState> roundStates;
@@ -41,12 +42,19 @@ public class BattleResult {
 
         this.cage = cage;
         this.fleetClash = cage.getFleetClash();
-        this.roundStates = cage.getHistoryOfRounds().stream().sorted(Comparator.comparing(FleetRoundState::getCombatRound)).collect(Collectors.toList());
+        this.roundStates = cage.getHistoryOfRounds().stream()
+                .sorted(Comparator.comparing(FleetRoundState::getCombatRound))
+                .collect(Collectors.toList());
         this.movements = cage.getHistoryMovement();
         this.beamVolleys = cage.getHistoryOfBeamSalvos();
         this.missileSalvos = cage.getHistoryOfMissileSalvos();
 
         this.roundStates.forEach(fleetRoundState -> this.losses.addAll(fleetRoundState.getFleetHealthState().getLosses().keySet()));
+
+        warshipHealthStates = new ArrayList<>(this.roundStates.get(this.roundStates.size() - 1)
+                .getFleetHealthState()
+                .getWarshipHealthStates()
+                .values());
     }
 
     @Nonnull
@@ -62,6 +70,11 @@ public class BattleResult {
     @Nonnull
     public Set<WarShip> getLosses() {
         return losses;
+    }
+
+    @Nonnull
+    public List<WarshipHealthState> getWarshipHealthStates() {
+        return warshipHealthStates;
     }
 
     @Nonnull
