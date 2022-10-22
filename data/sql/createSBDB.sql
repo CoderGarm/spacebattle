@@ -119,6 +119,14 @@
         primary key (idBattleReport, idCounterMissileHit)
     ) engine=InnoDB;
 
+    create table dbPatch (
+       idDBPatch integer not null auto_increment,
+        createdAt datetime(6) not null,
+        version varchar(255) not null,
+        description varchar(255) not null,
+        primary key (idDBPatch)
+    ) engine=InnoDB;
+
     create table electronicWarfare (
        idElectronicWarfare integer not null auto_increment,
         techLevel varchar(255) not null,
@@ -1476,3 +1484,5 @@
        add constraint FKo22n18dgjpraqosj7nkamrnvb 
        foreign key (idResearch) 
        references research (idResearch);
+
+insert into dbPatch values (null, now(), '0.0.5-1', 'create dbPatch table');

@@ -657,6 +657,8 @@
 
     drop table if exists counterMissileHits;
 
+    drop table if exists dbPatch;
+
     drop table if exists electronicWarfare;
 
     drop table if exists fleet;

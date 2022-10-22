@@ -1,5 +1,7 @@
 package de.yuga.spacebattle;
 
+import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.services.misc.DBPatchService;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.headers.Header;
@@ -11,15 +13,23 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.event.ContextStoppedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,6 +39,9 @@ import java.nio.file.Path;
 @EnableJpaRepositories(queryLookupStrategy = QueryLookupStrategy.Key.USE_DECLARED_QUERY)
 public class SpacebattleApplication {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(SpacebattleApplication.class);
+
+
     /**
      * Note: Compare application.properties for path to delete
      */
@@ -37,8 +50,40 @@ public class SpacebattleApplication {
     private final static String createPath = tmpdir + separator + "createSBDB.sql";
     private final static String dropPath = tmpdir + separator + "dropSBDB.sql";
 
+    @Nonnull
+    private final DBPatchService dbPatchService;
+
+    @Nonnull
+    private final ApplicationContext context;
+
+    @Autowired
+    public SpacebattleApplication(@Nonnull final DBPatchService dbPatchService,
+                                  @Nonnull final ApplicationContext context) {
+        this.dbPatchService = Preconditions.checkNotNull(dbPatchService, "dbPatchService must not be empty");
+        this.context = Preconditions.checkNotNull(context, "context must not be empty");
+        ;
+    }
+
     public static void main(String[] args) {
         SpringApplication.run(SpacebattleApplication.class, args);
+    }
+
+    /**
+     * Stops the application in case of a missing database patch.
+     */
+    @PostConstruct
+    public void validateDBPatches() {
+        final boolean everyPatchPresent = dbPatchService.checkDBPatches();
+        if (!everyPatchPresent) {
+            throw new ManualShutdownException("Not all db patches are applied.", "Please check the databases patches which have to be applied.");
+        } else {
+            LOGGER.info("Startup fine");
+        }
+    }
+
+    @EventListener
+    public void onShutdown(ContextStoppedEvent event) {
+        LOGGER.info("yeah");
     }
 
     @Bean
