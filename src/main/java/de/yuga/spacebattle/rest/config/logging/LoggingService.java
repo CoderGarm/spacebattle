@@ -7,8 +7,10 @@ import com.google.gson.JsonIOException;
 import de.yuga.spacebattle.rest.AuthRequestAdapter;
 import de.yuga.spacebattle.rest.BattleReportAdapter;
 import de.yuga.spacebattle.rest.LocalDateTimeAdapter;
+import de.yuga.spacebattle.rest.UserReqAdapter;
 import de.yuga.spacebattle.rest.api.EndpointDefinition;
 import de.yuga.spacebattle.rest.dto.account.AuthRequest;
+import de.yuga.spacebattle.rest.dto.account.UserReq;
 import de.yuga.spacebattle.rest.dto.turn.battle.BattleReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,13 +27,14 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 @Service
+@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public class LoggingService {
 
     public static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             .registerTypeAdapter(AuthRequest.class, new AuthRequestAdapter())
+            .registerTypeAdapter(UserReq.class, new UserReqAdapter())
             .registerTypeAdapter(BattleReport.class, new BattleReportAdapter())
             .setPrettyPrinting()
             .create();
