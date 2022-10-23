@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 @Schema(description = ".")
 public class SpacecraftCapabilities {
 
+    private static final Set<EModuleType> PROPULSION = Set.of(EModuleType.PROPULSION, EModuleType.FTLPROPULSION);
+
     @Nonnull
     @Schema(required = true, description = "The effect values per module type.")
     private final List<CapabilityValue> capabilities = new ArrayList<>();
@@ -65,7 +67,7 @@ public class SpacecraftCapabilities {
 
         effectValueByModuleType = Arrays.stream(EModuleType.values())
                 .collect(Collectors.toMap(Function.identity(), value -> BigDecimal.ZERO));
-
+        setValue(warshipHealthState);
         final List<CapabilityValue> capabilityValues = effectValueByModuleType.entrySet().stream()
                 .map(CapabilityValue::new)
                 .collect(Collectors.toList());
@@ -105,19 +107,49 @@ public class SpacecraftCapabilities {
             }
         });
 
-        final int armorState = warshipHealthState.getArmorState();
-        addValueByType(armorState, 1, EModuleType.ARMOR);
-        final int elokaState = warshipHealthState.getElokaState();
-        addValueByType(elokaState, 1, EModuleType.ELECTRONIC_WARFARE);
-        final int sidewallState = warshipHealthState.getSidewallState();
-        addValueByType(sidewallState, 1, EModuleType.SHIELD);
-        final int propulsionState = warshipHealthState.getPropulsionState();
-        addValueByType(propulsionState, 1, EModuleType.PROPULSION);
+        addValueByType(warshipHealthState.getArmorState(), 1, EModuleType.ARMOR);
+        addValueByType(warshipHealthState.getElokaState(), 1, EModuleType.ELECTRONIC_WARFARE);
+        addValueByType(warshipHealthState.getSidewallState(), 1, EModuleType.SHIELD);
+        addValueByType(warshipHealthState.getPropulsionState(), 1, EModuleType.PROPULSION);
+        if (warshipHealthState.getWarShip().getShipClass().isFTLCapable()) {
+            addValueByType(warshipHealthState.getPropulsionState(), 1, EModuleType.FTLPROPULSION);
+        }
     }
 
     @JsonIgnore
     private void setValue(@Nonnull final Map<ShipClass, Integer> shipClasses) {
         Preconditions.checkNotNull(shipClasses, "shipClasses shouldn't be null!");
+
+        // it's only possible to reduce speed while the slowest ship defined this parameter
+        final List<Double> propValue = new ArrayList<>();
+        final List<Double> ftlPropValue = new ArrayList<>();
+        shipClasses.keySet().forEach(shipClass -> {
+            final Map<ESupportType, List<SupportFitting>> supportTypeToModule = shipClass.getSupportFittings().stream()
+                    .collect(Collectors.groupingBy(c -> c.getPassiveModule().getSupportType(),
+                            Collectors.mapping(Function.identity(), Collectors.toList())));
+            final Propulsion propulsion = shipClass.getPropulsion();
+            if (propulsion != null) {
+                final EModuleType moduleType = EModuleType.PROPULSION;
+                final List<SupportFitting> supportFittings = supportTypeToModule.computeIfAbsent(ESupportType.getByValue(moduleType), k -> new ArrayList<>());
+                final double bonus = supportFittings.stream().map(SupportFitting::getEffectValue).reduce(0D, Double::sum);
+                final double absoluteValueAsFactor = bonus != 0 ? 1 + (bonus / 100) : 1;
+                final double effectValue = propulsion.getEffectValue() * absoluteValueAsFactor;
+                propValue.add(effectValue);
+            }
+            if (propulsion != null && propulsion.isFtlCapable()) {
+                final EModuleType moduleType = EModuleType.FTLPROPULSION;
+                final List<SupportFitting> supportFittings = supportTypeToModule.computeIfAbsent(ESupportType.getByValue(moduleType), k -> new ArrayList<>());
+                final double bonus = supportFittings.stream().map(SupportFitting::getEffectValue).reduce(0D, Double::sum);
+                final double absoluteValueAsFactor = bonus != 0 ? 1 + (bonus / 100) : 1;
+                final double effectValue = propulsion.getEffectValue() * absoluteValueAsFactor;
+                ftlPropValue.add(effectValue);
+            }
+        });
+
+        final Double lowestPropulsion = propValue.stream().min(Double::compareTo).orElse(0D);
+        final Double lowestFTLPropulsion = ftlPropValue.stream().min(Double::compareTo).orElse(0D);
+        effectValueByModuleType.put(EModuleType.PROPULSION, new BigDecimal(lowestPropulsion));
+        effectValueByModuleType.put(EModuleType.FTLPROPULSION, new BigDecimal(lowestFTLPropulsion));
 
         shipClasses.keySet().forEach(shipClass -> {
             final Map<ESupportType, List<SupportFitting>> supportTypeToModule = shipClass.getSupportFittings().stream()
@@ -131,18 +163,6 @@ public class SpacecraftCapabilities {
                     final EModuleType moduleType = EModuleType.ARMOR;
                     final List<SupportFitting> supportFittings = supportTypeToModule.computeIfAbsent(ESupportType.getByValue(moduleType), k -> new ArrayList<>());
                     calculateValueBySupportFitting(armor, 1, supportFittings, moduleType);
-                }
-
-                final Propulsion propulsion = shipClass.getPropulsion();
-                if (propulsion != null) {
-                    final EModuleType moduleType = EModuleType.PROPULSION;
-                    final List<SupportFitting> supportFittings = supportTypeToModule.computeIfAbsent(ESupportType.getByValue(moduleType), k -> new ArrayList<>());
-                    calculateValueBySupportFitting(propulsion, 1, supportFittings, moduleType);
-                }
-                if (propulsion != null && propulsion.isFtlCapable()) {
-                    final EModuleType moduleType = EModuleType.FTLPROPULSION;
-                    final List<SupportFitting> supportFittings = supportTypeToModule.computeIfAbsent(ESupportType.getByValue(moduleType), k -> new ArrayList<>());
-                    calculateValueBySupportFitting(propulsion, 1, supportFittings, moduleType);
                 }
 
                 final Sidewall sidewall = shipClass.getSidewall();
@@ -217,7 +237,7 @@ public class SpacecraftCapabilities {
         Preconditions.checkNotNull(supportFittings, "supportFittings shouldn't be null!");
         Preconditions.checkNotNull(moduleType, "moduleType shouldn't be null!");
 
-        final Double bonus = supportFittings.stream().map(SupportFitting::getEffectValue).reduce(0D, Double::sum);
+        final double bonus = supportFittings.stream().map(SupportFitting::getEffectValue).reduce(0D, Double::sum);
         final double absoluteValueAsFactor = bonus != 0 ? 1 + (bonus / 100) : 1;
         final double effectValue = baseModuleWithEffectValue.getEffectValue() * absoluteValueAsFactor;
         addValueByType(effectValue, amount, moduleType);
@@ -225,7 +245,7 @@ public class SpacecraftCapabilities {
 
     /**
      * Adds the effective value by {@link EModuleType} to the stats display.
-     * Remember: Speeds will not added.
+     * Remember: Speeds will not add.
      *
      * @param effectValue    the effect value
      * @param amountOfModule how often this module should be counted
@@ -239,16 +259,7 @@ public class SpacecraftCapabilities {
 
         final BigDecimal effectiveEffectValueAsBigD = new BigDecimal(effectValue);
         final BigDecimal currentEffectValue = effectValueByModuleType.get(moduleType);
-        BigDecimal effectiveResultingValue = BigDecimal.ZERO;
-        // it's only possible to reduce speed while the slowest ship defined this parameter
-        if (EModuleType.FTLPROPULSION == moduleType || EModuleType.PROPULSION == moduleType) {
-            final BigDecimal effectiveEffectValueByModuleAmount = effectiveEffectValueAsBigD.multiply(new BigDecimal(amountOfModule));
-            if (currentEffectValue.equals(BigDecimal.ZERO) || effectiveEffectValueByModuleAmount.compareTo(currentEffectValue) < 0) {
-                effectiveResultingValue = effectiveEffectValueByModuleAmount;
-            }
-        } else {
-            effectiveResultingValue = currentEffectValue.add(effectiveEffectValueAsBigD.multiply(new BigDecimal(amountOfModule)));
-        }
+        final BigDecimal effectiveResultingValue = currentEffectValue.add(effectiveEffectValueAsBigD.multiply(new BigDecimal(amountOfModule)));
         effectValueByModuleType.put(moduleType, effectiveResultingValue);
     }
 }

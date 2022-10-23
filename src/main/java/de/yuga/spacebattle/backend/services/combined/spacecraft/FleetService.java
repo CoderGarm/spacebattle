@@ -19,10 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -267,6 +264,13 @@ public class FleetService {
         return fleetRepository.findAllFleetsByPlanet(planet);
     }
 
+    @Nonnull
+    public Set<Fleet> findAllDamagedFleetsByPlanetAndOwner(@Nonnull final Planet planet) {
+        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+
+        return fleetRepository.findAllDamagedFleetsByPlanetAndOwner(planet);
+    }
+
     public boolean isShipClassInUse(final int idShipClass) {
         return fleetRepository.isShipClassInUse(idShipClass);
     }
@@ -304,7 +308,7 @@ public class FleetService {
         return clashes.get(0);
     }
 
-    public List<Fleet> saveAll(@Nonnull final List<Fleet> fleets) {
+    public List<Fleet> saveAll(@Nonnull final Collection<Fleet> fleets) {
         Preconditions.checkNotNull(fleets, "fleets shouldn't be null!");
 
         final Iterable<Fleet> saveAll = fleetRepository.saveAll(fleets);

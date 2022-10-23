@@ -5,6 +5,7 @@ import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
@@ -50,6 +51,7 @@ public class PlanetApi extends BaseApi {
     private static final String SHIPYARD_BUILD_IT_ENDPOINT = "shipyardConstructionBuild";
     private static final String GET_PLANET_BY_COORDINATES_ENDPOINT = "byCoord";
     private static final String GET_MAIN_PLANET = "main";
+    private static final String REPAIR_FLEET_ENDPOINT = SHIPYARD_BUILD_IT_ENDPOINT + "/repair";
 
     @Nonnull
     private final PlanetService planetService;
@@ -60,17 +62,18 @@ public class PlanetApi extends BaseApi {
     @Nonnull
     private final ShipClassService shipClassService;
 
+    @Nonnull
+    private final FleetService fleetService;
+
     @Autowired
     public PlanetApi(@Nonnull final PlanetService planetService,
                      @Nonnull final JobService jobService,
-                     @Nonnull final ShipClassService shipClassService) {
-        Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
-        Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
-        Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
-
-        this.planetService = planetService;
-        this.jobService = jobService;
-        this.shipClassService = shipClassService;
+                     @Nonnull final ShipClassService shipClassService,
+                     @Nonnull final FleetService fleetService) {
+        this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
+        this.jobService = Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
+        this.shipClassService = Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
+        this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
     }
 
     @GetMapping(value = "{idUser}")
@@ -217,6 +220,31 @@ public class PlanetApi extends BaseApi {
             return ResponseEntity.ok(new Planet(planet));
         }
         return ResponseEntity.ok().build();
+    }
 
+    @PostMapping(value = REPAIR_FLEET_ENDPOINT + "/{idPlanet}/{idFleet}")
+    @Operation(summary = "Repairs the fleet.", operationId = "repairFleets",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> repairFleets(@PathVariable("idPlanet") final int idPlanet, @PathVariable("idFleet") final int idFleet) {
+
+        final int idUser = getIdUser();
+        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetService.find(idPlanet);
+        final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetService.findById(idFleet);
+        if (planet == null || planet.getOwner() == null || fleet == null || (planet.getOwner().getId() != idUser || fleet.getOwner().getId() != idUser)) {
+            throw new NotifyWebUserException("This will not work that way.");
+        }
+
+        jobService.createShipyardJob(planet, fleet);
+        return ResponseEntity.ok(true);
     }
 }

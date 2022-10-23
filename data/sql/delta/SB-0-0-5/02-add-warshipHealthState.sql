@@ -7,10 +7,10 @@ create table activeFittings (
 ) engine=InnoDB;
 
 create table remainingShots (
-   idMissile integer not null,
+   idWarshipHealthState integer not null,
     amount decimal(19, 0) not null,
-    remainingShots_KEY integer not null,
-    primary key (idMissile, remainingShots_KEY)
+    idMissile integer not null,
+    primary key (idWarshipHealthState, idMissile)
 ) engine=InnoDB;
 
 create table warshipHealthState (
@@ -23,13 +23,6 @@ create table warshipHealthState (
     idWarship integer,
     primary key (idWarshipHealthState)
 ) engine=InnoDB;
-
-alter table warShip add column idWarshipHealthState integer;
-
-alter table warShip
-   add constraint FK6l9eidjrdstov1is7fb5elahr
-   foreign key (idWarshipHealthState)
-   references warshipHealthState (idWarshipHealthState);
 
 alter table activeFittings
    add constraint FK8g2ipqwq1getx5n0fmma0unx9
@@ -48,12 +41,12 @@ alter table activeFittings
 
 alter table remainingShots
    add constraint FKsucjuvh9f5mahyes6ikkbq8rr
-   foreign key (remainingShots_KEY)
+   foreign key (idMissile)
    references missile (idMissile);
 
 alter table remainingShots
    add constraint FK42u7h8yp1byrq1mqlgwcd2nph
-   foreign key (idMissile)
+   foreign key (idWarshipHealthState)
    references warshipHealthState (idWarshipHealthState);
 
 alter table warshipHealthState
@@ -61,4 +54,4 @@ alter table warshipHealthState
    foreign key (idWarship)
    references warShip (idWarShip);
 
-insert into dbPatch values (null, now(), '0.0.5-2', 'add warship health state');
+insert into dbPatch values (null, now(), 'add warship health state', '0.0.5-2');

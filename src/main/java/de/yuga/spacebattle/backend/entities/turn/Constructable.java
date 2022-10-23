@@ -4,6 +4,7 @@ package de.yuga.spacebattle.backend.entities.turn;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
@@ -55,6 +56,11 @@ public class Constructable {
     @Nullable
     private Integer amountShips;
 
+    @Nullable
+    @OneToOne
+    @JoinColumn(name = "idFleet", referencedColumnName = "idFleet")
+    private Fleet fleet;
+
     public Constructable() {
     }
 
@@ -88,6 +94,13 @@ public class Constructable {
         this.resourceType = EResourceType.ORBITAL_CONSTRUCTION;
     }
 
+    public Constructable(@Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(fleet, "toRepair must not be empty");
+
+        this.fleet = fleet;
+        this.resourceType = EResourceType.ORBITAL_CONSTRUCTION;
+    }
+
     @Nullable
     public Building getBuilding() {
         return building;
@@ -111,6 +124,11 @@ public class Constructable {
     @Nullable
     public Research getResearch() {
         return research;
+    }
+
+    @Nullable
+    public Fleet getFleet() {
+        return fleet;
     }
 
     @Nonnull
@@ -147,6 +165,10 @@ public class Constructable {
             final Integer targetLevel = this.targetLevel;
             final ResourceDeposit costs = building.getCosts();
             return JobCostsCalculator.getCostsForLevel(costs, targetLevel);
+        }
+
+        if (fleet != null) {
+            return JobCostsCalculator.calculateRemainingTicks(fleet);
         }
 
         throw new NotifyWebUserException("You have tried something interesting. May be you should talk to an admin.");

@@ -9,6 +9,7 @@ import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.enums.EJobPriority;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import org.hibernate.annotations.Check;
 
@@ -30,7 +31,7 @@ import javax.validation.constraints.NotNull;
 @Check(constraints = "(idBuilding IS NOT NULL AND targetLevel IS NOT NULL) " +
         "OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) " +
         "OR (idShipClass IS NOT NULL AND amountShips IS NOT NULL)")
-public class Job extends AbstractEntityKey {
+public class Job extends AbstractEntityKey implements Comparable<Job> {
 
     @Nonnull
     @NotNull
@@ -59,6 +60,10 @@ public class Job extends AbstractEntityKey {
     @NotNull
     @Column(columnDefinition = "decimal(19, 0)")
     private int jobDoneAtZero;
+
+    @Nonnull
+    @Enumerated(EnumType.STRING)
+    private EJobPriority priority = EJobPriority.NONE;
 
     public Job() {
     }
@@ -113,11 +118,41 @@ public class Job extends AbstractEntityKey {
         return jobDoneAtZero;
     }
 
+    @Nonnull
+    public EJobPriority getPriority() {
+        return priority;
+    }
+
+    public boolean matchesPriority(@Nonnull final EJobPriority priority) {
+        Preconditions.checkNotNull(priority, "priority must not be empty");
+
+        return this.priority == priority;
+    }
+
+    public void setPriority(@Nonnull final EJobPriority priority) {
+        this.priority = priority;
+    }
+
     /**
      * A job is done at zero and needed to be counted down.
      */
     public void tick() {
         this.jobDoneAtZero--;
+    }
+
+    @Override
+    public int compareTo(@Nonnull final Job o) {
+        Preconditions.checkNotNull(o, "o must not be empty");
+
+        if (matchesPriority(EJobPriority.PRIORITY) && !o.matchesPriority(EJobPriority.PRIORITY)) {
+            return -1;
+        }
+
+        if (o.matchesPriority(EJobPriority.PRIORITY) && !matchesPriority(EJobPriority.PRIORITY)) {
+            return 1;
+        }
+
+        return Integer.compare(getJobDoneAtZero(), o.getJobDoneAtZero());
     }
 
     @Override

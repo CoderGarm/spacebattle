@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,13 +30,13 @@ public class WarshipHealthStateService {
         return Objects.requireNonNullElse(byWarships, new ArrayList<>());
     }
 
-    public void saveAll(@Nonnull final List<WarshipHealthState> warshipHealthStates) {
+    public void saveAll(@Nonnull final Collection<WarshipHealthState> warshipHealthStates) {
         Preconditions.checkNotNull(warshipHealthStates, "warshipHealthStates must not be empty");
 
         warshipHealthStateRepository.saveAll(warshipHealthStates);
     }
 
-    public void deleteALl(final List<WarshipHealthState> warshipHealthStates) {
+    public void deleteAll(final Collection<WarshipHealthState> warshipHealthStates) {
         Preconditions.checkNotNull(warshipHealthStates, "warshipHealthStates must not be empty");
 
         warshipHealthStateRepository.deleteAll(warshipHealthStates);

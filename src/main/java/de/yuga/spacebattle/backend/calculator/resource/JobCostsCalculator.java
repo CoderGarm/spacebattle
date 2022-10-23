@@ -2,8 +2,11 @@ package de.yuga.spacebattle.backend.calculator.resource;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
+import de.yuga.spacebattle.backend.combat.round.WarshipHealthState;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
@@ -12,7 +15,11 @@ import de.yuga.spacebattle.backend.enums.EResourceType;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Calculator for the job relates costs stuff.
@@ -81,4 +88,42 @@ public class JobCostsCalculator {
         });
         return ticksNeeded.get();
     }
+
+    public static ResourceDeposit calculateRemainingTicks(@Nonnull final Fleet toRepair) {
+        Preconditions.checkNotNull(toRepair, "toRepair must not be empty");
+
+        final Map<WarShip, WarshipHealthState> referenceWarships = toRepair.getShips().stream()
+                .filter(w -> w.getWarshipHealthState() != null)
+                .collect(Collectors.toMap(Function.identity(), WarshipHealthState::new));
+
+        final Map<WarShip, WarshipHealthState> damagedStates = toRepair.getShips().stream()
+                .filter(w -> w.getWarshipHealthState() != null)
+                .collect(Collectors.toMap(Function.identity(), WarshipHealthState::new));
+
+        final ResourceDeposit costs = new ResourceDeposit();
+        referenceWarships.forEach((warShip, reference) -> {
+            final WarshipHealthState warshipHealthState = damagedStates.get(warShip);
+            final double damageFraction = warshipHealthState.getDamagedFraction(reference);
+            final ResourceDeposit costsOverall = warShip.getShipClass().getCostsOverall();
+            addReducedDeposit(costsOverall, costsOverall, damageFraction);
+        });
+        return costs;
+    }
+
+    private static void addReducedDeposit(@Nonnull final ResourceDeposit deposit,
+                                          @Nonnull final ResourceDeposit toAdd,
+                                          final double portionFactor) {
+        Preconditions.checkNotNull(deposit, "deposit must not be empty");
+        Preconditions.checkNotNull(toAdd, "toAdd must not be empty");
+
+        Arrays.stream(EResourceType.valuesWithoutPopulation()).forEach(r -> {
+            final long toAddAmount = toAdd.getResourceAmountByType(r);
+            deposit.updateResource(r, (long) (portionFactor * (double) toAddAmount));
+        });
+        Arrays.stream(EEducationType.valuesOfWorkforce()).forEach(e -> {
+            final long toAddAmount = toAdd.getCrewAmountByType(e);
+            deposit.updateCrewRequirement(e, (long) (portionFactor * (double) toAddAmount));
+        });
+    }
+
 }

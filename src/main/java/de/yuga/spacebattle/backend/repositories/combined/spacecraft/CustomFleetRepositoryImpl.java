@@ -110,6 +110,21 @@ public class CustomFleetRepositoryImpl implements CustomFleetRepository {
                 .getResultList());
     }
 
+    @Nonnull
+    @Override
+    public Set<Fleet> findAllDamagedFleetsByPlanetAndOwner(@Nonnull final Planet planet) {
+        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+
+        return em.createNamedQuery("Fleet.getAllDamagedForPlanetAndOwner", Fleet.class)
+                .setParameter("xCoordinate", planet.getOrbit().getXCoordinate())
+                .setParameter("yCoordinate", planet.getOrbit().getYCoordinate())
+                .setParameter("system", planet.getSystem())
+                .getResultList()
+                .stream()
+                .filter(f -> f.getOwner().equals(planet.getOwner()))
+                .collect(Collectors.toSet());
+    }
+
     @Override
     public boolean isShipClassInUse(final int idShipClass) {
         final Long amount = em.createNamedQuery("Fleet.checkShipInUse", Long.class)

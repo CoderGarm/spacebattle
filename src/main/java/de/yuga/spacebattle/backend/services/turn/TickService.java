@@ -16,7 +16,9 @@ import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.*;
+import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.EJobPriority;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.turn.TickRepository;
 import de.yuga.spacebattle.backend.services.ResourceService;
@@ -26,6 +28,7 @@ import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipSer
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
+import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStateService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,6 +84,9 @@ public class TickService {
     private final WarShipService warShipService;
 
     @Nonnull
+    private final WarshipHealthStateService warshipHealthStateService;
+
+    @Nonnull
     private final BattleService battleService;
 
     @Nonnull
@@ -98,6 +104,7 @@ public class TickService {
                        @Nonnull final ResearchService researchService,
                        @Nonnull final ColonizationService colonizationService,
                        @Nonnull final WarShipService warShipService,
+                       @Nonnull final WarshipHealthStateService warshipHealthStateService,
                        @Nonnull final BattleService battleService,
                        @Nonnull final ResourceService resourceService) {
         this.tickRepository = Preconditions.checkNotNull(tickRepository, "tickRepository shouldn't be null!");
@@ -109,6 +116,7 @@ public class TickService {
         this.researchService = Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
         this.colonizationService = Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
+        this.warshipHealthStateService = Preconditions.checkNotNull(warshipHealthStateService, "warshipHealthStateService must not be empty");
         this.battleService = Preconditions.checkNotNull(battleService, "battleService must not be empty");
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
     }
@@ -118,7 +126,7 @@ public class TickService {
         // block all rest endpoints while ticking
         isTicking = true;
         final long start = Calendar.getInstance().getTimeInMillis();
-        LOGGER.info("Tick scheduled"); // todo logging performance
+        LOGGER.info("Tick scheduled");
         doTick();
         LOGGER.info("Tick has processed!");
         final long end = Calendar.getInstance().getTimeInMillis();
@@ -249,6 +257,7 @@ public class TickService {
         }
         log(planet, "Done updating resources");
         planet = planetService.save(planet);
+
         final Set<Construction> constructions = planet.getConstructions().stream()
                 .filter(c -> !c.getJobs().isEmpty())
                 .collect(Collectors.toSet());
@@ -258,27 +267,29 @@ public class TickService {
             final EResourceType resourceType = facility.getBuilding().getProductionTarget();
             final Set<Job> toDelete = new HashSet<>();
             final Set<Job> jobs = facility.getJobs();
-            for (final Job job : jobs) {
-                log(planet, job, "Start processing job.");
-                if (!tickJob(job)) {
-                    jobService.save(job);
-                    log(planet, job, "Shifting job for tick after " + today + ".");
-                    continue;
-                }
-                log(planet, job, "Processing " + resourceType + " job.");
-                switch (resourceType) {
-                    case RESEARCH:
-                        tickResearch(planet, job);
-                        break;
-                    case CONSTRUCTION:
-                        tickConstruction(planet, planet.getConstructions(), toDelete, job);
-                        break;
-                    case ORBITAL_CONSTRUCTION:
-                        tickShipyard(planet, job);
-                        break;
-                }
-                toDelete.add(job);
-                log(planet, job, "Done processing job.");
+
+            final Job job = jobs.stream()
+                    .filter(j -> j.matchesPriority(EJobPriority.PRIORITY))
+                    .min(Job::compareTo)
+                    .orElseThrow(() -> new NotifyWebUserException("Yeah, shit happens. This can not happen."));
+
+            log(planet, job, "Start processing job.");
+            if (!tickJob(job)) {
+                jobService.save(job);
+                log(planet, job, "Shifting job for tick after " + today + ".");
+                continue;
+            }
+            log(planet, job, "Processing " + resourceType + " job.");
+            switch (resourceType) {
+                case RESEARCH:
+                    tickResearch(planet, job);
+                    break;
+                case CONSTRUCTION:
+                    tickConstruction(planet, planet.getConstructions(), toDelete, job);
+                    break;
+                case ORBITAL_CONSTRUCTION:
+                    tickShipyard(planet, job);
+                    break;
             }
             jobs.removeIf(toDelete::contains);
             toDeleteLogging.addAll(toDelete);
@@ -305,9 +316,50 @@ public class TickService {
             throw new NotifyWebUserException("There must be a planet's owner.");
         }
         final Constructable constructable = job.getConstructable();
+
+        realizeShipProduction(planet, owner, constructable, job);
+        realizeFleetRepair(planet, owner, constructable, job);
+
+        log(planet, job, "Done processing shipyard job.");
+    }
+
+    private void realizeFleetRepair(@Nonnull final Planet planet,
+                                    @Nonnull final User owner,
+                                    @Nonnull final Constructable constructable,
+                                    @Nonnull final Job job) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(owner, "owner must not be empty");
+        Preconditions.checkNotNull(constructable, "constructable must not be empty");
+        Preconditions.checkNotNull(job, "job must not be empty");
+
+        final Fleet fleet = constructable.getFleet();
+        if (fleet == null) {
+            return;
+        }
+        final Set<WarshipHealthState> toDelete = fleet.getShips().stream()
+                .map(WarShip::getWarshipHealthState)
+                .collect(Collectors.toSet());
+        warshipHealthStateService.deleteAll(toDelete);
+        fleet.setNeedsRepair(false);
+        fleetService.save(fleet);
+        log(planet, job, "Done repairing fleet.");
+    }
+
+    private void realizeShipProduction(@Nonnull final Planet planet,
+                                       @Nonnull final User owner,
+                                       @Nonnull final Constructable constructable,
+                                       @Nonnull final Job job) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(owner, "owner must not be empty");
+        Preconditions.checkNotNull(constructable, "constructable must not be empty");
+        Preconditions.checkNotNull(job, "job must not be empty");
+
         final ShipClass shipClass = constructable.getShipClass();
+        if (shipClass == null) {
+            return;
+        }
         final Integer amountShips = constructable.getAmountShips();
-        if (shipClass == null || amountShips == null || amountShips == 0) {
+        if (amountShips == null || amountShips == 0) {
             throw new NotifyWebUserException("This should never happen while build a fleet!");
         }
         Fleet fleet = new Fleet("Fresh Build @ " + planet.getName(), owner, new FleetOrbit(planet.getOrbit(), planet.getSystem()));
@@ -319,7 +371,7 @@ public class TickService {
             newFleetComposition.add(warShip);
         }
         warShipService.saveAll(newFleetComposition);
-        log(planet, job, "Done processing shipyard job .");
+        log(planet, job, "Done creating warships.");
     }
 
     private void tickConstruction(@Nonnull final Planet planet,

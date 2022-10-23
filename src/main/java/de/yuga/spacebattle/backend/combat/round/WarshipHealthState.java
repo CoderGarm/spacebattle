@@ -15,6 +15,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.enums.EHitArea;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -160,6 +161,37 @@ public class WarshipHealthState implements Cloneable {
     @Override
     public int hashCode() {
         return warShip.hashCode();
+    }
+
+    /**
+     * Checks if the health state has a difference from the untouched state of a fresh warship.
+     *
+     * @param reference the reference
+     * @return <code>true</code> if there is a relevant difference, <code>false</code> otherwise
+     */
+    public boolean hasChanged(@Nonnull final de.yuga.spacebattle.backend.combat.round.WarshipHealthState reference) {
+        Preconditions.checkNotNull(reference, "reference must not be empty");
+
+        if (!this.getWarShip().equals(reference.getWarShip())) {
+            throw new NotifyWebUserException("The warship health states can only be checked for the same individual ships.");
+        }
+
+        final boolean differState = !(this.getArmorState() == reference.getArmorState()
+                && this.getElokaState() == reference.getElokaState()
+                && this.getSidewallState() == reference.getSidewallState()
+                && this.getHullState() == reference.getHullState()
+                && this.getPropulsionState() == reference.getPropulsionState());
+
+        final MissileAmmunitionState referenceMissiles = reference.getMissileAmmunitionState();
+        final MissileAmmunitionState toCheckMissiles = this.getMissileAmmunitionState();
+        final boolean differMissiles = referenceMissiles.getRemainingShots().entrySet().stream().anyMatch(ref -> {
+            final Missile missile = ref.getKey();
+            final int refAmount = ref.getValue();
+            final int remainingShots = toCheckMissiles.getRemainingShots(missile);
+            return refAmount != remainingShots;
+        });
+
+        return differState || differMissiles;
     }
 
 
@@ -473,5 +505,31 @@ public class WarshipHealthState implements Cloneable {
         //noinspection unchecked
         return (Module) modules.stream().filter(m -> m.getClass().isAssignableFrom(module)).findAny().orElse(null);
 
+    }
+
+    public double getDamagedFraction(@Nonnull final WarshipHealthState reference) {
+        Preconditions.checkNotNull(reference, "reference must not be empty");
+
+        final double armorFraction = getFraction(armorState, reference.getArmorState());
+        final double elokaFraction = getFraction(elokaState, reference.getElokaState());
+        final double hullFraction = getFraction(hullState, reference.getHullState());
+        final double propFraction = getFraction(propulsionState, reference.getPropulsionState());
+        final double sidewallFraction = getFraction(sidewallState, reference.getSidewallState());
+
+        final long refDamage = reference.getMaximumDamage();
+        final long damage = getMaximumDamage();
+        final double damageFraction = getFraction(damage, refDamage);
+
+        //noinspection UnnecessaryLocalVariable
+        final double overallDamage = (armorFraction + elokaFraction + hullFraction + propFraction + sidewallFraction + damageFraction) / 6;
+        return overallDamage;
+    }
+
+    private double getFraction(final int state, final int referenceState) {
+        return (double) state / (double) referenceState;
+    }
+
+    private double getFraction(final long state, final long referenceState) {
+        return (double) state / (double) referenceState;
     }
 }

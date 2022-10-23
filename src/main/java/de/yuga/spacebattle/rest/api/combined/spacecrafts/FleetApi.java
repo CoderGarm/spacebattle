@@ -4,10 +4,13 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
+import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
+import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
+import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -45,6 +48,7 @@ public class FleetApi extends BaseApi {
     @Nonnull
     public static final String ENDPOINT = "fleet";
     private static final String FLEET_PER_SYSTEM_ENDPOINT = "inSystem";
+    private static final String FLEET_PER_PLANET_ENDPOINT = "atPlanet";
     private static final String FLEET_PER_USER_ENDPOINT = "perUser";
     private static final String MOVING_FLEET_PER_USER_ENDPOINT = "movingPerUser";
     private static final String MERGE_FLEET_ENDPOINT = "merge";
@@ -65,17 +69,23 @@ public class FleetApi extends BaseApi {
     @Nonnull
     private final UserService userService;
 
+    @Nonnull
+    private final JobService jobService;
+
+    @Nonnull
+    private final PlanetService planetService;
+
     @Autowired
     public FleetApi(@Nonnull final FleetService fleetService,
                     @Nonnull final UserService userService,
-                    @Nonnull final StarSystemService starSystemService) {
-        Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
-        Preconditions.checkNotNull(userService, "userService shouldn't be null!");
-        Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
-
-        this.fleetService = fleetService;
-        this.userService = userService;
-        this.starSystemService = starSystemService;
+                    @Nonnull final StarSystemService starSystemService,
+                    @Nonnull final JobService jobService,
+                    @Nonnull final PlanetService planetService) {
+        this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
+        this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
+        this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
+        this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
+        this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
     }
 
     @GetMapping(value = FLEET_PER_SYSTEM_ENDPOINT + "/{idStarSystem}")
@@ -96,6 +106,7 @@ public class FleetApi extends BaseApi {
             throw new NotifyWebUserException("There should be a star system, you searches for.");
         }
         return ResponseEntity.ok(starSystem.getFleets().stream()
+                .filter(de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet::isAlive)
                 .map(f -> new Fleet(f, getPreferredLanguage()))
                 .collect(Collectors.toList()));
     }
@@ -114,6 +125,29 @@ public class FleetApi extends BaseApi {
     public ResponseEntity<?> getInterstellarMovingFleets() {
 
         return ResponseEntity.ok(fleetService.findAllFleetsWithInterstellarMovement().stream().map(f -> new Fleet(f, getPreferredLanguage())).collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = FLEET_PER_PLANET_ENDPOINT + "/{idPlanet}")
+    @Operation(summary = "Get all fleets inside the orbit of a planet.", operationId = "getFleetsByPlanet",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Fleet.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getFleetsByPlanet(@PathVariable("idPlanet") final int idPlanet) {
+
+        final int idUser = getIdUser();
+        final Planet planet = planetService.find(idPlanet);
+        PreconditionWebHelper.checkNotNull(planet, "planet must not be empty");
+        final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> allFleetsByPlanet = fleetService.findAllFleetsByPlanet(planet).stream()
+                .filter(f -> f.getOwner().getId() == idUser).collect(Collectors.toSet());
+        return ResponseEntity.ok(allFleetsByPlanet.stream()
+                .map(f -> new Fleet(f, getPreferredLanguage()))
+                .collect(Collectors.toList()));
     }
 
     @GetMapping(value = FLEET_PER_SYSTEM_ENDPOINT + "/{idStarSystem}/" + FLEET_PER_USER_ENDPOINT + "/{idOwner}")
@@ -164,7 +198,7 @@ public class FleetApi extends BaseApi {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping(value = FLEET_PER_USER_ENDPOINT + "/{idUser}")
+    @GetMapping(value = FLEET_PER_USER_ENDPOINT)
     @Operation(summary = "Get all fleets of an owner.", operationId = "getFleetsForUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -175,7 +209,9 @@ public class FleetApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getFleetsForUser(@PathVariable("idUser") final int idUser) {
+    public ResponseEntity<?> getFleetsForUser() {
+
+        final int idUser = getIdUser();
 
         final User user = userService.find(idUser);
         if (user != null) {

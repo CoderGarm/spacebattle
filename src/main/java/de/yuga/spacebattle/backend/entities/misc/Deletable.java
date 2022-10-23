@@ -25,4 +25,8 @@ public class Deletable extends AbstractEntityKey {
     public boolean isDeleted() {
         return isDeleted;
     }
+
+    public boolean isAlive() {
+        return !isDeleted;
+    }
 }

@@ -43,6 +43,9 @@ public interface CustomFleetRepository {
     @Nonnull
     Set<Fleet> findAllFleetsByPlanet(@Nonnull Planet planet);
 
+    @Nonnull
+    Set<Fleet> findAllDamagedFleetsByPlanetAndOwner(@Nonnull Planet planet);
+
     /**
      * Checks if a ship class in part of a fleet and therefore 'in use'.
      *

@@ -48,19 +48,27 @@ import static de.yuga.spacebattle.backend.calculator.FittingUtils.DEFENSIVE_FITT
         @NamedQuery(name = "Fleet.getAllWithoutInterstellarMovement",
                 query = "SELECT f FROM Fleet f WHERE f.move.originOrbit.system = f.move.destinationOrbit.system AND f.isDeleted = false"),
         @NamedQuery(name = "Fleet.getAllFleetsWithInterstellarMovement",
-                query = "SELECT f FROM Fleet f WHERE f.move IS NOT NULL AND f.move.originOrbit.system <> f.move.destinationOrbit.system AND  f.isDeleted = false"),
+                query = "SELECT f FROM Fleet f WHERE f.move IS NOT NULL AND f.move.originOrbit.system <> f.move.destinationOrbit.system AND f.isDeleted = false"),
         @NamedQuery(name = "Fleet.getAllByUser",
                 query = "SELECT f FROM Fleet f WHERE f.owner = :owner AND  f.isDeleted = false"),
         @NamedQuery(name = "Fleet.getAllByUserAndSystem",
-                query = "SELECT f FROM Fleet f WHERE f.owner.id = :idOwner AND f.orbit.system.id = :idStarSystem AND  f.isDeleted = false"),
+                query = "SELECT f FROM Fleet f WHERE f.owner.id = :idOwner AND f.orbit.system.id = :idStarSystem AND f.isDeleted = false"),
         @NamedQuery(name = "Fleet.checkShipInUse",
-                query = "SELECT COUNT(f) FROM Fleet f LEFT JOIN f.ships s WHERE s.shipClass.id =:idShipClass AND  f.isDeleted = false"),
+                query = "SELECT COUNT(f) FROM Fleet f LEFT JOIN f.ships s WHERE s.shipClass.id =:idShipClass AND f.isDeleted = false"),
         @NamedQuery(name = "Fleet.getAllForPlanet",
                 query = "SELECT f FROM Fleet f LEFT JOIN f.move  " +
-                        " WHERE (f.orbit.system = :system AND f.orbit.orbit.xCoordinate = :xCoordinate  AND f.orbit.orbit.yCoordinate = :yCoordinate) " +
-                        " OR ( f.move.originOrbit.system = :system AND  f.move.originOrbit.orbit.xCoordinate = :xCoordinate AND f.move.originOrbit.orbit.yCoordinate = :yCoordinate) " +
-                        " OR (f.move.destinationOrbit.system = :system AND f.move.destinationOrbit.orbit.xCoordinate = :xCoordinate AND f.move.destinationOrbit.orbit.yCoordinate = :yCoordinate) " +
-                        " AND  f.isDeleted = false"
+                        "WHERE (f.orbit.system = :system AND f.orbit.orbit.xCoordinate = :xCoordinate  AND f.orbit.orbit.yCoordinate = :yCoordinate) " +
+                        "OR ( f.move.originOrbit.system = :system AND  f.move.originOrbit.orbit.xCoordinate = :xCoordinate AND f.move.originOrbit.orbit.yCoordinate = :yCoordinate) " +
+                        "OR (f.move.destinationOrbit.system = :system AND f.move.destinationOrbit.orbit.xCoordinate = :xCoordinate AND f.move.destinationOrbit.orbit.yCoordinate = :yCoordinate) " +
+                        "AND f.isDeleted = false"
+        ),
+        @NamedQuery(name = "Fleet.getAllDamagedForPlanetAndOwner",
+                query = "SELECT f FROM Fleet f LEFT JOIN f.move  " +
+                        "WHERE f.needsRepair = true " +
+                        "AND (f.orbit.system = :system AND f.orbit.orbit.xCoordinate = :xCoordinate  AND f.orbit.orbit.yCoordinate = :yCoordinate) " +
+                        "OR ( f.move.originOrbit.system = :system AND  f.move.originOrbit.orbit.xCoordinate = :xCoordinate AND f.move.originOrbit.orbit.yCoordinate = :yCoordinate) " +
+                        "OR (f.move.destinationOrbit.system = :system AND f.move.destinationOrbit.orbit.xCoordinate = :xCoordinate AND f.move.destinationOrbit.orbit.yCoordinate = :yCoordinate) " +
+                        "AND f.isDeleted = false"
         ),
 })
 @Entity
@@ -80,7 +88,7 @@ public class Fleet extends Deletable {
 
     @Nonnull
     @NotNull
-    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "idFleet")
     private final Set<WarShip> ships = new HashSet<>();
 
@@ -109,6 +117,9 @@ public class Fleet extends Deletable {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "idMove", unique = true)
     private Move move;
+
+    @Column(columnDefinition = "bit not null default false")
+    private boolean needsRepair = false;
 
     public Fleet() {
     }
@@ -145,16 +156,19 @@ public class Fleet extends Deletable {
 
     @Nonnull
     public Map<ShipClass, Integer> getShipsByClass() {
-        return ships.stream().collect(Collectors.groupingBy(WarShip::getShipClass, Collectors.summingInt(x -> 1)));
+        return getShips().stream()
+                .collect(Collectors.groupingBy(WarShip::getShipClass, Collectors.summingInt(x -> 1)));
     }
 
     @Nonnull
     public Set<WarShip> getShips() {
-        return ships;
+        return ships.stream()
+                .filter(Deletable::isAlive)
+                .collect(Collectors.toSet());
     }
 
     public boolean isAlive() {
-        return getShips().stream().anyMatch(s -> !s.isDeleted());
+        return !isDeleted() && getShips().stream().anyMatch(Deletable::isAlive);
     }
 
     /**
@@ -399,5 +413,13 @@ public class Fleet extends Deletable {
         final EHyperBand hyperBand = acceleration.getHyperBand();
         final BigDecimal vesselTopSpeed = hyperBand.getEffectiveTopSpeed();
         return new Velocity(vesselTopSpeed, EDistanceMetric.M, ETimeMetric.SECOND);
+    }
+
+    public boolean isNeedsRepair() {
+        return needsRepair;
+    }
+
+    public void setNeedsRepair(final boolean needsRepair) {
+        this.needsRepair = needsRepair;
     }
 }

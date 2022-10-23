@@ -46,7 +46,7 @@ public class WarShip extends Deletable {
      * If the health state if not present, there is no change from the ship class, the warship is fully operational.
      */
     @Nullable
-    @OneToOne(orphanRemoval = true)
+    @OneToOne(mappedBy = "warShip")
     @JoinColumn(name = "idWarshipHealthState")
     private WarshipHealthState warshipHealthState;
 

@@ -62,6 +62,10 @@ public class Fleet {
     @Schema(required = true, description = "If the fleet can run interstellar movements.")
     private boolean isFTLCapable;
 
+    @JsonProperty
+    @Schema(required = true, description = "If the fleet needs a repair.")
+    private boolean needsRepair;
+
     public Fleet() {
     }
 
@@ -78,6 +82,7 @@ public class Fleet {
         this.ships.addAll(fleet.getShips().stream().map(w -> new WarShip(w, w.getWarshipHealthState(), languageCode)).collect(Collectors.toList()));
         this.spacecraftCapabilities = new SpacecraftCapabilities(fleet);
         this.isFTLCapable = fleet.isFTLCapable();
+        this.needsRepair = fleet.isNeedsRepair();
     }
 
     @Nonnull

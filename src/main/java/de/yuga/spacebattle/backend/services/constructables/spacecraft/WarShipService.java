@@ -67,6 +67,6 @@ public class WarShipService {
         Preconditions.checkNotNull(warShips, "warShips shouldn't be null!");
 
         warShips.forEach(WarShip::setDeleted);
-        warShipRepository.deleteAll(warShips);
+        warShipRepository.saveAll(warShips);
     }
 }

@@ -66,9 +66,9 @@ public class WarshipHealthState extends AbstractEntityKey {
     @Nonnull
     @NotNull
     @ElementCollection(fetch = FetchType.EAGER)
-    @MapKeyColumn(name = "idMissile")
+    @MapKeyJoinColumn(name = "idMissile", referencedColumnName = "idMissile")
     @Column(name = "amount", columnDefinition = "decimal(19, 0)", nullable = false)
-    @CollectionTable(name = "remainingShots", joinColumns = @JoinColumn(name = "idMissile"))
+    @CollectionTable(name = "remainingShots", joinColumns = @JoinColumn(name = "idWarshipHealthState"))
     private final Map<Missile, Integer> remainingShots = new HashMap<>();
 
     public WarshipHealthState() {
@@ -83,10 +83,8 @@ public class WarshipHealthState extends AbstractEntityKey {
         this.sidewallState = warshipHealthState.getSidewallState();
         this.propulsionState = warshipHealthState.getPropulsionState();
         this.elokaState = warshipHealthState.getElokaState();
-
         this.activeFittings.addAll(warshipHealthState.getActiveFittings());
-
-        remainingShots.putAll(warshipHealthState.getMissileAmmunitionState().getRemainingShots());
+        this.remainingShots.putAll(warshipHealthState.getMissileAmmunitionState().getRemainingShots());
     }
 
     @Nonnull

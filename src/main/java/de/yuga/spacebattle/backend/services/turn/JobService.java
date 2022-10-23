@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -16,6 +17,7 @@ import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
+import de.yuga.spacebattle.backend.enums.EJobPriority;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.turn.JobRepository;
 import de.yuga.spacebattle.backend.services.account.UserService;
@@ -327,6 +329,23 @@ public class JobService {
         Iterable<Job> jobIterable = jobRepository.saveAll(newJobs);
         planetService.save(planet);
         return Sets.newHashSet(jobIterable);
+    }
+
+    public Job createShipyardJob(@Nonnull final Planet planet, @Nonnull final Fleet toRepair) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(toRepair, "toRepair must not be empty");
+
+        final Construction facility = planet.getConstructions().stream()
+                .filter(construction -> construction.getBuilding().getProductionTarget() == EResourceType.ORBITAL_CONSTRUCTION)
+                .findFirst().orElseThrow(() -> new NotifyWebUserException("If you want to repair a fleet, you need a shipyard."));
+
+        // do not check if free, the new job will squeeze in
+        final Constructable constructable = new Constructable(toRepair);
+        final Job job = new Job(planet, facility, constructable);
+        job.setPriority(EJobPriority.PRIORITY);
+        jobRepository.save(job);
+        planetService.save(planet);
+        return job;
     }
 
     @Nonnull
