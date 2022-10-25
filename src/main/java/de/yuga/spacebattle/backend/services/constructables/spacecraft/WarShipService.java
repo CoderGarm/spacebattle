@@ -10,6 +10,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -43,6 +44,11 @@ public class WarShipService {
         return warShipRepository.findById(fleet.getId()).orElse(null);
     }
 
+    public Set<WarShip> findAll() {
+        final Iterable<WarShip> allById = warShipRepository.findAll();
+        return StreamSupport.stream(allById.spliterator(), false).collect(Collectors.toSet());
+    }
+
     public WarShip save(@Nonnull final WarShip fleet) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
@@ -56,14 +62,14 @@ public class WarShipService {
         return StreamSupport.stream(storedWarShips.spliterator(), false).collect(Collectors.toList());
     }
 
-    public void delete(@Nonnull final WarShip warShip) {
+    public void markAsDestroyed(@Nonnull final WarShip warShip) {
         Preconditions.checkNotNull(warShip, "warShip shouldn't be null!");
 
         warShip.setDeleted();
         warShipRepository.save(warShip);
     }
 
-    public void deleteAll(@Nonnull final Collection<WarShip> warShips) {
+    public void markAllAsDestroyed(@Nonnull final Collection<WarShip> warShips) {
         Preconditions.checkNotNull(warShips, "warShips shouldn't be null!");
 
         warShips.forEach(WarShip::setDeleted);

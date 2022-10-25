@@ -14,8 +14,8 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.enums.EHitArea;
+import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
-import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -88,27 +88,17 @@ public class WarshipHealthState implements Cloneable {
         this.modules.add(electronicWarfare);
 
         final de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState healthState = warShip.getWarshipHealthState();
-        if (healthState == null) {
-            armorState = armor != null ? armor.getEffectValue() : 0;
-            hullState = armorState;
-            sidewallState = sidewall != null ? sidewall.getEffectValue() : 0;
-            propulsionState = propulsion != null ? propulsion.getEffectValue() : 0;
-            elokaState = electronicWarfare != null ? electronicWarfare.getEffectValue() : 0;
-            shipClass.getFittings().forEach(fitting -> fittings.put(fitting, true));
-            this.missileAmmunitionState = new MissileAmmunitionState(warShip);
-        } else {
-            armorState = healthState.getArmorState();
-            hullState = healthState.getHullState();
-            sidewallState = healthState.getSidewallState();
-            propulsionState = healthState.getPropulsionState();
-            elokaState = healthState.getElokaState();
-            final Set<AlignedFitting> activeFittings = healthState.getActiveFittings();
-            shipClass.getFittings().forEach(fitting -> {
-                final boolean active = activeFittings.contains(fitting);
-                fittings.put(fitting, active);
-            });
-            this.missileAmmunitionState = new MissileAmmunitionState(healthState);
-        }
+        armorState = healthState.getStateByAsInt(EModuleType.ARMOR);
+        hullState = healthState.getStateByAsInt(EModuleType.ARMOR);
+        sidewallState = healthState.getStateByAsInt(EModuleType.SHIELD);
+        propulsionState = Integer.max(healthState.getStateByAsInt(EModuleType.PROPULSION), healthState.getStateByAsInt(EModuleType.FTLPROPULSION));
+        elokaState = healthState.getStateByAsInt(EModuleType.ELECTRONIC_WARFARE);
+        final Set<AlignedFitting> activeFittings = healthState.getActiveFittings();
+        shipClass.getFittings().forEach(fitting -> {
+            final boolean active = activeFittings.contains(fitting);
+            fittings.put(fitting, active);
+        });
+        this.missileAmmunitionState = new MissileAmmunitionState(healthState);
     }
 
     @Nonnull
@@ -162,38 +152,6 @@ public class WarshipHealthState implements Cloneable {
     public int hashCode() {
         return warShip.hashCode();
     }
-
-    /**
-     * Checks if the health state has a difference from the untouched state of a fresh warship.
-     *
-     * @param reference the reference
-     * @return <code>true</code> if there is a relevant difference, <code>false</code> otherwise
-     */
-    public boolean hasChanged(@Nonnull final de.yuga.spacebattle.backend.combat.round.WarshipHealthState reference) {
-        Preconditions.checkNotNull(reference, "reference must not be empty");
-
-        if (!this.getWarShip().equals(reference.getWarShip())) {
-            throw new NotifyWebUserException("The warship health states can only be checked for the same individual ships.");
-        }
-
-        final boolean differState = !(this.getArmorState() == reference.getArmorState()
-                && this.getElokaState() == reference.getElokaState()
-                && this.getSidewallState() == reference.getSidewallState()
-                && this.getHullState() == reference.getHullState()
-                && this.getPropulsionState() == reference.getPropulsionState());
-
-        final MissileAmmunitionState referenceMissiles = reference.getMissileAmmunitionState();
-        final MissileAmmunitionState toCheckMissiles = this.getMissileAmmunitionState();
-        final boolean differMissiles = referenceMissiles.getRemainingShots().entrySet().stream().anyMatch(ref -> {
-            final Missile missile = ref.getKey();
-            final int refAmount = ref.getValue();
-            final int remainingShots = toCheckMissiles.getRemainingShots(missile);
-            return refAmount != remainingShots;
-        });
-
-        return differState || differMissiles;
-    }
-
 
     /**
      * Returns the maximum weapon range of the ship class.

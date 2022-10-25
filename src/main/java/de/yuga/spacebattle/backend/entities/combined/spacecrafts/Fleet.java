@@ -156,19 +156,24 @@ public class Fleet extends Deletable {
 
     @Nonnull
     public Map<ShipClass, Integer> getShipsByClass() {
-        return getShips().stream()
+        return getAliveShips().stream()
                 .collect(Collectors.groupingBy(WarShip::getShipClass, Collectors.summingInt(x -> 1)));
     }
 
     @Nonnull
-    public Set<WarShip> getShips() {
+    public Set<WarShip> getAliveShips() {
         return ships.stream()
                 .filter(Deletable::isAlive)
                 .collect(Collectors.toSet());
     }
 
+    @Nonnull
+    public Set<WarShip> getAllShips() {
+        return ships;
+    }
+
     public boolean isAlive() {
-        return !isDeleted() && getShips().stream().anyMatch(Deletable::isAlive);
+        return !isDeleted() && !getAliveShips().isEmpty();
     }
 
     /**

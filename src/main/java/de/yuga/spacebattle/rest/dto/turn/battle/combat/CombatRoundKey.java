@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.rest.dto.turn.battle;
+package de.yuga.spacebattle.rest.dto.turn.battle.combat;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;

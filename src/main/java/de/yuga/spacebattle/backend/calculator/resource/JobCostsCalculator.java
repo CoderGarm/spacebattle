@@ -92,11 +92,11 @@ public class JobCostsCalculator {
     public static ResourceDeposit calculateRemainingTicks(@Nonnull final Fleet toRepair) {
         Preconditions.checkNotNull(toRepair, "toRepair must not be empty");
 
-        final Map<WarShip, WarshipHealthState> referenceWarships = toRepair.getShips().stream()
+        final Map<WarShip, WarshipHealthState> referenceWarships = toRepair.getAliveShips().stream()
                 .filter(w -> w.getWarshipHealthState() != null)
                 .collect(Collectors.toMap(Function.identity(), WarshipHealthState::new));
 
-        final Map<WarShip, WarshipHealthState> damagedStates = toRepair.getShips().stream()
+        final Map<WarShip, WarshipHealthState> damagedStates = toRepair.getAliveShips().stream()
                 .filter(w -> w.getWarshipHealthState() != null)
                 .collect(Collectors.toMap(Function.identity(), WarshipHealthState::new));
 

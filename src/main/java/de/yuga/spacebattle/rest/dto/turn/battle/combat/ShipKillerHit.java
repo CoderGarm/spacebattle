@@ -1,10 +1,11 @@
-package de.yuga.spacebattle.rest.dto.turn.battle;
+package de.yuga.spacebattle.rest.dto.turn.battle.combat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.enums.EDamageResult;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
-import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.rest.dto.AbstractId;
+import de.yuga.spacebattle.rest.dto.turn.battle.LossRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -16,26 +17,32 @@ import java.util.stream.Collectors;
 public class ShipKillerHit {
 
     @Nullable
+    @JsonProperty
     @Schema(required = true, description = "The round and phase information.")
     private CombatRoundKey combatRoundKey;
 
     @Nullable
+    @JsonProperty
     @Schema(required = true, description = "The fleet which acts.")
-    private Fleet actor;
+    private AbstractId actor;
 
     @Nullable
+    @JsonProperty
     @Schema(required = true, description = "The fleet which is targeted.")
-    private Fleet target;
+    private AbstractId target;
 
     @Nullable
+    @JsonProperty
     @Schema(required = true, description = "The UUID of the damage dealer.")
     private UUID damageDealer;
 
     @Nullable
+    @JsonProperty
     @Schema(required = true, description = "The distance of this shot.")
     private Distance distance;
 
     @Nullable
+    @JsonProperty
     @Schema(required = true, description = "The result of this salvo.")
     private EDamageResult result;
 
@@ -58,67 +65,13 @@ public class ShipKillerHit {
         Preconditions.checkNotNull(input, "input shouldn't be null!");
 
         this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound(), input.getCombatPhase());
-        this.actor = new Fleet(input.getActor(), languageCode);
-        this.target = new Fleet(input.getTarget(), languageCode);
+        this.actor = new AbstractId(input.getActor());
+        this.target = new AbstractId(input.getTarget());
         this.damageDealer = input.getDamageDealer();
         this.distance = input.getDistance();
         this.result = input.getResult();
         this.hitLogs.addAll(input.getHitLogs().stream().map(h -> new HitLog(h, languageCode)).collect(Collectors.toList()));
         this.lossesByHit.putAll(input.getLossesByHit().entrySet().stream()
                 .collect(Collectors.toMap(e -> e.getKey().getId(), e -> new LossRole(e.getValue(), languageCode))));
-    }
-
-    @Nullable
-    public CombatRoundKey getCombatRoundKey() {
-        return combatRoundKey;
-    }
-
-    public void setCombatRoundKey(@Nullable final CombatRoundKey combatRoundKey) {
-        this.combatRoundKey = combatRoundKey;
-    }
-
-    @Nullable
-    public Fleet getActor() {
-        return actor;
-    }
-
-    public void setActor(@Nullable final Fleet actor) {
-        this.actor = actor;
-    }
-
-    @Nullable
-    public Fleet getTarget() {
-        return target;
-    }
-
-    public void setTarget(@Nullable final Fleet target) {
-        this.target = target;
-    }
-
-    @Nullable
-    public UUID getDamageDealer() {
-        return damageDealer;
-    }
-
-    public void setDamageDealer(@Nullable final UUID damageDealer) {
-        this.damageDealer = damageDealer;
-    }
-
-    @Nullable
-    public Distance getDistance() {
-        return distance;
-    }
-
-    public void setDistance(@Nullable final Distance distance) {
-        this.distance = distance;
-    }
-
-    @Nullable
-    public EDamageResult getResult() {
-        return result;
-    }
-
-    public void setResult(@Nullable final EDamageResult result) {
-        this.result = result;
     }
 }

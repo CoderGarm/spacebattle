@@ -1,9 +1,10 @@
 package de.yuga.spacebattle.rest.dto.turn.battle;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.rest.dto.AbstractId;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -15,10 +16,12 @@ import javax.annotation.Nonnull;
 public class LossRole {
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The user which is affected by the loss.")
     private UserJson owner;
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The fleet which was the war ships home.")
     private Fleet fleet;
 
@@ -27,16 +30,22 @@ public class LossRole {
      * The war ship itself will be deleted.
      */
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The name of the war ship which was destroyed.")
     private String warShipName;
+
+    @JsonProperty
+    @Schema(required = true, description = "The id of the war ship which was destroyed.")
+    private AbstractId warship;
 
     /**
      * The type of the loss.<br>
      * The ship class itself will never be removed but flagged as deleted.
      */
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The class of the war ship which was destroyed.")
-    private ShipClass shipClass;
+    private AbstractId shipClass;
 
     public LossRole() {
     }
@@ -49,30 +58,7 @@ public class LossRole {
         this.owner = new UserJson(lossRole.getShipClass().getOwner());
         this.fleet = new Fleet(lossRole.getFleet(), languageCode);
         this.warShipName = lossRole.getWarShipName();
-        this.shipClass = new ShipClass(lossRole.getShipClass(), languageCode);
-    }
-
-    @Nonnull
-    public UserJson getOwner() {
-        return owner;
-    }
-
-    @Nonnull
-    public Fleet getFleet() {
-        return fleet;
-    }
-
-    public void setFleet(@Nonnull final Fleet fleet) {
-        this.fleet = fleet;
-    }
-
-    @Nonnull
-    public String getWarShipName() {
-        return warShipName;
-    }
-
-    @Nonnull
-    public ShipClass getShipClass() {
-        return shipClass;
+        this.warship = new AbstractId(lossRole.getIdWarship());
+        this.shipClass = new AbstractId(lossRole.getShipClass());
     }
 }

@@ -42,7 +42,6 @@ public class RestControllerExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     protected ResponseEntity<FrontendError> handleConversion(@Nonnull final AccessDeniedException ex) {
-        // todo no distinction by spring mechanics between "refresh your token" and "your role does not match" currently not possible - compare HttpSecurityConfiguration#configure comments
         return new ResponseEntity<>(new FrontendError("Denied."), HttpStatus.UNAUTHORIZED);
     }
 

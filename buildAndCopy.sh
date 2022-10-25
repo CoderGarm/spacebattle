@@ -19,7 +19,7 @@ fi
 versionFile="version.txt"
 echo "$version" > $versionFile
 
-mvn clean install -DskipTests;
+mvn clean install;
 scp "target/spacebattle-$version.jar" medusa:uploadTarget/
 scp $versionFile medusa:spacebattle/
 rm $versionFile

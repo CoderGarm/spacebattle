@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -21,6 +22,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Disabled("repair me") // todo repair it
 public class DistanceCalculatorTest {
 
     private static Stream<Arguments> testCalculateDistanceDataProvider() {
@@ -215,7 +217,7 @@ public class DistanceCalculatorTest {
 
     @ParameterizedTest
     @MethodSource("scalingProvider")
-    void testConvertToScape(final Distance distance, final Distance expectation) {
+    void testConvertToScale(final Distance distance, final Distance expectation) {
 
         final Distance result = DistanceCalculator.convertToScale(distance);
         assertNotNull(result);

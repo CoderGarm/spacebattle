@@ -37,7 +37,7 @@ public enum EFleetSizeType implements HasIconName {
     public static EFleetSizeType getByFleet(@Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
-        final int size = fleet.getShips().size();
+        final int size = fleet.getAliveShips().size();
         return Arrays.stream(EFleetSizeType.values()).filter(e -> e.getFleetSize() >= size)
                 .findFirst()
                 .orElse(EFleetSizeType.values()[EFleetSizeType.values().length - 1]);

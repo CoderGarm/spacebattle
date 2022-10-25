@@ -29,10 +29,13 @@ public class LossRole {
 
     /**
      * Just the name of the lost ship.<br>
-     * The war ship itself will be deleted. todo
+     * The war ship itself will be marked as deleted.
      */
     @Nonnull
     private String warShipName;
+
+    @Nonnull
+    private int idWarship;
 
     /**
      * The type of the loss.<br>
@@ -52,6 +55,7 @@ public class LossRole {
         this.owner = warShip.getShipClass().getOwner();
         this.fleet = warShip.getFleet();
         this.warShipName = warShip.getName();
+        this.idWarship = warShip.getId();
         this.shipClass = warShip.getShipClass();
     }
 
@@ -68,6 +72,10 @@ public class LossRole {
     @Nonnull
     public String getWarShipName() {
         return warShipName;
+    }
+
+    public int getIdWarship() {
+        return idWarship;
     }
 
     @Nonnull

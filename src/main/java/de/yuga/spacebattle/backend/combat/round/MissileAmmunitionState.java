@@ -1,19 +1,13 @@
 package de.yuga.spacebattle.backend.combat.round;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
-import de.yuga.spacebattle.backend.enums.EWeaponType;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MissileAmmunitionState implements Cloneable {
@@ -23,20 +17,6 @@ public class MissileAmmunitionState implements Cloneable {
      */
     @Nonnull
     private final Map<Missile, Integer> shotsPerMissile = new HashMap<>();
-
-    public MissileAmmunitionState(@Nonnull final WarShip warShip) {
-        Preconditions.checkNotNull(warShip, "warShip shouldn't be null!");
-
-        final Set<AlignedFitting> missiles = warShip.getShipClass().getFittingByType(EWeaponType.MISSILE);
-        missiles.stream().filter(a -> a.getLauncher() != null).forEach(alignedFitting -> {
-            final Launcher launcher = alignedFitting.getLauncher();
-            final int amountOfLaunchers = alignedFitting.getAmount();
-            final AmmunitionModule ammunitionModule = launcher.getAmmunitionModule();
-            final int ammoPerModule = ammunitionModule.getEffectValue();
-            final Missile missile = ammunitionModule.getMissile();
-            shotsPerMissile.merge(missile, amountOfLaunchers * ammoPerModule, Integer::sum);
-        });
-    }
 
     public MissileAmmunitionState(@Nonnull final WarshipHealthState healthState) {
         Preconditions.checkNotNull(healthState, "healthState must not be empty");

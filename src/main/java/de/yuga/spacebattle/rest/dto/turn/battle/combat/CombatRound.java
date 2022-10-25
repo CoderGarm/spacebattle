@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.rest.dto.turn.battle;
+package de.yuga.spacebattle.rest.dto.turn.battle.combat;
 
 import com.google.common.base.Preconditions;
 import io.swagger.v3.oas.annotations.media.Schema;

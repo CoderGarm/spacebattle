@@ -1,5 +1,13 @@
 use sbdbTest;
 
+    create table activeFittings (
+       idWarshipHealthState integer not null,
+        amount integer not null,
+        idLauncher integer,
+        idWeapon integer,
+        weaponAlignment varchar(255)
+    ) engine=InnoDB;
+
     create table alignedFitting (
        idShipClass integer not null,
         amount integer not null,
@@ -123,8 +131,8 @@ use sbdbTest;
     create table dbPatch (
        idDBPatch integer not null auto_increment,
         createdAt datetime(6) not null,
-        version varchar(255) not null,
         description varchar(255) not null,
+        version varchar(255) not null,
         primary key (idDBPatch)
     ) engine=InnoDB;
 
@@ -145,6 +153,7 @@ use sbdbTest;
        idFleet integer not null auto_increment,
         isDeleted bit not null default false,
         name varchar(255) not null,
+        needsRepair bit not null default false,
         xCoordinateLocation varchar(255),
         yCoordinateLocation varchar(255),
         idMove integer,
@@ -237,7 +246,9 @@ use sbdbTest;
         resourceType varchar(255),
         targetLevel integer,
         jobDoneAtZero decimal(19, 0) not null,
+        priority varchar(255),
         idBuilding integer,
+        idFleet integer,
         idResearch integer,
         idShipClass integer,
         idFacility integer not null,
@@ -466,6 +477,13 @@ use sbdbTest;
         primary key (idBattleReport, idReleasedVolley)
     ) engine=InnoDB;
 
+    create table remainingShots (
+       idWarshipHealthState integer not null,
+        amount decimal(19, 0) not null,
+        idMissile integer not null,
+        primary key (idWarshipHealthState, idMissile)
+    ) engine=InnoDB;
+
     create table research (
        idResearch integer not null auto_increment,
         techLevel varchar(255) not null,
@@ -625,6 +643,19 @@ use sbdbTest;
         primary key (idWarShip)
     ) engine=InnoDB;
 
+    create table warshipCapabilities (
+       idWarshipHealthState integer not null,
+        moduleType varchar(255),
+        value decimal(19, 0)
+    ) engine=InnoDB;
+
+    create table warshipHealthState (
+       idWarshipHealthState integer not null auto_increment,
+        isFightingCapable bit not null default true,
+        idWarship integer not null,
+        primary key (idWarshipHealthState)
+    ) engine=InnoDB;
+
     create table weapon (
        idWeapon integer not null auto_increment,
         techLevel varchar(255) not null,
@@ -642,848 +673,890 @@ use sbdbTest;
         check (weaponType = 'BEAM' || weaponType = 'POINT_DEFENSE')
     ) engine=InnoDB;
 
-    alter table alliance 
+    alter table alliance
        add constraint UK_h7jfng3csi7xy8d1r3dqe07lo unique (code);
 
-    alter table alliance 
+    alter table alliance
        add constraint UK_7nuq4ufi5qsmpn1u6i8n2nxot unique (name);
 
-    alter table construction 
+    alter table construction
        add constraint CONSTRUCTION_UK unique (idPlanet, idBuilding);
 
-    alter table counterMissileHits 
+    alter table counterMissileHits
        add constraint UK_5t1h6fs2csdnofihl1lsysbf9 unique (idCounterMissileHit);
 
-    alter table fleet 
+    alter table fleet
        add constraint UK_duhimx7ydhmssl7vqp5w29yx0 unique (idMove);
 
-    alter table messageThread 
+    alter table messageThread
        add constraint messageThread_UC unique (idUserOne, idUserTwo);
 
-    alter table missile 
+    alter table missile
        add constraint UK_6gmi4lb4vkqblb63obx2991f unique (idAmmunitionModule);
 
-    alter table missileMovements 
+    alter table missileMovements
        add constraint UK_7i21tt2alyj9dggioukympy2t unique (idMissileMovement);
 
-    alter table movementActions 
+    alter table movementActions
        add constraint UK_k7lndwnt1rxmmjj2xslfrkuv unique (idMovementAction);
 
-    alter table orderedHitLog 
+    alter table orderedHitLog
        add constraint UK_mpoyl8losmb1ep0fxewrpbuf3 unique (idHitLog);
 
-    alter table planet 
+    alter table planet
        add constraint PLANET_UK unique (idStarSystem, idPlanet, xCoordinate, yCoordinate);
 
-    alter table releasesVolleys 
+    alter table releasesVolleys
        add constraint UK_hsr966dv9qpnj1i7nhg3nlbc6 unique (idReleasedVolley);
 
-    alter table shipClass 
+    alter table shipClass
        add constraint UK_4sgs4ew920mkttyjueq19n70q unique (idPredecessor);
 
-    alter table shipClass 
+    alter table shipClass
        add constraint UK_kqyh4et3r89d2iy3w2sggpt90 unique (idSuccessor);
 
-    alter table shipKillerHits 
+    alter table shipKillerHits
        add constraint UK_nd3dfq3yjyhaauawah5lm5mj2 unique (idShipKillerHit);
 
-    alter table starSystem 
+    alter table starSystem
        add constraint COORDINATE_UK unique (xCoordinate, yCoordinate);
 
-    alter table user 
+    alter table user
        add constraint EMAIL_UK unique (email);
 
-    alter table user 
+    alter table user
        add constraint UK_sb8bbouer5wak8vyiiy4pf2bx unique (username);
 
-    alter table alignedFitting 
-       add constraint FKkhnl9hmtdgol96bsu6d5csqxg 
-       foreign key (idLauncher) 
+    alter table activeFittings
+       add constraint FK9kawhm3fqubxvebrl8pjl10lv
+       foreign key (idLauncher)
        references launcher (idLauncher);
 
-    alter table alignedFitting 
-       add constraint FKt6aos80sh8332mepbkuwmo98i 
-       foreign key (idWeapon) 
+    alter table activeFittings
+       add constraint FKme68sre9mt8ikil6n15ax2grn
+       foreign key (idWeapon)
        references weapon (idWeapon);
 
-    alter table alignedFitting 
-       add constraint FKgdp5e1ylgswr29e2d5b7uhib 
-       foreign key (idShipClass) 
-       references shipClass (idShipClass);
+    alter table activeFittings
+       add constraint FKqf0cnnigkfynfaf6jok2lby74
+       foreign key (idWarshipHealthState)
+       references warshipHealthState (idWarshipHealthState);
 
-    alter table alliance 
-       add constraint FKqtn90ky0waqf7lslqa7gu66mo 
-       foreign key (idFounder) 
-       references user (idUser);
-
-    alter table allowedMissiles 
-       add constraint FKhp9tc55hay9lojn6swpo6q4kv 
-       foreign key (idMissile) 
-       references missile (idMissile);
-
-    alter table allowedMissiles 
-       add constraint FK1dns3uxovqh388wtp38xk3l8p 
-       foreign key (idLauncher) 
+    alter table alignedFitting
+       add constraint FKkhnl9hmtdgol96bsu6d5csqxg
+       foreign key (idLauncher)
        references launcher (idLauncher);
 
-    alter table ammunitionFitting 
-       add constraint FKmj2nxtrg5h9np8ugn7jre0v4f 
-       foreign key (idAmmunitionModule) 
-       references ammunitionModule (idAmmunitionModule);
+    alter table alignedFitting
+       add constraint FKt6aos80sh8332mepbkuwmo98i
+       foreign key (idWeapon)
+       references weapon (idWeapon);
 
-    alter table ammunitionFitting 
-       add constraint FKij9xicbw7lepyy25ixl7dr25q 
-       foreign key (idShipClass) 
+    alter table alignedFitting
+       add constraint FKgdp5e1ylgswr29e2d5b7uhib
+       foreign key (idShipClass)
        references shipClass (idShipClass);
 
-    alter table ammunitionModule 
-       add constraint FKtc1t67bo67jgxojnt1r8w1hr3 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table ammunitionModule 
-       add constraint FKivsjmyi7f7aym46q08qh71k1i 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table ammunitionModule 
-       add constraint FK9jn8385qcftsln9aiemohys6x 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
-
-    alter table ammunitionModule 
-       add constraint FKi9oa4xlh6y6c8nd9e25c8jlbq 
-       foreign key (idResearch) 
-       references research (idResearch);
-
-    alter table applications 
-       add constraint FKi0rvtwqjg2c06lvk50e4gakfa 
-       foreign key (idUser) 
+    alter table alliance
+       add constraint FKqtn90ky0waqf7lslqa7gu66mo
+       foreign key (idFounder)
        references user (idUser);
 
-    alter table applications 
-       add constraint FKpa65pbe483fu0uj4mwnwahn6w 
-       foreign key (idAlliance) 
-       references alliance (idAlliance);
-
-    alter table armor 
-       add constraint FK10dhr7h3pkps3d7u22q2pwpgc 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table armor 
-       add constraint FK843wjkvvkloflykng3p5xanqf 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table armor 
-       add constraint FKj95rgrpe0e0kldkrdk61180vb 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
-
-    alter table armor 
-       add constraint FKrb3h67mjdni459t4j1y8b7sw5 
-       foreign key (idResearch) 
-       references research (idResearch);
-
-    alter table battleReport 
-       add constraint FKktnc29kf1wrmrnbihghs9gmdp 
-       foreign key (idTick) 
-       references tick (idTick);
-
-    alter table battleReport 
-       add constraint FKr6smkmpvrxxus80181d1gwekl 
-       foreign key (idStarSystem) 
-       references starSystem (idStarSystem);
-
-    alter table building 
-       add constraint FK5vart3g8xv4gkgagwxxwyiuqi 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table building 
-       add constraint FK9jureiokh5eus3dq46euhltxo 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table building 
-       add constraint FKmqi7vubpnykxhu53hy5e7qri2 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
-
-    alter table building 
-       add constraint FKbp0gn3eiexsa5p6s20md9yfi7 
-       foreign key (idResearch) 
-       references research (idResearch);
-
-    alter table colonization 
-       add constraint FK6kxulldcu79b6d6ecjr7pvpyw 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table colonization 
-       add constraint FKb2jrbwdwy0j8t2tggwtbf64ty 
-       foreign key (idTarget) 
-       references planet (idPlanet);
-
-    alter table colonization 
-       add constraint FKrfuwalj6y19xvtebuy1q05pbt 
-       foreign key (idUser) 
-       references user (idUser);
-
-    alter table construction 
-       add constraint FKlkteuncyf95jg9hhq28yefrcl 
-       foreign key (idBuilding) 
-       references building (idBuilding);
-
-    alter table construction 
-       add constraint FKg139setxu2ng9hj6h7sgpyb9s 
-       foreign key (idPlanet) 
-       references planet (idPlanet);
-
-    alter table counterMissileHit 
-       add constraint FKdc9r09hg3me03436ahneu2r65 
-       foreign key (idActor) 
-       references fleet (idFleet);
-
-    alter table counterMissileHit 
-       add constraint FKksbgg1bvbgqrostw7xkhdo2lb 
-       foreign key (idMissile) 
+    alter table allowedMissiles
+       add constraint FKhp9tc55hay9lojn6swpo6q4kv
+       foreign key (idMissile)
        references missile (idMissile);
 
-    alter table counterMissileHit 
-       add constraint FKln1su9jkv2gcayljhc8x4vgem 
-       foreign key (idTarget) 
-       references fleet (idFleet);
+    alter table allowedMissiles
+       add constraint FK1dns3uxovqh388wtp38xk3l8p
+       foreign key (idLauncher)
+       references launcher (idLauncher);
 
-    alter table counterMissileHits 
-       add constraint FK3iy5c5p8yauo6g7lx2egjlg5g 
-       foreign key (idCounterMissileHit) 
-       references counterMissileHit (idCounterMissileHit);
-
-    alter table counterMissileHits 
-       add constraint FKcu6xd18vice5w5lmh1no2dk36 
-       foreign key (idBattleReport) 
-       references battleReport (idBattleReport);
-
-    alter table electronicWarfare 
-       add constraint FKccj76id0r5pq3p7f4viriwdqf 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table electronicWarfare 
-       add constraint FKi180vaq7gab8jy3r99bawdic5 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table electronicWarfare 
-       add constraint FKgehovt9s2xat817l0enflo5nq 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
-
-    alter table electronicWarfare 
-       add constraint FKhr2adrrpeb3vshv11ajrgnkd7 
-       foreign key (idResearch) 
-       references research (idResearch);
-
-    alter table fleet 
-       add constraint FK5yy9whqh6562iaxuym0wrkjeq 
-       foreign key (idMove) 
-       references move (idMove);
-
-    alter table fleet 
-       add constraint FK7p0cvm6ul1v1w1vqcljs63i61 
-       foreign key (idStarSystemLocation) 
-       references starSystem (idStarSystem);
-
-    alter table fleet 
-       add constraint FKjo66qwgl0a9bba5x7xq23fvok 
-       foreign key (idOwner) 
-       references user (idUser);
-
-    alter table fleet 
-       add constraint FKckq55cmimjpois3mst803atuy 
-       foreign key (idResourceDeposit) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table forum 
-       add constraint FKbd3cwb6yurr6utojembdwjiy1 
-       foreign key (idAlliance) 
-       references alliance (idAlliance);
-
-    alter table forumMessage 
-       add constraint FKibroa7vxdgc63xasj1kcwrg4w 
-       foreign key (idUserAuthor) 
-       references user (idUser);
-
-    alter table forumMessage 
-       add constraint FKh1a5uic7c3sdd84skyccc126q 
-       foreign key (idForumThread) 
-       references forumThread (idForumThread);
-
-    alter table forumMessageRead 
-       add constraint FK12uxerbm5t8a7shn88fvvalbu 
-       foreign key (idForum) 
-       references forum (idForum);
-
-    alter table forumMessageRead 
-       add constraint FKnf5e4g437o3l3hdg2ei0ywwe0 
-       foreign key (idForumMessage) 
-       references forumMessage (idForumMessage);
-
-    alter table forumMessageRead 
-       add constraint FKtcsdm5ruogje2vjsy4oeok3md 
-       foreign key (idForumThread) 
-       references forumThread (idForumThread);
-
-    alter table forumMessageRead 
-       add constraint FK2xe08nytb3qnnfmf906ynapx6 
-       foreign key (idUser) 
-       references user (idUser);
-
-    alter table forumThread 
-       add constraint FKbqtbt77ebauj9krlwc3ak31us 
-       foreign key (idForum) 
-       references forum (idForum);
-
-    alter table hitLog 
-       add constraint FK1pcr16gjbto8vd5g7v8hq14hw 
-       foreign key (idTarget) 
-       references warShip (idWarShip);
-
-    alter table hull 
-       add constraint FK65udyybp7syxvga5evxn8olhc 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table hull 
-       add constraint FKi1ghgbbrc1j4vovj7v03t0sd5 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table hull 
-       add constraint FK7g5aas0xko5stotsvyt9hhchw 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
-
-    alter table hull 
-       add constraint FK4hpf1pawl0wynjx9kdg74opea 
-       foreign key (idResearch) 
-       references research (idResearch);
-
-    alter table humanResources 
-       add constraint FKh3v7ra6rwylc7sofs1is80fb8 
-       foreign key (idResourceDeposit) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table job 
-       add constraint FK7otfjvk4vhy0gt0m3hnyam6au 
-       foreign key (idBuilding) 
-       references building (idBuilding);
-
-    alter table job 
-       add constraint FKdno72guom99osq9f36eixsd87 
-       foreign key (idResearch) 
-       references research (idResearch);
-
-    alter table job 
-       add constraint FKsevbhc9015r9wmqvojq1dbsen 
-       foreign key (idShipClass) 
-       references shipClass (idShipClass);
-
-    alter table job 
-       add constraint FK4ewa76co5drr08nptgdmax8d6 
-       foreign key (idFacility) 
-       references construction (idConstruction);
-
-    alter table job 
-       add constraint FK3urqlpl2jmbxlfk4q88i9i5tb 
-       foreign key (idOwner) 
-       references user (idUser);
-
-    alter table knownStarSystem 
-       add constraint FKayr540k7tyu8v1vuni31u2j17 
-       foreign key (idStarSystem) 
-       references starSystem (idStarSystem);
-
-    alter table knownStarSystem 
-       add constraint FKtjhh901to46le5kkmsybuwdbb 
-       foreign key (idOwner) 
-       references user (idUser);
-
-    alter table launcher 
-       add constraint FKpxevsicliklfnl6mycvl75sv9 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table launcher 
-       add constraint FKn80gj1fyhvn6v5smkbx3b4rhi 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table launcher 
-       add constraint FKa0tf8xicyfrn906krw65ieop1 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
-
-    alter table launcher 
-       add constraint FKdesag5bovcaxav76r4ln2occl 
-       foreign key (idResearch) 
-       references research (idResearch);
-
-    alter table launcher 
-       add constraint FKekm6qvnxv0b0y293v8h0ayjhm 
-       foreign key (idAmmunitionModule) 
+    alter table ammunitionFitting
+       add constraint FKmj2nxtrg5h9np8ugn7jre0v4f
+       foreign key (idAmmunitionModule)
        references ammunitionModule (idAmmunitionModule);
 
-    alter table lossesByHit 
-       add constraint FK8gwd5wcrghospusbhcyoffbpq 
-       foreign key (idFleet) 
-       references fleet (idFleet);
-
-    alter table lossesByHit 
-       add constraint FKmxpfhc6uuo325u2u81tb2k2g0 
-       foreign key (idOwner) 
-       references user (idUser);
-
-    alter table lossesByHit 
-       add constraint FK85p90t72v9he3a1iw7y0fhn05 
-       foreign key (idShipClass) 
+    alter table ammunitionFitting
+       add constraint FKij9xicbw7lepyy25ixl7dr25q
+       foreign key (idShipClass)
        references shipClass (idShipClass);
 
-    alter table lossesByHit 
-       add constraint FKhtcg0ctdj5ie6fbabo8puvteu 
-       foreign key (idHitLog) 
-       references hitLog (idHitLog);
-
-    alter table lossesByHit 
-       add constraint FK3o0d6nae9i5n6v33ake9fyvs8 
-       foreign key (idShipKillerHit) 
-       references shipKillerHit (idShipKillerHit);
-
-    alter table messageThread 
-       add constraint FK1d5qqscr6uidy4lithqwkfcsb 
-       foreign key (idUserOne) 
-       references user (idUser);
-
-    alter table messageThread 
-       add constraint FKlcfh5cw1nqv8howd22b9emwbf 
-       foreign key (idUserTwo) 
-       references user (idUser);
-
-    alter table miningFactorsComposition 
-       add constraint FK7pw467msglkrl51uo8uu6v6l6 
-       foreign key (idMiningFactors) 
-       references miningFactors (idMiningFactors);
-
-    alter table missile 
-       add constraint FK2y4rvixlct3ljky430p3bmwad 
-       foreign key (idCosts) 
+    alter table ammunitionModule
+       add constraint FKtc1t67bo67jgxojnt1r8w1hr3
+       foreign key (idCosts)
        references resourceDeposit (idResourceDeposit);
 
-    alter table missile 
-       add constraint FK3sugkdm5phqm3kkdraprgaj87 
-       foreign key (idTranslatableDescription) 
+    alter table ammunitionModule
+       add constraint FKivsjmyi7f7aym46q08qh71k1i
+       foreign key (idTranslatableDescription)
        references translatable (idTranslatable);
 
-    alter table missile 
-       add constraint FKorhea214ty529liubde204v2y 
-       foreign key (idTranslatableName) 
+    alter table ammunitionModule
+       add constraint FK9jn8385qcftsln9aiemohys6x
+       foreign key (idTranslatableName)
        references translatable (idTranslatable);
 
-    alter table missile 
-       add constraint FKdhk8trxq7c36hid883mj4p7us 
-       foreign key (idAmmunitionModule) 
-       references ammunitionModule (idAmmunitionModule);
-
-    alter table missile 
-       add constraint FK1ledmeodyggj4capnumuak58u 
-       foreign key (idMissileMotor) 
-       references missileMotor (idMissileMotor);
-
-    alter table missile 
-       add constraint FK6hqn2wt7gk1myp1ew4i29r3ss 
-       foreign key (idResearch) 
+    alter table ammunitionModule
+       add constraint FKi9oa4xlh6y6c8nd9e25c8jlbq
+       foreign key (idResearch)
        references research (idResearch);
 
-    alter table missile 
-       add constraint FKhgp8bhvbmvaefgws7b1t0km7k 
-       foreign key (idWarhead) 
-       references warhead (idWarhead);
-
-    alter table missileMotor 
-       add constraint FK6q2owmplw15x287lnle7mdeae 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table missileMotor 
-       add constraint FKs8aryxvu0dbr41yab1lqy7f54 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table missileMotor 
-       add constraint FKkygcap68itcbqkfukqxqhqti8 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
-
-    alter table missileMovement 
-       add constraint FK31pwab7jyqugac58td2yh50ju 
-       foreign key (idActor) 
-       references fleet (idFleet);
-
-    alter table missileMovement 
-       add constraint FKl9frhygmvi1n5d3sjchn19wrx 
-       foreign key (idTarget) 
-       references fleet (idFleet);
-
-    alter table missileMovements 
-       add constraint FKa4ut542bvmk335w8ldma12g22 
-       foreign key (idMissileMovement) 
-       references missileMovement (idMissileMovement);
-
-    alter table missileMovements 
-       add constraint FK4hmoghg3bi28t2pmfi3ea626u 
-       foreign key (idBattleReport) 
-       references battleReport (idBattleReport);
-
-    alter table move 
-       add constraint FKmcefsl29wdpj7xqe9790o0mch 
-       foreign key (idStarSystemDestination) 
-       references starSystem (idStarSystem);
-
-    alter table move 
-       add constraint FKg65nht3m74odamnrqiv1cdyl6 
-       foreign key (idFleet) 
-       references fleet (idFleet);
-
-    alter table move 
-       add constraint FK1y6v1eof54uci3p3b6mduv6sr 
-       foreign key (idStarSystemOrigin) 
-       references starSystem (idStarSystem);
-
-    alter table move 
-       add constraint FKm0l3o2yx8pq8hu2bww8maoa98 
-       foreign key (idUser) 
+    alter table applications
+       add constraint FKi0rvtwqjg2c06lvk50e4gakfa
+       foreign key (idUser)
        references user (idUser);
 
-    alter table movementAction 
-       add constraint FK2fc6fy40a1twi3bedin6c2sr1 
-       foreign key (idActor) 
-       references fleet (idFleet);
-
-    alter table movementActions 
-       add constraint FKlsfd21vc6bericbiwv6huwo 
-       foreign key (idMovementAction) 
-       references movementAction (idMovementAction);
-
-    alter table movementActions 
-       add constraint FKjkre459vr8w45a9wxhrtofsfa 
-       foreign key (idBattleReport) 
-       references battleReport (idBattleReport);
-
-    alter table orderedHitLog 
-       add constraint FKt4eji1de3lte0yql6naypaj9t 
-       foreign key (idHitLog) 
-       references hitLog (idHitLog);
-
-    alter table orderedHitLog 
-       add constraint FKtbchtybhbygepe1yjf9mu0lwf 
-       foreign key (idShipKillerHit) 
-       references shipKillerHit (idShipKillerHit);
-
-    alter table participatingFleets 
-       add constraint FKayayypcvevpaihludw9p2jcdh 
-       foreign key (idFleet) 
-       references fleet (idFleet);
-
-    alter table participatingFleets 
-       add constraint FKbp90ne9mn2vhmh9m7kinwjxki 
-       foreign key (idBattleReport) 
-       references battleReport (idBattleReport);
-
-    alter table participatingUsers 
-       add constraint FK5dp3ok6qf3ohs6s1s7f11k34h 
-       foreign key (idUser) 
-       references user (idUser);
-
-    alter table participatingUsers 
-       add constraint FKlreg972gg0pgmmoudxk12sy3g 
-       foreign key (idBattleReport) 
-       references battleReport (idBattleReport);
-
-    alter table passiveModule 
-       add constraint FKrr0cmtk4xqkbtajq5s17apmsu 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table passiveModule 
-       add constraint FK3q0uitju15ai7lhv7y7y61549 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table passiveModule 
-       add constraint FK1kqbngjlngfx049m4t1hmyelt 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
-
-    alter table passiveModule 
-       add constraint FKdchcy45rswteu33yrgh80m8a9 
-       foreign key (idResearch) 
-       references research (idResearch);
-
-    alter table planet 
-       add constraint FK6290orio72djryi0kktbn3esu 
-       foreign key (idMiningFactors) 
-       references miningFactors (idMiningFactors);
-
-    alter table planet 
-       add constraint FKobjb6jgxji3jrrgoxy9r30uyc 
-       foreign key (idOwner) 
-       references user (idUser);
-
-    alter table planet 
-       add constraint FK9cd80e9yxwnobejr9twlcknab 
-       foreign key (idResourceDeposit) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table planet 
-       add constraint FK2qd4p5ry3gaskjau8i2gutj0n 
-       foreign key (idStarSystem) 
-       references starSystem (idStarSystem);
-
-    alter table propulsion 
-       add constraint FKqjsvyhjc6w21niim4aeptpm85 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table propulsion 
-       add constraint FK1a2sbiyhyhlm5q99g8cs8qdpw 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table propulsion 
-       add constraint FK34jwo45015kmmtttnorlypaa3 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
-
-    alter table propulsion 
-       add constraint FK7rr2gvpcbjjhl9tuxe6c50v5q 
-       foreign key (idResearch) 
-       references research (idResearch);
-
-    alter table releasedVolley 
-       add constraint FK5phx9tuf726udgmc3oba1t80o 
-       foreign key (idActor) 
-       references fleet (idFleet);
-
-    alter table releasedVolley 
-       add constraint FKox4m8c517vryrxaijolfco99m 
-       foreign key (idTarget) 
-       references fleet (idFleet);
-
-    alter table releasesVolleys 
-       add constraint FKr0o8twcmeayvg09p39p71ktpf 
-       foreign key (idReleasedVolley) 
-       references releasedVolley (idReleasedVolley);
-
-    alter table releasesVolleys 
-       add constraint FKn08s5o12up3n1n85d1vnhrk4y 
-       foreign key (idBattleReport) 
-       references battleReport (idBattleReport);
-
-    alter table research 
-       add constraint FKni50te130dndarqgicsq3svhb 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table research 
-       add constraint FK1sxfrsxvrj2iaxi809oirhevj 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table research 
-       add constraint FKibqicobq7dm63vf792kgmk5wj 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
-
-    alter table research 
-       add constraint FKch37eb44iv0ls442yu7usvvtp 
-       foreign key (unlockedThrough) 
-       references research (idResearch);
-
-    alter table researchLevels 
-       add constraint FK8c7vw5t1ve4phgpfr6gwt3xj0 
-       foreign key (idResearch) 
-       references research (idResearch);
-
-    alter table researchLevels 
-       add constraint FKh9xjvymkiqwygpem46iaj0j3v 
-       foreign key (idUser) 
-       references user (idUser);
-
-    alter table resourcesDepositComposition 
-       add constraint FK6q26jn3ftmq2x638tsgi0aemy 
-       foreign key (idResourceDeposit) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table shipClass 
-       add constraint FKouxjssb18x4jeutl5r1l0byeu 
-       foreign key (idArmor) 
-       references armor (idArmor);
-
-    alter table shipClass 
-       add constraint FKfbii11hday9qcjpmi2i1k2611 
-       foreign key (idElectronicWarfare) 
-       references electronicWarfare (idElectronicWarfare);
-
-    alter table shipClass 
-       add constraint FKgkjpsgpvfaupqxr7cv9nhc9ai 
-       foreign key (idHull) 
-       references hull (idHull);
-
-    alter table shipClass 
-       add constraint FKovqcf68xgq4mm2n32sdoburq6 
-       foreign key (idOwner) 
-       references user (idUser);
-
-    alter table shipClass 
-       add constraint FKr6026i6kn4nm4ss4h011nifks 
-       foreign key (idPredecessor) 
-       references shipClass (idShipClass);
-
-    alter table shipClass 
-       add constraint FKdd7voavc2cml9rodxm6vnlaqq 
-       foreign key (idPropulsion) 
-       references propulsion (idPropulsion);
-
-    alter table shipClass 
-       add constraint FKsa1b1j6ur2emh3jv7s0ft3nru 
-       foreign key (idSidewall) 
-       references sidewall (idSidewall);
-
-    alter table shipClass 
-       add constraint FKnqevjdq10urslieg5r3peb5m3 
-       foreign key (idSuccessor) 
-       references shipClass (idShipClass);
-
-    alter table shipKillerHit 
-       add constraint FKi72vdedsqsrgj93k3k80ei5sk 
-       foreign key (idActor) 
-       references fleet (idFleet);
-
-    alter table shipKillerHit 
-       add constraint FK1d72qr1uwk27axl1yck2b2ux1 
-       foreign key (idTarget) 
-       references fleet (idFleet);
-
-    alter table shipKillerHits 
-       add constraint FKmaalns2ubmv8018dgku4bv0qs 
-       foreign key (idShipKillerHit) 
-       references shipKillerHit (idShipKillerHit);
-
-    alter table shipKillerHits 
-       add constraint FKsyea27u0x8dmybnb4r1qfsug0 
-       foreign key (idBattleReport) 
-       references battleReport (idBattleReport);
-
-    alter table sidewall 
-       add constraint FKlo0i3byallqh89wd535yrbs3l 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table sidewall 
-       add constraint FKdx39gsmusm1sai6wdid4s4xmn 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table sidewall 
-       add constraint FKmqieo3lwi46pddbgbhg7dbg4r 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
-
-    alter table sidewall 
-       add constraint FK693a9gix6ifpkiop612tghdy0 
-       foreign key (idResearch) 
-       references research (idResearch);
-
-    alter table supportFitting 
-       add constraint FKd2r1r3l1h9iehfvklg6tymj1o 
-       foreign key (idPassiveModule) 
-       references passiveModule (idPassiveModule);
-
-    alter table supportFitting 
-       add constraint FK2rgk45foa8brx1onuwdxsodtr 
-       foreign key (idShipClass) 
-       references shipClass (idShipClass);
-
-    alter table translation 
-       add constraint FK6y0ph13exuqqae7sowcvxac93 
-       foreign key (idTranslatable) 
-       references translatable (idTranslatable);
-
-    alter table user 
-       add constraint FKd0120p7tkvssh9r8hldenpw1w 
-       foreign key (idAlliance) 
+    alter table applications
+       add constraint FKpa65pbe483fu0uj4mwnwahn6w
+       foreign key (idAlliance)
        references alliance (idAlliance);
 
-    alter table userMessage 
-       add constraint FKgo5irmd79mx2cg76wtaoaxbxa 
-       foreign key (idMessageThread) 
-       references messageThread (idMessageThread);
-
-    alter table userMessage 
-       add constraint FK6xs6p78lala5xtd4eoe4xxrnv 
-       foreign key (idUserSender) 
-       references user (idUser);
-
-    alter table warhead 
-       add constraint FK4m9pxktw6iywf5aecc1n0xm4f 
-       foreign key (idCosts) 
+    alter table armor
+       add constraint FK10dhr7h3pkps3d7u22q2pwpgc
+       foreign key (idCosts)
        references resourceDeposit (idResourceDeposit);
 
-    alter table warhead 
-       add constraint FKjx1sqa9iiinbgfciltxdqp78u 
-       foreign key (idTranslatableDescription) 
+    alter table armor
+       add constraint FK843wjkvvkloflykng3p5xanqf
+       foreign key (idTranslatableDescription)
        references translatable (idTranslatable);
 
-    alter table warhead 
-       add constraint FKa939x3f6pjibpdv9k0wxbl3cq 
-       foreign key (idTranslatableName) 
+    alter table armor
+       add constraint FKj95rgrpe0e0kldkrdk61180vb
+       foreign key (idTranslatableName)
        references translatable (idTranslatable);
 
-    alter table warShip 
-       add constraint FK3kovfkp6003a62x5ff41h44hw 
-       foreign key (idFleet) 
-       references fleet (idFleet);
+    alter table armor
+       add constraint FKrb3h67mjdni459t4j1y8b7sw5
+       foreign key (idResearch)
+       references research (idResearch);
 
-    alter table warShip 
-       add constraint FKjr13y2u3qkka7d3npp9omwdoa 
-       foreign key (idShipClass) 
-       references shipClass (idShipClass);
+    alter table battleReport
+       add constraint FKktnc29kf1wrmrnbihghs9gmdp
+       foreign key (idTick)
+       references tick (idTick);
 
-    alter table warShip 
-       add constraint FKdywyvdwb0ovbd6oruywo13nyx 
-       foreign key (idShipyard) 
+    alter table battleReport
+       add constraint FKr6smkmpvrxxus80181d1gwekl
+       foreign key (idStarSystem)
+       references starSystem (idStarSystem);
+
+    alter table building
+       add constraint FK5vart3g8xv4gkgagwxxwyiuqi
+       foreign key (idCosts)
+       references resourceDeposit (idResourceDeposit);
+
+    alter table building
+       add constraint FK9jureiokh5eus3dq46euhltxo
+       foreign key (idTranslatableDescription)
+       references translatable (idTranslatable);
+
+    alter table building
+       add constraint FKmqi7vubpnykxhu53hy5e7qri2
+       foreign key (idTranslatableName)
+       references translatable (idTranslatable);
+
+    alter table building
+       add constraint FKbp0gn3eiexsa5p6s20md9yfi7
+       foreign key (idResearch)
+       references research (idResearch);
+
+    alter table colonization
+       add constraint FK6kxulldcu79b6d6ecjr7pvpyw
+       foreign key (idCosts)
+       references resourceDeposit (idResourceDeposit);
+
+    alter table colonization
+       add constraint FKb2jrbwdwy0j8t2tggwtbf64ty
+       foreign key (idTarget)
        references planet (idPlanet);
 
-    alter table weapon 
-       add constraint FK1rsb3ampiw8yjy8ngrget6ay 
-       foreign key (idCosts) 
+    alter table colonization
+       add constraint FKrfuwalj6y19xvtebuy1q05pbt
+       foreign key (idUser)
+       references user (idUser);
+
+    alter table construction
+       add constraint FKlkteuncyf95jg9hhq28yefrcl
+       foreign key (idBuilding)
+       references building (idBuilding);
+
+    alter table construction
+       add constraint FKg139setxu2ng9hj6h7sgpyb9s
+       foreign key (idPlanet)
+       references planet (idPlanet);
+
+    alter table counterMissileHit
+       add constraint FKdc9r09hg3me03436ahneu2r65
+       foreign key (idActor)
+       references fleet (idFleet);
+
+    alter table counterMissileHit
+       add constraint FKksbgg1bvbgqrostw7xkhdo2lb
+       foreign key (idMissile)
+       references missile (idMissile);
+
+    alter table counterMissileHit
+       add constraint FKln1su9jkv2gcayljhc8x4vgem
+       foreign key (idTarget)
+       references fleet (idFleet);
+
+    alter table counterMissileHits
+       add constraint FK3iy5c5p8yauo6g7lx2egjlg5g
+       foreign key (idCounterMissileHit)
+       references counterMissileHit (idCounterMissileHit);
+
+    alter table counterMissileHits
+       add constraint FKcu6xd18vice5w5lmh1no2dk36
+       foreign key (idBattleReport)
+       references battleReport (idBattleReport);
+
+    alter table electronicWarfare
+       add constraint FKccj76id0r5pq3p7f4viriwdqf
+       foreign key (idCosts)
        references resourceDeposit (idResourceDeposit);
 
-    alter table weapon 
-       add constraint FKqx172dx6j907oe0gcxskan5vy 
-       foreign key (idTranslatableDescription) 
+    alter table electronicWarfare
+       add constraint FKi180vaq7gab8jy3r99bawdic5
+       foreign key (idTranslatableDescription)
        references translatable (idTranslatable);
 
-    alter table weapon 
-       add constraint FKtrgd2x03dkumgxnryvhon8qm5 
-       foreign key (idTranslatableName) 
+    alter table electronicWarfare
+       add constraint FKgehovt9s2xat817l0enflo5nq
+       foreign key (idTranslatableName)
        references translatable (idTranslatable);
 
-    alter table weapon 
-       add constraint FKo22n18dgjpraqosj7nkamrnvb 
-       foreign key (idResearch) 
+    alter table electronicWarfare
+       add constraint FKhr2adrrpeb3vshv11ajrgnkd7
+       foreign key (idResearch)
        references research (idResearch);
 
-insert into dbPatch values (null, now(), '0.0.5-1', 'create dbPatch table');
+    alter table fleet
+       add constraint FK5yy9whqh6562iaxuym0wrkjeq
+       foreign key (idMove)
+       references move (idMove);
+
+    alter table fleet
+       add constraint FK7p0cvm6ul1v1w1vqcljs63i61
+       foreign key (idStarSystemLocation)
+       references starSystem (idStarSystem);
+
+    alter table fleet
+       add constraint FKjo66qwgl0a9bba5x7xq23fvok
+       foreign key (idOwner)
+       references user (idUser);
+
+    alter table fleet
+       add constraint FKckq55cmimjpois3mst803atuy
+       foreign key (idResourceDeposit)
+       references resourceDeposit (idResourceDeposit);
+
+    alter table forum
+       add constraint FKbd3cwb6yurr6utojembdwjiy1
+       foreign key (idAlliance)
+       references alliance (idAlliance);
+
+    alter table forumMessage
+       add constraint FKibroa7vxdgc63xasj1kcwrg4w
+       foreign key (idUserAuthor)
+       references user (idUser);
+
+    alter table forumMessage
+       add constraint FKh1a5uic7c3sdd84skyccc126q
+       foreign key (idForumThread)
+       references forumThread (idForumThread);
+
+    alter table forumMessageRead
+       add constraint FK12uxerbm5t8a7shn88fvvalbu
+       foreign key (idForum)
+       references forum (idForum);
+
+    alter table forumMessageRead
+       add constraint FKnf5e4g437o3l3hdg2ei0ywwe0
+       foreign key (idForumMessage)
+       references forumMessage (idForumMessage);
+
+    alter table forumMessageRead
+       add constraint FKtcsdm5ruogje2vjsy4oeok3md
+       foreign key (idForumThread)
+       references forumThread (idForumThread);
+
+    alter table forumMessageRead
+       add constraint FK2xe08nytb3qnnfmf906ynapx6
+       foreign key (idUser)
+       references user (idUser);
+
+    alter table forumThread
+       add constraint FKbqtbt77ebauj9krlwc3ak31us
+       foreign key (idForum)
+       references forum (idForum);
+
+    alter table hitLog
+       add constraint FK1pcr16gjbto8vd5g7v8hq14hw
+       foreign key (idTarget)
+       references warShip (idWarShip);
+
+    alter table hull
+       add constraint FK65udyybp7syxvga5evxn8olhc
+       foreign key (idCosts)
+       references resourceDeposit (idResourceDeposit);
+
+    alter table hull
+       add constraint FKi1ghgbbrc1j4vovj7v03t0sd5
+       foreign key (idTranslatableDescription)
+       references translatable (idTranslatable);
+
+    alter table hull
+       add constraint FK7g5aas0xko5stotsvyt9hhchw
+       foreign key (idTranslatableName)
+       references translatable (idTranslatable);
+
+    alter table hull
+       add constraint FK4hpf1pawl0wynjx9kdg74opea
+       foreign key (idResearch)
+       references research (idResearch);
+
+    alter table humanResources
+       add constraint FKh3v7ra6rwylc7sofs1is80fb8
+       foreign key (idResourceDeposit)
+       references resourceDeposit (idResourceDeposit);
+
+    alter table job
+       add constraint FK7otfjvk4vhy0gt0m3hnyam6au
+       foreign key (idBuilding)
+       references building (idBuilding);
+
+    alter table job
+       add constraint FK9cgvto0bqandfg7ly93veyvc5
+       foreign key (idFleet)
+       references fleet (idFleet);
+
+    alter table job
+       add constraint FKdno72guom99osq9f36eixsd87
+       foreign key (idResearch)
+       references research (idResearch);
+
+    alter table job
+       add constraint FKsevbhc9015r9wmqvojq1dbsen
+       foreign key (idShipClass)
+       references shipClass (idShipClass);
+
+    alter table job
+       add constraint FK4ewa76co5drr08nptgdmax8d6
+       foreign key (idFacility)
+       references construction (idConstruction);
+
+    alter table job
+       add constraint FK3urqlpl2jmbxlfk4q88i9i5tb
+       foreign key (idOwner)
+       references user (idUser);
+
+    alter table knownStarSystem
+       add constraint FKayr540k7tyu8v1vuni31u2j17
+       foreign key (idStarSystem)
+       references starSystem (idStarSystem);
+
+    alter table knownStarSystem
+       add constraint FKtjhh901to46le5kkmsybuwdbb
+       foreign key (idOwner)
+       references user (idUser);
+
+    alter table launcher
+       add constraint FKpxevsicliklfnl6mycvl75sv9
+       foreign key (idCosts)
+       references resourceDeposit (idResourceDeposit);
+
+    alter table launcher
+       add constraint FKn80gj1fyhvn6v5smkbx3b4rhi
+       foreign key (idTranslatableDescription)
+       references translatable (idTranslatable);
+
+    alter table launcher
+       add constraint FKa0tf8xicyfrn906krw65ieop1
+       foreign key (idTranslatableName)
+       references translatable (idTranslatable);
+
+    alter table launcher
+       add constraint FKdesag5bovcaxav76r4ln2occl
+       foreign key (idResearch)
+       references research (idResearch);
+
+    alter table launcher
+       add constraint FKekm6qvnxv0b0y293v8h0ayjhm
+       foreign key (idAmmunitionModule)
+       references ammunitionModule (idAmmunitionModule);
+
+    alter table lossesByHit
+       add constraint FK8gwd5wcrghospusbhcyoffbpq
+       foreign key (idFleet)
+       references fleet (idFleet);
+
+    alter table lossesByHit
+       add constraint FKmxpfhc6uuo325u2u81tb2k2g0
+       foreign key (idOwner)
+       references user (idUser);
+
+    alter table lossesByHit
+       add constraint FK85p90t72v9he3a1iw7y0fhn05
+       foreign key (idShipClass)
+       references shipClass (idShipClass);
+
+    alter table lossesByHit
+       add constraint FKhtcg0ctdj5ie6fbabo8puvteu
+       foreign key (idHitLog)
+       references hitLog (idHitLog);
+
+    alter table lossesByHit
+       add constraint FK3o0d6nae9i5n6v33ake9fyvs8
+       foreign key (idShipKillerHit)
+       references shipKillerHit (idShipKillerHit);
+
+    alter table messageThread
+       add constraint FK1d5qqscr6uidy4lithqwkfcsb
+       foreign key (idUserOne)
+       references user (idUser);
+
+    alter table messageThread
+       add constraint FKlcfh5cw1nqv8howd22b9emwbf
+       foreign key (idUserTwo)
+       references user (idUser);
+
+    alter table miningFactorsComposition
+       add constraint FK7pw467msglkrl51uo8uu6v6l6
+       foreign key (idMiningFactors)
+       references miningFactors (idMiningFactors);
+
+    alter table missile
+       add constraint FK2y4rvixlct3ljky430p3bmwad
+       foreign key (idCosts)
+       references resourceDeposit (idResourceDeposit);
+
+    alter table missile
+       add constraint FK3sugkdm5phqm3kkdraprgaj87
+       foreign key (idTranslatableDescription)
+       references translatable (idTranslatable);
+
+    alter table missile
+       add constraint FKorhea214ty529liubde204v2y
+       foreign key (idTranslatableName)
+       references translatable (idTranslatable);
+
+    alter table missile
+       add constraint FKdhk8trxq7c36hid883mj4p7us
+       foreign key (idAmmunitionModule)
+       references ammunitionModule (idAmmunitionModule);
+
+    alter table missile
+       add constraint FK1ledmeodyggj4capnumuak58u
+       foreign key (idMissileMotor)
+       references missileMotor (idMissileMotor);
+
+    alter table missile
+       add constraint FK6hqn2wt7gk1myp1ew4i29r3ss
+       foreign key (idResearch)
+       references research (idResearch);
+
+    alter table missile
+       add constraint FKhgp8bhvbmvaefgws7b1t0km7k
+       foreign key (idWarhead)
+       references warhead (idWarhead);
+
+    alter table missileMotor
+       add constraint FK6q2owmplw15x287lnle7mdeae
+       foreign key (idCosts)
+       references resourceDeposit (idResourceDeposit);
+
+    alter table missileMotor
+       add constraint FKs8aryxvu0dbr41yab1lqy7f54
+       foreign key (idTranslatableDescription)
+       references translatable (idTranslatable);
+
+    alter table missileMotor
+       add constraint FKkygcap68itcbqkfukqxqhqti8
+       foreign key (idTranslatableName)
+       references translatable (idTranslatable);
+
+    alter table missileMovement
+       add constraint FK31pwab7jyqugac58td2yh50ju
+       foreign key (idActor)
+       references fleet (idFleet);
+
+    alter table missileMovement
+       add constraint FKl9frhygmvi1n5d3sjchn19wrx
+       foreign key (idTarget)
+       references fleet (idFleet);
+
+    alter table missileMovements
+       add constraint FKa4ut542bvmk335w8ldma12g22
+       foreign key (idMissileMovement)
+       references missileMovement (idMissileMovement);
+
+    alter table missileMovements
+       add constraint FK4hmoghg3bi28t2pmfi3ea626u
+       foreign key (idBattleReport)
+       references battleReport (idBattleReport);
+
+    alter table move
+       add constraint FKmcefsl29wdpj7xqe9790o0mch
+       foreign key (idStarSystemDestination)
+       references starSystem (idStarSystem);
+
+    alter table move
+       add constraint FKg65nht3m74odamnrqiv1cdyl6
+       foreign key (idFleet)
+       references fleet (idFleet);
+
+    alter table move
+       add constraint FK1y6v1eof54uci3p3b6mduv6sr
+       foreign key (idStarSystemOrigin)
+       references starSystem (idStarSystem);
+
+    alter table move
+       add constraint FKm0l3o2yx8pq8hu2bww8maoa98
+       foreign key (idUser)
+       references user (idUser);
+
+    alter table movementAction
+       add constraint FK2fc6fy40a1twi3bedin6c2sr1
+       foreign key (idActor)
+       references fleet (idFleet);
+
+    alter table movementActions
+       add constraint FKlsfd21vc6bericbiwv6huwo
+       foreign key (idMovementAction)
+       references movementAction (idMovementAction);
+
+    alter table movementActions
+       add constraint FKjkre459vr8w45a9wxhrtofsfa
+       foreign key (idBattleReport)
+       references battleReport (idBattleReport);
+
+    alter table orderedHitLog
+       add constraint FKt4eji1de3lte0yql6naypaj9t
+       foreign key (idHitLog)
+       references hitLog (idHitLog);
+
+    alter table orderedHitLog
+       add constraint FKtbchtybhbygepe1yjf9mu0lwf
+       foreign key (idShipKillerHit)
+       references shipKillerHit (idShipKillerHit);
+
+    alter table participatingFleets
+       add constraint FKayayypcvevpaihludw9p2jcdh
+       foreign key (idFleet)
+       references fleet (idFleet);
+
+    alter table participatingFleets
+       add constraint FKbp90ne9mn2vhmh9m7kinwjxki
+       foreign key (idBattleReport)
+       references battleReport (idBattleReport);
+
+    alter table participatingUsers
+       add constraint FK5dp3ok6qf3ohs6s1s7f11k34h
+       foreign key (idUser)
+       references user (idUser);
+
+    alter table participatingUsers
+       add constraint FKlreg972gg0pgmmoudxk12sy3g
+       foreign key (idBattleReport)
+       references battleReport (idBattleReport);
+
+    alter table passiveModule
+       add constraint FKrr0cmtk4xqkbtajq5s17apmsu
+       foreign key (idCosts)
+       references resourceDeposit (idResourceDeposit);
+
+    alter table passiveModule
+       add constraint FK3q0uitju15ai7lhv7y7y61549
+       foreign key (idTranslatableDescription)
+       references translatable (idTranslatable);
+
+    alter table passiveModule
+       add constraint FK1kqbngjlngfx049m4t1hmyelt
+       foreign key (idTranslatableName)
+       references translatable (idTranslatable);
+
+    alter table passiveModule
+       add constraint FKdchcy45rswteu33yrgh80m8a9
+       foreign key (idResearch)
+       references research (idResearch);
+
+    alter table planet
+       add constraint FK6290orio72djryi0kktbn3esu
+       foreign key (idMiningFactors)
+       references miningFactors (idMiningFactors);
+
+    alter table planet
+       add constraint FKobjb6jgxji3jrrgoxy9r30uyc
+       foreign key (idOwner)
+       references user (idUser);
+
+    alter table planet
+       add constraint FK9cd80e9yxwnobejr9twlcknab
+       foreign key (idResourceDeposit)
+       references resourceDeposit (idResourceDeposit);
+
+    alter table planet
+       add constraint FK2qd4p5ry3gaskjau8i2gutj0n
+       foreign key (idStarSystem)
+       references starSystem (idStarSystem);
+
+    alter table propulsion
+       add constraint FKqjsvyhjc6w21niim4aeptpm85
+       foreign key (idCosts)
+       references resourceDeposit (idResourceDeposit);
+
+    alter table propulsion
+       add constraint FK1a2sbiyhyhlm5q99g8cs8qdpw
+       foreign key (idTranslatableDescription)
+       references translatable (idTranslatable);
+
+    alter table propulsion
+       add constraint FK34jwo45015kmmtttnorlypaa3
+       foreign key (idTranslatableName)
+       references translatable (idTranslatable);
+
+    alter table propulsion
+       add constraint FK7rr2gvpcbjjhl9tuxe6c50v5q
+       foreign key (idResearch)
+       references research (idResearch);
+
+    alter table releasedVolley
+       add constraint FK5phx9tuf726udgmc3oba1t80o
+       foreign key (idActor)
+       references fleet (idFleet);
+
+    alter table releasedVolley
+       add constraint FKox4m8c517vryrxaijolfco99m
+       foreign key (idTarget)
+       references fleet (idFleet);
+
+    alter table releasesVolleys
+       add constraint FKr0o8twcmeayvg09p39p71ktpf
+       foreign key (idReleasedVolley)
+       references releasedVolley (idReleasedVolley);
+
+    alter table releasesVolleys
+       add constraint FKn08s5o12up3n1n85d1vnhrk4y
+       foreign key (idBattleReport)
+       references battleReport (idBattleReport);
+
+    alter table remainingShots
+       add constraint FKapxtj9pueb5wn51s4bqdkpx2m
+       foreign key (idMissile)
+       references missile (idMissile);
+
+    alter table remainingShots
+       add constraint FKsu3q3bssdgu55ubnf1bbhr2ce
+       foreign key (idWarshipHealthState)
+       references warshipHealthState (idWarshipHealthState);
+
+    alter table research
+       add constraint FKni50te130dndarqgicsq3svhb
+       foreign key (idCosts)
+       references resourceDeposit (idResourceDeposit);
+
+    alter table research
+       add constraint FK1sxfrsxvrj2iaxi809oirhevj
+       foreign key (idTranslatableDescription)
+       references translatable (idTranslatable);
+
+    alter table research
+       add constraint FKibqicobq7dm63vf792kgmk5wj
+       foreign key (idTranslatableName)
+       references translatable (idTranslatable);
+
+    alter table research
+       add constraint FKch37eb44iv0ls442yu7usvvtp
+       foreign key (unlockedThrough)
+       references research (idResearch);
+
+    alter table researchLevels
+       add constraint FK8c7vw5t1ve4phgpfr6gwt3xj0
+       foreign key (idResearch)
+       references research (idResearch);
+
+    alter table researchLevels
+       add constraint FKh9xjvymkiqwygpem46iaj0j3v
+       foreign key (idUser)
+       references user (idUser);
+
+    alter table resourcesDepositComposition
+       add constraint FK6q26jn3ftmq2x638tsgi0aemy
+       foreign key (idResourceDeposit)
+       references resourceDeposit (idResourceDeposit);
+
+    alter table shipClass
+       add constraint FKouxjssb18x4jeutl5r1l0byeu
+       foreign key (idArmor)
+       references armor (idArmor);
+
+    alter table shipClass
+       add constraint FKfbii11hday9qcjpmi2i1k2611
+       foreign key (idElectronicWarfare)
+       references electronicWarfare (idElectronicWarfare);
+
+    alter table shipClass
+       add constraint FKgkjpsgpvfaupqxr7cv9nhc9ai
+       foreign key (idHull)
+       references hull (idHull);
+
+    alter table shipClass
+       add constraint FKovqcf68xgq4mm2n32sdoburq6
+       foreign key (idOwner)
+       references user (idUser);
+
+    alter table shipClass
+       add constraint FKr6026i6kn4nm4ss4h011nifks
+       foreign key (idPredecessor)
+       references shipClass (idShipClass);
+
+    alter table shipClass
+       add constraint FKdd7voavc2cml9rodxm6vnlaqq
+       foreign key (idPropulsion)
+       references propulsion (idPropulsion);
+
+    alter table shipClass
+       add constraint FKsa1b1j6ur2emh3jv7s0ft3nru
+       foreign key (idSidewall)
+       references sidewall (idSidewall);
+
+    alter table shipClass
+       add constraint FKnqevjdq10urslieg5r3peb5m3
+       foreign key (idSuccessor)
+       references shipClass (idShipClass);
+
+    alter table shipKillerHit
+       add constraint FKi72vdedsqsrgj93k3k80ei5sk
+       foreign key (idActor)
+       references fleet (idFleet);
+
+    alter table shipKillerHit
+       add constraint FK1d72qr1uwk27axl1yck2b2ux1
+       foreign key (idTarget)
+       references fleet (idFleet);
+
+    alter table shipKillerHits
+       add constraint FKmaalns2ubmv8018dgku4bv0qs
+       foreign key (idShipKillerHit)
+       references shipKillerHit (idShipKillerHit);
+
+    alter table shipKillerHits
+       add constraint FKsyea27u0x8dmybnb4r1qfsug0
+       foreign key (idBattleReport)
+       references battleReport (idBattleReport);
+
+    alter table sidewall
+       add constraint FKlo0i3byallqh89wd535yrbs3l
+       foreign key (idCosts)
+       references resourceDeposit (idResourceDeposit);
+
+    alter table sidewall
+       add constraint FKdx39gsmusm1sai6wdid4s4xmn
+       foreign key (idTranslatableDescription)
+       references translatable (idTranslatable);
+
+    alter table sidewall
+       add constraint FKmqieo3lwi46pddbgbhg7dbg4r
+       foreign key (idTranslatableName)
+       references translatable (idTranslatable);
+
+    alter table sidewall
+       add constraint FK693a9gix6ifpkiop612tghdy0
+       foreign key (idResearch)
+       references research (idResearch);
+
+    alter table supportFitting
+       add constraint FKd2r1r3l1h9iehfvklg6tymj1o
+       foreign key (idPassiveModule)
+       references passiveModule (idPassiveModule);
+
+    alter table supportFitting
+       add constraint FK2rgk45foa8brx1onuwdxsodtr
+       foreign key (idShipClass)
+       references shipClass (idShipClass);
+
+    alter table translation
+       add constraint FK6y0ph13exuqqae7sowcvxac93
+       foreign key (idTranslatable)
+       references translatable (idTranslatable);
+
+    alter table user
+       add constraint FKd0120p7tkvssh9r8hldenpw1w
+       foreign key (idAlliance)
+       references alliance (idAlliance);
+
+    alter table userMessage
+       add constraint FKgo5irmd79mx2cg76wtaoaxbxa
+       foreign key (idMessageThread)
+       references messageThread (idMessageThread);
+
+    alter table userMessage
+       add constraint FK6xs6p78lala5xtd4eoe4xxrnv
+       foreign key (idUserSender)
+       references user (idUser);
+
+    alter table warhead
+       add constraint FK4m9pxktw6iywf5aecc1n0xm4f
+       foreign key (idCosts)
+       references resourceDeposit (idResourceDeposit);
+
+    alter table warhead
+       add constraint FKjx1sqa9iiinbgfciltxdqp78u
+       foreign key (idTranslatableDescription)
+       references translatable (idTranslatable);
+
+    alter table warhead
+       add constraint FKa939x3f6pjibpdv9k0wxbl3cq
+       foreign key (idTranslatableName)
+       references translatable (idTranslatable);
+
+    alter table warShip
+       add constraint FK3kovfkp6003a62x5ff41h44hw
+       foreign key (idFleet)
+       references fleet (idFleet);
+
+    alter table warShip
+       add constraint FKjr13y2u3qkka7d3npp9omwdoa
+       foreign key (idShipClass)
+       references shipClass (idShipClass);
+
+    alter table warShip
+       add constraint FKdywyvdwb0ovbd6oruywo13nyx
+       foreign key (idShipyard)
+       references planet (idPlanet);
+
+    alter table warshipCapabilities
+       add constraint FKcx1bs2mh0pk76hg4yvq57vy71
+       foreign key (idWarshipHealthState)
+       references warshipHealthState (idWarshipHealthState);
+
+    alter table warshipHealthState
+       add constraint FK8n2fodpdy927lvcfqgsh1ejc8
+       foreign key (idWarship)
+       references warShip (idWarShip);
+
+    alter table weapon
+       add constraint FK1rsb3ampiw8yjy8ngrget6ay
+       foreign key (idCosts)
+       references resourceDeposit (idResourceDeposit);
+
+    alter table weapon
+       add constraint FKqx172dx6j907oe0gcxskan5vy
+       foreign key (idTranslatableDescription)
+       references translatable (idTranslatable);
+
+    alter table weapon
+       add constraint FKtrgd2x03dkumgxnryvhon8qm5
+       foreign key (idTranslatableName)
+       references translatable (idTranslatable);
+
+    alter table weapon
+       add constraint FKo22n18dgjpraqosj7nkamrnvb
+       foreign key (idResearch)
+       references research (idResearch);
+
+insert into dbPatch values (null, now(), 'create dbPatch table', '0.0.5-1');
+insert into dbPatch values (null, now(), 'add warship health state', '0.0.5-2');
+insert into dbPatch values (null, now(), 'repair fleets by job', '0.0.5-3');

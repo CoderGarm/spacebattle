@@ -13,16 +13,23 @@ create table remainingShots (
     primary key (idWarshipHealthState, idMissile)
 ) engine=InnoDB;
 
+create table warshipCapabilities (
+   idWarshipHealthState integer not null,
+    moduleType varchar(255),
+    value decimal(19, 0)
+) engine=InnoDB;
+
 create table warshipHealthState (
    idWarshipHealthState integer not null auto_increment,
-    armorState integer not null,
-    elokaState integer not null,
-    hullState integer not null,
-    propulsionState integer not null,
-    sidewallState integer not null,
-    idWarship integer,
+    isFightingCapable bit not null default true,
+    idWarship integer not null,
     primary key (idWarshipHealthState)
 ) engine=InnoDB;
+
+alter table warshipCapabilities
+   add constraint FKcx1bs2mh0pk76hg4yvq57vy71
+   foreign key (idWarshipHealthState)
+   references warshipHealthState (idWarshipHealthState);
 
 alter table activeFittings
    add constraint FK8g2ipqwq1getx5n0fmma0unx9
@@ -53,5 +60,9 @@ alter table warshipHealthState
    add constraint FK8n2fodpdy927lvcfqgsh1ejc8
    foreign key (idWarship)
    references warShip (idWarShip);
+
+alter table lossesByHit add column idWarship integer not null after idFleet;
+
+update lossesByHit set idWarship = (select idWarShip from sbdb.warShip where warShip.idFleet = lossesByHit.idFleet and warShip.name = lossesByHit.warShipName);
 
 insert into dbPatch values (null, now(), 'add warship health state', '0.0.5-2');

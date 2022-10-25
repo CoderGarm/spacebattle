@@ -8,7 +8,6 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
@@ -45,9 +44,10 @@ public class WarShip extends Deletable {
     /**
      * If the health state if not present, there is no change from the ship class, the warship is fully operational.
      */
-    @Nullable
-    @OneToOne(mappedBy = "warShip")
-    @JoinColumn(name = "idWarshipHealthState")
+    @Nonnull
+    @NotNull
+    @OneToOne(mappedBy = "warShip", cascade = CascadeType.ALL)
+    @JoinColumn(name = "idWarshipHealthState", updatable = false)
     private WarshipHealthState warshipHealthState;
 
     public WarShip() {
@@ -66,6 +66,7 @@ public class WarShip extends Deletable {
         this.shipyard = shipyard;
         this.fleet = fleet;
         this.shipClass = shipClass;
+        this.warshipHealthState = new WarshipHealthState(this);
     }
 
     @Nonnull
@@ -94,7 +95,7 @@ public class WarShip extends Deletable {
         return shipClass;
     }
 
-    @Nullable
+    @Nonnull
     public WarshipHealthState getWarshipHealthState() {
         return warshipHealthState;
     }
@@ -112,5 +113,9 @@ public class WarShip extends Deletable {
     @Override
     public int hashCode() {
         return id * 33;
+    }
+
+    public void createWarshipHealthState() {
+        this.warshipHealthState = new WarshipHealthState(this);
     }
 }

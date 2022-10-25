@@ -123,49 +123,40 @@ public class BattleService {
 
         final List<WarShip> warShips = battleResult.getFleetClash()
                 .getParticipatingFleets().stream()
-                .map(Fleet::getShips)
+                .map(Fleet::getAllShips)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
         final Set<WarShip> losses = battleResult.getLosses();
         warShips.removeAll(losses);
-        warShipService.deleteAll(losses);
-        fleetService.deleteFleetsWithoutShips(battleResult.getFleetClash().getParticipatingFleets());
+        warShipService.markAllAsDestroyed(losses);
+        fleetService.markFleetsWithoutShipsAsDeleted(battleResult.getFleetClash().getParticipatingFleets());
 
-        removeOldWarshipHealthStates(warShips);
-        final List<WarshipHealthState> toPersist = createNewWarshipHealthStates(warShips, battleResult.getWarshipHealthStates());
-        markDamagedFleets(toPersist);
+        final Map<WarShip, WarshipHealthState> knownStates = warShips.stream()
+                .collect(Collectors.toMap(Function.identity(), WarShip::getWarshipHealthState));
+
+        final Map<WarShip, de.yuga.spacebattle.backend.combat.round.WarshipHealthState> byResult = battleResult.getWarshipHealthStates().stream()
+                .collect(Collectors.toMap(de.yuga.spacebattle.backend.combat.round.WarshipHealthState::getWarShip, Function.identity()));
+
+        final Set<Fleet> fleetsToPersist = new HashSet<>();
+        final Set<WarshipHealthState> statesToPersist = new HashSet<>();
+        knownStates.forEach((warShip, knownState) -> {
+            final de.yuga.spacebattle.backend.combat.round.WarshipHealthState newState = byResult.get(warShip);
+            if (knownState.hasChanged(newState)) {
+                knownState.update(newState);
+                final Fleet fleet = warShip.getFleet();
+                fleet.setNeedsRepair(true);
+                fleetsToPersist.add(fleet);
+                statesToPersist.add(knownState);
+            }
+        });
+
+        warshipHealthStateService.saveAll(statesToPersist);
+        fleetService.saveAll(fleetsToPersist);
 
         BattleReport battleReport = new BattleReport(latest, battleResult);
         battleReport = battleReportService.save(battleReport);
         battleLogger.logBattleResult(battleReport, battleResult);
 
         return battleReport;
-    }
-
-    @Nonnull
-    private List<WarshipHealthState> createNewWarshipHealthStates(final List<WarShip> warShips, final List<de.yuga.spacebattle.backend.combat.round.WarshipHealthState> warshipHealthStates) {
-        final Map<WarShip, de.yuga.spacebattle.backend.combat.round.WarshipHealthState> referenceWarships = warShips.stream()
-                .collect(Collectors.toMap(Function.identity(), de.yuga.spacebattle.backend.combat.round.WarshipHealthState::new));
-
-        final List<WarshipHealthState> toPersist = warshipHealthStates.stream()
-                .filter(w -> w.hasChanged(referenceWarships.get(w.getWarShip())))
-                .map(WarshipHealthState::new)
-                .collect(Collectors.toList());
-        warshipHealthStateService.saveAll(toPersist);
-        return toPersist;
-    }
-
-    private void removeOldWarshipHealthStates(final List<WarShip> warShips) {
-        final List<WarshipHealthState> byWarships = warshipHealthStateService.findByWarships(warShips);
-        warshipHealthStateService.deleteAll(byWarships);
-    }
-
-    private void markDamagedFleets(final List<WarshipHealthState> toPersist) {
-        final Set<Fleet> needsRepair = toPersist.stream()
-                .map(w -> w.getWarShip().getFleet()).collect(Collectors.toSet());
-        needsRepair.forEach(damagedFleet -> {
-            damagedFleet.setNeedsRepair(true);
-        });
-        fleetService.saveAll(needsRepair);
     }
 }

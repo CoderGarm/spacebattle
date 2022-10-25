@@ -280,6 +280,7 @@
     create table lossesByHit (
        idShipKillerHit integer not null,
         idFleet integer,
+        idWarship integer not null,
         idOwner integer,
         idShipClass integer,
         warShipName varchar(255),
@@ -642,14 +643,16 @@
         primary key (idWarShip)
     ) engine=InnoDB;
 
+    create table warshipCapabilities (
+       idWarshipHealthState integer not null,
+        moduleType varchar(255),
+        value decimal(19, 0)
+    ) engine=InnoDB;
+
     create table warshipHealthState (
        idWarshipHealthState integer not null auto_increment,
-        armorState integer not null,
-        elokaState integer not null,
-        hullState integer not null,
-        propulsionState integer not null,
-        sidewallState integer not null,
-        idWarship integer,
+        isFightingCapable bit not null default true,
+        idWarship integer not null,
         primary key (idWarshipHealthState)
     ) engine=InnoDB;
 
@@ -1341,7 +1344,7 @@
 
     alter table remainingShots 
        add constraint FKapxtj9pueb5wn51s4bqdkpx2m 
-       foreign key (idMissile)
+       foreign key (idMissile) 
        references missile (idMissile);
 
     alter table remainingShots 
@@ -1523,6 +1526,11 @@
        add constraint FKdywyvdwb0ovbd6oruywo13nyx 
        foreign key (idShipyard) 
        references planet (idPlanet);
+
+    alter table warshipCapabilities 
+       add constraint FKcx1bs2mh0pk76hg4yvq57vy71 
+       foreign key (idWarshipHealthState) 
+       references warshipHealthState (idWarshipHealthState);
 
     alter table warshipHealthState 
        add constraint FK8n2fodpdy927lvcfqgsh1ejc8 

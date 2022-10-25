@@ -32,7 +32,7 @@ public class FleetHealthState implements Cloneable {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
         this.fleet = fleet;
-        this.warshipHealthStates = fleet.getShips().stream().collect(Collectors.toMap(Function.identity(), WarshipHealthState::new));
+        this.warshipHealthStates = fleet.getAliveShips().stream().collect(Collectors.toMap(Function.identity(), WarshipHealthState::new));
     }
 
     /**

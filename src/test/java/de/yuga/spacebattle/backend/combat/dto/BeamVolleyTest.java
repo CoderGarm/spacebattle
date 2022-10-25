@@ -43,9 +43,9 @@ class BeamVolleyTest {
     @Test
     void testApplyDamage() {
         // prepare stuff
-        final WarShip attacker = actor.getShips().stream().filter(Objects::nonNull).findFirst().orElse(null);
+        final WarShip attacker = actor.getAliveShips().stream().filter(Objects::nonNull).findFirst().orElse(null);
         assertNotNull(attacker);
-        final WarShip defender = target.getShips().stream().filter(Objects::nonNull).findFirst().orElse(null);
+        final WarShip defender = target.getAliveShips().stream().filter(Objects::nonNull).findFirst().orElse(null);
         assertNotNull(defender);
         final BeamState beamState = new BeamState(attacker, defender, 1, BigDecimal.ONE);
         ReflectionTestUtils.setField(testObject, "firedShots", List.of(beamState));

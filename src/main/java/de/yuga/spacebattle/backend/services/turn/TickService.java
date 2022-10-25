@@ -336,7 +336,7 @@ public class TickService {
         if (fleet == null) {
             return;
         }
-        final Set<WarshipHealthState> toDelete = fleet.getShips().stream()
+        final Set<WarshipHealthState> toDelete = fleet.getAliveShips().stream()
                 .map(WarShip::getWarshipHealthState)
                 .collect(Collectors.toSet());
         warshipHealthStateService.deleteAll(toDelete);

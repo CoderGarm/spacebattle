@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class DBPatchServiceTest {
 
@@ -36,6 +36,7 @@ class DBPatchServiceTest {
 
         final List<String> patchVersions = patchFiles.stream().map(this::readFile).flatMap(Collection::stream).collect(Collectors.toList());
 
+        assertEquals(patchFiles.size(), patchVersions.size());
         assertNotNull(dir);
     }
 
@@ -56,18 +57,22 @@ class DBPatchServiceTest {
     private List<String> readFromInputStream(@Nonnull final InputStream inputStream) throws IOException {
         Preconditions.checkNotNull(inputStream, "inputStream must not be empty");
 
+        boolean patchHasVersion = false;
         final List<String> result = new ArrayList<>();
-        try (BufferedReader br
-                     = new BufferedReader(new InputStreamReader(inputStream))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.startsWith(INSERT_PREFIX)) {
                     final Matcher matcher = pattern.matcher(line);
                     if (matcher.find()) {
+                        patchHasVersion = true;
                         result.add(matcher.group());
                     }
                 }
             }
+        }
+        if (!patchHasVersion) {
+            fail("There are database patches that didn't have a version inside. Please correct it.");
         }
         return result;
     }

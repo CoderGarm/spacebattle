@@ -52,6 +52,7 @@ import de.yuga.spacebattle.backend.services.spacecraft.HullService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStateService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
@@ -59,6 +60,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -132,6 +134,9 @@ public class MasterOfTheUniverseService {
     private final WarShipService warShipService;
 
     @Nonnull
+    private final WarshipHealthStateService warshipHealthStateService;
+
+    @Nonnull
     private final ForumService forumService;
 
     @Nonnull
@@ -160,6 +165,7 @@ public class MasterOfTheUniverseService {
                                       @Nonnull final ConstructionService constructionService,
                                       @Nonnull final FleetService fleetService,
                                       @Nonnull final WarShipService warShipService,
+                                      @Nonnull final WarshipHealthStateService warshipHealthStateService,
                                       @Nonnull final ForumService forumService,
                                       @Nonnull final ColonizationService colonizationService,
                                       @Nonnull final BattleService battleService,
@@ -178,11 +184,27 @@ public class MasterOfTheUniverseService {
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService shouldn't be null!");
+        this.warshipHealthStateService = Preconditions.checkNotNull(warshipHealthStateService, "warshipHealthStateService must not be empty");
         this.forumService = Preconditions.checkNotNull(forumService, "forumService shouldn't be null!");
         this.colonizationService = Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
         this.battleService = Preconditions.checkNotNull(battleService, "battleService must not be empty");
         this.translatableService = Preconditions.checkNotNull(translatableService, "translatableService must not be empty");
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
+    }
+
+    @PostConstruct
+    @SuppressWarnings("ConstantConditions")
+    public void transform() {
+        // todo remove after transform is done
+        LOGGER.info("---------------------------- POST CONSTRUCT ----------------------------");
+        final Set<WarShip> without = warShipService.findAll().stream().filter(w -> w.getWarshipHealthState() == null).collect(Collectors.toSet());
+        if (!without.isEmpty()) {
+            without.forEach(WarShip::createWarshipHealthState);
+            warShipService.saveAll(without);
+            LOGGER.info("Done creating health states");
+        } else {
+            LOGGER.info("---------------------------- nothing left to transform ----------------------------");
+        }
     }
 
     /**

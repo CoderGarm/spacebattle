@@ -54,8 +54,8 @@ public class FleetService {
         if (fleetsToMerge.stream().anyMatch(fleetToMerge -> !orbit.equals(fleetToMerge.getOrbit()))) {
             throw new NotifyWebUserException("That's not possible, no.");
         }
-        fleetsToMerge.stream().filter(fl -> !fl.getShips().isEmpty()).forEach(fleet2 -> {
-            final Set<WarShip> ships = fleet2.getShips();
+        fleetsToMerge.stream().filter(fl -> !fl.getAllShips().isEmpty()).forEach(fleet2 -> {
+            final Set<WarShip> ships = fleet2.getAllShips();
 
             baseFleet.updateShips(ships);
             fleet2.getShipsByClass().clear();
@@ -185,7 +185,7 @@ public class FleetService {
      *
      * @param fleets the fleets to check and possibly remove
      */
-    public void deleteFleetsWithoutShips(@Nonnull final List<Fleet> fleets) {
+    public void markFleetsWithoutShipsAsDeleted(@Nonnull final List<Fleet> fleets) {
         Preconditions.checkNotNull(fleets, "fleets shouldn't be null!");
 
         final List<Fleet> toRemove = new ArrayList<>();
@@ -239,10 +239,11 @@ public class FleetService {
         return fleetRepository.saveAndFlush(fleet);
     }
 
-    public void delete(@Nonnull final Fleet fleet) {
+    public void markAsDestroyed(@Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
-        fleetRepository.delete(fleet);
+        fleet.setDeleted();
+        fleetRepository.save(fleet);
     }
 
     @Nonnull

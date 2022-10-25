@@ -1,9 +1,10 @@
-package de.yuga.spacebattle.rest.dto.turn.battle;
+package de.yuga.spacebattle.rest.dto.turn.battle.combat;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
-import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.rest.dto.AbstractId;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -14,29 +15,41 @@ import java.util.UUID;
 public class ReleasedVolley {
 
     @Nullable
+    @JsonProperty
     @Schema(required = true, description = "The round and phase information.")
     private CombatRoundKey combatRoundKey;
 
     @Nullable
+    @JsonProperty
     @Schema(required = true, description = "The fleet which acts.")
-    private Fleet actor;
+    private AbstractId actor;
 
     @Nullable
+    @JsonProperty
+    @Schema(required = true, description = "The fleet which acts.")
+    private AbstractId actorOwner;
+
+    @Nullable
+    @JsonProperty
     @Schema(required = true, description = "The fleet which is targeted.")
-    private Fleet target;
+    private AbstractId target;
 
     @Nullable
+    @JsonProperty
     @Schema(required = true, description = "The UUID of the damage dealer.")
     private UUID damageDealer;
 
     @Nullable
+    @JsonProperty
     @Schema(required = true, description = "The type of the damage dealer.")
     private EWeaponType weaponType;
 
+    @JsonProperty
     @Schema(required = true, description = "The amount of missiles in this salvo.")
     private int amountOfShots;
 
     @Nullable
+    @JsonProperty
     @Schema(required = true, description = "The distance of this shot.")
     private Distance initialDistance;
 
@@ -49,73 +62,12 @@ public class ReleasedVolley {
         Preconditions.checkNotNull(input, "input shouldn't be null!");
 
         this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound(), input.getCombatPhase());
-        this.actor = new Fleet(input.getActor(), languageCode);
-        this.target = new Fleet(input.getTarget(), languageCode);
+        this.actor = new AbstractId(input.getActor());
+        this.actorOwner = new AbstractId(input.getActor().getOwner());
+        this.target = new AbstractId(input.getTarget());
         this.damageDealer = input.getDamageDealer();
         this.weaponType = input.getWeaponType();
         this.amountOfShots = input.getAmountOfShots();
         this.initialDistance = input.getInitialDistance();
-    }
-
-    @Nullable
-    public CombatRoundKey getCombatRoundKey() {
-        return combatRoundKey;
-    }
-
-    public void setCombatRoundKey(@Nullable final CombatRoundKey combatRoundKey) {
-        this.combatRoundKey = combatRoundKey;
-    }
-
-    @Nullable
-    public Fleet getActor() {
-        return actor;
-    }
-
-    public void setActor(@Nullable final Fleet actor) {
-        this.actor = actor;
-    }
-
-    @Nullable
-    public Fleet getTarget() {
-        return target;
-    }
-
-    public void setTarget(@Nullable final Fleet target) {
-        this.target = target;
-    }
-
-    @Nullable
-    public UUID getDamageDealer() {
-        return damageDealer;
-    }
-
-    public void setDamageDealer(@Nullable final UUID damageDealer) {
-        this.damageDealer = damageDealer;
-    }
-
-    @Nullable
-    public EWeaponType getWeaponType() {
-        return weaponType;
-    }
-
-    public void setWeaponType(@Nullable final EWeaponType weaponType) {
-        this.weaponType = weaponType;
-    }
-
-    public int getAmountOfShots() {
-        return amountOfShots;
-    }
-
-    public void setAmountOfShots(final int amountOfShots) {
-        this.amountOfShots = amountOfShots;
-    }
-
-    @Nullable
-    public Distance getInitialDistance() {
-        return initialDistance;
-    }
-
-    public void setInitialDistance(@Nullable final Distance initialDistance) {
-        this.initialDistance = initialDistance;
     }
 }

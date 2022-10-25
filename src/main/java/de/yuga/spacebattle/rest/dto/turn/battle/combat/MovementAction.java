@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.rest.dto.turn.battle;
+package de.yuga.spacebattle.rest.dto.turn.battle.combat;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
@@ -14,7 +14,7 @@ public class MovementAction {
 
     @Nullable
     @Schema(required = true, description = "The round and phase information.")
-    private de.yuga.spacebattle.rest.dto.turn.battle.CombatRoundKey combatRoundKey;
+    private CombatRoundKey combatRoundKey;
 
     @Nullable
     @Schema(required = true, description = "The fleet which acts.")

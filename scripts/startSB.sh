@@ -9,6 +9,7 @@ fi
 version="$(cat $versionFile)"
 echo "deploying version $version"
 
+# todo amend about run-check for application
 ./stopSB.sh
 echo "Application stopped"
 
