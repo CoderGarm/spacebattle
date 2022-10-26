@@ -139,6 +139,7 @@ public class CustomFleetRepositoryImpl implements CustomFleetRepository {
     public List<FleetClash> findAllFleetClashes() {
         final List<Fleet> nonMovingFleets = findAllFleetsWithoutMovement();
         final Map<FleetOrbit, List<Fleet>> fleetsToOrbit = nonMovingFleets.stream()
+                .filter(Fleet::isActive)
                 .collect(Collectors.groupingBy(Fleet::getOrbit, Collectors.mapping(Function.identity(), Collectors.toList())));
 
         return fleetsToOrbit.entrySet().stream()

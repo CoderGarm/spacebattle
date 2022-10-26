@@ -170,7 +170,7 @@
         title varchar(255) not null,
         idAlliance integer,
         primary key (idForum),
-        check (idAlliance IS NOT NULL || role IS NOT NULL)
+        constraint forum_CHECK check (idAlliance IS NOT NULL || role IS NOT NULL)
     ) engine=InnoDB;
 
     create table forumMessage (
@@ -229,7 +229,7 @@
         idTranslatableName integer not null,
         idResearch integer not null,
         primary key (idHull),
-        check (overallConstructionCapacity >= constructionCapacity + constructionCapacityBow + constructionCapacityStern + constructionCapacityBroadsides)
+        constraint hull_CHECK check (overallConstructionCapacity >= constructionCapacity + constructionCapacityBow + constructionCapacityStern + constructionCapacityBroadsides)
     ) engine=InnoDB;
 
     create table humanResources (
@@ -245,7 +245,7 @@
         resourceType varchar(255),
         targetLevel integer,
         jobDoneAtZero decimal(19, 0) not null,
-        priority varchar(255),
+        priority varchar(255) not null,
         idBuilding integer,
         idFleet integer,
         idResearch integer,
@@ -253,7 +253,7 @@
         idFacility integer not null,
         idOwner integer not null,
         primary key (idJob),
-        check ((idBuilding IS NOT NULL AND targetLevel IS NOT NULL) OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) OR (idShipClass IS NOT NULL AND amountShips IS NOT NULL))
+        constraint job_CHECK check ((idBuilding IS NOT NULL AND targetLevel IS NOT NULL) OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) OR (idShipClass IS NOT NULL AND amountShips IS NOT NULL) OR (idFleet IS NOT NULL) )
     ) engine=InnoDB;
 
     create table knownStarSystem (
@@ -274,7 +274,7 @@
         idResearch integer not null,
         idAmmunitionModule integer not null,
         primary key (idLauncher),
-        check (weaponType = 'MISSILE' || weaponType = 'COUNTER_MISSILE')
+        constraint launcher_CHECK check (weaponType = 'MISSILE' || weaponType = 'COUNTER_MISSILE')
     ) engine=InnoDB;
 
     create table lossesByHit (
@@ -374,7 +374,7 @@
         idStarSystemOrigin integer,
         idUser integer not null,
         primary key (idMove),
-        check (xCoordinateOrigin != xCoordinateDestination && yCoordinateOrigin != yCoordinateDestination)
+        constraint move_CHECK check (xCoordinateOrigin != xCoordinateDestination && yCoordinateOrigin != yCoordinateDestination)
     ) engine=InnoDB;
 
     create table movementAction (
@@ -670,7 +670,7 @@
         idTranslatableName integer not null,
         idResearch integer not null,
         primary key (idWeapon),
-        check (weaponType = 'BEAM' || weaponType = 'POINT_DEFENSE')
+        constraint weapon_CHECK check (weaponType = 'BEAM' || weaponType = 'POINT_DEFENSE')
     ) engine=InnoDB;
 
     alter table alliance 
@@ -1560,3 +1560,4 @@
 insert into dbPatch values (null, now(), 'create dbPatch table', '0.0.5-1');
 insert into dbPatch values (null, now(), 'add warship health state', '0.0.5-2');
 insert into dbPatch values (null, now(), 'repair fleets by job', '0.0.5-3');
+insert into dbPatch values (null, now(), 'add check constraint names', '0.0.5-4');

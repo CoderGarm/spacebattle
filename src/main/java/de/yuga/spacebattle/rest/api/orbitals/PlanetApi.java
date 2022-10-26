@@ -2,6 +2,8 @@ package de.yuga.spacebattle.rest.api.orbitals;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
+import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.enums.EResourceType;
@@ -33,6 +35,7 @@ import javax.annotation.security.RolesAllowed;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
@@ -48,6 +51,7 @@ public class PlanetApi extends BaseApi {
     private static final String GROUND_CONSTRUCTION_POSSIBLE_ENDPOINT = "groundConstructionPossible";
     private static final String GROUND_BUILD_IT_ENDPOINT = "groundConstructionBuild";
     private static final String SHIPYARD_POSSIBLE_ENDPOINT = "shipyardConstructionPossible";
+    private static final String SHIPYARD_EXISTS_ENDPOINT = "shipyardExists";
     private static final String SHIPYARD_BUILD_IT_ENDPOINT = "shipyardConstructionBuild";
     private static final String GET_PLANET_BY_COORDINATES_ENDPOINT = "byCoord";
     private static final String GET_MAIN_PLANET = "main";
@@ -159,6 +163,24 @@ public class PlanetApi extends BaseApi {
         return ResponseEntity.ok(buildingPossible);
     }
 
+    @GetMapping(value = SHIPYARD_EXISTS_ENDPOINT + "/{idPlanet}")
+    @Operation(summary = "Asks if a ship could be build on this planet.", operationId = "isShipyardExistsOnPlanet",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "you can build something or not",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> isShipyardExistsOnPlanet(@PathVariable("idPlanet") final int idPlanet) {
+        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetService.find(idPlanet);
+        if (planet == null) {
+            return ResponseEntity.ok(false);
+        }
+        final boolean exists = !planet.getConstructionByResource(EResourceType.ORBITAL_CONSTRUCTION).isEmpty();
+        return ResponseEntity.ok(exists);
+    }
+
     @PostMapping(value = SHIPYARD_BUILD_IT_ENDPOINT)
     @Operation(summary = "Starts a construction on this planet.", operationId = "buildShip",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -222,7 +244,7 @@ public class PlanetApi extends BaseApi {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping(value = REPAIR_FLEET_ENDPOINT + "/{idPlanet}/{idFleet}")
+    @PostMapping(value = REPAIR_FLEET_ENDPOINT + "/{idFleet}")
     @Operation(summary = "Repairs the fleet.", operationId = "repairFleets",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
@@ -235,12 +257,32 @@ public class PlanetApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> repairFleets(@PathVariable("idPlanet") final int idPlanet, @PathVariable("idFleet") final int idFleet) {
+    public ResponseEntity<?> repairFleets(@PathVariable("idFleet") final int idFleet) {
 
         final int idUser = getIdUser();
-        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetService.find(idPlanet);
         final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetService.findById(idFleet);
-        if (planet == null || planet.getOwner() == null || fleet == null || (planet.getOwner().getId() != idUser || fleet.getOwner().getId() != idUser)) {
+        PreconditionWebHelper.checkNotNull(fleet, "fleet must not be empty");
+
+        final FleetOrbit orbit = fleet.getOrbit();
+        PreconditionWebHelper.checkNotNull(orbit, "orbit must not be empty");
+
+        final StarSystem system = orbit.getSystem();
+        PreconditionWebHelper.checkNotNull(system, "system must not be empty");
+
+        final de.yuga.spacebattle.backend.entities.orbitals.Orbit planetaryOrbit = orbit.getOrbit();
+        PreconditionWebHelper.checkNotNull(planetaryOrbit, "planetaryOrbit must not be empty");
+
+        final Map<de.yuga.spacebattle.backend.entities.orbitals.Orbit, de.yuga.spacebattle.backend.entities.orbitals.Planet> planetsByOrbit = system.getPlanets().stream()
+                .collect(Collectors.toMap(de.yuga.spacebattle.backend.entities.orbitals.Planet::getOrbit, Function.identity()));
+
+        final de.yuga.spacebattle.backend.entities.orbitals.Orbit foundPlanetaryOrbit = planetsByOrbit.keySet().stream()
+                .filter(o -> o.compareTo(planetaryOrbit) == 0)
+                .findFirst()
+                .orElseThrow(() -> new NotifyWebUserException("It would be pretty good if there is a planet."));
+
+        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetsByOrbit.get(foundPlanetaryOrbit);
+
+        if (planet == null || planet.getOwner() == null || (planet.getOwner().getId() != idUser || fleet.getOwner().getId() != idUser)) {
             throw new NotifyWebUserException("This will not work that way.");
         }
 

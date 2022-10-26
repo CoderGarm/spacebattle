@@ -357,4 +357,8 @@ public class JobService {
     public List<Job> findAllJobsForUser(final int idUser) {
         return jobRepository.findAllJobsForUser(idUser);
     }
+
+    public boolean isJobRunningFor(final int idUser, final int idFleet) {
+        return jobRepository.isJobRunningFor(idUser, idFleet);
+    }
 }

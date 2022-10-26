@@ -41,9 +41,6 @@ public class WarShip extends Deletable {
     @JoinColumn(name = "idShipClass", updatable = false)
     private ShipClass shipClass;
 
-    /**
-     * If the health state if not present, there is no change from the ship class, the warship is fully operational.
-     */
     @Nonnull
     @NotNull
     @OneToOne(mappedBy = "warShip", cascade = CascadeType.ALL)

@@ -30,7 +30,8 @@ import javax.validation.constraints.NotNull;
 @AttributeOverride(name = "id", column = @Column(name = "idJob"))
 @Check(constraints = "(idBuilding IS NOT NULL AND targetLevel IS NOT NULL) " +
         "OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) " +
-        "OR (idShipClass IS NOT NULL AND amountShips IS NOT NULL)")
+        "OR (idShipClass IS NOT NULL AND amountShips IS NOT NULL) " +
+        "OR (idFleet IS NOT NULL) ")
 public class Job extends AbstractEntityKey implements Comparable<Job> {
 
     @Nonnull
@@ -62,6 +63,7 @@ public class Job extends AbstractEntityKey implements Comparable<Job> {
     private int jobDoneAtZero;
 
     @Nonnull
+    @NotNull
     @Enumerated(EnumType.STRING)
     private EJobPriority priority = EJobPriority.NONE;
 

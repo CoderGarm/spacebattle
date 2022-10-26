@@ -8,7 +8,6 @@ import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
-import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -18,7 +17,6 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.*;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.enums.EJobPriority;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.turn.TickRepository;
 import de.yuga.spacebattle.backend.services.ResourceService;
@@ -262,14 +260,11 @@ public class TickService {
                 .filter(c -> !c.getJobs().isEmpty())
                 .collect(Collectors.toSet());
 
-        final Set<Job> toDeleteLogging = new HashSet<>();
         for (final Construction facility : constructions) {
             final EResourceType resourceType = facility.getBuilding().getProductionTarget();
-            final Set<Job> toDelete = new HashSet<>();
             final Set<Job> jobs = facility.getJobs();
 
             final Job job = jobs.stream()
-                    .filter(j -> j.matchesPriority(EJobPriority.PRIORITY))
                     .min(Job::compareTo)
                     .orElseThrow(() -> new NotifyWebUserException("Yeah, shit happens. This can not happen."));
 
@@ -285,21 +280,13 @@ public class TickService {
                     tickResearch(planet, job);
                     break;
                 case CONSTRUCTION:
-                    tickConstruction(planet, planet.getConstructions(), toDelete, job);
+                    tickConstruction(planet, planet.getConstructions(), job);
                     break;
                 case ORBITAL_CONSTRUCTION:
                     tickShipyard(planet, job);
                     break;
             }
-            jobs.removeIf(toDelete::contains);
-            toDeleteLogging.addAll(toDelete);
-        }
-        if (!toDeleteLogging.isEmpty()) {
-            final String jobsToDelete = toDeleteLogging.stream()
-                    .map(AbstractEntityKey::getId)
-                    .map(String::valueOf)
-                    .collect(Collectors.joining(", "));
-            log(planet, "Removing jobs " + jobsToDelete + ".");
+            jobs.remove(job);
         }
 
         planetService.save(planet);
@@ -376,11 +363,9 @@ public class TickService {
 
     private void tickConstruction(@Nonnull final Planet planet,
                                   @Nonnull final Set<Construction> constructions,
-                                  @Nonnull final Set<Job> toDelete,
                                   @Nonnull final Job job) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(constructions, "constructions must not be empty");
-        Preconditions.checkNotNull(toDelete, "toDelete must not be empty");
         Preconditions.checkNotNull(job, "job must not be empty");
 
         log(planet, job, "Start processing construction job.");
@@ -393,10 +378,9 @@ public class TickService {
         Construction workInProgress = constructions.stream()
                 .filter(c -> c.getBuilding().equals(building)).findFirst().orElse(null);
         if (workInProgress != null) {
-            if (workInProgress.getLevel() == targetLevel) {
+            if (workInProgress.getLevel() == targetLevel || job.getJobDoneAtZero() < 0) {
                 // just delete the job - the last tick wasn't processed correctly
                 LOGGER.warn("Job already processed: " + job.getForWarnMessage());
-                toDelete.add(job);
             } else {
                 workInProgress.setLevel(targetLevel);
             }

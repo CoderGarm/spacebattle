@@ -168,7 +168,7 @@ public class Constructable {
         }
 
         if (fleet != null) {
-            return JobCostsCalculator.calculateRemainingTicks(fleet);
+            return JobCostsCalculator.calculateJobCost(fleet);
         }
 
         throw new NotifyWebUserException("You have tried something interesting. May be you should talk to an admin.");

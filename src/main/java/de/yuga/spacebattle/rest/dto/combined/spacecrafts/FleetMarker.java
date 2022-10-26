@@ -2,24 +2,20 @@ package de.yuga.spacebattle.rest.dto.combined.spacecrafts;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.rest.dto.account.UserJson;
-import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.rest.dto.AbstractId;
 import de.yuga.spacebattle.rest.dto.orbitals.FleetOrbit;
 import de.yuga.spacebattle.rest.dto.turn.Move;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Schema(description = ".")
-public class Fleet {
+public class FleetMarker {
 
     @JsonProperty
     @Schema(required = true, description = "The id.")
-    private int idFleet;
+    private AbstractId fleet;
 
     @Nonnull
     @JsonProperty
@@ -29,12 +25,7 @@ public class Fleet {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The owner of the fleet")
-    private UserJson owner;
-
-    @Nonnull
-    @JsonProperty
-    @Schema(required = true, description = "The fleet's individual war ships.")
-    private Set<WarShip> ships = new HashSet<>();
+    private AbstractId owner;
 
     /**
      * The current location of this fleet. <br>
@@ -58,16 +49,6 @@ public class Fleet {
     @Schema(description = "The fleet's current moving.")
     private Move move;
 
-    @Nonnull
-    @JsonProperty
-    @Schema(required = true, description = "The current effect value per module type.")
-    private SpacecraftCapabilities spacecraftCapabilities;
-
-    @Nonnull
-    @JsonProperty
-    @Schema(required = true, description = "The without-any-damage effect value per module type.")
-    private SpacecraftCapabilities baseSpacecraftCapabilities;
-
     @JsonProperty
     @Schema(required = true, description = "If the fleet can run interstellar movements.")
     private boolean isFTLCapable;
@@ -80,22 +61,17 @@ public class Fleet {
     @Schema(required = true, description = "If the fleet needs a repair.")
     private boolean needsRepair;
 
-    public Fleet() {
+    public FleetMarker() {
     }
 
-    public Fleet(@Nonnull final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet,
-                 @Nonnull final String languageCode) {
-        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
+    public FleetMarker(@Nonnull final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
-        this.idFleet = fleet.getId();
-        this.owner = new UserJson(fleet.getOwner());
+        this.fleet = new AbstractId(fleet.getId());
+        this.owner = new AbstractId(fleet.getOwner());
         this.name = fleet.getName();
         this.orbit = fleet.getOrbit() != null ? new FleetOrbit(fleet.getOrbit()) : null;
         this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;
-        this.ships.addAll(fleet.getAllShips().stream().map(w -> new WarShip(w, w.getWarshipHealthState(), languageCode)).collect(Collectors.toList()));
-        this.spacecraftCapabilities = new SpacecraftCapabilities(fleet);
-        this.baseSpacecraftCapabilities = new SpacecraftCapabilities(fleet.getShipsByClass());
         this.isFTLCapable = fleet.isFTLCapable();
         this.isActive = fleet.isActive();
         this.needsRepair = fleet.isNeedsRepair();

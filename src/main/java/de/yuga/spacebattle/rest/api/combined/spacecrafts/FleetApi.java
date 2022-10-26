@@ -183,16 +183,16 @@ public class FleetApi extends BaseApi {
     public ResponseEntity<?> getFleetDistribution() {
 
         final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> allFleets = fleetService.findAllFleetsWithoutInterstellarMovement();
-        final Map<StarSystem, Set<User>> userBySystem = allFleets
+        final Map<StarSystem, Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet>> fleetsBySystem = allFleets
                 .stream()
                 .filter(fleet -> fleet.getOrbit() != null)
                 .collect(Collectors.groupingBy(fleet -> {
                             assert fleet.getOrbit() != null;
                             return fleet.getOrbit().getSystem();
                         },
-                        Collectors.mapping(de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet::getOwner, Collectors.toSet())));
+                        Collectors.mapping(Function.identity(), Collectors.toSet())));
 
-        final List<FleetDistributionPerUser> result = userBySystem.entrySet().stream()
+        final List<FleetDistributionPerUser> result = fleetsBySystem.entrySet().stream()
                 .map(FleetDistributionPerUser::new)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(result);

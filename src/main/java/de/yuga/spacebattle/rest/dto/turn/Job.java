@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
 import de.yuga.spacebattle.rest.dto.buildings.Building;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.rest.dto.constructables.buildings.Construction;
 import de.yuga.spacebattle.rest.dto.enums.EResourceType;
 import de.yuga.spacebattle.rest.dto.orbitals.Planet;
@@ -45,6 +46,11 @@ public class Job {
     @Schema(required = true, description = "The type of costs.")
     private EResourceType resourceType;
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The priority of the job.")
+    private String priority;
+
     @JsonProperty
     @Schema(required = true, description = "Is this a building job build.")
     private boolean isBuildingJob;
@@ -82,6 +88,11 @@ public class Job {
     @Schema(description = "The targeted amount of ships in case of an shipyard job..")
     private Integer amountShips;
 
+    @Nullable
+    @JsonProperty
+    @Schema(description = "The fleet which will be repaired in case of an shipyard job.")
+    private Fleet repairTarget;
+
     public Job() {
     }
 
@@ -94,10 +105,13 @@ public class Job {
         this.facility = new Construction(job.getFacility(), languageCode);
         this.facilityPlanet = new Planet(job.getFacility().getPlanet());
         this.ticksLeft = job.getJobDoneAtZero();
+        this.priority = job.getPriority().name();
         final Constructable constructable = job.getConstructable();
         this.resourceType = new EResourceType(constructable.getResourceType());
         this.isBuildingJob = constructable.getBuilding() != null;
-        this.isShipyardJob = constructable.getShipClass() != null;
+        final de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass shipClass = constructable.getShipClass();
+        final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = constructable.getFleet();
+        this.isShipyardJob = shipClass != null || fleet != null;
         this.isResearchJob = constructable.getResearch() != null;
         if (isBuildingJob) {
             this.buildingTarget = new Building(constructable.getBuilding(), languageCode);
@@ -106,7 +120,12 @@ public class Job {
             this.researchTarget = new Research(constructable.getResearch(), languageCode);
         }
         if (isShipyardJob) {
-            this.shipYardTarget = new ShipClass(constructable.getShipClass(), languageCode);
+            if (shipClass != null) {
+                this.shipYardTarget = new ShipClass(shipClass, languageCode);
+            }
+            if (fleet != null) {
+                this.repairTarget = new Fleet(fleet, languageCode);
+            }
 
         }
         this.targetLevel = constructable.getTargetLevel();

@@ -74,7 +74,7 @@ public class JobCostsCalculator {
         Preconditions.checkNotNull(constructable, "constructable shouldn't be null!");
 
         final ResourceDeposit costs = constructable.getJobCosts();
-        final AtomicInteger ticksNeeded = new AtomicInteger(0);
+        final AtomicInteger ticksNeeded = new AtomicInteger(1);
         final ResourceDeposit ticklyIncome = facility.getPlanet().getTicklyIncome();
 
         costs.getForfeitableResource().forEach(r -> {
@@ -82,22 +82,20 @@ public class JobCostsCalculator {
             final long income = ticklyIncome.getResourceAmountByType(r);
 
             final int ticks = BigDecimal.valueOf(cost).divide(BigDecimal.valueOf(income), DistanceCalculator.MC).intValue();
-            if (ticksNeeded.get() < ticks) {
+            if (ticks > 0 && ticksNeeded.get() < ticks) {
                 ticksNeeded.set(ticks);
             }
         });
         return ticksNeeded.get();
     }
 
-    public static ResourceDeposit calculateRemainingTicks(@Nonnull final Fleet toRepair) {
+    public static ResourceDeposit calculateJobCost(@Nonnull final Fleet toRepair) {
         Preconditions.checkNotNull(toRepair, "toRepair must not be empty");
 
         final Map<WarShip, WarshipHealthState> referenceWarships = toRepair.getAliveShips().stream()
-                .filter(w -> w.getWarshipHealthState() != null)
                 .collect(Collectors.toMap(Function.identity(), WarshipHealthState::new));
 
         final Map<WarShip, WarshipHealthState> damagedStates = toRepair.getAliveShips().stream()
-                .filter(w -> w.getWarshipHealthState() != null)
                 .collect(Collectors.toMap(Function.identity(), WarshipHealthState::new));
 
         final ResourceDeposit costs = new ResourceDeposit();

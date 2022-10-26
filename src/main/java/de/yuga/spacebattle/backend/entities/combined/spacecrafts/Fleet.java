@@ -17,6 +17,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
+import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
@@ -121,6 +122,11 @@ public class Fleet extends Deletable {
     @Column(columnDefinition = "bit not null default false")
     private boolean needsRepair = false;
 
+    @Nullable
+    @OneToOne(mappedBy = "constructable.fleet", orphanRemoval = true)
+    @JoinColumn(name = "idFleet", updatable = false)
+    private Job job;
+
     public Fleet() {
     }
 
@@ -132,6 +138,10 @@ public class Fleet extends Deletable {
         this.owner = owner;
         this.name = name;
         this.orbit = orbit;
+    }
+
+    public boolean isActive() {
+        return job == null;
     }
 
     @Nonnull

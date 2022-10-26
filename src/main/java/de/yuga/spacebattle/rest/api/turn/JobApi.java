@@ -34,6 +34,7 @@ public class JobApi extends BaseApi {
     @Nonnull
     public static final String ENDPOINT = "job";
     private static final String JOB_RUNNING_AT_ENDPOINT = "runningAt";
+    private static final String JOB_RUNNING_FOR_FLEET_ENDPOINT = "runningForFleet";
 
     @Nonnull
     private final JobService jobService;
@@ -79,5 +80,21 @@ public class JobApi extends BaseApi {
         return ResponseEntity.ok(jobService.findAllJobsForUser(idUser).stream()
                 .map(j -> new Job(j, getPreferredLanguage()))
                 .collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = JOB_RUNNING_FOR_FLEET_ENDPOINT + "/{idFleet}")
+    @Operation(summary = "Get all jobs which are running for the questioning user.", operationId = "jobRunningForFleet",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "you can build something or not",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> jobRunningForFleet(@PathVariable("idFleet") final int idFleet) {
+        final int idUser = getIdUser();
+
+        final boolean isRunning = jobService.isJobRunningFor(idUser, idFleet);
+        return ResponseEntity.ok(isRunning);
     }
 }
