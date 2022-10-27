@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services.constructables.spacecraft;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.SpacecraftCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
@@ -18,6 +19,7 @@ import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.spacecraft.HullService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapabilities;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstructionSelection;
 import de.yuga.spacebattle.rest.dto.spacecrafts.details.AlignedFitting;
 import de.yuga.spacebattle.rest.dto.spacecrafts.details.AmmunitionFitting;
@@ -328,5 +330,13 @@ public class ShipClassCreationService {
 
         final ShipClass entity = mapShipClassToEntity(shipClass, idUser);
         return entity.getCostsOverall();
+    }
+
+    @Nonnull
+    public SpacecraftCapabilities getCaps(@Nonnull final de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass shipClass, final int idUser) {
+        Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
+
+        final ShipClass entity = mapShipClassToEntity(shipClass, idUser);
+        return new SpacecraftCalculator().getSpaceCraftCapabilities(entity);
     }
 }

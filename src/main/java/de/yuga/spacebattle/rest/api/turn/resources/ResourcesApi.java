@@ -8,7 +8,9 @@ import de.yuga.spacebattle.backend.services.constructables.buildings.Constructio
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassCreationService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
+import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapabilities;
 import de.yuga.spacebattle.rest.dto.constructables.buildings.PlannedConstruction;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstructionSelection;
 import de.yuga.spacebattle.rest.dto.enums.EEducationType;
@@ -40,7 +42,7 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 @RolesAllowed("USER")
 @RestController
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ResourcesApi.ENDPOINT + "/")
-public class ResourcesApi {
+public class ResourcesApi extends BaseApi {
 
     @Nonnull
     public static final String ENDPOINT = "resources";
@@ -52,6 +54,7 @@ public class ResourcesApi {
     private static final String COSTS_ENDPOINT = "costs";
     private static final String SHIPYARD_ORDER_COSTS_ENDPOINT = "costsShipyard";
     private static final String SHIP_CLASS_COSTS_ENDPOINT = "costsShipClass";
+    private static final String SHIP_CLASS_CAPS_ENDPOINT = "capsShipClass";
 
     @Nonnull
     private final JobService jobService;
@@ -229,7 +232,7 @@ public class ResourcesApi {
         return ResponseEntity.ok(new ResourceDeposit(shipClassCreationService.getCosts(shipyardConstructionOrder)));
     }
 
-    @PostMapping(value = SHIP_CLASS_COSTS_ENDPOINT + "/{idUser}")
+    @PostMapping(value = SHIP_CLASS_COSTS_ENDPOINT)
     @Operation(summary = "Get the costs of the given shipyard order.", operationId = "getShipClassCosts",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
@@ -245,9 +248,33 @@ public class ResourcesApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getShipClassCosts(@RequestBody @Nonnull final ShipClass shipClass, @PathVariable("idUser") final int idUser) {
+    public ResponseEntity<?> getShipClassCosts(@RequestBody @Nonnull final ShipClass shipClass) {
         PreconditionWebHelper.checkNotNull(shipClass, "Maybe there should be something like a request?!");
 
+        final int idUser = getIdUser();
         return ResponseEntity.ok(new ResourceDeposit(shipClassCreationService.getCosts(shipClass, idUser)));
+    }
+
+    @PostMapping(value = SHIP_CLASS_CAPS_ENDPOINT)
+    @Operation(summary = "Get the costs of the given shipyard order.", operationId = "getShipClassCaps",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ShipClass.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = SpacecraftCapabilities.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getShipClassCaps(@RequestBody @Nonnull final ShipClass shipClass) {
+        PreconditionWebHelper.checkNotNull(shipClass, "Maybe there should be something like a request?!");
+
+        final int idUser = getIdUser();
+        return ResponseEntity.ok(shipClassCreationService.getCaps(shipClass, idUser));
     }
 }
