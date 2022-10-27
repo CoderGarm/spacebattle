@@ -241,6 +241,7 @@
 
     create table job (
        idJob integer not null auto_increment,
+        isDeleted bit not null default false,
         amountShips integer,
         resourceType varchar(255),
         targetLevel integer,
@@ -251,6 +252,7 @@
         idResearch integer,
         idShipClass integer,
         idFacility integer not null,
+        idTick integer,
         idOwner integer not null,
         primary key (idJob),
         constraint job_CHECK check ((idBuilding IS NOT NULL AND targetLevel IS NOT NULL) OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) OR (idShipClass IS NOT NULL AND amountShips IS NOT NULL) OR (idFleet IS NOT NULL) )
@@ -1046,6 +1048,11 @@
        add constraint FK4ewa76co5drr08nptgdmax8d6 
        foreign key (idFacility) 
        references construction (idConstruction);
+
+    alter table job 
+       add constraint FKe2jgcwt8phugfp1aj5bu76132 
+       foreign key (idTick) 
+       references tick (idTick);
 
     alter table job 
        add constraint FK3urqlpl2jmbxlfk4q88i9i5tb 

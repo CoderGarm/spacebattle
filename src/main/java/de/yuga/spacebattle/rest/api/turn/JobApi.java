@@ -34,6 +34,8 @@ public class JobApi extends BaseApi {
     @Nonnull
     public static final String ENDPOINT = "job";
     private static final String JOB_RUNNING_AT_ENDPOINT = "runningAt";
+    private static final String JOB_FINISHED_ENDPOINT = "finished";
+    private static final String JOB_FINISHED_PRESENT_ENDPOINT = "finishedPresent";
     private static final String JOB_RUNNING_FOR_FLEET_ENDPOINT = "runningForFleet";
 
     @Nonnull
@@ -80,6 +82,40 @@ public class JobApi extends BaseApi {
         return ResponseEntity.ok(jobService.findAllJobsForUser(idUser).stream()
                 .map(j -> new Job(j, getPreferredLanguage()))
                 .collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = JOB_FINISHED_ENDPOINT)
+    @Operation(summary = "Get all jobs which finished today.", operationId = "getFinishedJobs",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Job.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getFinishedJobs() {
+
+        final int idUser = getIdUser();
+        return ResponseEntity.ok(jobService.findTodayFinishedJobsForUser(idUser).stream()
+                .map(j -> new Job(j, getPreferredLanguage()))
+                .collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = JOB_FINISHED_PRESENT_ENDPOINT)
+    @Operation(summary = "Get all jobs which finished today.", operationId = "areFinishedJobsPresent",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> areFinishedJobsPresent() {
+
+        final int idUser = getIdUser();
+        return ResponseEntity.ok(jobService.areTodayFinishedJobsForUserPresent(idUser));
     }
 
     @GetMapping(value = JOB_RUNNING_FOR_FLEET_ENDPOINT + "/{idFleet}")

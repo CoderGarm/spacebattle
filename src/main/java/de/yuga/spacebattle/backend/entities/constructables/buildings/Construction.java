@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.entities.constructables.buildings;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -12,6 +13,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @NamedQueries({
         @NamedQuery(name = "Construction.getAll", query = "SELECT a FROM Construction a"),
@@ -76,7 +78,7 @@ public class Construction extends AbstractEntityKey {
 
     @Nonnull
     public Set<Job> getJobs() {
-        return jobs;
+        return jobs.stream().filter(Deletable::isAlive).collect(Collectors.toSet());
     }
 
 

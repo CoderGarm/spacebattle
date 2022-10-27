@@ -5,7 +5,7 @@ import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
-import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
@@ -14,16 +14,17 @@ import de.yuga.spacebattle.backend.enums.EResourceType;
 import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @NamedQueries({
-        @NamedQuery(name = "Job.getAll", query = "SELECT p FROM Job p"),
-        @NamedQuery(name = "Job.getAllByOwner", query = "SELECT p FROM Job p WHERE p.owner.id = :idUser"),
-        @NamedQuery(name = "Job.getAllForConstruction", query = "SELECT p FROM Job p WHERE p.facility = :facility"),
-        @NamedQuery(name = "Job.isPresentForResearch", query = "SELECT CASE WHEN (COUNT(p) > 0)  THEN TRUE ELSE FALSE END FROM Job p WHERE p.constructable.research = :research"),
-        @NamedQuery(name = "Job.isPresentForResearches", query = "SELECT new de.yuga.spacebattle.backend.entities.researches.ActiveResearchTuple(p.constructable.research, CASE WHEN (COUNT(p) > 0)  THEN TRUE ELSE FALSE END) FROM Job p WHERE p.constructable.research IN (:researches)"),
-        @NamedQuery(name = "Job.getAllForPlanet", query = "SELECT p FROM Job p WHERE p.facility.planet.id = :idPlanet")
+        @NamedQuery(name = "Job.getAll", query = "SELECT j FROM Job j"),
+        @NamedQuery(name = "Job.getAllByOwner", query = "SELECT j FROM Job j WHERE j.isDeleted = false AND j.owner.id = :idUser"),
+        @NamedQuery(name = "Job.getAllForConstruction", query = "SELECT j FROM Job j WHERE j.isDeleted = false AND j.facility = :facility"),
+        @NamedQuery(name = "Job.isPresentForResearch", query = "SELECT CASE WHEN (COUNT(j) > 0)  THEN TRUE ELSE FALSE END FROM Job j WHERE j.isDeleted = false AND j.constructable.research = :research"),
+        @NamedQuery(name = "Job.isPresentForResearches", query = "SELECT new de.yuga.spacebattle.backend.entities.researches.ActiveResearchTuple(j.constructable.research, CASE WHEN (COUNT(j) > 0)  THEN TRUE ELSE FALSE END) FROM Job j WHERE j.isDeleted = false AND j.constructable.research IN (:researches)"),
+        @NamedQuery(name = "Job.getAllForPlanet", query = "SELECT j FROM Job j WHERE j.isDeleted = false AND j.facility.planet.id = :idPlanet")
 })
 @Entity
 @Table(name = "job")
@@ -32,7 +33,7 @@ import javax.validation.constraints.NotNull;
         "OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) " +
         "OR (idShipClass IS NOT NULL AND amountShips IS NOT NULL) " +
         "OR (idFleet IS NOT NULL) ")
-public class Job extends AbstractEntityKey implements Comparable<Job> {
+public class Job extends Deletable implements Comparable<Job> {
 
     @Nonnull
     @NotNull
@@ -61,6 +62,11 @@ public class Job extends AbstractEntityKey implements Comparable<Job> {
     @NotNull
     @Column(columnDefinition = "decimal(19, 0)")
     private int jobDoneAtZero;
+
+    @Nullable
+    @ManyToOne
+    @JoinColumn(name = "idTick")
+    private Tick finished;
 
     @Nonnull
     @NotNull
@@ -129,6 +135,13 @@ public class Job extends AbstractEntityKey implements Comparable<Job> {
         Preconditions.checkNotNull(priority, "priority must not be empty");
 
         return this.priority == priority;
+    }
+
+    public void setDeleted(@Nonnull final Tick finishedAt) {
+        Preconditions.checkNotNull(finishedAt, "finishedAt must not be empty");
+
+        this.finished = finishedAt;
+        setDeleted();
     }
 
     public void setPriority(@Nonnull final EJobPriority priority) {

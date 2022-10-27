@@ -286,7 +286,7 @@ public class TickService {
                     tickShipyard(planet, job);
                     break;
             }
-            jobs.remove(job);
+            job.setDeleted(today);
         }
 
         planetService.save(planet);

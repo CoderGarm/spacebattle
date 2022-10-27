@@ -108,18 +108,6 @@ public class JobService {
         return Objects.requireNonNullElse(jobRepository.isJobActiveFor(researches), new ArrayList<>());
     }
 
-    public void delete(@Nonnull final Collection<Job> jobs) {
-        Preconditions.checkNotNull(jobs, "jobs must not be empty");
-
-        jobRepository.deleteAll(jobs);
-    }
-
-    public void delete(@Nonnull final Job job) {
-        Preconditions.checkNotNull(job, "job must not be empty");
-
-        jobRepository.delete(job);
-    }
-
     /**
      * Returns the job cost if they were paied - no costs and no costs back for researches!
      *
@@ -360,5 +348,13 @@ public class JobService {
 
     public boolean isJobRunningFor(final int idUser, final int idFleet) {
         return jobRepository.isJobRunningFor(idUser, idFleet);
+    }
+
+    public List<Job> findTodayFinishedJobsForUser(final int idUser) {
+        return Objects.requireNonNullElse(jobRepository.findTodayFinishedJobsForUser(idUser), new ArrayList<>());
+    }
+
+    public boolean areTodayFinishedJobsForUserPresent(final int idUser) {
+        return jobRepository.areTodayFinishedJobsForUserPresent(idUser);
     }
 }
