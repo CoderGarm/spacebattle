@@ -1,10 +1,6 @@
 package de.yuga.spacebattle.rest.dto.orbitals;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.EPlanetClassType;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
@@ -41,8 +37,6 @@ public class Planet {
     private Orbit orbit;
 
     @Nullable
-    @JsonSerialize(using = ToStringSerializer.class)
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @Schema(description = "The timestamp when this planet was colonized first.")
     private LocalDateTime colonizedAt;
 

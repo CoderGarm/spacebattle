@@ -94,7 +94,6 @@ public class MessageThreadService {
         Preconditions.checkNotNull(sender, "sender shouldn't be null!");
         Preconditions.checkNotNull(chatMessage, "chatMessage shouldn't be null!");
 
-        // todo escape message
         MessageThread messageThread = messageThreadRepository.findByIdWithMessages(idUserMessage);
         if (messageThread != null) {
             final UserMessage userMessage = new UserMessage(messageThread, sender, chatMessage);
@@ -110,7 +109,6 @@ public class MessageThreadService {
         Preconditions.checkNotNull(receiver, "receiver shouldn't be null!");
         Preconditions.checkNotNull(message, "message shouldn't be null!");
 
-        // todo escape message
         final MessageThread messagesBetween = findMessagesBetween(sender, receiver);
         final MessageThread anywayUsed = Objects.requireNonNullElseGet(messagesBetween, () -> new MessageThread(sender, receiver));
         final UserMessage userMessage = new UserMessage(anywayUsed, sender, message);

@@ -1,10 +1,6 @@
 package de.yuga.spacebattle.rest.dto.turn;
 
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.google.common.base.Preconditions;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -19,14 +15,10 @@ public class Tick {
     private int tickNo;
 
     @Nonnull
-    @JsonSerialize(using = ToStringSerializer.class)
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @Schema(required = true, description = "The start timestamp of this tick.")
     private LocalDateTime tickStarts;
 
     @Nullable
-    @JsonSerialize(using = ToStringSerializer.class)
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @Schema(description = "The end timestamp of this tick.")
     private LocalDateTime tickEnds;
 
