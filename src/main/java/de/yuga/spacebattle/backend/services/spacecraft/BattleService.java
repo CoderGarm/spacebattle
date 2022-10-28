@@ -134,8 +134,7 @@ public class BattleService {
         final Map<WarShip, WarshipHealthState> knownStates = warShips.stream()
                 .collect(Collectors.toMap(Function.identity(), WarShip::getWarshipHealthState));
 
-        final Map<WarShip, de.yuga.spacebattle.backend.combat.round.WarshipHealthState> byResult = battleResult.getWarshipHealthStates().stream()
-                .collect(Collectors.toMap(de.yuga.spacebattle.backend.combat.round.WarshipHealthState::getWarShip, Function.identity()));
+        final Map<WarShip, de.yuga.spacebattle.backend.combat.round.WarshipHealthState> byResult = battleResult.getWarshipHealthStates();
 
         final Set<Fleet> fleetsToPersist = new HashSet<>();
         final Set<WarshipHealthState> statesToPersist = new HashSet<>();

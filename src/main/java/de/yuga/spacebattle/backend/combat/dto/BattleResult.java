@@ -23,7 +23,7 @@ public class BattleResult {
     private final Set<WarShip> losses = new HashSet<>();
 
     @Nonnull
-    private final List<WarshipHealthState> warshipHealthStates;
+    private final Map<WarShip, WarshipHealthState> warshipHealthStates = new HashMap<>();
 
     @Nonnull
     private final List<FleetRoundState> roundStates;
@@ -51,10 +51,9 @@ public class BattleResult {
 
         this.roundStates.forEach(fleetRoundState -> this.losses.addAll(fleetRoundState.getFleetHealthState().getLosses().keySet()));
 
-        warshipHealthStates = new ArrayList<>(this.roundStates.get(this.roundStates.size() - 1)
-                .getFleetHealthState()
-                .getWarshipHealthStates()
-                .values());
+        final Set<WarshipHealthState> warshipHealthStateSet = new HashSet<>();
+        this.roundStates.forEach(fleetRoundState -> warshipHealthStateSet.addAll(fleetRoundState.getFleetHealthState().getWarshipHealthStates().values()));
+        warshipHealthStateSet.forEach(state -> warshipHealthStates.put(state.getWarShip(), state));
     }
 
     @Nonnull
@@ -73,7 +72,7 @@ public class BattleResult {
     }
 
     @Nonnull
-    public List<WarshipHealthState> getWarshipHealthStates() {
+    public Map<WarShip, WarshipHealthState> getWarshipHealthStates() {
         return warshipHealthStates;
     }
 

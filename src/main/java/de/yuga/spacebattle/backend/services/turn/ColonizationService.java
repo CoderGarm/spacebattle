@@ -294,11 +294,32 @@ public class ColonizationService {
         final Map<Orbit, StarSystem> colonizableByOrbit = allColonizable.stream().collect(Collectors.toMap(StarSystem::getOrbit, Function.identity()));
         final Map<Orbit, StarSystem> colonizedByOrbit = allColonized.stream().collect(Collectors.toMap(StarSystem::getOrbit, Function.identity()));
         final List<OrbitalDistanceMarker> marker = new ArrayList<>();
+        colonizableByOrbit.entrySet().removeIf(e -> e.getValue().getPlanets().size() < 3);
         colonizableByOrbit.keySet().forEach(colonizable -> colonizedByOrbit.keySet().forEach(colonized -> marker.add(new OrbitalDistanceMarker(colonizable, colonized))));
         marker.sort(Comparator.comparing(o -> o.distance));
 
-        final OrbitalDistanceMarker biggestDistance = marker.get(marker.size() - 1);
-        final StarSystem starSystem = colonizableByOrbit.get(biggestDistance.first);
+        StarSystem starSystem = null;
+        for (int i = 0; i < marker.size() - 1; i += 2) {
+            final StarSystem starSystem1 = colonizableByOrbit.get(marker.get(0).first);
+            final StarSystem starSystem2 = colonizableByOrbit.get(marker.get(1).first);
+            if (starSystem1 == null || starSystem2 == null) {
+                continue;
+            }
+            final int size1 = starSystem1.getPlanets().size();
+            final int size2 = starSystem2.getPlanets().size();
+            if (size1 > size2) {
+                starSystem = starSystem1;
+            } else {
+                starSystem = starSystem2;
+            }
+            break;
+        }
+
+        if (starSystem == null) {
+            LOGGER.warn("No star system found!");
+            throw new NotifyWebUserException("Sorry, but we have to make some more stars in the universe - ours is done for now.");
+        }
+
         final List<Planet> planets = new ArrayList<>(starSystem.getPlanets());
         if (planets.size() == 1) {
             return planets.get(0);

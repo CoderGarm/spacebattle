@@ -67,7 +67,7 @@ public class BattleReport {
     private final Set<ShipKillerHit> shipKillerHits = new HashSet<>();
 
     public BattleReport() {
-    }
+    } // todo check that beginning states are fitting the reality
 
     public BattleReport(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.BattleReport battleReport,
                         @Nonnull final String languageCode) {

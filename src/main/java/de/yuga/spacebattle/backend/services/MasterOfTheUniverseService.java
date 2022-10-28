@@ -697,7 +697,7 @@ public class MasterOfTheUniverseService {
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    public void createOpponentForUser(@Nonnull final User user) {
+    public WarShip createOpponentForUser(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
         final User opponent = userService.findByUsername(DEFEATED_OPPONENT).get().getUser();
@@ -713,7 +713,7 @@ public class MasterOfTheUniverseService {
                 .collect(Collectors.toList());
         final ShipClass ship = shipClasses.get(shipClasses.size() - 1);
 
-        warShipService.save(new WarShip("Corsair", homePlanet, opponentsFleet, ship));
+        return warShipService.save(new WarShip("Corsair", homePlanet, opponentsFleet, ship));
     }
 
     @SuppressWarnings("DeprecatedIsStillUsed")

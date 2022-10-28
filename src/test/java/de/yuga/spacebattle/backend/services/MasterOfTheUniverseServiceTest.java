@@ -8,22 +8,23 @@ import de.yuga.spacebattle.backend.entities.account.forum.ForumThread;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.researches.ResearchLevel;
+import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.enums.EDepositType;
-import de.yuga.spacebattle.backend.enums.EProductionCategory;
-import de.yuga.spacebattle.backend.enums.ERefinementSequence;
-import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.services.account.ForumService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
+import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
+import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.backend.transformer.BuildingCsvTransformer;
@@ -31,17 +32,19 @@ import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import static de.yuga.spacebattle.backend.transformer.CSVTransformer.CSV_SEPARATOR;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootProdProfile
-@ActiveProfiles("dev")
+//@ActiveProfiles("dev")
 @Disabled("not needed for unit or integration testing")
 public class MasterOfTheUniverseServiceTest {
 
@@ -75,9 +78,51 @@ public class MasterOfTheUniverseServiceTest {
     @Autowired
     private ResourceService resourceService;
 
+    @Autowired
+    private ColonizationService colonizationService;
+
+    @Autowired
+    private WarShipService warShipService;
+
     @Test
     void tick() {
         tickService.doTick();
+    }
+
+    @Test
+    void runBattle() {
+        final String random = random();
+        final User entity = new User(random, "12457aA!", random + "@de", EWebUserRole.USER);
+        final User saved = userService.save(entity);
+
+        final List<Research> researchesWithoutPrecondition = researchService.getResearchesWithoutPrecondition();
+        researchService.addResearch(saved, researchesWithoutPrecondition);
+
+        final Planet planet = colonizationService.findPlanetForNewUser();
+        MasterOfTheUniverseService.populateNewColonization(planet.getResourceDeposit());
+        planetService.save(planet);
+        final Colonization colonization = new Colonization(saved, planet, planet.getResourceDeposit().getCrewRequirement(), 0);
+        colonizationService.colonizePlanet(colonization);
+
+        masterOfTheUniverseService.createFleetForUser(saved);
+        final WarShip opponentForUser = masterOfTheUniverseService.createOpponentForUser(saved);
+        opponentForUser.getWarshipHealthState().getCapabilities().forEach(cap -> cap.setValue(cap.getValue().divide(BigDecimal.valueOf(3), MathContext.DECIMAL32)));
+        warShipService.save(opponentForUser);
+        tickService.doTick();
+    }
+
+    private String random() {
+        int leftLimit = 97; // letter 'a'
+        int rightLimit = 122; // letter 'z'
+        int targetStringLength = 10;
+        Random random = new Random();
+        StringBuilder buffer = new StringBuilder(targetStringLength);
+        for (int i = 0; i < targetStringLength; i++) {
+            int randomLimitedInt = leftLimit + (int)
+                    (random.nextFloat() * (rightLimit - leftLimit + 1));
+            buffer.append((char) randomLimitedInt);
+        }
+        return buffer.toString();
     }
 
     @Test
