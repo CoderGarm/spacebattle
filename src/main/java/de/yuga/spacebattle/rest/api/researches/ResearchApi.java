@@ -77,7 +77,7 @@ public class ResearchApi extends BaseApi {
         this.planetService = planetService;
     }
 
-    @GetMapping(value = BY_USER_ENDPOINT + "/{idUser}")
+    @GetMapping(value = BY_USER_ENDPOINT)
     @Operation(summary = "Get all already researched researches for the user.", operationId = "getResearchByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -88,8 +88,8 @@ public class ResearchApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getResearchByUser(@PathVariable("idUser") final int idUser) {
-
+    public ResponseEntity<?> getResearchByUser() {
+        final int idUser = getIdUser();
         final Set<de.yuga.spacebattle.backend.entities.researches.ResearchLevel> researchesForUser = researchService.getResearchesForUser(idUser);
         final List<ResearchLevel> researchLevels = researchesForUser.stream()
                 .map(r -> new ResearchLevel(r, getPreferredLanguage()))
@@ -97,7 +97,7 @@ public class ResearchApi extends BaseApi {
         return ResponseEntity.ok(researchLevels);
     }
 
-    @PostMapping(value = BY_USER_ENDPOINT + "/{idUser}")
+    @PostMapping(value = BY_USER_ENDPOINT)
     @Operation(summary = "Starts a research job for the user.", operationId = "startResearchByUser",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
@@ -113,8 +113,8 @@ public class ResearchApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> startResearchByUser(@PathVariable("idUser") final int idUser, @RequestBody final ResearchLevel researchLevel) {
-
+    public ResponseEntity<?> startResearchByUser(@RequestBody final ResearchLevel researchLevel) {
+        final int idUser = getIdUser();
         final User user = userService.find(idUser);
         if (user == null) {
             throw new NotifyWebUserException("No user was found.");
@@ -127,7 +127,7 @@ public class ResearchApi extends BaseApi {
         return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(researchJob, getPreferredLanguage()));
     }
 
-    @GetMapping(value = AVAILABLE_BY_USER_ENDPOINT + "/{idUser}")
+    @GetMapping(value = AVAILABLE_BY_USER_ENDPOINT)
     @Operation(summary = "Get all available researches for the user.", operationId = "getAvailableResearchByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -138,7 +138,9 @@ public class ResearchApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getAvailableResearchByUser(@PathVariable("idUser") final int idUser) {
+    public ResponseEntity<?> getAvailableResearchByUser() {
+
+        final int idUser = getIdUser();
         final List<Research> jobActiveFor = jobService.getResearchesFromActiveJobs(idUser);
         final Map<Research, Integer> researchesForUser = researchService.getUnlockableResearches(idUser, jobActiveFor);
         final List<ResearchLevel> researchLevels = researchesForUser.entrySet().stream()
@@ -159,7 +161,7 @@ public class ResearchApi extends BaseApi {
         return ResponseEntity.ok(researchService.getResearchTree(getPreferredLanguage()));
     }
 
-    @GetMapping(value = RESEARCH_POSSIBLE_FOR_USER_ENDPOINT + "/{idUser}")
+    @GetMapping(value = RESEARCH_POSSIBLE_FOR_USER_ENDPOINT)
     @Operation(summary = "Checks if a research job is possible for the user.", operationId = "researchPossibleForUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -168,7 +170,8 @@ public class ResearchApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> researchPossibleForUser(@PathVariable("idUser") final int idUser) {
+    public ResponseEntity<?> researchPossibleForUser() {
+        final int idUser = getIdUser();
         final User user = userService.find(idUser);
         if (user == null) {
             throw new NotifyWebUserException("No user found for id '" + idUser + "'");
