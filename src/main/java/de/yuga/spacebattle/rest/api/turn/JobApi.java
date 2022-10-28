@@ -1,7 +1,9 @@
 package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.CacheStore;
 import de.yuga.spacebattle.backend.services.turn.JobService;
+import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.Job;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
@@ -32,20 +35,25 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 public class JobApi extends BaseApi {
 
     @Nonnull
+    private final CacheStore<Integer, de.yuga.spacebattle.backend.entities.turn.Tick> cache = new CacheStore<>(2, TimeUnit.DAYS);
+
     public static final String ENDPOINT = "job";
     private static final String JOB_RUNNING_AT_ENDPOINT = "runningAt";
     private static final String JOB_FINISHED_ENDPOINT = "finished";
-    private static final String JOB_FINISHED_PRESENT_ENDPOINT = "finishedPresent";
+    private static final String JOB_UNKNOWN_FINISHED_PRESENT_ENDPOINT = "unknownFinishedPresent";
     private static final String JOB_RUNNING_FOR_FLEET_ENDPOINT = "runningForFleet";
 
     @Nonnull
     private final JobService jobService;
 
-    @Autowired
-    public JobApi(@Nonnull final JobService jobService) {
-        Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
+    @Nonnull
+    private final TickService tickService;
 
-        this.jobService = jobService;
+    @Autowired
+    public JobApi(@Nonnull final JobService jobService,
+                  @Nonnull final TickService tickService) {
+        this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
+        this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
     }
 
     @GetMapping(value = JOB_RUNNING_AT_ENDPOINT + "/{idPlanet}")
@@ -98,13 +106,20 @@ public class JobApi extends BaseApi {
     public ResponseEntity<?> getFinishedJobs() {
 
         final int idUser = getIdUser();
+
+        final de.yuga.spacebattle.backend.entities.turn.Tick today = tickService.getToday();
+        final de.yuga.spacebattle.backend.entities.turn.Tick lastTick = cache.get(idUser);
+        if (lastTick == null || lastTick.compareTo(today) < 0) {
+            cache.add(idUser, today);
+        }
+
         return ResponseEntity.ok(jobService.findTodayFinishedJobsForUser(idUser).stream()
                 .map(j -> new Job(j, getPreferredLanguage()))
                 .collect(Collectors.toList()));
     }
 
-    @GetMapping(value = JOB_FINISHED_PRESENT_ENDPOINT)
-    @Operation(summary = "Get all jobs which finished today.", operationId = "areFinishedJobsPresent",
+    @GetMapping(value = JOB_UNKNOWN_FINISHED_PRESENT_ENDPOINT)
+    @Operation(summary = "Get all jobs which finished today and wasn't questioned before.", operationId = "areUnknownFinishedJobsPresent",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
@@ -112,10 +127,15 @@ public class JobApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> areFinishedJobsPresent() {
+    public ResponseEntity<?> areUnknownFinishedJobsPresent() {
 
         final int idUser = getIdUser();
-        return ResponseEntity.ok(jobService.areTodayFinishedJobsForUserPresent(idUser));
+        final de.yuga.spacebattle.backend.entities.turn.Tick today = tickService.getToday();
+        final de.yuga.spacebattle.backend.entities.turn.Tick lastTick = cache.get(idUser);
+        if (lastTick == null || lastTick.compareTo(today) < 0) {
+            return ResponseEntity.ok(jobService.areTodayFinishedJobsForUserPresent(idUser));
+        }
+        return ResponseEntity.ok(false);
     }
 
     @GetMapping(value = JOB_RUNNING_FOR_FLEET_ENDPOINT + "/{idFleet}")

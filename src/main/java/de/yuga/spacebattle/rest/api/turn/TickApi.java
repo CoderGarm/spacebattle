@@ -59,7 +59,7 @@ public class TickApi {
             }
     )
     public ResponseEntity<?> getCurrentTick() {
-        final de.yuga.spacebattle.backend.entities.turn.Tick latest = tickService.getLatest();
+        final de.yuga.spacebattle.backend.entities.turn.Tick latest = tickService.getToday();
         PreconditionWebHelper.checkNotNull(latest, "There should be at least one tick - please call the admin.");
         return ResponseEntity.ok(new Tick(latest));
     }

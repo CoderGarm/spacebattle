@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.entities.turn;
 
 
+import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 
 import javax.annotation.Nonnull;
@@ -18,7 +19,7 @@ import java.time.format.DateTimeFormatterBuilder;
 @Entity
 @Table(name = "tick")
 @AttributeOverride(name = "id", column = @Column(name = "idTick"))
-public class Tick extends AbstractEntityKey {
+public class Tick extends AbstractEntityKey implements Comparable<Tick> {
 
     /**
      * The tick duration in seconds.
@@ -76,5 +77,12 @@ public class Tick extends AbstractEntityKey {
 
     public String convertTickToText() {
         return "Tick " + this.getId() + " at " + this.getTickStarts().format(tickFormatter);
+    }
+
+    @Override
+    public int compareTo(@Nonnull final Tick o) {
+        Preconditions.checkNotNull(o, "o must not be empty");
+
+        return Integer.compare(getId(), o.getId());
     }
 }

@@ -45,10 +45,10 @@ public class BattleServiceTest {
 
     @Test
     public void testRunBattles() {
-        Tick latest = tickService.getLatest();
+        Tick latest = tickService.getToday();
         if (latest == null) {
             masterOfTheUniverseService.createInitialData();
-            latest = tickService.getLatest();
+            latest = tickService.getToday();
         }
         long start = System.currentTimeMillis();
         battleService.runBattles(latest);

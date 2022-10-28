@@ -472,9 +472,11 @@ public class TickService {
         return tickRepository.findById(idHull).orElse(null);
     }
 
-    @Nullable
-    public Tick getLatest() {
-        return tickRepository.getLatest();
+    @Nonnull
+    public Tick getToday() {
+        final Tick latest = tickRepository.getLatest();
+        Preconditions.checkNotNull(latest, "latest must not be empty");
+        return latest;
     }
 
     public boolean isTicking() {

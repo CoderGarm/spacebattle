@@ -750,7 +750,7 @@ public class MasterOfTheUniverseService {
     public void runBattleForNewUser(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
-        final Tick today = tickService.getLatest();
+        final Tick today = tickService.getToday();
         if (today == null) {
             throw new NotifyWebUserException("There is no today, could be a problem.");
         }
