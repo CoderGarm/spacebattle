@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
+import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStateService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
@@ -13,6 +14,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +36,8 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + BattleReportApi.ENDPOINT + "/")
 public class BattleReportApi extends BaseApi {
 
-    @Nonnull
+    private final static Logger LOGGER = LoggerFactory.getLogger(BattleReportApi.class);
+
     public static final String ENDPOINT = "report";
     public static final String FIGHTING_ENDPOINT = "battle";
     public static final String FIGHTING_BY_ID_ENDPOINT = "battle/byId";
@@ -42,11 +46,14 @@ public class BattleReportApi extends BaseApi {
     @Nonnull
     private final BattleReportService battleReportService;
 
-    @Autowired
-    public BattleReportApi(@Nonnull final BattleReportService battleReportService) {
-        Preconditions.checkNotNull(battleReportService, "fightingReportService shouldn't be null!");
+    @Nonnull
+    private final WarshipHealthStateService warshipHealthStateService;
 
-        this.battleReportService = battleReportService;
+    @Autowired
+    public BattleReportApi(@Nonnull final BattleReportService battleReportService,
+                           @Nonnull final WarshipHealthStateService warshipHealthStateService) {
+        this.battleReportService = Preconditions.checkNotNull(battleReportService, "battleReportService must not be empty");
+        this.warshipHealthStateService = Preconditions.checkNotNull(warshipHealthStateService, "warshipHealthStateService must not be empty");
     }
 
     @GetMapping(value = FIGHTING_AMOUNT_ENDPOINT)

@@ -36,9 +36,9 @@ public class WarshipHealthStateService {
         warshipHealthStateRepository.saveAll(warshipHealthStates);
     }
 
-    public void deleteAll(final Collection<WarshipHealthState> warshipHealthStates) {
-        Preconditions.checkNotNull(warshipHealthStates, "warshipHealthStates must not be empty");
+    public void save(@Nonnull final WarshipHealthState healthState) {
+        Preconditions.checkNotNull(healthState, "healthState must not be empty");
 
-        warshipHealthStateRepository.deleteAll(warshipHealthStates);
+        warshipHealthStateRepository.save(healthState);
     }
 }

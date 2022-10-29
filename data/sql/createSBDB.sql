@@ -7,6 +7,14 @@
         weaponAlignment varchar(255)
     ) engine=InnoDB;
 
+    create table activeFittingsSnapshot (
+       idWarshipHealthStateSnapshot integer not null,
+        amount integer not null,
+        idLauncher integer,
+        idWeapon integer,
+        weaponAlignment varchar(255)
+    ) engine=InnoDB;
+
     create table alignedFitting (
        idShipClass integer not null,
         amount integer not null,
@@ -160,6 +168,16 @@
         idOwner integer not null,
         idResourceDeposit integer,
         primary key (idFleet)
+    ) engine=InnoDB;
+
+    create table fleetSnapshot (
+       idFleetSnapshot integer not null auto_increment,
+        isDeleted bit not null default false,
+        name varchar(255) not null,
+        idBattleReport integer not null,
+        idFleet integer not null,
+        idOwner integer not null,
+        primary key (idFleetSnapshot)
     ) engine=InnoDB;
 
     create table forum (
@@ -409,8 +427,8 @@
 
     create table participatingFleets (
        idBattleReport integer not null,
-        idFleet integer not null,
-        primary key (idBattleReport, idFleet)
+        idFleetSnapshot integer not null,
+        primary key (idBattleReport, idFleetSnapshot)
     ) engine=InnoDB;
 
     create table participatingUsers (
@@ -484,6 +502,13 @@
         amount decimal(19, 0) not null,
         idMissile integer not null,
         primary key (idWarshipHealthState, idMissile)
+    ) engine=InnoDB;
+
+    create table remainingShotsSnapshot (
+       idWarshipHealthStateSnapshot integer not null,
+        amount decimal(19, 0) not null,
+        idMissile integer not null,
+        primary key (idWarshipHealthStateSnapshot, idMissile)
     ) engine=InnoDB;
 
     create table research (
@@ -651,11 +676,26 @@
         value decimal(19, 0)
     ) engine=InnoDB;
 
+    create table warshipCapabilitiesSnapshot (
+       idWarshipHealthStateSnapshot integer not null,
+        moduleType varchar(255),
+        value decimal(19, 0)
+    ) engine=InnoDB;
+
     create table warshipHealthState (
        idWarshipHealthState integer not null auto_increment,
         isFightingCapable bit not null default true,
         idWarship integer not null,
         primary key (idWarshipHealthState)
+    ) engine=InnoDB;
+
+    create table warshipHealthStateSnapshot (
+       idWarshipHealthStateSnapshot integer not null auto_increment,
+        isFightingCapable bit not null default true,
+        idBattleReport integer not null,
+        idFleetSnapshot integer not null,
+        idWarship integer not null,
+        primary key (idWarshipHealthStateSnapshot)
     ) engine=InnoDB;
 
     create table weapon (
@@ -743,6 +783,21 @@
        add constraint FKqf0cnnigkfynfaf6jok2lby74 
        foreign key (idWarshipHealthState) 
        references warshipHealthState (idWarshipHealthState);
+
+    alter table activeFittingsSnapshot 
+       add constraint FKlw1s63u5x690vuag5ym70upqw 
+       foreign key (idLauncher) 
+       references launcher (idLauncher);
+
+    alter table activeFittingsSnapshot 
+       add constraint FK8ug5h1r2xixwuogyl5n6y2jy2 
+       foreign key (idWeapon) 
+       references weapon (idWeapon);
+
+    alter table activeFittingsSnapshot 
+       add constraint FKm7x7patbu0qiko7r2v7hdnoi 
+       foreign key (idWarshipHealthStateSnapshot) 
+       references warshipHealthStateSnapshot (idWarshipHealthStateSnapshot);
 
     alter table alignedFitting 
        add constraint FKkhnl9hmtdgol96bsu6d5csqxg 
@@ -953,6 +1008,21 @@
        add constraint FKckq55cmimjpois3mst803atuy 
        foreign key (idResourceDeposit) 
        references resourceDeposit (idResourceDeposit);
+
+    alter table fleetSnapshot 
+       add constraint FK929r4p7vk0f3k3s4ocbt7h50e 
+       foreign key (idBattleReport) 
+       references battleReport (idBattleReport);
+
+    alter table fleetSnapshot 
+       add constraint FK7m974jpjlnp7r615irb6nppcj 
+       foreign key (idFleet) 
+       references fleet (idFleet);
+
+    alter table fleetSnapshot 
+       add constraint FKhr16a2b5d1q9yjjnc43holh2p 
+       foreign key (idOwner) 
+       references user (idUser);
 
     alter table forum 
        add constraint FKbd3cwb6yurr6utojembdwjiy1 
@@ -1250,9 +1320,9 @@
        references shipKillerHit (idShipKillerHit);
 
     alter table participatingFleets 
-       add constraint FKayayypcvevpaihludw9p2jcdh 
-       foreign key (idFleet) 
-       references fleet (idFleet);
+       add constraint FKptc0phylec3318d12arsxd0j 
+       foreign key (idFleetSnapshot) 
+       references fleetSnapshot (idFleetSnapshot);
 
     alter table participatingFleets 
        add constraint FKbp90ne9mn2vhmh9m7kinwjxki 
@@ -1358,6 +1428,16 @@
        add constraint FKsu3q3bssdgu55ubnf1bbhr2ce 
        foreign key (idWarshipHealthState) 
        references warshipHealthState (idWarshipHealthState);
+
+    alter table remainingShotsSnapshot 
+       add constraint FKcfct28ygeri834a9akuiafjqg 
+       foreign key (idMissile) 
+       references missile (idMissile);
+
+    alter table remainingShotsSnapshot 
+       add constraint FKowghx8dytftgsrejrwv13qlbf 
+       foreign key (idWarshipHealthStateSnapshot) 
+       references warshipHealthStateSnapshot (idWarshipHealthStateSnapshot);
 
     alter table research 
        add constraint FKni50te130dndarqgicsq3svhb 
@@ -1539,8 +1619,28 @@
        foreign key (idWarshipHealthState) 
        references warshipHealthState (idWarshipHealthState);
 
+    alter table warshipCapabilitiesSnapshot 
+       add constraint FKeoahcn00mc9xyot7w9bqpcsof 
+       foreign key (idWarshipHealthStateSnapshot) 
+       references warshipHealthStateSnapshot (idWarshipHealthStateSnapshot);
+
     alter table warshipHealthState 
        add constraint FK8n2fodpdy927lvcfqgsh1ejc8 
+       foreign key (idWarship) 
+       references warShip (idWarShip);
+
+    alter table warshipHealthStateSnapshot 
+       add constraint FKkohi791t1w85m3utjw493xcbe 
+       foreign key (idBattleReport) 
+       references battleReport (idBattleReport);
+
+    alter table warshipHealthStateSnapshot 
+       add constraint FKcjim226ew093h6wpualjjrodk 
+       foreign key (idFleetSnapshot) 
+       references fleetSnapshot (idFleetSnapshot);
+
+    alter table warshipHealthStateSnapshot 
+       add constraint FKboga6909c5cwey1d6ung5i8we 
        foreign key (idWarship) 
        references warShip (idWarShip);
 

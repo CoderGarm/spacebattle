@@ -100,4 +100,24 @@ public class Fleet {
         this.isActive = fleet.isActive();
         this.needsRepair = fleet.isNeedsRepair();
     }
+
+    public Fleet(@Nonnull final de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot fleetSnapshot,
+                 @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(fleetSnapshot, "fleetSnapshot shouldn't be null!");
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
+
+        final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetSnapshot.getFleet();
+        this.idFleet = fleet.getId();
+        this.owner = new UserJson(fleet.getOwner());
+        this.name = fleet.getName();
+        this.orbit = fleet.getOrbit() != null ? new FleetOrbit(fleet.getOrbit()) : null;
+        this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;
+
+        this.ships.addAll(fleetSnapshot.getShips().stream().map(w -> new WarShip(w, languageCode)).collect(Collectors.toList()));
+        this.spacecraftCapabilities = new SpacecraftCapabilities(fleetSnapshot);
+        this.baseSpacecraftCapabilities = new SpacecraftCapabilities(fleet.getShipsByClass());
+        this.isFTLCapable = fleet.isFTLCapable();
+        this.isActive = fleet.isActive();
+        this.needsRepair = fleet.isNeedsRepair();
+    }
 }

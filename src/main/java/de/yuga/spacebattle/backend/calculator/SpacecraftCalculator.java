@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.calculator;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.round.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
@@ -10,6 +11,8 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
+import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateAccessor;
+import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateSnapshot;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.ESupportType;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
@@ -60,11 +63,28 @@ public class SpacecraftCalculator {
         return getSpacecraftCapabilities();
     }
 
-    public SpacecraftCapabilities getSpaceCraftCapabilities(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState warshipHealthState) {
+    public SpacecraftCapabilities getSpaceCraftCapabilities(@Nonnull final WarshipHealthStateAccessor warshipHealthState) {
         Preconditions.checkNotNull(warshipHealthState, "warshipHealthState must not be empty");
 
         effectValueByModuleType = createBaseData();
         setValue(warshipHealthState);
+        return getSpacecraftCapabilities();
+    }
+
+    public SpacecraftCapabilities getSpaceCraftCapabilities(@Nonnull final Collection<de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateAccessor> warshipHealthStates) {
+        Preconditions.checkNotNull(warshipHealthStates, "warshipHealthStates must not be empty");
+
+        effectValueByModuleType = createBaseData();
+        warshipHealthStates.forEach(this::setValue);
+        return getSpacecraftCapabilities();
+    }
+
+    public SpacecraftCapabilities getSpaceCraftCapabilities(@Nonnull final FleetSnapshot fleetSnapshot) {
+        Preconditions.checkNotNull(fleetSnapshot, "fleetSnapshot must not be empty");
+
+        effectValueByModuleType = createBaseData();
+        final Set<WarshipHealthStateSnapshot> ships = fleetSnapshot.getShips();
+        ships.forEach(this::setValue);
         return getSpacecraftCapabilities();
     }
 
@@ -85,6 +105,16 @@ public class SpacecraftCalculator {
 
         effectValueByModuleType = createBaseData();
         setValue(warshipHealthState);
+        return effectValueByModuleType.entrySet().stream()
+                .map(de.yuga.spacebattle.backend.entities.turn.battle.combat.CapabilityValue::new)
+                .collect(Collectors.toSet());
+    }
+
+    public Set<de.yuga.spacebattle.backend.entities.turn.battle.combat.CapabilityValue> getCapabilityValues(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState healthState) {
+        Preconditions.checkNotNull(healthState, "healthState must not be empty");
+
+        effectValueByModuleType = createBaseData();
+        setValue(healthState);
         return effectValueByModuleType.entrySet().stream()
                 .map(de.yuga.spacebattle.backend.entities.turn.battle.combat.CapabilityValue::new)
                 .collect(Collectors.toSet());
@@ -134,7 +164,7 @@ public class SpacecraftCalculator {
                 .collect(Collectors.toMap(Function.identity(), value -> BigDecimal.ZERO));
     }
 
-    private void setValue(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState warshipHealthState) {
+    private void setValue(@Nonnull final WarshipHealthStateAccessor warshipHealthState) {
         Preconditions.checkNotNull(warshipHealthState, "warshipHealthState shouldn't be null!");
 
         final ShipClass shipClass = warshipHealthState.getWarShip().getShipClass();
@@ -165,7 +195,7 @@ public class SpacecraftCalculator {
         }
     }
 
-    private void setValueByPropulsion(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState warshipHealthState,
+    private void setValueByPropulsion(@Nonnull final WarshipHealthStateAccessor warshipHealthState,
                                       @Nonnull final EModuleType propulsion) {
         Preconditions.checkNotNull(warshipHealthState, "warshipHealthState must not be empty");
         Preconditions.checkNotNull(propulsion, "propulsion must not be empty");

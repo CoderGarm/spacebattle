@@ -52,6 +52,7 @@ import de.yuga.spacebattle.backend.services.spacecraft.HullService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
 import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStateService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.apache.commons.lang3.StringUtils;
@@ -151,6 +152,9 @@ public class MasterOfTheUniverseService {
     @Nonnull
     private final ResourceService resourceService;
 
+    @Nonnull
+    private final BattleReportService battleReportService;
+
     @Autowired
     public MasterOfTheUniverseService(@Nonnull final TickService tickService,
                                       @Nonnull final UserService userService,
@@ -170,7 +174,7 @@ public class MasterOfTheUniverseService {
                                       @Nonnull final ColonizationService colonizationService,
                                       @Nonnull final BattleService battleService,
                                       @Nonnull final TranslatableService translatableService,
-                                      @Nonnull final ResourceService resourceService) {
+                                      @Nonnull final ResourceService resourceService, @Nonnull final BattleReportService battleReportService) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.allianceService = Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");
@@ -190,20 +194,22 @@ public class MasterOfTheUniverseService {
         this.battleService = Preconditions.checkNotNull(battleService, "battleService must not be empty");
         this.translatableService = Preconditions.checkNotNull(translatableService, "translatableService must not be empty");
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
+        this.battleReportService = Preconditions.checkNotNull(battleReportService, "battleReportService must not be empty");
     }
 
     @PostConstruct
     @SuppressWarnings("ConstantConditions")
     public void transform() {
         // todo remove after transform is done
-        LOGGER.info("---------------------------- POST CONSTRUCT ----------------------------");
+        LOGGER.info("---------------------------- transforming ----------------------------");
         final Set<WarShip> without = warShipService.findAll().stream().filter(w -> w.getWarshipHealthState() == null).collect(Collectors.toSet());
         if (!without.isEmpty()) {
+            LOGGER.info("---------------------------- start transforming ----------------------------");
             without.forEach(WarShip::createWarshipHealthState);
             warShipService.saveAll(without);
-            LOGGER.info("Done creating health states");
+            LOGGER.info("---------------------------- done transforming ----------------------------");
         } else {
-            LOGGER.info("---------------------------- nothing left to transform ----------------------------");
+            LOGGER.info("---------------------------- nothing to transform ----------------------------");
         }
     }
 

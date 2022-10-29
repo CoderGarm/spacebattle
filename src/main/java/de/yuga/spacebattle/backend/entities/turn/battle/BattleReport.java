@@ -12,6 +12,7 @@ import de.yuga.spacebattle.backend.combat.round.MissileSalvoHealthState;
 import de.yuga.spacebattle.backend.converter.CombatRoundConverter;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
@@ -76,12 +77,12 @@ public class BattleReport extends AbstractEntityKey {
      * The protagonists - and the antagonists.
      */
     @Nonnull
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "participatingFleets",
             joinColumns = @JoinColumn(name = "idBattleReport", referencedColumnName = "idBattleReport"),
-            inverseJoinColumns = @JoinColumn(name = "idFleet", referencedColumnName = "idFleet")
+            inverseJoinColumns = @JoinColumn(name = "idFleetSnapshot", referencedColumnName = "idFleetSnapshot")
     )
-    private final Set<Fleet> participatingFleets = new HashSet<>();
+    private final Set<FleetSnapshot> participatingFleets = new HashSet<>();
 
     /**
      * The movements which were done in this clash.
@@ -146,9 +147,14 @@ public class BattleReport extends AbstractEntityKey {
         Preconditions.checkNotNull(battleResult, "fightingResult shouldn't be null!");
 
         this.tick = tick;
+        final List<CombatRound> combatRounds = battleResult.getRoundStates().stream()
+                .collect(Collectors.groupingBy(FleetRoundState::getCombatRound,
+                        Collectors.mapping(Function.identity(), Collectors.toList()))).keySet().stream()
+                .sorted(CombatRound::compareTo).collect(Collectors.toList());
+        this.lastRound = Collections.max(combatRounds, CombatRound::compareTo);
         this.venue = battleResult.getFleetClash().getOrbit();
         this.participatingUsers.addAll(battleResult.getFleetClash().getParticipatingFleets().stream().map(Fleet::getOwner).collect(Collectors.toSet()));
-        this.participatingFleets.addAll(battleResult.getFleetClash().getParticipatingFleets());
+        this.participatingFleets.addAll(battleResult.getFleetClash().getParticipatingFleets().stream().map(f -> new FleetSnapshot(this, f)).collect(Collectors.toSet()));
         stateBattleResult(battleResult);
     }
 
@@ -178,7 +184,7 @@ public class BattleReport extends AbstractEntityKey {
     }
 
     @Nonnull
-    public Set<Fleet> getParticipatingFleets() {
+    public Set<FleetSnapshot> getParticipatingFleets() {
         return participatingFleets;
     }
 
@@ -232,7 +238,6 @@ public class BattleReport extends AbstractEntityKey {
                         Collectors.mapping(Function.identity(), Collectors.toList())));
 
         final List<CombatRound> combatRounds = statesByRound.keySet().stream().sorted(CombatRound::compareTo).collect(Collectors.toList());
-        this.lastRound = Collections.max(combatRounds, CombatRound::compareTo);
         for (final CombatRound combatRound : combatRounds) {
             final List<ECombatPhase> combatPhases = Arrays.stream(ECombatPhase.values()).collect(Collectors.toList());
 

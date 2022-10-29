@@ -14,6 +14,7 @@ import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.researches.ResearchLevel;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Job;
+import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
@@ -27,6 +28,7 @@ import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStateService;
 import de.yuga.spacebattle.backend.transformer.BuildingCsvTransformer;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.junit.jupiter.api.Disabled;
@@ -84,6 +86,9 @@ public class MasterOfTheUniverseServiceTest {
     @Autowired
     private WarShipService warShipService;
 
+    @Autowired
+    private WarshipHealthStateService healthStateService;
+
     @Test
     void tick() {
         tickService.doTick();
@@ -106,9 +111,26 @@ public class MasterOfTheUniverseServiceTest {
 
         masterOfTheUniverseService.createFleetForUser(saved);
         final WarShip opponentForUser = masterOfTheUniverseService.createOpponentForUser(saved);
-        opponentForUser.getWarshipHealthState().getCapabilities().forEach(cap -> cap.setValue(cap.getValue().divide(BigDecimal.valueOf(3), MathContext.DECIMAL32)));
+        final WarshipHealthState warshipHealthState = opponentForUser.getWarshipHealthState();
+        warshipHealthState.getCapabilities().forEach(cap -> cap.setValue(cap.getValue().divide(BigDecimal.valueOf(3), MathContext.DECIMAL32)));
+
         warShipService.save(opponentForUser);
         tickService.doTick();
+
+        System.out.println("Login: " + random);
+    }
+
+    @Test
+    void runSecondBattle() {
+        final String username = "fluqhsjqda";
+        final User saved = userService.findByUsername(username).get().getUser();
+
+        final WarShip opponentForUser = masterOfTheUniverseService.createOpponentForUser(saved);
+
+        warShipService.save(opponentForUser);
+        tickService.doTick();
+
+        System.out.println("Login: " + username);
     }
 
     private String random() {

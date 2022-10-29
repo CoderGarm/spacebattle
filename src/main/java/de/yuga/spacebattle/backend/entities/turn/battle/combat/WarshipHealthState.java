@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "warshipHealthState")
 @AttributeOverride(name = "id", column = @Column(name = "idWarshipHealthState"))
-public class WarshipHealthState extends AbstractEntityKey {
+public class WarshipHealthState extends AbstractEntityKey implements WarshipHealthStateAccessor {
 
     /**
      * The war ship which is this state for.
@@ -34,7 +34,6 @@ public class WarshipHealthState extends AbstractEntityKey {
     @NotNull
     @OneToOne
     @JoinColumn(name = "idWarship")
-    @SuppressWarnings({"unused", "NotNullFieldNotInitialized"})
     private WarShip warShip;
 
     @Nonnull
@@ -102,33 +101,39 @@ public class WarshipHealthState extends AbstractEntityKey {
         this.remainingShots.putAll(warshipHealthState.getMissileAmmunitionState().getRemainingShots());
     }
 
+    @Override
     public double getStateByAsDouble(@Nonnull final EModuleType eModuleType) {
         Preconditions.checkNotNull(eModuleType, "eModuleType must not be empty");
 
         return capabilities.stream().filter(cap -> cap.getModuleType() == eModuleType).map(cap -> cap.getValue().doubleValue()).reduce(0D, Double::sum);
     }
 
+    @Override
     public int getStateByAsInt(@Nonnull final EModuleType eModuleType) {
         Preconditions.checkNotNull(eModuleType, "eModuleType must not be empty");
 
         return capabilities.stream().filter(cap -> cap.getModuleType() == eModuleType).map(cap -> cap.getValue().intValue()).reduce(0, Integer::sum);
     }
 
+    @Override
     @Nonnull
     public WarShip getWarShip() {
         return warShip;
     }
 
+    @Override
     @Nonnull
     public Set<AlignedFitting> getActiveFittings() {
         return activeFittings;
     }
 
+    @Override
     @Nonnull
     public Map<Missile, Integer> getRemainingShots() {
         return remainingShots;
     }
 
+    @Override
     public void setFightingCapable(final boolean fightingCapable) {
         isFightingCapable = fightingCapable;
     }
@@ -138,6 +143,7 @@ public class WarshipHealthState extends AbstractEntityKey {
      *
      * @return <code>true</code> if the ship can fight, <code>false</code> otherwise
      */
+    @Override
     public boolean isFightingCapable() {
         return isFightingCapable;
     }
@@ -147,10 +153,12 @@ public class WarshipHealthState extends AbstractEntityKey {
      *
      * @return <code>true</code> if the ship can is probably a hulk, but not destroyed, <code>false</code> otherwise
      */
+    @Override
     public boolean isAlive() {
         return warShip.isAlive();
     }
 
+    @Override
     @Nonnull
     public Set<CapabilityValue> getCapabilities() {
         return capabilities;

@@ -27,7 +27,7 @@ public class WarshipHealthState {
         this.isFightingCapable = isFightingCapable;
     }
 
-    public WarshipHealthState(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState warshipHealthState) {
+    public WarshipHealthState(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateAccessor warshipHealthState) {
         Preconditions.checkNotNull(warshipHealthState, "warshipHealthState shouldn't be null!");
 
         this.spacecraftCapabilities = new SpacecraftCapabilities(warshipHealthState);

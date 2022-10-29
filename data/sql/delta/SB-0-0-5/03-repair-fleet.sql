@@ -3,12 +3,11 @@ alter table fleet add column needsRepair bit not null default false after name;
 
 alter table job add column priority varchar(255) not null after jobDoneAtZero;
 alter table job add column idFleet integer after idBuilding;
-
-update job set priority = 'NONE' where priority is null;
-
 alter table job add column isDeleted bit not null default false after idJob;
-
 alter table job add column idTick integer after idFacility;
+
+# noinspection SqlWithoutWhere
+update job set priority = 'NONE';
 
 alter table job
        add constraint FK9cgvto0bqandfg7ly93veyvc5

@@ -55,6 +55,9 @@ public class Tick extends AbstractEntityKey implements Comparable<Tick> {
         return id == tick.id;
     }
 
+    public int getNo() {
+        return id;
+    }
 
     @Override
     public int hashCode() {

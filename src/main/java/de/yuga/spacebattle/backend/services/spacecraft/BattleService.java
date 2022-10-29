@@ -121,6 +121,7 @@ public class BattleService {
         Preconditions.checkNotNull(latest, "latest shouldn't be null!");
         Preconditions.checkNotNull(battleResult, "fightingResult shouldn't be null!");
 
+        final BattleReport battleReport = battleReportService.save(new BattleReport(latest, battleResult));
         final List<WarShip> warShips = battleResult.getFleetClash()
                 .getParticipatingFleets().stream()
                 .map(Fleet::getAllShips)
@@ -131,31 +132,27 @@ public class BattleService {
         warShipService.markAllAsDestroyed(losses);
         fleetService.markFleetsWithoutShipsAsDeleted(battleResult.getFleetClash().getParticipatingFleets());
 
-        final Map<WarShip, WarshipHealthState> knownStates = warShips.stream()
-                .collect(Collectors.toMap(Function.identity(), WarShip::getWarshipHealthState));
-
         final Map<WarShip, de.yuga.spacebattle.backend.combat.round.WarshipHealthState> byResult = battleResult.getWarshipHealthStates();
 
         final Set<Fleet> fleetsToPersist = new HashSet<>();
         final Set<WarshipHealthState> statesToPersist = new HashSet<>();
-        knownStates.forEach((warShip, knownState) -> {
-            final de.yuga.spacebattle.backend.combat.round.WarshipHealthState newState = byResult.get(warShip);
-            if (knownState.hasChanged(newState)) {
-                knownState.update(newState);
-                final Fleet fleet = warShip.getFleet();
-                fleet.setNeedsRepair(true);
-                fleetsToPersist.add(fleet);
-                statesToPersist.add(knownState);
-            }
-        });
+        warShips.stream()
+                .collect(Collectors.toMap(Function.identity(), WarShip::getWarshipHealthState))
+                .forEach((warShip, knownState) -> {
+                    final de.yuga.spacebattle.backend.combat.round.WarshipHealthState newState = byResult.get(warShip);
+                    if (knownState.hasChanged(newState)) {
+                        knownState.update(newState);
+                        final Fleet fleet = warShip.getFleet();
+                        fleet.setNeedsRepair(true);
+                        fleetsToPersist.add(fleet);
+                        statesToPersist.add(knownState);
+                    }
+                });
 
         warshipHealthStateService.saveAll(statesToPersist);
         fleetService.saveAll(fleetsToPersist);
 
-        BattleReport battleReport = new BattleReport(latest, battleResult);
-        battleReport = battleReportService.save(battleReport);
         battleLogger.logBattleResult(battleReport, battleResult);
-
         return battleReport;
     }
 }

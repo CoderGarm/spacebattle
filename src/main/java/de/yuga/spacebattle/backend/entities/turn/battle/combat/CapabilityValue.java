@@ -76,4 +76,9 @@ public class CapabilityValue {
     public int hashCode() {
         return new HashCodeBuilder(17, 37).append(moduleType).toHashCode();
     }
+
+    @Override
+    public String toString() {
+        return "moduleType: " + moduleType.name() + ", value: " + value;
+    }
 }
