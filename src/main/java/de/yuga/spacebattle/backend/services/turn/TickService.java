@@ -323,10 +323,11 @@ public class TickService {
         if (fleet == null) {
             return;
         }
-        final Set<WarshipHealthState> toDelete = fleet.getAliveShips().stream()
+        final Set<WarshipHealthState> toRepair = fleet.getAliveShips().stream()
                 .map(WarShip::getWarshipHealthState)
                 .collect(Collectors.toSet());
-        warshipHealthStateService.deleteAll(toDelete);
+        toRepair.forEach(WarshipHealthState::repair);
+        warshipHealthStateService.saveAll(toRepair);
         fleet.setNeedsRepair(false);
         fleetService.save(fleet);
         log(planet, job, "Done repairing fleet.");

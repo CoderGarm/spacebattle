@@ -201,4 +201,24 @@ public class WarshipHealthState extends AbstractEntityKey {
 
         return differState || differMissiles;
     }
+
+    public void repair() {
+        final ShipClass shipClass = warShip.getShipClass();
+        this.capabilities.clear();
+        this.capabilities.addAll(new SpacecraftCalculator().getCapabilityValues(shipClass));
+        this.activeFittings.clear();
+        this.activeFittings.addAll(shipClass.getFittings());
+        final Set<AlignedFitting> fittingByType = this.activeFittings.stream()
+                .filter(FittingUtils.MISSILES)
+                .collect(Collectors.toSet());
+
+        final Map<Missile, Integer> shotsPerMissile = fittingByType.stream()
+                .map(AlignedFitting::getLauncher)
+                .filter(Objects::nonNull)
+                .map(Launcher::getAmmunitionModule)
+                .collect(Collectors.groupingBy(AmmunitionModule::getMissile,
+                        Collectors.mapping(AmmunitionModule::getEffectValue, Collectors.reducing(0, Integer::sum))));
+        this.remainingShots.clear();
+        this.remainingShots.putAll(shotsPerMissile);
+    }
 }
