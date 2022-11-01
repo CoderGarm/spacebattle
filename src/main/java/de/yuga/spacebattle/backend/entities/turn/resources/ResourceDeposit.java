@@ -291,7 +291,6 @@ public class ResourceDeposit extends AbstractEntityKey {
     public void setAbsolutePopulation(@Nonnull final EEducationType educationType,
                                       final long totalAmount) {
         Preconditions.checkNotNull(educationType, "educationType shouldn't be null!");
-        Preconditions.checkArgument(totalAmount >= 0, "totalAmount shouldn't be negative!");
 
         humanResources.put(educationType, totalAmount);
     }
@@ -463,11 +462,12 @@ public class ResourceDeposit extends AbstractEntityKey {
     public void equalize() {
         Arrays.stream(EResourceType.valuesWithoutPopulation())
                 .forEach(eResourceType -> {
-                    if (!ETechLevel.TECH_I.getExcludedResources().contains(eResourceType)) {
+                    if (eResourceType.getCollectableType() == ECollectableType.COLLECTABLE && !ETechLevel.TECH_I.getExcludedResources().contains(eResourceType)) {
                         resources.put(eResourceType, 1000L);
                     } else {
                         resources.put(eResourceType, 0L);
                     }
                 });
+        Arrays.stream(EEducationType.values()).forEach(eEducationType -> humanResources.put(eEducationType, 0L));
     }
 }

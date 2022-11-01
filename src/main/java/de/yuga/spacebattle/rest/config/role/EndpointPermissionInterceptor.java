@@ -32,8 +32,8 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
  * The method prevents access to the method when the current user has not the permission to access.
  */
 @Aspect
-@Order(Ordered.LOWEST_PRECEDENCE - 100)
 @Component
+@Order(Ordered.LOWEST_PRECEDENCE - 100)
 public class EndpointPermissionInterceptor {
 
     @Nonnull

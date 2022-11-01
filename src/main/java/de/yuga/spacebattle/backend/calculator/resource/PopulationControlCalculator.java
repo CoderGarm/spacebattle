@@ -57,10 +57,10 @@ public class PopulationControlCalculator {
         final long miningFactor = planet.getMiningFactors().getMiningFactorByType(EResourceType.POPULATION);
         final BigDecimal N = getVirtualAmountOfPops(miningFactor, sumOfPopulation);
         // sum up all the output of the producing and capacity buildings
-        final BigDecimal r = reproductive.stream().map(TickOutputCalculator::getTickOutputByLevelForPopulation).reduce(BigDecimal.ZERO, BigDecimal::add);
-        if (r.compareTo(BigDecimal.ONE) > 0) {
-            // how to make sure that r is below 1?
-            throw new NotifyWebUserException("chef, you have to repair that!");
+        BigDecimal r = reproductive.stream().map(TickOutputCalculator::getTickOutputByLevelForPopulation).reduce(BigDecimal.ZERO, BigDecimal::add);
+        if (r.compareTo(BigDecimal.valueOf(0.9)) > 0) {
+            // maximum reproduction rate must not succeed 1 and is limited to 90 %
+            r = BigDecimal.valueOf(0.9);
         }
 
         final BigDecimal K = capacity.stream()

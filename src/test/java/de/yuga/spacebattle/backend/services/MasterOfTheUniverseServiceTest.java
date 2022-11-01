@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services;
 
 import de.yuga.spacebattle.SpringBootProdProfile;
+import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.account.forum.Forum;
 import de.yuga.spacebattle.backend.entities.account.forum.ForumMessage;
@@ -104,9 +105,8 @@ public class MasterOfTheUniverseServiceTest {
         researchService.addResearch(saved, researchesWithoutPrecondition);
 
         final Planet planet = colonizationService.findPlanetForNewUser();
-        MasterOfTheUniverseService.populateNewColonization(planet.getResourceDeposit());
         planetService.save(planet);
-        final Colonization colonization = new Colonization(saved, planet, planet.getResourceDeposit().getCrewRequirement(), 0);
+        final Colonization colonization = new Colonization(saved, planet, ColonizationCostCalculator.getCrewRequirementForColonization(), 0);
         colonizationService.colonizePlanet(colonization);
 
         masterOfTheUniverseService.createFleetForUser(saved);
@@ -187,13 +187,6 @@ public class MasterOfTheUniverseServiceTest {
     void readMap() {
         final List<MasterOfTheUniverseService.Coords> coords = resourceService.readStarSystems();
         assertNotNull(coords);
-    }
-
-    @Test
-    void transformGalaxy() {
-        System.out.println("Start transforming");
-        masterOfTheUniverseService.transformTheGalaxy();
-        System.out.println("Transforming done");
     }
 
     @Test

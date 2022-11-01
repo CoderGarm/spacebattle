@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.rest.api.account;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
@@ -281,9 +282,8 @@ public class AuthApi {
         final Planet planet = colonizationService.findPlanetForNewUser();
         planet.getMiningFactors().equalize();
         planet.getResourceDeposit().equalize();
-        MasterOfTheUniverseService.populateNewColonization(planet.getResourceDeposit());
         planetService.save(planet);
-        final Colonization colonization = new Colonization(saved, planet, planet.getResourceDeposit().getCrewRequirement(), 0);
+        final Colonization colonization = new Colonization(saved, planet, ColonizationCostCalculator.getCrewRequirementForColonization(), 0);
         colonizationService.colonizePlanet(colonization);
 
         final Optional<WebUserDetails> sender = userService.findByUsername("Flashkid");

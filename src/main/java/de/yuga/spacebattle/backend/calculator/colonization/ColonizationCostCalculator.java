@@ -55,14 +55,14 @@ public class ColonizationCostCalculator {
     }
 
     @Nonnull
-    private static CrewRequirement getCrewRequirementForColonization() {
+    public static CrewRequirement getCrewRequirementForColonization() {
         final Map<EEducationType, Long> requiredCrew = new HashMap<>();
         requiredCrew.put(EEducationType.NONE, 200L);
-        requiredCrew.put(EEducationType.ENLISTED, 50L);
-        requiredCrew.put(EEducationType.OFFICER, 20L);
         requiredCrew.put(EEducationType.SCHOOL, 100L);
-        requiredCrew.put(EEducationType.COLLEGE, 200L);
-        requiredCrew.put(EEducationType.UNIVERSITY, 500L);
+        requiredCrew.put(EEducationType.COLLEGE, 1000L);
+        requiredCrew.put(EEducationType.UNIVERSITY, 1500L);
+        requiredCrew.put(EEducationType.ENLISTED, 250L);
+        requiredCrew.put(EEducationType.OFFICER, 150L);
         return new CrewRequirement(requiredCrew, EDepositType.COSTS);
     }
 

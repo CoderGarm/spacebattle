@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
@@ -30,7 +31,8 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
-import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
+import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateSnapshot;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
@@ -89,6 +91,20 @@ public class MasterOfTheUniverseService {
     public static final String DEFEATED_OPPONENT = "Defeated Opponent";
 
     private final static Map<EEducationType, Long> militaryCrew = new HashMap<>();
+    public static final ProductionType CONSTRUCTION_YARD_PT = new ProductionType(EResourceType.CONSTRUCTION, EProductionCategory.PRODUCE, null);
+    public static final ProductionType SHIPYARD_PT = new ProductionType(EResourceType.ORBITAL_CONSTRUCTION, EProductionCategory.PRODUCE, null);
+    public static final ProductionType RESEARCH_LAB_PT = new ProductionType(EResourceType.RESEARCH, EProductionCategory.PRODUCE, null);
+    public static final ProductionType MARKET_PT = new ProductionType(EResourceType.CREDITS, EProductionCategory.PRODUCE, null);
+    public static final ProductionType METAL_WORKS = new ProductionType(EResourceType.METALORE, EProductionCategory.PRODUCE, null);
+    public static final ProductionType HEAVY_METALS_WORK_PT = new ProductionType(EResourceType.RARE_ELEMENTS, EProductionCategory.PRODUCE, null);
+    public static final ProductionType RARE_ELEMENTS_PT = new ProductionType(EResourceType.HEAVY_METALS, EProductionCategory.PRODUCE, null);
+    public static final ProductionType LIVING_PT = new ProductionType(EResourceType.POPULATION, EProductionCategory.CAPACITY, null);
+    public static final ProductionType DOCTOR_PT = new ProductionType(EResourceType.POPULATION, EProductionCategory.PRODUCE, null);
+    public static final ProductionType ELEMENTARY_SCHOOL_PT = new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_CIVIL_I);
+    public static final ProductionType SECONDARY_SCHOOL_PT = new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_CIVIL_II);
+    public static final ProductionType UNIVERSITY_PT = new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_CIVIL_III);
+    public static final ProductionType MILITARY_I_PT = new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_MILITARY_I);
+    public static final ProductionType MILITARY_II_PT = new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_MILITARY_II);
 
     static {
         militaryCrew.put(EEducationType.ENLISTED, 20L);
@@ -209,14 +225,180 @@ public class MasterOfTheUniverseService {
             LOGGER.info("---------------------------- start transforming ----------------------------");
             without.forEach(WarShip::createWarshipHealthState);
             warShipService.saveAll(without);
+            LOGGER.info("---------------------------- health states created ----------------------------");
+
+            final List<BattleReport> battleReports = battleReportService.findAll();
+            battleReports.forEach(report -> report.getParticipatingFleets().forEach(snap -> snap.getShips().forEach(WarshipHealthStateSnapshot::update)));
+            battleReportService.saveAll(battleReports);
+            LOGGER.info("---------------------------- battle reports updated ----------------------------");
 
             mainPlanets.forEach(p -> p.getMiningFactors().equalize());
             planetService.saveAll(mainPlanets);
+
+            balanceBuildings();
+            LOGGER.info("---------------------------- buildings balanced ----------------------------");
 
             LOGGER.info("---------------------------- done transforming ----------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
         }
+    }
+
+    private void balanceBuildings() {
+
+        final List<Building> toStore = new ArrayList<>();
+
+        // population
+        changeBaseOfBuilding(DOCTOR_PT, 50, toStore);
+        changeBaseOfBuilding(LIVING_PT, 500, toStore);
+        changeBaseOfBuilding(ELEMENTARY_SCHOOL_PT, 100, toStore);
+        changeBaseOfBuilding(SECONDARY_SCHOOL_PT, 100, toStore);
+        changeBaseOfBuilding(UNIVERSITY_PT, 100, toStore);
+        changeBaseOfBuilding(MILITARY_I_PT, 50, toStore);
+        changeBaseOfBuilding(MILITARY_II_PT, 50, toStore);
+
+        // resources
+        changeBaseOfBuilding(METAL_WORKS, 250, toStore);
+        changeBaseOfBuilding(HEAVY_METALS_WORK_PT, 200, toStore);
+        changeBaseOfBuilding(RARE_ELEMENTS_PT, 100, toStore);
+
+        // forfeitable resources
+        changeBaseOfBuilding(RESEARCH_LAB_PT, 10, toStore);
+
+
+        buildingService.saveAll(toStore);
+    }
+
+    private void changeBaseOfBuilding(final ProductionType productionType, final int baseValue, final List<Building> toStore) {
+        final Building houses = buildingService.findBuildingByProductionType(productionType).get(0);
+        houses.setBaseValue(baseValue);
+        toStore.add(houses);
+    }
+
+    @SuppressWarnings({"unused"})
+    void createInitialDataPayload() {
+
+        final User flashkid = userService.createUser("Flashkid", "12457aA!", "mail", EWebUserRole.ADMIN, EGameUserRole.ALLIANCE_ADMIN);
+        final User pirate = userService.createUser(DEFEATED_OPPONENT, "12457aA!", "mail3", EWebUserRole.USER);
+        LOGGER.info("Users created");
+
+        final Alliance a1 = allianceService.createAlliance("Argonauten", "A", flashkid);
+        LOGGER.info("Alliance created");
+        LOGGER.info("Alliance populated.");
+
+        createForums();
+
+        final List<Coords> coords = resourceService.readStarSystems();
+        createStarSystems(coords);
+        final List<StarSystem> starSystems = starsystemService.findAll();
+
+        StarSystem s1 = starSystems.stream().filter(s -> s.getName().equals("Manticore")).findFirst().orElseThrow(() -> new NotifyWebUserException("The star systems should be present."));
+        LOGGER.info("Star systems created");
+
+        final Planet p11 = new ArrayList<>(s1.getPlanets()).get(0);
+        LOGGER.info("Planets created");
+
+        // buildings
+        Research livingStuff = research("Eternal live", "How to buy wine.", 1, ETechLevel.TECH_I, null);
+        Research unlocksConstructionYard = research("Construction Yard", "The construction yard research researches the construction yard.", 1, ETechLevel.TECH_I, null);
+        Research unlocksShipyard = research("Orbitals Construction Yard", "The orbitals Construction Yard research researches the orbitals construction yard.", 1, ETechLevel.TECH_I, null);
+        Research unlocksLaboratory = research("Laboratories", "The laboratories research researches laboratories.", 1, ETechLevel.TECH_I, null);
+        Research unlocksBank = research("Market place", "The Market place research researches Market places.", 1, ETechLevel.TECH_I, null);
+        Research unlocksMetals = research("Metal works", "The Metal works research researches Metal works.", 1, ETechLevel.TECH_I, null);
+        Research unlocksMecur = research("Special orbital ores", "The Special orbital ores research researches Special orbital ores.", 1, ETechLevel.TECH_I, unlocksMetals);
+        Research unlocksHyperWorks = research("Asynchronous Investigations", "The Asynchronous Investigations research researches Asynchronous Investigations.", 1, ETechLevel.TECH_I, unlocksMecur);
+
+        // modules
+        Research unlockLaser = research("Laser", "The Laser research researches ...", 1, ETechLevel.TECH_I, null);
+        Research unlockMissiles = research("Missile", "The Missile research researches ...", 1, ETechLevel.TECH_I, null);
+        Research unlockCounterMissiles = research("Counter Missile", "The Counter Missile research researches ...", 1, ETechLevel.TECH_I, null);
+        Research unlockPointDefense = research("Point Defense", "The point defense research researches ...", 1, ETechLevel.TECH_I, null);
+        Research unlockArmor = research("Armor", "The Armor research researches ...", 1, ETechLevel.TECH_I, null);
+        Research unlockShield = research("Shield", "The Shield research researches ...", 1, ETechLevel.TECH_I, null);
+        Research unlockPropulsion = research("Speed", "The Speed research researches sub light ...", 1, ETechLevel.TECH_I, null);
+        Research unlockFTLPropulsion = research("FTL Speed", "The FTL Speed research researches FTL ...", 1, ETechLevel.TECH_I, null);
+        Research unlockElectronicWarfare = research("Electronic Warfare", "The EW research researches electronic warfare.", 1, ETechLevel.TECH_I, null);
+        Research unlocksRocketAmmunition = research("Rocket Ammunition", "a bunch of rockets.", 1, ETechLevel.TECH_I, null);
+        Research unlocksCounterRocketAmmunition = research("Counter Rocket Ammunition", "another bunch of rockets.", 1, ETechLevel.TECH_I, null);
+        Research unlockPassive = research("Armor improvement I", "Improves the armor improvement module", 1, ETechLevel.TECH_I, null);
+
+        // hulls
+        Research unlockHull1 = research("Corvette", "The Corvette research researches Corvettes.", 1, ETechLevel.TECH_I, null);
+        Research unlockHull2 = research("Frigate", "The Frigate research researches Frigates.", 1, ETechLevel.TECH_I, null);
+        Research unlockHull3 = research("Cruiser", "The Cruiser research researches Cruisers.", 1, ETechLevel.TECH_I, unlockHull2);
+        LOGGER.info("Researches created");
+
+        Building constructionYard = building("Construction Yard", "The construction yard construct constructions.", 100, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, CONSTRUCTION_YARD_PT, unlocksConstructionYard);
+        Building orbitalsConstructionYard = building("Orbitals Construction Yard", "The construction yard construct orbital constructions.", 100, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, SHIPYARD_PT, unlocksShipyard);
+        Building researchB = building("Research Laboratories", "The lab investigates researches.", 100, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, RESEARCH_LAB_PT, unlocksLaboratory);
+        Building bank = building("Market place", "The market makes money.", 100, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, MARKET_PT, unlocksBank);
+        Building metalsWorks = building("Metal works", "Metals for progress.", 100, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, METAL_WORKS, unlocksMetals);
+        Building orbitalOres = building("Special orbital ores", "Heavier metals for more progress.", 100, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_II, HEAVY_METALS_WORK_PT, unlocksMecur);
+        Building investigations = building("Asynchronous Investigations", "Rare elements for the future.", 100, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_III, RARE_ELEMENTS_PT, unlocksHyperWorks);
+
+        Building livingRoom = building("Living room", "Everyone needs a home", 200, 15, EEducationType.COLLEGE, ETechLevel.TECH_I, LIVING_PT, livingStuff);
+        Building hospital = building("Hospital", "Everyone needs a doctor", 1, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, DOCTOR_PT, livingStuff);
+        Building elementarySchool = building("Elementary schools", "a school", 1000, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, ELEMENTARY_SCHOOL_PT, livingStuff);
+        Building secondarySchool = building("Secondary schools", "another school", 1000, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, SECONDARY_SCHOOL_PT, livingStuff);
+        Building university = building("University", "a university", 1000, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, UNIVERSITY_PT, livingStuff);
+        Building enlistedSchool = building("Teams Rank School", "for the guys which are loud", 200, 10, EEducationType.ENLISTED, ETechLevel.TECH_I, MILITARY_I_PT, livingStuff);
+        Building militaryAcademy = building("Military Academy", "for the guys which are silent", 100, 10, EEducationType.OFFICER, ETechLevel.TECH_I, MILITARY_II_PT, livingStuff);
+        LOGGER.info("Buildings created");
+
+        colonizePlanet(flashkid, p11);
+        LOGGER.info("Planets colonized and populated. Constructions were build.");
+
+        Armor armor = moduleService.createArmor("Armor Mk I", "An armor", unlockArmor, 5, 3000, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Propulsion propulsion = moduleService.createPropulsion("Speed Mk I", "A drive", unlockPropulsion, 5, 500, ETechLevel.TECH_I, EHyperBand.NONE, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Propulsion propulsionFTL = moduleService.createPropulsion("FTL Speed Mk I", "A FTL drive", unlockFTLPropulsion, 10, 500, ETechLevel.TECH_I, EHyperBand.DELTA, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        ElectronicWarfare electronicWarfare = moduleService.createElectronicWarfare("Scanner Mk I", "A scanner", unlockElectronicWarfare, 5, 100, new Distance(2.669, EDistanceMetric.LS), ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Sidewall sidewall = moduleService.createSidewall("Shield Mk I", "A shield", unlockShield, 5, 15000, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+
+        AmmunitionModule shipKillerAmmunition = moduleService.createAmmunitionModule("Rocket Ammunition", "A bunch of rockets.", unlocksRocketAmmunition, 5, 10, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        MissileMotor shipKillerMotor = moduleService.createMissileMotor("Ship Killer Motor Mk I", "Ship Killer Motor Mk I", 180, ETechLevel.TECH_I, new Acceleration(46000, EAccelerationMetric.G), 20, 100);
+        Warhead nuclearShipKillerWarHead = moduleService.createWarhead("Nuclear ship killer war head", "Nuclear ship killer war head", 1000, ETechLevel.TECH_I, new Distance(0.00017, EDistanceMetric.LS), EWarheadType.EXPLOSION, 100);
+        Missile shipKillerMissile = moduleService.createMissile("Nuclear ship killer missile Mk I", "Nuclear ship killer missile Mk I", 100, 100, 100, ETechLevel.TECH_I, nuclearShipKillerWarHead, List.of(shipKillerMotor), unlockMissiles, shipKillerAmmunition);
+        Launcher shipKillerLauncher = moduleService.createLauncher("Ship killer launcher Mk I", "The launcher for ship killers", unlockMissiles, shipKillerAmmunition, 100, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(shipKillerMissile));
+
+        AmmunitionModule counterRocketAmmunition = moduleService.createAmmunitionModule("Counter Rocket Ammunition", "Another bunch of rockets.", unlocksCounterRocketAmmunition, 5, 10, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        MissileMotor counterMissileMotor = moduleService.createMissileMotor("Counter Motor Mk I", "Counter Motor Mk I", 30, ETechLevel.TECH_I, new Acceleration(96000, EAccelerationMetric.G), 80, 10);
+        Warhead counterWarHead = moduleService.createWarhead("Counter war head", "Counter war head", 1, ETechLevel.TECH_I, Distance.ZERO, EWarheadType.COUNTER_MISSILE, 10);
+        Missile counterMissile = moduleService.createMissile("Counter missile Mk I", "Counter missile Mk I", 10, 10, 10, ETechLevel.TECH_I, counterWarHead, List.of(counterMissileMotor), unlockCounterMissiles, counterRocketAmmunition);
+        Launcher counterMissileLauncher = moduleService.createLauncher("Counter missile launcher Mk I", "The launcher for counter missiles", unlockCounterMissiles, counterRocketAmmunition, 100, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
+
+        Weapon laserWeapon = moduleService.createWeapon("Laser Mk I", "A laser", unlockLaser, 5, 1000, ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Weapon pointDefense = moduleService.createWeapon("Point Defense Mk I", "A point defense", unlockPointDefense, 5, 1, ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.POINT_DEFENSE, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+
+        PassiveModule passiveModule = moduleService.createPassiveModule("Improves armor", "Increases the amount of armor", unlockPassive, ESupportType.ARMOR, ECalculationType.ADD, 5, 10, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        LOGGER.info("Modules created");
+
+        Hull hull1 = hullService.createHull("Corvette vessel", 4000, 500, 500, 500, 2000, ETechLevel.TECH_I, "The corvette hull", unlockHull1, EHullType.FG, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Hull hull2 = hullService.createHull("Frigate vessel", 5500, 800, 800, 800, 2500, ETechLevel.TECH_I, "The frigate hull", unlockHull2, EHullType.FG, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Hull hull3 = hullService.createHull("Cruiser vessel", 9000, 1200, 1200, 1200, 3500, ETechLevel.TECH_I, "The cruiser hull", unlockHull3, EHullType.CC, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        LOGGER.info("Hulls created");
+
+
+        ShipClass argonautShipClass = new ShipClass(flashkid, "Terrible", hull3, null);
+        createFitting(armor, propulsionFTL, electronicWarfare, sidewall, laserWeapon, pointDefense, new Launcher[]{shipKillerLauncher, counterMissileLauncher}, new PassiveModule[]{passiveModule}, new AmmunitionModule[]{shipKillerAmmunition, counterRocketAmmunition}, argonautShipClass);
+        ShipClass ers3 = new ShipClass(pirate, "Pirate corvette", hull1, null);
+        createPirateFitting(armor, propulsionFTL, electronicWarfare, sidewall, laserWeapon, pointDefense, new Launcher[]{shipKillerLauncher, counterMissileLauncher}, new PassiveModule[]{passiveModule}, new AmmunitionModule[]{shipKillerAmmunition, counterRocketAmmunition}, ers3);
+        LOGGER.info("ShipClass created");
+
+        addUnlockedResearches(flashkid);
+        LOGGER.info("Researches populated");
+
+        createFleetForUser(flashkid);
+        createOpponentForUser(flashkid);
+        LOGGER.info("Fleets created");
+        LOGGER.info("Warships created");
+        LOGGER.info("Fleets populated");
+
+        amendTranslations();
+        LOGGER.info("Translations amended.");
+
+        tickService.doTick();
+        LOGGER.info("First tick is done");
+        LOGGER.info("All Data created");
     }
 
     /**
@@ -342,39 +524,6 @@ public class MasterOfTheUniverseService {
         LOGGER.info("New star systems populated");
     }
 
-    public void transformTheGalaxy() {
-
-        LOGGER.info("Start transforming Galaxy.");
-        final List<Coords> coords = resourceService.readStarSystems();
-        final List<StarSystem> all = starsystemService.findAll();
-        final List<StarSystem> modified = new ArrayList<>();
-        final List<Planet> modifiedPlanets = new ArrayList<>();
-        final List<Coords> used = new ArrayList<>();
-        for (int i = 0; i < all.size(); i++) {
-            final StarSystem starSystem = all.get(i);
-            final Coords coord = coords.get(i);
-            final Orbit orbit = new Orbit(new Distance(coord.x, STAR_SYSTEM_STANDARD_METRIC), new Distance(coord.y, STAR_SYSTEM_STANDARD_METRIC));
-            starSystem.setOrbit(orbit);
-            starSystem.setName(coord.name);
-            modified.add(starSystem);
-            final List<Planet> planets = new ArrayList<>(starSystem.getPlanets());
-            final List<String> names = resourceService.getRandomPlanetName(planets.size());
-            for (int i1 = 0; i1 < planets.size(); i1++) {
-                final Planet planet = planets.get(i1);
-                planet.setName(names.get(i1));
-                modifiedPlanets.add(planet);
-            }
-            used.add(coord);
-        }
-        coords.removeAll(used);
-        starsystemService.saveAll(modified);
-        planetService.saveAll(modifiedPlanets);
-
-        LOGGER.info("Done transforming Galaxy.");
-        createStarSystems(coords);
-    }
-
-
     void createForums() {
         final List<Alliance> alliances = allianceService.findAll();
 
@@ -392,133 +541,6 @@ public class MasterOfTheUniverseService {
 
         forumService.saveAll(toStore);
         LOGGER.info("Forums created");
-    }
-
-
-    @SuppressWarnings({"unused"})
-    void createInitialDataPayload() {
-
-        final User flashkid = userService.createUser("Flashkid", "12457aA!", "mail", EWebUserRole.ADMIN, EGameUserRole.ALLIANCE_ADMIN);
-        final User pirate = userService.createUser(DEFEATED_OPPONENT, "12457aA!", "mail3", EWebUserRole.USER);
-        LOGGER.info("Users created");
-
-        final Alliance a1 = allianceService.createAlliance("Argonauten", "A", flashkid);
-        LOGGER.info("Alliance created");
-        LOGGER.info("Alliance populated.");
-
-        createForums();
-
-        final List<Coords> coords = resourceService.readStarSystems();
-        createStarSystems(coords);
-        final List<StarSystem> starSystems = starsystemService.findAll();
-
-        StarSystem s1 = starSystems.stream().filter(s -> s.getName().equals("Manticore")).findFirst().orElseThrow(() -> new NotifyWebUserException("The star systems should be present."));
-        LOGGER.info("Star systems created");
-
-        final Planet p11 = new ArrayList<>(s1.getPlanets()).get(0);
-        LOGGER.info("Planets created");
-
-        // buildings
-        Research livingStuff = research("Eternal live", "How to buy wine.", 1, ETechLevel.TECH_I, null);
-        Research unlocksConstructionYard = research("Construction Yard", "The construction yard research researches the construction yard.", 1, ETechLevel.TECH_I, null);
-        Research unlocksShipyard = research("Orbitals Construction Yard", "The orbitals Construction Yard research researches the orbitals construction yard.", 1, ETechLevel.TECH_I, null);
-        Research unlocksLaboratory = research("Laboratories", "The laboratories research researches laboratories.", 1, ETechLevel.TECH_I, null);
-        Research unlocksBank = research("Market place", "The Market place research researches Market places.", 1, ETechLevel.TECH_I, null);
-        Research unlocksMetals = research("Metal works", "The Metal works research researches Metal works.", 1, ETechLevel.TECH_I, null);
-        Research unlocksMecur = research("Special orbital ores", "The Special orbital ores research researches Special orbital ores.", 1, ETechLevel.TECH_I, unlocksMetals);
-        Research unlocksHyperWorks = research("Asynchronous Investigations", "The Asynchronous Investigations research researches Asynchronous Investigations.", 1, ETechLevel.TECH_I, unlocksMecur);
-
-        // modules
-        Research unlockLaser = research("Laser", "The Laser research researches ...", 1, ETechLevel.TECH_I, null);
-        Research unlockMissiles = research("Missile", "The Missile research researches ...", 1, ETechLevel.TECH_I, null);
-        Research unlockCounterMissiles = research("Counter Missile", "The Counter Missile research researches ...", 1, ETechLevel.TECH_I, null);
-        Research unlockPointDefense = research("Point Defense", "The point defense research researches ...", 1, ETechLevel.TECH_I, null);
-        Research unlockArmor = research("Armor", "The Armor research researches ...", 1, ETechLevel.TECH_I, null);
-        Research unlockShield = research("Shield", "The Shield research researches ...", 1, ETechLevel.TECH_I, null);
-        Research unlockPropulsion = research("Speed", "The Speed research researches sub light ...", 1, ETechLevel.TECH_I, null);
-        Research unlockFTLPropulsion = research("FTL Speed", "The FTL Speed research researches FTL ...", 1, ETechLevel.TECH_I, null);
-        Research unlockElectronicWarfare = research("Electronic Warfare", "The EW research researches electronic warfare.", 1, ETechLevel.TECH_I, null);
-        Research unlocksRocketAmmunition = research("Rocket Ammunition", "a bunch of rockets.", 1, ETechLevel.TECH_I, null);
-        Research unlocksCounterRocketAmmunition = research("Counter Rocket Ammunition", "another bunch of rockets.", 1, ETechLevel.TECH_I, null);
-        Research unlockPassive = research("Armor improvement I", "Improves the armor improvement module", 1, ETechLevel.TECH_I, null);
-
-        // hulls
-        Research unlockHull1 = research("Corvette", "The Corvette research researches Corvettes.", 1, ETechLevel.TECH_I, null);
-        Research unlockHull2 = research("Frigate", "The Frigate research researches Frigates.", 1, ETechLevel.TECH_I, null);
-        Research unlockHull3 = research("Cruiser", "The Cruiser research researches Cruisers.", 1, ETechLevel.TECH_I, unlockHull2);
-        LOGGER.info("Researches created");
-
-        Building constructionYard = building("Construction Yard", "The construction yard construct constructions.", 100, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.CONSTRUCTION, EProductionCategory.PRODUCE, null), EEducationType.COLLEGE, unlocksConstructionYard);
-        Building orbitalsConstructionYard = building("Orbitals Construction Yard", "The construction yard construct orbital constructions.", 100, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.ORBITAL_CONSTRUCTION, EProductionCategory.PRODUCE, null), EEducationType.COLLEGE, unlocksShipyard);
-        Building researchB = building("Research Laboratories", "The lab investigates researches.", 100, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.RESEARCH, EProductionCategory.PRODUCE, null), EEducationType.UNIVERSITY, unlocksLaboratory);
-        Building bank = building("Market place", "The market makes money.", 100, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.CREDITS, EProductionCategory.PRODUCE, null), EEducationType.COLLEGE, unlocksBank);
-        Building metalsWorks = building("Metal works", "Metals for progress.", 100, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.METALORE, EProductionCategory.PRODUCE, null), EEducationType.COLLEGE, unlocksMetals);
-        Building orbitalOres = building("Special orbital ores", "Heavier metals for more progress.", 100, 10, ETechLevel.TECH_II, new ProductionType(EResourceType.RARE_ELEMENTS, EProductionCategory.PRODUCE, null), EEducationType.UNIVERSITY, unlocksMecur);
-        Building investigations = building("Asynchronous Investigations", "Rare elements for the future.", 100, 10, ETechLevel.TECH_III, new ProductionType(EResourceType.HEAVY_METALS, EProductionCategory.PRODUCE, null), EEducationType.UNIVERSITY, unlocksHyperWorks);
-
-        Building livingRoom = building("Living room", "Everyone needs a home", 200, 15, ETechLevel.TECH_I, new ProductionType(EResourceType.POPULATION, EProductionCategory.CAPACITY, null), EEducationType.COLLEGE, livingStuff);
-        Building hospital = building("Hospital", "Everyone needs a doctor", 1, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.POPULATION, EProductionCategory.PRODUCE, null), EEducationType.UNIVERSITY, livingStuff);
-        Building elementarySchool = building("Elementary schools", "a school", 1000, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_CIVIL_I), EEducationType.UNIVERSITY, livingStuff);
-        Building secondarySchool = building("Secondary schools", "another school", 1000, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_CIVIL_II), EEducationType.UNIVERSITY, livingStuff);
-        Building university = building("University", "a university", 1000, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_CIVIL_III), EEducationType.UNIVERSITY, livingStuff);
-        Building enlistedSchool = building("Teams Rank School", "for the guys which are loud", 200, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_MILITARY_I), EEducationType.ENLISTED, livingStuff);
-        Building militaryAcademy = building("Military Academy", "for the guys which are silent", 100, 10, ETechLevel.TECH_I, new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_MILITARY_II), EEducationType.OFFICER, livingStuff);
-        LOGGER.info("Buildings created");
-
-        colonizePlanet(flashkid, p11);
-        LOGGER.info("Planets colonized and populated. Constructions were build.");
-
-        Armor armor = moduleService.createArmor("Armor Mk I", "An armor", unlockArmor, 5, 3000, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        Propulsion propulsion = moduleService.createPropulsion("Speed Mk I", "A drive", unlockPropulsion, 5, 500, ETechLevel.TECH_I, EHyperBand.NONE, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        Propulsion propulsionFTL = moduleService.createPropulsion("FTL Speed Mk I", "A FTL drive", unlockFTLPropulsion, 10, 500, ETechLevel.TECH_I, EHyperBand.DELTA, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        ElectronicWarfare electronicWarfare = moduleService.createElectronicWarfare("Scanner Mk I", "A scanner", unlockElectronicWarfare, 5, 100, new Distance(2.669, EDistanceMetric.LS), ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        Sidewall sidewall = moduleService.createSidewall("Shield Mk I", "A shield", unlockShield, 5, 15000, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-
-        AmmunitionModule shipKillerAmmunition = moduleService.createAmmunitionModule("Rocket Ammunition", "A bunch of rockets.", unlocksRocketAmmunition, 5, 10, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        MissileMotor shipKillerMotor = moduleService.createMissileMotor("Ship Killer Motor Mk I", "Ship Killer Motor Mk I", 180, ETechLevel.TECH_I, new Acceleration(46000, EAccelerationMetric.G), 20, 100);
-        Warhead nuclearShipKillerWarHead = moduleService.createWarhead("Nuclear ship killer war head", "Nuclear ship killer war head", 1000, ETechLevel.TECH_I, new Distance(0.00017, EDistanceMetric.LS), EWarheadType.EXPLOSION, 100);
-        Missile shipKillerMissile = moduleService.createMissile("Nuclear ship killer missile Mk I", "Nuclear ship killer missile Mk I", 100, 100, 100, ETechLevel.TECH_I, nuclearShipKillerWarHead, List.of(shipKillerMotor), unlockMissiles, shipKillerAmmunition);
-        Launcher shipKillerLauncher = moduleService.createLauncher("Ship killer launcher Mk I", "The launcher for ship killers", unlockMissiles, shipKillerAmmunition, 100, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(shipKillerMissile));
-
-        AmmunitionModule counterRocketAmmunition = moduleService.createAmmunitionModule("Counter Rocket Ammunition", "Another bunch of rockets.", unlocksCounterRocketAmmunition, 5, 10, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        MissileMotor counterMissileMotor = moduleService.createMissileMotor("Counter Motor Mk I", "Counter Motor Mk I", 30, ETechLevel.TECH_I, new Acceleration(96000, EAccelerationMetric.G), 80, 10);
-        Warhead counterWarHead = moduleService.createWarhead("Counter war head", "Counter war head", 1, ETechLevel.TECH_I, Distance.ZERO, EWarheadType.COUNTER_MISSILE, 10);
-        Missile counterMissile = moduleService.createMissile("Counter missile Mk I", "Counter missile Mk I", 10, 10, 10, ETechLevel.TECH_I, counterWarHead, List.of(counterMissileMotor), unlockCounterMissiles, counterRocketAmmunition);
-        Launcher counterMissileLauncher = moduleService.createLauncher("Counter missile launcher Mk I", "The launcher for counter missiles", unlockCounterMissiles, counterRocketAmmunition, 100, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
-
-        Weapon laserWeapon = moduleService.createWeapon("Laser Mk I", "A laser", unlockLaser, 5, 1000, ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        Weapon pointDefense = moduleService.createWeapon("Point Defense Mk I", "A point defense", unlockPointDefense, 5, 1, ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.POINT_DEFENSE, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-
-        PassiveModule passiveModule = moduleService.createPassiveModule("Improves armor", "Increases the amount of armor", unlockPassive, ESupportType.ARMOR, ECalculationType.ADD, 5, 10, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        LOGGER.info("Modules created");
-
-        Hull hull1 = hullService.createHull("Corvette vessel", 4000, 500, 500, 500, 2000, ETechLevel.TECH_I, "The corvette hull", unlockHull1, EHullType.FG, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        Hull hull2 = hullService.createHull("Frigate vessel", 5500, 800, 800, 800, 2500, ETechLevel.TECH_I, "The frigate hull", unlockHull2, EHullType.FG, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        Hull hull3 = hullService.createHull("Cruiser vessel", 9000, 1200, 1200, 1200, 3500, ETechLevel.TECH_I, "The cruiser hull", unlockHull3, EHullType.CC, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        LOGGER.info("Hulls created");
-
-
-        ShipClass argonautShipClass = new ShipClass(flashkid, "Terrible", hull3, null);
-        createFitting(armor, propulsionFTL, electronicWarfare, sidewall, laserWeapon, pointDefense, new Launcher[]{shipKillerLauncher, counterMissileLauncher}, new PassiveModule[]{passiveModule}, new AmmunitionModule[]{shipKillerAmmunition, counterRocketAmmunition}, argonautShipClass);
-        ShipClass ers3 = new ShipClass(pirate, "Pirate corvette", hull1, null);
-        createPirateFitting(armor, propulsionFTL, electronicWarfare, sidewall, laserWeapon, pointDefense, new Launcher[]{shipKillerLauncher, counterMissileLauncher}, new PassiveModule[]{passiveModule}, new AmmunitionModule[]{shipKillerAmmunition, counterRocketAmmunition}, ers3);
-        LOGGER.info("ShipClass created");
-
-        addUnlockedResearches(flashkid);
-        LOGGER.info("Researches populated");
-
-        createFleetForUser(flashkid);
-        createOpponentForUser(flashkid);
-        LOGGER.info("Fleets created");
-        LOGGER.info("Warships created");
-        LOGGER.info("Fleets populated");
-
-        amendTranslations();
-        LOGGER.info("Translations amended.");
-
-        tickService.doTick();
-        LOGGER.info("First tick is done");
-        LOGGER.info("All Data created");
     }
 
     private void amendTranslations() {
@@ -543,9 +565,9 @@ public class MasterOfTheUniverseService {
                                 final String description,
                                 final int baseValue,
                                 final int amountOfWorkers,
+                                final EEducationType educationType,
                                 final ETechLevel techLevel,
                                 final ProductionType productionType,
-                                final EEducationType educationType,
                                 final Research unlockedBy) {
         return buildingService.createBuilding(name, description, baseValue, techLevel, productionType, educationType, amountOfWorkers, unlockedBy);
     }
@@ -565,23 +587,8 @@ public class MasterOfTheUniverseService {
     @Deprecated(since = "productive environment")
     protected Planet colonizePlanet(@Nonnull final User owner, @Nonnull final Planet planet) {
         // first the guys, then the buildings
-        final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
-        populateNewColonization(resourceDeposit);
-
-        final Colonization colonization = new Colonization(owner, planet, resourceDeposit.getCrewRequirement(), 0);
+        final Colonization colonization = new Colonization(owner, planet, ColonizationCostCalculator.getCrewRequirementForColonization(), 0);
         return colonizationService.colonizePlanet(colonization);
-    }
-
-    public static void populateNewColonization(@Nonnull final ResourceDeposit resourceDeposit) {
-        Preconditions.checkNotNull(resourceDeposit, "resourceDeposit shouldn't be null!");
-
-        resourceDeposit.setAbsolutePopulation(EEducationType.NONE, 200);
-        resourceDeposit.setAbsolutePopulation(EEducationType.NONE, 200);
-        resourceDeposit.setAbsolutePopulation(EEducationType.SCHOOL, 200);
-        resourceDeposit.setAbsolutePopulation(EEducationType.COLLEGE, 500);
-        resourceDeposit.setAbsolutePopulation(EEducationType.UNIVERSITY, 1000);
-        resourceDeposit.setAbsolutePopulation(EEducationType.ENLISTED, 50);
-        resourceDeposit.setAbsolutePopulation(EEducationType.OFFICER, 20);
     }
 
     @SuppressWarnings("DeprecatedIsStillUsed")

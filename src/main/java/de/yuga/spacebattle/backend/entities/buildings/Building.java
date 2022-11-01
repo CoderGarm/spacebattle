@@ -85,6 +85,11 @@ public class Building extends HasCosts {
         return baseValue;
     }
 
+    @Deprecated(since = "Only for balancing issues.")
+    public void setBaseValue(final int baseValue) {
+        this.baseValue = baseValue;
+    }
+
     @Nonnull
     public BigDecimal getIncreasingFactorPerLevel() {
         return increasingFactorPerLevel;

@@ -121,20 +121,15 @@ public class TickService {
 
     @Scheduled(cron = "0 0 0 * * *", zone = "Europe/Berlin")
     protected void doIt() {
-        // block all rest endpoints while ticking
-        isTicking = true;
-        final long start = Calendar.getInstance().getTimeInMillis();
-        LOGGER.info("Tick scheduled");
         doTick();
-        LOGGER.info("Tick has processed!");
-        final long end = Calendar.getInstance().getTimeInMillis();
-        final long duration = (end - start) / 1000;
-        LOGGER.info("{} takes {} seconds", today, duration);
-        isTicking = false;
     }
 
     @Nonnull
     public Tick doTick() {
+        final long startB = Calendar.getInstance().getTimeInMillis();
+        LOGGER.info("Tick scheduled");
+        // block all rest endpoints while ticking
+        isTicking = true;
         today = tickRepository.save(new Tick());
         LOGGER.info("Today is " + today);
         final String start = "Start ticking";
@@ -149,7 +144,13 @@ public class TickService {
         LOGGER.info("Tick done.");
 
         today.setTickEnds(LocalDateTime.now());
-        return tickRepository.save(today);
+        final Tick tick = tickRepository.save(today);
+        isTicking = false;
+        LOGGER.info("Tick has processed!");
+        final long end = Calendar.getInstance().getTimeInMillis();
+        final long duration = (end - startB) / 1000;
+        LOGGER.info("{} takes {} seconds", today, duration);
+        return tick;
     }
 
     /**

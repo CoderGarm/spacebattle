@@ -39,6 +39,12 @@ public class BuildingService {
         return buildingRepository.findById(idBuilding).orElse(null);
     }
 
+    public void saveAll(@Nonnull final Collection<Building> toStore) {
+        Preconditions.checkNotNull(toStore, "toStore must not be empty");
+
+        buildingRepository.saveAll(toStore);
+    }
+
     /**
      * Creates a new {@link Building}.
      *

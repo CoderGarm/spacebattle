@@ -272,10 +272,15 @@ public class Planet extends AbstractEntityKey {
     private static BigDecimal getProductionValuePerTick(@Nonnull final List<Construction> constructions) {
         Preconditions.checkNotNull(constructions, "constructions must not be empty");
 
-        return constructions.stream().map(c ->
-                BigDecimal.valueOf(c.getBuilding().getBaseValue())
-                        .multiply(c.getBuilding().getIncreasingFactorPerLevel())
-                        .multiply(BigDecimal.valueOf(c.getLevel()))
+        return constructions.stream().map(c -> {
+                    final BigDecimal baseValue = BigDecimal.valueOf(c.getBuilding().getBaseValue());
+                    final BigDecimal increasingFactorPerLevel = c.getBuilding().getIncreasingFactorPerLevel();
+                    final BigDecimal level = BigDecimal.valueOf(c.getLevel());
+                    if (c.getLevel() == 1) {
+                        return baseValue;
+                    }
+                    return baseValue.add(baseValue.multiply(increasingFactorPerLevel).multiply(level));
+                }
         ).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 

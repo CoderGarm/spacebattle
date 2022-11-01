@@ -86,6 +86,16 @@ public class WarshipHealthStateSnapshot extends AbstractEntityKey implements War
         this.remainingShots.putAll(healthState.getRemainingShots());
     }
 
+    @Deprecated(since = "Remove after transform.")
+    public void update() {
+        if (capabilities.isEmpty()) {
+            final WarshipHealthState healthState = warShip.getWarshipHealthState();
+            capabilities.addAll(new SpacecraftCalculator().getCapabilityValues(healthState));
+            activeFittings.addAll(healthState.getActiveFittings());
+            remainingShots.putAll(healthState.getRemainingShots());
+        }
+    }
+
     @Nonnull
     public BattleReport getBattleReport() {
         return battleReport;

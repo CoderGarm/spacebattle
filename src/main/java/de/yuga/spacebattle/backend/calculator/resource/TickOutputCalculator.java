@@ -96,15 +96,15 @@ public class TickOutputCalculator {
         Preconditions.checkArgument(EResourceType.POPULATION == building.getProductionTarget(), " must be population!");
 
         // calculate level-based increasing factor
+        final BigDecimal increasingFactorPerLevel = building.getIncreasingFactorPerLevel();
+        final BigDecimal baseValue = new BigDecimal(building.getBaseValue());
         BigDecimal increasingFactorAtLevel = BigDecimal.ZERO;
         if (level != 1) {
-            final BigDecimal increasingFactorPerLevel = BigDecimal.ONE.add(building.getIncreasingFactorPerLevel());
-            increasingFactorAtLevel = increasingFactorPerLevel.multiply(new BigDecimal(level));
+            final BigDecimal increasingFactorPerLevel1 = BigDecimal.ONE.add(increasingFactorPerLevel);
+            increasingFactorAtLevel = increasingFactorPerLevel1.multiply(new BigDecimal(level));
         }
         final BigDecimal absoluteIncreasingFactor = BigDecimal.ONE.add(increasingFactorAtLevel);
         // calculate absolute output of construction
-        final BigDecimal baseValue = new BigDecimal(building.getBaseValue());
-        final int divisor = building.getProductionType().getProductionCategory().getDivisor();
-        return baseValue.divide(new BigDecimal(divisor), MATH_CONTEXT_MORE_PRECISION).multiply(absoluteIncreasingFactor);
+        return baseValue.multiply(absoluteIncreasingFactor, MATH_CONTEXT_MORE_PRECISION);
     }
 }
