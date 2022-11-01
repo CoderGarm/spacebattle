@@ -279,6 +279,8 @@ public class AuthApi {
         researchService.addResearch(saved, researchesWithoutPrecondition);
 
         final Planet planet = colonizationService.findPlanetForNewUser();
+        planet.getMiningFactors().equalize();
+        planet.getResourceDeposit().equalize();
         MasterOfTheUniverseService.populateNewColonization(planet.getResourceDeposit());
         planetService.save(planet);
         final Colonization colonization = new Colonization(saved, planet, planet.getResourceDeposit().getCrewRequirement(), 0);

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -131,7 +132,7 @@ public class PlanetService {
         return planetRepository.findByCoordinates(idStarSystem, xCoordinate, yCoordinate);
     }
 
-    public void saveAll(@Nonnull final List<Planet> modified) {
+    public void saveAll(@Nonnull final Collection<Planet> modified) {
         Preconditions.checkNotNull(modified, "modified must not be empty");
 
         planetRepository.saveAll(modified);

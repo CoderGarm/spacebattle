@@ -72,4 +72,15 @@ public class MiningFactors extends AbstractEntityKey {
             }
         }
     }
+
+    /**
+     * Create constant conditions for every new player.<br>
+     * <br>
+     * The main planet must have 100 % at every attribute.
+     */
+    public void equalize() {
+        for (EResourceType type : EResourceType.values()) {
+            resources.put(type, 100L);
+        }
+    }
 }

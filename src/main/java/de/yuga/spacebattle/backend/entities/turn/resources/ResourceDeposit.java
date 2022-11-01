@@ -454,4 +454,20 @@ public class ResourceDeposit extends AbstractEntityKey {
 
         calculate(resourceDeposit, ECalculationType.SUBTRACT);
     }
+
+    /**
+     * Create constant conditions for every new player.<br>
+     * <br>
+     * The main planet must have the same amount of resources.
+     */
+    public void equalize() {
+        Arrays.stream(EResourceType.valuesWithoutPopulation())
+                .forEach(eResourceType -> {
+                    if (!ETechLevel.TECH_I.getExcludedResources().contains(eResourceType)) {
+                        resources.put(eResourceType, 1000L);
+                    } else {
+                        resources.put(eResourceType, 0L);
+                    }
+                });
+    }
 }

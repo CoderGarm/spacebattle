@@ -201,12 +201,18 @@ public class MasterOfTheUniverseService {
     @SuppressWarnings("ConstantConditions")
     public void transform() {
         // todo remove after transform is done
-        LOGGER.info("---------------------------- transforming ----------------------------");
+        LOGGER.info("---------------------------- transforming the universe ----------------------------");
         final Set<WarShip> without = warShipService.findAll().stream().filter(w -> w.getWarshipHealthState() == null).collect(Collectors.toSet());
-        if (!without.isEmpty()) {
+        final boolean transformationNeeded = !without.isEmpty();
+        final Set<Planet> mainPlanets = planetService.findAll().stream().filter(Planet::isMain).collect(Collectors.toSet());
+        if (transformationNeeded) {
             LOGGER.info("---------------------------- start transforming ----------------------------");
             without.forEach(WarShip::createWarshipHealthState);
             warShipService.saveAll(without);
+
+            mainPlanets.forEach(p -> p.getMiningFactors().equalize());
+            planetService.saveAll(mainPlanets);
+
             LOGGER.info("---------------------------- done transforming ----------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
