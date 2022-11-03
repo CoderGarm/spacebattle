@@ -42,11 +42,11 @@ public class MiningFactors extends AbstractEntityKey {
         initialize();
     }
 
-    public long getMiningFactorByType(@Nullable final EResourceType resourceType) {
+    public double getMiningFactorByType(@Nullable final EResourceType resourceType) {
         if (resources.containsKey(resourceType)) {
-            return this.resources.get(resourceType);
+            return ((double) this.resources.get(resourceType) / 100);
         }
-        return 0;
+        return 1;
     }
 
     /**

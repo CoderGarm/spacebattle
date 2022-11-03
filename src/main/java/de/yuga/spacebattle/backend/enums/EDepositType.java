@@ -24,7 +24,13 @@ public enum EDepositType {
     /**
      * The income per tick of whatever.
      */
-    INCOME(ECalculationType.ADD);;
+    INCOME(ECalculationType.ADD),
+
+    /**
+     * If the deposit contains the capacity by resource type.
+     */
+    CAPACITY(ECalculationType.NONE),
+    ;
 
     @Nonnull
     private final ECalculationType calculationType;

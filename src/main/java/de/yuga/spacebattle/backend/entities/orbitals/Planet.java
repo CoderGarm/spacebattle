@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.entities.orbitals;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.PopulationControlCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
+import de.yuga.spacebattle.backend.calculator.resource.TickOutputCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
@@ -218,6 +219,27 @@ public class Planet extends AbstractEntityKey {
     }
 
     /**
+     * Returns the capacity of {@link ECollectableType#COLLECTABLE} or {@link ECollectableType#VIABLE} which can be placed in the storages of the planet.<br>
+     * <br>
+     * If a resource type isn't present, it means that there is no capacity restriction.
+     */
+    public ResourceDeposit getResourceCapacity() {
+        final ResourceDeposit cap = new ResourceDeposit(EDepositType.CAPACITY);
+        final Set<Construction> capacityBuildings = getConstructions().stream()
+                .filter(construction -> EProductionCategory.CAPACITY == construction.getBuilding().getProductionType().getProductionCategory())
+                .collect(Collectors.toSet());
+
+        for (final EResourceType resourceType : EResourceType.values()) {
+            final Set<Construction> forResource = capacityBuildings.stream().filter(c -> resourceType == c.getBuilding().getProductionTarget()).collect(Collectors.toSet());
+            if (!forResource.isEmpty()) {
+                final BigDecimal capacityValue = TickOutputCalculator.getTickOutput(forResource);
+                cap.updateResource(resourceType, capacityValue.longValue());
+            }
+        }
+        return cap;
+    }
+
+    /**
      * There are some strange rules running:<br>
      * <br>
      * All resources except {@link EResourceType#POPULATION} are normal, as always.<br>
@@ -251,13 +273,13 @@ public class Planet extends AbstractEntityKey {
 
         for (final EResourceType eResourceType : EResourceType.valuesWithoutPopulation()) {
             final List<Construction> constructions = resourceConstructionsByType.getOrDefault(eResourceType, new ArrayList<>());
-            final BigDecimal ticklyIncome = getProductionValuePerTick(constructions);
+            final BigDecimal ticklyIncome = TickOutputCalculator.getTickOutput(constructions);
             income.setAbsoluteResourceValue(eResourceType, ticklyIncome.longValue());
         }
 
         constructionsByRefinementSequence.forEach((eRefinementSequence, refinementConstructions) -> {
             final EEducationType educationType = eRefinementSequence.getProduct();
-            final BigDecimal ticklyIncome = getProductionValuePerTick(refinementConstructions);
+            final BigDecimal ticklyIncome = TickOutputCalculator.getTickOutput(refinementConstructions);
             income.setAbsolutePopulation(educationType, ticklyIncome.longValue());
         });
 
@@ -266,22 +288,6 @@ public class Planet extends AbstractEntityKey {
         income.setAbsolutePopulation(EEducationType.NONE, tickOutputForPopulation);
 
         return income;
-    }
-
-    @Nonnull
-    private static BigDecimal getProductionValuePerTick(@Nonnull final List<Construction> constructions) {
-        Preconditions.checkNotNull(constructions, "constructions must not be empty");
-
-        return constructions.stream().map(c -> {
-                    final BigDecimal baseValue = BigDecimal.valueOf(c.getBuilding().getBaseValue());
-                    final BigDecimal increasingFactorPerLevel = c.getBuilding().getIncreasingFactorPerLevel();
-                    final BigDecimal level = BigDecimal.valueOf(c.getLevel());
-                    if (c.getLevel() == 1) {
-                        return baseValue;
-                    }
-                    return baseValue.add(baseValue.multiply(increasingFactorPerLevel).multiply(level));
-                }
-        ).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     /**

@@ -23,7 +23,4 @@ public enum EProductionCategory {
      */
     REFINEMENT,
     ;
-
-    EProductionCategory() {
-    }
 }

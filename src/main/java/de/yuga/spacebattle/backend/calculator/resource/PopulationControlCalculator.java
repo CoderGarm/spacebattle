@@ -54,19 +54,16 @@ public class PopulationControlCalculator {
         // N equals no the total population (ignoring the non-reproductive population)
         // r equals to the maximal birth rate
         // K equals to the capacity
-        final long miningFactor = planet.getMiningFactors().getMiningFactorByType(EResourceType.POPULATION);
+        final double miningFactor = planet.getMiningFactors().getMiningFactorByType(EResourceType.POPULATION);
         final BigDecimal N = getVirtualAmountOfPops(miningFactor, sumOfPopulation);
         // sum up all the output of the producing and capacity buildings
-        BigDecimal r = reproductive.stream().map(TickOutputCalculator::getTickOutputByLevelForPopulation).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal r = TickOutputCalculator.getTickOutput(reproductive).divide(BigDecimal.valueOf(100), MATH_CONTEXT_MORE_PRECISION);
         if (r.compareTo(BigDecimal.valueOf(0.9)) > 0) {
             // maximum reproduction rate must not succeed 1 and is limited to 90 %
             r = BigDecimal.valueOf(0.9);
         }
 
-        final BigDecimal K = capacity.stream()
-                .map(TickOutputCalculator::getTickOutputByLevelForPopulation)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
+        final BigDecimal K = TickOutputCalculator.getTickOutput(capacity);
         if (N.compareTo(BigDecimal.ZERO) == 0) {
             // no bum no sum
             return 0;
@@ -90,8 +87,8 @@ public class PopulationControlCalculator {
      * @return the virtual amount
      */
     @Nonnull
-    public static BigDecimal getVirtualAmountOfPops(final long miningFactor, final long sumOfPopulation) {
-        BigDecimal popModifier = new BigDecimal(miningFactor).divide(BigDecimal.valueOf(100), MATH_CONTEXT_MORE_PRECISION);
+    public static BigDecimal getVirtualAmountOfPops(final double miningFactor, final long sumOfPopulation) {
+        BigDecimal popModifier = new BigDecimal(miningFactor);
         final int compareTo = popModifier.compareTo(BigDecimal.ONE);
         if (compareTo < 0) {
             // bei 0,7 -> 1,3
@@ -161,7 +158,7 @@ public class PopulationControlCalculator {
             }
             final EEducationType educt = refinementSequence.getEduct();
             final EEducationType product = refinementSequence.getProduct();
-            final BigDecimal educationCapacity = TickOutputCalculator.getTickOutputByLevelForPopulation(c);
+            final BigDecimal educationCapacity = TickOutputCalculator.getTickOutput(c);
             educationAmountDTOs.add(new EducationAmountDTO(educationCapacity.longValue(), educt, product));
         }
         final List<EducationAmountDTO> balancedEducation = balanceEducation(planet, educationAmountDTOs);

@@ -250,7 +250,7 @@ public class MasterOfTheUniverseService {
 
         // population
         changeBaseOfBuilding(DOCTOR_PT, 50, toStore);
-        changeBaseOfBuilding(LIVING_PT, 500, toStore);
+        changeBaseOfBuilding(LIVING_PT, 1000, toStore);
         changeBaseOfBuilding(ELEMENTARY_SCHOOL_PT, 100, toStore);
         changeBaseOfBuilding(SECONDARY_SCHOOL_PT, 100, toStore);
         changeBaseOfBuilding(UNIVERSITY_PT, 100, toStore);

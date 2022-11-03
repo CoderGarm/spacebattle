@@ -23,8 +23,8 @@ public class MiningFactors {
         Preconditions.checkNotNull(miningFactors, "miningFactors shouldn't be null!");
 
         this.resources = Arrays.stream(EResourceType.values()).map(eResourceType -> {
-            final long resourceAmountByType = miningFactors.getMiningFactorByType(eResourceType);
-            return new ResourceAmount(eResourceType, resourceAmountByType);
+            final double resourceAmountByType = miningFactors.getMiningFactorByType(eResourceType);
+            return new ResourceAmount(eResourceType, (long) (resourceAmountByType * 100));
         }).collect(Collectors.toList());
     }
 

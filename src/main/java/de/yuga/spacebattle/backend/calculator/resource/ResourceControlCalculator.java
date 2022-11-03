@@ -49,7 +49,7 @@ public class ResourceControlCalculator {
             // for normal resources only a pure production is possible
             final List<Construction> constructions = constructionMap.get(EProductionCategory.PRODUCE);
             // sum up all the output of the producing buildings
-            return constructions.stream().map(TickOutputCalculator::getTickOutputByLevel).reduce(0L, Long::sum);
+            return TickOutputCalculator.getTickOutput(constructions).longValue();
         }
         return null;
     }

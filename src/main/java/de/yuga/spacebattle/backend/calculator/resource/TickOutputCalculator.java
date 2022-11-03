@@ -4,107 +4,69 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit.MATH_CONTEXT_INTEGER;
-import static de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit.MATH_CONTEXT_MORE_PRECISION;
 
 public class TickOutputCalculator {
 
     private TickOutputCalculator() {
     }
 
-    /**
-     * Convenience delegator for {@link #getTickOutputByLevel(Planet, Building, int)}.
-     *
-     * @param construction the construction to calculate
-     * @return the tickly production
-     */
     @Nonnull
-    public static Long getTickOutputByLevel(@Nonnull final Construction construction) {
-        Preconditions.checkNotNull(construction, "construction shouldn't be null!");
+    public static BigDecimal getTickOutput(@Nonnull final Collection<Construction> constructions) {
+        Preconditions.checkNotNull(constructions, "constructions must not be empty");
 
-        final Planet planet = construction.getPlanet();
-        final Building building = construction.getBuilding();
-        final int level = construction.getLevel();
-        return getTickOutputByLevel(planet, building, level);
-    }
-
-    /**
-     * Calculates the tickly output of this construction.<br>
-     * <b>Attention:</b> only for non-{@link EResourceType#POPULATION}.
-     *
-     * @return the tickly production
-     */
-    @Nonnull
-    public static Long getTickOutputByLevel(@Nonnull final Planet planet,
-                                            @Nonnull final Building building,
-                                            final int level) {
-        Preconditions.checkNotNull(building, "building shouldn't be null!");
-        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
-        Preconditions.checkArgument(EResourceType.POPULATION != building.getProductionTarget(), " shouldn't be population!");
-
-        final EResourceType productionTarget = building.getProductionTarget();
-        // calculate level-based increasing factor
-        final BigDecimal increasingFactorPerLevel = building.getIncreasingFactorPerLevel();
-        BigDecimal increasingFactorAtLevel = BigDecimal.ZERO;
-        if (level != 1) {
-            increasingFactorAtLevel = increasingFactorPerLevel.multiply(new BigDecimal(level));
+        if (constructions.isEmpty()) {
+            return BigDecimal.ZERO;
         }
-        final BigDecimal absoluteIncreasingFactor = BigDecimal.ONE.add(increasingFactorAtLevel);
-        // calculate absolute output of construction
-        final int baseValue = building.getBaseValue();
-        final BigDecimal absoluteOutputAtLevel = new BigDecimal(baseValue).multiply(absoluteIncreasingFactor);
-        // calculate planetary mining factor
-        final long miningFactor = planet.getMiningFactors().getMiningFactorByType(productionTarget);
-        final BigDecimal miningFactorAsPercent = BigDecimal.ONE.add(new BigDecimal(miningFactor).divide(BigDecimal.TEN.movePointRight(1), MATH_CONTEXT_INTEGER));
-        // calculate absolute output of planet
-        return absoluteOutputAtLevel.multiply(miningFactorAsPercent, MATH_CONTEXT_INTEGER).longValue();
+
+        final Set<EResourceType> resourceTypes = constructions.stream().map(c -> c.getBuilding().getProductionTarget()).collect(Collectors.toSet());
+        Preconditions.checkArgument(resourceTypes.size() == 1, "resourceTypes must contain one element");
+        final Set<EProductionCategory> productionCategories = constructions.stream().map(c -> c.getBuilding().getProductionType().getProductionCategory()).collect(Collectors.toSet());
+        Preconditions.checkArgument(productionCategories.size() == 1, "productionCategories must contain one element");
+        final Set<Planet> planets = constructions.stream().map(Construction::getPlanet).collect(Collectors.toSet());
+        Preconditions.checkArgument(planets.size() == 1, "planets must contain one element");
+
+        return constructions.stream().map(TickOutputCalculator::getTickOutput).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    /**
-     * Convenience delegator for {@link #getTickOutputByLevel(Planet, Building, int)}.
-     *
-     * @param construction the construction to calculate
-     * @return the tickly production
-     */
     @Nonnull
-    public static BigDecimal getTickOutputByLevelForPopulation(@Nonnull final Construction construction) {
-        Preconditions.checkNotNull(construction, "construction shouldn't be null!");
+    public static BigDecimal getTickOutput(@Nonnull final Construction construction) {
+        Preconditions.checkNotNull(construction, "construction must not be empty");
 
-        final Planet planet = construction.getPlanet();
         final Building building = construction.getBuilding();
-        final int level = construction.getLevel();
-        return getTickOutputByLevelForPopulation(planet, building, level);
+        final BigDecimal baseValue = BigDecimal.valueOf(building.getBaseValue());
+        final BigDecimal increasingFactorPerLevel = building.getIncreasingFactorPerLevel();
+        final int constructionLevel = construction.getLevel();
+        double miningFactor = construction.getPlanet().getMiningFactors().getMiningFactorByType(building.getProductionTarget());
+        if (EResourceType.POPULATION == building.getProductionTarget() && EProductionCategory.CAPACITY != building.getProductionType().getProductionCategory()) {
+            miningFactor = 1;
+        }
+        // the mining factor of the population affects only the capacity, not the production directly
+        return getOutput(baseValue, increasingFactorPerLevel, miningFactor, constructionLevel);
     }
 
-    /**
-     * Calculates the tickly output of this construction.<br>
-     * <b>Attention:</b> only for {@link EResourceType#POPULATION}.
-     *
-     * @return the tickly production
-     */
     @Nonnull
-    public static BigDecimal getTickOutputByLevelForPopulation(@Nonnull final Planet planet,
-                                                               @Nonnull final Building building,
-                                                               final int level) {
-        Preconditions.checkNotNull(building, "building shouldn't be null!");
-        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
-        Preconditions.checkArgument(EResourceType.POPULATION == building.getProductionTarget(), " must be population!");
+    public static BigDecimal getOutput(@Nonnull final BigDecimal baseValue,
+                                       @Nonnull final BigDecimal increasingFactorPerLevel,
+                                       final double miningFactor,
+                                       final int constructionLevel) {
+        Preconditions.checkNotNull(baseValue, "baseValue must not be empty");
+        Preconditions.checkNotNull(increasingFactorPerLevel, "increasingFactorPerLevel must not be empty");
 
-        // calculate level-based increasing factor
-        final BigDecimal increasingFactorPerLevel = building.getIncreasingFactorPerLevel();
-        final BigDecimal baseValue = new BigDecimal(building.getBaseValue());
-        BigDecimal increasingFactorAtLevel = BigDecimal.ZERO;
-        if (level != 1) {
-            final BigDecimal increasingFactorPerLevel1 = BigDecimal.ONE.add(increasingFactorPerLevel);
-            increasingFactorAtLevel = increasingFactorPerLevel1.multiply(new BigDecimal(level));
+        final BigDecimal adjustedBaseValue = baseValue.multiply(new BigDecimal(miningFactor), MATH_CONTEXT_INTEGER);
+        final BigDecimal level = BigDecimal.valueOf(constructionLevel);
+        if (constructionLevel == 1) {
+            return adjustedBaseValue;
         }
-        final BigDecimal absoluteIncreasingFactor = BigDecimal.ONE.add(increasingFactorAtLevel);
-        // calculate absolute output of construction
-        return baseValue.multiply(absoluteIncreasingFactor, MATH_CONTEXT_MORE_PRECISION);
+        return adjustedBaseValue.add(adjustedBaseValue.multiply(increasingFactorPerLevel).multiply(level));
     }
 }

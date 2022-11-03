@@ -16,6 +16,7 @@ import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static de.yuga.spacebattle.backend.enums.EDepositType.CAPACITY;
 import static de.yuga.spacebattle.backend.enums.EDepositType.COSTS;
 import static de.yuga.spacebattle.backend.enums.EResourceType.POPULATION;
 
@@ -81,9 +82,6 @@ public class ResourceDeposit extends AbstractEntityKey {
     private EDepositType subType;
 
     public ResourceDeposit() {
-    }
-
-    public ResourceDeposit(final int techLevel) {
     }
 
     public ResourceDeposit(@Nonnull final ResourceDeposit resourceDeposit) {
@@ -211,7 +209,7 @@ public class ResourceDeposit extends AbstractEntityKey {
     public void updateResource(@Nonnull final EResourceType resourceType, final long amount) {
         Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
 
-        if (POPULATION == resourceType) {
+        if (POPULATION == resourceType && subType != CAPACITY) {
             return;
         }
         final long value;

@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.services.turn;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.PopulationControlCalculator;
+import de.yuga.spacebattle.backend.calculator.resource.TickOutputCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.account.User;
@@ -40,8 +41,6 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit.MATH_CONTEXT_MORE_PRECISION;
 
 @Service
 public class ColonizationService {
@@ -192,7 +191,7 @@ public class ColonizationService {
         // set crew from the ship to the planet
         creditorDeposit.updatePopulation(requiredCrew);
 
-        final long miningFactor = planet.getMiningFactors().getMiningFactorByType(EResourceType.POPULATION);
+        final double miningFactor = planet.getMiningFactors().getMiningFactorByType(EResourceType.POPULATION);
 
         final List<Building> basicBuildings = buildingService.findBasicBuildings();
         basicBuildings.forEach(building -> {
@@ -213,20 +212,26 @@ public class ColonizationService {
         return planetService.save(planet);
     }
 
-    private static int detectPopCapStartingLevel(@Nonnull final ResourceDeposit creditorDeposit, @Nonnull final Building building, final long miningFactor) {
+    private static int detectPopCapStartingLevel(@Nonnull final ResourceDeposit creditorDeposit, @Nonnull final Building building, final double miningFactor) {
         Preconditions.checkNotNull(creditorDeposit, "creditorDeposit must not be empty");
         Preconditions.checkNotNull(building, "building must not be empty");
 
-        final int baseValue = building.getBaseValue();
-        final BigDecimal increasingFactorPerLevel = BigDecimal.ONE.add(building.getIncreasingFactorPerLevel());
+        final BigDecimal baseValue = new BigDecimal(building.getBaseValue());
+        final BigDecimal increasingFactorPerLevel = building.getIncreasingFactorPerLevel();
         final long sumOfPopulation = creditorDeposit.getCrewRequirement().getSumOfPopulation();
 
+        final int maxLevel = 40;
+        int levelTo = maxLevel; // fallback
         final BigDecimal virtualSumOfPops = PopulationControlCalculator.getVirtualAmountOfPops(miningFactor, sumOfPopulation);
-        final BigDecimal levelTo = virtualSumOfPops
-                .divide(new BigDecimal(baseValue).multiply(increasingFactorPerLevel), MATH_CONTEXT_MORE_PRECISION)
-                .add(BigDecimal.ONE);
-        // be nice and add two levels - buildings on higher levels are not cheap
-        return levelTo.intValue() + 2;
+        for (int virtualLevel = 1; virtualLevel <= maxLevel; virtualLevel++) {
+            final BigDecimal output = TickOutputCalculator.getOutput(baseValue, increasingFactorPerLevel, miningFactor, virtualLevel);
+            if (output.compareTo(virtualSumOfPops) >= 0) {
+                levelTo = virtualLevel;
+                break;
+            }
+        }
+        // be nice and add three levels - buildings on higher levels are not cheap
+        return levelTo + 3;
     }
 
     /**
