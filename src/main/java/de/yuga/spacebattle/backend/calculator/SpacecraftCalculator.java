@@ -143,7 +143,7 @@ public class SpacecraftCalculator {
 
         addValueByType(warshipHealthState.getArmorState(), 1, EModuleType.ARMOR);
         addValueByType(warshipHealthState.getElokaState(), 1, EModuleType.ELECTRONIC_WARFARE);
-        addValueByType(warshipHealthState.getSidewallState(), 1, EModuleType.SHIELD);
+        addValueByType(warshipHealthState.getSidewallState(), 1, EModuleType.SIDEWALL);
 
         setValueByPropulsion(warshipHealthState, EModuleType.PROPULSION);
         if (warshipHealthState.getWarShip().getShipClass().isFTLCapable()) {
@@ -187,7 +187,7 @@ public class SpacecraftCalculator {
 
         addValueByType(warshipHealthState.getStateByAsDouble(EModuleType.ARMOR), 1, EModuleType.ARMOR);
         addValueByType(warshipHealthState.getStateByAsDouble(EModuleType.ELECTRONIC_WARFARE), 1, EModuleType.ELECTRONIC_WARFARE);
-        addValueByType(warshipHealthState.getStateByAsDouble(EModuleType.SHIELD), 1, EModuleType.SHIELD);
+        addValueByType(warshipHealthState.getStateByAsDouble(EModuleType.SIDEWALL), 1, EModuleType.SIDEWALL);
 
         setValueByPropulsion(warshipHealthState, EModuleType.PROPULSION);
         if (warshipHealthState.getWarShip().getShipClass().isFTLCapable()) {
@@ -266,7 +266,7 @@ public class SpacecraftCalculator {
 
                 final Sidewall sidewall = shipClass.getSidewall();
                 if (sidewall != null) {
-                    final EModuleType moduleType = EModuleType.SHIELD;
+                    final EModuleType moduleType = EModuleType.SIDEWALL;
                     final List<SupportFitting> supportFittings = supportTypeToModule.computeIfAbsent(ESupportType.getByValue(moduleType), k -> new ArrayList<>());
                     calculateValueBySupportFitting(sidewall, 1, supportFittings, moduleType);
                 }

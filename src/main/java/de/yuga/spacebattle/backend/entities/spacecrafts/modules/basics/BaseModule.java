@@ -5,13 +5,12 @@ import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.misc.HasCosts;
 import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.enums.EHullType;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
+import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 
 import javax.annotation.Nonnull;
-import javax.persistence.CascadeType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @MappedSuperclass
@@ -30,6 +29,14 @@ public class BaseModule extends HasCosts {
     @NotNull
     private int useCapacity;
 
+    /**
+     * Which is the targeted ship's hull class.
+     */
+    @Nonnull
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private EHullType hullType;
+
     protected BaseModule() {
     }
 
@@ -37,15 +44,18 @@ public class BaseModule extends HasCosts {
                       @Nonnull final String description,
                       @Nonnull final Research unlockedThrough,
                       final int useCapacity,
+                      @Nonnull final EHullType hullType,
                       @Nonnull final ETechLevel techLevel,
                       @Nonnull final CrewRequirement crewRequirement,
                       @Nonnull final Class<?> clazz) {
-        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, clazz);
+        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, useCapacity, clazz);
+        Preconditions.checkNotNull(hullType, "hullType must not be empty");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
         this.unlockedThrough = unlockedThrough;
         this.useCapacity = useCapacity;
+        this.hullType = hullType;
         this.getCosts().setCrewRequirement(crewRequirement);
     }
 
@@ -56,6 +66,21 @@ public class BaseModule extends HasCosts {
 
     public int getUseCapacity() {
         return useCapacity;
+    }
+
+    @Nonnull
+    public EHullType getHullType() {
+        return hullType;
+    }
+
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public void setHullType(@Nonnull final EHullType hullType) {
+        this.hullType = hullType;
+    }
+
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public void setUseCapacity(final int useCapacity) {
+        this.useCapacity = useCapacity;
     }
 
     @Override

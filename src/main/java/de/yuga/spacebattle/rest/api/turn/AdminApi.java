@@ -230,7 +230,7 @@ public class AdminApi extends BaseApi {
         result.add(new FileUpload("sidewallModules,csv", ev.convert(castEffectValue(moduleService.findAllSidewalls()))));
         result.add(new FileUpload("weaponModules.csv", ev.convert(castEffectValue(moduleService.findAllWeapons()))));
         result.add(new FileUpload("launcherModules.csv", bm.convert(cast(moduleService.findAllLaunchers()))));
-        result.add(new FileUpload("passiveModules.csv", ev.convert(castEffectValue(moduleService.findAllPassiveModule()))));
+        result.add(new FileUpload("passiveModules.csv", ev.convert(castEffectValue(moduleService.findAllPassiveModules()))));
         result.add(new FileUpload("electronicWarfareModules.csv", ev.convert(castEffectValue(moduleService.findAllElectronicWarfare()))));
         result.add(new FileUpload("ammunitionModules.csv", ev.convert(castEffectValue(moduleService.findAllAmmunitionModules()))));
         result.add(new FileUpload("armorModules.csv", ev.convert(castEffectValue(moduleService.findAllArmors()))));

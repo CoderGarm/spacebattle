@@ -3,20 +3,24 @@ package de.yuga.spacebattle.backend.enums;
 import com.google.common.base.Preconditions;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
- * This indicated what a type of ship is this hull for.
+ * This indicated what a type of ship is this hull for.<br>
+ * <b>ATTENTION</b><br>
+ * Do not reorder the elements - their order is used in creating first fitted ship for new users in {@link de.yuga.spacebattle.backend.services.MasterOfTheUniverseService#sortByValue(List, EHullType)}.<br>
+ * Or adapt an order number.
  */
 public enum EHullType implements HasIconName {
 
     // Warships
     LAC("LAC", false, false, "fighter", "light attack craft (11 to 21 thousand tons, no hyper capability)"),
+    VT("VT", false, false, "corvette", "corvette"),
     FG("FG", false, false, "cruiser", "frigate"),
     DD("DD", false, false, "corvette", "destroyer (68 to 189 thousand tons)"),
-    CC("CC", false, false, "frigate", "cruiser in general"),
     CL("CL", false, false, "frigate", "light cruiser (88 to 147 thousand tons)"),
     CA("CA", false, false, "frigate", "heavy cruiser (228 to 483 thousand tons)"),
-    BC("CA", false, false, "frigate", "battlecruiser (780 thousand to 2.5 million tons)"),
+    BC("BC", false, false, "frigate", "battlecruiser (780 thousand to 2.5 million tons)"),
     BCP("BC(P)", true, false, "frigate", "Battlecruiser pod-layer (1.7 million to 1.8 million tons)"),
     BB("BB", false, false, "frigate", "battleship (2 to 4 million tons)"),
     DN("DN", false, false, "frigate", "dreadnought (5 to 6.5 million tons)"),

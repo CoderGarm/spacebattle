@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.entities.researches.ResearchLevel;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.repositories.researches.ResearchLevelRepository;
 import de.yuga.spacebattle.backend.repositories.researches.ResearchRepository;
+import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import de.yuga.spacebattle.rest.dto.researches.ResearchTree;
 import de.yuga.spacebattle.rest.dto.researches.ResearchTreeElement;
 import org.springframework.stereotype.Service;
@@ -221,5 +222,12 @@ public class ResearchService {
         Preconditions.checkNotNull(description, "description shouldn't be null!");
 
         return researchRepository.save(new Research(name, description, levelCap, techLevel, unlockedThrough));
+    }
+
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public void save(@Nonnull final Research research) {
+        Preconditions.checkNotNull(research, "research must not be empty");
+
+        researchRepository.save(research);
     }
 }

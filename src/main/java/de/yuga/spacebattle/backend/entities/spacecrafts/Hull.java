@@ -10,6 +10,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModul
 import de.yuga.spacebattle.backend.enums.EHullType;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
+import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
@@ -77,7 +78,7 @@ public class Hull extends HasCosts {
                 @Nonnull final Research unlockedThrough,
                 @Nonnull final EHullType hullType,
                 @Nonnull final CrewRequirement crewRequirement) {
-        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, Hull.class);
+        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, overallConstructionCapacity, Hull.class);
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
@@ -122,6 +123,36 @@ public class Hull extends HasCosts {
     @Nonnull
     public EHullType getHullType() {
         return hullType;
+    }
+
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public void setHullType(@Nonnull final EHullType hullType) {
+        this.hullType = hullType;
+    }
+
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public void setOverallConstructionCapacity(final int overallConstructionCapacity) {
+        this.overallConstructionCapacity = overallConstructionCapacity;
+    }
+
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public void setConstructionCapacity(final int constructionCapacity) {
+        this.constructionCapacity = constructionCapacity;
+    }
+
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public void setConstructionCapacityBow(final int constructionCapacityBow) {
+        this.constructionCapacityBow = constructionCapacityBow;
+    }
+
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public void setConstructionCapacityStern(final int constructionCapacityStern) {
+        this.constructionCapacityStern = constructionCapacityStern;
+    }
+
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public void setConstructionCapacityBroadsides(final int constructionCapacityBroadsides) {
+        this.constructionCapacityBroadsides = constructionCapacityBroadsides;
     }
 
     @Override

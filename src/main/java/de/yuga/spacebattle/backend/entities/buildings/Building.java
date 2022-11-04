@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.enums.EBuildingType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
+import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -68,7 +69,7 @@ public class Building extends HasCosts {
                     @Nonnull final ProductionType productionType,
                     @Nonnull final CrewRequirement crewRequirement,
                     @Nonnull final Research unlockedThrough) {
-        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, Building.class);
+        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, null, Building.class);
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(productionType, "productionType shouldn't be null!");
@@ -85,7 +86,7 @@ public class Building extends HasCosts {
         return baseValue;
     }
 
-    @Deprecated(since = "Only for balancing issues.")
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
     public void setBaseValue(final int baseValue) {
         this.baseValue = baseValue;
     }

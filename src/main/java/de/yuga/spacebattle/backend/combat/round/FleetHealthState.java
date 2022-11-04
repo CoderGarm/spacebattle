@@ -128,7 +128,7 @@ public class FleetHealthState implements Cloneable {
     }
 
     /**
-     * Cleans up the fighting capable warships to the losses.
+     * Cleans up the fighting capable warships from the active ones.
      */
     private void cleanUp() {
         final Map<WarShip, WarshipHealthState> losses = warshipHealthStates.entrySet().stream()

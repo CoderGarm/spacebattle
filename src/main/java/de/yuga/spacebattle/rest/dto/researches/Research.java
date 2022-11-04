@@ -106,7 +106,7 @@ public class Research {
         }
         final boolean isSidewall = !research.getUnlocksSidewall().isEmpty();
         if (isSidewall) {
-            this.hasIcon = new HasIcon(EModuleType.SHIELD);
+            this.hasIcon = new HasIcon(EModuleType.SIDEWALL);
         }
     }
 

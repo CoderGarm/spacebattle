@@ -9,8 +9,10 @@ import de.yuga.spacebattle.backend.enums.EResourceDemand;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.ETranslatableType;
 import de.yuga.spacebattle.backend.enums.ETranslationTarget;
+import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
@@ -55,6 +57,7 @@ public class HasCosts extends AbstractEntityKey {
     public HasCosts(@Nonnull final Translation translatableName,
                     @Nonnull final Translation translatableDescription,
                     @Nonnull final ETechLevel techLevel,
+                    @Nullable final Integer capacity,
                     @Nonnull final Class<?> clazz) {
         Preconditions.checkNotNull(translatableName, "translatableName must not be empty");
         Preconditions.checkNotNull(translatableDescription, "translatableDescription must not be empty");
@@ -68,7 +71,7 @@ public class HasCosts extends AbstractEntityKey {
         this.description = new Translatable(ETranslationTarget.getByClazz(clazz), ETranslatableType.DESCRIPTION);
         this.description.add(translatableDescription);
         this.techLevel = techLevel;
-        this.costs = ResourceDepositInitializerCalculator.initializeResourceDeposit(techLevel, EResourceDemand.getByClazz(this.getClass()));
+        this.costs = ResourceDepositInitializerCalculator.initializeCosts(techLevel, capacity, EResourceDemand.getByClazz(this.getClass()));
     }
 
     @Nonnull
@@ -83,6 +86,18 @@ public class HasCosts extends AbstractEntityKey {
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
 
         return description.getTranslation(languageCode);
+    }
+
+    @Nonnull
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public Translatable getName() {
+        return name;
+    }
+
+    @Nonnull
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public Translatable getDescription() {
+        return description;
     }
 
     @Nonnull

@@ -2,9 +2,12 @@ package de.yuga.spacebattle.backend.entities.turn.resources;
 
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.misc.HasCosts;
 import de.yuga.spacebattle.backend.enums.*;
+import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
@@ -273,10 +276,26 @@ public class ResourceDeposit extends AbstractEntityKey {
 
         for (final EEducationType educationType : EEducationType.values()) {
             final long crewAmountByType = crewRequirement.getCrewAmountByType(educationType);
-            if (crewAmountByType != 0) {
-                humanResources.put(educationType, crewAmountByType);
-            }
+            humanResources.put(educationType, crewAmountByType);
         }
+    }
+
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public void setCrewRequirement(@Nonnull final Integer capacity, @Nonnull final Class<? extends HasCosts> clazz, @Nonnull final CrewRequirement crewRequirement) {
+        Preconditions.checkNotNull(capacity, "capacity must not be empty");
+        Preconditions.checkNotNull(clazz, "clazz must not be empty");
+        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
+
+        for (final EEducationType educationType : EEducationType.values()) {
+            final long crewAmountByType = crewRequirement.getCrewAmountByType(educationType);
+            humanResources.put(educationType, crewAmountByType);
+        }
+        final ResourceDeposit resourceDeposit = ResourceDepositInitializerCalculator.initializeCosts(ETechLevel.TECH_I, capacity, EResourceDemand.getByClazz(clazz));
+        for (final EResourceType eResourceType : EResourceType.valuesWithoutPopulation()) {
+            final long amount = resourceDeposit.getResourceAmountByType(eResourceType);
+            setAbsoluteResourceValue(eResourceType, amount);
+        }
+
     }
 
     /**

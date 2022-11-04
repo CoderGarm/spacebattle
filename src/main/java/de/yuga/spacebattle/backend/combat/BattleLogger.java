@@ -79,16 +79,16 @@ public class BattleLogger {
             final int id = battleReport.getId();
             final Tick tick = battleReport.getTick();
             final String path = DIR + PS + "battleReports" + PS + "tick_" + tick.getId();
-            final boolean mkdirs = new File(path).mkdirs();
-            if (mkdirs) {
-                final FileWriter fw = new FileWriter(path + PS + "battleReport_" + id + ".txt", true);
-                return new BufferedWriter(fw);
+            final File dir = new File(path);
+            if (!dir.exists()) {
+                dir.mkdirs();
             }
+            final FileWriter fw = new FileWriter(path + PS + "battleReport_" + id + ".txt", true);
+            return new BufferedWriter(fw);
         } catch (IOException e) {
             e.printStackTrace();
             throw new NotifyWebUserException("Universe is going down on open" + e.getMessage());
         }
-        return null;
     }
 
     private void write(@Nonnull final BufferedWriter bw, final String msg) {

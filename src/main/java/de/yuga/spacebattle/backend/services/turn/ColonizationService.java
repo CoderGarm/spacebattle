@@ -180,6 +180,8 @@ public class ColonizationService {
 
         final User owner = userService.findWithKnownStarSystems(colonization.getUser());
         final Planet planet = colonization.getTarget();
+        planet.getMiningFactors().equalize();
+        planet.getResourceDeposit().equalize();
         assert owner != null : "When this happens, the end is near.";
         planet.setOwner(owner);
         final List<Planet> allColonizedBy = planetService.findAllColonizedBy(owner);
@@ -225,13 +227,14 @@ public class ColonizationService {
         final BigDecimal virtualSumOfPops = PopulationControlCalculator.getVirtualAmountOfPops(miningFactor, sumOfPopulation);
         for (int virtualLevel = 1; virtualLevel <= maxLevel; virtualLevel++) {
             final BigDecimal output = TickOutputCalculator.getOutput(baseValue, increasingFactorPerLevel, miningFactor, virtualLevel);
-            if (output.compareTo(virtualSumOfPops) >= 0) {
+            if (output.compareTo(virtualSumOfPops) > 0) {
                 levelTo = virtualLevel;
+                LOGGER.warn("Something angry has changed the balancing so much!");
                 break;
             }
         }
         // be nice and add three levels - buildings on higher levels are not cheap
-        return levelTo + 3;
+        return levelTo + 4;
     }
 
     /**

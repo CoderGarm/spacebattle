@@ -90,7 +90,7 @@ public class WarshipHealthState implements Cloneable {
         final de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState healthState = warShip.getWarshipHealthState();
         armorState = healthState.getStateByAsInt(EModuleType.ARMOR);
         hullState = healthState.getStateByAsInt(EModuleType.ARMOR);
-        sidewallState = healthState.getStateByAsInt(EModuleType.SHIELD);
+        sidewallState = healthState.getStateByAsInt(EModuleType.SIDEWALL);
         propulsionState = Integer.max(healthState.getStateByAsInt(EModuleType.PROPULSION), healthState.getStateByAsInt(EModuleType.FTLPROPULSION));
         elokaState = healthState.getStateByAsInt(EModuleType.ELECTRONIC_WARFARE);
         final Set<AlignedFitting> activeFittings = healthState.getActiveFittings();

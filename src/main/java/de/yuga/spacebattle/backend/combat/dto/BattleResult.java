@@ -49,10 +49,16 @@ public class BattleResult {
         this.beamVolleys = cage.getHistoryOfBeamSalvos();
         this.missileSalvos = cage.getHistoryOfMissileSalvos();
 
-        this.roundStates.forEach(fleetRoundState -> this.losses.addAll(fleetRoundState.getFleetHealthState().getLosses().keySet()));
+        final Map<WarShip, WarshipHealthState> losses = new HashMap<>();
+        this.roundStates.forEach(fleetRoundState -> losses.putAll(fleetRoundState.getFleetHealthState().getLosses()));
+        this.losses.addAll(losses.keySet());
 
-        final Set<WarshipHealthState> warshipHealthStateSet = new HashSet<>();
-        this.roundStates.forEach(fleetRoundState -> warshipHealthStateSet.addAll(fleetRoundState.getFleetHealthState().getWarshipHealthStates().values()));
+        // add all losses - they have no "existing state" afterwards
+        final Set<WarshipHealthState> warshipHealthStateSet = new HashSet<>(losses.values());
+        // all others in reverse order to display the latest states
+        final List<FleetRoundState> reverse = new ArrayList<>(this.roundStates);
+        Collections.reverse(reverse);
+        reverse.forEach(fleetRoundState -> warshipHealthStateSet.addAll(fleetRoundState.getFleetHealthState().getWarshipHealthStates().values()));
         warshipHealthStateSet.forEach(state -> warshipHealthStates.put(state.getWarShip(), state));
     }
 

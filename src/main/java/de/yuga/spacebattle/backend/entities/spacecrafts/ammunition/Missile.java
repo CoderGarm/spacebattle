@@ -12,10 +12,12 @@ import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
+import de.yuga.spacebattle.backend.enums.EHullType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
+import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -79,6 +81,14 @@ public class Missile extends HasCosts {
     @Transient
     private Distance maxRange = null;
 
+    /**
+     * Which is the targeted ship's hull class.
+     */
+    @Nonnull
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private EHullType hullType;
+
     public Missile() {
     }
 
@@ -87,16 +97,18 @@ public class Missile extends HasCosts {
                    final int warheadCapacity,
                    final int motorCapacity,
                    final int elokaResistance,
+                   @Nonnull final EHullType hullType,
                    @Nonnull final ETechLevel techLevel,
                    @Nonnull final Warhead warhead,
                    @Nonnull final List<MissileMotor> missileMotors,
                    @Nonnull final Research unlockedThrough,
                    @Nonnull final AmmunitionModule ammunitionModule) {
-        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, Missile.class);
+        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, motorCapacity + warheadCapacity, Missile.class);
         Preconditions.checkNotNull(warhead, "warhead shouldn't be null!");
         Preconditions.checkNotNull(missileMotors, "missileMotors shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
         Preconditions.checkNotNull(ammunitionModule, "ammunitionModule shouldn't be null!");
+        Preconditions.checkNotNull(hullType, "hullType must not be empty");
 
         this.warheadCapacity = warheadCapacity;
         this.motorCapacity = motorCapacity;
@@ -106,6 +118,7 @@ public class Missile extends HasCosts {
         this.motorAmount = missileMotors.size(); // todo repair the methods away from list - to lazy currently
         this.unlockedThrough = unlockedThrough;
         this.ammunitionModule = ammunitionModule;
+        this.hullType = hullType;
     }
 
     public int getWarheadCapacity() {
@@ -132,6 +145,52 @@ public class Missile extends HasCosts {
 
     public int getMotorAmount() {
         return motorAmount;
+    }
+
+
+    @Nonnull
+    public EHullType getHullType() {
+        return hullType;
+    }
+
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public void setHullType(@Nonnull final EHullType hullType) {
+        this.hullType = hullType;
+    }
+
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public void setWarheadCapacity(final int warheadCapacity) {
+        this.warheadCapacity = warheadCapacity;
+    }
+
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public void setMotorCapacity(final int motorCapacity) {
+        this.motorCapacity = motorCapacity;
+    }
+
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public void setElokaResistance(final int elokaResistance) {
+        this.elokaResistance = elokaResistance;
+    }
+
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public void setWarhead(@Nonnull final Warhead warhead) {
+        this.warhead = warhead;
+    }
+
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public void setMissileMotor(@Nonnull final MissileMotor missileMotor) {
+        this.missileMotor = missileMotor;
+    }
+
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public void setMotorAmount(final int motorAmount) {
+        this.motorAmount = motorAmount;
+    }
+
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public void setAmmunitionModule(@Nonnull final AmmunitionModule ammunitionModule) {
+        this.ammunitionModule = ammunitionModule;
     }
 
     /**

@@ -369,7 +369,7 @@ public class ShipClass extends Deletable {
 
     /**
      * Necessary while vaadin data binding needs a setter for a full set of data and is not able to use an incremental add method.
-     * Removes all not longer contained modules and add or replace everything else.
+     * Removes all no longer contained modules and add or replace everything else.
      *
      * @param fittings the set of fittings
      */

@@ -101,13 +101,6 @@ public class ShipClassService {
         return shipClassRepository.save(entity);
     }
 
-    @Nonnull
-    public ShipClass saveAndFlush(@Nonnull final ShipClass entity) {
-        Preconditions.checkNotNull(entity, "entity shouldn't be null!");
-
-        return shipClassRepository.saveAndFlush(entity);
-    }
-
     /**
      * Marks a ship class as deleted.
      *
@@ -165,5 +158,11 @@ public class ShipClassService {
         Preconditions.checkNotNull(className, "className shouldn't be null!");
 
         return shipClassRepository.checkIfClassNameIsFree(idOwner, className);
+    }
+
+    public void saveAll(@Nonnull final Collection<ShipClass> shipClasses) {
+        Preconditions.checkNotNull(shipClasses, "shipClasses must not be empty");
+
+        shipClassRepository.saveAll(shipClasses);
     }
 }

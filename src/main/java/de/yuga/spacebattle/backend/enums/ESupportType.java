@@ -28,7 +28,7 @@ public enum ESupportType {
     /**
      * A module which supports this will increase the effective value for this property.
      */
-    SHIELD(EModuleType.SHIELD),
+    SIDEWALL(EModuleType.SIDEWALL),
 
     /**
      * A module which supports this will increase the effective value for this property.

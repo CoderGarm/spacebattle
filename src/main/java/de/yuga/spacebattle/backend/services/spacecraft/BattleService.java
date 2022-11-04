@@ -124,13 +124,9 @@ public class BattleService {
         final BattleReport battleReport = battleReportService.save(new BattleReport(latest, battleResult));
         final List<WarShip> warShips = battleResult.getFleetClash()
                 .getParticipatingFleets().stream()
-                .map(Fleet::getAllShips)
+                .map(Fleet::getAliveShips)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
-        final Set<WarShip> losses = battleResult.getLosses();
-        warShips.removeAll(losses);
-        warShipService.markAllAsDestroyed(losses);
-        fleetService.markFleetsWithoutShipsAsDeleted(battleResult.getFleetClash().getParticipatingFleets());
 
         final Map<WarShip, de.yuga.spacebattle.backend.combat.round.WarshipHealthState> byResult = battleResult.getWarshipHealthStates();
 
@@ -151,6 +147,11 @@ public class BattleService {
 
         warshipHealthStateService.saveAll(statesToPersist);
         fleetService.saveAll(fleetsToPersist);
+
+        final Set<WarShip> losses = battleResult.getLosses();
+        // todo how to handle fighting incapable ships?
+        warShipService.markAllAsDestroyed(losses);
+        fleetService.markFleetsWithoutShipsAsDeleted(battleResult.getFleetClash().getParticipatingFleets());
 
         battleLogger.logBattleResult(battleReport, battleResult);
         return battleReport;

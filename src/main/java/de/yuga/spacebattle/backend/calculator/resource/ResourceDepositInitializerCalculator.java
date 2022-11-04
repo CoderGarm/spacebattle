@@ -1,12 +1,6 @@
 package de.yuga.spacebattle.backend.calculator.resource;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
-import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
-import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.MissileMotor;
-import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Warhead;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EResourceDemand;
@@ -14,6 +8,8 @@ import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -26,15 +22,17 @@ public class ResourceDepositInitializerCalculator {
     }
 
     /**
-     * Should create costs and deposits.<br>
+     * Creates costs and deposits.<br>
      * Needs a heavy revision for productive run. Must be balanced.
      *
      * @param techLevel the tech level defines the complexity of cost structure
+     * @param capacity  if present it will be taken to weight the costs against other modules
      * @param clazz     the assigned class
      * @return the resource deposit
      */
-    public static ResourceDeposit initializeResourceDeposit(@Nonnull final ETechLevel techLevel,
-                                                            @Nonnull final EResourceDemand clazz) {
+    public static ResourceDeposit initializeCosts(@Nonnull final ETechLevel techLevel,
+                                                  @Nullable final Integer capacity,
+                                                  @Nonnull final EResourceDemand clazz) {
         Preconditions.checkNotNull(techLevel, "techLevel shouldn't be null!");
         Preconditions.checkNotNull(clazz, "clazz shouldn't be null!");
 
@@ -48,8 +46,10 @@ public class ResourceDepositInitializerCalculator {
                 // do not generate for 'forbidden types'
                 continue;
             }
-            long rand = ThreadLocalRandom.current().nextLong(10, 51);
-            resourceDeposit.setAbsoluteResourceValue(type, rand);
+            final int origin = getOrigin(capacity, clazz);
+            final int bound = getBound(capacity, clazz);
+            int next = new Random().nextInt(bound);
+            resourceDeposit.setAbsoluteResourceValue(type, origin + next);
         }
         return resourceDeposit;
     }
@@ -64,14 +64,39 @@ public class ResourceDepositInitializerCalculator {
         return resourceDeposit;
     }
 
-    private static boolean isOrbitalConstruction(@Nonnull final Class<?> clazz) {
-        Preconditions.checkNotNull(clazz, "clazz shouldn't be null!");
+    private static int getOrigin(@Nullable Integer capacity, @Nonnull final EResourceDemand clazz) {
+        Preconditions.checkNotNull(clazz, "clazz must not be empty");
 
-        return clazz.isAssignableFrom(BaseModuleWithEffectValue.class)
-                || clazz.isAssignableFrom(Hull.class)
-                || clazz.isAssignableFrom(Missile.class)
-                || clazz.isAssignableFrom(MissileMotor.class)
-                || clazz.isAssignableFrom(Warhead.class)
-                || clazz.isAssignableFrom(BaseModule.class);
+        switch (clazz) {
+            case BUILDING:
+            case RESEARCH:
+            default:
+                return 10;
+            case HULL:
+            case MISSILE:
+            case WARHEAD:
+            case MISSILE_MOTOR:
+            case BASE_MODULE:
+                Preconditions.checkNotNull(capacity, "capacity must not be empty");
+                return Integer.max(4, capacity / 10);
+        }
+    }
+
+    private static int getBound(@Nullable Integer capacity, @Nonnull final EResourceDemand clazz) {
+        Preconditions.checkNotNull(clazz, "clazz must not be empty");
+
+        switch (clazz) {
+            case BUILDING:
+            case RESEARCH:
+            default:
+                return 51;
+            case HULL:
+            case MISSILE:
+            case WARHEAD:
+            case MISSILE_MOTOR:
+            case BASE_MODULE:
+                Preconditions.checkNotNull(capacity, "capacity must not be empty");
+                return Integer.max(9, capacity / 2);
+        }
     }
 }

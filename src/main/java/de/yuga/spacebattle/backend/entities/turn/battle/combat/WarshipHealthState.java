@@ -95,6 +95,7 @@ public class WarshipHealthState extends AbstractEntityKey implements WarshipHeal
                 this.capabilities.add(newCap);
             }
         }
+        isFightingCapable = warshipHealthState.isFightingCapable();
         this.activeFittings.clear();
         this.activeFittings.addAll(warshipHealthState.getActiveFittings());
         this.remainingShots.clear();
@@ -195,7 +196,7 @@ public class WarshipHealthState extends AbstractEntityKey implements WarshipHeal
 
         final boolean differState = !(getStateByAsInt(EModuleType.ARMOR) == reference.getArmorState()
                 && getStateByAsInt(EModuleType.ELECTRONIC_WARFARE) == reference.getElokaState()
-                && getStateByAsInt(EModuleType.SHIELD) == reference.getSidewallState()
+                && getStateByAsInt(EModuleType.SIDEWALL) == reference.getSidewallState()
                 && getStateByAsInt(EModuleType.ARMOR) == reference.getHullState()
                 && getStateByAsInt(EModuleType.PROPULSION) == reference.getPropulsionState());
 
@@ -207,7 +208,8 @@ public class WarshipHealthState extends AbstractEntityKey implements WarshipHeal
             return refAmount != remainingShots;
         });
 
-        return differState || differMissiles;
+        final boolean differInActivityState = isFightingCapable || reference.isFightingCapable();
+        return differState || differMissiles || differInActivityState;
     }
 
     public void repair() {

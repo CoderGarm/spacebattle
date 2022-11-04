@@ -23,6 +23,7 @@ public class Translation extends AbstractEntityKey {
      * The default language for all translatable names and descriptions.
      */
     public static final String DEFAULT_LANGUAGE = "en";
+    public static final String SECOND_LANGUAGE = "de";
 
     /**
      * Best matching possibilities.

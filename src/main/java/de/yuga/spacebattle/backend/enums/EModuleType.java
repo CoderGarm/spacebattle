@@ -9,7 +9,7 @@ public enum EModuleType implements HasIconName {
 
     WEAPON("Attack", "attack"),
     ARMOR("Armor", "armor"),
-    SHIELD("Shield", "shield"),
+    SIDEWALL("Shield", "shield"),
 
     /**
      * As coordinates are in light seconds it has the native metric of {@link EDistanceMetric#LS}.

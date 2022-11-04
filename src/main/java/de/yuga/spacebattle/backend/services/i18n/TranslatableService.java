@@ -370,6 +370,6 @@ public class TranslatableService {
         if (en.equals("Counter missile Mk I")) {
             return "Gegenrakete Mk I";
         }
-        return null;
+        return "Stub text";
     }
 }

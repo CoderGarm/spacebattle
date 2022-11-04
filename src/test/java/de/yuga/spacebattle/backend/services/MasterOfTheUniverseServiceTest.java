@@ -110,7 +110,7 @@ public class MasterOfTheUniverseServiceTest {
         colonizationService.colonizePlanet(colonization);
 
         masterOfTheUniverseService.createFleetForUser(saved);
-        final WarShip opponentForUser = masterOfTheUniverseService.createOpponentForUser(saved);
+        final WarShip opponentForUser = masterOfTheUniverseService.createOpponentFleetForUser(saved);
         final WarshipHealthState warshipHealthState = opponentForUser.getWarshipHealthState();
         warshipHealthState.getCapabilities().forEach(cap -> cap.setValue(cap.getValue().divide(BigDecimal.valueOf(3), MathContext.DECIMAL32)));
 
@@ -125,7 +125,7 @@ public class MasterOfTheUniverseServiceTest {
         final String username = "fluqhsjqda";
         final User saved = userService.findByUsername(username).get().getUser();
 
-        final WarShip opponentForUser = masterOfTheUniverseService.createOpponentForUser(saved);
+        final WarShip opponentForUser = masterOfTheUniverseService.createOpponentFleetForUser(saved);
 
         warShipService.save(opponentForUser);
         tickService.doTick();

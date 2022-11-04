@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -58,11 +59,11 @@ public class HullService {
     @Deprecated(since = "productive environment")
     @SuppressWarnings("DeprecatedIsStillUsed")
     public Hull createHull(@Nonnull final String name,
-                           final int overallConstructionCapacity,
-                           final int constructionCapacity,
-                           final int constructionCapacityBow,
-                           final int constructionCapacityStern,
-                           final int constructionCapacityBroadsides,
+                           final int ccOverall,
+                           final int ccModules,
+                           final int ccBow,
+                           final int ccStern,
+                           final int ccBroadsides,
                            @Nonnull final ETechLevel techLevel,
                            @Nonnull final String description,
                            @Nonnull final Research unlockedThrough,
@@ -74,12 +75,18 @@ public class HullService {
         Preconditions.checkNotNull(hullType, "hullType shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        return hullRepository.save(new Hull(name, overallConstructionCapacity, constructionCapacity, constructionCapacityBow, constructionCapacityStern, constructionCapacityBroadsides, techLevel, description, unlockedThrough, hullType, crewRequirement));
+        return hullRepository.save(new Hull(name, ccOverall, ccModules, ccBow, ccStern, ccBroadsides, techLevel, description, unlockedThrough, hullType, crewRequirement));
     }
 
     public Hull save(@Nonnull final Hull entity) {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
 
         return hullRepository.save(entity);
+    }
+
+    public void saveAll(@Nonnull final Collection<Hull> toStore) {
+        Preconditions.checkNotNull(toStore, "toStore must not be empty");
+
+        hullRepository.saveAll(toStore);
     }
 }

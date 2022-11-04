@@ -19,6 +19,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfar
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.Move;
+import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EModuleType;
@@ -183,7 +184,8 @@ public class Fleet extends Deletable {
     }
 
     public boolean isAlive() {
-        return !isDeleted() && !getAliveShips().isEmpty();
+        final boolean fightingIsPossible = getAliveShips().stream().map(WarShip::getWarshipHealthState).anyMatch(WarshipHealthState::isFightingCapable);
+        return !isDeleted() && fightingIsPossible;
     }
 
     /**

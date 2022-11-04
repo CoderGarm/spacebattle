@@ -6,10 +6,7 @@ import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
-import de.yuga.spacebattle.backend.enums.EAlignmentType;
-import de.yuga.spacebattle.backend.enums.ETechLevel;
-import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
-import de.yuga.spacebattle.backend.enums.EWeaponType;
+import de.yuga.spacebattle.backend.enums.*;
 import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
@@ -74,13 +71,14 @@ public class Weapon extends BaseModuleWithEffectValue {
                   @Nonnull final Research unlockedThrough,
                   final int useCapacity,
                   final int effectValue,
+                  @Nonnull final EHullType hullType,
                   @Nonnull final ETechLevel techLevel,
                   @Nonnull final Distance damageProjectionRange,
                   final int amountDamageEmitter,
                   @Nonnull final EWeaponType weaponType,
                   @Nonnull final EAlignmentType alignmentType,
                   @Nonnull final CrewRequirement crewRequirement) {
-        super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement, Weapon.class);
+        super(name, description, unlockedThrough, useCapacity, effectValue, hullType, techLevel, crewRequirement, Weapon.class);
         Preconditions.checkNotNull(damageProjectionRange, "damageProjectionRange shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "eWeaponType shouldn't be null!");
         Preconditions.checkNotNull(alignmentType, "alignmentType shouldn't be null!");

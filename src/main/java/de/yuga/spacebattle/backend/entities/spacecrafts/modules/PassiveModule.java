@@ -4,6 +4,7 @@ import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.enums.ECalculationType;
+import de.yuga.spacebattle.backend.enums.EHullType;
 import de.yuga.spacebattle.backend.enums.ESupportType;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 
@@ -44,11 +45,12 @@ public class PassiveModule extends BaseModuleWithEffectValue {
                          @Nonnull final Research unlockedThrough,
                          final int useCapacity,
                          final int effectValue,
+                         @Nonnull final EHullType hullType,
                          @Nonnull final ETechLevel techLevel,
                          @Nonnull final ESupportType supportType,
                          @Nonnull final ECalculationType calculationType,
                          @Nonnull final CrewRequirement crewRequirement) {
-        super(name, description, unlockedThrough, useCapacity, effectValue, techLevel, crewRequirement, PassiveModule.class);
+        super(name, description, unlockedThrough, useCapacity, effectValue, hullType, techLevel, crewRequirement, PassiveModule.class);
 
         this.supportType = supportType;
         this.calculationType = calculationType;

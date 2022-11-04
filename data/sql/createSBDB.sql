@@ -47,6 +47,7 @@
     create table ammunitionModule (
        idAmmunitionModule integer not null auto_increment,
         techLevel varchar(255) not null,
+        hullType varchar(255) not null,
         useCapacity integer not null,
         effectValue integer not null,
         idCosts integer not null,
@@ -65,6 +66,7 @@
     create table armor (
        idArmor integer not null auto_increment,
         techLevel varchar(255) not null,
+        hullType varchar(255) not null,
         useCapacity integer not null,
         effectValue integer not null,
         idCosts integer not null,
@@ -146,6 +148,7 @@
     create table electronicWarfare (
        idElectronicWarfare integer not null auto_increment,
         techLevel varchar(255) not null,
+        hullType varchar(255) not null,
         useCapacity integer not null,
         effectValue integer not null,
         effectiveRange varchar(255),
@@ -285,6 +288,7 @@
     create table launcher (
        idLauncher integer not null auto_increment,
         techLevel varchar(255) not null,
+        hullType varchar(255) not null,
         useCapacity integer not null,
         alignmentType varchar(255) not null,
         weaponType varchar(255) not null,
@@ -331,6 +335,7 @@
        idMissile integer not null auto_increment,
         techLevel varchar(255) not null,
         elokaResistance integer not null,
+        hullType varchar(255) not null,
         motorAmount integer not null,
         motorCapacity integer not null,
         warheadCapacity integer not null,
@@ -349,6 +354,7 @@
         techLevel varchar(255) not null,
         acceleration varchar(255) not null,
         endurance integer not null,
+        hullType varchar(255) not null,
         maneuverability integer not null,
         useCapacity integer not null,
         idCosts integer not null,
@@ -440,6 +446,7 @@
     create table passiveModule (
        idPassiveModule integer not null auto_increment,
         techLevel varchar(255) not null,
+        hullType varchar(255) not null,
         useCapacity integer not null,
         effectValue integer not null,
         calculationType varchar(255) not null,
@@ -468,6 +475,7 @@
     create table propulsion (
        idPropulsion integer not null auto_increment,
         techLevel varchar(255) not null,
+        hullType varchar(255) not null,
         useCapacity integer not null,
         effectValue integer not null,
         hyperBand varchar(255),
@@ -579,6 +587,7 @@
     create table sidewall (
        idSidewall integer not null auto_increment,
         techLevel varchar(255) not null,
+        hullType varchar(255) not null,
         useCapacity integer not null,
         effectValue integer not null,
         idCosts integer not null,
@@ -652,6 +661,7 @@
         techLevel varchar(255) not null,
         damageProjectionRange varchar(255),
         damageValue bigint not null,
+        hullType varchar(255) not null,
         useCapacity integer not null,
         warheadType varchar(255) not null,
         idCosts integer not null,
@@ -701,6 +711,7 @@
     create table weapon (
        idWeapon integer not null auto_increment,
         techLevel varchar(255) not null,
+        hullType varchar(255) not null,
         useCapacity integer not null,
         effectValue integer not null,
         alignmentType varchar(255) not null,
@@ -1668,3 +1679,4 @@ insert into dbPatch values (null, now(), 'create dbPatch table', '0.0.5-1');
 insert into dbPatch values (null, now(), 'add warship health state', '0.0.5-2');
 insert into dbPatch values (null, now(), 'repair fleets by job', '0.0.5-3');
 insert into dbPatch values (null, now(), 'add check constraint names', '0.0.5-4');
+insert into dbPatch values (null, now(), 'balance spacecraft stuff', '0.0.5-5');

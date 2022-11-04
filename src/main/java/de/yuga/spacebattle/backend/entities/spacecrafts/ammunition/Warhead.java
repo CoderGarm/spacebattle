@@ -5,6 +5,7 @@ import de.yuga.spacebattle.backend.converter.DistanceConverter;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.misc.HasCosts;
+import de.yuga.spacebattle.backend.enums.EHullType;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.EWarheadType;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -39,24 +40,35 @@ public class Warhead extends HasCosts {
     @Column(nullable = false)
     private int useCapacity;
 
+    /**
+     * Which is the targeted ship's hull class.
+     */
+    @Nonnull
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private EHullType hullType;
+
     public Warhead() {
     }
 
     public Warhead(@Nonnull final String name,
                    @Nonnull final String description,
                    final int damageValue,
+                   @Nonnull final EHullType hullType,
                    @Nonnull final ETechLevel techLevel,
                    @Nonnull final Distance damageProjectionRange,
                    @Nonnull final EWarheadType warheadType,
                    final int useCapacity) {
-        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, Warhead.class);
+        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, damageValue, Warhead.class);
         Preconditions.checkNotNull(damageProjectionRange, "damageProjectionRange shouldn't be null!");
         Preconditions.checkNotNull(warheadType, "warheadType shouldn't be null!");
+        Preconditions.checkNotNull(hullType, "hullType must not be empty");
 
         this.damageValue = damageValue;
         this.damageProjectionRange = damageProjectionRange;
         this.warheadType = warheadType;
         this.useCapacity = useCapacity;
+        this.hullType = hullType;
     }
 
     public long getDamageValue() {

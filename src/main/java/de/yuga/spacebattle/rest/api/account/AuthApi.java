@@ -280,9 +280,6 @@ public class AuthApi {
         researchService.addResearch(saved, researchesWithoutPrecondition);
 
         final Planet planet = colonizationService.findPlanetForNewUser();
-        planet.getMiningFactors().equalize();
-        planet.getResourceDeposit().equalize();
-        planetService.save(planet);
         final Colonization colonization = new Colonization(saved, planet, ColonizationCostCalculator.getCrewRequirementForColonization(), 0);
         colonizationService.colonizePlanet(colonization);
 
@@ -300,7 +297,7 @@ public class AuthApi {
     @Async("taskExecutor")
     protected void createOpponentAndFight(final User saved) {
         masterOfTheUniverseService.createFleetForUser(saved);
-        masterOfTheUniverseService.createOpponentForUser(saved);
+        masterOfTheUniverseService.createOpponentFleetForUser(saved);
         masterOfTheUniverseService.runBattleForNewUser(saved);
     }
 
