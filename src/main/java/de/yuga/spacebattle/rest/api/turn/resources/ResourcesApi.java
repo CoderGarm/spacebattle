@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.api.turn.resources;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
@@ -162,6 +163,27 @@ public class ResourcesApi extends BaseApi {
         final Planet planet = planetService.find(idPlanet);
         PreconditionWebHelper.checkNotNull(planet, "planet shouldn't be null!");
         return ResponseEntity.ok(new ResourceDeposit(planet.getResourceDeposit()));
+    }
+
+    @GetMapping(value = RESOURCE_DEPOSIT_ENDPOINT)
+    @Operation(summary = "Get all EResourceTypes.", operationId = "getResourceDepositForUser",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceDeposit.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getResourceDepositForUser() {
+        final int idUser = getIdUser();
+        final List<Planet> planets = planetService.findAllColonizedBy(idUser);
+        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit resourceDeposit = new de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit(EDepositType.DEPOSITS);
+        planets.forEach(planet -> {
+            final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit deposit = planet.getResourceDeposit();
+            resourceDeposit.add(deposit);
+        });
+
+        return ResponseEntity.ok(new ResourceDeposit(resourceDeposit));
     }
 
     @GetMapping(value = INCOME_ENDPOINT + "/{idPlanet}")
