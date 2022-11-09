@@ -852,14 +852,14 @@ public class MasterOfTheUniverseService {
         hullService.createHull("Light attack vessel", 20, 4, 10, 3, 3, ETechLevel.TECH_I, "The light attack craft hull", smallest.getUnlockedThrough(), EHullType.LAC, new CrewRequirement(S_CREW, EDepositType.COSTS));
         Research hullResearch = biggestHull.getUnlockedThrough();
         hullService.createHull("Heavy cruiser vessel", 200, 60, 30, 30, 80, ETechLevel.TECH_I, "The assault cruiser hull", hullResearch, EHullType.CA, new CrewRequirement(L_CREW, EDepositType.COSTS));
-        hullResearch = research("Battle Cruiser", "Researches bigger cruisers.", 1, ETechLevel.TECH_I, hullResearch);
-        hullService.createHull("Battle cruiser vessel", 700, 280, 90, 90, 240, ETechLevel.TECH_I, "The battle cruiser hull", hullResearch, EHullType.BC, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
+        hullResearch = research("Battlecruiser", "Researches bigger cruisers.", 1, ETechLevel.TECH_I, hullResearch);
+        hullService.createHull("Battlecruiser vessel", 700, 280, 90, 90, 240, ETechLevel.TECH_I, "The battle cruiser hull", hullResearch, EHullType.BC, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
         hullResearch = research("Battleship", "Researches battleships.", 1, ETechLevel.TECH_I, hullResearch);
         hullService.createHull("Battleship vessel", 2000, 800, 200, 200, 800, ETechLevel.TECH_I, "The battle ship hull", hullResearch, EHullType.BB, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
         hullResearch = research("Dreadnought", "Researches dreadnoughts.", 1, ETechLevel.TECH_I, hullResearch);
         hullService.createHull("Dreadnought vessel", 5000, 1900, 400, 400, 2300, ETechLevel.TECH_I, "The dreadnought hull", hullResearch, EHullType.DN, new CrewRequirement(XXXL_CREW, EDepositType.COSTS));
-        hullResearch = research("Super Dreadnought", "Researches super dreadnoughts.", 1, ETechLevel.TECH_I, hullResearch);
-        hullService.createHull("Super dreadnought vessel", 8000, 3320, 640, 640, 3400, ETechLevel.TECH_I, "The super dreadnought hull", hullResearch, EHullType.SD, new CrewRequirement(XXXL_CREW, EDepositType.COSTS));
+        hullResearch = research("Superdreadnought", "Researches super dreadnoughts.", 1, ETechLevel.TECH_I, hullResearch);
+        hullService.createHull("Superdreadnought vessel", 8000, 3320, 640, 640, 3400, ETechLevel.TECH_I, "The super dreadnought hull", hullResearch, EHullType.SD, new CrewRequirement(XXXL_CREW, EDepositType.COSTS));
         hullService.createHull("Small Freighter hull", 2000, 2000, 0, 0, 0, ETechLevel.TECH_I, "The smaller freighter hull", smallest.getUnlockedThrough(), EHullType.FR, new CrewRequirement(S_CREW, EDepositType.COSTS));
         hullService.createHull("Big Freighter hull", 5000, 5000, 0, 0, 0, ETechLevel.TECH_I, "The bigger freighter hull", smallest.getUnlockedThrough(), EHullType.FR, new CrewRequirement(M_CREW, EDepositType.COSTS));
     }
@@ -1494,14 +1494,14 @@ public class MasterOfTheUniverseService {
         hullResearch = research("Cruiser", "The Cruiser research researches Cruisers.", 1, ETechLevel.TECH_I, hullResearch);
         hullService.createHull("Cruiser vessel", 80, 30, 10, 10, 30, ETechLevel.TECH_I, "The cruiser hull", hullResearch, EHullType.CL, new CrewRequirement(M_CREW, EDepositType.COSTS));
         hullService.createHull("Heavy cruiser vessel", 200, 60, 30, 30, 80, ETechLevel.TECH_I, "The assault cruiser hull", hullResearch, EHullType.CA, new CrewRequirement(L_CREW, EDepositType.COSTS));
-        hullResearch = research("Battle Cruiser", "Researches bigger cruisers.", 1, ETechLevel.TECH_I, hullResearch);
-        hullService.createHull("Battle Cruiser vessel", 700, 280, 90, 90, 240, ETechLevel.TECH_I, "The battle cruiser hull", hullResearch, EHullType.BC, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
+        hullResearch = research("Battlecruiser", "Researches bigger cruisers.", 1, ETechLevel.TECH_I, hullResearch);
+        hullService.createHull("Battlecruiser vessel", 700, 280, 90, 90, 240, ETechLevel.TECH_I, "The battle cruiser hull", hullResearch, EHullType.BC, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
         hullResearch = research("Battleship", "Researches battleships.", 1, ETechLevel.TECH_I, hullResearch);
         hullService.createHull("Battleship vessel", 2000, 800, 200, 200, 800, ETechLevel.TECH_I, "The battle ship hull", hullResearch, EHullType.BB, new CrewRequirement(XXXL_CREW, EDepositType.COSTS));
         hullResearch = research("Dreadnought", "Researches dreadnoughts.", 1, ETechLevel.TECH_I, hullResearch);
         hullService.createHull("Dreadnought vessel", 5000, 1900, 400, 400, 2300, ETechLevel.TECH_I, "The dreadnought hull", hullResearch, EHullType.DN, new CrewRequirement(XXXL_CREW, EDepositType.COSTS));
-        hullResearch = research("Super Dreadnought", "Researches super dreadnoughts.", 1, ETechLevel.TECH_I, hullResearch);
-        hullService.createHull("Super dreadnought vessel", 8000, 3320, 640, 640, 3400, ETechLevel.TECH_I, "The super dreadnought hull", hullResearch, EHullType.SD, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
+        hullResearch = research("Superdreadnought", "Researches super dreadnoughts.", 1, ETechLevel.TECH_I, hullResearch);
+        hullService.createHull("Superdreadnought vessel", 8000, 3320, 640, 640, 3400, ETechLevel.TECH_I, "The super dreadnought hull", hullResearch, EHullType.SD, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
     }
 
     private ShipClass createShipClass(@Nonnull final User user, @Nonnull final EHullType hullType) {

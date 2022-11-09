@@ -59,14 +59,14 @@ import static de.yuga.spacebattle.backend.calculator.FittingUtils.DEFENSIVE_FITT
                 query = "SELECT COUNT(f) FROM Fleet f LEFT JOIN f.ships s WHERE s.shipClass.id =:idShipClass AND f.isDeleted = false"),
         @NamedQuery(name = "Fleet.getAllForPlanet",
                 query = "SELECT f FROM Fleet f LEFT JOIN f.move  " +
-                        "WHERE (f.orbit.system = :system AND f.orbit.orbit.xCoordinate = :xCoordinate  AND f.orbit.orbit.yCoordinate = :yCoordinate) " +
+                        "WHERE f.isDeleted = false AND (f.orbit.system = :system AND f.orbit.orbit.xCoordinate = :xCoordinate  AND f.orbit.orbit.yCoordinate = :yCoordinate) " +
                         "OR ( f.move.originOrbit.system = :system AND  f.move.originOrbit.orbit.xCoordinate = :xCoordinate AND f.move.originOrbit.orbit.yCoordinate = :yCoordinate) " +
                         "OR (f.move.destinationOrbit.system = :system AND f.move.destinationOrbit.orbit.xCoordinate = :xCoordinate AND f.move.destinationOrbit.orbit.yCoordinate = :yCoordinate) " +
                         "AND f.isDeleted = false"
         ),
         @NamedQuery(name = "Fleet.getAllDamagedForPlanetAndOwner",
                 query = "SELECT f FROM Fleet f LEFT JOIN f.move  " +
-                        "WHERE f.needsRepair = true " +
+                        "WHERE f.isDeleted = false AND f.needsRepair = true " +
                         "AND (f.orbit.system = :system AND f.orbit.orbit.xCoordinate = :xCoordinate  AND f.orbit.orbit.yCoordinate = :yCoordinate) " +
                         "OR ( f.move.originOrbit.system = :system AND  f.move.originOrbit.orbit.xCoordinate = :xCoordinate AND f.move.originOrbit.orbit.yCoordinate = :yCoordinate) " +
                         "OR (f.move.destinationOrbit.system = :system AND f.move.destinationOrbit.orbit.xCoordinate = :xCoordinate AND f.move.destinationOrbit.orbit.yCoordinate = :yCoordinate) " +
