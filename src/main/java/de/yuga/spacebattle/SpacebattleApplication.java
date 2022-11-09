@@ -141,8 +141,7 @@ public class SpacebattleApplication implements Jackson2ObjectMapperBuilderCustom
 
     @Override
     public void customize(final Jackson2ObjectMapperBuilder builder) {
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        final LocalDateTimeDeserializer localDateTimeDeserializer = new LocalDateTimeDeserializer(formatter);
+        final LocalDateTimeDeserializer localDateTimeDeserializer = new LocalDateTimeDeserializer(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
         builder.failOnEmptyBeans(false)
                 .serializerByType(LocalDateTime.class, new ToStringSerializer())
