@@ -25,6 +25,7 @@ java \
 +-Dlogging.battle-log.write=false \
 +-Dlogging.rest.calls=false \
 -Dlogging.file.name=/home/karsten/spacebattle/log/spacebattle.log \
+-Ddb-patch-folder=/home/karsten/uploadTarget/sql/delta/ \
 -jar spacebattle-"$version".jar & echo $! > ./pid.file &
 
 echo "Application started"

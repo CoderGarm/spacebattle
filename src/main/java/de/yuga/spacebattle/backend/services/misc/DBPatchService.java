@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.repositories.misc.DBPatchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -25,8 +26,13 @@ public class DBPatchService {
     @Nonnull
     private final DBPatchRepository dbPatchRepository;
 
-    public DBPatchService(@Nonnull final DBPatchRepository dbPatchRepository) {
+    @Nonnull
+    private final String dbPatchFolder;
+
+    public DBPatchService(@Nonnull @Value("${db-patch-folder}") final String dbPatchFolder,
+                          @Nonnull final DBPatchRepository dbPatchRepository) {
         this.dbPatchRepository = Preconditions.checkNotNull(dbPatchRepository, "dbPatchRepository must not be empty");
+        this.dbPatchFolder = Preconditions.checkNotNull(dbPatchFolder, "dbPatchFolder must not be empty");
     }
 
     /**
@@ -41,8 +47,9 @@ public class DBPatchService {
 
 
     private List<String> fetchDBPatchVersions() {
-        final File dir = new File("data/sql/delta/");
-        final List<File> subFolders = Arrays.stream(Objects.requireNonNull(dir.listFiles()))
+        final File dir = new File(dbPatchFolder);
+        final File[] files = dir.listFiles();
+        final List<File> subFolders = Arrays.stream(files)
                 .filter(f -> f.getName().startsWith("SB"))
                 .collect(Collectors.toList());
 
