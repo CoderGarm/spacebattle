@@ -6,7 +6,6 @@ import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
@@ -50,16 +49,11 @@ public class Constructable {
 
     @Nullable
     @OneToOne
-    @JoinColumn(name = "idShipClass", referencedColumnName = "idShipClass")
-    private ShipClass shipClass;
-
-    @Nullable
-    private Integer amountShips;
-
-    @Nullable
-    @OneToOne
     @JoinColumn(name = "idFleet", referencedColumnName = "idFleet")
     private Fleet fleet;
+
+    @Column(columnDefinition = "bit not null default false")
+    private boolean isRepairJob = false;
 
     public Constructable() {
     }
@@ -84,21 +78,12 @@ public class Constructable {
         this.resourceType = EResourceType.RESEARCH;
     }
 
-    public Constructable(@Nonnull final ShipClass shipClass, @Nonnull final Integer amountShips) {
-        Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
-        Preconditions.checkNotNull(amountShips, "amountShips shouldn't be null!");
-        Preconditions.checkArgument(amountShips > 0, "amountShips shouldn't be lower than one!");
-
-        this.shipClass = shipClass;
-        this.amountShips = amountShips;
-        this.resourceType = EResourceType.ORBITAL_CONSTRUCTION;
-    }
-
-    public Constructable(@Nonnull final Fleet fleet) {
+    public Constructable(@Nonnull final Fleet fleet, final boolean isRepairJob) {
         Preconditions.checkNotNull(fleet, "toRepair must not be empty");
 
         this.fleet = fleet;
         this.resourceType = EResourceType.ORBITAL_CONSTRUCTION;
+        this.isRepairJob = isRepairJob;
     }
 
     @Nullable
@@ -109,16 +94,6 @@ public class Constructable {
     @Nullable
     public Integer getTargetLevel() {
         return targetLevel;
-    }
-
-    @Nullable
-    public ShipClass getShipClass() {
-        return shipClass;
-    }
-
-    @Nullable
-    public Integer getAmountShips() {
-        return amountShips;
     }
 
     @Nullable
@@ -134,6 +109,10 @@ public class Constructable {
     @Nonnull
     public EResourceType getResourceType() {
         return resourceType;
+    }
+
+    public boolean isRepairJob() {
+        return isRepairJob;
     }
 
     /**
@@ -153,14 +132,6 @@ public class Constructable {
             return resources;
         }
 
-        if (shipClass != null && amountShips != null) {
-            if (shipClass.getHull() == null) {
-                throw new NotifyWebUserException("You need a hull for your ship, really!");
-            }
-            final ResourceDeposit costsOverall = shipClass.getCostsOverall();
-            return JobCostsCalculator.getCostsForLevel(costsOverall, amountShips);
-        }
-
         if (building != null && targetLevel != null) {
             final Integer targetLevel = this.targetLevel;
             final ResourceDeposit costs = building.getCosts();
@@ -168,7 +139,7 @@ public class Constructable {
         }
 
         if (fleet != null) {
-            return JobCostsCalculator.calculateJobCost(fleet);
+            return JobCostsCalculator.calculateJobCost(fleet, isRepairJob);
         }
 
         throw new NotifyWebUserException("You have tried something interesting. May be you should talk to an admin.");

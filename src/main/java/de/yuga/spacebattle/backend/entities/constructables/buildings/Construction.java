@@ -39,6 +39,8 @@ public class Construction extends AbstractEntityKey {
 
     private int level;
 
+    private int operationalLevel = 0;
+
     @Nonnull
     @OneToMany(mappedBy = "facility", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private final Set<Job> jobs = new HashSet<>();
@@ -65,8 +67,8 @@ public class Construction extends AbstractEntityKey {
         return building;
     }
 
-    public int getLevel() {
-        return level;
+    public int getOperationalLevel() {
+        return operationalLevel;
     }
 
     public void setLevel(final int level) {
@@ -74,6 +76,14 @@ public class Construction extends AbstractEntityKey {
             throw new NotifyWebUserException("You cannot reduce the level of a construction");
         }
         this.level = level;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setOperationalLevel(final int operationalLevel) {
+        this.operationalLevel = operationalLevel;
     }
 
     @Nonnull

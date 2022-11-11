@@ -113,6 +113,7 @@
     create table construction (
        idConstruction integer not null auto_increment,
         level integer not null,
+        operationalLevel integer not null,
         idBuilding integer not null,
         idPlanet integer not null,
         primary key (idConstruction)
@@ -162,6 +163,7 @@
     create table fleet (
        idFleet integer not null auto_increment,
         isDeleted bit not null default false,
+        isOperational bit not null default false,
         name varchar(255) not null,
         needsRepair bit not null default false,
         xCoordinateLocation varchar(255),
@@ -263,7 +265,7 @@
     create table job (
        idJob integer not null auto_increment,
         isDeleted bit not null default false,
-        amountShips integer,
+        isRepairJob bit not null default false,
         resourceType varchar(255),
         targetLevel integer,
         jobDoneAtZero decimal(19, 0) not null,
@@ -271,12 +273,11 @@
         idBuilding integer,
         idFleet integer,
         idResearch integer,
-        idShipClass integer,
         idFacility integer not null,
         idTick integer,
         idOwner integer not null,
         primary key (idJob),
-        constraint job_CHECK check ((idBuilding IS NOT NULL AND targetLevel IS NOT NULL) OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) OR (idShipClass IS NOT NULL AND amountShips IS NOT NULL) OR (idFleet IS NOT NULL) )
+        constraint job_CHECK check ((idBuilding IS NOT NULL AND targetLevel IS NOT NULL) OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) OR (idFleet IS NOT NULL) )
     ) engine=InnoDB;
 
     create table knownStarSystem (
@@ -467,7 +468,9 @@
         yCoordinate varchar(255),
         idMiningFactors integer not null,
         idOwner integer,
+        idResourceDemand integer,
         idResourceDeposit integer,
+        idResourceUtilization integer,
         idStarSystem integer,
         primary key (idPlanet)
     ) engine=InnoDB;
@@ -673,6 +676,7 @@
     create table warShip (
        idWarShip integer not null auto_increment,
         isDeleted bit not null default false,
+        isOperational bit not null default false,
         name varchar(255) not null,
         idFleet integer not null,
         idShipClass integer not null,
@@ -1121,11 +1125,6 @@
        references research (idResearch);
 
     alter table job 
-       add constraint FKsevbhc9015r9wmqvojq1dbsen 
-       foreign key (idShipClass) 
-       references shipClass (idShipClass);
-
-    alter table job 
        add constraint FK4ewa76co5drr08nptgdmax8d6 
        foreign key (idFacility) 
        references construction (idConstruction);
@@ -1381,8 +1380,18 @@
        references user (idUser);
 
     alter table planet 
+       add constraint FKgayj6n1e1tkll78se8wj08yr9 
+       foreign key (idResourceDemand) 
+       references resourceDeposit (idResourceDeposit);
+
+    alter table planet 
        add constraint FK9cd80e9yxwnobejr9twlcknab 
        foreign key (idResourceDeposit) 
+       references resourceDeposit (idResourceDeposit);
+
+    alter table planet 
+       add constraint FKchm1nm87cpqlwgayp6vhl8vux 
+       foreign key (idResourceUtilization) 
        references resourceDeposit (idResourceDeposit);
 
     alter table planet 
@@ -1680,3 +1689,4 @@ insert into dbPatch values (null, now(), 'add warship health state', '0.0.5-2');
 insert into dbPatch values (null, now(), 'repair fleets by job', '0.0.5-3');
 insert into dbPatch values (null, now(), 'add check constraint names', '0.0.5-4');
 insert into dbPatch values (null, now(), 'balance spacecraft stuff', '0.0.5-5');
+insert into dbPatch values (null, now(), 'add operationals', '0.0.6-1');

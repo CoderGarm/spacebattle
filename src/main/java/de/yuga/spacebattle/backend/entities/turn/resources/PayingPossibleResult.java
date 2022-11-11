@@ -40,6 +40,10 @@ public class PayingPossibleResult {
         return resourceTypes.isEmpty() && educationTypes.isEmpty();
     }
 
+    public boolean isValidForPops() {
+        return educationTypes.isEmpty();
+    }
+
     public List<String> getResult() {
         final List<String> collect = resourceTypes.stream().map(Object::toString).collect(Collectors.toList());
         collect.addAll(educationTypes.stream().map(Object::toString).collect(Collectors.toList()));

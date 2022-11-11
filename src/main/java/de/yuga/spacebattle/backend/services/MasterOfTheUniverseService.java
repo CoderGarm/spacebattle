@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.services;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
+import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
@@ -14,7 +15,6 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.i18n.Translatable;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
-import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -33,8 +33,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModul
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
-import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
-import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateSnapshot;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
@@ -44,6 +43,7 @@ import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.combined.account.AllianceService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
+import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.i18n.TranslatableService;
@@ -55,7 +55,6 @@ import de.yuga.spacebattle.backend.services.spacecraft.HullService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
-import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
@@ -190,7 +189,7 @@ public class MasterOfTheUniverseService {
     private final ResourceService resourceService;
 
     @Nonnull
-    private final BattleReportService battleReportService;
+    private final ConstructionService constructionService;
 
     @Autowired
     public MasterOfTheUniverseService(@Nonnull final TickService tickService,
@@ -210,7 +209,7 @@ public class MasterOfTheUniverseService {
                                       @Nonnull final BattleService battleService,
                                       @Nonnull final TranslatableService translatableService,
                                       @Nonnull final ResourceService resourceService,
-                                      @Nonnull final BattleReportService battleReportService) {
+                                      @Nonnull final ConstructionService constructionService) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.allianceService = Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");
@@ -228,7 +227,7 @@ public class MasterOfTheUniverseService {
         this.battleService = Preconditions.checkNotNull(battleService, "battleService must not be empty");
         this.translatableService = Preconditions.checkNotNull(translatableService, "translatableService must not be empty");
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
-        this.battleReportService = Preconditions.checkNotNull(battleReportService, "battleReportService must not be empty");
+        this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
     }
 
     @PostConstruct
@@ -236,686 +235,23 @@ public class MasterOfTheUniverseService {
     public void transform() {
         // todo remove after transform is done
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final Set<WarShip> without = warShipService.findAll().stream().filter(w -> w.getWarshipHealthState() == null).collect(Collectors.toSet());
-        final boolean transformationNeeded = !without.isEmpty();
-        final Set<Planet> mainPlanets = planetService.findAll().stream().filter(Planet::isMain).collect(Collectors.toSet());
+        final boolean transformationNeeded = constructionService.findAll().stream().noneMatch(c -> c.getOperationalLevel() > 0);
         if (transformationNeeded) {
-            LOGGER.info("---------------------------- start transforming ----------------------------");
-            without.forEach(WarShip::createWarshipHealthState);
-            warShipService.saveAll(without);
-            LOGGER.info("---------------------------- health states created ----------------------------");
-            final List<BattleReport> battleReports = battleReportService.findAll();
-            battleReports.forEach(report -> report.getParticipatingFleets().forEach(snap -> snap.getShips().forEach(WarshipHealthStateSnapshot::update)));
-            battleReportService.saveAll(battleReports);
-            LOGGER.info("---------------------------- battle reports updated ----------------------------");
-            mainPlanets.forEach(p -> p.getMiningFactors().equalize());
-            planetService.saveAll(mainPlanets);
-            balanceBuildings();
-            LOGGER.info("---------------------------- buildings balanced ----------------------------");
-            balanceHulls();
-            LOGGER.info("---------------------------- hulls balanced ----------------------------");
-            balanceModules();
-            LOGGER.info("---------------------------- modules balanced ----------------------------");
+            final List<Planet> allColonized = planetService.findAllColonized();
+            allColonized.forEach(planet -> {
+                final ResourceDeposit deposit = ResourceDepositInitializerCalculator.getInfiniteDeposit();
+                final ResourceDeposit demand = ResourceDepositInitializerCalculator.getInfiniteDeposit();
+                final ResourceDeposit utilization = planet.getResourceUtilization();
 
-            final List<Fleet> allFleets = fleetService.findAllFleets();
-            allFleets.forEach(Fleet::setDeleted);
-            fleetService.saveAll(allFleets);
-            LOGGER.info("---------------------------- fleets disabled ----------------------------");
+                tickService.activateWarships(planet, deposit, demand, utilization);
+                tickService.activateConstructions(planet, deposit, demand, utilization);
+                planetService.save(planet);
+            });
 
-            final List<ShipClass> shipClasses = shipClassService.findAll();
-            shipClasses.forEach(Deletable::setDeleted);
-            shipClassService.saveAll(shipClasses);
-            LOGGER.info("---------------------------- ship classes disabled ----------------------------");
-
-            final List<User> users = userService.findAll();
-            final User opponent = users.stream().filter(u -> u.getUsername().equals(DEFEATED_OPPONENT)).findFirst().orElseThrow(NullPointerException::new);
-            createShipClass(opponent, EHullType.CL);
-            users.remove(opponent);
-
-            for (final User user : users) {
-                createFleetForUser(user);
-                createOpponentFleetForUser(user);
-            }
-            tickService.doTick();
             LOGGER.info("---------------------------- done transforming ----------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
         }
-    }
-
-    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
-    private void balanceModules() {
-
-        balanceArmors();
-        LOGGER.info("---------------------------- armor balanced ----------------------------");
-
-        balancePropulsions();
-        LOGGER.info("---------------------------- propulsion balanced ----------------------------");
-
-        balanceEloka();
-        LOGGER.info("---------------------------- eloka balanced ----------------------------");
-
-        balanceSidewalls();
-        LOGGER.info("---------------------------- sidewall balanced ----------------------------");
-
-        balanceMissiles();
-        LOGGER.info("---------------------------- missiles balanced ----------------------------");
-
-        balanceWeapons();
-        LOGGER.info("---------------------------- weapons balanced ----------------------------");
-
-        balancePassives();
-        LOGGER.info("---------------------------- support modules balanced ----------------------------");
-    }
-
-    private void balanceArmors() {
-        Armor armor = moduleService.findAllArmors().get(0);
-        Research armorUnlocked = armor.getUnlockedThrough();
-        armor.setUseCapacity(5);
-        armor.setEffectValue(3000);
-        armor.setHullType(EHullType.CL);
-        armor.getCosts().setCrewRequirement(5, Armor.class, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        armor.getName().updateOrCreate(Translation.DEFAULT_LANGUAGE, "Light cruiser armor Mk I");
-        armor.getDescription().updateOrCreate(Translation.DEFAULT_LANGUAGE, "The light cruiser armor is the smallest useful protection.");
-        armor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Leichte Kreuzer Panzerung Mk I");
-        armor.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Panzerung eines leichten Kreuzers ist die leichteste sinnvoll nutzbare Panzerung.");
-        moduleService.save(armor);
-
-        armorUnlocked = research("Cruiser Armor", "The Cruiser armor research.", 1, ETechLevel.TECH_I, armorUnlocked);
-        armor = moduleService.createArmor("Heavy cruiser armor Mk I", "The heavy cruiser armor is much heavier and thicker that the smaller pendant.", armorUnlocked, 9, 5000, EHullType.CA, ETechLevel.TECH_I, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        armor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Schwere Kreuzer Panzerung Mk I");
-        armor.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Panzerung eines schweren Kreuzers ist deutliche schwerer und stärker als ihr kleineres Gegenstück.");
-        moduleService.save(armor);
-
-        armorUnlocked = research("Battle cruiser Armor", "The battlecruiser armor research.", 1, ETechLevel.TECH_I, armorUnlocked);
-        armor = moduleService.createArmor("Battle cruiser armor Mk I", "The battle cruiser armor is much heavier and thicker that the smaller pendant.", armorUnlocked, 22, 11000, EHullType.BC, ETechLevel.TECH_I, new CrewRequirement(L_CREW, EDepositType.COSTS));
-        armor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Schlachtkreuzer Panzerung Mk I");
-        armor.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Panzerung eines Schlachtkreuzers ist deutliche schwerer und stärker als ihr kleineres Gegenstück.");
-        moduleService.save(armor);
-
-        armorUnlocked = research("Battleship Armor", "The battleship armor research.", 1, ETechLevel.TECH_I, armorUnlocked);
-        armor = moduleService.createArmor("Battleship armor Mk I", "The battleship armor is much heavier and thicker that the smaller pendant.", armorUnlocked, 34, 20000, EHullType.BB, ETechLevel.TECH_I, new CrewRequirement(XL_CREW, EDepositType.COSTS));
-        armor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Schlachtschiff Panzerung Mk I");
-        armor.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Panzerung eines Schlachtschiffs ist deutliche schwerer und stärker als ihr kleineres Gegenstück.");
-        moduleService.save(armor);
-
-        armorUnlocked = research("Dreadnought Armor", "The dreadnought armor research.", 1, ETechLevel.TECH_I, armorUnlocked);
-        armor = moduleService.createArmor("Dreadnought armor Mk I", "The dreadnought armor is much heavier and thicker that the smaller pendant.", armorUnlocked, 300, 190000, EHullType.DN, ETechLevel.TECH_I, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-        armor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Panzerung Mk I");
-        armor.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Panzerung eines Dreadnoughts ist deutliche schwerer und stärker als ihr kleineres Gegenstück.");
-        moduleService.save(armor);
-
-        armorUnlocked = research("Superdreadnought Armor", "The superdreadnought armor research.", 1, ETechLevel.TECH_I, armorUnlocked);
-        armor = moduleService.createArmor("Superdreadnought armor Mk I", "The superdreadnought armor is the biggest armor ever build for moving units.", armorUnlocked, 500, 360000, EHullType.SD, ETechLevel.TECH_I, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-        armor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Superdreadnought Panzerung Mk I");
-        armor.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Panzerung eines Superdreadnoughts ist die schwerste und stärkste jemals gebaute Panzerung für bewegliche Einheiten.");
-        moduleService.save(armor);
-    }
-
-    private void balancePropulsions() {
-        final List<Propulsion> props = moduleService.findAllPropulsions();
-        Research unlockPropulsion = null;
-        Research unlockFTLPropulsion = null;
-        for (final Propulsion prop : props) {
-            if (prop.isFtlCapable()) {
-                unlockFTLPropulsion = prop.getUnlockedThrough();
-                prop.setUseCapacity(7);
-                prop.setEffectValue(500);
-                prop.setHullType(EHullType.CL);
-                prop.getCosts().setCrewRequirement(7, Propulsion.class, new CrewRequirement(M_CREW, EDepositType.COSTS));
-                prop.getName().updateOrCreate(Translation.DEFAULT_LANGUAGE, "Light cruiser FTL drive Mk I");
-                prop.getDescription().updateOrCreate(Translation.DEFAULT_LANGUAGE, "The light cruiser FTL drive.");
-                prop.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Leichte Kreuzer Überlichtantrieb Mk I");
-                prop.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für leichte Kreuzer.");
-                moduleService.save(prop);
-            } else {
-                unlockPropulsion = prop.getUnlockedThrough();
-            }
-        }
-        assert unlockPropulsion != null;
-        assert unlockFTLPropulsion != null;
-
-        Propulsion propulsion = moduleService.createPropulsion("Light attack craft sub-light drive Mk I", "LAC drive", unlockPropulsion, 2, 500, EHullType.LAC, ETechLevel.TECH_I, EHyperBand.NONE, new CrewRequirement(XXS_CREW, EDepositType.COSTS));
-        propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Unterlichtantrieb für leichte Angriffsboote");
-        propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Unterlichtantrieb für leichte Angriffsboote.");
-        moduleService.save(propulsion);
-
-        propulsion = moduleService.createPropulsion("Corvette FTL drive Mk I", "Corvette FTL drive", unlockFTLPropulsion, 3, 500, EHullType.VT, ETechLevel.TECH_I, EHyperBand.DELTA, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Korvetten");
-        propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Korvetten.");
-        moduleService.save(propulsion);
-
-        propulsion = moduleService.createPropulsion("Frigate FTL drive Mk I", "Frigate FTL drive", unlockFTLPropulsion, 5, 500, EHullType.FG, ETechLevel.TECH_I, EHyperBand.DELTA, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Fregatten");
-        propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Fregatten.");
-        moduleService.save(propulsion);
-
-        unlockFTLPropulsion = research("Cruiser FTL drive", "The cruiser FTL drive research.", 1, ETechLevel.TECH_I, unlockFTLPropulsion);
-        propulsion = moduleService.createPropulsion("Cruiser FTL drive Mk I", "Cruiser FTL drive", unlockFTLPropulsion, 9, 500, EHullType.CA, ETechLevel.TECH_I, EHyperBand.DELTA, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Kreuzer");
-        propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Kreuzer.");
-        moduleService.save(propulsion);
-
-        unlockFTLPropulsion = research("Battlecruiser FTL drive", "The battlecruiser FTL drive research.", 1, ETechLevel.TECH_I, unlockFTLPropulsion);
-        propulsion = moduleService.createPropulsion("Battlecruiser FTL drive Mk I", "Battlecruiser FTL drive", unlockFTLPropulsion, 30, 500, EHullType.BC, ETechLevel.TECH_I, EHyperBand.DELTA, new CrewRequirement(L_CREW, EDepositType.COSTS));
-        propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Schlachtkreuzer");
-        propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Schlachtkreuzer.");
-        moduleService.save(propulsion);
-
-        unlockFTLPropulsion = research("Battleship FTL drive", "The battleship FTL drive research.", 1, ETechLevel.TECH_I, unlockFTLPropulsion);
-        propulsion = moduleService.createPropulsion("Battleship FTL drive Mk I", "Battleship FTL drive", unlockFTLPropulsion, 40, 500, EHullType.BB, ETechLevel.TECH_I, EHyperBand.DELTA, new CrewRequirement(XL_CREW, EDepositType.COSTS));
-        propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Schlachtschiffe");
-        propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Schlachtschiffe.");
-        moduleService.save(propulsion);
-
-        unlockFTLPropulsion = research("Dreadnought FTL drive", "The dreadnought FTL drive research.", 1, ETechLevel.TECH_I, unlockFTLPropulsion);
-        propulsion = moduleService.createPropulsion("Dreadnought FTL drive Mk I", "Dreadnought FTL drive", unlockFTLPropulsion, 240, 500, EHullType.DN, ETechLevel.TECH_I, EHyperBand.DELTA, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-        propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Dreadnoughts");
-        propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Dreadnoughts.");
-        moduleService.save(propulsion);
-
-        unlockFTLPropulsion = research("Superdreadnought FTL drive", "The superdreadnought FTL drive research.", 1, ETechLevel.TECH_I, unlockFTLPropulsion);
-        propulsion = moduleService.createPropulsion("Superdreadnought FTL drive Mk I", "Superdreadnought FTL drive", unlockFTLPropulsion, 320, 500, EHullType.SD, ETechLevel.TECH_I, EHyperBand.DELTA, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-        propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Superdreadnoughts");
-        propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Superdreadnoughts.");
-        moduleService.save(propulsion);
-
-        propulsion = moduleService.createPropulsion("Freighter FTL drive Mk I", "Freighter FTL drive", unlockFTLPropulsion, 250, 500, EHullType.FR, ETechLevel.TECH_I, EHyperBand.DELTA, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Frachter");
-        propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Frachter.");
-        moduleService.save(propulsion);
-    }
-
-    private void balanceEloka() {
-        ElectronicWarfare eloka = moduleService.findAllElectronicWarfare().get(0);
-        Research unlocksEloka = eloka.getUnlockedThrough();
-        eloka.setUseCapacity(4);
-        eloka.setEffectValue(100);
-        eloka.setHullType(EHullType.CL);
-        eloka.getCosts().setCrewRequirement(4, ElectronicWarfare.class, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        eloka.getName().updateOrCreate(Translation.DEFAULT_LANGUAGE, "Light cruiser electronic warfare Mk I");
-        eloka.getDescription().updateOrCreate(Translation.DEFAULT_LANGUAGE, "The light cruiser electronic warfare.");
-        eloka.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Leichte Kreuzer Eloka Mk I");
-        eloka.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für leichte Kreuzer.");
-        moduleService.save(eloka);
-
-        eloka = moduleService.createElectronicWarfare("LAC electronic warfare Mk I", "The light attack craft electronic warfare.", unlocksEloka, 1, 20, EHullType.LAC, new Distance(2.669, EDistanceMetric.LS), ETechLevel.TECH_I, new CrewRequirement(XXS_CREW, EDepositType.COSTS));
-        eloka.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für leichte Angriffsboote Mk I");
-        eloka.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für leichte Angriffsboote.");
-        moduleService.save(eloka);
-
-        eloka = moduleService.createElectronicWarfare("Corvette electronic warfare Mk I", "The corvette electronic warfare.", unlocksEloka, 1, 30, EHullType.VT, new Distance(2.669, EDistanceMetric.LS), ETechLevel.TECH_I, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        eloka.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Korvetten Mk I");
-        eloka.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Korvetten.");
-        moduleService.save(eloka);
-
-        eloka = moduleService.createElectronicWarfare("Frigate electronic warfare Mk I", "The frigate electronic warfare.", unlocksEloka, 2, 50, EHullType.FG, new Distance(2.669, EDistanceMetric.LS), ETechLevel.TECH_I, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        eloka.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Fregatten Mk I");
-        eloka.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Fregatten.");
-        moduleService.save(eloka);
-
-        unlocksEloka = research("Electronic Warfare for cruisers", "The EW for cruisers research.", 1, ETechLevel.TECH_I, unlocksEloka);
-        eloka = moduleService.createElectronicWarfare("Cruiser electronic warfare Mk I", "The cruiser electronic warfare.", unlocksEloka, 6, 150, EHullType.CA, new Distance(2.669, EDistanceMetric.LS), ETechLevel.TECH_I, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        eloka.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Kreuzer Mk I");
-        eloka.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Kreuzer.");
-        moduleService.save(eloka);
-
-        unlocksEloka = research("Electronic Warfare for battlecruisers", "The EW for battlecruisers research.", 1, ETechLevel.TECH_I, unlocksEloka);
-        eloka = moduleService.createElectronicWarfare("Battlecruiser electronic warfare Mk I", "The battlecruiser electronic warfare.", unlocksEloka, 25, 700, EHullType.BC, new Distance(2.669, EDistanceMetric.LS), ETechLevel.TECH_I, new CrewRequirement(L_CREW, EDepositType.COSTS));
-        eloka.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Schlachtkreuzer Mk I");
-        eloka.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Schlachtkreuzer.");
-        moduleService.save(eloka);
-
-        unlocksEloka = research("Electronic Warfare for battleships", "The EW for battleships research.", 1, ETechLevel.TECH_I, unlocksEloka);
-        eloka = moduleService.createElectronicWarfare("Battleship electronic warfare Mk I", "The battleship electronic warfare.", unlocksEloka, 30, 750, EHullType.BB, new Distance(2.669, EDistanceMetric.LS), ETechLevel.TECH_I, new CrewRequirement(L_CREW, EDepositType.COSTS));
-        eloka.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Schlachtschiffe Mk I");
-        eloka.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Schlachtschiffe.");
-        moduleService.save(eloka);
-
-        unlocksEloka = research("Electronic Warfare for dreadnoughts", "The EW for dreadnoughts research.", 1, ETechLevel.TECH_I, unlocksEloka);
-        eloka = moduleService.createElectronicWarfare("Dreadnought electronic warfare Mk I", "The dreadnought electronic warfare.", unlocksEloka, 260, 5000, EHullType.DN, new Distance(2.669, EDistanceMetric.LS), ETechLevel.TECH_I, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-        eloka.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Dreadnoughts Mk I");
-        eloka.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Dreadnoughts.");
-        moduleService.save(eloka);
-
-        unlocksEloka = research("Electronic Warfare for superdreadnoughts", "The EW for superdreadnoughts research.", 1, ETechLevel.TECH_I, unlocksEloka);
-        eloka = moduleService.createElectronicWarfare("Superdreadnought electronic warfare Mk I", "The superdreadnought electronic warfare.", unlocksEloka, 400, 7000, EHullType.SD, new Distance(2.669, EDistanceMetric.LS), ETechLevel.TECH_I, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-        eloka.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Superdreadnoughts Mk I");
-        eloka.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Superdreadnoughts.");
-        moduleService.save(eloka);
-    }
-
-    private void balanceSidewalls() {
-        Sidewall sidewall = moduleService.findAllSidewalls().get(0);
-        Research unlockShield = sidewall.getUnlockedThrough();
-        sidewall.setUseCapacity(7);
-        sidewall.setEffectValue(15000);
-        sidewall.setHullType(EHullType.CL);
-        sidewall.getCosts().setCrewRequirement(7, Sidewall.class, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        sidewall.getName().updateOrCreate(Translation.DEFAULT_LANGUAGE, "Light cruiser sidewall Mk I");
-        sidewall.getDescription().updateOrCreate(Translation.DEFAULT_LANGUAGE, "The light cruiser sidewall.");
-        sidewall.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Leichte Kreuzer Seitenschild Mk I");
-        sidewall.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild für leichte Kreuzer.");
-        moduleService.save(sidewall);
-
-        sidewall = moduleService.createSidewall("LAC sidewall Mk I", "The light attack craft sidewall.", unlockShield, 1, 2000, EHullType.LAC, ETechLevel.TECH_I, new CrewRequirement(XXS_CREW, EDepositType.COSTS));
-        sidewall.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Seitenschild Mk I");
-        sidewall.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild für leichte Angriffsboote.");
-        moduleService.save(sidewall);
-
-        sidewall = moduleService.createSidewall("Corvette sidewall Mk I", "The corvette sidewall.", unlockShield, 1, 2500, EHullType.VT, ETechLevel.TECH_I, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        sidewall.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Korvetten Seitenschild Mk I");
-        sidewall.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild für Korvetten.");
-        moduleService.save(sidewall);
-
-        sidewall = moduleService.createSidewall("Frigate sidewall Mk I", "The frigate sidewall.", unlockShield, 3, 7000, EHullType.FG, ETechLevel.TECH_I, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        sidewall.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Fregatten Seitenschild Mk I");
-        sidewall.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild für Fregatten.");
-        moduleService.save(sidewall);
-
-        unlockShield = research("Cruiser sidewall", "The cruiser sidewall research.", 1, ETechLevel.TECH_I, unlockShield);
-        sidewall = moduleService.createSidewall("Cruiser sidewall Mk I", "The cruiser sidewall.", unlockShield, 10, 21000, EHullType.CA, ETechLevel.TECH_I, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        sidewall.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Seitenschild Mk I");
-        sidewall.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild für Kreuzer.");
-        moduleService.save(sidewall);
-
-        unlockShield = research("Battlecruiser sidewall", "The battlecruiser sidewall research.", 1, ETechLevel.TECH_I, unlockShield);
-        sidewall = moduleService.createSidewall("Battlecruiser sidewall Mk I", "The battlecruiser sidewall.", unlockShield, 30, 60000, EHullType.BC, ETechLevel.TECH_I, new CrewRequirement(L_CREW, EDepositType.COSTS));
-        sidewall.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Schlachtkreuzer Seitenschild Mk I");
-        sidewall.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild für Schlachtkreuzer.");
-        moduleService.save(sidewall);
-
-        unlockShield = research("Battleship sidewall", "The battleship sidewall research.", 1, ETechLevel.TECH_I, unlockShield);
-        sidewall = moduleService.createSidewall("Battleship sidewall Mk I", "The battleship sidewall.", unlockShield, 40, 75000, EHullType.BB, ETechLevel.TECH_I, new CrewRequirement(XL_CREW, EDepositType.COSTS));
-        sidewall.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild Seitenschild Mk I");
-        sidewall.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild für Schlachtschiff.");
-        moduleService.save(sidewall);
-
-        unlockShield = research("Dreadnought sidewall", "The dreadnought sidewall research.", 1, ETechLevel.TECH_I, unlockShield);
-        sidewall = moduleService.createSidewall("Dreadnought sidewall Mk I", "The dreadnought sidewall.", unlockShield, 180, 375000, EHullType.DN, ETechLevel.TECH_I, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-        sidewall.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild Dreadnought Mk I");
-        sidewall.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild für Dreadnought.");
-        moduleService.save(sidewall);
-
-        unlockShield = research("Superdreadnought sidewall", "The superdreadnought sidewall research.", 1, ETechLevel.TECH_I, unlockShield);
-        sidewall = moduleService.createSidewall("Superdreadnought sidewall Mk I", "The superdreadnought sidewall.", unlockShield, 250, 700000, EHullType.DN, ETechLevel.TECH_I, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-        sidewall.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild Superdreadnought Mk I");
-        sidewall.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild für Superdreadnought.");
-        moduleService.save(sidewall);
-    }
-
-    private void balanceMissiles() {
-        final List<AmmunitionModule> ammunitionModules = moduleService.findAllAmmunitionModules();
-        for (final AmmunitionModule ammunitionModule : ammunitionModules) {
-            ammunitionModule.setUseCapacity(5);
-            ammunitionModule.setEffectValue(24);
-            String type = "ship killer";
-            if (ammunitionModule.getMissile().getWarhead().getWarheadType() == EWarheadType.COUNTER_MISSILE) {
-                ammunitionModule.setEffectValue(1);
-                type = "counter missile";
-            }
-            ammunitionModule.setHullType(EHullType.CL);
-            ammunitionModule.getCosts().setCrewRequirement(5, AmmunitionModule.class, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-            ammunitionModule.getName().updateOrCreate(Translation.DEFAULT_LANGUAGE, "Light cruiser " + type + " ammunition Mk I");
-            ammunitionModule.getDescription().updateOrCreate(Translation.DEFAULT_LANGUAGE, "The light cruiser ammunition.");
-            ammunitionModule.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Leichte Kreuzer " + type + "Raketenmunition Mk I");
-            ammunitionModule.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Raketenmunition für leichte Kreuzer.");
-            moduleService.save(ammunitionModule);
-        }
-        Research unlocksRocketAmmunition = ammunitionModules.stream()
-                .filter(a -> a.getMissile().getWarhead().getWarheadType() != EWarheadType.COUNTER_MISSILE).findFirst()
-                .map(BaseModule::getUnlockedThrough)
-                .orElseThrow(NullPointerException::new);
-        Research unlocksMissile = ammunitionModules.stream()
-                .filter(a -> a.getMissile().getWarhead().getWarheadType() != EWarheadType.COUNTER_MISSILE).findFirst()
-                .map(AmmunitionModule::getMissile)
-                .map(Missile::getUnlockedThrough)
-                .orElseThrow(NullPointerException::new);
-
-        final List<Launcher> allLaunchers = moduleService.findAllLaunchers();
-        final Launcher counter = allLaunchers.stream().filter(l -> l.getWeaponType() == EWeaponType.COUNTER_MISSILE).findFirst().orElseThrow(() -> new NotifyWebUserException("nope"));
-        counter.setUseCapacity(3);
-        counter.getCosts().setCrewRequirement(3, Launcher.class, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        moduleService.save(counter);
-
-        final AmmunitionModule counterRocketAmmunition = counter.getAmmunitionModule();
-        final Research unlocksCounterMissile = counter.getUnlockedThrough();
-        moduleService.createLauncher("Counter missile launcher Mk I", "The launcher for counter missiles", unlocksCounterMissile, counterRocketAmmunition, 6, EHullType.CL, ETechLevel.TECH_I, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, counter.getAllowedMissiles());
-
-        Launcher launcher = allLaunchers.stream().filter(l -> l.getWeaponType() == EWeaponType.MISSILE).findFirst().orElseThrow(() -> new NotifyWebUserException("nope"));
-        launcher.setUseCapacity(4);
-        launcher.getCosts().setCrewRequirement(4, Launcher.class, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        moduleService.save(launcher);
-        moduleService.createLauncher("Ship killer launcher Mk I", "The launcher for ship killers", unlocksMissile, launcher.getAmmunitionModule(), 8, EHullType.CL, ETechLevel.TECH_I, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS), EWeaponType.MISSILE, launcher.getAllowedMissiles());
-
-        // LAC launcher
-        EHullType hullType = EHullType.LAC;
-        unlocksRocketAmmunition = research("Light attack craft missile ammunition Mk I", "LAC missiles module Mk I.", 1, ETechLevel.TECH_I, unlocksRocketAmmunition);
-        unlocksRocketAmmunition.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketenmunition Mk I");
-        unlocksRocketAmmunition.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketenmunition Mk I.");
-        researchService.save(unlocksRocketAmmunition);
-
-        AmmunitionModule ammo = moduleService.createAmmunitionModule("Light attack craft missile ammunition Mk I", "LAC missiles module Mk I.", unlocksRocketAmmunition, 1, 5, hullType, ETechLevel.TECH_I, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
-        ammo.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketenmunition Mk I");
-        ammo.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketenmunition Mk I.");
-        moduleService.save(ammo);
-
-        MissileMotor motor = moduleService.createMissileMotor("LAC ship killer Motor Mk I", "LAC ship Killer Motor Mk I", 100, hullType, ETechLevel.TECH_I, new Acceleration(46000, EAccelerationMetric.G), 40, 100);
-        motor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketenmotor Mk I");
-        motor.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der LAC Raketenmotor Mk I.");
-        moduleService.save(motor);
-
-        Warhead warhead = moduleService.createWarhead("Nuclear LAC ship killer war head", "Nuclear LAC ship killer warhead", 800, hullType, ETechLevel.TECH_I, new Distance(0.00017, EDistanceMetric.LS), EWarheadType.EXPLOSION, 100);
-        warhead.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketen Sprengkopf Mk I");
-        warhead.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketen Sprengkopf Mk I.");
-        moduleService.save(warhead);
-
-        unlocksMissile = research("Light attack craft missile", "A LAC missiles.", 1, ETechLevel.TECH_I, unlocksMissile);
-        unlocksMissile.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketenwerfer mit Revolvermagazin Mk I");
-        unlocksMissile.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der LAC Raketenwerfer mit fünfschüssigem Revolvermagazin.");
-        researchService.save(unlocksMissile);
-
-        Missile missile = moduleService.createMissile("Nuclear LAC ship killer missile Mk I", "Nuclear LAC ship killer missile Mk I", 100, 100, 100, hullType, ETechLevel.TECH_I, warhead, List.of(motor), unlocksMissile, ammo);
-        missile.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketen mit Nuklearsprengkopf Mk I");
-        missile.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Rakete mit Nuklearsprengkopf Mk I.");
-        moduleService.save(missile);
-
-        launcher = moduleService.createLauncher("LAC ship killer launcher with revolver magazine Mk I", "The launcher with 5-shoot revolver magazine for LAC ship killers", unlocksMissile, ammo, 1, hullType, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXXS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(missile));
-        launcher.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketenwerfer mit Revolvermagazin Mk I");
-        launcher.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der LAC Raketenwerfer mit fünfschüssigem Revolvermagazin.");
-        moduleService.save(launcher);
-
-        // BC launcher
-        hullType = EHullType.BC;
-        unlocksRocketAmmunition = research("Cruiser missile ammunition Mk I", "Cruiser missiles module Mk I.", 1, ETechLevel.TECH_I, unlocksRocketAmmunition);
-        unlocksRocketAmmunition.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenmunition Mk I");
-        unlocksRocketAmmunition.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenmunition Mk I.");
-        researchService.save(unlocksRocketAmmunition);
-
-        ammo = moduleService.createAmmunitionModule("Cruiser missile ammunition Mk I", "Cruiser missiles module Mk I.", unlocksRocketAmmunition, 5, 24, hullType, ETechLevel.TECH_I, new CrewRequirement(XXS_CREW, EDepositType.COSTS));
-        ammo.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenmunition Mk I");
-        ammo.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenmunition Mk I.");
-        moduleService.save(ammo);
-
-        motor = moduleService.createMissileMotor("Cruiser ship killer Motor Mk I", "Cruiser ship Killer Motor Mk I", 180, hullType, ETechLevel.TECH_I, new Acceleration(46000, EAccelerationMetric.G), 20, 100);
-        motor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenmotor Mk I");
-        motor.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Kreuzer Raketenmotor Mk I.");
-        moduleService.save(motor);
-
-        warhead = moduleService.createWarhead("Nuclear Cruiser ship killer war head", "Nuclear Cruiser ship killer warhead", 1200, hullType, ETechLevel.TECH_I, new Distance(0.00017, EDistanceMetric.LS), EWarheadType.EXPLOSION, 100);
-        warhead.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Cruiser Raketen Sprengkopf Mk I");
-        warhead.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketen Sprengkopf Mk I.");
-        moduleService.save(warhead);
-
-        unlocksMissile = research("Cruiser missile", "A Cruiser missiles.", 1, ETechLevel.TECH_I, unlocksMissile);
-        unlocksMissile.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenwerfer Mk I");
-        unlocksMissile.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Kreuzer Raketenwerfer.");
-        researchService.save(unlocksMissile);
-
-        missile = moduleService.createMissile("Nuclear Cruiser ship killer missile Mk I", "Nuclear Cruiser ship killer missile Mk I", 100, 100, 100, hullType, ETechLevel.TECH_I, warhead, List.of(motor), unlocksMissile, ammo);
-        missile.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketen mit Nuklearsprengkopf Mk I");
-        missile.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Rakete mit Nuklearsprengkopf Mk I.");
-        moduleService.save(missile);
-
-        launcher = moduleService.createLauncher("Cruiser ship killer launcher Mk I", "The launcher for cruiser ship killers", unlocksMissile, ammo, 7, hullType, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(missile));
-        launcher.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenwerfer Mk I");
-        launcher.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Kreuzer Raketenwerfer.");
-        moduleService.save(launcher);
-
-        launcher = moduleService.createLauncher("Cruiser ship killer launcher Mk I", "The launcher for cruiser ship killers", unlocksMissile, ammo, 14, hullType, ETechLevel.TECH_I, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(missile));
-        launcher.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenwerfer Mk I");
-        launcher.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Kreuzer Raketenwerfer.");
-        moduleService.save(launcher);
-
-        // DN launcher
-        hullType = EHullType.DN;
-        unlocksRocketAmmunition = research("Dreadnought missile ammunition Mk I", "Dreadnought missiles module Mk I.", 1, ETechLevel.TECH_I, unlocksRocketAmmunition);
-        unlocksRocketAmmunition.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketenmunition Mk I");
-        unlocksRocketAmmunition.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketenmunition Mk I.");
-        researchService.save(unlocksRocketAmmunition);
-
-        ammo = moduleService.createAmmunitionModule("Dreadnought missile ammunition Mk I", "Dreadnought missiles module Mk I.", unlocksRocketAmmunition, 20, 48, hullType, ETechLevel.TECH_I, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        ammo.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketenmunition Mk I");
-        ammo.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketenmunition Mk I.");
-        moduleService.save(ammo);
-
-        motor = moduleService.createMissileMotor("Dreadnought ship killer Motor Mk I", "Dreadnought ship Killer Motor Mk I", 180, hullType, ETechLevel.TECH_I, new Acceleration(46000, EAccelerationMetric.G), 20, 100);
-        motor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketenmotor Mk I");
-        motor.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Dreadnought Raketenmotor Mk I.");
-        moduleService.save(motor);
-
-        warhead = moduleService.createWarhead("Nuclear Dreadnought ship killer war head", "Nuclear Dreadnought ship killer warhead", 1800, hullType, ETechLevel.TECH_I, new Distance(0.00017, EDistanceMetric.LS), EWarheadType.EXPLOSION, 100);
-        warhead.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketen Sprengkopf Mk I");
-        warhead.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketen Sprengkopf Mk I.");
-        moduleService.save(warhead);
-
-        unlocksMissile = research("Dreadnought missile", "A Dreadnought missiles.", 1, ETechLevel.TECH_I, unlocksMissile);
-        unlocksMissile.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketenwerfer Mk I");
-        unlocksMissile.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Dreadnought Raketenwerfer.");
-        researchService.save(unlocksMissile);
-
-        missile = moduleService.createMissile("Nuclear Dreadnought ship killer missile Mk I", "Nuclear Dreadnought ship killer missile Mk I", 100, 100, 100, hullType, ETechLevel.TECH_I, warhead, List.of(motor), unlocksMissile, ammo);
-        missile.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketen mit Nuklearsprengkopf Mk I");
-        missile.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Rakete mit Nuklearsprengkopf Mk I.");
-        moduleService.save(missile);
-
-        launcher = moduleService.createLauncher("Dreadnought ship killer launcher Mk I", "The launcher for Dreadnought ship killers", unlocksMissile, ammo, 20, hullType, ETechLevel.TECH_I, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(missile));
-        launcher.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketenwerfer Mk I");
-        launcher.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Dreadnought Raketenwerfer.");
-        moduleService.save(launcher);
-    }
-
-    private void balanceWeapons() {
-        final List<Weapon> allWeapons = moduleService.findAllWeapons();
-        Weapon pointDefense = allWeapons.stream().filter(w -> w.getWeaponType() == EWeaponType.POINT_DEFENSE).findFirst().orElseThrow(NullPointerException::new);
-        pointDefense.setUseCapacity(6);
-        pointDefense.setEffectValue(1);
-        pointDefense.getCosts().setCrewRequirement(6, Weapon.class, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        moduleService.save(pointDefense);
-        final Research unlocksPointDefense = pointDefense.getUnlockedThrough();
-        moduleService.createWeapon("Point Defense Mk I", "A point defense", unlocksPointDefense, 3, 1, EHullType.CL, ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.POINT_DEFENSE, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        moduleService.createWeapon("Point Defense Mk I", "A point defense", unlocksPointDefense, 1, 1, EHullType.LAC, ETechLevel.TECH_I, new Distance(0.6343, EDistanceMetric.LS), 1, EWeaponType.POINT_DEFENSE, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
-
-        Weapon laserWeapon = allWeapons.stream().filter(w -> w.getWeaponType() == EWeaponType.BEAM).findFirst().orElseThrow(NullPointerException::new);
-        Research unlocksLaser = laserWeapon.getUnlockedThrough();
-        laserWeapon.setEffectValue(200);
-        laserWeapon.setUseCapacity(4);
-        laserWeapon.getCosts().setCrewRequirement(4, Weapon.class, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.DEFAULT_LANGUAGE, "Light cruiser laser Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.DEFAULT_LANGUAGE, "Light cruiser laser.");
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Laser für leichte Kreuzer Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Laser für leichte Kreuzer.");
-        moduleService.save(laserWeapon);
-
-
-        laserWeapon = moduleService.createWeapon("Light cruiser graser Mk I", "Light cruiser graser.", unlocksLaser, 5, 300, EHullType.CL,
-                ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT,
-                new CrewRequirement(XXS_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Laser für leichte Kreuzer Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Laser für leichte Kreuzer.");
-        moduleService.save(laserWeapon);
-
-
-        unlocksLaser = research("LAC laser Mk I", "A LAC laser.", 1, ETechLevel.TECH_I, unlocksLaser);
-        laserWeapon = moduleService.createWeapon("LAC laser Mk I", "LAC laser.", unlocksLaser, 1, 50, EHullType.LAC,
-                ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT,
-                new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Laser für leichte Angriffsboote Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Laser für leichte Angriffsboote.");
-        moduleService.save(laserWeapon);
-
-        laserWeapon = moduleService.createWeapon("LAC laser Mk II", "LAC laser.", unlocksLaser, 2, 150, EHullType.LAC,
-                ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT,
-                new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Laser für leichte Angriffsboote Mk II");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Laser für leichte Angriffsboote.");
-        moduleService.save(laserWeapon);
-
-        unlocksLaser = research("LAC graser Mk I", "A LAC graser.", 1, ETechLevel.TECH_I, unlocksLaser);
-        laserWeapon = moduleService.createWeapon("LAC graser Mk I", "LAC graser.", unlocksLaser, 3, 250, EHullType.LAC,
-                ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT,
-                new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für leichte Angriffsboote Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für leichte Angriffsboote.");
-        moduleService.save(laserWeapon);
-
-        unlocksLaser = research("Cruiser graser Mk I", "A cruiser graser.", 1, ETechLevel.TECH_I, unlocksLaser);
-        laserWeapon = moduleService.createWeapon("Cruiser graser Mk I", "Cruiser graser.", unlocksLaser, 6, 400, EHullType.CA,
-                ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT,
-                new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Kreuzer Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Kreuzer.");
-        moduleService.save(laserWeapon);
-
-        unlocksLaser = research("Cruiser graser Mk I", "A cruiser graser.", 1, ETechLevel.TECH_I, unlocksLaser);
-        laserWeapon = moduleService.createWeapon("Cruiser graser Mk I", "Cruiser graser.", unlocksLaser, 12, 500, EHullType.CA,
-                ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT,
-                new CrewRequirement(S_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Kreuzer Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Kreuzer.");
-        moduleService.save(laserWeapon);
-
-        unlocksLaser = research("Battlecruiser graser Mk I", "A battlecruiser graser.", 1, ETechLevel.TECH_I, unlocksLaser);
-        laserWeapon = moduleService.createWeapon("Battlecruiser graser Mk I", "Battlecruiser graser.", unlocksLaser, 9, 500, EHullType.BC,
-                ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT,
-                new CrewRequirement(S_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Schlachtkreuzer Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Schlachtkreuzer.");
-        moduleService.save(laserWeapon);
-
-        unlocksLaser = research("Battlecruiser graser Mk I", "A battlecruiser graser.", 1, ETechLevel.TECH_I, unlocksLaser);
-        laserWeapon = moduleService.createWeapon("Battlecruiser graser Mk I", "Battlecruiser graser.", unlocksLaser, 18, 600, EHullType.BC,
-                ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT,
-                new CrewRequirement(M_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Schlachtkreuzer Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Schlachtkreuzer.");
-        moduleService.save(laserWeapon);
-
-        unlocksLaser = research("Dreadnought graser Mk I", "A dreadnought graser.", 1, ETechLevel.TECH_I, unlocksLaser);
-        laserWeapon = moduleService.createWeapon("Dreadnought graser Mk I", "Battlecruiser graser.", unlocksLaser, 20, 1100, EHullType.BC,
-                ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT,
-                new CrewRequirement(M_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Dreadnoughts Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Dreadnoughts.");
-        moduleService.save(laserWeapon);
-
-        unlocksLaser = research("Dreadnought graser Mk I", "A dreadnought graser.", 1, ETechLevel.TECH_I, unlocksLaser);
-        laserWeapon = moduleService.createWeapon("Dreadnought graser Mk I", "Battlecruiser graser.", unlocksLaser, 40, 1300, EHullType.BC,
-                ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT,
-                new CrewRequirement(L_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Dreadnoughts Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Dreadnoughts.");
-        moduleService.save(laserWeapon);
-    }
-
-    private void balancePassives() {
-        PassiveModule passiveModule = moduleService.findAllPassiveModules().get(0);
-        passiveModule.setUseCapacity(10);
-        passiveModule.getName().updateOrCreate(Translation.DEFAULT_LANGUAGE, "Armor increasement Mk I");
-        passiveModule.getDescription().updateOrCreate(Translation.DEFAULT_LANGUAGE, "Increases the armor value.");
-        passiveModule.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Verstärkung der Panzerung Mk I");
-        passiveModule.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Verstärkt die Panzerung.");
-        moduleService.save(passiveModule);
-
-        Research unlocksPassive = passiveModule.getUnlockedThrough();
-        passiveModule = moduleService.createPassiveModule("Sidewall increasement Mk I", "Increases the sidewall value.", unlocksPassive,
-                ESupportType.ARMOR, ECalculationType.ADD, 10, 6, EHullType.FR, ETechLevel.TECH_I, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        passiveModule.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Verstärkung des Seitenschilds Mk I");
-        passiveModule.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Verstärkt den Seitenschild.");
-        moduleService.save(passiveModule);
-
-        passiveModule = moduleService.createPassiveModule("Sidewall increasement Mk I", "Increases the sidewall value.", unlocksPassive,
-                ESupportType.SIDEWALL, ECalculationType.ADD, 10, 6, EHullType.FR, ETechLevel.TECH_I, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        passiveModule.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Verstärkung des Seitenschilds Mk I");
-        passiveModule.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Verstärkt den Seitenschild.");
-        moduleService.save(passiveModule);
-
-        passiveModule = moduleService.createPassiveModule("Electronic warfare increasement Mk I", "Increases the electronic warfare value.", unlocksPassive,
-                ESupportType.ELECTRONIC_WARFARE, ECalculationType.ADD, 2, 5, EHullType.FR, ETechLevel.TECH_I, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        passiveModule.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Verstärkung der Eloka Mk I");
-        passiveModule.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Verstärkt die Eloka.");
-        moduleService.save(passiveModule);
-    }
-
-    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
-    private void balanceHulls() {
-        final List<Hull> toStore = new ArrayList<>();
-
-        List<Hull> all = hullService.findAll();
-        final List<Hull> byCC = all.stream().sorted(Comparator.comparingInt(Hull::getConstructionCapacity)).collect(Collectors.toList());
-        final Hull smallest = byCC.get(0);
-        updateHull(toStore, smallest, 30, 6, 5, 5, 14, EHullType.VT, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        updateHull(toStore, byCC.get(1), 50, 18, 6, 6, 20, EHullType.FG, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        final Hull biggestHull = byCC.get(2);
-        updateHull(toStore, biggestHull, 80, 30, 10, 10, 30, EHullType.CL, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        hullService.saveAll(toStore);
-        hullService.createHull("Light attack vessel", 20, 4, 10, 3, 3, ETechLevel.TECH_I, "The light attack craft hull", smallest.getUnlockedThrough(), EHullType.LAC, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        Research hullResearch = biggestHull.getUnlockedThrough();
-        hullService.createHull("Heavy cruiser vessel", 200, 60, 30, 30, 80, ETechLevel.TECH_I, "The assault cruiser hull", hullResearch, EHullType.CA, new CrewRequirement(L_CREW, EDepositType.COSTS));
-        hullResearch = research("Battlecruiser", "Researches bigger cruisers.", 1, ETechLevel.TECH_I, hullResearch);
-        hullService.createHull("Battlecruiser vessel", 700, 280, 90, 90, 240, ETechLevel.TECH_I, "The battle cruiser hull", hullResearch, EHullType.BC, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-        hullResearch = research("Battleship", "Researches battleships.", 1, ETechLevel.TECH_I, hullResearch);
-        hullService.createHull("Battleship vessel", 2000, 800, 200, 200, 800, ETechLevel.TECH_I, "The battle ship hull", hullResearch, EHullType.BB, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-        hullResearch = research("Dreadnought", "Researches dreadnoughts.", 1, ETechLevel.TECH_I, hullResearch);
-        hullService.createHull("Dreadnought vessel", 5000, 1900, 400, 400, 2300, ETechLevel.TECH_I, "The dreadnought hull", hullResearch, EHullType.DN, new CrewRequirement(XXXL_CREW, EDepositType.COSTS));
-        hullResearch = research("Superdreadnought", "Researches super dreadnoughts.", 1, ETechLevel.TECH_I, hullResearch);
-        hullService.createHull("Superdreadnought vessel", 8000, 3320, 640, 640, 3400, ETechLevel.TECH_I, "The super dreadnought hull", hullResearch, EHullType.SD, new CrewRequirement(XXXL_CREW, EDepositType.COSTS));
-        hullService.createHull("Small Freighter hull", 2000, 2000, 0, 0, 0, ETechLevel.TECH_I, "The smaller freighter hull", smallest.getUnlockedThrough(), EHullType.FR, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        hullService.createHull("Big Freighter hull", 5000, 5000, 0, 0, 0, ETechLevel.TECH_I, "The bigger freighter hull", smallest.getUnlockedThrough(), EHullType.FR, new CrewRequirement(M_CREW, EDepositType.COSTS));
-    }
-
-    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
-    private void updateHull(@Nonnull final List<Hull> toStore,
-                            @Nonnull final Hull hull,
-                            final int ccOverall,
-                            final int cc,
-                            final int ccBow,
-                            final int ccStern,
-                            final int ccBroadsides,
-                            @Nonnull final EHullType hullType,
-                            @Nonnull final CrewRequirement crewRequirement) {
-        Preconditions.checkNotNull(hull, "hull must not be empty");
-        Preconditions.checkNotNull(hullType, "hullType shouldn't be null!");
-        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
-
-        hull.setHullType(hullType);
-        hull.setOverallConstructionCapacity(ccOverall);
-        hull.setConstructionCapacity(cc);
-        hull.setConstructionCapacityBow(ccBow);
-        hull.setConstructionCapacityStern(ccStern);
-        hull.setConstructionCapacityBroadsides(ccBroadsides);
-        hull.getCosts().setCrewRequirement(ccOverall, Hull.class, crewRequirement);
-        toStore.add(hull);
-    }
-
-    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
-    private void balanceBuildings() {
-        final List<Building> toStore = new ArrayList<>();
-
-        // population
-        changeBaseOfBuilding(DOCTOR_PT, 50, toStore);
-        changeBaseOfBuilding(LIVING_PT, 1000, toStore);
-        changeBaseOfBuilding(ELEMENTARY_SCHOOL_PT, 100, toStore);
-        changeBaseOfBuilding(SECONDARY_SCHOOL_PT, 100, toStore);
-        changeBaseOfBuilding(UNIVERSITY_PT, 100, toStore);
-        changeBaseOfBuilding(MILITARY_I_PT, 50, toStore);
-        changeBaseOfBuilding(MILITARY_II_PT, 50, toStore);
-
-        // resources
-        changeBaseOfBuilding(METAL_WORKS, 250, toStore);
-        changeBaseOfBuilding(HEAVY_METALS_WORK_PT, 200, toStore);
-
-        // forfeitable resources
-        changeBaseOfBuilding(RESEARCH_LAB_PT, 10, toStore);
-
-        buildingService.saveAll(toStore);
-    }
-
-    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
-    private void changeBaseOfBuilding(final ProductionType productionType, final int baseValue, final List<Building> toStore) {
-        final Building houses = buildingService.findBuildingByProductionType(productionType).get(0);
-        houses.setBaseValue(baseValue);
-        toStore.add(houses);
     }
 
     @SuppressWarnings({"unused"})
@@ -1713,6 +1049,9 @@ public class MasterOfTheUniverseService {
     protected Planet colonizePlanet(@Nonnull final User owner, @Nonnull final Planet planet) {
         // first the guys, then the buildings
         final Colonization colonization = new Colonization(owner, planet, ColonizationCostCalculator.getCrewRequirementForColonization(), 0);
+        planet.getMiningFactors().equalize();
+        planet.getResourceDeposit().equalize();
+        planetService.save(planet);
         return colonizationService.colonizePlanet(colonization);
     }
 

@@ -80,6 +80,22 @@ public class Planet extends AbstractEntityKey {
     @JoinColumn(name = "idResourceDeposit", updatable = false)
     private final ResourceDeposit resourceDeposit = ResourceDepositInitializerCalculator.initializeResourceDeposit();
 
+    /**
+     * The current need for resources and population for migrations.
+     */
+    @Nonnull
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    @JoinColumn(name = "idResourceDemand", updatable = false)
+    private final ResourceDeposit resourceDemand = new ResourceDeposit(EDepositType.DEMAND);
+
+    /**
+     * The current used resources.
+     */
+    @Nonnull
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    @JoinColumn(name = "idResourceUtilization", updatable = false)
+    private final ResourceDeposit resourceUtilization = new ResourceDeposit(EDepositType.UTILIZATION);
+
     @Nonnull
     @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, mappedBy = "planet")
     private final Set<Construction> constructions = new HashSet<>();
@@ -130,6 +146,11 @@ public class Planet extends AbstractEntityKey {
     @Nonnull
     public ResourceDeposit getResourceDeposit() {
         return resourceDeposit;
+    }
+
+    @Nonnull
+    public ResourceDeposit getResourceDemand() {
+        return resourceDemand;
     }
 
     @Nonnull
@@ -345,5 +366,14 @@ public class Planet extends AbstractEntityKey {
         }
 
         return Integer.max(tickCounterCollectable, tickCounterForfeitable);
+    }
+
+    public boolean isDemandPresent() {
+        return resourceDemand.isDemandPresent();
+    }
+
+    @Nonnull
+    public ResourceDeposit getResourceUtilization() {
+        return resourceUtilization;
     }
 }

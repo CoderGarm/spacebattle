@@ -44,7 +44,7 @@ public class Construction {
 
         this.idConstruction = construction.getId();
         this.building = new Building(construction.getBuilding(), languageCode);
-        this.level = construction.getLevel();
+        this.level = construction.getOperationalLevel();
     }
 
     @Nullable

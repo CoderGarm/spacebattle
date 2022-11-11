@@ -3,12 +3,9 @@ package de.yuga.spacebattle.backend.entities.turn;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
-import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.enums.EJobPriority;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import org.hibernate.annotations.Check;
@@ -31,7 +28,6 @@ import javax.validation.constraints.NotNull;
 @AttributeOverride(name = "id", column = @Column(name = "idJob"))
 @Check(constraints = "(idBuilding IS NOT NULL AND targetLevel IS NOT NULL) " +
         "OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) " +
-        "OR (idShipClass IS NOT NULL AND amountShips IS NOT NULL) " +
         "OR (idFleet IS NOT NULL) ")
 public class Job extends Deletable implements Comparable<Job> {
 
@@ -137,11 +133,11 @@ public class Job extends Deletable implements Comparable<Job> {
         return this.priority == priority;
     }
 
-    public void setDeleted(@Nonnull final Tick finishedAt) {
+    public void setFinished(@Nonnull final Tick finishedAt) {
         Preconditions.checkNotNull(finishedAt, "finishedAt must not be empty");
 
         this.finished = finishedAt;
-        setDeleted();
+        delete();
     }
 
     public void setPriority(@Nonnull final EJobPriority priority) {
@@ -183,30 +179,5 @@ public class Job extends Deletable implements Comparable<Job> {
     @Override
     public int hashCode() {
         return id * 31;
-    }
-
-    public String getForWarnMessage() {
-        String constructableRepresentation = "";
-        final Building building = constructable.getBuilding();
-        if (building != null) {
-            constructableRepresentation = "idBuilding: " + building.getId();
-        }
-        final Research research = constructable.getResearch();
-        if (research != null) {
-            constructableRepresentation = "idResearch: " + research.getId();
-        }
-        final ShipClass shipClass = constructable.getShipClass();
-        if (shipClass != null) {
-            final Integer amountShips = constructable.getAmountShips();
-            constructableRepresentation = amountShips + "x ";
-            constructableRepresentation += "idShipClass: " + shipClass.getId();
-        }
-        return "Job{" +
-                "owner:" + owner.getId() +
-                ", facility:" + facility.getId() +
-                ", constructable: {" + constructableRepresentation + "}" +
-                ", jobDoneAtZero:" + jobDoneAtZero +
-                ", id:" + id +
-                '}';
     }
 }

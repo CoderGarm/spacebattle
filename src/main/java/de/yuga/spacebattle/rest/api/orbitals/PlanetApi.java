@@ -34,7 +34,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -214,8 +213,8 @@ public class PlanetApi extends BaseApi {
         final Map<ShipClass, Integer> jobLoad = shipJobPayload.stream()
                 .collect(Collectors.toMap(entry -> foundClassesByID.get(entry.getIdShipClass()), ShipyardConstructionSelection::getAmount));
 
-        final Set<Job> shipyardJobs = jobService.createShipyardJob(planet, jobLoad);
-        return ResponseEntity.ok(!shipyardJobs.isEmpty());
+        jobService.createShipyardJob(planet, jobLoad);
+        return ResponseEntity.ok(true);
     }
 
     @PostMapping(value = GET_PLANET_BY_COORDINATES_ENDPOINT + "/{idStarSystem}")

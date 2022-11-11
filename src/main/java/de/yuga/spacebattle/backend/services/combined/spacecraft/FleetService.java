@@ -196,7 +196,7 @@ public class FleetService {
             }
         });
 
-        toRemove.forEach(Fleet::setDeleted);
+        toRemove.forEach(Fleet::delete);
         fleetRepository.saveAll(toRemove);
     }
 
@@ -242,7 +242,7 @@ public class FleetService {
     public void markAsDestroyed(@Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
-        fleet.setDeleted();
+        fleet.delete();
         fleetRepository.save(fleet);
     }
 

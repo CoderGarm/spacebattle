@@ -91,7 +91,7 @@ public class User extends AbstractEntityKey {
     private final Set<Planet> ownedPlanets = new HashSet<>();
 
     /**
-     * All already researched researches for the user.
+     * All already finished researches for the user.
      */
     @Nonnull
     @NotNull

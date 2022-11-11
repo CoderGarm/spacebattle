@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.ECalculationType;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
@@ -63,7 +64,7 @@ public class Colonization extends AbstractEntityKey {
         this.target = target;
         this.doneAtZero = doneAtZero;
         // do the switch because these are costs up to here but the running colonization knows all the people as deposit
-        this.costs.updatePopulation(crewRequirement.toggleToDepositMode());
+        this.costs.updateCrew(crewRequirement, ECalculationType.ADD);
     }
 
     @Nonnull

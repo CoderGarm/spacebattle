@@ -13,13 +13,15 @@ import javax.annotation.Nonnull;
  */
 public enum ERefinementSequence {
 
-    EDUCATION_CIVIL_I(EEducationType.NONE, EEducationType.SCHOOL),
-    EDUCATION_CIVIL_II(EEducationType.SCHOOL, EEducationType.COLLEGE),
-    EDUCATION_CIVIL_III(EEducationType.COLLEGE, EEducationType.UNIVERSITY),
+    EDUCATION_CIVIL_I(0, EEducationType.NONE, EEducationType.SCHOOL),
+    EDUCATION_CIVIL_II(1, EEducationType.SCHOOL, EEducationType.COLLEGE),
+    EDUCATION_CIVIL_III(1, EEducationType.COLLEGE, EEducationType.UNIVERSITY),
 
-    EDUCATION_MILITARY_I(EEducationType.COLLEGE, EEducationType.ENLISTED),
-    EDUCATION_MILITARY_II(EEducationType.UNIVERSITY, EEducationType.OFFICER),
+    EDUCATION_MILITARY_I(2, EEducationType.COLLEGE, EEducationType.ENLISTED),
+    EDUCATION_MILITARY_II(2, EEducationType.UNIVERSITY, EEducationType.OFFICER),
     ;
+
+    private final int educationPriority;
 
     /**
      * What goes in.
@@ -33,12 +35,17 @@ public enum ERefinementSequence {
     @Nonnull
     private final Enum<?> product;
 
-    ERefinementSequence(@Nonnull final Enum<?> educt, @Nonnull final Enum<?> product) {
+    ERefinementSequence(final int educationPriority, @Nonnull final Enum<?> educt, @Nonnull final Enum<?> product) {
         Preconditions.checkNotNull(educt, "educt shouldn't be null!");
         Preconditions.checkNotNull(product, "product shouldn't be null!");
 
+        this.educationPriority = educationPriority;
         this.educt = educt;
         this.product = product;
+    }
+
+    public int getEducationPriority() {
+        return educationPriority;
     }
 
     /**

@@ -47,7 +47,6 @@ public class SpacebattleApplication implements Jackson2ObjectMapperBuilderCustom
 
     private final static Logger LOGGER = LoggerFactory.getLogger(SpacebattleApplication.class);
 
-
     /**
      * Note: Compare application.properties for path to delete
      */
@@ -67,7 +66,6 @@ public class SpacebattleApplication implements Jackson2ObjectMapperBuilderCustom
                                   @Nonnull final ApplicationContext context) {
         this.dbPatchService = Preconditions.checkNotNull(dbPatchService, "dbPatchService must not be empty");
         this.context = Preconditions.checkNotNull(context, "context must not be empty");
-        ;
     }
 
     public static void main(String[] args) {

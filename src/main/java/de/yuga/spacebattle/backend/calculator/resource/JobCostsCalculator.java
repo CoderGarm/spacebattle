@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
@@ -89,7 +90,19 @@ public class JobCostsCalculator {
         return ticksNeeded.get();
     }
 
-    public static ResourceDeposit calculateJobCost(@Nonnull final Fleet toRepair) {
+    public static ResourceDeposit calculateJobCost(@Nonnull final Fleet fleet, final boolean isRepairJob) {
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+
+        if (isRepairJob) {
+            return calculateRepairJobCost(fleet);
+        }
+        final ResourceDeposit costs = new ResourceDeposit();
+        fleet.getAliveShips().stream().map(WarShip::getShipClass).map(ShipClass::getCosts).forEach(costs::add);
+        return costs;
+    }
+
+
+    private static ResourceDeposit calculateRepairJobCost(@Nonnull final Fleet toRepair) {
         Preconditions.checkNotNull(toRepair, "toRepair must not be empty");
 
         final Map<WarShip, WarshipHealthState> referenceWarships = toRepair.getAliveShips().stream()
@@ -102,8 +115,8 @@ public class JobCostsCalculator {
         referenceWarships.forEach((warShip, reference) -> {
             final WarshipHealthState warshipHealthState = damagedStates.get(warShip);
             final double damageFraction = warshipHealthState.getDamagedFraction(reference);
-            final ResourceDeposit costsOverall = warShip.getShipClass().getCostsOverall();
-            addReducedDeposit(costsOverall, costsOverall, damageFraction);
+            final ResourceDeposit costsOverall = warShip.getShipClass().getCosts();
+            addReducedDeposit(costs, costsOverall, damageFraction);
         });
         return costs;
     }
@@ -117,10 +130,6 @@ public class JobCostsCalculator {
         Arrays.stream(EResourceType.valuesWithoutPopulation()).forEach(r -> {
             final long toAddAmount = toAdd.getResourceAmountByType(r);
             deposit.updateResource(r, (long) (portionFactor * (double) toAddAmount));
-        });
-        Arrays.stream(EEducationType.valuesOfWorkforce()).forEach(e -> {
-            final long toAddAmount = toAdd.getCrewAmountByType(e);
-            deposit.updateCrewRequirement(e, (long) (portionFactor * (double) toAddAmount));
         });
     }
 

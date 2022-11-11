@@ -279,7 +279,10 @@ public class AuthApi {
         final List<Research> researchesWithoutPrecondition = researchService.getResearchesWithoutPrecondition();
         researchService.addResearch(saved, researchesWithoutPrecondition);
 
-        final Planet planet = colonizationService.findPlanetForNewUser();
+        Planet planet = colonizationService.findPlanetForNewUser();
+        planet.getMiningFactors().equalize();
+        planet.getResourceDeposit().equalize();
+        planet = planetService.save(planet);
         final Colonization colonization = new Colonization(saved, planet, ColonizationCostCalculator.getCrewRequirementForColonization(), 0);
         colonizationService.colonizePlanet(colonization);
 

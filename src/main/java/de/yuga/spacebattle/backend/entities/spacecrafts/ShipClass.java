@@ -164,7 +164,7 @@ public class ShipClass extends Deletable {
      * @return the total costs
      */
     @Nonnull
-    public ResourceDeposit getCostsOverall() {
+    public ResourceDeposit getCosts() {
         final ResourceDeposit clonedDeposit = new ResourceDeposit(EDepositType.COSTS);
 
         final Map<ESupportType, SupportFitting> supportTypeToModule = supportFittings.stream()
@@ -231,8 +231,7 @@ public class ShipClass extends Deletable {
             final SupportFitting supportFitting = supportTypeToModule.get(ESupportType.getByValue(resourceType));
             final double absoluteValueAsFactor = supportFitting != null ? supportFitting.getAbsoluteValueAsFactor() : 1;
             if (resourceType == EResourceType.POPULATION) {
-
-                clonedDeposit.updatePopulation(costsToAdd.getCrewRequirement().toggleToDepositMode());
+                clonedDeposit.updateCrew(costsToAdd.getCrewRequirement(), ECalculationType.ADD);
             } else {
                 final long amount = costsToAdd.getResourceAmountByType(resourceType);
                 final BigDecimal effectiveAmount = new BigDecimal(amount).multiply(new BigDecimal(absoluteValueAsFactor), ResourceDeposit.MATH_CONTEXT_INTEGER);

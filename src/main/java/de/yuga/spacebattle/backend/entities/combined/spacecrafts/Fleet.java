@@ -11,6 +11,7 @@ import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.misc.Deletable;
+import de.yuga.spacebattle.backend.entities.misc.Operationable;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
@@ -76,7 +77,7 @@ import static de.yuga.spacebattle.backend.calculator.FittingUtils.DEFENSIVE_FITT
 @Entity
 @Table(name = "fleet")
 @AttributeOverride(name = "id", column = @Column(name = "idFleet"))
-public class Fleet extends Deletable {
+public class Fleet extends Operationable {
 
     @Nonnull
     @NotNull
@@ -184,7 +185,7 @@ public class Fleet extends Deletable {
     }
 
     public boolean isAlive() {
-        final boolean fightingIsPossible = getAliveShips().stream().map(WarShip::getWarshipHealthState).anyMatch(WarshipHealthState::isFightingCapable);
+        final boolean fightingIsPossible = getAliveShips().stream().filter(WarShip::isOperational).map(WarShip::getWarshipHealthState).anyMatch(WarshipHealthState::isFightingCapable);
         return !isDeleted() && fightingIsPossible;
     }
 

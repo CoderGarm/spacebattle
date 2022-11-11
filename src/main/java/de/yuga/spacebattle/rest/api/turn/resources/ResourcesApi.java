@@ -3,12 +3,9 @@ package de.yuga.spacebattle.rest.api.turn.resources;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.EDepositType;
-import de.yuga.spacebattle.backend.services.account.UserService;
-import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassCreationService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
-import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapabilities;
@@ -50,7 +47,9 @@ public class ResourcesApi extends BaseApi {
     private static final String RESOURCE_TYPES_ENDPOINT = "types";
     private static final String HUMAN_RESOURCE_TYPES_ENDPOINT = "educationTypes";
     private static final String MINING_FACTORS_ENDPOINT = "miningFactors";
-    private static final String RESOURCE_DEPOSIT_ENDPOINT = "resourceDeposit";
+    private static final String RESOURCE_DEPOSIT_ENDPOINT = "deposit";
+    private static final String RESOURCE_DEMAND_ENDPOINT = "demand";
+    private static final String RESOURCE_UTILIZATION_ENDPOINT = "utilization";
     private static final String INCOME_ENDPOINT = "income";
     private static final String CAPACITY_ENDPOINT = "capacity";
     private static final String COSTS_ENDPOINT = "costs";
@@ -59,42 +58,24 @@ public class ResourcesApi extends BaseApi {
     private static final String SHIP_CLASS_CAPS_ENDPOINT = "capsShipClass";
 
     @Nonnull
-    private final JobService jobService;
-
-    @Nonnull
-    private final UserService userService;
-
-    @Nonnull
     private final PlanetService planetService;
 
     @Nonnull
     private final ConstructionService constructionService;
 
     @Nonnull
-    private final BuildingService buildingService;
-
-    @Nonnull
     private final ShipClassCreationService shipClassCreationService;
 
     @Autowired
-    public ResourcesApi(@Nonnull final JobService jobService,
-                        @Nonnull final UserService userService,
-                        @Nonnull final PlanetService planetService,
+    public ResourcesApi(@Nonnull final PlanetService planetService,
                         @Nonnull final ConstructionService constructionService,
-                        @Nonnull final BuildingService buildingService,
                         @Nonnull final ShipClassCreationService shipClassCreationService) {
-        Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
-        Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
-        Preconditions.checkNotNull(buildingService, "buildingService shouldn't be null!");
         Preconditions.checkNotNull(shipClassCreationService, "shipClassCreationService shouldn't be null!");
 
-        this.userService = userService;
-        this.jobService = jobService;
         this.planetService = planetService;
         this.constructionService = constructionService;
-        this.buildingService = buildingService;
         this.shipClassCreationService = shipClassCreationService;
     }
 
@@ -148,6 +129,37 @@ public class ResourcesApi extends BaseApi {
         return ResponseEntity.ok(new MiningFactors(planet.getMiningFactors()));
     }
 
+    @GetMapping(value = RESOURCE_DEMAND_ENDPOINT + "/{idPlanet}")
+    @Operation(summary = "Get all EResourceTypes.", operationId = "getResourceDemand",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceDeposit.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getResourceDemand(@PathVariable("idPlanet") final int idPlanet) {
+
+        final Planet planet = planetService.find(idPlanet);
+        PreconditionWebHelper.checkNotNull(planet, "planet shouldn't be null!");
+        return ResponseEntity.ok(new ResourceDeposit(planet.getResourceDemand()));
+    }
+
+    @GetMapping(value = RESOURCE_UTILIZATION_ENDPOINT + "/{idPlanet}")
+    @Operation(summary = "Get all EResourceTypes.", operationId = "getResourceUtilization",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceDeposit.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getResourceUtilization(@PathVariable("idPlanet") final int idPlanet) {
+
+        final Planet planet = planetService.find(idPlanet);
+        PreconditionWebHelper.checkNotNull(planet, "planet shouldn't be null!");
+        return ResponseEntity.ok(new ResourceDeposit(planet.getResourceUtilization()));
+    }
 
     @GetMapping(value = RESOURCE_DEPOSIT_ENDPOINT + "/{idPlanet}")
     @Operation(summary = "Get all EResourceTypes.", operationId = "getResourceDeposit",

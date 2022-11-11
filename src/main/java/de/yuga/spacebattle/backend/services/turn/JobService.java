@@ -1,13 +1,13 @@
 package de.yuga.spacebattle.backend.services.turn;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
-import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
+import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.ActiveResearchTuple;
 import de.yuga.spacebattle.backend.entities.researches.Research;
@@ -16,13 +16,15 @@ import de.yuga.spacebattle.backend.entities.turn.Constructable;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.ECalculationType;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EJobPriority;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.turn.JobRepository;
-import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.backend.services.ResourceService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
-import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
+import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
+import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -32,7 +34,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class JobService {
@@ -50,31 +51,29 @@ public class JobService {
     private final ResearchService researchService;
 
     @Nonnull
-    private final ShipClassService shipClassService;
+    private final WarShipService warShipService;
 
     @Nonnull
-    private final UserService userService;
+    private final ResourceService resourceService;
+
+    @Nonnull
+    private final FleetService fleetService;
 
     @Autowired
     public JobService(@Nonnull final JobRepository jobRepository,
                       @Nonnull final PlanetService planetService,
                       @Nonnull final BuildingService buildingService,
                       @Nonnull final ResearchService researchService,
-                      @Nonnull final ShipClassService shipClassService,
-                      @Nonnull final UserService userService) {
-        Preconditions.checkNotNull(jobRepository, "jobC shouldn't be null!");
-        Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
-        Preconditions.checkNotNull(buildingService, "buildingService shouldn't be null!");
-        Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
-        Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
-        Preconditions.checkNotNull(userService, "userService shouldn't be null!");
-
-        this.jobRepository = jobRepository;
-        this.planetService = planetService;
-        this.buildingService = buildingService;
-        this.researchService = researchService;
-        this.shipClassService = shipClassService;
-        this.userService = userService;
+                      @Nonnull final WarShipService warShipService,
+                      @Nonnull final ResourceService resourceService,
+                      @Nonnull final FleetService fleetService) {
+        this.jobRepository = Preconditions.checkNotNull(jobRepository, "jobC shouldn't be null!");
+        this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
+        this.buildingService = Preconditions.checkNotNull(buildingService, "buildingService shouldn't be null!");
+        this.researchService = Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
+        this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
+        this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
+        this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
     }
 
     @Nonnull
@@ -109,7 +108,7 @@ public class JobService {
     }
 
     /**
-     * Returns the job cost if they were paied - no costs and no costs back for researches!
+     * Returns the job cost if they were paid - no costs and no costs back for researches!
      *
      * @param entity the job to delete
      */
@@ -127,16 +126,21 @@ public class JobService {
             // not reached if the job is a research
             final ResourceDeposit jobCosts = entity.getConstructable().getJobCosts();
             final Planet planet = entity.getFacility().getPlanet();
+            planet.getResourceDemand().updateCrew(jobCosts.getCrewRequirement(), ECalculationType.SUBTRACT);
+
+            final Fleet fleet = doDelete.getConstructable().getFleet();
+            if (fleet != null) {
+                final boolean repairJob = doDelete.getConstructable().isRepairJob();
+                if (!repairJob) {
+                    fleet.delete();
+                    fleet.getAliveShips().forEach(WarShip::delete);
+                    fleetService.save(fleet);
+                }
+            }
 
             final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
-            for (final EResourceType resourceType : EResourceType.values()) {
-                // must be added again because payback and not thanks for the tip
-                if (EResourceType.POPULATION == resourceType) {
-                    final CrewRequirement crewRequirement = jobCosts.getCrewRequirement().toggleToDepositMode();
-                    resourceDeposit.updatePopulation(crewRequirement);
-                } else {
-                    resourceDeposit.updateResource(resourceType, jobCosts.getResourceAmountByType(resourceType));
-                }
+            for (final EResourceType resourceType : EResourceType.valuesWhichAreCollectable()) {
+                resourceDeposit.updateResource(resourceType, jobCosts.getResourceAmountByType(resourceType));
             }
             planetService.save(planet);
         }
@@ -163,6 +167,7 @@ public class JobService {
             throw new NotifyWebUserException("This job is to expensive!", result);
         }
         debtorDeposit.pay(costs);
+        planet.getResourceDemand().updateDemand(costs.getCrewRequirement());
     }
 
     /**
@@ -191,7 +196,7 @@ public class JobService {
                 .filter(construction -> construction.getBuilding().equals(building))
                 .findFirst().orElse(null);
 
-        final Constructable constructable = new Constructable(building, existingC != null ? existingC.getLevel() + 1 : 1);
+        final Constructable constructable = new Constructable(building, existingC != null ? existingC.getOperationalLevel() + 1 : 1);
         final Construction facility = planet.getConstructions().stream()
                 .filter(construction -> construction.getBuilding().getProductionTarget() == EResourceType.CONSTRUCTION)
                 .findFirst().orElse(null);
@@ -244,42 +249,6 @@ public class JobService {
     }
 
     /**
-     * Creates a entity by {@link ShipClass#getId()} and {@link Planet#getId()}.
-     * The buildings level will be incremented by 1 in every {@link Job}.
-     *
-     * @param idPlanet    the planet where the entity should be executed
-     * @param idShipClass the ShipClass which should be build
-     * @param amount      the amount of ship which should be build
-     * @return the created entity
-     */
-    public Job createShipyardJob(@Nonnull final Integer idPlanet,
-                                 @Nonnull final Integer idShipClass,
-                                 @Nonnull final Integer amount) {
-        Preconditions.checkNotNull(idPlanet, "idPlanet shouldn't be null!");
-        Preconditions.checkNotNull(idShipClass, "idShipClass shouldn't be null!");
-        Preconditions.checkNotNull(amount, "amount shouldn't be null!");
-        Preconditions.checkArgument(amount > 0, "amount shouldn't be lower than one!");
-
-        Planet planet = planetService.find(idPlanet);
-        ShipClass shipClass = shipClassService.find(idShipClass);
-        if (planet == null || planet.getOwner() == null || shipClass == null) {
-            throw new NotifyWebUserException("not that way!");
-        }
-
-        Constructable constructable = new Constructable(shipClass, amount);
-        Construction facility = planet.getConstructions().stream()
-                .filter(construction -> construction.getBuilding().getProductionTarget() == EResourceType.ORBITAL_CONSTRUCTION)
-                .findFirst().orElse(null);
-
-        checkIfFree(facility);
-        checkAndBalances(planet, constructable.getJobCosts());
-        Job entity = new Job(planet, facility, constructable);
-        jobRepository.save(entity);
-        planetService.save(planet);
-        return entity;
-    }
-
-    /**
      * Checks if the pointed facility is in use.
      *
      * @param facility the facility which could be in use
@@ -293,7 +262,7 @@ public class JobService {
         }
     }
 
-    public Set<Job> createShipyardJob(@Nonnull final Planet planet, @Nonnull final Map<ShipClass, Integer> shipJobPayload) {
+    public void createShipyardJob(@Nonnull final Planet planet, @Nonnull final Map<ShipClass, Integer> shipJobPayload) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkNotNull(shipJobPayload, "shipJobPayload shouldn't be null!");
 
@@ -307,19 +276,30 @@ public class JobService {
                 .findFirst().orElse(null);
 
         checkIfFree(facility);
+        Fleet fleet = new Fleet("Fresh Build @ " + planet.getName(), owner, new FleetOrbit(planet.getOrbit(), planet.getSystem()));
+        fleet.delete();
+        fleet = fleetService.save(fleet);
+        final Set<WarShip> newFleetComposition = new HashSet<>();
+        for (final Map.Entry<ShipClass, Integer> entry : shipJobPayload.entrySet()) {
+            final ShipClass shipClass = entry.getKey();
+            final Integer amount = entry.getValue();
+            final List<String> randomNames = resourceService.getRandomWarshipName(amount);
+            for (final String randomName : randomNames) {
+                final WarShip warShip = new WarShip(randomName, planet, fleet, shipClass);
+                warShip.delete();
+                newFleetComposition.add(warShip);
+            }
+        }
+        warShipService.saveAll(newFleetComposition);
 
-        final Set<Constructable> constructableSet = shipJobPayload.entrySet().stream()
-                .map(e -> new Constructable(e.getKey(), e.getValue())).collect(Collectors.toSet());
-
-        constructableSet.forEach(constructable -> checkAndBalances(planet, constructable.getJobCosts()));
-        Set<Job> newJobs = constructableSet.stream().map(constructable -> new Job(planet, facility, constructable)).collect(Collectors.toSet());
-
-        Iterable<Job> jobIterable = jobRepository.saveAll(newJobs);
+        final Constructable constructable = new Constructable(fleet, false);
+        checkAndBalances(planet, constructable.getJobCosts());
+        final Job job = new Job(planet, facility, constructable);
+        jobRepository.save(job);
         planetService.save(planet);
-        return Sets.newHashSet(jobIterable);
     }
 
-    public Job createShipyardJob(@Nonnull final Planet planet, @Nonnull final Fleet toRepair) {
+    public void createShipyardJob(@Nonnull final Planet planet, @Nonnull final Fleet toRepair) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(toRepair, "toRepair must not be empty");
 
@@ -328,12 +308,12 @@ public class JobService {
                 .findFirst().orElseThrow(() -> new NotifyWebUserException("If you want to repair a fleet, you need a shipyard."));
 
         // do not check if free, the new job will squeeze in
-        final Constructable constructable = new Constructable(toRepair);
+        final Constructable constructable = new Constructable(toRepair, true);
+        checkAndBalances(planet, constructable.getJobCosts());
         final Job job = new Job(planet, facility, constructable);
         job.setPriority(EJobPriority.PRIORITY);
         jobRepository.save(job);
         planetService.save(planet);
-        return job;
     }
 
     @Nonnull

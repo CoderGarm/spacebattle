@@ -76,6 +76,10 @@ public enum EResourceType implements HasIconName {
         return Arrays.stream(EResourceType.values()).filter(e -> EResourceType.POPULATION != e).toArray(EResourceType[]::new);
     }
 
+    public static EResourceType[] valuesWhichAreCollectable() {
+        return Arrays.stream(EResourceType.values()).filter(e -> COLLECTABLE == e.getCollectableType()).toArray(EResourceType[]::new);
+    }
+
     public static EResourceType[] valuesWhichForfeits() {
         return Arrays.stream(EResourceType.values()).filter(e -> FORFEITABLE != e.getCollectableType()).toArray(EResourceType[]::new);
     }

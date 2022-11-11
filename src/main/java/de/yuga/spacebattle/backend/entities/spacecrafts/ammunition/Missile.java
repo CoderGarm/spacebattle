@@ -11,10 +11,7 @@ import de.yuga.spacebattle.backend.entities.misc.HasCosts;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.enums.EDepositType;
-import de.yuga.spacebattle.backend.enums.EHullType;
-import de.yuga.spacebattle.backend.enums.EResourceType;
-import de.yuga.spacebattle.backend.enums.ETechLevel;
+import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
 import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
@@ -223,7 +220,7 @@ public class Missile extends HasCosts {
 
         for (final EResourceType resourceType : EResourceType.values()) {
             if (resourceType == EResourceType.POPULATION) {
-                resultingDeposit.updatePopulation(costsToAdd.getCrewRequirement().toggleToDepositMode());
+                resultingDeposit.updateCrew(costsToAdd.getCrewRequirement(), ECalculationType.ADD);
             } else {
                 resultingDeposit.updateResource(resourceType, costsToAdd.getResourceAmountByType(resourceType));
             }

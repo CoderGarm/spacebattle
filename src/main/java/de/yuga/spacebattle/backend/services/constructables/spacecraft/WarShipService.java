@@ -8,9 +8,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -65,14 +63,17 @@ public class WarShipService {
     public void markAsDestroyed(@Nonnull final WarShip warShip) {
         Preconditions.checkNotNull(warShip, "warShip shouldn't be null!");
 
-        warShip.setDeleted();
-        warShipRepository.save(warShip);
+        markAllAsDestroyed(List.of(warShip));
     }
 
     public void markAllAsDestroyed(@Nonnull final Collection<WarShip> warShips) {
         Preconditions.checkNotNull(warShips, "warShips shouldn't be null!");
 
-        warShips.forEach(WarShip::setDeleted);
+        warShips.forEach(WarShip::delete);
         warShipRepository.saveAll(warShips);
+    }
+
+    public List<WarShip> findAliveInoperationalForPlanet(final int idPlanet) {
+        return Objects.requireNonNullElse(warShipRepository.findAliveInoperationalForPlanet(idPlanet), new ArrayList<>());
     }
 }

@@ -17,6 +17,16 @@ public enum EDepositType {
     DEPOSITS(ECalculationType.NONE),
 
     /**
+     * These defining the need to supply all constructions with workers and ships with a crew.
+     */
+    DEMAND(ECalculationType.NONE),
+
+    /**
+     * Defines that whatever is described, it is in use.
+     */
+    UTILIZATION(ECalculationType.NONE),
+
+    /**
      * These defining the costs of whatever.
      */
     COSTS(ECalculationType.SUBTRACT),

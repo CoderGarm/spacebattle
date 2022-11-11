@@ -95,7 +95,7 @@ public class ConstructionService {
         return unlockedBuildings.stream()
                 .collect(Collectors.toMap(
                         Function.identity(),
-                        building -> constructionByBuilding.containsKey(building) ? constructionByBuilding.get(building).getLevel() + 1 : 1));
+                        building -> constructionByBuilding.containsKey(building) ? constructionByBuilding.get(building).getOperationalLevel() + 1 : 1));
     }
 
     /**
@@ -113,5 +113,11 @@ public class ConstructionService {
             return null;
         }
         return JobCostsCalculator.getCostsForLevel(costs, targetLevel);
+    }
+
+    public void saveAll(@Nonnull final Collection<Construction> constructions) {
+        Preconditions.checkNotNull(constructions, "constructions must not be empty");
+
+        constructionRepository.saveAll(constructions);
     }
 }

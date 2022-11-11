@@ -19,8 +19,7 @@ import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.yuga.spacebattle.backend.enums.EDepositType.CAPACITY;
-import static de.yuga.spacebattle.backend.enums.EDepositType.COSTS;
+import static de.yuga.spacebattle.backend.enums.EDepositType.*;
 import static de.yuga.spacebattle.backend.enums.EResourceType.POPULATION;
 
 /**
@@ -40,7 +39,6 @@ import static de.yuga.spacebattle.backend.enums.EResourceType.POPULATION;
 @Entity
 @Table(name = "resourceDeposit")
 @AttributeOverride(name = "id", column = @Column(name = "idResourceDeposit"))
-// todo @Check(constraints = "humanResources.availableAmount >= humanResources.usedAmount")
 public class ResourceDeposit extends AbstractEntityKey {
 
     /**
@@ -126,18 +124,14 @@ public class ResourceDeposit extends AbstractEntityKey {
         return 0;
     }
 
-    public boolean isPopulationSet() {
-        return resources.containsKey(POPULATION);
-    }
-
     /**
      * Checks if paying with the parameters is possible.
      *
      * @param resourceType the resource type
      * @param amount       the amount
-     * @return <code>true</code> if it can be payed, <code>false</code> otherwise
+     * @return <code>true</code> if it can be paid, <code>false</code> otherwise
      */
-    public boolean isReducingResourcePossible(@Nonnull final EResourceType resourceType, final long amount) {
+    private boolean isReducingResourcePossible(@Nonnull final EResourceType resourceType, final long amount) {
         Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
 
         return getResourceAmountByType(resourceType) >= amount;
@@ -154,17 +148,24 @@ public class ResourceDeposit extends AbstractEntityKey {
         Preconditions.checkArgument(COSTS == costs.getSubType(), "costs must be flagged as costs!");
 
         PayingPossibleResult result = new PayingPossibleResult();
-        for (final EResourceType resourceType : EResourceType.values()) {
-            if (EResourceType.POPULATION == resourceType) {
-                final CrewRequirement crewRequirement = costs.getCrewRequirement();
-                if (!isReducingPopulationPossible(crewRequirement)) {
-                    result.addProblem(resourceType);
-                }
-            } else if (ECollectableType.COLLECTABLE == resourceType.getCollectableType()) {
-                final long debit = costs.getResourceAmountByType(resourceType);
-                if (debit > 0 && !isReducingResourcePossible(resourceType, debit)) {
-                    result.addProblem(resourceType);
-                }
+        for (final EResourceType resourceType : EResourceType.valuesWhichAreCollectable()) {
+            final long debit = costs.getResourceAmountByType(resourceType);
+            if (debit > 0 && !isReducingResourcePossible(resourceType, debit)) {
+                result.addProblem(resourceType);
+            }
+        }
+        return result;
+    }
+
+    public PayingPossibleResult isPayingPossible(@Nonnull final CrewRequirement costs) {
+        Preconditions.checkNotNull(costs, "costs shouldn't be null!");
+        Preconditions.checkArgument(COSTS == costs.getSubType(), "costs must be flagged as costs!");
+
+        PayingPossibleResult result = new PayingPossibleResult();
+        for (final EEducationType resourceType : EEducationType.values()) {
+            final long debit = costs.getCrewAmountByType(resourceType);
+            if (getCrewAmountByType(resourceType) < debit) {
+                result.addProblem(resourceType);
             }
         }
         return result;
@@ -179,15 +180,23 @@ public class ResourceDeposit extends AbstractEntityKey {
         Preconditions.checkNotNull(costs, "costs shouldn't be null!");
         Preconditions.checkArgument(COSTS == costs.getSubType(), "costs must be flagged as costs!");
 
-        for (final EResourceType resourceType : EResourceType.values()) {
-            if (EResourceType.POPULATION == resourceType) {
-                // pay crew as normal from deposit
-                updateCrew(costs.getCrewRequirement());
-            } else if (ECollectableType.COLLECTABLE == resourceType.getCollectableType()) {
-                final long debit = costs.getResourceAmountByType(resourceType) * -1;
-                updateResource(resourceType, debit);
-            }
+        for (final EResourceType resourceType : EResourceType.valuesWhichAreCollectable()) {
+            final long debit = costs.getResourceAmountByType(resourceType) * -1;
+            updateResource(resourceType, debit);
         }
+    }
+
+    /**
+     * Reduces the amount of this by the demand in order to pay a job.
+     *
+     * @param demand the demand
+     */
+    public void updateDemand(@Nonnull final CrewRequirement demand) {
+        Preconditions.checkNotNull(demand, "demand shouldn't be null!");
+        Preconditions.checkArgument(COSTS == demand.getSubType(), "demand must be flagged as demand!");
+        Preconditions.checkArgument(DEMAND == subType, "I must be a represent a need!");
+
+        updateCrew(demand, ECalculationType.ADD);
     }
 
     @Nonnull
@@ -312,47 +321,6 @@ public class ResourceDeposit extends AbstractEntityKey {
         humanResources.put(educationType, totalAmount);
     }
 
-
-    /**
-     * Updates the amount of available and used people on this.<br>
-     * On {@link EDepositType#DEPOSITS} it will be added to the available people.<br>
-     * On {@link EDepositType#COSTS} it will be reduced from the available people.
-     *
-     * @param updateByThis the given crew to update or subtract
-     * @return if it was successful or not
-     */
-    public boolean updatePopulation(@Nonnull final CrewRequirement updateByThis) {
-        Preconditions.checkNotNull(updateByThis, "updateByThis shouldn't be null!");
-
-        switch (updateByThis.getSubType()) {
-            default:
-            case DEPOSITS:
-                Arrays.stream(EEducationType.values()).forEach(educationType -> {
-                    final Long currentAmount = humanResources.get(educationType);
-                    final long toAdd = updateByThis.getCrewAmountByType(educationType);
-                    if (toAdd != 0) {
-                        final long newValue = currentAmount != null ? currentAmount + toAdd : toAdd;
-                        humanResources.put(educationType, newValue);
-                    }
-                });
-                return true;
-            case COSTS:
-                if (!isReducingPopulationPossible(updateByThis)) {
-                    return false;
-                }
-                Arrays.stream(EEducationType.values()).forEach(educationType -> {
-                    final Long currentAmount = humanResources.get(educationType);
-                    final long toSubtract = updateByThis.getCrewAmountByType(educationType);
-                    if (toSubtract != 0) {
-                        final long newValue = currentAmount != null ? currentAmount - toSubtract : toSubtract;
-                        humanResources.put(educationType, newValue);
-                    }
-                });
-                return true;
-        }
-    }
-
-
     public void setAbsoluteCrewRequirement(@Nonnull final EEducationType educationType, final long amount) {
         Preconditions.checkNotNull(educationType, "educationType shouldn't be null!");
 
@@ -369,21 +337,25 @@ public class ResourceDeposit extends AbstractEntityKey {
         if (currentAmount == null) {
             setAbsoluteCrewRequirement(educationType, amount);
         } else {
-            setAbsoluteCrewRequirement(educationType, currentAmount + amount);
+            long sum = currentAmount + amount;
+            if (sum < 0) {
+                sum = 0;
+            }
+            setAbsoluteCrewRequirement(educationType, sum);
         }
     }
 
     /**
      * Updates the cloned crew amount with the given addition.
      *
-     * @param crewToAdd the new crew
+     * @param crew the new crew
      */
-    public void updateCrew(@Nonnull final CrewRequirement crewToAdd) {
-        Preconditions.checkNotNull(crewToAdd, "crewToAdd shouldn't be null!");
+    public void updateCrew(@Nonnull final CrewRequirement crew, @Nonnull final ECalculationType calculationType) {
+        Preconditions.checkNotNull(crew, "crew shouldn't be null!");
+        Preconditions.checkNotNull(calculationType, "calculationType must not be empty");
 
-        final ECalculationType calculationType = crewToAdd.getSubType().getCalculationType();
         Arrays.stream(EEducationType.values()).forEach(educationType -> {
-            final long amountToAdd = crewToAdd.getCrewAmountByType(educationType);
+            final long amountToAdd = crew.getCrewAmountByType(educationType);
             if (amountToAdd == 0) {
                 return;
             }
@@ -398,31 +370,6 @@ public class ResourceDeposit extends AbstractEntityKey {
 
         final Long amount = humanResources.get(educationType);
         return amount != null ? amount : 0;
-    }
-
-    /**
-     * Checks if it is possible to reduce this amount of people in that way.
-     *
-     * @param reducingBy the amount of people to check
-     * @return <code>true</code> if the reduction is possible, <code>false</code> otherwise
-     */
-    public boolean isReducingPopulationPossible(@Nonnull final CrewRequirement reducingBy) {
-        Preconditions.checkNotNull(reducingBy, "reducingBy shouldn't be null!");
-
-        return Arrays.stream(EEducationType.values()).noneMatch(educationType -> {
-            final Long currentAmount = humanResources.get(educationType);
-            final long reducingByThisAmount = reducingBy.getCrewAmountByType(educationType);
-            if (reducingByThisAmount == 0) {
-                // no update needed
-                return false;
-            }
-            if (currentAmount == null) {
-                // no update possible
-                return true;
-            }
-            // fine if false
-            return currentAmount < reducingByThisAmount;
-        });
     }
 
     @Override
@@ -486,5 +433,13 @@ public class ResourceDeposit extends AbstractEntityKey {
                     }
                 });
         Arrays.stream(EEducationType.values()).forEach(eEducationType -> humanResources.put(eEducationType, 0L));
+    }
+
+    public boolean isDemandPresent() {
+        Preconditions.checkArgument(DEMAND == subType, "I must be a represent a need!");
+
+        final boolean demandForHumans = humanResources.values().stream().anyMatch(amount -> amount > 0);
+        final boolean demandForResources = resources.values().stream().anyMatch(amount -> amount > 0);
+        return demandForHumans || demandForResources;
     }
 }

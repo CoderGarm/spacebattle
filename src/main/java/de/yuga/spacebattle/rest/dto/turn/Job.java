@@ -10,7 +10,6 @@ import de.yuga.spacebattle.rest.dto.constructables.buildings.Construction;
 import de.yuga.spacebattle.rest.dto.enums.EResourceType;
 import de.yuga.spacebattle.rest.dto.orbitals.Planet;
 import de.yuga.spacebattle.rest.dto.researches.Research;
-import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -60,6 +59,10 @@ public class Job {
     private boolean isShipyardJob;
 
     @JsonProperty
+    @Schema(required = true, description = "Is this a repair job.")
+    private boolean isRepairJob;
+
+    @JsonProperty
     @Schema(required = true, description = "Is this a research job.")
     private boolean isResearchJob;
 
@@ -80,18 +83,8 @@ public class Job {
 
     @Nullable
     @JsonProperty
-    @Schema(description = "If this is a shipyard job.")
-    private ShipClass shipYardTarget;
-
-    @Nullable
-    @JsonProperty
-    @Schema(description = "The targeted amount of ships in case of an shipyard job..")
-    private Integer amountShips;
-
-    @Nullable
-    @JsonProperty
     @Schema(description = "The fleet which will be repaired in case of an shipyard job.")
-    private Fleet repairTarget;
+    private Fleet fleet;
 
     public Job() {
     }
@@ -109,26 +102,19 @@ public class Job {
         final Constructable constructable = job.getConstructable();
         this.resourceType = new EResourceType(constructable.getResourceType());
         this.isBuildingJob = constructable.getBuilding() != null;
-        final de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass shipClass = constructable.getShipClass();
-        final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = constructable.getFleet();
-        this.isShipyardJob = shipClass != null || fleet != null;
-        this.isResearchJob = constructable.getResearch() != null;
         if (isBuildingJob) {
             this.buildingTarget = new Building(constructable.getBuilding(), languageCode);
         }
+        this.isResearchJob = constructable.getResearch() != null;
         if (isResearchJob) {
             this.researchTarget = new Research(constructable.getResearch(), languageCode);
         }
+        final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = constructable.getFleet();
+        this.isShipyardJob = fleet != null;
         if (isShipyardJob) {
-            if (shipClass != null) {
-                this.shipYardTarget = new ShipClass(shipClass, languageCode);
-            }
-            if (fleet != null) {
-                this.repairTarget = new Fleet(fleet, languageCode);
-            }
-
+            this.fleet = new Fleet(fleet, languageCode);
+            this.isRepairJob = job.getConstructable().isRepairJob();
         }
         this.targetLevel = constructable.getTargetLevel();
-        this.amountShips = constructable.getAmountShips();
     }
 }

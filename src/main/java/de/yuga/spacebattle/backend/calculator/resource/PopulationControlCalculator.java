@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.backend.calculator.resource;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
@@ -10,6 +10,8 @@ import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.ERefinementSequence;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
@@ -19,11 +21,19 @@ import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit.MATH_CONTEXT_INTEGER;
 import static de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit.MATH_CONTEXT_MORE_PRECISION;
+import static de.yuga.spacebattle.backend.enums.EEducationType.NONE;
+import static de.yuga.spacebattle.backend.enums.ERefinementSequence.*;
 
 /**
  * Runs the calculations for a growing and educating population.
  */
 public class PopulationControlCalculator {
+
+    @SuppressWarnings("unused")
+    private final static Logger LOGGER = LoggerFactory.getLogger(PopulationControlCalculator.class);
+
+    private static final List<ERefinementSequence> UNRESTRICTED_EDUCATION = List.of(EDUCATION_CIVIL_II, EDUCATION_CIVIL_I);
+    private static final List<ERefinementSequence> GUIDED_EDUCATION = List.of(EDUCATION_MILITARY_II, EDUCATION_MILITARY_I, EDUCATION_CIVIL_III);
 
     private PopulationControlCalculator() {
     }
@@ -45,11 +55,17 @@ public class PopulationControlCalculator {
 
         final Set<Construction> constructionsByResource = planet.getConstructionByResource(EResourceType.POPULATION);
         final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
-        final long sumOfPopulation = resourceDeposit.getCrewRequirement().getSumOfPopulation();
+        final long sumOfPopulationUtilization = planet.getResourceUtilization().getCrewRequirement().getSumOfPopulation();
+        final long sumOfPopulation = resourceDeposit.getCrewRequirement().getSumOfPopulation() + sumOfPopulationUtilization;
         // collecting all possible producing building
         final Map<EProductionCategory, List<Construction>> constructionMap = getConstructionsMappedByProductionCategory(constructionsByResource);
         final List<Construction> reproductive = constructionMap.computeIfAbsent(EProductionCategory.PRODUCE, k -> new ArrayList<>());
         final List<Construction> capacity = constructionMap.computeIfAbsent(EProductionCategory.CAPACITY, k -> new ArrayList<>());
+        final BigDecimal K = TickOutputCalculator.getTickOutput(capacity);
+        if (K.compareTo(BigDecimal.ZERO) == 0) {
+            // if no housing presents, no more growth
+            return 0;
+        }
         // for formula compare https://de.wikipedia.org/wiki/Fortpflanzungsstrategie
         // N equals no the total population (ignoring the non-reproductive population)
         // r equals to the maximal birth rate
@@ -63,16 +79,11 @@ public class PopulationControlCalculator {
             r = BigDecimal.valueOf(0.9);
         }
 
-        final BigDecimal K = TickOutputCalculator.getTickOutput(capacity);
         if (N.compareTo(BigDecimal.ZERO) == 0) {
             // no bum no sum
             return 0;
         }
         final BigDecimal increasingFactorByCurrentPopulation = r.multiply(N);
-        if (K.compareTo(BigDecimal.ZERO) == 0) {
-            // if no housing presents, a lot of people must die
-            return increasingFactorByCurrentPopulation.abs().negate().multiply(N, MATH_CONTEXT_INTEGER).longValue();
-        }
         final BigDecimal capacityLimitFactor = BigDecimal.ONE.subtract(N.divide(K, MATH_CONTEXT_MORE_PRECISION));
         // rounding down to long
         return increasingFactorByCurrentPopulation.multiply(capacityLimitFactor, MATH_CONTEXT_INTEGER).longValue();
@@ -111,25 +122,8 @@ public class PopulationControlCalculator {
 
         final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
         final long newbornChildren = getTickOutputForPopulation(planet);
-        final long currentNewbornChildren = resourceDeposit.getCrewAmountByType(EEducationType.NONE);
-        final long absoluteAmountOfDyingPeople = currentNewbornChildren + newbornChildren;
-        if (absoluteAmountOfDyingPeople <= 0) {
-            // if capacity is exceeded some newborn will die, sadly but true
-            resourceDeposit.setAbsolutePopulation(EEducationType.NONE, 0);
-            final List<EEducationType> educationTypes = new ArrayList<>(Arrays.asList(EEducationType.values()));
-            educationTypes.remove(EEducationType.NONE);
-            final long dyingPeoplePerType = Math.abs(absoluteAmountOfDyingPeople / educationTypes.size());
-            educationTypes.forEach(educationType -> {
-                // as well as the other people
-                final long crewAmountByType = resourceDeposit.getCrewAmountByType(educationType);
-                if (crewAmountByType - dyingPeoplePerType <= 0) {
-                    resourceDeposit.setAbsolutePopulation(educationType, 0);
-                } else {
-                    resourceDeposit.updateCrewRequirement(educationType, -1 * dyingPeoplePerType);
-                }
-            });
-        } else {
-            resourceDeposit.updateCrewRequirement(EEducationType.NONE, newbornChildren);
+        if (newbornChildren > 0) {
+            resourceDeposit.updateCrewRequirement(NONE, newbornChildren);
         }
     }
 
@@ -142,33 +136,116 @@ public class PopulationControlCalculator {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
 
         final Set<Construction> constructionsByResource = planet.getConstructionByResource(EResourceType.POPULATION);
-        if (constructionsByResource.isEmpty()) {
-            // nothing to do
-            return;
+        final Map<ERefinementSequence, Long> educationCapacity = constructionsByResource.stream()
+                .filter(c -> c.getBuilding().getProductionTarget() == EResourceType.POPULATION)
+                .filter(c -> Objects.nonNull(c.getBuilding().getProductionType().getRefinementSequence()))
+                .collect(Collectors.groupingBy(c -> c.getBuilding().getProductionType().getRefinementSequence(),
+                        Collectors.mapping(c -> TickOutputCalculator.getTickOutput(c).longValue(), Collectors.reducing(0L, Long::sum))));
+
+
+        final List<EducationAmountDTO> education = new ArrayList<>();
+        if (!planet.isDemandPresent()) {
+            doUnguidedEducation(planet, education, educationCapacity);
+        } else {
+            doGuidedEducation(planet, education, educationCapacity);
         }
-        // collecting all possible producing building
-        final Map<EProductionCategory, List<Construction>> constructionMap = getConstructionsMappedByProductionCategory(constructionsByResource);
-        final List<Construction> constructionsRefinement = constructionMap.computeIfAbsent(EProductionCategory.REFINEMENT, k -> new ArrayList<>());
+        education.stream().filter(Objects::nonNull).forEach(dto -> PopulationControlCalculator.educate(planet, dto));
+    }
+
+    /**
+     * Created an education plan which have a look at the current demand of education levels.
+     */
+    @VisibleForTesting
+    static void doGuidedEducation(@Nonnull final Planet planet,
+                                  @Nonnull final List<EducationAmountDTO> education,
+                                  @Nonnull final Map<ERefinementSequence, Long> educationCapacity) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(education, "education must not be empty");
+        Preconditions.checkNotNull(educationCapacity, "educationCapacity must not be empty");
+
+        final ResourceDeposit deposit = new ResourceDeposit(planet.getResourceDeposit());
+        final ResourceDeposit demand = new ResourceDeposit(planet.getResourceDemand());
+        UNRESTRICTED_EDUCATION.stream().filter(educationCapacity::containsKey).forEach(r -> setUnrestrictedEducation(education, deposit, demand, r, educationCapacity));
+        GUIDED_EDUCATION.stream().filter(educationCapacity::containsKey).forEach(r -> calculateDemandWeightedEducation(education, deposit, demand, r, educationCapacity));
+    }
+
+    /**
+     * Created an education plan which educated the most out of the possible.<br>
+     * The result will not pay attention to the current demand.
+     */
+    @VisibleForTesting
+    static void doUnguidedEducation(@Nonnull final Planet planet,
+                                    @Nonnull final List<EducationAmountDTO> education,
+                                    @Nonnull final Map<ERefinementSequence, Long> educationCapacity) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(education, "education must not be empty");
+        Preconditions.checkNotNull(educationCapacity, "educationCapacity must not be empty");
+
         final List<EducationAmountDTO> educationAmountDTOs = new ArrayList<>();
-        for (final Construction c : constructionsRefinement) {
-            final ProductionType productionType = c.getBuilding().getProductionType();
-            final ERefinementSequence refinementSequence = productionType.getRefinementSequence();
-            if (refinementSequence == null) {
-                continue;
+        for (final ERefinementSequence refinementSequence : values()) {
+            final long cap = educationCapacity.getOrDefault(refinementSequence, 0L);
+            if (cap > 0) {
+                final long guysPresent = planet.getResourceDeposit().getCrewAmountByType(refinementSequence.getEduct());
+                final long pupils = Long.min(cap, guysPresent);
+                educationAmountDTOs.add(new EducationAmountDTO(pupils, refinementSequence));
             }
-            final EEducationType educt = refinementSequence.getEduct();
-            final EEducationType product = refinementSequence.getProduct();
-            final BigDecimal educationCapacity = TickOutputCalculator.getTickOutput(c);
-            educationAmountDTOs.add(new EducationAmountDTO(educationCapacity.longValue(), educt, product));
         }
-        final List<EducationAmountDTO> balancedEducation = balanceEducation(planet, educationAmountDTOs);
-        balancedEducation.forEach(dto -> PopulationControlCalculator.educate(planet, dto));
+        education.addAll(balanceEducation(planet, educationAmountDTOs));
+    }
+
+    private static void setUnrestrictedEducation(@Nonnull final List<EducationAmountDTO> education,
+                                                 @Nonnull final ResourceDeposit deposit,
+                                                 @Nonnull final ResourceDeposit demand,
+                                                 @Nonnull final ERefinementSequence refinementSequence,
+                                                 @Nonnull final Map<ERefinementSequence, Long> educationCapacity) {
+        Preconditions.checkNotNull(education, "education must not be empty");
+        Preconditions.checkNotNull(deposit, "deposit must not be empty");
+        Preconditions.checkNotNull(demand, "demand must not be empty");
+        Preconditions.checkNotNull(refinementSequence, "refinementSequence must not be empty");
+        Preconditions.checkNotNull(educationCapacity, "educationCapacity must not be empty");
+
+        long pupils = deposit.getCrewAmountByType(refinementSequence.getEduct());
+        final long cap = educationCapacity.getOrDefault(refinementSequence, 0L);
+        pupils = Long.min(pupils, cap);
+        education.add(new EducationAmountDTO(pupils, refinementSequence));
+        deposit.updateCrewRequirement(refinementSequence.getEduct(), -pupils);
+        demand.updateCrewRequirement(refinementSequence.getProduct(), -pupils);
+    }
+
+    private static void calculateDemandWeightedEducation(@Nonnull final List<EducationAmountDTO> education,
+                                                         @Nonnull final ResourceDeposit deposit,
+                                                         @Nonnull final ResourceDeposit demand,
+                                                         @Nonnull final ERefinementSequence refinementSequence,
+                                                         @Nonnull final Map<ERefinementSequence, Long> educationCapacity) {
+        Preconditions.checkNotNull(education, "education must not be empty");
+        Preconditions.checkNotNull(deposit, "deposit must not be empty");
+        Preconditions.checkNotNull(demand, "demand must not be empty");
+        Preconditions.checkNotNull(refinementSequence, "refinementSequence must not be empty");
+        Preconditions.checkNotNull(educationCapacity, "educationCapacity must not be empty");
+
+        final long productPresent = deposit.getCrewAmountByType(refinementSequence.getProduct());
+        final long productNeeded = demand.getCrewAmountByType(refinementSequence.getProduct());
+
+        final long eductPresent = deposit.getCrewAmountByType(refinementSequence.getEduct());
+        final long eductNeeded = demand.getCrewAmountByType(refinementSequence.getEduct());
+
+        final long cap = educationCapacity.getOrDefault(refinementSequence, 0L);
+        if (productNeeded > productPresent) {
+            final long need = productNeeded - productPresent;
+            final long free = eductPresent - eductNeeded;
+            long educated = Math.min(need, free);
+            educated = Math.min(educated, cap);
+
+            deposit.updateCrewRequirement(refinementSequence.getEduct(), -educated);
+            demand.updateCrewRequirement(refinementSequence.getProduct(), -educated);
+            education.add(new EducationAmountDTO(educated, refinementSequence));
+        }
     }
 
     /**
      * Balances the needs of the planet to reach two goals:
      * 1st: educate every needed group
-     * 2nd: leave over some of the lower education level
+     * 2nd: leave over some lower education level
      *
      * @param educationAmountDTOs the parameters
      * @return the balanced DTOs
@@ -179,12 +256,20 @@ public class PopulationControlCalculator {
 
         final List<EducationAmountDTO> result = new ArrayList<>();
         final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
+
         final Map<EEducationType, Set<EducationAmountDTO>> educationAmountByEduct = educationAmountDTOs.stream()
                 .collect(Collectors.groupingBy(EducationAmountDTO::getEduct, Collectors.mapping(e -> e, Collectors.toSet())));
 
         final Map<EEducationType, BigDecimal> modifierMap = new HashMap<>();
         for (final EEducationType educt : educationAmountByEduct.keySet()) {
-            final long availablePeople = resourceDeposit.getCrewAmountByType(educt);
+            long availablePeople = resourceDeposit.getCrewAmountByType(educt);
+            if (availablePeople == 0) {
+                continue;
+            }
+            // reduce the available amount to left 20 % of population in old education level
+            final BigDecimal available = new BigDecimal(availablePeople);
+            availablePeople = available.subtract(available.multiply(BigDecimal.valueOf(0.2), MATH_CONTEXT_MORE_PRECISION)).longValue();
+
             final Set<EducationAmountDTO> hasSameEduct = educationAmountByEduct.get(educt);
             final long completeNeed = hasSameEduct.stream().map(EducationAmountDTO::getHowManyPupils).reduce(0L, Long::sum);
             if (completeNeed < availablePeople) {
@@ -203,8 +288,8 @@ public class PopulationControlCalculator {
         // add modified results
         for (final EEducationType educt : modifierMap.keySet()) {
             final BigDecimal modifier = modifierMap.get(educt);
-            educationAmountByEduct.get(educt).forEach(e -> e.reduceAmountBy(modifier));
-            result.addAll(educationAmountByEduct.get(educt));
+            final List<EducationAmountDTO> collect = educationAmountByEduct.get(educt).stream().map(e -> e.reduceAmountBy(modifier)).collect(Collectors.toList());
+            result.addAll(collect);
         }
         return result;
     }
@@ -214,18 +299,19 @@ public class PopulationControlCalculator {
      *
      * @param educationAmountDTO the education parameters
      */
-    private static void educate(@Nonnull final Planet planet, @Nonnull final EducationAmountDTO educationAmountDTO) {
+    @VisibleForTesting
+    static void educate(@Nonnull final Planet planet, @Nonnull final EducationAmountDTO educationAmountDTO) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkNotNull(educationAmountDTO, "educationAmountDTO shouldn't be null!");
 
         final EEducationType from = educationAmountDTO.getEduct();
         final EEducationType to = educationAmountDTO.getProduct();
-        final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
+        final ResourceDeposit deposit = planet.getResourceDeposit();
         // just to check if the calculation went wrong
-        final long sumOfPopulationBeforeEducation = resourceDeposit.getCrewRequirement().getSumOfPopulation();
+        final long sumOfPopulationBeforeEducation = deposit.getCrewRequirement().getSumOfPopulation();
         final long toUpgrade = educationAmountDTO.getHowManyPupils();
-        final long fromAmountBefore = resourceDeposit.getCrewAmountByType(from);
-        final long toAmountBefore = resourceDeposit.getCrewAmountByType(to);
+        final long fromAmountBefore = deposit.getCrewAmountByType(from);
+        final long toAmountBefore = deposit.getCrewAmountByType(to);
         final long newToAmount;
         final long newFromAmount;
         if (fromAmountBefore < toUpgrade) {
@@ -236,9 +322,9 @@ public class PopulationControlCalculator {
             newToAmount = toUpgrade + toAmountBefore;
             newFromAmount = fromAmountBefore - toUpgrade;
         }
-        resourceDeposit.setAbsolutePopulation(to, newToAmount);
-        resourceDeposit.setAbsolutePopulation(from, newFromAmount);
-        if (resourceDeposit.getCrewRequirement().getSumOfPopulation() != sumOfPopulationBeforeEducation) {
+        deposit.setAbsolutePopulation(to, newToAmount);
+        deposit.setAbsolutePopulation(from, newFromAmount);
+        if (deposit.getCrewRequirement().getSumOfPopulation() != sumOfPopulationBeforeEducation) {
             throw new NotifyWebUserException("Oh, this should not happen while educating people.");
         }
     }

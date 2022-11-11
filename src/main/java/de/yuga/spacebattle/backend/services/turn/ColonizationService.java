@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.services.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
+import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.PopulationControlCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.TickOutputCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
@@ -16,6 +17,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.ECalculationType;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.EResourceType;
@@ -63,12 +65,6 @@ public class ColonizationService {
     @Nonnull
     private final BuildingService buildingService;
 
-    /**
-     * Holds the colonization which is designated to be displayed to the user.
-     */
-    @Nullable
-    private Colonization colonizationToDisplay;
-
     public ColonizationService(@Nonnull final ColonizationRepository repository,
                                @Nonnull final UserService userService,
                                @Nonnull final PlanetService planetService,
@@ -85,15 +81,6 @@ public class ColonizationService {
         this.planetService = planetService;
         this.starSystemService = starSystemService;
         this.buildingService = buildingService;
-    }
-
-    @Nullable
-    public Colonization getColonizationToDisplay() {
-        return colonizationToDisplay;
-    }
-
-    public void setColonizationToDisplay(@Nullable final Colonization colonizationToDisplay) {
-        this.colonizationToDisplay = colonizationToDisplay;
     }
 
     @Nonnull
@@ -156,7 +143,7 @@ public class ColonizationService {
         }
 
         final CrewRequirement crewRequirement = colonizationCosts.getCrewRequirement();
-        debitorDeposit.pay(colonizationCosts);
+        debitorDeposit.updateCrew(crewRequirement, ECalculationType.SUBTRACT);
 
         final Colonization colonization = new Colonization(user, toColonize, crewRequirement, 10);
         save(colonization);
@@ -180,8 +167,6 @@ public class ColonizationService {
 
         final User owner = userService.findWithKnownStarSystems(colonization.getUser());
         final Planet planet = colonization.getTarget();
-        planet.getMiningFactors().equalize();
-        planet.getResourceDeposit().equalize();
         assert owner != null : "When this happens, the end is near.";
         planet.setOwner(owner);
         final List<Planet> allColonizedBy = planetService.findAllColonizedBy(owner);
@@ -191,7 +176,7 @@ public class ColonizationService {
         final ResourceDeposit creditorDeposit = planet.getResourceDeposit();
         final CrewRequirement requiredCrew = colonization.getCosts().getCrewRequirement();
         // set crew from the ship to the planet
-        creditorDeposit.updatePopulation(requiredCrew);
+        creditorDeposit.updateCrew(requiredCrew, ECalculationType.ADD);
 
         final double miningFactor = planet.getMiningFactors().getMiningFactorByType(EResourceType.POPULATION);
 
@@ -206,8 +191,12 @@ public class ColonizationService {
             } else {
                 level = 1;
             }
-            final Construction constructedConstructionYard = new Construction(planet, building, level);
-            planet.getConstructions().add(constructedConstructionYard);
+            final Construction construction = new Construction(planet, building, level);
+
+            final ResourceDeposit costsForLevel = JobCostsCalculator.getCostsForLevel(building.getCosts(), level);
+            planet.getResourceDemand().updateCrew(costsForLevel.getCrewRequirement(), ECalculationType.ADD);
+
+            planet.getConstructions().add(construction);
         });
         owner.addKnownStarSystems(planet.getSystem());
         userService.save(owner);

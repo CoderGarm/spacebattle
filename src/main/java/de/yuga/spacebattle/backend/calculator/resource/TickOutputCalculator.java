@@ -45,7 +45,7 @@ public class TickOutputCalculator {
         final Building building = construction.getBuilding();
         final BigDecimal baseValue = BigDecimal.valueOf(building.getBaseValue());
         final BigDecimal increasingFactorPerLevel = building.getIncreasingFactorPerLevel();
-        final int constructionLevel = construction.getLevel();
+        final int constructionLevel = construction.getOperationalLevel();
         double miningFactor = construction.getPlanet().getMiningFactors().getMiningFactorByType(building.getProductionTarget());
         if (EResourceType.POPULATION == building.getProductionTarget() && EProductionCategory.CAPACITY != building.getProductionType().getProductionCategory()) {
             miningFactor = 1;

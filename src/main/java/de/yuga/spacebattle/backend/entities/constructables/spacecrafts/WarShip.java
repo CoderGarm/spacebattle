@@ -2,7 +2,7 @@ package de.yuga.spacebattle.backend.entities.constructables.spacecrafts;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.backend.entities.misc.Deletable;
+import de.yuga.spacebattle.backend.entities.misc.Operationable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
@@ -17,7 +17,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "warShip")
 @AttributeOverride(name = "id", column = @Column(name = "idWarShip"))
-public class WarShip extends Deletable {
+public class WarShip extends Operationable {
 
     @Nonnull
     @NotNull

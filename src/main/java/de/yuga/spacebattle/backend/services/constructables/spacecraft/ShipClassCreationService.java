@@ -300,7 +300,7 @@ public class ShipClassCreationService {
 
         final Map<Integer, ResourceDeposit> resourceDepositMap = shipClassService.find(amountsByIdShipClasses.keySet())
                 .stream()
-                .collect(Collectors.toMap(ShipClass::getId, ShipClass::getCostsOverall));
+                .collect(Collectors.toMap(ShipClass::getId, ShipClass::getCosts));
 
         final ResourceDeposit jobCosts = new ResourceDeposit(EDepositType.COSTS);
         resourceDepositMap.forEach((idShipClass, costs) -> {
@@ -329,7 +329,7 @@ public class ShipClassCreationService {
         Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
 
         final ShipClass entity = mapShipClassToEntity(shipClass, idUser);
-        return entity.getCostsOverall();
+        return entity.getCosts();
     }
 
     @Nonnull

@@ -2,10 +2,7 @@ package de.yuga.spacebattle.backend.calculator.resource;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.enums.EDepositType;
-import de.yuga.spacebattle.backend.enums.EResourceDemand;
-import de.yuga.spacebattle.backend.enums.EResourceType;
-import de.yuga.spacebattle.backend.enums.ETechLevel;
+import de.yuga.spacebattle.backend.enums.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -60,6 +57,17 @@ public class ResourceDepositInitializerCalculator {
             // stay zero but to play games at start
             long rand = ThreadLocalRandom.current().nextLong(1000, 5100);
             resourceDeposit.setAbsoluteResourceValue(type, rand);
+        }
+        return resourceDeposit;
+    }
+
+    public static ResourceDeposit getInfiniteDeposit() {
+        final ResourceDeposit resourceDeposit = new ResourceDeposit(EDepositType.DEPOSITS);
+        for (final EResourceType type : EResourceType.valuesWithoutPopulation()) {
+            resourceDeposit.setAbsoluteResourceValue(type, Long.MAX_VALUE);
+        }
+        for (final EEducationType type : EEducationType.values()) {
+            resourceDeposit.setAbsoluteCrewRequirement(type, Long.MAX_VALUE);
         }
         return resourceDeposit;
     }

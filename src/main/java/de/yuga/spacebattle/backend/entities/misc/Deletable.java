@@ -18,8 +18,12 @@ public class Deletable extends AbstractEntityKey {
     public Deletable() {
     }
 
-    public void setDeleted() {
+    public void delete() {
         isDeleted = true;
+    }
+
+    public void animate() {
+        isDeleted = false;
     }
 
     public boolean isDeleted() {

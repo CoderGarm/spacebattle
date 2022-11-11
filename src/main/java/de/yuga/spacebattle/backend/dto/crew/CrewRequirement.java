@@ -40,14 +40,6 @@ public class CrewRequirement {
     }
 
     /**
-     * This is used for copy-constructor in case of an colonization.<br>
-     * It will set the subType to deposit because
-     */
-    public CrewRequirement toggleToDepositMode() {
-        return new CrewRequirement(crewRequirement, EDepositType.DEPOSITS);
-    }
-
-    /**
      * Returns the sum of all {@link EEducationType}s.
      *
      * @return the sum of all people
