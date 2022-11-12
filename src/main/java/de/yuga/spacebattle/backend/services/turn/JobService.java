@@ -347,7 +347,7 @@ public class JobService {
     }
 
     public boolean isJobRunningFor(final int idUser, final int idFleet) {
-        return jobRepository.isJobRunningFor(idUser, idFleet);
+        return jobRepository.isActiveJobRunningFor(idUser, idFleet);
     }
 
     public List<Job> findTodayFinishedJobsForUser(final int idUser) {
