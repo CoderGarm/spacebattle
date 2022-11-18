@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services.misc;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.misc.DBPatch;
 import de.yuga.spacebattle.backend.repositories.misc.DBPatchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,12 @@ public class DBPatchService {
      */
     public boolean checkDBPatches() {
         final List<String> dbPatchVersions = fetchDBPatchVersions();
-        return dbPatchRepository.isEveryPatchPresent(dbPatchVersions);
+        final List<DBPatch> appliedPatches = Objects.requireNonNullElse(dbPatchRepository.findAll(), new ArrayList<>());
+        final Set<String> versionStrings = appliedPatches.stream()
+                .map(DBPatch::getVersion)
+                .collect(Collectors.toSet());
+        dbPatchVersions.removeAll(versionStrings);
+        return dbPatchVersions.isEmpty();
     }
 
 

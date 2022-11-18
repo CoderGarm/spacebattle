@@ -110,21 +110,6 @@ public class AdminApi extends BaseApi {
         return ResponseEntity.ok(new Tick(now));
     }
 
-    @GetMapping(value = "/languages")
-    @Operation(summary = "Get the current tick.", operationId = "getPossibleLanguages",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = String.class)))
-                    ),
-                    @ApiResponse(responseCode = "400", description = "an error occurred",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
-            }
-    )
-    public ResponseEntity<?> getPossibleLanguages() {
-        return ResponseEntity.ok(Translation.LOCALES.stream().map(Locale::getLanguage).collect(Collectors.toSet()));
-    }
-
     @GetMapping(value = "/translations")
     @Operation(summary = "Get the current tick.", operationId = "getTranslations",
             responses = {

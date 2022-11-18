@@ -1,10 +1,13 @@
 package de.yuga.spacebattle.rest.api.turn.resources;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.EDepositType;
+import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassCreationService;
+import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
@@ -56,6 +59,7 @@ public class ResourcesApi extends BaseApi {
     private static final String SHIPYARD_ORDER_COSTS_ENDPOINT = "costsShipyard";
     private static final String SHIP_CLASS_COSTS_ENDPOINT = "costsShipClass";
     private static final String SHIP_CLASS_CAPS_ENDPOINT = "capsShipClass";
+    private static final String FLEET_COSTS_ENDPOINT = "costsFleet";
 
     @Nonnull
     private final PlanetService planetService;
@@ -66,17 +70,23 @@ public class ResourcesApi extends BaseApi {
     @Nonnull
     private final ShipClassCreationService shipClassCreationService;
 
+    @Nonnull
+    private final ShipClassService shipClassService;
+
+    @Nonnull
+    private final FleetService fleetService;
+
     @Autowired
     public ResourcesApi(@Nonnull final PlanetService planetService,
                         @Nonnull final ConstructionService constructionService,
-                        @Nonnull final ShipClassCreationService shipClassCreationService) {
-        Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
-        Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
-        Preconditions.checkNotNull(shipClassCreationService, "shipClassCreationService shouldn't be null!");
-
-        this.planetService = planetService;
-        this.constructionService = constructionService;
-        this.shipClassCreationService = shipClassCreationService;
+                        @Nonnull final ShipClassCreationService shipClassCreationService,
+                        @Nonnull final ShipClassService shipClassService,
+                        @Nonnull final FleetService fleetService) {
+        this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
+        this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
+        this.shipClassCreationService = Preconditions.checkNotNull(shipClassCreationService, "shipClassCreationService shouldn't be null!");
+        this.shipClassService = Preconditions.checkNotNull(shipClassService, "shipClassService must not be empty");
+        this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
     }
 
     @GetMapping(value = RESOURCE_TYPES_ENDPOINT)
@@ -306,6 +316,46 @@ public class ResourcesApi extends BaseApi {
 
         final int idUser = getIdUser();
         return ResponseEntity.ok(new ResourceDeposit(shipClassCreationService.getCosts(shipClass, idUser)));
+    }
+
+    @GetMapping(value = SHIP_CLASS_COSTS_ENDPOINT + "/{idShipClass}")
+    @Operation(summary = "Get the costs of the given shipyard order.", operationId = "getCostsForShipClass",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceDeposit.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getCostsForShipClass(@PathVariable("idShipClass") final int idShipClass) {
+
+        final int idUser = getIdUser();
+        final de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass shipClass = shipClassService.find(idShipClass);
+        if (shipClass == null || shipClass.getOwner().getId() != idUser) {
+            PreconditionWebHelper.checkNotNull(shipClass, "shipClass must not be empty");
+        }
+        return ResponseEntity.ok(new ResourceDeposit(shipClass.getCosts()));
+    }
+
+    @GetMapping(value = FLEET_COSTS_ENDPOINT + "/{idFleet}")
+    @Operation(summary = "Get the costs of the given shipyard order.", operationId = "getCostsForFleet",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceDeposit.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getCostsForFleet(@PathVariable("idFleet") final int idFleet) {
+
+        final int idUser = getIdUser();
+        final Fleet fleet = fleetService.findById(idFleet);
+        if (fleet == null || fleet.getOwner().getId() != idUser) {
+            PreconditionWebHelper.checkNotNull(fleet, "fleet must not be empty");
+        }
+        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit costs = new de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit(EDepositType.COSTS);
+        fleet.getAliveShips().forEach(warShip -> costs.add(warShip.getShipClass().getCosts()));
+        return ResponseEntity.ok(new ResourceDeposit(costs));
     }
 
     @PostMapping(value = SHIP_CLASS_CAPS_ENDPOINT)

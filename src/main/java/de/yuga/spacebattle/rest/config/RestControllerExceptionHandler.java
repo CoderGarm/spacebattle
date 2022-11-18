@@ -36,7 +36,7 @@ public class RestControllerExceptionHandler {
         final String stacktrace = ExceptionUtils.getStackTrace(ex);
         final UUID uuid = UUID.randomUUID();
         LOGGER.warn(uuid + "\n" + stacktrace);
-        return new ResponseEntity<>(new FrontendError("Something went wrong. Send a mail an mention '" + uuid + "'."), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new FrontendError("Something went wrong. Send a mail and mention '" + uuid + "'."), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(AccessDeniedException.class)

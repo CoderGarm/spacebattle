@@ -31,9 +31,9 @@ import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 
+@RestController
 @Tag(name = "UserApi")
 @RolesAllowed("USER")
-@RestController
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + UserApi.ENDPOINT + "/")
 public class UserApi {
 
@@ -67,25 +67,6 @@ public class UserApi {
     )
     public ResponseEntity<?> findAll() {
         return ResponseEntity.ok(service.findAll().stream().map(UserJson::new).collect(Collectors.toList()));
-    }
-
-    @GetMapping(value = "{idUser}")
-    @Operation(summary = "Get a single user by it's idUser", operationId = "getSingleUser",
-            description = "Returns a user which is  registered in the system",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserJson.class))),
-                    @ApiResponse(responseCode = "400", description = "an error occurred",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
-            }
-    )
-    public ResponseEntity<?> findById(@PathVariable("idUser") final int idUser) {
-
-        final User foundUser = service.find(idUser);
-        if (foundUser == null) {
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.ok(new UserJson(foundUser));
     }
 
     @PutMapping

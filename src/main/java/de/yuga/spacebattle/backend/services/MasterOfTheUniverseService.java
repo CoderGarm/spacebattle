@@ -136,6 +136,7 @@ public class MasterOfTheUniverseService {
     private final static Map<EEducationType, Long> XXXL_CREW = Map.of(
             EEducationType.ENLISTED, 500L,
             EEducationType.OFFICER, 180L);
+    public static final String FLASHKID = "Flashkid";
 
     @Nonnull
     private final TickService tickService;
@@ -233,7 +234,16 @@ public class MasterOfTheUniverseService {
     @PostConstruct
     @SuppressWarnings("ConstantConditions")
     public void transform() {
-        // todo remove after transform is done
+        LOGGER.info("---------------------------- validating the universe -----------------------------");
+        //noinspection OptionalGetWithoutIsPresent
+        final User flashkid = userService.findByUsername(FLASHKID).get().getUser();
+        final boolean initiationNeeded = flashkid.getAlliance() == null;
+        if (initiationNeeded) {
+            LOGGER.info("---------------------------- creating the universe ----------------------------");
+            createInitialDataPayload();
+            LOGGER.info("---------------------------- done creating ------------------------------------");
+        }
+        LOGGER.info("---------------------------- done validating --------------------------------------");
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
         final boolean transformationNeeded = constructionService.findAll().stream().noneMatch(c -> c.getOperationalLevel() > 0);
         if (transformationNeeded) {
@@ -248,7 +258,7 @@ public class MasterOfTheUniverseService {
                 planetService.save(planet);
             });
 
-            LOGGER.info("---------------------------- done transforming ----------------------------");
+            LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
         }
@@ -288,7 +298,8 @@ public class MasterOfTheUniverseService {
         Building militaryAcademy = building("Military Academy", "for the guys which are silent", 50, 10, EEducationType.OFFICER, ETechLevel.TECH_I, MILITARY_II_PT, livingStuff);
         LOGGER.info("Buildings created");
 
-        final User flashkid = userService.createUser("Flashkid", "12457aA!", "mail", EWebUserRole.ADMIN, EGameUserRole.ALLIANCE_ADMIN);
+        //noinspection OptionalGetWithoutIsPresent
+        final User flashkid = userService.findByUsername(FLASHKID).get().getUser();
         final User pirate = userService.createUser(DEFEATED_OPPONENT, "12457aA!", "mail3", EWebUserRole.USER);
         LOGGER.info("Users created");
 

@@ -43,6 +43,14 @@ public class WarShip {
     @Schema(required = true, description = "The ship class which this ship is a type of.")
     private WarshipHealthState warshipHealthState;
 
+    @JsonProperty
+    @Schema(required = true, description = "If the ship is marked as wrecked.")
+    private boolean isDeleted;
+
+    @JsonProperty
+    @Schema(required = true, description = "If the ship is marked as active.")
+    private boolean isOperational;
+
     public WarShip() {
     }
 
@@ -59,6 +67,8 @@ public class WarShip {
         this.idFleet = warShip.getFleet().getId();
         this.shipClass = new de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass(warShip.getShipClass(), languageCode);
         this.warshipHealthState = new WarshipHealthState(healthState);
+        this.isDeleted = warShip.isDeleted();
+        this.isOperational = warShip.isOperational();
     }
 
     public WarShip(@Nonnull final WarshipHealthStateSnapshot stateSnapshot, @Nonnull final String languageCode) {
@@ -70,5 +80,7 @@ public class WarShip {
         this.idFleet = warShip.getFleet().getId();
         this.shipClass = new de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass(warShip.getShipClass(), languageCode);
         this.warshipHealthState = new WarshipHealthState(stateSnapshot);
+        this.isDeleted = warShip.isDeleted();
+        this.isOperational = warShip.isOperational();
     }
 }

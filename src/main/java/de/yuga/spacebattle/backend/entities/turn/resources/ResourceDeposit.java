@@ -325,6 +325,10 @@ public class ResourceDeposit extends AbstractEntityKey {
         Preconditions.checkNotNull(educationType, "educationType shouldn't be null!");
 
         if (amount < 0) {
+            if (subType == DEMAND) {
+                // if there is no demand to reduce, there just is nothing to reduce
+                return;
+            }
             throw new NotifyWebUserException("Not below zero, as I told you!");
         }
         humanResources.put(educationType, amount);
