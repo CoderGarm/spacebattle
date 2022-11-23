@@ -14,10 +14,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -70,14 +67,14 @@ public class ConstructionService {
     }
 
     /**
-     * Returns every building which could be build or upgraded with ne next level.
+     * Returns every building which could be build or upgraded with the next level.
      *
      * @param planet            the planet
-     * @param researchesForUser the researches of the logged in user
+     * @param researchesForUser the researches of the logged-in user
      * @return the list of possible constructions
      */
     @Nonnull
-    public Map<Building, Integer> getUpgradeableConstructions(@Nonnull final Planet planet, @Nonnull final Set<ResearchLevel> researchesForUser) {
+    public Set<Construction> getUpgradeableConstructions(@Nonnull final Planet planet, @Nonnull final Set<ResearchLevel> researchesForUser) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkNotNull(researchesForUser, "researchesForUser shouldn't be null!");
 
@@ -92,10 +89,14 @@ public class ConstructionService {
         final Map<Building, Construction> constructionByBuilding = constructions.stream()
                 .collect(Collectors.toMap(Construction::getBuilding, Function.identity()));
 
-        return unlockedBuildings.stream()
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        building -> constructionByBuilding.containsKey(building) ? constructionByBuilding.get(building).getOperationalLevel() + 1 : 1));
+        final HashSet<Construction> result = new HashSet<>(constructionByBuilding.values());
+        unlockedBuildings.forEach(building -> {
+            if (!constructionByBuilding.containsKey(building)) {
+                result.add(new Construction(planet, building, 0));
+            }
+        });
+
+        return result;
     }
 
     /**

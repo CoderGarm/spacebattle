@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.rest.api.orbitals;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.buildings.Building;
+import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.ResearchLevel;
 import de.yuga.spacebattle.backend.services.account.UserService;
@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -93,11 +92,10 @@ public class ConstructionApi extends BaseApi {
             throw new NotifyWebUserException("This planet is not colonized");
         }
         final Set<ResearchLevel> researchesForUser = researchService.getResearchesForUser(planet.getOwner().getId());
-        final Map<Building, Integer> upgradeableConstructions = constructionService.getUpgradeableConstructions(planet, researchesForUser);
+        final Set<Construction> upgradeableConstructions = constructionService.getUpgradeableConstructions(planet, researchesForUser);
         final Set<de.yuga.spacebattle.rest.dto.constructables.buildings.Construction> possibleConstructions = upgradeableConstructions
-                .entrySet()
                 .stream()
-                .map(e -> new de.yuga.spacebattle.rest.dto.constructables.buildings.Construction(e.getKey(), e.getValue(), getPreferredLanguage()))
+                .map(e -> new de.yuga.spacebattle.rest.dto.constructables.buildings.Construction(e, getPreferredLanguage()))
                 .collect(Collectors.toSet());
 
         return ResponseEntity.ok(possibleConstructions);

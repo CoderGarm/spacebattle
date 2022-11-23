@@ -42,9 +42,8 @@ public class JobCostsCalculator {
                                                    final int targetLevel) {
         Preconditions.checkNotNull(costs, "costs shouldn't be null!");
 
-        final ResourceDeposit resources = new ResourceDeposit();
+        final ResourceDeposit resources = new ResourceDeposit(EDepositType.COSTS);
         final CrewRequirement crewRequirement = costs.getCrewRequirement();
-        resources.setSubType(EDepositType.COSTS);
         for (final EResourceType resourceType : EResourceType.valuesWithoutPopulation()) {
             final long resourceAmountByType = costs.getResourceAmountByType(resourceType);
             final BigDecimal multiply;
@@ -96,7 +95,7 @@ public class JobCostsCalculator {
         if (isRepairJob) {
             return calculateRepairJobCost(fleet);
         }
-        final ResourceDeposit costs = new ResourceDeposit();
+        final ResourceDeposit costs = new ResourceDeposit(EDepositType.COSTS);
         fleet.getAliveShips().stream().map(WarShip::getShipClass).map(ShipClass::getCosts).forEach(costs::add);
         return costs;
     }
@@ -111,8 +110,8 @@ public class JobCostsCalculator {
         final Map<WarShip, WarshipHealthState> damagedStates = toRepair.getAliveShips().stream()
                 .collect(Collectors.toMap(Function.identity(), WarshipHealthState::new));
 
-        final ResourceDeposit costs = new ResourceDeposit();
-        referenceWarships.forEach((warShip, reference) -> {
+        final ResourceDeposit costs = new ResourceDeposit(EDepositType.COSTS);
+        referenceWarships.forEach((warShip, reference) -> { // todo this seems to make so sense
             final WarshipHealthState warshipHealthState = damagedStates.get(warShip);
             final double damageFraction = warshipHealthState.getDamagedFraction(reference);
             final ResourceDeposit costsOverall = warShip.getShipClass().getCosts();

@@ -2,12 +2,15 @@ package de.yuga.spacebattle.backend.combat.round;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
+import de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MissileAmmunitionState implements Cloneable {
@@ -22,6 +25,18 @@ public class MissileAmmunitionState implements Cloneable {
         Preconditions.checkNotNull(healthState, "healthState must not be empty");
 
         shotsPerMissile.putAll(healthState.getRemainingShots());
+    }
+
+    public MissileAmmunitionState(@Nonnull final Set<AmmunitionFitting> ammunitionFittings) {
+        Preconditions.checkNotNull(ammunitionFittings, "ammunitionFittings must not be empty");
+
+        ammunitionFittings.forEach(f -> {
+            final AmmunitionModule ammunitionModule = f.getAmmunitionModule();
+            final Missile missile = ammunitionModule.getMissile();
+            final int effectValue = ammunitionModule.getEffectValue();
+            final int amountOfModules = f.getAmount();
+            shotsPerMissile.merge(missile, amountOfModules * effectValue, Integer::sum);
+        });
     }
 
     /**

@@ -104,7 +104,7 @@ public class Fleet extends Operationable {
      * The current location of this fleet. <br>
      * <br>
      * If null, then this is in hyper space.<br>
-     * The orbit.orbit could be null if the fleet is on a local movement.
+     * The <code>orbit.orbit could be null if the fleet is on a local movement.
      */
     @Nullable
     @Embedded
@@ -124,10 +124,9 @@ public class Fleet extends Operationable {
     @Column(columnDefinition = "bit not null default false")
     private boolean needsRepair = false;
 
-    @Nullable
-    @OneToOne(mappedBy = "constructable.fleet", orphanRemoval = true)
-    @JoinColumn(name = "idFleet", updatable = false)
-    private Job job;
+    @Nonnull
+    @OneToMany(mappedBy = "constructable.fleet", fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<Job> jobs = new HashSet<>();
 
     public Fleet() {
     }
@@ -143,7 +142,7 @@ public class Fleet extends Operationable {
     }
 
     public boolean isActive() {
-        return job == null;
+        return jobs.stream().noneMatch(Deletable::isAlive) && isAlive() && isOperational();
     }
 
     @Nonnull

@@ -197,7 +197,6 @@ public class WarshipHealthState extends AbstractEntityKey implements WarshipHeal
         final boolean differState = !(getStateByAsInt(EModuleType.ARMOR) == reference.getArmorState()
                 && getStateByAsInt(EModuleType.ELECTRONIC_WARFARE) == reference.getElokaState()
                 && getStateByAsInt(EModuleType.SIDEWALL) == reference.getSidewallState()
-                && getStateByAsInt(EModuleType.ARMOR) == reference.getHullState()
                 && getStateByAsInt(EModuleType.PROPULSION) == reference.getPropulsionState());
 
         final MissileAmmunitionState referenceMissiles = reference.getMissileAmmunitionState();

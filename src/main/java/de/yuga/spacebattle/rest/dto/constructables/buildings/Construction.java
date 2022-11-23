@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.rest.dto.constructables.buildings;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.buildings.Building;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,27 +15,24 @@ public class Construction {
      * If this is null, the information about the entity must be fetched.
      */
     @Nullable
+    @JsonProperty
     @Schema(required = true, description = "The ID of this construction.")
     private Integer idConstruction;
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The building which is the base of this construction.")
     private Building building;
 
+    @JsonProperty
     @Schema(required = true, description = "The level of this construction.")
     private int level;
 
+    @JsonProperty
+    @Schema(required = true, description = "The active level of this construction.")
+    private int operationalLevel;
+
     public Construction() {
-    }
-
-    public Construction(@Nonnull final de.yuga.spacebattle.backend.entities.buildings.Building building,
-                        final int level,
-                        @Nonnull final String languageCode) {
-        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
-        Preconditions.checkNotNull(building, "building shouldn't be null!");
-
-        this.building = new Building(building, languageCode);
-        this.level = level;
     }
 
     public Construction(@Nonnull final de.yuga.spacebattle.backend.entities.constructables.buildings.Construction construction,
@@ -44,20 +42,7 @@ public class Construction {
 
         this.idConstruction = construction.getId();
         this.building = new Building(construction.getBuilding(), languageCode);
-        this.level = construction.getOperationalLevel();
-    }
-
-    @Nullable
-    public Integer getIdConstruction() {
-        return idConstruction;
-    }
-
-    @Nonnull
-    public Building getBuilding() {
-        return building;
-    }
-
-    public int getLevel() {
-        return level;
+        this.level = construction.getLevel();
+        this.operationalLevel = construction.getOperationalLevel();
     }
 }

@@ -54,12 +54,8 @@ public class FleetMarker {
     private boolean isFTLCapable;
 
     @JsonProperty
-    @Schema(required = true, description = "If the fleet can do actions.")
-    private boolean isActive;
-
-    @JsonProperty
-    @Schema(required = true, description = "If the fleet needs a repair.")
-    private boolean needsRepair;
+    @Schema(required = true, description = "The states of the fleet.")
+    private StateBlock state;
 
     public FleetMarker() {
     }
@@ -73,7 +69,6 @@ public class FleetMarker {
         this.orbit = fleet.getOrbit() != null ? new FleetOrbit(fleet.getOrbit()) : null;
         this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;
         this.isFTLCapable = fleet.isFTLCapable();
-        this.isActive = fleet.isActive();
-        this.needsRepair = fleet.isNeedsRepair();
+        this.state = new StateBlock(fleet);
     }
 }

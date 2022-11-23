@@ -73,12 +73,8 @@ public class Fleet {
     private boolean isFTLCapable;
 
     @JsonProperty
-    @Schema(required = true, description = "If the fleet can do actions.")
-    private boolean isActive;
-
-    @JsonProperty
-    @Schema(required = true, description = "If the fleet needs a repair.")
-    private boolean needsRepair;
+    @Schema(required = true, description = "The states of the fleet.")
+    private StateBlock state;
 
     public Fleet() {
     }
@@ -97,8 +93,7 @@ public class Fleet {
         this.spacecraftCapabilities = new SpacecraftCapabilities(fleet);
         this.baseSpacecraftCapabilities = new SpacecraftCapabilities(fleet.getShipsByClass());
         this.isFTLCapable = fleet.isFTLCapable();
-        this.isActive = fleet.isActive();
-        this.needsRepair = fleet.isNeedsRepair();
+        this.state = new StateBlock(fleet);
     }
 
     public Fleet(@Nonnull final de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot fleetSnapshot,
@@ -117,7 +112,6 @@ public class Fleet {
         this.spacecraftCapabilities = new SpacecraftCapabilities(fleetSnapshot);
         this.baseSpacecraftCapabilities = new SpacecraftCapabilities(fleet.getShipsByClass());
         this.isFTLCapable = fleet.isFTLCapable();
-        this.isActive = fleet.isActive();
-        this.needsRepair = fleet.isNeedsRepair();
+        this.state = new StateBlock(fleet);
     }
 }

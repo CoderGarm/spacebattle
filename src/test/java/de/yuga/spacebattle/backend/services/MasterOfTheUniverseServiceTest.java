@@ -39,7 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -261,7 +260,7 @@ public class MasterOfTheUniverseServiceTest {
         final boolean researchPossible = isResearchPossible(user);
 
 
-        final Map<Building, Integer> upgradeableConstructions = getUpgradableConstructions(mainPlanet.getId());
+        getUpgradableConstructions(mainPlanet.getId());
 
 
     }
@@ -291,7 +290,7 @@ public class MasterOfTheUniverseServiceTest {
         return facility.getJobs().isEmpty();
     }
 
-    private Map<Building, Integer> getUpgradableConstructions(final int idPlanet) {
+    private Set<Construction> getUpgradableConstructions(final int idPlanet) {
         final Planet planet = planetService.find(idPlanet);
         assertNotNull(planet);
         assertNotNull(planet.getOwner());
