@@ -80,7 +80,7 @@ public class ColonizationApi extends BaseApi {
         this.planetService = planetService;
     }
 
-    @PutMapping(value = "/{idUser}")
+    @PutMapping
     @Operation(summary = "Starts the colonization of a planet for a user.", operationId = "startColonizingPlanet",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
@@ -96,9 +96,10 @@ public class ColonizationApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> startColonizingPlanet(@PathVariable("idUser") final int idUser, @RequestBody de.yuga.spacebattle.rest.dto.orbitals.Planet planet) {
+    public ResponseEntity<?> startColonizingPlanet(@RequestBody de.yuga.spacebattle.rest.dto.orbitals.Planet planet) {
         PreconditionWebHelper.checkNotNull(planet, "There must be a planet to colonize.");
 
+        final int idUser = getIdUser();
         final Planet p = planetService.find(planet.getIdPlanet());
         if (p == null) {
             throw new NotifyWebUserException("There must be a planet to colonize, as I said.");
@@ -115,7 +116,7 @@ public class ColonizationApi extends BaseApi {
         return ResponseEntity.ok(new Colonization(colonization));
     }
 
-    @PostMapping(value = BUY_SYSTEM_INFO_ENDPOINT + "/{idUser}")
+    @PostMapping(value = BUY_SYSTEM_INFO_ENDPOINT)
     @Operation(summary = "Get all not colonized but known systems for a user.", operationId = "buyInformationForSystem",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
@@ -131,9 +132,10 @@ public class ColonizationApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> buyInformationForSystem(@PathVariable("idUser") final int idUser, @RequestBody StarSystem starSystem) {
+    public ResponseEntity<?> buyInformationForSystem(@RequestBody StarSystem starSystem) {
         PreconditionWebHelper.checkNotNull(starSystem, "There must be a system to buy infos for.");
 
+        final int idUser = getIdUser();
         final User user = userService.find(idUser);
         if (user == null) {
             throw new NotifyWebUserException("There must be a user who buys the info.");
@@ -149,7 +151,7 @@ public class ColonizationApi extends BaseApi {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping(value = HOME_SYSTEM_ENDPOINT + "/{idUser}")
+    @GetMapping(value = HOME_SYSTEM_ENDPOINT)
     @Operation(summary = "Get all not colonized but known systems for a user.", operationId = "getHomeSystem",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -158,8 +160,8 @@ public class ColonizationApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getHomeSystem(@PathVariable("idUser") final int idUser) {
-
+    public ResponseEntity<?> getHomeSystem() {
+        final int idUser = getIdUser();
         final Planet mainPlanet = planetService.findMainPlanet(idUser);
         return ResponseEntity.ok(new StarSystem(mainPlanet.getSystem()));
     }
@@ -182,7 +184,7 @@ public class ColonizationApi extends BaseApi {
         return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.resources.ResourceDeposit(resourceDeposit));
     }
 
-    @GetMapping(value = ALL_SYSTEMS_ENDPOINT + "/{idUser}")
+    @GetMapping(value = ALL_SYSTEMS_ENDPOINT)
     @Operation(summary = "Get all colonizable systems for a user with their distances to all known systems.", operationId = "getColonizationStarSystemsForUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -193,16 +195,17 @@ public class ColonizationApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getColonizationStarSystemsForUser(@PathVariable("idUser") final int idUser) {
+    public ResponseEntity<?> getColonizationStarSystemsForUser() {
 
         // todo response to big
+        final int idUser = getIdUser();
         final List<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> all = starSystemService.findAllColonizable();
         final Set<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> knownStarSystems = userService.getKnownStarSystems(idUser);
         final List<de.yuga.spacebattle.backend.entities.turn.Colonization> colonizationsForUser = colonizationService.findAllForUser(idUser);
         return ResponseEntity.ok(StarSystemColonizationListConverter.create(all, knownStarSystems, colonizationsForUser));
     }
 
-    @GetMapping(value = ALL_PENDING_COLONIZATIONS_ENDPOINT + "/{idUser}")
+    @GetMapping(value = ALL_PENDING_COLONIZATIONS_ENDPOINT)
     @Operation(summary = "Get all pending colonizations for the user with their distances to all known systems.", operationId = "getPendingColonizationsForUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -213,8 +216,9 @@ public class ColonizationApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getPendingColonizationsForUser(@PathVariable("idUser") final int idUser) {
+    public ResponseEntity<?> getPendingColonizationsForUser() {
 
+        final int idUser = getIdUser();
         final Set<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> knownStarSystems = userService.getKnownStarSystems(idUser);
         final List<de.yuga.spacebattle.backend.entities.turn.Colonization> colonizationsForUser = colonizationService.findAllForUser(idUser);
         final Set<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> all = colonizationsForUser.stream()
@@ -223,7 +227,7 @@ public class ColonizationApi extends BaseApi {
         return ResponseEntity.ok(StarSystemColonizationListConverter.create(all, knownStarSystems, colonizationsForUser));
     }
 
-    @GetMapping(value = FREE_SYSTEMS_ENDPOINT + "/{idUser}")
+    @GetMapping(value = FREE_SYSTEMS_ENDPOINT)
     @Operation(summary = "Get all not colonized but known systems for a user.", operationId = "getUnknownStarSystemsForUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -234,8 +238,9 @@ public class ColonizationApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getUnknownStarSystemsForUser(@PathVariable("idUser") final int idUser) {
+    public ResponseEntity<?> getUnknownStarSystemsForUser() {
 
+        final int idUser = getIdUser();
         final List<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> all = starSystemService.findAll();
         final Set<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> knownStarSystems = userService.getKnownStarSystems(idUser);
         all.removeAll(knownStarSystems);
@@ -243,7 +248,7 @@ public class ColonizationApi extends BaseApi {
         return ResponseEntity.ok(starSystems);
     }
 
-    @GetMapping(value = KNOWN_SYSTEMS_ENDPOINT + "/{idUser}")
+    @GetMapping(value = KNOWN_SYSTEMS_ENDPOINT)
     @Operation(summary = "Get all not known systems for a user.", operationId = "getKnownStarSystemsForUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -254,8 +259,8 @@ public class ColonizationApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getKnownStarSystemsForUser(@PathVariable("idUser") final int idUser) {
-
+    public ResponseEntity<?> getKnownStarSystemsForUser() {
+        final int idUser = getIdUser();
         final Set<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> knownStarSystems = userService.getKnownStarSystems(idUser);
         final List<StarSystem> starSystems = knownStarSystems.stream().map(StarSystem::new).collect(Collectors.toList());
         return ResponseEntity.ok(starSystems);
