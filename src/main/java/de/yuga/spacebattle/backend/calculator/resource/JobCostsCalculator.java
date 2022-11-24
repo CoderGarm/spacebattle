@@ -45,9 +45,11 @@ public class JobCostsCalculator {
         final ResourceDeposit resources = new ResourceDeposit(EDepositType.COSTS);
         final CrewRequirement crewRequirement = costs.getCrewRequirement();
         for (final EResourceType resourceType : EResourceType.valuesWithoutPopulation()) {
-            final long resourceAmountByType = costs.getResourceAmountByType(resourceType);
-            final BigDecimal multiply;
-            multiply = new BigDecimal(resourceAmountByType).multiply(new BigDecimal(targetLevel), ResourceDeposit.MATH_CONTEXT_INTEGER);
+            final long amount = costs.getResourceAmountByType(resourceType);
+            if (amount == 0) {
+                continue;
+            }
+            final BigDecimal multiply = getLevelCosts(targetLevel, amount);
             resources.setAbsoluteResourceValue(resourceType, multiply.longValue());
         }
         for (final EEducationType educationType : EEducationType.valuesOfWorkforce()) {
@@ -55,10 +57,15 @@ public class JobCostsCalculator {
             if (amount == 0) {
                 continue;
             }
-            final BigDecimal multiply = new BigDecimal(amount).multiply(new BigDecimal(targetLevel), ResourceDeposit.MATH_CONTEXT_INTEGER);
+            final BigDecimal multiply = getLevelCosts(targetLevel, amount);
             resources.setAbsolutePopulation(educationType, multiply.longValue());
         }
         return resources;
+    }
+
+    @Nonnull
+    private static BigDecimal getLevelCosts(final int targetLevel, final long amount) {
+        return new BigDecimal(amount).add(new BigDecimal(amount).multiply(new BigDecimal(targetLevel).multiply(BigDecimal.valueOf(0.2)), ResourceDeposit.MATH_CONTEXT_INTEGER));
     }
 
     /**
