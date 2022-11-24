@@ -18,6 +18,10 @@ import javax.annotation.Nullable;
 @Schema(description = ".")
 public class Job {
 
+    @JsonProperty
+    @Schema(required = true, description = "The id")
+    private int idJob;
+
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The owner.")
@@ -94,6 +98,7 @@ public class Job {
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(job, "job shouldn't be null!");
 
+        this.idJob = job.getId();
         this.user = new UserJson(job.getOwner());
         this.facility = new Construction(job.getFacility(), languageCode);
         this.facilityPlanet = new Planet(job.getFacility().getPlanet());

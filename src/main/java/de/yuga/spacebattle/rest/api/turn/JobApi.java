@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.CacheStore;
+import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.BaseApi;
@@ -42,6 +43,7 @@ public class JobApi extends BaseApi {
     private static final String JOB_FINISHED_ENDPOINT = "finished";
     private static final String JOB_UNKNOWN_FINISHED_PRESENT_ENDPOINT = "unknownFinishedPresent";
     private static final String JOB_RUNNING_FOR_FLEET_ENDPOINT = "runningForFleet";
+    private static final String JOB_CANCEL = "cancel";
 
     @Nonnull
     private final JobService jobService;
@@ -152,5 +154,23 @@ public class JobApi extends BaseApi {
 
         final boolean isRunning = jobService.isJobRunningFor(idUser, idFleet);
         return ResponseEntity.ok(isRunning);
+    }
+
+    @Autowired
+    PlanetService planetService;
+
+    @GetMapping(value = JOB_CANCEL + "/{idJob}")
+    @Operation(summary = "Cancels and refund a job.", operationId = "cancelJob",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "you can build something or not",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> cancelJob(@PathVariable("idJob") final int idJob) {
+        final int idUser = getIdUser();
+        final boolean cancelled = jobService.cancelJob(idUser, idJob);
+        return ResponseEntity.ok(cancelled);
     }
 }

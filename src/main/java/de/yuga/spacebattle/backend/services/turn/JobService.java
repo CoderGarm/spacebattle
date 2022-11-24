@@ -110,22 +110,21 @@ public class JobService {
     /**
      * Returns the job cost if they were paid - no costs and no costs back for researches!
      *
-     * @param entity the job to delete
+     * @param job the job to delete
      */
-    public void refundJobAndDelete(@Nullable final Job entity) {
-        if (entity == null || entity.getId() < 1) {
-            return;
-        }
-        final Job doDelete = jobRepository.findById(entity.getId()).orElse(null);
+    public void refundJobAndDelete(@Nonnull final Job job) {
+        Preconditions.checkNotNull(job, "job must not be empty");
+
+        final Job doDelete = jobRepository.findById(job.getId()).orElse(null);
         if (doDelete == null) {
-            throw new NotifyWebUserException("no job to delete"); // fail first for development
+            return;
         }
 
         if (doDelete.getJobDoneAtZero() > 0 && EResourceType.RESEARCH != doDelete.getConstructable().getResourceType()) {
             // if reached job is not done -> payback the paycheck
             // not reached if the job is a research
-            final ResourceDeposit jobCosts = entity.getConstructable().getJobCosts();
-            final Planet planet = entity.getFacility().getPlanet();
+            final ResourceDeposit jobCosts = job.getConstructable().getJobCosts();
+            final Planet planet = job.getFacility().getPlanet();
             planet.getResourceDemand().updateCrew(jobCosts.getCrewRequirement(), ECalculationType.SUBTRACT);
 
             final Fleet fleet = doDelete.getConstructable().getFleet();
@@ -144,7 +143,8 @@ public class JobService {
             }
             planetService.save(planet);
         }
-        jobRepository.delete(doDelete);
+        doDelete.delete();
+        jobRepository.save(doDelete);
     }
 
     /**
@@ -336,5 +336,14 @@ public class JobService {
 
     public boolean areTodayFinishedJobsForUserPresent(final int idUser) {
         return jobRepository.areTodayFinishedJobsForUserPresent(idUser);
+    }
+
+    public boolean cancelJob(final int idUser, final int idJob) {
+        final Job job = jobRepository.findById(idJob).orElse(null);
+        if (job == null || job.getOwner().getId() != idUser) {
+            return false;
+        }
+        refundJobAndDelete(job);
+        return true;
     }
 }
