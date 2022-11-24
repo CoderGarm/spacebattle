@@ -20,7 +20,6 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfar
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.Move;
-import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EModuleType;
@@ -183,10 +182,6 @@ public class Fleet extends Operationable {
         return ships;
     }
 
-    public boolean isAlive() {
-        final boolean fightingIsPossible = getAliveShips().stream().filter(WarShip::isOperational).map(WarShip::getWarshipHealthState).anyMatch(WarshipHealthState::isFightingCapable);
-        return !isDeleted() && fightingIsPossible;
-    }
 
     /**
      * Creates a new set of war ships by the given parameter.
