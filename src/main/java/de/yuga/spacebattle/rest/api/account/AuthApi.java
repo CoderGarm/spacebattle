@@ -12,6 +12,7 @@ import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
+import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.config.security.JwtTokenUtil;
@@ -31,7 +32,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -107,6 +107,9 @@ public class AuthApi {
     @Nonnull
     private final JwtTokenUtil jwtTokenUtil;
 
+    @Nonnull
+    private final TickService tickService;
+
     @Autowired
     public AuthApi(@Nonnull final AuthenticationManager authenticationManager,
                    @Nonnull final JwtTokenUtil jwtTokenUtil,
@@ -115,7 +118,8 @@ public class AuthApi {
                    @Nonnull final ColonizationService colonizationService,
                    @Nonnull final PlanetService planetService,
                    @Nonnull final MessageThreadService messageThreadService,
-                   @Nonnull final MasterOfTheUniverseService masterOfTheUniverseService) {
+                   @Nonnull final MasterOfTheUniverseService masterOfTheUniverseService,
+                   @Nonnull final TickService tickService) {
         Preconditions.checkNotNull(authenticationManager, "authenticationManager shouldn't be null!");
         Preconditions.checkNotNull(jwtTokenUtil, "jwtTokenUtil shouldn't be null!");
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
@@ -124,6 +128,7 @@ public class AuthApi {
         Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         Preconditions.checkNotNull(messageThreadService, "messageThreadService must not be empty");
         Preconditions.checkNotNull(masterOfTheUniverseService, "masterOfTheUniverseService must not be empty");
+        this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
 
         this.userService = userService;
         this.researchService = researchService;
@@ -280,11 +285,10 @@ public class AuthApi {
         researchService.addResearch(saved, researchesWithoutPrecondition);
 
         Planet planet = colonizationService.findPlanetForNewUser();
-        planet.getMiningFactors().equalize();
-        planet.getResourceDeposit().equalize();
         planet = planetService.save(planet);
         final Colonization colonization = new Colonization(saved, planet, ColonizationCostCalculator.getCrewRequirementForColonization(), 0);
-        colonizationService.colonizePlanet(colonization);
+        planet = colonizationService.colonizePlanet(colonization);
+        tickService.operateInoperationals(planet);
 
         final Optional<WebUserDetails> sender = userService.findByUsername("Flashkid");
         sender.ifPresent(flash -> {
@@ -292,16 +296,8 @@ public class AuthApi {
             messageThreadService.createChatMessage(flash.getUser(), saved, replace);
         });
 
-        // todo run asynchroniously
-        createOpponentAndFight(saved);
+        masterOfTheUniverseService.createOpponentAndFightAsync(saved);
         return ResponseEntity.ok(new UserJson(saved));
-    }
-
-    @Async("taskExecutor")
-    protected void createOpponentAndFight(final User saved) {
-        masterOfTheUniverseService.createFleetForUser(saved);
-        masterOfTheUniverseService.createOpponentFleetForUser(saved);
-        masterOfTheUniverseService.runBattleForNewUser(saved);
     }
 
     @PostMapping("/checkUsername/{userName}")

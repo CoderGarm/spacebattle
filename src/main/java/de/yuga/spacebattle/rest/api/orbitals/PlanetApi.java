@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Job;
+import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
@@ -19,6 +20,7 @@ import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstruct
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.orbitals.Orbit;
 import de.yuga.spacebattle.rest.dto.orbitals.Planet;
+import de.yuga.spacebattle.rest.dto.turn.resources.ResourceDeposit;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -55,6 +57,7 @@ public class PlanetApi extends BaseApi {
     private static final String GET_PLANET_BY_COORDINATES_ENDPOINT = "byCoord";
     private static final String GET_MAIN_PLANET = "main";
     private static final String REPAIR_FLEET_ENDPOINT = SHIPYARD_BUILD_IT_ENDPOINT + "/repair";
+    private static final String TRANSPORTATION_ENDPOINT = "transportation";
 
     @Nonnull
     private final PlanetService planetService;
@@ -79,7 +82,7 @@ public class PlanetApi extends BaseApi {
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
     }
 
-    @GetMapping(value = "{idUser}")
+    @GetMapping
     @Operation(summary = "Get all planets which are colonized by a user.", operationId = "getPlanetByUsers",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -91,7 +94,8 @@ public class PlanetApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getPlanets(@PathVariable("idUser") final int idUser) {
+    public ResponseEntity<?> getPlanets() {
+        final int idUser = getIdUser();
         final List<de.yuga.spacebattle.backend.entities.orbitals.Planet> all = planetService.findAllColonizedBy(idUser);
         final List<Planet> planets = all.stream().map(Planet::new).collect(Collectors.toList());
         return ResponseEntity.ok(planets);
@@ -245,10 +249,6 @@ public class PlanetApi extends BaseApi {
 
     @PostMapping(value = REPAIR_FLEET_ENDPOINT + "/{idFleet}")
     @Operation(summary = "Repairs the fleet.", operationId = "repairFleets",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
-            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
@@ -287,5 +287,112 @@ public class PlanetApi extends BaseApi {
 
         jobService.createShipyardJob(planet, fleet);
         return ResponseEntity.ok(true);
+    }
+
+    @GetMapping(value = TRANSPORTATION_ENDPOINT + "/demand/{idPlanet}")
+    @Operation(summary = "Returns the transportation need of this planet.", operationId = "getTransportationDemand",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successfully started",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceDeposit.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getTransportationDemand(@PathVariable("idPlanet") final int idPlanet) {
+        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetService.find(idPlanet);
+        if (planet == null || planet.getOwner() == null || planet.getOwner().getId() != getIdUser()) {
+            throw new NotifyWebUserException("Well, no.");
+        }
+        return ResponseEntity.ok(new ResourceDeposit(planet.getResourceTransportationDemand()));
+    }
+
+    @PutMapping(value = TRANSPORTATION_ENDPOINT + "/demand/{idPlanet}")
+    @Operation(summary = "Sets the transportation demand.", operationId = "setTransportationDemand",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ResourceDeposit.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successfully started",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceDeposit.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> setTransportationDemand(@PathVariable("idPlanet") final int idPlanet,
+                                                     @RequestBody @Nonnull final ResourceDeposit demand) {
+        de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetService.find(idPlanet);
+        if (planet == null || planet.getOwner() == null || planet.getOwner().getId() != getIdUser()) {
+            throw new NotifyWebUserException("Well, no.");
+        }
+
+        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit planetaryDemand = planet.getResourceTransportationDemand();
+        updateResourceTransportation(demand, planetaryDemand);
+        planet = planetService.save(planet);
+        return ResponseEntity.ok(new ResourceDeposit(planet.getResourceTransportationDemand()));
+    }
+
+    @GetMapping(value = TRANSPORTATION_ENDPOINT + "/delivery/{idPlanet}")
+    @Operation(summary = "Returns the transportation delivery of this planet.", operationId = "getTransportationDelivery",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successfully started",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceDeposit.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getTransportationDelivery(@PathVariable("idPlanet") final int idPlanet) {
+        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetService.find(idPlanet);
+        if (planet == null || planet.getOwner() == null || planet.getOwner().getId() != getIdUser()) {
+            throw new NotifyWebUserException("Well, no.");
+        }
+        return ResponseEntity.ok(new ResourceDeposit(planet.getResourceTransportationDelivery()));
+    }
+
+    @PutMapping(value = TRANSPORTATION_ENDPOINT + "/delivery/{idPlanet}")
+    @Operation(summary = "Sets the transportation delivery.", operationId = "setTransportationDelivery",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ResourceDeposit.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successfully started",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceDeposit.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> setTransportationDelivery(@PathVariable("idPlanet") final int idPlanet,
+                                                       @RequestBody @Nonnull final ResourceDeposit delivery) {
+        de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetService.find(idPlanet);
+        if (planet == null || planet.getOwner() == null || planet.getOwner().getId() != getIdUser()) {
+            throw new NotifyWebUserException("Well, no.");
+        }
+
+        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit planetaryDelivery = planet.getResourceTransportationDelivery();
+        updateResourceTransportation(delivery, planetaryDelivery);
+        planet = planetService.save(planet);
+        return ResponseEntity.ok(new ResourceDeposit(planet.getResourceTransportationDelivery()));
+    }
+
+    private void updateResourceTransportation(@Nonnull final ResourceDeposit data,
+                                              @Nonnull final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit toUpdate) {
+        Preconditions.checkNotNull(data, "data must not be empty");
+        Preconditions.checkNotNull(toUpdate, "toUpdate must not be empty");
+
+        data.getResources().forEach(res -> {
+            final EResourceType realResourceType = res.getRealResourceType();
+            toUpdate.setAbsoluteResourceValue(realResourceType, res.getAmount());
+        });
+        data.getHumanResources().forEach(res -> {
+            final EEducationType realResourceType = res.getRealEducationType();
+            toUpdate.setAbsoluteCrewRequirement(realResourceType, res.getAmount());
+        });
     }
 }

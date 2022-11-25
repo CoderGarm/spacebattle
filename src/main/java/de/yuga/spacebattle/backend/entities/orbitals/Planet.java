@@ -97,6 +97,16 @@ public class Planet extends AbstractEntityKey {
     private final ResourceDeposit resourceUtilization = new ResourceDeposit(EDepositType.UTILIZATION);
 
     @Nonnull
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    @JoinColumn(name = "idResourceTransportationDemand", updatable = false)
+    private final ResourceDeposit resourceTransportationDemand = new ResourceDeposit(EDepositType.TRANSPORTATION_DEMAND);
+
+    @Nonnull
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    @JoinColumn(name = "idResourceTransportationDelivery", updatable = false)
+    private final ResourceDeposit resourceTransportationDelivery = new ResourceDeposit(EDepositType.TRANSPORTATION_DELIVERY);
+
+    @Nonnull
     @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, mappedBy = "planet")
     private final Set<Construction> constructions = new HashSet<>();
 
@@ -375,5 +385,15 @@ public class Planet extends AbstractEntityKey {
     @Nonnull
     public ResourceDeposit getResourceUtilization() {
         return resourceUtilization;
+    }
+
+    @Nonnull
+    public ResourceDeposit getResourceTransportationDemand() {
+        return resourceTransportationDemand;
+    }
+
+    @Nonnull
+    public ResourceDeposit getResourceTransportationDelivery() {
+        return resourceTransportationDelivery;
     }
 }

@@ -29,6 +29,6 @@ public class ArticleRevision {
 
         this.author = new AbstractId(rev.getAuthor());
         this.version = rev.getVersion();
-        this.article = new AbstractId(rev);
+        this.article = new AbstractId(rev.getArticle());
     }
 }

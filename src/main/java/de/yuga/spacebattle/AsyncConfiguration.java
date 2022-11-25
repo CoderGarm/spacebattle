@@ -18,14 +18,14 @@ public class AsyncConfiguration {
     @Nonnull
     private final static Logger LOGGER = LoggerFactory.getLogger(AsyncConfiguration.class);
 
-    @Bean(name = "taskExecutor")
-    public Executor taskExecutor() {
+    @Bean(name = "asyncTaskExecutor")
+    public Executor asyncTaskExecutor() {
         LOGGER.info("Creating Async Task Executor");
         final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(2);
         executor.setMaxPoolSize(10);
         executor.setQueueCapacity(100);
-        //executor.setThreadNamePrefix("CarThread-");
+        executor.setThreadNamePrefix("AsyncThread-");
         executor.initialize();
         return executor;
     }

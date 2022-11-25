@@ -2,12 +2,13 @@ package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.CacheStore;
-import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.backend.services.turn.TransportationCache;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.Job;
+import de.yuga.spacebattle.rest.dto.turn.TransportJob;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -44,6 +45,10 @@ public class JobApi extends BaseApi {
     private static final String JOB_UNKNOWN_FINISHED_PRESENT_ENDPOINT = "unknownFinishedPresent";
     private static final String JOB_RUNNING_FOR_FLEET_ENDPOINT = "runningForFleet";
     private static final String JOB_CANCEL = "cancel";
+    private static final String TRANSPORT_JOB_ENDPOINT = "transports";
+
+    @Nonnull
+    private final TransportationCache transportationCache;
 
     @Nonnull
     private final JobService jobService;
@@ -52,8 +57,10 @@ public class JobApi extends BaseApi {
     private final TickService tickService;
 
     @Autowired
-    public JobApi(@Nonnull final JobService jobService,
+    public JobApi(@Nonnull final TransportationCache transportationCache,
+                  @Nonnull final JobService jobService,
                   @Nonnull final TickService tickService) {
+        this.transportationCache = Preconditions.checkNotNull(transportationCache, "transportationCache must not be empty");
         this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
     }
@@ -156,9 +163,6 @@ public class JobApi extends BaseApi {
         return ResponseEntity.ok(isRunning);
     }
 
-    @Autowired
-    PlanetService planetService;
-
     @GetMapping(value = JOB_CANCEL + "/{idJob}")
     @Operation(summary = "Cancels and refund a job.", operationId = "cancelJob",
             responses = {
@@ -172,5 +176,24 @@ public class JobApi extends BaseApi {
         final int idUser = getIdUser();
         final boolean cancelled = jobService.cancelJob(idUser, idJob);
         return ResponseEntity.ok(cancelled);
+    }
+
+    @GetMapping(value = TRANSPORT_JOB_ENDPOINT)
+    @Operation(summary = "Get all jobs which are running on this planet.", operationId = "getTransportJobs",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = TransportJob.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getTransportJobs() {
+        final de.yuga.spacebattle.backend.entities.turn.Tick today = tickService.getToday();
+        final int idUser = getIdUser();
+        return ResponseEntity.ok(transportationCache.get(today, idUser).stream()
+                .map(TransportJob::new)
+                .collect(Collectors.toList()));
     }
 }

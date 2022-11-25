@@ -81,6 +81,6 @@ public enum EResourceType implements HasIconName {
     }
 
     public static EResourceType[] valuesWhichForfeits() {
-        return Arrays.stream(EResourceType.values()).filter(e -> FORFEITABLE != e.getCollectableType()).toArray(EResourceType[]::new);
+        return Arrays.stream(EResourceType.values()).filter(e -> FORFEITABLE == e.getCollectableType()).toArray(EResourceType[]::new);
     }
 }

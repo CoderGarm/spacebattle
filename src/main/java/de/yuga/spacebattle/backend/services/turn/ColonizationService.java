@@ -31,6 +31,7 @@ import de.yuga.spacebattle.rest.dto.turn.resources.ResourceAmount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
@@ -70,17 +71,11 @@ public class ColonizationService {
                                @Nonnull final PlanetService planetService,
                                @Nonnull final StarSystemService starSystemService,
                                @Nonnull final BuildingService buildingService) {
-        Preconditions.checkNotNull(repository, "colonizationRepository shouldn't be null!");
-        Preconditions.checkNotNull(userService, "userService shouldn't be null!");
-        Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
-        Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
-        Preconditions.checkNotNull(buildingService, "buildingService shouldn't be null!");
-
-        this.repository = repository;
-        this.userService = userService;
-        this.planetService = planetService;
-        this.starSystemService = starSystemService;
-        this.buildingService = buildingService;
+        this.repository = Preconditions.checkNotNull(repository, "colonizationRepository shouldn't be null!");
+        this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
+        this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
+        this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
+        this.buildingService = Preconditions.checkNotNull(buildingService, "buildingService shouldn't be null!");
     }
 
     @Nonnull
@@ -160,7 +155,7 @@ public class ColonizationService {
      * @param colonization the running colonization
      * @return the colonized planet
      */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED)
     public Planet colonizePlanet(@Nonnull final Colonization colonization) {
         Preconditions.checkNotNull(colonization, "colonization shouldn't be null!");
         Preconditions.checkState(colonization.getDoneAtZero() == 0, "colonization cannot be done if the ship isn't in the orbit!");
@@ -170,9 +165,13 @@ public class ColonizationService {
         assert owner != null : "When this happens, the end is near.";
         planet.setOwner(owner);
         final List<Planet> allColonizedBy = planetService.findAllColonizedBy(owner);
-        if (allColonizedBy.isEmpty()) {
+        final boolean isMain = allColonizedBy.isEmpty();
+        if (isMain) {
             planet.toggleMain();
+            planet.getMiningFactors().equalize();
         }
+        planet.getResourceDeposit().equalize(isMain);
+
         final ResourceDeposit creditorDeposit = planet.getResourceDeposit();
         final CrewRequirement requiredCrew = colonization.getCosts().getCrewRequirement();
         // set crew from the ship to the planet
@@ -218,7 +217,6 @@ public class ColonizationService {
             final BigDecimal output = TickOutputCalculator.getOutput(baseValue, increasingFactorPerLevel, miningFactor, virtualLevel);
             if (output.compareTo(virtualSumOfPops) > 0) {
                 levelTo = virtualLevel;
-                LOGGER.warn("Something angry has changed the balancing so much!");
                 break;
             }
         }

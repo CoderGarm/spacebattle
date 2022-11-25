@@ -2,7 +2,6 @@ package de.yuga.spacebattle.backend.services;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
-import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
@@ -33,7 +32,6 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModul
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
-import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
@@ -59,11 +57,14 @@ import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -234,34 +235,25 @@ public class MasterOfTheUniverseService {
     @PostConstruct
     @SuppressWarnings("ConstantConditions")
     public void transform() {
+        validateUniverse();
+        LOGGER.info("---------------------------- transforming the universe ----------------------------");
+        final boolean transformationNeeded = false;
+        if (transformationNeeded) {
+            LOGGER.info("---------------------------- done transforming -------------------------------");
+        } else {
+            LOGGER.info("---------------------------- nothing to transform ----------------------------");
+        }
+    }
+
+    private void validateUniverse() {
         LOGGER.info("---------------------------- validating the universe -----------------------------");
-        //noinspection OptionalGetWithoutIsPresent
-        final User flashkid = userService.findByUsername(FLASHKID).get().getUser();
-        final boolean initiationNeeded = flashkid.getAlliance() == null;
+        final boolean initiationNeeded = tickService.findAll().isEmpty();
         if (initiationNeeded) {
             LOGGER.info("---------------------------- creating the universe ----------------------------");
             createInitialDataPayload();
             LOGGER.info("---------------------------- done creating ------------------------------------");
         }
         LOGGER.info("---------------------------- done validating --------------------------------------");
-        LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = constructionService.findAll().stream().noneMatch(c -> c.getOperationalLevel() > 0);
-        if (transformationNeeded) {
-            final List<Planet> allColonized = planetService.findAllColonized();
-            allColonized.forEach(planet -> {
-                final ResourceDeposit deposit = ResourceDepositInitializerCalculator.getInfiniteDeposit();
-                final ResourceDeposit demand = ResourceDepositInitializerCalculator.getInfiniteDeposit();
-                final ResourceDeposit utilization = planet.getResourceUtilization();
-
-                tickService.activateWarships(planet, deposit, demand, utilization);
-                tickService.activateConstructions(planet, deposit, demand, utilization);
-                planetService.save(planet);
-            });
-
-            LOGGER.info("---------------------------- done transforming -------------------------------");
-        } else {
-            LOGGER.info("---------------------------- nothing to transform ----------------------------");
-        }
     }
 
     @SuppressWarnings({"unused"})
@@ -1060,8 +1052,6 @@ public class MasterOfTheUniverseService {
     protected Planet colonizePlanet(@Nonnull final User owner, @Nonnull final Planet planet) {
         // first the guys, then the buildings
         final Colonization colonization = new Colonization(owner, planet, ColonizationCostCalculator.getCrewRequirementForColonization(), 0);
-        planet.getMiningFactors().equalize();
-        planet.getResourceDeposit().equalize();
         planetService.save(planet);
         return colonizationService.colonizePlanet(colonization);
     }
@@ -1228,6 +1218,20 @@ public class MasterOfTheUniverseService {
     private void addUnlockedResearches(User user) {
         final List<Research> researchesWithoutPrecondition = researchService.getResearchesWithoutPrecondition();
         researchService.addResearch(user, researchesWithoutPrecondition);
+    }
+
+    @Async("asyncTaskExecutor")
+    public void createOpponentAndFightAsync(final User saved) {
+        try {
+            CompletableFuture.runAsync(() -> {
+                createFleetForUser(saved);
+                createOpponentFleetForUser(saved);
+                runBattleForNewUser(saved);
+            }).get();
+        } catch (final ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            throw new NotifyWebUserException(e.getMessage());
+        }
     }
 
     public void createFleetForUser(@Nonnull final User user) {

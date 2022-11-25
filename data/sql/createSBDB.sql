@@ -500,6 +500,8 @@
         idOwner integer,
         idResourceDemand integer,
         idResourceDeposit integer,
+        idResourceTransportationDelivery integer,
+        idResourceTransportationDemand integer,
         idResourceUtilization integer,
         idStarSystem integer,
         primary key (idPlanet)
@@ -1453,6 +1455,16 @@
        references resourceDeposit (idResourceDeposit);
 
     alter table planet 
+       add constraint FK7ica1a9s7r5jy3dn3krk4hkfe 
+       foreign key (idResourceTransportationDelivery) 
+       references resourceDeposit (idResourceDeposit);
+
+    alter table planet 
+       add constraint FKipb2odgmfpbftjlah8gxjh6fw 
+       foreign key (idResourceTransportationDemand) 
+       references resourceDeposit (idResourceDeposit);
+
+    alter table planet 
        add constraint FKchm1nm87cpqlwgayp6vhl8vux 
        foreign key (idResourceUtilization) 
        references resourceDeposit (idResourceDeposit);
@@ -1754,11 +1766,13 @@ INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('en', 'Welco
 INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('de', 'Willkommen auf dem Schlachtfeld', 'WELCOME_MESSAGE', 1);
 INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('en', 'Population', 'GAME_MECHANICS', null);
 INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('en', 'Combat and missions', 'GAME_MECHANICS', null);
+INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('en', 'Transport and Migration', 'GAME_MECHANICS', null);
 
 INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, 1, 1);
 INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, 2, 1);
 INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, 3, 1);
 INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, 4, 1);
+INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, 5, 1);
 
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (1, '# Welcome to the battlefield', 'INSERT', 0);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (1, '---', 'INSERT', 1);
@@ -2019,10 +2033,25 @@ INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES 
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (4, '', 'INSERT', 167);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (4, '', 'INSERT', 168);
 
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, '# Transport and Migration', 'INSERT', 0);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, '---', 'INSERT', 1);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, '## Transport', 'INSERT', 2);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, '', 'INSERT', 3);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, 'For every planet it can be set what is allowed to be delivered and what is needed.  ', 'INSERT', 4);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, 'If a delivery could really be done depends on the availability of the demanded resources or military personnel.', 'INSERT', 5);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, '', 'INSERT', 6);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, 'The transport companies of your empire will execute the jobs, searching the best routes and deliver at the time.', 'INSERT', 7);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, '', 'INSERT', 8);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, '---', 'INSERT', 9);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, 'For obvious reasons you can command your military, but not your civilians.  ', 'INSERT', 10);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, 'They will detect opportunities on other planets on their own and will move to planets with better working conditions.', 'INSERT', 11);
+
+
 INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (1, 1);
 INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (2, 2);
 INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (3, 3);
 INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (4, 4);
+INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (5, 5);
 
 insert into dbPatch values (null, now(), 'create dbPatch table', '0.0.5-1');
 insert into dbPatch values (null, now(), 'add warship health state', '0.0.5-2');
@@ -2031,3 +2060,4 @@ insert into dbPatch values (null, now(), 'add check constraint names', '0.0.5-4'
 insert into dbPatch values (null, now(), 'balance spacecraft stuff', '0.0.5-5');
 insert into dbPatch values (null, now(), 'add operationals', '0.0.6-1');
 insert into dbPatch values (null, now(), 'add wiki', '0.0.6-2');
+insert into dbPatch values (null, now(), 'add transportation', '0.0.7-1');

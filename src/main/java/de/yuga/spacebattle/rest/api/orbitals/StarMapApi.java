@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.rest.api.orbitals;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
@@ -40,17 +39,11 @@ public class StarMapApi {
     @Nonnull
     private final StarSystemService starSystemService;
 
-    @Nonnull
-    private final UserService userService;
-
     @Autowired
-    public StarMapApi(@Nonnull final StarSystemService starSystemService,
-                      @Nonnull final UserService userService) {
+    public StarMapApi(@Nonnull final StarSystemService starSystemService) {
         Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
-        Preconditions.checkNotNull(userService, "userService shouldn't be null!");
 
         this.starSystemService = starSystemService;
-        this.userService = userService;
     }
 
     @GetMapping(STAR_SYSTEMS_ENDPOINT)

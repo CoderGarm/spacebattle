@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.rest.dto.turn.resources;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
@@ -20,14 +21,17 @@ public class ResourceDeposit {
      * <b>Attention:</b> The {@link EResourceType#POPULATION} is something special.
      */
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The amount of stored resources by their type.")
     private List<ResourceAmount> resources;
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The amount of human resources by their type.")
     private List<HumanResourceAmount> humanResources;
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The type of the deposit - costs or a real deposit.")
     private EDepositType subType;
 

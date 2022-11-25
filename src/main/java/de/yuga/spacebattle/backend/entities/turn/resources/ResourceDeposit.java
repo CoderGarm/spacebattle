@@ -99,6 +99,10 @@ public class ResourceDeposit extends AbstractEntityKey {
         this.subType = subType;
     }
 
+    public boolean hasData() {
+        return !resources().isEmpty() || !humanResources().isEmpty();
+    }
+
     /**
      * Returns the amount of resources by type.<br>
      * In case of {@link EResourceType#POPULATION} it will return the total available amount of every {@link EEducationType}.<br>
@@ -275,6 +279,24 @@ public class ResourceDeposit extends AbstractEntityKey {
         resources.put(POPULATION, amount);
     }
 
+    /**
+     * Returns a shallow copy.
+     */
+    @Nonnull
+    public Map<EResourceType, Long> resources() {
+        final Map<EResourceType, Long> map = resources.entrySet().stream().filter(e -> e.getValue() > 0).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return new HashMap<>(map);
+    }
+
+    /**
+     * Returns a shallow copy.
+     */
+    @Nonnull
+    public Map<EEducationType, Long> humanResources() {
+        final Map<EEducationType, Long> map = humanResources.entrySet().stream().filter(e -> e.getValue() > 0).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return new HashMap<>(map);
+    }
+
     @Nonnull
     public CrewRequirement getCrewRequirement() {
         return new CrewRequirement(humanResources, subType);
@@ -427,15 +449,18 @@ public class ResourceDeposit extends AbstractEntityKey {
      * <br>
      * The main planet must have the same amount of resources.
      */
-    public void equalize() {
-        Arrays.stream(EResourceType.valuesWithoutPopulation())
-                .forEach(eResourceType -> {
-                    if (eResourceType.getCollectableType() == ECollectableType.COLLECTABLE && !ETechLevel.TECH_I.getExcludedResources().contains(eResourceType)) {
-                        resources.put(eResourceType, 1000L);
-                    } else {
-                        resources.put(eResourceType, 0L);
-                    }
-                });
+    public void equalize(final boolean isMain) {
+        if (isMain) {
+            Arrays.stream(EResourceType.valuesWhichAreCollectable())
+                    .forEach(eResourceType -> {
+                        if (ETechLevel.TECH_I.getExcludedResources().contains(eResourceType)) {
+                            resources.put(eResourceType, 0L);
+                        } else {
+                            resources.put(eResourceType, 1000L);
+                        }
+                    });
+        }
+        Arrays.stream(EResourceType.valuesWhichForfeits()).forEach(eResourceType -> resources.put(eResourceType, 100L));
         Arrays.stream(EEducationType.values()).forEach(eEducationType -> humanResources.put(eEducationType, 0L));
     }
 

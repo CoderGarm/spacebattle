@@ -150,9 +150,14 @@ public class ResearchService {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
         Preconditions.checkNotNull(researches, "researches shouldn't be null!");
 
-        final Set<ResearchLevel> allForUser = getResearchesForUser(entity.getId());
+        final Set<ResearchLevel> allForUser = getResearchesForUser(entity.getId()).stream()
+                .filter(rl -> rl.getLevel() < rl.getResearch().getLevelCap())
+                .collect(Collectors.toSet());
         for (Research research : researches) {
-            final ResearchLevel researchLevel = allForUser.stream().filter(rl -> rl.getResearch().equals(research)).findFirst().orElse(null);
+            final ResearchLevel researchLevel = allForUser.stream()
+                    .filter(rl -> rl.getResearch().equals(research))
+                    .findFirst()
+                    .orElse(null);
             if (researchLevel != null) {
                 final int currentLevel = researchLevel.getLevel();
                 researchLevel.setLevel(currentLevel + 1);

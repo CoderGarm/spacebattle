@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.rest.dto.turn.resources;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.enums.EResourceType;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,13 +12,11 @@ import javax.annotation.Nonnull;
 public class ResourceAmount {
 
     @Nonnull
-    @JsonIgnore
-    private de.yuga.spacebattle.backend.enums.EResourceType realResourceType;
-
-    @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The resource type.")
     private EResourceType resourceType;
 
+    @JsonProperty
     @Schema(required = true, description = "The amount for the resource.")
     private long amount;
 
@@ -27,7 +26,6 @@ public class ResourceAmount {
     public ResourceAmount(@Nonnull final de.yuga.spacebattle.backend.enums.EResourceType realResourceType, final long amount) {
         Preconditions.checkNotNull(realResourceType, "resourceType shouldn't be null!");
 
-        this.realResourceType = realResourceType;
         resourceType = new EResourceType(realResourceType);
         this.amount = amount;
     }
@@ -35,7 +33,7 @@ public class ResourceAmount {
     @Nonnull
     @JsonIgnore
     public de.yuga.spacebattle.backend.enums.EResourceType getRealResourceType() {
-        return realResourceType;
+        return de.yuga.spacebattle.backend.enums.EResourceType.valueOf(resourceType.getTypeName());
     }
 
     @Nonnull

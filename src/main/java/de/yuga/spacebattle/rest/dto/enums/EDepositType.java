@@ -11,23 +11,11 @@ import javax.annotation.Nonnull;
 @Schema(description = ".")
 public class EDepositType extends HasTypeName {
 
-    @Nonnull
-    @Schema(required = true, description = "The calculation type.")
-    private final ECalculationType calculationType;
-
     public EDepositType() {
         super();
-        calculationType = new ECalculationType();
     }
 
     public EDepositType(@Nonnull final de.yuga.spacebattle.backend.enums.EDepositType depositType) {
         super(depositType);
-
-        this.calculationType = new ECalculationType(depositType.getCalculationType());
-    }
-
-    @Nonnull
-    public ECalculationType getCalculationType() {
-        return calculationType;
     }
 }

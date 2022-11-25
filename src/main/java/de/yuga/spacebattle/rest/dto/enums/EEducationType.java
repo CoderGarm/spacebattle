@@ -1,6 +1,5 @@
 package de.yuga.spacebattle.rest.dto.enums;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -17,17 +16,25 @@ public class EEducationType extends HasIcon {
      * Defines if the education level is part of the working people.
      */
     @JsonProperty
+    @Schema(required = true, description = "If this education type is part of the workforce.")
     private final boolean isWorkforce;
+
+    @JsonProperty
+    @Schema(required = true, description = "If this education type is part of the military.")
+    private final boolean isMilitary;
 
     /**
      * The requirement of an educational level which must be fulfilled to reach *this* level.
      */
     @Nullable
+    @JsonProperty
     private final EEducationType requirement;
 
     public EEducationType() {
         super();
+
         isWorkforce = false;
+        isMilitary = false;
         requirement = null;
     }
 
@@ -35,16 +42,7 @@ public class EEducationType extends HasIcon {
         super(educationType);
 
         isWorkforce = educationType.isWorkforce();
+        isMilitary = educationType.isMilitary();
         requirement = educationType.getRequirement() != null ? new EEducationType(educationType.getRequirement()) : null;
-    }
-
-    @JsonIgnore
-    public boolean isWorkforce() {
-        return isWorkforce;
-    }
-
-    @Nullable
-    public EEducationType getRequirement() {
-        return requirement;
     }
 }

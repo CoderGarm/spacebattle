@@ -52,7 +52,7 @@ public class JobCostsCalculator {
             final BigDecimal multiply = getLevelCosts(targetLevel, amount);
             resources.setAbsoluteResourceValue(resourceType, multiply.longValue());
         }
-        for (final EEducationType educationType : EEducationType.valuesOfWorkforce()) {
+        for (final EEducationType educationType : EEducationType.WORKFORCE) {
             final long amount = crewRequirement.getCrewAmountByType(educationType);
             if (amount == 0) {
                 continue;

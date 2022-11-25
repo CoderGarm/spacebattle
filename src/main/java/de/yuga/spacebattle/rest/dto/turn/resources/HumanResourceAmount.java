@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.rest.dto.turn.resources;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.enums.EEducationType;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -29,6 +30,12 @@ public class HumanResourceAmount {
     @Nonnull
     public EEducationType getResourceType() {
         return resourceType;
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public de.yuga.spacebattle.backend.enums.EEducationType getRealEducationType() {
+        return de.yuga.spacebattle.backend.enums.EEducationType.valueOf(resourceType.getTypeName());
     }
 
     @Nonnull
