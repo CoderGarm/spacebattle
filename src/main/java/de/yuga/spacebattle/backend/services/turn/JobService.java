@@ -196,7 +196,7 @@ public class JobService {
                 .filter(construction -> construction.getBuilding().equals(building))
                 .findFirst().orElse(null);
 
-        final Constructable constructable = new Constructable(building, existingC != null ? existingC.getOperationalLevel() + 1 : 1);
+        final Constructable constructable = new Constructable(building, existingC != null ? existingC.getLevel() + 1 : 1);
         final Construction facility = planet.getConstructions().stream()
                 .filter(construction -> construction.getBuilding().getProductionTarget() == EResourceType.CONSTRUCTION)
                 .findFirst().orElse(null);

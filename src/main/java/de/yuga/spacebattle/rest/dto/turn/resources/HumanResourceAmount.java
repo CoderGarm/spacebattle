@@ -34,7 +34,7 @@ public class HumanResourceAmount {
 
     @Nonnull
     @JsonIgnore
-    public de.yuga.spacebattle.backend.enums.EEducationType getRealEducationType() {
+    public de.yuga.spacebattle.backend.enums.EEducationType getRealType() {
         return de.yuga.spacebattle.backend.enums.EEducationType.valueOf(resourceType.getTypeName());
     }
 

@@ -37,4 +37,6 @@ public class EnumValueDto {
     private de.yuga.spacebattle.backend.enums.EWeaponType[] eWeaponType;
     @JsonProperty
     private de.yuga.spacebattle.backend.enums.EWikiCategory[] eWikiCategories;
+    @JsonProperty
+    private de.yuga.spacebattle.backend.enums.ECapacityAreaType[] eCapacityAreaTypes;
 }

@@ -245,7 +245,7 @@ public class ColonizationService {
             throw new NotifyWebUserException("Buying this systems information is to expensive for you.", payingPossibleResult);
         }
 
-        resourceDeposit.updateResource(costs.getRealResourceType(), costs.getAmount());
+        resourceDeposit.updateResource(costs.getRealType(), costs.getAmount());
         assert withKnownStarSystems != null;
         withKnownStarSystems.addKnownStarSystems(starSystem);
         userService.save(withKnownStarSystems);
@@ -265,7 +265,7 @@ public class ColonizationService {
         final ResourceAmount costs = ColonizationCostCalculator.calculateInformationCost(starSystem);
         final ResourceDeposit resourceDeposit = mainPlanet.getResourceDeposit();
         ResourceDeposit c = new ResourceDeposit(EDepositType.COSTS);
-        c.setAbsoluteResourceValue(costs.getRealResourceType(), costs.getAmount());
+        c.setAbsoluteResourceValue(costs.getRealType(), costs.getAmount());
         return resourceDeposit.isPayingPossible(c);
     }
 

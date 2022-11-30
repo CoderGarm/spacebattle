@@ -54,4 +54,12 @@ public class PayingPossibleResult {
     public String getMessage() {
         return message;
     }
+
+    public PayingPossibleResult merge(@Nonnull final PayingPossibleResult toAdd) {
+        Preconditions.checkNotNull(toAdd, "toAdd must not be empty");
+
+        resourceTypes.addAll(toAdd.resourceTypes);
+        educationTypes.addAll(toAdd.educationTypes);
+        return this;
+    }
 }

@@ -259,7 +259,7 @@ public class PlanetApi extends BaseApi {
     public ResponseEntity<?> repairFleets(@PathVariable("idFleet") final int idFleet) {
 
         final int idUser = getIdUser();
-        final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetService.findById(idFleet);
+        final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetService.find(idFleet);
         PreconditionWebHelper.checkNotNull(fleet, "fleet must not be empty");
 
         final FleetOrbit orbit = fleet.getOrbit();
@@ -387,11 +387,11 @@ public class PlanetApi extends BaseApi {
         Preconditions.checkNotNull(toUpdate, "toUpdate must not be empty");
 
         data.getResources().forEach(res -> {
-            final EResourceType realResourceType = res.getRealResourceType();
+            final EResourceType realResourceType = res.getRealType();
             toUpdate.setAbsoluteResourceValue(realResourceType, res.getAmount());
         });
         data.getHumanResources().forEach(res -> {
-            final EEducationType realResourceType = res.getRealEducationType();
+            final EEducationType realResourceType = res.getRealType();
             toUpdate.setAbsoluteCrewRequirement(realResourceType, res.getAmount());
         });
     }

@@ -32,7 +32,7 @@ public class ResourceAmount {
 
     @Nonnull
     @JsonIgnore
-    public de.yuga.spacebattle.backend.enums.EResourceType getRealResourceType() {
+    public de.yuga.spacebattle.backend.enums.EResourceType getRealType() {
         return de.yuga.spacebattle.backend.enums.EResourceType.valueOf(resourceType.getTypeName());
     }
 

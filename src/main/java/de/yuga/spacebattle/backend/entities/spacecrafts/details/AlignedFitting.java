@@ -55,7 +55,7 @@ public class AlignedFitting {
      * <p>
      * Note that a {@link EWeaponAlignment#BROADSIDE} aligned fit needs to be doubled.
      */
-    @Min(0)
+    @Min(1)
     private int amount;
 
     public AlignedFitting() {
@@ -211,5 +211,15 @@ public class AlignedFitting {
             range = launcher.getAmmunitionModule().getMissile().getMaximumMissileRange();
         }
         return range;
+    }
+
+    public int calculateUsedCapacity() {
+        if (launcher != null) {
+            return amount * launcher.getUseCapacity();
+        }
+        if (weapon != null) {
+            return amount * weapon.getUseCapacity();
+        }
+        return 0;
     }
 }

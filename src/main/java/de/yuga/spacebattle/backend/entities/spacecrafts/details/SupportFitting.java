@@ -93,4 +93,8 @@ public class SupportFitting {
     public int hashCode() {
         return passiveModule.hashCode();
     }
+
+    public int calculateUsedCapacity() {
+        return amount * passiveModule.getUseCapacity();
+    }
 }

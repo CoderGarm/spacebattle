@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.entities.misc.HasCosts;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
+import de.yuga.spacebattle.backend.enums.ECapacityAreaType;
 import de.yuga.spacebattle.backend.enums.EHullType;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
@@ -168,5 +169,23 @@ public class Hull extends HasCosts {
     @Override
     public int hashCode() {
         return id;
+    }
+
+    public int getConstructionCapacity(@Nonnull final ECapacityAreaType capacityAreaType) {
+        Preconditions.checkNotNull(capacityAreaType, "capacityAreaType must not be empty");
+
+        switch (capacityAreaType) {
+            case BOW:
+                return getConstructionCapacityBow();
+            case STERN:
+                return getConstructionCapacityStern();
+            case BROADSIDE:
+                return getConstructionCapacityBroadsides();
+            case MODULE:
+                return getConstructionCapacity();
+            default:
+            case OVERALL:
+                return getOverallConstructionCapacity();
+        }
     }
 }

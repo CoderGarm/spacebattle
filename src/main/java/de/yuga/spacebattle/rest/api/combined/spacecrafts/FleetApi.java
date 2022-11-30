@@ -450,7 +450,7 @@ public class FleetApi extends BaseApi {
                                                                             @Nonnull final FleetMove move) {
         Preconditions.checkNotNull(move, "move shouldn't be null!");
 
-        final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetService.findById(move.getIdFleetToMove());
+        final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetService.find(move.getIdFleetToMove());
         PreconditionWebHelper.checkNotNull(fleet, "There is no fleet to move.");
 
         if (fleet.getOwner().getId() != idUser) {

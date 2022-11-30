@@ -5,6 +5,7 @@ import de.yuga.spacebattle.backend.combat.round.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
@@ -13,11 +14,14 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateAccessor;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateSnapshot;
+import de.yuga.spacebattle.backend.enums.ECapacityAreaType;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.ESupportType;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.CapabilityValue;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.CapacityValue;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapabilities;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapacityAreas;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -32,10 +36,12 @@ public class SpacecraftCalculator {
 
     private Map<EModuleType, BigDecimal> effectValueByModuleType;
 
+    private Map<ECapacityAreaType, CapacityValue> capacities;
+
     public SpacecraftCapabilities getSpaceCraftCapabilities(@Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
-        effectValueByModuleType = createBaseData();
+        createBaseData();
         final Set<de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState> warshipHealthStates = fleet.getAliveShips().stream()
                 .map(WarShip::getWarshipHealthState)
                 .collect(Collectors.toSet());
@@ -48,7 +54,7 @@ public class SpacecraftCalculator {
     public SpacecraftCapabilities getSpaceCraftCapabilities(@Nonnull final ShipClass shipClass) {
         Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
 
-        effectValueByModuleType = createBaseData();
+        createBaseData();
         final Map<ShipClass, Integer> shipClasses = new HashMap<>();
         shipClasses.put(shipClass, 1);
         setValue(shipClasses);
@@ -58,7 +64,7 @@ public class SpacecraftCalculator {
     public SpacecraftCapabilities getSpaceCraftCapabilities(@Nonnull final Map<ShipClass, Integer> shipClasses) {
         Preconditions.checkNotNull(shipClasses, "shipClasses must not be empty");
 
-        effectValueByModuleType = createBaseData();
+        createBaseData();
         setValue(shipClasses);
         return getSpacecraftCapabilities();
     }
@@ -66,7 +72,7 @@ public class SpacecraftCalculator {
     public SpacecraftCapabilities getSpaceCraftCapabilities(@Nonnull final WarshipHealthStateAccessor warshipHealthState) {
         Preconditions.checkNotNull(warshipHealthState, "warshipHealthState must not be empty");
 
-        effectValueByModuleType = createBaseData();
+        createBaseData();
         setValue(warshipHealthState);
         return getSpacecraftCapabilities();
     }
@@ -74,7 +80,7 @@ public class SpacecraftCalculator {
     public SpacecraftCapabilities getSpaceCraftCapabilities(@Nonnull final Collection<de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateAccessor> warshipHealthStates) {
         Preconditions.checkNotNull(warshipHealthStates, "warshipHealthStates must not be empty");
 
-        effectValueByModuleType = createBaseData();
+        createBaseData();
         warshipHealthStates.forEach(this::setValue);
         return getSpacecraftCapabilities();
     }
@@ -82,7 +88,7 @@ public class SpacecraftCalculator {
     public SpacecraftCapabilities getSpaceCraftCapabilities(@Nonnull final FleetSnapshot fleetSnapshot) {
         Preconditions.checkNotNull(fleetSnapshot, "fleetSnapshot must not be empty");
 
-        effectValueByModuleType = createBaseData();
+        createBaseData();
         final Set<WarshipHealthStateSnapshot> ships = fleetSnapshot.getShips();
         ships.forEach(this::setValue);
         return getSpacecraftCapabilities();
@@ -91,7 +97,7 @@ public class SpacecraftCalculator {
     public Set<de.yuga.spacebattle.backend.entities.turn.battle.combat.CapabilityValue> getCapabilityValues(@Nonnull final ShipClass shipClass) {
         Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
 
-        effectValueByModuleType = createBaseData();
+        createBaseData();
         final Map<ShipClass, Integer> shipClasses = new HashMap<>();
         shipClasses.put(shipClass, 1);
         setValue(shipClasses);
@@ -103,7 +109,7 @@ public class SpacecraftCalculator {
     public Set<de.yuga.spacebattle.backend.entities.turn.battle.combat.CapabilityValue> getCapabilityValues(@Nonnull final WarshipHealthState warshipHealthState) {
         Preconditions.checkNotNull(warshipHealthState, "warshipHealthState must not be empty");
 
-        effectValueByModuleType = createBaseData();
+        createBaseData();
         setValue(warshipHealthState);
         return effectValueByModuleType.entrySet().stream()
                 .map(de.yuga.spacebattle.backend.entities.turn.battle.combat.CapabilityValue::new)
@@ -113,7 +119,7 @@ public class SpacecraftCalculator {
     public Set<de.yuga.spacebattle.backend.entities.turn.battle.combat.CapabilityValue> getCapabilityValues(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState healthState) {
         Preconditions.checkNotNull(healthState, "healthState must not be empty");
 
-        effectValueByModuleType = createBaseData();
+        createBaseData();
         setValue(healthState);
         return effectValueByModuleType.entrySet().stream()
                 .map(de.yuga.spacebattle.backend.entities.turn.battle.combat.CapabilityValue::new)
@@ -158,8 +164,9 @@ public class SpacecraftCalculator {
         return new SpacecraftCapabilities().withValues(capabilityValues);
     }
 
-    private Map<EModuleType, BigDecimal> createBaseData() {
-        return Arrays.stream(EModuleType.values())
+    private void createBaseData() {
+        capacities = new HashMap<>();
+        effectValueByModuleType = Arrays.stream(EModuleType.values())
                 .filter(type -> !PROPULSIONS.contains(type))
                 .collect(Collectors.toMap(Function.identity(), value -> BigDecimal.ZERO));
     }
@@ -168,6 +175,7 @@ public class SpacecraftCalculator {
         Preconditions.checkNotNull(warshipHealthState, "warshipHealthState shouldn't be null!");
 
         final ShipClass shipClass = warshipHealthState.getWarShip().getShipClass();
+        setCapacityValue(shipClass);
         final Map<ESupportType, List<SupportFitting>> supportTypeToModule = shipClass.getSupportFittings().stream()
                 .collect(Collectors.groupingBy(c -> c.getPassiveModule().getSupportType(),
                         Collectors.mapping(Function.identity(), Collectors.toList())));
@@ -382,5 +390,61 @@ public class SpacecraftCalculator {
 
         final BigDecimal effectiveResultingValue = new BigDecimal(effectValue);
         effectValueByModuleType.put(moduleType, effectiveResultingValue);
+    }
+
+    @Nonnull
+    public SpacecraftCapacityAreas getSpacecraftCapacityAreas(@Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+
+        createBaseData();
+        fleet.getAliveShips().forEach(warShip -> setCapacityValue(warShip.getShipClass()));
+        return new SpacecraftCapacityAreas().withValues(capacities);
+    }
+
+    @Nonnull
+    public SpacecraftCapacityAreas getSpacecraftCapacityAreas(@Nonnull final ShipClass shipClass) {
+        Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
+
+        createBaseData();
+        setCapacityValue(shipClass);
+        return new SpacecraftCapacityAreas().withValues(capacities);
+    }
+
+    @Nonnull
+    public SpacecraftCapacityAreas getSpacecraftCapacityAreas(@Nonnull final Map<ShipClass, Integer> shipClasses) {
+        Preconditions.checkNotNull(shipClasses, "shipClasses must not be empty");
+
+        createBaseData();
+        shipClasses.forEach((shipClass, amount) -> {
+            for (int i = 0; i < amount; i++) {
+                setCapacityValue(shipClass);
+            }
+        });
+        return new SpacecraftCapacityAreas().withValues(capacities);
+    }
+
+    @Nonnull
+    public SpacecraftCapacityAreas getSpacecraftCapacityAreas(@Nonnull final FleetSnapshot fleetSnapshot) {
+        Preconditions.checkNotNull(fleetSnapshot, "fleetSnapshot must not be empty");
+
+        createBaseData();
+        fleetSnapshot.getShips().forEach(warshipHealthStateSnapshot -> {
+            final ShipClass shipClass = warshipHealthStateSnapshot.getWarShip().getShipClass();
+            setCapacityValue(shipClass);
+        });
+        return new SpacecraftCapacityAreas().withValues(capacities);
+    }
+
+    private void setCapacityValue(@Nonnull final ShipClass shipClass) {
+        Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
+
+        final Hull hull = shipClass.getHull();
+        for (final ECapacityAreaType capacityAreaType : ECapacityAreaType.values()) {
+            final CapacityValue orDefault = capacities.getOrDefault(capacityAreaType, new CapacityValue());
+            orDefault.setCapacityArea(capacityAreaType);
+            orDefault.setUsedCapacity(shipClass.getUsedCapacity(capacityAreaType));
+            orDefault.setCapacity(hull != null ? hull.getConstructionCapacity(capacityAreaType) : 0);
+            capacities.put(capacityAreaType, orDefault);
+        }
     }
 }

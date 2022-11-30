@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -192,8 +193,12 @@ public class JobApi extends BaseApi {
     public ResponseEntity<?> getTransportJobs() {
         final de.yuga.spacebattle.backend.entities.turn.Tick today = tickService.getToday();
         final int idUser = getIdUser();
-        return ResponseEntity.ok(transportationCache.get(today, idUser).stream()
+        final List<TransportJob> result = transportationCache.getTransports(today, idUser).stream()
+                .map(TransportJob::new)
+                .collect(Collectors.toList());
+        result.addAll(transportationCache.getOrbitalTransports(today, idUser).stream()
                 .map(TransportJob::new)
                 .collect(Collectors.toList()));
+        return ResponseEntity.ok(result);
     }
 }

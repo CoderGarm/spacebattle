@@ -211,7 +211,7 @@ public class FleetService {
     }
 
     @Nullable
-    public Fleet findById(int idFleet) {
+    public Fleet find(int idFleet) {
         return fleetRepository.findById(idFleet).orElse(null);
     }
 
@@ -231,12 +231,6 @@ public class FleetService {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
         return fleetRepository.save(fleet);
-    }
-
-    public Fleet saveAndFlush(@Nonnull final Fleet fleet) {
-        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
-
-        return fleetRepository.saveAndFlush(fleet);
     }
 
     public void markAsDestroyed(@Nonnull final Fleet fleet) {

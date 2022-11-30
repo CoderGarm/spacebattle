@@ -75,4 +75,8 @@ public class AmmunitionFitting {
     public int hashCode() {
         return ammunitionModule.hashCode();
     }
+
+    public int calculateUsedCapacity() {
+        return amount * ammunitionModule.getUseCapacity();
+    }
 }

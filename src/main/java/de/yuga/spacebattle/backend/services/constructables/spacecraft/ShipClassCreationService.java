@@ -20,6 +20,7 @@ import de.yuga.spacebattle.backend.services.spacecraft.HullService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapabilities;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapacityAreas;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstructionSelection;
 import de.yuga.spacebattle.rest.dto.spacecrafts.details.AlignedFitting;
 import de.yuga.spacebattle.rest.dto.spacecrafts.details.AmmunitionFitting;
@@ -89,12 +90,11 @@ public class ShipClassCreationService {
     public ShipClass mapAndCreateShipClass(@Nonnull final de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass shipClass, final int idUser) {
         Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
 
-        final Set<ConstraintViolation<de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass>> validate = validator.validate(shipClass);
+        final ShipClass entity = mapShipClassToEntity(shipClass, idUser);
+        final Set<ConstraintViolation<ShipClass>> validate = validator.validate(entity);
         if (!validate.isEmpty()) {
             throw new NotifyWebUserException("The provided class is not valid.", validate);
         }
-        final ShipClass entity = mapShipClassToEntity(shipClass, idUser);
-
         return shipClassService.save(entity);
     }
 
@@ -333,10 +333,18 @@ public class ShipClassCreationService {
     }
 
     @Nonnull
-    public SpacecraftCapabilities getCaps(@Nonnull final de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass shipClass, final int idUser) {
+    public SpacecraftCapabilities getShipClassCapabilities(@Nonnull final de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass shipClass, final int idUser) {
         Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
 
         final ShipClass entity = mapShipClassToEntity(shipClass, idUser);
         return new SpacecraftCalculator().getSpaceCraftCapabilities(entity);
+    }
+
+    @Nonnull
+    public SpacecraftCapacityAreas getShipClassCapacities(@Nonnull final de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass shipClass, final int idUser) {
+        Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
+
+        final ShipClass entity = mapShipClassToEntity(shipClass, idUser);
+        return new SpacecraftCalculator().getSpacecraftCapacityAreas(entity);
     }
 }

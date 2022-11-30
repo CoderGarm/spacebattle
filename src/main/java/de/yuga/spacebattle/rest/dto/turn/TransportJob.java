@@ -2,7 +2,7 @@ package de.yuga.spacebattle.rest.dto.turn;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.rest.dto.orbitals.Planet;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.turn.resources.HumanResourceAmount;
 import de.yuga.spacebattle.rest.dto.turn.resources.ResourceAmount;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -16,13 +16,13 @@ public class TransportJob {
 
     @Nonnull
     @JsonProperty
-    @Schema(required = true, description = "The planet from which it comes.")
-    private Planet from;
+    @Schema(required = true, description = "The origin from which it comes.")
+    private String from;
 
     @Nonnull
     @JsonProperty
-    @Schema(required = true, description = "The planet to which it goes.")
-    private Planet to;
+    @Schema(required = true, description = "The designation to which it goes.")
+    private String to;
 
     @Nonnull
     @JsonProperty
@@ -37,8 +37,27 @@ public class TransportJob {
     public TransportJob(@Nonnull final de.yuga.spacebattle.backend.dto.turn.TransportJob from) {
         Preconditions.checkNotNull(from, "from must not be empty");
 
-        this.from = new Planet(from.getFrom());
-        this.to = new Planet(from.getTo());
+        this.from = from.getFrom().getName();
+        this.to = from.getTo().getName();
+        this.resources = from.getResources().entrySet().stream().map(e -> new ResourceAmount(e.getKey(), e.getValue())).collect(Collectors.toList());
+        this.humanResources = from.getHumanResources().entrySet().stream().map(e -> new HumanResourceAmount(e.getKey(), e.getValue())).collect(Collectors.toList());
+    }
+
+    public TransportJob(@Nonnull final de.yuga.spacebattle.backend.dto.turn.OrbitalTransportJob from) throws NotifyWebUserException {
+        Preconditions.checkNotNull(from, "from must not be empty");
+
+        switch (from.getTransportType()) {
+            case PLANET_TO_FLEET:
+                this.from = from.getPlanet().getName();
+                this.to = from.getFleet().getName();
+                break;
+            case FLEET_TO_PLANET:
+                this.from = from.getFleet().getName();
+                this.to = from.getPlanet().getName();
+                break;
+            default:
+                throw new NotifyWebUserException("This is sadly not implemented.");
+        }
         this.resources = from.getResources().entrySet().stream().map(e -> new ResourceAmount(e.getKey(), e.getValue())).collect(Collectors.toList());
         this.humanResources = from.getHumanResources().entrySet().stream().map(e -> new HumanResourceAmount(e.getKey(), e.getValue())).collect(Collectors.toList());
     }

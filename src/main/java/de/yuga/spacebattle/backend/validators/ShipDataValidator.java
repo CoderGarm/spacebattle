@@ -7,15 +7,9 @@ import com.google.common.collect.Multimap;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Armor;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Sidewall;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
-import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
+import de.yuga.spacebattle.backend.enums.ECapacityAreaType;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,8 +17,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Transactional
 public class ShipDataValidator implements ConstraintValidator<ShipValidator, ShipClass> {
@@ -95,70 +87,35 @@ public class ShipDataValidator implements ConstraintValidator<ShipValidator, Shi
 
         final Hull hull = shipClass.getHull();
         if (hull != null) {
-            // checks is capacity is overridden
-            final Propulsion propulsion = shipClass.getPropulsion();
-            final Armor armor = shipClass.getArmor();
-            final ElectronicWarfare electronicWarfare = shipClass.getElectronicWarfare();
-            final Sidewall sidewall = shipClass.getSidewall();
-
-            final Set<AmmunitionFitting> ammunitionFittings = shipClass.getAmmunitionFittings();
-            final Set<SupportFitting> supportFittings = shipClass.getSupportFittings();
-
-            int usedCapacity = 0;
-            usedCapacity = addUsedCapacity(usedCapacity, propulsion);
-            usedCapacity = addUsedCapacity(usedCapacity, armor);
-            usedCapacity = addUsedCapacity(usedCapacity, electronicWarfare);
-            usedCapacity = addUsedCapacity(usedCapacity, sidewall);
-            for (AmmunitionFitting fitting : ammunitionFittings) {
-                int amount = fitting.getAmount();
-                for (; amount >= 0; amount--) {
-                    usedCapacity = addUsedCapacity(usedCapacity, fitting.getAmmunitionModule());
-                }
-            }
-            for (SupportFitting fitting : supportFittings) {
-                int amount = fitting.getAmount();
-                for (; amount >= 0; amount--) {
-                    usedCapacity = addUsedCapacity(usedCapacity, fitting.getPassiveModule());
-                }
-            }
-
+            // checks if capacity is overridden
+            final int usedCapacity = shipClass.getUsedCapacity(ECapacityAreaType.MODULE);
             int constructionCapacity = hull.getConstructionCapacity();
             if (usedCapacity > constructionCapacity) {
                 errorMap.put("ConstructionCapacity", "Capacity is exceeded.");
             }
 
-            final Set<AlignedFitting> fittings = shipClass.getFittings();
-            final Set<AlignedFitting> bowFittings = fittings.stream().filter(f -> EWeaponAlignment.BOW == f.getWeaponAlignment()).collect(Collectors.toSet());
-            int usedCapacityBow = 0;
-            for (AlignedFitting f : bowFittings) {
-                addUsedCapacity(usedCapacityBow, f.getWeapon());
-                addUsedCapacity(usedCapacityBow, f.getLauncher());
-            }
+            int usedCapacityBow = shipClass.getUsedCapacity(ECapacityAreaType.BOW);
             final int constructionCapacityBow = hull.getConstructionCapacityBow();
             if (usedCapacityBow > constructionCapacityBow) {
                 errorMap.put("ConstructionCapacity Bow", "Capacity is exceeded.");
             }
 
-            final Set<AlignedFitting> sternFittings = fittings.stream().filter(f -> EWeaponAlignment.STERN == f.getWeaponAlignment()).collect(Collectors.toSet());
-            int usedCapacityStern = 0;
-            for (AlignedFitting f : sternFittings) {
-                addUsedCapacity(usedCapacityStern, f.getWeapon());
-                addUsedCapacity(usedCapacityStern, f.getLauncher());
-            }
+            int usedCapacityStern = shipClass.getUsedCapacity(ECapacityAreaType.STERN);
             final int constructionCapacityStern = hull.getConstructionCapacityStern();
             if (usedCapacityStern > constructionCapacityStern) {
                 errorMap.put("ConstructionCapacity Stern", "Capacity is exceeded.");
             }
 
-            final Set<AlignedFitting> broadsideFittings = fittings.stream().filter(f -> EWeaponAlignment.BROADSIDE == f.getWeaponAlignment()).collect(Collectors.toSet());
-            int usedCapacityBroadside = 0;
-            for (AlignedFitting f : broadsideFittings) {
-                addUsedCapacity(usedCapacityBroadside, f.getWeapon());
-                addUsedCapacity(usedCapacityBroadside, f.getLauncher());
-            }
+            int usedCapacityBroadside = shipClass.getUsedCapacity(ECapacityAreaType.BROADSIDE);
             final int constructionCapacityBroadsides = hull.getConstructionCapacityBroadsides();
             if (usedCapacityBroadside > constructionCapacityBroadsides) {
                 errorMap.put("ConstructionCapacity Broadsides", "Capacity is exceeded.");
+            }
+
+            int usedCapacityOverall = shipClass.getUsedCapacity(ECapacityAreaType.OVERALL);
+            final int constructionCapacityOverall = hull.getOverallConstructionCapacity();
+            if (usedCapacityOverall > constructionCapacityOverall) {
+                errorMap.put("ConstructionCapacity Overall", "Capacity is exceeded.");
             }
         }
     }

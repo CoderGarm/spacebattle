@@ -33,37 +33,44 @@ public class SpacecraftCapabilities {
     public SpacecraftCapabilities(@Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
-        capabilities.addAll(new SpacecraftCalculator().getSpaceCraftCapabilities(fleet).getCapabilities());
+        setValues(new SpacecraftCalculator().getSpaceCraftCapabilities(fleet));
+    }
+
+    @JsonIgnore
+    private void setValues(@Nonnull final SpacecraftCapabilities spaceCraftCapabilities) {
+        Preconditions.checkNotNull(spaceCraftCapabilities, "spaceCraftCapabilities must not be empty");
+
+        capabilities.addAll(spaceCraftCapabilities.getCapabilities());
     }
 
     public SpacecraftCapabilities(@Nonnull final Collection<WarshipHealthStateAccessor> warshipHealthStateSnapshots) {
         Preconditions.checkNotNull(warshipHealthStateSnapshots, "warshipHealthStateSnapshots shouldn't be null!");
 
-        capabilities.addAll(new SpacecraftCalculator().getSpaceCraftCapabilities(warshipHealthStateSnapshots).getCapabilities());
+        setValues(new SpacecraftCalculator().getSpaceCraftCapabilities(warshipHealthStateSnapshots));
     }
 
     public SpacecraftCapabilities(@Nonnull final ShipClass shipClass) {
         Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
 
-        capabilities.addAll(new SpacecraftCalculator().getSpaceCraftCapabilities(shipClass).getCapabilities());
+        setValues(new SpacecraftCalculator().getSpaceCraftCapabilities(shipClass));
     }
 
     public SpacecraftCapabilities(@Nonnull final Map<ShipClass, Integer> shipClasses) {
         Preconditions.checkNotNull(shipClasses, "shipClasses must not be empty");
 
-        capabilities.addAll(new SpacecraftCalculator().getSpaceCraftCapabilities(shipClasses).getCapabilities());
+        setValues(new SpacecraftCalculator().getSpaceCraftCapabilities(shipClasses));
     }
 
     public SpacecraftCapabilities(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateAccessor warshipHealthState) {
         Preconditions.checkNotNull(warshipHealthState, "warshipHealthState must not be empty");
 
-        capabilities.addAll(new SpacecraftCalculator().getSpaceCraftCapabilities(warshipHealthState).getCapabilities());
+        setValues(new SpacecraftCalculator().getSpaceCraftCapabilities(warshipHealthState));
     }
 
     public SpacecraftCapabilities(@Nonnull final FleetSnapshot fleetSnapshot) {
         Preconditions.checkNotNull(fleetSnapshot, "fleetSnapshot must not be empty");
 
-        capabilities.addAll(new SpacecraftCalculator().getSpaceCraftCapabilities(fleetSnapshot).getCapabilities());
+        setValues(new SpacecraftCalculator().getSpaceCraftCapabilities(fleetSnapshot));
     }
 
     @Nonnull

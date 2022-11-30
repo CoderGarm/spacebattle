@@ -68,6 +68,11 @@ public class Fleet {
     @Schema(required = true, description = "The without-any-damage effect value per module type.")
     private SpacecraftCapabilities baseSpacecraftCapabilities;
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The capacities used per area.")
+    private SpacecraftCapacityAreas spacecraftCapacityAreas;
+
     @JsonProperty
     @Schema(required = true, description = "If the fleet can run interstellar movements.")
     private boolean isFTLCapable;
@@ -92,6 +97,7 @@ public class Fleet {
         this.ships.addAll(fleet.getAllShips().stream().map(w -> new WarShip(w, w.getWarshipHealthState(), languageCode)).collect(Collectors.toList()));
         this.spacecraftCapabilities = new SpacecraftCapabilities(fleet);
         this.baseSpacecraftCapabilities = new SpacecraftCapabilities(fleet.getShipsByClass());
+        this.spacecraftCapacityAreas = new SpacecraftCapacityAreas(fleet);
         this.isFTLCapable = fleet.isFTLCapable();
         this.state = new StateBlock(fleet);
     }
@@ -111,6 +117,7 @@ public class Fleet {
         this.ships.addAll(fleetSnapshot.getShips().stream().map(w -> new WarShip(w, languageCode)).collect(Collectors.toList()));
         this.spacecraftCapabilities = new SpacecraftCapabilities(fleetSnapshot);
         this.baseSpacecraftCapabilities = new SpacecraftCapabilities(fleet.getShipsByClass());
+        this.spacecraftCapacityAreas = new SpacecraftCapacityAreas(fleet);
         this.isFTLCapable = fleet.isFTLCapable();
         this.state = new StateBlock(fleet);
     }

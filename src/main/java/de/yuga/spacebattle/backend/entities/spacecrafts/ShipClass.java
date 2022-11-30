@@ -19,6 +19,7 @@ import de.yuga.spacebattle.backend.validators.ShipValidator;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
@@ -33,9 +34,9 @@ import java.util.stream.Collectors;
         @NamedQuery(name = "ShipClass.checkIfNameIsFree", query = "SELECT COUNT(a) FROM ShipClass a WHERE a.owner.id = :idOwner AND UPPER(a.name) = UPPER(:className)"),
 })
 @Entity
+@ShipValidator
 @Table(name = "shipClass")
 @AttributeOverride(name = "id", column = @Column(name = "idShipClass"))
-@ShipValidator
 public class ShipClass extends Deletable {
 
     @Nonnull
@@ -52,39 +53,46 @@ public class ShipClass extends Deletable {
     @Size(min = 3, max = 30, message = "name should be between 3 and 30 characters long")
     private String name;
 
+    @Valid
     @Nullable
     @NotNull
     @ManyToOne
     @JoinColumn(name = "idHull", updatable = false)
     private Hull hull;
 
+    @Valid
     @Nullable
     @NotNull
     @ManyToOne
     @JoinColumn(name = "idPropulsion")
     private Propulsion propulsion;
 
+    @Valid
     @Nullable
     @ManyToOne
     @JoinColumn(name = "idArmor")
     private Armor armor;
 
+    @Valid
     @Nullable
     @ManyToOne
     @JoinColumn(name = "idSidewall")
     private Sidewall sidewall;
 
+    @Valid
     @Nullable
     @ManyToOne
     @JoinColumn(name = "idElectronicWarfare")
     private ElectronicWarfare electronicWarfare;
 
+    @Valid
     @Nonnull
     @NotNull
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "alignedFitting", joinColumns = @JoinColumn(name = "idShipClass"))
     private final Set<AlignedFitting> fittings = new HashSet<>();
 
+    @Valid
     @Nonnull
     @NotNull
     @ElementCollection(fetch = FetchType.EAGER)
@@ -262,6 +270,15 @@ public class ShipClass extends Deletable {
 
         return fittings.stream()
                 .filter(e -> weaponType == e.getWeaponType() && weaponAlignment == e.getWeaponAlignment())
+                .collect(Collectors.toSet());
+    }
+
+    @Nonnull
+    public Set<AlignedFitting> getFittingByAlignment(@Nonnull final EWeaponAlignment weaponAlignment) {
+        Preconditions.checkNotNull(weaponAlignment, "weaponAlignment shouldn't be null!");
+
+        return fittings.stream()
+                .filter(e -> weaponAlignment == e.getWeaponAlignment())
                 .collect(Collectors.toSet());
     }
 
@@ -595,5 +612,35 @@ public class ShipClass extends Deletable {
     @Override
     public int hashCode() {
         return 31 * id;
+    }
+
+    public int getUsedCapacity(@Nonnull final ECapacityAreaType capacityAreaType) {
+        Preconditions.checkNotNull(capacityAreaType, "capacityAreaType must not be empty");
+
+        switch (capacityAreaType) {
+            case BOW:
+            case STERN:
+            case BROADSIDE:
+                assert capacityAreaType.getAlignment() != null : "Otherwise we had a problem.";
+                return getFittingByAlignment(capacityAreaType.getAlignment()).stream()
+                        .map(AlignedFitting::calculateUsedCapacity)
+                        .reduce(0, Integer::sum);
+            case MODULE:
+                int usedCapacity = getSupportFittings().stream()
+                        .map(SupportFitting::calculateUsedCapacity)
+                        .reduce(0, Integer::sum);
+                usedCapacity += getAmmunitionFittings().stream()
+                        .map(AmmunitionFitting::calculateUsedCapacity)
+                        .reduce(0, Integer::sum);
+                usedCapacity += propulsion != null ? propulsion.getUseCapacity() : 0;
+                usedCapacity += armor != null ? armor.getUseCapacity() : 0;
+                usedCapacity += sidewall != null ? sidewall.getUseCapacity() : 0;
+                usedCapacity += electronicWarfare != null ? electronicWarfare.getUseCapacity() : 0;
+                return usedCapacity;
+            case OVERALL:
+                return ECapacityAreaType.getValuesWithoutOverall().stream().map(this::getUsedCapacity).reduce(0, Integer::sum);
+            default:
+                return 0;
+        }
     }
 }

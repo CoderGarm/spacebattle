@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.FittingUtils;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
@@ -62,6 +63,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -137,7 +141,11 @@ public class MasterOfTheUniverseService {
     private final static Map<EEducationType, Long> XXXL_CREW = Map.of(
             EEducationType.ENLISTED, 500L,
             EEducationType.OFFICER, 180L);
+
     public static final String FLASHKID = "Flashkid";
+
+    @Nonnull
+    private final Validator validator;
 
     @Nonnull
     private final TickService tickService;
@@ -230,6 +238,7 @@ public class MasterOfTheUniverseService {
         this.translatableService = Preconditions.checkNotNull(translatableService, "translatableService must not be empty");
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
+        validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 
     @PostConstruct
@@ -1195,22 +1204,77 @@ public class MasterOfTheUniverseService {
         }
         shipClass.setFittings(fittings);
 
-        final List<AlignedFitting> launcherFittings = fittings.stream()
-                .filter(f -> f.getLauncher() != null)
-                .collect(Collectors.toList());
-        for (final AlignedFitting af : launcherFittings) {
-            final AmmunitionModule ammunitionModule = af.getLauncher().getAmmunitionModule();
-            final int amount = af.getAmount();
-            shipClass.addAmmunitionFitting(new AmmunitionFitting(ammunitionModule, amount));
-            cc -= ammunitionModule.getUseCapacity() * amount;
-        }
+        final Map<Launcher, Integer> attackMissilesToAmount = fittings.stream()
+                .filter(FittingUtils.ATTACK_MISSILES)
+                .collect(Collectors.groupingBy(AlignedFitting::getLauncher,
+                        Collectors.mapping(AlignedFitting::getAmount, Collectors.reducing(0, Integer::sum))));
+
+        final Map<Launcher, Integer> counterMissilesToAmount = fittings.stream()
+                .filter(FittingUtils.COUNTER_MISSILES)
+                .collect(Collectors.groupingBy(AlignedFitting::getLauncher,
+                        Collectors.mapping(AlignedFitting::getAmount, Collectors.reducing(0, Integer::sum))));
+
+        final Integer amountAttack = attackMissilesToAmount.values().stream().reduce(0, Integer::sum);
+        final Integer amountCounter = counterMissilesToAmount.values().stream().reduce(0, Integer::sum);
+
+        final int fullAmount = amountAttack + amountCounter;
+        final int piece = cc / fullAmount;
+        int freeCapForAttackAmmo = piece * amountAttack;
+        int freeCapForCounterAmmo = piece * amountCounter;
+
+        cc = addAmmunition(shipClass, cc, attackMissilesToAmount, freeCapForAttackAmmo);
+        cc = addAmmunition(shipClass, cc, counterMissilesToAmount, freeCapForCounterAmmo);
 
         final int neededCapacityForSupport = passiveModules.stream().map(PassiveModule::getUseCapacity).reduce(0, Integer::sum);
         final int amountOfSupportSets = (cc / neededCapacityForSupport) - 1;
-        final Set<SupportFitting> supportFittings = passiveModules.stream().map(af -> new SupportFitting(af, amountOfSupportSets)).collect(Collectors.toSet());
-        shipClass.setSupportFittings(supportFittings);
+        if (amountOfSupportSets > 0) {
+            final Set<SupportFitting> supportFittings = passiveModules.stream().map(af -> new SupportFitting(af, amountOfSupportSets)).collect(Collectors.toSet());
+            shipClass.setSupportFittings(supportFittings);
+        }
+
+        final Set<ConstraintViolation<ShipClass>> validate = validator.validate(shipClass);
+        if (!validate.isEmpty()) {
+            throw new NotifyWebUserException("The provided class is not valid.", validate);
+        }
 
         return shipClassService.save(shipClass);
+    }
+
+    private int addAmmunition(@Nonnull final ShipClass shipClass,
+                              final int capacity,
+                              @Nonnull final Map<Launcher, Integer> launcherToAmount,
+                              int freeCapForAttackAmmo) {
+        Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
+        Preconditions.checkNotNull(launcherToAmount, "launcherToAmount must not be empty");
+
+        int capClone = capacity;
+        boolean runNextRoundLoop = true;
+        while (runNextRoundLoop && freeCapForAttackAmmo >= 0) {
+            boolean madeChange = false;
+            for (final Launcher launcher : launcherToAmount.keySet()) {
+                final AmmunitionModule ammunitionModule = launcher.getAmmunitionModule();
+                final int useCapacity = ammunitionModule.getUseCapacity();
+                if (freeCapForAttackAmmo < useCapacity) {
+                    continue;
+                }
+                final AmmunitionFitting known = shipClass.getAmmunitionFittings().stream()
+                        .filter(ammo -> ammo.getAmmunitionModule().equals(ammunitionModule))
+                        .findFirst()
+                        .orElse(null);
+                if (known == null) {
+                    shipClass.addAmmunitionFitting(new AmmunitionFitting(ammunitionModule, 1));
+                } else {
+                    known.setAmount(known.getAmount() + 1);
+                }
+                capClone -= useCapacity;
+                freeCapForAttackAmmo -= useCapacity;
+                madeChange = true;
+            }
+            if (!madeChange) {
+                runNextRoundLoop = false;
+            }
+        }
+        return capClone;
     }
 
     @SuppressWarnings("DeprecatedIsStillUsed")

@@ -73,7 +73,7 @@ public class ColonizationCostCalculator {
         final CrewRequirement crewRequirement = ColonizationCostCalculator.getCrewRequirementForColonization();
         final ResourceAmount costs = ColonizationCostCalculator.calculateColonizationCost(planet);
         final ResourceDeposit resourceDeposit = new ResourceDeposit(EDepositType.COSTS);
-        resourceDeposit.setAbsoluteResourceValue(costs.getRealResourceType(), costs.getAmount());
+        resourceDeposit.setAbsoluteResourceValue(costs.getRealType(), costs.getAmount());
         resourceDeposit.setCrewRequirement(crewRequirement);
         return resourceDeposit;
     }

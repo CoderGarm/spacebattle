@@ -59,4 +59,6 @@ INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES 
 
 INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (5, 5);
 
+delete from supportFitting  where amount < 0;
+
 insert into dbPatch values (null, now(), 'add transportation', '0.0.7-1');

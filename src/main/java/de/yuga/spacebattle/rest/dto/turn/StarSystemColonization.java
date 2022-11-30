@@ -80,7 +80,7 @@ public class StarSystemColonization {
         Preconditions.checkNotNull(starSystem, "starSystem shouldn't be null!");
 
         final ResourceAmount costsDTO = ColonizationCostCalculator.calculateInformationCost(starSystem);
-        final EResourceType resourceType = costsDTO.getRealResourceType();
+        final EResourceType resourceType = costsDTO.getRealType();
         final Long amountWithDiff = costsDTO.getAmount();
         return amountWithDiff + " " + resourceType.getPluralName();
     }
