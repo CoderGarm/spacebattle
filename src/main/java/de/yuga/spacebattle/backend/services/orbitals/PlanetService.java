@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.services.orbitals;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
@@ -124,6 +125,17 @@ public class PlanetService {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
 
         return planetRepository.save(entity);
+    }
+
+    @Nullable
+    public Planet findByCoordinates(@Nonnull final FleetOrbit fleetOrbit) {
+        Preconditions.checkNotNull(fleetOrbit, "fleetOrbit must not be empty");
+
+        if (fleetOrbit.getSystem() == null || fleetOrbit.getOrbit() == null) {
+            return null;
+        }
+
+        return findByCoordinates(fleetOrbit.getSystem().getId(), fleetOrbit.getOrbit().getXCoordinate(), fleetOrbit.getOrbit().getYCoordinate());
     }
 
     @Nullable

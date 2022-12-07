@@ -6,11 +6,14 @@ import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
+import de.yuga.spacebattle.backend.services.turn.FleetMovementCache;
 import de.yuga.spacebattle.backend.services.turn.JobService;
+import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -19,6 +22,7 @@ import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetDistributionPerUse
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMerge;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMove;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
+import de.yuga.spacebattle.rest.dto.turn.FleetMovement;
 import de.yuga.spacebattle.rest.dto.turn.Move;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -59,6 +63,10 @@ public class FleetApi extends BaseApi {
     private static final String CANCEL_MOVE_FLEET_ENDPOINT = "cancelMove";
     private static final String FLEET_PER_USER_PER_SYSTEM_ENDPOINT = "fleetDistribution";
     private static final String INTERSTELLAR_MOVEMENT_ENDPOINT = "interstellarMovement";
+    private static final String FINISHED_MOVEMENT_ENDPOINT = "finishedMovement";
+
+    @Nonnull
+    private final FleetMovementCache fleetMovementCache;
 
     @Nonnull
     private final FleetService fleetService;
@@ -75,17 +83,24 @@ public class FleetApi extends BaseApi {
     @Nonnull
     private final PlanetService planetService;
 
+    @Nonnull
+    private final TickService tickService;
+
     @Autowired
-    public FleetApi(@Nonnull final FleetService fleetService,
+    public FleetApi(@Nonnull final FleetMovementCache fleetMovementCache,
+                    @Nonnull final FleetService fleetService,
                     @Nonnull final UserService userService,
                     @Nonnull final StarSystemService starSystemService,
                     @Nonnull final JobService jobService,
-                    @Nonnull final PlanetService planetService) {
+                    @Nonnull final PlanetService planetService,
+                    @Nonnull final TickService tickService) {
+        this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
         this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
+        this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
     }
 
     @GetMapping(value = FLEET_PER_SYSTEM_ENDPOINT + "/{idStarSystem}")
@@ -188,6 +203,7 @@ public class FleetApi extends BaseApi {
                 .filter(fleet -> fleet.getOrbit() != null)
                 .collect(Collectors.groupingBy(fleet -> {
                             assert fleet.getOrbit() != null;
+                            assert fleet.getOrbit().getSystem() != null;
                             return fleet.getOrbit().getSystem();
                         },
                         Collectors.mapping(Function.identity(), Collectors.toSet())));
@@ -395,6 +411,27 @@ public class FleetApi extends BaseApi {
     public ResponseEntity<?> getFleetsForUser(@PathVariable("idUser") final int idUser, @PathVariable("idFleet") final int idFleet) {
         final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet cancelFlight = fleetService.cancelFlight(idUser, idFleet);
         return ResponseEntity.ok(new Fleet(cancelFlight, getPreferredLanguage()));
+    }
+
+    @GetMapping(value = FINISHED_MOVEMENT_ENDPOINT)
+    @Operation(summary = "Get all finished movements of fleets of an owner.", operationId = "getFinishedMovements",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = FleetMovement.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getFinishedMovements() {
+
+        final int idUser = getIdUser();
+        final Tick today = tickService.getToday();
+        return ResponseEntity.ok(fleetMovementCache.getMovements(today, idUser).stream()
+                .map(FleetMovement::new)
+                .collect(Collectors.toList()));
+
     }
 
     /**

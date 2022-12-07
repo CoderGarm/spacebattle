@@ -4,13 +4,13 @@ import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
-import de.yuga.spacebattle.rest.AuthRequestAdapter;
-import de.yuga.spacebattle.rest.BattleReportAdapter;
-import de.yuga.spacebattle.rest.LocalDateTimeAdapter;
-import de.yuga.spacebattle.rest.UserReqAdapter;
+import de.yuga.spacebattle.rest.*;
 import de.yuga.spacebattle.rest.api.EndpointDefinition;
 import de.yuga.spacebattle.rest.dto.account.AuthRequest;
 import de.yuga.spacebattle.rest.dto.account.UserReq;
+import de.yuga.spacebattle.rest.dto.enums.HasIcon;
+import de.yuga.spacebattle.rest.dto.enums.HasTypeName;
+import de.yuga.spacebattle.rest.dto.orbitals.StarSystem;
 import de.yuga.spacebattle.rest.dto.turn.battle.BattleReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +34,9 @@ public class LoggingService {
     public static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             .registerTypeAdapter(AuthRequest.class, new AuthRequestAdapter())
+            .registerTypeAdapter(HasTypeName.class, new HasTypeNameAdapter())
+            .registerTypeAdapter(HasIcon.class, new HasIconAdapter())
+            .registerTypeAdapter(StarSystem.class, new StarSystemAdapter())
             .registerTypeAdapter(UserReq.class, new UserReqAdapter())
             .registerTypeAdapter(BattleReport.class, new BattleReportAdapter())
             .setPrettyPrinting()

@@ -28,6 +28,8 @@ import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipSer
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +39,8 @@ import java.util.*;
 
 @Service
 public class JobService {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(JobService.class);
 
     @Nonnull
     private final JobRepository jobRepository;
@@ -196,15 +200,22 @@ public class JobService {
                 .filter(construction -> construction.getBuilding().equals(building))
                 .findFirst().orElse(null);
 
-        final Constructable constructable = new Constructable(building, existingC != null ? existingC.getLevel() + 1 : 1);
+        final int targetLevel = existingC != null ? existingC.getLevel() + 1 : 1;
+        final Constructable constructable = new Constructable(building, targetLevel);
         final Construction facility = planet.getConstructions().stream()
                 .filter(construction -> construction.getBuilding().getProductionTarget() == EResourceType.CONSTRUCTION)
                 .findFirst().orElse(null);
 
         checkIfFree(facility);
         checkAndBalances(planet, constructable.getJobCosts());
-        final Job entity = new Job(planet, facility, constructable);
-        save(entity);
+        Job entity = new Job(planet, facility, constructable);
+        entity = save(entity);
+
+        LOGGER.info("Creating construction yard idJob '" + entity.getId() + "' " +
+                "for idBuilding: '" + building.getId() + "' " +
+                "with target level '" + constructable.getTargetLevel() + "' " +
+                "from level '" + (targetLevel - 1) + "'");
+
         planetService.save(planet);
         return entity;
     }

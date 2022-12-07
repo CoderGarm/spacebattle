@@ -14,7 +14,9 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class CustomPlanetRepositoryImpl implements CustomPlanetRepository {
@@ -62,7 +64,11 @@ public class CustomPlanetRepositoryImpl implements CustomPlanetRepository {
             return em.createNamedQuery("Planet.getPlanetsWithBuildingsForResourceType", Planet.class)
                     .setParameter("owner", owner)
                     .setParameter("resourceType", EResourceType.RESEARCH)
-                    .getSingleResult();
+                    .getResultList().stream()
+                    .filter(p -> Objects.nonNull(p.getColonizedAt()))
+                    .sorted(Comparator.comparing(Planet::getColonizedAt))
+                    .reduce((o1, o2) -> o1)
+                    .orElse(null);
         } catch (final NoResultException e) {
             return null;
         }
