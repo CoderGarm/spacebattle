@@ -30,7 +30,6 @@ public class FleetMovementCache {
         return Objects.requireNonNullElse(cache.get(idUser), new HashSet<FleetMovement>()).stream().filter(t -> t.isToday(today)).collect(Collectors.toSet());
     }
 
-
     public void add(@Nonnull final Tick today,
                     @Nonnull final Fleet fleet,
                     @Nonnull final Move move,
@@ -42,13 +41,13 @@ public class FleetMovementCache {
         Preconditions.checkNotNull(origin, "origin must not be empty");
         Preconditions.checkNotNull(destination, "destination must not be empty");
 
-        final Set<FleetMovement> job = getTodayTransportJob(today, fleet);
+        final Set<FleetMovement> job = getTodayMovement(today, fleet);
         job.add(new FleetMovement(today, fleet, origin, destination, move));
     }
 
     @Nonnull
-    private Set<FleetMovement> getTodayTransportJob(@Nonnull final Tick today,
-                                                    @Nonnull final Fleet fleet) {
+    private Set<FleetMovement> getTodayMovement(@Nonnull final Tick today,
+                                                @Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(fleet, "fleet must not be empty");
 

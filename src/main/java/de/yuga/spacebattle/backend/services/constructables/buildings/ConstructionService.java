@@ -71,7 +71,7 @@ public class ConstructionService {
      *
      * @param planet            the planet
      * @param researchesForUser the researches of the logged-in user
-     * @return the list of possible constructions
+     * @return the possible constructions
      */
     @Nonnull
     public Set<Construction> getUpgradeableConstructions(@Nonnull final Planet planet, @Nonnull final Set<ResearchLevel> researchesForUser) {

@@ -183,6 +183,7 @@ public class TickService {
                 final Planet planet = colonizationService.colonizePlanet(colonization);
                 operateInoperationals(planet);
                 colonizationService.delete(colonization);
+                colonizationCache.add(today, planet);
             } else {
                 colonizationService.save(colonization);
             }

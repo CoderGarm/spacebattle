@@ -2,11 +2,10 @@ package de.yuga.spacebattle.backend.services.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.CacheStore;
-import de.yuga.spacebattle.backend.dto.turn.TransportJob;
+import de.yuga.spacebattle.backend.dto.turn.FinishedColonization;
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
-import de.yuga.spacebattle.backend.enums.EEducationType;
-import de.yuga.spacebattle.backend.enums.EResourceType;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -20,62 +19,36 @@ import java.util.stream.Collectors;
 public class ColonizationCache {
 
     @Nonnull
-    private final CacheStore<Integer, Set<TransportJob>> transportCache = new CacheStore<>(2, TimeUnit.DAYS);
-
-    public void add(@Nonnull final Tick today,
-                    @Nonnull final Planet from,
-                    @Nonnull final Planet to,
-                    @Nonnull final EResourceType what,
-                    final long amount) {
-        Preconditions.checkNotNull(today, "today must not be empty");
-        Preconditions.checkNotNull(from, "from must not be empty");
-        Preconditions.checkNotNull(to, "to must not be empty");
-        Preconditions.checkNotNull(what, "what must not be empty");
-
-        final TransportJob job = getTodayTransportJob(today, from, to);
-        job.add(what, amount);
-    }
+    private final CacheStore<Integer, Set<FinishedColonization>> cache = new CacheStore<>(2, TimeUnit.DAYS);
 
     @Nonnull
-    public Set<TransportJob> getTransports(@Nonnull final Tick today,
-                                           final int idUser) {
+    public Set<FinishedColonization> getColonizations(@Nonnull final Tick today,
+                                                      final int idUser) {
         Preconditions.checkNotNull(today, "today must not be empty");
 
-        return Objects.requireNonNullElse(transportCache.get(idUser), new HashSet<TransportJob>()).stream().filter(t -> t.isToday(today)).collect(Collectors.toSet());
+        return Objects.requireNonNullElse(cache.get(idUser), new HashSet<FinishedColonization>()).stream().filter(t -> t.isToday(today)).collect(Collectors.toSet());
     }
 
     public void add(@Nonnull final Tick today,
-                    @Nonnull final Planet from,
-                    @Nonnull final Planet to,
-                    @Nonnull final EEducationType what,
-                    final long amount) {
+                    @Nonnull final Planet planet) {
         Preconditions.checkNotNull(today, "today must not be empty");
-        Preconditions.checkNotNull(from, "from must not be empty");
-        Preconditions.checkNotNull(to, "to must not be empty");
-        Preconditions.checkNotNull(what, "what must not be empty");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
 
-        final TransportJob job = getTodayTransportJob(today, from, to);
-        job.add(what, amount);
+        final Set<FinishedColonization> job = getTodayMovement(today, planet.getOwner());
+        job.add(new FinishedColonization(today, planet));
     }
 
     @Nonnull
-    private TransportJob getTodayTransportJob(@Nonnull final Tick today,
-                                              @Nonnull final Planet from,
-                                              @Nonnull final Planet to) {
+    private Set<FinishedColonization> getTodayMovement(@Nonnull final Tick today,
+                                                       @Nonnull final User user) {
         Preconditions.checkNotNull(today, "today must not be empty");
-        Preconditions.checkNotNull(from, "from must not be empty");
-        Preconditions.checkNotNull(to, "to must not be empty");
-        //noinspection ConstantConditions
-        Preconditions.checkState(from.getOwner().equals(to.getOwner()), "The id should match");
+        Preconditions.checkNotNull(user, "user must not be empty");
 
-        Set<TransportJob> transportJobs = transportCache.get(from.getOwner().getId());
-        if (transportJobs == null) {
-            transportJobs = new HashSet<>();
-            transportCache.add(from.getOwner().getId(), transportJobs);
+        Set<FinishedColonization> movements = cache.get(user.getId());
+        if (movements == null) {
+            movements = new HashSet<>();
+            cache.add(user.getId(), movements);
         }
-        final TransportJob transportJob = new TransportJob(today, from, to);
-        final TransportJob job = transportJobs.stream().filter(t -> t.equals(transportJob)).findFirst().orElse(transportJob);
-        transportJobs.add(job);
-        return job;
+        return movements;
     }
 }
