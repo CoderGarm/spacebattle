@@ -101,7 +101,6 @@ public class BattleReportApi extends BaseApi {
     )
     public ResponseEntity<?> getReportsById(@PathVariable("idBattleReport") final int idBattleReport) {
 
-        // todo response to big
         final int idUser = getIdUser();
         final de.yuga.spacebattle.backend.entities.turn.battle.BattleReport battleReport = battleReportService.findByIdWithAllData(idUser, idBattleReport);
         if (battleReport == null) {

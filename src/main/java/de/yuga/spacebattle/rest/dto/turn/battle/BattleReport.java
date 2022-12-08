@@ -78,7 +78,7 @@ public class BattleReport {
         this.participatingUsers.addAll(battleReport.getParticipatingUsers().stream().map(UserJson::new).collect(Collectors.toSet()));
         this.participatingFleets.addAll(battleReport.getParticipatingFleets().stream().map(f -> new Fleet(f, languageCode)).collect(Collectors.toList()));
         this.lossRole.addAll(battleReport.getLossRole().stream().map(l -> new LossRole(l, languageCode)).collect(Collectors.toList()));
-        this.movementActions.addAll(battleReport.getMovementActions().stream().map(m -> new MovementAction(m, languageCode)).collect(Collectors.toList()));
+        this.movementActions.addAll(battleReport.getMovementActions().stream().map(m -> new MovementAction(m, languageCode, battleReport.getParticipatingFleets())).collect(Collectors.toList()));
         this.counterMissileHits.addAll(battleReport.getCounterMissileHits().stream().map(c -> new CounterMissileHit(c, languageCode)).collect(Collectors.toList()));
         this.releasedVolleys.addAll(battleReport.getReleasedVolleys().stream().map(r -> new ReleasedVolley(r, languageCode)).collect(Collectors.toList()));
         this.missileMovements.addAll(battleReport.getMissileMovements().stream().map(m -> new MissileMovement(m, languageCode)).collect(Collectors.toList()));

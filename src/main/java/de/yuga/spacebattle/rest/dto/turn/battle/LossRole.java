@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.AbstractId;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
-import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -23,7 +22,7 @@ public class LossRole {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The fleet which was the war ships home.")
-    private Fleet fleet;
+    private AbstractId fleet;
 
     /**
      * Just the name of the lost ship.<br>
@@ -56,7 +55,7 @@ public class LossRole {
         Preconditions.checkNotNull(lossRole, "lossRole shouldn't be null!");
 
         this.owner = new UserJson(lossRole.getShipClass().getOwner());
-        this.fleet = new Fleet(lossRole.getFleet(), languageCode);
+        this.fleet = new AbstractId(lossRole.getFleet(), lossRole.getFleet().getName());
         this.warShipName = lossRole.getWarShipName();
         this.warship = new AbstractId(lossRole.getIdWarship());
         this.shipClass = new AbstractId(lossRole.getShipClass());

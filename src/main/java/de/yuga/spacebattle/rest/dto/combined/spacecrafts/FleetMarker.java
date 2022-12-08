@@ -2,6 +2,8 @@ package de.yuga.spacebattle.rest.dto.combined.spacecrafts;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.rest.dto.AbstractId;
 import de.yuga.spacebattle.rest.dto.orbitals.FleetOrbit;
 import de.yuga.spacebattle.rest.dto.turn.Move;
@@ -9,6 +11,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Schema(description = ".")
 public class FleetMarker {
@@ -26,6 +31,11 @@ public class FleetMarker {
     @JsonProperty
     @Schema(required = true, description = "The owner of the fleet")
     private AbstractId owner;
+
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The fleet's individual war ships.")
+    private final Set<AbstractId> ships = new HashSet<>();
 
     /**
      * The current location of this fleet. <br>
@@ -63,8 +73,23 @@ public class FleetMarker {
     public FleetMarker(@Nonnull final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
-        this.fleet = new AbstractId(fleet.getId());
-        this.owner = new AbstractId(fleet.getOwner());
+        this.fleet = new AbstractId(fleet, fleet.getName());
+        this.owner = new AbstractId(fleet.getOwner(), fleet.getOwner().getUsername());
+        this.ships.addAll(fleet.getAliveShips().stream().map(w -> new AbstractId(w, w.getName())).collect(Collectors.toSet()));
+        this.name = fleet.getName();
+        this.orbit = fleet.getOrbit() != null ? new FleetOrbit(fleet.getOrbit()) : null;
+        this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;
+        this.isFTLCapable = fleet.isFTLCapable();
+        this.state = new StateBlock(fleet);
+    }
+
+    public FleetMarker(@Nonnull final FleetSnapshot fleetSnapshot) {
+        Preconditions.checkNotNull(fleetSnapshot, "fleetSnapshot must not be empty");
+
+        final Fleet fleet = fleetSnapshot.getFleet();
+        this.fleet = new AbstractId(fleet, fleet.getName());
+        this.owner = new AbstractId(fleet.getOwner(), fleet.getOwner().getUsername());
+        this.ships.addAll(fleetSnapshot.getShips().stream().map(w -> new AbstractId(w.getWarShip(), w.getWarShip().getName())).collect(Collectors.toSet()));
         this.name = fleet.getName();
         this.orbit = fleet.getOrbit() != null ? new FleetOrbit(fleet.getOrbit()) : null;
         this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;

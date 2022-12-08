@@ -17,10 +17,7 @@ import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
-import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetDistributionPerUser;
-import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMerge;
-import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMove;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.*;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.FleetMovement;
 import de.yuga.spacebattle.rest.dto.turn.Move;
@@ -104,12 +101,30 @@ public class FleetApi extends BaseApi {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
     }
 
+    @GetMapping(value = "{idFleet}")
+    @Operation(summary = "Get the fleet.", operationId = "getFleet",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Fleet.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getFleet(@PathVariable("idFleet") final int idFleet) {
+
+        final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetService.find(idFleet);
+        if (fleet == null || fleet.getOwner().getId() != getIdUser()) {
+            throw new NotifyWebUserException("There should be the fleet, you searched for.");
+        }
+        return ResponseEntity.ok(new Fleet(fleet, getPreferredLanguage()));
+    }
+
     @GetMapping(value = FLEET_PER_SYSTEM_ENDPOINT + "/{idStarSystem}")
     @Operation(summary = "Get all fleets inside of a star system.", operationId = "getFleetsBySystem",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = Fleet.class))
+                                    schema = @Schema(implementation = FleetMarker.class))
                             )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
@@ -123,7 +138,7 @@ public class FleetApi extends BaseApi {
         }
         return ResponseEntity.ok(starSystem.getFleets().stream()
                 .filter(de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet::isAlive)
-                .map(f -> new Fleet(f, getPreferredLanguage()))
+                .map(FleetMarker::new)
                 .collect(Collectors.toList()));
     }
 
@@ -132,7 +147,7 @@ public class FleetApi extends BaseApi {
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = Fleet.class))
+                                    schema = @Schema(implementation = FleetMarker.class))
                             )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
@@ -140,7 +155,7 @@ public class FleetApi extends BaseApi {
     )
     public ResponseEntity<?> getInterstellarMovingFleets() {
 
-        return ResponseEntity.ok(fleetService.findAllFleetsWithInterstellarMovement().stream().map(f -> new Fleet(f, getPreferredLanguage())).collect(Collectors.toList()));
+        return ResponseEntity.ok(fleetService.findAllFleetsWithInterstellarMovement().stream().map(FleetMarker::new).collect(Collectors.toList()));
     }
 
     @GetMapping(value = FLEET_PER_PLANET_ENDPOINT + "/{idPlanet}")
