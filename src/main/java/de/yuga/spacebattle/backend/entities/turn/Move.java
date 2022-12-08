@@ -145,10 +145,7 @@ public class Move extends AbstractEntityKey {
      * @return <code>true</code> if this move is between stars, <code>false</code> otherwise
      */
     public boolean isSystemTravel() {
-        if (originOrbit.getSystem().equals(destinationOrbit.getSystem())) {
-            return false;
-        }
-        return true;
+        return originOrbit.getSystem() == null || destinationOrbit.getSystem() == null || !originOrbit.getSystem().equals(destinationOrbit.getSystem());
     }
 
     @Override

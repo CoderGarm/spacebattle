@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,11 +34,34 @@ public class CustomFleetRepositoryImpl implements CustomFleetRepository {
     @Nonnull
     @Override
     @Transactional
-    public Set<Fleet> findAllFleetsWithoutInterstellarMovement() {
+    public Set<Fleet> findAllFleetsWithoutInterstellarMovement(final int idUser) {
         final List<Fleet> fleets = em.createNamedQuery("Fleet.getAllWithoutInterstellarMovement", Fleet.class).getResultList();
         final List<Fleet> fleets1 = em.createNamedQuery("Fleet.getAllWithoutMovement", Fleet.class).getResultList();
         fleets.addAll(fleets1);
+        fleets.removeIf(f -> shouldNotAppearOnMap(f, idUser));
         return new HashSet<>(fleets);
+    }
+
+    private static boolean shouldNotAppearOnMap(@Nonnull final Fleet fleet,
+                                                final int idUser) {
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+        Preconditions.checkNotNull(fleet.getOrbit(), "fleet.getOrbit() must not be empty");
+        Preconditions.checkNotNull(fleet.getOrbit().getSystem(), "fleet.getOrbit().getSystem() must not be empty");
+
+        final StarSystem system = fleet.getOrbit().getSystem();
+        final Set<Planet> planets = system.getPlanets();
+        final boolean fleetInSystemOfUser = planets.stream().filter(p -> p.getOwner() != null).anyMatch(p -> p.getOwner().getId() == idUser);
+        if (fleetInSystemOfUser) {
+            return false;
+        }
+
+        final Set<Fleet> fleets = system.getFleets();
+        final boolean systemContainsUserFleet = fleets.stream().anyMatch(f -> f.getOwner().getId() == idUser);
+        if (systemContainsUserFleet) {
+            return false;
+        }
+
+        return fleet.getOwner().getId() != idUser;
     }
 
     @Nonnull

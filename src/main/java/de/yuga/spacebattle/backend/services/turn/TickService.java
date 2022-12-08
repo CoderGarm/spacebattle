@@ -22,6 +22,9 @@ import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.repositories.turn.TickRepository;
+import de.yuga.spacebattle.backend.services.caches.ColonizationCache;
+import de.yuga.spacebattle.backend.services.caches.FleetMovementCache;
+import de.yuga.spacebattle.backend.services.caches.TransportationCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
@@ -201,10 +204,15 @@ public class TickService {
                 Fleet fleet = m.getFleet();
                 fleet.setMove(null);
                 fleet = fleetService.save(fleet);
-                final Planet origin = planetService.findByCoordinates(m.getOriginOrbit());
-                final Planet destination = planetService.findByCoordinates(m.getDestinationOrbit());
-                if (origin != null && destination != null) {
-                    fleetMovementCache.add(today, fleet, m, origin, destination);
+                final Planet originPlanet = planetService.findByCoordinates(m.getOriginOrbit());
+                final Planet destinationPlanet = planetService.findByCoordinates(m.getDestinationOrbit());
+                if (originPlanet != null && destinationPlanet != null) {
+                    // planet to planet travel
+                    fleetMovementCache.add(today, fleet, m, originPlanet, destinationPlanet);
+                }
+                if (destinationPlanet == null && m.getOriginOrbit().getSystem() != null && m.getDestinationOrbit().getSystem() != null) {
+                    // somewhere to hyperlimit travel
+                    fleetMovementCache.add(today, fleet, m, originPlanet, m.getOriginOrbit().getSystem(), m.getDestinationOrbit().getSystem());
                 }
             } else {
                 moveService.save(m);

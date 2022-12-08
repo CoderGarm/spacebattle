@@ -201,8 +201,8 @@ public class FleetService {
     }
 
     @Nonnull
-    public Set<Fleet> findAllFleetsWithoutInterstellarMovement() {
-        return fleetRepository.findAllFleetsWithoutInterstellarMovement();
+    public Set<Fleet> findAllFleetsWithoutInterstellarMovement(final int idUser) {
+        return fleetRepository.findAllFleetsWithoutInterstellarMovement(idUser);
     }
 
     @Nonnull

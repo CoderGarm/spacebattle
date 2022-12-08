@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.backend;
+package de.yuga.spacebattle.backend.services.caches;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;

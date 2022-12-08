@@ -15,7 +15,7 @@ public interface CustomFleetRepository {
     List<Fleet> findAllFleets();
 
     @Nonnull
-    Set<Fleet> findAllFleetsWithoutInterstellarMovement();
+    Set<Fleet> findAllFleetsWithoutInterstellarMovement(final int idUser);
 
     @Nonnull
     List<Fleet> findAllFleetsWithoutMovement();
