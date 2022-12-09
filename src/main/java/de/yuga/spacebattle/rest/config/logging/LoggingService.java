@@ -8,6 +8,8 @@ import de.yuga.spacebattle.rest.*;
 import de.yuga.spacebattle.rest.api.EndpointDefinition;
 import de.yuga.spacebattle.rest.dto.account.AuthRequest;
 import de.yuga.spacebattle.rest.dto.account.UserReq;
+import de.yuga.spacebattle.rest.dto.account.chat.ChatMessage;
+import de.yuga.spacebattle.rest.dto.account.forum.ForumMessage;
 import de.yuga.spacebattle.rest.dto.enums.HasIcon;
 import de.yuga.spacebattle.rest.dto.enums.HasTypeName;
 import de.yuga.spacebattle.rest.dto.orbitals.StarSystem;
@@ -36,6 +38,8 @@ public class LoggingService {
             .registerTypeAdapter(AuthRequest.class, new AuthRequestAdapter())
             .registerTypeAdapter(HasTypeName.class, new HasTypeNameAdapter())
             .registerTypeAdapter(HasIcon.class, new HasIconAdapter())
+            .registerTypeAdapter(ChatMessage.class, new ChatMessageAdapter())
+            .registerTypeAdapter(ForumMessage.class, new ForumMessageAdapter())
             .registerTypeAdapter(StarSystem.class, new StarSystemAdapter())
             .registerTypeAdapter(UserReq.class, new UserReqAdapter())
             .registerTypeAdapter(BattleReport.class, new BattleReportAdapter())
