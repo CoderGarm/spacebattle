@@ -35,10 +35,12 @@ public interface WarshipHealthStateAccessor {
 
     boolean isAlive();
 
+    boolean isOperational();
+
     @Nonnull
     Set<CapabilityValue> getCapabilities();
 
-    default boolean hasChanged() {
+    default boolean needsRepair() {
         if (!isFightingCapable() || !isAlive()) {
             return true;
         }
@@ -46,22 +48,26 @@ public interface WarshipHealthStateAccessor {
         final ShipClass shipClass = getWarShip().getShipClass();
         final Set<CapabilityValue> capabilityValues = new SpacecraftCalculator().getCapabilityValues(shipClass);
 
-        final boolean differState = !(getStateByAsInt(EModuleType.ARMOR) == getInteger(capabilityValues, EModuleType.ARMOR)
+        return !(getStateByAsInt(EModuleType.ARMOR) == getInteger(capabilityValues, EModuleType.ARMOR)
                 && getStateByAsInt(EModuleType.ELECTRONIC_WARFARE) == getInteger(capabilityValues, EModuleType.ELECTRONIC_WARFARE)
                 && getStateByAsInt(EModuleType.SIDEWALL) == getInteger(capabilityValues, EModuleType.SIDEWALL)
                 && getStateByAsInt(EModuleType.PROPULSION) == getInteger(capabilityValues, EModuleType.PROPULSION));
+    }
 
+    default boolean needsAmmunition() {
+        if (!isFightingCapable() || !isAlive()) {
+            return true;
+        }
+
+        final ShipClass shipClass = getWarShip().getShipClass();
         final Set<AmmunitionFitting> ammunitionFittings = shipClass.getAmmunitionFittings();
-
         final MissileAmmunitionState referenceMissiles = new MissileAmmunitionState(ammunitionFittings);
-        final boolean differMissiles = referenceMissiles.getRemainingShots().entrySet().stream().anyMatch(ref -> {
+        return referenceMissiles.getRemainingShots().entrySet().stream().anyMatch(ref -> {
             final Missile missile = ref.getKey();
             final int refAmount = ref.getValue();
-            final int remainingShots = getRemainingShots().get(missile);
+            final int remainingShots = getRemainingShots().getOrDefault(missile, 0);
             return refAmount != remainingShots;
         });
-
-        return differState || differMissiles;
     }
 
     private int getInteger(final Set<CapabilityValue> capabilityValues, final EModuleType electronicWarfare) {

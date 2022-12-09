@@ -144,6 +144,10 @@ public class Fleet extends Operationable {
         return jobs.stream().noneMatch(Deletable::isAlive) && isAlive() && isOperational();
     }
 
+    public boolean isOperational() {
+        return super.isOperational() && getAliveShips().stream().allMatch(WarShip::isOperational);
+    }
+
     @Nonnull
     public String getName() {
         return name;

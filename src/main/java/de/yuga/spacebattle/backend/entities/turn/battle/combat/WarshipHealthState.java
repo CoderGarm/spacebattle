@@ -160,6 +160,11 @@ public class WarshipHealthState extends AbstractEntityKey implements WarshipHeal
     }
 
     @Override
+    public boolean isOperational() {
+        return warShip.isOperational();
+    }
+
+    @Override
     @Nonnull
     public Set<CapabilityValue> getCapabilities() {
         return capabilities;
@@ -187,7 +192,7 @@ public class WarshipHealthState extends AbstractEntityKey implements WarshipHeal
      * @param reference the reference
      * @return <code>true</code> if there is a relevant difference, <code>false</code> otherwise
      */
-    public boolean hasChanged(@Nonnull final de.yuga.spacebattle.backend.combat.round.WarshipHealthState reference) {
+    public boolean needsRepair(@Nonnull final de.yuga.spacebattle.backend.combat.round.WarshipHealthState reference) {
         Preconditions.checkNotNull(reference, "reference must not be empty");
 
         if (!this.getWarShip().equals(reference.getWarShip())) {
@@ -199,16 +204,31 @@ public class WarshipHealthState extends AbstractEntityKey implements WarshipHeal
                 && getStateByAsInt(EModuleType.SIDEWALL) == reference.getSidewallState()
                 && getStateByAsInt(EModuleType.PROPULSION) == reference.getPropulsionState());
 
+        final boolean differInActivityState = isFightingCapable || reference.isFightingCapable();
+        return differState || differInActivityState;
+    }
+
+    /**
+     * Checks if the health state has a difference from the untouched state of a fresh warship.
+     *
+     * @param reference the reference
+     * @return <code>true</code> if there is a relevant difference, <code>false</code> otherwise
+     */
+    public boolean needsAmmunition(@Nonnull final de.yuga.spacebattle.backend.combat.round.WarshipHealthState reference) {
+        Preconditions.checkNotNull(reference, "reference must not be empty");
+
+        if (!this.getWarShip().equals(reference.getWarShip())) {
+            throw new NotifyWebUserException("The warship health states can only be checked for the same individual ships.");
+        }
+
         final MissileAmmunitionState referenceMissiles = reference.getMissileAmmunitionState();
-        final boolean differMissiles = referenceMissiles.getRemainingShots().entrySet().stream().anyMatch(ref -> {
+
+        return referenceMissiles.getRemainingShots().entrySet().stream().anyMatch(ref -> {
             final Missile missile = ref.getKey();
             final int refAmount = ref.getValue();
-            final int remainingShots = getRemainingShots().get(missile);
-            return refAmount != remainingShots;
+            final int remainingShots1 = getRemainingShots().get(missile);
+            return refAmount != remainingShots1;
         });
-
-        final boolean differInActivityState = isFightingCapable || reference.isFightingCapable();
-        return differState || differMissiles || differInActivityState;
     }
 
     public void repair() {

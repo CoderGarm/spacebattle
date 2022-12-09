@@ -61,7 +61,7 @@ public class FleetService {
             fleet2.getShipsByClass().clear();
         });
         fleetRepository.save(baseFleet);
-        fleetRepository.deleteAll(fleetsToMerge.stream().map(Fleet::getId).collect(Collectors.toSet()));
+        markAsDestroyed(fleetsToMerge);
         return baseFleet;
     }
 
@@ -238,6 +238,13 @@ public class FleetService {
 
         fleet.delete();
         fleetRepository.save(fleet);
+    }
+
+    public void markAsDestroyed(@Nonnull final Collection<Fleet> fleets) {
+        Preconditions.checkNotNull(fleets, "fleets shouldn't be null!");
+
+        fleets.forEach(Fleet::delete);
+        fleetRepository.saveAll(fleets);
     }
 
     @Nonnull

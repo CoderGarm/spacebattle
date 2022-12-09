@@ -33,6 +33,10 @@ public class StateBlock {
     @Schema(required = true, description = "If the spacecraft needs a repair.")
     private final boolean needsRepair;
 
+    @JsonProperty
+    @Schema(required = true, description = "If the spacecraft needs ammunition.")
+    private final boolean needsAmmunition;
+
     public StateBlock(@Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(fleet, "fleet must not be empty");
 
@@ -40,6 +44,7 @@ public class StateBlock {
         this.isOperational = fleet.isOperational();
         this.isActive = fleet.isActive();
         this.needsRepair = fleet.isNeedsRepair();
+        this.needsAmmunition = fleet.getAliveShips().stream().anyMatch(w -> w.getWarshipHealthState().needsAmmunition());
         this.isFightingCapable = fleet.isOperational();
     }
 
@@ -48,9 +53,10 @@ public class StateBlock {
 
         this.isDeleted = !warShip.isAlive();
         this.isOperational = warShip.isOperational();
-        this.isActive = warShip.getFleet().isActive();
+        this.isActive = warShip.isAlive();
         final WarshipHealthState warshipHealthState = warShip.getWarshipHealthState();
-        this.needsRepair = warshipHealthState.hasChanged();
+        this.needsRepair = warshipHealthState.needsRepair();
+        this.needsAmmunition = warshipHealthState.needsAmmunition();
         this.isFightingCapable = warshipHealthState.isFightingCapable();
     }
 
@@ -58,9 +64,10 @@ public class StateBlock {
         Preconditions.checkNotNull(warshipHealthState, "warshipHealthState must not be empty");
 
         this.isDeleted = !warshipHealthState.isAlive();
-        this.isOperational = warshipHealthState.getWarShip().isOperational();
-        this.isActive = warshipHealthState.getWarShip().getFleet().isActive();
-        this.needsRepair = warshipHealthState.hasChanged();
+        this.isOperational = warshipHealthState.isOperational();
+        this.isActive = warshipHealthState.isAlive();
+        this.needsRepair = warshipHealthState.needsRepair();
+        this.needsAmmunition = warshipHealthState.needsAmmunition();
         this.isFightingCapable = warshipHealthState.isFightingCapable();
     }
 }

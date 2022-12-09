@@ -136,11 +136,15 @@ public class BattleService {
                 .collect(Collectors.toMap(Function.identity(), WarShip::getWarshipHealthState))
                 .forEach((warShip, knownState) -> {
                     final de.yuga.spacebattle.backend.combat.round.WarshipHealthState newState = byResult.get(warShip);
-                    if (knownState.hasChanged(newState)) {
-                        knownState.update(newState);
+                    final boolean needsRepair = knownState.needsRepair(newState);
+                    final boolean needsAmmunition = knownState.needsAmmunition(newState);
+                    if (needsRepair) {
                         final Fleet fleet = warShip.getFleet();
                         fleet.setNeedsRepair(true);
                         fleetsToPersist.add(fleet);
+                    }
+                    if (needsRepair || needsAmmunition) {
+                        knownState.update(newState);
                         statesToPersist.add(knownState);
                     }
                 });

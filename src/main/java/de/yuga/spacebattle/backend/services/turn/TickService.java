@@ -367,6 +367,8 @@ public class TickService {
             demand.updateCrewRequirement(demandedType, -amount);
             // reduce the real demand by updating the deposit
             planet.getResourceDeposit().updateCrewRequirement(demandedType, amount);
+            // reduce the persistent storage
+            planet.getResourceDemand().updateCrewRequirement(demandedType, -amount);
             // reduce the deposit of the sending planet
             from.getResourceDeposit().updateCrewRequirement(demandedType, -amount);
             toStore.add(from);

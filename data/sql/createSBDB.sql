@@ -737,6 +737,8 @@
 
     create table warshipHealthStateSnapshot (
        idWarshipHealthStateSnapshot integer not null auto_increment,
+        isDeleted bit not null default false,
+        isOperational bit not null default false,
         isFightingCapable bit not null default true,
         idBattleReport integer not null,
         idFleetSnapshot integer not null,
@@ -2061,3 +2063,4 @@ insert into dbPatch values (null, now(), 'balance spacecraft stuff', '0.0.5-5');
 insert into dbPatch values (null, now(), 'add operationals', '0.0.6-1');
 insert into dbPatch values (null, now(), 'add wiki', '0.0.6-2');
 insert into dbPatch values (null, now(), 'add transportation', '0.0.7-1');
+insert into dbPatch values (null, now(), 'add operational to health state snap', '0.0.7-2');

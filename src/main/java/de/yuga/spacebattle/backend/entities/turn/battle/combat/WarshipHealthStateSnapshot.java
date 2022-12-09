@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.SpacecraftCalculator;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
-import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.misc.Operationable;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
@@ -23,7 +23,7 @@ import java.util.Set;
 @Entity
 @Table(name = "warshipHealthStateSnapshot")
 @AttributeOverride(name = "id", column = @Column(name = "idWarshipHealthStateSnapshot"))
-public class WarshipHealthStateSnapshot extends AbstractEntityKey implements WarshipHealthStateAccessor {
+public class WarshipHealthStateSnapshot extends Operationable implements WarshipHealthStateAccessor {
 
     @Nonnull
     @NotNull
@@ -146,15 +146,6 @@ public class WarshipHealthStateSnapshot extends AbstractEntityKey implements War
      */
     public boolean isFightingCapable() {
         return isFightingCapable;
-    }
-
-    /**
-     * States if the war ship is alive.
-     *
-     * @return <code>true</code> if the ship can is probably a hulk, but not destroyed, <code>false</code> otherwise
-     */
-    public boolean isAlive() {
-        return warShip.isAlive();
     }
 
     @Nonnull

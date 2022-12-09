@@ -94,7 +94,7 @@ public class Fleet {
         this.name = fleet.getName();
         this.orbit = fleet.getOrbit() != null ? new FleetOrbit(fleet.getOrbit()) : null;
         this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;
-        this.ships.addAll(fleet.getAllShips().stream().map(w -> new WarShip(w, w.getWarshipHealthState(), languageCode)).collect(Collectors.toList()));
+        this.ships.addAll(fleet.getAliveShips().stream().map(w -> new WarShip(w, w.getWarshipHealthState(), languageCode)).collect(Collectors.toList()));
         this.spacecraftCapabilities = new SpacecraftCapabilities(fleet);
         this.baseSpacecraftCapabilities = new SpacecraftCapabilities(fleet.getShipsByClass());
         this.spacecraftCapacityAreas = new SpacecraftCapacityAreas(fleet);
