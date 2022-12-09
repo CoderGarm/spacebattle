@@ -10,7 +10,7 @@
     </parent>
     <groupId>de.yuga</groupId>
     <artifactId>spacebattle</artifactId>
-    <version>0.0.7</version>
+    <version>0.0.7-hotfix</version>
     <name>spacebattle</name>
     <description>A honorverse browsergame</description>
     <properties>

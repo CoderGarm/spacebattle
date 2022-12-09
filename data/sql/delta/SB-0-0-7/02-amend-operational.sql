@@ -27,8 +27,6 @@ select distinct cap.idWarshipHealthState, value, effectValue from warshipCapabil
         select sf.idShipClass from supportFitting sf natural join passiveModule pm where pm.supportType = 'ARMOR'))))
 );
 
-select * from tmp_caps;
-
 update warshipCapabilities cap
     set value = (select t.effectValue from tmp_caps t where cap.idWarshipHealthState = t.idWarshipHealthState)
     where moduleType = 'ARMOR'

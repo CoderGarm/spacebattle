@@ -64,6 +64,7 @@ public class FleetApi extends BaseApi {
     private static final String FLEET_PER_USER_PER_SYSTEM_ENDPOINT = "fleetDistribution";
     private static final String INTERSTELLAR_MOVEMENT_ENDPOINT = "interstellarMovement";
     private static final String FINISHED_MOVEMENT_ENDPOINT = "finishedMovement";
+    private static final String RENAME_FLEET_ENDPOINT = "rename";
 
     @Nonnull
     private final FleetMovementCache fleetMovementCache;
@@ -431,7 +432,27 @@ public class FleetApi extends BaseApi {
         return ResponseEntity.ok(fleetMovementCache.getMovements(today, idUser).stream()
                 .map(FleetMovement::new)
                 .collect(Collectors.toList()));
+    }
 
+    @PutMapping(value = RENAME_FLEET_ENDPOINT + "/{idFleet}/{name}")
+    @Operation(summary = "Renames a fleet.", operationId = "renameFleet",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> renameFleet(@PathVariable("idFleet") final int idFleet, @PathVariable("name") final String name) {
+
+        final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetService.find(idFleet);
+        if (fleet == null || fleet.getOwner().getId() != getIdUser()) {
+            throw new NotifyWebUserException("Nope, I guess not.");
+        }
+
+        fleet.setName(name);
+        fleetService.save(fleet);
+        return ResponseEntity.ok(true);
     }
 
     /**
