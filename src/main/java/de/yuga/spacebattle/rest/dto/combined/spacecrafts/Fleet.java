@@ -86,15 +86,22 @@ public class Fleet {
 
     public Fleet(@Nonnull final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet,
                  @Nonnull final String languageCode) {
-        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
+        this(fleet, fleet.getAliveShips(), languageCode);
+    }
+
+    public Fleet(@Nonnull final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet,
+                 @Nonnull final Set<de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip> containingShips,
+                 @Nonnull final String languageCode) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+        Preconditions.checkNotNull(containingShips, "containingShips must not be empty");
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
 
         this.idFleet = fleet.getId();
         this.owner = new UserJson(fleet.getOwner());
         this.name = fleet.getName();
         this.orbit = fleet.getOrbit() != null ? new FleetOrbit(fleet.getOrbit()) : null;
         this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;
-        this.ships.addAll(fleet.getAliveShips().stream().map(w -> new WarShip(w, w.getWarshipHealthState(), languageCode)).collect(Collectors.toList()));
+        this.ships.addAll(containingShips.stream().map(w -> new WarShip(w, w.getWarshipHealthState(), languageCode)).collect(Collectors.toList()));
         this.spacecraftCapabilities = new SpacecraftCapabilities(fleet);
         this.baseSpacecraftCapabilities = new SpacecraftCapabilities(fleet.getShipsByClass());
         this.spacecraftCapacityAreas = new SpacecraftCapacityAreas(fleet);
@@ -113,7 +120,6 @@ public class Fleet {
         this.name = fleet.getName();
         this.orbit = fleet.getOrbit() != null ? new FleetOrbit(fleet.getOrbit()) : null;
         this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;
-
         this.ships.addAll(fleetSnapshot.getShips().stream().map(w -> new WarShip(w, languageCode)).collect(Collectors.toList()));
         this.spacecraftCapabilities = new SpacecraftCapabilities(fleetSnapshot);
         this.baseSpacecraftCapabilities = new SpacecraftCapabilities(fleet.getShipsByClass());

@@ -288,9 +288,10 @@ public class JobService {
 
         checkIfFree(facility);
         Fleet fleet = new Fleet("Fresh Build @ " + planet.getName(), owner, new FleetOrbit(planet.getOrbit(), planet.getSystem()));
+        // todo small hack to don't display the new build fleet on map before "under construction handlind"
         fleet.delete();
         fleet = fleetService.save(fleet);
-        final Set<WarShip> newFleetComposition = new HashSet<>();
+        final List<WarShip> newFleetComposition = new ArrayList<>();
         for (final Map.Entry<ShipClass, Integer> entry : shipJobPayload.entrySet()) {
             final ShipClass shipClass = entry.getKey();
             final Integer amount = entry.getValue();

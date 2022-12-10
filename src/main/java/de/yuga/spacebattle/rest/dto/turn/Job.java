@@ -117,7 +117,7 @@ public class Job {
         final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = constructable.getFleet();
         this.isShipyardJob = fleet != null;
         if (isShipyardJob) {
-            this.fleet = new Fleet(fleet, languageCode);
+            this.fleet = new Fleet(fleet, fleet.getAllShips(), languageCode);
             this.isRepairJob = job.getConstructable().isRepairJob();
         }
         this.targetLevel = constructable.getTargetLevel();

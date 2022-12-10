@@ -78,7 +78,8 @@ public class JobApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getJobsOnPlanet(@PathVariable("idPlanet") final int idPlanet) {
-        return ResponseEntity.ok(jobService.findAllJobsByPlanet(idPlanet).stream()
+        final List<de.yuga.spacebattle.backend.entities.turn.Job> allJobsByPlanet = jobService.findAllJobsByPlanet(idPlanet);
+        return ResponseEntity.ok(allJobsByPlanet.stream()
                 .map(j -> new Job(j, getPreferredLanguage()))
                 .collect(Collectors.toList()));
     }
