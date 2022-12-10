@@ -3,7 +3,6 @@ package de.yuga.spacebattle.rest.dto.combined.spacecrafts;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.rest.dto.account.UserJson;
 import de.yuga.spacebattle.rest.dto.orbitals.StarSystem;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -24,11 +23,6 @@ public class FleetDistributionPerUser {
 
     @Nonnull
     @JsonProperty
-    @Schema(required = true, description = "The owner of the fleets in the system.")
-    private final List<UserJson> users = new ArrayList<>();
-
-    @Nonnull
-    @JsonProperty
     @Schema(required = true, description = "The fleets by owner.")
     private final List<FleetMarker> fleetMarker = new ArrayList<>();
 
@@ -39,7 +33,6 @@ public class FleetDistributionPerUser {
         Preconditions.checkNotNull(entry, "entry shouldn't be null!");
 
         starSystem = new StarSystem(entry.getKey());
-        users.addAll(entry.getValue().stream().map(Fleet::getOwner).collect(Collectors.toSet()).stream().map(UserJson::new).collect(Collectors.toList()));
         fleetMarker.addAll(entry.getValue().stream().map(FleetMarker::new).collect(Collectors.toList()));
     }
 }

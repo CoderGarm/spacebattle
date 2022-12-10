@@ -362,7 +362,7 @@ public class FleetApi extends BaseApi {
                 .collect(Collectors.toList()));
     }
 
-    @PostMapping(value = PLAN_MOVE_FLEET_ENDPOINT + "/{idUser}")
+    @PostMapping(value = PLAN_MOVE_FLEET_ENDPOINT)
     @Operation(summary = "Plan a movement of a fleet to another celestial.", operationId = "planMovement",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
@@ -378,14 +378,14 @@ public class FleetApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> planMovement(@PathVariable("idUser") final int idUser, @RequestBody FleetMove move) {
+    public ResponseEntity<?> planMovement(@RequestBody FleetMove move) {
 
         // todo validate interstellar flights with propulsion
-        final de.yuga.spacebattle.backend.entities.turn.Move m = createSingleMove(idUser, move);
+        final de.yuga.spacebattle.backend.entities.turn.Move m = createSingleMove(getIdUser(), move);
         return ResponseEntity.ok(new Move(m));
     }
 
-    @PostMapping(value = PLAN_MOVES_FLEET_ENDPOINT + "/{idUser}")
+    @PostMapping(value = PLAN_MOVES_FLEET_ENDPOINT)
     @Operation(summary = "Plan a movement of a fleet to another celestial.", operationId = "planMovements",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
@@ -403,11 +403,11 @@ public class FleetApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> planMovements(@PathVariable("idUser") final int idUser, @RequestBody @Nonnull final List<FleetMove> moves) {
+    public ResponseEntity<?> planMovements(@RequestBody @Nonnull final List<FleetMove> moves) {
         PreconditionWebHelper.checkNotNull(moves, "moves shouldn't be null!");
 
         // todo validate interstellar flights with propulsion
-        final List<de.yuga.spacebattle.backend.entities.turn.Move> plannedMoves = getMultiMove(idUser, moves);
+        final List<de.yuga.spacebattle.backend.entities.turn.Move> plannedMoves = getMultiMove(getIdUser(), moves);
         return ResponseEntity.ok(plannedMoves.stream().map(Move::new).collect(Collectors.toList()));
     }
 
