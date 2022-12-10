@@ -253,9 +253,9 @@ public class Fleet extends Operationable {
      *
      * @param move the planned move
      */
-    public void setMove(@Nullable Move move) {
+    public void setMove(@Nullable final Move move) {
         if (move != null && orbit != null) {
-            if (move.isSystemTravel()) {
+            if (move.isInterstellarTravel()) {
                 orbit = null;
             } else {
                 orbit.leavePlanet();

@@ -129,26 +129,6 @@ public class JobApi extends BaseApi {
                 .collect(Collectors.toList()));
     }
 
-    @GetMapping(value = JOB_UNKNOWN_FINISHED_PRESENT_ENDPOINT)
-    @Operation(summary = "Get all jobs which finished today and wasn't questioned before.", operationId = "areUnknownFinishedJobsPresent",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
-                    @ApiResponse(responseCode = "400", description = "an error occurred",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
-            }
-    )
-    public ResponseEntity<?> areUnknownFinishedJobsPresent() {
-
-        final int idUser = getIdUser();
-        final de.yuga.spacebattle.backend.entities.turn.Tick today = tickService.getToday();
-        final de.yuga.spacebattle.backend.entities.turn.Tick lastTick = cache.get(idUser);
-        if (lastTick == null || lastTick.compareTo(today) < 0) {
-            return ResponseEntity.ok(jobService.areTodayFinishedJobsForUserPresent(idUser));
-        }
-        return ResponseEntity.ok(false);
-    }
-
     @GetMapping(value = JOB_RUNNING_FOR_FLEET_ENDPOINT + "/{idFleet}")
     @Operation(summary = "Get all jobs which are running for the questioning user.", operationId = "jobRunningForFleet",
             responses = {

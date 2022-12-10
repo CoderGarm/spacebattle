@@ -79,16 +79,20 @@ public class FleetService {
         return fleets;
     }
 
-    @Nonnull
-    public Fleet cancelFlight(final int idUser, final int idFleet) {
-        final Fleet fleet = fleetRepository.findById(idFleet).orElse(null);
-        if (fleet != null) {
-            if (idUser == fleet.getOwner().getId()) {
-                return cancelFlight(fleet);
+    public void cancelFlights(final int idUser, @Nonnull final List<Integer> fleetIds) {
+        Preconditions.checkNotNull(fleetIds, "fleetIds must not be empty");
+
+        final Iterable<Fleet> fleets = fleetRepository.findAllById(fleetIds);
+        for (final Fleet fleet : fleets) {
+            if (fleet != null) {
+                if (idUser == fleet.getOwner().getId()) {
+                    cancelFlight(fleet);
+                    continue;
+                }
+                throw new NotifyWebUserException("You cannot cancel this flight.");
+            } else {
+                throw new NotifyWebUserException("Nothing to see here.");
             }
-            throw new NotifyWebUserException("You cannot cancel this flight.");
-        } else {
-            throw new NotifyWebUserException("Nothing to see here.");
         }
     }
 

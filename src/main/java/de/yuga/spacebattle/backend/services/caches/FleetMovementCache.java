@@ -29,7 +29,7 @@ public class FleetMovementCache {
                                            final int idUser) {
         Preconditions.checkNotNull(today, "today must not be empty");
 
-        return Objects.requireNonNullElse(cache.get(idUser), new HashSet<>());
+        return Objects.requireNonNullElse(cache.get(idUser), new HashSet<FleetMovement>()).stream().filter(t -> t.isToday(today)).collect(Collectors.toSet());
     }
 
     public void add(@Nonnull final Tick today,
