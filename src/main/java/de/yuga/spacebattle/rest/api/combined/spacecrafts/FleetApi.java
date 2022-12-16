@@ -17,7 +17,10 @@ import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
-import de.yuga.spacebattle.rest.dto.combined.spacecrafts.*;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMarker;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMerge;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMove;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.FleetMovement;
 import de.yuga.spacebattle.rest.dto.turn.Move;
@@ -58,7 +61,6 @@ public class FleetApi extends BaseApi {
     private static final String PLAN_MOVES_FLEET_ENDPOINT = "planMoves";
     private static final String CANCEL_MOVES_FLEET_ENDPOINT = "cancelMoves";
     private static final String FLEET_PER_USER_PER_SYSTEM_ENDPOINT = "fleetDistribution";
-    private static final String INTERSTELLAR_MOVEMENT_ENDPOINT = "interstellarMovement";
     private static final String FINISHED_MOVEMENT_ENDPOINT = "finishedMovement";
     private static final String RENAME_FLEET_ENDPOINT = "rename";
 
@@ -148,22 +150,6 @@ public class FleetApi extends BaseApi {
                 .collect(Collectors.toList()));
     }
 
-    @GetMapping(value = INTERSTELLAR_MOVEMENT_ENDPOINT)
-    @Operation(summary = "Get all fleets inside of a star system.", operationId = "getInterstellarMovingFleets",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = FleetMarker.class))
-                            )),
-                    @ApiResponse(responseCode = "400", description = "an error occurred",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
-            }
-    )
-    public ResponseEntity<?> getInterstellarMovingFleets() {
-
-        return ResponseEntity.ok(fleetService.findAllFleetsWithInterstellarMovement().stream().map(FleetMarker::new).collect(Collectors.toList()));
-    }
-
     @GetMapping(value = FLEET_PER_PLANET_ENDPOINT + "/{idPlanet}")
     @Operation(summary = "Get all fleets inside the orbit of a planet.", operationId = "getFleetsByPlanet",
             responses = {
@@ -211,7 +197,7 @@ public class FleetApi extends BaseApi {
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = FleetDistributionPerUser.class))
+                                    schema = @Schema(implementation = FleetMarker.class))
                             )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
@@ -221,19 +207,10 @@ public class FleetApi extends BaseApi {
 
         final int idUser = getIdUser();
         final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> allFleets = fleetService.findAllFleetsWithoutInterstellarMovement(idUser);
-        final Map<StarSystem, Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet>> fleetsBySystem = allFleets
-                .stream()
-                .filter(fleet -> fleet.getOrbit() != null)
-                .collect(Collectors.groupingBy(fleet -> {
-                            assert fleet.getOrbit() != null;
-                            assert fleet.getOrbit().getSystem() != null;
-                            return fleet.getOrbit().getSystem();
-                        },
-                        Collectors.mapping(Function.identity(), Collectors.toSet())));
 
-        final List<FleetDistributionPerUser> result = fleetsBySystem.entrySet().stream()
-                .map(FleetDistributionPerUser::new)
-                .collect(Collectors.toList());
+        final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> interstellarMovement = fleetService.findAllFleetsWithInterstellarMovement(idUser);
+        final List<FleetMarker> result = interstellarMovement.stream().map(FleetMarker::new).collect(Collectors.toList());
+        result.addAll(allFleets.stream().map(FleetMarker::new).collect(Collectors.toList()));
         return ResponseEntity.ok(result);
     }
 

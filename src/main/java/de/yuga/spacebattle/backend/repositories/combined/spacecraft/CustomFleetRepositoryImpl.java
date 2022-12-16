@@ -80,8 +80,10 @@ public class CustomFleetRepositoryImpl implements CustomFleetRepository {
 
     @Nonnull
     @Override
-    public List<Fleet> findAllFleetsWithInterstellarMovement() {
-        return em.createNamedQuery("Fleet.getAllFleetsWithInterstellarMovement", Fleet.class).getResultList();
+    public List<Fleet> findAllFleetsWithInterstellarMovement(final int idUser) {
+        return em.createNamedQuery("Fleet.getFleetsWithInterstellarMovement", Fleet.class)
+                .setParameter("idUser", idUser)
+                .getResultList();
     }
 
     @Nonnull
