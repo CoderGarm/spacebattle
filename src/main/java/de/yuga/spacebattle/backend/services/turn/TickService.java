@@ -682,7 +682,7 @@ public class TickService {
         Construction workInProgress = constructions.stream()
                 .filter(c -> c.getBuilding().equals(building)).findFirst().orElse(null);
         if (workInProgress != null) {
-            if (workInProgress.getLevel() <= targetLevel || job.getJobDoneAtZero() < 0) {
+            if (workInProgress.getLevel() >= targetLevel) {
                 // just delete the job - the last tick wasn't processed correctly
                 LOGGER.warn("Job already processed: " + job.getId());
             } else {
