@@ -217,7 +217,7 @@ public class Fleet extends Operationable {
         return toMove;
     }
 
-    public void updateShips(@Nonnull final Set<WarShip> warShips) {
+    public void addShips(@Nonnull final Set<WarShip> warShips) {
         Preconditions.checkNotNull(warShips, "warShips shouldn't be null!");
 
         ships.addAll(warShips);

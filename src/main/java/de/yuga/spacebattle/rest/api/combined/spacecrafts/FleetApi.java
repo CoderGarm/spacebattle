@@ -12,7 +12,6 @@ import de.yuga.spacebattle.backend.services.caches.FleetMovementCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
-import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
@@ -77,9 +76,6 @@ public class FleetApi extends BaseApi {
     private final UserService userService;
 
     @Nonnull
-    private final JobService jobService;
-
-    @Nonnull
     private final PlanetService planetService;
 
     @Nonnull
@@ -90,14 +86,12 @@ public class FleetApi extends BaseApi {
                     @Nonnull final FleetService fleetService,
                     @Nonnull final UserService userService,
                     @Nonnull final StarSystemService starSystemService,
-                    @Nonnull final JobService jobService,
                     @Nonnull final PlanetService planetService,
                     @Nonnull final TickService tickService) {
         this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
-        this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
     }
@@ -258,7 +252,7 @@ public class FleetApi extends BaseApi {
 
     }
 
-    @PostMapping(value = MERGE_FLEET_ENDPOINT + "/{idUser}")
+    @PostMapping(value = MERGE_FLEET_ENDPOINT)
     @Operation(summary = "Merge two fleets of an owner.", operationId = "mergeFleets",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
@@ -269,26 +263,17 @@ public class FleetApi extends BaseApi {
             ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Fleet.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> mergeFleets(@PathVariable("idUser") final int idUser, @RequestBody FleetMerge merge) {
+    public ResponseEntity<?> mergeFleets(@RequestBody @Nonnull final FleetMerge merge) {
+        PreconditionWebHelper.checkNotNull(merge, "merge must not be empty");
 
-        final List<Integer> fleetIDs = List.of(merge.getIdFleetToMerge(), merge.getIdFleetMergeTarget());
-        final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> fleetList = fleetService.findByIds(fleetIDs);
-        fleetList.stream().filter(fleet -> fleet.getOwner().getId() != idUser).findAny().ifPresent(fleet -> {
-            throw new NotifyWebUserException("You cannot do that.");
-        });
+        fleetService.mergeFleets(merge, getIdUser());
 
-        final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleetSubject = fleetList.stream().filter(fleet -> fleet.getId() == merge.getIdFleetMergeTarget()).findFirst().orElseThrow(() -> {
-            throw new NotifyWebUserException("You cannot do that.");
-        });
-        final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> hashSet = fleetList.stream().filter(fl -> fl.getId() != merge.getIdFleetMergeTarget()).collect(Collectors.toSet());
-        final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetService.mergeFleets(fleetSubject, hashSet);
-
-        return ResponseEntity.ok(new Fleet(fleet, getPreferredLanguage()));
+        return ResponseEntity.ok(true);
     }
 
     @PostMapping(value = MOVE_FLEETS_ENDPOINT)

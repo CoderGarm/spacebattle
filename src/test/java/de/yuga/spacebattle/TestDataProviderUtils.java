@@ -130,7 +130,7 @@ public class TestDataProviderUtils {
         final Set<WarShip> warShips = new HashSet<>();
         final WarShip warShip = warShip(fleet, shipClass, planetStart);
         warShips.add(warShip);
-        fleet.updateShips(warShips);
+        fleet.addShips(warShips);
         fleet.setOrbit(new FleetOrbit(planetStart.getOrbit(), planetStart.getSystem()));
         return fleet;
     }

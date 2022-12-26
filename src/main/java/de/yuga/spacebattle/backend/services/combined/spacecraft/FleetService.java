@@ -13,9 +13,9 @@ import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.repositories.combined.spacecraft.FleetRepository;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMerge;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -40,29 +40,33 @@ public class FleetService {
     /**
      * Merges the second fleet into the first.
      */
-    @Transactional(rollbackFor = Exception.class)
-    public Fleet mergeFleets(@Nonnull final Fleet baseFleet, final Set<Fleet> fleetsToMerge) {
-        Preconditions.checkNotNull(baseFleet, "baseFleet shouldn't be null!");
-        Preconditions.checkNotNull(fleetsToMerge, "fleetsToMerge shouldn't be null!");
-        Preconditions.checkState(baseFleet.getOrbit() != null, "baseFleets orbit shouldn't be empty!");
+    public void mergeFleets(@Nonnull final FleetMerge merge, final int idUser) {
+        Preconditions.checkNotNull(merge, "merge must not be empty");
 
-        if (fleetsToMerge.isEmpty()) {
-            return baseFleet;
+
+        final Map<Integer, List<Integer>> fleetConstellations = merge.getFleetConstellations();
+        final List<Fleet> fleets = findByIds(fleetConstellations.keySet());
+        final Set<Fleet> foreign = fleets.stream().filter(f -> f.getOwner().getId() != idUser).collect(Collectors.toSet());
+        if (!foreign.isEmpty()) {
+            throw new NotifyWebUserException("You must own all the merged fleets.");
         }
 
-        final FleetOrbit orbit = baseFleet.getOrbit();
-        if (fleetsToMerge.stream().anyMatch(fleetToMerge -> !orbit.equals(fleetToMerge.getOrbit()))) {
-            throw new NotifyWebUserException("That's not possible, no.");
-        }
-        fleetsToMerge.stream().filter(fl -> !fl.getAllShips().isEmpty()).forEach(fleet2 -> {
-            final Set<WarShip> ships = fleet2.getAllShips();
-
-            baseFleet.updateShips(ships);
-            fleet2.getShipsByClass().clear();
+        final Map<Integer, WarShip> warshipsById = fleets.stream().map(Fleet::getAliveShips).flatMap(Collection::stream).collect(Collectors.toMap(WarShip::getId, Function.identity()));
+        fleetConstellations.forEach((idFleet, warshipIDs) -> {
+            final Fleet fleet = fleets.stream().filter(f -> f.getId() == idFleet).findFirst().orElse(null);
+            assert fleet != null : "Would be good at this stage.";
+            final Map<Integer, WarShip> shipMap = fleet.getAliveShips().stream().collect(Collectors.toMap(WarShip::getId, Function.identity()));
+            final Set<WarShip> toRemove = shipMap.values().stream().filter(w -> !warshipIDs.contains(w.getId())).collect(Collectors.toSet());
+            final Set<WarShip> toAdd = warshipsById.values().stream().filter(w -> warshipIDs.contains(w.getId())).collect(Collectors.toSet());
+            toAdd.removeAll(shipMap.values());
+            fleet.addShips(toAdd);
+            fleet.removeShips(toRemove);
         });
-        fleetRepository.save(baseFleet);
-        markAsDestroyed(fleetsToMerge);
-        return baseFleet;
+
+        final Set<Fleet> toMarkAsDeleted = fleets.stream().filter(f -> f.getAliveShips().isEmpty()).collect(Collectors.toSet());
+        markAsDestroyed(toMarkAsDeleted);
+        final Set<Fleet> toStore = fleets.stream().filter(f -> !f.getAliveShips().isEmpty()).collect(Collectors.toSet());
+        saveAll(toStore);
     }
 
     public List<Fleet> moveFleets(@Nonnull final List<Move> moves) {
@@ -220,7 +224,9 @@ public class FleetService {
     }
 
     @Nonnull
-    public List<Fleet> findByIds(List<Integer> fleetIDs) {
+    public List<Fleet> findByIds(@Nonnull final Collection<Integer> fleetIDs) {
+        Preconditions.checkNotNull(fleetIDs, "fleetIDs must not be empty");
+
         final Iterable<Fleet> allById = fleetRepository.findAllById(fleetIDs);
         return StreamSupport.stream(allById.spliterator(), false).collect(Collectors.toList());
     }

@@ -54,7 +54,7 @@ public class FleetMovement {
         this.destinationPlanet = destinationPlanet;
         this.destinationSystem = destinationPlanet.getSystem();
         this.originalDuration = move.getOriginalDuration();
-        this.isForeignFleet = fleet.getOwner().equals(destinationPlanet.getOwner());
+        this.isForeignFleet = !fleet.getOwner().equals(destinationPlanet.getOwner());
     }
 
     public FleetMovement(@Nonnull final Tick today,
