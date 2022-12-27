@@ -277,6 +277,13 @@ public class FleetService {
     }
 
     @Nonnull
+    public Set<Fleet> findAllAnchoredForPlanet(@Nonnull final Planet planet) {
+        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+
+        return fleetRepository.findAllAnchoredForPlanet(planet);
+    }
+
+    @Nonnull
     public Set<Fleet> findAllDamagedFleetsByPlanetAndOwner(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
 

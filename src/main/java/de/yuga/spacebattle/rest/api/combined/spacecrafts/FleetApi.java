@@ -160,7 +160,7 @@ public class FleetApi extends BaseApi {
         final int idUser = getIdUser();
         final Planet planet = planetService.find(idPlanet);
         PreconditionWebHelper.checkNotNull(planet, "planet must not be empty");
-        final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> allFleetsByPlanet = fleetService.findAllFleetsByPlanet(planet).stream()
+        final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> allFleetsByPlanet = fleetService.findAllAnchoredForPlanet(planet).stream()
                 .filter(f -> f.getOwner().getId() == idUser).collect(Collectors.toSet());
         return ResponseEntity.ok(allFleetsByPlanet.stream()
                 .map(f -> new Fleet(f, getPreferredLanguage()))

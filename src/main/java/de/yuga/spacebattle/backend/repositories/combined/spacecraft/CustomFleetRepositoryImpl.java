@@ -138,6 +138,18 @@ public class CustomFleetRepositoryImpl implements CustomFleetRepository {
 
     @Nonnull
     @Override
+    public Set<Fleet> findAllAnchoredForPlanet(@Nonnull final Planet planet) {
+        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+
+        return new HashSet<>(em.createNamedQuery("Fleet.getAllAnchoredForPlanet", Fleet.class)
+                .setParameter("xCoordinate", planet.getOrbit().getXCoordinate())
+                .setParameter("yCoordinate", planet.getOrbit().getYCoordinate())
+                .setParameter("system", planet.getSystem())
+                .getResultList());
+    }
+
+    @Nonnull
+    @Override
     public Set<Fleet> findAllDamagedFleetsByPlanetAndOwner(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
 

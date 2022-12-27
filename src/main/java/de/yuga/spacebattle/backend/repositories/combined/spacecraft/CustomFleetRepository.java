@@ -44,6 +44,9 @@ public interface CustomFleetRepository {
     Set<Fleet> findAllFleetsByPlanet(@Nonnull Planet planet);
 
     @Nonnull
+    Set<Fleet> findAllAnchoredForPlanet(@Nonnull Planet planet);
+
+    @Nonnull
     Set<Fleet> findAllDamagedFleetsByPlanetAndOwner(@Nonnull Planet planet);
 
     /**
