@@ -13,6 +13,7 @@ import de.yuga.spacebattle.rest.dto.spacecrafts.modules.Armor;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.ElectronicWarfare;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.Propulsion;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.Sidewall;
+import de.yuga.spacebattle.rest.dto.turn.battle.combat.MissileAmmunitionState;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -100,6 +101,11 @@ public class ShipClass {
     @Schema(required = true, description = "The capacities used per area.")
     private SpacecraftCapacityAreas spacecraftCapacityAreas;
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The aggregated missile load out.")
+    private MissileAmmunitionState ammunitionState;
+
     public ShipClass() {
     }
 
@@ -140,6 +146,7 @@ public class ShipClass {
         this.isDeleted = shipClass.isDeleted();
         this.shipClassCapabilities = new SpacecraftCapabilities(shipClass);
         this.spacecraftCapacityAreas = new SpacecraftCapacityAreas(shipClass);
+        this.ammunitionState = new MissileAmmunitionState(shipClass.getAmmunitionFittings(), languageCode);
     }
 
     @Nullable

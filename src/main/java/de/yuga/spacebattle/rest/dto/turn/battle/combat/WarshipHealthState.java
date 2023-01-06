@@ -15,14 +15,22 @@ public class WarshipHealthState {
     @Schema(required = true, description = "The current capabilities per module type.")
     private SpacecraftCapabilities spacecraftCapabilities;
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The aggregated missile load out.")
+    private MissileAmmunitionState ammunitionState;
+
     @JsonProperty
     @Schema(required = true, description = "The states of the warship.")
     private StateBlock state;
 
-    public WarshipHealthState(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateAccessor warshipHealthState) {
+    public WarshipHealthState(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateAccessor warshipHealthState,
+                              @Nonnull final String languageCode) {
         Preconditions.checkNotNull(warshipHealthState, "warshipHealthState shouldn't be null!");
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
 
         this.spacecraftCapabilities = new SpacecraftCapabilities(warshipHealthState);
         this.state = new StateBlock(warshipHealthState);
+        this.ammunitionState = new MissileAmmunitionState(warshipHealthState, languageCode);
     }
 }

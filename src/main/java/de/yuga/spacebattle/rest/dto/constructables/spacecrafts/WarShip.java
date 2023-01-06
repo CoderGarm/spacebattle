@@ -58,7 +58,7 @@ public class WarShip {
         this.shipyard = new de.yuga.spacebattle.rest.dto.orbitals.Planet(warShip.getShipyard());
         this.idFleet = warShip.getFleet().getId();
         this.shipClass = new de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass(warShip.getShipClass(), languageCode);
-        this.warshipHealthState = new WarshipHealthState(healthState);
+        this.warshipHealthState = new WarshipHealthState(healthState, languageCode);
     }
 
     public WarShip(@Nonnull final WarshipHealthStateSnapshot stateSnapshot, @Nonnull final String languageCode) {
@@ -69,6 +69,6 @@ public class WarShip {
         this.shipyard = new de.yuga.spacebattle.rest.dto.orbitals.Planet(warShip.getShipyard());
         this.idFleet = warShip.getFleet().getId();
         this.shipClass = new de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass(warShip.getShipClass(), languageCode);
-        this.warshipHealthState = new WarshipHealthState(stateSnapshot);
+        this.warshipHealthState = new WarshipHealthState(stateSnapshot, languageCode);
     }
 }
