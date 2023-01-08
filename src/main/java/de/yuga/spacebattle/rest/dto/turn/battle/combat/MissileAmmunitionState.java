@@ -9,10 +9,7 @@ import de.yuga.spacebattle.rest.dto.combined.spacecrafts.AmmunitionValue;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Schema(description = ".")
@@ -24,15 +21,18 @@ public class MissileAmmunitionState {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The amount of missiles.")
-    private final List<AmmunitionValue> shotsPerMissile;
+    private final List<AmmunitionValue> shotsPerMissile = new ArrayList<>();
+
+    public MissileAmmunitionState() {
+    }
 
     public MissileAmmunitionState(@Nonnull final WarshipHealthStateAccessor healthState, @Nonnull final String languageCode) {
         Preconditions.checkNotNull(healthState, "healthState must not be empty");
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
 
-        shotsPerMissile = healthState.getRemainingShots().entrySet().stream()
+        shotsPerMissile.addAll(healthState.getRemainingShots().entrySet().stream()
                 .map(e -> new AmmunitionValue(e.getKey(), e.getValue(), languageCode))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     public MissileAmmunitionState(@Nonnull final Set<AmmunitionFitting> ammunitionFittings, @Nonnull final String languageCode) {
@@ -48,8 +48,8 @@ public class MissileAmmunitionState {
             shotsPerMissile.merge(missile, amountOfModules * effectValue, Integer::sum);
         });
 
-        this.shotsPerMissile = shotsPerMissile.entrySet().stream()
+        this.shotsPerMissile.addAll(shotsPerMissile.entrySet().stream()
                 .map(e -> new AmmunitionValue(e.getKey(), e.getValue(), languageCode))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 }

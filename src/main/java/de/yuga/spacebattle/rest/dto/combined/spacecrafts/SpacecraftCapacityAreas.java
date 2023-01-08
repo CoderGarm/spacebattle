@@ -14,6 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Schema(description = ".")
 public class SpacecraftCapacityAreas {
@@ -69,7 +70,7 @@ public class SpacecraftCapacityAreas {
     public SpacecraftCapacityAreas withValues(@Nonnull final Map<ECapacityAreaType, CapacityValue> capacities) {
         Preconditions.checkNotNull(capacities, "capacities must not be empty");
 
-        this.capacityValues.addAll(capacities.values());
+        this.capacityValues.addAll(capacities.values().stream().sorted(CapacityValue::compareTo).collect(Collectors.toList()));
         return this;
     }
 }

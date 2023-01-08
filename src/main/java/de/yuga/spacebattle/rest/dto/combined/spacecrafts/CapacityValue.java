@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import javax.annotation.Nonnull;
 
 @Schema(description = ".")
-public class CapacityValue {
+public class CapacityValue implements Comparable<CapacityValue> {
 
     @Nonnull
     @JsonProperty
@@ -58,5 +58,11 @@ public class CapacityValue {
     @JsonIgnore
     public String toString() {
         return "capacityArea: " + capacityArea + ", value: " + usedCapacity;
+    }
+
+    @Override
+    @JsonIgnore
+    public int compareTo(@Nonnull final CapacityValue o) {
+        return ECapacityAreaType.compare(this.capacityArea, o.capacityArea);
     }
 }
