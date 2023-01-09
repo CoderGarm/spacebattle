@@ -199,7 +199,7 @@ public class FleetService {
         final List<Fleet> toRemove = new ArrayList<>();
         final Iterable<Fleet> allById = fleetRepository.findAllById(fleets.stream().map(Fleet::getId).collect(Collectors.toList()));
         allById.forEach(fleet -> {
-            if (!fleet.isAlive()) {
+            if (fleet.getAliveShips().isEmpty()) {
                 toRemove.add(fleet);
             }
         });
