@@ -1,0 +1,120 @@
+
+
+fixed. kämpfen und gucken ob tote flotte noch lebt
+
+
+
+todo. fleet displays nach funktion aufteilen und darstellung verbessern
+
+
+todo. Munitionskapazität in flottendisplay darstellen
+
+
+todo. auf map transport von info trennen
+
+
+todo. muni automatisch auffüllen wenn in werft
+
+todo. better fleet formation display
+
+bug. demand bei operationals nicht/falsch gesetzt
+bug. tick calculation shipyard job
+
+
+todo. organize svg elements in groups, like coord cross for planet and so on
+
+
+todo. aktivierte operationals meldung im dashboard
+todo. kolonisierungen müssen demand erzeugen
+
+
+
+todo. combat aufhübschen
+
+
+todo. who has colonized a system?
+
+todo. rework battle report -> Trennung Anzeigenlogik / Businesslogik
+
+todo. fitting stats only visible when minimum conditions are fulfilled - but not stated
+
+todo. dont reload full map on flight confirm
+
+
+todo. consolidate cache api?
+todo. persist cache content?
+todo. spinner abbrechen
+
+--------- bugs ---------
+
+
+
+--------- next steps ---------
+
+todo. population balancing broken
+todo. shipyard balancing broken, Bauzeit für Flotten zu klein
+
+todo. scroll issue if the last page forbids overflow
+
+todo. bootstrap css?
+
+todo. rework sidenav with ng-content areas
+
+
+
+todo. combat with more then 2 opponents
+todo. inoperational flotten zerstören bei sieg
+todo. im bau befindliche flotten während des Baus zerstören
+todo. nicht kampffähige aber lebende flotte nicht als tot markieren
+    - nur bei Accounterstellung
+
+
+
+todo. Handelssystem
+todo. simulierter ziviler Handel - Kosten und Steuereinnahmen
+todo. Pläne von wo nach wo (Lieferzeit) festlegen
+todo. piraten plus Flotten zur Systemsicherung nutzen
+todo. anti-piraterie-mission schützt vor Diebstahl aus Orbit
+
+
+
+todo. wiki: welcome message nur durch admin editable
+todo. wiki: list of contents (dynamically from markdown headlines)
+todo. wiki: images and position
+    - file size?
+    - stored in?
+todo. wiki: links between articles?
+    - every article know their links and pass them by a keyword?
+
+
+
+todo. bewegungsgeschwindigkeit von Masse abhängig machen
+
+todo. support module zum reduzieren der benötigten crew
+
+todo. researches: display what is the result
+
+todo. state that used images are borrowed by the icon page
+
+todo. synchronize enums in frontend
+todo. unify getLink for icons
+todo. unify mat-icons for purposes
+
+todo. sorting für resourcen, gebäudetype
+
+
+
+
+
+todo. Wurmlöcher
+
+todo. Forumsbeiträge müssen automatisch runter scrollen
+
+todo. leerzeichen im usernamen verbieten
+todo. Anzeigenamen für User plus Dienstgrad je nach Nation
+
+map:
+todo. look at the credits
+todo. take the style
+
+todo. google fonts selber hosten / per apache forwarden?
