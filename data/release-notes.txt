@@ -1,30 +1,31 @@
 
 
-fixed. kämpfen und gucken ob tote flotte noch lebt
+
+1. Munitionskapazität im Flottendisplay darstellen
+2. Informationen zur Flotte werden nun hoffentlich etwas besser dargestellt
+3. neue Kriegsschiffe werden in die größte Flotte im Orbit integriert, ansonsten wird eine neue Flotte erzeugt
+4. Action-Buttons auf Karte wurden etwas angepasst und werden nun situationsspezifisch angezeigt
+5. Flotten im Orbit einer Werft werden automatisch aufmunitioniert
+
+
+fixed. Nach einem siegreichen Kampf wird die gegnerische Flotte nun als zerstört markiert
+fixed. Munition falsch bei Erzeugung des Schiffs berechnet
+fixed. Die benötigten Ticks eines Shipyard Jobs wurden in der UI richtig angezeigt aber im Job falsch gespeichert
+
+todo. aktivierte operationals meldung im dashboard
 
 
 
 todo. fleet displays nach funktion aufteilen und darstellung verbessern
 
 
-todo. Munitionskapazität in flottendisplay darstellen
 
 
-todo. auf map transport von info trennen
-
-
-todo. muni automatisch auffüllen wenn in werft
-
-todo. better fleet formation display
-
-bug. demand bei operationals nicht/falsch gesetzt
-bug. tick calculation shipyard job
 
 
 todo. organize svg elements in groups, like coord cross for planet and so on
 
 
-todo. aktivierte operationals meldung im dashboard
 todo. kolonisierungen müssen demand erzeugen
 
 

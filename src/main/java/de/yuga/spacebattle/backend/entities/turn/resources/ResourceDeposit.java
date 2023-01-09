@@ -190,19 +190,6 @@ public class ResourceDeposit extends AbstractEntityKey {
         }
     }
 
-    /**
-     * Reduces the amount of this by the demand in order to pay a job.
-     *
-     * @param demand the demand
-     */
-    public void updateDemand(@Nonnull final CrewRequirement demand) {
-        Preconditions.checkNotNull(demand, "demand shouldn't be null!");
-        Preconditions.checkArgument(COSTS == demand.getSubType(), "demand must be flagged as demand!");
-        Preconditions.checkArgument(DEMAND == subType, "I must be a represent a need!");
-
-        updateCrew(demand, ECalculationType.ADD);
-    }
-
     @Nonnull
     public EDepositType getSubType() {
         return subType;

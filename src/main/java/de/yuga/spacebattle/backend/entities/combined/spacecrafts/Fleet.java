@@ -89,7 +89,7 @@ public class Fleet extends Operationable {
 
     @Nonnull
     @NotNull
-    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "idFleet")
     private final Set<WarShip> ships = new HashSet<>();
 
@@ -124,7 +124,7 @@ public class Fleet extends Operationable {
 
     @Nonnull
     @OneToMany(mappedBy = "constructable.fleet", fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<Job> jobs = new HashSet<>();
+    private final Set<Job> jobs = new HashSet<>();
 
     public Fleet() {
     }

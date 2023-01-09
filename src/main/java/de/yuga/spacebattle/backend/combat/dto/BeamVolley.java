@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC;
+import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC_HU;
 import static de.yuga.spacebattle.backend.combat.enums.EDamageResult.BURST_ON_IMPELLER_WEDGE;
 import static de.yuga.spacebattle.backend.combat.enums.EDamageResult.DAMAGE_APPLIED;
 import static de.yuga.spacebattle.backend.combat.enums.EMovementType.IMPELLER_WEDGE_PROTECTION;
@@ -155,7 +155,7 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
             firedShots.forEach(beamState -> {
                 final BigDecimal chanceToHit = beamState.getChanceToHit();
                 // chance to hit is here pars pro toto for every hit
-                final long applicableDamage = chanceToHit.multiply(BigDecimal.valueOf(beamState.getDamageValue()), MC).longValue();
+                final long applicableDamage = chanceToHit.multiply(BigDecimal.valueOf(beamState.getDamageValue()), MC_HU).longValue();
                 final WarShip targetedWarship = beamState.getTarget();
                 targetHealthState.applyDamage(targetedWarship, applicableDamage, this).ifPresent(warShip -> {
                     final List<Long> alreadyAppliedDamages = appliedDamage.computeIfAbsent(warShip, k -> new ArrayList<>());

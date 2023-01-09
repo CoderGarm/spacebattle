@@ -88,7 +88,7 @@ public class JobService {
     }
 
     @Nonnull
-    public List<Job> findAllJobsForConstruction(@Nonnull Construction facility) {
+    public List<Job> findAllJobsForConstruction(@Nonnull final Construction facility) {
         Preconditions.checkNotNull(facility, "facility shouldn't be null!");
 
         return jobRepository.findAllJobsForConstruction(facility);
@@ -171,7 +171,7 @@ public class JobService {
             throw new NotifyWebUserException("This job is to expensive!", result);
         }
         debtorDeposit.pay(costs);
-        planet.getResourceDemand().updateDemand(costs.getCrewRequirement());
+        planet.getResourceDemand().updateCrew(costs.getCrewRequirement(), ECalculationType.ADD);
     }
 
     /**
@@ -288,7 +288,7 @@ public class JobService {
 
         checkIfFree(facility);
         Fleet fleet = new Fleet("Fresh Build @ " + planet.getName(), owner, new FleetOrbit(planet.getOrbit(), planet.getSystem()));
-        // todo small hack to don't display the new build fleet on map before "under construction handlind"
+        // small hack to don't display the new build fleet on map and in fleet list before "under construction handling"
         fleet.delete();
         fleet = fleetService.save(fleet);
         final List<WarShip> newFleetComposition = new ArrayList<>();
@@ -298,12 +298,14 @@ public class JobService {
             final List<String> randomNames = resourceService.getRandomWarshipName(amount);
             for (final String randomName : randomNames) {
                 final WarShip warShip = new WarShip(randomName, planet, fleet, shipClass);
+                // analogous behavior like at the 'delete' fleet
                 warShip.delete();
                 newFleetComposition.add(warShip);
             }
         }
         warShipService.saveAll(newFleetComposition);
 
+        fleet = fleetService.find(fleet);
         final Constructable constructable = new Constructable(fleet, false);
         checkAndBalances(planet, constructable.getJobCosts());
         final Job job = new Job(planet, facility, constructable);

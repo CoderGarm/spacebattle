@@ -320,7 +320,7 @@ public class Cage implements Future<Cage> {
      */
     private void initiateCombat() {
         final BigDecimal initialCageDiameter = getInitialCageDiameter();
-        final BigDecimal initialCageRadius = initialCageDiameter.divide(BigDecimal.valueOf(2), DistanceCalculator.MC);
+        final BigDecimal initialCageRadius = initialCageDiameter.divide(BigDecimal.valueOf(2), DistanceCalculator.MC_HU);
         System.out.println("Initial cage radius: " + initialCageRadius + " LS");
         final Orbit fleetOneStartingOrbit = DistanceCalculator.createByRadiusAndQuadrant(initialCageRadius, Quadrant.Q1, Planet.PLANET_STANDARD_METRIC);
         final Orbit fleetTwoStartingOrbit = DistanceCalculator.createByRadiusAndQuadrant(initialCageRadius, Quadrant.Q3, Planet.PLANET_STANDARD_METRIC);
@@ -365,7 +365,7 @@ public class Cage implements Future<Cage> {
             final Distance min = f1.min(f2);
             System.out.println("Weapon range: " + min.getCoordinateInMetric(LS) + " LS");
             final BigDecimal coordinateInMetric = min.getCoordinateInMetric(Planet.PLANET_STANDARD_METRIC);
-            initialCageDiameter = coordinateInMetric.multiply(INITIAL_CAGE_DIAMETER_MULTIPLIER, DistanceCalculator.MC);
+            initialCageDiameter = coordinateInMetric.multiply(INITIAL_CAGE_DIAMETER_MULTIPLIER, DistanceCalculator.MC_HU);
         } else {
             initialCageDiameter = INITIAL_CAGE_DIAMETER;
         }

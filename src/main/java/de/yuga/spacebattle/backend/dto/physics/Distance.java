@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 
-import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC;
+import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC_HU;
 
 @Schema(description = ".")
 public class Distance implements Cloneable, Comparable<Distance> {
@@ -227,7 +227,7 @@ public class Distance implements Cloneable, Comparable<Distance> {
     @Nonnull
     @JsonIgnore
     public Distance sqrt() {
-        return new Distance(coordinate.sqrt(MC), distanceMetric);
+        return new Distance(coordinate.sqrt(MC_HU), distanceMetric);
     }
 
     @Nonnull
@@ -236,7 +236,7 @@ public class Distance implements Cloneable, Comparable<Distance> {
         Preconditions.checkNotNull(o, "o shouldn't be null!");
 
         final BigDecimal factor = o.getCoordinateInMetric(distanceMetric);
-        return new Distance(coordinate.divide(factor, MC), distanceMetric);
+        return new Distance(coordinate.divide(factor, MC_HU), distanceMetric);
     }
 
     @Nonnull

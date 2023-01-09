@@ -87,16 +87,6 @@ public class WarshipHealthStateSnapshot extends Operationable implements Warship
         this.isFightingCapable = healthState.isFightingCapable();
     }
 
-    @Deprecated(since = "Remove after transform.")
-    public void update() {
-        if (capabilities.isEmpty()) {
-            final WarshipHealthState healthState = warShip.getWarshipHealthState();
-            capabilities.addAll(new SpacecraftCalculator().getCapabilityValues(healthState));
-            activeFittings.addAll(healthState.getActiveFittings());
-            remainingShots.putAll(healthState.getRemainingShots());
-        }
-    }
-
     @Nonnull
     public BattleReport getBattleReport() {
         return battleReport;

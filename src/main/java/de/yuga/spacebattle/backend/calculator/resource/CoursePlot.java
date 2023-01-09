@@ -26,7 +26,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC;
+import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC_HU;
 import static de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator.MAX_PERCENTAGE_SPEED_OF_LIGHT;
 import static de.yuga.spacebattle.backend.combat.enums.EMovementType.*;
 import static de.yuga.spacebattle.backend.combat.round.CombatRound.COMBAT_ROUND;
@@ -173,12 +173,12 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
 
         // calculate acceleration to top speed
         final BigDecimal accelerationValue = acceleration.convertToMetric(EAccelerationMetric.MS2);
-        final BigDecimal timeToTopSpeed = vesselTopSpeed.divide(accelerationValue, MC);
+        final BigDecimal timeToTopSpeed = vesselTopSpeed.divide(accelerationValue, MC_HU);
 
         // Stage 2: calculate time to halfway distance
-        final BigDecimal halfwayDistanceInMetric = distance.getCoordinateInMetric(distanceMetric).divide(BigDecimal.valueOf(2), MC);
-        final BigDecimal timeToHalfwaySquared = halfwayDistanceInMetric.divide(new BigDecimal("0.5").multiply(accelerationValue), MC);
-        final BigDecimal timeToHalfwayDistance = timeToHalfwaySquared.sqrt(MC);
+        final BigDecimal halfwayDistanceInMetric = distance.getCoordinateInMetric(distanceMetric).divide(BigDecimal.valueOf(2), MC_HU);
+        final BigDecimal timeToHalfwaySquared = halfwayDistanceInMetric.divide(new BigDecimal("0.5").multiply(accelerationValue), MC_HU);
+        final BigDecimal timeToHalfwayDistance = timeToHalfwaySquared.sqrt(MC_HU);
 
         final BigDecimal speedAtHalfway;
         final boolean isTravellingWithConstantVelocityNecessary = timeToHalfwayDistance.compareTo(timeToTopSpeed) > 0;
@@ -189,7 +189,7 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
             final Distance halfway = new Distance(halfwayDistanceInMetric, distanceMetric);
             final Distance distanceToTravelWithTopSpeed = halfway.subtract(distanceToTopSpeed);
             // Stage 2.1 calc time to travel at top speed
-            final BigDecimal travelTimeAtTopSpeed = distanceToTravelWithTopSpeed.getCoordinateInMetric(distanceMetric).divide(vesselTopSpeed, MC);
+            final BigDecimal travelTimeAtTopSpeed = distanceToTravelWithTopSpeed.getCoordinateInMetric(distanceMetric).divide(vesselTopSpeed, MC_HU);
 
             setCourseOrderElements(origin, destination, REDUCE_DISTANCE, agentsVelocity, acceleration, timeToTopSpeed);
             final CourseOrderElement latestCourseElement = getLatestCourseElement();
@@ -204,7 +204,7 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         } else {
             // effective case: timeToHalfwayDistance <= timeToTopSpeed
             // accelerate only to half distance time
-            speedAtHalfway = accelerationValue.multiply(timeToHalfwayDistance, MC);
+            speedAtHalfway = accelerationValue.multiply(timeToHalfwayDistance, MC_HU);
             setCourseOrderElements(origin, destination, REDUCE_DISTANCE, agentsVelocity, acceleration, timeToHalfwayDistance);
         }
 
@@ -212,7 +212,7 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         final BigDecimal targetedVesselEndSpeed = BigDecimal.ZERO;
         final BigDecimal speedToSlowDownFrom = speedAtHalfway.compareTo(targetedVesselEndSpeed) > 0 ? speedAtHalfway.subtract(targetedVesselEndSpeed) : speedAtHalfway;
         // t = v / a
-        final BigDecimal timeToSlowDown = speedToSlowDownFrom.divide(accelerationValue, MC);
+        final BigDecimal timeToSlowDown = speedToSlowDownFrom.divide(accelerationValue, MC_HU);
 
         final CourseOrderElement latestCourseElement = getLatestCourseElement();
         if (latestCourseElement == null) {
@@ -244,7 +244,7 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         final Distance minRange = bestDamagePotentialRangeDefinition.getMinRange();
         final Distance maxRange = bestDamagePotentialRangeDefinition.getMaxRange();
         final Distance difference = maxRange.subtract(minRange);
-        final BigDecimal divide = difference.getCoordinate().divide(BigDecimal.valueOf(2), MC);
+        final BigDecimal divide = difference.getCoordinate().divide(BigDecimal.valueOf(2), MC_HU);
         // state distance from target
         final Distance bestDistanceToTarget = new Distance(divide, difference.getDistanceMetric());
 

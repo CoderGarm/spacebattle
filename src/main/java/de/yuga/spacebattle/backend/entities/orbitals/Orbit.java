@@ -15,7 +15,7 @@ import javax.persistence.Convert;
 import javax.persistence.Embeddable;
 import java.math.BigDecimal;
 
-import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC;
+import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC_HU;
 
 @Embeddable
 public class Orbit implements Comparable<Orbit>, Cloneable {
@@ -112,8 +112,8 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
         final Distance xC = xCoordinate.subtract(direction.getXCoordinate());
         final Distance yC = yCoordinate.subtract(direction.getYCoordinate());
         final BigDecimal uC = DistanceCalculator.getDistance(xC.getCoordinate(), yC.getCoordinate());
-        final BigDecimal eXC = xC.getCoordinate().divide(uC, MC);
-        final BigDecimal eYC = yC.getCoordinate().divide(uC, MC);
+        final BigDecimal eXC = xC.getCoordinate().divide(uC, MC_HU);
+        final BigDecimal eYC = yC.getCoordinate().divide(uC, MC_HU);
         final Distance x1 = xCoordinate.add(new Distance(distanceScalar.multiply(eXC), distanceMetric));
         final Distance y1 = yCoordinate.add(new Distance(distanceScalar.multiply(eYC), distanceMetric));
         return new Orbit(x1, y1);
@@ -140,8 +140,8 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
         final BigDecimal xDirection = direction.getXCoordinate();
         final BigDecimal yDirection = direction.getYCoordinate();
 
-        final BigDecimal x = xDirection.multiply(distanceScalar, MC);
-        final BigDecimal y = yDirection.multiply(distanceScalar, MC);
+        final BigDecimal x = xDirection.multiply(distanceScalar, MC_HU);
+        final BigDecimal y = yDirection.multiply(distanceScalar, MC_HU);
 
         final BigDecimal newX = this.xCoordinate.getCoordinateInMetric(distanceMetric).add(x);
         final BigDecimal newY = this.yCoordinate.getCoordinateInMetric(distanceMetric).add(y);

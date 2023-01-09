@@ -304,26 +304,20 @@ public class PopulationControlCalculator {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkNotNull(educationAmountDTO, "educationAmountDTO shouldn't be null!");
 
-        final EEducationType from = educationAmountDTO.getEduct();
-        final EEducationType to = educationAmountDTO.getProduct();
+        final EEducationType educationSource = educationAmountDTO.getEduct();
+        final EEducationType educationGoal = educationAmountDTO.getProduct();
         final ResourceDeposit deposit = planet.getResourceDeposit();
+        final ResourceDeposit demand = planet.getResourceDemand();
         // just to check if the calculation went wrong
         final long sumOfPopulationBeforeEducation = deposit.getCrewRequirement().getSumOfPopulation();
         final long toUpgrade = educationAmountDTO.getHowManyPupils();
-        final long fromAmountBefore = deposit.getCrewAmountByType(from);
-        final long toAmountBefore = deposit.getCrewAmountByType(to);
-        final long newToAmount;
-        final long newFromAmount;
-        if (fromAmountBefore < toUpgrade) {
-            // set all possible people to new level if they are not to fulfil the complete job
-            newToAmount = fromAmountBefore + toAmountBefore;
-            newFromAmount = 0L;
-        } else {
-            newToAmount = toUpgrade + toAmountBefore;
-            newFromAmount = fromAmountBefore - toUpgrade;
-        }
-        deposit.setAbsolutePopulation(to, newToAmount);
-        deposit.setAbsolutePopulation(from, newFromAmount);
+        final long fromAmountBefore = deposit.getCrewAmountByType(educationSource);
+        final long educatedAmount = Long.min(toUpgrade, fromAmountBefore);
+
+        deposit.updateCrewRequirement(educationGoal, educatedAmount);
+        deposit.updateCrewRequirement(educationSource, -educatedAmount);
+        demand.updateCrewRequirement(educationGoal, -educatedAmount);
+
         if (deposit.getCrewRequirement().getSumOfPopulation() != sumOfPopulationBeforeEducation) {
             throw new NotifyWebUserException("Oh, this should not happen while educating people.");
         }

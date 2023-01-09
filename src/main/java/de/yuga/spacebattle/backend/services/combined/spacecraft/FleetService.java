@@ -63,10 +63,10 @@ public class FleetService {
             fleet.removeShips(toRemove);
         });
 
-        final Set<Fleet> toMarkAsDeleted = fleets.stream().filter(f -> f.getAliveShips().isEmpty()).collect(Collectors.toSet());
-        markAsDestroyed(toMarkAsDeleted);
         final Set<Fleet> toStore = fleets.stream().filter(f -> !f.getAliveShips().isEmpty()).collect(Collectors.toSet());
         saveAll(toStore);
+        final Set<Fleet> toMarkAsDeleted = fleets.stream().filter(f -> f.getAliveShips().isEmpty()).collect(Collectors.toSet());
+        markAsDestroyed(toMarkAsDeleted);
     }
 
     public List<Fleet> moveFleets(@Nonnull final List<Move> moves) {
@@ -186,6 +186,11 @@ public class FleetService {
     @Nonnull
     public List<Fleet> findAllFleets() {
         return fleetRepository.findAllFleets();
+    }
+
+    @Nonnull
+    public List<Fleet> findAllAliveFleets() {
+        return Objects.requireNonNullElse(fleetRepository.findAllAliveFleets(), new ArrayList<>());
     }
 
     /**

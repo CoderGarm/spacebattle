@@ -7,7 +7,6 @@ import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,8 +33,7 @@ public class ResourceControlCalculator {
      * @param resourceType the resource type
      * @return the pure production
      */
-    @Nullable
-    public static Long getTickOutput(@Nonnull final Planet planet, @Nonnull final EResourceType resourceType) {
+    public static long getTickOutput(@Nonnull final Planet planet, @Nonnull final EResourceType resourceType) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
         Preconditions.checkArgument(EResourceType.POPULATION != resourceType, "resourceType shouldn't be population!");
@@ -51,6 +49,6 @@ public class ResourceControlCalculator {
             // sum up all the output of the producing buildings
             return TickOutputCalculator.getTickOutput(constructions).longValue();
         }
-        return null;
+        return 0L;
     }
 }

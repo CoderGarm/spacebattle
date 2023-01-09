@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 public class DistanceCalculator {
 
-    public final static MathContext MC = new MathContext(8, RoundingMode.HALF_UP);
+    public final static MathContext MC_HU = new MathContext(8, RoundingMode.HALF_UP);
 
     /**
      * Returns the amount of digits.
@@ -255,7 +255,7 @@ public class DistanceCalculator {
     public static BigDecimal getDistance(final BigDecimal firstCoord, final BigDecimal secondCoord) {
         final BigDecimal x = firstCoord.pow(2);
         final BigDecimal y = secondCoord.pow(2);
-        return (x.add(y)).sqrt(MC);
+        return (x.add(y)).sqrt(MC_HU);
     }
 
     /**
@@ -271,7 +271,7 @@ public class DistanceCalculator {
 
         final BigDecimal distanceInMetric = distance.getCoordinateInMetric(EDistanceMetric.M);
         final BigDecimal rangeInMetric = rangePerCombatRound.getCoordinateInMetric(EDistanceMetric.M);
-        return distanceInMetric.divide(rangeInMetric, MC).intValue();
+        return distanceInMetric.divide(rangeInMetric, MC_HU).intValue();
     }
 
     /**

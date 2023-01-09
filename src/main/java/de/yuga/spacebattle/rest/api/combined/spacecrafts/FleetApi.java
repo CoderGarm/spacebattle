@@ -241,9 +241,11 @@ public class FleetApi extends BaseApi {
 
         final User user = userService.find(idUser);
         if (user != null) {
-            return ResponseEntity.ok(fleetService.findAllFleetsByUser(user).stream()
+            final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> allFleetsByUser = fleetService.findAllFleetsByUser(user);
+            final List<Fleet> result = allFleetsByUser.stream()
                     .map(f -> new Fleet(f, getPreferredLanguage()))
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(result);
         }
         throw new NotifyWebUserException("No user found.");
     }

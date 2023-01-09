@@ -426,6 +426,7 @@ public class TickService {
         for (final Planet p : planets) {
             log(p, "Start ticking planet");
             tickPlanet(p);
+            tickFleetsAtStarbase(p);
         }
     }
 
@@ -615,19 +616,42 @@ public class TickService {
         return planetService.save(planet);
     }
 
+    /**
+     * Refresh all ammunition for a fleet in a starbase orbit.
+     */
+    private void tickFleetsAtStarbase(@Nonnull final Planet planet) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+        assert planet.getOwner() != null : "Please be colonized!";
+        final Set<Fleet> anchoredFleets = fleetService.findAllAnchoredForPlanet(planet);
+        final Set<WarshipHealthState> healthStates = anchoredFleets.stream()
+                .filter(f -> f.getOwner().getId() == planet.getOwner().getId())
+                .map(Fleet::getAliveShips)
+                .flatMap(Collection::stream)
+                .map(WarShip::getWarshipHealthState)
+                .collect(Collectors.toSet());
+        healthStates.forEach(WarshipHealthState::ammoUp);
+        warshipHealthStateService.saveAll(healthStates);
+    }
+
     private void tickShipyard(@Nonnull final Planet planet, @Nonnull final Job job) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(job, "job must not be empty");
 
         log(planet, job, "Start processing shipyard job .");
-        final User owner = planet.getOwner();
-        if (owner == null) {
-            throw new NotifyWebUserException("There must be a planet's owner.");
-        }
         final Constructable constructable = job.getConstructable();
+        final Fleet fleet = constructable.getFleet();
+        if (fleet == null) {
+            return;
+        }
 
-        realizeShipProduction(planet, owner, constructable, job);
-        realizeFleetRepair(planet, owner, constructable, job);
+        final User owner = planet.getOwner();
+        assert owner != null : "There must be a planet's owner.";
+        if (constructable.isRepairJob()) {
+            realizeFleetRepair(planet, owner, constructable, job);
+        } else {
+            realizeShipProduction(planet, owner, constructable, job);
+        }
 
         log(planet, job, "Done processing shipyard job.");
     }
@@ -640,11 +664,10 @@ public class TickService {
         Preconditions.checkNotNull(owner, "owner must not be empty");
         Preconditions.checkNotNull(constructable, "constructable must not be empty");
         Preconditions.checkNotNull(job, "job must not be empty");
+        Preconditions.checkNotNull(constructable.getFleet(), "fleet must not be empty");
 
+        log(planet, job, "Start repair fleet.");
         final Fleet fleet = constructable.getFleet();
-        if (fleet == null) {
-            return;
-        }
         final Set<WarshipHealthState> toRepair = fleet.getAliveShips().stream()
                 .map(WarShip::getWarshipHealthState)
                 .collect(Collectors.toSet());
@@ -666,9 +689,16 @@ public class TickService {
         Preconditions.checkNotNull(constructable.getFleet(), "fleet must not be empty");
 
         log(planet, job, "Start realizing warships.");
+        final Set<Fleet> anchoredFleets = fleetService.findAllAnchoredForPlanet(planet);
+        final Fleet biggestInOrbit = anchoredFleets.stream().sorted(Comparator.comparingInt(o -> o.getAliveShips().size())).reduce((o1, o2) -> o2).orElse(null);
+
         final Fleet fleet = constructable.getFleet();
-        fleet.animate();
         fleet.getAllShips().forEach(WarShip::animate);
+        if (biggestInOrbit != null) {
+            biggestInOrbit.addShips(fleet.getAllShips());
+        } else {
+            fleet.animate();
+        }
         fleetService.save(fleet);
         log(planet, job, "Done creating warships.");
     }
@@ -731,10 +761,6 @@ public class TickService {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
 
-        Long tickOutput = null;
-        if (EResourceType.POPULATION != resourceType) {
-            tickOutput = ResourceControlCalculator.getTickOutput(planet, resourceType);
-        }
         final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
         switch (resourceType.getCollectableType()) {
             case VIABLE:
@@ -745,16 +771,12 @@ public class TickService {
                 break;
             case FORFEITABLE:
                 // only set new available points
-                if (tickOutput != null) {
-                    resourceDeposit.setAbsoluteResourceValue(resourceType, tickOutput);
-                }
+                resourceDeposit.setAbsoluteResourceValue(resourceType, ResourceControlCalculator.getTickOutput(planet, resourceType));
                 break;
             default:
             case COLLECTABLE:
                 // add points to the old deposit
-                if (tickOutput != null) {
-                    resourceDeposit.updateResource(resourceType, tickOutput);
-                }
+                resourceDeposit.updateResource(resourceType, ResourceControlCalculator.getTickOutput(planet, resourceType));
                 break;
         }
     }

@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 
-import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC;
+import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC_HU;
 
 public class NavigationCalculator {
 
@@ -75,15 +75,15 @@ public class NavigationCalculator {
 
         // calculate acceleration to top speed
         final BigDecimal accelerationValue = acceleration.convertToMetric(EAccelerationMetric.MS2);
-        final BigDecimal timeToTopSpeed = vesselTopSpeed.divide(accelerationValue, MC);
+        final BigDecimal timeToTopSpeed = vesselTopSpeed.divide(accelerationValue, MC_HU);
 
         // Stage 2: calculate time to halfway distance
         // s = 0,5 · a · t²
         // t = sqrt(  s / (0,5 * a) )
         final EDistanceMetric distanceMetric = EDistanceMetric.M;
-        final BigDecimal halfwayDistanceInMetric = distance.getCoordinateInMetric(distanceMetric).divide(BigDecimal.valueOf(2), MC);
-        final BigDecimal timeToHalfwaySquared = halfwayDistanceInMetric.divide(new BigDecimal("0.5").multiply(accelerationValue), MC);
-        final BigDecimal timeToHalfwayDistance = timeToHalfwaySquared.sqrt(MC);
+        final BigDecimal halfwayDistanceInMetric = distance.getCoordinateInMetric(distanceMetric).divide(BigDecimal.valueOf(2), MC_HU);
+        final BigDecimal timeToHalfwaySquared = halfwayDistanceInMetric.divide(new BigDecimal("0.5").multiply(accelerationValue), MC_HU);
+        final BigDecimal timeToHalfwayDistance = timeToHalfwaySquared.sqrt(MC_HU);
 
         final BigDecimal timeToHalfway;
         final BigDecimal speedAtHalfway;
@@ -95,23 +95,23 @@ public class NavigationCalculator {
             final Distance distanceToTravelWithTopSpeed = halfway.subtract(distanceToTopSpeed);
             // calc time to travel at top speed
             // t = s / v
-            final BigDecimal travelTimeAtTopSpeed = distanceToTravelWithTopSpeed.getCoordinateInMetric(distanceMetric).divide(vesselTopSpeed, MC);
+            final BigDecimal travelTimeAtTopSpeed = distanceToTravelWithTopSpeed.getCoordinateInMetric(distanceMetric).divide(vesselTopSpeed, MC_HU);
             speedAtHalfway = vesselTopSpeed;
             timeToHalfway = travelTimeAtTopSpeed.add(timeToTopSpeed);
         } else {
             // effective case: timeToHalfwayDistance <= timeToTopSpeed
             // accelerate only to half distance time
             // v = a * t
-            speedAtHalfway = accelerationValue.multiply(timeToHalfwayDistance, MC);
+            speedAtHalfway = accelerationValue.multiply(timeToHalfwayDistance, MC_HU);
             timeToHalfway = timeToHalfwayDistance;
         }
 
         // Stage 3: Slow down to targeted speed
         final String percentageString = ((double) targetedPercentageOfTopSpeed / 100) + "";
-        final BigDecimal targetedVesselEndSpeed = vesselTopSpeed.multiply(new BigDecimal(percentageString), MC);
+        final BigDecimal targetedVesselEndSpeed = vesselTopSpeed.multiply(new BigDecimal(percentageString), MC_HU);
         final BigDecimal speedToSlowDownFrom = speedAtHalfway.compareTo(targetedVesselEndSpeed) > 0 ? speedAtHalfway.subtract(targetedVesselEndSpeed) : speedAtHalfway;
         // t = v / a
-        final BigDecimal timeToSlowDown = speedToSlowDownFrom.divide(accelerationValue, MC);
+        final BigDecimal timeToSlowDown = speedToSlowDownFrom.divide(accelerationValue, MC_HU);
 
         // must be in seconds
         final BigDecimal travelTime = timeToHalfway.add(timeToSlowDown);

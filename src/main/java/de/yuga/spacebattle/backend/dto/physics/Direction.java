@@ -7,7 +7,7 @@ import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 
-import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC;
+import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC_HU;
 
 /**
  * The direction represents the normed vectorial direction between two points.
@@ -55,7 +55,7 @@ public class Direction implements Cloneable {
 
         BigDecimal xO = BigDecimal.ZERO;
         if (isDifferentFromZero(val) && isDifferentFromZero(other)) {
-            xO = val.divide(other, MC);
+            xO = val.divide(other, MC_HU);
         }
         return xO;
     }
@@ -101,7 +101,7 @@ public class Direction implements Cloneable {
         Preconditions.checkNotNull(x, "x shouldn't be null!");
         Preconditions.checkNotNull(y, "y shouldn't be null!");
 
-        return x.pow(2).add(y.pow(2)).sqrt(MC);
+        return x.pow(2).add(y.pow(2)).sqrt(MC_HU);
     }
 
     /**
@@ -161,11 +161,11 @@ public class Direction implements Cloneable {
         // calculate scalar product
         final BigDecimal scalar = xCoordinate.multiply(that.getXCoordinate()).add(yCoordinate.multiply(that.getYCoordinate()));
         // calculate quantities of the vectors
-        final BigDecimal thisQuantity = xCoordinate.pow(2).add(yCoordinate.pow(2)).sqrt(MC);
-        final BigDecimal thatQuantity = that.getXCoordinate().pow(2).add(that.getYCoordinate().pow(2)).sqrt(MC);
+        final BigDecimal thisQuantity = xCoordinate.pow(2).add(yCoordinate.pow(2)).sqrt(MC_HU);
+        final BigDecimal thatQuantity = that.getXCoordinate().pow(2).add(that.getYCoordinate().pow(2)).sqrt(MC_HU);
         // calculate cosines of angle
         final BigDecimal multiply = thisQuantity.multiply(thatQuantity);
-        final BigDecimal cosinesOfPhi = scalar.divide(multiply, MC);
+        final BigDecimal cosinesOfPhi = scalar.divide(multiply, MC_HU);
         final double acos = Math.acos(cosinesOfPhi.doubleValue());
         return Math.toDegrees(acos);
     }

@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.rest.dto.combined.spacecrafts;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ammunition.Missile;
@@ -31,5 +32,12 @@ public class AmmunitionValue {
 
         this.missile = new Missile(missile, langCode);
         this.value = value;
+    }
+
+
+    @Override
+    @JsonIgnore
+    public String toString() {
+        return missile.getTypeName() + ": " + value;
     }
 }

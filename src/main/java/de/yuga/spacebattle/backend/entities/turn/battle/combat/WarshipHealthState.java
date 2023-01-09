@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.entities.turn.battle.combat;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.FittingUtils;
 import de.yuga.spacebattle.backend.calculator.SpacecraftCalculator;
 import de.yuga.spacebattle.backend.combat.round.MissileAmmunitionState;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
@@ -9,8 +8,6 @@ import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -19,7 +16,10 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
@@ -69,16 +69,10 @@ public class WarshipHealthState extends AbstractEntityKey implements WarshipHeal
         this.warShip = warship;
         this.capabilities.addAll(new SpacecraftCalculator().getCapabilityValues(shipClass));
         this.activeFittings.addAll(shipClass.getFittings());
-        final Set<AlignedFitting> fittingByType = this.activeFittings.stream()
-                .filter(FittingUtils.MISSILES)
-                .collect(Collectors.toSet());
 
-        final Map<Missile, Integer> shotsPerMissile = fittingByType.stream()
-                .map(AlignedFitting::getLauncher)
-                .filter(Objects::nonNull)
-                .map(Launcher::getAmmunitionModule)
-                .collect(Collectors.groupingBy(AmmunitionModule::getMissile,
-                        Collectors.mapping(AmmunitionModule::getEffectValue, Collectors.reducing(0, Integer::sum))));
+        final Map<Missile, Integer> shotsPerMissile = shipClass.getAmmunitionFittings().stream()
+                .collect(Collectors.groupingBy(af -> af.getAmmunitionModule().getMissile(),
+                        Collectors.mapping(af -> af.getAmmunitionModule().getEffectValue() * af.getAmount(), Collectors.reducing(0, Integer::sum))));
 
         this.remainingShots.putAll(shotsPerMissile);
     }
@@ -237,16 +231,15 @@ public class WarshipHealthState extends AbstractEntityKey implements WarshipHeal
         this.capabilities.addAll(new SpacecraftCalculator().getCapabilityValues(shipClass));
         this.activeFittings.clear();
         this.activeFittings.addAll(shipClass.getFittings());
-        final Set<AlignedFitting> fittingByType = this.activeFittings.stream()
-                .filter(FittingUtils.MISSILES)
-                .collect(Collectors.toSet());
+        ammoUp();
+    }
 
-        final Map<Missile, Integer> shotsPerMissile = fittingByType.stream()
-                .map(AlignedFitting::getLauncher)
-                .filter(Objects::nonNull)
-                .map(Launcher::getAmmunitionModule)
-                .collect(Collectors.groupingBy(AmmunitionModule::getMissile,
-                        Collectors.mapping(AmmunitionModule::getEffectValue, Collectors.reducing(0, Integer::sum))));
+    public void ammoUp() {
+        final ShipClass shipClass = warShip.getShipClass();
+        final Map<Missile, Integer> shotsPerMissile = shipClass.getAmmunitionFittings().stream()
+                .collect(Collectors.groupingBy(af -> af.getAmmunitionModule().getMissile(),
+                        Collectors.mapping(af -> af.getAmmunitionModule().getEffectValue() * af.getAmount(), Collectors.reducing(0, Integer::sum))));
+
         this.remainingShots.clear();
         this.remainingShots.putAll(shotsPerMissile);
     }

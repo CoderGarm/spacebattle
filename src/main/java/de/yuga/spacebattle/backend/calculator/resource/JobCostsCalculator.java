@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.calculator.resource;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.combat.round.WarshipHealthState;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
@@ -16,6 +15,7 @@ import de.yuga.spacebattle.backend.enums.EResourceType;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -88,7 +88,7 @@ public class JobCostsCalculator {
             final long cost = costs.getResourceAmountByType(r);
             final long income = ticklyIncome.getResourceAmountByType(r);
 
-            final int ticks = BigDecimal.valueOf(cost).divide(BigDecimal.valueOf(income), DistanceCalculator.MC).intValue();
+            final int ticks = BigDecimal.valueOf(cost).divide(BigDecimal.valueOf(income), RoundingMode.CEILING).intValue();
             if (ticks > 0 && ticksNeeded.get() < ticks) {
                 ticksNeeded.set(ticks);
             }
@@ -103,7 +103,7 @@ public class JobCostsCalculator {
             return calculateRepairJobCost(fleet);
         }
         final ResourceDeposit costs = new ResourceDeposit(EDepositType.COSTS);
-        fleet.getAliveShips().stream().map(WarShip::getShipClass).map(ShipClass::getCosts).forEach(costs::add);
+        fleet.getAllShips().stream().map(WarShip::getShipClass).map(ShipClass::getCosts).forEach(costs::add);
         return costs;
     }
 
@@ -118,7 +118,7 @@ public class JobCostsCalculator {
                 .collect(Collectors.toMap(Function.identity(), WarshipHealthState::new));
 
         final ResourceDeposit costs = new ResourceDeposit(EDepositType.COSTS);
-        referenceWarships.forEach((warShip, reference) -> { // todo this seems to make so sense
+        referenceWarships.forEach((warShip, reference) -> { // todo this seems to make no sense
             final WarshipHealthState warshipHealthState = damagedStates.get(warShip);
             final double damageFraction = warshipHealthState.getDamagedFraction(reference);
             final ResourceDeposit costsOverall = warShip.getShipClass().getCosts();

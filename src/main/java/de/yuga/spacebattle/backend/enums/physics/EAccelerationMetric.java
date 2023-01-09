@@ -55,6 +55,6 @@ public enum EAccelerationMetric {
     public BigDecimal getConversionFactor(@Nonnull final EAccelerationMetric targetMetric) {
         Preconditions.checkNotNull(targetMetric, "targetMetric shouldn't be null!");
 
-        return meterEquivalent.divide(targetMetric.getMeterEquivalent(), DistanceCalculator.MC);
+        return meterEquivalent.divide(targetMetric.getMeterEquivalent(), DistanceCalculator.MC_HU);
     }
 }

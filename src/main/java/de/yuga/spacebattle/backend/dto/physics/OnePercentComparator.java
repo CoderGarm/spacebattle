@@ -18,7 +18,7 @@ public class OnePercentComparator implements Comparator<BigDecimal> {
         Preconditions.checkNotNull(o2, "o2 shouldn't be null!");
 
         final BigDecimal absolutDifference = o1.subtract(o2).abs();
-        final BigDecimal absPercentageDifference = absolutDifference.divide(o1.min(o2), DistanceCalculator.MC).multiply(BigDecimal.valueOf(100)).abs();
+        final BigDecimal absPercentageDifference = absolutDifference.divide(o1.min(o2), DistanceCalculator.MC_HU).multiply(BigDecimal.valueOf(100)).abs();
         // ATTENTION: if there is a problem with it
         return absPercentageDifference.compareTo(BigDecimal.valueOf(0.01)) <= 0 ? 0 : o1.compareTo(o2);
     }

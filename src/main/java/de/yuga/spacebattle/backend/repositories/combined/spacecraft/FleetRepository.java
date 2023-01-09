@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Set;
 
 public interface FleetRepository extends CrudRepository<Fleet, Integer>, CustomFleetRepository {
@@ -27,4 +29,8 @@ public interface FleetRepository extends CrudRepository<Fleet, Integer>, CustomF
     @Query("DELETE FROM Fleet f WHERE f.id = ?1")
     @Transactional
     void delete(Integer id);
+
+    @Nullable
+    @Query("SELECT f FROM Fleet f WHERE f.isDeleted = false")
+    List<Fleet> findAllAliveFleets();
 }

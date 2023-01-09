@@ -80,7 +80,7 @@ public enum EHyperBand {
      * @return the top speed in m/s
      */
     public BigDecimal getPhysicalTopSpeed() {
-        return EDistanceMetric.LS.getMeterEquivalent().multiply(BigDecimal.valueOf(effectiveCWarship), DistanceCalculator.MC);
+        return EDistanceMetric.LS.getMeterEquivalent().multiply(BigDecimal.valueOf(effectiveCWarship), DistanceCalculator.MC_HU);
     }
 
     /**
@@ -89,6 +89,6 @@ public enum EHyperBand {
      * @return the top speed in m/s which is safe to travel
      */
     public BigDecimal getEffectiveTopSpeed() {
-        return getPhysicalTopSpeed().multiply(MAX_PERCENTAGE_SPEED_OF_LIGHT, DistanceCalculator.MC);
+        return getPhysicalTopSpeed().multiply(MAX_PERCENTAGE_SPEED_OF_LIGHT, DistanceCalculator.MC_HU);
     }
 }
