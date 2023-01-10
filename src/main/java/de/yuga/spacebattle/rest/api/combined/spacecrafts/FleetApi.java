@@ -6,13 +6,10 @@ import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
-import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.services.account.UserService;
-import de.yuga.spacebattle.backend.services.caches.FleetMovementCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
-import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -21,7 +18,6 @@ import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMarker;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMerge;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMove;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
-import de.yuga.spacebattle.rest.dto.turn.FleetMovement;
 import de.yuga.spacebattle.rest.dto.turn.Move;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -60,11 +56,7 @@ public class FleetApi extends BaseApi {
     private static final String PLAN_MOVES_FLEET_ENDPOINT = "planMoves";
     private static final String CANCEL_MOVES_FLEET_ENDPOINT = "cancelMoves";
     private static final String FLEET_PER_USER_PER_SYSTEM_ENDPOINT = "fleetDistribution";
-    private static final String FINISHED_MOVEMENT_ENDPOINT = "finishedMovement";
     private static final String RENAME_FLEET_ENDPOINT = "rename";
-
-    @Nonnull
-    private final FleetMovementCache fleetMovementCache;
 
     @Nonnull
     private final FleetService fleetService;
@@ -78,22 +70,15 @@ public class FleetApi extends BaseApi {
     @Nonnull
     private final PlanetService planetService;
 
-    @Nonnull
-    private final TickService tickService;
-
     @Autowired
-    public FleetApi(@Nonnull final FleetMovementCache fleetMovementCache,
-                    @Nonnull final FleetService fleetService,
+    public FleetApi(@Nonnull final FleetService fleetService,
                     @Nonnull final UserService userService,
                     @Nonnull final StarSystemService starSystemService,
-                    @Nonnull final PlanetService planetService,
-                    @Nonnull final TickService tickService) {
-        this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
+                    @Nonnull final PlanetService planetService) {
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
-        this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
     }
 
     @GetMapping(value = "{idFleet}")
@@ -371,25 +356,6 @@ public class FleetApi extends BaseApi {
         return ResponseEntity.ok(true);
     }
 
-    @GetMapping(value = FINISHED_MOVEMENT_ENDPOINT)
-    @Operation(summary = "Get all finished movements of fleets of an owner.", operationId = "getFinishedMovements",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = FleetMovement.class))
-                            )),
-                    @ApiResponse(responseCode = "400", description = "an error occurred",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
-            }
-    )
-    public ResponseEntity<?> getFinishedMovements() {
-
-        final int idUser = getIdUser();
-        final Tick today = tickService.getToday();
-        return ResponseEntity.ok(fleetMovementCache.getMovements(today, idUser).stream()
-                .map(FleetMovement::new)
-                .collect(Collectors.toList()));
-    }
 
     @PutMapping(value = RENAME_FLEET_ENDPOINT + "/{idFleet}/{name}")
     @Operation(summary = "Renames a fleet.", operationId = "renameFleet",
@@ -451,35 +417,5 @@ public class FleetApi extends BaseApi {
             final FleetOrbit destination = new FleetOrbit(targetOrbit, targetSystem);
             return new de.yuga.spacebattle.backend.entities.turn.Move(fleet, destination);
         }).collect(Collectors.toList());
-    }
-
-    /**
-     * Creates a move for the given movement.
-     *
-     * @param idUser the owner of the fleet to move
-     * @param move   the planned movement
-     * @return the move
-     */
-    @Nonnull
-    private de.yuga.spacebattle.backend.entities.turn.Move createSingleMove(final int idUser,
-                                                                            @Nonnull final FleetMove move) {
-        Preconditions.checkNotNull(move, "move shouldn't be null!");
-
-        final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetService.find(move.getIdFleetToMove());
-        PreconditionWebHelper.checkNotNull(fleet, "There is no fleet to move.");
-
-        if (fleet.getOwner().getId() != idUser) {
-            throw new NotifyWebUserException("No, you cannot move this single fleet.");
-        }
-
-        final FleetOrbit currentLocation = fleet.getOrbit();
-        PreconditionWebHelper.checkNotNull(currentLocation, "This move is not possible because the idFleet '" + fleet.getId() + "' is in hyperspace and cannot be moved");
-
-        final Integer idTargetSystem = move.getIdDestinationSystem();
-        final StarSystem targetSystem = idTargetSystem != null ? starSystemService.find(idTargetSystem) : null;
-
-        final Orbit targetOrbit = move.getDestinationOrbit() != null ? new Orbit(move.getDestinationOrbit()) : null;
-        final FleetOrbit destination = new FleetOrbit(targetOrbit, targetSystem);
-        return new de.yuga.spacebattle.backend.entities.turn.Move(fleet, destination);
     }
 }

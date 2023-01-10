@@ -4,21 +4,17 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
-import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.services.account.UserService;
-import de.yuga.spacebattle.backend.services.caches.ColonizationCache;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
-import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.orbitals.StarSystem;
 import de.yuga.spacebattle.rest.dto.turn.Colonization;
-import de.yuga.spacebattle.rest.dto.turn.FinishedColonization;
 import de.yuga.spacebattle.rest.dto.turn.StarSystemColonization;
 import de.yuga.spacebattle.rest.dto.turn.StarSystemColonizationListConverter;
 import io.swagger.v3.oas.annotations.Operation;
@@ -55,10 +51,6 @@ public class ColonizationApi extends BaseApi {
     private static final String HOME_SYSTEM_ENDPOINT = "home";
     private static final String BUY_SYSTEM_INFO_ENDPOINT = "buy";
     private static final String COSTS_SYSTEM_INFO_ENDPOINT = "costs";
-    private static final String FINISHED_COLONIZATIONS_ENDPOINT = "finishedColonizations";
-
-    @Nonnull
-    private final ColonizationCache colonizationCache;
 
     @Nonnull
     private final UserService userService;
@@ -72,22 +64,15 @@ public class ColonizationApi extends BaseApi {
     @Nonnull
     private final PlanetService planetService;
 
-    @Nonnull
-    private final TickService tickService;
-
     @Autowired
-    public ColonizationApi(@Nonnull final ColonizationCache colonizationCache,
-                           @Nonnull final UserService userService,
+    public ColonizationApi(@Nonnull final UserService userService,
                            @Nonnull final ColonizationService colonizationService,
                            @Nonnull final StarSystemService starSystemService,
-                           @Nonnull final PlanetService planetService,
-                           @Nonnull final TickService tickService) {
-        this.colonizationCache = Preconditions.checkNotNull(colonizationCache, "colonizationCache must not be empty");
+                           @Nonnull final PlanetService planetService) {
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.colonizationService = Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
         this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
-        this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
     }
 
     @PutMapping
@@ -274,22 +259,5 @@ public class ColonizationApi extends BaseApi {
         final Set<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> knownStarSystems = userService.getKnownStarSystems(idUser);
         final List<StarSystem> starSystems = knownStarSystems.stream().map(StarSystem::new).collect(Collectors.toList());
         return ResponseEntity.ok(starSystems);
-    }
-
-    @GetMapping(value = FINISHED_COLONIZATIONS_ENDPOINT)
-    @Operation(summary = "Get all finished colonizations.", operationId = "getFinishedColonizations",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = FinishedColonization.class))
-                            )),
-                    @ApiResponse(responseCode = "400", description = "an error occurred",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
-            }
-    )
-    public ResponseEntity<?> getFinishedColonizations() {
-        final int idUser = getIdUser();
-        final Tick today = tickService.getToday();
-        return ResponseEntity.ok(colonizationCache.getColonizations(today, idUser).stream().map(FinishedColonization::new).collect(Collectors.toList()));
     }
 }

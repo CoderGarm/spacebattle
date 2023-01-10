@@ -42,7 +42,6 @@ todo. fitting stats only visible when minimum conditions are fulfilled - but not
 todo. dont reload full map on flight confirm
 
 
-todo. consolidate cache api?
 todo. persist cache content?
 todo. spinner abbrechen
 
