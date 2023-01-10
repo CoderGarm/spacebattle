@@ -3,7 +3,7 @@ package de.yuga.spacebattle.rest.api.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.MessageThread;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.services.account.MessageThreadService;
+import de.yuga.spacebattle.backend.services.account.ChatService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -42,16 +42,16 @@ public class ChatApi extends BaseApi {
     private final UserService userService;
 
     @Nonnull
-    private final MessageThreadService messageThreadService;
+    private final ChatService chatService;
 
     @Autowired
     public ChatApi(@Nonnull final UserService userService,
-                   @Nonnull final MessageThreadService messageThreadService) {
+                   @Nonnull final ChatService chatService) {
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
-        Preconditions.checkNotNull(messageThreadService, "messageThreadService shouldn't be null!");
+        Preconditions.checkNotNull(chatService, "messageThreadService shouldn't be null!");
 
         this.userService = userService;
-        this.messageThreadService = messageThreadService;
+        this.chatService = chatService;
     }
 
     @GetMapping(value = "{idUser}")
@@ -67,7 +67,7 @@ public class ChatApi extends BaseApi {
     public ResponseEntity<?> getChatByUsers(@PathVariable("idUser") final int idUser) {
 
         final int idUserByToken = getIdUser();
-        final MessageThread messagesBetween = messageThreadService.findMessagesBetween(idUserByToken, idUser);
+        final MessageThread messagesBetween = chatService.findMessagesBetween(idUserByToken, idUser);
         if (messagesBetween != null) {
             return ResponseEntity.ok(new ChatHistory(messagesBetween));
         }
@@ -89,7 +89,7 @@ public class ChatApi extends BaseApi {
     public ResponseEntity<?> getChatByUser() {
 
         final int idUserByToken = getIdUser();
-        final List<MessageThread> threadsWithUser = messageThreadService.findThreadsWithUser(idUserByToken);
+        final List<MessageThread> threadsWithUser = chatService.findThreadsWithUser(idUserByToken);
         if (!threadsWithUser.isEmpty()) {
             return ResponseEntity.ok(threadsWithUser.stream().map(ChatHistory::new).collect(Collectors.toList()));
         }
@@ -143,7 +143,7 @@ public class ChatApi extends BaseApi {
         final User receiver = userService.find(idReceiver);
 
         //noinspection ConstantConditions
-        final MessageThread messageThread = messageThreadService.createChatMessage(sender, receiver, message);
+        final MessageThread messageThread = chatService.createChatMessage(sender, receiver, message);
         return ResponseEntity.ok(new ChatHistory(messageThread));
     }
 
@@ -180,7 +180,7 @@ public class ChatApi extends BaseApi {
             throw new NotifyWebUserException("You should not pretend to be someone other if you try to write a message!");
         }
         final User sender = userService.find(idUserSender);
-        final MessageThread messageThread = messageThreadService.sendChatMessage(idUserMessage, sender, chatMessage);
+        final MessageThread messageThread = chatService.sendChatMessage(idUserMessage, sender, chatMessage);
         if (messageThread != null) {
             return ResponseEntity.ok(new ChatHistory(messageThread));
         } else {
@@ -201,7 +201,7 @@ public class ChatApi extends BaseApi {
     public ResponseEntity<?> hasUnread(
             @PathVariable("idChatHistory") final int idChatHistory) {
         final int idReceiver = getIdUser();
-        final boolean hasUnread = messageThreadService.hasUnreadMessages(idReceiver, idChatHistory);
+        final boolean hasUnread = chatService.hasUnreadMessages(idReceiver, idChatHistory);
         return ResponseEntity.ok(hasUnread);
     }
 
@@ -217,7 +217,7 @@ public class ChatApi extends BaseApi {
     )
     public ResponseEntity<?> hasUserUnread() {
         final int idUser = getIdUser();
-        final boolean hasUnread = messageThreadService.hasUserUnreadMessages(idUser);
+        final boolean hasUnread = chatService.hasUserUnreadMessages(idUser);
         return ResponseEntity.ok(hasUnread);
     }
 
@@ -235,7 +235,7 @@ public class ChatApi extends BaseApi {
 
         final int idUser = getIdUser();
 
-        messageThreadService.markMessageReadIfForUser(idUserMessage, idUser);
+        chatService.markMessageReadIfForUser(idUserMessage, idUser);
         return ResponseEntity.ok(true);
     }
 }

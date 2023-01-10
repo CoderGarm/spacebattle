@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@Disabled("Please run with empty message read table. Adapt accordingly when tests where interesting.")
 @SpringBootTestProfile
+@Disabled("Please run with empty message read table. Adapt accordingly when tests where interesting.")
 class ForumMessageReadRepositoryTest {
 
     @Autowired

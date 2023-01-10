@@ -46,7 +46,6 @@ import static de.yuga.spacebattle.backend.transformer.CSVTransformer.CSV_SEPARAT
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootProdProfile
-//@ActiveProfiles("dev")
 @Disabled("not needed for unit or integration testing")
 public class MasterOfTheUniverseServiceTest {
 

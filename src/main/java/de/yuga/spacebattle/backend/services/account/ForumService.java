@@ -19,6 +19,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -220,5 +221,19 @@ public class ForumService {
     @Nullable
     public ForumMessage findMessage(final int idForumMessage) {
         return forumMessageRepository.findById(idForumMessage).orElse(null);
+    }
+
+    @Nullable
+    @Deprecated(since = "Just for markdown transformation")
+    public Set<ForumMessage> findAllMessages() {
+        final Iterable<ForumMessage> all = forumMessageRepository.findAll();
+        return StreamSupport.stream(all.spliterator(), false).collect(Collectors.toSet());
+    }
+
+    @Deprecated(since = "Just for markdown transformation")
+    public void saveAllMessages(@Nonnull final Collection<ForumMessage> messages) {
+        Preconditions.checkNotNull(messages, "messages must not be empty");
+
+        forumMessageRepository.saveAll(messages);
     }
 }

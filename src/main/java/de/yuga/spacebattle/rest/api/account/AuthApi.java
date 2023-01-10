@@ -7,7 +7,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
-import de.yuga.spacebattle.backend.services.account.MessageThreadService;
+import de.yuga.spacebattle.backend.services.account.ChatService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
@@ -93,7 +93,7 @@ public class AuthApi {
     private final PlanetService planetService;
 
     @Nonnull
-    private final MessageThreadService messageThreadService;
+    private final ChatService chatService;
 
     @Nonnull
     private final MasterOfTheUniverseService masterOfTheUniverseService;
@@ -117,7 +117,7 @@ public class AuthApi {
                    @Nonnull final ResearchService researchService,
                    @Nonnull final ColonizationService colonizationService,
                    @Nonnull final PlanetService planetService,
-                   @Nonnull final MessageThreadService messageThreadService,
+                   @Nonnull final ChatService chatService,
                    @Nonnull final MasterOfTheUniverseService masterOfTheUniverseService,
                    @Nonnull final TickService tickService) {
         Preconditions.checkNotNull(authenticationManager, "authenticationManager shouldn't be null!");
@@ -126,7 +126,7 @@ public class AuthApi {
         Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
         Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
         Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
-        Preconditions.checkNotNull(messageThreadService, "messageThreadService must not be empty");
+        Preconditions.checkNotNull(chatService, "messageThreadService must not be empty");
         Preconditions.checkNotNull(masterOfTheUniverseService, "masterOfTheUniverseService must not be empty");
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
 
@@ -136,7 +136,7 @@ public class AuthApi {
         this.jwtTokenUtil = jwtTokenUtil;
         this.colonizationService = colonizationService;
         this.planetService = planetService;
-        this.messageThreadService = messageThreadService;
+        this.chatService = chatService;
         this.masterOfTheUniverseService = masterOfTheUniverseService;
     }
 
@@ -293,7 +293,7 @@ public class AuthApi {
         final Optional<WebUserDetails> sender = userService.findByUsername("Flashkid");
         sender.ifPresent(flash -> {
             final String replace = WELCOME_MESSAGE.replace(NAME_PLACEHOLDER, saved.getUsername());
-            messageThreadService.createChatMessage(flash.getUser(), saved, replace);
+            chatService.createChatMessage(flash.getUser(), saved, replace);
         });
 
         masterOfTheUniverseService.createOpponentAndFightAsync(saved);

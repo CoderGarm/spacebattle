@@ -11,11 +11,15 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
-public class MessageThreadService {
+public class ChatService {
 
     @Nonnull
     private final MessageThreadRepository messageThreadRepository;
@@ -24,8 +28,8 @@ public class MessageThreadService {
     private final UserMessageRepository userMessageRepository;
 
     @Autowired
-    public MessageThreadService(@Nonnull final MessageThreadRepository messageThreadRepository,
-                                @Nonnull final UserMessageRepository userMessageRepository) {
+    public ChatService(@Nonnull final MessageThreadRepository messageThreadRepository,
+                       @Nonnull final UserMessageRepository userMessageRepository) {
         Preconditions.checkNotNull(messageThreadRepository, "userMessageRepository should not be null");
         Preconditions.checkNotNull(userMessageRepository, "userMessageRepository shouldn't be null!");
 
@@ -149,5 +153,18 @@ public class MessageThreadService {
      */
     public boolean hasUserUnreadMessages(final int idUser) {
         return userMessageRepository.hasUserUnreadMessages(idUser);
+    }
+
+    @Deprecated(since = "Just for markdown transformation")
+    public Set<UserMessage> findAllMessages() {
+        final Iterable<UserMessage> all = userMessageRepository.findAll();
+        return StreamSupport.stream(all.spliterator(), false).collect(Collectors.toSet());
+    }
+
+    @Deprecated(since = "Just for markdown transformation")
+    public void saveAllMessages(@Nonnull final Collection<UserMessage> messages) {
+        Preconditions.checkNotNull(messages, "messages must not be empty");
+
+        userMessageRepository.saveAll(messages);
     }
 }

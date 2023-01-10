@@ -7,7 +7,9 @@ import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.UserMessage;
 import de.yuga.spacebattle.backend.entities.account.forum.Forum;
+import de.yuga.spacebattle.backend.entities.account.forum.ForumMessage;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
@@ -37,12 +39,12 @@ import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
+import de.yuga.spacebattle.backend.services.account.ChatService;
 import de.yuga.spacebattle.backend.services.account.ForumService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.combined.account.AllianceService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
-import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.i18n.TranslatableService;
@@ -55,6 +57,8 @@ import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import io.github.furstenheim.CopyDown;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +70,8 @@ import javax.annotation.PostConstruct;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -199,7 +205,7 @@ public class MasterOfTheUniverseService {
     private final ResourceService resourceService;
 
     @Nonnull
-    private final ConstructionService constructionService;
+    private final ChatService chatService;
 
     @Autowired
     public MasterOfTheUniverseService(@Nonnull final TickService tickService,
@@ -219,7 +225,7 @@ public class MasterOfTheUniverseService {
                                       @Nonnull final BattleService battleService,
                                       @Nonnull final TranslatableService translatableService,
                                       @Nonnull final ResourceService resourceService,
-                                      @Nonnull final ConstructionService constructionService) {
+                                      @Nonnull final ChatService chatService) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.allianceService = Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");
@@ -237,17 +243,44 @@ public class MasterOfTheUniverseService {
         this.battleService = Preconditions.checkNotNull(battleService, "battleService must not be empty");
         this.translatableService = Preconditions.checkNotNull(translatableService, "translatableService must not be empty");
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
-        this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
+        this.chatService = Preconditions.checkNotNull(chatService, "constructionService must not be empty");
         validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
+
+    @Deprecated(since = "Just for markdown transformation")
+    private final CopyDown converter = new CopyDown();
+    @Deprecated(since = "Just for markdown transformation")
+    private final static String tmpdir = "/home/karsten/";
+    @Deprecated(since = "Just for markdown transformation")
+    private final static String separator = System.getProperty("file.separator");
 
     @PostConstruct
     @SuppressWarnings("ConstantConditions")
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = false;
+        final boolean transformationNeeded = !new File(tmpdir + separator + "convertHtmlToMarkdown").exists();
         if (transformationNeeded) {
+            final Set<ForumMessage> allMessages = forumService.findAllMessages();
+            final Set<UserMessage> allChatMessages = chatService.findAllMessages();
+            allMessages.forEach(msg -> {
+                final String message = msg.getMessage();
+                final String markdown = converter.convert(message);
+                msg.setMessage(markdown);
+            });
+            forumService.saveAllMessages(allMessages);
+            allChatMessages.forEach(msg -> {
+                final String message = msg.getMessage();
+                final String markdown = converter.convert(message);
+                msg.setMessage(markdown);
+            });
+            forumService.saveAllMessages(allMessages);
+            try {
+                FileUtils.writeStringToFile(new File(tmpdir + separator + "convertHtmlToMarkdown"), "1");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
