@@ -91,7 +91,7 @@ public class ColonizationApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> startColonizingPlanet(@RequestBody de.yuga.spacebattle.rest.dto.orbitals.Planet planet) {
+    public ResponseEntity<?> startColonizingPlanet(@RequestBody @Nonnull final de.yuga.spacebattle.rest.dto.orbitals.Planet planet) {
         PreconditionWebHelper.checkNotNull(planet, "There must be a planet to colonize.");
 
         final int idUser = getIdUser();

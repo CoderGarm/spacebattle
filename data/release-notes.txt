@@ -4,7 +4,7 @@
 1. Munitionskapazität im Flottendisplay darstellen
 2. Informationen zur Flotte werden nun hoffentlich etwas besser dargestellt
 3. neue Kriegsschiffe werden in die größte Flotte im Orbit integriert, ansonsten wird eine neue Flotte erzeugt
-4. Action-Buttons auf Karte wurden etwas angepasst und werden nun situationsspezifisch angezeigt
+4. Action-Buttons auf Karte wurden etwas angepasst und werden jetzt situationsspezifisch angezeigt
 5. Flotten im Orbit einer Werft werden automatisch aufmunitioniert
 6. Meldung über aktivierte Operationals im Journal
 
@@ -12,22 +12,16 @@
 fixed. Nach einem siegreichen Kampf wird die gegnerische Flotte nun als zerstört markiert
 fixed. Munition falsch bei Erzeugung des Schiffs berechnet
 fixed. Die benötigten Ticks eines Shipyard Jobs wurden in der UI richtig angezeigt aber im Job falsch gespeichert
+fixed. Die Kosten von Flottenreparaturen sind korrekt
 
 
-todo. fleet displays nach funktion aufteilen und darstellung verbessern
-
-
-
-
-
-
-todo. organize svg elements in groups, like coord cross for planet and so on
-
-
-todo. kolonisierungen müssen demand erzeugen
 
 todo. forum und chat als markdown
 
+
+
+
+--------- next steps ---------
 
 todo. who has colonized a system?
 todo. dont reload full map on flight confirm
@@ -35,19 +29,11 @@ todo. dont reload full map on flight confirm
 
 todo. combat aufhübschen
 todo. rework battle report -> Trennung Anzeigenlogik / Businesslogik
-
 todo. fitting stats only visible when minimum conditions are fulfilled - but not stated
 
 todo. spinner abbrechen
 
---------- bugs ---------
-
-
-
---------- next steps ---------
-
 todo. population balancing broken
-todo. shipyard balancing broken, Bauzeit für Flotten zu klein
 
 todo. scroll issue if the last page forbids overflow
 
@@ -64,6 +50,7 @@ todo. nicht kampffähige aber lebende flotte nicht als tot markieren
     - nur bei Accounterstellung
 
 
+todo. kolonisierungen müssen demand erzeugen
 
 todo. Handelssystem
 todo. simulierter ziviler Handel - Kosten und Steuereinnahmen

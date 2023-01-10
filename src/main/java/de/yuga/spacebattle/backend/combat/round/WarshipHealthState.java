@@ -484,10 +484,10 @@ public class WarshipHealthState implements Cloneable {
     }
 
     private double getFraction(final int state, final int referenceState) {
-        return (double) state / (double) referenceState;
+        return 1 - ((double) state / (double) referenceState);
     }
 
     private double getFraction(final long state, final long referenceState) {
-        return (double) state / (double) referenceState;
+        return 1 - ((double) state / (double) referenceState);
     }
 }

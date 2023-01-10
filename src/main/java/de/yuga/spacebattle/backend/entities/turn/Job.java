@@ -140,6 +140,11 @@ public class Job extends Deletable implements Comparable<Job> {
         delete();
     }
 
+    public void delete() {
+        this.jobDoneAtZero = 0;
+        super.delete();
+    }
+
     public void setPriority(@Nonnull final EJobPriority priority) {
         this.priority = priority;
     }
