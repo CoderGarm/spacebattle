@@ -34,4 +34,4 @@ update warshipCapabilities cap
 
 drop table tmp_caps;
 
-insert into dbPatch values (null, now(), 'add operational to health state snap', '0.0.7-2');
+insert into dbPatch values (null, now(), 'add commissioning to health state snap', '0.0.7-2');

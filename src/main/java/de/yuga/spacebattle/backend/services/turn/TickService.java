@@ -24,6 +24,7 @@ import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.repositories.turn.TickRepository;
 import de.yuga.spacebattle.backend.services.caches.ColonizationCache;
 import de.yuga.spacebattle.backend.services.caches.FleetMovementCache;
+import de.yuga.spacebattle.backend.services.caches.OperationalCache;
 import de.yuga.spacebattle.backend.services.caches.TransportationCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
@@ -68,6 +69,9 @@ public class TickService {
     private final ColonizationCache colonizationCache;
 
     @Nonnull
+    private final OperationalCache operationalCache;
+
+    @Nonnull
     private final TickRepository tickRepository;
 
     @Nonnull
@@ -106,6 +110,7 @@ public class TickService {
     public TickService(@Nonnull final TransportationCache transportationCache,
                        @Nonnull final FleetMovementCache fleetMovementCache,
                        @Nonnull final ColonizationCache colonizationCache,
+                       @Nonnull final OperationalCache operationalCache,
                        @Nonnull final TickRepository tickRepository,
                        @Nonnull final JobService jobService,
                        @Nonnull final PlanetService planetService,
@@ -120,6 +125,7 @@ public class TickService {
         this.transportationCache = Preconditions.checkNotNull(transportationCache, "transportationCache must not be empty");
         this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
         this.colonizationCache = Preconditions.checkNotNull(colonizationCache, "colonizationCache must not be empty");
+        this.operationalCache = Preconditions.checkNotNull(operationalCache, "operationalCache must not be empty");
         this.tickRepository = Preconditions.checkNotNull(tickRepository, "tickRepository shouldn't be null!");
         this.jobService = Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
@@ -572,7 +578,9 @@ public class TickService {
                 }
             }
         }
-        constructionService.saveAll(ops);
+        if (!ops.isEmpty()) {
+            operationalCache.activateConstructions(today, planet, constructionService.saveAll(ops));
+        }
     }
 
     public void activateWarships(@Nonnull final Planet planet,
@@ -598,11 +606,14 @@ public class TickService {
                 operationals.add(inoperational);
             }
         }
-        warShipService.saveAll(operationals);
-        Set<Fleet> fleets = operationals.stream().map(WarShip::getFleet).collect(Collectors.toSet());
-        fleets = fleets.stream().filter(f -> f.getAliveShips().stream().allMatch(Operationable::isOperational)).collect(Collectors.toSet());
-        fleets.forEach(Fleet::setOperational);
-        fleetService.saveAll(fleets);
+        if (!operationals.isEmpty()) {
+            warShipService.saveAll(operationals);
+            Set<Fleet> fleets = operationals.stream().map(WarShip::getFleet).collect(Collectors.toSet());
+            fleets = fleets.stream().filter(f -> f.getAliveShips().stream().allMatch(Operationable::isOperational)).collect(Collectors.toSet());
+            fleets.forEach(Fleet::setOperational);
+            fleetService.saveAll(fleets);
+            operationalCache.activateWarships(today, planet, operationals);
+        }
     }
 
     @Nonnull

@@ -320,6 +320,7 @@ public class FleetService {
             return null;
         }
         final Map<FleetOrbit, List<Fleet>> fleetsByOrbit = allFleetsByPlanet.stream()
+                .filter(f -> Objects.nonNull(f.getOrbit()))
                 .collect(Collectors.groupingBy(Fleet::getOrbit, Collectors.mapping(Function.identity(), Collectors.toList())));
         if (fleetsByOrbit.size() > 1) {
             throw new NotifyWebUserException("There cannot be more than one orbit for a single planet.");
@@ -332,10 +333,11 @@ public class FleetService {
         return clashes.get(0);
     }
 
-    public List<Fleet> saveAll(@Nonnull final Collection<Fleet> fleets) {
+    @Nonnull
+    public Set<Fleet> saveAll(@Nonnull final Collection<Fleet> fleets) {
         Preconditions.checkNotNull(fleets, "fleets shouldn't be null!");
 
         final Iterable<Fleet> saveAll = fleetRepository.saveAll(fleets);
-        return StreamSupport.stream(saveAll.spliterator(), false).collect(Collectors.toList());
+        return StreamSupport.stream(saveAll.spliterator(), false).collect(Collectors.toSet());
     }
 }

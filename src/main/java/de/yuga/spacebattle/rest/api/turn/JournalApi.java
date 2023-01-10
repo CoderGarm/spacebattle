@@ -4,15 +4,13 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.services.caches.ColonizationCache;
 import de.yuga.spacebattle.backend.services.caches.FleetMovementCache;
+import de.yuga.spacebattle.backend.services.caches.OperationalCache;
 import de.yuga.spacebattle.backend.services.caches.TransportationCache;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
-import de.yuga.spacebattle.rest.dto.turn.FinishedColonization;
-import de.yuga.spacebattle.rest.dto.turn.FleetMovement;
-import de.yuga.spacebattle.rest.dto.turn.Job;
-import de.yuga.spacebattle.rest.dto.turn.TransportJob;
+import de.yuga.spacebattle.rest.dto.turn.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -44,6 +42,7 @@ public class JournalApi extends BaseApi {
     private static final String TRANSPORT_JOB_ENDPOINT = "transports";
     private static final String FINISHED_MOVEMENT_ENDPOINT = "finishedMovement";
     private static final String FINISHED_COLONIZATIONS_ENDPOINT = "finishedColonizations";
+    private static final String OPERATIONALS_ENDPOINT = "operationals";
 
     @Nonnull
     private final TickService tickService;
@@ -59,18 +58,20 @@ public class JournalApi extends BaseApi {
 
     @Nonnull
     private final ColonizationCache colonizationCache;
+    private final OperationalCache operationalCache;
 
     @Autowired
     public JournalApi(@Nonnull final TickService tickService,
                       @Nonnull final JobService jobService,
                       @Nonnull final TransportationCache transportationCache,
                       @Nonnull final FleetMovementCache fleetMovementCache,
-                      @Nonnull final ColonizationCache colonizationCache) {
+                      @Nonnull final ColonizationCache colonizationCache, final OperationalCache operationalCache) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
         this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
         this.transportationCache = Preconditions.checkNotNull(transportationCache, "transportationCache must not be empty");
         this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
         this.colonizationCache = Preconditions.checkNotNull(colonizationCache, "colonizationCache must not be empty");
+        this.operationalCache = operationalCache;
     }
 
     @GetMapping(value = JOB_FINISHED_ENDPOINT)
@@ -151,5 +152,24 @@ public class JournalApi extends BaseApi {
         final int idUser = getIdUser();
         final Tick today = tickService.getToday();
         return ResponseEntity.ok(colonizationCache.getColonizations(today, idUser).stream().map(FinishedColonization::new).collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = OPERATIONALS_ENDPOINT)
+    @Operation(summary = "Get all newly active operationals.", operationId = "getNewlyActiveOperationals",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Commissioning.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getNewlyActiveOperationals() {
+        final int idUser = getIdUser();
+        final Tick today = tickService.getToday();
+        return ResponseEntity.ok(operationalCache.getOperationals(today, idUser).stream()
+                .map(o -> new Commissioning(o, getPreferredLanguage()))
+                .collect(Collectors.toList()));
     }
 }

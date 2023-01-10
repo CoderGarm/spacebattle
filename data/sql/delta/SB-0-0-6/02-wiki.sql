@@ -156,7 +156,7 @@ INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES 
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (3, '', 'INSERT', 22);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (3, '### Warships', 'INSERT', 23);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (3, '', 'INSERT', 24);
-INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (3, 'Every warship of a fleet must be operational in order to use the fleet.', 'INSERT', 25);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (3, 'Every warship of a fleet must be commissioning in order to use the fleet.', 'INSERT', 25);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (3, '', 'INSERT', 26);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (3, '### Colonization', 'INSERT', 27);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (3, '', 'INSERT', 28);

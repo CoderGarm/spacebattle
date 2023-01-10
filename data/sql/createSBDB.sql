@@ -1860,7 +1860,7 @@ INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES 
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (3, '', 'INSERT', 22);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (3, '### Warships', 'INSERT', 23);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (3, '', 'INSERT', 24);
-INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (3, 'Every warship of a fleet must be operational in order to use the fleet.', 'INSERT', 25);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (3, 'Every warship of a fleet must be commissioning in order to use the fleet.', 'INSERT', 25);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (3, '', 'INSERT', 26);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (3, '### Colonization', 'INSERT', 27);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (3, '', 'INSERT', 28);
@@ -2063,4 +2063,4 @@ insert into dbPatch values (null, now(), 'balance spacecraft stuff', '0.0.5-5');
 insert into dbPatch values (null, now(), 'add operationals', '0.0.6-1');
 insert into dbPatch values (null, now(), 'add wiki', '0.0.6-2');
 insert into dbPatch values (null, now(), 'add transportation', '0.0.7-1');
-insert into dbPatch values (null, now(), 'add operational to health state snap', '0.0.7-2');
+insert into dbPatch values (null, now(), 'add commissioning to health state snap', '0.0.7-2');
