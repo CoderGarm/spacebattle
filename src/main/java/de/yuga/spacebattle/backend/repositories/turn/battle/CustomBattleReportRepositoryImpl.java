@@ -68,6 +68,6 @@ public class CustomBattleReportRepositoryImpl implements CustomBattleReportRepos
                 .setFirstResult(startPosition)
                 .setMaxResults(size);
         final List<BattleReport> resultList = query.getResultList();
-        return resultList.stream().map(BattleReportStatistics::new).collect(Collectors.toList());
+        return resultList.stream().filter(battleReport -> battleReport.getLastRound().getNo() > 1).map(BattleReportStatistics::new).collect(Collectors.toList());
     }
 }

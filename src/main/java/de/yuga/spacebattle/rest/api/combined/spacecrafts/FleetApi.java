@@ -12,10 +12,7 @@ import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
-import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMarker;
-import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMerge;
-import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMove;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.*;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.Move;
 import io.swagger.v3.oas.annotations.Operation;
@@ -277,7 +274,7 @@ public class FleetApi extends BaseApi {
             ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FleetMergeResult.class))),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
@@ -285,9 +282,7 @@ public class FleetApi extends BaseApi {
     public ResponseEntity<?> mergeFleets(@RequestBody @Nonnull final FleetMerge merge) {
         PreconditionWebHelper.checkNotNull(merge, "merge must not be empty");
 
-        fleetService.mergeFleets(merge, getIdUser());
-
-        return ResponseEntity.ok(true);
+        return ResponseEntity.ok(fleetService.mergeFleets(merge, getIdUser()));
     }
 
     @PostMapping(value = MOVE_FLEETS_ENDPOINT)

@@ -9,21 +9,14 @@
 6. Meldung über aktivierte Operationals im Journal
 7. HTML-Editor in Chat und Forum gegen Markdown getauscht
 8. Übersicht über kolonisierte Planeten auf der Sternenkarte
-
+9. Die Sternenkarte wird nicht mehr komplett neu geladen, wenn man eine Aktion durchführt
 
 fixed. Nach einem siegreichen Kampf wird die gegnerische Flotte nun als zerstört markiert
 fixed. Munition falsch bei Erzeugung des Schiffs berechnet
 fixed. Die benötigten Ticks eines Shipyard Jobs wurden in der UI richtig angezeigt aber im Job falsch gespeichert
 fixed. Die Kosten von Flottenreparaturen sind korrekt
 
-
-todo. dont reload full map on flight confirm
-
-
-todo. splice in move and cancel edit
-todo. display fleet notch for foreign fleet
-
-
+todo. re-calculate status of fleets and warships - probably as preCommit-hook or better as "live calculation based on dependent factors"
 
 
 --------- next steps ---------
@@ -31,12 +24,13 @@ todo. display fleet notch for foreign fleet
 todo. upgrade to angular 15 -> angular markdown editor has xss vulnerability
 
 
-
 todo. combat aufhübschen
 todo. rework battle report -> Trennung Anzeigenlogik / Businesslogik
 todo. fitting stats only visible when minimum conditions are fulfilled - but not stated
 
 todo. spinner abbrechen
+
+todo. fleets in motion needs nav point icon
 
 todo. population balancing broken
 
@@ -46,6 +40,7 @@ todo. bootstrap css?
 
 todo. rework sidenav with ng-content areas
 
+todo. switch to "calculate orbit in backend" while travelling
 
 
 todo. combat with more then 2 opponents

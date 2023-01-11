@@ -14,6 +14,7 @@ import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.repositories.combined.spacecraft.FleetRepository;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMerge;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMergeResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +41,7 @@ public class FleetService {
     /**
      * Merges the second fleet into the first.
      */
-    public void mergeFleets(@Nonnull final FleetMerge merge, final int idUser) {
+    public FleetMergeResult mergeFleets(@Nonnull final FleetMerge merge, final int idUser) {
         Preconditions.checkNotNull(merge, "merge must not be empty");
 
 
@@ -67,6 +68,7 @@ public class FleetService {
         saveAll(toStore);
         final Set<Fleet> toMarkAsDeleted = fleets.stream().filter(f -> f.getAliveShips().isEmpty()).collect(Collectors.toSet());
         markAsDestroyed(toMarkAsDeleted);
+        return new FleetMergeResult(toStore, toMarkAsDeleted);
     }
 
     public List<Fleet> moveFleets(@Nonnull final List<Move> moves) {
