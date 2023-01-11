@@ -8,6 +8,7 @@
 5. Flotten im Orbit einer Werft werden automatisch aufmunitioniert
 6. Meldung über aktivierte Operationals im Journal
 7. HTML-Editor in Chat und Forum gegen Markdown getauscht
+8. Übersicht über kolonisierte Planeten auf der Sternenkarte
 
 
 fixed. Nach einem siegreichen Kampf wird die gegnerische Flotte nun als zerstört markiert
@@ -16,7 +17,11 @@ fixed. Die benötigten Ticks eines Shipyard Jobs wurden in der UI richtig angeze
 fixed. Die Kosten von Flottenreparaturen sind korrekt
 
 
+todo. dont reload full map on flight confirm
 
+
+todo. splice in move and cancel edit
+todo. display fleet notch for foreign fleet
 
 
 
@@ -25,8 +30,6 @@ fixed. Die Kosten von Flottenreparaturen sind korrekt
 
 todo. upgrade to angular 15 -> angular markdown editor has xss vulnerability
 
-todo. who has colonized a system?
-todo. dont reload full map on flight confirm
 
 
 todo. combat aufhübschen

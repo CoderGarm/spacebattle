@@ -8,6 +8,8 @@ import de.yuga.spacebattle.rest.dto.AbstractId;
 import de.yuga.spacebattle.rest.dto.orbitals.FleetOrbit;
 import de.yuga.spacebattle.rest.dto.turn.Move;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -95,5 +97,21 @@ public class FleetMarker {
         this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;
         this.isFTLCapable = fleet.isFTLCapable();
         this.state = new StateBlock(fleet);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final FleetMarker that = (FleetMarker) o;
+
+        return new EqualsBuilder().append(fleet, that.fleet).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(fleet).toHashCode();
     }
 }

@@ -88,10 +88,8 @@ public class CustomFleetRepositoryImpl implements CustomFleetRepository {
 
     @Nonnull
     @Override
-    public List<Fleet> findAllFleetsBy(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-
-        return em.createNamedQuery("Fleet.getAllByUser", Fleet.class).setParameter("owner", user).getResultList();
+    public List<Fleet> findAllFleetsBy(final int idUser) {
+        return em.createNamedQuery("Fleet.getAllByUser", Fleet.class).setParameter("idUser", idUser).getResultList();
     }
 
     @Nonnull

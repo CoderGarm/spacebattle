@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.rest.api.combined.spacecrafts;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -51,10 +50,10 @@ public class FleetApi extends BaseApi {
     private static final String FLEET_PER_PLANET_ENDPOINT = "atPlanet";
     private static final String FLEET_PER_USER_ENDPOINT = "perUser";
     private static final String MOVING_FLEET_PER_USER_ENDPOINT = "movingPerUser";
-    private static final String MERGE_FLEET_ENDPOINT = "merge";
+    private static final String MERGE_FLEETS_ENDPOINT = "merge";
     private static final String MOVE_FLEETS_ENDPOINT = "moveFleets";
-    private static final String PLAN_MOVES_FLEET_ENDPOINT = "planMoves";
-    private static final String CANCEL_MOVES_FLEET_ENDPOINT = "cancelMoves";
+    private static final String PLAN_MOVES_ENDPOINT = "planMoves";
+    private static final String CANCEL_MOVES_ENDPOINT = "cancelMoves";
     private static final String FLEET_PER_USER_PER_SYSTEM_ENDPOINT = "fleetDistribution";
     private static final String RENAME_FLEET_ENDPOINT = "rename";
 
@@ -201,12 +200,29 @@ public class FleetApi extends BaseApi {
     public ResponseEntity<?> getFleetDistribution() {
 
         final int idUser = getIdUser();
-        final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> allFleets = fleetService.findAllFleetsWithoutInterstellarMovement(idUser);
+        final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> byUser = fleetService.findAllFleetsByUser(idUser);
 
-        final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> interstellarMovement = fleetService.findAllFleetsWithInterstellarMovement(idUser);
-        final List<FleetMarker> result = interstellarMovement.stream().map(FleetMarker::new).collect(Collectors.toList());
-        result.addAll(allFleets.stream().map(FleetMarker::new).collect(Collectors.toList()));
-        return ResponseEntity.ok(result);
+        final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> fleets = new HashSet<>();
+
+        final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> collect = byUser.stream()
+                .filter(f -> f.getOrbit() != null)
+                .filter(f -> f.getOrbit().getSystem() != null)
+                .map(f -> f.getOrbit().getSystem().getFleets())
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+
+        final List<Planet> allColonizedBy = planetService.findAllColonizedBy(idUser);
+        final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> collect1 = allColonizedBy.stream()
+                .map(Planet::getSystem)
+                .map(StarSystem::getFleets)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+
+        fleets.addAll(byUser);
+        fleets.addAll(collect);
+        fleets.addAll(collect1);
+
+        return ResponseEntity.ok(fleets.stream().map(FleetMarker::new).collect(Collectors.toSet()));
     }
 
     @GetMapping(value = FLEET_PER_USER_ENDPOINT)
@@ -223,16 +239,11 @@ public class FleetApi extends BaseApi {
     public ResponseEntity<?> getFleetsForUser() {
 
         final int idUser = getIdUser();
-
-        final User user = userService.find(idUser);
-        if (user != null) {
-            final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> allFleetsByUser = fleetService.findAllFleetsByUser(user);
-            final List<Fleet> result = allFleetsByUser.stream()
-                    .map(f -> new Fleet(f, getPreferredLanguage()))
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(result);
-        }
-        throw new NotifyWebUserException("No user found.");
+        final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> allFleetsByUser = fleetService.findAllFleetsByUser(idUser);
+        final List<Fleet> result = allFleetsByUser.stream()
+                .map(f -> new Fleet(f, getPreferredLanguage()))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping(value = MOVING_FLEET_PER_USER_ENDPOINT)
@@ -255,7 +266,7 @@ public class FleetApi extends BaseApi {
 
     }
 
-    @PostMapping(value = MERGE_FLEET_ENDPOINT)
+    @PostMapping(value = MERGE_FLEETS_ENDPOINT)
     @Operation(summary = "Merge two fleets of an owner.", operationId = "mergeFleets",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
@@ -291,7 +302,7 @@ public class FleetApi extends BaseApi {
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = Fleet.class))
+                                    schema = @Schema(implementation = FleetMarker.class))
                             )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
@@ -303,11 +314,11 @@ public class FleetApi extends BaseApi {
         // todo validate interstellar flights with propulsion
         final List<de.yuga.spacebattle.backend.entities.turn.Move> plannedMoves = getMultiMove(getIdUser(), moves);
         return ResponseEntity.ok(fleetService.moveFleets(plannedMoves).stream()
-                .map(f -> new Fleet(f, getPreferredLanguage()))
+                .map(FleetMarker::new)
                 .collect(Collectors.toList()));
     }
 
-    @PostMapping(value = PLAN_MOVES_FLEET_ENDPOINT)
+    @PostMapping(value = PLAN_MOVES_ENDPOINT)
     @Operation(summary = "Plan a movement of a fleet to another celestial.", operationId = "planMovements",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
@@ -334,8 +345,8 @@ public class FleetApi extends BaseApi {
     }
 
     @Parameter(name = "fleetIds", array = @ArraySchema(schema = @Schema(implementation = Integer.class)))
-    @PutMapping(value = CANCEL_MOVES_FLEET_ENDPOINT + "/{fleetIds}")
-    @Operation(summary = "Cancels a movement of a fleet and creates the way back.", operationId = "cancelMovement",
+    @PutMapping(value = CANCEL_MOVES_ENDPOINT + "/{fleetIds}")
+    @Operation(summary = "Cancels a movement of a fleet and creates the way back.", operationId = "cancelMovements",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE
@@ -343,17 +354,21 @@ public class FleetApi extends BaseApi {
             ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = FleetMarker.class))
+                            )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> cancelMovement(@PathVariable("fleetIds") @Nonnull final List<Integer> fleetIds) {
+    public ResponseEntity<?> cancelMovements(@PathVariable("fleetIds") @Nonnull final List<Integer> fleetIds) {
         PreconditionWebHelper.checkNotNull(fleetIds, "fleetIds must not be empty");
 
         final int idUser = getIdUser();
-        fleetService.cancelFlights(idUser, fleetIds);
-        return ResponseEntity.ok(true);
+        final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> cancelFlights = fleetService.cancelFlights(idUser, fleetIds);
+        return ResponseEntity.ok(cancelFlights.stream()
+                .map(FleetMarker::new)
+                .collect(Collectors.toList()));
     }
 
 

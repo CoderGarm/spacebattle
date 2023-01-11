@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.repositories.combined.spacecraft;
 
 import de.yuga.spacebattle.backend.combat.dto.FleetClash;
-import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 
@@ -27,7 +26,7 @@ public interface CustomFleetRepository {
     List<Fleet> findAllFleetsWithInterstellarMovement(final int idUser);
 
     @Nonnull
-    List<Fleet> findAllFleetsBy(User user);
+    List<Fleet> findAllFleetsBy(final int idUser);
 
     @Nonnull
     List<Fleet> findAllFleetsByStarSystemAndOwner(int idStarSystem, int idOwner);

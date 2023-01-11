@@ -83,14 +83,16 @@ public class FleetService {
         return fleets;
     }
 
-    public void cancelFlights(final int idUser, @Nonnull final List<Integer> fleetIds) {
+    @Nonnull
+    public Set<Fleet> cancelFlights(final int idUser, @Nonnull final List<Integer> fleetIds) {
         Preconditions.checkNotNull(fleetIds, "fleetIds must not be empty");
 
+        final Set<Fleet> cancelled = new HashSet<>();
         final Iterable<Fleet> fleets = fleetRepository.findAllById(fleetIds);
         for (final Fleet fleet : fleets) {
             if (fleet != null) {
                 if (idUser == fleet.getOwner().getId()) {
-                    cancelFlight(fleet);
+                    cancelled.add(cancelFlight(fleet));
                     continue;
                 }
                 throw new NotifyWebUserException("You cannot cancel this flight.");
@@ -98,6 +100,7 @@ public class FleetService {
                 throw new NotifyWebUserException("Nothing to see here.");
             }
         }
+        return cancelled;
     }
 
     /**
@@ -263,10 +266,8 @@ public class FleetService {
     }
 
     @Nonnull
-    public List<Fleet> findAllFleetsByUser(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-
-        return fleetRepository.findAllFleetsBy(user);
+    public List<Fleet> findAllFleetsByUser(final int idUser) {
+        return fleetRepository.findAllFleetsBy(idUser);
     }
 
     @Nonnull

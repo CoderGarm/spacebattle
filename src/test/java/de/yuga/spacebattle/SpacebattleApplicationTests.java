@@ -13,7 +13,6 @@ import org.springframework.web.context.WebApplicationContext;
 import java.io.File;
 
 @SpringBootTestProfile
-//@ActiveProfiles("dev")
 @Disabled("only for generation of swagger spec needed")
 public class SpacebattleApplicationTests {
 

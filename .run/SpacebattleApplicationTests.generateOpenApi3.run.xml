@@ -3,7 +3,7 @@
         <module name="spacebattle"/>
         <extension name="coverage">
             <pattern>
-                <option name="PATTERN" value="de.yuga.spacebattle.rest.config.context.*"/>
+                <option name="PATTERN" value="de.yuga.spacebattle.*"/>
                 <option name="ENABLED" value="true"/>
             </pattern>
         </extension>
