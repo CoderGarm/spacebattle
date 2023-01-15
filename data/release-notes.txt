@@ -2,22 +2,20 @@
 
 
 1. Munitionskapazität im Flottendisplay darstellen
-2. Informationen zur Flotte werden nun hoffentlich etwas besser dargestellt
-3. neue Kriegsschiffe werden in die größte Flotte im Orbit integriert, ansonsten wird eine neue Flotte erzeugt
-4. Action-Buttons auf Karte wurden etwas angepasst und werden jetzt situationsspezifisch angezeigt
-5. Flotten im Orbit einer Werft werden automatisch aufmunitioniert
-6. Meldung über aktivierte Operationals im Journal
-7. HTML-Editor in Chat und Forum gegen Markdown getauscht
-8. Übersicht über kolonisierte Planeten auf der Sternenkarte
-9. Die Sternenkarte wird nicht mehr komplett neu geladen, wenn man eine Aktion durchführt
+1. Informationen zur Flotte werden nun hoffentlich etwas besser dargestellt
+1. neue Kriegsschiffe werden in die größte Flotte im Orbit integriert, ansonsten wird eine neue Flotte erzeugt
+1. Action-Buttons auf Karte wurden etwas angepasst und werden jetzt situationsspezifisch angezeigt
+1. Flotten im Orbit einer Werft werden automatisch aufmunitioniert
+1. Meldung über aktivierte Operationals im Journal
+1. HTML-Editor in Chat und Forum gegen Markdown getauscht
+1. Übersicht über kolonisierte Planeten auf der Sternenkarte
+1. Die Sternenkarte wird nicht mehr komplett neu geladen, wenn man eine Aktion durchführt
 
-fixed. Nach einem siegreichen Kampf wird die gegnerische Flotte nun als zerstört markiert
-fixed. Munition falsch bei Erzeugung des Schiffs berechnet
-fixed. Die benötigten Ticks eines Shipyard Jobs wurden in der UI richtig angezeigt aber im Job falsch gespeichert
-fixed. Die Kosten von Flottenreparaturen sind korrekt
-
-todo. re-calculate status of fleets and warships - probably as preCommit-hook or better as "live calculation based on dependent factors"
-
+Bugs fixed
+1. Nach einem siegreichen Kampf wird die gegnerische Flotte nun als zerstört markiert
+1. Munition falsch bei Erzeugung des Schiffs berechnet
+1. Die benötigten Ticks eines Shipyard Jobs wurden in der UI richtig angezeigt aber im Job falsch gespeichert
+1. Die Kosten von Flottenreparaturen sind korrekt
 
 --------- next steps ---------
 

@@ -65,9 +65,11 @@ public class BattleService {
     public void runBattles(@Nonnull final Tick today) {
         Preconditions.checkNotNull(today, "today shouldn't be null!");
 
+        // todo first step is just to fight all users against each other
+
         final List<BattleReport> reports = new ArrayList<>();
         final List<FleetClash> fleetClashes = fleetService.findAllFleetClashes();
-        // todo first step is just to fight all users against each other
+        LOGGER.info("# {} battles for {}", fleetClashes.size(), today);
 
         final List<CompletableFuture<Cage>> futures = new ArrayList<>();
         for (FleetClash fleetClash : fleetClashes) {
@@ -89,6 +91,7 @@ public class BattleService {
             throw new NotifyWebUserException(e.getMessage());
         }
 
+        LOGGER.info("# {} battles executed for {}", reports.size(), today);
         battleReportService.saveAll(reports);
     }
 
@@ -130,7 +133,6 @@ public class BattleService {
 
         final Map<WarShip, de.yuga.spacebattle.backend.combat.round.WarshipHealthState> byResult = battleResult.getWarshipHealthStates();
 
-        final Set<Fleet> fleetsToPersist = new HashSet<>();
         final Set<WarshipHealthState> statesToPersist = new HashSet<>();
         warShips.stream()
                 .collect(Collectors.toMap(Function.identity(), WarShip::getWarshipHealthState))
@@ -138,11 +140,6 @@ public class BattleService {
                     final de.yuga.spacebattle.backend.combat.round.WarshipHealthState newState = byResult.get(warShip);
                     final boolean needsRepair = knownState.needsRepair(newState);
                     final boolean needsAmmunition = knownState.needsAmmunition(newState);
-                    if (needsRepair) {
-                        final Fleet fleet = warShip.getFleet();
-                        fleet.setNeedsRepair(true);
-                        fleetsToPersist.add(fleet);
-                    }
                     if (needsRepair || needsAmmunition) {
                         knownState.update(newState);
                         statesToPersist.add(knownState);
@@ -150,7 +147,6 @@ public class BattleService {
                 });
 
         warshipHealthStateService.saveAll(statesToPersist);
-        fleetService.saveAll(fleetsToPersist);
 
         final Set<WarShip> losses = battleResult.getLosses();
         // todo how to handle fighting incapable ships?

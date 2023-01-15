@@ -195,7 +195,6 @@
         isDeleted bit not null default false,
         isOperational bit not null default false,
         name varchar(255) not null,
-        needsRepair bit not null default false,
         xCoordinateLocation varchar(255),
         yCoordinateLocation varchar(255),
         idMove integer,
@@ -2064,3 +2063,4 @@ insert into dbPatch values (null, now(), 'add operationals', '0.0.6-1');
 insert into dbPatch values (null, now(), 'add wiki', '0.0.6-2');
 insert into dbPatch values (null, now(), 'add transportation', '0.0.7-1');
 insert into dbPatch values (null, now(), 'add commissioning to health state snap', '0.0.7-2');
+insert into dbPatch values (null, now(), 'drop needs repair flag from fleet', '0.0.9-1');

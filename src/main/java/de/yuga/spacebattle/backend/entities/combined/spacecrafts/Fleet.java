@@ -64,13 +64,7 @@ import static de.yuga.spacebattle.backend.calculator.FittingUtils.DEFENSIVE_FITT
                         "OR (f.move.destinationOrbit.system = :system AND f.move.destinationOrbit.orbit.xCoordinate = :xCoordinate AND f.move.destinationOrbit.orbit.yCoordinate = :yCoordinate)"),
         @NamedQuery(name = "Fleet.getAllAnchoredForPlanet",
                 query = "SELECT f FROM Fleet f LEFT JOIN f.move  " +
-                        "WHERE f.isDeleted = false AND (f.orbit.system = :system AND f.orbit.orbit.xCoordinate = :xCoordinate  AND f.orbit.orbit.yCoordinate = :yCoordinate)"),
-        @NamedQuery(name = "Fleet.getAllDamagedForPlanetAndOwner",
-                query = "SELECT f FROM Fleet f LEFT JOIN f.move  " +
-                        "WHERE f.isDeleted = false AND f.needsRepair = true " +
-                        "AND (f.orbit.system = :system AND f.orbit.orbit.xCoordinate = :xCoordinate  AND f.orbit.orbit.yCoordinate = :yCoordinate) " +
-                        "OR ( f.move.originOrbit.system = :system AND  f.move.originOrbit.orbit.xCoordinate = :xCoordinate AND f.move.originOrbit.orbit.yCoordinate = :yCoordinate) " +
-                        "OR (f.move.destinationOrbit.system = :system AND f.move.destinationOrbit.orbit.xCoordinate = :xCoordinate AND f.move.destinationOrbit.orbit.yCoordinate = :yCoordinate) "),
+                        "WHERE f.isDeleted = false AND (f.orbit.system = :system AND f.orbit.orbit.xCoordinate = :xCoordinate  AND f.orbit.orbit.yCoordinate = :yCoordinate)")
 })
 @Entity
 @Table(name = "fleet")
@@ -118,9 +112,6 @@ public class Fleet extends Operationable {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "idMove", unique = true)
     private Move move;
-
-    @Column(columnDefinition = "bit not null default false")
-    private boolean needsRepair = false;
 
     @Nonnull
     @OneToMany(mappedBy = "constructable.fleet", fetch = FetchType.EAGER, orphanRemoval = true)
@@ -431,10 +422,6 @@ public class Fleet extends Operationable {
     }
 
     public boolean isNeedsRepair() {
-        return needsRepair;
-    }
-
-    public void setNeedsRepair(final boolean needsRepair) {
-        this.needsRepair = needsRepair;
+        return getAliveShips().stream().anyMatch(s -> s.getWarshipHealthState().needsRepair());
     }
 }

@@ -684,8 +684,6 @@ public class TickService {
                 .collect(Collectors.toSet());
         toRepair.forEach(WarshipHealthState::repair);
         warshipHealthStateService.saveAll(toRepair);
-        fleet.setNeedsRepair(false);
-        fleetService.save(fleet);
         log(planet, job, "Done repairing fleet.");
     }
 
