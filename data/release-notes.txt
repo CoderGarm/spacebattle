@@ -1,29 +1,45 @@
 
 
-
-1. Munitionskapazität im Flottendisplay darstellen
-1. Informationen zur Flotte werden nun hoffentlich etwas besser dargestellt
-1. neue Kriegsschiffe werden in die größte Flotte im Orbit integriert, ansonsten wird eine neue Flotte erzeugt
-1. Action-Buttons auf Karte wurden etwas angepasst und werden jetzt situationsspezifisch angezeigt
-1. Flotten im Orbit einer Werft werden automatisch aufmunitioniert
-1. Meldung über aktivierte Operationals im Journal
-1. HTML-Editor in Chat und Forum gegen Markdown getauscht
-1. Übersicht über kolonisierte Planeten auf der Sternenkarte
-1. Die Sternenkarte wird nicht mehr komplett neu geladen, wenn man eine Aktion durchführt
-
-Bugs fixed
-1. Nach einem siegreichen Kampf wird die gegnerische Flotte nun als zerstört markiert
-1. Munition falsch bei Erzeugung des Schiffs berechnet
-1. Die benötigten Ticks eines Shipyard Jobs wurden in der UI richtig angezeigt aber im Job falsch gespeichert
-1. Die Kosten von Flottenreparaturen sind korrekt
-
---------- next steps ---------
-
 todo. upgrade to angular 15 -> angular markdown editor has xss vulnerability
+ -> https://www.hostingadvice.com/how-to/update-node-js-latest-version/#linux node 18.10.0
 
+1.
 
 todo. combat aufhübschen
 todo. rework battle report -> Trennung Anzeigenlogik / Businesslogik
+todo. warship icon instead of fleet shark
+
+
+
+
+
+Bugs fixed
+1. chat und forum nachrichten nach abschicken clearen
+
+
+
+--------- next steps ---------
+
+
+--------- bugs ---------
+1. fleet nicht deleted wenn all schiffe nicht mehr kampffähig
+
+
+----------------- plannings ---------------------------
+1. Die Darstellung des Kampfes aufhübschen.
+2. Aktuell kann man nur 1on1 kämpfen, das muss aufgebohrt werden
+3. Population balancing
+4. Kleinkram in der UI, der aber wie das angular upgrade "nichts neues" bringt und auch nur nice-to-have ist
+5. Das man Kolonisierungen planen kann
+6. Rework der Flottenbewegungen (nice to have)
+7. mich den spannenden Aufgaben widmen: ein NPC-System, Missionen, simulierte Handelsflotten, Piraten und sowas (multi-combat wäre wohl sehr sinnvoll -> Darstellung des Kampfes muss erkennbaren Mehrwert bringen)
+8. Änderungen in der Spielmechanik, z.B. dass die Leistung des Antriebs im Verhältnis zur Schiffsmasse steht -> erneutes Rebalancing der Module
+9. mich endlich mal um die "corporate identity" kümmern, also eigene Icons, Symbole, Benennungen usw erzeugen
+10. Fitting selection aufhübschen
+
+
+todo. use context menu for star map?
+
 todo. fitting stats only visible when minimum conditions are fulfilled - but not stated
 
 todo. spinner abbrechen

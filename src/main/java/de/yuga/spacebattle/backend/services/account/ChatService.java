@@ -11,12 +11,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 public class ChatService {
@@ -153,18 +149,5 @@ public class ChatService {
      */
     public boolean hasUserUnreadMessages(final int idUser) {
         return userMessageRepository.hasUserUnreadMessages(idUser);
-    }
-
-    @Deprecated(since = "Just for markdown transformation")
-    public Set<UserMessage> findAllMessages() {
-        final Iterable<UserMessage> all = userMessageRepository.findAll();
-        return StreamSupport.stream(all.spliterator(), false).collect(Collectors.toSet());
-    }
-
-    @Deprecated(since = "Just for markdown transformation")
-    public void saveAllMessages(@Nonnull final Collection<UserMessage> messages) {
-        Preconditions.checkNotNull(messages, "messages must not be empty");
-
-        userMessageRepository.saveAll(messages);
     }
 }

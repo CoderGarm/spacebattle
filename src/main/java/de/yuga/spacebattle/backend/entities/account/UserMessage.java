@@ -66,13 +66,6 @@ public class UserMessage extends AbstractEntityKey {
         return sender;
     }
 
-    @Deprecated(since = "Just for markdown transformation")
-    public void setMessage(@Nonnull final String message) {
-        Preconditions.checkNotNull(message, "message must not be empty");
-
-        this.message = message;
-    }
-
     @Nonnull
     public String getMessage() {
         return message;

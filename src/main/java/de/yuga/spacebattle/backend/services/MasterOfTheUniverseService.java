@@ -7,9 +7,7 @@ import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.entities.account.UserMessage;
 import de.yuga.spacebattle.backend.entities.account.forum.Forum;
-import de.yuga.spacebattle.backend.entities.account.forum.ForumMessage;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
@@ -57,8 +55,6 @@ import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
-import io.github.furstenheim.CopyDown;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,8 +66,6 @@ import javax.annotation.PostConstruct;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -247,40 +241,13 @@ public class MasterOfTheUniverseService {
         validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 
-    @Deprecated(since = "Just for markdown transformation")
-    private final CopyDown converter = new CopyDown();
-    @Deprecated(since = "Just for markdown transformation")
-    private final static String tmpdir = "/home/karsten/";
-    @Deprecated(since = "Just for markdown transformation")
-    private final static String separator = System.getProperty("file.separator");
-
     @PostConstruct
     @SuppressWarnings("ConstantConditions")
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = !new File(tmpdir + separator + "convertHtmlToMarkdown").exists();
+        final boolean transformationNeeded = false;
         if (transformationNeeded) {
-            final Set<ForumMessage> allMessages = forumService.findAllMessages();
-            final Set<UserMessage> allChatMessages = chatService.findAllMessages();
-            allMessages.forEach(msg -> {
-                final String message = msg.getMessage();
-                final String markdown = converter.convert(message);
-                msg.setMessage(markdown);
-            });
-            forumService.saveAllMessages(allMessages);
-            allChatMessages.forEach(msg -> {
-                final String message = msg.getMessage();
-                final String markdown = converter.convert(message);
-                msg.setMessage(markdown);
-            });
-            forumService.saveAllMessages(allMessages);
-            try {
-                FileUtils.writeStringToFile(new File(tmpdir + separator + "convertHtmlToMarkdown"), "1");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
