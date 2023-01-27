@@ -58,6 +58,8 @@ public class JournalApi extends BaseApi {
 
     @Nonnull
     private final ColonizationCache colonizationCache;
+
+    @Nonnull
     private final OperationalCache operationalCache;
 
     @Autowired
@@ -65,13 +67,14 @@ public class JournalApi extends BaseApi {
                       @Nonnull final JobService jobService,
                       @Nonnull final TransportationCache transportationCache,
                       @Nonnull final FleetMovementCache fleetMovementCache,
-                      @Nonnull final ColonizationCache colonizationCache, final OperationalCache operationalCache) {
+                      @Nonnull final ColonizationCache colonizationCache,
+                      @Nonnull final OperationalCache operationalCache) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
         this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
         this.transportationCache = Preconditions.checkNotNull(transportationCache, "transportationCache must not be empty");
         this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
         this.colonizationCache = Preconditions.checkNotNull(colonizationCache, "colonizationCache must not be empty");
-        this.operationalCache = operationalCache;
+        this.operationalCache = Preconditions.checkNotNull(operationalCache, "operationalCache must not be empty");
     }
 
     @GetMapping(value = JOB_FINISHED_ENDPOINT)

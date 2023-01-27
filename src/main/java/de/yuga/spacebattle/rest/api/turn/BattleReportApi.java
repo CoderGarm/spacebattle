@@ -1,8 +1,10 @@
 package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
+import de.yuga.spacebattle.backend.services.caches.BattleReportCache;
+import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
-import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStateService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
@@ -14,8 +16,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,24 +36,28 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + BattleReportApi.ENDPOINT + "/")
 public class BattleReportApi extends BaseApi {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(BattleReportApi.class);
-
     public static final String ENDPOINT = "report";
     public static final String FIGHTING_ENDPOINT = "battle";
-    public static final String FIGHTING_BY_ID_ENDPOINT = "battle/byId";
-    public static final String FIGHTING_AMOUNT_ENDPOINT = "battle/amount";
+    public static final String HAS_NEW_REPORTS_ENDPOINT = "hasNew";
+    public static final String FIGHTING_BY_ID_ENDPOINT = FIGHTING_ENDPOINT + "/byId";
+    public static final String FIGHTING_AMOUNT_ENDPOINT = FIGHTING_ENDPOINT + "/amount";
 
     @Nonnull
     private final BattleReportService battleReportService;
 
     @Nonnull
-    private final WarshipHealthStateService warshipHealthStateService;
+    private final TickService tickService;
+
+    @Nonnull
+    private final BattleReportCache battleReportCache;
 
     @Autowired
     public BattleReportApi(@Nonnull final BattleReportService battleReportService,
-                           @Nonnull final WarshipHealthStateService warshipHealthStateService) {
+                           @Nonnull final TickService tickService,
+                           @Nonnull final BattleReportCache battleReportCache) {
         this.battleReportService = Preconditions.checkNotNull(battleReportService, "battleReportService must not be empty");
-        this.warshipHealthStateService = Preconditions.checkNotNull(warshipHealthStateService, "warshipHealthStateService must not be empty");
+        this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
+        this.battleReportCache = Preconditions.checkNotNull(battleReportCache, "battleReportCache must not be empty");
     }
 
     @GetMapping(value = FIGHTING_AMOUNT_ENDPOINT)
@@ -107,5 +111,28 @@ public class BattleReportApi extends BaseApi {
             throw new NotifyWebUserException("Nothing there, buddy.");
         }
         return ResponseEntity.ok(new BattleReport(battleReport, getPreferredLanguage()));
+    }
+
+    @GetMapping(value = HAS_NEW_REPORTS_ENDPOINT)
+    @Operation(summary = "Returns if there are unknown battle reports.", operationId = "hasNewReportsForUser",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> hasNewReportsForUser() {
+
+        final int idUser = getIdUser();
+        final Tick today = tickService.getToday();
+        final Tick lastQueried = battleReportCache.getLastQueryBattleReports(idUser);
+        battleReportCache.setLastQueryBattleReports(today, idUser);
+        if (lastQueried == null || lastQueried.equals(today)) {
+            // has already asked today or never asked before
+            return ResponseEntity.ok(false);
+        }
+        final boolean hasNewReportsSince = battleReportService.hasNewReportsSince(idUser, lastQueried);
+        return ResponseEntity.ok(hasNewReportsSince);
     }
 }

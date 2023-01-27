@@ -1,5 +1,6 @@
 package de.yuga.spacebattle;
 
+import com.google.common.base.Preconditions;
 import com.google.common.reflect.ClassPath;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -38,9 +39,18 @@ public final class TestUtils {
      *
      * @param entity the entity to modify
      */
-    public static void setId(@Nonnull AbstractEntityKey entity) {
+    public static void setId(@Nonnull final AbstractEntityKey entity) {
+        Preconditions.checkNotNull(entity, "entity must not be empty");
+
         final int nextInt = ThreadLocalRandom.current().nextInt(Integer.MIN_VALUE, Integer.MAX_VALUE);
         ReflectionTestUtils.setField(entity, "id", nextInt);
+    }
+
+
+    public static void setId(@Nonnull final AbstractEntityKey entity, final int i) {
+        Preconditions.checkNotNull(entity, "entity must not be empty");
+
+        ReflectionTestUtils.setField(entity, "id", i);
     }
 
     /**

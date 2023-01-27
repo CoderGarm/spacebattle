@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
         @NamedQuery(name = "BattleReport.findByIdWithAllData",
                 query = "SELECT r FROM BattleReport r LEFT JOIN r.participatingUsers u ON (u.id = :idUser) WHERE r.id = :idBattleReport"),
         @NamedQuery(name = "BattleReport.countAllWithUser",
-                query = "SELECT COUNT(r) FROM BattleReport r LEFT JOIN r.participatingUsers u ON (u.id = :idUser)"),
+                query = "SELECT COUNT(u) FROM BattleReport r LEFT JOIN r.participatingUsers u ON (u.id = :idUser)"),
 })
 @Entity
 @Table(name = "battleReport")

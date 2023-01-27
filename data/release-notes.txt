@@ -1,31 +1,23 @@
 
 
-todo. upgrade to angular 15 -> angular markdown editor has xss vulnerability
- -> https://www.hostingadvice.com/how-to/update-node-js-latest-version/#linux node 18.10.0
-
-1.
-
-todo. combat aufhübschen
-todo. rework battle report -> Trennung Anzeigenlogik / Businesslogik
-todo. warship icon instead of fleet shark
-
-
-todo. notification for battle report
-
-
-Bugs fixed
-1. chat und forum nachrichten nach abschicken clearen
+----------------- Features -------------
+1. Markierung wenn es neue Battle Reports gibt
 
 
 
---------- next steps ---------
-
-
---------- bugs ---------
+----------------- Bugs fixed -----------
+1. Eingabefeld für Chat- und Forumsbeiträge sind nach dem Abschicken wieder leer
 
 
 
------------------ plannings ---------------------------
+----------------- next steps -----------
+todo. ship fitting aufhübschen
+
+----------------- bugs -----------------
+
+
+
+----------------- plannings ------------
 1. Die Darstellung des Kampfes aufhübschen.
 2. Aktuell kann man nur 1on1 kämpfen, das muss aufgebohrt werden
 3. Population balancing
@@ -37,6 +29,10 @@ Bugs fixed
 9. mich endlich mal um die "corporate identity" kümmern, also eigene Icons, Symbole, Benennungen usw erzeugen
 10. Fitting selection aufhübschen
 
+
+todo. combat aufhübschen and more infos
+
+todo. warship icon instead of fleet shark
 
 todo. use context menu for star map?
 
@@ -58,11 +54,9 @@ todo. switch to "calculate orbit in backend" while travelling
 
 
 todo. combat with more then 2 opponents
-todo. inoperational flotten zerstören bei sieg
+todo. inoperational flotten zerstören bei sieg oder beute?
 todo. im bau befindliche flotten während des Baus zerstören
-todo. nicht kampffähige aber lebende flotte nicht als tot markieren
-    - nur bei Accounterstellung
-
+todo. Schiffe erbeuten?
 
 todo. kolonisierungen müssen demand erzeugen
 

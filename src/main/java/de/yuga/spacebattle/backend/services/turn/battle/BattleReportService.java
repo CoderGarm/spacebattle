@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services.turn.battle;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
 import de.yuga.spacebattle.backend.repositories.turn.battle.BattleReportRepository;
 import de.yuga.spacebattle.rest.dto.turn.battle.BattleReportStatistics;
@@ -68,5 +69,11 @@ public class BattleReportService {
 
     public Collection<BattleReportStatistics> findReportBasicInformationByPaging(final int idUser, final int page, final int size) {
         return battleReportRepository.findReportBasicInformationByPaging(idUser, page, size);
+    }
+
+    public boolean hasNewReportsSince(final int idUser, @Nonnull final Tick since) {
+        Preconditions.checkNotNull(since, "since must not be empty");
+
+        return battleReportRepository.hasNewReportsSince(idUser, since.getNo());
     }
 }
