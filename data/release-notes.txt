@@ -10,7 +10,7 @@ todo. rework battle report -> Trennung Anzeigenlogik / Businesslogik
 todo. warship icon instead of fleet shark
 
 
-
+todo. notification for battle report
 
 
 Bugs fixed
@@ -22,7 +22,7 @@ Bugs fixed
 
 
 --------- bugs ---------
-1. fleet nicht deleted wenn all schiffe nicht mehr kampffähig
+
 
 
 ----------------- plannings ---------------------------

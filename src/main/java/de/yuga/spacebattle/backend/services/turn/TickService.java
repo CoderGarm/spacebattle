@@ -44,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
@@ -137,6 +138,11 @@ public class TickService {
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.warshipHealthStateService = Preconditions.checkNotNull(warshipHealthStateService, "warshipHealthStateService must not be empty");
         this.battleService = Preconditions.checkNotNull(battleService, "battleService must not be empty");
+    }
+
+    @PostConstruct
+    private void load() {
+        this.today = getToday();
     }
 
     @Scheduled(cron = "0 0 0 * * *", zone = "Europe/Berlin")
