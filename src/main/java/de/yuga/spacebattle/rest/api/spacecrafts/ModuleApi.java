@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -70,7 +69,7 @@ public class ModuleApi extends BaseApi {
         this.userService = userService;
     }
 
-    @GetMapping(value = ARMOR_ENDPOINT + "/{idUser}")
+    @GetMapping(value = ARMOR_ENDPOINT)
     @Operation(summary = "Get all unlocked armors for the owner .", operationId = "getArmorsByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -81,13 +80,13 @@ public class ModuleApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getArmorsByUser(@PathVariable("idUser") final int idUser) {
-        final User owner = userService.findWithResearches(idUser);
+    public ResponseEntity<?> getArmorsByUser() {
+        final User owner = userService.findWithResearches(getIdUser());
 
         return ResponseEntity.ok(moduleService.findAllArmorByUser(owner).stream().map(a -> new Armor(a, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
-    @GetMapping(value = WEAPON_ENDPOINT + "/{idUser}")
+    @GetMapping(value = WEAPON_ENDPOINT)
     @Operation(summary = "Get all unlocked weapons for the owner .", operationId = "getWeaponsByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -98,8 +97,8 @@ public class ModuleApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getWeaponsByUser(@PathVariable("idUser") final int idUser) {
-        final User owner = userService.findWithResearches(idUser);
+    public ResponseEntity<?> getWeaponsByUser() {
+        final User owner = userService.findWithResearches(getIdUser());
         final List<de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon> allWeaponByUser = moduleService.findAllWeaponByUser(owner);
         final List<de.yuga.spacebattle.rest.dto.spacecrafts.modules.Weapon> weaponList = allWeaponByUser.stream()
                 .map(w -> new de.yuga.spacebattle.rest.dto.spacecrafts.modules.Weapon(w, getPreferredLanguage()))
@@ -107,7 +106,7 @@ public class ModuleApi extends BaseApi {
         return ResponseEntity.ok(weaponList);
     }
 
-    @GetMapping(value = LAUNCHER_ENDPOINT + "/{idUser}")
+    @GetMapping(value = LAUNCHER_ENDPOINT)
     @Operation(summary = "Get all unlocked weapons for the owner .", operationId = "getLaunchersByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -118,12 +117,12 @@ public class ModuleApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getLaunchersByUser(@PathVariable("idUser") final int idUser) {
-        final User owner = userService.findWithResearches(idUser);
+    public ResponseEntity<?> getLaunchersByUser() {
+        final User owner = userService.findWithResearches(getIdUser());
         return ResponseEntity.ok(moduleService.findAllLauncherByUser(owner).stream().map(l -> new Launcher(l, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
-    @GetMapping(value = SIDEWALL_ENDPOINT + "/{idUser}")
+    @GetMapping(value = SIDEWALL_ENDPOINT)
     @Operation(summary = "Get all unlocked sidewalls for the owner .", operationId = "getSidewallsByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -134,12 +133,12 @@ public class ModuleApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getSidewallsByUser(@PathVariable("idUser") final int idUser) {
-        final User owner = userService.findWithResearches(idUser);
+    public ResponseEntity<?> getSidewallsByUser() {
+        final User owner = userService.findWithResearches(getIdUser());
         return ResponseEntity.ok(moduleService.findAllSidewallByUser(owner).stream().map(s -> new Sidewall(s, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
-    @GetMapping(value = PROPULSION_ENDPOINT + "/{idUser}")
+    @GetMapping(value = PROPULSION_ENDPOINT)
     @Operation(summary = "Get all unlocked propulsions for the owner .", operationId = "getPropulsionsByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -150,13 +149,13 @@ public class ModuleApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getPropulsionsByUser(@PathVariable("idUser") final int idUser) {
-        final User owner = userService.findWithResearches(idUser);
+    public ResponseEntity<?> getPropulsionsByUser() {
+        final User owner = userService.findWithResearches(getIdUser());
 
         return ResponseEntity.ok(moduleService.findAllPropulsionByUser(owner).stream().map(p -> new Propulsion(p, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
-    @GetMapping(value = HULL_ENDPOINT + "/{idUser}")
+    @GetMapping(value = HULL_ENDPOINT)
     @Operation(summary = "Get all unlocked hulls for the owner .", operationId = "getHullsByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -167,13 +166,13 @@ public class ModuleApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getHullsByUser(@PathVariable("idUser") final int idUser) {
-        final User owner = userService.findWithResearches(idUser);
+    public ResponseEntity<?> getHullsByUser() {
+        final User owner = userService.findWithResearches(getIdUser());
 
         return ResponseEntity.ok(hullService.findAllByUser(owner).stream().map(h -> new Hull(h, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
-    @GetMapping(value = ELOKA_ENDPOINT + "/{idUser}")
+    @GetMapping(value = ELOKA_ENDPOINT)
     @Operation(summary = "Get all unlocked electronic warfare for the owner .", operationId = "getElectronicWarfareByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -184,13 +183,13 @@ public class ModuleApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getElectronicWarfaresByUser(@PathVariable("idUser") final int idUser) {
-        final User owner = userService.findWithResearches(idUser);
+    public ResponseEntity<?> getElectronicWarfaresByUser() {
+        final User owner = userService.findWithResearches(getIdUser());
 
         return ResponseEntity.ok(moduleService.findAllElectronicWarfareByUser(owner).stream().map(e -> new ElectronicWarfare(e, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
-    @GetMapping(value = PASSIVE_ENDPOINT + "/{idUser}")
+    @GetMapping(value = PASSIVE_ENDPOINT)
     @Operation(summary = "Get all unlocked passive modules for the owner .", operationId = "getPassiveModulesByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -201,13 +200,13 @@ public class ModuleApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getPassiveModulesByUser(@PathVariable("idUser") final int idUser) {
-        final User owner = userService.findWithResearches(idUser);
+    public ResponseEntity<?> getPassiveModulesByUser() {
+        final User owner = userService.findWithResearches(getIdUser());
 
         return ResponseEntity.ok(moduleService.findAllPassiveModuleByUser(owner).stream().map(p -> new PassiveModule(p, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
-    @GetMapping(value = AMMUNITION_ENDPOINT + "/{idUser}")
+    @GetMapping(value = AMMUNITION_ENDPOINT)
     @Operation(summary = "Get all unlocked ammunition modules for the owner .", operationId = "getAmmunitionModulesByUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -218,8 +217,8 @@ public class ModuleApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getAmmunitionModulesByUser(@PathVariable("idUser") final int idUser) {
-        final User owner = userService.findWithResearches(idUser);
+    public ResponseEntity<?> getAmmunitionModulesByUser() {
+        final User owner = userService.findWithResearches(getIdUser());
 
         return ResponseEntity.ok(moduleService.findAllAmmunitionModulesByUser(owner).stream().map(a -> new AmmunitionModule(a, getPreferredLanguage())).collect(Collectors.toList()));
     }

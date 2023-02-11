@@ -1,23 +1,28 @@
 
 
 ----------------- Features -------------
-1. Markierung wenn es neue Battle Reports gibt
 
-
+1. Das Seitenmenü ist etwas umgestaltet
+1. Die Schiffswerft sieht etwas weniger nach Excel aus und zeigt nun alle notwendigen Informationen an
+1. Das Passwort-Feld im Login zeigt das Passwort bei Bedarf an
 
 ----------------- Bugs fixed -----------
-1. Eingabefeld für Chat- und Forumsbeiträge sind nach dem Abschicken wieder leer
 
+1. Expansion Manager
+    1. Die aufklappbaren Elemente im Expansion Manager sind wieder vollständig sichtbar
+    1. Die Sortierung nach Entfernung zum gewählten Sternensystem funktioniert wieder
+1. Sternenkarte
+    1. Die Flotteninfo auf der Map ist wieder nutzbar
+    1. Die Auswahl eines Sterns ist wieder möglich
+1. Es gab fälschlicherweise manchmal eine Lücke zwischen der linken Navigationsleiste und dem Content
 
+----------------- next steps -----------  
+todo. library for modules and hulls
 
------------------ next steps -----------
-todo. ship fitting aufhübschen
-
------------------ bugs -----------------
-
-
+----------------- bugs -----------------  
 
 ----------------- plannings ------------
+
 1. Die Darstellung des Kampfes aufhübschen.
 2. Aktuell kann man nur 1on1 kämpfen, das muss aufgebohrt werden
 3. Population balancing

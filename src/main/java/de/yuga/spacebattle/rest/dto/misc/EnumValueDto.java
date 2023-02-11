@@ -8,6 +8,8 @@ public class EnumValueDto {
 
 
     @JsonProperty
+    private de.yuga.spacebattle.backend.enums.EModuleType[] eModuleTypes;
+    @JsonProperty
     private de.yuga.spacebattle.backend.enums.EDepositType[] eDepositType;
     @JsonProperty
     private de.yuga.spacebattle.backend.enums.EResourceType[] eResourceType;

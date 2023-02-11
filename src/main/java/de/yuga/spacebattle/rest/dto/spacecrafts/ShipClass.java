@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Schema(description = ".")
-public class ShipClass {
+public class ShipClass implements ShipClassData {
 
     @Nullable
     @Schema(description = "The ID.")
@@ -159,46 +159,55 @@ public class ShipClass {
         return owner;
     }
 
+    @Override
     @Nonnull
     public String getName() {
         return name;
     }
 
+    @Override
     @Nonnull
     public Hull getHull() {
         return hull;
     }
 
+    @Override
     @Nullable
     public Propulsion getPropulsion() {
         return propulsion;
     }
 
+    @Override
     @Nullable
     public Armor getArmor() {
         return armor;
     }
 
+    @Override
     @Nullable
     public Sidewall getSidewall() {
         return sidewall;
     }
 
+    @Override
     @Nullable
     public ElectronicWarfare getElectronicWarfare() {
         return electronicWarfare;
     }
 
+    @Override
     @Nonnull
     public List<AlignedFitting> getFittings() {
         return fittings;
     }
 
+    @Override
     @Nonnull
     public List<AmmunitionFitting> getAmmunitionFittings() {
         return ammunitionFittings;
     }
 
+    @Override
     @Nonnull
     public List<SupportFitting> getSupportFittings() {
         return supportFittings;

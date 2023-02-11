@@ -7,11 +7,11 @@ import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassCreationService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
-import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass;
+import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClassMock;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -43,13 +43,9 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + ShipyardApi.ENDPOINT + "/")
 public class ShipyardApi extends BaseApi {
 
-    @Nonnull
     public static final String ENDPOINT = "shipyard";
-    private static final String E_HULL_TYPE = "hullType";
-    private static final String E_MODULE_TYPE = "moduleType";
-
-    @Nonnull
-    private final JobService jobService;
+    public static final String E_HULL_TYPE_ENDPOINT = "hullType";
+    public static final String E_MODULE_TYPE_ENDPOINT = "moduleType";
 
     @Nonnull
     private final ShipClassService shipClassService;
@@ -64,20 +60,17 @@ public class ShipyardApi extends BaseApi {
     private final Validator validator;
 
     @Autowired
-    public ShipyardApi(@Nonnull final JobService jobService,
-                       @Nonnull final ShipClassService shipClassService,
+    public ShipyardApi(@Nonnull final ShipClassService shipClassService,
                        @Nonnull final UserService userService,
                        @Nonnull final ShipClassCreationService shipClassCreationService) {
-        Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
         Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         Preconditions.checkNotNull(shipClassCreationService, "shipClassCreationService shouldn't be null!");
 
-        this.jobService = jobService;
         this.shipClassService = shipClassService;
         this.userService = userService;
         this.shipClassCreationService = shipClassCreationService;
-        validator = Validation.buildDefaultValidatorFactory().getValidator();
+        this.validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 
     @GetMapping
@@ -103,7 +96,7 @@ public class ShipyardApi extends BaseApi {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all active ship classes for the owner .", operationId = "setShipClass",
+    @Operation(summary = "Get all active ship classes for the owner .", operationId = "createShipClass",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ShipClass.class))),
@@ -111,7 +104,30 @@ public class ShipyardApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> setShipClass(@RequestBody ShipClass shipClass) {
+    public ResponseEntity<?> createShipClass(@RequestBody ShipClassMock shipClass) {
+
+        final int idUser = getIdUser();
+        if (shipClass == null) {
+            throw new NotifyWebUserException("There should be a ship class provided.");
+        }
+
+        final Set<ConstraintViolation<ShipClassMock>> validate = validator.validate(shipClass);
+        if (!validate.isEmpty()) {
+            throw new NotifyWebUserException("The provided class is not valid.", validate);
+        }
+        return ResponseEntity.ok(new ShipClass(shipClassCreationService.createShipClass(shipClass, idUser), getPreferredLanguage()));
+    }
+
+    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all active ship classes for the owner .", operationId = "updateShipClass",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ShipClass.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> updateShipClass(@RequestBody ShipClass shipClass) {
 
         final int idUser = getIdUser();
         if (shipClass == null) {
@@ -122,7 +138,7 @@ public class ShipyardApi extends BaseApi {
         if (!validate.isEmpty()) {
             throw new NotifyWebUserException("The provided class is not valid.", validate);
         }
-        return ResponseEntity.ok(new ShipClass(shipClassCreationService.mapAndCreateShipClass(shipClass, idUser), getPreferredLanguage()));
+        return ResponseEntity.ok(new ShipClass(shipClassCreationService.updateShipClassToEntity(shipClass, idUser), getPreferredLanguage()));
     }
 
     @DeleteMapping(value = "/{idShipClass}")
@@ -158,7 +174,7 @@ public class ShipyardApi extends BaseApi {
         return ResponseEntity.ok(shipClassService.checkIfClassNameIsFree(idUser, className));
     }
 
-    @GetMapping(value = E_HULL_TYPE)
+    @GetMapping(value = E_HULL_TYPE_ENDPOINT)
     @Operation(summary = "Get all EHullType.", operationId = "getEHullTypes",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -173,7 +189,7 @@ public class ShipyardApi extends BaseApi {
         return ResponseEntity.ok(Arrays.stream(EHullType.values()).map(de.yuga.spacebattle.rest.dto.enums.EHullType::new).collect(Collectors.toList()));
     }
 
-    @GetMapping(value = E_MODULE_TYPE)
+    @GetMapping(value = E_MODULE_TYPE_ENDPOINT)
     @Operation(summary = "Get all EModuleType.", operationId = "getEModuleTypes",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",

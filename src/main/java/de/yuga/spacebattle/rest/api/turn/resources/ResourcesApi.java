@@ -24,7 +24,7 @@ import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstruct
 import de.yuga.spacebattle.rest.dto.enums.EEducationType;
 import de.yuga.spacebattle.rest.dto.enums.EResourceType;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
-import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass;
+import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClassMock;
 import de.yuga.spacebattle.rest.dto.turn.resources.MiningFactors;
 import de.yuga.spacebattle.rest.dto.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.rest.dto.turn.resources.ResourceTransfer;
@@ -343,7 +343,7 @@ public class ResourcesApi extends BaseApi {
                     required = true,
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ShipClass.class)
+                            schema = @Schema(implementation = ShipClassMock.class)
                     )
             ),
             responses = {
@@ -353,11 +353,10 @@ public class ResourcesApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getShipClassCosts(@RequestBody @Nonnull final ShipClass shipClass) {
+    public ResponseEntity<?> getShipClassCosts(@RequestBody @Nonnull final ShipClassMock shipClass) {
         PreconditionWebHelper.checkNotNull(shipClass, "Maybe there should be something like a request?!");
 
-        final int idUser = getIdUser();
-        return ResponseEntity.ok(new ResourceDeposit(shipClassCreationService.getCosts(shipClass, idUser)));
+        return ResponseEntity.ok(new ResourceDeposit(shipClassCreationService.getCosts(shipClass)));
     }
 
     @GetMapping(value = SHIP_CLASS_COSTS_ENDPOINT + "/{idShipClass}")
@@ -406,7 +405,7 @@ public class ResourcesApi extends BaseApi {
                     required = true,
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ShipClass.class)
+                            schema = @Schema(implementation = ShipClassMock.class)
                     )
             ),
             responses = {
@@ -416,11 +415,10 @@ public class ResourcesApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getShipClassCapabilities(@RequestBody @Nonnull final ShipClass shipClass) {
+    public ResponseEntity<?> getShipClassCapabilities(@RequestBody @Nonnull final ShipClassMock shipClass) {
         PreconditionWebHelper.checkNotNull(shipClass, "Maybe there should be something like a request?!");
 
-        final int idUser = getIdUser();
-        return ResponseEntity.ok(shipClassCreationService.getShipClassCapabilities(shipClass, idUser));
+        return ResponseEntity.ok(shipClassCreationService.getShipClassCapabilities(shipClass));
     }
 
     @PostMapping(value = SHIP_CLASS_CAPACITIES_ENDPOINT)
@@ -429,7 +427,7 @@ public class ResourcesApi extends BaseApi {
                     required = true,
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ShipClass.class)
+                            schema = @Schema(implementation = ShipClassMock.class)
                     )
             ),
             responses = {
@@ -439,11 +437,10 @@ public class ResourcesApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getShipClassCapacities(@RequestBody @Nonnull final ShipClass shipClass) {
+    public ResponseEntity<?> getShipClassCapacities(@RequestBody @Nonnull final ShipClassMock shipClass) {
         PreconditionWebHelper.checkNotNull(shipClass, "Maybe there should be something like a request?!");
 
-        final int idUser = getIdUser();
-        return ResponseEntity.ok(shipClassCreationService.getShipClassCapacities(shipClass, idUser));
+        return ResponseEntity.ok(shipClassCreationService.getShipClassCapacities(shipClass));
     }
 
     @PostMapping(value = TRANSFER_RESOURCES_ENDPOINT)
