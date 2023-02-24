@@ -2,19 +2,10 @@
 
 ----------------- Features -------------
 
-1. Das Seitenmenü ist etwas umgestaltet
-1. Die Schiffswerft sieht etwas weniger nach Excel aus und zeigt nun alle notwendigen Informationen an
-1. Das Passwort-Feld im Login zeigt das Passwort bei Bedarf an
+1.
 
 ----------------- Bugs fixed -----------
 
-1. Expansion Manager
-    1. Die aufklappbaren Elemente im Expansion Manager sind wieder vollständig sichtbar
-    1. Die Sortierung nach Entfernung zum gewählten Sternensystem funktioniert wieder
-1. Sternenkarte
-    1. Die Flotteninfo auf der Map ist wieder nutzbar
-    1. Die Auswahl eines Sterns ist wieder möglich
-1. Es gab fälschlicherweise manchmal eine Lücke zwischen der linken Navigationsleiste und dem Content
 
 ----------------- next steps -----------  
 todo. library for modules and hulls
@@ -32,16 +23,12 @@ todo. library for modules and hulls
 7. mich den spannenden Aufgaben widmen: ein NPC-System, Missionen, simulierte Handelsflotten, Piraten und sowas (multi-combat wäre wohl sehr sinnvoll -> Darstellung des Kampfes muss erkennbaren Mehrwert bringen)
 8. Änderungen in der Spielmechanik, z.B. dass die Leistung des Antriebs im Verhältnis zur Schiffsmasse steht -> erneutes Rebalancing der Module
 9. mich endlich mal um die "corporate identity" kümmern, also eigene Icons, Symbole, Benennungen usw erzeugen
-10. Fitting selection aufhübschen
-
 
 todo. combat aufhübschen and more infos
 
 todo. warship icon instead of fleet shark
 
 todo. use context menu for star map?
-
-todo. fitting stats only visible when minimum conditions are fulfilled - but not stated
 
 todo. spinner abbrechen
 
@@ -50,10 +37,6 @@ todo. fleets in motion needs nav point icon
 todo. population balancing broken
 
 todo. scroll issue if the last page forbids overflow
-
-todo. bootstrap css?
-
-todo. rework sidenav with ng-content areas
 
 todo. switch to "calculate orbit in backend" while travelling
 
