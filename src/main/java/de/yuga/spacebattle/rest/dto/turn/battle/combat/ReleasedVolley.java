@@ -26,7 +26,7 @@ public class ReleasedVolley {
 
     @Nullable
     @JsonProperty
-    @Schema(required = true, description = "The fleet which acts.")
+    @Schema(required = true, description = "The actors owner.")
     private AbstractId actorOwner;
 
     @Nullable

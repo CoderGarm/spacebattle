@@ -6,11 +6,11 @@ Just a simple 4X game which is based on the honorverse created by David Weber.
 
 ## State
 
-This is in a very early stage which I would describe as pre-alpha.<br />
-Just register, log in and take a tour.<br />
+This is in a very early stage which I would describe as pre-alpha.  
+Just register, log in and take a tour.  
 Ideally you write a comment in the internal forum to address an issue ;)
 
-It can be accessed via http://65.109.16.233/ <br />
+It can be accessed via https://www.battleforhonor.de  
 And yeah, currently it's plain http without the s. Don't share secrets!
 
 ## Impressions
@@ -20,7 +20,7 @@ First, the game is in a **really early stage**.
 There is no balancing in resources and outputs, in amor values and weapon strength.
 Even not in flight speed to distance.
 
-The basic mechanics are implemented and a lot of items are only present.<br />
+The basic mechanics are implemented and a lot of items are only present.  
 But it looks a bit better now.
 
 ### Constructions

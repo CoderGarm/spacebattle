@@ -2,15 +2,19 @@ package de.yuga.spacebattle.backend.entities.turn.battle.combat;
 
 import de.yuga.spacebattle.backend.combat.dto.BeamVolley;
 import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
+import de.yuga.spacebattle.backend.combat.round.BeamState;
 import de.yuga.spacebattle.backend.converter.DistanceConverter;
 import de.yuga.spacebattle.backend.converter.UUIDConverter;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity
@@ -63,16 +67,23 @@ public class ReleasedVolley extends CombatRoundKey {
     public ReleasedVolley(@Nonnull final BeamVolley volley) {
         super(volley.getCombatRound(), volley.getCombatSubPhase());
 
+        final Map<WarShip, List<Long>> appliedDamage = volley.getAppliedDamage();
+        final List<BeamState> firedShots = volley.getFiredShots();
+        /*fixme notice the warship's potion of the salvo */
+
         this.weaponType = EWeaponType.BEAM;
         this.actor = volley.getActor();
         this.target = volley.getTarget();
         this.damageDealer = volley.getUuid();
-        this.amountOfShots = volley.getFiredShots().size();
+        this.amountOfShots = firedShots.size();
         this.initialDistance = volley.getInitialDistance();
     }
 
     public ReleasedVolley(@Nonnull final MissileSalvo volley) {
         super(volley.getCombatRound(), volley.getCombatSubPhase());
+
+        final Map<WarShip, List<Long>> appliedDamage = volley.getAppliedDamage();
+        /*fixme notice the warship's potion of the salvo */
 
         this.weaponType = EWeaponType.MISSILE;
         this.actor = volley.getActor();

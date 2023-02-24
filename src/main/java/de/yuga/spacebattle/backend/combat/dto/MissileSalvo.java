@@ -158,6 +158,9 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
                             if (remainingShots <= 0) {
                                 return;
                             }
+
+                            final WarShip warShip = w.getWarShip(); /*fixme notice the warship's potion of the salvo */
+
                             // setting missiles to the salvo
                             if (remainingShots >= amountOfLauncher) {
                                 amountByType.merge(missile, amountOfLauncher, Integer::sum);

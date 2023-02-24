@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.backend.services;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.FittingUtils;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
@@ -1380,9 +1381,12 @@ public class MasterOfTheUniverseService {
         return result;
     }
 
-    static class Coords {
+    public static class Coords {
+        @JsonProperty
         int x;
+        @JsonProperty
         int y;
+        @JsonProperty
         String name;
 
         /**

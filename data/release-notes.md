@@ -6,11 +6,19 @@
 
 ----------------- Bugs fixed -----------
 
+1. Battle Reports
+    1. Slider, der die aktuelle Kampfrunde anzeigt, funktioniert wieder
+    1.
 
 ----------------- next steps -----------  
-todo. library for modules and hulls
+todo. Systemkoordinaten abrufbar machen
+todo. Berechtigungskonzept für Forum (inkl Sperrzeit für user), Wiki
+todo. eMail-Validierung-Mail vs "anonym" - nur Mails an validierte Adressen
+todo. Passwortwechsel ermöglichen
+todo. User Passwortwechsel und Login
+todo. Forum aufräumen
 
------------------ bugs -----------------  
+----------------- bugs -----------------
 
 ----------------- plannings ------------
 
@@ -20,13 +28,16 @@ todo. library for modules and hulls
 4. Kleinkram in der UI, der aber wie das angular upgrade "nichts neues" bringt und auch nur nice-to-have ist
 5. Das man Kolonisierungen planen kann
 6. Rework der Flottenbewegungen (nice to have)
-7. mich den spannenden Aufgaben widmen: ein NPC-System, Missionen, simulierte Handelsflotten, Piraten und sowas (multi-combat wäre wohl sehr sinnvoll -> Darstellung des Kampfes muss erkennbaren Mehrwert bringen)
+7. mich den spannenden Aufgaben widmen: ein NPC-System, Missionen, simulierte Handelsflotten, Piraten und sowas (multi-combat wäre wohl sehr sinnvoll -> Darstellung des Kampfes
+   muss erkennbaren Mehrwert bringen)
 8. Änderungen in der Spielmechanik, z.B. dass die Leistung des Antriebs im Verhältnis zur Schiffsmasse steht -> erneutes Rebalancing der Module
 9. mich endlich mal um die "corporate identity" kümmern, also eigene Icons, Symbole, Benennungen usw erzeugen
 
 todo. combat aufhübschen and more infos
 
 todo. warship icon instead of fleet shark
+
+todo. library for modules and hulls
 
 todo. use context menu for star map?
 
