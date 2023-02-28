@@ -69,7 +69,7 @@ public class User extends AbstractEntityKey {
 
     @Nonnull
     @NotNull
-    @Column(updatable = false) // todo how to change password? Must be kind of a hack at this point. Do not change to "decrypt able" mechanism
+    @Column
     @Pattern(regexp = "((?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,30})", message = "must contain of 8 to 30 characters of numbers, letters, capital letters and special characters")
     @Convert(converter = PasswordConverter.class)
     private String password;
@@ -133,15 +133,22 @@ public class User extends AbstractEntityKey {
             uniqueConstraints = @UniqueConstraint(name = "knownStarSystem_UC", columnNames = {"idOwner", "idStarSystem"}))
     private final Set<StarSystem> knownStarSystems = new HashSet<>();
 
-    /**
-     * The ship classes which was created by the user.
-     */
     @Nonnull
     @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, mappedBy = "user")
     private final Set<Colonization> colonizations = new HashSet<>();
 
-    @Transient
-    private final String avatar = "https://mir-s3-cdn-cf.behance.net/project_modules/disp/ce54bf11889067.562541ef7cde4.png";
+    /**
+     * Marks if the user must not log in.
+     */
+    @Column(columnDefinition = "bit not null default false")
+    private boolean isLoginForbidden = false;
+
+
+    /**
+     * Marks if the user don't want to provide an eMail.
+     */
+    @Column(columnDefinition = "bit not null default false")
+    private boolean noEMailWanted = false;
 
     @Nonnull
     @NotNull
@@ -154,6 +161,7 @@ public class User extends AbstractEntityKey {
                 @Nonnull final String password,
                 @Nonnull final String email,
                 @Nonnull final EWebUserRole role,
+                final boolean noEMailWanted,
                 @Nullable final EGameUserRole... gameUserRoles) {
         Preconditions.checkNotNull(username, "username shouldn't be null!");
         Preconditions.checkNotNull(password, "password shouldn't be null!");
@@ -163,6 +171,7 @@ public class User extends AbstractEntityKey {
         this.username = username;
         this.password = password;
         this.email = email;
+        this.noEMailWanted = noEMailWanted;
         this.userRole = role;
         if (gameUserRoles != null) {
             this.gameUserRoles.addAll(Arrays.stream(gameUserRoles).collect(Collectors.toSet()));
@@ -267,8 +276,13 @@ public class User extends AbstractEntityKey {
         return knownStarSystems;
     }
 
-    public String getAvatar() {
-        return avatar;
+    public boolean isLoginForbidden() {
+        return isLoginForbidden;
+    }
+
+    @Nonnull
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     @Override
@@ -282,6 +296,7 @@ public class User extends AbstractEntityKey {
     }
 
     @Override
+    @SuppressWarnings("ConstantValue")
     public int hashCode() {
         return username != null ? username.hashCode() : 0;
     }

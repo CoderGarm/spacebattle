@@ -673,6 +673,8 @@
         createdAt datetime(6) not null,
         email varchar(50) not null,
         gameUserRoles varchar(255),
+        isLoginForbidden bit not null default false,
+        noEMailWanted bit not null default false,
         password varchar(255) not null,
         userRole varchar(255),
         username varchar(30) not null,
@@ -1828,7 +1830,7 @@ INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES 
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (2, 'Dieses Spiel befindet sich in einem frühen Stadium und befindet sich in der Entwicklung.  ', 'INSERT', 20);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (2, 'Nicht alles wird wie erwartet funktionieren und etwas sollte funktionieren, wird es möglicherweise aber nicht.', 'INSERT', 21);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (2, '', 'INSERT', 22);
-INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (2, 'Bitte informiere die in diesen Fällen die Entwickler.', 'INSERT', 23);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (2, 'Bitte informiere in diesen Fällen die Entwickler.', 'INSERT', 23);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (2, '', 'INSERT', 24);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (2, '---', 'INSERT', 25);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (2, '## Wichtiger Hinweis', 'INSERT', 26);
@@ -2064,3 +2066,4 @@ insert into dbPatch values (null, now(), 'add wiki', '0.0.6-2');
 insert into dbPatch values (null, now(), 'add transportation', '0.0.7-1');
 insert into dbPatch values (null, now(), 'add commissioning to health state snap', '0.0.7-2');
 insert into dbPatch values (null, now(), 'drop needs repair flag from fleet', '0.0.9-1');
+insert into dbPatch values (null, now(), 'adding password change and flags', '0.0.12-1');

@@ -14,6 +14,7 @@ public class UserReqAdapter implements JsonSerializer<UserReq> {
         jsonObject.add("username", new JsonPrimitive(request.getUsername()));
         jsonObject.add("password", new JsonPrimitive("******"));
         jsonObject.add("email", new JsonPrimitive(request.getEmail()));
+        jsonObject.add("noEMailWanted", new JsonPrimitive(request.isNoEMailWanted()));
         return jsonObject;
     }
 }

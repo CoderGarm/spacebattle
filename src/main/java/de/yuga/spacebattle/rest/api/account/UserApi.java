@@ -1,12 +1,10 @@
 package de.yuga.spacebattle.rest.api.account;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
-import de.yuga.spacebattle.rest.dto.account.UserReq;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -23,10 +21,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
-import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
@@ -67,42 +63,6 @@ public class UserApi {
     )
     public ResponseEntity<?> findAll() {
         return ResponseEntity.ok(service.findAll().stream().map(UserJson::new).collect(Collectors.toList()));
-    }
-
-    @PutMapping
-    @Operation(summary = "Updates a single user", operationId = "updateUser",
-            description = "Updates and returns a user which is now registered in the system. Every changed field except the idUser will be updated. The user id must be present.",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = UserReq.class)
-                    )
-            ),
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserJson.class))),
-                    @ApiResponse(responseCode = "400", description = "an error occurred",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
-            }
-    )
-    public ResponseEntity<?> update(@RequestBody @Nonnull final UserReq userJson) {
-        PreconditionWebHelper.checkNotNull(userJson, "userJson shouldn't be null!");
-        PreconditionWebHelper.checkNotNull(userJson.getIdUser(), "idUser shouldn't be null!");
-
-        final Set<ConstraintViolation<UserReq>> validate = validator.validate(userJson);
-        if (validate.isEmpty()) {
-            final User user = service.find(userJson.getIdUser());
-            if (user == null) {
-                throw new NotifyWebUserException("User wasn't found for idUser '");
-            }
-
-            user.setEmail(userJson.getEmail());
-            user.setPassword(userJson.getPassword());
-            final User saved = service.save(user);
-            return ResponseEntity.ok(new UserJson(saved));
-        }
-        throw new NotifyWebUserException("User wasn't updated for idUser '", validate);
     }
 
     @DeleteMapping(value = "/{idUser}")

@@ -2,7 +2,8 @@
 
 ----------------- Features -------------
 
-1.
+1. Systemkoordinaten abrufbar unter https://www.battleforhonor.de/api/public/resources/system-coordinates
+2.
 
 ----------------- Bugs fixed -----------
 
@@ -11,11 +12,12 @@
     1.
 
 ----------------- next steps -----------  
-todo. Systemkoordinaten abrufbar machen
-todo. Berechtigungskonzept für Forum (inkl Sperrzeit für user), Wiki
 todo. eMail-Validierung-Mail vs "anonym" - nur Mails an validierte Adressen
 todo. Passwortwechsel ermöglichen
-todo. User Passwortwechsel und Login
+
+todo. close http://65.109.16.233:8081/ and http://battleforhonor.de:8081/
+
+todo. Berechtigungskonzept für Forum (inkl Sperrzeit für user), Wiki
 todo. Forum aufräumen
 
 ----------------- bugs -----------------
@@ -38,6 +40,8 @@ todo. combat aufhübschen and more infos
 todo. warship icon instead of fleet shark
 
 todo. library for modules and hulls
+
+todo. provide alliance at account creation to place main planet by friends?
 
 todo. use context menu for star map?
 

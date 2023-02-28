@@ -38,7 +38,6 @@ import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
-import de.yuga.spacebattle.backend.services.account.ChatService;
 import de.yuga.spacebattle.backend.services.account.ForumService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
@@ -199,9 +198,6 @@ public class MasterOfTheUniverseService {
     @Nonnull
     private final ResourceService resourceService;
 
-    @Nonnull
-    private final ChatService chatService;
-
     @Autowired
     public MasterOfTheUniverseService(@Nonnull final TickService tickService,
                                       @Nonnull final UserService userService,
@@ -219,8 +215,7 @@ public class MasterOfTheUniverseService {
                                       @Nonnull final ColonizationService colonizationService,
                                       @Nonnull final BattleService battleService,
                                       @Nonnull final TranslatableService translatableService,
-                                      @Nonnull final ResourceService resourceService,
-                                      @Nonnull final ChatService chatService) {
+                                      @Nonnull final ResourceService resourceService) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.allianceService = Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");
@@ -238,8 +233,7 @@ public class MasterOfTheUniverseService {
         this.battleService = Preconditions.checkNotNull(battleService, "battleService must not be empty");
         this.translatableService = Preconditions.checkNotNull(translatableService, "translatableService must not be empty");
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
-        this.chatService = Preconditions.checkNotNull(chatService, "constructionService must not be empty");
-        validator = Validation.buildDefaultValidatorFactory().getValidator();
+        this.validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 
     @PostConstruct

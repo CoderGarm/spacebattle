@@ -53,8 +53,8 @@ import java.util.Set;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PUBLIC_BASE_ENDPOINT;
 
-@Tag(name = "AuthApi")
 @RestController
+@Tag(name = "AuthApi")
 @RequestMapping(value = "/" + PUBLIC_BASE_ENDPOINT + "/" + AuthApi.ENDPOINT + "/")
 public class AuthApi {
 
@@ -169,6 +169,9 @@ public class AuthApi {
 
             final WebUserDetails webUser = (WebUserDetails) authenticate.getPrincipal();
             final User user = webUser.getUser();
+            if (user.isLoginForbidden()) {
+                throw new NotifyWebUserException("Your login is prohibited.");
+            }
             final String accessToken = jwtTokenUtil.generateAccessToken(user);
             final String refreshToken = jwtTokenUtil.generateRefreshToken(user);
 
@@ -222,7 +225,7 @@ public class AuthApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> changePassword(@RequestBody @Nonnull ChangePassword changePassword) {
+    public ResponseEntity<?> changePassword(@RequestBody @Nonnull final ChangePassword changePassword) {
         PreconditionWebHelper.checkNotNull(changePassword, "changePassword shouldn't be null!");
 
         final boolean changePasswordSuccessful = writeChangePasswordRequest(changePassword);

@@ -135,7 +135,7 @@ public class UserService {
         Preconditions.checkNotNull(email, "email shouldn't be null!");
         Preconditions.checkNotNull(role, "role shouldn't be null!");
 
-        return this.save(new User(username, password, email, role, gameUserRoles));
+        return this.save(new User(username, password, email, role, false, gameUserRoles));
     }
 
     public Set<Colonization> getColonizations(@Nonnull final User user) {

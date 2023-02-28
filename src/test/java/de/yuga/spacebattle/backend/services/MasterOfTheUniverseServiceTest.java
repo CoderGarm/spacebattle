@@ -96,7 +96,7 @@ public class MasterOfTheUniverseServiceTest {
     @Test
     void runBattle() {
         final String random = random();
-        final User entity = new User(random, "12457aA!", random + "@de", EWebUserRole.USER);
+        final User entity = new User(random, "12457aA!", random + "@de", EWebUserRole.USER, false);
         final User saved = userService.save(entity);
 
         final List<Research> researchesWithoutPrecondition = researchService.getResearchesWithoutPrecondition();

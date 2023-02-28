@@ -129,7 +129,7 @@ public class UserServiceTest extends BaseTestCase {
         final String username = "user";
         final String password = "password";
         final String email = "email";
-        final User user = new User(username, password, email, EWebUserRole.USER);
+        final User user = new User(username, password, email, EWebUserRole.USER, false);
         // prepare mocks
         when(userRepositoryMock.save(user)).thenReturn(user);
         // test method

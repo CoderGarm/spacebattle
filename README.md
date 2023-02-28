@@ -73,7 +73,7 @@ Set up the database and the application:
 1. Check it out, built it, install mariaDB
 2. create the database 'sbdb'
 3. pipe [createSBDB.sql](data/sql/createSBDB.sql) into the db
-4. run the test [createInitialData()](src/test/java/de/yuga/spacebattle/backend/services/MasterOfTheUniverseServiceTest.java)
+4. the initial database state will be created automatically
 5. start the application
 
 Set up the frontend:
