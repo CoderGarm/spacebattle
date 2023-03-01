@@ -36,6 +36,34 @@ public class MailService {
         sendMail(user.getEmail(), templateMailVerification(user));
     }
 
+
+    public void sendMailChangePasswordMessage(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+
+        if (user.isNoEMailWanted() || !user.isEMailVerified()) {
+            LOGGER.info("Password change eMail will not processed for '" + user.getUsername() + "'");
+            return;
+        }
+
+        sendMail(user.getEmail(), templatePasswordChange(user));
+    }
+
+    private SimpleMailMessage templatePasswordChange(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+
+        final SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("noreply@battleforhonor.de");
+        message.setSubject("Password change requested");
+        message.setText("You can change your password by clicking the link or copying it into your browser's address line.\n\n\n" + getPasswordChangeURL(user));
+        return message;
+    }
+
+    private String getPasswordChangeURL(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+
+        return "https://www.battleforhonor.de/forgotten-password/" + getUserIdentificationCode(user);
+    }
+
     private void sendMail(@Nonnull final String destination, @Nonnull final SimpleMailMessage message) {
         Preconditions.checkNotNull(destination, "destination must not be empty");
 
@@ -61,10 +89,10 @@ public class MailService {
     private String getVerificationURL(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
-        return "https://www.battleforhonor.de/api/public/auth/verify/" + getVerificationCode(user);
+        return "https://www.battleforhonor.de/api/public/auth/verify/" + getUserIdentificationCode(user);
     }
 
-    private String getVerificationCode(@Nonnull final User user) {
+    private String getUserIdentificationCode(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
         final String hash = user.getPassword();

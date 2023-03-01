@@ -673,6 +673,7 @@
         createdAt datetime(6) not null,
         email varchar(50) not null,
         gameUserRoles varchar(255),
+        isEMailVerified bit not null default false,
         isLoginForbidden bit not null default false,
         noEMailWanted bit not null default false,
         password varchar(255) not null,

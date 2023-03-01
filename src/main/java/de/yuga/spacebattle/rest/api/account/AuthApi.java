@@ -46,9 +46,6 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -217,8 +214,16 @@ public class AuthApi {
         }
     }
 
-    @PostMapping(value = "/changePassword")
-    @Operation(summary = "Triggers a password change.", operationId = "changePassword",
+    @PostMapping(value = "/requestPasswordChange")
+    @Operation(summary = "Triggers the password change mail.", operationId = "requestPasswordChange",
+            description = "Triggers the password change mail.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ChangePassword.class)
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
@@ -226,28 +231,33 @@ public class AuthApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> changePassword(@RequestBody @Nonnull final ChangePassword changePassword) {
+    public void requestPasswordChange(@RequestBody @Nonnull final ChangePassword changePassword) {
         PreconditionWebHelper.checkNotNull(changePassword, "changePassword shouldn't be null!");
 
-        final boolean changePasswordSuccessful = writeChangePasswordRequest(changePassword);
-        return ResponseEntity.ok(changePasswordSuccessful);
+        final User user = userService.findByUsernameOrEMail(changePassword.getUsername(), changePassword.geteMail());
+        if (user != null) {
+            mailService.sendMailChangePasswordMessage(user);
+        }
     }
 
-    private boolean writeChangePasswordRequest(@Nonnull final ChangePassword changePassword) {
-        Preconditions.checkNotNull(changePassword, "changePassword shouldn't be null!");
+    @PostMapping("processPasswordChange/{code}/{newPassword}")
+    @Operation(summary = "Changes the password.", operationId = "processPasswordChange")
+    public void processPasswordChange(@PathVariable("code") @Nullable final String code,
+                                      @PathVariable("newPassword") @Nullable final String newPassword,
+                                      @Nonnull final HttpServletResponse httpServletResponse) {
+        if (StringUtils.isBlank(code) || StringUtils.isBlank(newPassword)) {
+            return;
+        }
 
-        final WebUserDetails toModify = userService.findByUsername(changePassword.getUsername()).orElse(null);
-        PreconditionWebHelper.checkNotNull(toModify, "toModify shouldn't be null!");
-        final boolean eMailEquals = toModify.getUser().getEmail().equals(changePassword.geteMail());
-        PreconditionWebHelper.checkArgument(!eMailEquals, "There was something wrong, guy!");
+        final MailService.VerificationParameter params = MailService.getParametersFromVerificationCode(code);
+        final User user = userService.find(params.getId());
+        if (user != null) {
+            if (params.verifyUser(user)) {
+                userService.changePassword(user, newPassword);
 
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter("/changePassword/" + changePassword.getUsername()));
-            writer.write(changePassword.geteMail());
-            writer.close();
-            return true;
-        } catch (IOException e) {
-            return false;
+                httpServletResponse.setHeader("Location", "https://www.battleforhonor.de/login");
+                httpServletResponse.setStatus(302);
+            }
         }
     }
 
@@ -340,7 +350,8 @@ public class AuthApi {
 
     @GetMapping("verify/{code}")
     @Operation(summary = "Checks if a eMail already exists.", operationId = "verifyEmail")
-    public void verifyEmail(@PathVariable("code") @Nullable final String code, HttpServletResponse httpServletResponse) {
+    public void verifyEmail(@PathVariable("code") @Nullable final String code,
+                            @Nonnull final HttpServletResponse httpServletResponse) {
         if (StringUtils.isBlank(code)) {
             return;
         }

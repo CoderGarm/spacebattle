@@ -3,4 +3,6 @@ alter table user add column isLoginForbidden bit not null default false after ga
 alter table user add column noEMailWanted bit not null default false after isLoginForbidden;
 alter table user add column isEMailVerified bit not null default false after noEMailWanted;
 
+update user set isEMailVerified = true;
+
 insert into dbPatch values (null, now(), 'adding password change and flags', '0.0.12-1');

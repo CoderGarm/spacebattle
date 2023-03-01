@@ -5,6 +5,7 @@
 1. Systemkoordinaten abrufbar unter https://www.battleforhonor.de/api/public/resources/system-coordinates
 2. eMail-Verifizierung zwecks Passwortwechsel nun möglich
 3. Anmeldung ohne eMail-Adresse ebenfalls möglich
+4. Man kann jetzt sein Passwort wechseln
 
 ----------------- Bugs fixed -----------
 
@@ -12,10 +13,7 @@
     1. Slider, der die aktuelle Kampfrunde anzeigt, funktioniert wieder
     1.
 
------------------ next steps -----------  
-todo. Passwortwechsel ermöglichen
-
-todo. close http://65.109.16.233:8081/ and http://battleforhonor.de:8081/
+----------------- next steps -----------
 
 todo. Berechtigungskonzept für Forum (inkl Sperrzeit für user), Wiki
 todo. Forum aufräumen

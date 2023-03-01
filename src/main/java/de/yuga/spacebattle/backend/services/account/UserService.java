@@ -152,6 +152,14 @@ public class UserService {
         return userRepository.findLikeUsername(username);
     }
 
+    @Nullable
+    public User findByUsernameOrEMail(@Nullable final String username, @Nullable final String eMail) {
+        if (StringUtils.isBlank(username) && StringUtils.isBlank(eMail)) {
+            return null;
+        }
+        return userRepository.findByUsernameOrEMail(username, eMail);
+    }
+
     @Nonnull
     public Optional<WebUserDetails> findByUsername(@Nullable final String username) {
         if (StringUtils.isEmpty(username)) {
@@ -164,12 +172,6 @@ public class UserService {
         return Optional.of(new WebUserDetails(byUsername));
     }
 
-    /**
-     * Deletes an user by it's ID.
-     *
-     * @param idUser the valid id
-     * @return <code>true</code> if the user does not exist.
-     */
     public boolean delete(final int idUser) {
         Preconditions.checkArgument(idUser > 1, "idUser must be valid!");
 
@@ -219,6 +221,14 @@ public class UserService {
         Preconditions.checkNotNull(user, "user must not be empty");
 
         user.setEMailVerified(true);
+        save(user);
+    }
+
+    public void changePassword(@Nonnull final User user, @Nonnull final String newPassword) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+        Preconditions.checkNotNull(newPassword, "newPassword must not be empty");
+
+        user.setPassword(newPassword);
         save(user);
     }
 }

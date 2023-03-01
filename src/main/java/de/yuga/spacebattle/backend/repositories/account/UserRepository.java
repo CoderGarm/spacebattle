@@ -16,4 +16,8 @@ public interface UserRepository extends CrudRepository<User, Integer>, CustomUse
     @Nullable
     @Query(name = "User.findAllianceAdminByAlliance")
     List<User> findAllianceAdminByAlliance(@Param("alliance") @Nonnull final Alliance alliance, @Param("gameUserRole") @Nonnull final EGameUserRole gameUserRole);
+
+    @Nullable
+    @Query("SELECT u FROM User u WHERE u.username = :username OR u.email = :eMail")
+    User findByUsernameOrEMail(@Nullable final String username, @Nullable final String eMail);
 }
