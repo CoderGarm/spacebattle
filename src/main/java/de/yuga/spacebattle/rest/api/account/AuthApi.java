@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
+import de.yuga.spacebattle.backend.services.MailService;
 import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import de.yuga.spacebattle.backend.services.account.ChatService;
 import de.yuga.spacebattle.backend.services.account.UserService;
@@ -40,6 +41,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
@@ -48,9 +50,11 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import static de.yuga.spacebattle.backend.services.MasterOfTheUniverseService.DEFEATED_OPPONENT;
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PUBLIC_BASE_ENDPOINT;
 
 @RestController
@@ -110,6 +114,9 @@ public class AuthApi {
     @Nonnull
     private final TickService tickService;
 
+    @Nonnull
+    private final MailService mailService;
+
     @Autowired
     public AuthApi(@Nonnull final AuthenticationManager authenticationManager,
                    @Nonnull final JwtTokenUtil jwtTokenUtil,
@@ -119,25 +126,19 @@ public class AuthApi {
                    @Nonnull final PlanetService planetService,
                    @Nonnull final ChatService chatService,
                    @Nonnull final MasterOfTheUniverseService masterOfTheUniverseService,
-                   @Nonnull final TickService tickService) {
-        Preconditions.checkNotNull(authenticationManager, "authenticationManager shouldn't be null!");
-        Preconditions.checkNotNull(jwtTokenUtil, "jwtTokenUtil shouldn't be null!");
-        Preconditions.checkNotNull(userService, "userService shouldn't be null!");
-        Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
-        Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
-        Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
-        Preconditions.checkNotNull(chatService, "messageThreadService must not be empty");
-        Preconditions.checkNotNull(masterOfTheUniverseService, "masterOfTheUniverseService must not be empty");
+                   @Nonnull final TickService tickService,
+                   @Nonnull final MailService mailService) {
+        this.authenticationManager = Preconditions.checkNotNull(authenticationManager, "authenticationManager shouldn't be null!");
+        this.jwtTokenUtil = Preconditions.checkNotNull(jwtTokenUtil, "jwtTokenUtil shouldn't be null!");
+        this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
+        this.researchService = Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
+        this.colonizationService = Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
+        this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
+        this.chatService = Preconditions.checkNotNull(chatService, "messageThreadService must not be empty");
+        this.masterOfTheUniverseService = Preconditions.checkNotNull(masterOfTheUniverseService, "masterOfTheUniverseService must not be empty");
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
+        this.mailService = Preconditions.checkNotNull(mailService, "mailService must not be empty");
 
-        this.userService = userService;
-        this.researchService = researchService;
-        this.authenticationManager = authenticationManager;
-        this.jwtTokenUtil = jwtTokenUtil;
-        this.colonizationService = colonizationService;
-        this.planetService = planetService;
-        this.chatService = chatService;
-        this.masterOfTheUniverseService = masterOfTheUniverseService;
     }
 
     @PostMapping("/login")
@@ -284,6 +285,8 @@ public class AuthApi {
         final User entity = userJson.transform();
         final User saved = userService.save(entity);
 
+        mailService.sendMailVerificationMessage(Objects.requireNonNull(userService.find(saved.getId())));
+
         final List<Research> researchesWithoutPrecondition = researchService.getResearchesWithoutPrecondition();
         researchService.addResearch(saved, researchesWithoutPrecondition);
 
@@ -293,7 +296,7 @@ public class AuthApi {
         planet = colonizationService.colonizePlanet(colonization);
         tickService.operateInoperationals(planet);
 
-        final Optional<WebUserDetails> sender = userService.findByUsername("Flashkid");
+        final Optional<WebUserDetails> sender = userService.findByUsername(DEFEATED_OPPONENT);
         sender.ifPresent(flash -> {
             final String replace = WELCOME_MESSAGE.replace(NAME_PLACEHOLDER, saved.getUsername());
             chatService.createChatMessage(flash.getUser(), saved, replace);
@@ -333,5 +336,24 @@ public class AuthApi {
             return ResponseEntity.ok(false);
         }
         return ResponseEntity.ok(true);
+    }
+
+    @GetMapping("verify/{code}")
+    @Operation(summary = "Checks if a eMail already exists.", operationId = "verifyEmail")
+    public void verifyEmail(@PathVariable("code") @Nullable final String code, HttpServletResponse httpServletResponse) {
+        if (StringUtils.isBlank(code)) {
+            return;
+        }
+
+        final MailService.VerificationParameter params = MailService.getParametersFromVerificationCode(code);
+        final User user = userService.find(params.getId());
+        if (user != null) {
+            if (params.verifyUser(user)) {
+                userService.verifyEmail(user);
+
+                httpServletResponse.setHeader("Location", "https://www.battleforhonor.de/login");
+                httpServletResponse.setStatus(302);
+            }
+        }
     }
 }

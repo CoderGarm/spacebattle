@@ -3,7 +3,8 @@
 ----------------- Features -------------
 
 1. Systemkoordinaten abrufbar unter https://www.battleforhonor.de/api/public/resources/system-coordinates
-2.
+2. eMail-Verifizierung zwecks Passwortwechsel nun möglich
+3. Anmeldung ohne eMail-Adresse ebenfalls möglich
 
 ----------------- Bugs fixed -----------
 
@@ -12,7 +13,6 @@
     1.
 
 ----------------- next steps -----------  
-todo. eMail-Validierung-Mail vs "anonym" - nur Mails an validierte Adressen
 todo. Passwortwechsel ermöglichen
 
 todo. close http://65.109.16.233:8081/ and http://battleforhonor.de:8081/

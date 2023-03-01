@@ -214,4 +214,11 @@ public class UserService {
 
         userRepository.saveAll(users);
     }
+
+    public void verifyEmail(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+
+        user.setEMailVerified(true);
+        save(user);
+    }
 }
