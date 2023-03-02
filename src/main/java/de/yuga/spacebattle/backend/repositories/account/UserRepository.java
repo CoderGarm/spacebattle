@@ -20,4 +20,8 @@ public interface UserRepository extends CrudRepository<User, Integer>, CustomUse
     @Nullable
     @Query("SELECT u FROM User u WHERE u.username = :username OR u.email = :eMail")
     User findByUsernameOrEMail(@Nullable final String username, @Nullable final String eMail);
+
+    @Nullable
+    @Query("SELECT u.gameUserRoles FROM User u WHERE u.id = :idUser")
+    String findGameUserRoles(final int idUser);
 }

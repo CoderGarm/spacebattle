@@ -15,8 +15,6 @@
 
 ----------------- next steps -----------
 
-todo. Berechtigungskonzept für Forum (inkl Sperrzeit für user), Wiki
-todo. Forum aufräumen
 
 ----------------- bugs -----------------
 

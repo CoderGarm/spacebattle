@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.rest.config.role;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -58,8 +57,7 @@ public class EndpointPermissionInterceptor {
      * @param allowedRoles permissions annotates on the method
      */
     @Before("@annotation(allowedRoles)")
-    public void checkPermissions(final JoinPoint joinPoint,
-                                 @Nullable final AllowedRoles allowedRoles) {
+    public void checkPermissions(final JoinPoint joinPoint, @Nullable final AllowedRoles allowedRoles) {
         if (allowedRoles == null || allowedRoles.roles().length == 0) {
             return;
         }
@@ -79,10 +77,6 @@ public class EndpointPermissionInterceptor {
         final HttpServletRequest request = requestAttributes.getRequest();
         final String token = request.getHeader(AUTHORIZATION);
         final int idUser = tokenUtil.getIdUserFromAccessToken(token);
-        final User user = userService.find(idUser);
-        if (user == null) {
-            throw new HttpForbiddenException("Nope.");
-        }
-        return user.getGameUserRoles();
+        return userService.findGameUserRoles(idUser);
     }
 }

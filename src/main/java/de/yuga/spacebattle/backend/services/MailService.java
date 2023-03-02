@@ -40,7 +40,7 @@ public class MailService {
     public void sendMailChangePasswordMessage(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
-        if (user.isNoEMailWanted() || !user.isEMailVerified()) {
+        if (user.isNoEMailWanted() || !user.isEMailVerified() || user.isLoginForbidden()) {
             LOGGER.info("Password change eMail will not processed for '" + user.getUsername() + "'");
             return;
         }

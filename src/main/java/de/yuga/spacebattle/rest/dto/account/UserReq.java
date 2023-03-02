@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.dto.account;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -59,6 +60,6 @@ public class UserReq {
     }
 
     public User transform() {
-        return new User(username, password, email, EWebUserRole.USER, noEMailWanted);
+        return new User(username, password, email, EWebUserRole.USER, noEMailWanted, EGameUserRole.FORUM_READ, EGameUserRole.FORUM_WRITE);
     }
 }

@@ -11,7 +11,11 @@ public enum EGameUserRole {
     /**
      * The alliance admin - something like the chief of a tribe.
      */
-    ALLIANCE_ADMIN("ALLIANCE_ADMIN");
+    ALLIANCE_ADMIN("ALLIANCE_ADMIN"),
+    WIKI_ADMIN("WIKI_ADMIN"),
+    FORUM_READ("FORUM_READ"),
+    FORUM_WRITE("FORUM_WRITE"),
+    ;
 
     private final String name;
 

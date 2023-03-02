@@ -4,11 +4,13 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.forum.IdToId;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
+import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.services.account.ForumService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import de.yuga.spacebattle.rest.config.role.AllowedRoles;
 import de.yuga.spacebattle.rest.dto.account.forum.*;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import io.swagger.v3.oas.annotations.Operation;
@@ -65,6 +67,7 @@ public class ForumApi extends BaseApi {
         this.userService = userService;
     }
 
+    @AllowedRoles(roles = EGameUserRole.FORUM_READ)
     @GetMapping(FORUMS_FOR_USER)
     @Operation(summary = "Get a list of forums which the given user is allowed to access.", operationId = "getForumsForUser",
             responses = {
@@ -100,6 +103,7 @@ public class ForumApi extends BaseApi {
         return ResponseEntity.ok(forums);
     }
 
+    @AllowedRoles(roles = EGameUserRole.FORUM_READ)
     @GetMapping(ALLIANCE_FORUMS_FOR_USER)
     @Operation(summary = "Get a list of forums which the given user is allowed to access.", operationId = "getAllianceForumForUser",
             responses = {
@@ -133,6 +137,7 @@ public class ForumApi extends BaseApi {
         return ResponseEntity.ok(forum);
     }
 
+    @AllowedRoles(roles = EGameUserRole.FORUM_READ)
     @GetMapping(FORUM_THREAD + "/{idForumThread}")
     @Operation(summary = "Get a list of forums which the given user is allowed to access.", operationId = "getForumThreadById",
             responses = {
@@ -158,6 +163,7 @@ public class ForumApi extends BaseApi {
         return ResponseEntity.ok().build();
     }
 
+    @AllowedRoles(roles = EGameUserRole.FORUM_READ)
     @GetMapping(FORUM_THREAD + "/" + BY_FORUM + "/{idForum}")
     @Operation(summary = "Get a list of threads in a forum which the given user is allowed to access.", operationId = "getForumThreadsByForumId",
             responses = {
@@ -194,6 +200,7 @@ public class ForumApi extends BaseApi {
         return ResponseEntity.ok(result);
     }
 
+    @AllowedRoles(roles = EGameUserRole.FORUM_READ)
     @GetMapping(FORUM_THREAD + "/{idForumThread}/{page}/{size}")
     @Operation(summary = "Get a list of forums which the given user is allowed to access.", operationId = "getMessagesInThread",
             responses = {
@@ -236,6 +243,7 @@ public class ForumApi extends BaseApi {
         return ResponseEntity.ok(forumMessages);
     }
 
+    @AllowedRoles(roles = EGameUserRole.FORUM_READ)
     @GetMapping(FORUM_THREAD_COUNT + "/{idForumThread}")
     @Operation(summary = "Get a list of forums which the given user is allowed to access.", operationId = "countMessagesInThread",
             responses = {
@@ -266,6 +274,7 @@ public class ForumApi extends BaseApi {
         return user;
     }
 
+    @AllowedRoles(roles = EGameUserRole.FORUM_WRITE)
     @PutMapping(value = CREATE_FORUM_THREAD, consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get a list of forums which the given user is allowed to access.", operationId = "createForumThread",
             responses = {
@@ -292,6 +301,7 @@ public class ForumApi extends BaseApi {
         return ResponseEntity.ok(new ForumThread(forumThread));
     }
 
+    @AllowedRoles(roles = EGameUserRole.FORUM_WRITE)
     @PutMapping(value = CREATE_FORUM_THREAD_MESSAGE, consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get a list of forums which the given user is allowed to access.", operationId = "createThreadMessage",
             responses = {
@@ -314,6 +324,7 @@ public class ForumApi extends BaseApi {
         return ResponseEntity.ok(true);
     }
 
+    @AllowedRoles(roles = EGameUserRole.FORUM_WRITE)
     @PostMapping(value = EDIT_FORUM_THREAD_MESSAGE, consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get a list of forums which the given user is allowed to access.", operationId = "editThreadMessage",
             responses = {
@@ -340,6 +351,7 @@ public class ForumApi extends BaseApi {
         return ResponseEntity.ok(true);
     }
 
+    @AllowedRoles(roles = EGameUserRole.FORUM_READ)
     @GetMapping("/isMessageUnread/{idForumThread}/{idForumMessage}")
     @Operation(summary = "Returns if the chat has unread messages.", operationId = "isMessageUnread",
             description = "Returns if the chat has unread messages.",
@@ -357,6 +369,7 @@ public class ForumApi extends BaseApi {
         return ResponseEntity.ok(hasUnread);
     }
 
+    @AllowedRoles(roles = EGameUserRole.FORUM_READ)
     @GetMapping("/hasThreadUnread/{idForumThread}")
     @Operation(summary = "Returns if the chat has unread messages.", operationId = "hasThreadUnread",
             description = "Returns if the chat has unread messages.",
@@ -373,6 +386,7 @@ public class ForumApi extends BaseApi {
         return ResponseEntity.ok(hasUnread);
     }
 
+    @AllowedRoles(roles = EGameUserRole.FORUM_READ)
     @GetMapping("/hasForumUnread/{idForum}")
     @Operation(summary = "Returns if the chat has unread messages.", operationId = "hasForumUnread",
             description = "Returns if the chat has unread messages.",
@@ -383,13 +397,13 @@ public class ForumApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> hasForumUnread(
-            @PathVariable("idForum") final int idForum) {
+    public ResponseEntity<?> hasForumUnread(@PathVariable("idForum") final int idForum) {
         final int idUser = getIdUser();
         final boolean hasUnread = forumService.hasForumUnread(idForum, idUser);
         return ResponseEntity.ok(hasUnread);
     }
 
+    @AllowedRoles(roles = EGameUserRole.FORUM_READ)
     @GetMapping("/hasUserUnreadMessages")
     @Operation(summary = "Returns if the chat has unread messages.", operationId = "hasUserUnreadMessages",
             description = "Returns if the chat has unread messages.",
@@ -409,6 +423,7 @@ public class ForumApi extends BaseApi {
         return ResponseEntity.ok(hasUnread);
     }
 
+    @AllowedRoles(roles = EGameUserRole.FORUM_READ)
     @PutMapping("/markForumMessageRead/{idForum}/{idForumThread}/{idForumMessage}")
     @Operation(summary = "Creates a chat message", operationId = "markForumMessageRead",
             description = "Creates a chat message",

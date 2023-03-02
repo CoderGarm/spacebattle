@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services.account;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.converter.EGameUserRolesConverter;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
@@ -69,6 +70,16 @@ public class UserService {
         Preconditions.checkNotNull(idUser, "idUser shouldn't be null!");
 
         return userRepository.findById(idUser).orElse(null);
+    }
+
+    @Nonnull
+    public Set<EGameUserRole> findGameUserRoles(@Nullable final Integer idUser) {
+        if (idUser == null) {
+            return Set.of();
+        }
+
+        final String result = userRepository.findGameUserRoles(idUser);
+        return new EGameUserRolesConverter().convertToEntityAttribute(result);
     }
 
     @Nonnull
