@@ -14,6 +14,13 @@ import java.util.stream.Collectors;
 @Converter
 public class EGameUserRolesConverter implements AttributeConverter<Set<EGameUserRole>, String> {
 
+    private static final String PIPE = "|";
+    private static final String PIPE_REGEX = "\\" + PIPE;
+    /**
+     * Quickfix because spring returns the string comma separated from database -.-
+     */
+    private static final String COMMA_REGEX = ",";
+
     @Override
     public String convertToDatabaseColumn(@Nullable final Set<EGameUserRole> attribute) {
         if (attribute != null) {
@@ -29,7 +36,16 @@ public class EGameUserRolesConverter implements AttributeConverter<Set<EGameUser
         if (StringUtils.isBlank(dbData)) {
             return new HashSet<>();
         }
-        return Arrays.stream(dbData.split("\\|"))
+
+        String[] result = {};
+        if (dbData.contains(COMMA_REGEX)) {
+            result = dbData.split(COMMA_REGEX);
+        }
+        if (dbData.contains(PIPE)) {
+            result = dbData.split(PIPE_REGEX);
+        }
+
+        return Arrays.stream(result)
                 .map(EGameUserRole::getRoleByName)
                 .collect(Collectors.toSet());
     }
