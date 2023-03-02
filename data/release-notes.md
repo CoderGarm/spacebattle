@@ -1,5 +1,3 @@
-
-
 ----------------- Features -------------
 
 1. Systemkoordinaten abrufbar unter https://www.battleforhonor.de/api/public/resources/system-coordinates
@@ -9,9 +7,7 @@
 
 ----------------- Bugs fixed -----------
 
-1. Battle Reports
-    1. Slider, der die aktuelle Kampfrunde anzeigt, funktioniert wieder
-    1.
+1. Battle Reports - Der Kampfrunden-Slider zeigt die aktuelle Kampfrunde wieder an
 
 ----------------- next steps -----------
 
