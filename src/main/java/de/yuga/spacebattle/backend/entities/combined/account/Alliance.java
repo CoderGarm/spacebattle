@@ -19,8 +19,6 @@ import java.util.Set;
         @NamedQuery(name = "Alliance.findByCodeExact", query = "SELECT a.id FROM Alliance a WHERE UPPER(a.code) = UPPER(:code)"),
         @NamedQuery(name = "Alliance.findAllWithMembers", query = "SELECT DISTINCT a FROM Alliance a LEFT JOIN FETCH a.members"),
         @NamedQuery(name = "Alliance.findByIdWithMembers", query = "SELECT a FROM Alliance a LEFT JOIN FETCH a.members WHERE a.id = :idAlliance"),
-        @NamedQuery(name = "Alliance.findByIdWithApplications", query = "SELECT a FROM Alliance a LEFT JOIN FETCH a.applications WHERE a.id = :idAlliance"),
-        @NamedQuery(name = "Alliance.hasOpenApplication", query = "SELECT a FROM Alliance a LEFT JOIN a.applications app WHERE app.id = :idUser"),
 })
 @Entity
 @Table(name = "alliance")
@@ -45,11 +43,9 @@ public class Alliance extends AbstractEntityKey {
     private final Set<User> members = new HashSet<>();
 
     @Nonnull
-    @ManyToMany
-    @JoinTable(name = "applications",
-            joinColumns = @JoinColumn(name = "idAlliance"),
-            inverseJoinColumns = @JoinColumn(name = "idUser"))
-    private final Set<User> applications = new HashSet<>();
+    @OneToMany
+    @JoinColumn(name = "idAlliance")
+    private final Set<AllianceApplication> applications = new HashSet<>();
 
     @Nonnull
     @NotNull
@@ -106,7 +102,7 @@ public class Alliance extends AbstractEntityKey {
     }
 
     @Nonnull
-    public Set<User> getApplications() {
+    public Set<AllianceApplication> getApplications() {
         return applications;
     }
 

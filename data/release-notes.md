@@ -1,17 +1,17 @@
 ----------------- Features -------------
 
-1. Systemkoordinaten abrufbar unter https://www.battleforhonor.de/api/public/resources/system-coordinates
-2. eMail-Verifizierung zwecks Passwortwechsel nun möglich
-3. Anmeldung ohne eMail-Adresse ebenfalls möglich
-4. Man kann jetzt sein Passwort wechseln
+1. Der Allianzen-Bereich ist jetzt sinnvoll benutzbar
 
 ----------------- Bugs fixed -----------
 
-1. Battle Reports - Der Kampfrunden-Slider zeigt die aktuelle Kampfrunde wieder an
-
 ----------------- next steps -----------
 
-todo. apply to alliance
+todo. kein alter Menüpunkt mehr ausgewählt
+
+todo. Exception per mail an webmaster
+todo. Userliste
+todo. restart backend
+todo. StarMap beim Download der Koordinaten?
 
 ----------------- bugs -----------------
 

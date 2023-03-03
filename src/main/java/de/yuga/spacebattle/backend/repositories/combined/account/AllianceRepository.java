@@ -17,12 +17,4 @@ public interface AllianceRepository extends CrudRepository<Alliance, Integer>, C
     @Nullable
     @Query(name = "Alliance.findByIdWithMembers")
     Alliance findWithMembers(@Param("idAlliance") final int idAlliance);
-
-    @Nullable
-    @Query(name = "Alliance.findByIdWithApplications")
-    Alliance findWithApplications(@Param("idAlliance") final int idAlliance);
-
-    @Nullable
-    @Query(name = "Alliance.hasOpenApplication")
-    Alliance hasOpenApplication(@Param("idUser") final int idUser);
 }

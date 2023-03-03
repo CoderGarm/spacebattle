@@ -32,6 +32,16 @@
         primary key (idAlliance)
     ) engine=InnoDB;
 
+    create table allianceApplication (
+       idAllianceApplication integer not null auto_increment,
+        applicationState varchar(255) not null,
+        idAlliance integer not null,
+        idUser integer not null,
+        idTickAppliedAt integer not null,
+        idTickDecidedAt integer,
+        primary key (idAllianceApplication)
+    ) engine=InnoDB;
+
     create table allowedMissiles (
        idLauncher integer not null,
         idMissile integer not null,
@@ -55,12 +65,6 @@
         idTranslatableName integer not null,
         idResearch integer not null,
         primary key (idAmmunitionModule)
-    ) engine=InnoDB;
-
-    create table applications (
-       idAlliance integer not null,
-        idUser integer not null,
-        primary key (idAlliance, idUser)
     ) engine=InnoDB;
 
     create table armor (
@@ -873,6 +877,26 @@
        foreign key (idFounder) 
        references user (idUser);
 
+    alter table allianceApplication 
+       add constraint FK1awqwgyqyd6ij150b4dwhoa8t 
+       foreign key (idAlliance) 
+       references alliance (idAlliance);
+
+    alter table allianceApplication 
+       add constraint FKibkneamgqu1yjkxmtn09gn7ct 
+       foreign key (idUser) 
+       references user (idUser);
+
+    alter table allianceApplication 
+       add constraint FK90anukwo3tqyrbwum7veaglgp 
+       foreign key (idTickAppliedAt) 
+       references tick (idTick);
+
+    alter table allianceApplication 
+       add constraint FKn3vxrm2s3ytx9ivggr9fflnqh 
+       foreign key (idTickDecidedAt) 
+       references tick (idTick);
+
     alter table allowedMissiles 
        add constraint FKhp9tc55hay9lojn6swpo6q4kv 
        foreign key (idMissile) 
@@ -912,16 +936,6 @@
        add constraint FKi9oa4xlh6y6c8nd9e25c8jlbq 
        foreign key (idResearch) 
        references research (idResearch);
-
-    alter table applications 
-       add constraint FKi0rvtwqjg2c06lvk50e4gakfa 
-       foreign key (idUser) 
-       references user (idUser);
-
-    alter table applications 
-       add constraint FKpa65pbe483fu0uj4mwnwahn6w 
-       foreign key (idAlliance) 
-       references alliance (idAlliance);
 
     alter table armor 
        add constraint FK10dhr7h3pkps3d7u22q2pwpgc 
@@ -1763,7 +1777,7 @@
        foreign key (idResearch) 
        references research (idResearch);
 
-INSERT INTO user (createdAt, email, gameUserRoles, password, userRole, username) VALUES ('2022-08-24 20:29:15.693', 'mail', 'ALLIANCE_ADMIN', '49675c186a6c1b1d10cb800e2792ebabd6abd8597bcef2fcaa99bfc813a6f1868b7dc91812ac66718c4fefd59daafa6a658901b7356b3b65fa5528419a93a7a4', 'ADMIN', 'Flashkid');
+INSERT INTO user (createdAt, email, gameUserRoles, password, userRole, username) VALUES ('2022-08-24 20:29:15.693', 'mail', 'FORUM_WRITE|WIKI_ADMIN|FORUM_READ|ALLIANCE_ADMIN', '49675c186a6c1b1d10cb800e2792ebabd6abd8597bcef2fcaa99bfc813a6f1868b7dc91812ac66718c4fefd59daafa6a658901b7356b3b65fa5528419a93a7a4', 'ADMIN', 'Flashkid');
 
 
 INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('en', 'Welcome to the battlefield', 'WELCOME_MESSAGE', null);
@@ -2068,3 +2082,4 @@ insert into dbPatch values (null, now(), 'add transportation', '0.0.7-1');
 insert into dbPatch values (null, now(), 'add commissioning to health state snap', '0.0.7-2');
 insert into dbPatch values (null, now(), 'drop needs repair flag from fleet', '0.0.9-1');
 insert into dbPatch values (null, now(), 'adding password change and flags', '0.0.12-1');
+insert into dbPatch values (null, now(), 'enrich alliance application', '0.0.13-1');

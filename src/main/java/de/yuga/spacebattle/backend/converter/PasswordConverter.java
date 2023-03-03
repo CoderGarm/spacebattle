@@ -7,7 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
@@ -25,9 +24,13 @@ public class PasswordConverter implements AttributeConverter<String, String>, Pa
      */
     @Nonnull
     @Override
-    public String convertToDatabaseColumn(@Nullable final String password) {
+    public String convertToDatabaseColumn(@Nonnull final String password) {
         if (StringUtils.isBlank(password)) {
             throw new NotifyWebUserException("Nothing to hash here.");
+        }
+        if (password.length() > 30) {
+            // do not change a hashed password
+            return password;
         }
         return new DigestUtils("SHA3-512").digestAsHex(password);
     }

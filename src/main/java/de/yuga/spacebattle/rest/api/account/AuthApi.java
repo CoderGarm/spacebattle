@@ -65,21 +65,21 @@ public class AuthApi {
     public static final String ENDPOINT = "auth";
 
     private static final String NAME_PLACEHOLDER = "NAME_PLACEHOLDER";
-    private static final String WELCOME_MESSAGE = "Hello " + NAME_PLACEHOLDER + ",<br>" +
-            "<br>" +
-            "a happy welcome to the honorverse.<br>" +
-            "<br>" +
-            "I want to purpose that you have a look at the planet you conquered from the pirates.<br>" +
-            "You can replay the battle at the journals section to see the glorious victory of your admirals and crews.<br>" +
-            "<br>" +
-            "In order to improve the conditions for your colonists you should have a look if you can build some houses or hospitals.<br>" +
-            "But keep in mind, you can only house as many persons as you can support.<br>" +
-            "<br>" +
-            "If you noticed, the universe is a hostile place so it could be a good idea to build a shipyard and build ships to control your space.<br>" +
-            "<br>" +
-            "<br>" +
-            "Sincerely and with the best wishes,<br>" +
-            "Flashkid<br>";
+    private static final String WELCOME_MESSAGE = "Hello " + NAME_PLACEHOLDER + ",  " +
+            "  " +
+            "a happy welcome to the honorverse.  " +
+            "  " +
+            "I want to purpose that you have a look at the planet you conquered from the pirates.  " +
+            "You can replay the battle at the journals section to see the glorious victory of your admirals and crews.  " +
+            "  " +
+            "In order to improve the conditions for your colonists you should have a look if you can build some houses or hospitals.  " +
+            "But keep in mind, you can only house as many persons as you can support.  " +
+            "  " +
+            "If you noticed, the universe is a hostile place so it could be a good idea to build a shipyard and build ships to control your space.  " +
+            "  " +
+            "  " +
+            "Sincerely and with the best wishes,  " +
+            DEFEATED_OPPONENT + "  ";
 
     @Nonnull
     private final UserService userService;

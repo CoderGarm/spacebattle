@@ -242,9 +242,7 @@ public class User extends AbstractEntityKey {
         return alliance;
     }
 
-    public void setAlliance(@Nonnull final Alliance alliance) {
-        Preconditions.checkNotNull(alliance, "alliance shouldn't be null!");
-
+    public void setAlliance(@Nullable final Alliance alliance) {
         this.alliance = alliance;
     }
 
