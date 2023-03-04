@@ -7,7 +7,6 @@ import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.combat.dto.RangeDefinition;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
-import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.misc.Deletable;
@@ -23,11 +22,10 @@ import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EModuleType;
+import de.yuga.spacebattle.backend.enums.ETechnologyType;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
-import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
-import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
@@ -410,15 +408,15 @@ public class Fleet extends Operationable {
         return new CounterMissileWeaponry(alignedFittings);
     }
 
-    @Nonnull
-    public Velocity getMaxVelocity(@Nonnull final EModuleType propulsion) {
-        Preconditions.checkNotNull(propulsion, "propulsion shouldn't be null!");
-        Preconditions.checkArgument(propulsion == EModuleType.PROPULSION || propulsion == EModuleType.FTLPROPULSION, "propulsion must be propulsion type!");
-
-        final Acceleration acceleration = getAccelerationFor(propulsion);
-        final EHyperBand hyperBand = acceleration.getHyperBand();
-        final BigDecimal vesselTopSpeed = hyperBand.getEffectiveTopSpeed();
-        return new Velocity(vesselTopSpeed, EDistanceMetric.M, ETimeMetric.SECOND);
+    public ETechnologyType getRestrictingTechnologyType() {
+        return getAliveShips()
+                .stream()
+                .filter(Operationable::isOperational)
+                .map(s -> s.getShipClass().getPropulsion())
+                .filter(Objects::nonNull)
+                .map(Propulsion::getTechnologyType)
+                .reduce((o1, o2) -> o1.getMaxVelocitySOL() < o2.getMaxVelocitySOL() ? o1 : o2)
+                .orElse(ETechnologyType.CIVIL);
     }
 
     public boolean isNeedsRepair() {

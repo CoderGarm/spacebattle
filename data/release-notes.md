@@ -1,17 +1,22 @@
------------------ Features -------------
+----------------- Features -------------  
+Thema: NPC, Handel und Missionen
 
-1. Der Allianzen-Bereich ist jetzt sinnvoll benutzbar
+Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
+
+todo. Antriebsleistung in Bezug zur Masse setzen
+todo. Hyperband abhängig vom Zusammenpassen der HullTypes  
+todo. Beschleunigung, Maximalgeschwindigkeit (zivil, militärisch) anzeigen, Zeit des Erreichens von v_max
 
 ----------------- Bugs fixed -----------
 
------------------ next steps -----------
+----------------- next steps -----------  
+Thema: NPC, Handel und Missionen
 
-todo. kein alter Menüpunkt mehr ausgewählt
-
-todo. Exception per mail an webmaster
-todo. Userliste
-todo. restart backend
-todo. StarMap beim Download der Koordinaten?
+todo. Bestenliste mit Punkten pro Leistungsfeld  
+todo. Marktplatz und NPC-Handelssystem  
+todo. interne Sektoraufteilung der Map nach Entfernung um wirtschaftliche Leistungszentren  
+todo. NPC-Konzept für Systeme und systemfreie NPC (Piraten, fliegende Händler ...)  
+todo. Konzept für Missionen und NPC-Missionen
 
 ----------------- bugs -----------------
 
@@ -20,13 +25,18 @@ todo. StarMap beim Download der Koordinaten?
 1. Die Darstellung des Kampfes aufhübschen.
 2. Aktuell kann man nur 1on1 kämpfen, das muss aufgebohrt werden
 3. Population balancing
-4. Kleinkram in der UI, der aber wie das angular upgrade "nichts neues" bringt und auch nur nice-to-have ist
 5. Das man Kolonisierungen planen kann
 6. Rework der Flottenbewegungen (nice to have)
 7. mich den spannenden Aufgaben widmen: ein NPC-System, Missionen, simulierte Handelsflotten, Piraten und sowas (multi-combat wäre wohl sehr sinnvoll -> Darstellung des Kampfes
    muss erkennbaren Mehrwert bringen)
 8. Änderungen in der Spielmechanik, z.B. dass die Leistung des Antriebs im Verhältnis zur Schiffsmasse steht -> erneutes Rebalancing der Module
 9. mich endlich mal um die "corporate identity" kümmern, also eigene Icons, Symbole, Benennungen usw erzeugen
+
+todo. kein alter Menüpunkt mehr ausgewählt wenn man sich wieder einloggt
+todo. Exception per mail an webmaster
+todo. Userliste
+todo. restart backend
+todo. StarMap beim Download der Koordinaten?
 
 todo. combat aufhübschen and more infos
 
@@ -40,6 +50,8 @@ todo. use context menu for star map?
 
 todo. spinner abbrechen
 
+todo. wormholes (see mapdata.js file)
+
 todo. fleets in motion needs nav point icon
 
 todo. population balancing broken
@@ -47,7 +59,6 @@ todo. population balancing broken
 todo. scroll issue if the last page forbids overflow
 
 todo. switch to "calculate orbit in backend" while travelling
-
 
 todo. combat with more then 2 opponents
 todo. inoperational flotten zerstören bei sieg oder beute?
@@ -62,19 +73,14 @@ todo. Pläne von wo nach wo (Lieferzeit) festlegen
 todo. piraten plus Flotten zur Systemsicherung nutzen
 todo. anti-piraterie-mission schützt vor Diebstahl aus Orbit
 
-
-
-todo. wiki: welcome message nur durch admin editable
 todo. wiki: list of contents (dynamically from markdown headlines)
 todo. wiki: images and position
-    - file size?
-    - stored in?
-todo. wiki: links between articles?
-    - every article know their links and pass them by a keyword?
 
+- file size?
+- stored in?
+  todo. wiki: links between articles?
+- every article know their links and pass them by a keyword?
 
-
-todo. bewegungsgeschwindigkeit von Masse abhängig machen
 
 todo. support module zum reduzieren der benötigten crew
 
@@ -87,10 +93,6 @@ todo. unify getLink for icons
 todo. unify mat-icons for purposes
 
 todo. sorting für resourcen, gebäudetype
-
-
-
-
 
 todo. Wurmlöcher
 

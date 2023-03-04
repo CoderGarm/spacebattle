@@ -514,6 +514,7 @@
        idPropulsion integer not null auto_increment,
         techLevel varchar(255) not null,
         hullType varchar(255) not null,
+        technologyType varchar(255) not null,
         useCapacity integer not null,
         effectValue integer not null,
         hyperBand varchar(255),

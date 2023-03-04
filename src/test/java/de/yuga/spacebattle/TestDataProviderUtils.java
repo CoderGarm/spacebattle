@@ -42,6 +42,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.TestUtils.setId;
+import static de.yuga.spacebattle.backend.enums.ETechnologyType.MILITARY;
 
 public class TestDataProviderUtils {
 
@@ -224,8 +225,7 @@ public class TestDataProviderUtils {
         Map<EEducationType, Long> militaryCrew = militaryCrew();
 
         Armor armor = createArmor("Armor Mk I", "An armor", 5, 3000, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        //Propulsion propulsion = createPropulsion("Speed Mk I", "A drive", 5, 500,ETechLevel.TECH_I,EHyperBand.NONE, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        Propulsion propulsionFTL = createPropulsion("FTL Speed Mk I", "A FTL drive", 10, effectFTLValue, ETechLevel.TECH_I, EHyperBand.DELTA, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Propulsion propulsionFTL = createPropulsion("FTL Speed Mk I", "A FTL drive", 10, effectFTLValue, ETechLevel.TECH_I, EHyperBand.DELTA, MILITARY, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         ElectronicWarfare electronicWarfare = createElectronicWarfare("Scanner Mk I", "A scanner", 5, 1000, dis(1000000, EDistanceMetric.M), ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         Sidewall sidewall = createSidewall("Shield Mk I", "A shield", 5, 15000, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
 
@@ -463,13 +463,15 @@ public class TestDataProviderUtils {
                                               final int value,
                                               final ETechLevel techLevel,
                                               @Nonnull final EHyperBand hyperBand,
+                                              @Nonnull final ETechnologyType technologyType,
                                               @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(hyperBand, "hyperBand shouldn't be null!");
+        Preconditions.checkNotNull(technologyType, "technologyType must not be empty");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        final Propulsion propulsion = new Propulsion(name, description, research(), useCapacity, value, EHullType.CA, techLevel, hyperBand, crewRequirement);
+        final Propulsion propulsion = new Propulsion(name, description, research(), useCapacity, value, EHullType.CA, techLevel, hyperBand, technologyType, crewRequirement);
         setId(propulsion);
         return propulsion;
     }

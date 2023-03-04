@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.dto.physics.Time;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.enums.EModuleType;
+import de.yuga.spacebattle.backend.enums.ETechnologyType;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
@@ -15,24 +16,10 @@ import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 
 import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC_HU;
 
 public class NavigationCalculator {
-
-    private final static MathContext MATH_CONTEXT_MORE_PRECISION = new MathContext(4, RoundingMode.DOWN);
-
-    /**
-     * The gravitation earth constant value
-     */
-    public static final BigDecimal GRAVITATION_EARTH = new BigDecimal("0.98");
-
-    /**
-     * The maximum percentage of the speed of light which can be reached by a star ship.
-     */
-    public static final BigDecimal MAX_PERCENTAGE_SPEED_OF_LIGHT = BigDecimal.valueOf(0.8);
 
     private NavigationCalculator() {
     }
@@ -69,9 +56,10 @@ public class NavigationCalculator {
         // s = 0,5 · a · t²
         // v = a · t
         // s = 0,5 · v · t
+        final ETechnologyType restrictingTechnologyType = fleet.getRestrictingTechnologyType();
         final Acceleration acceleration = fleet.getAccelerationFor(propulsionType);
         final EHyperBand hyperBand = acceleration.getHyperBand();
-        final BigDecimal vesselTopSpeed = hyperBand.getEffectiveTopSpeed();
+        final BigDecimal vesselTopSpeed = hyperBand.getEffectiveTopSpeed(restrictingTechnologyType);
 
         // calculate acceleration to top speed
         final BigDecimal accelerationValue = acceleration.convertToMetric(EAccelerationMetric.MS2);

@@ -322,14 +322,16 @@ public class ModuleService {
                                        @Nonnull final EHullType hullType,
                                        @Nonnull final ETechLevel techLevel,
                                        @Nonnull final EHyperBand hyperBand,
+                                       @Nonnull final ETechnologyType technologyType,
                                        @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
         Preconditions.checkNotNull(hyperBand, "hyperBand shouldn't be null!");
+        Preconditions.checkNotNull(technologyType, "technologyType must not be empty");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        return propulsionRepository.save(new Propulsion(name, description, unlockedThrough, useCapacity, value, hullType, techLevel, hyperBand, crewRequirement));
+        return propulsionRepository.save(new Propulsion(name, description, unlockedThrough, useCapacity, value, hullType, techLevel, hyperBand, technologyType, crewRequirement));
     }
 
     @Nonnull

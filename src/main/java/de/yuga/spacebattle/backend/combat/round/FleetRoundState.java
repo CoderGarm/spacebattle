@@ -20,6 +20,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfar
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.enums.EModuleType;
+import de.yuga.spacebattle.backend.enums.ETechnologyType;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
@@ -426,16 +427,30 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         Preconditions.checkArgument((eModuleType == EModuleType.FTLPROPULSION || eModuleType == EModuleType.PROPULSION),
                 "EModuleType must be kind of propulsion.");
 
-        final Integer minAcceleration = getFightingWarShips()
+        final int lowestAcceleration = getLowestAccelerationValue();
+
+        final EAccelerationMetric accelerationMetric = eModuleType == EModuleType.PROPULSION ? EAccelerationMetric.G : EAccelerationMetric.C;
+        final EHyperBand activeBand = eModuleType == EModuleType.PROPULSION ? EHyperBand.NONE : getLowestHyperBand();
+        return new Acceleration(BigDecimal.valueOf(lowestAcceleration), accelerationMetric, activeBand);
+    }
+
+    private int getLowestAccelerationValue() {
+        return getFightingWarShips()
                 .map(s -> s.getModule(Propulsion.class))
                 .filter(Objects::nonNull)
                 .map(BaseModuleWithEffectValue::getEffectValue)
                 .min(Integer::compareTo)
                 .orElse(0);
+    }
 
-        final EAccelerationMetric accelerationMetric = eModuleType == EModuleType.PROPULSION ? EAccelerationMetric.G : EAccelerationMetric.C;
-        // todo set hyper band for ftl
-        return new Acceleration(BigDecimal.valueOf(minAcceleration), accelerationMetric, EHyperBand.NONE);
+    @Nonnull
+    private EHyperBand getLowestHyperBand() {
+        return getFightingWarShips()
+                .map(s -> s.getModule(Propulsion.class))
+                .filter(Objects::nonNull)
+                .map(Propulsion::getHyperBand)
+                .reduce((o1, o2) -> o1.getVelocityMultiplier() < o2.getVelocityMultiplier() ? o1 : o2)
+                .orElse(EHyperBand.NONE);
     }
 
     @Nonnull
@@ -443,9 +458,15 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         Preconditions.checkNotNull(propulsion, "propulsion shouldn't be null!");
         Preconditions.checkArgument(propulsion == EModuleType.PROPULSION || propulsion == EModuleType.FTLPROPULSION, "propulsion must be propulsion type!");
 
-        final Acceleration acceleration = getAccelerationFor(propulsion);
-        final EHyperBand hyperBand = acceleration.getHyperBand();
-        final BigDecimal vesselTopSpeed = hyperBand.getEffectiveTopSpeed();
+        final ETechnologyType restrictingTechnologyType = getFightingWarShips()
+                .map(s -> s.getModule(Propulsion.class))
+                .filter(Objects::nonNull)
+                .map(Propulsion::getTechnologyType)
+                .reduce((o1, o2) -> o1.getMaxVelocitySOL() < o2.getMaxVelocitySOL() ? o1 : o2)
+                .orElse(ETechnologyType.CIVIL);
+
+        final EHyperBand hyperBand = getLowestHyperBand();
+        final BigDecimal vesselTopSpeed = hyperBand.getEffectiveTopSpeed(restrictingTechnologyType);
         return new Velocity(vesselTopSpeed, EDistanceMetric.M, ETimeMetric.SECOND);
     }
 }

@@ -69,7 +69,7 @@ public class ReleasedVolley extends CombatRoundKey {
 
         final Map<WarShip, List<Long>> appliedDamage = volley.getAppliedDamage();
         final List<BeamState> firedShots = volley.getFiredShots();
-        /*fixme notice the warship's potion of the salvo */
+        /*todo notice the warship's potion of the salvo */
 
         this.weaponType = EWeaponType.BEAM;
         this.actor = volley.getActor();
@@ -83,7 +83,7 @@ public class ReleasedVolley extends CombatRoundKey {
         super(volley.getCombatRound(), volley.getCombatSubPhase());
 
         final Map<WarShip, List<Long>> appliedDamage = volley.getAppliedDamage();
-        /*fixme notice the warship's potion of the salvo */
+        /*todo notice the warship's potion of the salvo */
 
         this.weaponType = EWeaponType.MISSILE;
         this.actor = volley.getActor();

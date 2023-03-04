@@ -26,7 +26,7 @@ public enum EHullType implements HasIconName {
     DN("DN", false, false, "frigate", "dreadnought (5 to 6.5 million tons)"),
     CLAC("CLAC", false, false, "frigate", "LAC carrier (6.2 million tons)"),
     SD("SD", false, false, "frigate", "super dreadnought (7 to 9 million tons)"),
-    SDP("SD(P)", false, false, "frigate", "super dreadnought pod-layer (8.5 to 8.7 million tons)"),
+    SDP("SD(P)", true, false, "frigate", "super dreadnought pod-layer (8.5 to 8.7 million tons)"),
 
     //Auxiliary Warship
     AE("AE", false, true, "satellite", "ammunition ship"),

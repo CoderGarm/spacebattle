@@ -27,7 +27,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC_HU;
-import static de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator.MAX_PERCENTAGE_SPEED_OF_LIGHT;
 import static de.yuga.spacebattle.backend.combat.enums.EMovementType.*;
 import static de.yuga.spacebattle.backend.combat.round.CombatRound.COMBAT_ROUND;
 import static de.yuga.spacebattle.backend.enums.EWeaponAlignment.BROADSIDE;
@@ -361,7 +360,7 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         Preconditions.checkNotNull(acceleration, "acceleration shouldn't be null!");
         Preconditions.checkNotNull(travelDuration, "travelDuration shouldn't be null!");
 
-        final Velocity topSpeed = Velocity.SOL.multiply(MAX_PERCENTAGE_SPEED_OF_LIGHT);
+        final Velocity topSpeed = Velocity.SOL.multiply(BigDecimal.valueOf(agent.getRestrictingTechnologyType().getMaxVelocitySOL()));
 
         final int roundsToTravel = travelDuration.intValue() / CombatRound.COMBAT_ROUND_DURATION;
         // calculate desired direction by origin and destination
@@ -398,11 +397,6 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         Preconditions.checkNotNull(velocity, "velocity shouldn't be null!");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
         Preconditions.checkNotNull(target, "target shouldn't be null!");
-
-        final boolean present = courseOrderElements.stream().anyMatch(e -> e.getCombatRound().equals(combatRound));
-        if (present) {
-            int br = 0;
-        }
 
         courseOrderElements.add(new CourseOrderElement(combatRound, movementType, velocity, destination, target));
     }

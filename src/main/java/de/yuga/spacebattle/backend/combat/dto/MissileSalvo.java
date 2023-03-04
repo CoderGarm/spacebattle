@@ -159,7 +159,7 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
                                 return;
                             }
 
-                            final WarShip warShip = w.getWarShip(); /*fixme notice the warship's potion of the salvo */
+                            final WarShip warShip = w.getWarShip(); /*todo notice the warship's potion of the salvo */
 
                             // setting missiles to the salvo
                             if (remainingShots >= amountOfLauncher) {
