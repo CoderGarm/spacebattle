@@ -148,6 +148,7 @@ public class TickService {
 
     @PostConstruct
     private void load() {
+
         this.today = getToday();
     }
 
@@ -831,11 +832,13 @@ public class TickService {
         return tickRepository.findById(idHull).orElse(null);
     }
 
+    /**
+     * Is non-null after initialization.
+     */
     @Nonnull
+    @SuppressWarnings("DataFlowIssue")
     public Tick getToday() {
-        final Tick latest = tickRepository.getLatest();
-        Preconditions.checkNotNull(latest, "latest must not be empty");
-        return latest;
+        return tickRepository.getLatest();
     }
 
     public boolean isTicking() {

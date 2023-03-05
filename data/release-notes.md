@@ -3,7 +3,7 @@ Thema: NPC, Handel und Missionen
 
 Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
-Sonstiges:
+Gameplay:
 
 1. Auf der StarMap verändert sich nun der Cursor, wenn man etwas anklicken kann.
 
@@ -11,11 +11,17 @@ todo. Beschleunigung, Maximalgeschwindigkeit (zivil, militärisch) in Bezug zum 
 todo. Antriebsleistung in Bezug zur Masse setzen
 todo. Hyperband abhängig vom Zusammenpassen der HullTypes
 
+todo. andere module auf NamedTechLevel umstellen
+todo. Forschungen mit NamedTechLevel ausrüsten?
+
 ----------------- Bugs fixed -----------
 
 1. Der Bau-Button in der Werft war fälschlicherweise disabled.
 
 ----------------- next steps -----------  
+todo. webmaster mail at contact section
+todo. changelog mit highlight auf versions-button
+
 Thema: NPC, Handel und Missionen
 
 todo. Bestenliste mit Punkten pro Leistungsfeld  

@@ -188,8 +188,8 @@ public class ShipClass extends Deletable {
         if (hull != null) {
             updateCosts(clonedDeposit, supportTypeToModule, hull.getCosts());
         }
-        if (propulsion != null) {
-            updateCosts(clonedDeposit, supportTypeToModule, propulsion.getCosts());
+        if (propulsion != null && hull != null) {
+            updateCosts(clonedDeposit, supportTypeToModule, propulsion.getCosts(hull));
         }
         if (armor != null) {
             updateCosts(clonedDeposit, supportTypeToModule, armor.getCosts());
@@ -639,7 +639,7 @@ public class ShipClass extends Deletable {
                 usedCapacity += getAmmunitionFittings().stream()
                         .map(AmmunitionFitting::calculateUsedCapacity)
                         .reduce(0, Integer::sum);
-                usedCapacity += propulsion != null ? propulsion.getUseCapacity() : 0;
+                usedCapacity += (propulsion != null && hull != null) ? propulsion.getUseCapacity(hull) : 0;
                 usedCapacity += armor != null ? armor.getUseCapacity() : 0;
                 usedCapacity += sidewall != null ? sidewall.getUseCapacity() : 0;
                 usedCapacity += electronicWarfare != null ? electronicWarfare.getUseCapacity() : 0;
@@ -687,7 +687,17 @@ public class ShipClass extends Deletable {
                 BigDecimal.valueOf(-1.275354).scaleByPowerOfTen(-31)
         );
 
-        final BigDecimal x = BigDecimal.valueOf(getHull().getTonnage()); /* fixme currently no influence from the tonnage */
+        final BigDecimal x = BigDecimal.valueOf(getHull().getTonnage());
+        /* fixme
+            currently no influence from the tonnage:, solve by
+                - research hyper band -> is enum
+                - research efficiency improvement -> is running research level
+                - researchable base-propulsion module by tech level -> changes effect value -> acceleration
+                - prop-module costs x% of the hull, including construction capacity
+                - user chooses hyperband -> cost change (e.g. NONE to ALPHA +80% CC)
+                - user chooses CIVIL vs MILITARY
+                - prop will be property of ship class as "prop tech level, prop hyper band, prop technology type -> is present by default
+        */
         BigDecimal result = a;
         for (int i = 0; i < paramList.size(); i++) {
             final BigDecimal coefficient = paramList.get(i);

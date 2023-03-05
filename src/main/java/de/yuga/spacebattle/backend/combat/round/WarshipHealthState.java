@@ -73,6 +73,9 @@ public class WarshipHealthState implements Cloneable {
     @Nonnull
     private MissileAmmunitionState missileAmmunitionState;
 
+    @Nonnull
+    private final Propulsion propulsion;
+
     public WarshipHealthState(@Nonnull final WarShip warShip) {
         Preconditions.checkNotNull(warShip, "warShip shouldn't be null!");
 
@@ -80,11 +83,11 @@ public class WarshipHealthState implements Cloneable {
         final ShipClass shipClass = warShip.getShipClass();
         final Armor armor = shipClass.getArmor();
         final Sidewall sidewall = shipClass.getSidewall();
-        final Propulsion propulsion = shipClass.getPropulsion();
+        assert shipClass.getPropulsion() != null;
+        this.propulsion = shipClass.getPropulsion();
         final ElectronicWarfare electronicWarfare = shipClass.getElectronicWarfare();
         this.modules.add(armor);
         this.modules.add(sidewall);
-        this.modules.add(propulsion);
         this.modules.add(electronicWarfare);
 
         final de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState healthState = warShip.getWarshipHealthState();
@@ -489,5 +492,10 @@ public class WarshipHealthState implements Cloneable {
 
     private double getFraction(final long state, final long referenceState) {
         return 1 - ((double) state / (double) referenceState);
+    }
+
+    @Nonnull
+    public Propulsion getPropulsion() {
+        return propulsion;
     }
 }

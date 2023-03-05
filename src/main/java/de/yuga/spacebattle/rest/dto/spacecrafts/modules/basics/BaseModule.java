@@ -50,8 +50,8 @@ public class BaseModule {
 
     public BaseModule(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule baseModule,
                       @Nonnull final String languageCode) {
-        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(baseModule, "baseModule shouldn't be null!");
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
 
         this.idModule = baseModule.getId();
         this.name = baseModule.getName(languageCode);

@@ -32,6 +32,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.enums.*;
@@ -403,63 +404,85 @@ public class MasterOfTheUniverseService {
     }
 
     private void createPropulsions() {
-        Research unlockPropulsion = research("Speed", "The Speed research researches sub light ...", 1, ETechLevel.TECH_I, null);
-        Research unlockFTLPropulsion = research("FTL Speed", "The FTL Speed research researches FTL ...", 1, ETechLevel.TECH_I, null);
-        final Research freighterFTL = unlockFTLPropulsion;
-        Propulsion propulsionFTL = moduleService.createPropulsion("Light cruiser FTL drive Mk I", "The light cruiser FTL drive.", unlockFTLPropulsion, 7, 558, EHullType.CL, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        propulsionFTL.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Leichte Kreuzer Überlichtantrieb Mk I");
-        propulsionFTL.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für leichte Kreuzer.");
-        moduleService.save(propulsionFTL);
+        Research research = research("Impeller drive", "The phased array gravity drive, more commonly known as the impeller drive, was the preeminent sub-light propulsion mechanism for space-faring vessels of the post Diaspora era.", 1, ETechLevel.TECH_I, null);
+        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Impellerantrieb");
+        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Ein reaktionsmittelfreier Unterlichtantrieb, der auf der Beeinflussung von Gravitation basiert.");
+        researchService.save(research);
 
-        Propulsion propulsion = moduleService.createPropulsion("Light attack craft sub-light drive Mk I", "LAC drive", unlockPropulsion, 2, 558, EHullType.LAC, ETechLevel.TECH_I, EHyperBand.NONE, ETechnologyType.MILITARY, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Unterlichtantrieb für leichte Angriffsboote");
-        propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Unterlichtantrieb für leichte Angriffsboote.");
-        moduleService.save(propulsion);
+        final NamedTechLevel impellerDrive = moduleService.createBaseModule("Impeller drive",
+                "The phased array gravity drive, more commonly known as the impeller drive, was the preeminent sub-light propulsion mechanism for space-faring vessels of the post Diaspora era.", ETechLevel.TECH_I, Propulsion.class);
+        impellerDrive.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Impellerantrieb");
+        impellerDrive.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Ein reaktionsmittelfreier Unterlichtantrieb, der auf der Beeinflussung von Gravitation basiert.");
+        moduleService.save(impellerDrive);
 
-        propulsion = moduleService.createPropulsion("Corvette FTL drive Mk I", "Corvette FTL drive", unlockFTLPropulsion, 3, 558, EHullType.VT, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Korvetten");
-        propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Korvetten.");
-        moduleService.save(propulsion);
+        moduleService.createPropulsion(impellerDrive, research, 558, 7, EHyperBand.NONE, ETechnologyType.CIVIL);
+        moduleService.createPropulsion(impellerDrive, research, 558, 8, EHyperBand.NONE, ETechnologyType.MILITARY);
 
-        propulsion = moduleService.createPropulsion("Frigate FTL drive Mk I", "Frigate FTL drive", unlockFTLPropulsion, 5, 558, EHullType.FG, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Fregatten");
-        propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Fregatten.");
-        moduleService.save(propulsion);
+        final NamedTechLevel warshawskiSail = moduleService.createBaseModule("Warshawski-Sail",
+                "The Warshawski sail was a gravitic technology, and a key component to interstellar travel in the Post Diaspora era. Allows faster-than-light travel.", ETechLevel.TECH_I, Propulsion.class);
+        warshawskiSail.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Warshawski-Segel");
+        warshawskiSail.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Segel sind Teil des Impellerantriebs eines Schiffes und werden von den Alpha-Emittern erzeugt. Sie ermöglichen die Reise mit scheinbarer Überlichtgeschwindigkeit.");
+        moduleService.save(warshawskiSail);
 
-        unlockFTLPropulsion = research("Cruiser FTL drive", "The cruiser FTL drive research.", 1, ETechLevel.TECH_I, unlockFTLPropulsion);
-        propulsion = moduleService.createPropulsion("Cruiser FTL drive Mk I", "Cruiser FTL drive", unlockFTLPropulsion, 9, 558, EHullType.CA, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Kreuzer");
-        propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Kreuzer.");
-        moduleService.save(propulsion);
+        research = research("Warshawski-Sail " + EHyperBand.ALPHA.name(), "The Warshawski sail was a gravitic technology, and a key component to interstellar travel in the Post Diaspora era. Allows faster-than-light travels at the " + EHyperBand.ALPHA.name() + " band.", 1, ETechLevel.TECH_I, research);
+        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Warshawski-Segel " + EHyperBand.ALPHA.name());
+        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Segel sind Teil des Impellerantriebs eines Schiffes und werden von den Alpha-Emittern erzeugt, es handelt sich um zwei leicht gewölbte, kreisförmige Felder aus Gravitationsenergie, die im rechten Winkel zur Mittschiffslinie stehen.");
+        researchService.save(research);
 
-        unlockFTLPropulsion = research("Battlecruiser FTL drive", "The battlecruiser FTL drive research.", 1, ETechLevel.TECH_I, unlockFTLPropulsion);
-        propulsion = moduleService.createPropulsion("Battlecruiser FTL drive Mk I", "Battlecruiser FTL drive", unlockFTLPropulsion, 30, 558, EHullType.BC, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(L_CREW, EDepositType.COSTS));
-        propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Schlachtkreuzer");
-        propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Schlachtkreuzer.");
-        moduleService.save(propulsion);
+        moduleService.createPropulsion(warshawskiSail, research, 558, 13, EHyperBand.ALPHA, ETechnologyType.CIVIL);
+        moduleService.createPropulsion(warshawskiSail, research, 558, 16, EHyperBand.ALPHA, ETechnologyType.MILITARY);
 
-        unlockFTLPropulsion = research("Battleship FTL drive", "The battleship FTL drive research.", 1, ETechLevel.TECH_I, unlockFTLPropulsion);
-        propulsion = moduleService.createPropulsion("Battleship FTL drive Mk I", "Battleship FTL drive", unlockFTLPropulsion, 40, 558, EHullType.BB, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(XL_CREW, EDepositType.COSTS));
-        propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Schlachtschiffe");
-        propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Schlachtschiffe.");
-        moduleService.save(propulsion);
+        research = research("Warshawski-Sail " + EHyperBand.BETA.name(), "The Warshawski sail was a gravitic technology, and a key component to interstellar travel in the Post Diaspora era. Allows faster-than-light travels at the " + EHyperBand.ALPHA.name() + " band.", 1, ETechLevel.TECH_I, research);
+        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Warshawski-Segel " + EHyperBand.BETA.name());
+        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Segel sind Teil des Impellerantriebs eines Schiffes und werden von den Alpha-Emittern erzeugt, es handelt sich um zwei leicht gewölbte, kreisförmige Felder aus Gravitationsenergie, die im rechten Winkel zur Mittschiffslinie stehen.");
+        researchService.save(research);
 
-        unlockFTLPropulsion = research("Dreadnought FTL drive", "The dreadnought FTL drive research.", 1, ETechLevel.TECH_I, unlockFTLPropulsion);
-        propulsion = moduleService.createPropulsion("Dreadnought FTL drive Mk I", "Dreadnought FTL drive", unlockFTLPropulsion, 240, 558, EHullType.DN, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-        propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Dreadnoughts");
-        propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Dreadnoughts.");
-        moduleService.save(propulsion);
+        moduleService.createPropulsion(warshawskiSail, research, 558, 14, EHyperBand.BETA, ETechnologyType.CIVIL);
+        moduleService.createPropulsion(warshawskiSail, research, 558, 17, EHyperBand.BETA, ETechnologyType.MILITARY);
 
-        unlockFTLPropulsion = research("Superdreadnought FTL drive", "The superdreadnought FTL drive research.", 1, ETechLevel.TECH_I, unlockFTLPropulsion);
-        propulsion = moduleService.createPropulsion("Superdreadnought FTL drive Mk I", "Superdreadnought FTL drive", unlockFTLPropulsion, 320, 558, EHullType.SD, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-        propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Superdreadnoughts");
-        propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Superdreadnoughts.");
-        moduleService.save(propulsion);
+        research = research("Warshawski-Sail " + EHyperBand.GAMMA.name(), "The Warshawski sail was a gravitic technology, and a key component to interstellar travel in the Post Diaspora era.Allows faster-than-light travels at the " + EHyperBand.GAMMA.name() + " band.", 1, ETechLevel.TECH_I, research);
+        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Warshawski-Segel " + EHyperBand.GAMMA.name());
+        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Segel sind Teil des Impellerantriebs eines Schiffes und werden von den Alpha-Emittern erzeugt, es handelt sich um zwei leicht gewölbte, kreisförmige Felder aus Gravitationsenergie, die im rechten Winkel zur Mittschiffslinie stehen.");
+        researchService.save(research);
 
-        propulsion = moduleService.createPropulsion("Freighter FTL drive Mk I", "Freighter FTL drive", freighterFTL, 250, 558, EHullType.FR, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.CIVIL, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Frachter");
-        propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Frachter.");
-        moduleService.save(propulsion);
+        moduleService.createPropulsion(warshawskiSail, research, 558, 15, EHyperBand.GAMMA, ETechnologyType.CIVIL);
+        moduleService.createPropulsion(warshawskiSail, research, 558, 18, EHyperBand.GAMMA, ETechnologyType.MILITARY);
+
+        research = research("Warshawski-Sail " + EHyperBand.DELTA.name(), "The Warshawski sail was a gravitic technology, and a key component to interstellar travel in the Post Diaspora era.Allows faster-than-light travels at the " + EHyperBand.DELTA.name() + " band.", 1, ETechLevel.TECH_I, research);
+        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Warshawski-Segel " + EHyperBand.DELTA.name());
+        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Segel sind Teil des Impellerantriebs eines Schiffes und werden von den Alpha-Emittern erzeugt, es handelt sich um zwei leicht gewölbte, kreisförmige Felder aus Gravitationsenergie, die im rechten Winkel zur Mittschiffslinie stehen.");
+        researchService.save(research);
+
+        moduleService.createPropulsion(warshawskiSail, research, 558, 16, EHyperBand.DELTA, ETechnologyType.CIVIL);
+        moduleService.createPropulsion(warshawskiSail, research, 558, 19, EHyperBand.DELTA, ETechnologyType.MILITARY);
+
+        research = research("Warshawski-Sail " + EHyperBand.EPSILON.name(), "The Warshawski sail was a gravitic technology, and a key component to interstellar travel in the Post Diaspora era.Allows faster-than-light travels at the " + EHyperBand.EPSILON.name() + " band.", 1, ETechLevel.TECH_I, research);
+        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Warshawski-Segel " + EHyperBand.EPSILON.name());
+        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Segel sind Teil des Impellerantriebs eines Schiffes und werden von den Alpha-Emittern erzeugt, es handelt sich um zwei leicht gewölbte, kreisförmige Felder aus Gravitationsenergie, die im rechten Winkel zur Mittschiffslinie stehen.");
+        researchService.save(research);
+
+        moduleService.createPropulsion(warshawskiSail, research, 558, 20, EHyperBand.EPSILON, ETechnologyType.MILITARY);
+
+        research = research("Warshawski-Sail " + EHyperBand.ZETA.name(), "The Warshawski sail was a gravitic technology, and a key component to interstellar travel in the Post Diaspora era.Allows faster-than-light travels at the " + EHyperBand.ZETA.name() + " band.", 1, ETechLevel.TECH_I, research);
+        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Warshawski-Segel " + EHyperBand.ZETA.name());
+        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Segel sind Teil des Impellerantriebs eines Schiffes und werden von den Alpha-Emittern erzeugt, es handelt sich um zwei leicht gewölbte, kreisförmige Felder aus Gravitationsenergie, die im rechten Winkel zur Mittschiffslinie stehen.");
+        researchService.save(research);
+
+        moduleService.createPropulsion(warshawskiSail, research, 558, 21, EHyperBand.ZETA, ETechnologyType.MILITARY);
+
+        research = research("Warshawski-Sail " + EHyperBand.ETA.name(), "The Warshawski sail was a gravitic technology, and a key component to interstellar travel in the Post Diaspora era.Allows faster-than-light travels at the " + EHyperBand.ETA.name() + " band.", 1, ETechLevel.TECH_I, research);
+        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Warshawski-Segel " + EHyperBand.ETA.name());
+        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Segel sind Teil des Impellerantriebs eines Schiffes und werden von den Alpha-Emittern erzeugt, es handelt sich um zwei leicht gewölbte, kreisförmige Felder aus Gravitationsenergie, die im rechten Winkel zur Mittschiffslinie stehen.");
+        researchService.save(research);
+
+        moduleService.createPropulsion(warshawskiSail, research, 558, 22, EHyperBand.ETA, ETechnologyType.MILITARY);
+
+        research = research("Warshawski-Sail " + EHyperBand.THETA.name(), "The Warshawski sail was a gravitic technology, and a key component to interstellar travel in the Post Diaspora era.Allows faster-than-light travels at the " + EHyperBand.THETA.name() + " band.", 1, ETechLevel.TECH_I, research);
+        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Warshawski-Segel " + EHyperBand.THETA.name());
+        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Segel sind Teil des Impellerantriebs eines Schiffes und werden von den Alpha-Emittern erzeugt, es handelt sich um zwei leicht gewölbte, kreisförmige Felder aus Gravitationsenergie, die im rechten Winkel zur Mittschiffslinie stehen.");
+        researchService.save(research);
+
+        moduleService.createPropulsion(warshawskiSail, research, 558, 23, EHyperBand.THETA, ETechnologyType.MILITARY);
     }
 
     private void createEloka() {
@@ -1081,9 +1104,9 @@ public class MasterOfTheUniverseService {
         final Sidewall sidewall = sidewalls.stream().reduce((o1, o2) -> o2).orElse(null);
         final ElectronicWarfare electronicWarfare = electronicWarfares.stream().reduce((o1, o2) -> o2).orElse(null);
 
-        // take the one with ftl and best value
-        final List<Propulsion> propulsions = sortByValue(moduleService.findAllPropulsions().stream().filter(Propulsion::isFtlCapable).collect(Collectors.toList()), hullType);
-        final Propulsion propulsionFTL = propulsions.stream().reduce((o1, o2) -> o2).orElse(null);
+        final Propulsion propulsionFTL = moduleService.findAllPropulsions()
+                .stream().filter(p -> p.getHyperBand() == EHyperBand.ALPHA && p.getTechnologyType() == ETechnologyType.MILITARY)
+                .reduce((o1, o2) -> o2).orElse(null);
 
         final List<Weapon> weapons = moduleService.findAllWeapons();
         final List<Weapon> allBeams = sortByValue(weapons.stream().filter(w -> w.getWeaponType() == EWeaponType.BEAM).collect(Collectors.toList()), hullType);
@@ -1116,7 +1139,7 @@ public class MasterOfTheUniverseService {
 
         cc -= armor.getUseCapacity();
         cc -= sidewall.getUseCapacity();
-        cc -= propulsionFTL.getUseCapacity();
+        cc -= propulsionFTL.getUseCapacity(hull);
         cc -= electronicWarfare.getUseCapacity();
 
         shipClass.setArmor(armor);

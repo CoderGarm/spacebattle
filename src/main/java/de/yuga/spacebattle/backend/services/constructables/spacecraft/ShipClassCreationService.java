@@ -168,7 +168,7 @@ public class ShipClassCreationService {
         }
 
         if (shipClass.getPropulsion() != null) {
-            final Propulsion module = moduleService.findPropulsionById(shipClass.getPropulsion().getBaseModule().getIdModule());
+            final Propulsion module = moduleService.findPropulsionById(shipClass.getPropulsion().getIdModule());
             entity.setPropulsion(module);
         }
 

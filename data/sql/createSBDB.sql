@@ -60,9 +60,9 @@
         hullType varchar(255) not null,
         useCapacity integer not null,
         effectValue integer not null,
-        idCosts integer not null,
         idTranslatableDescription integer not null,
         idTranslatableName integer not null,
+        idCosts integer not null,
         idResearch integer not null,
         primary key (idAmmunitionModule)
     ) engine=InnoDB;
@@ -73,9 +73,9 @@
         hullType varchar(255) not null,
         useCapacity integer not null,
         effectValue integer not null,
-        idCosts integer not null,
         idTranslatableDescription integer not null,
         idTranslatableName integer not null,
+        idCosts integer not null,
         idResearch integer not null,
         primary key (idArmor)
     ) engine=InnoDB;
@@ -128,9 +128,9 @@
         productionCategory varchar(255) not null,
         productionTarget varchar(255) not null,
         refinementSequence varchar(255),
-        idCosts integer not null,
         idTranslatableDescription integer not null,
         idTranslatableName integer not null,
+        idCosts integer not null,
         idResearch integer not null,
         primary key (idBuilding)
     ) engine=InnoDB;
@@ -187,9 +187,9 @@
         useCapacity integer not null,
         effectValue integer not null,
         effectiveRange varchar(255),
-        idCosts integer not null,
         idTranslatableDescription integer not null,
         idTranslatableName integer not null,
+        idCosts integer not null,
         idResearch integer not null,
         primary key (idElectronicWarfare)
     ) engine=InnoDB;
@@ -280,9 +280,9 @@
         constructionCapacityStern integer not null,
         hullType varchar(255) not null,
         overallConstructionCapacity integer not null,
-        idCosts integer not null,
         idTranslatableDescription integer not null,
         idTranslatableName integer not null,
+        idCosts integer not null,
         idResearch integer not null,
         primary key (idHull),
         constraint hull_CHECK check (overallConstructionCapacity >= constructionCapacity + constructionCapacityBow + constructionCapacityStern + constructionCapacityBroadsides)
@@ -326,9 +326,9 @@
         useCapacity integer not null,
         alignmentType varchar(255) not null,
         weaponType varchar(255) not null,
-        idCosts integer not null,
         idTranslatableDescription integer not null,
         idTranslatableName integer not null,
+        idCosts integer not null,
         idResearch integer not null,
         idAmmunitionModule integer not null,
         primary key (idLauncher),
@@ -373,9 +373,9 @@
         motorAmount integer not null,
         motorCapacity integer not null,
         warheadCapacity integer not null,
-        idCosts integer not null,
         idTranslatableDescription integer not null,
         idTranslatableName integer not null,
+        idCosts integer not null,
         idAmmunitionModule integer not null,
         idMissileMotor integer not null,
         idResearch integer not null,
@@ -391,9 +391,9 @@
         hullType varchar(255) not null,
         maneuverability integer not null,
         useCapacity integer not null,
-        idCosts integer not null,
         idTranslatableDescription integer not null,
         idTranslatableName integer not null,
+        idCosts integer not null,
         primary key (idMissileMotor)
     ) engine=InnoDB;
 
@@ -458,6 +458,15 @@
         primary key (idBattleReport, idMovementAction)
     ) engine=InnoDB;
 
+    create table namedTechLevel (
+       idNamedTechLevel integer not null auto_increment,
+        techLevel varchar(255) not null,
+        translationTarget varchar(255) not null,
+        idTranslatableDescription integer not null,
+        idTranslatableName integer not null,
+        primary key (idNamedTechLevel)
+    ) engine=InnoDB;
+
     create table orderedHitLog (
        idShipKillerHit integer not null,
         idHitLog integer not null,
@@ -485,9 +494,9 @@
         effectValue integer not null,
         calculationType varchar(255) not null,
         supportType varchar(255) not null,
-        idCosts integer not null,
         idTranslatableDescription integer not null,
         idTranslatableName integer not null,
+        idCosts integer not null,
         idResearch integer not null,
         primary key (idPassiveModule)
     ) engine=InnoDB;
@@ -512,15 +521,12 @@
 
     create table propulsion (
        idPropulsion integer not null auto_increment,
-        techLevel varchar(255) not null,
-        hullType varchar(255) not null,
-        technologyType varchar(255) not null,
-        useCapacity integer not null,
+        technicalTypeName varchar(255) not null,
+        costsPercentage integer not null,
         effectValue integer not null,
-        hyperBand varchar(255),
-        idCosts integer not null,
-        idTranslatableDescription integer not null,
-        idTranslatableName integer not null,
+        hyperBand varchar(255) not null,
+        technologyType varchar(255) not null,
+        idNamedTechLevel integer not null,
         idResearch integer not null,
         primary key (idPropulsion)
     ) engine=InnoDB;
@@ -562,9 +568,9 @@
        idResearch integer not null auto_increment,
         techLevel varchar(255) not null,
         levelCap integer not null,
-        idCosts integer not null,
         idTranslatableDescription integer not null,
         idTranslatableName integer not null,
+        idCosts integer not null,
         unlockedThrough integer,
         primary key (idResearch)
     ) engine=InnoDB;
@@ -629,9 +635,9 @@
         hullType varchar(255) not null,
         useCapacity integer not null,
         effectValue integer not null,
-        idCosts integer not null,
         idTranslatableDescription integer not null,
         idTranslatableName integer not null,
+        idCosts integer not null,
         idResearch integer not null,
         primary key (idSidewall)
     ) engine=InnoDB;
@@ -706,9 +712,9 @@
         hullType varchar(255) not null,
         useCapacity integer not null,
         warheadType varchar(255) not null,
-        idCosts integer not null,
         idTranslatableDescription integer not null,
         idTranslatableName integer not null,
+        idCosts integer not null,
         primary key (idWarhead)
     ) engine=InnoDB;
 
@@ -763,9 +769,9 @@
         amountDamageEmitter integer not null,
         damageProjectionRange varchar(255),
         weaponType varchar(255) not null,
-        idCosts integer not null,
         idTranslatableDescription integer not null,
         idTranslatableName integer not null,
+        idCosts integer not null,
         idResearch integer not null,
         primary key (idWeapon),
         constraint weapon_CHECK check (weaponType = 'BEAM' || weaponType = 'POINT_DEFENSE')
@@ -919,11 +925,6 @@
        references shipClass (idShipClass);
 
     alter table ammunitionModule 
-       add constraint FKtc1t67bo67jgxojnt1r8w1hr3 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table ammunitionModule 
        add constraint FKivsjmyi7f7aym46q08qh71k1i 
        foreign key (idTranslatableDescription) 
        references translatable (idTranslatable);
@@ -934,14 +935,14 @@
        references translatable (idTranslatable);
 
     alter table ammunitionModule 
+       add constraint FKtc1t67bo67jgxojnt1r8w1hr3 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
+
+    alter table ammunitionModule 
        add constraint FKi9oa4xlh6y6c8nd9e25c8jlbq 
        foreign key (idResearch) 
        references research (idResearch);
-
-    alter table armor 
-       add constraint FK10dhr7h3pkps3d7u22q2pwpgc 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
 
     alter table armor 
        add constraint FK843wjkvvkloflykng3p5xanqf 
@@ -952,6 +953,11 @@
        add constraint FKj95rgrpe0e0kldkrdk61180vb 
        foreign key (idTranslatableName) 
        references translatable (idTranslatable);
+
+    alter table armor 
+       add constraint FK10dhr7h3pkps3d7u22q2pwpgc 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
 
     alter table armor 
        add constraint FKrb3h67mjdni459t4j1y8b7sw5 
@@ -999,11 +1005,6 @@
        references starSystem (idStarSystem);
 
     alter table building 
-       add constraint FK5vart3g8xv4gkgagwxxwyiuqi 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table building 
        add constraint FK9jureiokh5eus3dq46euhltxo 
        foreign key (idTranslatableDescription) 
        references translatable (idTranslatable);
@@ -1012,6 +1013,11 @@
        add constraint FKmqi7vubpnykxhu53hy5e7qri2 
        foreign key (idTranslatableName) 
        references translatable (idTranslatable);
+
+    alter table building 
+       add constraint FK5vart3g8xv4gkgagwxxwyiuqi 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
 
     alter table building 
        add constraint FKbp0gn3eiexsa5p6s20md9yfi7 
@@ -1069,11 +1075,6 @@
        references battleReport (idBattleReport);
 
     alter table electronicWarfare 
-       add constraint FKccj76id0r5pq3p7f4viriwdqf 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table electronicWarfare 
        add constraint FKi180vaq7gab8jy3r99bawdic5 
        foreign key (idTranslatableDescription) 
        references translatable (idTranslatable);
@@ -1082,6 +1083,11 @@
        add constraint FKgehovt9s2xat817l0enflo5nq 
        foreign key (idTranslatableName) 
        references translatable (idTranslatable);
+
+    alter table electronicWarfare 
+       add constraint FKccj76id0r5pq3p7f4viriwdqf 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
 
     alter table electronicWarfare 
        add constraint FKhr2adrrpeb3vshv11ajrgnkd7 
@@ -1169,11 +1175,6 @@
        references warShip (idWarShip);
 
     alter table hull 
-       add constraint FK65udyybp7syxvga5evxn8olhc 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table hull 
        add constraint FKi1ghgbbrc1j4vovj7v03t0sd5 
        foreign key (idTranslatableDescription) 
        references translatable (idTranslatable);
@@ -1182,6 +1183,11 @@
        add constraint FK7g5aas0xko5stotsvyt9hhchw 
        foreign key (idTranslatableName) 
        references translatable (idTranslatable);
+
+    alter table hull 
+       add constraint FK65udyybp7syxvga5evxn8olhc 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
 
     alter table hull 
        add constraint FK4hpf1pawl0wynjx9kdg74opea 
@@ -1234,11 +1240,6 @@
        references user (idUser);
 
     alter table launcher 
-       add constraint FKpxevsicliklfnl6mycvl75sv9 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table launcher 
        add constraint FKn80gj1fyhvn6v5smkbx3b4rhi 
        foreign key (idTranslatableDescription) 
        references translatable (idTranslatable);
@@ -1247,6 +1248,11 @@
        add constraint FKa0tf8xicyfrn906krw65ieop1 
        foreign key (idTranslatableName) 
        references translatable (idTranslatable);
+
+    alter table launcher 
+       add constraint FKpxevsicliklfnl6mycvl75sv9 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
 
     alter table launcher 
        add constraint FKdesag5bovcaxav76r4ln2occl 
@@ -1299,11 +1305,6 @@
        references miningFactors (idMiningFactors);
 
     alter table missile 
-       add constraint FK2y4rvixlct3ljky430p3bmwad 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table missile 
        add constraint FK3sugkdm5phqm3kkdraprgaj87 
        foreign key (idTranslatableDescription) 
        references translatable (idTranslatable);
@@ -1312,6 +1313,11 @@
        add constraint FKorhea214ty529liubde204v2y 
        foreign key (idTranslatableName) 
        references translatable (idTranslatable);
+
+    alter table missile 
+       add constraint FK2y4rvixlct3ljky430p3bmwad 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
 
     alter table missile 
        add constraint FKdhk8trxq7c36hid883mj4p7us 
@@ -1334,11 +1340,6 @@
        references warhead (idWarhead);
 
     alter table missileMotor 
-       add constraint FK6q2owmplw15x287lnle7mdeae 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table missileMotor 
        add constraint FKs8aryxvu0dbr41yab1lqy7f54 
        foreign key (idTranslatableDescription) 
        references translatable (idTranslatable);
@@ -1347,6 +1348,11 @@
        add constraint FKkygcap68itcbqkfukqxqhqti8 
        foreign key (idTranslatableName) 
        references translatable (idTranslatable);
+
+    alter table missileMotor 
+       add constraint FK6q2owmplw15x287lnle7mdeae 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
 
     alter table missileMovement 
        add constraint FK31pwab7jyqugac58td2yh50ju 
@@ -1403,6 +1409,16 @@
        foreign key (idBattleReport) 
        references battleReport (idBattleReport);
 
+    alter table namedTechLevel 
+       add constraint FKhmsd2ia4ak8y1bhaxrq9sap7w 
+       foreign key (idTranslatableDescription) 
+       references translatable (idTranslatable);
+
+    alter table namedTechLevel 
+       add constraint FK47uiy14jdi17mluflq1obl3kw 
+       foreign key (idTranslatableName) 
+       references translatable (idTranslatable);
+
     alter table orderedHitLog 
        add constraint FKt4eji1de3lte0yql6naypaj9t 
        foreign key (idHitLog) 
@@ -1434,11 +1450,6 @@
        references battleReport (idBattleReport);
 
     alter table passiveModule 
-       add constraint FKrr0cmtk4xqkbtajq5s17apmsu 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table passiveModule 
        add constraint FK3q0uitju15ai7lhv7y7y61549 
        foreign key (idTranslatableDescription) 
        references translatable (idTranslatable);
@@ -1447,6 +1458,11 @@
        add constraint FK1kqbngjlngfx049m4t1hmyelt 
        foreign key (idTranslatableName) 
        references translatable (idTranslatable);
+
+    alter table passiveModule 
+       add constraint FKrr0cmtk4xqkbtajq5s17apmsu 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
 
     alter table passiveModule 
        add constraint FKdchcy45rswteu33yrgh80m8a9 
@@ -1494,19 +1510,9 @@
        references starSystem (idStarSystem);
 
     alter table propulsion 
-       add constraint FKqjsvyhjc6w21niim4aeptpm85 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table propulsion 
-       add constraint FK1a2sbiyhyhlm5q99g8cs8qdpw 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table propulsion 
-       add constraint FK34jwo45015kmmtttnorlypaa3 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
+       add constraint FKlwu2dh95c5jr984f3l2ohr7s7 
+       foreign key (idNamedTechLevel) 
+       references namedTechLevel (idNamedTechLevel);
 
     alter table propulsion 
        add constraint FK7rr2gvpcbjjhl9tuxe6c50v5q 
@@ -1554,11 +1560,6 @@
        references warshipHealthStateSnapshot (idWarshipHealthStateSnapshot);
 
     alter table research 
-       add constraint FKni50te130dndarqgicsq3svhb 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table research 
        add constraint FK1sxfrsxvrj2iaxi809oirhevj 
        foreign key (idTranslatableDescription) 
        references translatable (idTranslatable);
@@ -1567,6 +1568,11 @@
        add constraint FKibqicobq7dm63vf792kgmk5wj 
        foreign key (idTranslatableName) 
        references translatable (idTranslatable);
+
+    alter table research 
+       add constraint FKni50te130dndarqgicsq3svhb 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
 
     alter table research 
        add constraint FKch37eb44iv0ls442yu7usvvtp 
@@ -1649,11 +1655,6 @@
        references battleReport (idBattleReport);
 
     alter table sidewall 
-       add constraint FKlo0i3byallqh89wd535yrbs3l 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table sidewall 
        add constraint FKdx39gsmusm1sai6wdid4s4xmn 
        foreign key (idTranslatableDescription) 
        references translatable (idTranslatable);
@@ -1662,6 +1663,11 @@
        add constraint FKmqieo3lwi46pddbgbhg7dbg4r 
        foreign key (idTranslatableName) 
        references translatable (idTranslatable);
+
+    alter table sidewall 
+       add constraint FKlo0i3byallqh89wd535yrbs3l 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
 
     alter table sidewall 
        add constraint FK693a9gix6ifpkiop612tghdy0 
@@ -1699,11 +1705,6 @@
        references user (idUser);
 
     alter table warhead 
-       add constraint FK4m9pxktw6iywf5aecc1n0xm4f 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table warhead 
        add constraint FKjx1sqa9iiinbgfciltxdqp78u 
        foreign key (idTranslatableDescription) 
        references translatable (idTranslatable);
@@ -1712,6 +1713,11 @@
        add constraint FKa939x3f6pjibpdv9k0wxbl3cq 
        foreign key (idTranslatableName) 
        references translatable (idTranslatable);
+
+    alter table warhead 
+       add constraint FK4m9pxktw6iywf5aecc1n0xm4f 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
 
     alter table warShip 
        add constraint FK3kovfkp6003a62x5ff41h44hw 
@@ -1759,11 +1765,6 @@
        references warShip (idWarShip);
 
     alter table weapon 
-       add constraint FK1rsb3ampiw8yjy8ngrget6ay 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table weapon 
        add constraint FKqx172dx6j907oe0gcxskan5vy 
        foreign key (idTranslatableDescription) 
        references translatable (idTranslatable);
@@ -1772,6 +1773,11 @@
        add constraint FKtrgd2x03dkumgxnryvhon8qm5 
        foreign key (idTranslatableName) 
        references translatable (idTranslatable);
+
+    alter table weapon 
+       add constraint FK1rsb3ampiw8yjy8ngrget6ay 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
 
     alter table weapon 
        add constraint FKo22n18dgjpraqosj7nkamrnvb 
@@ -2071,16 +2077,3 @@ INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArti
 INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (3, 3);
 INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (4, 4);
 INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (5, 5);
-
-insert into dbPatch values (null, now(), 'create dbPatch table', '0.0.5-1');
-insert into dbPatch values (null, now(), 'add warship health state', '0.0.5-2');
-insert into dbPatch values (null, now(), 'repair fleets by job', '0.0.5-3');
-insert into dbPatch values (null, now(), 'add check constraint names', '0.0.5-4');
-insert into dbPatch values (null, now(), 'balance spacecraft stuff', '0.0.5-5');
-insert into dbPatch values (null, now(), 'add operationals', '0.0.6-1');
-insert into dbPatch values (null, now(), 'add wiki', '0.0.6-2');
-insert into dbPatch values (null, now(), 'add transportation', '0.0.7-1');
-insert into dbPatch values (null, now(), 'add commissioning to health state snap', '0.0.7-2');
-insert into dbPatch values (null, now(), 'drop needs repair flag from fleet', '0.0.9-1');
-insert into dbPatch values (null, now(), 'adding password change and flags', '0.0.12-1');
-insert into dbPatch values (null, now(), 'enrich alliance application', '0.0.13-1');

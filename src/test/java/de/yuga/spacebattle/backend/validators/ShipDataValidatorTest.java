@@ -64,7 +64,7 @@ class ShipDataValidatorTest {
         final Set<SupportFitting> supportFittings = shipClass.getSupportFittings();
 
         int usedCapacity = 0;
-        usedCapacity += getUsedCapacity(propulsion);
+        usedCapacity += propulsion != null && shipClass.getHull() != null ? propulsion.getUseCapacity(shipClass.getHull()) : 0;
         usedCapacity += getUsedCapacity(armor);
         usedCapacity += getUsedCapacity(electronicWarfare);
         usedCapacity += getUsedCapacity(sidewall);

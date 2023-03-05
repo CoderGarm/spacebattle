@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 
 @Service
-public class MailService { /*fixme exception mail*/
+public class MailService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MailService.class);
 

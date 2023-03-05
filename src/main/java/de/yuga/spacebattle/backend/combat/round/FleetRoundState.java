@@ -18,7 +18,6 @@ import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.ETechnologyType;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
@@ -436,9 +435,8 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
 
     private int getLowestAccelerationValue() {
         return getFightingWarShips()
-                .map(s -> s.getModule(Propulsion.class))
-                .filter(Objects::nonNull)
-                .map(BaseModuleWithEffectValue::getEffectValue)
+                .map(WarshipHealthState::getPropulsion)
+                .map(Propulsion::getEffectValue)
                 .min(Integer::compareTo)
                 .orElse(0);
     }
@@ -446,8 +444,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
     @Nonnull
     private EHyperBand getLowestHyperBand() {
         return getFightingWarShips()
-                .map(s -> s.getModule(Propulsion.class))
-                .filter(Objects::nonNull)
+                .map(WarshipHealthState::getPropulsion)
                 .map(Propulsion::getHyperBand)
                 .reduce((o1, o2) -> o1.getVelocityMultiplier() < o2.getVelocityMultiplier() ? o1 : o2)
                 .orElse(EHyperBand.NONE);
@@ -459,8 +456,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         Preconditions.checkArgument(propulsion == EModuleType.PROPULSION || propulsion == EModuleType.FTLPROPULSION, "propulsion must be propulsion type!");
 
         final ETechnologyType restrictingTechnologyType = getFightingWarShips()
-                .map(s -> s.getModule(Propulsion.class))
-                .filter(Objects::nonNull)
+                .map(WarshipHealthState::getPropulsion)
                 .map(Propulsion::getTechnologyType)
                 .reduce((o1, o2) -> o1.getMaxVelocitySOL() < o2.getMaxVelocitySOL() ? o1 : o2)
                 .orElse(ETechnologyType.CIVIL);

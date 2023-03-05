@@ -11,6 +11,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.MissileMotor;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Warhead;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
 import de.yuga.spacebattle.backend.repositories.spacecraft.MissileMotorRepository;
@@ -29,6 +30,9 @@ import java.util.Set;
 @SuppressWarnings({"DeprecatedIsStillUsed", "unused"})
 @Service
 public class ModuleService {
+
+    @Nonnull
+    private final NamedTechLevelRepository namedTechLevelRepository;
 
     @Nonnull
     private final ArmorRepository armorRepository;
@@ -63,7 +67,8 @@ public class ModuleService {
     @Nonnull
     private final PassiveModuleRepository passiveModuleRepository;
 
-    public ModuleService(@Nonnull final ArmorRepository armorRepository,
+    public ModuleService(@Nonnull final NamedTechLevelRepository namedTechLevelRepository,
+                         @Nonnull final ArmorRepository armorRepository,
                          @Nonnull final WeaponRepository weaponRepository,
                          @Nonnull final LauncherRepository launcherRepository,
                          @Nonnull final WarheadRepository warheadRepository,
@@ -74,45 +79,34 @@ public class ModuleService {
                          @Nonnull final ElectronicWarfareRepository electronicWarfareRepository,
                          @Nonnull final AmmunitionRepository ammunitionRepository,
                          @Nonnull final PassiveModuleRepository passiveModuleRepository) {
-        Preconditions.checkNotNull(armorRepository, "armorRepository shouldn't be null!");
-        Preconditions.checkNotNull(weaponRepository, "weaponRepository shouldn't be null!");
-        Preconditions.checkNotNull(launcherRepository, "launcherRepository shouldn't be null!");
-        Preconditions.checkNotNull(warheadRepository, "warheadRepository shouldn't be null!");
-        Preconditions.checkNotNull(missileMotorRepository, "missileMotorRepository shouldn't be null!");
-        Preconditions.checkNotNull(missileRepository, "missileRepository shouldn't be null!");
-        Preconditions.checkNotNull(sidewallRepository, "sidewallRepository shouldn't be null!");
-        Preconditions.checkNotNull(propulsionRepository, "propulsionRepository shouldn't be null!");
-        Preconditions.checkNotNull(electronicWarfareRepository, "electronicWarfareRepository shouldn't be null!");
-        Preconditions.checkNotNull(ammunitionRepository, "ammunitionRepository shouldn't be null!");
-        Preconditions.checkNotNull(passiveModuleRepository, "passiveModuleRepository shouldn't be null!");
-
-        this.armorRepository = armorRepository;
-        this.weaponRepository = weaponRepository;
-        this.launcherRepository = launcherRepository;
-        this.warheadRepository = warheadRepository;
-        this.missileMotorRepository = missileMotorRepository;
-        this.missileRepository = missileRepository;
-        this.sidewallRepository = sidewallRepository;
-        this.propulsionRepository = propulsionRepository;
-        this.electronicWarfareRepository = electronicWarfareRepository;
-        this.ammunitionRepository = ammunitionRepository;
-        this.passiveModuleRepository = passiveModuleRepository;
+        this.namedTechLevelRepository = Preconditions.checkNotNull(namedTechLevelRepository, "namedTechLevelRepository must not be empty");
+        this.armorRepository = Preconditions.checkNotNull(armorRepository, "armorRepository must not be empty");
+        this.weaponRepository = Preconditions.checkNotNull(weaponRepository, "weaponRepository must not be empty");
+        this.launcherRepository = Preconditions.checkNotNull(launcherRepository, "launcherRepository must not be empty");
+        this.warheadRepository = Preconditions.checkNotNull(warheadRepository, "warheadRepository must not be empty");
+        this.missileMotorRepository = Preconditions.checkNotNull(missileMotorRepository, "missileMotorRepository must not be empty");
+        this.missileRepository = Preconditions.checkNotNull(missileRepository, "missileRepository must not be empty");
+        this.sidewallRepository = Preconditions.checkNotNull(sidewallRepository, "sidewallRepository must not be empty");
+        this.propulsionRepository = Preconditions.checkNotNull(propulsionRepository, "propulsionRepository must not be empty");
+        this.electronicWarfareRepository = Preconditions.checkNotNull(electronicWarfareRepository, "electronicWarfareRepository must not be empty");
+        this.ammunitionRepository = Preconditions.checkNotNull(ammunitionRepository, "ammunitionRepository must not be empty");
+        this.passiveModuleRepository = Preconditions.checkNotNull(passiveModuleRepository, "passiveModuleRepository must not be empty");
     }
 
-
-    /**
-     * Creates a new {@link Armor}.
-     *
-     * @param name            the name of the research
-     * @param description     the description
-     * @param useCapacity     the amount of construction capacity used
-     * @param value           the base effect value, e.g. damage
-     * @param techLevel       the techLevel of this module
-     * @param unlockedThrough the research to unlock this module
-     * @return the new module
-     */
     @Nonnull
-    @Deprecated(since = "productive environment")
+    public NamedTechLevel createBaseModule(@Nonnull final String name,
+                                           @Nonnull final String description,
+                                           @Nonnull final ETechLevel techLevel,
+                                           @Nonnull final Class<?> clazz) {
+        Preconditions.checkNotNull(name, "name must not be empty");
+        Preconditions.checkNotNull(description, "description must not be empty");
+        Preconditions.checkNotNull(techLevel, "techLevel must not be empty");
+        Preconditions.checkNotNull(clazz, "clazz must not be empty");
+
+        return namedTechLevelRepository.save(new NamedTechLevel(name, description, techLevel, clazz));
+    }
+
+    @Nonnull
     public Armor createArmor(@Nonnull final String name,
                              @Nonnull final String description,
                              @Nonnull final Research unlockedThrough,
@@ -129,19 +123,7 @@ public class ModuleService {
         return armorRepository.save(new Armor(name, description, unlockedThrough, useCapacity, value, hullType, techLevel, crewRequirement));
     }
 
-    /**
-     * Creates a new {@link ElectronicWarfare}.
-     *
-     * @param name            the name of the research
-     * @param description     the description
-     * @param useCapacity     the amount of construction capacity used
-     * @param value           the base effect value, e.g. damage
-     * @param techLevel       the techLevel of this module
-     * @param unlockedThrough the research to unlock this module
-     * @return the new module
-     */
     @Nonnull
-    @Deprecated(since = "productive environment")
     public ElectronicWarfare createElectronicWarfare(@Nonnull final String name,
                                                      @Nonnull final String description,
                                                      @Nonnull final Research unlockedThrough,
@@ -160,17 +142,6 @@ public class ModuleService {
         return electronicWarfareRepository.save(new ElectronicWarfare(name, description, unlockedThrough, useCapacity, value, hullType, effectiveRange, techLevel, crewRequirement));
     }
 
-    /**
-     * Creates a new {@link Sidewall}.
-     *
-     * @param name            the name of the research
-     * @param description     the description
-     * @param useCapacity     the amount of construction capacity used
-     * @param value           the base effect value, e.g. damage
-     * @param techLevel       the techLevel of this module
-     * @param unlockedThrough the research to unlock this module
-     * @return the new module
-     */
     @Nonnull
     @Deprecated(since = "productive environment")
     public Sidewall createSidewall(@Nonnull final String name,
@@ -189,19 +160,7 @@ public class ModuleService {
         return sidewallRepository.save(new Sidewall(name, description, unlockedThrough, useCapacity, value, hullType, techLevel, crewRequirement));
     }
 
-    /**
-     * Creates a new {@link Weapon}.
-     *
-     * @param name            the name of the research
-     * @param description     the description
-     * @param useCapacity     the amount of construction capacity used
-     * @param effectValue     the base effect effectValue, e.g. damage
-     * @param techLevel       the techLevel of this module
-     * @param unlockedThrough the research to unlock this module
-     * @return the new module
-     */
     @Nonnull
-    @Deprecated(since = "productive environment")
     public Weapon createWeapon(@Nonnull final String name,
                                @Nonnull final String description,
                                @Nonnull final Research unlockedThrough,
@@ -227,7 +186,6 @@ public class ModuleService {
     }
 
     @Nonnull
-    @Deprecated(since = "productive environment")
     public Launcher createLauncher(@Nonnull final String name,
                                    @Nonnull final String description,
                                    @Nonnull final Research unlockedThrough,
@@ -252,7 +210,6 @@ public class ModuleService {
     }
 
     @Nonnull
-    @Deprecated(since = "productive environment")
     public MissileMotor createMissileMotor(@Nonnull final String typeName,
                                            @Nonnull final String description,
                                            final int endurance,
@@ -270,7 +227,6 @@ public class ModuleService {
     }
 
     @Nonnull
-    @Deprecated(since = "productive environment")
     public Warhead createWarhead(@Nonnull final String name,
                                  @Nonnull final String description,
                                  final int effectValue,
@@ -289,7 +245,6 @@ public class ModuleService {
     }
 
     @Nonnull
-    @Deprecated(since = "productive environment")
     public Missile createMissile(@Nonnull final String typeName,
                                  @Nonnull final String description,
                                  final int warheadCapacity,
@@ -313,29 +268,22 @@ public class ModuleService {
     }
 
     @Nonnull
-    @Deprecated(since = "productive environment")
-    public Propulsion createPropulsion(@Nonnull final String name,
-                                       @Nonnull final String description,
+    public Propulsion createPropulsion(@Nonnull final NamedTechLevel namedTechLevel,
                                        @Nonnull final Research unlockedThrough,
-                                       final int useCapacity,
-                                       final int value,
-                                       @Nonnull final EHullType hullType,
-                                       @Nonnull final ETechLevel techLevel,
+                                       final int effectValue,
+                                       final int costsPercentage,
                                        @Nonnull final EHyperBand hyperBand,
-                                       @Nonnull final ETechnologyType technologyType,
-                                       @Nonnull final CrewRequirement crewRequirement) {
-        Preconditions.checkNotNull(name, "name shouldn't be null!");
-        Preconditions.checkNotNull(description, "description shouldn't be null!");
+                                       @Nonnull final ETechnologyType technologyType) {
+        Preconditions.checkNotNull(namedTechLevel, "genericBaseModule shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
         Preconditions.checkNotNull(hyperBand, "hyperBand shouldn't be null!");
         Preconditions.checkNotNull(technologyType, "technologyType must not be empty");
-        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        return propulsionRepository.save(new Propulsion(name, description, unlockedThrough, useCapacity, value, hullType, techLevel, hyperBand, technologyType, crewRequirement));
+        final String technicalTypeName = "P-" + hyperBand.name().charAt(0) + namedTechLevel.getTechLevel().name().split("_")[1] + "-" + technologyType.name().charAt(0);
+        return propulsionRepository.save(new Propulsion(namedTechLevel, technicalTypeName, unlockedThrough, effectValue, costsPercentage, hyperBand, technologyType));
     }
 
     @Nonnull
-    @Deprecated(since = "productive environment")
     public PassiveModule createPassiveModule(@Nonnull final String name,
                                              @Nonnull final String description,
                                              @Nonnull final Research unlockedThrough,
@@ -355,7 +303,6 @@ public class ModuleService {
     }
 
     @Nonnull
-    @Deprecated(since = "productive environment")
     public AmmunitionModule createAmmunitionModule(@Nonnull final String name,
                                                    @Nonnull final String description,
                                                    @Nonnull final Research unlockedThrough,
@@ -704,5 +651,12 @@ public class ModuleService {
         Preconditions.checkNotNull(passiveModule, "passiveModule must not be empty");
 
         passiveModuleRepository.save(passiveModule);
+    }
+
+    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
+    public void save(final NamedTechLevel baseModule) {
+        Preconditions.checkNotNull(baseModule, "baseModule must not be empty");
+
+        namedTechLevelRepository.save(baseModule);
     }
 }

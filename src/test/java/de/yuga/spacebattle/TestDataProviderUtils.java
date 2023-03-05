@@ -27,6 +27,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AmmunitionFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
@@ -225,7 +226,7 @@ public class TestDataProviderUtils {
         Map<EEducationType, Long> militaryCrew = militaryCrew();
 
         Armor armor = createArmor("Armor Mk I", "An armor", 5, 3000, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        Propulsion propulsionFTL = createPropulsion("FTL Speed Mk I", "A FTL drive", 10, effectFTLValue, ETechLevel.TECH_I, EHyperBand.DELTA, MILITARY, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Propulsion propulsionFTL = createPropulsion("FTL Speed Mk I", "A FTL drive", 10, effectFTLValue, ETechLevel.TECH_I, EHyperBand.DELTA, MILITARY);
         ElectronicWarfare electronicWarfare = createElectronicWarfare("Scanner Mk I", "A scanner", 5, 1000, dis(1000000, EDistanceMetric.M), ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         Sidewall sidewall = createSidewall("Shield Mk I", "A shield", 5, 15000, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
 
@@ -463,15 +464,14 @@ public class TestDataProviderUtils {
                                               final int value,
                                               final ETechLevel techLevel,
                                               @Nonnull final EHyperBand hyperBand,
-                                              @Nonnull final ETechnologyType technologyType,
-                                              @Nonnull final CrewRequirement crewRequirement) {
+                                              @Nonnull final ETechnologyType technologyType) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(hyperBand, "hyperBand shouldn't be null!");
         Preconditions.checkNotNull(technologyType, "technologyType must not be empty");
-        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        final Propulsion propulsion = new Propulsion(name, description, research(), useCapacity, value, EHullType.CA, techLevel, hyperBand, technologyType, crewRequirement);
+        final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, techLevel, Propulsion.class);
+        final Propulsion propulsion = new Propulsion(namedTechLevel, "xXx", research(), useCapacity, value, hyperBand, technologyType);
         setId(propulsion);
         return propulsion;
     }

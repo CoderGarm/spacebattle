@@ -1,11 +1,9 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.modules;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
+import de.yuga.spacebattle.backend.entities.misc.HasCostsByParent;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
-import de.yuga.spacebattle.backend.enums.EHullType;
-import de.yuga.spacebattle.backend.enums.ETechLevel;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.ETechnologyType;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
 
@@ -24,7 +22,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "propulsion")
 @AttributeOverride(name = "id", column = @Column(name = "idPropulsion"))
-public class Propulsion extends BaseModuleWithEffectValue {
+public class Propulsion extends HasCostsByParent {
 
     /**
      * If this propulsion module provides the ability to travel faster than light.
@@ -42,25 +40,34 @@ public class Propulsion extends BaseModuleWithEffectValue {
     @Enumerated(EnumType.STRING)
     private ETechnologyType technologyType;
 
+    private int effectValue;
+
+    @Nonnull
+    @NotNull
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "idResearch")
+    private Research unlockedThrough;
+
     public Propulsion() {
 
     }
 
-    public Propulsion(@Nonnull final String name,
-                      @Nonnull final String description,
+    public Propulsion(@Nonnull final NamedTechLevel baseModule,
+                      @Nonnull final String technicalTypeName,
                       @Nonnull final Research unlockedThrough,
-                      final int useCapacity,
                       final int effectValue,
-                      @Nonnull final EHullType hullType,
-                      @Nonnull final ETechLevel techLevel,
+                      final int costsPercentage,
                       @Nonnull final EHyperBand hyperBand,
-                      @Nonnull final ETechnologyType technologyType,
-                      @Nonnull final CrewRequirement crewRequirement) {
-        super(name, description, unlockedThrough, useCapacity, effectValue, hullType, techLevel, crewRequirement, Propulsion.class);
-        Preconditions.checkNotNull(hyperBand, "hyperBand shouldn't be null!");
+                      @Nonnull final ETechnologyType technologyType) {
+        super(baseModule, technicalTypeName, costsPercentage);
+        Preconditions.checkNotNull(unlockedThrough, "unlockedThrough must not be empty");
+        Preconditions.checkNotNull(hyperBand, "hyperBand must not be empty");
+        Preconditions.checkNotNull(technologyType, "technologyType must not be empty");
 
         this.hyperBand = hyperBand;
         this.technologyType = technologyType;
+        this.effectValue = effectValue;
+        this.unlockedThrough = unlockedThrough;
     }
 
     @Nonnull
@@ -75,5 +82,14 @@ public class Propulsion extends BaseModuleWithEffectValue {
 
     public boolean isFtlCapable() {
         return hyperBand != EHyperBand.NONE;
+    }
+
+    public int getEffectValue() {
+        return effectValue;
+    }
+
+    @Nonnull
+    public Research getUnlockedThrough() {
+        return unlockedThrough;
     }
 }

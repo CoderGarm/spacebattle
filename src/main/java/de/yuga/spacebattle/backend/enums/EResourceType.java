@@ -68,7 +68,7 @@ public enum EResourceType implements HasIconName {
     }
 
     /**
-     * Returns all the the values of {@link EResourceType} except {@link #POPULATION}.
+     * Returns all the values of {@link EResourceType} except {@link #POPULATION}.
      *
      * @return the values
      */

@@ -211,7 +211,7 @@ public class AdminApi extends BaseApi {
 
         result.add(new FileUpload("warHeads.csv", hc.convert(moduleService.findAllWarheads().stream().map(m -> ((HasCosts) m)).collect(Collectors.toList()))));
         result.add(new FileUpload("missiles.csv", hc.convert(moduleService.findAllMissiles().stream().map(m -> ((HasCosts) m)).collect(Collectors.toList()))));
-        result.add(new FileUpload("propulsionModules.csv", ev.convert(castEffectValue(moduleService.findAllPropulsions()))));
+        // todo serious rebuild needed result.add(new FileUpload("propulsionModules.csv", ev.convert(castEffectValue(moduleService.findAllPropulsions()))));
         result.add(new FileUpload("sidewallModules,csv", ev.convert(castEffectValue(moduleService.findAllSidewalls()))));
         result.add(new FileUpload("weaponModules.csv", ev.convert(castEffectValue(moduleService.findAllWeapons()))));
         result.add(new FileUpload("launcherModules.csv", bm.convert(cast(moduleService.findAllLaunchers()))));

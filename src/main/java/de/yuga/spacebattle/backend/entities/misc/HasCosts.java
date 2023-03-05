@@ -2,42 +2,19 @@ package de.yuga.spacebattle.backend.entities.misc;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
-import de.yuga.spacebattle.backend.entities.i18n.Translatable;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EResourceDemand;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
-import de.yuga.spacebattle.backend.enums.ETranslatableType;
-import de.yuga.spacebattle.backend.enums.ETranslationTarget;
-import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-/**
- * Simply the entity key.
- */
 @MappedSuperclass
-public class HasCosts extends AbstractEntityKey {
-
-    @Nonnull
-    @NotNull
-    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL)
-    @JoinColumn(name = "idTranslatableName")
-    private Translatable name;
-
-    @Nonnull
-    @NotNull
-    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL)
-    @JoinColumn(name = "idTranslatableDescription")
-    private Translatable description;
-
-    @Nonnull
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private ETechLevel techLevel;
+public class HasCosts extends HasName {
 
     @Nonnull
     @NotNull
@@ -45,13 +22,12 @@ public class HasCosts extends AbstractEntityKey {
     @JoinColumn(name = "idCosts", updatable = false)
     private ResourceDeposit costs;
 
-    public HasCosts() {
-    }
+    @Nonnull
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private ETechLevel techLevel;
 
-    @PostPersist
-    public void setParentId() {
-        name.setIdParent(getId());
-        description.setIdParent(getId());
+    public HasCosts() {
     }
 
     public HasCosts(@Nonnull final Translation translatableName,
@@ -59,45 +35,21 @@ public class HasCosts extends AbstractEntityKey {
                     @Nonnull final ETechLevel techLevel,
                     @Nullable final Integer capacity,
                     @Nonnull final Class<?> clazz) {
+        super(translatableName, translatableDescription, techLevel, clazz);
         Preconditions.checkNotNull(translatableName, "translatableName must not be empty");
         Preconditions.checkNotNull(translatableDescription, "translatableDescription must not be empty");
         Preconditions.checkArgument(translatableName.getLanguageCode().equals(Translation.DEFAULT_LANGUAGE), "translatableName: common language must be english");
-        Preconditions.checkArgument(translatableDescription.getLanguageCode().equals("en"), "translatableDescription: common language must be english");
+        Preconditions.checkArgument(translatableDescription.getLanguageCode().equals(Translation.DEFAULT_LANGUAGE), "translatableDescription: common language must be english");
         Preconditions.checkNotNull(techLevel, "techLevel shouldn't be null!");
         Preconditions.checkNotNull(clazz, "clazz shouldn't be null!");
 
-        this.name = new Translatable(ETranslationTarget.getByClazz(clazz), ETranslatableType.NAME);
-        this.name.add(translatableName);
-        this.description = new Translatable(ETranslationTarget.getByClazz(clazz), ETranslatableType.DESCRIPTION);
-        this.description.add(translatableDescription);
-        this.techLevel = techLevel;
         this.costs = ResourceDepositInitializerCalculator.initializeCosts(techLevel, capacity, EResourceDemand.getByClazz(this.getClass()));
+        this.techLevel = techLevel;
     }
 
     @Nonnull
-    public String getName(@Nonnull final String languageCode) {
-        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
-
-        return name.getTranslation(languageCode);
-    }
-
-    @Nonnull
-    public String getDescription(@Nonnull final String languageCode) {
-        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
-
-        return description.getTranslation(languageCode);
-    }
-
-    @Nonnull
-    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
-    public Translatable getName() {
-        return name;
-    }
-
-    @Nonnull
-    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
-    public Translatable getDescription() {
-        return description;
+    public ResourceDeposit getCosts() {
+        return costs;
     }
 
     @Nonnull
@@ -105,8 +57,17 @@ public class HasCosts extends AbstractEntityKey {
         return techLevel;
     }
 
-    @Nonnull
-    public ResourceDeposit getCosts() {
-        return costs;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof NamedTechLevel)) return false;
+
+        NamedTechLevel module = (NamedTechLevel) o;
+        return id == module.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * id;
     }
 }
