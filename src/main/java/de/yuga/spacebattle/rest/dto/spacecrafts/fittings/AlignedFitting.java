@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.rest.dto.spacecrafts.details;
+package de.yuga.spacebattle.rest.dto.spacecrafts.fittings;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
@@ -47,7 +47,7 @@ public class AlignedFitting {
     public AlignedFitting() {
     }
 
-    public AlignedFitting(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting alignedFitting,
+    public AlignedFitting(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting alignedFitting,
                           @Nonnull final String languageCode) {
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(alignedFitting, "alignedFitting shouldn't be null!");

@@ -3,11 +3,17 @@ Thema: NPC, Handel und Missionen
 
 Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
+Sonstiges:
+
+1. Auf der StarMap verändert sich nun der Cursor, wenn man etwas anklicken kann.
+
+todo. Beschleunigung, Maximalgeschwindigkeit (zivil, militärisch) in Bezug zum Hyperband anzeigen, Zeit des Erreichens von v_max
 todo. Antriebsleistung in Bezug zur Masse setzen
-todo. Hyperband abhängig vom Zusammenpassen der HullTypes  
-todo. Beschleunigung, Maximalgeschwindigkeit (zivil, militärisch) anzeigen, Zeit des Erreichens von v_max
+todo. Hyperband abhängig vom Zusammenpassen der HullTypes
 
 ----------------- Bugs fixed -----------
+
+1. Der Bau-Button in der Werft war fälschlicherweise disabled.
 
 ----------------- next steps -----------  
 Thema: NPC, Handel und Missionen

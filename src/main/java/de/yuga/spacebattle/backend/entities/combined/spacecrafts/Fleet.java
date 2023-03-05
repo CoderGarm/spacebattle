@@ -13,8 +13,7 @@ import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.misc.Operationable;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 import de.yuga.spacebattle.backend.entities.turn.Job;
@@ -24,15 +23,12 @@ import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.ETechnologyType;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
-import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
-import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -285,41 +281,23 @@ public class Fleet extends Operationable {
         return id * 31;
     }
 
-    /**
-     * Returns the range units which can be passed per turn based on the slowest ship.
-     *
-     * @return the maximal distance which could be passed in a tick
-     */
+    @Nonnull
     public Acceleration getAccelerationFor(@Nonnull final EModuleType eModuleType) {
         Preconditions.checkNotNull(eModuleType, "eModuleType shouldn't be null!");
         Preconditions.checkArgument((eModuleType == EModuleType.FTLPROPULSION || eModuleType == EModuleType.PROPULSION),
                 "EModuleType must be kind of propulsion.");
 
-        final List<Integer> speeds = new ArrayList<>();
-        final Set<ShipClass> shipClasses = ships.stream().map(WarShip::getShipClass).collect(Collectors.toSet());
-        EHyperBand hyperBand = EHyperBand.NONE;
-        for (ShipClass sc : shipClasses) {
-            final double propulsionSupportFactor = sc.getSupportFittings().stream()
-                    .filter(s -> eModuleType == s.getPassiveModule().getSupportType().getModifiedProperty())
-                    .findAny().stream()
-                    .map(SupportFitting::getAbsoluteValueAsFactor).reduce(0D, Double::sum);
-
-            final Propulsion propulsion = sc.getPropulsion();
-            if (propulsion == null || (EModuleType.FTLPROPULSION == eModuleType && !propulsion.isFtlCapable())) {
-                // if no propulsion present or ftl is used and no ftl is present
-                return Acceleration.ZERO;
-            }
-            // calculate effect of support modules
-            final BigDecimal factor = BigDecimal.ONE.add(new BigDecimal(propulsionSupportFactor));
-            final BigDecimal effectValue = new BigDecimal(propulsion.getEffectValue());
-            // if the prop's hyper band is lower than use this
-            hyperBand = propulsion.getHyperBand().ordinal() >= hyperBand.ordinal() ? propulsion.getHyperBand() : hyperBand;
-            speeds.add(effectValue.multiply(factor, ResourceDeposit.MATH_CONTEXT_INTEGER).intValue());
+        final Set<ShipClass> shipClasses = getAliveShips().stream().map(WarShip::getShipClass).collect(Collectors.toSet());
+        if (shipClasses.isEmpty()) {
+            return Acceleration.ZERO;
         }
-        Collections.sort(speeds);
-        final EAccelerationMetric accelerationMetric = eModuleType == EModuleType.PROPULSION ? EAccelerationMetric.G : EAccelerationMetric.C;
-        hyperBand = eModuleType == EModuleType.FTLPROPULSION ? hyperBand : EHyperBand.NONE;
-        return new Acceleration(new BigDecimal(speeds.get(0)), accelerationMetric, hyperBand);
+        final List<Acceleration> accelerations = shipClasses.stream()
+                .filter(sc -> sc.getPropulsion() != null)
+                .map(sc -> sc.getAcceleration(sc.getPropulsion().getHyperBand()))
+                .sorted(Comparator.comparing(Acceleration::getValue))
+                .collect(Collectors.toList());
+
+        return accelerations.get(0);
     }
 
     /**

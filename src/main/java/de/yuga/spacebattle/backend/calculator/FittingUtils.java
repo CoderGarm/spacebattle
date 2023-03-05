@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.backend.calculator;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 
 import javax.annotation.Nonnull;

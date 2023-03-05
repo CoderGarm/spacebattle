@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 
 public enum EAccelerationMetric {
+
     MS2(BigDecimal.ONE, "m/s²"),
     G(new BigDecimal("9.81"), "g"),
     C(new BigDecimal("299792458"), "c");

@@ -2,7 +2,7 @@ package de.yuga.spacebattle.rest.dto.turn.battle.combat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AmmunitionFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateAccessor;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.AmmunitionValue;

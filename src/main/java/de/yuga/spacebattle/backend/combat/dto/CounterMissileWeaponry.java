@@ -3,7 +3,7 @@ package de.yuga.spacebattle.backend.combat.dto;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.BattleCalculator;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
 

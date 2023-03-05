@@ -21,7 +21,7 @@ public class Acceleration implements Cloneable, Comparable<Acceleration> {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The value of this acceleration.")
-    private BigDecimal accelerationValue;
+    private BigDecimal value;
 
     @Nonnull
     @JsonProperty
@@ -36,30 +36,30 @@ public class Acceleration implements Cloneable, Comparable<Acceleration> {
     public Acceleration() {
     }
 
-    public Acceleration(final int accelerationValue, @Nonnull final EAccelerationMetric accelerationMetric) {
+    public Acceleration(final int value, @Nonnull final EAccelerationMetric accelerationMetric) {
         Preconditions.checkNotNull(accelerationMetric, "lengthDefinition shouldn't be null!");
 
-        this.accelerationValue = BigDecimal.valueOf(accelerationValue);
+        this.value = BigDecimal.valueOf(value);
         this.accelerationMetric = accelerationMetric;
         this.hyperBand = EHyperBand.NONE;
     }
 
-    public Acceleration(@Nonnull final BigDecimal accelerationValue,
+    public Acceleration(@Nonnull final BigDecimal value,
                         @Nonnull final EAccelerationMetric accelerationMetric,
                         @Nonnull final EHyperBand hyperBand) {
-        Preconditions.checkNotNull(accelerationValue, "coordinate shouldn't be null!");
+        Preconditions.checkNotNull(value, "coordinate shouldn't be null!");
         Preconditions.checkNotNull(accelerationMetric, "lengthDefinition shouldn't be null!");
         Preconditions.checkNotNull(hyperBand, "hyperBand shouldn't be null!");
 
-        this.accelerationValue = accelerationValue;
+        this.value = value;
         this.accelerationMetric = accelerationMetric;
         this.hyperBand = hyperBand;
     }
 
-    public Acceleration(final double accelerationValue, @Nonnull final EAccelerationMetric accelerationMetric) {
+    public Acceleration(final double value, @Nonnull final EAccelerationMetric accelerationMetric) {
         Preconditions.checkNotNull(accelerationMetric, "lengthDefinition shouldn't be null!");
 
-        this.accelerationValue = BigDecimal.valueOf(accelerationValue);
+        this.value = BigDecimal.valueOf(value);
         this.accelerationMetric = accelerationMetric;
         this.hyperBand = EHyperBand.NONE;
     }
@@ -81,8 +81,8 @@ public class Acceleration implements Cloneable, Comparable<Acceleration> {
 
     @Nonnull
     @JsonIgnore
-    public BigDecimal getAccelerationValue() {
-        return accelerationValue;
+    public BigDecimal getValue() {
+        return value;
     }
 
     @Nonnull
@@ -102,7 +102,7 @@ public class Acceleration implements Cloneable, Comparable<Acceleration> {
     @Nonnull
     @JsonIgnore
     public String asString() {
-        return accelerationValue + " " + accelerationMetric + " " + hyperBand;
+        return value + " " + accelerationMetric + " " + hyperBand;
     }
 
     @Override
@@ -116,10 +116,10 @@ public class Acceleration implements Cloneable, Comparable<Acceleration> {
         Preconditions.checkNotNull(targetMetric, "targetMetric shouldn't be null!");
 
         if (accelerationMetric == targetMetric) {
-            return accelerationValue;
+            return value;
         }
         final BigDecimal factor = accelerationMetric.getConversionFactor(targetMetric);
-        return accelerationValue.multiply(factor);
+        return value.multiply(factor);
     }
 
     /**
@@ -150,7 +150,7 @@ public class Acceleration implements Cloneable, Comparable<Acceleration> {
     @Nonnull
     @JsonIgnore
     public Acceleration negate() {
-        return new Acceleration(accelerationValue.negate(), accelerationMetric, hyperBand);
+        return new Acceleration(value.negate(), accelerationMetric, hyperBand);
     }
 
     @Override
@@ -162,13 +162,13 @@ public class Acceleration implements Cloneable, Comparable<Acceleration> {
 
         final Acceleration distance = (Acceleration) o;
 
-        return new EqualsBuilder().append(accelerationValue, distance.accelerationValue).append(accelerationMetric, distance.accelerationMetric).isEquals();
+        return new EqualsBuilder().append(value, distance.value).append(accelerationMetric, distance.accelerationMetric).isEquals();
     }
 
     @Override
     @JsonIgnore
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(accelerationValue).append(accelerationMetric).toHashCode();
+        return new HashCodeBuilder(17, 37).append(value).append(accelerationMetric).toHashCode();
     }
 
     @Override

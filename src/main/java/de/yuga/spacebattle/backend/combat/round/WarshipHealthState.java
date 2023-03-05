@@ -10,7 +10,7 @@ import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.enums.EHitArea;

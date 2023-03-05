@@ -7,7 +7,7 @@ import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.apache.commons.lang3.builder.EqualsBuilder;

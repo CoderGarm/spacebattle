@@ -2,7 +2,7 @@ package de.yuga.spacebattle.backend.combat.round;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AmmunitionFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;

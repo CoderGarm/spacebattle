@@ -2,9 +2,9 @@ package de.yuga.spacebattle.backend.validators;
 
 import de.yuga.spacebattle.TestDataProviderUtils;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AmmunitionFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Armor;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;

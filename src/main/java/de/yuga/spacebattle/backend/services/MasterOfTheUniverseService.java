@@ -26,9 +26,9 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.MissileMotor;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Warhead;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AmmunitionFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
@@ -406,57 +406,57 @@ public class MasterOfTheUniverseService {
         Research unlockPropulsion = research("Speed", "The Speed research researches sub light ...", 1, ETechLevel.TECH_I, null);
         Research unlockFTLPropulsion = research("FTL Speed", "The FTL Speed research researches FTL ...", 1, ETechLevel.TECH_I, null);
         final Research freighterFTL = unlockFTLPropulsion;
-        Propulsion propulsionFTL = moduleService.createPropulsion("Light cruiser FTL drive Mk I", "The light cruiser FTL drive.", unlockFTLPropulsion, 7, 500, EHullType.CL, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(M_CREW, EDepositType.COSTS));
+        Propulsion propulsionFTL = moduleService.createPropulsion("Light cruiser FTL drive Mk I", "The light cruiser FTL drive.", unlockFTLPropulsion, 7, 558, EHullType.CL, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(M_CREW, EDepositType.COSTS));
         propulsionFTL.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Leichte Kreuzer Überlichtantrieb Mk I");
         propulsionFTL.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für leichte Kreuzer.");
         moduleService.save(propulsionFTL);
 
-        Propulsion propulsion = moduleService.createPropulsion("Light attack craft sub-light drive Mk I", "LAC drive", unlockPropulsion, 2, 500, EHullType.LAC, ETechLevel.TECH_I, EHyperBand.NONE, ETechnologyType.MILITARY, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+        Propulsion propulsion = moduleService.createPropulsion("Light attack craft sub-light drive Mk I", "LAC drive", unlockPropulsion, 2, 558, EHullType.LAC, ETechLevel.TECH_I, EHyperBand.NONE, ETechnologyType.MILITARY, new CrewRequirement(XS_CREW, EDepositType.COSTS));
         propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Unterlichtantrieb für leichte Angriffsboote");
         propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Unterlichtantrieb für leichte Angriffsboote.");
         moduleService.save(propulsion);
 
-        propulsion = moduleService.createPropulsion("Corvette FTL drive Mk I", "Corvette FTL drive", unlockFTLPropulsion, 3, 500, EHullType.VT, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(S_CREW, EDepositType.COSTS));
+        propulsion = moduleService.createPropulsion("Corvette FTL drive Mk I", "Corvette FTL drive", unlockFTLPropulsion, 3, 558, EHullType.VT, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(S_CREW, EDepositType.COSTS));
         propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Korvetten");
         propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Korvetten.");
         moduleService.save(propulsion);
 
-        propulsion = moduleService.createPropulsion("Frigate FTL drive Mk I", "Frigate FTL drive", unlockFTLPropulsion, 5, 500, EHullType.FG, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(S_CREW, EDepositType.COSTS));
+        propulsion = moduleService.createPropulsion("Frigate FTL drive Mk I", "Frigate FTL drive", unlockFTLPropulsion, 5, 558, EHullType.FG, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(S_CREW, EDepositType.COSTS));
         propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Fregatten");
         propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Fregatten.");
         moduleService.save(propulsion);
 
         unlockFTLPropulsion = research("Cruiser FTL drive", "The cruiser FTL drive research.", 1, ETechLevel.TECH_I, unlockFTLPropulsion);
-        propulsion = moduleService.createPropulsion("Cruiser FTL drive Mk I", "Cruiser FTL drive", unlockFTLPropulsion, 9, 500, EHullType.CA, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(M_CREW, EDepositType.COSTS));
+        propulsion = moduleService.createPropulsion("Cruiser FTL drive Mk I", "Cruiser FTL drive", unlockFTLPropulsion, 9, 558, EHullType.CA, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(M_CREW, EDepositType.COSTS));
         propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Kreuzer");
         propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Kreuzer.");
         moduleService.save(propulsion);
 
         unlockFTLPropulsion = research("Battlecruiser FTL drive", "The battlecruiser FTL drive research.", 1, ETechLevel.TECH_I, unlockFTLPropulsion);
-        propulsion = moduleService.createPropulsion("Battlecruiser FTL drive Mk I", "Battlecruiser FTL drive", unlockFTLPropulsion, 30, 500, EHullType.BC, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(L_CREW, EDepositType.COSTS));
+        propulsion = moduleService.createPropulsion("Battlecruiser FTL drive Mk I", "Battlecruiser FTL drive", unlockFTLPropulsion, 30, 558, EHullType.BC, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(L_CREW, EDepositType.COSTS));
         propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Schlachtkreuzer");
         propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Schlachtkreuzer.");
         moduleService.save(propulsion);
 
         unlockFTLPropulsion = research("Battleship FTL drive", "The battleship FTL drive research.", 1, ETechLevel.TECH_I, unlockFTLPropulsion);
-        propulsion = moduleService.createPropulsion("Battleship FTL drive Mk I", "Battleship FTL drive", unlockFTLPropulsion, 40, 500, EHullType.BB, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(XL_CREW, EDepositType.COSTS));
+        propulsion = moduleService.createPropulsion("Battleship FTL drive Mk I", "Battleship FTL drive", unlockFTLPropulsion, 40, 558, EHullType.BB, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(XL_CREW, EDepositType.COSTS));
         propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Schlachtschiffe");
         propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Schlachtschiffe.");
         moduleService.save(propulsion);
 
         unlockFTLPropulsion = research("Dreadnought FTL drive", "The dreadnought FTL drive research.", 1, ETechLevel.TECH_I, unlockFTLPropulsion);
-        propulsion = moduleService.createPropulsion("Dreadnought FTL drive Mk I", "Dreadnought FTL drive", unlockFTLPropulsion, 240, 500, EHullType.DN, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
+        propulsion = moduleService.createPropulsion("Dreadnought FTL drive Mk I", "Dreadnought FTL drive", unlockFTLPropulsion, 240, 558, EHullType.DN, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
         propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Dreadnoughts");
         propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Dreadnoughts.");
         moduleService.save(propulsion);
 
         unlockFTLPropulsion = research("Superdreadnought FTL drive", "The superdreadnought FTL drive research.", 1, ETechLevel.TECH_I, unlockFTLPropulsion);
-        propulsion = moduleService.createPropulsion("Superdreadnought FTL drive Mk I", "Superdreadnought FTL drive", unlockFTLPropulsion, 320, 500, EHullType.SD, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
+        propulsion = moduleService.createPropulsion("Superdreadnought FTL drive Mk I", "Superdreadnought FTL drive", unlockFTLPropulsion, 320, 558, EHullType.SD, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.MILITARY, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
         propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Superdreadnoughts");
         propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Superdreadnoughts.");
         moduleService.save(propulsion);
 
-        propulsion = moduleService.createPropulsion("Freighter FTL drive Mk I", "Freighter FTL drive", freighterFTL, 250, 500, EHullType.FR, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.CIVIL, new CrewRequirement(M_CREW, EDepositType.COSTS));
+        propulsion = moduleService.createPropulsion("Freighter FTL drive Mk I", "Freighter FTL drive", freighterFTL, 250, 558, EHullType.FR, ETechLevel.TECH_I, EHyperBand.DELTA, ETechnologyType.CIVIL, new CrewRequirement(M_CREW, EDepositType.COSTS));
         propulsion.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Überlichtantrieb für Frachter");
         propulsion.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Überlichtantrieb für Frachter.");
         moduleService.save(propulsion);

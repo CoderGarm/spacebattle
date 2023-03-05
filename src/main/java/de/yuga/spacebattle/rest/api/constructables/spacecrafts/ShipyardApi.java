@@ -10,6 +10,7 @@ import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassS
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
+import de.yuga.spacebattle.rest.dto.spacecrafts.PropulsionCapacity;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClassMock;
 import io.swagger.v3.oas.annotations.Operation;
@@ -164,8 +165,7 @@ public class ShipyardApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> checkClassName(
-            @PathVariable("className") final String className) {
+    public ResponseEntity<?> checkClassName(@PathVariable("className") final String className) {
 
         if (StringUtils.isBlank(className) || className.trim().length() < 3 || className.trim().length() > 30) {
             throw new NotifyWebUserException("The name of the class did not suit the requirements.");
@@ -202,5 +202,20 @@ public class ShipyardApi extends BaseApi {
     )
     public ResponseEntity<?> getEModuleTypes() {
         return ResponseEntity.ok(Arrays.stream(EModuleType.values()).map(de.yuga.spacebattle.rest.dto.enums.EModuleType::new).collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = "propulsionCapacity/{idHull}/{idPropulsion}")
+    @Operation(summary = "Calculates the ability of the propulsion to move the hull.", operationId = "getPropulsionCapacity",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = PropulsionCapacity.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getPropulsionCapacity(@PathVariable("idHull") final int idHull, @PathVariable("idPropulsion") final int idPropulsion) {
+        return ResponseEntity.ok(shipClassCreationService.getPropulsionCapacity(idHull, idPropulsion));
     }
 }

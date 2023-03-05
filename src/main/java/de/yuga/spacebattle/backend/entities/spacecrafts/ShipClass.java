@@ -4,16 +4,19 @@ package de.yuga.spacebattle.backend.entities.spacecrafts;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.combat.dto.RangeDefinition;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AmmunitionFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
+import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
+import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
 import de.yuga.spacebattle.backend.validators.ShipValidator;
 
 import javax.annotation.Nonnull;
@@ -23,6 +26,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -38,6 +43,8 @@ import java.util.stream.Collectors;
 @Table(name = "shipClass")
 @AttributeOverride(name = "id", column = @Column(name = "idShipClass"))
 public class ShipClass extends Deletable {
+
+    private final static MathContext MATH_CONTEXT = new MathContext(8, RoundingMode.DOWN);
 
     @Nonnull
     @NotNull
@@ -642,5 +649,52 @@ public class ShipClass extends Deletable {
             default:
                 return 0;
         }
+    }
+
+    @Nonnull
+    public Acceleration getAcceleration(@Nonnull final EHyperBand hyperBand) {
+        Preconditions.checkNotNull(hyperBand, "hyperBand must not be empty");
+
+        final EModuleType eModuleType = hyperBand == EHyperBand.NONE ? EModuleType.PROPULSION : EModuleType.FTLPROPULSION;
+        final double propulsionSupportFactor = getSupportFittings().stream()
+                .filter(s -> eModuleType == s.getPassiveModule().getSupportType().getModifiedProperty())
+                .findAny().stream()
+                .map(SupportFitting::getAbsoluteValueAsFactor).reduce(0D, Double::sum);
+        final BigDecimal factor = BigDecimal.ONE.add(new BigDecimal(propulsionSupportFactor));
+        final BigDecimal accelerationValue = getMathematicallyAcceleration(hyperBand).multiply(factor, ResourceDeposit.MATH_CONTEXT_INTEGER);
+        return new Acceleration(accelerationValue, EAccelerationMetric.G, hyperBand);
+    }
+
+    @Nonnull
+    private BigDecimal getMathematicallyAcceleration(@Nonnull final EHyperBand hyperBand) {
+        Preconditions.checkNotNull(hyperBand, "hyperBand must not be empty");
+
+        if (getPropulsion() == null || getHull() == null) {
+            return BigDecimal.ZERO;
+        }
+
+        if (getPropulsion().getHyperBand().getVelocityMultiplier() < hyperBand.getVelocityMultiplier()) {
+            return BigDecimal.ZERO;
+        }
+
+        //y = 558.1465 - 0.0001075032*x + 7.261618e-11*x^2 - 2.1753440000000002e-17*x^3 + 2.786797e-24*x^4 - 1.275354e-31*x^5
+        final BigDecimal a = BigDecimal.valueOf(getPropulsion().getEffectValue());
+        final List<BigDecimal> paramList = List.of(
+                BigDecimal.valueOf(-0.0001075032),
+                BigDecimal.valueOf(7.261618).scaleByPowerOfTen(-11),
+                BigDecimal.valueOf(-2.175344).scaleByPowerOfTen(-17),
+                BigDecimal.valueOf(2.786797).scaleByPowerOfTen(-24),
+                BigDecimal.valueOf(-1.275354).scaleByPowerOfTen(-31)
+        );
+
+        final BigDecimal x = BigDecimal.valueOf(getHull().getTonnage()); /* fixme currently no influence from the tonnage */
+        BigDecimal result = a;
+        for (int i = 0; i < paramList.size(); i++) {
+            final BigDecimal coefficient = paramList.get(i);
+            final BigDecimal inBetween = coefficient.multiply(x.pow(i + 1), MATH_CONTEXT);
+            result = result.add(inBetween);
+        }
+        result = result.setScale(0, RoundingMode.HALF_EVEN);
+        return result.multiply(BigDecimal.valueOf(hyperBand.getVelocityMultiplier()), MATH_CONTEXT);
     }
 }

@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.rest.dto.spacecrafts.details;
+package de.yuga.spacebattle.rest.dto.spacecrafts.fittings;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.AmmunitionModule;
@@ -28,7 +28,7 @@ public class AmmunitionFitting {
     public AmmunitionFitting() {
     }
 
-    public AmmunitionFitting(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting ammunitionFitting,
+    public AmmunitionFitting(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AmmunitionFitting ammunitionFitting,
                              @Nonnull final String languageCode) {
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(ammunitionFitting, "ammunitionFitting shouldn't be null!");

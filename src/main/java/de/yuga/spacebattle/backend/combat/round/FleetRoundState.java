@@ -15,7 +15,7 @@ import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;

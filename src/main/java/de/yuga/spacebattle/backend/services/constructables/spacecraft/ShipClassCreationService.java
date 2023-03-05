@@ -2,6 +2,8 @@ package de.yuga.spacebattle.backend.services.constructables.spacecraft;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.SpacecraftCalculator;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
+import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
@@ -14,6 +16,9 @@ import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
+import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
+import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
+import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.spacecraft.HullService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
@@ -21,9 +26,10 @@ import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapabilities;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapacityAreas;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstructionSelection;
-import de.yuga.spacebattle.rest.dto.spacecrafts.details.AlignedFitting;
-import de.yuga.spacebattle.rest.dto.spacecrafts.details.AmmunitionFitting;
-import de.yuga.spacebattle.rest.dto.spacecrafts.details.SupportFitting;
+import de.yuga.spacebattle.rest.dto.spacecrafts.PropulsionCapacity;
+import de.yuga.spacebattle.rest.dto.spacecrafts.fittings.AlignedFitting;
+import de.yuga.spacebattle.rest.dto.spacecrafts.fittings.AmmunitionFitting;
+import de.yuga.spacebattle.rest.dto.spacecrafts.fittings.SupportFitting;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.AmmunitionModule;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.PassiveModule;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.Weapon;
@@ -34,6 +40,7 @@ import javax.annotation.Nonnull;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -197,11 +204,11 @@ public class ShipClassCreationService {
                 moduleService.findAmmunitionModulesById(ammunitionModulesById).stream()
                         .collect(Collectors.toMap(de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule::getId, Function.identity()));
 
-        final Set<de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting> ammunitionFittings = shipClass.getAmmunitionFittings().stream().map(ammunitionFitting -> {
+        final Set<de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AmmunitionFitting> ammunitionFittings = shipClass.getAmmunitionFittings().stream().map(ammunitionFitting -> {
             final int idModule = ammunitionFitting.getAmmunitionModule().getBaseModule().getIdModule();
             final de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule ammunitionModule = integerAmmunitionModuleMap.get(idModule);
             final int amount = ammunitionFitting.getAmount();
-            return new de.yuga.spacebattle.backend.entities.spacecrafts.details.AmmunitionFitting(ammunitionModule, amount);
+            return new de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AmmunitionFitting(ammunitionModule, amount);
         }).collect(Collectors.toSet());
         entity.setAmmunitionFittings(ammunitionFittings);
     }
@@ -227,11 +234,11 @@ public class ShipClassCreationService {
                 moduleService.findPassiveModulesById(passiveModulesById).stream()
                         .collect(Collectors.toMap(de.yuga.spacebattle.backend.entities.spacecrafts.modules.PassiveModule::getId, Function.identity()));
 
-        final Set<de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting> passiveFittings = shipClass.getSupportFittings().stream().map(passiveFitting -> {
+        final Set<de.yuga.spacebattle.backend.entities.spacecrafts.fittings.SupportFitting> passiveFittings = shipClass.getSupportFittings().stream().map(passiveFitting -> {
             final int idModule = passiveFitting.getPassiveModule().getBaseModule().getIdModule();
             final de.yuga.spacebattle.backend.entities.spacecrafts.modules.PassiveModule passiveModule = integerPassiveModuleMap.get(idModule);
             final int amount = passiveFitting.getAmount();
-            return new de.yuga.spacebattle.backend.entities.spacecrafts.details.SupportFitting(passiveModule, amount);
+            return new de.yuga.spacebattle.backend.entities.spacecrafts.fittings.SupportFitting(passiveModule, amount);
         }).collect(Collectors.toSet());
         entity.setSupportFittings(passiveFittings);
     }
@@ -269,18 +276,18 @@ public class ShipClassCreationService {
                 .findLaunchersById(launcherModulesById).stream()
                 .collect(Collectors.toMap(de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher::getId, Function.identity()));
 
-        final Set<de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting> weaponFittings = shipClass.getFittings().stream().map(weaponFitting -> {
+        final Set<de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting> weaponFittings = shipClass.getFittings().stream().map(weaponFitting -> {
             final int amount = weaponFitting.getAmount();
             final EWeaponAlignment weaponAlignment = weaponFitting.getWeaponAlignment();
             if (weaponFitting.getWeapon() != null) {
                 final int idModule = weaponFitting.getWeapon().getBaseModule().getIdModule();
                 final de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon weaponModule = integerWeaponModuleMap.get(idModule);
-                return new de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting(weaponAlignment, weaponModule, amount);
+                return new de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting(weaponAlignment, weaponModule, amount);
             }
             if (weaponFitting.getLauncher() != null) {
                 final int idModule = weaponFitting.getLauncher().getBaseModule().getIdModule();
                 final de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher launcherModule = integerLauncherModuleMap.get(idModule);
-                return new de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting(weaponAlignment, launcherModule, amount);
+                return new de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting(weaponAlignment, launcherModule, amount);
             }
             throw new NotifyWebUserException("There should be always one weapon system in the fitting!");
         }).collect(Collectors.toSet());
@@ -342,5 +349,28 @@ public class ShipClassCreationService {
 
         final ShipClass entity = mapShipClassMockToEntity(shipClass, new ShipClass());
         return new SpacecraftCalculator().getSpacecraftCapacityAreas(entity);
+    }
+
+    public List<PropulsionCapacity> getPropulsionCapacity(final int idHull, final int idPropulsion) {
+
+        final Hull hull = hullService.find(idHull);
+        Preconditions.checkNotNull(hull, "hull must not be empty");
+        final Propulsion propulsion = moduleService.findPropulsionById(idPropulsion);
+        Preconditions.checkNotNull(propulsion, "propulsion must not be empty");
+
+        final ShipClass shipClass = new ShipClass();
+        shipClass.setHull(hull);
+        shipClass.setPropulsion(propulsion);
+
+        final ArrayList<PropulsionCapacity> result = new ArrayList<>();
+        for (final EHyperBand hyperBand : EHyperBand.values()) {
+            final Acceleration acceleration = shipClass.getAcceleration(hyperBand);
+            Velocity velocity = Velocity.ZERO;
+            if (acceleration.getValue().compareTo(BigDecimal.ZERO) != 0) {
+                velocity = new Velocity(hyperBand.getEffectiveTopSpeed(propulsion.getTechnologyType()), EDistanceMetric.M, ETimeMetric.SECOND);
+            }
+            result.add(new PropulsionCapacity(acceleration, velocity));
+        }
+        return result;
     }
 }

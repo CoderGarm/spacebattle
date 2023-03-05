@@ -1,9 +1,9 @@
 package de.yuga.spacebattle.rest.dto.spacecrafts;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.yuga.spacebattle.rest.dto.spacecrafts.details.AlignedFitting;
-import de.yuga.spacebattle.rest.dto.spacecrafts.details.AmmunitionFitting;
-import de.yuga.spacebattle.rest.dto.spacecrafts.details.SupportFitting;
+import de.yuga.spacebattle.rest.dto.spacecrafts.fittings.AlignedFitting;
+import de.yuga.spacebattle.rest.dto.spacecrafts.fittings.AmmunitionFitting;
+import de.yuga.spacebattle.rest.dto.spacecrafts.fittings.SupportFitting;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.Armor;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.ElectronicWarfare;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.Propulsion;

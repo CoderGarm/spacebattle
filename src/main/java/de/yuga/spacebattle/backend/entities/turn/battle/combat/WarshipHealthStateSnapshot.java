@@ -6,7 +6,7 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.misc.Operationable;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
-import de.yuga.spacebattle.backend.entities.spacecrafts.details.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import org.apache.commons.lang3.builder.EqualsBuilder;

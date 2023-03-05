@@ -26,8 +26,8 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
 
     @Nonnull
     @JsonProperty
-    @Schema(required = true, description = "The value of this distance.")
-    private BigDecimal coordinate;
+    @Schema(required = true, description = "The value of this velocity.")
+    private BigDecimal value;
 
     @Nonnull
     @JsonProperty
@@ -42,44 +42,44 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
     public Velocity() {
     }
 
-    public Velocity(final int coordinate,
+    public Velocity(final int value,
                     @Nonnull final EDistanceMetric distanceMetric,
                     @Nonnull final ETimeMetric timeMetric) {
         Preconditions.checkNotNull(distanceMetric, "distanceMetric shouldn't be null!");
         Preconditions.checkNotNull(timeMetric, "timeMetric shouldn't be null!");
 
-        this.coordinate = BigDecimal.valueOf(coordinate);
+        this.value = BigDecimal.valueOf(value);
         this.distanceMetric = distanceMetric;
         this.timeMetric = timeMetric;
     }
 
-    public Velocity(final double coordinate,
+    public Velocity(final double value,
                     @Nonnull final EDistanceMetric distanceMetric,
                     @Nonnull final ETimeMetric timeMetric) {
         Preconditions.checkNotNull(distanceMetric, "distanceMetric shouldn't be null!");
         Preconditions.checkNotNull(timeMetric, "timeMetric shouldn't be null!");
 
-        this.coordinate = BigDecimal.valueOf(coordinate);
+        this.value = BigDecimal.valueOf(value);
         this.distanceMetric = distanceMetric;
         this.timeMetric = timeMetric;
     }
 
-    public Velocity(@Nonnull final BigDecimal coordinate,
+    public Velocity(@Nonnull final BigDecimal value,
                     @Nonnull final EDistanceMetric distanceMetric,
                     @Nonnull final ETimeMetric timeMetric) {
-        Preconditions.checkNotNull(coordinate, "coordinate shouldn't be null!");
+        Preconditions.checkNotNull(value, "coordinate shouldn't be null!");
         Preconditions.checkNotNull(distanceMetric, "distanceMetric shouldn't be null!");
         Preconditions.checkNotNull(timeMetric, "timeMetric shouldn't be null!");
 
-        this.coordinate = coordinate;
+        this.value = value;
         this.distanceMetric = distanceMetric;
         this.timeMetric = timeMetric;
     }
 
     @Nonnull
     @JsonIgnore
-    public BigDecimal getCoordinate() {
-        return coordinate;
+    public BigDecimal getValue() {
+        return value;
     }
 
     @Nonnull
@@ -102,12 +102,12 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
         Preconditions.checkNotNull(targetTimeMetric, "targetTimeMetric shouldn't be null!");
 
         if (distanceMetric == targetDistanceMetric && timeMetric == targetTimeMetric) {
-            return coordinate;
+            return value;
         }
-        final int scale = coordinate.scale();
+        final int scale = value.scale();
         final BigDecimal distanceMetricConversionFactor = distanceMetric.getConversionFactor(targetDistanceMetric);
         final BigDecimal timeMetricConversionFactor = timeMetric.getConversionFactor(targetTimeMetric);
-        return coordinate.multiply(distanceMetricConversionFactor)
+        return value.multiply(distanceMetricConversionFactor)
                 .multiply(timeMetricConversionFactor, new MathContext(scale, RoundingMode.HALF_UP));
     }
 
@@ -118,7 +118,7 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
         Preconditions.checkNotNull(targetDistanceMetric, "targetDistanceMetric shouldn't be null!");
         Preconditions.checkNotNull(targetTimeMetric, "targetTimeMetric shouldn't be null!");
 
-        this.coordinate = getCoordinateInMetric(targetDistanceMetric, targetTimeMetric);
+        this.value = getCoordinateInMetric(targetDistanceMetric, targetTimeMetric);
         this.distanceMetric = targetDistanceMetric;
         this.timeMetric = targetTimeMetric;
         return this;
@@ -140,7 +140,7 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
     @Override
     @JsonIgnore
     public String toString() {
-        return coordinate + " " + distanceMetric + "/" + timeMetric;
+        return value + " " + distanceMetric + "/" + timeMetric;
     }
 
     @Override
@@ -159,7 +159,7 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
     @Override
     @JsonIgnore
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(coordinate).append(distanceMetric).toHashCode();
+        return new HashCodeBuilder(17, 37).append(value).append(distanceMetric).toHashCode();
     }
 
     @Override
@@ -167,7 +167,7 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
     public Velocity clone() {
         try {
             final Velocity clone = (Velocity) super.clone();
-            clone.coordinate = new BigDecimal(coordinate.toString());
+            clone.value = new BigDecimal(value.toString());
             clone.distanceMetric = EDistanceMetric.getByName(distanceMetric.name());
             clone.timeMetric = ETimeMetric.getByName(timeMetric.name());
             return clone;
@@ -190,9 +190,9 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
     public int compareTo(@Nonnull final Velocity that) {
         Preconditions.checkNotNull(that, "that shouldn't be null!");
 
-        if (getCoordinate().compareTo(BigDecimal.ZERO) == 0 || that.getCoordinate().compareTo(BigDecimal.ZERO) == 0) {
+        if (getValue().compareTo(BigDecimal.ZERO) == 0 || that.getValue().compareTo(BigDecimal.ZERO) == 0) {
             // if one value is zero than just compare the values
-            return getCoordinate().compareTo(that.getCoordinate());
+            return getValue().compareTo(that.getValue());
         }
 
         final BigDecimal thisValue;
@@ -201,11 +201,11 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
             // convert values to the same scale if different
             final EDistanceMetric distanceMetric = EDistanceMetric.M;
             final ETimeMetric timeMetric = ETimeMetric.SECOND;
-            thisValue = getInMetricWithScale(distanceMetric, timeMetric).getCoordinate();
-            thatValue = that.getInMetricWithScale(distanceMetric, timeMetric).getCoordinate();
+            thisValue = getInMetricWithScale(distanceMetric, timeMetric).getValue();
+            thatValue = that.getInMetricWithScale(distanceMetric, timeMetric).getValue();
         } else {
-            thisValue = getCoordinate();
-            thatValue = that.getCoordinate();
+            thisValue = getValue();
+            thatValue = that.getValue();
         }
         return new OnePercentComparator().compare(thisValue, thatValue);
     }
@@ -216,7 +216,7 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
         Preconditions.checkNotNull(o, "o shouldn't be null!");
 
         final BigDecimal additional = o.getCoordinateInMetric(distanceMetric, timeMetric);
-        return new Velocity(coordinate.add(additional), distanceMetric, timeMetric);
+        return new Velocity(value.add(additional), distanceMetric, timeMetric);
     }
 
     @Nonnull
@@ -225,7 +225,7 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
         Preconditions.checkNotNull(o, "o shouldn't be null!");
 
         final BigDecimal subtrahend = o.getCoordinateInMetric(distanceMetric, timeMetric);
-        return new Velocity(coordinate.subtract(subtrahend), distanceMetric, timeMetric);
+        return new Velocity(value.subtract(subtrahend), distanceMetric, timeMetric);
     }
 
     /**
@@ -279,7 +279,7 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
     public Velocity multiply(@Nonnull final BigDecimal multiplier) {
         Preconditions.checkNotNull(multiplier, "multiplier shouldn't be null!");
 
-        return new Velocity(coordinate.multiply(multiplier), distanceMetric, timeMetric);
+        return new Velocity(value.multiply(multiplier), distanceMetric, timeMetric);
     }
 
     /**

@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.backend.entities.spacecrafts.details;
+package de.yuga.spacebattle.backend.entities.spacecrafts.fittings;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule;

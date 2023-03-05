@@ -4,18 +4,22 @@ import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static de.yuga.spacebattle.TestDataProviderUtils.*;
 import static de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric.G;
 import static de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric.MS2;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AccelerationTest {
 
@@ -56,5 +60,38 @@ class AccelerationTest {
                                final Distance expectation) {
         final Distance result = acceleration.getDistanceByTime(duration, velocity, targetMetric);
         assertThat(result, Matchers.comparesEqualTo(expectation));
+    }
+
+    private final static MathContext MATH_CONTEXT = new MathContext(8, RoundingMode.DOWN);
+
+    @Test
+    void testAccelerationCalculationByMass() {
+        final int[] civilAcceleration = {190, 207, 215, 230, 240, 253};
+
+        final int[] tons = {8500000, 7000000, 4500000, 1500000, 500000, 80000};
+        final int[] militaryAcceleration = {420, 450, 470, 500, 520, 550};
+
+        final BigDecimal a = BigDecimal.valueOf(558); // Antriebswert
+
+        final List<BigDecimal> paramList = List.of(
+                BigDecimal.valueOf(-0.0001075032),
+                BigDecimal.valueOf(7.261618).scaleByPowerOfTen(-11),
+                BigDecimal.valueOf(-2.175344).scaleByPowerOfTen(-17),
+                BigDecimal.valueOf(2.786797).scaleByPowerOfTen(-24),
+                BigDecimal.valueOf(-1.275354).scaleByPowerOfTen(-31)
+        );
+
+        //y = 558.1465 - 0.0001075032*x + 7.261618e-11*x^2 - 2.1753440000000002e-17*x^3 + 2.786797e-24*x^4 - 1.275354e-31*x^5
+
+        for (int j = 0; j < tons.length; j++) {
+            final BigDecimal x = BigDecimal.valueOf(tons[j]);
+            BigDecimal result = a;
+            for (int i = 0; i < paramList.size(); i++) {
+                final BigDecimal coefficient = paramList.get(i);
+                final BigDecimal inBetween = coefficient.multiply(x.pow(i + 1), MATH_CONTEXT);
+                result = result.add(inBetween);
+            }
+            assertEquals(result.setScale(0, RoundingMode.HALF_EVEN).intValue(), militaryAcceleration[j]);
+        }
     }
 }

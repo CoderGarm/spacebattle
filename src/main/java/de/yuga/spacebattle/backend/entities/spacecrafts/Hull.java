@@ -100,6 +100,10 @@ public class Hull extends HasCosts {
         return overallConstructionCapacity;
     }
 
+    public int getTonnage() {
+        return overallConstructionCapacity * 1000;
+    }
+
     public int getConstructionCapacity() {
         return constructionCapacity;
     }
