@@ -22,6 +22,7 @@ import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.repositories.turn.TickRepository;
+import de.yuga.spacebattle.backend.services.MailService;
 import de.yuga.spacebattle.backend.services.caches.ColonizationCache;
 import de.yuga.spacebattle.backend.services.caches.FleetMovementCache;
 import de.yuga.spacebattle.backend.services.caches.OperationalCache;
@@ -33,7 +34,6 @@ import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
 import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStateService;
-import de.yuga.spacebattle.rest.api.error.LogInfo;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,6 +106,9 @@ public class TickService {
     @Nonnull
     private final BattleService battleService;
 
+    @Nonnull
+    private final MailService mailService;
+
     private boolean isTicking = false;
 
     @Autowired
@@ -123,7 +126,8 @@ public class TickService {
                        @Nonnull final ColonizationService colonizationService,
                        @Nonnull final WarShipService warShipService,
                        @Nonnull final WarshipHealthStateService warshipHealthStateService,
-                       @Nonnull final BattleService battleService) {
+                       @Nonnull final BattleService battleService,
+                       @Nonnull final MailService mailService) {
         this.transportationCache = Preconditions.checkNotNull(transportationCache, "transportationCache must not be empty");
         this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
         this.colonizationCache = Preconditions.checkNotNull(colonizationCache, "colonizationCache must not be empty");
@@ -139,6 +143,7 @@ public class TickService {
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.warshipHealthStateService = Preconditions.checkNotNull(warshipHealthStateService, "warshipHealthStateService must not be empty");
         this.battleService = Preconditions.checkNotNull(battleService, "battleService must not be empty");
+        this.mailService = Preconditions.checkNotNull(mailService, "mailService must not be empty");
     }
 
     @PostConstruct
@@ -152,11 +157,11 @@ public class TickService {
         doTick();
     }
 
-    @Nonnull
     @Transactional(propagation = Propagation.REQUIRED)
-    public Tick doTick() {
+    public void doTick() {
+        final long startB = Calendar.getInstance().getTimeInMillis();
+
         try {
-            final long startB = Calendar.getInstance().getTimeInMillis();
             LOGGER.info("Tick scheduled");
             // block all rest endpoints while ticking
             isTicking = true;
@@ -176,17 +181,17 @@ public class TickService {
             LOGGER.info(start + " battles.");
             battleService.runBattles(today);
             LOGGER.info("Tick done.");
-
+        } catch (final Exception ex) {
+            mailService.sendExceptionMail(ex);
+            throw ex;
+        } finally {
             today.setTickEnds(LocalDateTime.now());
-            final Tick tick = tickRepository.save(today);
+            tickRepository.save(today);
             LOGGER.info("Tick has processed!");
             final long end = Calendar.getInstance().getTimeInMillis();
             final long duration = (end - startB) / 1000;
             LOGGER.info("{} takes {} seconds", today, duration);
-            return tick;
-        } finally {
             isTicking = false;
-            throw new NotifyWebUserException("yeah coole test", new LogInfo("stringAA").appendLN("huhu hallo").appendLN("new line"));
         }
     }
 

@@ -106,8 +106,8 @@ public class AdminApi extends BaseApi {
     )
     public ResponseEntity<?> doTick() {
         LOGGER.info("Tick initialized");
-        final de.yuga.spacebattle.backend.entities.turn.Tick now = tickController.doTick();
-        return ResponseEntity.ok(new Tick(now));
+        tickController.doTick();
+        return ResponseEntity.ok(new Tick(tickController.getToday()));
     }
 
     @GetMapping(value = "/translations")
