@@ -14,3 +14,4 @@ fi
 
 # shellcheck disable=SC2024
 sudo mysqldump sbdb > "/home/karsten/dumps/medusa_sbdb_dump_$nameComplement.sql"
+echo "dumped to: /home/karsten/dumps/medusa_sbdb_dump_$nameComplement.sql"

@@ -33,6 +33,7 @@ import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
 import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStateService;
+import de.yuga.spacebattle.rest.api.error.LogInfo;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,7 +146,8 @@ public class TickService {
         this.today = getToday();
     }
 
-    @Scheduled(cron = "0 0 0 * * *", zone = "Europe/Berlin")
+    //@Scheduled(cron = "0 0 0 * * *", zone = "Europe/Berlin")
+    @Scheduled(cron = "0 40 12 * * *", zone = "Europe/Berlin")
     protected void doIt() {
         doTick();
     }
@@ -153,35 +155,39 @@ public class TickService {
     @Nonnull
     @Transactional(propagation = Propagation.REQUIRED)
     public Tick doTick() {
-        final long startB = Calendar.getInstance().getTimeInMillis();
-        LOGGER.info("Tick scheduled");
-        // block all rest endpoints while ticking
-        isTicking = true;
-        today = tickRepository.save(new Tick());
-        LOGGER.info("Today is " + today);
-        final String start = "Start ticking";
-        LOGGER.info(start + " transportation.");
-        tickTransportations();
-        LOGGER.info(start + " migration.");
-        tickMigrations();
-        LOGGER.info(start + " planets.");
-        tickPlanets();
-        LOGGER.info(start + " movements.");
-        tickMovements();
-        LOGGER.info(start + " colonization.");
-        tickColonizations();
-        LOGGER.info(start + " battles.");
-        battleService.runBattles(today);
-        LOGGER.info("Tick done.");
+        try {
+            final long startB = Calendar.getInstance().getTimeInMillis();
+            LOGGER.info("Tick scheduled");
+            // block all rest endpoints while ticking
+            isTicking = true;
+            today = tickRepository.save(new Tick());
+            LOGGER.info("Today is " + today);
+            final String start = "Start ticking";
+            LOGGER.info(start + " transportation.");
+            tickTransportations();
+            LOGGER.info(start + " migration.");
+            tickMigrations();
+            LOGGER.info(start + " planets.");
+            tickPlanets();
+            LOGGER.info(start + " movements.");
+            tickMovements();
+            LOGGER.info(start + " colonization.");
+            tickColonizations();
+            LOGGER.info(start + " battles.");
+            battleService.runBattles(today);
+            LOGGER.info("Tick done.");
 
-        today.setTickEnds(LocalDateTime.now());
-        final Tick tick = tickRepository.save(today);
-        isTicking = false;
-        LOGGER.info("Tick has processed!");
-        final long end = Calendar.getInstance().getTimeInMillis();
-        final long duration = (end - startB) / 1000;
-        LOGGER.info("{} takes {} seconds", today, duration);
-        return tick;
+            today.setTickEnds(LocalDateTime.now());
+            final Tick tick = tickRepository.save(today);
+            LOGGER.info("Tick has processed!");
+            final long end = Calendar.getInstance().getTimeInMillis();
+            final long duration = (end - startB) / 1000;
+            LOGGER.info("{} takes {} seconds", today, duration);
+            return tick;
+        } finally {
+            isTicking = false;
+            throw new NotifyWebUserException("yeah coole test", new LogInfo("stringAA").appendLN("huhu hallo").appendLN("new line"));
+        }
     }
 
     /**

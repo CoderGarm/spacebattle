@@ -2,6 +2,8 @@ package de.yuga.spacebattle.backend.services;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +15,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 
 @Service
-public class MailService {
+public class MailService { /*fixme exception mail*/
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MailService.class);
 
@@ -48,6 +50,7 @@ public class MailService {
         sendMail(user.getEmail(), templatePasswordChange(user));
     }
 
+    @Nonnull
     private SimpleMailMessage templatePasswordChange(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
@@ -58,6 +61,7 @@ public class MailService {
         return message;
     }
 
+    @Nonnull
     private String getPasswordChangeURL(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
@@ -76,6 +80,7 @@ public class MailService {
         }
     }
 
+    @Nonnull
     private SimpleMailMessage templateMailVerification(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
@@ -86,12 +91,14 @@ public class MailService {
         return message;
     }
 
+    @Nonnull
     private String getVerificationURL(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
         return "https://www.battleforhonor.de/api/public/auth/verify/" + getUserIdentificationCode(user);
     }
 
+    @Nonnull
     private String getUserIdentificationCode(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
@@ -100,11 +107,39 @@ public class MailService {
         return hash + "-" + id;
     }
 
+    @Nonnull
     public static VerificationParameter getParametersFromVerificationCode(@Nonnull final String code) {
         Preconditions.checkNotNull(code, "code must not be empty");
 
         final String[] split = code.split("-");
         return new VerificationParameter(split[1], split[0]);
+    }
+
+    public void sendExceptionMail(@Nonnull final Exception ex) {
+        Preconditions.checkNotNull(ex, "ex must not be empty");
+
+        if (ex instanceof NotifyWebUserException && !((NotifyWebUserException) ex).isLoggingNecessary()) {
+            return;
+        }
+        final SimpleMailMessage mailException = templateMailException(ex);
+        emailSender.send(mailException);
+    }
+
+    @Nonnull
+    private SimpleMailMessage templateMailException(@Nonnull final Exception ex) {
+        Preconditions.checkNotNull(ex, "ex must not be empty");
+
+        final SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("noreply@battleforhonor.de");
+        message.setTo("webmaster@battleforhonor.de");
+        message.setSubject("Exception occurred: " + ex.getMessage());
+
+        if (ex instanceof NotifyWebUserException && ((NotifyWebUserException) ex).isLoggingNecessary()) {
+            message.setText(ex.toString());
+        }
+        message.setText(ExceptionUtils.getStackTrace(ex));
+
+        return message;
     }
 
     public static class VerificationParameter {

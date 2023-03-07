@@ -8,7 +8,7 @@ import de.yuga.spacebattle.backend.enums.ERefinementSequence;
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 
-class EducationAmountDTO {
+public class EducationAmountDTO {
 
     private final long howManyPupils;
 

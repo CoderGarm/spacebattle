@@ -9,6 +9,7 @@ import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.ERefinementSequence;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.rest.api.error.LogInfo;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -232,7 +233,7 @@ public class PopulationControlCalculator {
         final long cap = educationCapacity.getOrDefault(refinementSequence, 0L);
         if (productNeeded > productPresent) {
             final long need = productNeeded - productPresent;
-            final long free = eductPresent - eductNeeded;
+            final long free = Math.max(0, eductPresent - eductNeeded);
             long educated = Math.min(need, free);
             educated = Math.min(educated, cap);
 
@@ -304,6 +305,7 @@ public class PopulationControlCalculator {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkNotNull(educationAmountDTO, "educationAmountDTO shouldn't be null!");
 
+        final LogInfo logInfo = new LogInfo(planet);
         final EEducationType educationSource = educationAmountDTO.getEduct();
         final EEducationType educationGoal = educationAmountDTO.getProduct();
         final ResourceDeposit deposit = planet.getResourceDeposit();
@@ -311,15 +313,20 @@ public class PopulationControlCalculator {
         // just to check if the calculation went wrong
         final long sumOfPopulationBeforeEducation = deposit.getCrewRequirement().getSumOfPopulation();
         final long toUpgrade = educationAmountDTO.getHowManyPupils();
-        final long fromAmountBefore = deposit.getCrewAmountByType(educationSource);
-        final long educatedAmount = Long.min(toUpgrade, fromAmountBefore);
+        logInfo.appendLN("Education plan: " + toUpgrade + " pupils from " + educationAmountDTO.getEduct() + " to " + educationAmountDTO.getProduct());
 
-        deposit.updateCrewRequirement(educationGoal, educatedAmount);
-        deposit.updateCrewRequirement(educationSource, -educatedAmount);
-        demand.updateCrewRequirement(educationGoal, -educatedAmount);
+        final long eductAmount = deposit.getCrewAmountByType(educationSource);
+        final long toEducateAmount = Long.min(toUpgrade, eductAmount);
+        logInfo.appendLN("Found " + toEducateAmount + " pupils from educt");
 
-        if (deposit.getCrewRequirement().getSumOfPopulation() != sumOfPopulationBeforeEducation) {
-            throw new NotifyWebUserException("Oh, this should not happen while educating people.");
+        deposit.updateCrewRequirement(educationGoal, toEducateAmount);
+        deposit.updateCrewRequirement(educationSource, -toEducateAmount);
+        demand.updateCrewRequirement(educationGoal, -toEducateAmount);
+
+        final long sumOfPopulationAfterEducation = deposit.getCrewRequirement().getSumOfPopulation();
+        logInfo.appendLN("Full sum of before: " + sumOfPopulationBeforeEducation + " vs after education: " + sumOfPopulationAfterEducation);
+        if (sumOfPopulationAfterEducation != sumOfPopulationBeforeEducation) {
+            throw new NotifyWebUserException("Oh, this should not happen while educating people.", logInfo);
         }
     }
 

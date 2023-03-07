@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.rest.api.error;
 
+import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 
 import javax.annotation.Nonnull;
@@ -15,6 +16,9 @@ public class NotifyWebUserException extends RuntimeException {
 
     @Nullable
     private PayingPossibleResult payingPossibleResult;
+
+    @Nullable
+    private LogInfo logInfo;
 
     public NotifyWebUserException() {
     }
@@ -35,6 +39,13 @@ public class NotifyWebUserException extends RuntimeException {
         this.constraintViolations.addAll(constraintViolations);
     }
 
+    public NotifyWebUserException(@Nonnull final String message, @Nonnull final LogInfo logInfo) {
+        super(message);
+        Preconditions.checkNotNull(logInfo, "logInfo must not be empty");
+
+        this.logInfo = logInfo;
+    }
+
     @Nonnull
     public Set<ConstraintViolation<?>> getConstraintViolations() {
         return constraintViolations;
@@ -43,5 +54,19 @@ public class NotifyWebUserException extends RuntimeException {
     @Nullable
     public PayingPossibleResult getPayingPossibleResult() {
         return payingPossibleResult;
+    }
+
+    @Nullable
+    public LogInfo getLogInfo() {
+        return logInfo;
+    }
+
+    public boolean isLoggingNecessary() {
+        return logInfo != null;
+    }
+
+    @Override
+    public String toString() {
+        return logInfo != null ? logInfo.toString() : "";
     }
 }
