@@ -151,8 +151,7 @@ public class TickService {
         this.today = getToday();
     }
 
-    //@Scheduled(cron = "0 0 0 * * *", zone = "Europe/Berlin")
-    @Scheduled(cron = "0 40 12 * * *", zone = "Europe/Berlin")
+    @Scheduled(cron = "${sb.tick.cron}", zone = "Europe/Berlin")
     protected void doIt() {
         doTick();
     }
