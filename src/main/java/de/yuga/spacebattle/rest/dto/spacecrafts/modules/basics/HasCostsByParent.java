@@ -1,0 +1,32 @@
+package de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Preconditions;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import javax.annotation.Nonnull;
+
+@Schema(description = ".")
+public class HasCostsByParent {
+
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "Some relevant info about this module.")
+    private HasNamedTechLevel hasNamedTechLevel;
+
+    @JsonProperty
+    @Schema(required = true, description = "The percentage of the parent's module cost which represents the costs of 'this'.")
+    private int costsPercentage;
+
+    public HasCostsByParent() {
+    }
+
+    public HasCostsByParent(@Nonnull final de.yuga.spacebattle.backend.entities.misc.HasCostsByParent hasCostsByParent,
+                            @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(hasCostsByParent, "hasCostsByParent must not be empty");
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
+
+        this.hasNamedTechLevel = new HasNamedTechLevel(hasCostsByParent, languageCode);
+        this.costsPercentage = hasCostsByParent.getCostsPercentage();
+    }
+}

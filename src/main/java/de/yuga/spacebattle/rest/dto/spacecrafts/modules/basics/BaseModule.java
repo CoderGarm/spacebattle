@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-
 @Schema(description = ".")
 public class BaseModule {
 
