@@ -366,177 +366,114 @@ public class MasterOfTheUniverseService {
     }
 
     private void createArmors() {
+        final Research research = research("Armor", "A protection of many layers of armor that alternated between ablative composites that absorbed energy from energy weapons and solid anti-kinetic layers.", 18, ETechLevel.TECH_I, null);
+        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Panzerung");
+        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eine Schutzhülle aus verschiedenen Lagen von Komposit-Panzerung aus Keramik und Durastahl und hitzeabsorbierenden Materialien.");
+        researchService.save(research);
 
         final NamedTechLevel baseModule = moduleService.createBaseModule("Armor",
-                "A protection of many layers of armor that alternated between ablative composites that absorbed energy from energy weapons and solid anti-kinetic layers.", ETechLevel.TECH_I, Armor.class);
+                "A protection of many layers of armor that alternated between ablative composites that absorbed energy from energy weapons and solid anti-kinetic layers.",
+                research, ETechLevel.TECH_I, Armor.class);
         baseModule.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Panzerung");
         baseModule.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eine Schutzhülle aus verschiedenen Lagen von Komposit-Panzerung aus Keramik und Durastahl und hitzeabsorbierenden Materialien.");
         moduleService.save(baseModule);
 
-        final Research research = research("Armor", "A protection of many layers of armor that alternated between ablative composites that absorbed energy from energy weapons and solid anti-kinetic layers.", 1, ETechLevel.TECH_I, null);
-        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Panzerung");
-        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eine Schutzhülle aus verschiedenen Lagen von Komposit-Panzerung aus Keramik und Durastahl und hitzeabsorbierenden Materialien.");
-        researchService.save(research);
-        moduleService.createArmor(baseModule, research, 3000, 3, EHullType.CL);
-        moduleService.createArmor(baseModule, research, 5000, 5, EHullType.CA);
-        moduleService.createArmor(baseModule, research, 13000, 8, EHullType.BC);
-        moduleService.createArmor(baseModule, research, 28000, 9, EHullType.BB);
-        moduleService.createArmor(baseModule, research, 190000, 10, EHullType.DN);
-        moduleService.createArmor(baseModule, research, 360000, 12, EHullType.SD);
+        moduleService.createArmor(baseModule, 1, 3000, 3, EHullType.CL);
+        moduleService.createArmor(baseModule, 3, 5000, 5, EHullType.CA);
+        moduleService.createArmor(baseModule, 6, 13000, 8, EHullType.BC);
+        moduleService.createArmor(baseModule, 9, 28000, 9, EHullType.BB);
+        moduleService.createArmor(baseModule, 13, 190000, 10, EHullType.DN);
+        moduleService.createArmor(baseModule, 18, 360000, 12, EHullType.SD);
 
     }
 
     private void createPropulsions() {
-        Research research = research("Impeller drive", "The phased array gravity drive, more commonly known as the impeller drive, was the preeminent sub-light propulsion mechanism for space-faring vessels of the post Diaspora era.", 1, ETechLevel.TECH_I, null);
+        Research research = research("Impeller drive", "The phased array gravity drive, more commonly known as the impeller drive, was the preeminent sub-light propulsion mechanism for space-faring vessels of the post Diaspora era.", 10, ETechLevel.TECH_I, null);
         research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Impellerantrieb");
         research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Ein reaktionsmittelfreier Unterlichtantrieb, der auf der Beeinflussung von Gravitation basiert.");
         researchService.save(research);
 
         final NamedTechLevel impellerDrive = moduleService.createBaseModule("Impeller drive",
-                "The phased array gravity drive, more commonly known as the impeller drive, was the preeminent sub-light propulsion mechanism for space-faring vessels of the post Diaspora era.", ETechLevel.TECH_I, Propulsion.class);
+                "The phased array gravity drive, more commonly known as the impeller drive, was the preeminent sub-light propulsion mechanism for space-faring vessels of the post Diaspora era.",
+                research, ETechLevel.TECH_I, Propulsion.class);
         impellerDrive.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Impellerantrieb");
         impellerDrive.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Ein reaktionsmittelfreier Unterlichtantrieb, der auf der Beeinflussung von Gravitation basiert.");
         moduleService.save(impellerDrive);
 
-        moduleService.createPropulsion(impellerDrive, research, 558, 7, EHyperBand.NONE, ETechnologyType.CIVIL);
-        moduleService.createPropulsion(impellerDrive, research, 558, 8, EHyperBand.NONE, ETechnologyType.MILITARY);
+        moduleService.createPropulsion(impellerDrive, 1, 558, 7, EHyperBand.NONE, ETechnologyType.CIVIL);
+        moduleService.createPropulsion(impellerDrive, 2, 558, 8, EHyperBand.NONE, ETechnologyType.MILITARY);
 
         final NamedTechLevel warshawskiSail = moduleService.createBaseModule("Warshawski-Sail",
-                "The Warshawski sail was a gravitic technology, and a key component to interstellar travel in the Post Diaspora era. Allows faster-than-light travel.", ETechLevel.TECH_I, Propulsion.class);
+                "The Warshawski sail was a gravitic technology, and a key component to interstellar travel in the Post Diaspora era. Allows faster-than-light travel.",
+                research, ETechLevel.TECH_I, Propulsion.class);
         warshawskiSail.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Warshawski-Segel");
         warshawskiSail.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Segel sind Teil des Impellerantriebs eines Schiffes und werden von den Alpha-Emittern erzeugt. Sie ermöglichen die Reise mit scheinbarer Überlichtgeschwindigkeit.");
         moduleService.save(warshawskiSail);
 
-        research = research("Warshawski-Sail " + EHyperBand.ALPHA.name(), "The Warshawski sail was a gravitic technology, and a key component to interstellar travel in the Post Diaspora era. Allows faster-than-light travels at the " + EHyperBand.ALPHA.name() + " band.", 1, ETechLevel.TECH_I, research);
-        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Warshawski-Segel " + EHyperBand.ALPHA.name());
-        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Segel sind Teil des Impellerantriebs eines Schiffes und werden von den Alpha-Emittern erzeugt, es handelt sich um zwei leicht gewölbte, kreisförmige Felder aus Gravitationsenergie, die im rechten Winkel zur Mittschiffslinie stehen.");
-        researchService.save(research);
-
-        moduleService.createPropulsion(warshawskiSail, research, 558, 13, EHyperBand.ALPHA, ETechnologyType.CIVIL);
-        moduleService.createPropulsion(warshawskiSail, research, 558, 16, EHyperBand.ALPHA, ETechnologyType.MILITARY);
-
-        research = research("Warshawski-Sail " + EHyperBand.BETA.name(), "The Warshawski sail was a gravitic technology, and a key component to interstellar travel in the Post Diaspora era. Allows faster-than-light travels at the " + EHyperBand.ALPHA.name() + " band.", 1, ETechLevel.TECH_I, research);
-        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Warshawski-Segel " + EHyperBand.BETA.name());
-        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Segel sind Teil des Impellerantriebs eines Schiffes und werden von den Alpha-Emittern erzeugt, es handelt sich um zwei leicht gewölbte, kreisförmige Felder aus Gravitationsenergie, die im rechten Winkel zur Mittschiffslinie stehen.");
-        researchService.save(research);
-
-        moduleService.createPropulsion(warshawskiSail, research, 558, 14, EHyperBand.BETA, ETechnologyType.CIVIL);
-        moduleService.createPropulsion(warshawskiSail, research, 558, 17, EHyperBand.BETA, ETechnologyType.MILITARY);
-
-        research = research("Warshawski-Sail " + EHyperBand.GAMMA.name(), "The Warshawski sail was a gravitic technology, and a key component to interstellar travel in the Post Diaspora era.Allows faster-than-light travels at the " + EHyperBand.GAMMA.name() + " band.", 1, ETechLevel.TECH_I, research);
-        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Warshawski-Segel " + EHyperBand.GAMMA.name());
-        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Segel sind Teil des Impellerantriebs eines Schiffes und werden von den Alpha-Emittern erzeugt, es handelt sich um zwei leicht gewölbte, kreisförmige Felder aus Gravitationsenergie, die im rechten Winkel zur Mittschiffslinie stehen.");
-        researchService.save(research);
-
-        moduleService.createPropulsion(warshawskiSail, research, 558, 15, EHyperBand.GAMMA, ETechnologyType.CIVIL);
-        moduleService.createPropulsion(warshawskiSail, research, 558, 18, EHyperBand.GAMMA, ETechnologyType.MILITARY);
-
-        research = research("Warshawski-Sail " + EHyperBand.DELTA.name(), "The Warshawski sail was a gravitic technology, and a key component to interstellar travel in the Post Diaspora era.Allows faster-than-light travels at the " + EHyperBand.DELTA.name() + " band.", 1, ETechLevel.TECH_I, research);
-        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Warshawski-Segel " + EHyperBand.DELTA.name());
-        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Segel sind Teil des Impellerantriebs eines Schiffes und werden von den Alpha-Emittern erzeugt, es handelt sich um zwei leicht gewölbte, kreisförmige Felder aus Gravitationsenergie, die im rechten Winkel zur Mittschiffslinie stehen.");
-        researchService.save(research);
-
-        moduleService.createPropulsion(warshawskiSail, research, 558, 16, EHyperBand.DELTA, ETechnologyType.CIVIL);
-        moduleService.createPropulsion(warshawskiSail, research, 558, 19, EHyperBand.DELTA, ETechnologyType.MILITARY);
-
-        research = research("Warshawski-Sail " + EHyperBand.EPSILON.name(), "The Warshawski sail was a gravitic technology, and a key component to interstellar travel in the Post Diaspora era.Allows faster-than-light travels at the " + EHyperBand.EPSILON.name() + " band.", 1, ETechLevel.TECH_I, research);
-        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Warshawski-Segel " + EHyperBand.EPSILON.name());
-        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Segel sind Teil des Impellerantriebs eines Schiffes und werden von den Alpha-Emittern erzeugt, es handelt sich um zwei leicht gewölbte, kreisförmige Felder aus Gravitationsenergie, die im rechten Winkel zur Mittschiffslinie stehen.");
-        researchService.save(research);
-
-        moduleService.createPropulsion(warshawskiSail, research, 558, 20, EHyperBand.EPSILON, ETechnologyType.MILITARY);
-
-        research = research("Warshawski-Sail " + EHyperBand.ZETA.name(), "The Warshawski sail was a gravitic technology, and a key component to interstellar travel in the Post Diaspora era.Allows faster-than-light travels at the " + EHyperBand.ZETA.name() + " band.", 1, ETechLevel.TECH_I, research);
-        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Warshawski-Segel " + EHyperBand.ZETA.name());
-        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Segel sind Teil des Impellerantriebs eines Schiffes und werden von den Alpha-Emittern erzeugt, es handelt sich um zwei leicht gewölbte, kreisförmige Felder aus Gravitationsenergie, die im rechten Winkel zur Mittschiffslinie stehen.");
-        researchService.save(research);
-
-        moduleService.createPropulsion(warshawskiSail, research, 558, 21, EHyperBand.ZETA, ETechnologyType.MILITARY);
-
-        research = research("Warshawski-Sail " + EHyperBand.ETA.name(), "The Warshawski sail was a gravitic technology, and a key component to interstellar travel in the Post Diaspora era.Allows faster-than-light travels at the " + EHyperBand.ETA.name() + " band.", 1, ETechLevel.TECH_I, research);
-        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Warshawski-Segel " + EHyperBand.ETA.name());
-        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Segel sind Teil des Impellerantriebs eines Schiffes und werden von den Alpha-Emittern erzeugt, es handelt sich um zwei leicht gewölbte, kreisförmige Felder aus Gravitationsenergie, die im rechten Winkel zur Mittschiffslinie stehen.");
-        researchService.save(research);
-
-        moduleService.createPropulsion(warshawskiSail, research, 558, 22, EHyperBand.ETA, ETechnologyType.MILITARY);
-
-        research = research("Warshawski-Sail " + EHyperBand.THETA.name(), "The Warshawski sail was a gravitic technology, and a key component to interstellar travel in the Post Diaspora era.Allows faster-than-light travels at the " + EHyperBand.THETA.name() + " band.", 1, ETechLevel.TECH_I, research);
-        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Warshawski-Segel " + EHyperBand.THETA.name());
-        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Segel sind Teil des Impellerantriebs eines Schiffes und werden von den Alpha-Emittern erzeugt, es handelt sich um zwei leicht gewölbte, kreisförmige Felder aus Gravitationsenergie, die im rechten Winkel zur Mittschiffslinie stehen.");
-        researchService.save(research);
-
-        moduleService.createPropulsion(warshawskiSail, research, 558, 23, EHyperBand.THETA, ETechnologyType.MILITARY);
+        moduleService.createPropulsion(warshawskiSail, 1, 558, 13, EHyperBand.ALPHA, ETechnologyType.CIVIL);
+        moduleService.createPropulsion(warshawskiSail, 2, 558, 16, EHyperBand.ALPHA, ETechnologyType.MILITARY);
+        moduleService.createPropulsion(warshawskiSail, 2, 558, 14, EHyperBand.BETA, ETechnologyType.CIVIL);
+        moduleService.createPropulsion(warshawskiSail, 3, 558, 17, EHyperBand.BETA, ETechnologyType.MILITARY);
+        moduleService.createPropulsion(warshawskiSail, 2, 558, 15, EHyperBand.GAMMA, ETechnologyType.CIVIL);
+        moduleService.createPropulsion(warshawskiSail, 4, 558, 18, EHyperBand.GAMMA, ETechnologyType.MILITARY);
+        moduleService.createPropulsion(warshawskiSail, 3, 558, 16, EHyperBand.DELTA, ETechnologyType.CIVIL);
+        moduleService.createPropulsion(warshawskiSail, 6, 558, 19, EHyperBand.DELTA, ETechnologyType.MILITARY);
+        moduleService.createPropulsion(warshawskiSail, 7, 558, 20, EHyperBand.EPSILON, ETechnologyType.MILITARY);
+        moduleService.createPropulsion(warshawskiSail, 8, 558, 21, EHyperBand.ZETA, ETechnologyType.MILITARY);
+        moduleService.createPropulsion(warshawskiSail, 9, 558, 22, EHyperBand.ETA, ETechnologyType.MILITARY);
+        moduleService.createPropulsion(warshawskiSail, 10, 558, 23, EHyperBand.THETA, ETechnologyType.MILITARY);
     }
 
     private void createEloka() {
         final Distance effectiveRange = new Distance(2.669, EDistanceMetric.LS);
 
-        final NamedTechLevel electronicWarfare = moduleService.createBaseModule("Electronic Warfare",
-                "The electronic warfare combines sensors and emitters for the electromagnetic and gravimetric spectrum.", ETechLevel.TECH_I, ElectronicWarfare.class);
-        electronicWarfare.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Elektronische Kriegsführung");
-        electronicWarfare.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Maßnahmen zur elektronischen Kriegsführung beinhalten Sensoren und Emitter über das gesamte elektromagnetische und gravimetrische Spektrum.");
-        moduleService.save(electronicWarfare);
-
-        Research research = research("Electronic Warfare", "The electronic warfare combines sensors and emitters for the electromagnetic and gravimetric spectrum.", 1, ETechLevel.TECH_I, null);
+        Research research = research("Electronic Warfare", "The electronic warfare combines sensors and emitters for the electromagnetic and gravimetric spectrum.", 10, ETechLevel.TECH_I, null);
         research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Elektronische Kriegsführung");
         research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Maßnahmen zur elektronischen Kriegsführung beinhalten Sensoren und Emitter über das gesamte elektromagnetische und gravimetrische Spektrum.");
         researchService.save(research);
 
-        moduleService.createElectronicWarfare(electronicWarfare, research, 4, 100, EHullType.CL, effectiveRange);
+        final NamedTechLevel namedTechLevel = moduleService.createBaseModule("Electronic Warfare",
+                "The electronic warfare combines sensors and emitters for the electromagnetic and gravimetric spectrum.",
+                research, ETechLevel.TECH_I, ElectronicWarfare.class);
+        namedTechLevel.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Elektronische Kriegsführung");
+        namedTechLevel.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Maßnahmen zur elektronischen Kriegsführung beinhalten Sensoren und Emitter über das gesamte elektromagnetische und gravimetrische Spektrum.");
+        moduleService.save(namedTechLevel);
 
+        moduleService.createElectronicWarfare(namedTechLevel, 1, 30, 3, EHullType.LAC, effectiveRange);
+        moduleService.createElectronicWarfare(namedTechLevel, 2, 60, 4, EHullType.VT, effectiveRange);
+        moduleService.createElectronicWarfare(namedTechLevel, 3, 70, 5, EHullType.FG, effectiveRange);
+        moduleService.createElectronicWarfare(namedTechLevel, 4, 75, 6, EHullType.DD, effectiveRange);
+        moduleService.createElectronicWarfare(namedTechLevel, 5, 100, 7, EHullType.CL, effectiveRange);
+        moduleService.createElectronicWarfare(namedTechLevel, 6, 150, 8, EHullType.CA, effectiveRange);
+        moduleService.createElectronicWarfare(namedTechLevel, 7, 700, 9, EHullType.BC, effectiveRange);
+        moduleService.createElectronicWarfare(namedTechLevel, 8, 750, 9, EHullType.BB, effectiveRange);
+        moduleService.createElectronicWarfare(namedTechLevel, 9, 5000, 10, EHullType.DN, effectiveRange);
+        moduleService.createElectronicWarfare(namedTechLevel, 10, 7000, 10, EHullType.SD, effectiveRange);
     }
 
     private void createSidewalls() {
-        Research unlockSidewall = research("Shield", "The Shield research researches ...", 1, ETechLevel.TECH_I, null);
-        Sidewall sidewall = moduleService.createSidewall("Light cruiser sidewall Mk I", "The light cruiser sidewall.", unlockSidewall, 7, 15000, EHullType.CL, ETechLevel.TECH_I, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        sidewall.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Leichte Kreuzer Seitenschild Mk I");
-        sidewall.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild für leichte Kreuzer.");
-        moduleService.save(sidewall);
+        Research research = research("Sidewall", "The sidewall was the main passive protection of a warship against all sorts of weapons fire.", 10, ETechLevel.TECH_I, null);
+        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild");
+        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschilde sind die wichtigste passive Verteidigung gegen alle Arten von Waffenfeuer.");
+        researchService.save(research);
 
-        sidewall = moduleService.createSidewall("LAC sidewall Mk I", "The light attack craft sidewall.", unlockSidewall, 1, 2000, EHullType.LAC, ETechLevel.TECH_I, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        sidewall.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Seitenschild Mk I");
-        sidewall.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild für leichte Angriffsboote.");
-        moduleService.save(sidewall);
+        final NamedTechLevel namedTechLevel = moduleService.createBaseModule("Sidewall",
+                "The sidewall was the main passive protection of a warship against all sorts of weapons fire.",
+                research, ETechLevel.TECH_I, Sidewall.class);
+        namedTechLevel.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild");
+        namedTechLevel.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschilde sind die wichtigste passive Verteidigung gegen alle Arten von Waffenfeuer.");
+        moduleService.save(namedTechLevel);
 
-        sidewall = moduleService.createSidewall("Corvette sidewall Mk I", "The corvette sidewall.", unlockSidewall, 1, 2500, EHullType.VT, ETechLevel.TECH_I, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        sidewall.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Korvetten Seitenschild Mk I");
-        sidewall.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild für Korvetten.");
-        moduleService.save(sidewall);
-
-        sidewall = moduleService.createSidewall("Frigate sidewall Mk I", "The frigate sidewall.", unlockSidewall, 3, 7000, EHullType.FG, ETechLevel.TECH_I, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        sidewall.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Fregatten Seitenschild Mk I");
-        sidewall.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild für Fregatten.");
-        moduleService.save(sidewall);
-
-        unlockSidewall = research("Cruiser sidewall", "The cruiser sidewall research.", 1, ETechLevel.TECH_I, unlockSidewall);
-        sidewall = moduleService.createSidewall("Cruiser sidewall Mk I", "The cruiser sidewall.", unlockSidewall, 10, 21000, EHullType.CA, ETechLevel.TECH_I, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        sidewall.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Seitenschild Mk I");
-        sidewall.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild für Kreuzer.");
-        moduleService.save(sidewall);
-
-        unlockSidewall = research("Battlecruiser sidewall", "The battlecruiser sidewall research.", 1, ETechLevel.TECH_I, unlockSidewall);
-        sidewall = moduleService.createSidewall("Battlecruiser sidewall Mk I", "The battlecruiser sidewall.", unlockSidewall, 30, 60000, EHullType.BC, ETechLevel.TECH_I, new CrewRequirement(L_CREW, EDepositType.COSTS));
-        sidewall.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Schlachtkreuzer Seitenschild Mk I");
-        sidewall.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild für Schlachtkreuzer.");
-        moduleService.save(sidewall);
-
-        unlockSidewall = research("Battleship sidewall", "The battleship sidewall research.", 1, ETechLevel.TECH_I, unlockSidewall);
-        sidewall = moduleService.createSidewall("Battleship sidewall Mk I", "The battleship sidewall.", unlockSidewall, 40, 75000, EHullType.BB, ETechLevel.TECH_I, new CrewRequirement(XL_CREW, EDepositType.COSTS));
-        sidewall.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild Seitenschild Mk I");
-        sidewall.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild für Schlachtschiff.");
-        moduleService.save(sidewall);
-
-        unlockSidewall = research("Dreadnought sidewall", "The dreadnought sidewall research.", 1, ETechLevel.TECH_I, unlockSidewall);
-        sidewall = moduleService.createSidewall("Dreadnought sidewall Mk I", "The dreadnought sidewall.", unlockSidewall, 180, 375000, EHullType.DN, ETechLevel.TECH_I, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-        sidewall.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild Dreadnought Mk I");
-        sidewall.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild für Dreadnought.");
-        moduleService.save(sidewall);
-
-        unlockSidewall = research("Superdreadnought sidewall", "The superdreadnought sidewall research.", 1, ETechLevel.TECH_I, unlockSidewall);
-        sidewall = moduleService.createSidewall("Superdreadnought sidewall Mk I", "The superdreadnought sidewall.", unlockSidewall, 250, 700000, EHullType.DN, ETechLevel.TECH_I, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-        sidewall.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild Superdreadnought Mk I");
-        sidewall.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild für Superdreadnought.");
-        moduleService.save(sidewall);
+        moduleService.createSidewall(namedTechLevel, 1, 1000, 2, EHullType.LAC);
+        moduleService.createSidewall(namedTechLevel, 2, 6000, 3, EHullType.VT);
+        moduleService.createSidewall(namedTechLevel, 3, 8000, 4, EHullType.FG);
+        moduleService.createSidewall(namedTechLevel, 4, 11000, 5, EHullType.DD);
+        moduleService.createSidewall(namedTechLevel, 5, 15000, 6, EHullType.CL);
+        moduleService.createSidewall(namedTechLevel, 6, 21000, 7, EHullType.CA);
+        moduleService.createSidewall(namedTechLevel, 7, 60000, 8, EHullType.BC);
+        moduleService.createSidewall(namedTechLevel, 8, 75000, 9, EHullType.BB);
+        moduleService.createSidewall(namedTechLevel, 9, 375000, 10, EHullType.DN);
+        moduleService.createSidewall(namedTechLevel, 10, 700000, 11, EHullType.SD);
     }
 
     private void createMissiles() {
@@ -797,7 +734,7 @@ public class MasterOfTheUniverseService {
         moduleService.save(passiveModule);
     }
 
-    private void createHulls() {
+    private void createHulls() { /* fixme rethink research tree - probably change it to research by level instead 1to1 research to goal */
         Research hullResearch = research("Corvette", "The Corvette research researches Corvettes.", 1, ETechLevel.TECH_I, null);
         hullService.createHull("Light attack vessel", 20, 4, 10, 3, 3, ETechLevel.TECH_I, "The light attack craft hull", hullResearch, EHullType.LAC, new CrewRequirement(S_CREW, EDepositType.COSTS));
         hullService.createHull("Corvette vessel", 30, 6, 5, 5, 14, ETechLevel.TECH_I, "The corvette hull", hullResearch, EHullType.VT, new CrewRequirement(M_CREW, EDepositType.COSTS));
@@ -1043,13 +980,13 @@ public class MasterOfTheUniverseService {
         int ccBroadsides = hull.getConstructionCapacityBroadsides();
         final EHullType hullType = hull.getHullType();
 
-        // take the best value
-        final List<Sidewall> sidewalls = sortByValue(moduleService.findAllSidewalls(), hullType);
-
         final Armor armor = moduleService.findAllArmors().stream()
                 .filter(a -> a.getHullType() == hullType)
                 .findFirst().orElse(null);
-        final Sidewall sidewall = sidewalls.stream().reduce((o1, o2) -> o2).orElse(null);
+
+        final Sidewall sidewall = moduleService.findAllSidewalls().stream()
+                .filter(e -> e.getHullType() == hullType)
+                .findFirst().orElse(null);
 
         final ElectronicWarfare electronicWarfare = moduleService.findAllElectronicWarfare().stream()
                 .filter(e -> e.getHullType() == hullType)
@@ -1088,21 +1025,24 @@ public class MasterOfTheUniverseService {
 
         final List<PassiveModule> passiveModules = sortByValue(sortByValue(moduleService.findAllPassiveModules(), hullType), hullType);
 
+        cc -= propulsion.getUseCapacity(hull);
+        shipClass.setPropulsion(propulsion);
+
         if (armor != null) {
             cc -= armor.getUseCapacity(hull);
             shipClass.setArmor(armor);
         }
 
-        cc -= sidewall.getUseCapacity();
-        cc -= propulsion.getUseCapacity(hull);
+        if (sidewall != null) {
+            cc -= sidewall.getUseCapacity(hull);
+            shipClass.setSidewall(sidewall);
+        }
 
         if (electronicWarfare != null) {
             cc -= electronicWarfare.getUseCapacity(hull);
             shipClass.setElectronicWarfare(electronicWarfare);
         }
 
-        shipClass.setSidewall(sidewall);
-        shipClass.setPropulsion(propulsion);
 
         final Set<AlignedFitting> fittings = new HashSet<>();
         for (final EWeaponAlignment alignment : EWeaponAlignment.values()) {

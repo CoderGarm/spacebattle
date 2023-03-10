@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics;
 
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.misc.HasName;
+import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.ETranslationTarget;
 
@@ -24,17 +25,25 @@ public class NamedTechLevel extends HasName {
     @Enumerated(EnumType.STRING)
     private ETechLevel techLevel;
 
+    @Nonnull
+    @NotNull
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "idResearch")
+    private Research unlockedThrough;
+
     protected NamedTechLevel() {
     }
 
     public NamedTechLevel(@Nonnull final String name,
                           @Nonnull final String description,
+                          @Nonnull final Research unlockedThrough,
                           @Nonnull final ETechLevel techLevel,
                           @Nonnull final Class<?> clazz) {
         super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, clazz);
 
         this.translationTarget = ETranslationTarget.getByClazz(clazz);
         this.techLevel = techLevel;
+        this.unlockedThrough = unlockedThrough;
     }
 
     @Nonnull
@@ -45,6 +54,11 @@ public class NamedTechLevel extends HasName {
     @Nonnull
     public ETechLevel getTechLevel() {
         return techLevel;
+    }
+
+    @Nonnull
+    public Research getUnlockedThrough() {
+        return unlockedThrough;
     }
 
     @Override

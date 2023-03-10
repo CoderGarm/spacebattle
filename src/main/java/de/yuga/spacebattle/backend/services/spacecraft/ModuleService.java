@@ -96,31 +96,16 @@ public class ModuleService {
     @Nonnull
     public NamedTechLevel createBaseModule(@Nonnull final String name,
                                            @Nonnull final String description,
+                                           @Nonnull final Research unlockedThrough,
                                            @Nonnull final ETechLevel techLevel,
                                            @Nonnull final Class<?> clazz) {
         Preconditions.checkNotNull(name, "name must not be empty");
         Preconditions.checkNotNull(description, "description must not be empty");
+        Preconditions.checkNotNull(unlockedThrough, "unlockedThrough must not be empty");
         Preconditions.checkNotNull(techLevel, "techLevel must not be empty");
         Preconditions.checkNotNull(clazz, "clazz must not be empty");
 
-        return namedTechLevelRepository.save(new NamedTechLevel(name, description, techLevel, clazz));
-    }
-
-    @Nonnull
-    public Sidewall createSidewall(@Nonnull final String name,
-                                   @Nonnull final String description,
-                                   @Nonnull final Research unlockedThrough,
-                                   final int useCapacity,
-                                   final int value,
-                                   @Nonnull final EHullType hullType,
-                                   @Nonnull final ETechLevel techLevel,
-                                   @Nonnull final CrewRequirement crewRequirement) {
-        Preconditions.checkNotNull(name, "name shouldn't be null!");
-        Preconditions.checkNotNull(description, "description shouldn't be null!");
-        Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
-        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
-
-        return sidewallRepository.save(new Sidewall(name, description, unlockedThrough, useCapacity, value, hullType, techLevel, crewRequirement));
+        return namedTechLevelRepository.save(new NamedTechLevel(name, description, unlockedThrough, techLevel, clazz));
     }
 
     @Nonnull
@@ -232,48 +217,58 @@ public class ModuleService {
 
     @Nonnull
     public Propulsion createPropulsion(@Nonnull final NamedTechLevel namedTechLevel,
-                                       @Nonnull final Research unlockedThrough,
+                                       final int unlockedThroughLevel,
                                        final int effectValue,
                                        final int costsPercentage,
                                        @Nonnull final EHyperBand hyperBand,
                                        @Nonnull final ETechnologyType technologyType) {
         Preconditions.checkNotNull(namedTechLevel, "genericBaseModule shouldn't be null!");
-        Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
         Preconditions.checkNotNull(hyperBand, "hyperBand shouldn't be null!");
         Preconditions.checkNotNull(technologyType, "technologyType must not be empty");
 
         final String technicalTypeName = "P-" + hyperBand.name().charAt(0) + namedTechLevel.getTechLevel().name().split("_")[1] + "-" + technologyType.name().charAt(0);
-        return propulsionRepository.save(new Propulsion(namedTechLevel, technicalTypeName, unlockedThrough, effectValue, costsPercentage, hyperBand, technologyType));
+        return propulsionRepository.save(new Propulsion(namedTechLevel, technicalTypeName, unlockedThroughLevel, effectValue, costsPercentage, hyperBand, technologyType));
     }
 
 
     @Nonnull
     public Armor createArmor(@Nonnull final NamedTechLevel namedTechLevel,
-                             @Nonnull final Research unlockedThrough,
+                             final int unlockedThroughLevel,
                              final int effectValue,
                              final int costsPercentage,
                              @Nonnull final EHullType hullType) {
         Preconditions.checkNotNull(namedTechLevel, "namedTechLevel must not be empty");
-        Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
 
         final String technicalTypeName = "A-" + namedTechLevel.getTechLevel().name().split("_")[1] + "-" + hullType.name();
-        return armorRepository.save(new Armor(namedTechLevel, technicalTypeName, unlockedThrough, effectValue, costsPercentage, hullType));
+        return armorRepository.save(new Armor(namedTechLevel, technicalTypeName, unlockedThroughLevel, effectValue, costsPercentage, hullType));
     }
 
     @Nonnull
     public ElectronicWarfare createElectronicWarfare(@Nonnull final NamedTechLevel namedTechLevel,
-                                                     @Nonnull final Research unlockedThrough,
+                                                     final int unlockedThroughLevel,
                                                      final int effectValue,
                                                      final int costsPercentage,
                                                      @Nonnull final EHullType hullType,
                                                      @Nonnull final Distance effectiveRange) {
         Preconditions.checkNotNull(namedTechLevel, "namedTechLevel must not be empty");
-        Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
         Preconditions.checkNotNull(hullType, "hullType must not be empty");
         Preconditions.checkNotNull(effectiveRange, "effectiveRange shouldn't be null!");
 
-        final String technicalTypeName = "EloKa-" + namedTechLevel.getTechLevel().name().split("_")[1] + "-" + hullType.name();
-        return electronicWarfareRepository.save(new ElectronicWarfare(namedTechLevel, technicalTypeName, unlockedThrough, costsPercentage, effectValue, hullType, effectiveRange));
+        final String technicalTypeName = "E-" + namedTechLevel.getTechLevel().name().split("_")[1] + "-" + hullType.name();
+        return electronicWarfareRepository.save(new ElectronicWarfare(namedTechLevel, technicalTypeName, unlockedThroughLevel, effectValue, costsPercentage, hullType, effectiveRange));
+    }
+
+    @Nonnull
+    public Sidewall createSidewall(@Nonnull final NamedTechLevel namedTechLevel,
+                                   final int unlockedThroughLevel,
+                                   final int effectValue,
+                                   final int costsPercentage,
+                                   @Nonnull final EHullType hullType) {
+        Preconditions.checkNotNull(namedTechLevel, "namedTechLevel must not be empty");
+        Preconditions.checkNotNull(hullType, "hullType must not be empty");
+
+        final String technicalTypeName = "S-" + namedTechLevel.getTechLevel().name().split("_")[1] + "-" + hullType.name();
+        return sidewallRepository.save(new Sidewall(namedTechLevel, technicalTypeName, unlockedThroughLevel, effectValue, costsPercentage, hullType));
     }
 
     @Nonnull

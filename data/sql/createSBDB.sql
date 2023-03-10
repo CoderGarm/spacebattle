@@ -70,11 +70,11 @@
     create table armor (
        idArmor integer not null auto_increment,
         technicalTypeName varchar(255) not null,
+        unlockedThroughLevel integer not null,
         costsPercentage integer not null,
         effectValue integer not null,
         hullType varchar(255) not null,
         idNamedTechLevel integer not null,
-        idResearch integer not null,
         primary key (idArmor)
     ) engine=InnoDB;
 
@@ -181,12 +181,12 @@
     create table electronicWarfare (
        idElectronicWarfare integer not null auto_increment,
         technicalTypeName varchar(255) not null,
+        unlockedThroughLevel integer not null,
         costsPercentage integer not null,
         effectValue integer not null,
         hullType varchar(255) not null,
         effectiveRange varchar(255),
         idNamedTechLevel integer not null,
-        idResearch integer not null,
         primary key (idElectronicWarfare)
     ) engine=InnoDB;
 
@@ -460,6 +460,7 @@
         translationTarget varchar(255) not null,
         idTranslatableDescription integer not null,
         idTranslatableName integer not null,
+        idResearch integer not null,
         primary key (idNamedTechLevel)
     ) engine=InnoDB;
 
@@ -518,12 +519,12 @@
     create table propulsion (
        idPropulsion integer not null auto_increment,
         technicalTypeName varchar(255) not null,
+        unlockedThroughLevel integer not null,
         costsPercentage integer not null,
         effectValue integer not null,
         hyperBand varchar(255) not null,
         technologyType varchar(255) not null,
         idNamedTechLevel integer not null,
-        idResearch integer not null,
         primary key (idPropulsion)
     ) engine=InnoDB;
 
@@ -627,14 +628,12 @@
 
     create table sidewall (
        idSidewall integer not null auto_increment,
-        techLevel varchar(255) not null,
-        hullType varchar(255) not null,
-        useCapacity integer not null,
+        technicalTypeName varchar(255) not null,
+        unlockedThroughLevel integer not null,
+        costsPercentage integer not null,
         effectValue integer not null,
-        idTranslatableDescription integer not null,
-        idTranslatableName integer not null,
-        idCosts integer not null,
-        idResearch integer not null,
+        hullType varchar(255) not null,
+        idNamedTechLevel integer not null,
         primary key (idSidewall)
     ) engine=InnoDB;
 
@@ -945,11 +944,6 @@
        foreign key (idNamedTechLevel) 
        references namedTechLevel (idNamedTechLevel);
 
-    alter table armor 
-       add constraint FKrb3h67mjdni459t4j1y8b7sw5 
-       foreign key (idResearch) 
-       references research (idResearch);
-
     alter table article 
        add constraint FKhuuswjlsmm6e5n3l8ur3ba4dp 
        foreign key (idBase) 
@@ -1064,11 +1058,6 @@
        add constraint FKpwiw9e7b62krmlt84y1jbj5n8 
        foreign key (idNamedTechLevel) 
        references namedTechLevel (idNamedTechLevel);
-
-    alter table electronicWarfare 
-       add constraint FKhr2adrrpeb3vshv11ajrgnkd7 
-       foreign key (idResearch) 
-       references research (idResearch);
 
     alter table fleet 
        add constraint FK5yy9whqh6562iaxuym0wrkjeq 
@@ -1395,6 +1384,11 @@
        foreign key (idTranslatableName) 
        references translatable (idTranslatable);
 
+    alter table namedTechLevel 
+       add constraint FKcrxytyomlq85evr4ct20pvq3u 
+       foreign key (idResearch) 
+       references research (idResearch);
+
     alter table orderedHitLog 
        add constraint FKt4eji1de3lte0yql6naypaj9t 
        foreign key (idHitLog) 
@@ -1489,11 +1483,6 @@
        add constraint FKlwu2dh95c5jr984f3l2ohr7s7 
        foreign key (idNamedTechLevel) 
        references namedTechLevel (idNamedTechLevel);
-
-    alter table propulsion 
-       add constraint FK7rr2gvpcbjjhl9tuxe6c50v5q 
-       foreign key (idResearch) 
-       references research (idResearch);
 
     alter table releasedVolley 
        add constraint FK5phx9tuf726udgmc3oba1t80o 
@@ -1631,24 +1620,9 @@
        references battleReport (idBattleReport);
 
     alter table sidewall 
-       add constraint FKdx39gsmusm1sai6wdid4s4xmn 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table sidewall 
-       add constraint FKmqieo3lwi46pddbgbhg7dbg4r 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
-
-    alter table sidewall 
-       add constraint FKlo0i3byallqh89wd535yrbs3l 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table sidewall 
-       add constraint FK693a9gix6ifpkiop612tghdy0 
-       foreign key (idResearch) 
-       references research (idResearch);
+       add constraint FKsotde61rdfb2dofbtlun2h1fn 
+       foreign key (idNamedTechLevel) 
+       references namedTechLevel (idNamedTechLevel);
 
     alter table supportFitting 
        add constraint FKd2r1r3l1h9iehfvklg6tymj1o 

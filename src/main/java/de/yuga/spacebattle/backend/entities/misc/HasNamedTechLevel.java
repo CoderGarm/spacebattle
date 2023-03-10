@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.entities.misc;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 
@@ -25,25 +24,20 @@ public class HasNamedTechLevel extends AbstractEntityKey {
     @JoinColumn(name = "idNamedTechLevel")
     private NamedTechLevel namedTechLevel;
 
-    @Nonnull
-    @NotNull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "idResearch")
-    private Research unlockedThrough;
+    private int unlockedThroughLevel;
 
     public HasNamedTechLevel() {
     }
 
     public HasNamedTechLevel(@Nonnull final NamedTechLevel baseModule,
-                             @Nonnull final Research unlockedThrough,
+                             final int unlockedThroughLevel,
                              @Nonnull final String technicalTypeName) {
         Preconditions.checkNotNull(baseModule, "baseModule must not be empty");
-        Preconditions.checkNotNull(unlockedThrough, "unlockedThrough must not be empty");
         Preconditions.checkNotNull(technicalTypeName, "technicalTypeName must not be empty");
 
         this.namedTechLevel = baseModule;
         this.technicalTypeName = technicalTypeName;
-        this.unlockedThrough = unlockedThrough;
+        this.unlockedThroughLevel = unlockedThroughLevel;
     }
 
     @Nonnull
@@ -70,9 +64,8 @@ public class HasNamedTechLevel extends AbstractEntityKey {
         return namedTechLevel.getTechLevel();
     }
 
-    @Nonnull
-    public Research getUnlockedThrough() {
-        return unlockedThrough;
+    public int getUnlockedThroughLevel() {
+        return unlockedThroughLevel;
     }
 
     @Override

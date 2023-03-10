@@ -323,8 +323,8 @@ public class TestDataProviderUtils {
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, techLevel, Armor.class);
-        final Armor armor = new Armor(namedTechLevel, "XxX", research(), effectValue, costsPercentage, EHullType.CA);
+        final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, research(), techLevel, Armor.class);
+        final Armor armor = new Armor(namedTechLevel, "XxX", 1, effectValue, costsPercentage, EHullType.CA);
         setId(armor);
         return armor;
     }
@@ -341,8 +341,8 @@ public class TestDataProviderUtils {
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, techLevel, ElectronicWarfare.class);
-        final ElectronicWarfare electronicWarfare = new ElectronicWarfare(namedTechLevel, "yYy", research(), costsPercentage, value, EHullType.CA, effectiveRange);
+        final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, research(), techLevel, ElectronicWarfare.class);
+        final ElectronicWarfare electronicWarfare = new ElectronicWarfare(namedTechLevel, "yYy", 1, costsPercentage, value, EHullType.CA, effectiveRange);
         setId(electronicWarfare);
         return electronicWarfare;
     }
@@ -358,7 +358,8 @@ public class TestDataProviderUtils {
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        final Sidewall sidewall = new Sidewall(name, description, research(), useCapacity, value, EHullType.CA, techLevel, crewRequirement);
+        final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, research(), techLevel, Sidewall.class);
+        final Sidewall sidewall = new Sidewall(namedTechLevel, "sSs", 1, useCapacity, value, EHullType.CA);
         setId(sidewall);
         return sidewall;
     }
@@ -472,8 +473,8 @@ public class TestDataProviderUtils {
         Preconditions.checkNotNull(hyperBand, "hyperBand shouldn't be null!");
         Preconditions.checkNotNull(technologyType, "technologyType must not be empty");
 
-        final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, techLevel, Propulsion.class);
-        final Propulsion propulsion = new Propulsion(namedTechLevel, "xXx", research(), useCapacity, value, hyperBand, technologyType);
+        final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, research(), techLevel, Propulsion.class);
+        final Propulsion propulsion = new Propulsion(namedTechLevel, "xXx", 1, useCapacity, value, hyperBand, technologyType);
         setId(propulsion);
         return propulsion;
     }

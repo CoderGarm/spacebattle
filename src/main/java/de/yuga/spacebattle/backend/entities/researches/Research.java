@@ -7,8 +7,11 @@ import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.misc.HasCosts;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
+import de.yuga.spacebattle.backend.enums.ETranslationTarget;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -52,23 +55,11 @@ public class Research extends HasCosts {
 
     @Nonnull
     @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
-    private final Set<Armor> unlocksArmor = new HashSet<>();
-
-    @Nonnull
-    @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
-    private final Set<Propulsion> unlocksPropulsion = new HashSet<>();
-
-    @Nonnull
-    @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
-    private final Set<Sidewall> unlocksSidewall = new HashSet<>();
-
-    @Nonnull
-    @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
-    private final Set<ElectronicWarfare> unlocksElectronicWarfare = new HashSet<>();
-
-    @Nonnull
-    @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
     private final Set<Missile> unlocksMissiles = new HashSet<>();
+
+    @Nonnull
+    @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
+    private final Set<NamedTechLevel> unlocksNamedTechLevel = new HashSet<>();
 
     public Research() {
     }
@@ -111,28 +102,26 @@ public class Research extends HasCosts {
     }
 
     @Nonnull
-    public Set<Armor> getUnlocksArmor() {
-        return unlocksArmor;
-    }
-
-    @Nonnull
-    public Set<Propulsion> getUnlocksPropulsion() {
-        return unlocksPropulsion;
-    }
-
-    @Nonnull
-    public Set<Sidewall> getUnlocksSidewall() {
-        return unlocksSidewall;
-    }
-
-    @Nonnull
-    public Set<ElectronicWarfare> getUnlocksElectronicWarfare() {
-        return unlocksElectronicWarfare;
-    }
-
-    @Nonnull
     public Set<Missile> getUnlocksMissiles() {
         return unlocksMissiles;
+    }
+
+    @Nonnull
+    public ETranslationTarget getUnlocks() {
+        ETranslationTarget eTranslationTarget = unlocksNamedTechLevel.stream().map(NamedTechLevel::getTranslationTarget).findFirst().orElse(null);
+        if (eTranslationTarget != null) {
+            return eTranslationTarget;
+        }
+        if (!getUnlocksWeapons().isEmpty()) {
+            return ETranslationTarget.WEAPON;
+        }
+        if (!getUnlocksLauncher().isEmpty()) {
+            return ETranslationTarget.LAUNCHER;
+        }
+        if (!getUnlocksMissiles().isEmpty()) {
+            return ETranslationTarget.MISSILE;
+        }
+        return ETranslationTarget.RESEARCH;
     }
 
     @Nullable

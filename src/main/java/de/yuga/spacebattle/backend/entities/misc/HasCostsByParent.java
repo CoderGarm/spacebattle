@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.entities.misc;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
@@ -33,13 +32,13 @@ public class HasCostsByParent extends HasNamedTechLevel implements HasEffectValu
 
     public HasCostsByParent(@Nonnull final NamedTechLevel baseModule,
                             @Nonnull final String technicalTypeName,
-                            @Nonnull final Research unlockedThrough,
-                            final int costsPercentage,
-                            final int effectValue) {
-        super(baseModule, unlockedThrough, technicalTypeName);
+                            final int unlockedThroughLevel,
+                            final int effectValue,
+                            final int costsPercentage) {
+        super(baseModule, unlockedThroughLevel, technicalTypeName);
 
-        this.costsPercentage = costsPercentage;
         this.effectValue = effectValue;
+        this.costsPercentage = costsPercentage;
     }
 
     public int getCostsPercentage() {

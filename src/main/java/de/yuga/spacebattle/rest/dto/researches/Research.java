@@ -5,16 +5,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 import de.yuga.spacebattle.backend.enums.EHullType;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.enums.ETranslationTarget;
 import de.yuga.spacebattle.rest.dto.enums.HasIcon;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Optional;
 
 @Schema(description = ".")
 public class Research {
@@ -71,42 +70,45 @@ public class Research {
     private void setIcon(@Nonnull final de.yuga.spacebattle.backend.entities.researches.Research research) {
         Preconditions.checkNotNull(research, "research must not be empty");
 
-        final Optional<EResourceType> eResourceType = research.getUnlocksBuildings().stream().findFirst().map(Building::getProductionTarget);
-        eResourceType.ifPresent(resourceType -> this.hasIcon = new HasIcon(resourceType));
-
-        final Optional<EHullType> eHullType = research.getUnlocksHulls().stream().findFirst().map(Hull::getHullType);
-        eHullType.ifPresent(hullType -> this.hasIcon = new HasIcon(hullType));
-
-        final boolean isArmor = !research.getUnlocksArmor().isEmpty();
-        if (isArmor) {
-            this.hasIcon = new HasIcon(EModuleType.ARMOR);
+        final EResourceType eResourceType = research.getUnlocksBuildings().stream().findFirst().map(Building::getProductionTarget).orElse(null);
+        if (eResourceType != null) {
+            this.hasIcon = new HasIcon(eResourceType);
+            return;
         }
 
-        final boolean isPropulsion = !research.getUnlocksPropulsion().isEmpty();
-        final boolean isFTLCapable = research.getUnlocksPropulsion().stream().findFirst().map(Propulsion::isFtlCapable).orElse(false);
-        if (isPropulsion) {
-            if (isFTLCapable) {
-                this.hasIcon = new HasIcon(EModuleType.FTLPROPULSION);
-            } else {
+        final EHullType eHullType = research.getUnlocksHulls().stream().findFirst().map(Hull::getHullType).orElse(null);
+        if (eHullType != null) {
+            this.hasIcon = new HasIcon(eHullType);
+            return;
+        }
+
+        final ETranslationTarget unlocks = research.getUnlocks();
+        switch (unlocks) {
+            case HULL:
+            case BUILDING:
+            case RESEARCH:
+            case PASSIVE_MODULE:
+                break;
+            case WEAPON:
+            case WARHEAD:
+            case MISSILE:
+            case LAUNCHER:
+            case MISSILE_MOTOR:
+            case AMMUNITION_MODULE:
+                this.hasIcon = new HasIcon(EModuleType.WEAPON);
+                break;
+            case ARMOR:
+                this.hasIcon = new HasIcon(EModuleType.ARMOR);
+                break;
+            case ELECTRONIC_WARFARE:
+                this.hasIcon = new HasIcon(EModuleType.ELECTRONIC_WARFARE);
+                break;
+            case PROPULSION:
                 this.hasIcon = new HasIcon(EModuleType.PROPULSION);
-            }
-        }
-        final boolean isMissile = !research.getUnlocksMissiles().isEmpty();
-        if (isMissile) {
-            this.hasIcon = new HasIcon(EModuleType.WEAPON);
-        }
-        final boolean isEloka = !research.getUnlocksElectronicWarfare().isEmpty();
-        if (isEloka) {
-            this.hasIcon = new HasIcon(EModuleType.ELECTRONIC_WARFARE);
-        }
-        final boolean isWeapon = !research.getUnlocksWeapons().isEmpty();
-        final boolean isLauncher = !research.getUnlocksLauncher().isEmpty();
-        if (isWeapon || isLauncher) {
-            this.hasIcon = new HasIcon(EModuleType.WEAPON);
-        }
-        final boolean isSidewall = !research.getUnlocksSidewall().isEmpty();
-        if (isSidewall) {
-            this.hasIcon = new HasIcon(EModuleType.SIDEWALL);
+                break;
+            case SIDEWALL:
+                this.hasIcon = new HasIcon(EModuleType.SIDEWALL);
+                break;
         }
     }
 

@@ -2,7 +2,6 @@ package de.yuga.spacebattle.backend.entities.spacecrafts.modules;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.misc.HasCostsByParent;
-import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.ETechnologyType;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
@@ -17,7 +16,7 @@ import javax.validation.constraints.NotNull;
  */
 @NamedQueries({
         @NamedQuery(name = "Propulsion.getAll", query = "SELECT a FROM Propulsion a"),
-        @NamedQuery(name = "Propulsion.getAllByResearches", query = "SELECT a FROM Propulsion a WHERE a.unlockedThrough IN (:researches) OR a.unlockedThrough IS NULL")
+        @NamedQuery(name = "Propulsion.getAllByResearches", query = "SELECT a FROM Propulsion a WHERE a.namedTechLevel.unlockedThrough IN (:researches) OR a.namedTechLevel.unlockedThrough IS NULL")
 })
 @Entity
 @Table(name = "propulsion")
@@ -46,12 +45,12 @@ public class Propulsion extends HasCostsByParent {
 
     public Propulsion(@Nonnull final NamedTechLevel baseModule,
                       @Nonnull final String technicalTypeName,
-                      @Nonnull final Research unlockedThrough,
+                      final int unlockedThroughLevel,
                       final int effectValue,
                       final int costsPercentage,
                       @Nonnull final EHyperBand hyperBand,
                       @Nonnull final ETechnologyType technologyType) {
-        super(baseModule, technicalTypeName, unlockedThrough, costsPercentage, effectValue);
+        super(baseModule, technicalTypeName, unlockedThroughLevel, effectValue, costsPercentage);
         Preconditions.checkNotNull(hyperBand, "hyperBand must not be empty");
         Preconditions.checkNotNull(technologyType, "technologyType must not be empty");
 

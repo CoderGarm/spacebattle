@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.entities.misc;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.EHullType;
 
@@ -27,11 +26,11 @@ public class HasHullType extends HasCostsByParent {
 
     public HasHullType(@Nonnull final NamedTechLevel baseModule,
                        @Nonnull final String technicalTypeName,
-                       @Nonnull final Research unlockedThrough,
-                       final int costsPercentage,
+                       final int unlockedThroughLevel,
                        final int effectValue,
+                       final int costsPercentage,
                        @Nonnull final EHullType hullType) {
-        super(baseModule, technicalTypeName, unlockedThrough, costsPercentage, effectValue);
+        super(baseModule, technicalTypeName, unlockedThroughLevel, effectValue, costsPercentage);
 
         this.hullType = Preconditions.checkNotNull(hullType, "hullType must not be empty");
     }

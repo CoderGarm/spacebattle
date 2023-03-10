@@ -65,11 +65,12 @@ class ShipDataValidatorTest {
         final Set<SupportFitting> supportFittings = shipClass.getSupportFittings();
 
         int usedCapacity = 0;
-        if (shipClass.getHull() != null) {
-            usedCapacity += propulsion != null ? propulsion.getUseCapacity(shipClass.getHull()) : 0;
-            usedCapacity += armor != null ? armor.getUseCapacity(shipClass.getHull()) : 0;
-            usedCapacity += electronicWarfare != null ? electronicWarfare.getUseCapacity(new Hull()) : 0;
-            usedCapacity += getUsedCapacity(sidewall);
+        final Hull hull = shipClass.getHull();
+        if (hull != null) {
+            usedCapacity += propulsion != null ? propulsion.getUseCapacity(hull) : 0;
+            usedCapacity += armor != null ? armor.getUseCapacity(hull) : 0;
+            usedCapacity += electronicWarfare != null ? electronicWarfare.getUseCapacity(hull) : 0;
+            usedCapacity += sidewall != null ? sidewall.getUseCapacity(hull) : 0;
         }
         for (AmmunitionFitting fitting : ammunitionFittings) {
             int amount = fitting.getAmount();

@@ -6,12 +6,16 @@ Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 1. Das Antriebsmodell entspricht jetzt dem Honorverse.
     - https://honor-harrington.fandom.com/de/wiki/Impellerantrieb
     - https://honor-harrington.fandom.com/de/wiki/Warshawski-Segel
+-
 
 Gameplay:
 
 1. Auf der StarMap verändert sich der Cursor, wenn man etwas anklicken kann.
+2.
 
-todo. andere module auf NamedTechLevel umstellen
+todo. Beschleunigung, Maximalgeschwindigkeit (zivil, militärisch) in Bezug zum Hyperband anzeigen, Zeit des Erreichens von v_max
+todo. Antriebsleistung in Bezug zur Masse setzen
+
 todo. abhängige Forschungen pro Level erlauben? NamedTechLevel kennt Forschung, konkretes Modul kennt notwendiges Level, entsprechende Supportmodule halt bei höherem Level
 todo. Forschungen mit NamedTechLevel ausrüsten?
 
@@ -23,6 +27,7 @@ todo. Forschungen mit NamedTechLevel ausrüsten?
 
 todo. webmaster mail at contact section
 todo. changelog mit highlight auf versions-button
+todo. change table names to use derby for useful tests
 
 Thema: NPC, Handel und Missionen
 

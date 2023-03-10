@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.modules;
 
 import de.yuga.spacebattle.backend.entities.misc.HasHullType;
-import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.EHullType;
 
@@ -10,7 +9,7 @@ import javax.persistence.*;
 
 @NamedQueries({
         @NamedQuery(name = "Armor.getAll", query = "SELECT a FROM Armor a"),
-        @NamedQuery(name = "Armor.getAllByResearches", query = "SELECT a FROM Armor a WHERE a.unlockedThrough IN (:researches) OR a.unlockedThrough IS NULL")
+        @NamedQuery(name = "Armor.getAllByResearches", query = "SELECT a FROM Armor a WHERE a.namedTechLevel.unlockedThrough IN (:researches) OR a.namedTechLevel.unlockedThrough IS NULL")
 })
 @Entity
 @Table(name = "armor")
@@ -22,10 +21,10 @@ public class Armor extends HasHullType {
 
     public Armor(@Nonnull final NamedTechLevel baseModule,
                  @Nonnull final String technicalTypeName,
-                 @Nonnull final Research unlockedThrough,
+                 final int unlockedThroughLevel,
                  final int effectValue,
                  final int costsPercentage,
                  @Nonnull final EHullType hullType) {
-        super(baseModule, technicalTypeName, unlockedThrough, costsPercentage, effectValue, hullType);
+        super(baseModule, technicalTypeName, unlockedThroughLevel, effectValue, costsPercentage, hullType);
     }
 }
