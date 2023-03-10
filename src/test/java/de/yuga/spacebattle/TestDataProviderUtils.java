@@ -315,7 +315,7 @@ public class TestDataProviderUtils {
     @Nonnull
     public static Armor createArmor(@Nonnull final String name,
                                     @Nonnull final String description,
-                                    final int useCapacity,
+                                    final int costsPercentage,
                                     final int effectValue,
                                     final ETechLevel techLevel,
                                     @Nonnull final CrewRequirement crewRequirement) {
@@ -324,7 +324,7 @@ public class TestDataProviderUtils {
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
         final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, techLevel, Armor.class);
-        final Armor armor = new Armor(namedTechLevel, "XxX", research(), effectValue, useCapacity, EHullType.CA);
+        final Armor armor = new Armor(namedTechLevel, "XxX", research(), effectValue, costsPercentage, EHullType.CA);
         setId(armor);
         return armor;
     }
@@ -332,7 +332,7 @@ public class TestDataProviderUtils {
     @Nonnull
     public static ElectronicWarfare createElectronicWarfare(@Nonnull final String name,
                                                             @Nonnull final String description,
-                                                            final int useCapacity,
+                                                            final int costsPercentage,
                                                             final int value,
                                                             @Nonnull final Distance effectiveRange,
                                                             final ETechLevel techLevel,
@@ -341,7 +341,8 @@ public class TestDataProviderUtils {
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        final ElectronicWarfare electronicWarfare = new ElectronicWarfare(name, description, research(), useCapacity, value, EHullType.CA, effectiveRange, techLevel, crewRequirement);
+        final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, techLevel, ElectronicWarfare.class);
+        final ElectronicWarfare electronicWarfare = new ElectronicWarfare(namedTechLevel, "yYy", research(), costsPercentage, value, EHullType.CA, effectiveRange);
         setId(electronicWarfare);
         return electronicWarfare;
     }

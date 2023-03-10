@@ -107,26 +107,6 @@ public class ModuleService {
     }
 
     @Nonnull
-    public ElectronicWarfare createElectronicWarfare(@Nonnull final String name,
-                                                     @Nonnull final String description,
-                                                     @Nonnull final Research unlockedThrough,
-                                                     final int useCapacity,
-                                                     final int value,
-                                                     @Nonnull final EHullType hullType,
-                                                     @Nonnull final Distance effectiveRange,
-                                                     @Nonnull final ETechLevel techLevel,
-                                                     @Nonnull final CrewRequirement crewRequirement) {
-        Preconditions.checkNotNull(name, "name shouldn't be null!");
-        Preconditions.checkNotNull(description, "description shouldn't be null!");
-        Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
-        Preconditions.checkNotNull(effectiveRange, "effectiveRange shouldn't be null!");
-        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
-
-        return electronicWarfareRepository.save(new ElectronicWarfare(name, description, unlockedThrough, useCapacity, value, hullType, effectiveRange, techLevel, crewRequirement));
-    }
-
-    @Nonnull
-    @Deprecated(since = "productive environment")
     public Sidewall createSidewall(@Nonnull final String name,
                                    @Nonnull final String description,
                                    @Nonnull final Research unlockedThrough,
@@ -278,6 +258,22 @@ public class ModuleService {
 
         final String technicalTypeName = "A-" + namedTechLevel.getTechLevel().name().split("_")[1] + "-" + hullType.name();
         return armorRepository.save(new Armor(namedTechLevel, technicalTypeName, unlockedThrough, effectValue, costsPercentage, hullType));
+    }
+
+    @Nonnull
+    public ElectronicWarfare createElectronicWarfare(@Nonnull final NamedTechLevel namedTechLevel,
+                                                     @Nonnull final Research unlockedThrough,
+                                                     final int effectValue,
+                                                     final int costsPercentage,
+                                                     @Nonnull final EHullType hullType,
+                                                     @Nonnull final Distance effectiveRange) {
+        Preconditions.checkNotNull(namedTechLevel, "namedTechLevel must not be empty");
+        Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
+        Preconditions.checkNotNull(hullType, "hullType must not be empty");
+        Preconditions.checkNotNull(effectiveRange, "effectiveRange shouldn't be null!");
+
+        final String technicalTypeName = "EloKa-" + namedTechLevel.getTechLevel().name().split("_")[1] + "-" + hullType.name();
+        return electronicWarfareRepository.save(new ElectronicWarfare(namedTechLevel, technicalTypeName, unlockedThrough, costsPercentage, effectValue, hullType, effectiveRange));
     }
 
     @Nonnull

@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.validators;
 
 import de.yuga.spacebattle.TestDataProviderUtils;
+import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AmmunitionFitting;
@@ -65,10 +66,9 @@ class ShipDataValidatorTest {
 
         int usedCapacity = 0;
         if (shipClass.getHull() != null) {
-
             usedCapacity += propulsion != null ? propulsion.getUseCapacity(shipClass.getHull()) : 0;
             usedCapacity += armor != null ? armor.getUseCapacity(shipClass.getHull()) : 0;
-            usedCapacity += getUsedCapacity(electronicWarfare);
+            usedCapacity += electronicWarfare != null ? electronicWarfare.getUseCapacity(new Hull()) : 0;
             usedCapacity += getUsedCapacity(sidewall);
         }
         for (AmmunitionFitting fitting : ammunitionFittings) {
@@ -85,7 +85,6 @@ class ShipDataValidatorTest {
         }
         return usedCapacity;
     }
-
 
     private static int getUsedCapacity(@Nullable final BaseModule baseModuleWithEffectValue) {
         return baseModuleWithEffectValue != null ? baseModuleWithEffectValue.getUseCapacity() : 0;

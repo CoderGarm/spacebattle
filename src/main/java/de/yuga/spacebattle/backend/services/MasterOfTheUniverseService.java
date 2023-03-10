@@ -472,7 +472,7 @@ public class MasterOfTheUniverseService {
         final Distance effectiveRange = new Distance(2.669, EDistanceMetric.LS);
 
         final NamedTechLevel electronicWarfare = moduleService.createBaseModule("Electronic Warfare",
-                "The electronic warfare combines sensors and emitters for the electromagnetic and gravimetric spectrum.", ETechLevel.TECH_I, Propulsion.class);
+                "The electronic warfare combines sensors and emitters for the electromagnetic and gravimetric spectrum.", ETechLevel.TECH_I, ElectronicWarfare.class);
         electronicWarfare.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Elektronische Kriegsführung");
         electronicWarfare.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Maßnahmen zur elektronischen Kriegsführung beinhalten Sensoren und Emitter über das gesamte elektromagnetische und gravimetrische Spektrum.");
         moduleService.save(electronicWarfare);
@@ -482,7 +482,7 @@ public class MasterOfTheUniverseService {
         research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Maßnahmen zur elektronischen Kriegsführung beinhalten Sensoren und Emitter über das gesamte elektromagnetische und gravimetrische Spektrum.");
         researchService.save(research);
 
-        moduleService.createElectronicWarfare("Light cruiser electronic warfare Mk I", "The light cruiser electronic warfare.", research, 4, 100, EHullType.CL, effectiveRange, ETechLevel.TECH_I, new CrewRequirement(M_CREW, EDepositType.COSTS));
+        moduleService.createElectronicWarfare(electronicWarfare, research, 4, 100, EHullType.CL, effectiveRange);
 
     }
 
@@ -1044,18 +1044,20 @@ public class MasterOfTheUniverseService {
         final EHullType hullType = hull.getHullType();
 
         // take the best value
-        final List<ElectronicWarfare> electronicWarfares = sortByValue(moduleService.findAllElectronicWarfare(), hullType);
         final List<Sidewall> sidewalls = sortByValue(moduleService.findAllSidewalls(), hullType);
 
         final Armor armor = moduleService.findAllArmors().stream()
                 .filter(a -> a.getHullType() == hullType)
-                .reduce((o1, o2) -> o2).orElse(null);
+                .findFirst().orElse(null);
         final Sidewall sidewall = sidewalls.stream().reduce((o1, o2) -> o2).orElse(null);
-        final ElectronicWarfare electronicWarfare = electronicWarfares.stream().reduce((o1, o2) -> o2).orElse(null);
 
-        final Propulsion propulsion = moduleService.findAllPropulsions()
-                .stream().filter(p -> p.getHyperBand() == EHyperBand.ALPHA && p.getTechnologyType() == ETechnologyType.MILITARY)
-                .reduce((o1, o2) -> o2).orElse(null);
+        final ElectronicWarfare electronicWarfare = moduleService.findAllElectronicWarfare().stream()
+                .filter(e -> e.getHullType() == hullType)
+                .findFirst().orElse(null);
+
+        final Propulsion propulsion = moduleService.findAllPropulsions().stream()
+                .filter(p -> p.getHyperBand() == EHyperBand.ALPHA && p.getTechnologyType() == ETechnologyType.MILITARY)
+                .findFirst().orElse(null);
 
         final List<Weapon> weapons = moduleService.findAllWeapons();
         final List<Weapon> allBeams = sortByValue(weapons.stream().filter(w -> w.getWeaponType() == EWeaponType.BEAM).collect(Collectors.toList()), hullType);
@@ -1093,11 +1095,14 @@ public class MasterOfTheUniverseService {
 
         cc -= sidewall.getUseCapacity();
         cc -= propulsion.getUseCapacity(hull);
-        cc -= electronicWarfare.getUseCapacity();
+
+        if (electronicWarfare != null) {
+            cc -= electronicWarfare.getUseCapacity(hull);
+            shipClass.setElectronicWarfare(electronicWarfare);
+        }
 
         shipClass.setSidewall(sidewall);
         shipClass.setPropulsion(propulsion);
-        shipClass.setElectronicWarfare(electronicWarfare);
 
         final Set<AlignedFitting> fittings = new HashSet<>();
         for (final EWeaponAlignment alignment : EWeaponAlignment.values()) {

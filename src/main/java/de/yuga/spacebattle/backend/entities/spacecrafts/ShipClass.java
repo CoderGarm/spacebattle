@@ -194,7 +194,7 @@ public class ShipClass extends Deletable {
                 updateCosts(clonedDeposit, supportTypeToModule, armor.getCosts(hull));
             }
             if (electronicWarfare != null) {
-                updateCosts(clonedDeposit, supportTypeToModule, electronicWarfare.getCosts());
+                updateCosts(clonedDeposit, supportTypeToModule, electronicWarfare.getCosts(hull));
             }
             if (sidewall != null) {
                 updateCosts(clonedDeposit, supportTypeToModule, sidewall.getCosts());
@@ -534,7 +534,7 @@ public class ShipClass extends Deletable {
                     usedCapacity += propulsion != null ? propulsion.getUseCapacity(hull) : 0;
                     usedCapacity += armor != null ? armor.getUseCapacity(hull) : 0;
                     usedCapacity += sidewall != null ? sidewall.getUseCapacity() : 0;
-                    usedCapacity += electronicWarfare != null ? electronicWarfare.getUseCapacity() : 0;
+                    usedCapacity += electronicWarfare != null ? electronicWarfare.getUseCapacity(hull) : 0;
                 }
                 return usedCapacity;
             case OVERALL:

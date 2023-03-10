@@ -180,14 +180,12 @@
 
     create table electronicWarfare (
        idElectronicWarfare integer not null auto_increment,
-        techLevel varchar(255) not null,
-        hullType varchar(255) not null,
-        useCapacity integer not null,
+        technicalTypeName varchar(255) not null,
+        costsPercentage integer not null,
         effectValue integer not null,
+        hullType varchar(255) not null,
         effectiveRange varchar(255),
-        idTranslatableDescription integer not null,
-        idTranslatableName integer not null,
-        idCosts integer not null,
+        idNamedTechLevel integer not null,
         idResearch integer not null,
         primary key (idElectronicWarfare)
     ) engine=InnoDB;
@@ -1063,19 +1061,9 @@
        references battleReport (idBattleReport);
 
     alter table electronicWarfare 
-       add constraint FKi180vaq7gab8jy3r99bawdic5 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table electronicWarfare 
-       add constraint FKgehovt9s2xat817l0enflo5nq 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
-
-    alter table electronicWarfare 
-       add constraint FKccj76id0r5pq3p7f4viriwdqf 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
+       add constraint FKpwiw9e7b62krmlt84y1jbj5n8 
+       foreign key (idNamedTechLevel) 
+       references namedTechLevel (idNamedTechLevel);
 
     alter table electronicWarfare 
        add constraint FKhr2adrrpeb3vshv11ajrgnkd7 
