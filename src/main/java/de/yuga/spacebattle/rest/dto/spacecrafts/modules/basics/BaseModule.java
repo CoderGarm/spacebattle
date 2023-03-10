@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
@@ -22,11 +23,16 @@ public class BaseModule {
 
     @Nonnull
     @JsonProperty
+    @Schema(description = "The technical type name of this module.")
+    private String technicalTypeName;
+
+    @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The description of this module.")
     private String description;
 
     @JsonProperty
-    @Schema(required = true, description = "The capacity usage of this module.")
+    @Schema(description = "The capacity usage of this module.")
     private int useCapacity;
 
     @Nullable
@@ -41,7 +47,7 @@ public class BaseModule {
 
     @Nonnull
     @JsonProperty
-    @Schema(required = true, description = "The intended hull type of this module.")
+    @Schema(description = "The intended hull type of this module.")
     private de.yuga.spacebattle.rest.dto.enums.EHullType hullType;
 
     protected BaseModule() {
@@ -67,6 +73,20 @@ public class BaseModule {
         this.effectValue = baseModuleWithEffectValue.getEffectValue();
     }
 
+    public BaseModule(@Nonnull final de.yuga.spacebattle.backend.entities.misc.HasNamedTechLevel hasNamedTechLevel,
+                      @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(hasNamedTechLevel, "hasNamedTechLevel shouldn't be null!");
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
+
+        this.idModule = hasNamedTechLevel.getId();
+        this.name = hasNamedTechLevel.getName(languageCode);
+        this.technicalTypeName = hasNamedTechLevel.getTechnicalTypeName();
+        this.technicalTypeName = hasNamedTechLevel.getTechnicalTypeName();
+        this.description = hasNamedTechLevel.getDescription(languageCode);
+        this.techLevel = hasNamedTechLevel.getTechLevel();
+    }
+
+    @JsonIgnore
     public int getIdModule() {
         return idModule;
     }

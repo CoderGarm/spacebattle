@@ -187,18 +187,18 @@ public class ShipClass extends Deletable {
 
         if (hull != null) {
             updateCosts(clonedDeposit, supportTypeToModule, hull.getCosts());
-        }
-        if (propulsion != null && hull != null) {
-            updateCosts(clonedDeposit, supportTypeToModule, propulsion.getCosts(hull));
-        }
-        if (armor != null) {
-            updateCosts(clonedDeposit, supportTypeToModule, armor.getCosts());
-        }
-        if (electronicWarfare != null) {
-            updateCosts(clonedDeposit, supportTypeToModule, electronicWarfare.getCosts());
-        }
-        if (sidewall != null) {
-            updateCosts(clonedDeposit, supportTypeToModule, sidewall.getCosts());
+            if (propulsion != null) {
+                updateCosts(clonedDeposit, supportTypeToModule, propulsion.getCosts(hull));
+            }
+            if (armor != null) {
+                updateCosts(clonedDeposit, supportTypeToModule, armor.getCosts(hull));
+            }
+            if (electronicWarfare != null) {
+                updateCosts(clonedDeposit, supportTypeToModule, electronicWarfare.getCosts());
+            }
+            if (sidewall != null) {
+                updateCosts(clonedDeposit, supportTypeToModule, sidewall.getCosts());
+            }
         }
         fittings.forEach(fitting -> {
             int amount = fitting.getAmount();
@@ -261,62 +261,12 @@ public class ShipClass extends Deletable {
     }
 
     @Nonnull
-    public Set<AlignedFitting> getFittingByType(@Nonnull final EWeaponType weaponType) {
-        Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
-
-        return fittings.stream()
-                .filter(e -> weaponType == e.getWeaponType())
-                .collect(Collectors.toSet());
-    }
-
-    @Nonnull
-    public Set<AlignedFitting> getFittingByTypeAndAlignment(@Nonnull final EWeaponType weaponType,
-                                                            @Nonnull final EWeaponAlignment weaponAlignment) {
-        Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
-        Preconditions.checkNotNull(weaponAlignment, "weaponAlignment shouldn't be null!");
-
-        return fittings.stream()
-                .filter(e -> weaponType == e.getWeaponType() && weaponAlignment == e.getWeaponAlignment())
-                .collect(Collectors.toSet());
-    }
-
-    @Nonnull
     public Set<AlignedFitting> getFittingByAlignment(@Nonnull final EWeaponAlignment weaponAlignment) {
         Preconditions.checkNotNull(weaponAlignment, "weaponAlignment shouldn't be null!");
 
         return fittings.stream()
                 .filter(e -> weaponAlignment == e.getWeaponAlignment())
                 .collect(Collectors.toSet());
-    }
-
-    /**
-     * Adds a fitting to the ships modules.
-     *
-     * @param fitting the fitting to add
-     */
-    public void addFitting(@Nonnull final AlignedFitting fitting) {
-        Preconditions.checkNotNull(fitting, "fitting shouldn't be null!");
-
-        fittings.stream()
-                .filter(fitting::equals)
-                .findFirst()
-                .ifPresentOrElse(
-                        alignedFitting -> alignedFitting.setAmount(fitting.getAmount()),
-                        () -> fittings.add(fitting));
-    }
-
-    /**
-     * Removes a module from the ships modules.
-     *
-     * @param fitting the fitting to remove
-     */
-    public void removeFitting(@Nonnull final AlignedFitting fitting) {
-        Preconditions.checkNotNull(fitting, "fitting shouldn't be null!");
-
-        fittings.stream()
-                .filter(fitting::equals)
-                .findFirst()
-                .ifPresent(fittings::remove);
     }
 
     /**
@@ -377,20 +327,6 @@ public class ShipClass extends Deletable {
     }
 
     /**
-     * Removes a module from the ammunition fitting.
-     *
-     * @param fitting the fitting to remove
-     */
-    public void removeAmmunitionFitting(@Nonnull final AmmunitionFitting fitting) {
-        Preconditions.checkNotNull(fitting, "fitting shouldn't be null!");
-
-        ammunitionFittings.stream()
-                .filter(fitting::equals)
-                .findFirst()
-                .ifPresent(ammunitionFittings::remove);
-    }
-
-    /**
      * Necessary while vaadin data binding needs a setter for a full set of data and is not able to use an incremental add method.
      * Removes all no longer contained modules and add or replace everything else.
      *
@@ -406,36 +342,6 @@ public class ShipClass extends Deletable {
     @Nonnull
     public Set<AmmunitionFitting> getAmmunitionFittings() {
         return ammunitionFittings;
-    }
-
-    /**
-     * Adds a fitting to the ammunition fitting.
-     *
-     * @param fitting the fitting to add
-     */
-    public void addSupportFitting(@Nonnull final SupportFitting fitting) {
-        Preconditions.checkNotNull(fitting, "fitting shouldn't be null!");
-
-        supportFittings.stream()
-                .filter(fitting::equals)
-                .findFirst()
-                .ifPresentOrElse(
-                        alignedFitting -> alignedFitting.setAmount(fitting.getAmount()),
-                        () -> supportFittings.add(fitting));
-    }
-
-    /**
-     * Removes a module from the ammunition fitting.
-     *
-     * @param fitting the fitting to remove
-     */
-    public void removeSupportFitting(@Nonnull final SupportFitting fitting) {
-        Preconditions.checkNotNull(fitting, "fitting shouldn't be null!");
-
-        supportFittings.stream()
-                .filter(fitting::equals)
-                .findFirst()
-                .ifPresent(supportFittings::remove);
     }
 
     /**
@@ -580,21 +486,6 @@ public class ShipClass extends Deletable {
      * @param boundaries the boundaries
      * @return the damage value
      */
-    public List<DamagePerRangeAndAlignment> getDamagePerRange(@Nonnull final RangeDefinition boundaries) {
-        Preconditions.checkNotNull(boundaries, "boundaries shouldn't be null!");
-
-        return fittings.stream()
-                .map(fitting -> fitting.getDamagePerRange(boundaries))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Returns the damage which can be applied by this class to the given range in meter.
-     *
-     * @param boundaries the boundaries
-     * @return the damage value
-     */
     public List<DamagePerRangeAndAlignment> getDamagePerRangePerWeaponType(@Nonnull final RangeDefinition boundaries,
                                                                            @Nonnull final EWeaponType weaponType) {
         Preconditions.checkNotNull(boundaries, "boundaries shouldn't be null!");
@@ -639,10 +530,12 @@ public class ShipClass extends Deletable {
                 usedCapacity += getAmmunitionFittings().stream()
                         .map(AmmunitionFitting::calculateUsedCapacity)
                         .reduce(0, Integer::sum);
-                usedCapacity += (propulsion != null && hull != null) ? propulsion.getUseCapacity(hull) : 0;
-                usedCapacity += armor != null ? armor.getUseCapacity() : 0;
-                usedCapacity += sidewall != null ? sidewall.getUseCapacity() : 0;
-                usedCapacity += electronicWarfare != null ? electronicWarfare.getUseCapacity() : 0;
+                if (hull != null) {
+                    usedCapacity += propulsion != null ? propulsion.getUseCapacity(hull) : 0;
+                    usedCapacity += armor != null ? armor.getUseCapacity(hull) : 0;
+                    usedCapacity += sidewall != null ? sidewall.getUseCapacity() : 0;
+                    usedCapacity += electronicWarfare != null ? electronicWarfare.getUseCapacity() : 0;
+                }
                 return usedCapacity;
             case OVERALL:
                 return ECapacityAreaType.getValuesWithoutOverall().stream().map(this::getUsedCapacity).reduce(0, Integer::sum);

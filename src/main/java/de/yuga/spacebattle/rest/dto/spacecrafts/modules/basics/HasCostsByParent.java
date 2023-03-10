@@ -9,11 +9,6 @@ import javax.annotation.Nonnull;
 @Schema(description = ".")
 public class HasCostsByParent {
 
-    @Nonnull
-    @JsonProperty
-    @Schema(required = true, description = "Some relevant info about this module.")
-    private HasNamedTechLevel hasNamedTechLevel;
-
     @JsonProperty
     @Schema(required = true, description = "The percentage of the parent's module cost which represents the costs of 'this'.")
     private int costsPercentage;
@@ -21,12 +16,9 @@ public class HasCostsByParent {
     public HasCostsByParent() {
     }
 
-    public HasCostsByParent(@Nonnull final de.yuga.spacebattle.backend.entities.misc.HasCostsByParent hasCostsByParent,
-                            @Nonnull final String languageCode) {
+    public HasCostsByParent(@Nonnull final de.yuga.spacebattle.backend.entities.misc.HasCostsByParent hasCostsByParent) {
         Preconditions.checkNotNull(hasCostsByParent, "hasCostsByParent must not be empty");
-        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
 
-        this.hasNamedTechLevel = new HasNamedTechLevel(hasCostsByParent, languageCode);
         this.costsPercentage = hasCostsByParent.getCostsPercentage();
     }
 }

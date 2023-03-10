@@ -69,13 +69,11 @@
 
     create table armor (
        idArmor integer not null auto_increment,
-        techLevel varchar(255) not null,
-        hullType varchar(255) not null,
-        useCapacity integer not null,
+        technicalTypeName varchar(255) not null,
+        costsPercentage integer not null,
         effectValue integer not null,
-        idTranslatableDescription integer not null,
-        idTranslatableName integer not null,
-        idCosts integer not null,
+        hullType varchar(255) not null,
+        idNamedTechLevel integer not null,
         idResearch integer not null,
         primary key (idArmor)
     ) engine=InnoDB;
@@ -945,19 +943,9 @@
        references research (idResearch);
 
     alter table armor 
-       add constraint FK843wjkvvkloflykng3p5xanqf 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table armor 
-       add constraint FKj95rgrpe0e0kldkrdk61180vb 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
-
-    alter table armor 
-       add constraint FK10dhr7h3pkps3d7u22q2pwpgc 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
+       add constraint FKc1peuds75yuluxfttbe5omesp 
+       foreign key (idNamedTechLevel) 
+       references namedTechLevel (idNamedTechLevel);
 
     alter table armor 
        add constraint FKrb3h67mjdni459t4j1y8b7sw5 

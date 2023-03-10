@@ -3,22 +3,24 @@ Thema: NPC, Handel und Missionen
 
 Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
+1. Das Antriebsmodell entspricht jetzt dem Honorverse.
+    - https://honor-harrington.fandom.com/de/wiki/Impellerantrieb
+    - https://honor-harrington.fandom.com/de/wiki/Warshawski-Segel
+
 Gameplay:
 
-1. Auf der StarMap verändert sich nun der Cursor, wenn man etwas anklicken kann.
-
-todo. Beschleunigung, Maximalgeschwindigkeit (zivil, militärisch) in Bezug zum Hyperband anzeigen, Zeit des Erreichens von v_max
-todo. Antriebsleistung in Bezug zur Masse setzen
-todo. Hyperband abhängig vom Zusammenpassen der HullTypes
+1. Auf der StarMap verändert sich der Cursor, wenn man etwas anklicken kann.
 
 todo. andere module auf NamedTechLevel umstellen
+todo. abhängige Forschungen pro Level erlauben? NamedTechLevel kennt Forschung, konkretes Modul kennt notwendiges Level, entsprechende Supportmodule halt bei höherem Level
 todo. Forschungen mit NamedTechLevel ausrüsten?
 
 ----------------- Bugs fixed -----------
 
 1. Der Bau-Button in der Werft war fälschlicherweise disabled.
 
------------------ next steps -----------  
+----------------- next steps -----------
+
 todo. webmaster mail at contact section
 todo. changelog mit highlight auf versions-button
 
@@ -92,7 +94,6 @@ todo. wiki: images and position
 - stored in?
   todo. wiki: links between articles?
 - every article know their links and pass them by a keyword?
-
 
 todo. support module zum reduzieren der benötigten crew
 

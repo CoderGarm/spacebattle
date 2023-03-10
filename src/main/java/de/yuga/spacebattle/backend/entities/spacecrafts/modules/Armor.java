@@ -1,10 +1,9 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.modules;
 
-import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
+import de.yuga.spacebattle.backend.entities.misc.HasHullType;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.EHullType;
-import de.yuga.spacebattle.backend.enums.ETechLevel;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -16,19 +15,17 @@ import javax.persistence.*;
 @Entity
 @Table(name = "armor")
 @AttributeOverride(name = "id", column = @Column(name = "idArmor"))
-public class Armor extends BaseModuleWithEffectValue {
+public class Armor extends HasHullType {
 
     public Armor() {
     }
 
-    public Armor(@Nonnull final String name,
-                 @Nonnull final String description,
+    public Armor(@Nonnull final NamedTechLevel baseModule,
+                 @Nonnull final String technicalTypeName,
                  @Nonnull final Research unlockedThrough,
-                 final int useCapacity,
                  final int effectValue,
-                 @Nonnull final EHullType hullType,
-                 @Nonnull final ETechLevel techLevel,
-                 @Nonnull final CrewRequirement crewRequirement) {
-        super(name, description, unlockedThrough, useCapacity, effectValue, hullType, techLevel, crewRequirement, Armor.class);
+                 final int costsPercentage,
+                 @Nonnull final EHullType hullType) {
+        super(baseModule, technicalTypeName, unlockedThrough, costsPercentage, effectValue, hullType);
     }
 }

@@ -410,7 +410,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
     public Distance getElokaRange() {
         return getFightingWarShips()
                 .map(shipClass -> {
-                    final ElectronicWarfare eloka = shipClass.getModule(ElectronicWarfare.class);
+                    final ElectronicWarfare eloka = shipClass.getElectronicWarfare();
                     return eloka != null ? eloka.getEffectiveRange() : Distance.ZERO;
                 }).max(Comparator.naturalOrder())
                 .orElse(Distance.ZERO);

@@ -12,7 +12,6 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.enums.EHitArea;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
@@ -68,27 +67,30 @@ public class WarshipHealthState implements Cloneable {
     private final List<HitLog> hitLog = new ArrayList<>();
 
     @Nonnull
-    private final List<BaseModuleWithEffectValue> modules = new ArrayList<>();
-
-    @Nonnull
     private MissileAmmunitionState missileAmmunitionState;
 
     @Nonnull
     private final Propulsion propulsion;
+
+    @Nullable
+    private final Armor armor;
+
+    @Nullable
+    private final Sidewall sidewall;
+
+    @Nullable
+    private final ElectronicWarfare electronicWarfare;
 
     public WarshipHealthState(@Nonnull final WarShip warShip) {
         Preconditions.checkNotNull(warShip, "warShip shouldn't be null!");
 
         this.warShip = warShip;
         final ShipClass shipClass = warShip.getShipClass();
-        final Armor armor = shipClass.getArmor();
-        final Sidewall sidewall = shipClass.getSidewall();
         assert shipClass.getPropulsion() != null;
         this.propulsion = shipClass.getPropulsion();
-        final ElectronicWarfare electronicWarfare = shipClass.getElectronicWarfare();
-        this.modules.add(armor);
-        this.modules.add(sidewall);
-        this.modules.add(electronicWarfare);
+        this.sidewall = shipClass.getSidewall();
+        this.armor = shipClass.getArmor();
+        this.electronicWarfare = shipClass.getElectronicWarfare();
 
         final de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState healthState = warShip.getWarshipHealthState();
         armorState = healthState.getStateByAsInt(EModuleType.ARMOR);
@@ -458,16 +460,6 @@ public class WarshipHealthState implements Cloneable {
                 .orElse(Distance.ZERO);
     }
 
-    @Nullable
-    @SuppressWarnings("TypeParameterHidesVisibleType")
-    public <Module extends BaseModuleWithEffectValue> Module getModule(@Nonnull final Class<Module> module) {
-        Preconditions.checkNotNull(module, "module shouldn't be null!");
-
-        //noinspection unchecked
-        return (Module) modules.stream().filter(m -> m.getClass().isAssignableFrom(module)).findAny().orElse(null);
-
-    }
-
     public double getDamagedFraction(@Nonnull final WarshipHealthState reference) {
         Preconditions.checkNotNull(reference, "reference must not be empty");
 
@@ -497,5 +489,20 @@ public class WarshipHealthState implements Cloneable {
     @Nonnull
     public Propulsion getPropulsion() {
         return propulsion;
+    }
+
+    @Nullable
+    public Armor getArmor() {
+        return armor;
+    }
+
+    @Nullable
+    public Sidewall getSidewall() {
+        return sidewall;
+    }
+
+    @Nullable
+    public ElectronicWarfare getElectronicWarfare() {
+        return electronicWarfare;
     }
 }

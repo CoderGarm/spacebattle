@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.entities.misc;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
@@ -16,7 +17,7 @@ import java.math.RoundingMode;
 import java.util.Arrays;
 
 @MappedSuperclass
-public class HasCostsByParent extends HasNamedTechLevel {
+public class HasCostsByParent extends HasNamedTechLevel implements HasEffectValue {
 
     private static final MathContext MC = new MathContext(8, RoundingMode.HALF_UP);
 
@@ -25,19 +26,29 @@ public class HasCostsByParent extends HasNamedTechLevel {
      */
     private int costsPercentage;
 
+    private int effectValue;
+
     public HasCostsByParent() {
     }
 
     public HasCostsByParent(@Nonnull final NamedTechLevel baseModule,
                             @Nonnull final String technicalTypeName,
-                            final int costsPercentage) {
-        super(baseModule, technicalTypeName);
+                            @Nonnull final Research unlockedThrough,
+                            final int costsPercentage,
+                            final int effectValue) {
+        super(baseModule, unlockedThrough, technicalTypeName);
 
         this.costsPercentage = costsPercentage;
+        this.effectValue = effectValue;
     }
 
     public int getCostsPercentage() {
         return costsPercentage;
+    }
+
+    @Override
+    public int getEffectValue() {
+        return effectValue;
     }
 
     private int getPercentValue(final int baseValue) {

@@ -316,14 +316,15 @@ public class TestDataProviderUtils {
     public static Armor createArmor(@Nonnull final String name,
                                     @Nonnull final String description,
                                     final int useCapacity,
-                                    final int value,
+                                    final int effectValue,
                                     final ETechLevel techLevel,
                                     @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        final Armor armor = new Armor(name, description, research(), useCapacity, value, EHullType.CA, techLevel, crewRequirement);
+        final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, techLevel, Armor.class);
+        final Armor armor = new Armor(namedTechLevel, "XxX", research(), effectValue, useCapacity, EHullType.CA);
         setId(armor);
         return armor;
     }

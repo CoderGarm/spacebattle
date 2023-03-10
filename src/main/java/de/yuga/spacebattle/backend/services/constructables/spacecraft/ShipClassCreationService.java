@@ -163,7 +163,7 @@ public class ShipClassCreationService {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
 
         if (shipClass.getArmor() != null) {
-            final Armor module = moduleService.findArmorById(shipClass.getArmor().getBaseModule().getIdModule());
+            final Armor module = moduleService.findArmorById(shipClass.getArmor().getIdModule());
             entity.setArmor(module);
         }
 

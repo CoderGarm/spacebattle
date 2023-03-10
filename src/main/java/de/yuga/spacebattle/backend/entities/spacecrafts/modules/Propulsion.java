@@ -40,14 +40,6 @@ public class Propulsion extends HasCostsByParent {
     @Enumerated(EnumType.STRING)
     private ETechnologyType technologyType;
 
-    private int effectValue;
-
-    @Nonnull
-    @NotNull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "idResearch")
-    private Research unlockedThrough;
-
     public Propulsion() {
 
     }
@@ -59,15 +51,12 @@ public class Propulsion extends HasCostsByParent {
                       final int costsPercentage,
                       @Nonnull final EHyperBand hyperBand,
                       @Nonnull final ETechnologyType technologyType) {
-        super(baseModule, technicalTypeName, costsPercentage);
-        Preconditions.checkNotNull(unlockedThrough, "unlockedThrough must not be empty");
+        super(baseModule, technicalTypeName, unlockedThrough, costsPercentage, effectValue);
         Preconditions.checkNotNull(hyperBand, "hyperBand must not be empty");
         Preconditions.checkNotNull(technologyType, "technologyType must not be empty");
 
         this.hyperBand = hyperBand;
         this.technologyType = technologyType;
-        this.effectValue = effectValue;
-        this.unlockedThrough = unlockedThrough;
     }
 
     @Nonnull
@@ -82,14 +71,5 @@ public class Propulsion extends HasCostsByParent {
 
     public boolean isFtlCapable() {
         return hyperBand != EHyperBand.NONE;
-    }
-
-    public int getEffectValue() {
-        return effectValue;
-    }
-
-    @Nonnull
-    public Research getUnlockedThrough() {
-        return unlockedThrough;
     }
 }

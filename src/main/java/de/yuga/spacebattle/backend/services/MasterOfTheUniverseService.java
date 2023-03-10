@@ -366,41 +366,24 @@ public class MasterOfTheUniverseService {
     }
 
     private void createArmors() {
-        Research unlockArmor = research("Armor", "The Armor research researches ...", 1, ETechLevel.TECH_I, null);
-        Armor armor = moduleService.createArmor("Light cruiser armor Mk I", "The light cruiser armor is the smallest useful protection.", unlockArmor, 5, 3000, EHullType.CL, ETechLevel.TECH_I, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        armor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Leichte Kreuzer Panzerung Mk I");
-        armor.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Panzerung eines leichten Kreuzers ist die leichteste sinnvoll nutzbare Panzerung.");
-        moduleService.save(armor);
 
-        unlockArmor = research("Cruiser Armor", "The Cruiser armor research.", 1, ETechLevel.TECH_I, unlockArmor);
-        armor = moduleService.createArmor("Heavy cruiser armor Mk I", "The heavy cruiser armor is much heavier and thicker that the smaller pendant.", unlockArmor, 9, 5000, EHullType.CA, ETechLevel.TECH_I, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        armor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Schwere Kreuzer Panzerung Mk I");
-        armor.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Panzerung eines schweren Kreuzers ist deutliche schwerer und stärker als ihr kleineres Gegenstück.");
-        moduleService.save(armor);
+        final NamedTechLevel baseModule = moduleService.createBaseModule("Armor",
+                "A protection of many layers of armor that alternated between ablative composites that absorbed energy from energy weapons and solid anti-kinetic layers.", ETechLevel.TECH_I, Armor.class);
+        baseModule.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Panzerung");
+        baseModule.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eine Schutzhülle aus verschiedenen Lagen von Komposit-Panzerung aus Keramik und Durastahl und hitzeabsorbierenden Materialien.");
+        moduleService.save(baseModule);
 
-        unlockArmor = research("Battle cruiser Armor", "The battlecruiser armor research.", 1, ETechLevel.TECH_I, unlockArmor);
-        armor = moduleService.createArmor("Battle cruiser armor Mk I", "The battle cruiser armor is much heavier and thicker that the smaller pendant.", unlockArmor, 22, 11000, EHullType.BC, ETechLevel.TECH_I, new CrewRequirement(L_CREW, EDepositType.COSTS));
-        armor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Schlachtkreuzer Panzerung Mk I");
-        armor.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Panzerung eines Schlachtkreuzers ist deutliche schwerer und stärker als ihr kleineres Gegenstück.");
-        moduleService.save(armor);
+        final Research research = research("Armor", "A protection of many layers of armor that alternated between ablative composites that absorbed energy from energy weapons and solid anti-kinetic layers.", 1, ETechLevel.TECH_I, null);
+        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Panzerung");
+        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eine Schutzhülle aus verschiedenen Lagen von Komposit-Panzerung aus Keramik und Durastahl und hitzeabsorbierenden Materialien.");
+        researchService.save(research);
+        moduleService.createArmor(baseModule, research, 3000, 3, EHullType.CL);
+        moduleService.createArmor(baseModule, research, 5000, 5, EHullType.CA);
+        moduleService.createArmor(baseModule, research, 13000, 8, EHullType.BC);
+        moduleService.createArmor(baseModule, research, 28000, 9, EHullType.BB);
+        moduleService.createArmor(baseModule, research, 190000, 10, EHullType.DN);
+        moduleService.createArmor(baseModule, research, 360000, 12, EHullType.SD);
 
-        unlockArmor = research("Battleship Armor", "The battleship armor research.", 1, ETechLevel.TECH_I, unlockArmor);
-        armor = moduleService.createArmor("Battleship armor Mk I", "The battleship armor is much heavier and thicker that the smaller pendant.", unlockArmor, 34, 20000, EHullType.BB, ETechLevel.TECH_I, new CrewRequirement(XL_CREW, EDepositType.COSTS));
-        armor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Schlachtschiff Panzerung Mk I");
-        armor.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Panzerung eines Schlachtschiffs ist deutliche schwerer und stärker als ihr kleineres Gegenstück.");
-        moduleService.save(armor);
-
-        unlockArmor = research("Dreadnought Armor", "The dreadnought armor research.", 1, ETechLevel.TECH_I, unlockArmor);
-        armor = moduleService.createArmor("Dreadnought armor Mk I", "The dreadnought armor is much heavier and thicker that the smaller pendant.", unlockArmor, 300, 190000, EHullType.DN, ETechLevel.TECH_I, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-        armor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Panzerung Mk I");
-        armor.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Panzerung eines Dreadnoughts ist deutliche schwerer und stärker als ihr kleineres Gegenstück.");
-        moduleService.save(armor);
-
-        unlockArmor = research("Superdreadnought Armor", "The superdreadnought armor research.", 1, ETechLevel.TECH_I, unlockArmor);
-        armor = moduleService.createArmor("Superdreadnought armor Mk I", "The superdreadnought armor is the biggest armor ever build for moving units.", unlockArmor, 500, 360000, EHullType.SD, ETechLevel.TECH_I, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-        armor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Superdreadnought Panzerung Mk I");
-        armor.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Panzerung eines Superdreadnoughts ist die schwerste und stärkste jemals gebaute Panzerung für bewegliche Einheiten.");
-        moduleService.save(armor);
     }
 
     private void createPropulsions() {
@@ -486,56 +469,21 @@ public class MasterOfTheUniverseService {
     }
 
     private void createEloka() {
-        Research unlockElectronicWarfare = research("Electronic Warfare", "The EW research researches electronic warfare.", 1, ETechLevel.TECH_I, null);
-        ElectronicWarfare eloka = moduleService.createElectronicWarfare("Light cruiser electronic warfare Mk I", "The light cruiser electronic warfare.", unlockElectronicWarfare, 4, 100, EHullType.CL, new Distance(2.669, EDistanceMetric.LS), ETechLevel.TECH_I, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        eloka.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Leichte Kreuzer Eloka Mk I");
-        eloka.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für leichte Kreuzer.");
-        moduleService.save(eloka);
+        final Distance effectiveRange = new Distance(2.669, EDistanceMetric.LS);
 
-        eloka = moduleService.createElectronicWarfare("LAC electronic warfare Mk I", "The light attack craft electronic warfare.", unlockElectronicWarfare, 1, 20, EHullType.LAC, new Distance(2.669, EDistanceMetric.LS), ETechLevel.TECH_I, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        eloka.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für leichte Angriffsboote Mk I");
-        eloka.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für leichte Angriffsboote.");
-        moduleService.save(eloka);
+        final NamedTechLevel electronicWarfare = moduleService.createBaseModule("Electronic Warfare",
+                "The electronic warfare combines sensors and emitters for the electromagnetic and gravimetric spectrum.", ETechLevel.TECH_I, Propulsion.class);
+        electronicWarfare.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Elektronische Kriegsführung");
+        electronicWarfare.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Maßnahmen zur elektronischen Kriegsführung beinhalten Sensoren und Emitter über das gesamte elektromagnetische und gravimetrische Spektrum.");
+        moduleService.save(electronicWarfare);
 
-        eloka = moduleService.createElectronicWarfare("Corvette electronic warfare Mk I", "The corvette electronic warfare.", unlockElectronicWarfare, 1, 30, EHullType.VT, new Distance(2.669, EDistanceMetric.LS), ETechLevel.TECH_I, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        eloka.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Korvetten Mk I");
-        eloka.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Korvetten.");
-        moduleService.save(eloka);
+        Research research = research("Electronic Warfare", "The electronic warfare combines sensors and emitters for the electromagnetic and gravimetric spectrum.", 1, ETechLevel.TECH_I, null);
+        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Elektronische Kriegsführung");
+        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Maßnahmen zur elektronischen Kriegsführung beinhalten Sensoren und Emitter über das gesamte elektromagnetische und gravimetrische Spektrum.");
+        researchService.save(research);
 
-        eloka = moduleService.createElectronicWarfare("Frigate electronic warfare Mk I", "The frigate electronic warfare.", unlockElectronicWarfare, 2, 50, EHullType.FG, new Distance(2.669, EDistanceMetric.LS), ETechLevel.TECH_I, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        eloka.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Fregatten Mk I");
-        eloka.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Fregatten.");
-        moduleService.save(eloka);
+        moduleService.createElectronicWarfare("Light cruiser electronic warfare Mk I", "The light cruiser electronic warfare.", research, 4, 100, EHullType.CL, effectiveRange, ETechLevel.TECH_I, new CrewRequirement(M_CREW, EDepositType.COSTS));
 
-        unlockElectronicWarfare = research("Electronic Warfare for cruisers", "The EW for cruisers research.", 1, ETechLevel.TECH_I, unlockElectronicWarfare);
-        eloka = moduleService.createElectronicWarfare("Cruiser electronic warfare Mk I", "The cruiser electronic warfare.", unlockElectronicWarfare, 6, 150, EHullType.CA, new Distance(2.669, EDistanceMetric.LS), ETechLevel.TECH_I, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        eloka.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Kreuzer Mk I");
-        eloka.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Kreuzer.");
-        moduleService.save(eloka);
-
-        unlockElectronicWarfare = research("Electronic Warfare for battlecruisers", "The EW for battlecruisers research.", 1, ETechLevel.TECH_I, unlockElectronicWarfare);
-        eloka = moduleService.createElectronicWarfare("Battlecruiser electronic warfare Mk I", "The battlecruiser electronic warfare.", unlockElectronicWarfare, 25, 700, EHullType.BC, new Distance(2.669, EDistanceMetric.LS), ETechLevel.TECH_I, new CrewRequirement(L_CREW, EDepositType.COSTS));
-        eloka.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Schlachtkreuzer Mk I");
-        eloka.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Schlachtkreuzer.");
-        moduleService.save(eloka);
-
-        unlockElectronicWarfare = research("Electronic Warfare for battleships", "The EW for battleships research.", 1, ETechLevel.TECH_I, unlockElectronicWarfare);
-        eloka = moduleService.createElectronicWarfare("Battleship electronic warfare Mk I", "The battleship electronic warfare.", unlockElectronicWarfare, 30, 750, EHullType.BB, new Distance(2.669, EDistanceMetric.LS), ETechLevel.TECH_I, new CrewRequirement(L_CREW, EDepositType.COSTS));
-        eloka.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Schlachtschiffe Mk I");
-        eloka.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Schlachtschiffe.");
-        moduleService.save(eloka);
-
-        unlockElectronicWarfare = research("Electronic Warfare for dreadnoughts", "The EW for dreadnoughts research.", 1, ETechLevel.TECH_I, unlockElectronicWarfare);
-        eloka = moduleService.createElectronicWarfare("Dreadnought electronic warfare Mk I", "The dreadnought electronic warfare.", unlockElectronicWarfare, 260, 5000, EHullType.DN, new Distance(2.669, EDistanceMetric.LS), ETechLevel.TECH_I, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-        eloka.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Dreadnoughts Mk I");
-        eloka.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Dreadnoughts.");
-        moduleService.save(eloka);
-
-        unlockElectronicWarfare = research("Electronic Warfare for superdreadnoughts", "The EW for superdreadnoughts research.", 1, ETechLevel.TECH_I, unlockElectronicWarfare);
-        eloka = moduleService.createElectronicWarfare("Superdreadnought electronic warfare Mk I", "The superdreadnought electronic warfare.", unlockElectronicWarfare, 400, 7000, EHullType.SD, new Distance(2.669, EDistanceMetric.LS), ETechLevel.TECH_I, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-        eloka.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Superdreadnoughts Mk I");
-        eloka.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eloka für Superdreadnoughts.");
-        moduleService.save(eloka);
     }
 
     private void createSidewalls() {
@@ -1096,15 +1044,16 @@ public class MasterOfTheUniverseService {
         final EHullType hullType = hull.getHullType();
 
         // take the best value
-        final List<Armor> armors = sortByValue(moduleService.findAllArmors(), hullType);
         final List<ElectronicWarfare> electronicWarfares = sortByValue(moduleService.findAllElectronicWarfare(), hullType);
         final List<Sidewall> sidewalls = sortByValue(moduleService.findAllSidewalls(), hullType);
 
-        final Armor armor = armors.stream().reduce((o1, o2) -> o2).orElse(null);
+        final Armor armor = moduleService.findAllArmors().stream()
+                .filter(a -> a.getHullType() == hullType)
+                .reduce((o1, o2) -> o2).orElse(null);
         final Sidewall sidewall = sidewalls.stream().reduce((o1, o2) -> o2).orElse(null);
         final ElectronicWarfare electronicWarfare = electronicWarfares.stream().reduce((o1, o2) -> o2).orElse(null);
 
-        final Propulsion propulsionFTL = moduleService.findAllPropulsions()
+        final Propulsion propulsion = moduleService.findAllPropulsions()
                 .stream().filter(p -> p.getHyperBand() == EHyperBand.ALPHA && p.getTechnologyType() == ETechnologyType.MILITARY)
                 .reduce((o1, o2) -> o2).orElse(null);
 
@@ -1137,14 +1086,17 @@ public class MasterOfTheUniverseService {
 
         final List<PassiveModule> passiveModules = sortByValue(sortByValue(moduleService.findAllPassiveModules(), hullType), hullType);
 
-        cc -= armor.getUseCapacity();
+        if (armor != null) {
+            cc -= armor.getUseCapacity(hull);
+            shipClass.setArmor(armor);
+        }
+
         cc -= sidewall.getUseCapacity();
-        cc -= propulsionFTL.getUseCapacity(hull);
+        cc -= propulsion.getUseCapacity(hull);
         cc -= electronicWarfare.getUseCapacity();
 
-        shipClass.setArmor(armor);
         shipClass.setSidewall(sidewall);
-        shipClass.setPropulsion(propulsionFTL);
+        shipClass.setPropulsion(propulsion);
         shipClass.setElectronicWarfare(electronicWarfare);
 
         final Set<AlignedFitting> fittings = new HashSet<>();

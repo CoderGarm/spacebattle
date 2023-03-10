@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.entities.misc;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 
@@ -24,15 +25,25 @@ public class HasNamedTechLevel extends AbstractEntityKey {
     @JoinColumn(name = "idNamedTechLevel")
     private NamedTechLevel namedTechLevel;
 
+    @Nonnull
+    @NotNull
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "idResearch")
+    private Research unlockedThrough;
+
     public HasNamedTechLevel() {
     }
 
-    public HasNamedTechLevel(@Nonnull final NamedTechLevel baseModule, @Nonnull final String technicalTypeName) {
+    public HasNamedTechLevel(@Nonnull final NamedTechLevel baseModule,
+                             @Nonnull final Research unlockedThrough,
+                             @Nonnull final String technicalTypeName) {
         Preconditions.checkNotNull(baseModule, "baseModule must not be empty");
+        Preconditions.checkNotNull(unlockedThrough, "unlockedThrough must not be empty");
         Preconditions.checkNotNull(technicalTypeName, "technicalTypeName must not be empty");
 
         this.namedTechLevel = baseModule;
         this.technicalTypeName = technicalTypeName;
+        this.unlockedThrough = unlockedThrough;
     }
 
     @Nonnull
@@ -59,12 +70,17 @@ public class HasNamedTechLevel extends AbstractEntityKey {
         return namedTechLevel.getTechLevel();
     }
 
+    @Nonnull
+    public Research getUnlockedThrough() {
+        return unlockedThrough;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof NamedTechLevel)) return false;
+        if (!(o instanceof HasNamedTechLevel)) return false;
 
-        NamedTechLevel module = (NamedTechLevel) o;
+        HasNamedTechLevel module = (HasNamedTechLevel) o;
         return id == module.id;
     }
 

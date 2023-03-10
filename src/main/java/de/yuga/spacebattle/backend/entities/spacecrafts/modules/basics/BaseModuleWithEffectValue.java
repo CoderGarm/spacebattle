@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics;
 
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
+import de.yuga.spacebattle.backend.entities.misc.HasEffectValue;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.enums.EHullType;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
@@ -10,7 +11,7 @@ import javax.annotation.Nonnull;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public class BaseModuleWithEffectValue extends BaseModule {
+public class BaseModuleWithEffectValue extends BaseModule implements HasEffectValue {
 
     /**
      * The basic value for this module's effect, e.g. it's attack value or shield value.
@@ -34,6 +35,7 @@ public class BaseModuleWithEffectValue extends BaseModule {
         this.effectValue = effectValue;
     }
 
+    @Override
     public int getEffectValue() {
         return effectValue;
     }

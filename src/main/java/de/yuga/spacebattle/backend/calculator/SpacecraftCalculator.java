@@ -5,13 +5,13 @@ import de.yuga.spacebattle.backend.combat.round.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.backend.entities.misc.HasEffectValue;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateAccessor;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateSnapshot;
 import de.yuga.spacebattle.backend.enums.ECapacityAreaType;
@@ -350,7 +350,7 @@ public class SpacecraftCalculator {
      * @param moduleType                the module type
      * @param amount                    the amount of modules
      */
-    private void calculateValueBySupportFitting(@Nonnull final BaseModuleWithEffectValue baseModuleWithEffectValue,
+    private void calculateValueBySupportFitting(@Nonnull final HasEffectValue baseModuleWithEffectValue,
                                                 final int amount,
                                                 @Nonnull final List<SupportFitting> supportFittings,
                                                 @Nonnull final EModuleType moduleType) {

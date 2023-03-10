@@ -107,23 +107,6 @@ public class ModuleService {
     }
 
     @Nonnull
-    public Armor createArmor(@Nonnull final String name,
-                             @Nonnull final String description,
-                             @Nonnull final Research unlockedThrough,
-                             final int useCapacity,
-                             final int value,
-                             @Nonnull final EHullType hullType,
-                             @Nonnull final ETechLevel techLevel,
-                             @Nonnull final CrewRequirement crewRequirement) {
-        Preconditions.checkNotNull(name, "name shouldn't be null!");
-        Preconditions.checkNotNull(description, "description shouldn't be null!");
-        Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
-        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
-
-        return armorRepository.save(new Armor(name, description, unlockedThrough, useCapacity, value, hullType, techLevel, crewRequirement));
-    }
-
-    @Nonnull
     public ElectronicWarfare createElectronicWarfare(@Nonnull final String name,
                                                      @Nonnull final String description,
                                                      @Nonnull final Research unlockedThrough,
@@ -281,6 +264,20 @@ public class ModuleService {
 
         final String technicalTypeName = "P-" + hyperBand.name().charAt(0) + namedTechLevel.getTechLevel().name().split("_")[1] + "-" + technologyType.name().charAt(0);
         return propulsionRepository.save(new Propulsion(namedTechLevel, technicalTypeName, unlockedThrough, effectValue, costsPercentage, hyperBand, technologyType));
+    }
+
+
+    @Nonnull
+    public Armor createArmor(@Nonnull final NamedTechLevel namedTechLevel,
+                             @Nonnull final Research unlockedThrough,
+                             final int effectValue,
+                             final int costsPercentage,
+                             @Nonnull final EHullType hullType) {
+        Preconditions.checkNotNull(namedTechLevel, "namedTechLevel must not be empty");
+        Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
+
+        final String technicalTypeName = "A-" + namedTechLevel.getTechLevel().name().split("_")[1] + "-" + hullType.name();
+        return armorRepository.save(new Armor(namedTechLevel, technicalTypeName, unlockedThrough, effectValue, costsPercentage, hullType));
     }
 
     @Nonnull
