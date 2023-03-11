@@ -308,31 +308,23 @@ public class ModuleService {
     }
 
     @Nonnull
-    public List<Armor> findAllArmorByUser(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-
-        return armorRepository.findAllByUser(user);
+    public List<Armor> findAllArmorByUser(final int idUser) {
+        return armorRepository.findAllByUser(idUser);
     }
 
     @Nonnull
-    public List<Propulsion> findAllPropulsionByUser(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-
-        return propulsionRepository.findAllByUser(user);
+    public List<Propulsion> findAllPropulsionByUser(final int idUser) {
+        return propulsionRepository.findAllByUser(idUser);
     }
 
     @Nonnull
-    public List<ElectronicWarfare> findAllElectronicWarfareByUser(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-
-        return electronicWarfareRepository.findAllByUser(user);
+    public List<ElectronicWarfare> findAllElectronicWarfareByUser(final int idUser) {
+        return electronicWarfareRepository.findAllByUser(idUser);
     }
 
     @Nonnull
-    public List<Sidewall> findAllSidewallByUser(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-
-        return sidewallRepository.findAllByUser(user);
+    public List<Sidewall> findAllSidewallByUser(final int idUser) {
+        return sidewallRepository.findAllByUser(idUser);
     }
 
     @Nonnull

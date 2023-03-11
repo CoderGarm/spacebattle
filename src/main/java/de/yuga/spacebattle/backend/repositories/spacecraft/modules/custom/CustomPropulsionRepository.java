@@ -1,6 +1,5 @@
 package de.yuga.spacebattle.backend.repositories.spacecraft.modules.custom;
 
-import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 
 import javax.annotation.Nonnull;
@@ -12,5 +11,5 @@ public interface CustomPropulsionRepository {
     List<Propulsion> findAll();
 
     @Nonnull
-    List<Propulsion> findAllByUser(User user);
+    List<Propulsion> findAllByUser(final int idUser);
 }

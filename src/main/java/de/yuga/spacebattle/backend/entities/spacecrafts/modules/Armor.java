@@ -9,7 +9,8 @@ import javax.persistence.*;
 
 @NamedQueries({
         @NamedQuery(name = "Armor.getAll", query = "SELECT a FROM Armor a"),
-        @NamedQuery(name = "Armor.getAllByResearches", query = "SELECT a FROM Armor a WHERE a.namedTechLevel.unlockedThrough IN (:researches) OR a.namedTechLevel.unlockedThrough IS NULL")
+        @NamedQuery(name = "Armor.getAllByResearches",
+                query = "SELECT a FROM Armor a LEFT JOIN ResearchLevel rl ON (rl.research = a.namedTechLevel.unlockedThrough AND rl.user.id = :idUser) WHERE rl IS NOT NULL AND rl.level >= a.unlockedThroughLevel")
 })
 @Entity
 @Table(name = "armor")

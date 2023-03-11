@@ -13,9 +13,6 @@ Gameplay:
 1. Auf der StarMap verändert sich der Cursor, wenn man etwas anklicken kann.
 2.
 
-todo. Beschleunigung, Maximalgeschwindigkeit (zivil, militärisch) in Bezug zum Hyperband anzeigen, Zeit des Erreichens von v_max
-todo. Antriebsleistung in Bezug zur Masse setzen
-
 todo. abhängige Forschungen pro Level erlauben? NamedTechLevel kennt Forschung, konkretes Modul kennt notwendiges Level, entsprechende Supportmodule halt bei höherem Level
 todo. Forschungen mit NamedTechLevel ausrüsten?
 

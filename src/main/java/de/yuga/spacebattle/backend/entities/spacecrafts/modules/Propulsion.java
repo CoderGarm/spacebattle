@@ -16,7 +16,8 @@ import javax.validation.constraints.NotNull;
  */
 @NamedQueries({
         @NamedQuery(name = "Propulsion.getAll", query = "SELECT a FROM Propulsion a"),
-        @NamedQuery(name = "Propulsion.getAllByResearches", query = "SELECT a FROM Propulsion a WHERE a.namedTechLevel.unlockedThrough IN (:researches) OR a.namedTechLevel.unlockedThrough IS NULL")
+        @NamedQuery(name = "Propulsion.getAllByResearches",
+                query = "SELECT a FROM Propulsion a LEFT JOIN ResearchLevel rl ON (rl.research = a.namedTechLevel.unlockedThrough AND rl.user.id = :idUser) WHERE rl IS NOT NULL AND rl.level >= a.unlockedThroughLevel")
 })
 @Entity
 @Table(name = "propulsion")

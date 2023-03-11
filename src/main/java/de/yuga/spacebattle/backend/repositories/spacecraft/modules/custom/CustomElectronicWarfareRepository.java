@@ -1,6 +1,5 @@
 package de.yuga.spacebattle.backend.repositories.spacecraft.modules.custom;
 
-import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
 
 import javax.annotation.Nonnull;
@@ -12,5 +11,5 @@ public interface CustomElectronicWarfareRepository {
     List<ElectronicWarfare> findAll();
 
     @Nonnull
-    List<ElectronicWarfare> findAllByUser(User user);
+    List<ElectronicWarfare> findAllByUser(final int idUser);
 }

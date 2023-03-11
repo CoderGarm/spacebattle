@@ -81,9 +81,7 @@ public class ModuleApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getArmorsByUser() {
-        final User owner = userService.findWithResearches(getIdUser());
-
-        return ResponseEntity.ok(moduleService.findAllArmorByUser(owner).stream().map(a -> new Armor(a, getPreferredLanguage())).collect(Collectors.toList()));
+        return ResponseEntity.ok(moduleService.findAllArmorByUser(getIdUser()).stream().map(a -> new Armor(a, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = WEAPON_ENDPOINT)
@@ -134,8 +132,7 @@ public class ModuleApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getSidewallsByUser() {
-        final User owner = userService.findWithResearches(getIdUser());
-        return ResponseEntity.ok(moduleService.findAllSidewallByUser(owner).stream().map(s -> new Sidewall(s, getPreferredLanguage())).collect(Collectors.toList()));
+        return ResponseEntity.ok(moduleService.findAllSidewallByUser(getIdUser()).stream().map(s -> new Sidewall(s, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = PROPULSION_ENDPOINT)
@@ -150,9 +147,7 @@ public class ModuleApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getPropulsionsByUser() {
-        final User owner = userService.findWithResearches(getIdUser());
-
-        return ResponseEntity.ok(moduleService.findAllPropulsionByUser(owner).stream().map(p -> new Propulsion(p, getPreferredLanguage())).collect(Collectors.toList()));
+        return ResponseEntity.ok(moduleService.findAllPropulsionByUser(getIdUser()).stream().map(p -> new Propulsion(p, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = HULL_ENDPOINT)
@@ -184,9 +179,7 @@ public class ModuleApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getElectronicWarfaresByUser() {
-        final User owner = userService.findWithResearches(getIdUser());
-
-        return ResponseEntity.ok(moduleService.findAllElectronicWarfareByUser(owner).stream().map(e -> new ElectronicWarfare(e, getPreferredLanguage())).collect(Collectors.toList()));
+        return ResponseEntity.ok(moduleService.findAllElectronicWarfareByUser(getIdUser()).stream().map(e -> new ElectronicWarfare(e, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = PASSIVE_ENDPOINT)

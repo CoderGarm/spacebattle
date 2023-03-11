@@ -1,6 +1,5 @@
 package de.yuga.spacebattle.backend.repositories.spacecraft.modules.custom;
 
-import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Sidewall;
 
 import javax.annotation.Nonnull;
@@ -12,5 +11,5 @@ public interface CustomSidewallRepository {
     List<Sidewall> findAll();
 
     @Nonnull
-    List<Sidewall> findAllByUser(User user);
+    List<Sidewall> findAllByUser(final int idUser);
 }
