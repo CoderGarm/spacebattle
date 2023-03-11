@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.validators;
 
 import de.yuga.spacebattle.TestDataProviderUtils;
+import de.yuga.spacebattle.backend.entities.misc.HasCostsByOwn;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
@@ -88,6 +89,10 @@ class ShipDataValidatorTest {
     }
 
     private static int getUsedCapacity(@Nullable final BaseModule baseModuleWithEffectValue) {
+        return baseModuleWithEffectValue != null ? baseModuleWithEffectValue.getUseCapacity() : 0;
+    }
+
+    private static int getUsedCapacity(@Nullable final HasCostsByOwn baseModuleWithEffectValue) {
         return baseModuleWithEffectValue != null ? baseModuleWithEffectValue.getUseCapacity() : 0;
     }
 }

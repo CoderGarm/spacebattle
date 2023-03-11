@@ -3,7 +3,7 @@ package de.yuga.spacebattle.backend.entities.spacecrafts.modules;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.converter.DistanceConverter;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
-import de.yuga.spacebattle.backend.entities.misc.HasHullType;
+import de.yuga.spacebattle.backend.entities.misc.HasHullTypeCostsByParent;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.EHullType;
 
@@ -18,7 +18,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "electronicWarfare")
 @AttributeOverride(name = "id", column = @Column(name = "idElectronicWarfare"))
-public class ElectronicWarfare extends HasHullType {
+public class ElectronicWarfare extends HasHullTypeCostsByParent {
 
     /**
      * Defines the range of this eloka.

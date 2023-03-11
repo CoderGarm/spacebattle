@@ -8,7 +8,6 @@ import de.yuga.spacebattle.backend.entities.misc.HasCosts;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.ETranslationTarget;
@@ -47,10 +46,6 @@ public class Research extends HasCosts {
 
     @Nonnull
     @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
-    private final Set<Weapon> unlocksWeapons = new HashSet<>();
-
-    @Nonnull
-    @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
     private final Set<Launcher> unlocksLauncher = new HashSet<>();
 
     @Nonnull
@@ -58,6 +53,7 @@ public class Research extends HasCosts {
     private final Set<Missile> unlocksMissiles = new HashSet<>();
 
     @Nonnull
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
     private final Set<NamedTechLevel> unlocksNamedTechLevel = new HashSet<>();
 
@@ -92,11 +88,6 @@ public class Research extends HasCosts {
     }
 
     @Nonnull
-    public Set<Weapon> getUnlocksWeapons() {
-        return unlocksWeapons;
-    }
-
-    @Nonnull
     public Set<Launcher> getUnlocksLauncher() {
         return unlocksLauncher;
     }
@@ -111,9 +102,6 @@ public class Research extends HasCosts {
         ETranslationTarget eTranslationTarget = unlocksNamedTechLevel.stream().map(NamedTechLevel::getTranslationTarget).findFirst().orElse(null);
         if (eTranslationTarget != null) {
             return eTranslationTarget;
-        }
-        if (!getUnlocksWeapons().isEmpty()) {
-            return ETranslationTarget.WEAPON;
         }
         if (!getUnlocksLauncher().isEmpty()) {
             return ETranslationTarget.LAUNCHER;

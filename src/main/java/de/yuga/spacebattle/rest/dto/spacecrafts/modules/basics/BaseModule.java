@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.misc.HasCostsByParent;
-import de.yuga.spacebattle.backend.entities.misc.HasHullType;
+import de.yuga.spacebattle.backend.entities.misc.HasHullTypeByOwnCosts;
+import de.yuga.spacebattle.backend.entities.misc.HasHullTypeCostsByParent;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -75,7 +76,7 @@ public class BaseModule {
         this.effectValue = module.getEffectValue();
     }
 
-    public BaseModule(@Nonnull final HasHullType module,
+    public BaseModule(@Nonnull final HasHullTypeCostsByParent module,
                       @Nonnull final String languageCode) {
         Preconditions.checkNotNull(module, "module shouldn't be null!");
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
@@ -91,6 +92,20 @@ public class BaseModule {
     }
 
     public BaseModule(@Nonnull final HasCostsByParent module,
+                      @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(module, "module shouldn't be null!");
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
+
+        this.idModule = module.getId();
+        this.name = module.getName(languageCode);
+        this.technicalTypeName = module.getTechnicalTypeName();
+        this.technicalTypeName = module.getTechnicalTypeName();
+        this.description = module.getDescription(languageCode);
+        this.techLevel = module.getTechLevel();
+        this.effectValue = module.getEffectValue();
+    }
+
+    public BaseModule(@Nonnull final HasHullTypeByOwnCosts module,
                       @Nonnull final String languageCode) {
         Preconditions.checkNotNull(module, "module shouldn't be null!");
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");

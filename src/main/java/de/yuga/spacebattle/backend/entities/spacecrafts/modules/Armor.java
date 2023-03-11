@@ -1,6 +1,6 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.modules;
 
-import de.yuga.spacebattle.backend.entities.misc.HasHullType;
+import de.yuga.spacebattle.backend.entities.misc.HasHullTypeCostsByParent;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.EHullType;
 
@@ -15,7 +15,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "armor")
 @AttributeOverride(name = "id", column = @Column(name = "idArmor"))
-public class Armor extends HasHullType {
+public class Armor extends HasHullTypeCostsByParent {
 
     public Armor() {
     }

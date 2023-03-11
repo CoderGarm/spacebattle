@@ -109,28 +109,25 @@ public class ModuleService {
     }
 
     @Nonnull
-    public Weapon createWeapon(@Nonnull final String name,
-                               @Nonnull final String description,
-                               @Nonnull final Research unlockedThrough,
+    public Weapon createWeapon(@Nonnull final NamedTechLevel namedTechLevel,
+                               final int unlockedThroughLevel,
                                final int useCapacity,
                                final int effectValue,
                                @Nonnull final EHullType hullType,
-                               @Nonnull final ETechLevel techLevel,
                                @Nonnull final Distance damageProjectionRange,
                                final int amountDamageEmitter,
                                @Nonnull final EWeaponType weaponType,
                                @Nonnull final EAlignmentType alignmentType,
                                @Nonnull final CrewRequirement crewRequirement) {
-        Preconditions.checkNotNull(name, "name shouldn't be null!");
-        Preconditions.checkNotNull(description, "description shouldn't be null!");
-        Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
+        Preconditions.checkNotNull(namedTechLevel, "namedTechLevel must not be empty");
         Preconditions.checkNotNull(hullType, "hullType must not be empty");
         Preconditions.checkNotNull(damageProjectionRange, "damageProjectionRange shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
         Preconditions.checkNotNull(alignmentType, "alignmentType shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        return weaponRepository.save(new Weapon(name, description, unlockedThrough, useCapacity, effectValue, hullType, techLevel, damageProjectionRange, amountDamageEmitter, weaponType, alignmentType, crewRequirement));
+        final String technicalTypeName = "D-" + hullType.name() + namedTechLevel.getTechLevel().name().split("_")[1] + weaponType.name().charAt(0) + "-" + amountDamageEmitter + alignmentType.name().charAt(0);
+        return weaponRepository.save(new Weapon(namedTechLevel, technicalTypeName, unlockedThroughLevel, useCapacity, effectValue, hullType, damageProjectionRange, amountDamageEmitter, weaponType, alignmentType, crewRequirement));
     }
 
     @Nonnull

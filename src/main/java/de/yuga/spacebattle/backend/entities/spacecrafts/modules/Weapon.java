@@ -4,9 +4,12 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.converter.DistanceConverter;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
-import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
-import de.yuga.spacebattle.backend.enums.*;
+import de.yuga.spacebattle.backend.entities.misc.HasHullTypeByOwnCosts;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
+import de.yuga.spacebattle.backend.enums.EAlignmentType;
+import de.yuga.spacebattle.backend.enums.EHullType;
+import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
+import de.yuga.spacebattle.backend.enums.EWeaponType;
 import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
@@ -17,13 +20,14 @@ import java.util.Set;
 
 @NamedQueries({
         @NamedQuery(name = "Weapon.getAll", query = "SELECT a FROM Weapon a"),
-        @NamedQuery(name = "Weapon.getAllByResearches", query = "SELECT a FROM Weapon a WHERE a.unlockedThrough IN (:researches) OR a.unlockedThrough IS NULL")
+        @NamedQuery(name = "Weapon.getAllByResearches",
+                query = "SELECT a FROM Weapon a LEFT JOIN ResearchLevel rl ON (rl.research = a.namedTechLevel.unlockedThrough AND rl.user.id = :idUser) WHERE rl IS NOT NULL AND rl.level >= a.unlockedThroughLevel")
 })
 @Entity
 @Table(name = "weapon")
 @Check(constraints = "weaponType = 'BEAM' || weaponType = 'POINT_DEFENSE'")
 @AttributeOverride(name = "id", column = @Column(name = "idWeapon"))
-public class Weapon extends BaseModuleWithEffectValue {
+public class Weapon extends HasHullTypeByOwnCosts {
 
     /**
      * Defines the range of this weapon in meter.
@@ -66,19 +70,18 @@ public class Weapon extends BaseModuleWithEffectValue {
     public Weapon() {
     }
 
-    public Weapon(@Nonnull final String name,
-                  @Nonnull final String description,
-                  @Nonnull final Research unlockedThrough,
+    public Weapon(@Nonnull final NamedTechLevel baseModule,
+                  @Nonnull final String technicalTypeName,
+                  final int unlockedThroughLevel,
                   final int useCapacity,
                   final int effectValue,
                   @Nonnull final EHullType hullType,
-                  @Nonnull final ETechLevel techLevel,
                   @Nonnull final Distance damageProjectionRange,
                   final int amountDamageEmitter,
                   @Nonnull final EWeaponType weaponType,
                   @Nonnull final EAlignmentType alignmentType,
                   @Nonnull final CrewRequirement crewRequirement) {
-        super(name, description, unlockedThrough, useCapacity, effectValue, hullType, techLevel, crewRequirement, Weapon.class);
+        super(baseModule, technicalTypeName, unlockedThroughLevel, useCapacity, effectValue, hullType, crewRequirement);
         Preconditions.checkNotNull(damageProjectionRange, "damageProjectionRange shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "eWeaponType shouldn't be null!");
         Preconditions.checkNotNull(alignmentType, "alignmentType shouldn't be null!");
@@ -113,8 +116,6 @@ public class Weapon extends BaseModuleWithEffectValue {
         final Set<EWeaponAlignment> allowedWeaponAlignments = new HashSet<>();
         if (EAlignmentType.CHASE_ALIGNMENT == alignmentType) {
             allowedWeaponAlignments.add(EWeaponAlignment.BOW);
-        }
-        if (EAlignmentType.CHASE_ALIGNMENT == alignmentType) {
             allowedWeaponAlignments.add(EWeaponAlignment.STERN);
         }
         if (EAlignmentType.BATTLE_ALIGNMENT == alignmentType) {

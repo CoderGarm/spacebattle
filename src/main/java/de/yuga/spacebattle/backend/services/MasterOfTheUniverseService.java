@@ -16,6 +16,7 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.i18n.Translatable;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
+import de.yuga.spacebattle.backend.entities.misc.HasName;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -112,8 +113,7 @@ public class MasterOfTheUniverseService {
             EEducationType.ENLISTED, 1L);
 
     private final static Map<EEducationType, Long> XXS_CREW = Map.of(
-            EEducationType.ENLISTED, 1L,
-            EEducationType.OFFICER, 1L);
+            EEducationType.ENLISTED, 3L);
 
     private final static Map<EEducationType, Long> XS_CREW = Map.of(
             EEducationType.ENLISTED, 5L,
@@ -331,11 +331,11 @@ public class MasterOfTheUniverseService {
         createSidewalls();
         LOGGER.info("sidewall created");
 
-        createMissiles();
-        LOGGER.info("missiles created");
-
         createWeapons();
         LOGGER.info("weapons created");
+
+        createMissiles();
+        LOGGER.info("missiles created");
 
         createPassiveModules();
         LOGGER.info("support modules created");
@@ -452,16 +452,15 @@ public class MasterOfTheUniverseService {
     }
 
     private void createSidewalls() {
-        Research research = research("Sidewall", "The sidewall was the main passive protection of a warship against all sorts of weapons fire.", 10, ETechLevel.TECH_I, null);
-        research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild");
-        research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschilde sind die wichtigste passive Verteidigung gegen alle Arten von Waffenfeuer.");
+        Research research = research("Sidewall",
+                "The sidewall was the main passive protection of a warship against all sorts of weapons fire.", 10, ETechLevel.TECH_I, null);
+        amendTranslation(research, "Seitenschild", "Seitenschilde sind die wichtigste passive Verteidigung gegen alle Arten von Waffenfeuer.");
         researchService.save(research);
 
         final NamedTechLevel namedTechLevel = moduleService.createBaseModule("Sidewall",
                 "The sidewall was the main passive protection of a warship against all sorts of weapons fire.",
                 research, ETechLevel.TECH_I, Sidewall.class);
-        namedTechLevel.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschild");
-        namedTechLevel.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Seitenschilde sind die wichtigste passive Verteidigung gegen alle Arten von Waffenfeuer.");
+        amendTranslation(namedTechLevel, "Seitenschild", "Seitenschilde sind die wichtigste passive Verteidigung gegen alle Arten von Waffenfeuer.");
         moduleService.save(namedTechLevel);
 
         moduleService.createSidewall(namedTechLevel, 1, 1000, 2, EHullType.LAC);
@@ -613,98 +612,96 @@ public class MasterOfTheUniverseService {
         moduleService.createLauncher("Counter missile launcher Mk I", "The launcher for counter missiles", unlocksCounterMissile, counterRocketAmmunition, 6, EHullType.CL, ETechLevel.TECH_I, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
     }
 
+    private void amendTranslation(@Nonnull final HasName hasName, @Nonnull final String name, @Nonnull final String description) {
+        Preconditions.checkNotNull(hasName, "hasName must not be empty");
+        Preconditions.checkNotNull(name, "name must not be empty");
+        Preconditions.checkNotNull(description, "description must not be empty");
+
+        hasName.getName().updateOrCreate(Translation.SECOND_LANGUAGE, name);
+        hasName.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, description);
+    }
+
     private void createWeapons() {
-        Research unlocksPointDefense = research("Point Defense", "The point defense research researches ...", 1, ETechLevel.TECH_I, null);
-        moduleService.createWeapon("Point Defense Mk I", "A point defense", unlocksPointDefense, 3, 1, EHullType.CL, ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.POINT_DEFENSE, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        moduleService.createWeapon("Point Defense Mk I", "A point defense", unlocksPointDefense, 6, 1, EHullType.CL, ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.POINT_DEFENSE, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        moduleService.createWeapon("Point Defense Mk I", "A point defense", unlocksPointDefense, 1, 1, EHullType.LAC, ETechLevel.TECH_I, new Distance(0.6343, EDistanceMetric.LS), 1, EWeaponType.POINT_DEFENSE, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
+        Research research = research("Point Defense",
+                "Close-range defense includes all of a ship's defense systems that represent the last active line of defense against incoming fire.",
+                4, ETechLevel.TECH_I, null);
+        amendTranslation(research, "Nahbereichsabwehr",
+                "Unter Nahbereichsabwehr fasst man alle Verteidigungssysteme eines Schiffes zusammen, die die letzte aktive Verteidigungslinie gegen einkommenden Beschuss darstellen.");
+        researchService.save(research);
 
-        Research unlocksLaser = research("Laser", "The Laser research researches ...", 1, ETechLevel.TECH_I, null);
-        Weapon laserWeapon = moduleService.createWeapon("Light cruiser laser Mk I", "Light cruiser laser.", unlocksLaser,
-                4, 200, EHullType.CL, ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS),
-                1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Laser für leichte Kreuzer Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Laser für leichte Kreuzer.");
-        moduleService.save(laserWeapon);
+        NamedTechLevel namedTechLevel = moduleService.createBaseModule("Point Defense",
+                "Close-range defense includes all of a ship's defense systems that represent the last active line of defense against incoming fire.",
+                research, ETechLevel.TECH_I, Weapon.class);
+        amendTranslation(namedTechLevel, "Nahbereichsabwehr", "Unter Nahbereichsabwehr fasst man alle Verteidigungssysteme eines Schiffes zusammen, die die letzte aktive Verteidigungslinie gegen einkommenden Beschuss darstellen.");
+        moduleService.save(namedTechLevel);
 
-        laserWeapon = moduleService.createWeapon("Light cruiser graser Mk I", "Light cruiser graser.", unlocksLaser, 5, 300, EHullType.CL,
-                ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT,
-                new CrewRequirement(XXS_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Laser für leichte Kreuzer Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Laser für leichte Kreuzer.");
-        moduleService.save(laserWeapon);
+        final Distance closePDDistance = new Distance(0.6343, EDistanceMetric.LS);
+        final Distance beamDistance = new Distance(1.3343, EDistanceMetric.LS);
+        moduleService.createWeapon(namedTechLevel, 1, 1, 1, EHullType.LAC, closePDDistance, 2, EWeaponType.POINT_DEFENSE, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 1, 2, 1, EHullType.LAC, closePDDistance, 4, EWeaponType.POINT_DEFENSE, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
 
+        moduleService.createWeapon(namedTechLevel, 4, 1, 1, EHullType.LAC, beamDistance, 3, EWeaponType.POINT_DEFENSE, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 4, 2, 1, EHullType.LAC, beamDistance, 6, EWeaponType.POINT_DEFENSE, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
 
-        unlocksLaser = research("LAC laser Mk I", "A LAC laser.", 1, ETechLevel.TECH_I, unlocksLaser);
-        laserWeapon = moduleService.createWeapon("LAC laser Mk I", "LAC laser.", unlocksLaser, 1, 50, EHullType.LAC,
-                ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT,
-                new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Laser für leichte Angriffsboote Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Laser für leichte Angriffsboote.");
-        moduleService.save(laserWeapon);
+        moduleService.createWeapon(namedTechLevel, 1, 2, 1, EHullType.CL, closePDDistance, 6, EWeaponType.POINT_DEFENSE, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 1, 3, 1, EHullType.CL, closePDDistance, 12, EWeaponType.POINT_DEFENSE, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XXS_CREW, EDepositType.COSTS));
 
-        laserWeapon = moduleService.createWeapon("LAC laser Mk II", "LAC laser.", unlocksLaser, 2, 150, EHullType.LAC,
-                ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT,
-                new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Laser für leichte Angriffsboote Mk II");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Laser für leichte Angriffsboote.");
-        moduleService.save(laserWeapon);
+        moduleService.createWeapon(namedTechLevel, 4, 2, 1, EHullType.CL, beamDistance, 10, EWeaponType.POINT_DEFENSE, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 4, 3, 1, EHullType.CL, beamDistance, 16, EWeaponType.POINT_DEFENSE, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
 
-        unlocksLaser = research("LAC graser Mk I", "A LAC graser.", 1, ETechLevel.TECH_I, unlocksLaser);
-        laserWeapon = moduleService.createWeapon("LAC graser Mk I", "LAC graser.", unlocksLaser, 3, 250, EHullType.LAC,
-                ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT,
-                new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für leichte Angriffsboote Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für leichte Angriffsboote.");
-        moduleService.save(laserWeapon);
+        research = research("Laser",
+                "Lasers were the most common ship-mounted energy weapon. Anti-ship lasers had lenses that ranged from several decimeters to over a meter in diameter and operate in the X-ray range.",
+                4, ETechLevel.TECH_I, null);
+        amendTranslation(research, "Laser", "Ein Laser ist eine künstliche, gerichtete Strahlungsquelle und eine von zwei gebräuchlichen Energiewaffen.");
+        researchService.save(research);
 
-        unlocksLaser = research("Cruiser graser Mk I", "A cruiser graser.", 1, ETechLevel.TECH_I, unlocksLaser);
-        laserWeapon = moduleService.createWeapon("Cruiser graser Mk I", "Cruiser graser.", unlocksLaser, 6, 400, EHullType.CA,
-                ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT,
-                new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Kreuzer Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Kreuzer.");
-        moduleService.save(laserWeapon);
+        namedTechLevel = moduleService.createBaseModule("Laser",
+                "Lasers were the most common ship-mounted energy weapon. Anti-ship lasers had lenses that ranged from several decimeters to over a meter in diameter and operate in the X-ray range.",
+                research, ETechLevel.TECH_I, Weapon.class);
+        amendTranslation(namedTechLevel, "Laser", "Ein Laser ist eine künstliche, gerichtete Strahlungsquelle und eine von zwei gebräuchlichen Energiewaffen.");
+        moduleService.save(namedTechLevel);
 
-        unlocksLaser = research("Cruiser graser Mk I", "A cruiser graser.", 1, ETechLevel.TECH_I, unlocksLaser);
-        laserWeapon = moduleService.createWeapon("Cruiser graser Mk I", "Cruiser graser.", unlocksLaser, 12, 500, EHullType.CA,
-                ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT,
-                new CrewRequirement(S_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Kreuzer Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Kreuzer.");
-        moduleService.save(laserWeapon);
+        moduleService.createWeapon(namedTechLevel, 1, 1, 50, EHullType.LAC, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 1, 2, 75, EHullType.LAC, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
 
-        unlocksLaser = research("Battlecruiser graser Mk I", "A battlecruiser graser.", 1, ETechLevel.TECH_I, unlocksLaser);
-        laserWeapon = moduleService.createWeapon("Battlecruiser graser Mk I", "Battlecruiser graser.", unlocksLaser, 9, 500, EHullType.BC,
-                ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT,
-                new CrewRequirement(S_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Schlachtkreuzer Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Schlachtkreuzer.");
-        moduleService.save(laserWeapon);
+        moduleService.createWeapon(namedTechLevel, 2, 3, 70, EHullType.DD, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 2, 4, 85, EHullType.DD, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XXS_CREW, EDepositType.COSTS));
 
-        unlocksLaser = research("Battlecruiser graser Mk I", "A battlecruiser graser.", 1, ETechLevel.TECH_I, unlocksLaser);
-        laserWeapon = moduleService.createWeapon("Battlecruiser graser Mk I", "Battlecruiser graser.", unlocksLaser, 18, 600, EHullType.BC,
-                ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT,
-                new CrewRequirement(M_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Schlachtkreuzer Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Schlachtkreuzer.");
-        moduleService.save(laserWeapon);
+        moduleService.createWeapon(namedTechLevel, 3, 5, 90, EHullType.CL, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 3, 7, 115, EHullType.CL, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
 
-        unlocksLaser = research("Dreadnought graser Mk I", "A dreadnought graser.", 1, ETechLevel.TECH_I, unlocksLaser);
-        laserWeapon = moduleService.createWeapon("Dreadnought graser Mk I", "Battlecruiser graser.", unlocksLaser, 20, 1100, EHullType.BC,
-                ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT,
-                new CrewRequirement(M_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Dreadnoughts Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Dreadnoughts.");
-        moduleService.save(laserWeapon);
+        moduleService.createWeapon(namedTechLevel, 4, 8, 110, EHullType.CA, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 4, 10, 160, EHullType.CA, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS));
 
-        unlocksLaser = research("Dreadnought graser Mk I", "A dreadnought graser.", 1, ETechLevel.TECH_I, unlocksLaser);
-        laserWeapon = moduleService.createWeapon("Dreadnought graser Mk I", "Battlecruiser graser.", unlocksLaser, 40, 1300, EHullType.BC,
-                ETechLevel.TECH_I, new Distance(1.3343, EDistanceMetric.LS), 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT,
-                new CrewRequirement(L_CREW, EDepositType.COSTS));
-        laserWeapon.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Dreadnoughts Mk I");
-        laserWeapon.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Graser für Dreadnoughts.");
-        moduleService.save(laserWeapon);
+        research = research("Graser",
+                "Grasers were lasers operating in the gamma ray range. Considered vastly superior in both strength and size when compared to lasers, grasers were often only seen in small numbers in smaller ships, due to their larger mass.",
+                6, ETechLevel.TECH_I, research);
+        amendTranslation(research, "Graser", "Ein Laser ist eine künstliche, gerichtete Strahlungsquelle und eine von zwei gebräuchlichen Energiewaffen.");
+        researchService.save(research);
+
+        namedTechLevel = moduleService.createBaseModule("Graser",
+                "Grasers were lasers operating in the gamma ray range. Considered vastly superior in both strength and size when compared to lasers, grasers were often only seen in small numbers in smaller ships, due to their larger mass.",
+                research, ETechLevel.TECH_I, Weapon.class);
+        amendTranslation(namedTechLevel, "Graser", "Graser sind wie die Laser lichtschnelle Waffen, die aber im Gegensatz zu diesen nicht im Bereich des Lichts, sondern im Bereich der Gamma-Strahlung operieren.");
+        moduleService.save(namedTechLevel);
+
+        moduleService.createWeapon(namedTechLevel, 1, 9, 200, EHullType.CL, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 1, 12, 350, EHullType.CL, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+
+        moduleService.createWeapon(namedTechLevel, 2, 13, 240, EHullType.CA, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 2, 16, 400, EHullType.CA, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+
+        moduleService.createWeapon(namedTechLevel, 3, 20, 350, EHullType.BC, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 3, 36, 500, EHullType.BC, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+
+        moduleService.createWeapon(namedTechLevel, 4, 28, 500, EHullType.BB, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 4, 44, 850, EHullType.BB, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+
+        moduleService.createWeapon(namedTechLevel, 5, 37, 750, EHullType.DN, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 5, 54, 1100, EHullType.DN, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+
+        moduleService.createWeapon(namedTechLevel, 6, 43, 900, EHullType.SD, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 6, 62, 1450, EHullType.SD, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
     }
 
     private void createPassiveModules() {
@@ -742,6 +739,7 @@ public class MasterOfTheUniverseService {
         hullService.createHull("Big Freighter hull", 5000, 5000, 0, 0, 0, ETechLevel.TECH_I, "The bigger freighter hull", hullResearch, EHullType.FR, new CrewRequirement(M_CREW, EDepositType.COSTS));
         hullResearch = research("Frigate", "The Frigate research researches Frigates.", 1, ETechLevel.TECH_I, null);
         hullService.createHull("Frigate vessel", 50, 18, 6, 6, 20, ETechLevel.TECH_I, "The frigate hull", hullResearch, EHullType.FG, new CrewRequirement(M_CREW, EDepositType.COSTS));
+        hullService.createHull("Destroyer vessel", 65, 24, 8, 8, 24, ETechLevel.TECH_I, "The destroyer hull", hullResearch, EHullType.DD, new CrewRequirement(M_CREW, EDepositType.COSTS));
         hullResearch = research("Cruiser", "The Cruiser research researches Cruisers.", 1, ETechLevel.TECH_I, hullResearch);
         hullService.createHull("Cruiser vessel", 80, 30, 10, 10, 30, ETechLevel.TECH_I, "The cruiser hull", hullResearch, EHullType.CL, new CrewRequirement(M_CREW, EDepositType.COSTS));
         hullService.createHull("Heavy cruiser vessel", 200, 60, 30, 30, 80, ETechLevel.TECH_I, "The assault cruiser hull", hullResearch, EHullType.CA, new CrewRequirement(L_CREW, EDepositType.COSTS));
@@ -997,13 +995,13 @@ public class MasterOfTheUniverseService {
                 .findFirst().orElse(null);
 
         final List<Weapon> weapons = moduleService.findAllWeapons();
-        final List<Weapon> allBeams = sortByValue(weapons.stream().filter(w -> w.getWeaponType() == EWeaponType.BEAM).collect(Collectors.toList()), hullType);
+        final List<Weapon> allBeams = weapons.stream().filter(w -> w.getWeaponType() == EWeaponType.BEAM && w.getHullType() == hullType).collect(Collectors.toList());
         final Map<EAlignmentType, Weapon> bestBeams = allBeams.stream().collect(Collectors.groupingBy(Weapon::getAlignmentType,
                         Collectors.mapping(Function.identity(), Collectors.toList())))
                 .entrySet()
                 .stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().stream().reduce((o1, o2) -> o2).orElse(null)));
 
-        final List<Weapon> allPDs = sortByValue(weapons.stream().filter(w -> w.getWeaponType() == EWeaponType.POINT_DEFENSE).collect(Collectors.toList()), hullType);
+        final List<Weapon> allPDs = weapons.stream().filter(w -> w.getWeaponType() == EWeaponType.POINT_DEFENSE).collect(Collectors.toList());
         final Map<EAlignmentType, Weapon> bestPDs = allPDs.stream().collect(Collectors.groupingBy(Weapon::getAlignmentType,
                         Collectors.mapping(Function.identity(), Collectors.toList())))
                 .entrySet()
@@ -1228,9 +1226,15 @@ public class MasterOfTheUniverseService {
         final Fleet fleet = createFleet(user, homePlanet, "Homefleet");
 
         final List<String> randomWarshipName = resourceService.getRandomWarshipName(3);
-        warShipService.save(new WarShip(randomWarshipName.get(0), homePlanet, fleet, ship));
-        warShipService.save(new WarShip(randomWarshipName.get(1), homePlanet, fleet, ship));
-        warShipService.save(new WarShip(randomWarshipName.get(2), homePlanet, fleet, ship));
+        WarShip warShip = new WarShip(randomWarshipName.get(0), homePlanet, fleet, ship);
+        warShip.setOperational();
+        warShipService.save(warShip);
+        warShip = new WarShip(randomWarshipName.get(1), homePlanet, fleet, ship);
+        warShip.setOperational();
+        warShipService.save(warShip);
+        warShip = new WarShip(randomWarshipName.get(2), homePlanet, fleet, ship);
+        warShip.setOperational();
+        warShipService.save(warShip);
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -1250,7 +1254,9 @@ public class MasterOfTheUniverseService {
                 .collect(Collectors.toList());
         final ShipClass ship = shipClasses.stream().reduce((o1, o2) -> o2).orElseThrow(() -> new NotifyWebUserException("No ship class found."));
 
-        return warShipService.save(new WarShip("Corsair", homePlanet, opponentsFleet, ship));
+        final WarShip warShip = new WarShip("Corsair", homePlanet, opponentsFleet, ship);
+        warShip.setOperational();
+        return warShipService.save(warShip);
     }
 
     public void runBattleForNewUser(@Nonnull final User user) {

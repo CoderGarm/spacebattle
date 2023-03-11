@@ -382,7 +382,8 @@ public class TestDataProviderUtils {
         Preconditions.checkNotNull(alignmentType, "alignmentType shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        final Weapon weapon = new Weapon(name, description, research(), useCapacity, value, EHullType.CA, techLevel, damageProjectionRange, amountDamageEmitter, weaponType, alignmentType, crewRequirement);
+        final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, research(), techLevel, Weapon.class);
+        final Weapon weapon = new Weapon(namedTechLevel, "gGg", 1, useCapacity, value, EHullType.CA, damageProjectionRange, amountDamageEmitter, weaponType, alignmentType, crewRequirement);
         setId(weapon);
         return weapon;
     }
