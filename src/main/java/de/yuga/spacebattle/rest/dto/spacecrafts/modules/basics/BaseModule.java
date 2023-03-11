@@ -3,6 +3,8 @@ package de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.misc.HasCostsByParent;
+import de.yuga.spacebattle.backend.entities.misc.HasHullType;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -53,37 +55,53 @@ public class BaseModule {
     protected BaseModule() {
     }
 
-    public BaseModule(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule baseModule,
+    public BaseModule(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule module,
                       @Nonnull final String languageCode) {
-        Preconditions.checkNotNull(baseModule, "baseModule shouldn't be null!");
+        Preconditions.checkNotNull(module, "module shouldn't be null!");
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
 
-        this.idModule = baseModule.getId();
-        this.name = baseModule.getName(languageCode);
-        this.description = baseModule.getDescription(languageCode);
-        this.useCapacity = baseModule.getUseCapacity();
-        this.techLevel = baseModule.getTechLevel();
-        this.hullType = new de.yuga.spacebattle.rest.dto.enums.EHullType(baseModule.getHullType());
+        this.idModule = module.getId();
+        this.name = module.getName(languageCode);
+        this.description = module.getDescription(languageCode);
+        this.useCapacity = module.getUseCapacity();
+        this.techLevel = module.getTechLevel();
+        this.hullType = new de.yuga.spacebattle.rest.dto.enums.EHullType(module.getHullType());
     }
 
-    public BaseModule(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue baseModuleWithEffectValue,
+    public BaseModule(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue module,
                       @Nonnull final String languageCode) {
-        this((de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule) baseModuleWithEffectValue, languageCode);
+        this((de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule) module, languageCode);
 
-        this.effectValue = baseModuleWithEffectValue.getEffectValue();
+        this.effectValue = module.getEffectValue();
     }
 
-    public BaseModule(@Nonnull final de.yuga.spacebattle.backend.entities.misc.HasNamedTechLevel hasNamedTechLevel,
+    public BaseModule(@Nonnull final HasHullType module,
                       @Nonnull final String languageCode) {
-        Preconditions.checkNotNull(hasNamedTechLevel, "hasNamedTechLevel shouldn't be null!");
+        Preconditions.checkNotNull(module, "module shouldn't be null!");
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
 
-        this.idModule = hasNamedTechLevel.getId();
-        this.name = hasNamedTechLevel.getName(languageCode);
-        this.technicalTypeName = hasNamedTechLevel.getTechnicalTypeName();
-        this.technicalTypeName = hasNamedTechLevel.getTechnicalTypeName();
-        this.description = hasNamedTechLevel.getDescription(languageCode);
-        this.techLevel = hasNamedTechLevel.getTechLevel();
+        this.idModule = module.getId();
+        this.name = module.getName(languageCode);
+        this.technicalTypeName = module.getTechnicalTypeName();
+        this.technicalTypeName = module.getTechnicalTypeName();
+        this.description = module.getDescription(languageCode);
+        this.techLevel = module.getTechLevel();
+        this.hullType = new de.yuga.spacebattle.rest.dto.enums.EHullType(module.getHullType());
+        this.effectValue = module.getEffectValue();
+    }
+
+    public BaseModule(@Nonnull final HasCostsByParent module,
+                      @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(module, "module shouldn't be null!");
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
+
+        this.idModule = module.getId();
+        this.name = module.getName(languageCode);
+        this.technicalTypeName = module.getTechnicalTypeName();
+        this.technicalTypeName = module.getTechnicalTypeName();
+        this.description = module.getDescription(languageCode);
+        this.techLevel = module.getTechLevel();
+        this.effectValue = module.getEffectValue();
     }
 
     @JsonIgnore
