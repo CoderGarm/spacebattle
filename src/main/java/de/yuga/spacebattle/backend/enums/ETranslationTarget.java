@@ -27,8 +27,7 @@ public enum ETranslationTarget {
     PROPULSION(Propulsion.class),
     WEAPON(Weapon.class),
     PASSIVE_MODULE(PassiveModule.class),
-    SIDEWALL(Sidewall.class),
-    AMMUNITION_MODULE(AmmunitionModule.class);
+    SIDEWALL(Sidewall.class);
 
     @Nonnull
     private final Class<?> clazz;

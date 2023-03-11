@@ -25,10 +25,10 @@ import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapabilities;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapacityAreas;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstructionSelection;
 import de.yuga.spacebattle.rest.dto.spacecrafts.PropulsionCapacity;
+import de.yuga.spacebattle.rest.dto.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.rest.dto.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.rest.dto.spacecrafts.fittings.AmmunitionFitting;
 import de.yuga.spacebattle.rest.dto.spacecrafts.fittings.SupportFitting;
-import de.yuga.spacebattle.rest.dto.spacecrafts.modules.AmmunitionModule;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.PassiveModule;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.Weapon;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics.BaseModule;
@@ -191,21 +191,20 @@ public class ShipClassCreationService {
         Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
 
-        final List<Integer> ammunitionModulesById = shipClass.getAmmunitionFittings().stream()
-                .map(AmmunitionFitting::getAmmunitionModule)
-                .map(AmmunitionModule::getBaseModule)
-                .map(BaseModule::getIdModule)
+        final List<Integer> missilesById = shipClass.getAmmunitionFittings().stream()
+                .map(AmmunitionFitting::getMissile)
+                .map(Missile::getIdMissile)
                 .collect(Collectors.toList());
 
-        final Map<Integer, de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule> integerAmmunitionModuleMap =
-                moduleService.findAmmunitionModulesById(ammunitionModulesById).stream()
-                        .collect(Collectors.toMap(de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule::getId, Function.identity()));
+        final Map<Integer, de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile> integerAmmunitionModuleMap =
+                moduleService.findMissilesById(missilesById).stream()
+                        .collect(Collectors.toMap(de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile::getId, Function.identity()));
 
         final Set<de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AmmunitionFitting> ammunitionFittings = shipClass.getAmmunitionFittings().stream().map(ammunitionFitting -> {
-            final int idModule = ammunitionFitting.getAmmunitionModule().getBaseModule().getIdModule();
-            final de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule ammunitionModule = integerAmmunitionModuleMap.get(idModule);
+            final int idMissile = ammunitionFitting.getMissile().getIdMissile();
+            final de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile missile = integerAmmunitionModuleMap.get(idMissile);
             final int amount = ammunitionFitting.getAmount();
-            return new de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AmmunitionFitting(ammunitionModule, amount);
+            return new de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AmmunitionFitting(missile, amount);
         }).collect(Collectors.toSet());
         entity.setAmmunitionFittings(ammunitionFittings);
     }

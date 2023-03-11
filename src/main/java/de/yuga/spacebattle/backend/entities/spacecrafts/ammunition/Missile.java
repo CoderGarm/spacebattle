@@ -9,7 +9,6 @@ import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.misc.HasCosts;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
@@ -63,15 +62,6 @@ public class Missile extends HasCosts {
     private Research unlockedThrough;
 
     /**
-     * An empty ammunition module means that the weapon needs no ammunition.
-     */
-    @Nonnull
-    @NotNull
-    @OneToOne(cascade = CascadeType.ALL, optional = false)
-    @JoinColumn(name = "idAmmunitionModule")
-    private AmmunitionModule ammunitionModule;
-
-    /**
      * Quick performance
      */
     @Nullable
@@ -98,13 +88,11 @@ public class Missile extends HasCosts {
                    @Nonnull final ETechLevel techLevel,
                    @Nonnull final Warhead warhead,
                    @Nonnull final List<MissileMotor> missileMotors,
-                   @Nonnull final Research unlockedThrough,
-                   @Nonnull final AmmunitionModule ammunitionModule) {
+                   @Nonnull final Research unlockedThrough) {
         super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, motorCapacity + warheadCapacity, Missile.class);
         Preconditions.checkNotNull(warhead, "warhead shouldn't be null!");
         Preconditions.checkNotNull(missileMotors, "missileMotors shouldn't be null!");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
-        Preconditions.checkNotNull(ammunitionModule, "ammunitionModule shouldn't be null!");
         Preconditions.checkNotNull(hullType, "hullType must not be empty");
 
         this.warheadCapacity = warheadCapacity;
@@ -114,8 +102,11 @@ public class Missile extends HasCosts {
         this.missileMotor = missileMotors.get(0);
         this.motorAmount = missileMotors.size(); // todo repair the methods away from list - to lazy currently
         this.unlockedThrough = unlockedThrough;
-        this.ammunitionModule = ammunitionModule;
         this.hullType = hullType;
+    }
+
+    public double getUsedCapacity() {
+        return ((double) getMotorCapacity() + getWarheadCapacity()) / 1000;
     }
 
     public int getWarheadCapacity() {
@@ -185,11 +176,6 @@ public class Missile extends HasCosts {
         this.motorAmount = motorAmount;
     }
 
-    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
-    public void setAmmunitionModule(@Nonnull final AmmunitionModule ammunitionModule) {
-        this.ammunitionModule = ammunitionModule;
-    }
-
     /**
      * Will calculate and return the full costs of this missile.
      *
@@ -230,11 +216,6 @@ public class Missile extends HasCosts {
     @Nonnull
     public Research getUnlockedThrough() {
         return unlockedThrough;
-    }
-
-    @Nonnull
-    public AmmunitionModule getAmmunitionModule() {
-        return ammunitionModule;
     }
 
     @Override

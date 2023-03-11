@@ -46,10 +46,6 @@ public class BattleServiceTest {
     @Test
     public void testRunBattles() {
         Tick latest = tickService.getToday();
-        if (latest == null) {
-            masterOfTheUniverseService.createInitialData();
-            latest = tickService.getToday();
-        }
         long start = System.currentTimeMillis();
         battleService.runBattles(latest);
         logMessage("calculating battle overall: ", start, System.currentTimeMillis());

@@ -76,7 +76,7 @@ class ShipDataValidatorTest {
         for (AmmunitionFitting fitting : ammunitionFittings) {
             int amount = fitting.getAmount();
             for (; amount > 0; amount--) {
-                usedCapacity += getUsedCapacity(fitting.getAmmunitionModule());
+                usedCapacity += fitting.getUsedCapacity();
             }
         }
         for (SupportFitting fitting : supportFittings) {

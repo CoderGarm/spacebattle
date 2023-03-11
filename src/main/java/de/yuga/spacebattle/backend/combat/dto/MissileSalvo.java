@@ -152,7 +152,7 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
                         .forEach(alignedFitting -> {
                             final Launcher launcher = alignedFitting.getLauncher();
                             final int amountOfLauncher = alignedFitting.getAmount();
-                            final Missile missile = launcher.getAmmunitionModule().getMissile();
+                            final Missile missile = new ArrayList<>(launcher.getAllowedMissiles()).get(0); // todo fix missile selection
                             final MissileAmmunitionState missileAmmunitionState = w.getMissileAmmunitionState();
                             final int remainingShots = missileAmmunitionState.getRemainingShots(missile);
                             if (remainingShots <= 0) {

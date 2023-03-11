@@ -96,8 +96,7 @@ public class ModuleApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getWeaponsByUser() {
-        final User owner = userService.findWithResearches(getIdUser());
-        final List<de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon> allWeaponByUser = moduleService.findAllWeaponByUser(owner);
+        final List<de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon> allWeaponByUser = moduleService.findAllWeaponByUser(getIdUser());
         final List<de.yuga.spacebattle.rest.dto.spacecrafts.modules.Weapon> weaponList = allWeaponByUser.stream()
                 .map(w -> new de.yuga.spacebattle.rest.dto.spacecrafts.modules.Weapon(w, getPreferredLanguage()))
                 .collect(Collectors.toList());
@@ -197,22 +196,5 @@ public class ModuleApi extends BaseApi {
         final User owner = userService.findWithResearches(getIdUser());
 
         return ResponseEntity.ok(moduleService.findAllPassiveModuleByUser(owner).stream().map(p -> new PassiveModule(p, getPreferredLanguage())).collect(Collectors.toList()));
-    }
-
-    @GetMapping(value = AMMUNITION_ENDPOINT)
-    @Operation(summary = "Get all unlocked ammunition modules for the owner .", operationId = "getAmmunitionModulesByUser",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = AmmunitionModule.class))
-                            )),
-                    @ApiResponse(responseCode = "400", description = "an error occurred",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
-            }
-    )
-    public ResponseEntity<?> getAmmunitionModulesByUser() {
-        final User owner = userService.findWithResearches(getIdUser());
-
-        return ResponseEntity.ok(moduleService.findAllAmmunitionModulesByUser(owner).stream().map(a -> new AmmunitionModule(a, getPreferredLanguage())).collect(Collectors.toList()));
     }
 }

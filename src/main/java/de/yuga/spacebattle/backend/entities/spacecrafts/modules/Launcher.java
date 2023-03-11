@@ -20,7 +20,7 @@ import java.util.Set;
 })
 @Entity
 @Table(name = "launcher")
-@Check(constraints = "weaponType = 'MISSILE' || weaponType = 'COUNTER_MISSILE'")
+@Check(constraints = "weaponType = 'MISSILE' OR weaponType = 'COUNTER_MISSILE'")
 @AttributeOverride(name = "id", column = @Column(name = "idLauncher"))
 public class Launcher extends BaseModule {
 
@@ -45,22 +45,12 @@ public class Launcher extends BaseModule {
     )
     private Set<Missile> allowedMissiles = new HashSet<>();
 
-    /**
-     * An empty ammunition module means that the weapon needs no ammunition.
-     */
-    @Nonnull
-    @NotNull
-    @OneToOne
-    @JoinColumn(name = "idAmmunitionModule", nullable = false)
-    private AmmunitionModule ammunitionModule;
-
     public Launcher() {
     }
 
     public Launcher(@Nonnull final String name,
                     @Nonnull final String description,
                     @Nonnull final Research unlockedThrough,
-                    @Nonnull final AmmunitionModule ammunitionModule,
                     final int useCapacity,
                     @Nonnull final EHullType hullType,
                     @Nonnull final ETechLevel techLevel,
@@ -72,7 +62,6 @@ public class Launcher extends BaseModule {
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
         Preconditions.checkNotNull(alignmentType, "alignmentType shouldn't be null!");
 
-        this.ammunitionModule = ammunitionModule;
         this.alignmentType = alignmentType;
         this.weaponType = weaponType;
         this.allowedMissiles = allowedMissiles;
@@ -88,13 +77,9 @@ public class Launcher extends BaseModule {
         return alignmentType;
     }
 
+    @Nonnull
     public Set<Missile> getAllowedMissiles() {
         return allowedMissiles;
-    }
-
-    @Nonnull
-    public AmmunitionModule getAmmunitionModule() {
-        return ammunitionModule;
     }
 
     @Nonnull

@@ -52,7 +52,7 @@ public class Constructable {
     @JoinColumn(name = "idFleet", referencedColumnName = "idFleet")
     private Fleet fleet;
 
-    @Column(columnDefinition = "bit not null default false")
+    @Column(columnDefinition = "boolean not null default false")
     private boolean isRepairJob = false;
 
     public Constructable() {

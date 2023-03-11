@@ -66,7 +66,7 @@ public class WarshipHealthStateSnapshot extends Operationable implements Warship
     @CollectionTable(name = "remainingShotsSnapshot", joinColumns = @JoinColumn(name = "idWarshipHealthStateSnapshot"))
     private final Map<Missile, Integer> remainingShots = new HashMap<>();
 
-    @Column(columnDefinition = "bit not null default true")
+    @Column(columnDefinition = "boolean not null default true")
     private boolean isFightingCapable = true;
 
     public WarshipHealthStateSnapshot() {

@@ -50,21 +50,8 @@
 
     create table ammunitionFitting (
        idShipClass integer not null,
-        idAmmunitionModule integer,
-        amount integer not null
-    ) engine=InnoDB;
-
-    create table ammunitionModule (
-       idAmmunitionModule integer not null auto_increment,
-        techLevel varchar(255) not null,
-        hullType varchar(255) not null,
-        useCapacity integer not null,
-        effectValue integer not null,
-        idTranslatableDescription integer not null,
-        idTranslatableName integer not null,
-        idCosts integer not null,
-        idResearch integer not null,
-        primary key (idAmmunitionModule)
+        amount integer not null,
+        idMissile integer
     ) engine=InnoDB;
 
     create table armor (
@@ -192,8 +179,8 @@
 
     create table fleet (
        idFleet integer not null auto_increment,
-        isDeleted bit not null default false,
-        isOperational bit not null default false,
+        isDeleted boolean not null default false,
+        isOperational boolean not null default false,
         name varchar(255) not null,
         xCoordinateLocation varchar(255),
         yCoordinateLocation varchar(255),
@@ -206,7 +193,7 @@
 
     create table fleetSnapshot (
        idFleetSnapshot integer not null auto_increment,
-        isDeleted bit not null default false,
+        isDeleted boolean not null default false,
         name varchar(255) not null,
         idBattleReport integer not null,
         idFleet integer not null,
@@ -222,7 +209,7 @@
         title varchar(255) not null,
         idAlliance integer,
         primary key (idForum),
-        constraint forum_CHECK check (idAlliance IS NOT NULL || role IS NOT NULL)
+        constraint forum_CHECK check (idAlliance IS NOT NULL OR role IS NOT NULL)
     ) engine=InnoDB;
 
     create table forumMessage (
@@ -260,8 +247,8 @@
         attackedPart varchar(255) not null,
         damageDealer varchar(255) not null,
         damageValue bigint not null,
-        isAlive bit not null,
-        isFightingCapable bit not null,
+        isAlive boolean not null,
+        isFightingCapable boolean not null,
         state integer not null,
         idTarget integer not null,
         primary key (idHitLog)
@@ -293,8 +280,8 @@
 
     create table job (
        idJob integer not null auto_increment,
-        isDeleted bit not null default false,
-        isRepairJob bit not null default false,
+        isDeleted boolean not null default false,
+        isRepairJob boolean not null default false,
         resourceType varchar(255),
         targetLevel integer,
         jobDoneAtZero decimal(19, 0) not null,
@@ -326,9 +313,8 @@
         idTranslatableName integer not null,
         idCosts integer not null,
         idResearch integer not null,
-        idAmmunitionModule integer not null,
         primary key (idLauncher),
-        constraint launcher_CHECK check (weaponType = 'MISSILE' || weaponType = 'COUNTER_MISSILE')
+        constraint launcher_CHECK check (weaponType = 'MISSILE' OR weaponType = 'COUNTER_MISSILE')
     ) engine=InnoDB;
 
     create table lossesByHit (
@@ -372,7 +358,6 @@
         idTranslatableDescription integer not null,
         idTranslatableName integer not null,
         idCosts integer not null,
-        idAmmunitionModule integer not null,
         idMissileMotor integer not null,
         idResearch integer not null,
         idWarhead integer,
@@ -430,7 +415,7 @@
         idStarSystemOrigin integer,
         idUser integer not null,
         primary key (idMove),
-        constraint move_CHECK check (xCoordinateOrigin != xCoordinateDestination && yCoordinateOrigin != yCoordinateDestination)
+        constraint move_CHECK check (xCoordinateOrigin != xCoordinateDestination AND yCoordinateOrigin != yCoordinateDestination)
     ) engine=InnoDB;
 
     create table movementAction (
@@ -501,7 +486,7 @@
     create table planet (
        idPlanet integer not null auto_increment,
         colonizedAt datetime(6),
-        isMain bit not null default false,
+        isMain boolean not null default false,
         name varchar(30) not null,
         xCoordinate varchar(255),
         yCoordinate varchar(255),
@@ -595,7 +580,7 @@
 
     create table shipClass (
        idShipClass integer not null auto_increment,
-        isDeleted bit not null default false,
+        isDeleted boolean not null default false,
         name varchar(30) not null,
         idArmor integer,
         idElectronicWarfare integer,
@@ -679,9 +664,9 @@
         createdAt datetime(6) not null,
         email varchar(50) not null,
         gameUserRoles varchar(255),
-        isEMailVerified bit not null default false,
-        isLoginForbidden bit not null default false,
-        noEMailWanted bit not null default false,
+        isEMailVerified boolean not null default false,
+        isLoginForbidden boolean not null default false,
+        noEMailWanted boolean not null default false,
         password varchar(255) not null,
         userRole varchar(255),
         username varchar(30) not null,
@@ -715,8 +700,8 @@
 
     create table warShip (
        idWarShip integer not null auto_increment,
-        isDeleted bit not null default false,
-        isOperational bit not null default false,
+        isDeleted boolean not null default false,
+        isOperational boolean not null default false,
         name varchar(255) not null,
         idFleet integer not null,
         idShipClass integer not null,
@@ -738,16 +723,16 @@
 
     create table warshipHealthState (
        idWarshipHealthState integer not null auto_increment,
-        isFightingCapable bit not null default true,
+        isFightingCapable boolean not null default true,
         idWarship integer not null,
         primary key (idWarshipHealthState)
     ) engine=InnoDB;
 
     create table warshipHealthStateSnapshot (
        idWarshipHealthStateSnapshot integer not null auto_increment,
-        isDeleted bit not null default false,
-        isOperational bit not null default false,
-        isFightingCapable bit not null default true,
+        isDeleted boolean not null default false,
+        isOperational boolean not null default false,
+        isFightingCapable boolean not null default true,
         idBattleReport integer not null,
         idFleetSnapshot integer not null,
         idWarship integer not null,
@@ -756,20 +741,19 @@
 
     create table weapon (
        idWeapon integer not null auto_increment,
-        techLevel varchar(255) not null,
-        hullType varchar(255) not null,
-        useCapacity integer not null,
+        technicalTypeName varchar(255) not null,
+        unlockedThroughLevel integer not null,
         effectValue integer not null,
+        useCapacity integer not null,
+        hullType varchar(255) not null,
         alignmentType varchar(255) not null,
         amountDamageEmitter integer not null,
         damageProjectionRange varchar(255),
         weaponType varchar(255) not null,
-        idTranslatableDescription integer not null,
-        idTranslatableName integer not null,
+        idNamedTechLevel integer not null,
         idCosts integer not null,
-        idResearch integer not null,
         primary key (idWeapon),
-        constraint weapon_CHECK check (weaponType = 'BEAM' || weaponType = 'POINT_DEFENSE')
+        constraint weapon_CHECK check (weaponType = 'BEAM' OR weaponType = 'POINT_DEFENSE')
     ) engine=InnoDB;
 
     alter table alliance 
@@ -792,9 +776,6 @@
 
     alter table messageThread 
        add constraint messageThread_UC unique (idUserOne, idUserTwo);
-
-    alter table missile 
-       add constraint UK_6gmi4lb4vkqblb63obx2991f unique (idAmmunitionModule);
 
     alter table missileMovements 
        add constraint UK_7i21tt2alyj9dggioukympy2t unique (idMissileMovement);
@@ -910,34 +891,14 @@
        references launcher (idLauncher);
 
     alter table ammunitionFitting 
-       add constraint FKmj2nxtrg5h9np8ugn7jre0v4f 
-       foreign key (idAmmunitionModule) 
-       references ammunitionModule (idAmmunitionModule);
+       add constraint FK3bacpw2vspgqtq2trokhge1g 
+       foreign key (idMissile) 
+       references missile (idMissile);
 
     alter table ammunitionFitting 
        add constraint FKij9xicbw7lepyy25ixl7dr25q 
        foreign key (idShipClass) 
        references shipClass (idShipClass);
-
-    alter table ammunitionModule 
-       add constraint FKivsjmyi7f7aym46q08qh71k1i 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table ammunitionModule 
-       add constraint FK9jn8385qcftsln9aiemohys6x 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
-
-    alter table ammunitionModule 
-       add constraint FKtc1t67bo67jgxojnt1r8w1hr3 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table ammunitionModule 
-       add constraint FKi9oa4xlh6y6c8nd9e25c8jlbq 
-       foreign key (idResearch) 
-       references research (idResearch);
 
     alter table armor 
        add constraint FKc1peuds75yuluxfttbe5omesp 
@@ -1224,11 +1185,6 @@
        foreign key (idResearch) 
        references research (idResearch);
 
-    alter table launcher 
-       add constraint FKekm6qvnxv0b0y293v8h0ayjhm 
-       foreign key (idAmmunitionModule) 
-       references ammunitionModule (idAmmunitionModule);
-
     alter table lossesByHit 
        add constraint FK8gwd5wcrghospusbhcyoffbpq 
        foreign key (idFleet) 
@@ -1283,11 +1239,6 @@
        add constraint FK2y4rvixlct3ljky430p3bmwad 
        foreign key (idCosts) 
        references resourceDeposit (idResourceDeposit);
-
-    alter table missile 
-       add constraint FKdhk8trxq7c36hid883mj4p7us 
-       foreign key (idAmmunitionModule) 
-       references ammunitionModule (idAmmunitionModule);
 
     alter table missile 
        add constraint FK1ledmeodyggj4capnumuak58u 
@@ -1715,24 +1666,14 @@
        references warShip (idWarShip);
 
     alter table weapon 
-       add constraint FKqx172dx6j907oe0gcxskan5vy 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table weapon 
-       add constraint FKtrgd2x03dkumgxnryvhon8qm5 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
+       add constraint FK65koohae6q4aft6chde2j86d9 
+       foreign key (idNamedTechLevel) 
+       references namedTechLevel (idNamedTechLevel);
 
     alter table weapon 
        add constraint FK1rsb3ampiw8yjy8ngrget6ay 
        foreign key (idCosts) 
        references resourceDeposit (idResourceDeposit);
-
-    alter table weapon 
-       add constraint FKo22n18dgjpraqosj7nkamrnvb 
-       foreign key (idResearch) 
-       references research (idResearch);
 
 INSERT INTO user (createdAt, email, gameUserRoles, password, userRole, username) VALUES ('2022-08-24 20:29:15.693', 'mail', 'FORUM_WRITE|WIKI_ADMIN|FORUM_READ|ALLIANCE_ADMIN', '49675c186a6c1b1d10cb800e2792ebabd6abd8597bcef2fcaa99bfc813a6f1868b7dc91812ac66718c4fefd59daafa6a658901b7356b3b65fa5528419a93a7a4', 'ADMIN', 'Flashkid');
 

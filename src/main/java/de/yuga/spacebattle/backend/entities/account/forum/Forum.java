@@ -23,7 +23,7 @@ import java.util.Set;
 @Entity
 @Table(name = "forum")
 @AttributeOverride(name = "id", column = @Column(name = "idForum"))
-@Check(constraints = "idAlliance IS NOT NULL || role IS NOT NULL")
+@Check(constraints = "idAlliance IS NOT NULL OR role IS NOT NULL")
 public class Forum extends AbstractEntityKey {
 
     /**

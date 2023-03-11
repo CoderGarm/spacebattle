@@ -140,20 +140,20 @@ public class User extends AbstractEntityKey {
     /**
      * Marks if the user must not log in.
      */
-    @Column(columnDefinition = "bit not null default false")
+    @Column(columnDefinition = "boolean not null default false")
     private final boolean isLoginForbidden = false;
 
 
     /**
      * Marks if the user don't want to provide an eMail.
      */
-    @Column(columnDefinition = "bit not null default false")
+    @Column(columnDefinition = "boolean not null default false")
     private boolean noEMailWanted = false;
 
     /**
      * Marks if the user has already verified it's eMail.
      */
-    @Column(columnDefinition = "bit not null default false")
+    @Column(columnDefinition = "boolean not null default false")
     private boolean isEMailVerified = false;
 
     @Nonnull

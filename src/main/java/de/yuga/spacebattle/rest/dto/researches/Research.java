@@ -94,7 +94,6 @@ public class Research {
             case MISSILE:
             case LAUNCHER:
             case MISSILE_MOTOR:
-            case AMMUNITION_MODULE:
                 this.hasIcon = new HasIcon(EModuleType.WEAPON);
                 break;
             case ARMOR:

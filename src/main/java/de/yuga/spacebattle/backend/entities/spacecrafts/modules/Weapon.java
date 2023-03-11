@@ -25,7 +25,7 @@ import java.util.Set;
 })
 @Entity
 @Table(name = "weapon")
-@Check(constraints = "weaponType = 'BEAM' || weaponType = 'POINT_DEFENSE'")
+@Check(constraints = "weaponType = 'BEAM' OR weaponType = 'POINT_DEFENSE'")
 @AttributeOverride(name = "id", column = @Column(name = "idWeapon"))
 public class Weapon extends HasHullTypeByOwnCosts {
 

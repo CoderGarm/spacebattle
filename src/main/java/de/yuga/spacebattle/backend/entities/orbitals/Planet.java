@@ -116,7 +116,7 @@ public class Planet extends AbstractEntityKey {
     /**
      * Marks if the planet is the main of the owner.
      */
-    @Column(columnDefinition = "bit not null default false")
+    @Column(columnDefinition = "boolean not null default false")
     private boolean isMain;
 
     @Nonnull

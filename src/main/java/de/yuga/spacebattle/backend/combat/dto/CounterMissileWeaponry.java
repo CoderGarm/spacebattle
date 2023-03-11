@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -129,7 +130,7 @@ public class CounterMissileWeaponry {
             }
             final Launcher launcher = alignedFitting.getLauncher();
             if (launcher != null) {
-                this.maneuverability = launcher.getAmmunitionModule().getMissile().getMissileMotor().getManeuverability();
+                this.maneuverability = new ArrayList<>(launcher.getAllowedMissiles()).get(0).getMissileMotor().getManeuverability(); // todo fix missile selection
                 this.amountOfDamageProjectors = weaponAmount;
             }
         }

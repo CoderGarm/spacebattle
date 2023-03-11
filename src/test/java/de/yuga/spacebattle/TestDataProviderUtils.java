@@ -34,7 +34,6 @@ import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
 import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
@@ -114,12 +113,9 @@ public class TestDataProviderUtils {
 
     @Nonnull
     public static Missile missile(final int damageValue) {
-        AmmunitionModule shipKillerAmmunition = createAmmunitionModule("Rocket Ammunition", "A bunch of rockets.", 5, 10, ETechLevel.TECH_I, new CrewRequirement(militaryCrew(), EDepositType.COSTS));
         MissileMotor shipKillerMotor = createMissileMotor("Ship Killer Motor Mk I", 180, ETechLevel.TECH_I, acc(46000, EAccelerationMetric.G), 20, 100);
         Warhead nuclearShipKillerWarHead = createWarhead("Nuclear ship killer war head", damageValue, ETechLevel.TECH_I, dis(50000, EDistanceMetric.M), EWarheadType.EXPLOSION, 100);
-        Missile shipKillerMissile = createMissile("Nuclear ship killer missile Mk I", 100, 100, 10, ETechLevel.TECH_I, nuclearShipKillerWarHead, List.of(shipKillerMotor), shipKillerAmmunition);
-        ReflectionTestUtils.setField(shipKillerAmmunition, "missile", shipKillerMissile);
-        return shipKillerMissile;
+        return createMissile("Nuclear ship killer missile Mk I", 100, 100, 10, ETechLevel.TECH_I, nuclearShipKillerWarHead, List.of(shipKillerMotor));
     }
 
     @Nonnull
@@ -230,19 +226,15 @@ public class TestDataProviderUtils {
         ElectronicWarfare electronicWarfare = createElectronicWarfare("Scanner Mk I", "A scanner", 5, 1000, dis(1000000, EDistanceMetric.M), ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         Sidewall sidewall = createSidewall("Shield Mk I", "A shield", 5, 15000, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
 
-        AmmunitionModule shipKillerAmmunition = createAmmunitionModule("Rocket Ammunition", "A bunch of rockets.", 5, 10, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         MissileMotor shipKillerMotor = createMissileMotor("Ship Killer Motor Mk I", 180, ETechLevel.TECH_I, acc(46000, EAccelerationMetric.G), 20, 100);
         Warhead nuclearShipKillerWarHead = createWarhead("Nuclear ship killer war head", 1000, ETechLevel.TECH_I, dis(50000, EDistanceMetric.M), EWarheadType.EXPLOSION, 100);
-        Missile shipKillerMissile = createMissile("Nuclear ship killer missile Mk I", 100, 100, 10, ETechLevel.TECH_I, nuclearShipKillerWarHead, List.of(shipKillerMotor), shipKillerAmmunition);
-        ReflectionTestUtils.setField(shipKillerAmmunition, "missile", shipKillerMissile);
-        Launcher shipKillerLauncher = createLauncher("Ship killer launcher Mk I", "The launcher for ship killers", shipKillerAmmunition, 100, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(shipKillerMissile));
+        Missile shipKillerMissile = createMissile("Nuclear ship killer missile Mk I", 100, 100, 10, ETechLevel.TECH_I, nuclearShipKillerWarHead, List.of(shipKillerMotor));
+        Launcher shipKillerLauncher = createLauncher("Ship killer launcher Mk I", "The launcher for ship killers", 100, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(shipKillerMissile));
 
-        AmmunitionModule counterRocketAmmunition = createAmmunitionModule("Counter Rocket Ammunition", "Another bunch of rockets.", 5, 10, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         MissileMotor counterMissileMotor = createMissileMotor("Counter Motor Mk I", 5, ETechLevel.TECH_I, acc(96000, EAccelerationMetric.G), 80, 10);
         Warhead counterWarHead = createWarhead("Counter war head", 1, ETechLevel.TECH_I, Distance.ZERO, EWarheadType.COUNTER_MISSILE, 10);
-        Missile counterMissile = createMissile("Counter missile Mk I", 10, 10, 10, ETechLevel.TECH_I, counterWarHead, List.of(counterMissileMotor), counterRocketAmmunition);
-        ReflectionTestUtils.setField(counterRocketAmmunition, "missile", counterMissile);
-        Launcher counterMissileLauncher = createLauncher("Counter missile launcher Mk I", "The launcher for counter missiles", counterRocketAmmunition, 100, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
+        Missile counterMissile = createMissile("Counter missile Mk I", 10, 10, 10, ETechLevel.TECH_I, counterWarHead, List.of(counterMissileMotor));
+        Launcher counterMissileLauncher = createLauncher("Counter missile launcher Mk I", "The launcher for counter missiles", 100, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
 
         Weapon laserWeapon = createWeapon("Laser Mk I", "A laser", 5, 10, ETechLevel.TECH_I, dis(400000, EDistanceMetric.M), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         Weapon pointDefense = createWeapon("Point Defense Mk I", "A point defense", 5, 1, ETechLevel.TECH_I, dis(50000, EDistanceMetric.M), 1, EWeaponType.POINT_DEFENSE, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS));
@@ -252,7 +244,7 @@ public class TestDataProviderUtils {
         Hull hull3 = createHull("Cruiser vessel", 80000, 150, 45, 45, 75, "The cruiser hull", EHullType.CA, new CrewRequirement(militaryCrew, EDepositType.COSTS));
 
         ShipClass as3 = new ShipClass(user, "Argonauts cruiser", hull3, null);
-        return createFitting(armor, propulsionFTL, electronicWarfare, sidewall, laserWeapon, pointDefense, new Launcher[]{shipKillerLauncher, counterMissileLauncher}, new PassiveModule[]{passiveModule}, new AmmunitionModule[]{shipKillerAmmunition, counterRocketAmmunition}, as3);
+        return createFitting(armor, propulsionFTL, electronicWarfare, sidewall, laserWeapon, pointDefense, new Launcher[]{shipKillerLauncher, counterMissileLauncher}, new PassiveModule[]{passiveModule}, as3);
     }
 
     @Nonnull
@@ -289,9 +281,8 @@ public class TestDataProviderUtils {
                                            Sidewall sidewall,
                                            Weapon laserWeapon,
                                            Weapon pointDefense,
-                                           Launcher[] missiles,
+                                           Launcher[] launchers,
                                            PassiveModule[] passiveModules,
-                                           AmmunitionModule[] ammunitionModules,
                                            ShipClass shipClass) {
         shipClass.setArmor(armor);
         shipClass.setSidewall(sidewall);
@@ -299,15 +290,17 @@ public class TestDataProviderUtils {
         shipClass.setElectronicWarfare(electronicWarfare);
         Set<AlignedFitting> fittings = new HashSet<>();
         fittings.add(new AlignedFitting(EWeaponAlignment.BOW, laserWeapon, 1));
-        Arrays.stream(missiles).forEach(missile -> fittings.add(new AlignedFitting(EWeaponAlignment.STERN, missile, 1)));
+        Set<AmmunitionFitting> ammunitionFittings = new HashSet<>();
+        Arrays.stream(launchers).forEach(launcher -> {
+            fittings.add(new AlignedFitting(EWeaponAlignment.STERN, launcher, 1));
+            ammunitionFittings.add(new AmmunitionFitting(new ArrayList<>(launcher.getAllowedMissiles()).get(0), 1));
+        });
         fittings.add(new AlignedFitting(EWeaponAlignment.BROADSIDE, pointDefense, 1));
         shipClass.setFittings(fittings);
+        shipClass.setAmmunitionFittings(ammunitionFittings);
 
         Set<SupportFitting> supportFittings = Arrays.stream(passiveModules).map(af -> new SupportFitting(af, 1)).collect(Collectors.toSet());
         shipClass.setSupportFittings(supportFittings);
-
-        Set<AmmunitionFitting> ammunitionFittings = Arrays.stream(ammunitionModules).map(af -> new AmmunitionFitting(af, 1)).collect(Collectors.toSet());
-        shipClass.setAmmunitionFittings(ammunitionFittings);
 
         return shipClass;
     }
@@ -391,7 +384,6 @@ public class TestDataProviderUtils {
     @Nonnull
     public static Launcher createLauncher(@Nonnull final String name,
                                           @Nonnull final String description,
-                                          @Nonnull final AmmunitionModule ammunitionModule,
                                           final int useCapacity,
                                           final ETechLevel techLevel,
                                           @Nonnull final EAlignmentType alignmentType,
@@ -400,13 +392,12 @@ public class TestDataProviderUtils {
                                           @Nonnull final Set<Missile> allowedMissiles) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
-        Preconditions.checkNotNull(ammunitionModule, "ammunitionModule shouldn't be null!");
         Preconditions.checkNotNull(alignmentType, "alignmentType shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
         Preconditions.checkNotNull(allowedMissiles, "allowedMissiles shouldn't be null!");
 
-        final Launcher launcher = new Launcher(name, description, research(), ammunitionModule, useCapacity, EHullType.CA, techLevel, alignmentType, crewRequirement, weaponType, allowedMissiles);
+        final Launcher launcher = new Launcher(name, description, research(), useCapacity, EHullType.CA, techLevel, alignmentType, crewRequirement, weaponType, allowedMissiles);
         setId(launcher);
         return launcher;
     }
@@ -449,14 +440,12 @@ public class TestDataProviderUtils {
                                         final int elokaResistance,
                                         final ETechLevel techLevel,
                                         @Nonnull Warhead warhead,
-                                        @Nonnull List<MissileMotor> missileMotors,
-                                        @Nonnull final AmmunitionModule ammunitionModule) {
+                                        @Nonnull List<MissileMotor> missileMotors) {
         Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
         Preconditions.checkNotNull(warhead, "warhead shouldn't be null!");
         Preconditions.checkNotNull(missileMotors, "missileMotors shouldn't be null!");
-        Preconditions.checkNotNull(ammunitionModule, "ammunitionModule shouldn't be null!");
 
-        final Missile missile = new Missile(typeName, "", warheadCapacity, motorCapacity, elokaResistance, HULL_TYPE, techLevel, warhead, missileMotors, research(), ammunitionModule);
+        final Missile missile = new Missile(typeName, "", warheadCapacity, motorCapacity, elokaResistance, HULL_TYPE, techLevel, warhead, missileMotors, research());
         setId(missile);
         return missile;
     }
@@ -496,22 +485,6 @@ public class TestDataProviderUtils {
         final PassiveModule passiveModule = new PassiveModule(name, description, research(), useCapacity, value, HULL_TYPE, techLevel, supportType, calculationType, crewRequirement);
         setId(passiveModule);
         return passiveModule;
-    }
-
-    @Nonnull
-    public static AmmunitionModule createAmmunitionModule(@Nonnull final String name,
-                                                          @Nonnull final String description,
-                                                          final int useCapacity,
-                                                          final int value,
-                                                          final ETechLevel techLevel,
-                                                          @Nonnull final CrewRequirement crewRequirement) {
-        Preconditions.checkNotNull(name, "name shouldn't be null!");
-        Preconditions.checkNotNull(description, "description shouldn't be null!");
-        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
-
-        final AmmunitionModule ammunitionModule = new AmmunitionModule(name, description, research(), useCapacity, value, HULL_TYPE, techLevel, crewRequirement);
-        setId(ammunitionModule);
-        return ammunitionModule;
     }
 
     @Nonnull

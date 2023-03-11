@@ -220,7 +220,7 @@ public class ShipClass extends Deletable {
         ammunitionFittings.forEach(s -> {
             int amount = s.getAmount();
             for (; amount >= 0; amount--) {
-                updateCosts(clonedDeposit, supportTypeToModule, s.getAmmunitionModule().getCosts());
+                updateCosts(clonedDeposit, supportTypeToModule, s.getMissile().getCostsOverall());
             }
         });
         supportFittings.forEach(s -> {
@@ -402,7 +402,7 @@ public class ShipClass extends Deletable {
     }
 
     /**
-     * Checks if this class is the last in it's ancestry row.
+     * Checks if this class is the last in its ancestry row.
      *
      * @return <code>true</code> if yes, <code>false</code> otherwise
      */
@@ -447,7 +447,7 @@ public class ShipClass extends Deletable {
                     }
                     final Launcher launcher = fitting.getLauncher();
                     if (launcher != null) {
-                        final Missile missile = launcher.getAmmunitionModule().getMissile();
+                        final Missile missile = new ArrayList<>(launcher.getAllowedMissiles()).get(0); // todo fix missile selection
                         damageProjectionRange = missile.getMaximumMissileRange();
                     }
                     return damageProjectionRange;
@@ -475,7 +475,7 @@ public class ShipClass extends Deletable {
                     }
                     final Launcher launcher = fitting.getLauncher();
                     if (launcher != null) {
-                        final Missile missile = launcher.getAmmunitionModule().getMissile();
+                        final Missile missile = new ArrayList<>(launcher.getAllowedMissiles()).get(0); // todo fix missile selection
                         damageProjectionRange = missile.getMaximumMissileRange();
                     }
                     return damageProjectionRange;
@@ -532,8 +532,9 @@ public class ShipClass extends Deletable {
                         .map(SupportFitting::calculateUsedCapacity)
                         .reduce(0, Integer::sum);
                 usedCapacity += getAmmunitionFittings().stream()
-                        .map(AmmunitionFitting::calculateUsedCapacity)
-                        .reduce(0, Integer::sum);
+                        .map(AmmunitionFitting::getUsedCapacity)
+                        .reduce(0D, Double::sum)
+                        .intValue();
                 if (hull != null) {
                     usedCapacity += propulsion != null ? propulsion.getUseCapacity(hull) : 0;
                     usedCapacity += armor != null ? armor.getUseCapacity(hull) : 0;

@@ -146,11 +146,6 @@ public class MasterOfTheUniverseServiceTest {
     }
 
     @Test
-    public void createInitialData() {
-        masterOfTheUniverseService.createInitialData();
-    }
-
-    @Test
     void testCreateForums() {
         masterOfTheUniverseService.createForums();
     }

@@ -18,7 +18,7 @@ import javax.validation.constraints.NotNull;
 })
 @Entity
 @Table(name = "move")
-@Check(constraints = "xCoordinateOrigin != xCoordinateDestination && yCoordinateOrigin != yCoordinateDestination")
+@Check(constraints = "xCoordinateOrigin != xCoordinateDestination AND yCoordinateOrigin != yCoordinateDestination")
 @AttributeOverride(name = "id", column = @Column(name = "idMove"))
 public class Move extends AbstractEntityKey {
 

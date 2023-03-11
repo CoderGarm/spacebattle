@@ -6,6 +6,7 @@ Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 1. Das Antriebsmodell entspricht jetzt dem Honorverse.
     - https://honor-harrington.fandom.com/de/wiki/Impellerantrieb
     - https://honor-harrington.fandom.com/de/wiki/Warshawski-Segel
+
 -
 
 Gameplay:
@@ -13,7 +14,11 @@ Gameplay:
 1. Auf der StarMap verändert sich der Cursor, wenn man etwas anklicken kann.
 2.
 
-todo. abhängige Forschungen pro Level erlauben? NamedTechLevel kennt Forschung, konkretes Modul kennt notwendiges Level, entsprechende Supportmodule halt bei höherem Level
+todo. missile ammo fitting amount ist jetzt anzahl missiles nicht anzahl ammo-fittings
+todo. alle möglichen module zu HasNamedLevel machen  
+todo. missiles überarbeiten → Komplexität wirklich nötig?
+
+todo. abhängige Forschungen pro Level erlauben? NamedTechLevel kennt Forschung, konkretes Modul kennt notwendiges Level, entsprechende Supportmodule halt bei höherem Level  
 todo. Forschungen mit NamedTechLevel ausrüsten?
 
 ----------------- Bugs fixed -----------
@@ -22,9 +27,10 @@ todo. Forschungen mit NamedTechLevel ausrüsten?
 
 ----------------- next steps -----------
 
+todo. change table names to use derby for useful tests
 todo. webmaster mail at contact section
 todo. changelog mit highlight auf versions-button
-todo. change table names to use derby for useful tests
+todo. fleet movement report im dashboard
 
 Thema: NPC, Handel und Missionen
 

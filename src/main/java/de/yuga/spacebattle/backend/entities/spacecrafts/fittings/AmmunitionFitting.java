@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.fittings;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.AmmunitionModule;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 
 import javax.annotation.Nonnull;
 import javax.persistence.Embeddable;
@@ -22,11 +22,11 @@ public class AmmunitionFitting {
     @Nonnull
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "idAmmunitionModule")
-    private AmmunitionModule ammunitionModule;
+    @JoinColumn(name = "idMissile")
+    private Missile missile;
 
     /**
-     * The amount of this weapon with the given {@link AmmunitionModule}.
+     * The amount of missiles in this fitting.
      */
     @Min(0)
     private int amount;
@@ -34,24 +34,17 @@ public class AmmunitionFitting {
     public AmmunitionFitting() {
     }
 
-    public AmmunitionFitting(@Nonnull final AmmunitionModule ammunitionModule,
+    public AmmunitionFitting(@Nonnull final Missile missile,
                              final int amount) {
-        Preconditions.checkNotNull(ammunitionModule, "ammunitionModule shouldn't be null!");
-
-        this.ammunitionModule = ammunitionModule;
+        this.missile = Preconditions.checkNotNull(missile, "missile must not be empty");
         this.amount = amount;
     }
 
     @Nonnull
-    public AmmunitionModule getAmmunitionModule() {
-        return ammunitionModule;
+    public Missile getMissile() {
+        return missile;
     }
 
-    public void setAmmunitionModule(@Nonnull AmmunitionModule ammunitionModule) {
-        Preconditions.checkNotNull(ammunitionModule, "ammunitionModule shouldn't be null!");
-
-        this.ammunitionModule = ammunitionModule;
-    }
 
     public int getAmount() {
         return amount;
@@ -68,15 +61,15 @@ public class AmmunitionFitting {
 
         AmmunitionFitting that = (AmmunitionFitting) o;
 
-        return ammunitionModule.equals(that.ammunitionModule);
+        return missile.equals(that.missile);
     }
 
     @Override
     public int hashCode() {
-        return ammunitionModule.hashCode();
+        return missile.hashCode();
     }
 
-    public int calculateUsedCapacity() {
-        return amount * ammunitionModule.getUseCapacity();
+    public double getUsedCapacity() {
+        return ((double) amount) * missile.getUsedCapacity();
     }
 }

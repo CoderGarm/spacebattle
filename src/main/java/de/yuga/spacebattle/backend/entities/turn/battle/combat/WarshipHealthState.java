@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
+import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AmmunitionFitting;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -56,7 +57,7 @@ public class WarshipHealthState extends AbstractEntityKey implements WarshipHeal
     @CollectionTable(name = "remainingShots", joinColumns = @JoinColumn(name = "idWarshipHealthState"))
     private final Map<Missile, Integer> remainingShots = new HashMap<>();
 
-    @Column(columnDefinition = "bit not null default true")
+    @Column(columnDefinition = "boolean not null default true")
     private boolean isFightingCapable = true;
 
     public WarshipHealthState() {
@@ -71,8 +72,8 @@ public class WarshipHealthState extends AbstractEntityKey implements WarshipHeal
         this.activeFittings.addAll(shipClass.getFittings());
 
         final Map<Missile, Integer> shotsPerMissile = shipClass.getAmmunitionFittings().stream()
-                .collect(Collectors.groupingBy(af -> af.getAmmunitionModule().getMissile(),
-                        Collectors.mapping(af -> af.getAmmunitionModule().getEffectValue() * af.getAmount(), Collectors.reducing(0, Integer::sum))));
+                .collect(Collectors.groupingBy(AmmunitionFitting::getMissile,
+                        Collectors.mapping(AmmunitionFitting::getAmount, Collectors.reducing(0, Integer::sum))));
 
         this.remainingShots.putAll(shotsPerMissile);
     }
@@ -237,8 +238,8 @@ public class WarshipHealthState extends AbstractEntityKey implements WarshipHeal
     public void ammoUp() {
         final ShipClass shipClass = warShip.getShipClass();
         final Map<Missile, Integer> shotsPerMissile = shipClass.getAmmunitionFittings().stream()
-                .collect(Collectors.groupingBy(af -> af.getAmmunitionModule().getMissile(),
-                        Collectors.mapping(af -> af.getAmmunitionModule().getEffectValue() * af.getAmount(), Collectors.reducing(0, Integer::sum))));
+                .collect(Collectors.groupingBy(AmmunitionFitting::getMissile,
+                        Collectors.mapping(AmmunitionFitting::getAmount, Collectors.reducing(0, Integer::sum))));
 
         this.remainingShots.clear();
         this.remainingShots.putAll(shotsPerMissile);

@@ -360,7 +360,7 @@ public class MasterOfTheUniverseService {
         amendTranslations();
         LOGGER.info("Translations amended.");
 
-        tickService.doTick();
+        tickService.doTick(); /*fixme the battle will not started - check why*/
         LOGGER.info("First tick is done");
         LOGGER.info("All Data created");
     }
@@ -481,12 +481,11 @@ public class MasterOfTheUniverseService {
         Research unlocksRocketAmmunition = research("Rocket Ammunition", "a bunch of rockets.", 1, ETechLevel.TECH_I, null);
         Research unlocksCounterRocketAmmunition = research("Counter Rocket Ammunition", "another bunch of rockets.", 1, ETechLevel.TECH_I, null);
         // CL launcher
-        AmmunitionModule shipKillerAmmunition = moduleService.createAmmunitionModule("Rocket Ammunition", "A bunch of rockets.", unlocksRocketAmmunition, 5, 10, EHullType.CL, ETechLevel.TECH_I, new CrewRequirement(XS_CREW, EDepositType.COSTS));
         MissileMotor shipKillerMotor = moduleService.createMissileMotor("Ship Killer Motor Mk I", "Ship Killer Motor Mk I", 180, EHullType.CL, ETechLevel.TECH_I, new Acceleration(46000, EAccelerationMetric.G), 20, 100);
         Warhead nuclearShipKillerWarHead = moduleService.createWarhead("Nuclear ship killer war head", "Nuclear ship killer war head", 1000, EHullType.CL, ETechLevel.TECH_I, new Distance(0.00017, EDistanceMetric.LS), EWarheadType.EXPLOSION, 100);
-        Missile shipKillerMissile = moduleService.createMissile("Nuclear ship killer missile Mk I", "Nuclear ship killer missile Mk I", 100, 100, 100, EHullType.CL, ETechLevel.TECH_I, nuclearShipKillerWarHead, List.of(shipKillerMotor), unlocksMissile, shipKillerAmmunition);
-        moduleService.createLauncher("Ship killer launcher Mk I", "The launcher for ship killers", unlocksMissile, shipKillerAmmunition, 4, EHullType.CL, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(shipKillerMissile));
-        moduleService.createLauncher("Ship killer launcher Mk I", "The launcher for ship killers", unlocksMissile, shipKillerAmmunition, 8, EHullType.CL, ETechLevel.TECH_I, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(shipKillerMissile));
+        Missile shipKillerMissile = moduleService.createMissile("Nuclear ship killer missile Mk I", "Nuclear ship killer missile Mk I", 100, 100, 100, EHullType.CL, ETechLevel.TECH_I, nuclearShipKillerWarHead, List.of(shipKillerMotor), unlocksMissile);
+        moduleService.createLauncher("Ship killer launcher Mk I", "The launcher for ship killers", unlocksMissile, 4, EHullType.CL, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(shipKillerMissile));
+        moduleService.createLauncher("Ship killer launcher Mk I", "The launcher for ship killers", unlocksMissile, 8, EHullType.CL, ETechLevel.TECH_I, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(shipKillerMissile));
 
         // LAC launcher
         EHullType hullType = EHullType.LAC;
@@ -494,11 +493,6 @@ public class MasterOfTheUniverseService {
         unlocksRocketAmmunition.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketenmunition Mk I");
         unlocksRocketAmmunition.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketenmunition Mk I.");
         researchService.save(unlocksRocketAmmunition);
-
-        AmmunitionModule ammo = moduleService.createAmmunitionModule("Light attack craft missile ammunition Mk I", "LAC missiles module Mk I.", unlocksRocketAmmunition, 1, 5, hullType, ETechLevel.TECH_I, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
-        ammo.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketenmunition Mk I");
-        ammo.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketenmunition Mk I.");
-        moduleService.save(ammo);
 
         MissileMotor motor = moduleService.createMissileMotor("LAC ship killer Motor Mk I", "LAC ship Killer Motor Mk I", 100, hullType, ETechLevel.TECH_I, new Acceleration(46000, EAccelerationMetric.G), 40, 100);
         motor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketenmotor Mk I");
@@ -515,12 +509,12 @@ public class MasterOfTheUniverseService {
         unlocksMissile.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der LAC Raketenwerfer mit fünfschüssigem Revolvermagazin.");
         researchService.save(unlocksMissile);
 
-        Missile missile = moduleService.createMissile("Nuclear LAC ship killer missile Mk I", "Nuclear LAC ship killer missile Mk I", 100, 100, 100, hullType, ETechLevel.TECH_I, warhead, List.of(motor), unlocksMissile, ammo);
+        Missile missile = moduleService.createMissile("Nuclear LAC ship killer missile Mk I", "Nuclear LAC ship killer missile Mk I", 100, 100, 100, hullType, ETechLevel.TECH_I, warhead, List.of(motor), unlocksMissile);
         missile.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketen mit Nuklearsprengkopf Mk I");
         missile.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Rakete mit Nuklearsprengkopf Mk I.");
         moduleService.save(missile);
 
-        Launcher launcher = moduleService.createLauncher("LAC ship killer launcher with revolver magazine Mk I", "The launcher with 5-shoot revolver magazine for LAC ship killers", unlocksMissile, ammo, 1, hullType, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXXS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(missile));
+        Launcher launcher = moduleService.createLauncher("LAC ship killer launcher with revolver magazine Mk I", "The launcher with 5-shoot revolver magazine for LAC ship killers", unlocksMissile, 1, hullType, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXXS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(missile));
         launcher.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketenwerfer mit Revolvermagazin Mk I");
         launcher.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der LAC Raketenwerfer mit fünfschüssigem Revolvermagazin.");
         moduleService.save(launcher);
@@ -531,11 +525,6 @@ public class MasterOfTheUniverseService {
         unlocksRocketAmmunition.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenmunition Mk I");
         unlocksRocketAmmunition.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenmunition Mk I.");
         researchService.save(unlocksRocketAmmunition);
-
-        ammo = moduleService.createAmmunitionModule("Cruiser missile ammunition Mk I", "Cruiser missiles module Mk I.", unlocksRocketAmmunition, 5, 24, hullType, ETechLevel.TECH_I, new CrewRequirement(XXS_CREW, EDepositType.COSTS));
-        ammo.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenmunition Mk I");
-        ammo.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenmunition Mk I.");
-        moduleService.save(ammo);
 
         motor = moduleService.createMissileMotor("Cruiser ship killer Motor Mk I", "Cruiser ship Killer Motor Mk I", 180, hullType, ETechLevel.TECH_I, new Acceleration(46000, EAccelerationMetric.G), 20, 100);
         motor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenmotor Mk I");
@@ -552,17 +541,17 @@ public class MasterOfTheUniverseService {
         unlocksMissile.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Kreuzer Raketenwerfer.");
         researchService.save(unlocksMissile);
 
-        missile = moduleService.createMissile("Nuclear Cruiser ship killer missile Mk I", "Nuclear Cruiser ship killer missile Mk I", 100, 100, 100, hullType, ETechLevel.TECH_I, warhead, List.of(motor), unlocksMissile, ammo);
+        missile = moduleService.createMissile("Nuclear Cruiser ship killer missile Mk I", "Nuclear Cruiser ship killer missile Mk I", 100, 100, 100, hullType, ETechLevel.TECH_I, warhead, List.of(motor), unlocksMissile);
         missile.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketen mit Nuklearsprengkopf Mk I");
         missile.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Rakete mit Nuklearsprengkopf Mk I.");
         moduleService.save(missile);
 
-        launcher = moduleService.createLauncher("Cruiser ship killer launcher Mk I", "The launcher for cruiser ship killers", unlocksMissile, ammo, 7, hullType, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(missile));
+        launcher = moduleService.createLauncher("Cruiser ship killer launcher Mk I", "The launcher for cruiser ship killers", unlocksMissile, 7, hullType, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(missile));
         launcher.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenwerfer Mk I");
         launcher.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Kreuzer Raketenwerfer.");
         moduleService.save(launcher);
 
-        launcher = moduleService.createLauncher("Cruiser ship killer launcher Mk I", "The launcher for cruiser ship killers", unlocksMissile, ammo, 14, hullType, ETechLevel.TECH_I, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(missile));
+        launcher = moduleService.createLauncher("Cruiser ship killer launcher Mk I", "The launcher for cruiser ship killers", unlocksMissile, 14, hullType, ETechLevel.TECH_I, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(missile));
         launcher.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenwerfer Mk I");
         launcher.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Kreuzer Raketenwerfer.");
         moduleService.save(launcher);
@@ -573,11 +562,6 @@ public class MasterOfTheUniverseService {
         unlocksRocketAmmunition.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketenmunition Mk I");
         unlocksRocketAmmunition.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketenmunition Mk I.");
         researchService.save(unlocksRocketAmmunition);
-
-        ammo = moduleService.createAmmunitionModule("Dreadnought missile ammunition Mk I", "Dreadnought missiles module Mk I.", unlocksRocketAmmunition, 20, 48, hullType, ETechLevel.TECH_I, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        ammo.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketenmunition Mk I");
-        ammo.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketenmunition Mk I.");
-        moduleService.save(ammo);
 
         motor = moduleService.createMissileMotor("Dreadnought ship killer Motor Mk I", "Dreadnought ship Killer Motor Mk I", 180, hullType, ETechLevel.TECH_I, new Acceleration(46000, EAccelerationMetric.G), 20, 100);
         motor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketenmotor Mk I");
@@ -594,22 +578,21 @@ public class MasterOfTheUniverseService {
         unlocksMissile.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Dreadnought Raketenwerfer.");
         researchService.save(unlocksMissile);
 
-        missile = moduleService.createMissile("Nuclear Dreadnought ship killer missile Mk I", "Nuclear Dreadnought ship killer missile Mk I", 100, 100, 100, hullType, ETechLevel.TECH_I, warhead, List.of(motor), unlocksMissile, ammo);
+        missile = moduleService.createMissile("Nuclear Dreadnought ship killer missile Mk I", "Nuclear Dreadnought ship killer missile Mk I", 100, 100, 100, hullType, ETechLevel.TECH_I, warhead, List.of(motor), unlocksMissile);
         missile.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketen mit Nuklearsprengkopf Mk I");
         missile.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Rakete mit Nuklearsprengkopf Mk I.");
         moduleService.save(missile);
 
-        launcher = moduleService.createLauncher("Dreadnought ship killer launcher Mk I", "The launcher for Dreadnought ship killers", unlocksMissile, ammo, 20, hullType, ETechLevel.TECH_I, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(missile));
+        launcher = moduleService.createLauncher("Dreadnought ship killer launcher Mk I", "The launcher for Dreadnought ship killers", unlocksMissile, 20, hullType, ETechLevel.TECH_I, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(missile));
         launcher.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketenwerfer Mk I");
         launcher.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Dreadnought Raketenwerfer.");
         moduleService.save(launcher);
 
-        AmmunitionModule counterRocketAmmunition = moduleService.createAmmunitionModule("Counter Rocket Ammunition", "Another bunch of rockets.", unlocksCounterRocketAmmunition, 5, 100, EHullType.CL, ETechLevel.TECH_I, new CrewRequirement(XS_CREW, EDepositType.COSTS));
         MissileMotor counterMissileMotor = moduleService.createMissileMotor("Counter Motor Mk I", "Counter Motor Mk I", 30, EHullType.CL, ETechLevel.TECH_I, new Acceleration(96000, EAccelerationMetric.G), 80, 10);
         Warhead counterWarHead = moduleService.createWarhead("Counter war head", "Counter war head", 1, EHullType.CL, ETechLevel.TECH_I, Distance.ZERO, EWarheadType.COUNTER_MISSILE, 10);
-        Missile counterMissile = moduleService.createMissile("Counter missile Mk I", "Counter missile Mk I", 10, 10, 10, EHullType.CL, ETechLevel.TECH_I, counterWarHead, List.of(counterMissileMotor), unlocksCounterMissile, counterRocketAmmunition);
-        moduleService.createLauncher("Counter missile launcher Mk I", "The launcher for counter missiles", unlocksCounterMissile, counterRocketAmmunition, 3, EHullType.CL, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
-        moduleService.createLauncher("Counter missile launcher Mk I", "The launcher for counter missiles", unlocksCounterMissile, counterRocketAmmunition, 6, EHullType.CL, ETechLevel.TECH_I, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
+        Missile counterMissile = moduleService.createMissile("Counter missile Mk I", "Counter missile Mk I", 10, 10, 10, EHullType.CL, ETechLevel.TECH_I, counterWarHead, List.of(counterMissileMotor), unlocksCounterMissile);
+        moduleService.createLauncher("Counter missile launcher Mk I", "The launcher for counter missiles", unlocksCounterMissile, 3, EHullType.CL, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
+        moduleService.createLauncher("Counter missile launcher Mk I", "The launcher for counter missiles", unlocksCounterMissile, 6, EHullType.CL, ETechLevel.TECH_I, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
     }
 
     private void amendTranslation(@Nonnull final HasName hasName, @Nonnull final String name, @Nonnull final String description) {
@@ -773,17 +756,6 @@ public class MasterOfTheUniverseService {
                 .orElseThrow(() -> new NotifyWebUserException("There was no hull found for your request."));
         final String randomWarshipName = resourceService.getRandomWarshipName();
         return createFitting(new ShipClass(user, randomWarshipName, hull, null));
-    }
-
-    /**
-     * Create the minimal base data for the current stage of development.
-     */
-    public void createInitialData() {
-        List<User> all = userService.findAll();
-        if (!all.isEmpty()) {
-            throw new NotifyWebUserException("The database was already initialized!");
-        }
-        createInitialDataPayload();
     }
 
     /**
@@ -1155,38 +1127,29 @@ public class MasterOfTheUniverseService {
 
     private int addAmmunition(@Nonnull final ShipClass shipClass,
                               final int capacity,
-                              @Nonnull final Map<Launcher, Integer> launcherToAmount,
-                              int freeCapForAttackAmmo) {
+                              @Nonnull final Map<Launcher, Integer> launcherToLauncherAmount,
+                              int freeCapForAmmo) {
         Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
-        Preconditions.checkNotNull(launcherToAmount, "launcherToAmount must not be empty");
+        Preconditions.checkNotNull(launcherToLauncherAmount, "launcherToLauncherAmount must not be empty");
 
         int capClone = capacity;
-        boolean runNextRoundLoop = true;
-        while (runNextRoundLoop && freeCapForAttackAmmo >= 0) {
-            boolean madeChange = false;
-            for (final Launcher launcher : launcherToAmount.keySet()) {
-                final AmmunitionModule ammunitionModule = launcher.getAmmunitionModule();
-                final int useCapacity = ammunitionModule.getUseCapacity();
-                if (freeCapForAttackAmmo < useCapacity) {
-                    continue;
-                }
-                final AmmunitionFitting known = shipClass.getAmmunitionFittings().stream()
-                        .filter(ammo -> ammo.getAmmunitionModule().equals(ammunitionModule))
-                        .findFirst()
-                        .orElse(null);
-                if (known == null) {
-                    shipClass.addAmmunitionFitting(new AmmunitionFitting(ammunitionModule, 1));
-                } else {
-                    known.setAmount(known.getAmount() + 1);
-                }
-                capClone -= useCapacity;
-                freeCapForAttackAmmo -= useCapacity;
-                madeChange = true;
-            }
-            if (!madeChange) {
-                runNextRoundLoop = false;
-            }
-        }
+
+        final double capacityForSingleShotFromAllLaunchers = launcherToLauncherAmount.entrySet().stream().map(l -> {
+            final Missile missile = new ArrayList<>(l.getKey().getAllowedMissiles()).get(0);
+            final Integer amountOfLaunchers = l.getValue();
+            //noinspection UnnecessaryLocalVariable
+            final double capacityForSingleShot = missile.getUsedCapacity() * amountOfLaunchers;
+            return capacityForSingleShot;
+        }).reduce(0D, Double::sum);
+
+        final int shotsAvailablePerLauncher = (int) (((double) freeCapForAmmo) / capacityForSingleShotFromAllLaunchers);
+
+        capClone -= (shotsAvailablePerLauncher * capacityForSingleShotFromAllLaunchers);
+
+        launcherToLauncherAmount.forEach((launcher, amountOfLauncher) -> {
+            final Missile missile = new ArrayList<>(launcher.getAllowedMissiles()).get(0);
+            shipClass.addAmmunitionFitting(new AmmunitionFitting(missile, amountOfLauncher * shotsAvailablePerLauncher));
+        });
         return capClone;
     }
 
