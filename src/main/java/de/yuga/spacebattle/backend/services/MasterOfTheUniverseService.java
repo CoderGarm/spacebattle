@@ -734,7 +734,7 @@ public class MasterOfTheUniverseService {
         moduleService.save(passiveModule);
     }
 
-    private void createHulls() { /* fixme rethink research tree - probably change it to research by level instead 1to1 research to goal */
+    private void createHulls() {
         Research hullResearch = research("Corvette", "The Corvette research researches Corvettes.", 1, ETechLevel.TECH_I, null);
         hullService.createHull("Light attack vessel", 20, 4, 10, 3, 3, ETechLevel.TECH_I, "The light attack craft hull", hullResearch, EHullType.LAC, new CrewRequirement(S_CREW, EDepositType.COSTS));
         hullService.createHull("Corvette vessel", 30, 6, 5, 5, 14, ETechLevel.TECH_I, "The corvette hull", hullResearch, EHullType.VT, new CrewRequirement(M_CREW, EDepositType.COSTS));

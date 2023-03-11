@@ -1,6 +1,8 @@
 package de.yuga.spacebattle.rest.dto.spacecrafts;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.enums.ETechnologyType;
 import de.yuga.spacebattle.rest.dto.enums.EHullType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -10,33 +12,47 @@ import javax.annotation.Nonnull;
 public class Hull {
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The id of this hull.")
     private int idHull;
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The name of this hull.")
     private String name;
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The description of the hull.")
     private String description;
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The hull type.")
     private EHullType hullType;
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The tech type of this hull.")
+    private ETechnologyType technologyType = ETechnologyType.CIVIL;
+
+    @JsonProperty
     @Schema(required = true, description = "The overall construction capacity as displacement like in the wet navies.")
     private int overallConstructionCapacity;
 
+    @JsonProperty
     @Schema(required = true, description = "The unaligned construction capacity.")
     private int constructionCapacity;
 
+    @JsonProperty
     @Schema(required = true, description = "The bow-aligned construction capacity.")
     private int constructionCapacityBow;
 
+    @JsonProperty
     @Schema(required = true, description = "The stern-aligned construction capacity.")
     private int constructionCapacityStern;
 
+    @JsonProperty
     @Schema(required = true, description = "The broadside-aligned construction capacity.")
     private int constructionCapacityBroadsides;
 
@@ -52,6 +68,7 @@ public class Hull {
         this.name = hull.getName(languageCode);
         this.description = hull.getDescription(languageCode);
         this.hullType = new EHullType(hull.getHullType());
+        this.technologyType = hull.getHullType().isCivilShip() ? ETechnologyType.CIVIL : ETechnologyType.MILITARY;
         this.overallConstructionCapacity = hull.getOverallConstructionCapacity();
         this.constructionCapacity = hull.getConstructionCapacity();
         this.constructionCapacityBow = hull.getConstructionCapacityBow();

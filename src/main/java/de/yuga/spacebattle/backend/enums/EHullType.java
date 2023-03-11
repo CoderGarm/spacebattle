@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This indicated what a type of ship is this hull for.<br>
@@ -34,6 +35,8 @@ public enum EHullType implements HasIconName {
     FAT("FAT", false, true, "satellite", "fast attack transport"),
     FR("FR", false, true, "satellite", "freighter"),
     ;
+
+    private static Set<EHullType> CIVIL = Set.of(FR);
 
     @Nonnull
     private final String type;
@@ -75,6 +78,10 @@ public enum EHullType implements HasIconName {
 
     public boolean isAuxiliaryShip() {
         return auxiliaryShip;
+    }
+
+    public boolean isCivilShip() {
+        return CIVIL.contains(this);
     }
 
     @Nonnull

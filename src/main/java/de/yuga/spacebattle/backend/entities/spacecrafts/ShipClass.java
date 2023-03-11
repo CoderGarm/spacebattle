@@ -2,10 +2,12 @@ package de.yuga.spacebattle.backend.entities.spacecrafts;
 
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.combat.dto.RangeDefinition;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
@@ -16,7 +18,9 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
+import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
+import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
 import de.yuga.spacebattle.backend.validators.ShipValidator;
 
 import javax.annotation.Nonnull;
@@ -548,14 +552,32 @@ public class ShipClass extends Deletable {
     public Acceleration getAcceleration(@Nonnull final EHyperBand hyperBand) {
         Preconditions.checkNotNull(hyperBand, "hyperBand must not be empty");
 
+        if (propulsion == null) {
+            return Acceleration.ZERO;
+        }
+
+        final double maxAccelerationOfMilitary = propulsion.getTechnologyType().getMaxAccelerationOfMilitary();
         final EModuleType eModuleType = hyperBand == EHyperBand.NONE ? EModuleType.PROPULSION : EModuleType.FTLPROPULSION;
         final double propulsionSupportFactor = getSupportFittings().stream()
                 .filter(s -> eModuleType == s.getPassiveModule().getSupportType().getModifiedProperty())
                 .findAny().stream()
                 .map(SupportFitting::getAbsoluteValueAsFactor).reduce(0D, Double::sum);
         final BigDecimal factor = BigDecimal.ONE.add(new BigDecimal(propulsionSupportFactor));
-        final BigDecimal accelerationValue = getMathematicallyAcceleration(hyperBand).multiply(factor, ResourceDeposit.MATH_CONTEXT_INTEGER);
+        final BigDecimal accelerationValue = getMathematicallyAcceleration(hyperBand)
+                .multiply(factor, ResourceDeposit.MATH_CONTEXT_INTEGER)
+                .multiply(BigDecimal.valueOf(maxAccelerationOfMilitary), DistanceCalculator.MC_HU);
         return new Acceleration(accelerationValue, EAccelerationMetric.G, hyperBand);
+    }
+
+    @Nonnull
+    public Velocity getVelocity(@Nonnull final EHyperBand hyperBand) {
+        Preconditions.checkNotNull(hyperBand, "hyperBand must not be empty");
+
+        if (propulsion == null) {
+            return Velocity.ZERO;
+        }
+
+        return new Velocity(hyperBand.getEffectiveTopSpeed(propulsion.getTechnologyType()), EDistanceMetric.M, ETimeMetric.SECOND);
     }
 
     @Nonnull
@@ -581,16 +603,6 @@ public class ShipClass extends Deletable {
         );
 
         final BigDecimal x = BigDecimal.valueOf(getHull().getTonnage());
-        /* fixme
-            currently no influence from the tonnage:, solve by
-                - research hyper band -> is enum
-                - research efficiency improvement -> is running research level
-                - researchable base-propulsion module by tech level -> changes effect value -> acceleration
-                - prop-module costs x% of the hull, including construction capacity
-                - user chooses hyperband -> cost change (e.g. NONE to ALPHA +80% CC)
-                - user chooses CIVIL vs MILITARY
-                - prop will be property of ship class as "prop tech level, prop hyper band, prop technology type -> is present by default
-        */
         BigDecimal result = a;
         for (int i = 0; i < paramList.size(); i++) {
             final BigDecimal coefficient = paramList.get(i);

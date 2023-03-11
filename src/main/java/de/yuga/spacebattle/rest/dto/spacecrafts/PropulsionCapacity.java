@@ -3,6 +3,7 @@ package de.yuga.spacebattle.rest.dto.spacecrafts;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
+import de.yuga.spacebattle.backend.dto.physics.Time;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
@@ -30,7 +31,7 @@ public class PropulsionCapacity {
 
     @JsonProperty
     @Schema(required = true, description = "The time to reach the maximum velocity.")
-    private final int timeToVMax;
+    private final Time timeToVMax;
 
     @Nonnull
     @JsonProperty
@@ -43,10 +44,10 @@ public class PropulsionCapacity {
 
         final BigDecimal velo = velocity.getCoordinateInMetric(EDistanceMetric.M, ETimeMetric.SECOND);
         final BigDecimal acc = acceleration.getCoordinateInMetric(EAccelerationMetric.MS2);
-        if (velocity != Velocity.ZERO) {
-            this.timeToVMax = velo.divide(acc, MC_HU).setScale(0, RoundingMode.HALF_EVEN).intValue();
+        if (!velocity.equals(Velocity.ZERO) && !acceleration.equals(Acceleration.ZERO)) {
+            this.timeToVMax = new Time(velo.divide(acc, MC_HU).setScale(0, RoundingMode.HALF_EVEN).intValue(), ETimeMetric.SECOND);
         } else {
-            this.timeToVMax = 0;
+            this.timeToVMax = Time.ZERO;
         }
     }
 }

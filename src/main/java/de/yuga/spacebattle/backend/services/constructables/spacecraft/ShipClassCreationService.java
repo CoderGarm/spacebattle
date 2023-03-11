@@ -16,9 +16,7 @@ import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
-import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
-import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.spacecraft.HullService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
@@ -40,7 +38,6 @@ import javax.annotation.Nonnull;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -365,10 +362,7 @@ public class ShipClassCreationService {
         final ArrayList<PropulsionCapacity> result = new ArrayList<>();
         for (final EHyperBand hyperBand : EHyperBand.values()) {
             final Acceleration acceleration = shipClass.getAcceleration(hyperBand);
-            Velocity velocity = Velocity.ZERO;
-            if (acceleration.getValue().compareTo(BigDecimal.ZERO) != 0) {
-                velocity = new Velocity(hyperBand.getEffectiveTopSpeed(propulsion.getTechnologyType()), EDistanceMetric.M, ETimeMetric.SECOND);
-            }
+            final Velocity velocity = shipClass.getVelocity(hyperBand);
             result.add(new PropulsionCapacity(acceleration, velocity));
         }
         return result;

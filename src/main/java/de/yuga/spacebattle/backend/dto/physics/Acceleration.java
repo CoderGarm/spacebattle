@@ -161,8 +161,8 @@ public class Acceleration implements Cloneable, Comparable<Acceleration> {
         if (!(o instanceof Acceleration)) return false;
 
         final Acceleration distance = (Acceleration) o;
-
-        return new EqualsBuilder().append(value, distance.value).append(accelerationMetric, distance.accelerationMetric).isEquals();
+        final int compareTo = compareTo(distance);
+        return new EqualsBuilder().append(compareTo, 0).isEquals();
     }
 
     @Override
