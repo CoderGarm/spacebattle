@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 
+@Schema(description = ".")
 public class Time implements Cloneable, Comparable<Time> {
 
     public static final Time ZERO = new Time(0, ETimeMetric.SECOND);

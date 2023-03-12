@@ -335,7 +335,7 @@ public class SpacecraftCalculator {
         Preconditions.checkNotNull(supportFittings, "supportFittings shouldn't be null!");
         Preconditions.checkNotNull(moduleType, "moduleType shouldn't be null!");
 
-        final Missile missile = new ArrayList<>(launcher.getAllowedMissiles()).get(0); // todo fix missile selection
+        final Missile missile = launcher.getHeaviestMissile();
         final double bonus = supportFittings.stream().map(SupportFitting::getEffectValue).reduce(0D, Double::sum);
         final double absoluteValueAsFactor = bonus != 0 ? 1 + (bonus / 100) : 1;
         final double effectValue = missile.getWarhead().getDamageValue() * absoluteValueAsFactor;

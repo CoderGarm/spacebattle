@@ -36,7 +36,7 @@ public enum EHullType implements HasIconName {
     FR("FR", false, true, "satellite", "freighter"),
     ;
 
-    private static Set<EHullType> CIVIL = Set.of(FR);
+    private static final Set<EHullType> CIVIL = Set.of(FR);
 
     @Nonnull
     private final String type;
@@ -82,6 +82,11 @@ public enum EHullType implements HasIconName {
 
     public boolean isCivilShip() {
         return CIVIL.contains(this);
+    }
+
+    public boolean suitsHullType(@Nonnull final EHullType comparator) {
+        // todo make it better
+        return ordinal() >= comparator.ordinal();
     }
 
     @Nonnull

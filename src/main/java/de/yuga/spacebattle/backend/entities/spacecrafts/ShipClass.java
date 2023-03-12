@@ -220,7 +220,7 @@ public class ShipClass extends Deletable {
         ammunitionFittings.forEach(s -> {
             int amount = s.getAmount();
             for (; amount >= 0; amount--) {
-                updateCosts(clonedDeposit, supportTypeToModule, s.getMissile().getCostsOverall());
+                updateCosts(clonedDeposit, supportTypeToModule, s.getMissile().getCosts());
             }
         });
         supportFittings.forEach(s -> {
@@ -447,7 +447,7 @@ public class ShipClass extends Deletable {
                     }
                     final Launcher launcher = fitting.getLauncher();
                     if (launcher != null) {
-                        final Missile missile = new ArrayList<>(launcher.getAllowedMissiles()).get(0); // todo fix missile selection
+                        final Missile missile = new ArrayList<>(launcher.getAllowedMissiles()).get(0); // fixme fix missile selection
                         damageProjectionRange = missile.getMaximumMissileRange();
                     }
                     return damageProjectionRange;
@@ -475,7 +475,7 @@ public class ShipClass extends Deletable {
                     }
                     final Launcher launcher = fitting.getLauncher();
                     if (launcher != null) {
-                        final Missile missile = new ArrayList<>(launcher.getAllowedMissiles()).get(0); // todo fix missile selection
+                        final Missile missile = new ArrayList<>(launcher.getAllowedMissiles()).get(0); // fixme fix missile selection
                         damageProjectionRange = missile.getMaximumMissileRange();
                     }
                     return damageProjectionRange;

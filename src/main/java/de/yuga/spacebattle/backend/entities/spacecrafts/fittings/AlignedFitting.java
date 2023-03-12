@@ -141,7 +141,7 @@ public class AlignedFitting {
 
         }
         if (launcher != null) {
-            final Missile missile = new ArrayList<>(launcher.getAllowedMissiles()).get(0); // todo fix missile selection
+            final Missile missile = new ArrayList<>(launcher.getAllowedMissiles()).get(0); // fixme fix missile selection
             damageProjectionRange = missile.getMaximumMissileRange();
             isInRange = boundaries.isInRange(damageProjectionRange);
 
@@ -167,7 +167,7 @@ public class AlignedFitting {
 
         }
         if (launcher != null) {
-            final Missile missile = new ArrayList<>(launcher.getAllowedMissiles()).get(0); // todo fix missile selection
+            final Missile missile = new ArrayList<>(launcher.getAllowedMissiles()).get(0); // fixme fix missile selection
             damageProjectionRange = missile.getMaximumMissileRange();
 
             damageValue = missile.getWarhead().getDamageValue() * amount;
@@ -209,7 +209,7 @@ public class AlignedFitting {
             range = weapon.getDamageProjectionRange();
         }
         if (launcher != null) {
-            range = new ArrayList<>(launcher.getAllowedMissiles()).get(0).getMaximumMissileRange(); // todo fix missile selection
+            range = new ArrayList<>(launcher.getAllowedMissiles()).get(0).getMaximumMissileRange(); // fixme fix missile selection
         }
         return range;
     }

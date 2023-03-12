@@ -6,14 +6,11 @@ import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Time;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
-import de.yuga.spacebattle.backend.entities.i18n.Translation;
-import de.yuga.spacebattle.backend.entities.misc.HasCosts;
-import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.enums.*;
+import de.yuga.spacebattle.backend.entities.misc.HasHullTypeByOwnCosts;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
+import de.yuga.spacebattle.backend.enums.EHullType;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
-import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -21,45 +18,26 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
+@NamedQueries({
+        @NamedQuery(name = "Missile.getAll", query = "SELECT a FROM Missile a"),
+        @NamedQuery(name = "Missile.getAllByResearches", query = "SELECT a FROM Missile a LEFT JOIN ResearchLevel rl ON (rl.research = a.namedTechLevel.unlockedThrough AND rl.user.id = :idUser) WHERE rl IS NOT NULL AND rl.level >= a.unlockedThroughLevel")
+})
 @Entity
 @Table(name = "missile")
 @AttributeOverride(name = "id", column = @Column(name = "idMissile"))
-public class Missile extends HasCosts {
-
-    @Column(nullable = false)
-    private int warheadCapacity; // todo validate warhead capacity
-
-    @Column(nullable = false)
-    private int motorCapacity; // todo validate motor capacity
-
-    /**
-     * The resistance against electronic counter measures.
-     */
-    @Column(nullable = false)
-    private int elokaResistance;
-
-    @Nonnull
-    @ManyToOne
-    @JoinColumn(name = "idWarhead")
-    private Warhead warhead;
-
-    @Nonnull
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "idMissileMotor")
-    private MissileMotor missileMotor;
-
-    /**
-     * The amounts of {@link #missileMotor} which are installed on the missile.
-     */
-    private int motorAmount;
+@AttributeOverride(name = "effectValue", column = @Column(name = "elokaResistance"))
+public class Missile extends HasHullTypeByOwnCosts {
 
     @Nonnull
     @NotNull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "idResearch")
-    private Research unlockedThrough;
+    @Embedded
+    private Warhead warhead;
+
+    @Nonnull
+    @NotNull
+    @Embedded
+    private MissileMotor missileMotor;
 
     /**
      * Quick performance
@@ -68,57 +46,38 @@ public class Missile extends HasCosts {
     @Transient
     private Distance maxRange = null;
 
-    /**
-     * Which is the targeted ship's hull class.
-     */
-    @Nonnull
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private EHullType hullType;
-
     public Missile() {
     }
 
-    public Missile(@Nonnull final String name,
-                   @Nonnull final String description,
-                   final int warheadCapacity,
-                   final int motorCapacity,
+    /**
+     * @param useCapacity the capacity must be given in full tons and later calculated in "naval capacity units" of kilo-tons
+     */
+    public Missile(@Nonnull final NamedTechLevel baseModule,
+                   @Nonnull final String technicalTypeName,
+                   final int unlockedThroughLevel,
                    final int elokaResistance,
+                   final int useCapacity,
                    @Nonnull final EHullType hullType,
-                   @Nonnull final ETechLevel techLevel,
                    @Nonnull final Warhead warhead,
-                   @Nonnull final List<MissileMotor> missileMotors,
-                   @Nonnull final Research unlockedThrough) {
-        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, motorCapacity + warheadCapacity, Missile.class);
+                   @Nonnull final MissileMotor missileMotor) {
+        super(baseModule, technicalTypeName, unlockedThroughLevel, useCapacity, elokaResistance, hullType);
         Preconditions.checkNotNull(warhead, "warhead shouldn't be null!");
-        Preconditions.checkNotNull(missileMotors, "missileMotors shouldn't be null!");
-        Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
-        Preconditions.checkNotNull(hullType, "hullType must not be empty");
+        Preconditions.checkNotNull(missileMotor, "missileMotor shouldn't be null!");
 
-        this.warheadCapacity = warheadCapacity;
-        this.motorCapacity = motorCapacity;
-        this.elokaResistance = elokaResistance;
         this.warhead = warhead;
-        this.missileMotor = missileMotors.get(0);
-        this.motorAmount = missileMotors.size(); // todo repair the methods away from list - to lazy currently
-        this.unlockedThrough = unlockedThrough;
-        this.hullType = hullType;
+        this.missileMotor = missileMotor;
     }
 
     public double getUsedCapacity() {
-        return ((double) getMotorCapacity() + getWarheadCapacity()) / 1000;
-    }
-
-    public int getWarheadCapacity() {
-        return warheadCapacity;
-    }
-
-    public int getMotorCapacity() {
-        return motorCapacity;
+        return ((double) super.getUseCapacity()) / 1000;
     }
 
     public int getElokaResistance() {
-        return elokaResistance;
+        return getEffectValue();
+    }
+
+    public long getDamageValue() {
+        return warhead.getDamageValue();
     }
 
     @Nonnull
@@ -129,93 +88,6 @@ public class Missile extends HasCosts {
     @Nonnull
     public MissileMotor getMissileMotor() {
         return missileMotor;
-    }
-
-    public int getMotorAmount() {
-        return motorAmount;
-    }
-
-
-    @Nonnull
-    public EHullType getHullType() {
-        return hullType;
-    }
-
-    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
-    public void setHullType(@Nonnull final EHullType hullType) {
-        this.hullType = hullType;
-    }
-
-    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
-    public void setWarheadCapacity(final int warheadCapacity) {
-        this.warheadCapacity = warheadCapacity;
-    }
-
-    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
-    public void setMotorCapacity(final int motorCapacity) {
-        this.motorCapacity = motorCapacity;
-    }
-
-    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
-    public void setElokaResistance(final int elokaResistance) {
-        this.elokaResistance = elokaResistance;
-    }
-
-    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
-    public void setWarhead(@Nonnull final Warhead warhead) {
-        this.warhead = warhead;
-    }
-
-    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
-    public void setMissileMotor(@Nonnull final MissileMotor missileMotor) {
-        this.missileMotor = missileMotor;
-    }
-
-    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
-    public void setMotorAmount(final int motorAmount) {
-        this.motorAmount = motorAmount;
-    }
-
-    /**
-     * Will calculate and return the full costs of this missile.
-     *
-     * @return the total costs
-     */
-    @Nonnull
-    public ResourceDeposit getCostsOverall() {
-        final ResourceDeposit clonedDeposit = new ResourceDeposit(EDepositType.COSTS);
-
-        updateCosts(clonedDeposit, getCosts());
-        updateCosts(clonedDeposit, warhead.getCosts());
-        for (int i = 1; i <= motorAmount; i++) {
-            updateCosts(clonedDeposit, missileMotor.getCosts());
-        }
-        return clonedDeposit;
-    }
-
-    /**
-     * Calculates and sets the costs by a possible existent support module.
-     *
-     * @param resultingDeposit the deposit to update
-     * @param costsToAdd       the resource map
-     */
-    private void updateCosts(@Nonnull final ResourceDeposit resultingDeposit,
-                             @Nonnull final ResourceDeposit costsToAdd) {
-        Preconditions.checkNotNull(resultingDeposit, "resultingDeposit shouldn't be null!");
-        Preconditions.checkNotNull(costsToAdd, "costsToAdd shouldn't be null!");
-
-        for (final EResourceType resourceType : EResourceType.values()) {
-            if (resourceType == EResourceType.POPULATION) {
-                resultingDeposit.updateCrew(costsToAdd.getCrewRequirement(), ECalculationType.ADD);
-            } else {
-                resultingDeposit.updateResource(resourceType, costsToAdd.getResourceAmountByType(resourceType));
-            }
-        }
-    }
-
-    @Nonnull
-    public Research getUnlockedThrough() {
-        return unlockedThrough;
     }
 
     @Override
@@ -245,7 +117,7 @@ public class Missile extends HasCosts {
             return maxRange;
         }
 
-        final int endurance = missileMotor.getEndurance() * motorAmount;
+        final int endurance = missileMotor.getEndurance();
         final Acceleration acceleration = missileMotor.getAcceleration();
         maxRange = acceleration.getDistanceByTime(new Time(endurance, ETimeMetric.SECOND), Velocity.ZERO, EDistanceMetric.LS);
         return maxRange;

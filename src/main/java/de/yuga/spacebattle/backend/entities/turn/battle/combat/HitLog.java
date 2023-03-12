@@ -55,11 +55,13 @@ public class HitLog extends CombatRoundKey {
     /**
      * If the ship is alive after damage.
      */
+    @Column(columnDefinition = "boolean not null default true")
     private boolean isAlive;
 
     /**
      * If the ship is capable of staying in the battle after damage.
      */
+    @Column(columnDefinition = "boolean not null default true")
     private boolean isFightingCapable;
 
     public HitLog() {

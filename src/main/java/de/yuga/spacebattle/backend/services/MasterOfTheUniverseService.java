@@ -475,126 +475,6 @@ public class MasterOfTheUniverseService {
         moduleService.createSidewall(namedTechLevel, 10, 700000, 11, EHullType.SD);
     }
 
-    private void createMissiles() {
-        Research unlocksMissile = research("Missile", "The Missile research researches ...", 1, ETechLevel.TECH_I, null);
-        Research unlocksCounterMissile = research("Counter Missile", "The Counter Missile research researches ...", 1, ETechLevel.TECH_I, null);
-        Research unlocksRocketAmmunition = research("Rocket Ammunition", "a bunch of rockets.", 1, ETechLevel.TECH_I, null);
-        Research unlocksCounterRocketAmmunition = research("Counter Rocket Ammunition", "another bunch of rockets.", 1, ETechLevel.TECH_I, null);
-        // CL launcher
-        MissileMotor shipKillerMotor = moduleService.createMissileMotor("Ship Killer Motor Mk I", "Ship Killer Motor Mk I", 180, EHullType.CL, ETechLevel.TECH_I, new Acceleration(46000, EAccelerationMetric.G), 20, 100);
-        Warhead nuclearShipKillerWarHead = moduleService.createWarhead("Nuclear ship killer war head", "Nuclear ship killer war head", 1000, EHullType.CL, ETechLevel.TECH_I, new Distance(0.00017, EDistanceMetric.LS), EWarheadType.EXPLOSION, 100);
-        Missile shipKillerMissile = moduleService.createMissile("Nuclear ship killer missile Mk I", "Nuclear ship killer missile Mk I", 100, 100, 100, EHullType.CL, ETechLevel.TECH_I, nuclearShipKillerWarHead, List.of(shipKillerMotor), unlocksMissile);
-        moduleService.createLauncher("Ship killer launcher Mk I", "The launcher for ship killers", unlocksMissile, 4, EHullType.CL, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(shipKillerMissile));
-        moduleService.createLauncher("Ship killer launcher Mk I", "The launcher for ship killers", unlocksMissile, 8, EHullType.CL, ETechLevel.TECH_I, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(shipKillerMissile));
-
-        // LAC launcher
-        EHullType hullType = EHullType.LAC;
-        unlocksRocketAmmunition = research("Light attack craft missile ammunition Mk I", "LAC missiles module Mk I.", 1, ETechLevel.TECH_I, unlocksRocketAmmunition);
-        unlocksRocketAmmunition.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketenmunition Mk I");
-        unlocksRocketAmmunition.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketenmunition Mk I.");
-        researchService.save(unlocksRocketAmmunition);
-
-        MissileMotor motor = moduleService.createMissileMotor("LAC ship killer Motor Mk I", "LAC ship Killer Motor Mk I", 100, hullType, ETechLevel.TECH_I, new Acceleration(46000, EAccelerationMetric.G), 40, 100);
-        motor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketenmotor Mk I");
-        motor.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der LAC Raketenmotor Mk I.");
-        moduleService.save(motor);
-
-        Warhead warhead = moduleService.createWarhead("Nuclear LAC ship killer war head", "Nuclear LAC ship killer warhead", 800, hullType, ETechLevel.TECH_I, new Distance(0.00017, EDistanceMetric.LS), EWarheadType.EXPLOSION, 100);
-        warhead.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketen Sprengkopf Mk I");
-        warhead.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketen Sprengkopf Mk I.");
-        moduleService.save(warhead);
-
-        unlocksMissile = research("Light attack craft missile", "A LAC missiles.", 1, ETechLevel.TECH_I, unlocksMissile);
-        unlocksMissile.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketenwerfer mit Revolvermagazin Mk I");
-        unlocksMissile.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der LAC Raketenwerfer mit fünfschüssigem Revolvermagazin.");
-        researchService.save(unlocksMissile);
-
-        Missile missile = moduleService.createMissile("Nuclear LAC ship killer missile Mk I", "Nuclear LAC ship killer missile Mk I", 100, 100, 100, hullType, ETechLevel.TECH_I, warhead, List.of(motor), unlocksMissile);
-        missile.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketen mit Nuklearsprengkopf Mk I");
-        missile.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Rakete mit Nuklearsprengkopf Mk I.");
-        moduleService.save(missile);
-
-        Launcher launcher = moduleService.createLauncher("LAC ship killer launcher with revolver magazine Mk I", "The launcher with 5-shoot revolver magazine for LAC ship killers", unlocksMissile, 1, hullType, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXXS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(missile));
-        launcher.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "LAC Raketenwerfer mit Revolvermagazin Mk I");
-        launcher.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der LAC Raketenwerfer mit fünfschüssigem Revolvermagazin.");
-        moduleService.save(launcher);
-
-        // BC launcher
-        hullType = EHullType.BC;
-        unlocksRocketAmmunition = research("Cruiser missile ammunition Mk I", "Cruiser missiles module Mk I.", 1, ETechLevel.TECH_I, unlocksRocketAmmunition);
-        unlocksRocketAmmunition.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenmunition Mk I");
-        unlocksRocketAmmunition.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenmunition Mk I.");
-        researchService.save(unlocksRocketAmmunition);
-
-        motor = moduleService.createMissileMotor("Cruiser ship killer Motor Mk I", "Cruiser ship Killer Motor Mk I", 180, hullType, ETechLevel.TECH_I, new Acceleration(46000, EAccelerationMetric.G), 20, 100);
-        motor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenmotor Mk I");
-        motor.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenmotor Mk I.");
-        moduleService.save(motor);
-
-        warhead = moduleService.createWarhead("Nuclear Cruiser ship killer war head", "Nuclear Cruiser ship killer warhead", 1200, hullType, ETechLevel.TECH_I, new Distance(0.00017, EDistanceMetric.LS), EWarheadType.EXPLOSION, 100);
-        warhead.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Cruiser Raketen Sprengkopf Mk I");
-        warhead.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketen Sprengkopf Mk I.");
-        moduleService.save(warhead);
-
-        unlocksMissile = research("Cruiser missile", "A Cruiser missiles.", 1, ETechLevel.TECH_I, unlocksMissile);
-        unlocksMissile.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenwerfer Mk I");
-        unlocksMissile.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Kreuzer Raketenwerfer.");
-        researchService.save(unlocksMissile);
-
-        missile = moduleService.createMissile("Nuclear Cruiser ship killer missile Mk I", "Nuclear Cruiser ship killer missile Mk I", 100, 100, 100, hullType, ETechLevel.TECH_I, warhead, List.of(motor), unlocksMissile);
-        missile.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketen mit Nuklearsprengkopf Mk I");
-        missile.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Rakete mit Nuklearsprengkopf Mk I.");
-        moduleService.save(missile);
-
-        launcher = moduleService.createLauncher("Cruiser ship killer launcher Mk I", "The launcher for cruiser ship killers", unlocksMissile, 7, hullType, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(missile));
-        launcher.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenwerfer Mk I");
-        launcher.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Kreuzer Raketenwerfer.");
-        moduleService.save(launcher);
-
-        launcher = moduleService.createLauncher("Cruiser ship killer launcher Mk I", "The launcher for cruiser ship killers", unlocksMissile, 14, hullType, ETechLevel.TECH_I, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(missile));
-        launcher.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Kreuzer Raketenwerfer Mk I");
-        launcher.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Kreuzer Raketenwerfer.");
-        moduleService.save(launcher);
-
-        // DN launcher
-        hullType = EHullType.DN;
-        unlocksRocketAmmunition = research("Dreadnought missile ammunition Mk I", "Dreadnought missiles module Mk I.", 1, ETechLevel.TECH_I, unlocksRocketAmmunition);
-        unlocksRocketAmmunition.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketenmunition Mk I");
-        unlocksRocketAmmunition.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketenmunition Mk I.");
-        researchService.save(unlocksRocketAmmunition);
-
-        motor = moduleService.createMissileMotor("Dreadnought ship killer Motor Mk I", "Dreadnought ship Killer Motor Mk I", 180, hullType, ETechLevel.TECH_I, new Acceleration(46000, EAccelerationMetric.G), 20, 100);
-        motor.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketenmotor Mk I");
-        motor.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Dreadnought Raketenmotor Mk I.");
-        moduleService.save(motor);
-
-        warhead = moduleService.createWarhead("Nuclear Dreadnought ship killer war head", "Nuclear Dreadnought ship killer warhead", 1800, hullType, ETechLevel.TECH_I, new Distance(0.00017, EDistanceMetric.LS), EWarheadType.EXPLOSION, 100);
-        warhead.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketen Sprengkopf Mk I");
-        warhead.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketen Sprengkopf Mk I.");
-        moduleService.save(warhead);
-
-        unlocksMissile = research("Dreadnought missile", "A Dreadnought missiles.", 1, ETechLevel.TECH_I, unlocksMissile);
-        unlocksMissile.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketenwerfer Mk I");
-        unlocksMissile.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Dreadnought Raketenwerfer.");
-        researchService.save(unlocksMissile);
-
-        missile = moduleService.createMissile("Nuclear Dreadnought ship killer missile Mk I", "Nuclear Dreadnought ship killer missile Mk I", 100, 100, 100, hullType, ETechLevel.TECH_I, warhead, List.of(motor), unlocksMissile);
-        missile.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketen mit Nuklearsprengkopf Mk I");
-        missile.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Rakete mit Nuklearsprengkopf Mk I.");
-        moduleService.save(missile);
-
-        launcher = moduleService.createLauncher("Dreadnought ship killer launcher Mk I", "The launcher for Dreadnought ship killers", unlocksMissile, 20, hullType, ETechLevel.TECH_I, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(missile));
-        launcher.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Dreadnought Raketenwerfer Mk I");
-        launcher.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Der Dreadnought Raketenwerfer.");
-        moduleService.save(launcher);
-
-        MissileMotor counterMissileMotor = moduleService.createMissileMotor("Counter Motor Mk I", "Counter Motor Mk I", 30, EHullType.CL, ETechLevel.TECH_I, new Acceleration(96000, EAccelerationMetric.G), 80, 10);
-        Warhead counterWarHead = moduleService.createWarhead("Counter war head", "Counter war head", 1, EHullType.CL, ETechLevel.TECH_I, Distance.ZERO, EWarheadType.COUNTER_MISSILE, 10);
-        Missile counterMissile = moduleService.createMissile("Counter missile Mk I", "Counter missile Mk I", 10, 10, 10, EHullType.CL, ETechLevel.TECH_I, counterWarHead, List.of(counterMissileMotor), unlocksCounterMissile);
-        moduleService.createLauncher("Counter missile launcher Mk I", "The launcher for counter missiles", unlocksCounterMissile, 3, EHullType.CL, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
-        moduleService.createLauncher("Counter missile launcher Mk I", "The launcher for counter missiles", unlocksCounterMissile, 6, EHullType.CL, ETechLevel.TECH_I, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
-    }
-
     private void amendTranslation(@Nonnull final HasName hasName, @Nonnull final String name, @Nonnull final String description) {
         Preconditions.checkNotNull(hasName, "hasName must not be empty");
         Preconditions.checkNotNull(name, "name must not be empty");
@@ -605,6 +485,8 @@ public class MasterOfTheUniverseService {
     }
 
     private void createWeapons() {
+        // broadside weapons must be 'virtually' present twice and are slightly lighter than their chasing counterparts
+
         Research research = research("Point Defense",
                 "Close-range defense includes all of a ship's defense systems that represent the last active line of defense against incoming fire.",
                 4, ETechLevel.TECH_I, null);
@@ -644,17 +526,17 @@ public class MasterOfTheUniverseService {
         amendTranslation(namedTechLevel, "Laser", "Ein Laser ist eine künstliche, gerichtete Strahlungsquelle und eine von zwei gebräuchlichen Energiewaffen.");
         moduleService.save(namedTechLevel);
 
-        moduleService.createWeapon(namedTechLevel, 1, 1, 50, EHullType.LAC, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 1, 2, 75, EHullType.LAC, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 1, 1, 75, EHullType.LAC, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 1, 2, 50, EHullType.LAC, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
 
-        moduleService.createWeapon(namedTechLevel, 2, 3, 70, EHullType.DD, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXS_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 2, 4, 85, EHullType.DD, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XXS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 2, 3, 85, EHullType.DD, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 2, 5, 70, EHullType.DD, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
 
-        moduleService.createWeapon(namedTechLevel, 3, 5, 90, EHullType.CL, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 3, 7, 115, EHullType.CL, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 3, 5, 115, EHullType.CL, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 3, 8, 90, EHullType.CL, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS));
 
-        moduleService.createWeapon(namedTechLevel, 4, 8, 110, EHullType.CA, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 4, 10, 160, EHullType.CA, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 4, 9, 160, EHullType.CA, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 4, 16, 110, EHullType.CA, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(M_CREW, EDepositType.COSTS));
 
         research = research("Graser",
                 "Grasers were lasers operating in the gamma ray range. Considered vastly superior in both strength and size when compared to lasers, grasers were often only seen in small numbers in smaller ships, due to their larger mass.",
@@ -668,23 +550,80 @@ public class MasterOfTheUniverseService {
         amendTranslation(namedTechLevel, "Graser", "Graser sind wie die Laser lichtschnelle Waffen, die aber im Gegensatz zu diesen nicht im Bereich des Lichts, sondern im Bereich der Gamma-Strahlung operieren.");
         moduleService.save(namedTechLevel);
 
-        moduleService.createWeapon(namedTechLevel, 1, 9, 200, EHullType.CL, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 1, 12, 350, EHullType.CL, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 1, 9, 350, EHullType.CL, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 1, 14, 200, EHullType.CL, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS));
 
-        moduleService.createWeapon(namedTechLevel, 2, 13, 240, EHullType.CA, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 2, 16, 400, EHullType.CA, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 2, 11, 400, EHullType.CA, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 2, 18, 240, EHullType.CA, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(M_CREW, EDepositType.COSTS));
 
-        moduleService.createWeapon(namedTechLevel, 3, 20, 350, EHullType.BC, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 3, 36, 500, EHullType.BC, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 3, 21, 500, EHullType.BC, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(M_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 3, 36, 350, EHullType.BC, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(L_CREW, EDepositType.COSTS));
 
-        moduleService.createWeapon(namedTechLevel, 4, 28, 500, EHullType.BB, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 4, 44, 850, EHullType.BB, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 4, 37, 850, EHullType.BB, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(M_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 4, 64, 500, EHullType.BB, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(L_CREW, EDepositType.COSTS));
 
-        moduleService.createWeapon(namedTechLevel, 5, 37, 750, EHullType.DN, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 5, 54, 1100, EHullType.DN, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 5, 51, 1100, EHullType.DN, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(L_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 5, 98, 750, EHullType.DN, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XL_CREW, EDepositType.COSTS));
 
-        moduleService.createWeapon(namedTechLevel, 6, 43, 900, EHullType.SD, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 6, 62, 1450, EHullType.SD, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 6, 75, 1450, EHullType.SD, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(L_CREW, EDepositType.COSTS));
+        moduleService.createWeapon(namedTechLevel, 6, 122, 900, EHullType.SD, beamDistance, 1, EWeaponType.BEAM, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XL_CREW, EDepositType.COSTS));
+    }
+
+    private void createMissiles() {
+        // broadside weapons must be 'virtually' present twice
+
+        Research research = research("Missile systems",
+                "A missile was a self-propelled guided projectile used as a weapon. By the 20th Century PD, impeller drive-propelled missiles were the most common weapons of naval warfare.",
+                10, ETechLevel.TECH_I, null);
+        amendTranslation(research, "Raketensysteme", "Eine Rakete ist ein selbst angetriebener Flugkörper, der im Raumkampf hauptsächlich als Waffe eingesetzt wird.");
+        researchService.save(research);
+
+        final NamedTechLevel missileNTL = moduleService.createBaseModule("Missile",
+                "A missile was a self-propelled guided projectile used as a weapon. By the 20th Century PD, impeller drive-propelled missiles were the most common weapons of naval warfare.",
+                research, ETechLevel.TECH_I, Missile.class);
+        amendTranslation(missileNTL, "Raketen", "Eine Rakete ist ein selbst angetriebener Flugkörper, der im Raumkampf hauptsächlich als Waffe eingesetzt wird.");
+        moduleService.save(missileNTL);
+
+        final NamedTechLevel counterMissileNTL = moduleService.createBaseModule("Counter missile",
+                "A missile was a self-propelled guided projectile used as a weapon. By the 20th Century PD, impeller drive-propelled missiles were the most common weapons of naval warfare.",
+                research, ETechLevel.TECH_I, Missile.class);
+        amendTranslation(counterMissileNTL, "Anti-Raketen", "Eine Rakete ist ein selbst angetriebener Flugkörper, der im Raumkampf hauptsächlich als Waffe eingesetzt wird.");
+        moduleService.save(counterMissileNTL);
+
+        final Distance counterProjectionRange = new Distance(1, EDistanceMetric.KM);
+        final Acceleration counterAcceleration = new Acceleration(96000, EAccelerationMetric.G);
+        final MissileMotor counterMotor = new MissileMotor(30, 80, counterAcceleration);
+
+        final Distance damageProjectionRange = new Distance(40000, EDistanceMetric.KM);
+        final Acceleration shipKillerAcceleration = new Acceleration(46000, EAccelerationMetric.G);
+        final MissileMotor shipKillerMotor = new MissileMotor(180, 20, shipKillerAcceleration);
+
+        final Missile counterMissile = moduleService.createMissile(counterMissileNTL, 1, 5, 5, EHullType.LAC, new Warhead(counterProjectionRange, EWarheadType.COUNTER_MISSILE, 1), counterMotor);
+        final Missile lacMissile = moduleService.createMissile(missileNTL, 1, 5, 5, EHullType.LAC, new Warhead(damageProjectionRange, EWarheadType.EXPLOSION, 20), shipKillerMotor);
+        final Missile ddMissile = moduleService.createMissile(missileNTL, 2, 30, 20, EHullType.DD, new Warhead(damageProjectionRange, EWarheadType.EXPLOSION, 100), shipKillerMotor);
+        final Missile caMissile = moduleService.createMissile(missileNTL, 4, 70, 50, EHullType.CA, new Warhead(damageProjectionRange, EWarheadType.EXPLOSION, 400), shipKillerMotor);
+        final Missile dnMissile = moduleService.createMissile(missileNTL, 6, 100, 80, EHullType.DN, new Warhead(damageProjectionRange, EWarheadType.EXPLOSION, 800), shipKillerMotor);
+
+        final NamedTechLevel launcherNTL = moduleService.createBaseModule("Missile launcher",
+                "Originally, missile tubes merely housed the missile prior to launch. Missiles would receive pre-programmed instructions from their ship, and would then use reaction thrusters to move out beyond the ship's impeller wedge before activating their own. This severely limited the fire rate.",
+                research, ETechLevel.TECH_I, Missile.class);
+        amendTranslation(launcherNTL, "Raketenwerfer", "Raketenwerfer bestehen in der einfachsten Ausführung aus einem Startrohr, in dem die abschussbereite Rakete gelagert wird, und einer Zielvorrichtung. Bordraketenwerfer von Raumschiffen verfügen normalerweise über ein einzelnes Startrohr mit einem Nachladesystem, mit dem Raketen aus internen Magazinen nachgeladen werden können, bis die Munition erschöpft ist.");
+        moduleService.save(launcherNTL);
+
+        moduleService.createLauncher(launcherNTL, 1, 1, EHullType.LAC, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXXS_CREW, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
+        moduleService.createLauncher(launcherNTL, 1, 2, EHullType.LAC, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XXS_CREW, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
+
+        moduleService.createLauncher(launcherNTL, 1, 2, EHullType.LAC, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXXS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(lacMissile));
+        moduleService.createLauncher(launcherNTL, 1, 4, EHullType.LAC, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XXS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(lacMissile));
+
+        moduleService.createLauncher(launcherNTL, 2, 7, EHullType.DD, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(XXS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(ddMissile));
+        moduleService.createLauncher(launcherNTL, 2, 13, EHullType.DD, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(XS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(ddMissile));
+
+        moduleService.createLauncher(launcherNTL, 4, 15, EHullType.CA, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(S_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(caMissile));
+        moduleService.createLauncher(launcherNTL, 4, 27, EHullType.CA, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(M_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(caMissile));
+
+        moduleService.createLauncher(launcherNTL, 6, 41, EHullType.DN, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(M_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(dnMissile));
+        moduleService.createLauncher(launcherNTL, 6, 76, EHullType.DN, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(M_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(dnMissile));
     }
 
     private void createPassiveModules() {
@@ -952,43 +891,43 @@ public class MasterOfTheUniverseService {
         final EHullType hullType = hull.getHullType();
 
         final Armor armor = moduleService.findAllArmors().stream()
-                .filter(a -> a.getHullType() == hullType)
-                .findFirst().orElse(null);
+                .filter(a -> hullType.suitsHullType(a.getHullType()))
+                .reduce((o1, o2) -> o2).orElse(null);
 
         final Sidewall sidewall = moduleService.findAllSidewalls().stream()
-                .filter(e -> e.getHullType() == hullType)
-                .findFirst().orElse(null);
+                .filter(e -> hullType.suitsHullType(e.getHullType()))
+                .reduce((o1, o2) -> o2).orElse(null);
 
         final ElectronicWarfare electronicWarfare = moduleService.findAllElectronicWarfare().stream()
-                .filter(e -> e.getHullType() == hullType)
-                .findFirst().orElse(null);
+                .filter(e -> hullType.suitsHullType(e.getHullType()))
+                .reduce((o1, o2) -> o2).orElse(null);
 
         final Propulsion propulsion = moduleService.findAllPropulsions().stream()
                 .filter(p -> p.getHyperBand() == EHyperBand.ALPHA && p.getTechnologyType() == ETechnologyType.MILITARY)
                 .findFirst().orElse(null);
 
         final List<Weapon> weapons = moduleService.findAllWeapons();
-        final List<Weapon> allBeams = weapons.stream().filter(w -> w.getWeaponType() == EWeaponType.BEAM && w.getHullType() == hullType).collect(Collectors.toList());
+        final List<Weapon> allBeams = weapons.stream().filter(w -> w.getWeaponType() == EWeaponType.BEAM && hullType.suitsHullType(w.getHullType())).collect(Collectors.toList());
         final Map<EAlignmentType, Weapon> bestBeams = allBeams.stream().collect(Collectors.groupingBy(Weapon::getAlignmentType,
                         Collectors.mapping(Function.identity(), Collectors.toList())))
-                .entrySet()
-                .stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().stream().reduce((o1, o2) -> o2).orElse(null)));
+                .entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().stream().sorted(Comparator.comparingInt(Weapon::getDamageValue)).reduce((o1, o2) -> o2).orElse(null)));
 
-        final List<Weapon> allPDs = weapons.stream().filter(w -> w.getWeaponType() == EWeaponType.POINT_DEFENSE).collect(Collectors.toList());
+        final List<Weapon> allPDs = weapons.stream().filter(w -> w.getWeaponType() == EWeaponType.POINT_DEFENSE && hullType.suitsHullType(w.getHullType())).collect(Collectors.toList());
         final Map<EAlignmentType, Weapon> bestPDs = allPDs.stream().collect(Collectors.groupingBy(Weapon::getAlignmentType,
                         Collectors.mapping(Function.identity(), Collectors.toList())))
-                .entrySet()
-                .stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().stream().reduce((o1, o2) -> o2).orElse(null)));
+                .entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().stream().reduce((o1, o2) -> o2).orElse(null)));
 
         final List<Launcher> allLaunchers = moduleService.findAllLaunchers();
-        final List<Launcher> shipKillers = getMatchingByHullType(allLaunchers.stream().filter(w -> w.getWeaponType() == EWeaponType.MISSILE).collect(Collectors.toList()), hullType);
+        final List<Launcher> shipKillers = allLaunchers.stream().filter(w -> w.getWeaponType() == EWeaponType.MISSILE && hullType.suitsHullType(w.getHullType())).collect(Collectors.toList());
         final Map<EAlignmentType, Launcher> bestShipKillers = shipKillers.stream().collect(Collectors.groupingBy(Launcher::getAlignmentType,
                         Collectors.mapping(Function.identity(), Collectors.toList())))
-                .entrySet()
-                .stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().stream().reduce((o1, o2) -> o2).orElse(null)));
+                .entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().stream().sorted(Comparator.comparingLong(l -> l.getHeaviestMissile().getDamageValue())).reduce((o1, o2) -> o2).orElse(null)));
 
 
-        final List<Launcher> counterMissiles = getMatchingByHullType(allLaunchers.stream().filter(w -> w.getWeaponType() == EWeaponType.COUNTER_MISSILE).collect(Collectors.toList()), hullType);
+        final List<Launcher> counterMissiles = allLaunchers.stream().filter(w -> w.getWeaponType() == EWeaponType.COUNTER_MISSILE && hullType.suitsHullType(w.getHullType())).collect(Collectors.toList());
         final Map<EAlignmentType, Launcher> bestCounters = counterMissiles.stream().collect(Collectors.groupingBy(Launcher::getAlignmentType,
                         Collectors.mapping(Function.identity(), Collectors.toList())))
                 .entrySet()
@@ -1013,7 +952,6 @@ public class MasterOfTheUniverseService {
             cc -= electronicWarfare.getUseCapacity(hull);
             shipClass.setElectronicWarfare(electronicWarfare);
         }
-
 
         final Set<AlignedFitting> fittings = new HashSet<>();
         for (final EWeaponAlignment alignment : EWeaponAlignment.values()) {
@@ -1104,12 +1042,17 @@ public class MasterOfTheUniverseService {
         final Integer amountCounter = counterMissilesToAmount.values().stream().reduce(0, Integer::sum);
 
         final int fullAmount = amountAttack + amountCounter;
-        final int piece = cc / fullAmount;
-        int freeCapForAttackAmmo = piece * amountAttack;
-        int freeCapForCounterAmmo = piece * amountCounter;
+        final double piece = (double) cc / (double) fullAmount;
+        double freeCapForAttackAmmo = piece * amountAttack;
+        double freeCapForCounterAmmo = piece * amountCounter;
 
         cc = addAmmunition(shipClass, cc, attackMissilesToAmount, freeCapForAttackAmmo);
         cc = addAmmunition(shipClass, cc, counterMissilesToAmount, freeCapForCounterAmmo);
+
+        final int shotsLoad = shipClass.getAmmunitionFittings().stream().map(AmmunitionFitting::getAmount).reduce(0, Integer::sum);
+        if (shotsLoad == 0) {
+            throw new NotifyWebUserException("You must fight, bitch! Take a stone!");
+        }
 
         final int neededCapacityForSupport = passiveModules.stream().map(PassiveModule::getUseCapacity).reduce(0, Integer::sum);
         final int amountOfSupportSets = (cc / neededCapacityForSupport) - 1;
@@ -1129,7 +1072,7 @@ public class MasterOfTheUniverseService {
     private int addAmmunition(@Nonnull final ShipClass shipClass,
                               final int capacity,
                               @Nonnull final Map<Launcher, Integer> launcherToLauncherAmount,
-                              int freeCapForAmmo) {
+                              double freeCapForAmmo) {
         Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
         Preconditions.checkNotNull(launcherToLauncherAmount, "launcherToLauncherAmount must not be empty");
 
@@ -1143,7 +1086,7 @@ public class MasterOfTheUniverseService {
             return capacityForSingleShot;
         }).reduce(0D, Double::sum);
 
-        final int shotsAvailablePerLauncher = (int) (((double) freeCapForAmmo) / capacityForSingleShotFromAllLaunchers);
+        final int shotsAvailablePerLauncher = (int) ((freeCapForAmmo) / capacityForSingleShotFromAllLaunchers);
 
         capClone -= (shotsAvailablePerLauncher * capacityForSingleShotFromAllLaunchers);
 

@@ -11,7 +11,7 @@ import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.i18n.TranslatableService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
-import de.yuga.spacebattle.backend.transformer.*;
+import de.yuga.spacebattle.backend.transformer.BuildingCsvTransformer;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -201,6 +201,7 @@ public class AdminApi extends BaseApi {
     public ResponseEntity<?> getModules() {
 
         final List<FileUpload> result = new ArrayList<>();
+        /* todo serious rebuild needed
         final String preferredLanguage = getPreferredLanguage();
 
         final BaseModuleCsvTransformer bm = new BaseModuleCsvTransformer(preferredLanguage);
@@ -208,18 +209,18 @@ public class AdminApi extends BaseApi {
         final MissileMotorCsvTransformer mm = new MissileMotorCsvTransformer(preferredLanguage);
         final BaseModuleWithEffectValueCsvTransformer ev = new BaseModuleWithEffectValueCsvTransformer(preferredLanguage);
 
-        /*todo serious rebuild needed*/
-        //result.add(new FileUpload("warHeads.csv", hc.convert(moduleService.findAllWarheads().stream().map(m -> ((HasCosts) m)).collect(Collectors.toList()))));
-        //result.add(new FileUpload("missiles.csv", hc.convert(moduleService.findAllMissiles().stream().map(m -> ((HasCosts) m)).collect(Collectors.toList()))));
-        //result.add(new FileUpload("propulsionModules.csv", ev.convert(castEffectValue(moduleService.findAllPropulsions()))));
-        //result.add(new FileUpload("sidewallModules,csv", ev.convert(castEffectValue(moduleService.findAllSidewalls()))));
-        //result.add(new FileUpload("weaponModules.csv", ev.convert(castEffectValue(moduleService.findAllWeapons()))));
-        //result.add(new FileUpload("launcherModules.csv", bm.convert(cast(moduleService.findAllLaunchers()))));
-        //result.add(new FileUpload("passiveModules.csv", ev.convert(castEffectValue(moduleService.findAllPassiveModules()))));
-        //result.add(new FileUpload("electronicWarfareModules.csv", ev.convert(castEffectValue(moduleService.findAllElectronicWarfare()))));
-        //result.add(new FileUpload("ammunitionModules.csv", ev.convert(castEffectValue(moduleService.findAllAmmunitionModules()))));
-        //result.add(new FileUpload("armorModules.csv", ev.convert(castEffectValue(moduleService.findAllArmors()))));
-        //result.add(new FileUpload("missileMotors.csv", mm.convert(moduleService.findAllMissileMotors())));
+        result.add(new FileUpload("warHeads.csv", hc.convert(moduleService.findAllWarheads().stream().map(m -> ((HasCosts) m)).collect(Collectors.toList()))));
+        result.add(new FileUpload("missiles.csv", hc.convert(moduleService.findAllMissiles().stream().map(m -> ((HasCosts) m)).collect(Collectors.toList()))));
+        result.add(new FileUpload("propulsionModules.csv", ev.convert(castEffectValue(moduleService.findAllPropulsions()))));
+        result.add(new FileUpload("sidewallModules,csv", ev.convert(castEffectValue(moduleService.findAllSidewalls()))));
+        result.add(new FileUpload("weaponModules.csv", ev.convert(castEffectValue(moduleService.findAllWeapons()))));
+        result.add(new FileUpload("launcherModules.csv", bm.convert(cast(moduleService.findAllLaunchers()))));
+        result.add(new FileUpload("passiveModules.csv", ev.convert(castEffectValue(moduleService.findAllPassiveModules()))));
+        result.add(new FileUpload("electronicWarfareModules.csv", ev.convert(castEffectValue(moduleService.findAllElectronicWarfare()))));
+        result.add(new FileUpload("ammunitionModules.csv", ev.convert(castEffectValue(moduleService.findAllAmmunitionModules()))));
+        result.add(new FileUpload("armorModules.csv", ev.convert(castEffectValue(moduleService.findAllArmors()))));
+        result.add(new FileUpload("missileMotors.csv", mm.convert(moduleService.findAllMissileMotors())));
+          */
         return ResponseEntity.ok(result);
     }
 

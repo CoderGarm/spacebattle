@@ -5,8 +5,6 @@ import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
-import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.MissileMotor;
-import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Warhead;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
@@ -19,8 +17,6 @@ public enum ETranslationTarget {
     HULL(Hull.class),
     RESEARCH(Research.class),
     MISSILE(Missile.class),
-    WARHEAD(Warhead.class),
-    MISSILE_MOTOR(MissileMotor.class),
     LAUNCHER(Launcher.class),
     ARMOR(Armor.class),
     ELECTRONIC_WARFARE(ElectronicWarfare.class),

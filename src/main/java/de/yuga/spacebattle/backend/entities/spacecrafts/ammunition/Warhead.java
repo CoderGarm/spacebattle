@@ -3,10 +3,6 @@ package de.yuga.spacebattle.backend.entities.spacecrafts.ammunition;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.converter.DistanceConverter;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
-import de.yuga.spacebattle.backend.entities.i18n.Translation;
-import de.yuga.spacebattle.backend.entities.misc.HasCosts;
-import de.yuga.spacebattle.backend.enums.EHullType;
-import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.EWarheadType;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -15,11 +11,10 @@ import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-@Entity
-@Table(name = "warhead")
-@AttributeOverride(name = "id", column = @Column(name = "idWarhead"))
-public class Warhead extends HasCosts {
+@Embeddable
+public class Warhead {
 
+    @NotNull
     @Column(nullable = false)
     private long damageValue;
 
@@ -37,38 +32,18 @@ public class Warhead extends HasCosts {
     @Enumerated(EnumType.STRING)
     private EWarheadType warheadType;
 
-    @Column(nullable = false)
-    private int useCapacity;
-
-    /**
-     * Which is the targeted ship's hull class.
-     */
-    @Nonnull
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private EHullType hullType;
-
     public Warhead() {
     }
 
-    public Warhead(@Nonnull final String name,
-                   @Nonnull final String description,
-                   final int damageValue,
-                   @Nonnull final EHullType hullType,
-                   @Nonnull final ETechLevel techLevel,
-                   @Nonnull final Distance damageProjectionRange,
+    public Warhead(@Nonnull final Distance damageProjectionRange,
                    @Nonnull final EWarheadType warheadType,
-                   final int useCapacity) {
-        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, damageValue, Warhead.class);
+                   final int damageValue) {
         Preconditions.checkNotNull(damageProjectionRange, "damageProjectionRange shouldn't be null!");
         Preconditions.checkNotNull(warheadType, "warheadType shouldn't be null!");
-        Preconditions.checkNotNull(hullType, "hullType must not be empty");
 
         this.damageValue = damageValue;
         this.damageProjectionRange = damageProjectionRange;
         this.warheadType = warheadType;
-        this.useCapacity = useCapacity;
-        this.hullType = hullType;
     }
 
     public long getDamageValue() {
@@ -84,23 +59,19 @@ public class Warhead extends HasCosts {
         return warheadType;
     }
 
-    public int getUseCapacity() {
-        return useCapacity;
-    }
-
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
 
-        if (!(o instanceof Warhead)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
 
         final Warhead warhead = (Warhead) o;
 
-        return new EqualsBuilder().append(id, warhead.getId()).isEquals();
+        return new EqualsBuilder().append(damageValue, warhead.damageValue).append(damageProjectionRange, warhead.damageProjectionRange).append(warheadType, warhead.warheadType).isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(id).toHashCode();
+        return new HashCodeBuilder(17, 37).append(damageValue).append(damageProjectionRange).append(warheadType).toHashCode();
     }
 }

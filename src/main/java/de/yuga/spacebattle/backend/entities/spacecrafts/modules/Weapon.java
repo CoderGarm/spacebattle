@@ -101,6 +101,10 @@ public class Weapon extends HasHullTypeByOwnCosts {
         return amountDamageEmitter;
     }
 
+    public int getDamageValue() {
+        return getEffectValue();
+    }
+
     @Nonnull
     public EWeaponType getWeaponType() {
         return weaponType;

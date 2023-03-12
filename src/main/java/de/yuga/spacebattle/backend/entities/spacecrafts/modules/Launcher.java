@@ -2,27 +2,31 @@ package de.yuga.spacebattle.backend.entities.spacecrafts.modules;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
-import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.misc.HasHullTypeByOwnCosts;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
-import de.yuga.spacebattle.backend.enums.*;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
+import de.yuga.spacebattle.backend.enums.EAlignmentType;
+import de.yuga.spacebattle.backend.enums.EHullType;
+import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
+import de.yuga.spacebattle.backend.enums.EWeaponType;
 import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
 @NamedQueries({
         @NamedQuery(name = "Launcher.getAll", query = "SELECT a FROM Launcher a"),
-        @NamedQuery(name = "Launcher.getAllByResearches", query = "SELECT a FROM Launcher a WHERE a.unlockedThrough IN (:researches) OR a.unlockedThrough IS NULL")
+        @NamedQuery(name = "Launcher.getAllByResearches", query = "SELECT a FROM Launcher a LEFT JOIN ResearchLevel rl ON (rl.research = a.namedTechLevel.unlockedThrough AND rl.user.id = :idUser) WHERE rl IS NOT NULL AND rl.level >= a.unlockedThroughLevel")
 })
 @Entity
 @Table(name = "launcher")
 @Check(constraints = "weaponType = 'MISSILE' OR weaponType = 'COUNTER_MISSILE'")
 @AttributeOverride(name = "id", column = @Column(name = "idLauncher"))
-public class Launcher extends BaseModule {
+public class Launcher extends HasHullTypeByOwnCosts {
 
     @Nonnull
     @NotNull
@@ -48,17 +52,16 @@ public class Launcher extends BaseModule {
     public Launcher() {
     }
 
-    public Launcher(@Nonnull final String name,
-                    @Nonnull final String description,
-                    @Nonnull final Research unlockedThrough,
+    public Launcher(@Nonnull final NamedTechLevel baseModule,
+                    @Nonnull final String technicalTypeName,
+                    final int unlockedThroughLevel,
                     final int useCapacity,
                     @Nonnull final EHullType hullType,
-                    @Nonnull final ETechLevel techLevel,
                     @Nonnull final EAlignmentType alignmentType,
                     @Nonnull final CrewRequirement crewRequirement,
                     @Nonnull final EWeaponType weaponType,
                     @Nonnull final Set<Missile> allowedMissiles) {
-        super(name, description, unlockedThrough, useCapacity, hullType, techLevel, crewRequirement, Launcher.class);
+        super(baseModule, technicalTypeName, unlockedThroughLevel, 1, useCapacity, hullType, crewRequirement);
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
         Preconditions.checkNotNull(alignmentType, "alignmentType shouldn't be null!");
 
@@ -80,6 +83,11 @@ public class Launcher extends BaseModule {
     @Nonnull
     public Set<Missile> getAllowedMissiles() {
         return allowedMissiles;
+    }
+
+    @Nonnull
+    public Missile getHeaviestMissile() {
+        return allowedMissiles.stream().sorted(Comparator.comparingLong(Missile::getDamageValue)).reduce((o1, o2) -> o2).orElseThrow(NullPointerException::new);
     }
 
     @Nonnull

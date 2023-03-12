@@ -115,8 +115,7 @@ public class ModuleApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getLaunchersByUser() {
-        final User owner = userService.findWithResearches(getIdUser());
-        return ResponseEntity.ok(moduleService.findAllLauncherByUser(owner).stream().map(l -> new Launcher(l, getPreferredLanguage())).collect(Collectors.toList()));
+        return ResponseEntity.ok(moduleService.findAllLauncherByUser(getIdUser()).stream().map(l -> new Launcher(l, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = SIDEWALL_ENDPOINT)

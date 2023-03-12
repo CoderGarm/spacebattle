@@ -6,8 +6,6 @@ import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.misc.HasCosts;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
-import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.ETranslationTarget;
@@ -45,14 +43,6 @@ public class Research extends HasCosts {
     private final Set<Hull> unlocksHulls = new HashSet<>();
 
     @Nonnull
-    @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
-    private final Set<Launcher> unlocksLauncher = new HashSet<>();
-
-    @Nonnull
-    @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
-    private final Set<Missile> unlocksMissiles = new HashSet<>();
-
-    @Nonnull
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
     private final Set<NamedTechLevel> unlocksNamedTechLevel = new HashSet<>();
@@ -88,26 +78,10 @@ public class Research extends HasCosts {
     }
 
     @Nonnull
-    public Set<Launcher> getUnlocksLauncher() {
-        return unlocksLauncher;
-    }
-
-    @Nonnull
-    public Set<Missile> getUnlocksMissiles() {
-        return unlocksMissiles;
-    }
-
-    @Nonnull
     public ETranslationTarget getUnlocks() {
         ETranslationTarget eTranslationTarget = unlocksNamedTechLevel.stream().map(NamedTechLevel::getTranslationTarget).findFirst().orElse(null);
         if (eTranslationTarget != null) {
             return eTranslationTarget;
-        }
-        if (!getUnlocksLauncher().isEmpty()) {
-            return ETranslationTarget.LAUNCHER;
-        }
-        if (!getUnlocksMissiles().isEmpty()) {
-            return ETranslationTarget.MISSILE;
         }
         return ETranslationTarget.RESEARCH;
     }

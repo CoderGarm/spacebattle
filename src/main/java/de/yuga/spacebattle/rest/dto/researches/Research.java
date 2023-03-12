@@ -90,10 +90,8 @@ public class Research {
             case PASSIVE_MODULE:
                 break;
             case WEAPON:
-            case WARHEAD:
             case MISSILE:
             case LAUNCHER:
-            case MISSILE_MOTOR:
                 this.hasIcon = new HasIcon(EModuleType.WEAPON);
                 break;
             case ARMOR:

@@ -113,9 +113,9 @@ public class TestDataProviderUtils {
 
     @Nonnull
     public static Missile missile(final int damageValue) {
-        MissileMotor shipKillerMotor = createMissileMotor("Ship Killer Motor Mk I", 180, ETechLevel.TECH_I, acc(46000, EAccelerationMetric.G), 20, 100);
-        Warhead nuclearShipKillerWarHead = createWarhead("Nuclear ship killer war head", damageValue, ETechLevel.TECH_I, dis(50000, EDistanceMetric.M), EWarheadType.EXPLOSION, 100);
-        return createMissile("Nuclear ship killer missile Mk I", 100, 100, 10, ETechLevel.TECH_I, nuclearShipKillerWarHead, List.of(shipKillerMotor));
+        MissileMotor shipKillerMotor = createMissileMotor(180, acc(46000, EAccelerationMetric.G), 20);
+        Warhead nuclearShipKillerWarHead = createWarhead(damageValue, dis(50000, EDistanceMetric.M), EWarheadType.EXPLOSION);
+        return createMissile(100, ETechLevel.TECH_I, nuclearShipKillerWarHead, shipKillerMotor);
     }
 
     @Nonnull
@@ -226,14 +226,14 @@ public class TestDataProviderUtils {
         ElectronicWarfare electronicWarfare = createElectronicWarfare("Scanner Mk I", "A scanner", 5, 1000, dis(1000000, EDistanceMetric.M), ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
         Sidewall sidewall = createSidewall("Shield Mk I", "A shield", 5, 15000, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
 
-        MissileMotor shipKillerMotor = createMissileMotor("Ship Killer Motor Mk I", 180, ETechLevel.TECH_I, acc(46000, EAccelerationMetric.G), 20, 100);
-        Warhead nuclearShipKillerWarHead = createWarhead("Nuclear ship killer war head", 1000, ETechLevel.TECH_I, dis(50000, EDistanceMetric.M), EWarheadType.EXPLOSION, 100);
-        Missile shipKillerMissile = createMissile("Nuclear ship killer missile Mk I", 100, 100, 10, ETechLevel.TECH_I, nuclearShipKillerWarHead, List.of(shipKillerMotor));
+        MissileMotor shipKillerMotor = createMissileMotor(180, acc(46000, EAccelerationMetric.G), 20);
+        Warhead nuclearShipKillerWarHead = createWarhead(1000, dis(50000, EDistanceMetric.M), EWarheadType.EXPLOSION);
+        Missile shipKillerMissile = createMissile(100, ETechLevel.TECH_I, nuclearShipKillerWarHead, shipKillerMotor);
         Launcher shipKillerLauncher = createLauncher("Ship killer launcher Mk I", "The launcher for ship killers", 100, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(shipKillerMissile));
 
-        MissileMotor counterMissileMotor = createMissileMotor("Counter Motor Mk I", 5, ETechLevel.TECH_I, acc(96000, EAccelerationMetric.G), 80, 10);
-        Warhead counterWarHead = createWarhead("Counter war head", 1, ETechLevel.TECH_I, Distance.ZERO, EWarheadType.COUNTER_MISSILE, 10);
-        Missile counterMissile = createMissile("Counter missile Mk I", 10, 10, 10, ETechLevel.TECH_I, counterWarHead, List.of(counterMissileMotor));
+        MissileMotor counterMissileMotor = createMissileMotor(5, acc(96000, EAccelerationMetric.G), 80);
+        Warhead counterWarHead = createWarhead(1, Distance.ZERO, EWarheadType.COUNTER_MISSILE);
+        Missile counterMissile = createMissile(10, ETechLevel.TECH_I, counterWarHead, counterMissileMotor);
         Launcher counterMissileLauncher = createLauncher("Counter missile launcher Mk I", "The launcher for counter missiles", 100, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
 
         Weapon laserWeapon = createWeapon("Laser Mk I", "A laser", 5, 10, ETechLevel.TECH_I, dis(400000, EDistanceMetric.M), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS));
@@ -397,55 +397,41 @@ public class TestDataProviderUtils {
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
         Preconditions.checkNotNull(allowedMissiles, "allowedMissiles shouldn't be null!");
 
-        final Launcher launcher = new Launcher(name, description, research(), useCapacity, EHullType.CA, techLevel, alignmentType, crewRequirement, weaponType, allowedMissiles);
+        final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, research(), techLevel, Launcher.class);
+        final Launcher launcher = new Launcher(namedTechLevel, "dwq", 1, useCapacity, EHullType.CA, alignmentType, crewRequirement, weaponType, allowedMissiles);
         setId(launcher);
         return launcher;
     }
 
     @Nonnull
-    public static MissileMotor createMissileMotor(@Nonnull final String typeName,
-                                                  final int endurance,
-                                                  final ETechLevel techLevel,
+    public static MissileMotor createMissileMotor(final int endurance,
                                                   @Nonnull final Acceleration acceleration,
-                                                  final int maneuverability,
-                                                  final int useCapacity) {
-        Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
+                                                  final int maneuverability) {
         Preconditions.checkNotNull(acceleration, "acceleration shouldn't be null!");
 
-        final MissileMotor missileMotor = new MissileMotor(typeName, "", endurance, HULL_TYPE, techLevel, acceleration, maneuverability, useCapacity);
-        setId(missileMotor);
-        return missileMotor;
+        return new MissileMotor(endurance, maneuverability, acceleration);
     }
 
     @Nonnull
-    public static Warhead createWarhead(@Nonnull final String typeName,
-                                        final int effectValue,
-                                        final ETechLevel techLevel,
+    public static Warhead createWarhead(final int effectValue,
                                         @Nonnull final Distance damageProjectionRange,
-                                        @Nonnull final EWarheadType warheadType,
-                                        final int useCapacity) {
-        Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
+                                        @Nonnull final EWarheadType warheadType) {
         Preconditions.checkNotNull(damageProjectionRange, "damageProjectionRange shouldn't be null!");
         Preconditions.checkNotNull(warheadType, "warheadType shouldn't be null!");
 
-        final Warhead warhead = new Warhead(typeName, "", effectValue, HULL_TYPE, techLevel, damageProjectionRange, warheadType, useCapacity);
-        setId(warhead);
-        return warhead;
+        return new Warhead(damageProjectionRange, warheadType, effectValue);
     }
 
     @Nonnull
-    public static Missile createMissile(@Nonnull String typeName,
-                                        final int warheadCapacity,
-                                        final int motorCapacity,
-                                        final int elokaResistance,
+    public static Missile createMissile(final int elokaResistance,
                                         final ETechLevel techLevel,
                                         @Nonnull Warhead warhead,
-                                        @Nonnull List<MissileMotor> missileMotors) {
-        Preconditions.checkNotNull(typeName, "typeName shouldn't be null!");
+                                        @Nonnull MissileMotor missileMotors) {
         Preconditions.checkNotNull(warhead, "warhead shouldn't be null!");
         Preconditions.checkNotNull(missileMotors, "missileMotors shouldn't be null!");
 
-        final Missile missile = new Missile(typeName, "", warheadCapacity, motorCapacity, elokaResistance, HULL_TYPE, techLevel, warhead, missileMotors, research());
+        final NamedTechLevel namedTechLevel = new NamedTechLevel("name", "description", research(), techLevel, Missile.class);
+        final Missile missile = new Missile(namedTechLevel, "", 1, elokaResistance, 1, HULL_TYPE, warhead, missileMotors);
         setId(missile);
         return missile;
     }

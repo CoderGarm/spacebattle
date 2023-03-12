@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.entities.misc;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
+import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EHullType;
 
 import javax.annotation.Nonnull;
@@ -10,6 +11,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
+import java.util.Map;
 
 @MappedSuperclass
 public class HasHullTypeByOwnCosts extends HasCostsByOwn {
@@ -24,6 +26,16 @@ public class HasHullTypeByOwnCosts extends HasCostsByOwn {
 
     public HasHullTypeByOwnCosts() {
     }
+
+    public HasHullTypeByOwnCosts(@Nonnull final NamedTechLevel baseModule,
+                                 @Nonnull final String technicalTypeName,
+                                 final int unlockedThroughLevel,
+                                 final int effectValue,
+                                 final int useCapacity,
+                                 @Nonnull final EHullType hullType) {
+        this(baseModule, technicalTypeName, unlockedThroughLevel, effectValue, useCapacity, hullType, new CrewRequirement(Map.of(), EDepositType.COSTS));
+    }
+
 
     public HasHullTypeByOwnCosts(@Nonnull final NamedTechLevel baseModule,
                                  @Nonnull final String technicalTypeName,

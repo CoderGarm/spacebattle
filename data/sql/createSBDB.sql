@@ -247,8 +247,8 @@
         attackedPart varchar(255) not null,
         damageDealer varchar(255) not null,
         damageValue bigint not null,
-        isAlive boolean not null,
-        isFightingCapable boolean not null,
+        isAlive boolean not null default true,
+        isFightingCapable boolean not null default true,
         state integer not null,
         idTarget integer not null,
         primary key (idHitLog)
@@ -304,15 +304,15 @@
 
     create table launcher (
        idLauncher integer not null auto_increment,
-        techLevel varchar(255) not null,
-        hullType varchar(255) not null,
+        technicalTypeName varchar(255) not null,
+        unlockedThroughLevel integer not null,
+        effectValue integer not null,
         useCapacity integer not null,
+        hullType varchar(255) not null,
         alignmentType varchar(255) not null,
         weaponType varchar(255) not null,
-        idTranslatableDescription integer not null,
-        idTranslatableName integer not null,
+        idNamedTechLevel integer not null,
         idCosts integer not null,
-        idResearch integer not null,
         primary key (idLauncher),
         constraint launcher_CHECK check (weaponType = 'MISSILE' OR weaponType = 'COUNTER_MISSILE')
     ) engine=InnoDB;
@@ -349,33 +349,20 @@
 
     create table missile (
        idMissile integer not null auto_increment,
-        techLevel varchar(255) not null,
-        elokaResistance integer not null,
-        hullType varchar(255) not null,
-        motorAmount integer not null,
-        motorCapacity integer not null,
-        warheadCapacity integer not null,
-        idTranslatableDescription integer not null,
-        idTranslatableName integer not null,
-        idCosts integer not null,
-        idMissileMotor integer not null,
-        idResearch integer not null,
-        idWarhead integer,
-        primary key (idMissile)
-    ) engine=InnoDB;
-
-    create table missileMotor (
-       idMissileMotor integer not null auto_increment,
-        techLevel varchar(255) not null,
-        acceleration varchar(255) not null,
-        endurance integer not null,
-        hullType varchar(255) not null,
-        maneuverability integer not null,
+        technicalTypeName varchar(255) not null,
+        unlockedThroughLevel integer not null,
+        elokaResistance integer,
         useCapacity integer not null,
-        idTranslatableDescription integer not null,
-        idTranslatableName integer not null,
+        hullType varchar(255) not null,
+        acceleration varchar(255),
+        endurance integer not null,
+        maneuverability integer not null,
+        damageProjectionRange varchar(255),
+        damageValue bigint not null,
+        warheadType varchar(255),
+        idNamedTechLevel integer not null,
         idCosts integer not null,
-        primary key (idMissileMotor)
+        primary key (idMissile)
     ) engine=InnoDB;
 
     create table missileMovement (
@@ -653,8 +640,8 @@
 
     create table translation (
        idTranslation integer not null auto_increment,
-        languageCode varchar(2),
-        translation varchar(255),
+        languageCode varchar(3),
+        translation varchar(400),
         idTranslatable integer,
         primary key (idTranslation)
     ) engine=InnoDB;
@@ -682,20 +669,6 @@
         idMessageThread integer not null,
         idUserSender integer not null,
         primary key (idUserMessage)
-    ) engine=InnoDB;
-
-    create table warhead (
-       idWarhead integer not null auto_increment,
-        techLevel varchar(255) not null,
-        damageProjectionRange varchar(255),
-        damageValue bigint not null,
-        hullType varchar(255) not null,
-        useCapacity integer not null,
-        warheadType varchar(255) not null,
-        idTranslatableDescription integer not null,
-        idTranslatableName integer not null,
-        idCosts integer not null,
-        primary key (idWarhead)
     ) engine=InnoDB;
 
     create table warShip (
@@ -1166,24 +1139,14 @@
        references user (idUser);
 
     alter table launcher 
-       add constraint FKn80gj1fyhvn6v5smkbx3b4rhi 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table launcher 
-       add constraint FKa0tf8xicyfrn906krw65ieop1 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
+       add constraint FKt9vkee5hlkie2gu9lj8rmdal7 
+       foreign key (idNamedTechLevel) 
+       references namedTechLevel (idNamedTechLevel);
 
     alter table launcher 
        add constraint FKpxevsicliklfnl6mycvl75sv9 
        foreign key (idCosts) 
        references resourceDeposit (idResourceDeposit);
-
-    alter table launcher 
-       add constraint FKdesag5bovcaxav76r4ln2occl 
-       foreign key (idResearch) 
-       references research (idResearch);
 
     alter table lossesByHit 
        add constraint FK8gwd5wcrghospusbhcyoffbpq 
@@ -1226,47 +1189,12 @@
        references miningFactors (idMiningFactors);
 
     alter table missile 
-       add constraint FK3sugkdm5phqm3kkdraprgaj87 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table missile 
-       add constraint FKorhea214ty529liubde204v2y 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
+       add constraint FK1as0lfywn7yqhs89vsuebxh4o 
+       foreign key (idNamedTechLevel) 
+       references namedTechLevel (idNamedTechLevel);
 
     alter table missile 
        add constraint FK2y4rvixlct3ljky430p3bmwad 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table missile 
-       add constraint FK1ledmeodyggj4capnumuak58u 
-       foreign key (idMissileMotor) 
-       references missileMotor (idMissileMotor);
-
-    alter table missile 
-       add constraint FK6hqn2wt7gk1myp1ew4i29r3ss 
-       foreign key (idResearch) 
-       references research (idResearch);
-
-    alter table missile 
-       add constraint FKhgp8bhvbmvaefgws7b1t0km7k 
-       foreign key (idWarhead) 
-       references warhead (idWarhead);
-
-    alter table missileMotor 
-       add constraint FKs8aryxvu0dbr41yab1lqy7f54 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table missileMotor 
-       add constraint FKkygcap68itcbqkfukqxqhqti8 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
-
-    alter table missileMotor 
-       add constraint FK6q2owmplw15x287lnle7mdeae 
        foreign key (idCosts) 
        references resourceDeposit (idResourceDeposit);
 
@@ -1604,21 +1532,6 @@
        add constraint FK6xs6p78lala5xtd4eoe4xxrnv 
        foreign key (idUserSender) 
        references user (idUser);
-
-    alter table warhead 
-       add constraint FKjx1sqa9iiinbgfciltxdqp78u 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table warhead 
-       add constraint FKa939x3f6pjibpdv9k0wxbl3cq 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
-
-    alter table warhead 
-       add constraint FK4m9pxktw6iywf5aecc1n0xm4f 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
 
     alter table warShip 
        add constraint FK3kovfkp6003a62x5ff41h44hw 

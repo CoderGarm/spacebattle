@@ -37,10 +37,11 @@ public class Translation extends AbstractEntityKey {
     );
 
     @Nonnull
-    @Size(min = 2, max = 2)
+    @Size(min = 2, max = 3)
     private String languageCode;
 
     @Nonnull
+    @Column(length = 400)
     private String translation;
 
     @ManyToOne

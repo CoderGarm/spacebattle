@@ -14,14 +14,12 @@ Gameplay:
 1. Auf der StarMap verändert sich der Cursor, wenn man etwas anklicken kann.
 2.
 
-todo. missile ammo fitting amount ist jetzt anzahl missiles nicht anzahl ammo-fittings
+todo. schiffstypen nachbauen und daraus die Werte ableiten  
+todo. chase wird wie battle gefittet → immer doppelt, keine chase-only bewaffnung,
+todo. anzahl waffen -> einschränkung durch beschränkende hüllenoberfläche
 
-todo. fix to often called propulsion capACITY
+todo. fix to often called propulsion capacity
 
-todo. alle möglichen module zu HasNamedLevel machen  
-todo. missiles überarbeiten → Komplexität wirklich nötig?
-
-todo. abhängige Forschungen pro Level erlauben? NamedTechLevel kennt Forschung, konkretes Modul kennt notwendiges Level, entsprechende Supportmodule halt bei höherem Level  
 todo. Forschungen mit NamedTechLevel ausrüsten?
 
 ----------------- Bugs fixed -----------
@@ -34,6 +32,9 @@ todo. change table names to use derby for useful tests
 todo. webmaster mail at contact section
 todo. changelog mit highlight auf versions-button
 todo. fleet movement report im dashboard
+
+- look & feel wie in büchern
+- emission spectra als gimmick
 
 Thema: NPC, Handel und Missionen
 

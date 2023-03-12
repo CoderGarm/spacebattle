@@ -34,11 +34,13 @@ public class MissileMotorCsvTransformer extends CSVTransformer<MissileMotor> {
     protected void convertInternally(@Nonnull final MissileMotor toTransform) {
         Preconditions.checkNotNull(toTransform, "building must not be empty");
 
+        /*
         a(toTransform.getId());
         a(((HasCostsCsvTransformer) dependencies.get(0)).convert(toTransform));
         a(toTransform.getEndurance());
         a(toTransform.getAcceleration().asString());
         a(toTransform.getManeuverability());
         a(toTransform.getUseCapacity());
+        */
     }
 }
