@@ -360,7 +360,7 @@ public class MasterOfTheUniverseService {
         amendTranslations();
         LOGGER.info("Translations amended.");
 
-        tickService.doTick(); /*fixme the battle will not started - check why*/
+        tickService.doTick();
         LOGGER.info("First tick is done");
         LOGGER.info("All Data created");
     }
@@ -925,9 +925,10 @@ public class MasterOfTheUniverseService {
 
     @Nonnull
     protected Fleet createFleet(User user, Planet planet, String name) {
-        FleetOrbit fo1 = new FleetOrbit(planet.getOrbit(), planet.getSystem());
-        Fleet f1 = new Fleet(name, user, fo1);
-        return fleetService.save(f1);
+        FleetOrbit fleetOrbit = new FleetOrbit(planet.getOrbit(), planet.getSystem());
+        Fleet fleet = new Fleet(name, user, fleetOrbit);
+        fleet.setOperational();
+        return fleetService.save(fleet);
     }
 
     @Deprecated(since = "productive environment")

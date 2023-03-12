@@ -117,6 +117,7 @@ public class BaseModule {
         this.description = module.getDescription(languageCode);
         this.techLevel = module.getTechLevel();
         this.effectValue = module.getEffectValue();
+        this.hullType = new de.yuga.spacebattle.rest.dto.enums.EHullType(module.getHullType());
     }
 
     @JsonIgnore

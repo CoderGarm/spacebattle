@@ -8,7 +8,6 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -101,27 +100,6 @@ public class CustomFleetRepositoryImpl implements CustomFleetRepository {
                 .getResultList();
     }
 
-    /**
-     * The normal {@link JpaRepository#save(Object)} is not definitely safe to return not null
-     * but storing the entity nevertheless. Strange but sadly true.
-     *
-     * @param fleet the fleet to store
-     * @return the stored fleet
-     */
-    @Override
-    public Fleet saveAndFlush(@Nonnull final Fleet fleet) {
-        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
-
-        if (fleet.getId() != -1) {
-            em.merge(fleet);
-        } else {
-            em.persist(fleet);
-
-        }
-        em.flush();
-        return fleet;
-    }
-
     @Nonnull
     @Override
     public Set<Fleet> findAllFleetsByPlanet(@Nonnull final Planet planet) {
@@ -146,21 +124,6 @@ public class CustomFleetRepositoryImpl implements CustomFleetRepository {
                 .getResultList());
     }
 
-    @Nonnull
-    @Override
-    public Set<Fleet> findAllDamagedFleetsByPlanetAndOwner(@Nonnull final Planet planet) {
-        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
-
-        return em.createNamedQuery("Fleet.getAllDamagedForPlanetAndOwner", Fleet.class)
-                .setParameter("xCoordinate", planet.getOrbit().getXCoordinate())
-                .setParameter("yCoordinate", planet.getOrbit().getYCoordinate())
-                .setParameter("system", planet.getSystem())
-                .getResultList()
-                .stream()
-                .filter(f -> f.getOwner().equals(planet.getOwner()))
-                .collect(Collectors.toSet());
-    }
-
     @Override
     public boolean isShipClassInUse(final int idShipClass) {
         final Long amount = em.createNamedQuery("Fleet.checkShipInUse", Long.class)
@@ -176,6 +139,7 @@ public class CustomFleetRepositoryImpl implements CustomFleetRepository {
         final List<Fleet> nonMovingFleets = findAllFleetsWithoutMovement();
         final Map<FleetOrbit, List<Fleet>> fleetsToOrbit = nonMovingFleets.stream()
                 .filter(Fleet::isActive)
+                .filter(f -> f.getOrbit() != null)
                 .collect(Collectors.groupingBy(Fleet::getOrbit, Collectors.mapping(Function.identity(), Collectors.toList())));
 
         return fleetsToOrbit.entrySet().stream()

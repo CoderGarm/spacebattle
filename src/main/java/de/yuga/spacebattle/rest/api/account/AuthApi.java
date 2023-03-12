@@ -67,9 +67,9 @@ public class AuthApi {
     private static final String NAME_PLACEHOLDER = "NAME_PLACEHOLDER";
     private static final String WELCOME_MESSAGE = "Hello " + NAME_PLACEHOLDER + ",  " +
             "  " +
-            "a happy welcome to the honorverse.  " +
+            "welcome to the honorverse. If you want to survive, listen carefully.  " +
             "  " +
-            "I want to purpose that you have a look at the planet you conquered from the pirates.  " +
+            "I suggest that you have a look at the planet you conquered from the pirates.  " +
             "You can replay the battle at the journals section to see the glorious victory of your admirals and crews.  " +
             "  " +
             "In order to improve the conditions for your colonists you should have a look if you can build some houses or hospitals.  " +

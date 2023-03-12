@@ -15,6 +15,9 @@ Gameplay:
 2.
 
 todo. missile ammo fitting amount ist jetzt anzahl missiles nicht anzahl ammo-fittings
+
+todo. fix to often called propulsion capACITY
+
 todo. alle möglichen module zu HasNamedLevel machen  
 todo. missiles überarbeiten → Komplexität wirklich nötig?
 

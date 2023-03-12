@@ -31,8 +31,6 @@ public interface CustomFleetRepository {
     @Nonnull
     List<Fleet> findAllFleetsByStarSystemAndOwner(int idStarSystem, int idOwner);
 
-    Fleet saveAndFlush(@Nonnull Fleet shipClass);
-
     /**
      * Fetches all fleets which are in orbit around the planet, which are moving from or to the planet.
      *
@@ -44,9 +42,6 @@ public interface CustomFleetRepository {
 
     @Nonnull
     Set<Fleet> findAllAnchoredForPlanet(@Nonnull Planet planet);
-
-    @Nonnull
-    Set<Fleet> findAllDamagedFleetsByPlanetAndOwner(@Nonnull Planet planet);
 
     /**
      * Checks if a ship class in part of a fleet and therefore 'in use'.
