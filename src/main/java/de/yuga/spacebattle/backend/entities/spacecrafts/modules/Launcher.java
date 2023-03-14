@@ -5,9 +5,7 @@ import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.misc.HasHullTypeByOwnCosts;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
-import de.yuga.spacebattle.backend.enums.EAlignmentType;
 import de.yuga.spacebattle.backend.enums.EHullType;
-import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 import org.hibernate.annotations.Check;
 
@@ -33,14 +31,6 @@ public class Launcher extends HasHullTypeByOwnCosts {
     @Enumerated(EnumType.STRING)
     private EWeaponType weaponType;
 
-    /**
-     * Holds the information about the alignment ability.
-     */
-    @Nonnull
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private EAlignmentType alignmentType;
-
     @Nonnull
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "allowedMissiles",
@@ -57,15 +47,12 @@ public class Launcher extends HasHullTypeByOwnCosts {
                     final int unlockedThroughLevel,
                     final int useCapacity,
                     @Nonnull final EHullType hullType,
-                    @Nonnull final EAlignmentType alignmentType,
                     @Nonnull final CrewRequirement crewRequirement,
                     @Nonnull final EWeaponType weaponType,
                     @Nonnull final Set<Missile> allowedMissiles) {
         super(baseModule, technicalTypeName, unlockedThroughLevel, 1, useCapacity, hullType, crewRequirement);
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
-        Preconditions.checkNotNull(alignmentType, "alignmentType shouldn't be null!");
 
-        this.alignmentType = alignmentType;
         this.weaponType = weaponType;
         this.allowedMissiles = allowedMissiles;
     }
@@ -76,11 +63,6 @@ public class Launcher extends HasHullTypeByOwnCosts {
     }
 
     @Nonnull
-    public EAlignmentType getAlignmentType() {
-        return alignmentType;
-    }
-
-    @Nonnull
     public Set<Missile> getAllowedMissiles() {
         return allowedMissiles;
     }
@@ -88,21 +70,5 @@ public class Launcher extends HasHullTypeByOwnCosts {
     @Nonnull
     public Missile getHeaviestMissile() {
         return allowedMissiles.stream().sorted(Comparator.comparingLong(Missile::getDamageValue)).reduce((o1, o2) -> o2).orElseThrow(NullPointerException::new);
-    }
-
-    @Nonnull
-    public Set<EWeaponAlignment> getAllowedWeaponAlignments() {
-        final Set<EWeaponAlignment> allowedWeaponAlignments = new HashSet<>();
-        if (EAlignmentType.CHASE_ALIGNMENT == alignmentType) {
-            allowedWeaponAlignments.add(EWeaponAlignment.BOW);
-        }
-        if (EAlignmentType.CHASE_ALIGNMENT == alignmentType) {
-            allowedWeaponAlignments.add(EWeaponAlignment.STERN);
-        }
-        if (EAlignmentType.BATTLE_ALIGNMENT == alignmentType) {
-            allowedWeaponAlignments.add(EWeaponAlignment.BROADSIDE);
-
-        }
-        return allowedWeaponAlignments;
     }
 }

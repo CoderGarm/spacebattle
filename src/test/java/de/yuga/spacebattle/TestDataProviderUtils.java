@@ -229,15 +229,15 @@ public class TestDataProviderUtils {
         MissileMotor shipKillerMotor = createMissileMotor(180, acc(46000, EAccelerationMetric.G), 20);
         Warhead nuclearShipKillerWarHead = createWarhead(1000, dis(50000, EDistanceMetric.M), EWarheadType.EXPLOSION);
         Missile shipKillerMissile = createMissile(100, ETechLevel.TECH_I, nuclearShipKillerWarHead, shipKillerMotor);
-        Launcher shipKillerLauncher = createLauncher("Ship killer launcher Mk I", "The launcher for ship killers", 100, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(shipKillerMissile));
+        Launcher shipKillerLauncher = createLauncher("Ship killer launcher Mk I", "The launcher for ship killers", 100, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(shipKillerMissile));
 
         MissileMotor counterMissileMotor = createMissileMotor(5, acc(96000, EAccelerationMetric.G), 80);
         Warhead counterWarHead = createWarhead(1, Distance.ZERO, EWarheadType.COUNTER_MISSILE);
         Missile counterMissile = createMissile(10, ETechLevel.TECH_I, counterWarHead, counterMissileMotor);
-        Launcher counterMissileLauncher = createLauncher("Counter missile launcher Mk I", "The launcher for counter missiles", 100, ETechLevel.TECH_I, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
+        Launcher counterMissileLauncher = createLauncher("Counter missile launcher Mk I", "The launcher for counter missiles", 100, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
 
-        Weapon laserWeapon = createWeapon("Laser Mk I", "A laser", 5, 10, ETechLevel.TECH_I, dis(400000, EDistanceMetric.M), 1, EWeaponType.BEAM, EAlignmentType.CHASE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-        Weapon pointDefense = createWeapon("Point Defense Mk I", "A point defense", 5, 1, ETechLevel.TECH_I, dis(50000, EDistanceMetric.M), 1, EWeaponType.POINT_DEFENSE, EAlignmentType.BATTLE_ALIGNMENT, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Weapon laserWeapon = createWeapon("Laser Mk I", "A laser", 5, 10, ETechLevel.TECH_I, dis(400000, EDistanceMetric.M), 1, EWeaponType.BEAM, new CrewRequirement(militaryCrew, EDepositType.COSTS));
+        Weapon pointDefense = createWeapon("Point Defense Mk I", "A point defense", 5, 1, ETechLevel.TECH_I, dis(50000, EDistanceMetric.M), 1, EWeaponType.POINT_DEFENSE, new CrewRequirement(militaryCrew, EDepositType.COSTS));
 
         PassiveModule passiveModule = createPassiveModule("Improves armor", "Increases the amount of armor", ESupportType.ARMOR, ECalculationType.ADD, 5, 10, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
 
@@ -366,17 +366,15 @@ public class TestDataProviderUtils {
                                       @Nonnull final Distance damageProjectionRange,
                                       final int amountDamageEmitter,
                                       @Nonnull final EWeaponType weaponType,
-                                      @Nonnull final EAlignmentType alignmentType,
                                       @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(damageProjectionRange, "damageProjectionRange shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
-        Preconditions.checkNotNull(alignmentType, "alignmentType shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
         final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, research(), techLevel, Weapon.class);
-        final Weapon weapon = new Weapon(namedTechLevel, "gGg", 1, useCapacity, value, EHullType.CA, damageProjectionRange, amountDamageEmitter, weaponType, alignmentType, crewRequirement);
+        final Weapon weapon = new Weapon(namedTechLevel, "gGg", 1, useCapacity, value, EHullType.CA, damageProjectionRange, amountDamageEmitter, weaponType, crewRequirement);
         setId(weapon);
         return weapon;
     }
@@ -386,19 +384,17 @@ public class TestDataProviderUtils {
                                           @Nonnull final String description,
                                           final int useCapacity,
                                           final ETechLevel techLevel,
-                                          @Nonnull final EAlignmentType alignmentType,
                                           @Nonnull final CrewRequirement crewRequirement,
                                           @Nonnull final EWeaponType weaponType,
                                           @Nonnull final Set<Missile> allowedMissiles) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
-        Preconditions.checkNotNull(alignmentType, "alignmentType shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
         Preconditions.checkNotNull(allowedMissiles, "allowedMissiles shouldn't be null!");
 
         final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, research(), techLevel, Launcher.class);
-        final Launcher launcher = new Launcher(namedTechLevel, "dwq", 1, useCapacity, EHullType.CA, alignmentType, crewRequirement, weaponType, allowedMissiles);
+        final Launcher launcher = new Launcher(namedTechLevel, "dwq", 1, useCapacity, EHullType.CA, crewRequirement, weaponType, allowedMissiles);
         setId(launcher);
         return launcher;
     }

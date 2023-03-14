@@ -100,17 +100,15 @@ public class ModuleService {
                                @Nonnull final Distance damageProjectionRange,
                                final int amountDamageEmitter,
                                @Nonnull final EWeaponType weaponType,
-                               @Nonnull final EAlignmentType alignmentType,
                                @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(namedTechLevel, "namedTechLevel must not be empty");
         Preconditions.checkNotNull(hullType, "hullType must not be empty");
         Preconditions.checkNotNull(damageProjectionRange, "damageProjectionRange shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
-        Preconditions.checkNotNull(alignmentType, "alignmentType shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        final String technicalTypeName = "D-" + hullType.name() + namedTechLevel.getTechLevel().name().split("_")[1] + weaponType.name().charAt(0) + "-" + amountDamageEmitter + alignmentType.name().charAt(0);
-        return weaponRepository.save(new Weapon(namedTechLevel, technicalTypeName, unlockedThroughLevel, useCapacity, effectValue, hullType, damageProjectionRange, amountDamageEmitter, weaponType, alignmentType, crewRequirement));
+        final String technicalTypeName = "D-" + hullType.name() + namedTechLevel.getTechLevel().name().split("_")[1] + weaponType.name().charAt(0);
+        return weaponRepository.save(new Weapon(namedTechLevel, technicalTypeName, unlockedThroughLevel, useCapacity, effectValue, hullType, damageProjectionRange, amountDamageEmitter, weaponType, crewRequirement));
     }
 
     @Nonnull
@@ -119,18 +117,16 @@ public class ModuleService {
                                    final int unlockedThroughLevel,
                                    final int useCapacity,
                                    @Nonnull final EHullType hullType,
-                                   @Nonnull final EAlignmentType alignmentType,
                                    @Nonnull final CrewRequirement crewRequirement,
                                    @Nonnull final EWeaponType weaponType,
                                    @Nonnull final Set<Missile> allowedMissiles) {
         Preconditions.checkNotNull(namedTechLevel, "namedTechLevel must not be empty");
-        Preconditions.checkNotNull(alignmentType, "alignmentType shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
         Preconditions.checkNotNull(allowedMissiles, "allowedMissiles shouldn't be null!");
 
-        final String technicalTypeName = "L-" + hullType.name() + namedTechLevel.getTechLevel().name().split("_")[1] + weaponType.name().charAt(0) + alignmentType.name().charAt(0);
-        return launcherRepository.save(new Launcher(namedTechLevel, technicalTypeName, unlockedThroughLevel, useCapacity, hullType, alignmentType, crewRequirement, weaponType, allowedMissiles));
+        final String technicalTypeName = "L-" + hullType.name() + namedTechLevel.getTechLevel().name().split("_")[1] + weaponType.name().charAt(0);
+        return launcherRepository.save(new Launcher(namedTechLevel, technicalTypeName, unlockedThroughLevel, useCapacity, hullType, crewRequirement, weaponType, allowedMissiles));
     }
 
     @Nonnull

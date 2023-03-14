@@ -5,7 +5,6 @@ import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import de.yuga.spacebattle.backend.services.ResourceService;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -39,16 +38,14 @@ public class PublicResourcesApi extends BaseApi {
     @Operation(summary = "Get star systems by coordinates.", operationId = "getAllSystemCoordinates",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = MasterOfTheUniverseService.Coords.class)))
-                    ),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = MasterOfTheUniverseService.CoordsBlob.class))),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getAllSystemCoordinates() {
         final List<MasterOfTheUniverseService.Coords> coords = resourceService.readStarSystems();
-        return ResponseEntity.ok(coords);
+        return ResponseEntity.ok(new MasterOfTheUniverseService.CoordsBlob(coords));
     }
 
 }

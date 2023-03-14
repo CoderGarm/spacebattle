@@ -6,17 +6,13 @@ import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.misc.HasHullTypeByOwnCosts;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
-import de.yuga.spacebattle.backend.enums.EAlignmentType;
 import de.yuga.spacebattle.backend.enums.EHullType;
-import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.HashSet;
-import java.util.Set;
 
 @NamedQueries({
         @NamedQuery(name = "Weapon.getAll", query = "SELECT a FROM Weapon a"),
@@ -59,14 +55,6 @@ public class Weapon extends HasHullTypeByOwnCosts {
     @Enumerated(EnumType.STRING)
     private EWeaponType weaponType;
 
-    /**
-     * Holds the information about the alignment ability.
-     */
-    @Nonnull
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private EAlignmentType alignmentType;
-
     public Weapon() {
     }
 
@@ -79,17 +67,14 @@ public class Weapon extends HasHullTypeByOwnCosts {
                   @Nonnull final Distance damageProjectionRange,
                   final int amountDamageEmitter,
                   @Nonnull final EWeaponType weaponType,
-                  @Nonnull final EAlignmentType alignmentType,
                   @Nonnull final CrewRequirement crewRequirement) {
         super(baseModule, technicalTypeName, unlockedThroughLevel, useCapacity, effectValue, hullType, crewRequirement);
         Preconditions.checkNotNull(damageProjectionRange, "damageProjectionRange shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "eWeaponType shouldn't be null!");
-        Preconditions.checkNotNull(alignmentType, "alignmentType shouldn't be null!");
 
         this.damageProjectionRange = damageProjectionRange;
         this.amountDamageEmitter = amountDamageEmitter;
         this.weaponType = weaponType;
-        this.alignmentType = alignmentType;
     }
 
     @Nonnull
@@ -108,24 +93,5 @@ public class Weapon extends HasHullTypeByOwnCosts {
     @Nonnull
     public EWeaponType getWeaponType() {
         return weaponType;
-    }
-
-    @Nonnull
-    public EAlignmentType getAlignmentType() {
-        return alignmentType;
-    }
-
-    @Nonnull
-    public Set<EWeaponAlignment> getAllowedWeaponAlignments() {
-        final Set<EWeaponAlignment> allowedWeaponAlignments = new HashSet<>();
-        if (EAlignmentType.CHASE_ALIGNMENT == alignmentType) {
-            allowedWeaponAlignments.add(EWeaponAlignment.BOW);
-            allowedWeaponAlignments.add(EWeaponAlignment.STERN);
-        }
-        if (EAlignmentType.BATTLE_ALIGNMENT == alignmentType) {
-            allowedWeaponAlignments.add(EWeaponAlignment.BROADSIDE);
-
-        }
-        return allowedWeaponAlignments;
     }
 }

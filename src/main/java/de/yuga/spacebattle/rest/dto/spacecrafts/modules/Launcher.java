@@ -2,7 +2,6 @@ package de.yuga.spacebattle.rest.dto.spacecrafts.modules;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics.BaseModule;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,14 +24,6 @@ public class Launcher {
     @Schema(required = true, description = "The way how the damage will be projected.")
     private EWeaponType weaponType;
 
-    /**
-     * Holds the information about the alignment ability.
-     */
-    @Nonnull
-    @JsonProperty
-    @Schema(required = true, description = "The possible mount points of this weapon.")
-    private List<EWeaponAlignment> alignmentTypes;
-
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The bunch of allowed missiles for this launcher.")
@@ -48,7 +39,6 @@ public class Launcher {
 
         this.baseModule = new BaseModule(launcher, languageCode);
         this.weaponType = launcher.getWeaponType();
-        this.alignmentTypes = new ArrayList<>(launcher.getAllowedWeaponAlignments());
         this.allowedMissiles = launcher.getAllowedMissiles().stream()
                 .map(m -> new de.yuga.spacebattle.rest.dto.spacecrafts.ammunition.Missile(m, languageCode))
                 .collect(Collectors.toList());

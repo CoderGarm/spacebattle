@@ -15,12 +15,6 @@ Gameplay:
 2.
 
 todo. schiffstypen nachbauen und daraus die Werte ableiten  
-todo. chase wird wie battle gefittet → immer doppelt, keine chase-only bewaffnung,
-todo. anzahl waffen -> einschränkung durch beschränkende hüllenoberfläche
-
-todo. fix to often called propulsion capacity
-
-todo. Forschungen mit NamedTechLevel ausrüsten?
 
 ----------------- Bugs fixed -----------
 
@@ -58,6 +52,7 @@ todo. Konzept für Missionen und NPC-Missionen
 8. Änderungen in der Spielmechanik, z.B. dass die Leistung des Antriebs im Verhältnis zur Schiffsmasse steht -> erneutes Rebalancing der Module
 9. mich endlich mal um die "corporate identity" kümmern, also eigene Icons, Symbole, Benennungen usw erzeugen
 
+todo. fix to often called propulsion capacity
 todo. kein alter Menüpunkt mehr ausgewählt wenn man sich wieder einloggt
 todo. Exception per mail an webmaster
 todo. Userliste

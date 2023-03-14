@@ -31,6 +31,7 @@
         <springdoc-openapi.version>1.6.8</springdoc-openapi.version>
         <springdoc-openapi-core.version>1.1.49</springdoc-openapi-core.version>
         <java-diff-utils.version>4.12</java-diff-utils.version>
+        <commons-csv.version>1.10.0</commons-csv.version>
     </properties>
 
     <dependencies>
@@ -205,6 +206,16 @@
             <groupId>io.github.java-diff-utils</groupId>
             <artifactId>java-diff-utils</artifactId>
             <version>${java-diff-utils.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>${commons-csv.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.5.3</version>
         </dependency>
     </dependencies>
 
