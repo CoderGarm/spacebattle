@@ -45,22 +45,42 @@ public class WikiShipClassEvaluationTest {
         final Map<EHullType, List<WikiShipClass>> byType = wikiShipClasses.stream().collect(Collectors.groupingBy(WikiShipClass::getHullType, Collectors.mapping(Function.identity(), Collectors.toList())));
 
         //printWeaponLoadout(byType);
-        final List<WeaponsPerAlignmentPerHullTypePerAffiliation> result = printWeaponsCountPerTonnage(byType);
+        printTonnagePerHullType(byType);
 
+        /*
+        final List<WeaponsPerAlignmentPerHullTypePerAffiliation> result = getWeaponsCountPerHullType(byType);
+        printWeaponsCountPerHullType(result);
+        */
+    }
+
+    private static void printTonnagePerHullType(final Map<EHullType, List<WikiShipClass>> byType) {
+
+        byType.forEach((hullType, list) -> {
+            System.out.println(hullType);
+
+            final List<WikiShipClass> byTonnage = list.stream().sorted((Comparator.comparingInt(o -> o.getClassPhysics().getMasse()))).collect(Collectors.toList());
+
+            byTonnage.forEach(dto -> {
+                System.out.println("\t" + dto.getClassPhysics().getMasse());
+            });
+        });
+    }
+
+    private static void printWeaponsCountPerHullType(final List<WeaponsPerAlignmentPerHullTypePerAffiliation> result) {
         final int length = result.stream().sorted(Comparator.comparingInt(o -> o.getAffiliation().length())).map(w -> w.getAffiliation().length()).reduce((o1, o2) -> o2).orElse(0);
         final String placeholder = Strings.repeat(" ", length);
         final Map<EHullType, List<WeaponsPerAlignmentPerHullTypePerAffiliation>> typeListMap = result.stream().collect(Collectors.groupingBy(WeaponsPerAlignmentPerHullTypePerAffiliation::getHullType, Collectors.mapping(Function.identity(), Collectors.toList())));
         typeListMap.forEach((hullType, list) -> {
             System.out.println(hullType);
             list.forEach(dto -> {
-                final String collect = dto.getMap().entrySet().stream().map(e -> e.getKey() + ": " + e.getValue()).collect(Collectors.joining("\t"));
+                final String collect = dto.getMap().entrySet().stream().sorted(Comparator.comparingInt(o -> o.getKey().ordinal())).map(e -> e.getKey() + ": " + e.getValue()).collect(Collectors.joining("\t"));
                 final String ph = placeholder.substring(0, length - dto.getAffiliation().length());
                 System.out.println("\t" + dto.getAffiliation() + ":" + ph + "\t" + collect);
             });
         });
     }
 
-    private static List<WeaponsPerAlignmentPerHullTypePerAffiliation> printWeaponsCountPerTonnage(final Map<EHullType, List<WikiShipClass>> byType) {
+    private static List<WeaponsPerAlignmentPerHullTypePerAffiliation> getWeaponsCountPerHullType(final Map<EHullType, List<WikiShipClass>> byType) {
 
         final List<WeaponsPerAlignmentPerHullTypePerAffiliation> result = new ArrayList<>();
         byType.forEach((type, shipClasses) -> {

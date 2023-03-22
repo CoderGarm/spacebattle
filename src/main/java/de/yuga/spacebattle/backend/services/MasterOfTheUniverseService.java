@@ -653,25 +653,31 @@ public class MasterOfTheUniverseService {
     }
 
     private void createHulls() {
-        Research hullResearch = research("Corvette", "The Corvette research researches Corvettes.", 1, ETechLevel.TECH_I, null);
-        hullService.createHull("Light attack vessel", 20, 4, 10, 3, 3, ETechLevel.TECH_I, "The light attack craft hull", hullResearch, EHullType.LAC, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        hullService.createHull("Corvette vessel", 30, 6, 5, 5, 14, ETechLevel.TECH_I, "The corvette hull", hullResearch, EHullType.VT, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        hullService.createHull("Small Freighter hull", 2000, 2000, 0, 0, 0, ETechLevel.TECH_I, "The smaller freighter hull", hullResearch, EHullType.FR, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        hullService.createHull("Big Freighter hull", 5000, 5000, 0, 0, 0, ETechLevel.TECH_I, "The bigger freighter hull", hullResearch, EHullType.FR, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        hullResearch = research("Frigate", "The Frigate research researches Frigates.", 1, ETechLevel.TECH_I, null);
-        hullService.createHull("Frigate vessel", 50, 18, 6, 6, 20, ETechLevel.TECH_I, "The frigate hull", hullResearch, EHullType.FG, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        hullService.createHull("Destroyer vessel", 65, 24, 8, 8, 24, ETechLevel.TECH_I, "The destroyer hull", hullResearch, EHullType.DD, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        hullResearch = research("Cruiser", "The Cruiser research researches Cruisers.", 1, ETechLevel.TECH_I, hullResearch);
-        hullService.createHull("Cruiser vessel", 80, 30, 10, 10, 30, ETechLevel.TECH_I, "The cruiser hull", hullResearch, EHullType.CL, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        hullService.createHull("Heavy cruiser vessel", 200, 60, 30, 30, 80, ETechLevel.TECH_I, "The assault cruiser hull", hullResearch, EHullType.CA, new CrewRequirement(L_CREW, EDepositType.COSTS));
-        hullResearch = research("Battlecruiser", "Researches bigger cruisers.", 1, ETechLevel.TECH_I, hullResearch);
-        hullService.createHull("Battlecruiser vessel", 700, 280, 90, 90, 240, ETechLevel.TECH_I, "The battle cruiser hull", hullResearch, EHullType.BC, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-        hullResearch = research("Battleship", "Researches battleships.", 1, ETechLevel.TECH_I, hullResearch);
-        hullService.createHull("Battleship vessel", 2000, 800, 200, 200, 800, ETechLevel.TECH_I, "The battle ship hull", hullResearch, EHullType.BB, new CrewRequirement(XXXL_CREW, EDepositType.COSTS));
-        hullResearch = research("Dreadnought", "Researches dreadnoughts.", 1, ETechLevel.TECH_I, hullResearch);
-        hullService.createHull("Dreadnought vessel", 5000, 1900, 400, 400, 2300, ETechLevel.TECH_I, "The dreadnought hull", hullResearch, EHullType.DN, new CrewRequirement(XXXL_CREW, EDepositType.COSTS));
-        hullResearch = research("Superdreadnought", "Researches super dreadnoughts.", 1, ETechLevel.TECH_I, hullResearch);
-        hullService.createHull("Superdreadnought vessel", 8000, 3320, 640, 640, 3400, ETechLevel.TECH_I, "The super dreadnought hull", hullResearch, EHullType.SD, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
+        Research research = research("Corvette", "The Corvette research researches Corvettes.", 1, ETechLevel.TECH_I, null);
+        amendTranslation(research, "Raketen", "Eine Rakete ist ein selbst angetriebener Flugkörper, der im Raumkampf hauptsächlich als Waffe eingesetzt wird.");
+        researchService.save(research);
+
+        final NamedTechLevel ntl = moduleService.createBaseModule("Missile",
+                "A missile was a self-propelled guided projectile used as a weapon. By the 20th Century PD, impeller drive-propelled missiles were the most common weapons of naval warfare.",
+                research, ETechLevel.TECH_I, Hull.class);
+        amendTranslation(ntl, "Raketen", "Eine Rakete ist ein selbst angetriebener Flugkörper, der im Raumkampf hauptsächlich als Waffe eingesetzt wird.");
+        moduleService.save(ntl);
+
+        hullService.createHull(ntl, "Small Freighter hull", 1, 2000, 2000, 0, 0, 0, EHullType.FR, new CrewRequirement(S_CREW, EDepositType.COSTS));
+        hullService.createHull(ntl, "Big Freighter hull", 1, 5000, 5000, 0, 0, 0, EHullType.FR, new CrewRequirement(M_CREW, EDepositType.COSTS));
+
+        hullService.createHull(ntl, "Light attack vessel", 1, 20, 4, 10, 3, 3, EHullType.LAC, new CrewRequirement(S_CREW, EDepositType.COSTS));
+        hullService.createHull(ntl, "Corvette vessel", 1, 30, 6, 5, 5, 14, EHullType.VT, new CrewRequirement(M_CREW, EDepositType.COSTS));
+        hullService.createHull(ntl, "Frigate vessel", 1, 50, 18, 6, 6, 20, EHullType.FG, new CrewRequirement(M_CREW, EDepositType.COSTS));
+        hullService.createHull(ntl, "Destroyer vessel", 1, 65, 24, 8, 8, 24, EHullType.DD, new CrewRequirement(M_CREW, EDepositType.COSTS));
+
+
+        hullService.createHull(ntl, "Cruiser vessel", 1, 80, 30, 10, 10, 30, EHullType.CL, new CrewRequirement(M_CREW, EDepositType.COSTS));
+        hullService.createHull(ntl, "Heavy cruiser vessel", 1, 200, 60, 30, 30, 80, EHullType.CA, new CrewRequirement(L_CREW, EDepositType.COSTS));
+        hullService.createHull(ntl, "Battlecruiser vessel", 1, 700, 280, 90, 90, 240, EHullType.BC, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
+        hullService.createHull(ntl, "Battleship vessel", 1, 2000, 800, 200, 200, 800, EHullType.BB, new CrewRequirement(XXXL_CREW, EDepositType.COSTS));
+        hullService.createHull(ntl, "Dreadnought vessel", 1, 5000, 1900, 400, 400, 2300, EHullType.DN, new CrewRequirement(XXXL_CREW, EDepositType.COSTS));
+        hullService.createHull(ntl, "Superdreadnought vessel", 1, 8000, 3320, 640, 640, 3400, EHullType.SD, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
     }
 
     private ShipClass createShipClass(@Nonnull final User user, @Nonnull final EHullType hullType) {

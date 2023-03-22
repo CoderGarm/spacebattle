@@ -2,21 +2,19 @@ package de.yuga.spacebattle.backend.entities.spacecrafts;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
-import de.yuga.spacebattle.backend.entities.i18n.Translation;
-import de.yuga.spacebattle.backend.entities.misc.HasCosts;
-import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.misc.HasHullTypeByOwnCosts;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.ECapacityAreaType;
 import de.yuga.spacebattle.backend.enums.EHullType;
-import de.yuga.spacebattle.backend.enums.ETechLevel;
+import de.yuga.spacebattle.backend.enums.EResourceDemand;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 
 @NamedQueries({
         @NamedQuery(name = "Hull.getAll", query = "SELECT a FROM Hull a"),
@@ -26,7 +24,7 @@ import javax.validation.constraints.NotNull;
 @Table(name = "hull")
 @Check(constraints = "overallConstructionCapacity >= constructionCapacity + constructionCapacityBow + constructionCapacityStern + constructionCapacityBroadsides")
 @AttributeOverride(name = "id", column = @Column(name = "idHull"))
-public class Hull extends HasCosts {
+public class Hull extends HasHullTypeByOwnCosts { /* fixme remove hull completely */
 
     /**
      * The overall CC represents the size of a hull in metric tons.
@@ -53,47 +51,26 @@ public class Hull extends HasCosts {
      */
     private int constructionCapacityBroadsides;
 
-    @Nonnull
-    @NotNull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "idResearch")
-    private Research unlockedThrough;
-
-
-    @Nonnull
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private EHullType hullType;
-
     public Hull() {
     }
 
-    public Hull(@Nonnull final String name,
+    public Hull(@Nonnull final NamedTechLevel baseModule,
+                @Nonnull final String technicalTypeName,
+                final int unlockedThroughLevel,
                 final int overallConstructionCapacity,
                 final int constructionCapacity,
                 final int constructionCapacityBow,
                 final int constructionCapacityStern,
-                int constructionCapacityBroadsides,
-                @Nonnull final ETechLevel techLevel,
-                @Nonnull final String description,
-                @Nonnull final Research unlockedThrough,
+                final int constructionCapacityBroadsides,
                 @Nonnull final EHullType hullType,
                 @Nonnull final CrewRequirement crewRequirement) {
-        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, overallConstructionCapacity, Hull.class);
-        Preconditions.checkNotNull(name, "name shouldn't be null!");
-        Preconditions.checkNotNull(description, "description shouldn't be null!");
-        Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
-        Preconditions.checkNotNull(hullType, "hullType shouldn't be null!");
-        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
+        super(baseModule, technicalTypeName, unlockedThroughLevel, overallConstructionCapacity, hullType, crewRequirement, EResourceDemand.HULL);
 
         this.overallConstructionCapacity = overallConstructionCapacity;
         this.constructionCapacity = constructionCapacity;
         this.constructionCapacityBow = constructionCapacityBow;
         this.constructionCapacityStern = constructionCapacityStern;
         this.constructionCapacityBroadsides = constructionCapacityBroadsides;
-        this.unlockedThrough = unlockedThrough;
-        this.hullType = hullType;
-        this.getCosts().setCrewRequirement(crewRequirement);
     }
 
     public int getOverallConstructionCapacity() {
@@ -118,21 +95,6 @@ public class Hull extends HasCosts {
 
     public int getConstructionCapacityBroadsides() {
         return constructionCapacityBroadsides;
-    }
-
-    @Nonnull
-    public Research getUnlockedThrough() {
-        return unlockedThrough;
-    }
-
-    @Nonnull
-    public EHullType getHullType() {
-        return hullType;
-    }
-
-    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
-    public void setHullType(@Nonnull final EHullType hullType) {
-        this.hullType = hullType;
     }
 
     @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)

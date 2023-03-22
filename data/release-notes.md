@@ -7,14 +7,25 @@ Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
     - https://honor-harrington.fandom.com/de/wiki/Impellerantrieb
     - https://honor-harrington.fandom.com/de/wiki/Warshawski-Segel
 
--
+2. Das Konzept von Jagd- und Breitseitenbewaffnung wurde geändert.
+    - Es bleibt (vorerst) dabei, dass Bug- und Heck-Bewaffnung manuell gefittet werden muss.
+    - Es wird nicht mehr zwischen Breitseiten- und Jagdwaffen unterschieden - ein Waffensystem ist universell benutzbar.
+    - Eine Breitseitenwaffe wird immer zweimal gefittet - eine pro Breitseite.
+3. Die Schiffshüllen wurden entfernt.  
+   Ganz nach dem Rollenverständnis der RMN folgen Schiffstypen einer Funktion und nicht einer Klassifizierung nach Masse.
+    - Die einzelnen Module sind weiterhin einer Klasse als Sortier- und Vergleichskriterium zugeordnet.
+    - Das Fitting einer Schiffsklasse entscheidet darüber, wie viel Tonnage das Schiff im Ganzen besitzt.  
+      Das beinhaltet den physikalischen Zwang, dass in den Bug- und Hecksektionen nur ein gewisser Prozentsatz des Schiffsvolumens und damit der Schiffsmasse zur Verfügung steht.
+        - https://honor-harrington.fandom.com/de/wiki/Hammerkopf
 
 Gameplay:
 
 1. Auf der StarMap verändert sich der Cursor, wenn man etwas anklicken kann.
-2.
 
-todo. schiffstypen nachbauen und daraus die Werte ableiten  
+todo. schiffsklasse enthält hülle nicht mehr
+todo. schifsklasse enthält hull type -> rename ship type
+
+todo. schiffstypen nachbauen und daraus die Werte ableiten
 
 ----------------- Bugs fixed -----------
 

@@ -41,12 +41,23 @@ public class HasCostsByOwn extends HasNamedTechLevel implements HasEffectValue {
                          final int effectValue,
                          final int useCapacity,
                          @Nonnull final CrewRequirement crewRequirement) {
+        this(baseModule, technicalTypeName, unlockedThroughLevel, effectValue, useCapacity, crewRequirement, EResourceDemand.BASE_MODULE);
+    }
+
+    public HasCostsByOwn(@Nonnull final NamedTechLevel baseModule,
+                         @Nonnull final String technicalTypeName,
+                         final int unlockedThroughLevel,
+                         final int effectValue,
+                         final int useCapacity,
+                         @Nonnull final CrewRequirement crewRequirement,
+                         @Nonnull final EResourceDemand eResourceDemand) {
         super(baseModule, unlockedThroughLevel, technicalTypeName);
         Preconditions.checkNotNull(crewRequirement, "crewRequirement must not be empty");
+        Preconditions.checkNotNull(eResourceDemand, "eResourceDemand must not be empty");
 
         this.effectValue = effectValue;
         this.useCapacity = useCapacity;
-        this.costs = ResourceDepositInitializerCalculator.initializeCosts(baseModule.getTechLevel(), useCapacity, EResourceDemand.BASE_MODULE);
+        this.costs = ResourceDepositInitializerCalculator.initializeCosts(baseModule.getTechLevel(), useCapacity, eResourceDemand);
         this.costs.setCrewRequirement(crewRequirement);
     }
 

@@ -3,10 +3,9 @@ package de.yuga.spacebattle.backend.services.spacecraft;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.EHullType;
-import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.repositories.spacecraft.HullRepository;
 import org.springframework.stereotype.Service;
 
@@ -58,24 +57,23 @@ public class HullService {
     @Nonnull
     @Deprecated(since = "productive environment")
     @SuppressWarnings("DeprecatedIsStillUsed")
-    public Hull createHull(@Nonnull final String name,
+    public Hull createHull(@Nonnull final NamedTechLevel baseModule,
+                           @Nonnull final String technicalTypeName,
+                           final int unlockedThroughLevel,
                            final int ccOverall,
                            final int ccModules,
                            final int ccBow,
                            final int ccStern,
                            final int ccBroadsides,
-                           @Nonnull final ETechLevel techLevel,
-                           @Nonnull final String description,
-                           @Nonnull final Research unlockedThrough,
                            @Nonnull final EHullType hullType,
                            @Nonnull final CrewRequirement crewRequirement) {
-        Preconditions.checkNotNull(name, "name shouldn't be null!");
-        Preconditions.checkNotNull(description, "description shouldn't be null!");
-        Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
+
+        Preconditions.checkNotNull(baseModule, "baseModule must not be empty");
+        Preconditions.checkNotNull(technicalTypeName, "technicalTypeName must not be empty");
         Preconditions.checkNotNull(hullType, "hullType shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        return hullRepository.save(new Hull(name, ccOverall, ccModules, ccBow, ccStern, ccBroadsides, techLevel, description, unlockedThrough, hullType, crewRequirement));
+        return hullRepository.save(new Hull(baseModule, technicalTypeName, unlockedThroughLevel, ccOverall, ccModules, ccBow, ccStern, ccBroadsides, hullType, crewRequirement));
     }
 
     public Hull save(@Nonnull final Hull entity) {
