@@ -40,7 +40,7 @@ import java.util.*;
 @Service
 public class JobService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(JobService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JobService.class);
 
     @Nonnull
     private final JobRepository jobRepository;

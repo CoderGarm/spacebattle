@@ -2,7 +2,6 @@ package de.yuga.spacebattle.backend.services;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.FittingUtils;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
@@ -16,13 +15,13 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.i18n.Translatable;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
+import de.yuga.spacebattle.backend.entities.misc.HasCostsByOwn;
 import de.yuga.spacebattle.backend.entities.misc.HasName;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.MissileMotor;
@@ -31,7 +30,6 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AmmunitionFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
@@ -52,7 +50,6 @@ import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
-import de.yuga.spacebattle.backend.services.spacecraft.HullService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
@@ -64,6 +61,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -108,39 +106,15 @@ public class MasterOfTheUniverseService {
     public static final ProductionType MILITARY_I_PT = new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_MILITARY_I);
     public static final ProductionType MILITARY_II_PT = new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_MILITARY_II);
 
-    private final static Map<EEducationType, Long> XXXS_CREW = Map.of(
-            EEducationType.ENLISTED, 1L);
-
-    private final static Map<EEducationType, Long> XXS_CREW = Map.of(
-            EEducationType.ENLISTED, 3L);
-
-    private final static Map<EEducationType, Long> XS_CREW = Map.of(
-            EEducationType.ENLISTED, 5L,
-            EEducationType.OFFICER, 1L);
-
-    private final static Map<EEducationType, Long> S_CREW = Map.of(
-            EEducationType.ENLISTED, 8L,
-            EEducationType.OFFICER, 2L);
-
-    private final static Map<EEducationType, Long> M_CREW = Map.of(
-            EEducationType.ENLISTED, 12L,
-            EEducationType.OFFICER, 3L);
-
-    private final static Map<EEducationType, Long> L_CREW = Map.of(
-            EEducationType.ENLISTED, 18L,
-            EEducationType.OFFICER, 6L);
-
-    private final static Map<EEducationType, Long> XL_CREW = Map.of(
-            EEducationType.ENLISTED, 20L,
-            EEducationType.OFFICER, 9L);
-
-    private final static Map<EEducationType, Long> XXL_CREW = Map.of(
-            EEducationType.ENLISTED, 300L,
-            EEducationType.OFFICER, 100L);
-
-    private final static Map<EEducationType, Long> XXXL_CREW = Map.of(
-            EEducationType.ENLISTED, 500L,
-            EEducationType.OFFICER, 180L);
+    private static final Map<EEducationType, Long> XXXS_CREW = Map.of(EEducationType.ENLISTED, 1L);
+    private static final Map<EEducationType, Long> XXS_CREW = Map.of(EEducationType.ENLISTED, 3L);
+    private static final Map<EEducationType, Long> XS_CREW = Map.of(EEducationType.ENLISTED, 5L, EEducationType.OFFICER, 1L);
+    private static final Map<EEducationType, Long> S_CREW = Map.of(EEducationType.ENLISTED, 8L, EEducationType.OFFICER, 2L);
+    private static final Map<EEducationType, Long> M_CREW = Map.of(EEducationType.ENLISTED, 12L, EEducationType.OFFICER, 3L);
+    private static final Map<EEducationType, Long> L_CREW = Map.of(EEducationType.ENLISTED, 18L, EEducationType.OFFICER, 6L);
+    private static final Map<EEducationType, Long> XL_CREW = Map.of(EEducationType.ENLISTED, 20L, EEducationType.OFFICER, 9L);
+    private static final Map<EEducationType, Long> XXL_CREW = Map.of(EEducationType.ENLISTED, 300L, EEducationType.OFFICER, 100L);
+    private static final Map<EEducationType, Long> XXXL_CREW = Map.of(EEducationType.ENLISTED, 500L, EEducationType.OFFICER, 180L);
 
     public static final String FLASHKID = "Flashkid";
 
@@ -167,9 +141,6 @@ public class MasterOfTheUniverseService {
 
     @Nonnull
     private final ModuleService moduleService;
-
-    @Nonnull
-    private final HullService hullService;
 
     @Nonnull
     private final ShipClassService shipClassService;
@@ -206,7 +177,6 @@ public class MasterOfTheUniverseService {
                                       @Nonnull final PlanetService planetService,
                                       @Nonnull final BuildingService buildingService,
                                       @Nonnull final ModuleService moduleService,
-                                      @Nonnull final HullService hullService,
                                       @Nonnull final ShipClassService shipClassService,
                                       @Nonnull final ResearchService researchService,
                                       @Nonnull final FleetService fleetService,
@@ -223,7 +193,6 @@ public class MasterOfTheUniverseService {
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.buildingService = Preconditions.checkNotNull(buildingService, "buildingService shouldn't be null!");
         this.moduleService = Preconditions.checkNotNull(moduleService, "moduleService shouldn't be null!");
-        this.hullService = Preconditions.checkNotNull(hullService, "hullService shouldn't be null!");
         this.shipClassService = Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
         this.researchService = Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
@@ -318,36 +287,33 @@ public class MasterOfTheUniverseService {
         colonizePlanet(flashkid, p11);
         LOGGER.info("Planets colonized and populated. Constructions were build.");
 
-        createArmors();
+        final List<Armor> armors = createArmors();
         LOGGER.info("armors created");
 
-        createPropulsions();
+        final List<Propulsion> propulsions = createPropulsions();
         LOGGER.info("propulsions created");
 
-        createEloka();
+        final List<ElectronicWarfare> eloka = createEloka();
         LOGGER.info("eloka created");
 
-        createSidewalls();
+        final List<Sidewall> sidewalls = createSidewalls();
         LOGGER.info("sidewall created");
 
-        createWeapons();
+        final List<Weapon> weapons = createWeapons();
         LOGGER.info("weapons created");
 
-        createMissiles();
+        final Map<Launcher, Missile> missiles = createMissiles();
         LOGGER.info("missiles created");
 
-        createPassiveModules();
+        final List<PassiveModule> passiveModules = createPassiveModules();
         LOGGER.info("support modules created");
         LOGGER.info("Modules created");
-
-        createHulls();
-        LOGGER.info("Hulls created");
 
         addUnlockedResearches(flashkid);
         LOGGER.info("Researches populated");
 
-        createShipClass(flashkid, EHullType.CA);
-        createShipClass(pirate, EHullType.CL);
+        final Fitting fitting = new Fitting(propulsions, armors, eloka, sidewalls, weapons, missiles, passiveModules);
+        final ShipClass chanson = chansonDestroyer(pirate, fitting);
         LOGGER.info("ShipClass created");
 
         createFleetForUser(flashkid);
@@ -364,7 +330,81 @@ public class MasterOfTheUniverseService {
         LOGGER.info("All Data created");
     }
 
-    private void createArmors() {
+    private ShipClass chansonDestroyer(@Nonnull final User owner,
+                                       @Nonnull final Fitting f) {
+        Preconditions.checkNotNull(owner, "owner must not be empty");
+        Preconditions.checkNotNull(f, "f must not be empty");
+
+        final EShipClassType shipClassType = EShipClassType.DD;
+        final ShipClass shipClass = new ShipClass(owner, "Song");
+        shipClass.setShipClassType(shipClassType);
+
+        final Armor a = f.getByType(shipClassType, f.armors);
+        final Propulsion p = f.getProp(ETechnologyType.MILITARY);
+        final ElectronicWarfare e = f.getByType(shipClassType, f.eloka);
+        final Sidewall s = f.getByType(shipClassType, f.sidewalls);
+
+        final Weapon beam = f.getWeapon(shipClassType, EWeaponType.BEAM);
+        final Weapon pointDefense = f.getWeapon(shipClassType, EWeaponType.POINT_DEFENSE);
+
+        final Map.Entry<Launcher, Missile> shipKiller = f.getLauncher(shipClassType, EWeaponType.MISSILE);
+        final Map.Entry<Launcher, Missile> counterMissile = f.getLauncher(shipClassType, EWeaponType.COUNTER_MISSILE);
+
+        fit(shipClass, a, p, e, s,
+                Set.of(
+                        new AlignedFitting(EWeaponAlignment.BOW, Objects.requireNonNull(beam), 1),
+                        new AlignedFitting(EWeaponAlignment.BROADSIDE, Objects.requireNonNull(beam), 6),
+                        new AlignedFitting(EWeaponAlignment.STERN, Objects.requireNonNull(beam), 1),
+                        new AlignedFitting(EWeaponAlignment.BOW, Objects.requireNonNull(pointDefense), 2),
+                        new AlignedFitting(EWeaponAlignment.BROADSIDE, Objects.requireNonNull(pointDefense), 4),
+                        new AlignedFitting(EWeaponAlignment.STERN, Objects.requireNonNull(pointDefense), 2),
+
+                        new AlignedFitting(EWeaponAlignment.BOW, Objects.requireNonNull(shipKiller).getKey(), 2),
+                        new AlignedFitting(EWeaponAlignment.BROADSIDE, Objects.requireNonNull(shipKiller).getKey(), 6),
+                        new AlignedFitting(EWeaponAlignment.STERN, Objects.requireNonNull(shipKiller).getKey(), 2),
+                        new AlignedFitting(EWeaponAlignment.BOW, Objects.requireNonNull(counterMissile).getKey(), 2),
+                        new AlignedFitting(EWeaponAlignment.BROADSIDE, Objects.requireNonNull(counterMissile).getKey(), 4),
+                        new AlignedFitting(EWeaponAlignment.STERN, Objects.requireNonNull(counterMissile).getKey(), 2)
+                ),
+                Set.of(
+                        new AmmunitionFitting(shipKiller.getValue(), 160),
+                        new AmmunitionFitting(counterMissile.getValue(), 444)
+                ),
+                Set.of());
+
+
+        final Set<ConstraintViolation<ShipClass>> validate = validator.validate(shipClass);
+        if (!validate.isEmpty()) {
+            throw new NotifyWebUserException("The provided class is not valid.", validate);
+        }
+        shipClassService.save(shipClass);
+        return shipClass;
+    }
+
+    private void fit(@Nonnull final ShipClass shipClass,
+                     @Nullable final Armor armor,
+                     @Nonnull final Propulsion propulsion,
+                     @Nullable final ElectronicWarfare electronicWarfare,
+                     @Nullable final Sidewall sidewall,
+                     @Nonnull final Set<AlignedFitting> fittings,
+                     @Nonnull final Set<AmmunitionFitting> ammunitionFittings,
+                     @Nonnull final Set<SupportFitting> supportFittings) {
+        Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
+        Preconditions.checkNotNull(propulsion, "propulsion must not be empty");
+        Preconditions.checkNotNull(fittings, "fittings must not be empty");
+        Preconditions.checkNotNull(ammunitionFittings, "ammunitionFittings must not be empty");
+        Preconditions.checkNotNull(supportFittings, "supportFittings must not be empty");
+
+        shipClass.setArmor(armor);
+        shipClass.setSidewall(sidewall);
+        shipClass.setPropulsion(propulsion);
+        shipClass.setElectronicWarfare(electronicWarfare);
+        shipClass.setFittings(fittings);
+        shipClass.setAmmunitionFittings(ammunitionFittings);
+        shipClass.setSupportFittings(supportFittings);
+    }
+
+    private List<Armor> createArmors() {
         final Research research = research("Armor", "A protection of many layers of armor that alternated between ablative composites that absorbed energy from energy weapons and solid anti-kinetic layers.", 18, ETechLevel.TECH_I, null);
         research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Panzerung");
         research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eine Schutzhülle aus verschiedenen Lagen von Komposit-Panzerung aus Keramik und Durastahl und hitzeabsorbierenden Materialien.");
@@ -377,16 +417,17 @@ public class MasterOfTheUniverseService {
         baseModule.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Eine Schutzhülle aus verschiedenen Lagen von Komposit-Panzerung aus Keramik und Durastahl und hitzeabsorbierenden Materialien.");
         moduleService.save(baseModule);
 
-        moduleService.createArmor(baseModule, 1, 3000, 3, EHullType.CL);
-        moduleService.createArmor(baseModule, 3, 5000, 5, EHullType.CA);
-        moduleService.createArmor(baseModule, 6, 13000, 8, EHullType.BC);
-        moduleService.createArmor(baseModule, 9, 28000, 9, EHullType.BB);
-        moduleService.createArmor(baseModule, 13, 190000, 10, EHullType.DN);
-        moduleService.createArmor(baseModule, 18, 360000, 12, EHullType.SD);
-
+        final List<Armor> result = new ArrayList<>();
+        result.add(moduleService.createArmor(baseModule, 1, 3000, 8000, EShipClassType.CL, CrewRequirement.of(S_CREW)));
+        result.add(moduleService.createArmor(baseModule, 3, 5000, 25000, EShipClassType.CA, CrewRequirement.of(M_CREW)));
+        result.add(moduleService.createArmor(baseModule, 6, 13000, 70000, EShipClassType.BC, CrewRequirement.of(L_CREW)));
+        result.add(moduleService.createArmor(baseModule, 9, 28000, 200000, EShipClassType.BB, CrewRequirement.of(XL_CREW)));
+        result.add(moduleService.createArmor(baseModule, 13, 190000, 600000, EShipClassType.DN, CrewRequirement.of(XXL_CREW)));
+        result.add(moduleService.createArmor(baseModule, 18, 360000, 750000, EShipClassType.SD, CrewRequirement.of(XXXL_CREW)));
+        return result;
     }
 
-    private void createPropulsions() {
+    private List<Propulsion> createPropulsions() {
         Research research = research("Impeller drive", "The phased array gravity drive, more commonly known as the impeller drive, was the preeminent sub-light propulsion mechanism for space-faring vessels of the post Diaspora era.", 10, ETechLevel.TECH_I, null);
         research.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Impellerantrieb");
         research.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Ein reaktionsmittelfreier Unterlichtantrieb, der auf der Beeinflussung von Gravitation basiert.");
@@ -399,8 +440,9 @@ public class MasterOfTheUniverseService {
         impellerDrive.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Ein reaktionsmittelfreier Unterlichtantrieb, der auf der Beeinflussung von Gravitation basiert.");
         moduleService.save(impellerDrive);
 
-        moduleService.createPropulsion(impellerDrive, 1, 558, 7, EHyperBand.NONE, ETechnologyType.CIVIL);
-        moduleService.createPropulsion(impellerDrive, 2, 558, 8, EHyperBand.NONE, ETechnologyType.MILITARY);
+        final List<Propulsion> result = new ArrayList<>();
+        result.add(moduleService.createPropulsion(impellerDrive, 1, 558, 23, EHyperBand.NONE, ETechnologyType.CIVIL));
+        result.add(moduleService.createPropulsion(impellerDrive, 2, 558, 31, EHyperBand.NONE, ETechnologyType.MILITARY));
 
         final NamedTechLevel warshawskiSail = moduleService.createBaseModule("Warshawski-Sail",
                 "The Warshawski sail was a gravitic technology, and a key component to interstellar travel in the Post Diaspora era. Allows faster-than-light travel.",
@@ -409,21 +451,22 @@ public class MasterOfTheUniverseService {
         warshawskiSail.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Segel sind Teil des Impellerantriebs eines Schiffes und werden von den Alpha-Emittern erzeugt. Sie ermöglichen die Reise mit scheinbarer Überlichtgeschwindigkeit.");
         moduleService.save(warshawskiSail);
 
-        moduleService.createPropulsion(warshawskiSail, 1, 558, 13, EHyperBand.ALPHA, ETechnologyType.CIVIL);
-        moduleService.createPropulsion(warshawskiSail, 2, 558, 16, EHyperBand.ALPHA, ETechnologyType.MILITARY);
-        moduleService.createPropulsion(warshawskiSail, 2, 558, 14, EHyperBand.BETA, ETechnologyType.CIVIL);
-        moduleService.createPropulsion(warshawskiSail, 3, 558, 17, EHyperBand.BETA, ETechnologyType.MILITARY);
-        moduleService.createPropulsion(warshawskiSail, 2, 558, 15, EHyperBand.GAMMA, ETechnologyType.CIVIL);
-        moduleService.createPropulsion(warshawskiSail, 4, 558, 18, EHyperBand.GAMMA, ETechnologyType.MILITARY);
-        moduleService.createPropulsion(warshawskiSail, 3, 558, 16, EHyperBand.DELTA, ETechnologyType.CIVIL);
-        moduleService.createPropulsion(warshawskiSail, 6, 558, 19, EHyperBand.DELTA, ETechnologyType.MILITARY);
-        moduleService.createPropulsion(warshawskiSail, 7, 558, 20, EHyperBand.EPSILON, ETechnologyType.MILITARY);
-        moduleService.createPropulsion(warshawskiSail, 8, 558, 21, EHyperBand.ZETA, ETechnologyType.MILITARY);
-        moduleService.createPropulsion(warshawskiSail, 9, 558, 22, EHyperBand.ETA, ETechnologyType.MILITARY);
-        moduleService.createPropulsion(warshawskiSail, 10, 558, 23, EHyperBand.THETA, ETechnologyType.MILITARY);
+        result.add(moduleService.createPropulsion(warshawskiSail, 1, 558, 36, EHyperBand.ALPHA, ETechnologyType.CIVIL));
+        result.add(moduleService.createPropulsion(warshawskiSail, 2, 558, 41, EHyperBand.ALPHA, ETechnologyType.MILITARY));
+        result.add(moduleService.createPropulsion(warshawskiSail, 2, 558, 39, EHyperBand.BETA, ETechnologyType.CIVIL));
+        result.add(moduleService.createPropulsion(warshawskiSail, 3, 558, 51, EHyperBand.BETA, ETechnologyType.MILITARY));
+        result.add(moduleService.createPropulsion(warshawskiSail, 2, 558, 44, EHyperBand.GAMMA, ETechnologyType.CIVIL));
+        result.add(moduleService.createPropulsion(warshawskiSail, 4, 558, 59, EHyperBand.GAMMA, ETechnologyType.MILITARY));
+        result.add(moduleService.createPropulsion(warshawskiSail, 3, 558, 52, EHyperBand.DELTA, ETechnologyType.CIVIL));
+        result.add(moduleService.createPropulsion(warshawskiSail, 6, 558, 62, EHyperBand.DELTA, ETechnologyType.MILITARY));
+        result.add(moduleService.createPropulsion(warshawskiSail, 7, 558, 68, EHyperBand.EPSILON, ETechnologyType.MILITARY));
+        result.add(moduleService.createPropulsion(warshawskiSail, 8, 558, 70, EHyperBand.ZETA, ETechnologyType.MILITARY));
+        result.add(moduleService.createPropulsion(warshawskiSail, 9, 558, 75, EHyperBand.ETA, ETechnologyType.MILITARY));
+        result.add(moduleService.createPropulsion(warshawskiSail, 10, 558, 80, EHyperBand.THETA, ETechnologyType.MILITARY));
+        return result;
     }
 
-    private void createEloka() {
+    private List<ElectronicWarfare> createEloka() {
         final Distance effectiveRange = new Distance(2.669, EDistanceMetric.LS);
 
         Research research = research("Electronic Warfare", "The electronic warfare combines sensors and emitters for the electromagnetic and gravimetric spectrum.", 10, ETechLevel.TECH_I, null);
@@ -438,19 +481,21 @@ public class MasterOfTheUniverseService {
         namedTechLevel.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Maßnahmen zur elektronischen Kriegsführung beinhalten Sensoren und Emitter über das gesamte elektromagnetische und gravimetrische Spektrum.");
         moduleService.save(namedTechLevel);
 
-        moduleService.createElectronicWarfare(namedTechLevel, 1, 30, 3, EHullType.LAC, effectiveRange);
-        moduleService.createElectronicWarfare(namedTechLevel, 2, 60, 4, EHullType.VT, effectiveRange);
-        moduleService.createElectronicWarfare(namedTechLevel, 3, 70, 5, EHullType.FG, effectiveRange);
-        moduleService.createElectronicWarfare(namedTechLevel, 4, 75, 6, EHullType.DD, effectiveRange);
-        moduleService.createElectronicWarfare(namedTechLevel, 5, 100, 7, EHullType.CL, effectiveRange);
-        moduleService.createElectronicWarfare(namedTechLevel, 6, 150, 8, EHullType.CA, effectiveRange);
-        moduleService.createElectronicWarfare(namedTechLevel, 7, 700, 9, EHullType.BC, effectiveRange);
-        moduleService.createElectronicWarfare(namedTechLevel, 8, 750, 9, EHullType.BB, effectiveRange);
-        moduleService.createElectronicWarfare(namedTechLevel, 9, 5000, 10, EHullType.DN, effectiveRange);
-        moduleService.createElectronicWarfare(namedTechLevel, 10, 7000, 10, EHullType.SD, effectiveRange);
+        final List<ElectronicWarfare> result = new ArrayList<>();
+        result.add(moduleService.createElectronicWarfare(namedTechLevel, 1, 30, 750, EShipClassType.LAC, CrewRequirement.of(XXXS_CREW), effectiveRange));
+        result.add(moduleService.createElectronicWarfare(namedTechLevel, 2, 60, 1500, EShipClassType.VT, CrewRequirement.of(XXS_CREW), effectiveRange));
+        result.add(moduleService.createElectronicWarfare(namedTechLevel, 3, 70, 1600, EShipClassType.FG, CrewRequirement.of(XS_CREW), effectiveRange));
+        result.add(moduleService.createElectronicWarfare(namedTechLevel, 4, 75, 2000, EShipClassType.DD, CrewRequirement.of(S_CREW), effectiveRange));
+        result.add(moduleService.createElectronicWarfare(namedTechLevel, 5, 100, 2700, EShipClassType.CL, CrewRequirement.of(M_CREW), effectiveRange));
+        result.add(moduleService.createElectronicWarfare(namedTechLevel, 6, 150, 5600, EShipClassType.CA, CrewRequirement.of(M_CREW), effectiveRange));
+        result.add(moduleService.createElectronicWarfare(namedTechLevel, 7, 700, 9000, EShipClassType.BC, CrewRequirement.of(L_CREW), effectiveRange));
+        result.add(moduleService.createElectronicWarfare(namedTechLevel, 8, 750, 11000, EShipClassType.BB, CrewRequirement.of(XL_CREW), effectiveRange));
+        result.add(moduleService.createElectronicWarfare(namedTechLevel, 9, 5000, 210000, EShipClassType.DN, CrewRequirement.of(XXL_CREW), effectiveRange));
+        result.add(moduleService.createElectronicWarfare(namedTechLevel, 10, 7000, 350000, EShipClassType.SD, CrewRequirement.of(XXXL_CREW), effectiveRange));
+        return result;
     }
 
-    private void createSidewalls() {
+    private List<Sidewall> createSidewalls() {
         Research research = research("Sidewall",
                 "The sidewall was the main passive protection of a warship against all sorts of weapons fire.", 10, ETechLevel.TECH_I, null);
         amendTranslation(research, "Seitenschild", "Seitenschilde sind die wichtigste passive Verteidigung gegen alle Arten von Waffenfeuer.");
@@ -462,16 +507,18 @@ public class MasterOfTheUniverseService {
         amendTranslation(namedTechLevel, "Seitenschild", "Seitenschilde sind die wichtigste passive Verteidigung gegen alle Arten von Waffenfeuer.");
         moduleService.save(namedTechLevel);
 
-        moduleService.createSidewall(namedTechLevel, 1, 1000, 2, EHullType.LAC);
-        moduleService.createSidewall(namedTechLevel, 2, 6000, 3, EHullType.VT);
-        moduleService.createSidewall(namedTechLevel, 3, 8000, 4, EHullType.FG);
-        moduleService.createSidewall(namedTechLevel, 4, 11000, 5, EHullType.DD);
-        moduleService.createSidewall(namedTechLevel, 5, 15000, 6, EHullType.CL);
-        moduleService.createSidewall(namedTechLevel, 6, 21000, 7, EHullType.CA);
-        moduleService.createSidewall(namedTechLevel, 7, 60000, 8, EHullType.BC);
-        moduleService.createSidewall(namedTechLevel, 8, 75000, 9, EHullType.BB);
-        moduleService.createSidewall(namedTechLevel, 9, 375000, 10, EHullType.DN);
-        moduleService.createSidewall(namedTechLevel, 10, 700000, 11, EHullType.SD);
+        final List<Sidewall> result = new ArrayList<>();
+        result.add(moduleService.createSidewall(namedTechLevel, 1, 1000, 750, EShipClassType.LAC, CrewRequirement.of(XXXS_CREW)));
+        result.add(moduleService.createSidewall(namedTechLevel, 2, 6000, 1500, EShipClassType.VT, CrewRequirement.of(XXS_CREW)));
+        result.add(moduleService.createSidewall(namedTechLevel, 3, 8000, 1600, EShipClassType.FG, CrewRequirement.of(XS_CREW)));
+        result.add(moduleService.createSidewall(namedTechLevel, 4, 11000, 2000, EShipClassType.DD, CrewRequirement.of(S_CREW)));
+        result.add(moduleService.createSidewall(namedTechLevel, 5, 15000, 2700, EShipClassType.CL, CrewRequirement.of(M_CREW)));
+        result.add(moduleService.createSidewall(namedTechLevel, 6, 21000, 5600, EShipClassType.CA, CrewRequirement.of(M_CREW)));
+        result.add(moduleService.createSidewall(namedTechLevel, 7, 60000, 9000, EShipClassType.BC, CrewRequirement.of(L_CREW)));
+        result.add(moduleService.createSidewall(namedTechLevel, 8, 75000, 11000, EShipClassType.BB, CrewRequirement.of(XL_CREW)));
+        result.add(moduleService.createSidewall(namedTechLevel, 9, 375000, 210000, EShipClassType.DN, CrewRequirement.of(XXL_CREW)));
+        result.add(moduleService.createSidewall(namedTechLevel, 10, 700000, 350000, EShipClassType.SD, CrewRequirement.of(XXXL_CREW)));
+        return result;
     }
 
     private void amendTranslation(@Nonnull final HasName hasName, @Nonnull final String name, @Nonnull final String description) {
@@ -483,7 +530,7 @@ public class MasterOfTheUniverseService {
         hasName.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, description);
     }
 
-    private void createWeapons() {
+    private List<Weapon> createWeapons() {
         // broadside weapons must be 'virtually' present twice and are slightly lighter than their chasing counterparts
 
         Research research = research("Point Defense",
@@ -499,19 +546,14 @@ public class MasterOfTheUniverseService {
         amendTranslation(namedTechLevel, "Nahbereichsabwehr", "Unter Nahbereichsabwehr fasst man alle Verteidigungssysteme eines Schiffes zusammen, die die letzte aktive Verteidigungslinie gegen einkommenden Beschuss darstellen.");
         moduleService.save(namedTechLevel);
 
-        final Distance closePDDistance = new Distance(0.6343, EDistanceMetric.LS);
+        final Distance closePDDistance = new Distance(643, EDistanceMetric.KM);
         final Distance beamDistance = new Distance(1.3343, EDistanceMetric.LS);
-        moduleService.createWeapon(namedTechLevel, 1, 1, 1, EHullType.LAC, closePDDistance, 2, EWeaponType.POINT_DEFENSE, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 1, 2, 1, EHullType.LAC, closePDDistance, 4, EWeaponType.POINT_DEFENSE, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
+        final List<Weapon> result = new ArrayList<>();
+        result.add(moduleService.createWeapon(namedTechLevel, 1, 200, 1, EShipClassType.LAC, closePDDistance, 4, EWeaponType.POINT_DEFENSE, CrewRequirement.of(XXXS_CREW)));
+        result.add(moduleService.createWeapon(namedTechLevel, 1, 500, 1, EShipClassType.CL, closePDDistance, 12, EWeaponType.POINT_DEFENSE, CrewRequirement.of(XXS_CREW)));
 
-        moduleService.createWeapon(namedTechLevel, 4, 1, 1, EHullType.LAC, beamDistance, 3, EWeaponType.POINT_DEFENSE, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 4, 2, 1, EHullType.LAC, beamDistance, 6, EWeaponType.POINT_DEFENSE, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
-
-        moduleService.createWeapon(namedTechLevel, 1, 2, 1, EHullType.CL, closePDDistance, 6, EWeaponType.POINT_DEFENSE, new CrewRequirement(XXS_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 1, 3, 1, EHullType.CL, closePDDistance, 12, EWeaponType.POINT_DEFENSE, new CrewRequirement(XXS_CREW, EDepositType.COSTS));
-
-        moduleService.createWeapon(namedTechLevel, 4, 2, 1, EHullType.CL, beamDistance, 10, EWeaponType.POINT_DEFENSE, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 4, 3, 1, EHullType.CL, beamDistance, 16, EWeaponType.POINT_DEFENSE, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
+        result.add(moduleService.createWeapon(namedTechLevel, 4, 400, 1, EShipClassType.LAC, beamDistance, 8, EWeaponType.POINT_DEFENSE, CrewRequirement.of(XXXS_CREW)));
+        result.add(moduleService.createWeapon(namedTechLevel, 4, 800, 1, EShipClassType.CL, beamDistance, 16, EWeaponType.POINT_DEFENSE, CrewRequirement.of(XXXS_CREW)));
 
         research = research("Laser",
                 "Lasers were the most common ship-mounted energy weapon. Anti-ship lasers had lenses that ranged from several decimeters to over a meter in diameter and operate in the X-ray range.",
@@ -525,17 +567,14 @@ public class MasterOfTheUniverseService {
         amendTranslation(namedTechLevel, "Laser", "Ein Laser ist eine künstliche, gerichtete Strahlungsquelle und eine von zwei gebräuchlichen Energiewaffen.");
         moduleService.save(namedTechLevel);
 
-        moduleService.createWeapon(namedTechLevel, 1, 1, 75, EHullType.LAC, beamDistance, 1, EWeaponType.BEAM, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 1, 2, 50, EHullType.LAC, beamDistance, 1, EWeaponType.BEAM, new CrewRequirement(XXXS_CREW, EDepositType.COSTS));
+        result.add(moduleService.createWeapon(namedTechLevel, 1, 300, 40, EShipClassType.LAC, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(XXXS_CREW)));
+        result.add(moduleService.createWeapon(namedTechLevel, 1, 350, 65, EShipClassType.LAC, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(XXS_CREW)));
 
-        moduleService.createWeapon(namedTechLevel, 2, 3, 85, EHullType.DD, beamDistance, 1, EWeaponType.BEAM, new CrewRequirement(XXS_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 2, 5, 70, EHullType.DD, beamDistance, 1, EWeaponType.BEAM, new CrewRequirement(XS_CREW, EDepositType.COSTS));
+        result.add(moduleService.createWeapon(namedTechLevel, 2, 450, 80, EShipClassType.DD, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(XXS_CREW)));
+        result.add(moduleService.createWeapon(namedTechLevel, 3, 600, 90, EShipClassType.CL, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(S_CREW)));
 
-        moduleService.createWeapon(namedTechLevel, 3, 5, 115, EHullType.CL, beamDistance, 1, EWeaponType.BEAM, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 3, 8, 90, EHullType.CL, beamDistance, 1, EWeaponType.BEAM, new CrewRequirement(S_CREW, EDepositType.COSTS));
-
-        moduleService.createWeapon(namedTechLevel, 4, 9, 160, EHullType.CA, beamDistance, 1, EWeaponType.BEAM, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 4, 16, 110, EHullType.CA, beamDistance, 1, EWeaponType.BEAM, new CrewRequirement(M_CREW, EDepositType.COSTS));
+        result.add(moduleService.createWeapon(namedTechLevel, 4, 800, 110, EShipClassType.CA, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(S_CREW)));
+        result.add(moduleService.createWeapon(namedTechLevel, 4, 1500, 160, EShipClassType.CA, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(M_CREW)));
 
         research = research("Graser",
                 "Grasers were lasers operating in the gamma ray range. Considered vastly superior in both strength and size when compared to lasers, grasers were often only seen in small numbers in smaller ships, due to their larger mass.",
@@ -549,26 +588,17 @@ public class MasterOfTheUniverseService {
         amendTranslation(namedTechLevel, "Graser", "Graser sind wie die Laser lichtschnelle Waffen, die aber im Gegensatz zu diesen nicht im Bereich des Lichts, sondern im Bereich der Gamma-Strahlung operieren.");
         moduleService.save(namedTechLevel);
 
-        moduleService.createWeapon(namedTechLevel, 1, 9, 350, EHullType.CL, beamDistance, 1, EWeaponType.BEAM, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 1, 14, 200, EHullType.CL, beamDistance, 1, EWeaponType.BEAM, new CrewRequirement(S_CREW, EDepositType.COSTS));
-
-        moduleService.createWeapon(namedTechLevel, 2, 11, 400, EHullType.CA, beamDistance, 1, EWeaponType.BEAM, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 2, 18, 240, EHullType.CA, beamDistance, 1, EWeaponType.BEAM, new CrewRequirement(M_CREW, EDepositType.COSTS));
-
-        moduleService.createWeapon(namedTechLevel, 3, 21, 500, EHullType.BC, beamDistance, 1, EWeaponType.BEAM, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 3, 36, 350, EHullType.BC, beamDistance, 1, EWeaponType.BEAM, new CrewRequirement(L_CREW, EDepositType.COSTS));
-
-        moduleService.createWeapon(namedTechLevel, 4, 37, 850, EHullType.BB, beamDistance, 1, EWeaponType.BEAM, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 4, 64, 500, EHullType.BB, beamDistance, 1, EWeaponType.BEAM, new CrewRequirement(L_CREW, EDepositType.COSTS));
-
-        moduleService.createWeapon(namedTechLevel, 5, 51, 1100, EHullType.DN, beamDistance, 1, EWeaponType.BEAM, new CrewRequirement(L_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 5, 98, 750, EHullType.DN, beamDistance, 1, EWeaponType.BEAM, new CrewRequirement(XL_CREW, EDepositType.COSTS));
-
-        moduleService.createWeapon(namedTechLevel, 6, 75, 1450, EHullType.SD, beamDistance, 1, EWeaponType.BEAM, new CrewRequirement(L_CREW, EDepositType.COSTS));
-        moduleService.createWeapon(namedTechLevel, 6, 122, 900, EHullType.SD, beamDistance, 1, EWeaponType.BEAM, new CrewRequirement(XL_CREW, EDepositType.COSTS));
+        result.add(moduleService.createWeapon(namedTechLevel, 1, 1900, 200, EShipClassType.CL, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(XXS_CREW)));
+        result.add(moduleService.createWeapon(namedTechLevel, 1, 2600, 350, EShipClassType.CL, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(XS_CREW)));
+        result.add(moduleService.createWeapon(namedTechLevel, 2, 3100, 400, EShipClassType.CA, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(S_CREW)));
+        result.add(moduleService.createWeapon(namedTechLevel, 3, 3600, 500, EShipClassType.BC, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(M_CREW)));
+        result.add(moduleService.createWeapon(namedTechLevel, 4, 6600, 850, EShipClassType.BB, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(M_CREW)));
+        result.add(moduleService.createWeapon(namedTechLevel, 5, 9800, 1100, EShipClassType.DN, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(L_CREW)));
+        result.add(moduleService.createWeapon(namedTechLevel, 6, 12200, 1450, EShipClassType.SD, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(XL_CREW)));
+        return result;
     }
 
-    private void createMissiles() {
+    private Map<Launcher, Missile> createMissiles() {
         // broadside weapons must be 'virtually' present twice
 
         Research research = research("Missile systems",
@@ -597,11 +627,11 @@ public class MasterOfTheUniverseService {
         final Acceleration shipKillerAcceleration = new Acceleration(46000, EAccelerationMetric.G);
         final MissileMotor shipKillerMotor = new MissileMotor(180, 20, shipKillerAcceleration);
 
-        final Missile counterMissile = moduleService.createMissile(counterMissileNTL, 1, 5, 5, EHullType.LAC, new Warhead(counterProjectionRange, EWarheadType.COUNTER_MISSILE, 1), counterMotor);
-        final Missile lacMissile = moduleService.createMissile(missileNTL, 1, 5, 5, EHullType.LAC, new Warhead(damageProjectionRange, EWarheadType.EXPLOSION, 20), shipKillerMotor);
-        final Missile ddMissile = moduleService.createMissile(missileNTL, 2, 30, 20, EHullType.DD, new Warhead(damageProjectionRange, EWarheadType.EXPLOSION, 100), shipKillerMotor);
-        final Missile caMissile = moduleService.createMissile(missileNTL, 4, 70, 50, EHullType.CA, new Warhead(damageProjectionRange, EWarheadType.EXPLOSION, 400), shipKillerMotor);
-        final Missile dnMissile = moduleService.createMissile(missileNTL, 6, 100, 80, EHullType.DN, new Warhead(damageProjectionRange, EWarheadType.EXPLOSION, 800), shipKillerMotor);
+        final Missile counterMissile = moduleService.createMissile(counterMissileNTL, 1, 5, 6, EShipClassType.LAC, new Warhead(counterProjectionRange, EWarheadType.COUNTER_MISSILE, 1), counterMotor);
+        final Missile lacMissile = moduleService.createMissile(missileNTL, 1, 5, 20, EShipClassType.LAC, new Warhead(damageProjectionRange, EWarheadType.EXPLOSION, 20), shipKillerMotor);
+        final Missile ddMissile = moduleService.createMissile(missileNTL, 2, 30, 60, EShipClassType.DD, new Warhead(damageProjectionRange, EWarheadType.EXPLOSION, 100), shipKillerMotor);
+        final Missile caMissile = moduleService.createMissile(missileNTL, 4, 70, 80, EShipClassType.CA, new Warhead(damageProjectionRange, EWarheadType.EXPLOSION, 400), shipKillerMotor);
+        final Missile dnMissile = moduleService.createMissile(missileNTL, 6, 100, 120, EShipClassType.DN, new Warhead(damageProjectionRange, EWarheadType.EXPLOSION, 800), shipKillerMotor);
 
         final NamedTechLevel launcherNTL = moduleService.createBaseModule("Missile launcher",
                 "Originally, missile tubes merely housed the missile prior to launch. Missiles would receive pre-programmed instructions from their ship, and would then use reaction thrusters to move out beyond the ship's impeller wedge before activating their own. This severely limited the fire rate.",
@@ -609,97 +639,53 @@ public class MasterOfTheUniverseService {
         amendTranslation(launcherNTL, "Raketenwerfer", "Raketenwerfer bestehen in der einfachsten Ausführung aus einem Startrohr, in dem die abschussbereite Rakete gelagert wird, und einer Zielvorrichtung. Bordraketenwerfer von Raumschiffen verfügen normalerweise über ein einzelnes Startrohr mit einem Nachladesystem, mit dem Raketen aus internen Magazinen nachgeladen werden können, bis die Munition erschöpft ist.");
         moduleService.save(launcherNTL);
 
-        moduleService.createLauncher(launcherNTL, 1, 1, EHullType.LAC, new CrewRequirement(XXXS_CREW, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
-        moduleService.createLauncher(launcherNTL, 1, 2, EHullType.LAC, new CrewRequirement(XXS_CREW, EDepositType.COSTS), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile));
+        final Map<Launcher, Missile> result = new HashMap<>();
 
-        moduleService.createLauncher(launcherNTL, 1, 2, EHullType.LAC, new CrewRequirement(XXXS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(lacMissile));
-        moduleService.createLauncher(launcherNTL, 1, 4, EHullType.LAC, new CrewRequirement(XXS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(lacMissile));
-
-        moduleService.createLauncher(launcherNTL, 2, 7, EHullType.DD, new CrewRequirement(XXS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(ddMissile));
-        moduleService.createLauncher(launcherNTL, 2, 13, EHullType.DD, new CrewRequirement(XS_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(ddMissile));
-
-        moduleService.createLauncher(launcherNTL, 4, 15, EHullType.CA, new CrewRequirement(S_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(caMissile));
-        moduleService.createLauncher(launcherNTL, 4, 27, EHullType.CA, new CrewRequirement(M_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(caMissile));
-
-        moduleService.createLauncher(launcherNTL, 6, 41, EHullType.DN, new CrewRequirement(M_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(dnMissile));
-        moduleService.createLauncher(launcherNTL, 6, 76, EHullType.DN, new CrewRequirement(M_CREW, EDepositType.COSTS), EWeaponType.MISSILE, Set.of(dnMissile));
+        result.put(moduleService.createLauncher(launcherNTL, 1, 350, EShipClassType.LAC, CrewRequirement.of(XXXS_CREW), EWeaponType.COUNTER_MISSILE, Set.of(counterMissile)), counterMissile);
+        result.put(moduleService.createLauncher(launcherNTL, 1, 450, EShipClassType.LAC, CrewRequirement.of(XXXS_CREW), EWeaponType.MISSILE, Set.of(lacMissile)), lacMissile);
+        result.put(moduleService.createLauncher(launcherNTL, 2, 800, EShipClassType.DD, CrewRequirement.of(XS_CREW), EWeaponType.MISSILE, Set.of(ddMissile)), ddMissile);
+        result.put(moduleService.createLauncher(launcherNTL, 4, 1000, EShipClassType.CA, CrewRequirement.of(M_CREW), EWeaponType.MISSILE, Set.of(caMissile)), caMissile);
+        result.put(moduleService.createLauncher(launcherNTL, 6, 2600, EShipClassType.DN, CrewRequirement.of(L_CREW), EWeaponType.MISSILE, Set.of(dnMissile)), dnMissile);
+        return result;
     }
 
-    private void createPassiveModules() {
-        Research unlocksPassive = research("Armor improvement I", "Improves the armor improvement module", 1, ETechLevel.TECH_I, null);
-        PassiveModule passiveModule = moduleService.createPassiveModule("Armor increasement Mk I", "Increases the armor value.", unlocksPassive,
-                ESupportType.ARMOR, ECalculationType.ADD, 10, 10, EHullType.CL, ETechLevel.TECH_I, new CrewRequirement(XS_CREW, EDepositType.COSTS));
-        passiveModule.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Verstärkung der Panzerung Mk I");
-        passiveModule.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Verstärkt die Panzerung.");
-        moduleService.save(passiveModule);
-
-        passiveModule = moduleService.createPassiveModule("Sidewall increasement Mk I", "Increases the sidewall value.", unlocksPassive,
-                ESupportType.ARMOR, ECalculationType.ADD, 10, 6, EHullType.FR, ETechLevel.TECH_I, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        passiveModule.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Verstärkung des Seitenschilds Mk I");
-        passiveModule.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Verstärkt den Seitenschild.");
-        moduleService.save(passiveModule);
-
-        passiveModule = moduleService.createPassiveModule("Sidewall increasement Mk I", "Increases the sidewall value.", unlocksPassive,
-                ESupportType.SIDEWALL, ECalculationType.ADD, 10, 6, EHullType.FR, ETechLevel.TECH_I, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        passiveModule.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Verstärkung des Seitenschilds Mk I");
-        passiveModule.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Verstärkt den Seitenschild.");
-        moduleService.save(passiveModule);
-
-        passiveModule = moduleService.createPassiveModule("Electronic warfare increasement Mk I", "Increases the electronic warfare value.", unlocksPassive,
-                ESupportType.ELECTRONIC_WARFARE, ECalculationType.ADD, 2, 5, EHullType.FR, ETechLevel.TECH_I, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        passiveModule.getName().updateOrCreate(Translation.SECOND_LANGUAGE, "Verstärkung der Eloka Mk I");
-        passiveModule.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Verstärkt die Eloka.");
-        moduleService.save(passiveModule);
-    }
-
-    private void createHulls() {
-        Research research = research("Corvette", "The Corvette research researches Corvettes.", 1, ETechLevel.TECH_I, null);
-        amendTranslation(research, "Raketen", "Eine Rakete ist ein selbst angetriebener Flugkörper, der im Raumkampf hauptsächlich als Waffe eingesetzt wird.");
+    private List<PassiveModule> createPassiveModules() {
+        Research research = research("Support modules", "Unlocks improvements for combat and non-combat supportive.", 1, ETechLevel.TECH_I, null);
+        amendTranslation(research, "Unterstützungsmodule", "Ermöglicht Verbesserungen von Schiffsmodulen.");
         researchService.save(research);
 
-        final NamedTechLevel ntl = moduleService.createBaseModule("Missile",
-                "A missile was a self-propelled guided projectile used as a weapon. By the 20th Century PD, impeller drive-propelled missiles were the most common weapons of naval warfare.",
-                research, ETechLevel.TECH_I, Hull.class);
-        amendTranslation(ntl, "Raketen", "Eine Rakete ist ein selbst angetriebener Flugkörper, der im Raumkampf hauptsächlich als Waffe eingesetzt wird.");
-        moduleService.save(ntl);
+        final List<PassiveModule> result = new ArrayList<>();
+        PassiveModule passiveModule =
+                /*moduleService.createPassiveModule("Armor increasement Mk I", "Increases the armor value.", research,
+                ESupportType.ARMOR, ECalculationType.ADD, 10, 10, EShipClassType.CL, ETechLevel.TECH_I, CrewRequirement.of(XS_CREW));
+        amendTranslation(passiveModule, "Verstärkung der Panzerung Mk I", "Verstärkt die Panzerung.");
+        result.add(moduleService.save(passiveModule));
 
-        hullService.createHull(ntl, "Small Freighter hull", 1, 2000, 2000, 0, 0, 0, EHullType.FR, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        hullService.createHull(ntl, "Big Freighter hull", 1, 5000, 5000, 0, 0, 0, EHullType.FR, new CrewRequirement(M_CREW, EDepositType.COSTS));
+        passiveModule = moduleService.createPassiveModule("Sidewall increasement Mk I", "Increases the sidewall value.", research,
+                ESupportType.ARMOR, ECalculationType.ADD, 10, 6, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(S_CREW));
+        amendTranslation(passiveModule, "Verstärkung des Seitenschilds Mk I", "Verstärkt den Seitenschild.");
+        result.add(moduleService.save(passiveModule));
 
-        hullService.createHull(ntl, "Light attack vessel", 1, 20, 4, 10, 3, 3, EHullType.LAC, new CrewRequirement(S_CREW, EDepositType.COSTS));
-        hullService.createHull(ntl, "Corvette vessel", 1, 30, 6, 5, 5, 14, EHullType.VT, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        hullService.createHull(ntl, "Frigate vessel", 1, 50, 18, 6, 6, 20, EHullType.FG, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        hullService.createHull(ntl, "Destroyer vessel", 1, 65, 24, 8, 8, 24, EHullType.DD, new CrewRequirement(M_CREW, EDepositType.COSTS));
+        passiveModule = moduleService.createPassiveModule("Sidewall increasement Mk I", "Increases the sidewall value.", research,
+                ESupportType.SIDEWALL, ECalculationType.ADD, 10, 6, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(S_CREW));
+        amendTranslation(passiveModule, "Verstärkung des Seitenschilds Mk I", "Verstärkt den Seitenschild.");
+        result.add(moduleService.save(passiveModule));
 
+        passiveModule = moduleService.createPassiveModule("Electronic warfare increasement Mk I", "Increases the electronic warfare value.", research,
+                ESupportType.ELECTRONIC_WARFARE, ECalculationType.ADD, 2, 5, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(S_CREW));
+        amendTranslation(passiveModule, "Verstärkung der Eloka Mk I", "Verstärkt die Eloka.");
+        result.add(moduleService.save(passiveModule));*/
 
-        hullService.createHull(ntl, "Cruiser vessel", 1, 80, 30, 10, 10, 30, EHullType.CL, new CrewRequirement(M_CREW, EDepositType.COSTS));
-        hullService.createHull(ntl, "Heavy cruiser vessel", 1, 200, 60, 30, 30, 80, EHullType.CA, new CrewRequirement(L_CREW, EDepositType.COSTS));
-        hullService.createHull(ntl, "Battlecruiser vessel", 1, 700, 280, 90, 90, 240, EHullType.BC, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-        hullService.createHull(ntl, "Battleship vessel", 1, 2000, 800, 200, 200, 800, EHullType.BB, new CrewRequirement(XXXL_CREW, EDepositType.COSTS));
-        hullService.createHull(ntl, "Dreadnought vessel", 1, 5000, 1900, 400, 400, 2300, EHullType.DN, new CrewRequirement(XXXL_CREW, EDepositType.COSTS));
-        hullService.createHull(ntl, "Superdreadnought vessel", 1, 8000, 3320, 640, 640, 3400, EHullType.SD, new CrewRequirement(XXL_CREW, EDepositType.COSTS));
-    }
+                passiveModule = moduleService.createPassiveModule("Freight module", "A simple cargo hold.", research,
+                        ESupportType.FREIGHT, ECalculationType.ADD, 750, 500, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(S_CREW));
+        amendTranslation(passiveModule, "Frachtmodul", "Ein einfaches Frachtmodul.");
+        result.add(moduleService.save(passiveModule));
 
-    private ShipClass createShipClass(@Nonnull final User user, @Nonnull final EHullType hullType) {
-        Preconditions.checkNotNull(user, "user must not be empty");
-        Preconditions.checkNotNull(hullType, "hullType must not be empty");
-
-        final boolean shipIsPresent = shipClassService.findAllLatestByOwner(user).stream()
-                .map(ShipClass::getHull)
-                .filter(Objects::nonNull)
-                .map(Hull::getHullType)
-                .anyMatch(h -> h == hullType);
-        if (shipIsPresent) {
-            throw new NotifyWebUserException("You already have your starter ship. Don't be greedy!");
-        }
-
-        final List<Hull> byHullType = hullService.findByHullType(hullType);
-        final Hull hull = byHullType.stream()
-                .sorted(Comparator.comparingInt(Hull::getOverallConstructionCapacity))
-                .reduce((o1, o2) -> o1)
-                .orElseThrow(() -> new NotifyWebUserException("There was no hull found for your request."));
-        final String randomWarshipName = resourceService.getRandomWarshipName();
-        return createFitting(new ShipClass(user, randomWarshipName, hull, null));
+        passiveModule = moduleService.createPassiveModule("Passenger module", "A simple passenger module.", research,
+                ESupportType.PASSENGER, ECalculationType.ADD, 300, 25, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(S_CREW));
+        amendTranslation(passiveModule, "Passagiermodul", "Ein einfaches Passagiermodul.");
+        result.add(moduleService.save(passiveModule));
+        return result;
     }
 
     /**
@@ -883,216 +869,15 @@ public class MasterOfTheUniverseService {
         return colonizationService.colonizePlanet(colonization);
     }
 
-    @SuppressWarnings("ConstantConditions")
-    protected ShipClass createFitting(@Nonnull final ShipClass shipClass) {
-        Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
-
-        final Hull hull = shipClass.getHull();
-        assert hull != null : "If this is wrong, then everything is broken!";
-        int cc = hull.getConstructionCapacity();
-        int ccBow = hull.getConstructionCapacityBow();
-        int ccStern = hull.getConstructionCapacityStern();
-        int ccBroadsides = hull.getConstructionCapacityBroadsides();
-        final EHullType hullType = hull.getHullType();
-
-        final Armor armor = moduleService.findAllArmors().stream()
-                .filter(a -> hullType.suitsHullType(a.getHullType()))
-                .reduce((o1, o2) -> o2).orElse(null);
-
-        final Sidewall sidewall = moduleService.findAllSidewalls().stream()
-                .filter(e -> hullType.suitsHullType(e.getHullType()))
-                .reduce((o1, o2) -> o2).orElse(null);
-
-        final ElectronicWarfare electronicWarfare = moduleService.findAllElectronicWarfare().stream()
-                .filter(e -> hullType.suitsHullType(e.getHullType()))
-                .reduce((o1, o2) -> o2).orElse(null);
-
-        final Propulsion propulsion = moduleService.findAllPropulsions().stream()
-                .filter(p -> p.getHyperBand() == EHyperBand.ALPHA && p.getTechnologyType() == ETechnologyType.MILITARY)
-                .findFirst().orElse(null);
-
-        final List<Weapon> weapons = moduleService.findAllWeapons();
-
-        final Weapon beam = weapons.stream().filter(w2 -> w2.getWeaponType() == EWeaponType.BEAM && hullType.suitsHullType(w2.getHullType()))
-                .sorted(Comparator.comparingInt(Weapon::getDamageValue))
-                .reduce((o1, o2) -> o2)
-                .orElse(null);
-
-        final Weapon pd = weapons.stream().filter(w -> w.getWeaponType() == EWeaponType.POINT_DEFENSE && hullType.suitsHullType(w.getHullType()))
-                .reduce((o1, o2) -> o2)
-                .orElse(null);
-
-        final List<Launcher> allLaunchers = moduleService.findAllLaunchers();
-        final Launcher missile = allLaunchers.stream().filter(w1 -> w1.getWeaponType() == EWeaponType.MISSILE && hullType.suitsHullType(w1.getHullType()))
-                .sorted(Comparator.comparingLong(l -> l.getHeaviestMissile().getDamageValue()))
-                .reduce((o1, o2) -> o2)
-                .orElse(null);
-
-        final Launcher counter = allLaunchers.stream().filter(w -> w.getWeaponType() == EWeaponType.COUNTER_MISSILE && hullType.suitsHullType(w.getHullType()))
-                .reduce((o1, o2) -> o2)
-                .orElse(null);
-
-        final List<PassiveModule> passiveModules = sortByValue(sortByValue(moduleService.findAllPassiveModules(), hullType), hullType);
-
-        cc -= propulsion.getUseCapacity(hull);
-        shipClass.setPropulsion(propulsion);
-
-        if (armor != null) {
-            cc -= armor.getUseCapacity(hull);
-            shipClass.setArmor(armor);
-        }
-
-        if (sidewall != null) {
-            cc -= sidewall.getUseCapacity(hull);
-            shipClass.setSidewall(sidewall);
-        }
-
-        if (electronicWarfare != null) {
-            cc -= electronicWarfare.getUseCapacity(hull);
-            shipClass.setElectronicWarfare(electronicWarfare);
-        }
-
-        final Set<AlignedFitting> fittings = new HashSet<>();
-        for (final EWeaponAlignment alignment : EWeaponAlignment.values()) {
-
-            int presentCapacity;
-            switch (alignment) {
-                default:
-                case BROADSIDE:
-                    presentCapacity = ccBroadsides;
-                    break;
-                case BOW:
-                    presentCapacity = ccBow;
-                    break;
-                case STERN:
-                    presentCapacity = ccStern;
-                    break;
-            }
-
-            int amountBeam = 0;
-            int amountMissile = 0;
-            int amountPD = 0;
-            int amountCounter = 0;
-            boolean hasChanged;
-            while (presentCapacity >= 0) {
-                hasChanged = false;
-                if (presentCapacity >= beam.getUseCapacity()) {
-                    amountBeam++;
-                    presentCapacity -= beam.getUseCapacity();
-                    hasChanged = true;
-                }
-                if (presentCapacity >= missile.getUseCapacity()) {
-                    amountMissile++;
-                    presentCapacity -= missile.getUseCapacity();
-                    hasChanged = true;
-                }
-                if (presentCapacity >= counter.getUseCapacity()) {
-                    amountCounter++;
-                    presentCapacity -= counter.getUseCapacity();
-                    hasChanged = true;
-                }
-                if (presentCapacity >= pd.getUseCapacity()) {
-                    amountPD++;
-                    presentCapacity -= pd.getUseCapacity();
-                    hasChanged = true;
-                }
-                if (!hasChanged) {
-                    break;
-                }
-            }
-            if (amountBeam > 0) {
-                fittings.add(new AlignedFitting(alignment, beam, amountBeam));
-            }
-            if (amountMissile > 0) {
-                fittings.add(new AlignedFitting(alignment, missile, amountMissile));
-            }
-            if (amountCounter > 0) {
-                fittings.add(new AlignedFitting(alignment, counter, amountCounter));
-            }
-            if (amountPD > 0) {
-                fittings.add(new AlignedFitting(alignment, pd, amountPD));
-            }
-        }
-
-        if (fittings.isEmpty()) {
-            throw new NotifyWebUserException("You must fight, bitch!");
-        }
-        shipClass.setFittings(fittings);
-
-        final Map<Launcher, Integer> attackMissilesToAmount = fittings.stream()
-                .filter(FittingUtils.ATTACK_MISSILES)
-                .collect(Collectors.groupingBy(AlignedFitting::getLauncher,
-                        Collectors.mapping(AlignedFitting::getAmount, Collectors.reducing(0, Integer::sum))));
-
-        final Map<Launcher, Integer> counterMissilesToAmount = fittings.stream()
-                .filter(FittingUtils.COUNTER_MISSILES)
-                .collect(Collectors.groupingBy(AlignedFitting::getLauncher,
-                        Collectors.mapping(AlignedFitting::getAmount, Collectors.reducing(0, Integer::sum))));
-
-        final Integer amountAttack = attackMissilesToAmount.values().stream().reduce(0, Integer::sum);
-        final Integer amountCounter = counterMissilesToAmount.values().stream().reduce(0, Integer::sum);
-
-        final int fullAmount = amountAttack + amountCounter;
-        final double piece = (double) cc / (double) fullAmount;
-        double freeCapForAttackAmmo = piece * amountAttack;
-        double freeCapForCounterAmmo = piece * amountCounter;
-
-        cc = addAmmunition(shipClass, cc, attackMissilesToAmount, freeCapForAttackAmmo);
-        cc = addAmmunition(shipClass, cc, counterMissilesToAmount, freeCapForCounterAmmo);
-
-        final int shotsLoad = shipClass.getAmmunitionFittings().stream().map(AmmunitionFitting::getAmount).reduce(0, Integer::sum);
-        if (shotsLoad == 0) {
-            throw new NotifyWebUserException("You must fight, bitch! Take a stone!");
-        }
-
-        final int neededCapacityForSupport = passiveModules.stream().map(PassiveModule::getUseCapacity).reduce(0, Integer::sum);
-        final int amountOfSupportSets = (cc / neededCapacityForSupport) - 1;
-        if (amountOfSupportSets > 0) {
-            final Set<SupportFitting> supportFittings = passiveModules.stream().map(af -> new SupportFitting(af, amountOfSupportSets)).collect(Collectors.toSet());
-            shipClass.setSupportFittings(supportFittings);
-        }
-
-        final Set<ConstraintViolation<ShipClass>> validate = validator.validate(shipClass);
-        if (!validate.isEmpty()) {
-            throw new NotifyWebUserException("The provided class is not valid.", validate);
-        }
-
-        return shipClassService.save(shipClass);
-    }
-
-    private int addAmmunition(@Nonnull final ShipClass shipClass,
-                              final int capacity,
-                              @Nonnull final Map<Launcher, Integer> launcherToLauncherAmount,
-                              double freeCapForAmmo) {
-        Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
-        Preconditions.checkNotNull(launcherToLauncherAmount, "launcherToLauncherAmount must not be empty");
-
-        int capClone = capacity;
-
-        final double capacityForSingleShotFromAllLaunchers = launcherToLauncherAmount.entrySet().stream().map(l -> {
-            final Missile missile = new ArrayList<>(l.getKey().getAllowedMissiles()).get(0);
-            final Integer amountOfLaunchers = l.getValue();
-            //noinspection UnnecessaryLocalVariable
-            final double capacityForSingleShot = missile.getUsedCapacity() * amountOfLaunchers;
-            return capacityForSingleShot;
-        }).reduce(0D, Double::sum);
-
-        final int shotsAvailablePerLauncher = (int) ((freeCapForAmmo) / capacityForSingleShotFromAllLaunchers);
-
-        capClone -= (shotsAvailablePerLauncher * capacityForSingleShotFromAllLaunchers);
-
-        launcherToLauncherAmount.forEach((launcher, amountOfLauncher) -> {
-            final Missile missile = new ArrayList<>(launcher.getAllowedMissiles()).get(0);
-            shipClass.addAmmunitionFitting(new AmmunitionFitting(missile, amountOfLauncher * shotsAvailablePerLauncher));
-        });
-        return capClone;
-    }
 
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated(since = "productive environment")
     private void addUnlockedResearches(User user) {
         final List<Research> researchesWithoutPrecondition = researchService.getResearchesWithoutPrecondition();
-        researchService.addResearch(user, researchesWithoutPrecondition);
+        for (int i = 1; i <= 4; i++) {
+            // add up to all DD-level stuff
+            researchService.addResearch(user, researchesWithoutPrecondition);
+        }
     }
 
     @Async("asyncTaskExecutor")
@@ -1109,17 +894,16 @@ public class MasterOfTheUniverseService {
         }
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public void createFleetForUser(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
-        final List<ShipClass> classList = shipClassService.findAllByOwner(user);
-        ShipClass ship = classList.stream()
-                .filter(s -> s.getHull() != null)
-                .sorted(Comparator.comparingInt(o -> o.getHull().getOverallConstructionCapacity()))
-                .reduce((o1, o2) -> o2).orElse(null);
-        if (ship == null) {
-            ship = createShipClass(user, EHullType.CA);
-        }
+        final User opponent = userService.findByUsername(DEFEATED_OPPONENT).get().getUser();
+        final List<ShipClass> classList = shipClassService.findAllLatestByOwner(opponent);
+        ShipClass ship = classList.get(0);
+        ship = new ShipClass(user, ship);
+        shipClassService.save(ship);
+
         final Planet homePlanet = planetService.findMainPlanet(user);
         final Fleet fleet = createFleet(user, homePlanet, "Homefleet");
 
@@ -1140,17 +924,12 @@ public class MasterOfTheUniverseService {
         Preconditions.checkNotNull(user, "user must not be empty");
 
         final User opponent = userService.findByUsername(DEFEATED_OPPONENT).get().getUser();
+        final List<ShipClass> classList = shipClassService.findAllLatestByOwner(opponent);
+        final ShipClass ship = classList.get(0);
 
         final Planet homePlanet = planetService.findMainPlanet(user);
         final Fleet opponentsFleet = createFleet(opponent, homePlanet, "Pirates bane");
 
-        final List<ShipClass> classList = shipClassService.findAllLatestByOwner(opponent);
-        final List<ShipClass> shipClasses = classList.stream()
-                .filter(s -> s.getHull() != null)
-                .filter(s -> s.getHull().getHullType() == EHullType.CL)
-                .sorted(Comparator.comparingInt(o -> o.getHull().getOverallConstructionCapacity()))
-                .collect(Collectors.toList());
-        final ShipClass ship = shipClasses.stream().reduce((o1, o2) -> o2).orElseThrow(() -> new NotifyWebUserException("No ship class found."));
 
         final WarShip warShip = new WarShip("Corsair", homePlanet, opponentsFleet, ship);
         warShip.setOperational();
@@ -1165,39 +944,15 @@ public class MasterOfTheUniverseService {
         battleService.runBattleAtPlanet(today, homePlanet);
     }
 
-    private <M extends BaseModuleWithEffectValue> List<M> sortByValue(@Nonnull final List<M> modules, @Nonnull final EHullType hullType) {
+    private <M extends BaseModuleWithEffectValue> List<M> sortByValue(@Nonnull final List<M> modules, @Nonnull final EShipClassType shipClassType) {
         Preconditions.checkNotNull(modules, "modules must not be empty");
-        Preconditions.checkNotNull(hullType, "hullType must not be empty");
+        Preconditions.checkNotNull(shipClassType, "shipClassType must not be empty");
 
-        final List<M> result = getMatchingByHullType(modules, hullType);
-        return result.stream().sorted(Comparator.comparingInt(BaseModuleWithEffectValue::getEffectValue)).collect(Collectors.toList());
+        return modules.stream().filter(e -> shipClassType.suitsShipClassType(e.getShipClassType()))
+                .sorted(Comparator.comparingInt(BaseModuleWithEffectValue::getEffectValue))
+                .collect(Collectors.toList());
     }
 
-    @Nonnull
-    private static <M extends BaseModule> List<M> getMatchingByHullType(final @Nonnull List<M> modules, final @Nonnull EHullType hullType) {
-        final Map<Integer, List<M>> modulesByHullTypeOrdinal = modules.stream().collect(Collectors.groupingBy(m -> m.getHullType().ordinal(),
-                Collectors.mapping(m -> m, Collectors.toList())));
-        List<M> result = modulesByHullTypeOrdinal.getOrDefault(hullType.ordinal(), new ArrayList<>());
-        if (result.isEmpty()) {
-            for (int i = hullType.ordinal() - 1; i >= 0; i--) {
-                // get from smaller hulls
-                result = modulesByHullTypeOrdinal.getOrDefault(i, new ArrayList<>());
-                if (!result.isEmpty()) {
-                    break;
-                }
-            }
-            if (result.isEmpty()) {
-                for (int i = hullType.ordinal() + 1; i < EHullType.values().length; i++) {
-                    // get from bigger hulls
-                    result = modulesByHullTypeOrdinal.getOrDefault(i, new ArrayList<>());
-                    if (!result.isEmpty()) {
-                        break;
-                    }
-                }
-            }
-        }
-        return result;
-    }
 
     public static class CoordsBlob extends ArrayList<MasterOfTheUniverseService.Coords> {
 
@@ -1224,6 +979,75 @@ public class MasterOfTheUniverseService {
             this.name = split[0];
             this.x = Integer.parseInt(split[1].replace("x", "").replaceAll(" ", ""));
             this.y = Integer.parseInt(split[2].replace("y", "").replaceAll(" ", "")) * -1;
+        }
+    }
+
+    private static class Fitting {
+
+        private final List<Propulsion> propulsions;
+        private final List<Armor> armors;
+        private final List<ElectronicWarfare> eloka;
+        private final List<Sidewall> sidewalls;
+        private final List<Weapon> weapons;
+        private final Map<Launcher, Missile> missiles;
+        private final List<PassiveModule> passiveModules;
+
+        public Fitting(final List<Propulsion> propulsions,
+                       final List<Armor> armors,
+                       final List<ElectronicWarfare> eloka,
+                       final List<Sidewall> sidewalls,
+                       final List<Weapon> weapons,
+                       final Map<Launcher, Missile> missiles,
+                       final List<PassiveModule> passiveModules) {
+
+            this.propulsions = propulsions;
+            this.armors = armors;
+            this.eloka = eloka;
+            this.sidewalls = sidewalls;
+            this.weapons = weapons;
+            this.missiles = missiles;
+            this.passiveModules = passiveModules;
+        }
+
+        @Nullable
+        public <MODULE extends HasCostsByOwn> MODULE getByType(@Nonnull final EShipClassType shipClassType, @Nonnull final Collection<MODULE> elements) {
+            Preconditions.checkNotNull(shipClassType, "shipClassType must not be empty");
+            Preconditions.checkNotNull(elements, "elements must not be empty");
+
+            return elements.stream().sorted(Comparator.comparingInt(HasCostsByOwn::getEffectValue)).filter(a -> a.getShipClassType().suitsShipClassType(shipClassType)).findFirst().orElse(null);
+        }
+
+        @Nullable
+        public Weapon getWeapon(@Nonnull final EShipClassType shipClassType, @Nonnull final EWeaponType weaponType) {
+            Preconditions.checkNotNull(shipClassType, "shipClassType must not be empty");
+            Preconditions.checkNotNull(weaponType, "weaponType must not be empty");
+
+            return weapons.stream()
+                    .sorted(Comparator.comparingInt(HasCostsByOwn::getEffectValue))
+                    .filter(a -> shipClassType.suitsShipClassType(a.getShipClassType()))
+                    .filter(a -> a.getWeaponType() == weaponType)
+                    .findFirst().orElse(null);
+        }
+
+        @Nullable
+        public Map.Entry<Launcher, Missile> getLauncher(@Nonnull final EShipClassType shipClassType, @Nonnull final EWeaponType weaponType) {
+            Preconditions.checkNotNull(shipClassType, "shipClassType must not be empty");
+            Preconditions.checkNotNull(weaponType, "weaponType must not be empty");
+
+            return missiles.entrySet().stream()
+                    .filter(a -> shipClassType.suitsShipClassType(a.getKey().getShipClassType()))
+                    .filter(a -> a.getKey().getWeaponType() == weaponType)
+                    .findFirst().orElse(null);
+        }
+
+        @Nonnull
+        public Propulsion getProp(@Nonnull final ETechnologyType technologyType) {
+            Preconditions.checkNotNull(technologyType, "technologyType must not be empty");
+
+            return propulsions.stream()
+                    .sorted(Comparator.comparing(Propulsion::getHyperBand))
+                    .filter(p -> p.getTechnologyType() == technologyType)
+                    .reduce((o1, o2) -> o2).orElseThrow(NullPointerException::new);
         }
     }
 }

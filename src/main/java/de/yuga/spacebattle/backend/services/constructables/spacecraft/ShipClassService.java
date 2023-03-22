@@ -21,7 +21,7 @@ import java.util.stream.StreamSupport;
 @Service
 public class ShipClassService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(ShipClassService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShipClassService.class);
 
     @Nonnull
     private final ShipClassRepository shipClassRepository;
@@ -98,7 +98,7 @@ public class ShipClassService {
     public ShipClass save(@Nonnull final ShipClass entity) {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
 
-        return shipClassRepository.save(entity);
+        return shipClassRepository.saveAndFlush(entity);
     }
 
     /**

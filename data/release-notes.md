@@ -4,28 +4,29 @@ Thema: NPC, Handel und Missionen
 Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
 1. Das Antriebsmodell entspricht jetzt dem Honorverse.
-    - https://honor-harrington.fandom.com/de/wiki/Impellerantrieb
-    - https://honor-harrington.fandom.com/de/wiki/Warshawski-Segel
+   - https://honor-harrington.fandom.com/de/wiki/Impellerantrieb
+   - https://honor-harrington.fandom.com/de/wiki/Warshawski-Segel
 
 2. Das Konzept von Jagd- und Breitseitenbewaffnung wurde geändert.
-    - Es bleibt (vorerst) dabei, dass Bug- und Heck-Bewaffnung manuell gefittet werden muss.
-    - Es wird nicht mehr zwischen Breitseiten- und Jagdwaffen unterschieden - ein Waffensystem ist universell benutzbar.
-    - Eine Breitseitenwaffe wird immer zweimal gefittet - eine pro Breitseite.
+   - Es bleibt (vorerst) dabei, dass Bug- und Heck-Bewaffnung manuell gefittet werden muss.
+   - Es wird nicht mehr zwischen Breitseiten- und Jagdwaffen unterschieden - ein Waffensystem ist universell benutzbar.
+   - Eine Breitseitenwaffe wird immer zweimal gefittet - eine pro Breitseite.
 3. Die Schiffshüllen wurden entfernt.  
    Ganz nach dem Rollenverständnis der RMN folgen Schiffstypen einer Funktion und nicht einer Klassifizierung nach Masse.
-    - Die einzelnen Module sind weiterhin einer Klasse als Sortier- und Vergleichskriterium zugeordnet.
-    - Das Fitting einer Schiffsklasse entscheidet darüber, wie viel Tonnage das Schiff im Ganzen besitzt.  
-      Das beinhaltet den physikalischen Zwang, dass in den Bug- und Hecksektionen nur ein gewisser Prozentsatz des Schiffsvolumens und damit der Schiffsmasse zur Verfügung steht.
-        - https://honor-harrington.fandom.com/de/wiki/Hammerkopf
+   - Die einzelnen Module sind weiterhin einer Klasse als Sortier- und Vergleichskriterium zugeordnet.
+   - Das Fitting einer Schiffsklasse entscheidet darüber, wie viel Tonnage das Schiff im Ganzen besitzt.  
+     Das beinhaltet den physikalischen Zwang, dass in den Bug- und Hecksektionen nur ein gewisser Prozentsatz des Schiffsvolumens und der Schiffsmasse zur Verfügung steht.
+      - https://honor-harrington.fandom.com/de/wiki/Hammerkopf
+4. Berechnung der Tonnage
+   - Siehe oben, die Gesamtmasse eines Schiffes definiert sich über die Anforderungen des Impellerantriebs.  
+     Damit ergibt sich spielerisch das Konzept der toten Tonnage. Massetechnisch asymmetrisch gefittete Hammerköpfe benötigen eine identische Masseverteilung, dass bedeutet,
+     dass der "leere" Hammerkopf mit Superstruktur aufgefüllt wird, um den physikalischen Anforderungen zu entsprechen.  
+     Analoges gilt für schwere Hammerköpfe und eine gewissermaßen leere Breitseite. Dann muss die Breitseite mit bzw. der Modulraum des Schiffes mit inaktiver Masse gefüllt
+     werden.
 
 Gameplay:
 
 1. Auf der StarMap verändert sich der Cursor, wenn man etwas anklicken kann.
-
-todo. schiffsklasse enthält hülle nicht mehr
-todo. schifsklasse enthält hull type -> rename ship type
-
-todo. schiffstypen nachbauen und daraus die Werte ableiten
 
 ----------------- Bugs fixed -----------
 
@@ -33,10 +34,20 @@ todo. schiffstypen nachbauen und daraus die Werte ableiten
 
 ----------------- next steps -----------
 
-todo. change table names to use derby for useful tests
-todo. webmaster mail at contact section
+todo. research tree per svg malen
+
+todo. schiffstypen nachbauen und daraus die Werte ableiten um Sinnnhaftigkeit zu prüfen
+todo. gebäude redaktionell überarbeiten
+
+todo. interaktive karte als iframe bereitstellen, zentrierung auf namen
+
+- request im frontend mit parametern z.B. primary highlighted system, secondary highlighted systems, draggable / scrollable, custom text fields (where to place), system names on
+  hover or always on
+
+todo. ressourcen- bzw worker anzeige im ship fitting überdenken
+
 todo. changelog mit highlight auf versions-button
-todo. fleet movement report im dashboard
+todo. change table names to use derby for useful tests?
 
 - look & feel wie in büchern
 - emission spectra als gimmick
@@ -48,6 +59,8 @@ todo. Marktplatz und NPC-Handelssystem
 todo. interne Sektoraufteilung der Map nach Entfernung um wirtschaftliche Leistungszentren  
 todo. NPC-Konzept für Systeme und systemfreie NPC (Piraten, fliegende Händler ...)  
 todo. Konzept für Missionen und NPC-Missionen
+
+todo. im profil opt-in ob man infos zur neuen season möchte
 
 ----------------- bugs -----------------
 
@@ -63,7 +76,6 @@ todo. Konzept für Missionen und NPC-Missionen
 8. Änderungen in der Spielmechanik, z.B. dass die Leistung des Antriebs im Verhältnis zur Schiffsmasse steht -> erneutes Rebalancing der Module
 9. mich endlich mal um die "corporate identity" kümmern, also eigene Icons, Symbole, Benennungen usw erzeugen
 
-todo. fix to often called propulsion capacity
 todo. kein alter Menüpunkt mehr ausgewählt wenn man sich wieder einloggt
 todo. Exception per mail an webmaster
 todo. Userliste
@@ -71,6 +83,10 @@ todo. restart backend
 todo. StarMap beim Download der Koordinaten?
 
 todo. combat aufhübschen and more infos
+
+todo. fleet movement report im dashboard
+
+todo. Wartung von Schiffen und Flotten -> Abnutzung der Impeller
 
 todo. warship icon instead of fleet shark
 

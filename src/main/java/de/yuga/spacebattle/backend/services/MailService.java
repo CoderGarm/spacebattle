@@ -17,7 +17,7 @@ import javax.annotation.Nonnull;
 @Service
 public class MailService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(MailService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MailService.class);
 
     @Nonnull
     private final JavaMailSender emailSender;

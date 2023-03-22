@@ -67,4 +67,11 @@ public class CrewRequirement {
         final Long amount = crewRequirement.get(educationType);
         return amount != null ? amount : 0;
     }
+
+    @Nonnull
+    public static CrewRequirement of(@Nonnull final Map<EEducationType, Long> crew) {
+        Preconditions.checkNotNull(crew, "crew must not be empty");
+
+        return new CrewRequirement(crew, EDepositType.COSTS);
+    }
 }

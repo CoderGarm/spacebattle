@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.misc.fandom.spacecraft.dto;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.enums.EHullType;
+import de.yuga.spacebattle.backend.enums.EShipClassType;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
@@ -33,6 +33,9 @@ public class WikiShipClass {
                 text = text.replaceAll("</ br>", "\n");
                 text = text.replaceAll("<br/>", "\n");
                 text = text.replaceAll("<br />", "\n");
+                if (fieldName == FieldName.Typ && text.startsWith("G")) {
+                    final String ignore = ""; // todo fetch next category as long as next field name is present
+                }
                 keyValues.put(fieldName, List.of(text.split("\n")));
             }
         }
@@ -97,36 +100,36 @@ public class WikiShipClass {
     }
 
     @Nonnull
-    public EHullType getHullType() {
+    public EShipClassType getShipClassType() {
         final String rawValue = getRawValue(FieldName.Typ);
 
         switch (rawValue) {
             case "Schlachtschiff":
-                return EHullType.BB;
+                return EShipClassType.BB;
             case "Superdreadnought":
-                return EHullType.SD;
+                return EShipClassType.SD;
             case "Dreadnought":
-                return EHullType.DN;
+                return EShipClassType.DN;
             case "Schwerer Kreuzer":
             case "Schwerer Kreuzer - Marinessupport":
-                return EHullType.CA;
+                return EShipClassType.CA;
             case "Zerstörer":
-                return EHullType.DD;
+                return EShipClassType.DD;
             case "Schlachtkreuzer":
-                return EHullType.BC;
+                return EShipClassType.BC;
             case "Leichtes Angriffsboot":
-                return EHullType.LAC;
+                return EShipClassType.LAC;
             case "Gondelleger":
             case "Podnought":
-                return EHullType.SDP;
+                return EShipClassType.SDP;
             case "Fregatte":
-                return EHullType.FG;
+                return EShipClassType.FG;
             case "LAC-Träger":
-                return EHullType.CLAC;
+                return EShipClassType.CLAC;
             case "Leichter Kreuzer":
-                return EHullType.CL;
+                return EShipClassType.CL;
             default:
-                return EHullType.AR;
+                return EShipClassType.AR;
         }
     }
 

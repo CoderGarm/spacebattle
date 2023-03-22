@@ -24,7 +24,7 @@ import java.util.Date;
 public class JwtTokenUtil {
 
     @Nonnull
-    private final static Logger LOGGER = LoggerFactory.getLogger(JwtTokenUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenUtil.class);
 
     @Nonnull
     public static final SignatureAlgorithm HS_256 = SignatureAlgorithm.HS256;

@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.misc.HasCosts;
-import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.ETranslationTarget;
@@ -39,10 +38,6 @@ public class Research extends HasCosts {
     private final Set<Building> unlocksBuildings = new HashSet<>();
 
     @Nonnull
-    @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
-    private final Set<Hull> unlocksHulls = new HashSet<>();
-
-    @Nonnull
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
     private final Set<NamedTechLevel> unlocksNamedTechLevel = new HashSet<>();
@@ -70,11 +65,6 @@ public class Research extends HasCosts {
     @Nonnull
     public Set<Building> getUnlocksBuildings() {
         return unlocksBuildings;
-    }
-
-    @Nonnull
-    public Set<Hull> getUnlocksHulls() {
-        return unlocksHulls;
     }
 
     @Nonnull

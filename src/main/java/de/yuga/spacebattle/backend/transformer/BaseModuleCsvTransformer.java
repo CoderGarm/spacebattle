@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.transformer;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
+import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
 
 import javax.annotation.Nonnull;
 
@@ -19,7 +20,7 @@ public class BaseModuleCsvTransformer extends CSVTransformer<BaseModule> {
     @Override
     protected void createHeader() {
         headers.add(dependencies.get(0).getHeadersString());
-        headers.add("useCapacity");
+        headers.add("tonnage");
     }
 
     @Override
@@ -32,6 +33,6 @@ public class BaseModuleCsvTransformer extends CSVTransformer<BaseModule> {
         Preconditions.checkNotNull(toTransform, "toTransform must not be empty");
 
         a(((HasCostsCsvTransformer) dependencies.get(0)).convert(toTransform));
-        a(toTransform.getUseCapacity());
+        a(toTransform.getTonnage().convertToMetric(EMassMetric.T).getCoordinate().intValue());
     }
 }

@@ -18,13 +18,13 @@ public class Crew {
 
     private static final String[] TO_REMOVE = {"<", ">", "\\."};
 
-    private final static String[] ENLISTED = {"mannschaften", "crew", "unteroffiziere"};
-    private final static String OFFICER = "offizier";
+    private static final String[] ENLISTED = {"mannschaften", "crew", "unteroffiziere"};
+    private static final String OFFICER = "offizier";
 
-    private final static String NAVY = "navy";
-    private final static String[] MARINES = {"marines", "truppen"};
-    private final static String STAB = "stab";
-    private final static String LAC = "lac";
+    private static final String NAVY = "navy";
+    private static final String[] MARINES = {"marines", "truppen"};
+    private static final String STAB = "stab";
+    private static final String LAC = "lac";
 
     private int overallAmount = 0;
 

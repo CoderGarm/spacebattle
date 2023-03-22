@@ -37,7 +37,7 @@ import static de.yuga.spacebattle.backend.enums.physics.EDistanceMetric.LS;
 public class Cage implements Future<Cage> {
 
     @Nonnull
-    private final static Logger LOGGER = LoggerFactory.getLogger(Cage.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Cage.class);
 
     @Nonnull
     private final BattleLogger battleLogger;

@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.rest.dto.spacecrafts;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.yuga.spacebattle.rest.dto.enums.EShipClassType;
 import de.yuga.spacebattle.rest.dto.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.rest.dto.spacecrafts.fittings.AmmunitionFitting;
 import de.yuga.spacebattle.rest.dto.spacecrafts.fittings.SupportFitting;
@@ -25,12 +26,12 @@ public class ShipClassMock implements ShipClassData {
 
     @Nullable
     @JsonProperty
-    @Schema(description = "The hull of this class.")
-    protected Hull hull;
+    @Schema(description = "The strategic usage of this class.")
+    protected EShipClassType shipClassType;
 
-    @Nullable
+    @Nonnull
     @JsonProperty
-    @Schema(description = "The propulsion of this class.")
+    @Schema(required = true, description = "The propulsion of this class.")
     protected Propulsion propulsion;
 
     @Nullable
@@ -74,12 +75,12 @@ public class ShipClassMock implements ShipClassData {
 
     @Override
     @Nullable
-    public Hull getHull() {
-        return hull;
+    public EShipClassType getShipClassType() {
+        return shipClassType;
     }
 
     @Override
-    @Nullable
+    @Nonnull
     public Propulsion getPropulsion() {
         return propulsion;
     }

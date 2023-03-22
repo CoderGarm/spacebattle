@@ -3,16 +3,13 @@ package de.yuga.spacebattle.backend.enums;
 import com.google.common.base.Preconditions;
 
 import javax.annotation.Nonnull;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Set;
 
 /**
- * This indicated what a type of ship is this hull for.<br>
- * <b>ATTENTION</b><br>
- * Do not reorder the elements - their order is used in creating first fitted ship for new users in {@link de.yuga.spacebattle.backend.services.MasterOfTheUniverseService#sortByValue(List, EHullType)}.<br>
- * Or adapt an order number.
+ * This indicated what a type of ship is this hull for.
  */
-public enum EHullType implements HasIconName {
+public enum EShipClassType implements HasIconName {
 
     // Warships
     LAC("LAC", false, false, "fighter", "light attack craft (11 to 21 thousand tons, no hyper capability)"),
@@ -36,7 +33,7 @@ public enum EHullType implements HasIconName {
     FR("FR", false, true, "satellite", "freighter"),
     ;
 
-    private static final Set<EHullType> CIVIL = Set.of(FR);
+    private static final Set<EShipClassType> CIVIL = Set.of(FR);
 
     @Nonnull
     private final String type;
@@ -51,11 +48,11 @@ public enum EHullType implements HasIconName {
     @Nonnull
     private final String description;
 
-    EHullType(@Nonnull final String type,
-              boolean podLayer,
-              final boolean auxiliaryShip,
-              @Nonnull final String iconName,
-              @Nonnull final String description) {
+    EShipClassType(@Nonnull final String type,
+                   boolean podLayer,
+                   final boolean auxiliaryShip,
+                   @Nonnull final String iconName,
+                   @Nonnull final String description) {
         Preconditions.checkNotNull(type, "type shouldn't be null!");
         Preconditions.checkNotNull(iconName, "iconName shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
@@ -65,6 +62,13 @@ public enum EHullType implements HasIconName {
         this.auxiliaryShip = auxiliaryShip;
         this.description = description;
         this.iconName = iconName;
+    }
+
+    @Nonnull
+    public static EShipClassType valueOf(@Nonnull final de.yuga.spacebattle.rest.dto.enums.EShipClassType shipClassType) {
+        Preconditions.checkNotNull(shipClassType, "shipClassType must not be empty");
+
+        return Arrays.stream(values()).filter(ht -> ht.getType().equals(shipClassType.getType())).findFirst().orElseThrow(NullPointerException::new);
     }
 
     @Nonnull
@@ -84,7 +88,7 @@ public enum EHullType implements HasIconName {
         return CIVIL.contains(this);
     }
 
-    public boolean suitsHullType(@Nonnull final EHullType comparator) {
+    public boolean suitsShipClassType(@Nonnull final EShipClassType comparator) {
         // todo make it better
         return ordinal() >= comparator.ordinal();
     }

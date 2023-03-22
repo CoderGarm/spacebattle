@@ -51,7 +51,7 @@ public class AdminApi extends BaseApi {
     @Nonnull
     public static final String ENDPOINT = "admin";
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(AdminApi.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AdminApi.class);
 
     @Nonnull
     private final String applicationVersion;

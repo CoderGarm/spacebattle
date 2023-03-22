@@ -6,9 +6,9 @@ import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Time;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
-import de.yuga.spacebattle.backend.entities.misc.HasHullTypeByOwnCosts;
+import de.yuga.spacebattle.backend.entities.misc.HasCostsByOwn;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
-import de.yuga.spacebattle.backend.enums.EHullType;
+import de.yuga.spacebattle.backend.enums.EShipClassType;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -27,7 +27,7 @@ import javax.validation.constraints.NotNull;
 @Table(name = "missile")
 @AttributeOverride(name = "id", column = @Column(name = "idMissile"))
 @AttributeOverride(name = "effectValue", column = @Column(name = "elokaResistance"))
-public class Missile extends HasHullTypeByOwnCosts {
+public class Missile extends HasCostsByOwn {
 
     @Nonnull
     @NotNull
@@ -49,27 +49,20 @@ public class Missile extends HasHullTypeByOwnCosts {
     public Missile() {
     }
 
-    /**
-     * @param useCapacity the capacity must be given in full tons and later calculated in "naval capacity units" of kilo-tons
-     */
     public Missile(@Nonnull final NamedTechLevel baseModule,
                    @Nonnull final String technicalTypeName,
                    final int unlockedThroughLevel,
                    final int elokaResistance,
-                   final int useCapacity,
-                   @Nonnull final EHullType hullType,
+                   final int tonnage,
+                   @Nonnull final EShipClassType shipClassType,
                    @Nonnull final Warhead warhead,
                    @Nonnull final MissileMotor missileMotor) {
-        super(baseModule, technicalTypeName, unlockedThroughLevel, useCapacity, elokaResistance, hullType);
+        super(baseModule, technicalTypeName, unlockedThroughLevel, tonnage, elokaResistance, shipClassType);
         Preconditions.checkNotNull(warhead, "warhead shouldn't be null!");
         Preconditions.checkNotNull(missileMotor, "missileMotor shouldn't be null!");
 
         this.warhead = warhead;
         this.missileMotor = missileMotor;
-    }
-
-    public double getUsedCapacity() {
-        return ((double) super.getUseCapacity()) / 1000;
     }
 
     public int getElokaResistance() {

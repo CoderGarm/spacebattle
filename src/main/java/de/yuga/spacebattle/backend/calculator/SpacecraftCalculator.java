@@ -1,12 +1,15 @@
 package de.yuga.spacebattle.backend.calculator;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.combat.round.WarshipHealthState;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
+import de.yuga.spacebattle.backend.dto.physics.Mass;
+import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.misc.HasEffectValue;
-import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
@@ -14,10 +17,12 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateAccessor;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateSnapshot;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.ECapacityAreaType;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.ESupportType;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
+import de.yuga.spacebattle.backend.enums.physics.*;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.CapabilityValue;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.CapacityValue;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapabilities;
@@ -26,11 +31,15 @@ import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapacityAreas
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class SpacecraftCalculator {
+
+    private static final MathContext MATH_CONTEXT = new MathContext(8, RoundingMode.DOWN);
 
     private final Set<EModuleType> PROPULSIONS = Set.of(EModuleType.PROPULSION, EModuleType.FTLPROPULSION);
 
@@ -438,13 +447,79 @@ public class SpacecraftCalculator {
     private void setCapacityValue(@Nonnull final ShipClass shipClass) {
         Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
 
-        final Hull hull = shipClass.getHull();
-        for (final ECapacityAreaType capacityAreaType : ECapacityAreaType.values()) {
+        for (final ECapacityAreaType capacityAreaType : ECapacityAreaType.getValuesWithoutOverall()) {
             final CapacityValue orDefault = capacities.getOrDefault(capacityAreaType, new CapacityValue());
             orDefault.setCapacityArea(capacityAreaType);
-            orDefault.setUsedCapacity(shipClass.getUsedCapacity(capacityAreaType));
-            orDefault.setCapacity(hull != null ? hull.getConstructionCapacity(capacityAreaType) : 0);
+            orDefault.setTonnage(shipClass.getTonnage(capacityAreaType));
             capacities.put(capacityAreaType, orDefault);
         }
+        capacities.put(ECapacityAreaType.OVERALL, new CapacityValue(ECapacityAreaType.OVERALL, SpacecraftTonnageCalculator.getFullTonnage(shipClass)));
+    }
+
+    @Nonnull
+    public static Acceleration getAcceleration(@Nonnull final Mass tonnage,
+                                               @Nonnull final Propulsion propulsion,
+                                               @Nonnull final EHyperBand hyperBand,
+                                               @Nonnull final Set<SupportFitting> supportFittings) {
+        Preconditions.checkNotNull(tonnage, "tonnage must not be empty");
+        Preconditions.checkNotNull(propulsion, "propulsion must not be empty");
+        Preconditions.checkNotNull(hyperBand, "hyperBand must not be empty");
+        Preconditions.checkNotNull(supportFittings, "supportFittings must not be empty");
+
+
+        final double maxAccelerationOfMilitary = propulsion.getTechnologyType().getMaxAccelerationOfMilitary();
+        final EModuleType eModuleType = hyperBand == EHyperBand.NONE ? EModuleType.PROPULSION : EModuleType.FTLPROPULSION;
+        final double propulsionSupportFactor = supportFittings.stream()
+                .filter(s -> eModuleType == s.getPassiveModule().getSupportType().getModifiedProperty())
+                .findAny().stream()
+                .map(SupportFitting::getAbsoluteValueAsFactor)
+                .reduce(0D, Double::sum);
+        final BigDecimal factor = BigDecimal.ONE.add(new BigDecimal(propulsionSupportFactor));
+        final BigDecimal accelerationValue = getMathematicallyAcceleration(tonnage, propulsion, hyperBand)
+                .multiply(factor, ResourceDeposit.MATH_CONTEXT_INTEGER)
+                .multiply(BigDecimal.valueOf(maxAccelerationOfMilitary), DistanceCalculator.MC_HU);
+        return new Acceleration(accelerationValue, EAccelerationMetric.G, hyperBand);
+    }
+
+    @Nonnull
+    public static Velocity getVelocity(@Nonnull final Propulsion propulsion,
+                                       @Nonnull final EHyperBand hyperBand) {
+        Preconditions.checkNotNull(propulsion, "propulsion must not be empty");
+        Preconditions.checkNotNull(hyperBand, "hyperBand must not be empty");
+
+        return new Velocity(hyperBand.getEffectiveTopSpeed(propulsion.getTechnologyType()), EDistanceMetric.M, ETimeMetric.SECOND);
+    }
+
+    @Nonnull
+    private static BigDecimal getMathematicallyAcceleration(@Nonnull final Mass tonnage,
+                                                            @Nonnull final Propulsion propulsion,
+                                                            @Nonnull final EHyperBand hyperBand) {
+        Preconditions.checkNotNull(tonnage, "tonnage must not be empty");
+        Preconditions.checkNotNull(propulsion, "propulsion must not be empty");
+        Preconditions.checkNotNull(hyperBand, "hyperBand must not be empty");
+
+        if (propulsion.getHyperBand().getVelocityMultiplier() < hyperBand.getVelocityMultiplier()) {
+            return BigDecimal.ZERO;
+        }
+
+        //y = 558.1465 - 0.0001075032*x + 7.261618e-11*x^2 - 2.1753440000000002e-17*x^3 + 2.786797e-24*x^4 - 1.275354e-31*x^5
+        final BigDecimal a = BigDecimal.valueOf(propulsion.getEffectValue());
+        final List<BigDecimal> paramList = List.of(
+                BigDecimal.valueOf(-0.0001075032),
+                BigDecimal.valueOf(7.261618).scaleByPowerOfTen(-11),
+                BigDecimal.valueOf(-2.175344).scaleByPowerOfTen(-17),
+                BigDecimal.valueOf(2.786797).scaleByPowerOfTen(-24),
+                BigDecimal.valueOf(-1.275354).scaleByPowerOfTen(-31)
+        );
+
+        final BigDecimal tons = tonnage.getCoordinateInMetric(EMassMetric.T); // is x
+        BigDecimal result = a;
+        for (int i = 0; i < paramList.size(); i++) {
+            final BigDecimal coefficient = paramList.get(i);
+            final BigDecimal inBetween = coefficient.multiply(tons.pow(i + 1), MATH_CONTEXT);
+            result = result.add(inBetween);
+        }
+        result = result.setScale(0, RoundingMode.HALF_EVEN);
+        return result.multiply(BigDecimal.valueOf(hyperBand.getVelocityMultiplier()), MATH_CONTEXT);
     }
 }

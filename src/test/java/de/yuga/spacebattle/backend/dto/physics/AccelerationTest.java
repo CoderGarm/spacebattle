@@ -62,7 +62,7 @@ class AccelerationTest {
         assertThat(result, Matchers.comparesEqualTo(expectation));
     }
 
-    private final static MathContext MATH_CONTEXT = new MathContext(8, RoundingMode.DOWN);
+    private static final MathContext MATH_CONTEXT = new MathContext(8, RoundingMode.DOWN);
 
     @Test
     void testAccelerationCalculationByMass() {

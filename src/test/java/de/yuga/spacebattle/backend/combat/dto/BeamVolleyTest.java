@@ -30,7 +30,7 @@ class BeamVolleyTest {
     Fleet target;
 
     private BeamVolley testObject;
-    private final static Distance DISTANCE = new Distance(10000, EDistanceMetric.M);
+    private static final Distance DISTANCE = new Distance(10000, EDistanceMetric.M);
 
     @BeforeEach
     void setUp() {

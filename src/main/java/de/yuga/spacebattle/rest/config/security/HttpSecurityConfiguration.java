@@ -40,7 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 public class HttpSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Nonnull
-    private final static Logger LOGGER = LoggerFactory.getLogger(HttpSecurityConfiguration.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpSecurityConfiguration.class);
 
     @Nonnull
     private final UserService userService;

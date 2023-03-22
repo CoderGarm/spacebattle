@@ -1,12 +1,15 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.converter.MassConverter;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
+import de.yuga.spacebattle.backend.dto.physics.Mass;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.misc.HasCosts;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.enums.EHullType;
+import de.yuga.spacebattle.backend.enums.EShipClassType;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
+import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
 import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 
 import javax.annotation.Nonnull;
@@ -27,7 +30,9 @@ public class BaseModule extends HasCosts {
      * This capacity includes all 'opportunity costs' to use a module, from crew quarters up to toilets, from screens and displays up to seats and impact cages.
      */
     @NotNull
-    private int useCapacity;
+    @Nonnull
+    @Convert(converter = MassConverter.class)
+    private Mass tonnage;
 
     /**
      * Which is the targeted ship's hull class.
@@ -35,7 +40,7 @@ public class BaseModule extends HasCosts {
     @Nonnull
     @NotNull
     @Enumerated(EnumType.STRING)
-    private EHullType hullType;
+    private EShipClassType shipClassType;
 
     protected BaseModule() {
     }
@@ -43,19 +48,19 @@ public class BaseModule extends HasCosts {
     public BaseModule(@Nonnull final String name,
                       @Nonnull final String description,
                       @Nonnull final Research unlockedThrough,
-                      final int useCapacity,
-                      @Nonnull final EHullType hullType,
+                      final int tonnage,
+                      @Nonnull final EShipClassType shipClassType,
                       @Nonnull final ETechLevel techLevel,
                       @Nonnull final CrewRequirement crewRequirement,
                       @Nonnull final Class<?> clazz) {
-        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, useCapacity, clazz);
-        Preconditions.checkNotNull(hullType, "hullType must not be empty");
+        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, tonnage, clazz);
+        Preconditions.checkNotNull(shipClassType, "shipClassType must not be empty");
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
         this.unlockedThrough = unlockedThrough;
-        this.useCapacity = useCapacity;
-        this.hullType = hullType;
+        this.tonnage = new Mass(tonnage, EMassMetric.T);
+        this.shipClassType = shipClassType;
         this.getCosts().setCrewRequirement(crewRequirement);
     }
 
@@ -64,23 +69,19 @@ public class BaseModule extends HasCosts {
         return unlockedThrough;
     }
 
-    public int getUseCapacity() {
-        return useCapacity;
+    @Nonnull
+    public Mass getTonnage() {
+        return tonnage;
     }
 
     @Nonnull
-    public EHullType getHullType() {
-        return hullType;
+    public EShipClassType getShipClassType() {
+        return shipClassType;
     }
 
     @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
-    public void setHullType(@Nonnull final EHullType hullType) {
-        this.hullType = hullType;
-    }
-
-    @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
-    public void setUseCapacity(final int useCapacity) {
-        this.useCapacity = useCapacity;
+    public void setShipClassType(@Nonnull final EShipClassType shipClassType) {
+        this.shipClassType = shipClassType;
     }
 
     @Override

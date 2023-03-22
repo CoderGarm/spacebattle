@@ -23,7 +23,7 @@ import static de.yuga.spacebattle.backend.entities.wiki.ArticleLine.LN;
 
 public class WikiCalculator {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(WikiCalculator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WikiCalculator.class);
 
     public static final String WS = " ";
 

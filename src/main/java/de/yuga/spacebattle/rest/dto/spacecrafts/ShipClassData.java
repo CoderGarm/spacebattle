@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.rest.dto.spacecrafts;
 
+import de.yuga.spacebattle.rest.dto.enums.EShipClassType;
 import de.yuga.spacebattle.rest.dto.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.rest.dto.spacecrafts.fittings.AmmunitionFitting;
 import de.yuga.spacebattle.rest.dto.spacecrafts.fittings.SupportFitting;
@@ -20,9 +21,9 @@ public interface ShipClassData {
     String getName();
 
     @Nullable
-    Hull getHull();
+    EShipClassType getShipClassType();
 
-    @Nullable
+    @Nonnull
     Propulsion getPropulsion();
 
     @Nullable

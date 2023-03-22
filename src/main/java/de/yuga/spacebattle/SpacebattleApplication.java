@@ -45,15 +45,15 @@ import java.time.format.DateTimeFormatter;
 @EnableJpaRepositories(queryLookupStrategy = QueryLookupStrategy.Key.USE_DECLARED_QUERY)
 public class SpacebattleApplication implements Jackson2ObjectMapperBuilderCustomizer {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(SpacebattleApplication.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpacebattleApplication.class);
 
     /**
      * Note: Compare application.properties for path to delete
      */
-    private final static String tmpdir = System.getProperty("java.io.tmpdir");
-    private final static String separator = System.getProperty("file.separator");
-    private final static String createPath = tmpdir + separator + "createSBDB.sql";
-    private final static String dropPath = tmpdir + separator + "dropSBDB.sql";
+    private static final String tmpdir = System.getProperty("java.io.tmpdir");
+    private static final String separator = System.getProperty("file.separator");
+    private static final String createPath = tmpdir + separator + "createSBDB.sql";
+    private static final String dropPath = tmpdir + separator + "dropSBDB.sql";
 
     @Nonnull
     private final DBPatchService dbPatchService;

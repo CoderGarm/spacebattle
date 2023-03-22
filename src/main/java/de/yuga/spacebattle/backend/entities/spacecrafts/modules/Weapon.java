@@ -4,9 +4,9 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.converter.DistanceConverter;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
-import de.yuga.spacebattle.backend.entities.misc.HasHullTypeByOwnCosts;
+import de.yuga.spacebattle.backend.entities.misc.HasCostsByOwn;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
-import de.yuga.spacebattle.backend.enums.EHullType;
+import de.yuga.spacebattle.backend.enums.EShipClassType;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 import org.hibernate.annotations.Check;
 
@@ -23,7 +23,7 @@ import javax.validation.constraints.NotNull;
 @Table(name = "weapon")
 @Check(constraints = "weaponType = 'BEAM' OR weaponType = 'POINT_DEFENSE'")
 @AttributeOverride(name = "id", column = @Column(name = "idWeapon"))
-public class Weapon extends HasHullTypeByOwnCosts {
+public class Weapon extends HasCostsByOwn {
 
     /**
      * Defines the range of this weapon in meter.
@@ -61,14 +61,14 @@ public class Weapon extends HasHullTypeByOwnCosts {
     public Weapon(@Nonnull final NamedTechLevel baseModule,
                   @Nonnull final String technicalTypeName,
                   final int unlockedThroughLevel,
-                  final int useCapacity,
+                  final int tonnage,
                   final int effectValue,
-                  @Nonnull final EHullType hullType,
+                  @Nonnull final EShipClassType shipClassType,
                   @Nonnull final Distance damageProjectionRange,
                   final int amountDamageEmitter,
                   @Nonnull final EWeaponType weaponType,
                   @Nonnull final CrewRequirement crewRequirement) {
-        super(baseModule, technicalTypeName, unlockedThroughLevel, useCapacity, effectValue, hullType, crewRequirement);
+        super(baseModule, technicalTypeName, unlockedThroughLevel, tonnage, effectValue, shipClassType, crewRequirement);
         Preconditions.checkNotNull(damageProjectionRange, "damageProjectionRange shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "eWeaponType shouldn't be null!");
 

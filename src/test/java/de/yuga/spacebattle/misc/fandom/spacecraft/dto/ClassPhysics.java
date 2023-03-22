@@ -8,7 +8,7 @@ import java.util.List;
 
 public class ClassPhysics {
 
-    @Nullable
+    @Nonnull
     private Integer masse = null;
     @Nullable
     private Integer laenge = null;
@@ -60,7 +60,7 @@ public class ClassPhysics {
                 ;
     }
 
-    @Nullable
+    @Nonnull
     public Integer getMasse() {
         return masse;
     }

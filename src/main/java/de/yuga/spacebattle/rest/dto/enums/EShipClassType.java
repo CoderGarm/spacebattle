@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
  * This indicated what a type of ship is this hull for.
  */
 @Schema(description = ".")
-public class EHullType extends HasIcon {
+public class EShipClassType extends HasIcon {
 
     @Nonnull
     @Schema(required = true, description = "The hulls type.")
@@ -28,7 +28,7 @@ public class EHullType extends HasIcon {
     @Schema(required = true, description = "The hulls description.")
     private final String description;
 
-    public EHullType() {
+    public EShipClassType() {
         super();
         description = "";
         podLayer = false;
@@ -36,13 +36,13 @@ public class EHullType extends HasIcon {
         type = "";
     }
 
-    public EHullType(@Nonnull final de.yuga.spacebattle.backend.enums.EHullType hullType) {
-        super(hullType);
+    public EShipClassType(@Nonnull final de.yuga.spacebattle.backend.enums.EShipClassType shipClassType) {
+        super(shipClassType);
 
-        this.type = hullType.getType();
-        this.podLayer = hullType.isPodLayer();
-        this.auxiliaryShip = hullType.isAuxiliaryShip();
-        this.description = hullType.getDescription();
+        this.type = shipClassType.getType();
+        this.podLayer = shipClassType.isPodLayer();
+        this.auxiliaryShip = shipClassType.isAuxiliaryShip();
+        this.description = shipClassType.getDescription();
     }
 
     @Nonnull

@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.fittings;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Mass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.PassiveModule;
 
 import javax.annotation.Nonnull;
@@ -94,7 +95,7 @@ public class SupportFitting {
         return passiveModule.hashCode();
     }
 
-    public int calculateUsedCapacity() {
-        return amount * passiveModule.getUseCapacity();
+    public Mass getTonnage() {
+        return passiveModule.getTonnage().multiply(amount);
     }
 }

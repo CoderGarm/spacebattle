@@ -88,7 +88,7 @@ public class Weaponry {
                                 orDefault.put(keyword, amount);
                                 alignmentSet.put(EWeaponAlignment.STERN, orDefault);
                             } else if (alignment.toLowerCase().contains("breit")) {
-                                orDefault = alignmentSet.getOrDefault(EWeaponAlignment.BROADSIDE, new HashMap<>()); /* fixme how to count broadsides ?*/
+                                orDefault = alignmentSet.getOrDefault(EWeaponAlignment.BROADSIDE, new HashMap<>());
                                 orDefault.put(keyword, weaponsCount);
                                 alignmentSet.put(EWeaponAlignment.BROADSIDE, orDefault);
                             }

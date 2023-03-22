@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 
+@Schema(description = ".")
 public class Velocity implements Cloneable, Comparable<Velocity> {
 
     public static final Velocity ZERO = new Velocity(0, EDistanceMetric.M, ETimeMetric.SECOND);

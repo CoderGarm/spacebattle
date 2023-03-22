@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.fittings;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Mass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 
 import javax.annotation.Nonnull;
@@ -69,7 +70,8 @@ public class AmmunitionFitting {
         return missile.hashCode();
     }
 
-    public double getUsedCapacity() {
-        return ((double) amount) * missile.getUsedCapacity();
+    @Nonnull
+    public Mass getTonnage() {
+        return missile.getTonnage().multiply(amount);
     }
 }

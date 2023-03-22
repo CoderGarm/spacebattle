@@ -27,10 +27,6 @@ public class MissileMotor {
                     " The means the maneuver capability to find a gap in the tank to fire into it, for instance.")
     private double maneuverability;
 
-    @JsonProperty
-    @Schema(required = true, description = "The capacity usage of this module.")
-    private int useCapacity;
-
     public MissileMotor() {
     }
 

@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.rest.dto.misc;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.yuga.spacebattle.backend.enums.EShipClassType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Only to transfer enum values to the frontend.")
@@ -24,7 +25,7 @@ public class EnumValueDto {
     @JsonProperty
     private de.yuga.spacebattle.backend.enums.EHitArea[] eHitArea;
     @JsonProperty
-    private de.yuga.spacebattle.backend.enums.EHullType[] eHullType;
+    private EShipClassType[] eShipClassType;
     @JsonProperty
     private de.yuga.spacebattle.backend.enums.EProductionCategory[] eProductionCategory;
     @JsonProperty
@@ -41,4 +42,16 @@ public class EnumValueDto {
     private de.yuga.spacebattle.backend.enums.EWikiCategory[] eWikiCategories;
     @JsonProperty
     private de.yuga.spacebattle.backend.enums.ECapacityAreaType[] eCapacityAreaTypes;
+    @JsonProperty
+    private de.yuga.spacebattle.backend.enums.ETechnologyType[] eTechnologyTypes;
+    @JsonProperty
+    private de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric[] eAccelerationMetrics;
+    @JsonProperty
+    private de.yuga.spacebattle.backend.enums.physics.EDistanceMetric[] eDistanceMetrics;
+    @JsonProperty
+    private de.yuga.spacebattle.backend.enums.physics.EHyperBand[] eHyperBands;
+    @JsonProperty
+    private de.yuga.spacebattle.backend.enums.physics.EMassMetric[] eMassMetrics;
+    @JsonProperty
+    private de.yuga.spacebattle.backend.enums.physics.ETimeMetric[] eTimeMetrics;
 }

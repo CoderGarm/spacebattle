@@ -7,7 +7,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class BattleCalculator {
 
-    private final static MathContext MATH_CONTEXT = new MathContext(4, RoundingMode.DOWN);
+    private static final MathContext MATH_CONTEXT = new MathContext(4, RoundingMode.DOWN);
 
     private BattleCalculator() {
     }

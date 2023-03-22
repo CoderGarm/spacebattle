@@ -23,8 +23,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 @Disabled("no test")
 public class FandomWikiQueryTest {
 
-    private final static String URL_EN = "https://honorverse.fandom.com/api.php";
-    private final static String URL_DE = "https://honor-harrington.fandom.com/de/api.php"; // no api available?
+    private static final String URL_EN = "https://honorverse.fandom.com/api.php";
+    private static final String URL_DE = "https://honor-harrington.fandom.com/de/api.php"; // no api available?
 
     private static final Wiki WIKI = new Wiki.Builder()
             .withApiEndpoint(HttpUrl.get(URL_DE))

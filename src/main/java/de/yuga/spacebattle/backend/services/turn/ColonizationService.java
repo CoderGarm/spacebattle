@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
 public class ColonizationService {
 
     @Nonnull
-    private final static Logger LOGGER = LoggerFactory.getLogger(ColonizationService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ColonizationService.class);
 
     @Nonnull
     private final ColonizationRepository repository;

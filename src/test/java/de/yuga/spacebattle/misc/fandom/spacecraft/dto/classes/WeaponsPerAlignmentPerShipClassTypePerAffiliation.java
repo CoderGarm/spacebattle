@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.misc.fandom.spacecraft.dto.classes;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.enums.EHullType;
+import de.yuga.spacebattle.backend.enums.EShipClassType;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.misc.fandom.spacecraft.dto.Weaponry;
 import de.yuga.spacebattle.misc.fandom.spacecraft.dto.WikiShipClass;
@@ -11,21 +11,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class WeaponsPerAlignmentPerHullTypePerAffiliation {
+public class WeaponsPerAlignmentPerShipClassTypePerAffiliation {
 
     @Nonnull
     private final String affiliation;
 
     @Nonnull
-    private final EHullType hullType;
+    private final EShipClassType shipClassType;
 
     private final Map<EWeaponAlignment, Integer> map = new HashMap<>();
 
     int counterShipClasses = 0;
 
-    public WeaponsPerAlignmentPerHullTypePerAffiliation(@Nonnull final String affiliation, @Nonnull final EHullType hullType) {
+    public WeaponsPerAlignmentPerShipClassTypePerAffiliation(@Nonnull final String affiliation, @Nonnull final EShipClassType shipClassType) {
         this.affiliation = Preconditions.checkNotNull(affiliation, "affiliation must not be empty");
-        this.hullType = Preconditions.checkNotNull(hullType, "hullType must not be empty");
+        this.shipClassType = Preconditions.checkNotNull(shipClassType, "shipClassType must not be empty");
     }
 
 
@@ -47,8 +47,8 @@ public class WeaponsPerAlignmentPerHullTypePerAffiliation {
     }
 
     @Nonnull
-    public EHullType getHullType() {
-        return hullType;
+    public EShipClassType getShipClassType() {
+        return shipClassType;
     }
 
     public Map<EWeaponAlignment, Integer> getMap() {

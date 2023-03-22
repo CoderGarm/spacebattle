@@ -25,10 +25,6 @@ public class Warhead {
     @Schema(required = true, description = "The warhead type.")
     private EWarheadType warheadType;
 
-    @JsonProperty
-    @Schema(required = true, description = "The used capacity of this warhead.")
-    private int useCapacity;
-
     public Warhead() {
     }
 

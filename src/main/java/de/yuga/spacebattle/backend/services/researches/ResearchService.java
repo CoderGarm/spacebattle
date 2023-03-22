@@ -129,9 +129,6 @@ public class ResearchService {
             if (unlockedThrough != null && !levelsByResearch.containsKey(unlockedThrough)) {
                 return true;
             }
-            if (levelsByResearch.containsKey(research)) {
-                return true;
-            }
             final Integer researchLevel = levelsByResearch.get(research);
             if (researchLevel != null) {
                 return research.getLevelCap() <= researchLevel;
@@ -150,9 +147,7 @@ public class ResearchService {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
         Preconditions.checkNotNull(researches, "researches shouldn't be null!");
 
-        final Set<ResearchLevel> allForUser = getResearchesForUser(entity.getId()).stream()
-                .filter(rl -> rl.getLevel() < rl.getResearch().getLevelCap())
-                .collect(Collectors.toSet());
+        final Set<ResearchLevel> allForUser = getResearchesForUser(entity.getId());
         for (Research research : researches) {
             final ResearchLevel researchLevel = allForUser.stream()
                     .filter(rl -> rl.getResearch().equals(research))
@@ -160,7 +155,10 @@ public class ResearchService {
                     .orElse(null);
             if (researchLevel != null) {
                 final int currentLevel = researchLevel.getLevel();
-                researchLevel.setLevel(currentLevel + 1);
+                final int nextLevel = currentLevel + 1;
+                if (nextLevel < research.getLevelCap()) {
+                    researchLevel.setLevel(nextLevel);
+                }
             } else {
                 allForUser.add(new ResearchLevel(entity, research));
             }

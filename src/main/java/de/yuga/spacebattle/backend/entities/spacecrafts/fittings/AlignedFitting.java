@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.combat.dto.RangeDefinition;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.physics.Mass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
@@ -214,13 +215,14 @@ public class AlignedFitting {
         return range;
     }
 
-    public int calculateUsedCapacity() {
+    public Mass getTonnage() {
+        Mass mass = Mass.ZERO;
         if (launcher != null) {
-            return amount * launcher.getUseCapacity();
+            mass = launcher.getTonnage();
         }
         if (weapon != null) {
-            return amount * weapon.getUseCapacity();
+            mass = weapon.getTonnage();
         }
-        return 0;
+        return mass.multiply(amount);
     }
 }

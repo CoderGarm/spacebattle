@@ -31,7 +31,7 @@ import static de.yuga.spacebattle.backend.enums.ERefinementSequence.*;
 public class PopulationControlCalculator {
 
     @SuppressWarnings("unused")
-    private final static Logger LOGGER = LoggerFactory.getLogger(PopulationControlCalculator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PopulationControlCalculator.class);
 
     private static final List<ERefinementSequence> UNRESTRICTED_EDUCATION = List.of(EDUCATION_CIVIL_II, EDUCATION_CIVIL_I);
     private static final List<ERefinementSequence> GUIDED_EDUCATION = List.of(EDUCATION_MILITARY_II, EDUCATION_MILITARY_I, EDUCATION_CIVIL_III);

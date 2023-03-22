@@ -1,8 +1,10 @@
 package de.yuga.spacebattle.backend.calculator.resource;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Mass;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
+import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -23,28 +25,27 @@ public class ResourceDepositInitializerCalculator {
      * Needs a heavy revision for productive run. Must be balanced.
      *
      * @param techLevel the tech level defines the complexity of cost structure
-     * @param capacity  if present it will be taken to weight the costs against other modules
+     * @param tonnage   if present it will be taken to weight the costs against other modules
      * @param clazz     the assigned class
      * @return the resource deposit
      */
     public static ResourceDeposit initializeCosts(@Nonnull final ETechLevel techLevel,
-                                                  @Nullable final Integer capacity,
+                                                  @Nullable final Integer tonnage,
                                                   @Nonnull final EResourceDemand clazz) {
         Preconditions.checkNotNull(techLevel, "techLevel shouldn't be null!");
         Preconditions.checkNotNull(clazz, "clazz shouldn't be null!");
 
-        final EDepositType subType = EDepositType.COSTS;
         final Set<EResourceType> overrideResources = clazz.getOverrideResources();
         overrideResources.addAll(techLevel.getExcludedResources());
 
-        final ResourceDeposit resourceDeposit = new ResourceDeposit(subType);
+        final ResourceDeposit resourceDeposit = new ResourceDeposit(EDepositType.COSTS);
         for (final EResourceType type : EResourceType.valuesWithoutPopulation()) {
             if (overrideResources.contains(type)) {
                 // do not generate for 'forbidden types'
                 continue;
             }
-            final int origin = getOrigin(capacity, clazz);
-            final int bound = getBound(capacity, clazz);
+            final int origin = getOrigin(tonnage, clazz);
+            final int bound = getBound(tonnage, clazz);
             int next = new Random().nextInt(bound);
             resourceDeposit.setAbsoluteResourceValue(type, origin + next);
         }
@@ -80,7 +81,6 @@ public class ResourceDepositInitializerCalculator {
             case RESEARCH:
             default:
                 return 10;
-            case HULL:
             case WEAPON_SYSTEM:
             case BASE_MODULE:
                 Preconditions.checkNotNull(capacity, "capacity must not be empty");
@@ -96,11 +96,42 @@ public class ResourceDepositInitializerCalculator {
             case RESEARCH:
             default:
                 return 51;
-            case HULL:
             case WEAPON_SYSTEM:
             case BASE_MODULE:
                 Preconditions.checkNotNull(capacity, "capacity must not be empty");
                 return Integer.max(9, capacity / 2);
         }
+    }
+
+    @Nonnull
+    public static ResourceDeposit getCostsForTonnage(@Nonnull final ETechLevel techLevel, @Nonnull final Mass tonnage) {
+        Preconditions.checkNotNull(techLevel, "techLevel must not be empty");
+        Preconditions.checkNotNull(tonnage, "tonnage must not be empty");
+
+        final int tons = tonnage.getCoordinateInMetric(EMassMetric.T).intValue();
+        final int personnelMultiplier = tons / 750;
+
+        final ResourceDeposit result = getCostsEquivalent(techLevel, tons);
+        result.setAbsolutePopulation(EEducationType.OFFICER, (long) (personnelMultiplier * 0.1));
+        result.setAbsolutePopulation(EEducationType.ENLISTED, (long) (personnelMultiplier * 0.9));
+        return result;
+    }
+
+    public static ResourceDeposit getCostsEquivalent(@Nonnull final ETechLevel techLevel,
+                                                     final int tonnage) {
+        Preconditions.checkNotNull(techLevel, "techLevel shouldn't be null!");
+
+        final Set<EResourceType> overrideResources = EResourceDemand.BASE_MODULE.getOverrideResources();
+        overrideResources.addAll(techLevel.getExcludedResources());
+
+        final ResourceDeposit resourceDeposit = new ResourceDeposit(EDepositType.COSTS);
+        for (final EResourceType type : EResourceType.valuesWithoutPopulation()) {
+            if (overrideResources.contains(type)) {
+                // do not generate for 'forbidden types'
+                continue;
+            }
+            resourceDeposit.setAbsoluteResourceValue(type, tonnage);
+        }
+        return resourceDeposit;
     }
 }

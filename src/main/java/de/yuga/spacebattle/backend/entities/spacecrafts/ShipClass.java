@@ -2,11 +2,13 @@ package de.yuga.spacebattle.backend.entities.spacecrafts;
 
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
+import de.yuga.spacebattle.backend.calculator.SpacecraftCalculator;
+import de.yuga.spacebattle.backend.calculator.SpacecraftTonnageCalculator;
 import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.combat.dto.RangeDefinition;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.physics.Mass;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.misc.Deletable;
@@ -17,10 +19,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
-import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
-import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
-import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
 import de.yuga.spacebattle.backend.validators.ShipValidator;
 
 import javax.annotation.Nonnull;
@@ -30,8 +29,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -48,8 +45,6 @@ import java.util.stream.Collectors;
 @AttributeOverride(name = "id", column = @Column(name = "idShipClass"))
 public class ShipClass extends Deletable {
 
-    private final static MathContext MATH_CONTEXT = new MathContext(8, RoundingMode.DOWN);
-
     @Nonnull
     @NotNull
     @ManyToOne(optional = false)
@@ -64,15 +59,13 @@ public class ShipClass extends Deletable {
     @Size(min = 3, max = 30, message = "name should be between 3 and 30 characters long")
     private String name;
 
-    @Valid
-    @Nullable
+    @Nonnull
     @NotNull
-    @ManyToOne
-    @JoinColumn(name = "idHull", updatable = false)
-    private Hull hull;
+    @Enumerated(EnumType.STRING)
+    private EShipClassType shipClassType;
 
     @Valid
-    @Nullable
+    @Nonnull
     @NotNull
     @ManyToOne
     @JoinColumn(name = "idPropulsion")
@@ -136,20 +129,39 @@ public class ShipClass extends Deletable {
     }
 
     public ShipClass(@Nonnull final User owner,
+                     @Nonnull final String name) {
+        this(owner, name, null);
+    }
+
+    public ShipClass(@Nonnull final User owner,
                      @Nonnull final String name,
-                     @Nonnull final Hull hull,
                      @Nullable final ShipClass predecessor) {
         Preconditions.checkNotNull(owner, "owner shouldn't be null!");
         Preconditions.checkNotNull(name, "name shouldn't be null!");
-        Preconditions.checkNotNull(hull, "hull shouldn't be null!");
 
         this.owner = owner;
         this.name = name;
-        this.hull = hull;
         if (predecessor != null) {
             this.predecessor = predecessor;
             this.predecessor.successor = this;
         }
+    }
+
+    public ShipClass(@Nonnull final User owner,
+                     @Nonnull final ShipClass toCopy) {
+        Preconditions.checkNotNull(owner, "owner must not be empty");
+        Preconditions.checkNotNull(toCopy, "toCopy must not be empty");
+
+        this.owner = owner;
+        this.name = toCopy.getName();
+        this.shipClassType = toCopy.getShipClassType();
+        this.propulsion = toCopy.getPropulsion();
+        this.armor = toCopy.getArmor();
+        this.sidewall = toCopy.getSidewall();
+        this.electronicWarfare = toCopy.getElectronicWarfare();
+        this.fittings.addAll(toCopy.getFittings());
+        this.ammunitionFittings.addAll(toCopy.getAmmunitionFittings());
+        this.supportFittings.addAll(toCopy.getSupportFittings());
     }
 
     @Nonnull
@@ -166,97 +178,6 @@ public class ShipClass extends Deletable {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
 
         this.name = name;
-    }
-
-    public void setHull(@Nullable final Hull hull) {
-        this.hull = hull;
-    }
-
-    @Nullable
-    public Hull getHull() {
-        return hull;
-    }
-
-    /**
-     * Will calculate and return the full costs of this ship.
-     *
-     * @return the total costs
-     */
-    @Nonnull
-    public ResourceDeposit getCosts() {
-        final ResourceDeposit clonedDeposit = new ResourceDeposit(EDepositType.COSTS);
-
-        final Map<ESupportType, SupportFitting> supportTypeToModule = supportFittings.stream()
-                .collect(Collectors.toMap(e -> e.getPassiveModule().getSupportType(), Function.identity()));
-
-        if (hull != null) {
-            updateCosts(clonedDeposit, supportTypeToModule, hull.getCosts());
-            if (propulsion != null) {
-                updateCosts(clonedDeposit, supportTypeToModule, propulsion.getCosts(hull));
-            }
-            if (armor != null) {
-                updateCosts(clonedDeposit, supportTypeToModule, armor.getCosts(hull));
-            }
-            if (electronicWarfare != null) {
-                updateCosts(clonedDeposit, supportTypeToModule, electronicWarfare.getCosts(hull));
-            }
-            if (sidewall != null) {
-                updateCosts(clonedDeposit, supportTypeToModule, sidewall.getCosts(hull));
-            }
-        }
-        fittings.forEach(fitting -> {
-            int amount = fitting.getAmount();
-            for (; amount >= 0; amount--) {
-                final Weapon weapon = fitting.getWeapon();
-                final Launcher launcher = fitting.getLauncher();
-                if (weapon != null) {
-                    updateCosts(clonedDeposit, supportTypeToModule, weapon.getCosts());
-                }
-                if (launcher != null) {
-                    updateCosts(clonedDeposit, supportTypeToModule, launcher.getCosts());
-                }
-            }
-        });
-        ammunitionFittings.forEach(s -> {
-            int amount = s.getAmount();
-            for (; amount >= 0; amount--) {
-                updateCosts(clonedDeposit, supportTypeToModule, s.getMissile().getCosts());
-            }
-        });
-        supportFittings.forEach(s -> {
-            int amount = s.getAmount();
-            for (; amount >= 0; amount--) {
-                updateCosts(clonedDeposit, supportTypeToModule, s.getPassiveModule().getCosts());
-            }
-        });
-        return clonedDeposit;
-    }
-
-    /**
-     * Calculates and sets the costs by a possible existent support module.
-     *
-     * @param clonedDeposit       the deposit to update
-     * @param supportTypeToModule the support module map
-     * @param costsToAdd          the resource map
-     */
-    private void updateCosts(@Nonnull final ResourceDeposit clonedDeposit,
-                             @Nonnull final Map<ESupportType, SupportFitting> supportTypeToModule,
-                             @Nonnull final ResourceDeposit costsToAdd) {
-        Preconditions.checkNotNull(clonedDeposit, "clonedDeposit shouldn't be null!");
-        Preconditions.checkNotNull(supportTypeToModule, "supportTypeToModule shouldn't be null!");
-        Preconditions.checkNotNull(costsToAdd, "costsToAdd shouldn't be null!");
-
-        for (final EResourceType resourceType : EResourceType.values()) {
-            final SupportFitting supportFitting = supportTypeToModule.get(ESupportType.getByValue(resourceType));
-            final double absoluteValueAsFactor = supportFitting != null ? supportFitting.getAbsoluteValueAsFactor() : 1;
-            if (resourceType == EResourceType.POPULATION) {
-                clonedDeposit.updateCrew(costsToAdd.getCrewRequirement(), ECalculationType.ADD);
-            } else {
-                final long amount = costsToAdd.getResourceAmountByType(resourceType);
-                final BigDecimal effectiveAmount = new BigDecimal(amount).multiply(new BigDecimal(absoluteValueAsFactor), ResourceDeposit.MATH_CONTEXT_INTEGER);
-                clonedDeposit.updateResource(resourceType, effectiveAmount.longValue());
-            }
-        }
     }
 
     @Nonnull
@@ -286,13 +207,13 @@ public class ShipClass extends Deletable {
         this.fittings.addAll(fittings);
     }
 
-    @Nullable
+    @Nonnull
     public Propulsion getPropulsion() {
         return propulsion;
     }
 
-    public void setPropulsion(@Nullable Propulsion propulsion) {
-        this.propulsion = propulsion;
+    public void setPropulsion(@Nonnull final Propulsion propulsion) {
+        this.propulsion = Preconditions.checkNotNull(propulsion, "propulsion must not be empty");
     }
 
     @Nullable
@@ -371,7 +292,7 @@ public class ShipClass extends Deletable {
      *
      * @return the mark
      */
-    public int getMark() {
+    public int getFlight() {
         int counter = 1;
         ShipClass runner = this;
         while (runner.getPredecessor() != null) {
@@ -380,6 +301,20 @@ public class ShipClass extends Deletable {
         }
 
         return counter;
+    }
+
+    public void setShipClassType(@Nonnull final EShipClassType shipClassType) {
+        this.shipClassType = Preconditions.checkNotNull(shipClassType, "shipClassType must not be empty");
+    }
+
+    @Nonnull
+    public EShipClassType getShipClassType() {
+        return shipClassType;
+    }
+
+    @Nonnull
+    public Mass getTonnage() {
+        return getTonnage(ECapacityAreaType.OVERALL);
     }
 
     @Nullable
@@ -416,9 +351,6 @@ public class ShipClass extends Deletable {
      * @return <code>true</code> if the class can drive faster than light, <code>false</code> otherwise
      */
     public boolean isFTLCapable() {
-        if (propulsion == null) {
-            return false;
-        }
         return propulsion.isFtlCapable();
     }
 
@@ -516,101 +448,104 @@ public class ShipClass extends Deletable {
         return 31 * id;
     }
 
-    public int getUsedCapacity(@Nonnull final ECapacityAreaType capacityAreaType) {
+
+    /**
+     * Will calculate and return the full costs of this ship.
+     *
+     * @return the total costs
+     */
+    @Nonnull
+    public ResourceDeposit getCosts() {
+        final ResourceDeposit clonedDeposit = new ResourceDeposit(EDepositType.COSTS);
+
+        final Map<ESupportType, SupportFitting> supportTypeToModule = supportFittings.stream()
+                .collect(Collectors.toMap(e -> e.getPassiveModule().getSupportType(), Function.identity()));
+
+        fittings.forEach(fitting -> {
+            int amount = fitting.getAmount();
+            for (; amount >= 0; amount--) {
+                final Weapon weapon = fitting.getWeapon();
+                final Launcher launcher = fitting.getLauncher();
+                if (weapon != null) {
+                    updateCosts(clonedDeposit, supportTypeToModule, weapon.getCosts());
+                }
+                if (launcher != null) {
+                    updateCosts(clonedDeposit, supportTypeToModule, launcher.getCosts());
+                }
+            }
+        });
+        ammunitionFittings.forEach(s -> {
+            int amount = s.getAmount();
+            for (; amount >= 0; amount--) {
+                updateCosts(clonedDeposit, supportTypeToModule, s.getMissile().getCosts());
+            }
+        });
+        supportFittings.forEach(s -> {
+            int amount = s.getAmount();
+            for (; amount >= 0; amount--) {
+                updateCosts(clonedDeposit, supportTypeToModule, s.getPassiveModule().getCosts());
+            }
+        });
+        if (armor != null) {
+            updateCosts(clonedDeposit, supportTypeToModule, armor.getCosts());
+        }
+        if (electronicWarfare != null) {
+            updateCosts(clonedDeposit, supportTypeToModule, electronicWarfare.getCosts());
+        }
+        if (sidewall != null) {
+            updateCosts(clonedDeposit, supportTypeToModule, sidewall.getCosts());
+        }
+
+        final Mass tonnage = getTonnage();
+        updateCosts(clonedDeposit, supportTypeToModule, propulsion.getCosts(tonnage));
+        return clonedDeposit;
+    }
+
+    /**
+     * Calculates and sets the costs by a possible existent support module.
+     *
+     * @param clonedDeposit       the deposit to update
+     * @param supportTypeToModule the support module map
+     * @param costsToAdd          the resource map
+     */
+    private void updateCosts(@Nonnull final ResourceDeposit clonedDeposit,
+                             @Nonnull final Map<ESupportType, SupportFitting> supportTypeToModule,
+                             @Nonnull final ResourceDeposit costsToAdd) {
+        Preconditions.checkNotNull(clonedDeposit, "clonedDeposit shouldn't be null!");
+        Preconditions.checkNotNull(supportTypeToModule, "supportTypeToModule shouldn't be null!");
+        Preconditions.checkNotNull(costsToAdd, "costsToAdd shouldn't be null!");
+
+        for (final EResourceType resourceType : EResourceType.values()) {
+            final SupportFitting supportFitting = supportTypeToModule.get(ESupportType.getByValue(resourceType));
+            final double absoluteValueAsFactor = supportFitting != null ? supportFitting.getAbsoluteValueAsFactor() : 1;
+            if (resourceType == EResourceType.POPULATION) {
+                clonedDeposit.updateCrew(costsToAdd.getCrewRequirement(), ECalculationType.ADD);
+            } else {
+                final long amount = costsToAdd.getResourceAmountByType(resourceType);
+                final BigDecimal effectiveAmount = new BigDecimal(amount).multiply(new BigDecimal(absoluteValueAsFactor), ResourceDeposit.MATH_CONTEXT_INTEGER);
+                clonedDeposit.updateResource(resourceType, effectiveAmount.longValue());
+            }
+        }
+    }
+
+    @Nonnull
+    public Mass getTonnage(@Nonnull final ECapacityAreaType capacityAreaType) {
         Preconditions.checkNotNull(capacityAreaType, "capacityAreaType must not be empty");
 
-        switch (capacityAreaType) {
-            case BOW:
-            case STERN:
-            case BROADSIDE:
-                assert capacityAreaType.getAlignment() != null : "Otherwise we had a problem.";
-                return getFittingByAlignment(capacityAreaType.getAlignment()).stream()
-                        .map(AlignedFitting::calculateUsedCapacity)
-                        .reduce(0, Integer::sum);
-            case MODULE:
-                int usedCapacity = getSupportFittings().stream()
-                        .map(SupportFitting::calculateUsedCapacity)
-                        .reduce(0, Integer::sum);
-                usedCapacity += getAmmunitionFittings().stream()
-                        .map(AmmunitionFitting::getUsedCapacity)
-                        .reduce(0D, Double::sum)
-                        .intValue();
-                if (hull != null) {
-                    usedCapacity += propulsion != null ? propulsion.getUseCapacity(hull) : 0;
-                    usedCapacity += armor != null ? armor.getUseCapacity(hull) : 0;
-                    usedCapacity += sidewall != null ? sidewall.getUseCapacity(hull) : 0;
-                    usedCapacity += electronicWarfare != null ? electronicWarfare.getUseCapacity(hull) : 0;
-                }
-                return usedCapacity;
-            case OVERALL:
-                return ECapacityAreaType.getValuesWithoutOverall().stream().map(this::getUsedCapacity).reduce(0, Integer::sum);
-            default:
-                return 0;
-        }
+        return SpacecraftTonnageCalculator.getTonnage(capacityAreaType, this);
     }
 
     @Nonnull
     public Acceleration getAcceleration(@Nonnull final EHyperBand hyperBand) {
         Preconditions.checkNotNull(hyperBand, "hyperBand must not be empty");
 
-        if (propulsion == null) {
-            return Acceleration.ZERO;
-        }
-
-        final double maxAccelerationOfMilitary = propulsion.getTechnologyType().getMaxAccelerationOfMilitary();
-        final EModuleType eModuleType = hyperBand == EHyperBand.NONE ? EModuleType.PROPULSION : EModuleType.FTLPROPULSION;
-        final double propulsionSupportFactor = getSupportFittings().stream()
-                .filter(s -> eModuleType == s.getPassiveModule().getSupportType().getModifiedProperty())
-                .findAny().stream()
-                .map(SupportFitting::getAbsoluteValueAsFactor).reduce(0D, Double::sum);
-        final BigDecimal factor = BigDecimal.ONE.add(new BigDecimal(propulsionSupportFactor));
-        final BigDecimal accelerationValue = getMathematicallyAcceleration(hyperBand)
-                .multiply(factor, ResourceDeposit.MATH_CONTEXT_INTEGER)
-                .multiply(BigDecimal.valueOf(maxAccelerationOfMilitary), DistanceCalculator.MC_HU);
-        return new Acceleration(accelerationValue, EAccelerationMetric.G, hyperBand);
+        return SpacecraftCalculator.getAcceleration(SpacecraftTonnageCalculator.getFullTonnage(this), propulsion, hyperBand, supportFittings);
     }
 
     @Nonnull
     public Velocity getVelocity(@Nonnull final EHyperBand hyperBand) {
         Preconditions.checkNotNull(hyperBand, "hyperBand must not be empty");
 
-        if (propulsion == null) {
-            return Velocity.ZERO;
-        }
-
-        return new Velocity(hyperBand.getEffectiveTopSpeed(propulsion.getTechnologyType()), EDistanceMetric.M, ETimeMetric.SECOND);
-    }
-
-    @Nonnull
-    private BigDecimal getMathematicallyAcceleration(@Nonnull final EHyperBand hyperBand) {
-        Preconditions.checkNotNull(hyperBand, "hyperBand must not be empty");
-
-        if (getPropulsion() == null || getHull() == null) {
-            return BigDecimal.ZERO;
-        }
-
-        if (getPropulsion().getHyperBand().getVelocityMultiplier() < hyperBand.getVelocityMultiplier()) {
-            return BigDecimal.ZERO;
-        }
-
-        //y = 558.1465 - 0.0001075032*x + 7.261618e-11*x^2 - 2.1753440000000002e-17*x^3 + 2.786797e-24*x^4 - 1.275354e-31*x^5
-        final BigDecimal a = BigDecimal.valueOf(getPropulsion().getEffectValue());
-        final List<BigDecimal> paramList = List.of(
-                BigDecimal.valueOf(-0.0001075032),
-                BigDecimal.valueOf(7.261618).scaleByPowerOfTen(-11),
-                BigDecimal.valueOf(-2.175344).scaleByPowerOfTen(-17),
-                BigDecimal.valueOf(2.786797).scaleByPowerOfTen(-24),
-                BigDecimal.valueOf(-1.275354).scaleByPowerOfTen(-31)
-        );
-
-        final BigDecimal x = BigDecimal.valueOf(getHull().getTonnage());
-        BigDecimal result = a;
-        for (int i = 0; i < paramList.size(); i++) {
-            final BigDecimal coefficient = paramList.get(i);
-            final BigDecimal inBetween = coefficient.multiply(x.pow(i + 1), MATH_CONTEXT);
-            result = result.add(inBetween);
-        }
-        result = result.setScale(0, RoundingMode.HALF_EVEN);
-        return result.multiply(BigDecimal.valueOf(hyperBand.getVelocityMultiplier()), MATH_CONTEXT);
+        return SpacecraftCalculator.getVelocity(propulsion, hyperBand);
     }
 }

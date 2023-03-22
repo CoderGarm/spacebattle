@@ -2,10 +2,9 @@ package de.yuga.spacebattle.rest.dto.researches;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
-import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
-import de.yuga.spacebattle.backend.enums.EHullType;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.enums.ETranslationTarget;
@@ -18,22 +17,26 @@ import javax.annotation.Nullable;
 @Schema(description = ".")
 public class Research {
 
-    @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The id of this research.")
     private int idResearch;
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The name of this research.")
     private String name;
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The description of this research.")
     private String description;
 
+    @JsonProperty
     @Schema(required = true, description = "The maximum level of this research.")
     private int levelCap;
 
     @Nullable
+    @JsonProperty
     @Schema(description = "If it has an icon, then it is described here.")
     private HasIcon hasIcon;
 
@@ -75,16 +78,9 @@ public class Research {
             this.hasIcon = new HasIcon(eResourceType);
             return;
         }
-
-        final EHullType eHullType = research.getUnlocksHulls().stream().findFirst().map(Hull::getHullType).orElse(null);
-        if (eHullType != null) {
-            this.hasIcon = new HasIcon(eHullType);
-            return;
-        }
-
         final ETranslationTarget unlocks = research.getUnlocks();
+
         switch (unlocks) {
-            case HULL:
             case BUILDING:
             case RESEARCH:
             case PASSIVE_MODULE:
@@ -111,24 +107,5 @@ public class Research {
 
     public int getIdResearch() {
         return idResearch;
-    }
-
-    @Nonnull
-    public String getName() {
-        return name;
-    }
-
-    @Nonnull
-    public String getDescription() {
-        return description;
-    }
-
-    public int getLevelCap() {
-        return levelCap;
-    }
-
-    @Nullable
-    public HasIcon getHasIcon() {
-        return hasIcon;
     }
 }

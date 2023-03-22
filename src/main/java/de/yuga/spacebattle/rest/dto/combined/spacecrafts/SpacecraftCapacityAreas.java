@@ -4,9 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.SpacecraftCalculator;
+import de.yuga.spacebattle.backend.dto.physics.Mass;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateSnapshot;
 import de.yuga.spacebattle.backend.enums.ECapacityAreaType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -24,6 +27,15 @@ public class SpacecraftCapacityAreas {
     @Schema(required = true, description = "The construction capacity values per area.")
     private final List<CapacityValue> capacityValues = new ArrayList<>();
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The tonnage of freight which can be taken over.")
+    private Mass cargoHold;
+
+    @JsonProperty
+    @Schema(required = true, description = "The amount of passengers can be taken over.")
+    private int passengerSpace;
+
     public SpacecraftCapacityAreas() {
     }
 
@@ -34,6 +46,32 @@ public class SpacecraftCapacityAreas {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
         setValues(new SpacecraftCalculator().getSpacecraftCapacityAreas(fleet));
+        fleet.getAliveShips().stream().map(WarShip::getShipClass).forEach(this::addCargoHolds);
+    }
+
+    public SpacecraftCapacityAreas(@Nonnull final ShipClass shipClass) {
+        Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
+
+        setValues(new SpacecraftCalculator().getSpacecraftCapacityAreas(shipClass));
+        addCargoHolds(shipClass);
+    }
+
+    public SpacecraftCapacityAreas(@Nonnull final Map<ShipClass, Integer> shipClasses) {
+        Preconditions.checkNotNull(shipClasses, "shipClasses must not be empty");
+
+        setValues(new SpacecraftCalculator().getSpacecraftCapacityAreas(shipClasses));
+        shipClasses.forEach((shipClass, amount) -> {
+            for (int i = 0; i < amount; i++) {
+                addCargoHolds(shipClass);
+            }
+        });
+    }
+
+    public SpacecraftCapacityAreas(@Nonnull final FleetSnapshot fleetSnapshot) {
+        Preconditions.checkNotNull(fleetSnapshot, "fleetSnapshot must not be empty");
+
+        setValues(new SpacecraftCalculator().getSpacecraftCapacityAreas(fleetSnapshot));
+        fleetSnapshot.getShips().stream().map(WarshipHealthStateSnapshot::getWarShip).map(WarShip::getShipClass).forEach(this::addCargoHolds);
     }
 
     @JsonIgnore
@@ -43,22 +81,10 @@ public class SpacecraftCapacityAreas {
         capacityValues.addAll(spaceCraftCapabilities.getCapacityValues());
     }
 
-    public SpacecraftCapacityAreas(@Nonnull final ShipClass shipClass) {
-        Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
-
-        setValues(new SpacecraftCalculator().getSpacecraftCapacityAreas(shipClass));
-    }
-
-    public SpacecraftCapacityAreas(@Nonnull final Map<ShipClass, Integer> shipClasses) {
-        Preconditions.checkNotNull(shipClasses, "shipClasses must not be empty");
-
-        setValues(new SpacecraftCalculator().getSpacecraftCapacityAreas(shipClasses));
-    }
-
-    public SpacecraftCapacityAreas(@Nonnull final FleetSnapshot fleetSnapshot) {
-        Preconditions.checkNotNull(fleetSnapshot, "fleetSnapshot must not be empty");
-
-        setValues(new SpacecraftCalculator().getSpacecraftCapacityAreas(fleetSnapshot));
+    @JsonIgnore
+    private void addCargoHolds(@Nonnull final ShipClass shipClass) {
+        this.cargoHold = shipClass.getSupportFittings().stream().filter(f -> f.getPassiveModule().isCargo()).map(f -> f.getPassiveModule().getCargoCapacity().multiply(f.getAmount())).reduce(Mass.ZERO, Mass::add);
+        this.passengerSpace += shipClass.getSupportFittings().stream().filter(f -> f.getPassiveModule().isPassenger()).map(f -> f.getPassiveModule().getPassengers() * f.getAmount()).reduce(0, Integer::sum);
     }
 
     @Nonnull

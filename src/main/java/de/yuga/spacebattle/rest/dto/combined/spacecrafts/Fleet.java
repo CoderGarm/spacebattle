@@ -77,6 +77,7 @@ public class Fleet {
     @Schema(required = true, description = "If the fleet can run interstellar movements.")
     private boolean isFTLCapable;
 
+    @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The states of the fleet.")
     private StateBlock state;

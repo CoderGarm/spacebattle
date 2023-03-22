@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics.BaseModule;
-import de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics.HasCostsByParent;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -18,11 +17,6 @@ public class Armor {
     @Schema(required = true, description = "The basic values of this module.")
     private BaseModule baseModule;
 
-    @Nonnull
-    @JsonProperty
-    @Schema(required = true, description = "Some relevant info about the cost of this module.")
-    private HasCostsByParent hasCostsByParent;
-
     public Armor() {
     }
 
@@ -32,7 +26,6 @@ public class Armor {
         Preconditions.checkNotNull(armor, "armor shouldn't be null!");
 
         this.baseModule = new BaseModule(armor, languageCode);
-        this.hasCostsByParent = new HasCostsByParent(armor);
     }
 
     @JsonIgnore

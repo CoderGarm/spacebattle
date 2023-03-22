@@ -19,8 +19,8 @@ public class SpacebattleApplicationTests {
     @Autowired
     WebApplicationContext context;
 
-    private final static String tmpdir = System.getProperty("java.io.tmpdir");
-    private final static String separator = System.getProperty("file.separator");
+    private static final String tmpdir = System.getProperty("java.io.tmpdir");
+    private static final String separator = System.getProperty("file.separator");
 
     /**
      * Run this test to generate the open api definition of the rest api.

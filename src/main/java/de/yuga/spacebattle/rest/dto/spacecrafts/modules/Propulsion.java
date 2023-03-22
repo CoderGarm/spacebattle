@@ -7,7 +7,6 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.ETechnologyType;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics.BaseModule;
-import de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics.HasCostsByParent;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -20,10 +19,9 @@ public class Propulsion {
     @Schema(required = true, description = "The basic values of this module.")
     private BaseModule baseModule;
 
-    @Nonnull
     @JsonProperty
-    @Schema(required = true, description = "Some relevant info about the cost of this module.")
-    private HasCostsByParent hasCostsByParent;
+    @Schema(required = true, description = "The percentage of the parent's module cost which represents the costs of 'this'.")
+    private int costsPercentage;
 
     @Nonnull
     @JsonProperty
@@ -44,7 +42,7 @@ public class Propulsion {
         Preconditions.checkNotNull(propulsion, "propulsion shouldn't be null!");
 
         this.baseModule = new BaseModule(propulsion, languageCode);
-        this.hasCostsByParent = new HasCostsByParent(propulsion);
+        this.costsPercentage = propulsion.getCostsPercentage();
         this.technologyType = propulsion.getTechnologyType();
         this.hyperBand = propulsion.getHyperBand();
     }

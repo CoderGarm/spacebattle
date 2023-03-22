@@ -2,8 +2,8 @@ package de.yuga.spacebattle.rest.api.constructables.spacecrafts;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.enums.EHullType;
 import de.yuga.spacebattle.backend.enums.EModuleType;
+import de.yuga.spacebattle.backend.enums.EShipClassType;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassCreationService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
@@ -45,7 +45,7 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 public class ShipyardApi extends BaseApi {
 
     public static final String ENDPOINT = "shipyard";
-    public static final String E_HULL_TYPE_ENDPOINT = "hullType";
+    public static final String E_HULL_TYPE_ENDPOINT = "shipClassType";
     public static final String E_MODULE_TYPE_ENDPOINT = "moduleType";
 
     @Nonnull
@@ -175,18 +175,18 @@ public class ShipyardApi extends BaseApi {
     }
 
     @GetMapping(value = E_HULL_TYPE_ENDPOINT)
-    @Operation(summary = "Get all EHullType.", operationId = "getEHullTypes",
+    @Operation(summary = "Get all EShipClassTypes.", operationId = "getEShipClassTypes",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = de.yuga.spacebattle.rest.dto.enums.EHullType.class))
+                                    schema = @Schema(implementation = de.yuga.spacebattle.rest.dto.enums.EShipClassType.class))
                             )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getEHullTypes() {
-        return ResponseEntity.ok(Arrays.stream(EHullType.values()).map(de.yuga.spacebattle.rest.dto.enums.EHullType::new).collect(Collectors.toList()));
+    public ResponseEntity<?> getEShipClassTypes() {
+        return ResponseEntity.ok(Arrays.stream(EShipClassType.values()).map(de.yuga.spacebattle.rest.dto.enums.EShipClassType::new).collect(Collectors.toList()));
     }
 
     @GetMapping(value = E_MODULE_TYPE_ENDPOINT)
@@ -204,8 +204,15 @@ public class ShipyardApi extends BaseApi {
         return ResponseEntity.ok(Arrays.stream(EModuleType.values()).map(de.yuga.spacebattle.rest.dto.enums.EModuleType::new).collect(Collectors.toList()));
     }
 
-    @GetMapping(value = "propulsionCapacity/{idHull}/{idPropulsion}")
+    @PutMapping(value = "propulsionCapacity/{idPropulsion}")
     @Operation(summary = "Calculates the ability of the propulsion to move the hull.", operationId = "getPropulsionCapacity",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ShipClassMock.class)
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
@@ -215,7 +222,9 @@ public class ShipyardApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getPropulsionCapacity(@PathVariable("idHull") final int idHull, @PathVariable("idPropulsion") final int idPropulsion) {
-        return ResponseEntity.ok(shipClassCreationService.getPropulsionCapacity(idHull, idPropulsion));
+    public ResponseEntity<?> getPropulsionCapacity(@PathVariable("idPropulsion") final int idPropulsion, @RequestBody @Nonnull final ShipClassMock classData) {
+        Preconditions.checkNotNull(classData, "classData must not be empty");
+
+        return ResponseEntity.ok(shipClassCreationService.getPropulsionCapacity(classData, idPropulsion));
     }
 }

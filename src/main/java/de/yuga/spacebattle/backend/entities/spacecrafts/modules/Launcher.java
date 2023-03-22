@@ -2,10 +2,10 @@ package de.yuga.spacebattle.backend.entities.spacecrafts.modules;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
-import de.yuga.spacebattle.backend.entities.misc.HasHullTypeByOwnCosts;
+import de.yuga.spacebattle.backend.entities.misc.HasCostsByOwn;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
-import de.yuga.spacebattle.backend.enums.EHullType;
+import de.yuga.spacebattle.backend.enums.EShipClassType;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 import org.hibernate.annotations.Check;
 
@@ -24,7 +24,7 @@ import java.util.Set;
 @Table(name = "launcher")
 @Check(constraints = "weaponType = 'MISSILE' OR weaponType = 'COUNTER_MISSILE'")
 @AttributeOverride(name = "id", column = @Column(name = "idLauncher"))
-public class Launcher extends HasHullTypeByOwnCosts {
+public class Launcher extends HasCostsByOwn {
 
     @Nonnull
     @NotNull
@@ -45,12 +45,12 @@ public class Launcher extends HasHullTypeByOwnCosts {
     public Launcher(@Nonnull final NamedTechLevel baseModule,
                     @Nonnull final String technicalTypeName,
                     final int unlockedThroughLevel,
-                    final int useCapacity,
-                    @Nonnull final EHullType hullType,
+                    final int tonnage,
+                    @Nonnull final EShipClassType shipClassType,
                     @Nonnull final CrewRequirement crewRequirement,
                     @Nonnull final EWeaponType weaponType,
                     @Nonnull final Set<Missile> allowedMissiles) {
-        super(baseModule, technicalTypeName, unlockedThroughLevel, 1, useCapacity, hullType, crewRequirement);
+        super(baseModule, technicalTypeName, unlockedThroughLevel, 1, tonnage, shipClassType, crewRequirement);
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
 
         this.weaponType = weaponType;

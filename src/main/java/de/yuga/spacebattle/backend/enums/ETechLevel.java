@@ -3,7 +3,6 @@ package de.yuga.spacebattle.backend.enums;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,12 +23,17 @@ public enum ETechLevel {
         if (excludedResources != null) {
             this.excludedResources = Arrays.stream(excludedResources).collect(Collectors.toSet());
         } else {
-            this.excludedResources = new HashSet<>();
+            this.excludedResources = Set.of();
         }
     }
 
     @Nonnull
     public Set<EResourceType> getExcludedResources() {
         return excludedResources;
+    }
+
+    @Nonnull
+    public Set<EResourceType> getIncludedResources() {
+        return Arrays.stream(EResourceType.valuesWithoutPopulation()).filter(r -> !excludedResources.contains(r)).collect(Collectors.toSet());
     }
 }

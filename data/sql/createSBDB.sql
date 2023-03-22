@@ -58,10 +58,11 @@
        idArmor integer not null auto_increment,
         technicalTypeName varchar(255) not null,
         unlockedThroughLevel integer not null,
-        costsPercentage integer not null,
         effectValue integer not null,
-        hullType varchar(255) not null,
+        shipClassType varchar(255) not null,
+        tonnage varchar(255) not null,
         idNamedTechLevel integer not null,
+        idCosts integer not null,
         primary key (idArmor)
     ) engine=InnoDB;
 
@@ -169,11 +170,12 @@
        idElectronicWarfare integer not null auto_increment,
         technicalTypeName varchar(255) not null,
         unlockedThroughLevel integer not null,
-        costsPercentage integer not null,
         effectValue integer not null,
-        hullType varchar(255) not null,
+        shipClassType varchar(255) not null,
+        tonnage varchar(255) not null,
         effectiveRange varchar(255),
         idNamedTechLevel integer not null,
+        idCosts integer not null,
         primary key (idElectronicWarfare)
     ) engine=InnoDB;
 
@@ -254,23 +256,6 @@
         primary key (idHitLog)
     ) engine=InnoDB;
 
-    create table hull (
-       idHull integer not null auto_increment,
-        techLevel varchar(255) not null,
-        constructionCapacity integer not null,
-        constructionCapacityBow integer not null,
-        constructionCapacityBroadsides integer not null,
-        constructionCapacityStern integer not null,
-        hullType varchar(255) not null,
-        overallConstructionCapacity integer not null,
-        idTranslatableDescription integer not null,
-        idTranslatableName integer not null,
-        idCosts integer not null,
-        idResearch integer not null,
-        primary key (idHull),
-        constraint hull_CHECK check (overallConstructionCapacity >= constructionCapacity + constructionCapacityBow + constructionCapacityStern + constructionCapacityBroadsides)
-    ) engine=InnoDB;
-
     create table humanResources (
        idResourceDeposit integer not null,
         amount decimal(19, 0) not null,
@@ -307,8 +292,8 @@
         technicalTypeName varchar(255) not null,
         unlockedThroughLevel integer not null,
         effectValue integer not null,
-        useCapacity integer not null,
-        hullType varchar(255) not null,
+        shipClassType varchar(255) not null,
+        tonnage varchar(255) not null,
         weaponType varchar(255) not null,
         idNamedTechLevel integer not null,
         idCosts integer not null,
@@ -351,8 +336,8 @@
         technicalTypeName varchar(255) not null,
         unlockedThroughLevel integer not null,
         elokaResistance integer,
-        useCapacity integer not null,
-        hullType varchar(255) not null,
+        shipClassType varchar(255) not null,
+        tonnage varchar(255) not null,
         acceleration varchar(255),
         endurance integer not null,
         maneuverability integer not null,
@@ -457,8 +442,8 @@
     create table passiveModule (
        idPassiveModule integer not null auto_increment,
         techLevel varchar(255) not null,
-        hullType varchar(255) not null,
-        useCapacity integer not null,
+        shipClassType varchar(255) not null,
+        tonnage varchar(255) not null,
         effectValue integer not null,
         calculationType varchar(255) not null,
         supportType varchar(255) not null,
@@ -568,9 +553,9 @@
        idShipClass integer not null auto_increment,
         isDeleted boolean not null default false,
         name varchar(30) not null,
+        shipClassType varchar(255) not null,
         idArmor integer,
         idElectronicWarfare integer,
-        idHull integer not null,
         idOwner integer not null,
         idPredecessor integer,
         idPropulsion integer not null,
@@ -601,10 +586,11 @@
        idSidewall integer not null auto_increment,
         technicalTypeName varchar(255) not null,
         unlockedThroughLevel integer not null,
-        costsPercentage integer not null,
         effectValue integer not null,
-        hullType varchar(255) not null,
+        shipClassType varchar(255) not null,
+        tonnage varchar(255) not null,
         idNamedTechLevel integer not null,
+        idCosts integer not null,
         primary key (idSidewall)
     ) engine=InnoDB;
 
@@ -716,8 +702,8 @@
         technicalTypeName varchar(255) not null,
         unlockedThroughLevel integer not null,
         effectValue integer not null,
-        useCapacity integer not null,
-        hullType varchar(255) not null,
+        shipClassType varchar(255) not null,
+        tonnage varchar(255) not null,
         amountDamageEmitter integer not null,
         damageProjectionRange varchar(255),
         weaponType varchar(255) not null,
@@ -876,6 +862,11 @@
        foreign key (idNamedTechLevel) 
        references namedTechLevel (idNamedTechLevel);
 
+    alter table armor 
+       add constraint FK10dhr7h3pkps3d7u22q2pwpgc 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
+
     alter table article 
        add constraint FKhuuswjlsmm6e5n3l8ur3ba4dp 
        foreign key (idBase) 
@@ -991,6 +982,11 @@
        foreign key (idNamedTechLevel) 
        references namedTechLevel (idNamedTechLevel);
 
+    alter table electronicWarfare 
+       add constraint FKccj76id0r5pq3p7f4viriwdqf 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
+
     alter table fleet 
        add constraint FK5yy9whqh6562iaxuym0wrkjeq 
        foreign key (idMove) 
@@ -1070,26 +1066,6 @@
        add constraint FK1pcr16gjbto8vd5g7v8hq14hw 
        foreign key (idTarget) 
        references warShip (idWarShip);
-
-    alter table hull 
-       add constraint FKi1ghgbbrc1j4vovj7v03t0sd5 
-       foreign key (idTranslatableDescription) 
-       references translatable (idTranslatable);
-
-    alter table hull 
-       add constraint FK7g5aas0xko5stotsvyt9hhchw 
-       foreign key (idTranslatableName) 
-       references translatable (idTranslatable);
-
-    alter table hull 
-       add constraint FK65udyybp7syxvga5evxn8olhc 
-       foreign key (idCosts) 
-       references resourceDeposit (idResourceDeposit);
-
-    alter table hull 
-       add constraint FK4hpf1pawl0wynjx9kdg74opea 
-       foreign key (idResearch) 
-       references research (idResearch);
 
     alter table humanResources 
        add constraint FKh3v7ra6rwylc7sofs1is80fb8 
@@ -1447,11 +1423,6 @@
        references electronicWarfare (idElectronicWarfare);
 
     alter table shipClass 
-       add constraint FKgkjpsgpvfaupqxr7cv9nhc9ai 
-       foreign key (idHull) 
-       references hull (idHull);
-
-    alter table shipClass 
        add constraint FKovqcf68xgq4mm2n32sdoburq6 
        foreign key (idOwner) 
        references user (idUser);
@@ -1500,6 +1471,11 @@
        add constraint FKsotde61rdfb2dofbtlun2h1fn 
        foreign key (idNamedTechLevel) 
        references namedTechLevel (idNamedTechLevel);
+
+    alter table sidewall 
+       add constraint FKlo0i3byallqh89wd535yrbs3l 
+       foreign key (idCosts) 
+       references resourceDeposit (idResourceDeposit);
 
     alter table supportFitting 
        add constraint FKd2r1r3l1h9iehfvklg6tymj1o 

@@ -22,7 +22,7 @@ public class MissileMotorCsvTransformer extends CSVTransformer<MissileMotor> {
         headers.add("endurance");
         headers.add("acceleration");
         headers.add("maneuverability");
-        headers.add("useCapacity");
+        headers.add("tonnage");
     }
 
     @Override
@@ -40,7 +40,7 @@ public class MissileMotorCsvTransformer extends CSVTransformer<MissileMotor> {
         a(toTransform.getEndurance());
         a(toTransform.getAcceleration().asString());
         a(toTransform.getManeuverability());
-        a(toTransform.getUseCapacity());
+        a(toTransform.gettonnage());
         */
     }
 }

@@ -3,7 +3,7 @@ package de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.misc.HasEffectValue;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.enums.EHullType;
+import de.yuga.spacebattle.backend.enums.EShipClassType;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 
@@ -24,13 +24,13 @@ public class BaseModuleWithEffectValue extends BaseModule implements HasEffectVa
     public BaseModuleWithEffectValue(@Nonnull final String name,
                                      @Nonnull final String description,
                                      @Nonnull final Research unlockedThrough,
-                                     final int useCapacity,
+                                     final int tonnage,
                                      final int effectValue,
-                                     @Nonnull final EHullType hullType,
+                                     @Nonnull final EShipClassType shipClassType,
                                      @Nonnull final ETechLevel techLevel,
                                      @Nonnull final CrewRequirement crewRequirement,
                                      @Nonnull final Class<?> clazz) {
-        super(name, description, unlockedThrough, useCapacity, hullType, techLevel, crewRequirement, clazz);
+        super(name, description, unlockedThrough, tonnage, shipClassType, techLevel, crewRequirement, clazz);
 
         this.effectValue = effectValue;
     }

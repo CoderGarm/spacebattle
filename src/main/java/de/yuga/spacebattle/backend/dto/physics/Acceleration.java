@@ -14,6 +14,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 
+@Schema(description = ".")
 public class Acceleration implements Cloneable, Comparable<Acceleration> {
 
     public static final Acceleration ZERO = new Acceleration(0, EAccelerationMetric.MS2);

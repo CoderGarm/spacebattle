@@ -94,29 +94,29 @@ public class ModuleService {
     @SuppressWarnings("UnusedReturnValue")
     public Weapon createWeapon(@Nonnull final NamedTechLevel namedTechLevel,
                                final int unlockedThroughLevel,
-                               final int useCapacity,
+                               final int tonnage,
                                final int effectValue,
-                               @Nonnull final EHullType hullType,
+                               @Nonnull final EShipClassType shipClassType,
                                @Nonnull final Distance damageProjectionRange,
                                final int amountDamageEmitter,
                                @Nonnull final EWeaponType weaponType,
                                @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(namedTechLevel, "namedTechLevel must not be empty");
-        Preconditions.checkNotNull(hullType, "hullType must not be empty");
+        Preconditions.checkNotNull(shipClassType, "shipClassType must not be empty");
         Preconditions.checkNotNull(damageProjectionRange, "damageProjectionRange shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        final String technicalTypeName = "D-" + hullType.name() + namedTechLevel.getTechLevel().name().split("_")[1] + weaponType.name().charAt(0);
-        return weaponRepository.save(new Weapon(namedTechLevel, technicalTypeName, unlockedThroughLevel, useCapacity, effectValue, hullType, damageProjectionRange, amountDamageEmitter, weaponType, crewRequirement));
+        final String technicalTypeName = "D-" + shipClassType.name() + namedTechLevel.getTechLevel().name().split("_")[1] + weaponType.name().charAt(0);
+        return weaponRepository.save(new Weapon(namedTechLevel, technicalTypeName, unlockedThroughLevel, tonnage, effectValue, shipClassType, damageProjectionRange, amountDamageEmitter, weaponType, crewRequirement));
     }
 
     @Nonnull
     @SuppressWarnings("UnusedReturnValue")
     public Launcher createLauncher(@Nonnull final NamedTechLevel namedTechLevel,
                                    final int unlockedThroughLevel,
-                                   final int useCapacity,
-                                   @Nonnull final EHullType hullType,
+                                   final int tonnage,
+                                   @Nonnull final EShipClassType shipClassType,
                                    @Nonnull final CrewRequirement crewRequirement,
                                    @Nonnull final EWeaponType weaponType,
                                    @Nonnull final Set<Missile> allowedMissiles) {
@@ -125,8 +125,8 @@ public class ModuleService {
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
         Preconditions.checkNotNull(allowedMissiles, "allowedMissiles shouldn't be null!");
 
-        final String technicalTypeName = "L-" + hullType.name() + namedTechLevel.getTechLevel().name().split("_")[1] + weaponType.name().charAt(0);
-        return launcherRepository.save(new Launcher(namedTechLevel, technicalTypeName, unlockedThroughLevel, useCapacity, hullType, crewRequirement, weaponType, allowedMissiles));
+        final String technicalTypeName = "L-" + shipClassType.name() + namedTechLevel.getTechLevel().name().split("_")[1] + weaponType.name().charAt(0);
+        return launcherRepository.save(new Launcher(namedTechLevel, technicalTypeName, unlockedThroughLevel, tonnage, shipClassType, crewRequirement, weaponType, allowedMissiles));
     }
 
     @Nonnull
@@ -134,17 +134,17 @@ public class ModuleService {
     public Missile createMissile(@Nonnull final NamedTechLevel namedTechLevel,
                                  final int unlockedThroughLevel,
                                  final int elokaResistance,
-                                 final int useCapacity,
-                                 @Nonnull final EHullType hullType,
+                                 final int tonnage,
+                                 @Nonnull final EShipClassType shipClassType,
                                  @Nonnull Warhead warhead,
                                  @Nonnull MissileMotor missileMotor) {
         Preconditions.checkNotNull(namedTechLevel, "namedTechLevel must not be empty");
         Preconditions.checkNotNull(warhead, "warhead shouldn't be null!");
         Preconditions.checkNotNull(missileMotor, "missileMotor shouldn't be null!");
 
-        final String technicalTypeName = "M-" + hullType.name() + missileMotor.getEndurance() + "-" + missileMotor.getManeuverability() + "-"
+        final String technicalTypeName = "M-" + shipClassType.name() + missileMotor.getEndurance() + "-" + missileMotor.getManeuverability() + "-"
                 + namedTechLevel.getTechLevel().name().split("_")[1] + "-" + warhead.getWarheadType().name().charAt(0);
-        return missileRepository.save(new Missile(namedTechLevel, technicalTypeName, unlockedThroughLevel, elokaResistance, useCapacity, hullType, warhead, missileMotor));
+        return missileRepository.save(new Missile(namedTechLevel, technicalTypeName, unlockedThroughLevel, elokaResistance, tonnage, shipClassType, warhead, missileMotor));
     }
 
     @Nonnull
@@ -169,12 +169,13 @@ public class ModuleService {
     public Armor createArmor(@Nonnull final NamedTechLevel namedTechLevel,
                              final int unlockedThroughLevel,
                              final int effectValue,
-                             final int costsPercentage,
-                             @Nonnull final EHullType hullType) {
+                             final int tonnage,
+                             @Nonnull final EShipClassType shipClassType,
+                             @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(namedTechLevel, "namedTechLevel must not be empty");
 
-        final String technicalTypeName = "A-" + namedTechLevel.getTechLevel().name().split("_")[1] + "-" + hullType.name();
-        return armorRepository.save(new Armor(namedTechLevel, technicalTypeName, unlockedThroughLevel, effectValue, costsPercentage, hullType));
+        final String technicalTypeName = "A-" + namedTechLevel.getTechLevel().name().split("_")[1] + "-" + shipClassType.name();
+        return armorRepository.save(new Armor(namedTechLevel, technicalTypeName, unlockedThroughLevel, effectValue, tonnage, shipClassType, crewRequirement));
     }
 
     @Nonnull
@@ -182,15 +183,16 @@ public class ModuleService {
     public ElectronicWarfare createElectronicWarfare(@Nonnull final NamedTechLevel namedTechLevel,
                                                      final int unlockedThroughLevel,
                                                      final int effectValue,
-                                                     final int costsPercentage,
-                                                     @Nonnull final EHullType hullType,
+                                                     final int tonnage,
+                                                     @Nonnull final EShipClassType shipClassType,
+                                                     @Nonnull final CrewRequirement crewRequirement,
                                                      @Nonnull final Distance effectiveRange) {
         Preconditions.checkNotNull(namedTechLevel, "namedTechLevel must not be empty");
-        Preconditions.checkNotNull(hullType, "hullType must not be empty");
+        Preconditions.checkNotNull(shipClassType, "shipClassType must not be empty");
         Preconditions.checkNotNull(effectiveRange, "effectiveRange shouldn't be null!");
 
-        final String technicalTypeName = "E-" + namedTechLevel.getTechLevel().name().split("_")[1] + "-" + hullType.name();
-        return electronicWarfareRepository.save(new ElectronicWarfare(namedTechLevel, technicalTypeName, unlockedThroughLevel, effectValue, costsPercentage, hullType, effectiveRange));
+        final String technicalTypeName = "E-" + namedTechLevel.getTechLevel().name().split("_")[1] + "-" + shipClassType.name();
+        return electronicWarfareRepository.save(new ElectronicWarfare(namedTechLevel, technicalTypeName, unlockedThroughLevel, effectValue, tonnage, shipClassType, crewRequirement, effectiveRange));
     }
 
     @Nonnull
@@ -198,13 +200,14 @@ public class ModuleService {
     public Sidewall createSidewall(@Nonnull final NamedTechLevel namedTechLevel,
                                    final int unlockedThroughLevel,
                                    final int effectValue,
-                                   final int costsPercentage,
-                                   @Nonnull final EHullType hullType) {
+                                   final int tonnage,
+                                   @Nonnull final EShipClassType shipClassType,
+                                   @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(namedTechLevel, "namedTechLevel must not be empty");
-        Preconditions.checkNotNull(hullType, "hullType must not be empty");
+        Preconditions.checkNotNull(shipClassType, "shipClassType must not be empty");
 
-        final String technicalTypeName = "S-" + namedTechLevel.getTechLevel().name().split("_")[1] + "-" + hullType.name();
-        return sidewallRepository.save(new Sidewall(namedTechLevel, technicalTypeName, unlockedThroughLevel, effectValue, costsPercentage, hullType));
+        final String technicalTypeName = "S-" + namedTechLevel.getTechLevel().name().split("_")[1] + "-" + shipClassType.name();
+        return sidewallRepository.save(new Sidewall(namedTechLevel, technicalTypeName, unlockedThroughLevel, effectValue, tonnage, shipClassType, crewRequirement));
     }
 
     @Nonnull
@@ -214,9 +217,9 @@ public class ModuleService {
                                              @Nonnull final Research unlockedThrough,
                                              @Nonnull final ESupportType supportType,
                                              @Nonnull final ECalculationType calculationType,
-                                             final int useCapacity,
+                                             final int tonnage,
                                              final int value,
-                                             @Nonnull final EHullType hullType,
+                                             @Nonnull final EShipClassType shipClassType,
                                              @Nonnull final ETechLevel techLevel,
                                              @Nonnull final CrewRequirement crewRequirement) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
@@ -224,7 +227,7 @@ public class ModuleService {
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        return passiveModuleRepository.save(new PassiveModule(name, description, unlockedThrough, useCapacity, value, hullType, techLevel, supportType, calculationType, crewRequirement));
+        return passiveModuleRepository.save(new PassiveModule(name, description, unlockedThrough, tonnage, value, shipClassType, techLevel, supportType, calculationType, crewRequirement));
     }
 
     @Nonnull
@@ -464,10 +467,10 @@ public class ModuleService {
     }
 
     @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
-    public void save(@Nonnull final PassiveModule passiveModule) {
+    public PassiveModule save(@Nonnull final PassiveModule passiveModule) {
         Preconditions.checkNotNull(passiveModule, "passiveModule must not be empty");
 
-        passiveModuleRepository.save(passiveModule);
+        return passiveModuleRepository.save(passiveModule);
     }
 
     @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)

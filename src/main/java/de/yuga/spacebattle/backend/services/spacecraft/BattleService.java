@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 public class BattleService {
 
     @Nonnull
-    private final static Logger LOGGER = LoggerFactory.getLogger(BattleService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BattleService.class);
 
     @Nonnull
     private final BattleLogger battleLogger;

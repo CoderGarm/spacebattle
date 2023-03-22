@@ -69,6 +69,10 @@ public enum ESupportType {
      * A module which supports the population will reduce the general amount of crew members for a ship.
      */
     POPULATION(EResourceType.POPULATION),
+
+    PASSENGER(ECargoType.PASSENGER),
+
+    FREIGHT(ECargoType.FREIGHT),
     ;
 
     private final Enum<?> modifiedProperty;

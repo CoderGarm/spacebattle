@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 public class BattleLogger {
 
     @Nonnull
-    private final static Logger LOGGER = LoggerFactory.getLogger(BattleLogger.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BattleLogger.class);
 
     private final boolean logBattleResult;
 

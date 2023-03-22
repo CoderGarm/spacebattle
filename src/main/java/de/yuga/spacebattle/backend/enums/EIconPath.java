@@ -33,13 +33,13 @@ public enum EIconPath {
     }
 
     @Nonnull
-    private final static String DELIMITER = "_";
+    private static final String DELIMITER = "_";
 
     @Nonnull
-    private final static String FILE_EXTENSION = "png";
+    private static final String FILE_EXTENSION = "png";
 
     @Nonnull
-    private final static String FILE_EXTENSION_SEPARATOR = ".";
+    private static final String FILE_EXTENSION_SEPARATOR = ".";
 
     @Nonnull
     public static <ENUM extends Enum<?> & HasIconName> String getFolder(@Nonnull final ENUM isForEnum) {
@@ -50,7 +50,7 @@ public enum EIconPath {
             directory = RESOURCES.getPath();
         } else if (isForEnum instanceof EModuleType) {
             directory = STATS.getPath();
-        } else if (isForEnum instanceof EHullType) {
+        } else if (isForEnum instanceof EShipClassType) {
             directory = HULL.getPath();
         } else if (isForEnum instanceof EBuildingType) {
             directory = BUILDING.getPath();
@@ -80,7 +80,7 @@ public enum EIconPath {
             directory = RESOURCES.getPath();
         } else if (isForEnum instanceof EModuleType) {
             directory = STATS.getPath();
-        } else if (isForEnum instanceof EHullType) {
+        } else if (isForEnum instanceof EShipClassType) {
             directory = HULL.getPath();
         } else if (isForEnum instanceof EBuildingType) {
             directory = BUILDING.getPath();

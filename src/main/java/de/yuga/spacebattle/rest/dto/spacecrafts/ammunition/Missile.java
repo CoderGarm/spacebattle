@@ -3,6 +3,7 @@ package de.yuga.spacebattle.rest.dto.spacecrafts.ammunition;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Mass;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics.BaseModule;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -22,7 +23,7 @@ public class Missile {
 
     @JsonProperty
     @Schema(required = true, description = "The uses capacity of this missile.")
-    private double useCapacity;
+    private Mass tonnage;
 
     @Nonnull
     @JsonProperty
@@ -44,7 +45,7 @@ public class Missile {
 
         this.baseModule = new BaseModule(missile, languageCode);
         this.elokaResistance = missile.getElokaResistance();
-        this.useCapacity = missile.getUsedCapacity();
+        this.tonnage = missile.getTonnage();
         this.warhead = new Warhead(missile.getWarhead(), languageCode);
         this.missileMotor = new MissileMotor(missile.getMissileMotor(), languageCode);
     }

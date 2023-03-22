@@ -22,7 +22,7 @@ import java.util.Objects;
 public class CustomPlanetRepositoryImpl implements CustomPlanetRepository {
 
     @Nonnull
-    private final static Logger LOGGER = LoggerFactory.getLogger(CustomPlanetRepositoryImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomPlanetRepositoryImpl.class);
 
     @PersistenceContext
     private EntityManager em;

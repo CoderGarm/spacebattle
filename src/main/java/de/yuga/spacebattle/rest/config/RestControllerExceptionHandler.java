@@ -22,7 +22,7 @@ import java.util.UUID;
 @RestControllerAdvice
 public class RestControllerExceptionHandler {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(RestControllerExceptionHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestControllerExceptionHandler.class);
 
     @ExceptionHandler(NotifyWebUserException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

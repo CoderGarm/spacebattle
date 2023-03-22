@@ -2,29 +2,27 @@ package de.yuga.spacebattle.backend.services.constructables.spacecraft;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.SpacecraftCalculator;
+import de.yuga.spacebattle.backend.calculator.SpacecraftTonnageCalculator;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Armor;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Sidewall;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.enums.EDepositType;
-import de.yuga.spacebattle.backend.enums.EEducationType;
-import de.yuga.spacebattle.backend.enums.EResourceType;
-import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
+import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
 import de.yuga.spacebattle.backend.services.account.UserService;
-import de.yuga.spacebattle.backend.services.spacecraft.HullService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapabilities;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapacityAreas;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstructionSelection;
 import de.yuga.spacebattle.rest.dto.spacecrafts.PropulsionCapacity;
+import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClassData;
+import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClassMock;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.rest.dto.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.rest.dto.spacecrafts.fittings.AmmunitionFitting;
@@ -51,8 +49,6 @@ public class ShipClassCreationService {
     @Nonnull
     private final ModuleService moduleService;
 
-    @Nonnull
-    private final HullService hullService;
 
     @Nonnull
     private final UserService userService;
@@ -62,16 +58,13 @@ public class ShipClassCreationService {
 
     public ShipClassCreationService(@Nonnull final ShipClassService shipClassService,
                                     @Nonnull final ModuleService moduleService,
-                                    @Nonnull final HullService hullService,
                                     @Nonnull final UserService userService) {
         Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
         Preconditions.checkNotNull(moduleService, "moduleService shouldn't be null!");
-        Preconditions.checkNotNull(hullService, "hullService shouldn't be null!");
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
 
         this.shipClassService = shipClassService;
         this.moduleService = moduleService;
-        this.hullService = hullService;
         this.userService = userService;
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
@@ -81,13 +74,9 @@ public class ShipClassCreationService {
         Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
 
         final User user = userService.find(idUser);
-        assert shipClass.getHull() != null;
-        final Hull hull = hullService.find(shipClass.getHull().getIdHull());
-
         assert user != null;
         assert shipClass.getName() != null;
-        assert hull != null;
-        final ShipClass entity = mapShipClassMockToEntity(shipClass, new ShipClass(user, shipClass.getName(), hull, null));
+        final ShipClass entity = mapShipClassMockToEntity(shipClass, new ShipClass(user, shipClass.getName(), null));
         final Set<ConstraintViolation<ShipClass>> validate = validator.validate(entity);
         if (!validate.isEmpty()) {
             throw new NotifyWebUserException("The provided class is not valid.", validate);
@@ -116,13 +105,11 @@ public class ShipClassCreationService {
             throw new NotifyWebUserException("There should be a questioned user.");
         }
 
-        final Hull hull = hullService.find(shipClass.getHull().getIdHull());
-        assert hull != null;
 
         final Integer idPredecessor = shipClass.getIdPredecessor();
         assert idPredecessor != null;
         ShipClass predecessor = shipClassService.find(idPredecessor);
-        ShipClass entity = new ShipClass(owner, shipClass.getName(), hull, predecessor);
+        final ShipClass entity = new ShipClass(owner, shipClass.getName(), predecessor);
 
         mapSingularities(shipClass, entity);
         mapAmmunitionModules(shipClass, entity);
@@ -136,16 +123,19 @@ public class ShipClassCreationService {
         Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
         Preconditions.checkNotNull(entity, "entity must not be empty");
 
-        if (shipClass.getHull() != null && entity.getHull() == null) {
-            final Hull hull = hullService.find(shipClass.getHull().getIdHull());
-            entity.setHull(hull);
-        }
-
+        mapShipClassType(shipClass, entity);
         mapSingularities(shipClass, entity);
         mapAmmunitionModules(shipClass, entity);
         mapPassiveModules(shipClass, entity);
         mapWeaponModules(shipClass, entity);
         return entity;
+    }
+
+    private static void mapShipClassType(final @Nonnull ShipClassData shipClass, final @Nonnull ShipClass entity) {
+        final de.yuga.spacebattle.rest.dto.enums.EShipClassType shipClassType = shipClass.getShipClassType();
+        if (shipClassType != null) {
+            entity.setShipClassType(EShipClassType.valueOf(shipClassType));
+        }
     }
 
     /**
@@ -347,21 +337,18 @@ public class ShipClassCreationService {
         return new SpacecraftCalculator().getSpacecraftCapacityAreas(entity);
     }
 
-    public List<PropulsionCapacity> getPropulsionCapacity(final int idHull, final int idPropulsion) {
+    public List<PropulsionCapacity> getPropulsionCapacity(@Nonnull final ShipClassMock shipClassMock, final int idPropulsion) {
+        Preconditions.checkNotNull(shipClassMock, "shipClassMock must not be empty");
 
-        final Hull hull = hullService.find(idHull);
-        Preconditions.checkNotNull(hull, "hull must not be empty");
         final Propulsion propulsion = moduleService.findPropulsionById(idPropulsion);
         Preconditions.checkNotNull(propulsion, "propulsion must not be empty");
 
-        final ShipClass shipClass = new ShipClass();
-        shipClass.setHull(hull);
-        shipClass.setPropulsion(propulsion);
+        final ShipClass shipClass = mapShipClassMockToEntity(shipClassMock, new ShipClass());
 
         final ArrayList<PropulsionCapacity> result = new ArrayList<>();
         for (final EHyperBand hyperBand : EHyperBand.values()) {
-            final Acceleration acceleration = shipClass.getAcceleration(hyperBand);
-            final Velocity velocity = shipClass.getVelocity(hyperBand);
+            final Acceleration acceleration = SpacecraftCalculator.getAcceleration(SpacecraftTonnageCalculator.getFullTonnage(shipClass), propulsion, hyperBand, Set.of());
+            final Velocity velocity = SpacecraftCalculator.getVelocity(propulsion, hyperBand);
             result.add(new PropulsionCapacity(acceleration, velocity));
         }
         return result;

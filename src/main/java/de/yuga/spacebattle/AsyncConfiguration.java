@@ -16,7 +16,7 @@ import java.util.concurrent.Executor;
 public class AsyncConfiguration {
 
     @Nonnull
-    private final static Logger LOGGER = LoggerFactory.getLogger(AsyncConfiguration.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AsyncConfiguration.class);
 
     @Bean(name = "asyncTaskExecutor")
     public Executor asyncTaskExecutor() {

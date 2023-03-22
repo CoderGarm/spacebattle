@@ -3,7 +3,7 @@ package de.yuga.spacebattle.backend.dto.physics;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
+import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -14,9 +14,11 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 
 @Schema(description = ".")
-public class Time implements Cloneable, Comparable<Time> {
+public class Mass implements Cloneable, Comparable<Mass> {
 
-    public static final Time ZERO = new Time(0, ETimeMetric.SECOND);
+    private static final MathContext MC = new MathContext(8, RoundingMode.HALF_UP);
+
+    public static final Mass ZERO = new Mass(0, EMassMetric.T);
 
     @Nonnull
     @JsonProperty
@@ -26,31 +28,31 @@ public class Time implements Cloneable, Comparable<Time> {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The metric of this time.")
-    private ETimeMetric timeMetric;
+    private EMassMetric massMetric;
 
-    public Time() {
+    public Mass() {
     }
 
-    public Time(final int coordinate, @Nonnull final ETimeMetric timeMetric) {
-        Preconditions.checkNotNull(timeMetric, "timeMetric shouldn't be null!");
+    public Mass(final int coordinate, @Nonnull final EMassMetric massMetric) {
+        Preconditions.checkNotNull(massMetric, "timeMetric shouldn't be null!");
 
         this.coordinate = BigDecimal.valueOf(coordinate);
-        this.timeMetric = timeMetric;
+        this.massMetric = massMetric;
     }
 
-    public Time(final double coordinate, @Nonnull final ETimeMetric timeMetric) {
-        Preconditions.checkNotNull(timeMetric, "timeMetric shouldn't be null!");
+    public Mass(final double coordinate, @Nonnull final EMassMetric massMetric) {
+        Preconditions.checkNotNull(massMetric, "timeMetric shouldn't be null!");
 
         this.coordinate = BigDecimal.valueOf(coordinate);
-        this.timeMetric = timeMetric;
+        this.massMetric = massMetric;
     }
 
-    public Time(@Nonnull final BigDecimal coordinate, @Nonnull final ETimeMetric timeMetric) {
+    public Mass(@Nonnull final BigDecimal coordinate, @Nonnull final EMassMetric massMetric) {
         Preconditions.checkNotNull(coordinate, "coordinate shouldn't be null!");
-        Preconditions.checkNotNull(timeMetric, "timeMetric shouldn't be null!");
+        Preconditions.checkNotNull(massMetric, "timeMetric shouldn't be null!");
 
         this.coordinate = coordinate;
-        this.timeMetric = timeMetric;
+        this.massMetric = massMetric;
     }
 
     @Nonnull
@@ -61,57 +63,74 @@ public class Time implements Cloneable, Comparable<Time> {
 
     @Nonnull
     @JsonIgnore
-    public ETimeMetric getTimeMetric() {
-        return timeMetric;
+    public EMassMetric getMassMetric() {
+        return massMetric;
     }
 
     @Nonnull
     @JsonIgnore
-    public BigDecimal getCoordinateInMetric(@Nonnull final ETimeMetric targetMetric) {
+    public BigDecimal getCoordinateInMetric(@Nonnull final EMassMetric targetMetric) {
         Preconditions.checkNotNull(targetMetric, "targetMetric shouldn't be null!");
 
-        if (timeMetric == targetMetric) {
+        if (massMetric == targetMetric) {
             return coordinate;
         }
-        final BigDecimal factor = timeMetric.getConversionFactor(targetMetric);
+        final BigDecimal factor = massMetric.getConversionFactor(targetMetric);
         return coordinate.multiply(factor, new MathContext(targetMetric.getScale(), RoundingMode.HALF_UP));
     }
 
     @Nonnull
     @JsonIgnore
-    public Time convertToMetric(@Nonnull final ETimeMetric targetMetric) {
+    public Mass convertToMetric(@Nonnull final EMassMetric targetMetric) {
         Preconditions.checkNotNull(targetMetric, "targetMetric shouldn't be null!");
 
         this.coordinate = getCoordinateInMetric(targetMetric);
-        this.timeMetric = targetMetric;
+        this.massMetric = targetMetric;
         return this;
     }
 
     @Nonnull
     @JsonIgnore
-    public Time convertToMetricWithScale(@Nonnull final ETimeMetric targetMetric) {
+    public Mass convertToMetricWithScale(@Nonnull final EMassMetric targetMetric) {
         Preconditions.checkNotNull(targetMetric, "targetMetric shouldn't be null!");
 
         this.coordinate = getCoordinateInMetric(targetMetric).setScale(targetMetric.getScale(), RoundingMode.HALF_UP);
-        this.timeMetric = targetMetric;
+        this.massMetric = targetMetric;
         return this;
     }
 
     @Nonnull
     @JsonIgnore
-    public Time multiply(final int factor) {
-        final BigDecimal result = getCoordinate().multiply(BigDecimal.valueOf(factor));
-        return new Time(result, timeMetric);
+    public Mass multiply(final int factor) {
+        return multiply(BigDecimal.valueOf(factor));
     }
 
     @Nonnull
     @JsonIgnore
-    public Time getInMetricWithScale(@Nonnull final ETimeMetric targetMetric) {
+    public Mass multiply(@Nonnull final BigDecimal factor) {
+        Preconditions.checkNotNull(factor, "factor must not be empty");
+
+        final BigDecimal result = getCoordinate().multiply(factor, MC);
+        return new Mass(result, massMetric);
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public Mass divide(@Nonnull final BigDecimal dividend) {
+        Preconditions.checkNotNull(dividend, "dividend must not be empty");
+
+        final BigDecimal result = getCoordinate().divide(dividend, MC);
+        return new Mass(result, massMetric);
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public Mass getInMetricWithScale(@Nonnull final EMassMetric targetMetric) {
         Preconditions.checkNotNull(targetMetric, "targetMetric shouldn't be null!");
 
         final BigDecimal coordinate = getCoordinateInMetric(targetMetric)
                 .setScale(targetMetric.getScale(), RoundingMode.HALF_UP);
-        return new Time(coordinate, targetMetric);
+        return new Mass(coordinate, targetMetric);
     }
 
     @Override
@@ -119,9 +138,9 @@ public class Time implements Cloneable, Comparable<Time> {
     public boolean equals(final Object o) {
         if (this == o) return true;
 
-        if (!(o instanceof Time)) return false;
+        if (!(o instanceof Mass)) return false;
 
-        final Time distance = (Time) o;
+        final Mass distance = (Mass) o;
 
         final int compareTo = compareTo(distance);
         return new EqualsBuilder().append(compareTo, 0).isEquals();
@@ -130,16 +149,16 @@ public class Time implements Cloneable, Comparable<Time> {
     @Override
     @JsonIgnore
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(coordinate).append(timeMetric).toHashCode();
+        return new HashCodeBuilder(17, 37).append(coordinate).append(massMetric).toHashCode();
     }
 
     @Override
     @JsonIgnore
-    public Time clone() {
+    public Mass clone() {
         try {
-            final Time clone = (Time) super.clone();
+            final Mass clone = (Mass) super.clone();
             clone.coordinate = new BigDecimal(coordinate.toString());
-            clone.timeMetric = ETimeMetric.getByName(timeMetric.name());
+            clone.massMetric = EMassMetric.getByName(massMetric.name());
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
@@ -157,7 +176,7 @@ public class Time implements Cloneable, Comparable<Time> {
      */
     @Override
     @JsonIgnore
-    public int compareTo(@Nonnull final Time that) {
+    public int compareTo(@Nonnull final Mass that) {
         Preconditions.checkNotNull(that, "that shouldn't be null!");
 
         if (getCoordinate().compareTo(BigDecimal.ZERO) == 0 || that.getCoordinate().compareTo(BigDecimal.ZERO) == 0) {
@@ -167,9 +186,9 @@ public class Time implements Cloneable, Comparable<Time> {
 
         final BigDecimal thisValue;
         final BigDecimal thatValue;
-        if (getTimeMetric() != that.getTimeMetric()) {
+        if (getMassMetric() != that.getMassMetric()) {
             // convert values to the same scale if different
-            final ETimeMetric metric = ETimeMetric.SECOND;
+            final EMassMetric metric = EMassMetric.KG;
             thisValue = getInMetricWithScale(metric).getCoordinate();
             thatValue = that.getInMetricWithScale(metric).getCoordinate();
         } else {
@@ -179,23 +198,22 @@ public class Time implements Cloneable, Comparable<Time> {
         return new OnePercentComparator().compare(thisValue, thatValue);
     }
 
-
     @Nonnull
     @JsonIgnore
-    public Time add(@Nonnull final Time o) {
+    public Mass add(@Nonnull final Mass o) {
         Preconditions.checkNotNull(o, "o shouldn't be null!");
 
-        final BigDecimal additional = o.getCoordinateInMetric(timeMetric);
-        return new Time(coordinate.add(additional), timeMetric);
+        final BigDecimal additional = o.getCoordinateInMetric(massMetric);
+        return new Mass(coordinate.add(additional), massMetric);
     }
 
     @Nonnull
     @JsonIgnore
-    public Time subtract(@Nonnull final Time o) {
+    public Mass subtract(@Nonnull final Mass o) {
         Preconditions.checkNotNull(o, "o shouldn't be null!");
 
-        final BigDecimal subtrahend = o.getCoordinateInMetric(timeMetric);
-        return new Time(coordinate.subtract(subtrahend), timeMetric);
+        final BigDecimal subtrahend = o.getCoordinateInMetric(massMetric);
+        return new Mass(coordinate.subtract(subtrahend), massMetric);
     }
 
     /**
@@ -206,7 +224,7 @@ public class Time implements Cloneable, Comparable<Time> {
      */
     @Nonnull
     @JsonIgnore
-    public Time min(@Nonnull final Time o) {
+    public Mass min(@Nonnull final Mass o) {
         Preconditions.checkNotNull(o, "o shouldn't be null!");
 
         return compareTo(o) < 0 ? this : o;
@@ -220,7 +238,7 @@ public class Time implements Cloneable, Comparable<Time> {
      */
     @Nonnull
     @JsonIgnore
-    public Time max(@Nonnull final Time o) {
+    public Mass max(@Nonnull final Mass o) {
         Preconditions.checkNotNull(o, "o shouldn't be null!");
 
         return compareTo(o) > 0 ? this : o;
@@ -228,10 +246,16 @@ public class Time implements Cloneable, Comparable<Time> {
 
     @Nonnull
     @JsonIgnore
-    public static Time valueOf(@Nonnull final String fromDb) {
+    public static Mass valueOf(@Nonnull final String fromDb) {
         Preconditions.checkNotNull(fromDb, "fromDb shouldn't be null!");
 
         final String[] split = fromDb.trim().split("\\s");
-        return new Time(new BigDecimal(split[0]), ETimeMetric.getByName(split[1]));
+        return new Mass(new BigDecimal(split[0]), EMassMetric.getByName(split[1]));
+    }
+
+    @JsonIgnore
+    @Override
+    public String toString() {
+        return coordinate + " " + massMetric.name();
     }
 }

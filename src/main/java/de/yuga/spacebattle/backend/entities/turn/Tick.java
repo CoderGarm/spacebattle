@@ -27,7 +27,7 @@ public class Tick extends AbstractEntityKey implements Comparable<Tick> {
     public static final int TICK_DURATION_IN_SECONDS = 604800;
 
     @Nonnull
-    private final static DateTimeFormatter tickFormatter = new DateTimeFormatterBuilder().appendPattern("yyyy MM dd").toFormatter();
+    private static final DateTimeFormatter tickFormatter = new DateTimeFormatterBuilder().appendPattern("yyyy MM dd").toFormatter();
 
     @Nonnull
     @NotNull

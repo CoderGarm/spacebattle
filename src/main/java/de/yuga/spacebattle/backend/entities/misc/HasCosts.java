@@ -33,7 +33,7 @@ public class HasCosts extends HasName {
     public HasCosts(@Nonnull final Translation translatableName,
                     @Nonnull final Translation translatableDescription,
                     @Nonnull final ETechLevel techLevel,
-                    @Nullable final Integer capacity,
+                    @Nullable final Integer tonnage,
                     @Nonnull final Class<?> clazz) {
         super(translatableName, translatableDescription, techLevel, clazz);
         Preconditions.checkNotNull(translatableName, "translatableName must not be empty");
@@ -43,7 +43,7 @@ public class HasCosts extends HasName {
         Preconditions.checkNotNull(techLevel, "techLevel shouldn't be null!");
         Preconditions.checkNotNull(clazz, "clazz shouldn't be null!");
 
-        this.costs = ResourceDepositInitializerCalculator.initializeCosts(techLevel, capacity, EResourceDemand.getByClazz(this.getClass()));
+        this.costs = ResourceDepositInitializerCalculator.initializeCosts(techLevel, tonnage, EResourceDemand.getByClazz(this.getClass()));
         this.techLevel = techLevel;
     }
 

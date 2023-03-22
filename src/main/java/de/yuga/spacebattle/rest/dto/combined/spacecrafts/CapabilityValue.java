@@ -41,6 +41,12 @@ public class CapabilityValue {
         this.value = capability.getValue();
     }
 
+    @Nonnull
+    @JsonIgnore
+    public EModuleType getModuleType() {
+        return moduleType;
+    }
+
     @Override
     @JsonIgnore
     public String toString() {

@@ -3,6 +3,7 @@ package de.yuga.spacebattle.rest.dto.combined.spacecrafts;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Mass;
 import de.yuga.spacebattle.backend.enums.ECapacityAreaType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -16,25 +17,21 @@ public class CapacityValue implements Comparable<CapacityValue> {
     @Schema(required = true, description = "The value's type.")
     private ECapacityAreaType capacityArea;
 
+    @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The used capacity in that area.")
-    private int usedCapacity;
-
-    @JsonProperty
-    @Schema(required = true, description = "The overall capacity in that area.")
-    private int capacity;
+    private Mass tonnage;
 
     public CapacityValue() {
     }
 
     public CapacityValue(@Nonnull final de.yuga.spacebattle.backend.enums.ECapacityAreaType capacityArea,
-                         final int usedCapacity,
-                         final int capacity) {
+                         @Nonnull final Mass tonnage) {
         Preconditions.checkNotNull(capacityArea, "moduleType shouldn't be null!");
+        Preconditions.checkNotNull(tonnage, "tonnage must not be empty");
 
         this.capacityArea = capacityArea;
-        this.usedCapacity = usedCapacity;
-        this.capacity = capacity;
+        this.tonnage = tonnage;
     }
 
     @JsonIgnore
@@ -45,19 +42,14 @@ public class CapacityValue implements Comparable<CapacityValue> {
     }
 
     @JsonIgnore
-    public void setUsedCapacity(final int usedCapacity) {
-        this.usedCapacity = usedCapacity;
-    }
-
-    @JsonIgnore
-    public void setCapacity(final int capacity) {
-        this.capacity = capacity;
+    public void setTonnage(@Nonnull final Mass tonnage) {
+        this.tonnage = Preconditions.checkNotNull(tonnage, "tonnage must not be empty");
     }
 
     @Override
     @JsonIgnore
     public String toString() {
-        return "capacityArea: " + capacityArea + ", value: " + usedCapacity;
+        return "capacityArea: " + capacityArea + ", value: " + tonnage;
     }
 
     @Override

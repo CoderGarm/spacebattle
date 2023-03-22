@@ -18,7 +18,6 @@ import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.spacecrafts.Hull;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.MissileMotor;
@@ -46,7 +45,7 @@ import static de.yuga.spacebattle.backend.enums.ETechnologyType.MILITARY;
 
 public class TestDataProviderUtils {
 
-    private static final EHullType HULL_TYPE = EHullType.CA;
+    private static final EShipClassType HULL_TYPE = EShipClassType.CA;
 
     @Nonnull
     public static Cage cage() {
@@ -241,9 +240,7 @@ public class TestDataProviderUtils {
 
         PassiveModule passiveModule = createPassiveModule("Improves armor", "Increases the amount of armor", ESupportType.ARMOR, ECalculationType.ADD, 5, 10, ETechLevel.TECH_I, new CrewRequirement(militaryCrew, EDepositType.COSTS));
 
-        Hull hull3 = createHull("Cruiser vessel", 80000, 150, 45, 45, 75, "The cruiser hull", EHullType.CA, new CrewRequirement(militaryCrew, EDepositType.COSTS));
-
-        ShipClass as3 = new ShipClass(user, "Argonauts cruiser", hull3, null);
+        ShipClass as3 = new ShipClass(user, "Argonauts cruiser", null);
         return createFitting(armor, propulsionFTL, electronicWarfare, sidewall, laserWeapon, pointDefense, new Launcher[]{shipKillerLauncher, counterMissileLauncher}, new PassiveModule[]{passiveModule}, as3);
     }
 
@@ -253,26 +250,6 @@ public class TestDataProviderUtils {
         militaryCrew.put(EEducationType.ENLISTED, 20L);
         militaryCrew.put(EEducationType.OFFICER, 10L);
         return militaryCrew;
-    }
-
-    @Nonnull
-    public static Hull createHull(@Nonnull final String name,
-                                  final int overallConstructionCapacity,
-                                  final int constructionCapacity,
-                                  final int constructionCapacityBow,
-                                  final int constructionCapacityStern,
-                                  final int constructionCapacityBroadsides,
-                                  @Nonnull final String description,
-                                  @Nonnull final EHullType hullType,
-                                  @Nonnull final CrewRequirement crewRequirement) {
-        Preconditions.checkNotNull(name, "name shouldn't be null!");
-        Preconditions.checkNotNull(description, "description shouldn't be null!");
-        Preconditions.checkNotNull(hullType, "hullType shouldn't be null!");
-        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
-
-        final Hull hull = new Hull(name, overallConstructionCapacity, constructionCapacity, constructionCapacityBow, constructionCapacityStern, constructionCapacityBroadsides, ETechLevel.TECH_I, description, research(), hullType, crewRequirement);
-        setId(hull);
-        return hull;
     }
 
     private static ShipClass createFitting(Armor armor,
@@ -317,7 +294,7 @@ public class TestDataProviderUtils {
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
         final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, research(), techLevel, Armor.class);
-        final Armor armor = new Armor(namedTechLevel, "XxX", 1, effectValue, costsPercentage, EHullType.CA);
+        final Armor armor = new Armor(namedTechLevel, "XxX", 1, effectValue, costsPercentage, EShipClassType.CA, crewRequirement);
         setId(armor);
         return armor;
     }
@@ -335,7 +312,7 @@ public class TestDataProviderUtils {
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
         final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, research(), techLevel, ElectronicWarfare.class);
-        final ElectronicWarfare electronicWarfare = new ElectronicWarfare(namedTechLevel, "yYy", 1, costsPercentage, value, EHullType.CA, effectiveRange);
+        final ElectronicWarfare electronicWarfare = new ElectronicWarfare(namedTechLevel, "yYy", 1, costsPercentage, value, EShipClassType.CA, crewRequirement, effectiveRange);
         setId(electronicWarfare);
         return electronicWarfare;
     }
@@ -343,7 +320,7 @@ public class TestDataProviderUtils {
     @Nonnull
     public static Sidewall createSidewall(@Nonnull final String name,
                                           @Nonnull final String description,
-                                          final int useCapacity,
+                                          final int tonnage,
                                           final int value,
                                           final ETechLevel techLevel,
                                           @Nonnull final CrewRequirement crewRequirement) {
@@ -352,7 +329,7 @@ public class TestDataProviderUtils {
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
         final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, research(), techLevel, Sidewall.class);
-        final Sidewall sidewall = new Sidewall(namedTechLevel, "sSs", 1, useCapacity, value, EHullType.CA);
+        final Sidewall sidewall = new Sidewall(namedTechLevel, "sSs", 1, tonnage, value, EShipClassType.CA, crewRequirement);
         setId(sidewall);
         return sidewall;
     }
@@ -360,7 +337,7 @@ public class TestDataProviderUtils {
     @Nonnull
     public static Weapon createWeapon(@Nonnull final String name,
                                       @Nonnull final String description,
-                                      final int useCapacity,
+                                      final int tonnage,
                                       final int value,
                                       final ETechLevel techLevel,
                                       @Nonnull final Distance damageProjectionRange,
@@ -374,7 +351,7 @@ public class TestDataProviderUtils {
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
         final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, research(), techLevel, Weapon.class);
-        final Weapon weapon = new Weapon(namedTechLevel, "gGg", 1, useCapacity, value, EHullType.CA, damageProjectionRange, amountDamageEmitter, weaponType, crewRequirement);
+        final Weapon weapon = new Weapon(namedTechLevel, "gGg", 1, tonnage, value, EShipClassType.CA, damageProjectionRange, amountDamageEmitter, weaponType, crewRequirement);
         setId(weapon);
         return weapon;
     }
@@ -382,7 +359,7 @@ public class TestDataProviderUtils {
     @Nonnull
     public static Launcher createLauncher(@Nonnull final String name,
                                           @Nonnull final String description,
-                                          final int useCapacity,
+                                          final int tonnage,
                                           final ETechLevel techLevel,
                                           @Nonnull final CrewRequirement crewRequirement,
                                           @Nonnull final EWeaponType weaponType,
@@ -394,7 +371,7 @@ public class TestDataProviderUtils {
         Preconditions.checkNotNull(allowedMissiles, "allowedMissiles shouldn't be null!");
 
         final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, research(), techLevel, Launcher.class);
-        final Launcher launcher = new Launcher(namedTechLevel, "dwq", 1, useCapacity, EHullType.CA, crewRequirement, weaponType, allowedMissiles);
+        final Launcher launcher = new Launcher(namedTechLevel, "dwq", 1, tonnage, EShipClassType.CA, crewRequirement, weaponType, allowedMissiles);
         setId(launcher);
         return launcher;
     }
@@ -435,7 +412,7 @@ public class TestDataProviderUtils {
     @Nonnull
     public static Propulsion createPropulsion(@Nonnull final String name,
                                               @Nonnull final String description,
-                                              final int useCapacity,
+                                              final int tonnage,
                                               final int value,
                                               final ETechLevel techLevel,
                                               @Nonnull final EHyperBand hyperBand,
@@ -446,7 +423,7 @@ public class TestDataProviderUtils {
         Preconditions.checkNotNull(technologyType, "technologyType must not be empty");
 
         final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, research(), techLevel, Propulsion.class);
-        final Propulsion propulsion = new Propulsion(namedTechLevel, "xXx", 1, useCapacity, value, hyperBand, technologyType);
+        final Propulsion propulsion = new Propulsion(namedTechLevel, "xXx", 1, tonnage, value, hyperBand, technologyType);
         setId(propulsion);
         return propulsion;
     }
@@ -456,7 +433,7 @@ public class TestDataProviderUtils {
                                                     @Nonnull final String description,
                                                     @Nonnull final ESupportType supportType,
                                                     @Nonnull final ECalculationType calculationType,
-                                                    final int useCapacity,
+                                                    final int tonnage,
                                                     final int value,
                                                     final ETechLevel techLevel,
                                                     @Nonnull final CrewRequirement crewRequirement) {
@@ -464,7 +441,7 @@ public class TestDataProviderUtils {
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        final PassiveModule passiveModule = new PassiveModule(name, description, research(), useCapacity, value, HULL_TYPE, techLevel, supportType, calculationType, crewRequirement);
+        final PassiveModule passiveModule = new PassiveModule(name, description, research(), tonnage, value, HULL_TYPE, techLevel, supportType, calculationType, crewRequirement);
         setId(passiveModule);
         return passiveModule;
     }

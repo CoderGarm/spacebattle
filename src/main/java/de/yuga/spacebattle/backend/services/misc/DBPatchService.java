@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Service
 public class DBPatchService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(DBPatchService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DBPatchService.class);
 
     private static final Pattern pattern = Pattern.compile("[0-9]+\\.[0-9]+\\.[0-9]+-[0-9]+");
     private static final String INSERT_PREFIX = "insert into dbPatch values (null, now()";
