@@ -20,7 +20,6 @@ import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 
 /**
  * The aligned fitting represents a weapon system and the alignment, where the weapon is placed.
@@ -142,7 +141,7 @@ public class AlignedFitting {
 
         }
         if (launcher != null) {
-            final Missile missile = new ArrayList<>(launcher.getAllowedMissiles()).get(0); // fixme fix missile selection
+            final Missile missile = launcher.getHeaviestMissile();
             damageProjectionRange = missile.getMaximumMissileRange();
             isInRange = boundaries.isInRange(damageProjectionRange);
 
@@ -168,7 +167,7 @@ public class AlignedFitting {
 
         }
         if (launcher != null) {
-            final Missile missile = new ArrayList<>(launcher.getAllowedMissiles()).get(0); // fixme fix missile selection
+            final Missile missile = launcher.getHeaviestMissile();
             damageProjectionRange = missile.getMaximumMissileRange();
 
             damageValue = missile.getWarhead().getDamageValue() * amount;
@@ -210,7 +209,7 @@ public class AlignedFitting {
             range = weapon.getDamageProjectionRange();
         }
         if (launcher != null) {
-            range = new ArrayList<>(launcher.getAllowedMissiles()).get(0).getMaximumMissileRange(); // fixme fix missile selection
+            range = launcher.getHeaviestMissile().getMaximumMissileRange();
         }
         return range;
     }

@@ -5,10 +5,9 @@ import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
-import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.researches.ResearchLevel;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.repositories.constructables.buildings.ConstructionRepository;
+import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,12 +23,14 @@ public class ConstructionService {
 
     @Nonnull
     private final ConstructionRepository constructionRepository;
+    private final BuildingService buildingService;
 
     @Autowired
-    public ConstructionService(@Nonnull final ConstructionRepository constructionRepository) {
+    public ConstructionService(@Nonnull final ConstructionRepository constructionRepository, final BuildingService buildingService) {
         Preconditions.checkNotNull(constructionRepository, "constructionRepository shouldn't be null!");
 
         this.constructionRepository = constructionRepository;
+        this.buildingService = buildingService;
     }
 
     @Nonnull
@@ -67,23 +68,12 @@ public class ConstructionService {
         return constructionRepository.findAllConstructionsOnPlanet(idPlanet);
     }
 
-    /**
-     * Returns every building which could be build or upgraded with the next level.
-     *
-     * @param planet            the planet
-     * @param researchesForUser the researches of the logged-in user
-     * @return the possible constructions
-     */
     @Nonnull
-    public Set<Construction> getUpgradeableConstructions(@Nonnull final Planet planet, @Nonnull final Set<ResearchLevel> researchesForUser) {
+    public Set<Construction> getUpgradeableConstructions(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
-        Preconditions.checkNotNull(researchesForUser, "researchesForUser shouldn't be null!");
+        Preconditions.checkNotNull(planet.getOwner(), "planet owner must not be empty");
 
-        final Set<Building> unlockedBuildings = researchesForUser.stream()
-                .map(ResearchLevel::getResearch)
-                .map(Research::getUnlocksBuildings)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+        final List<Building> unlockedBuildings = buildingService.findAllByUser(planet.getOwner().getId());
 
         final Set<Construction> constructions = planet.getConstructions();
 

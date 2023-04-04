@@ -5,8 +5,9 @@ import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.misc.HasCosts;
 import de.yuga.spacebattle.backend.entities.misc.HasCostsByOwn;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.PassiveModule;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics.BaseModule;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -25,7 +26,8 @@ public enum EResourceDemand {
     BUILDING(Building.class, ORBITAL_CONSTRUCTION, EResourceType.RESEARCH),
     RESEARCH(Research.class, ORBITAL_CONSTRUCTION, CONSTRUCTION, CREDITS, METALORE, HEAVY_METALS, RARE_ELEMENTS, POPULATION),
     WEAPON_SYSTEM(HasCostsByOwn.class, CONSTRUCTION, EResourceType.RESEARCH),
-    BASE_MODULE(BaseModule.class, CONSTRUCTION, EResourceType.RESEARCH),
+    PASSIVE_MODULE(PassiveModule.class, CONSTRUCTION, EResourceType.RESEARCH),
+    BASE_MODULE(BaseModule.class, PASSIVE_MODULE.getOverrideResources().toArray(EResourceType[]::new)),
     ;
 
     @Nonnull

@@ -3,7 +3,6 @@ package de.yuga.spacebattle.backend.entities.misc;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EResourceDemand;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
@@ -55,19 +54,5 @@ public class HasCosts extends HasName {
     @Nonnull
     public ETechLevel getTechLevel() {
         return techLevel;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof NamedTechLevel)) return false;
-
-        NamedTechLevel module = (NamedTechLevel) o;
-        return id == module.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return 31 * id;
     }
 }

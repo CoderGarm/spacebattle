@@ -5,7 +5,6 @@ import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.misc.HasCosts;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.enums.EBuildingType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
@@ -22,7 +21,9 @@ import java.math.BigDecimal;
                         "AND p.productionType.refinementSequence IS NULL"),
         @NamedQuery(name = "Building.getByProductionTypeWithRefinement",
                 query = "SELECT p FROM Building p WHERE p.productionType.productionTarget = :productionTarget AND p.productionType.productionCategory = :productionCategory " +
-                        "AND p.productionType.refinementSequence = :refinementSequence")
+                        "AND p.productionType.refinementSequence = :refinementSequence"),
+        @NamedQuery(name = "Building.getAllByResearches",
+                query = "SELECT b FROM Building b LEFT JOIN ResearchLevel rl ON (rl.research = b.unlockedThrough AND rl.user.id = :idUser) WHERE rl IS NOT NULL AND rl.level >= b.unlockedThroughLevel")
 })
 @Entity
 @Table(name = "building")
@@ -55,9 +56,7 @@ public class Building extends HasCosts {
     @JoinColumn(name = "idResearch")
     private Research unlockedThrough;
 
-    @Nonnull
-    @Transient
-    private final EBuildingType buildingType = EBuildingType.BUILDING;
+    private int unlockedThroughLevel;
 
     public Building() {
     }
@@ -68,7 +67,8 @@ public class Building extends HasCosts {
                     @Nonnull final ETechLevel techLevel,
                     @Nonnull final ProductionType productionType,
                     @Nonnull final CrewRequirement crewRequirement,
-                    @Nonnull final Research unlockedThrough) {
+                    @Nonnull final Research unlockedThrough,
+                    final int unlockedThroughLevel) {
         super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, null, Building.class);
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
@@ -80,6 +80,7 @@ public class Building extends HasCosts {
         this.productionType = productionType;
         this.getCosts().setCrewRequirement(crewRequirement);
         this.unlockedThrough = unlockedThrough;
+        this.unlockedThroughLevel = unlockedThroughLevel;
     }
 
     public int getBaseValue() {
@@ -111,9 +112,8 @@ public class Building extends HasCosts {
         return unlockedThrough;
     }
 
-    @Nonnull
-    public EBuildingType getBuildingType() {
-        return buildingType;
+    public int getUnlockedThroughLevel() {
+        return unlockedThroughLevel;
     }
 
     @Override

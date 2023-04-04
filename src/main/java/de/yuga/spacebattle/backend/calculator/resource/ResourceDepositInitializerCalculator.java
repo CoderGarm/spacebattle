@@ -83,6 +83,7 @@ public class ResourceDepositInitializerCalculator {
                 return 10;
             case WEAPON_SYSTEM:
             case BASE_MODULE:
+            case PASSIVE_MODULE:
                 Preconditions.checkNotNull(capacity, "capacity must not be empty");
                 return Integer.max(4, capacity / 10);
         }
@@ -98,6 +99,7 @@ public class ResourceDepositInitializerCalculator {
                 return 51;
             case WEAPON_SYSTEM:
             case BASE_MODULE:
+            case PASSIVE_MODULE:
                 Preconditions.checkNotNull(capacity, "capacity must not be empty");
                 return Integer.max(9, capacity / 2);
         }

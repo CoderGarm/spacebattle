@@ -13,4 +13,7 @@ public interface CustomBuildingRepository {
 
     @Nonnull
     List<Building> findBuildingsByProductionTarget(@Nonnull ProductionType resourceType);
+
+    @Nonnull
+    List<Building> findAllByUser(int idUser);
 }

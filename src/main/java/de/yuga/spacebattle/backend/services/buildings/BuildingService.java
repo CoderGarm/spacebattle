@@ -32,11 +32,23 @@ public class BuildingService {
         return buildingRepository.findAllBuildings();
     }
 
+
+    @Nonnull
+    public List<Building> findAllByUser(final int idUser) {
+        return buildingRepository.findAllByUser(idUser);
+    }
+
     @Nullable
     public Building find(@Nonnull final Integer idBuilding) {
         Preconditions.checkNotNull(idBuilding, "idBuilding shouldn't be null!");
 
         return buildingRepository.findById(idBuilding).orElse(null);
+    }
+
+    public void save(@Nonnull final Building building) {
+        Preconditions.checkNotNull(building, "building must not be empty");
+
+        buildingRepository.save(building);
     }
 
     public void saveAll(@Nonnull final Collection<Building> toStore) {
@@ -66,7 +78,8 @@ public class BuildingService {
                                    @Nonnull final ProductionType productionType,
                                    @Nonnull final EEducationType educationType,
                                    final long amountOfWorkers,
-                                   @Nonnull final Research unlockedThrough) {
+                                   @Nonnull final Research unlockedThrough,
+                                   final int unlockedThroughLevel) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(techLevel, "techLevel shouldn't be null!");
@@ -75,7 +88,7 @@ public class BuildingService {
 
         final Map<EEducationType, Long> crewRequirement = new HashMap<>();
         crewRequirement.put(educationType, amountOfWorkers);
-        return buildingRepository.save(new Building(name, description, baseValue, techLevel, productionType, new CrewRequirement(crewRequirement, EDepositType.COSTS), unlockedThrough));
+        return buildingRepository.save(new Building(name, description, baseValue, techLevel, productionType, new CrewRequirement(crewRequirement, EDepositType.COSTS), unlockedThrough, unlockedThroughLevel));
     }
 
     public List<Building> findBuildingByProductionType(@Nonnull final ProductionType productionType) {

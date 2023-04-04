@@ -69,6 +69,7 @@ public class Launcher extends HasCostsByOwn {
 
     @Nonnull
     public Missile getHeaviestMissile() {
+        /* todo fix missile selection */
         return allowedMissiles.stream().sorted(Comparator.comparingLong(Missile::getDamageValue)).reduce((o1, o2) -> o2).orElseThrow(NullPointerException::new);
     }
 }

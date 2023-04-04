@@ -379,7 +379,7 @@ public class ShipClass extends Deletable {
                     }
                     final Launcher launcher = fitting.getLauncher();
                     if (launcher != null) {
-                        final Missile missile = new ArrayList<>(launcher.getAllowedMissiles()).get(0); // fixme fix missile selection
+                        final Missile missile = launcher.getHeaviestMissile();
                         damageProjectionRange = missile.getMaximumMissileRange();
                     }
                     return damageProjectionRange;
@@ -407,7 +407,7 @@ public class ShipClass extends Deletable {
                     }
                     final Launcher launcher = fitting.getLauncher();
                     if (launcher != null) {
-                        final Missile missile = new ArrayList<>(launcher.getAllowedMissiles()).get(0); // fixme fix missile selection
+                        final Missile missile = launcher.getHeaviestMissile();
                         damageProjectionRange = missile.getMaximumMissileRange();
                     }
                     return damageProjectionRange;

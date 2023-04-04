@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalcu
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.spacecraft.Fitting;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.account.forum.Forum;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
@@ -13,9 +14,7 @@ import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
-import de.yuga.spacebattle.backend.entities.i18n.Translatable;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
-import de.yuga.spacebattle.backend.entities.misc.HasCostsByOwn;
 import de.yuga.spacebattle.backend.entities.misc.HasName;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
@@ -30,7 +29,6 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AmmunitionFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
@@ -45,7 +43,6 @@ import de.yuga.spacebattle.backend.services.combined.account.AllianceService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
-import de.yuga.spacebattle.backend.services.i18n.TranslatableService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
@@ -54,7 +51,6 @@ import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -164,9 +160,6 @@ public class MasterOfTheUniverseService {
     private final BattleService battleService;
 
     @Nonnull
-    private final TranslatableService translatableService;
-
-    @Nonnull
     private final ResourceService resourceService;
 
     @Autowired
@@ -184,7 +177,6 @@ public class MasterOfTheUniverseService {
                                       @Nonnull final ForumService forumService,
                                       @Nonnull final ColonizationService colonizationService,
                                       @Nonnull final BattleService battleService,
-                                      @Nonnull final TranslatableService translatableService,
                                       @Nonnull final ResourceService resourceService) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
@@ -200,7 +192,6 @@ public class MasterOfTheUniverseService {
         this.forumService = Preconditions.checkNotNull(forumService, "forumService shouldn't be null!");
         this.colonizationService = Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
         this.battleService = Preconditions.checkNotNull(battleService, "battleService must not be empty");
-        this.translatableService = Preconditions.checkNotNull(translatableService, "translatableService must not be empty");
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
@@ -231,36 +222,7 @@ public class MasterOfTheUniverseService {
 
     @SuppressWarnings({"unused"})
     void createInitialDataPayload() {
-
-        Research unlocksConstructionYard = research("Construction Yard", "The construction yard research researches the construction yard.", 1, ETechLevel.TECH_I, null);
-        Building constructionYard = building("Construction Yard", "The construction yard construct constructions.", 100, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, CONSTRUCTION_YARD_PT, unlocksConstructionYard);
-
-        Research unlocksShipyard = research("Orbitals Construction Yard", "The orbitals Construction Yard research researches the orbitals construction yard.", 1, ETechLevel.TECH_I, null);
-        Building orbitalsConstructionYard = building("Orbitals Construction Yard", "The construction yard construct orbital constructions.", 100, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, SHIPYARD_PT, unlocksShipyard);
-
-        Research unlocksLaboratory = research("Laboratories", "The laboratories research researches laboratories.", 1, ETechLevel.TECH_I, null);
-        Building researchB = building("Research Laboratories", "The lab investigates researches.", 10, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, RESEARCH_LAB_PT, unlocksLaboratory);
-
-        Research unlocksBank = research("Market place", "The Market place research researches Market places.", 1, ETechLevel.TECH_I, null);
-        Building bank = building("Market place", "The market makes money.", 100, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, MARKET_PT, unlocksBank);
-
-        Research unlocksMetals = research("Metal works", "The Metal works research researches Metal works.", 1, ETechLevel.TECH_I, null);
-        Building metalsWorks = building("Metal works", "Metals for progress.", 250, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, METAL_WORKS, unlocksMetals);
-
-        Research unlocksMecur = research("Special orbital ores", "The Special orbital ores research researches Special orbital ores.", 1, ETechLevel.TECH_I, unlocksMetals);
-        Building orbitalOres = building("Special orbital ores", "Heavier metals for more progress.", 200, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_II, HEAVY_METALS_WORK_PT, unlocksMecur);
-
-        Research unlocksHyperWorks = research("Asynchronous Investigations", "The Asynchronous Investigations research researches Asynchronous Investigations.", 1, ETechLevel.TECH_I, unlocksMecur);
-        Building investigations = building("Asynchronous Investigations", "Rare elements for the future.", 100, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_III, RARE_ELEMENTS_PT, unlocksHyperWorks);
-
-        Research livingStuff = research("Eternal live", "How to buy wine.", 1, ETechLevel.TECH_I, null);
-        Building livingRoom = building("Living room", "Everyone needs a home", 1000, 15, EEducationType.COLLEGE, ETechLevel.TECH_I, LIVING_PT, livingStuff);
-        Building hospital = building("Hospital", "Everyone needs a doctor", 50, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, DOCTOR_PT, livingStuff);
-        Building elementarySchool = building("Elementary schools", "a school", 100, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, ELEMENTARY_SCHOOL_PT, livingStuff);
-        Building secondarySchool = building("Secondary schools", "another school", 100, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, SECONDARY_SCHOOL_PT, livingStuff);
-        Building university = building("University", "a university", 100, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, UNIVERSITY_PT, livingStuff);
-        Building enlistedSchool = building("Teams Rank School", "for the guys which are loud", 50, 10, EEducationType.ENLISTED, ETechLevel.TECH_I, MILITARY_I_PT, livingStuff);
-        Building militaryAcademy = building("Military Academy", "for the guys which are silent", 50, 10, EEducationType.OFFICER, ETechLevel.TECH_I, MILITARY_II_PT, livingStuff);
+        createBuildings();
         LOGGER.info("Buildings created");
 
         //noinspection OptionalGetWithoutIsPresent
@@ -322,12 +284,102 @@ public class MasterOfTheUniverseService {
         LOGGER.info("Warships created");
         LOGGER.info("Fleets populated");
 
-        amendTranslations();
-        LOGGER.info("Translations amended.");
-
         tickService.doTick();
         LOGGER.info("First tick is done");
         LOGGER.info("All Data created");
+    }
+
+    private void createBuildings() {
+        /* civil constructions */
+        Research research = research("Civil facilities", "This contains every kind of technological and industrial knowledge and development.", ETechLevel.TECH_I, null);
+        amendTranslation(research, "Zivile Anlagen", "Erforscht und enthält das technische Wissen und Fähigkeiten für zivile Konstruktionen.");
+        final Research civilConstructions = researchService.save(research);
+
+        Building b = building("Construction Yard", "Useful to build ground constructions.",
+                100, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, CONSTRUCTION_YARD_PT, research, 1);
+        amendTranslation(b, "Bauhof", "Nützlich für Gebäude.");
+        buildingService.save(b);
+
+        b = building("Financial markets", "A mixture from public investments and tax systems to create income.",
+                100, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, MARKET_PT, research, 1);
+        amendTranslation(b, "Finanzmärkte", "Eine Mixtur aus öffentlichen Investitionen und Steuern um Einkommen zu generieren.");
+        buildingService.save(b);
+
+        b = building("Metal works", "Produces the most basic materials, from rubber in shoes to special alloys for spacecrafts.",
+                250, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, METAL_WORKS, research, 1);
+        amendTranslation(b, "Metallwerke", "Produziert grundlegende Materialien, von Gummi für Schuhe bis zu speziellen Legierungen für die Raumfahrt.");
+        buildingService.save(b);
+
+        b = building("Orbital ore factory", "Produces some asteroid-based materials and farms gas from the giants and clouds in the system.",
+                200, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_II, HEAVY_METALS_WORK_PT, research, 7);
+        amendTranslation(b, "Orbitale Metallwerke", "Baut Ressourcen und Gase ab, die hauptsächlich außerhalb des Planeten zu finden sind.");
+        buildingService.save(b);
+
+        b = building("Nanofarm", "Produces rare elements and combines them to specialized molycircs and complex nano structures.",
+                100, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_III, RARE_ELEMENTS_PT, research, 10);
+        amendTranslation(b, "Nanofarm", "Produziert die notwendigen Rohstoffe für Molycircs und komplexe Nanostrukturen.");
+        buildingService.save(b);
+
+        research = research("Healthcare and living", "Improves the way to live and stay alive.", ETechLevel.TECH_I, null);
+        amendTranslation(research, "Gesundheit und Wohnen", "Verbessert die Möglichkeiten des allgemeinen Lebens.");
+        researchService.save(research);
+
+        b = building("Residential and housing", "Everyone needs a home.", 1000, 15, EEducationType.COLLEGE, ETechLevel.TECH_I, LIVING_PT, research, 1);
+        amendTranslation(b, "Wohnräume", "Jeder braucht ein zuhause.");
+        buildingService.save(b);
+
+        b = building("Medical care", "Everyone needs a doctor.", 50, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, DOCTOR_PT, research, 1);
+        amendTranslation(b, "Medizinische Versorgung", "Jeder braucht mal einen Arzt.");
+        buildingService.save(b);
+        /* civil constructions */
+
+        /* civil education */
+        research = research("Scientific and pedagogical methods", "How to teach someone.", ETechLevel.TECH_I, null);
+        amendTranslation(research, "Wissenschaftliche und pädagogische Methoden", "Wie man jemanden ausbildet.");
+        final Research civilEducation = researchService.save(research);
+
+        b = building("Research Laboratories", "Brings light into the dark.",
+                10, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, RESEARCH_LAB_PT, research, 1);
+        amendTranslation(b, "Forschungslabore", "Bringt Licht ins Dunkel.");
+        buildingService.save(b);
+
+        b = building("Elementary schools", "The first school.", 100, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, ELEMENTARY_SCHOOL_PT, research, 1);
+        amendTranslation(b, "Grundschule", "Die erste Schule.");
+        buildingService.save(b);
+
+        b = building("Secondary schools", "Prepares pupils for the workforce.", 100, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, SECONDARY_SCHOOL_PT, research, 1);
+        amendTranslation(b, "Weiterführende Schule", "Bereitet Schüler auf das Arbeitsleben vor.");
+        buildingService.save(b);
+
+        b = building("University", "Prepares and trains people to be researchers.", 100, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, UNIVERSITY_PT, research, 1);
+        amendTranslation(b, "Universität", "Bildet Forscher aus.");
+        buildingService.save(b);
+        /* civil education */
+
+        /* military constructions */
+        research = research("Military facilities", "This contains every kind of technological and military knowledge and development.", ETechLevel.TECH_I, civilConstructions);
+        amendTranslation(research, "Militärische Strukturen", "Erforscht und enthält das technische Wissen und Fähigkeiten für militärische Konstruktionen");
+        researchService.save(research);
+
+        b = building("Orbitals Construction Yard", "The construction yard construct orbital constructions.",
+                100, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, SHIPYARD_PT, research, 1);
+        amendTranslation(b, "", "");
+        buildingService.save(b);
+        /* military constructions */
+
+        /* military education */
+        research = research("Military history and modern tactics", "The knowledge about the military past will improve the military future.", ETechLevel.TECH_I, civilEducation);
+        amendTranslation(research, "Militärhistorie und moderne Taktiken", "Das Wissen über die Vergangenheit wird die Zukunft verbessern.");
+        researchService.save(research);
+
+        b = building("Teams Rank School", "Trains ordinary people into crew people.", 50, 10, EEducationType.ENLISTED, ETechLevel.TECH_I, MILITARY_I_PT, research, 1);
+        amendTranslation(b, "Mannschaftsschule", "Bildet gewöhnliche Leute zu Besatzungsmitgliedern aus.");
+        buildingService.save(b);
+
+        b = building("Officer school", "Trains officers.", 50, 10, EEducationType.OFFICER, ETechLevel.TECH_I, MILITARY_II_PT, research, 1);
+        amendTranslation(b, "Offiziersschule", "Bildet Offiziere aus.");
+        buildingService.save(b);
+        /* military education */
     }
 
     private ShipClass chansonDestroyer(@Nonnull final User owner,
@@ -339,10 +391,10 @@ public class MasterOfTheUniverseService {
         final ShipClass shipClass = new ShipClass(owner, "Song");
         shipClass.setShipClassType(shipClassType);
 
-        final Armor a = f.getByType(shipClassType, f.armors);
+        final Armor a = f.getByType(shipClassType, f.getArmors());
         final Propulsion p = f.getProp(ETechnologyType.MILITARY);
-        final ElectronicWarfare e = f.getByType(shipClassType, f.eloka);
-        final Sidewall s = f.getByType(shipClassType, f.sidewalls);
+        final ElectronicWarfare e = f.getByType(shipClassType, f.getEloka());
+        final Sidewall s = f.getByType(shipClassType, f.getSidewalls());
 
         final Weapon beam = f.getWeapon(shipClassType, EWeaponType.BEAM);
         final Weapon pointDefense = f.getWeapon(shipClassType, EWeaponType.POINT_DEFENSE);
@@ -819,23 +871,6 @@ public class MasterOfTheUniverseService {
         forumService.saveAll(toStore);
     }
 
-    private void amendTranslations() {
-        final String de = "de";
-        final List<Translatable> all = translatableService.findAll();
-        all.forEach(tr -> {
-            final String inEN = tr.getTranslation(Translation.DEFAULT_LANGUAGE);
-            final String inDe = tr.getTranslation(de);
-            if (StringUtils.isBlank(inDe)) {
-                final String germanTranslation = translatableService.provideTranslation(inEN);
-                if (StringUtils.isBlank(germanTranslation)) {
-                    throw new NotifyWebUserException("Oh this must not happen. There is something missing");
-                }
-                tr.updateOrCreate(de, germanTranslation);
-            }
-        });
-        translatableService.saveAll(all);
-    }
-
     @Nonnull
     protected Building building(final String name,
                                 final String description,
@@ -844,8 +879,14 @@ public class MasterOfTheUniverseService {
                                 final EEducationType educationType,
                                 final ETechLevel techLevel,
                                 final ProductionType productionType,
-                                final Research unlockedBy) {
-        return buildingService.createBuilding(name, description, baseValue, techLevel, productionType, educationType, amountOfWorkers, unlockedBy);
+                                final Research unlockedBy,
+                                final int unlockedThroughLevel) {
+        return buildingService.createBuilding(name, description, baseValue, techLevel, productionType, educationType, amountOfWorkers, unlockedBy, unlockedThroughLevel);
+    }
+
+
+    private Research research(final String name, final String description, final ETechLevel techLevel, final Research unlockedBy) {
+        return researchService.createResearch(name, description, Integer.MAX_VALUE, techLevel, unlockedBy);
     }
 
     @Nonnull
@@ -944,16 +985,6 @@ public class MasterOfTheUniverseService {
         battleService.runBattleAtPlanet(today, homePlanet);
     }
 
-    private <M extends BaseModuleWithEffectValue> List<M> sortByValue(@Nonnull final List<M> modules, @Nonnull final EShipClassType shipClassType) {
-        Preconditions.checkNotNull(modules, "modules must not be empty");
-        Preconditions.checkNotNull(shipClassType, "shipClassType must not be empty");
-
-        return modules.stream().filter(e -> shipClassType.suitsShipClassType(e.getShipClassType()))
-                .sorted(Comparator.comparingInt(BaseModuleWithEffectValue::getEffectValue))
-                .collect(Collectors.toList());
-    }
-
-
     public static class CoordsBlob extends ArrayList<MasterOfTheUniverseService.Coords> {
 
         public CoordsBlob(@Nonnull final List<Coords> coords) {
@@ -962,7 +993,6 @@ public class MasterOfTheUniverseService {
             super.addAll(coords);
         }
     }
-
 
     public static class Coords {
         @JsonProperty
@@ -979,75 +1009,6 @@ public class MasterOfTheUniverseService {
             this.name = split[0];
             this.x = Integer.parseInt(split[1].replace("x", "").replaceAll(" ", ""));
             this.y = Integer.parseInt(split[2].replace("y", "").replaceAll(" ", "")) * -1;
-        }
-    }
-
-    private static class Fitting {
-
-        private final List<Propulsion> propulsions;
-        private final List<Armor> armors;
-        private final List<ElectronicWarfare> eloka;
-        private final List<Sidewall> sidewalls;
-        private final List<Weapon> weapons;
-        private final Map<Launcher, Missile> missiles;
-        private final List<PassiveModule> passiveModules;
-
-        public Fitting(final List<Propulsion> propulsions,
-                       final List<Armor> armors,
-                       final List<ElectronicWarfare> eloka,
-                       final List<Sidewall> sidewalls,
-                       final List<Weapon> weapons,
-                       final Map<Launcher, Missile> missiles,
-                       final List<PassiveModule> passiveModules) {
-
-            this.propulsions = propulsions;
-            this.armors = armors;
-            this.eloka = eloka;
-            this.sidewalls = sidewalls;
-            this.weapons = weapons;
-            this.missiles = missiles;
-            this.passiveModules = passiveModules;
-        }
-
-        @Nullable
-        public <MODULE extends HasCostsByOwn> MODULE getByType(@Nonnull final EShipClassType shipClassType, @Nonnull final Collection<MODULE> elements) {
-            Preconditions.checkNotNull(shipClassType, "shipClassType must not be empty");
-            Preconditions.checkNotNull(elements, "elements must not be empty");
-
-            return elements.stream().sorted(Comparator.comparingInt(HasCostsByOwn::getEffectValue)).filter(a -> a.getShipClassType().suitsShipClassType(shipClassType)).findFirst().orElse(null);
-        }
-
-        @Nullable
-        public Weapon getWeapon(@Nonnull final EShipClassType shipClassType, @Nonnull final EWeaponType weaponType) {
-            Preconditions.checkNotNull(shipClassType, "shipClassType must not be empty");
-            Preconditions.checkNotNull(weaponType, "weaponType must not be empty");
-
-            return weapons.stream()
-                    .sorted(Comparator.comparingInt(HasCostsByOwn::getEffectValue))
-                    .filter(a -> shipClassType.suitsShipClassType(a.getShipClassType()))
-                    .filter(a -> a.getWeaponType() == weaponType)
-                    .findFirst().orElse(null);
-        }
-
-        @Nullable
-        public Map.Entry<Launcher, Missile> getLauncher(@Nonnull final EShipClassType shipClassType, @Nonnull final EWeaponType weaponType) {
-            Preconditions.checkNotNull(shipClassType, "shipClassType must not be empty");
-            Preconditions.checkNotNull(weaponType, "weaponType must not be empty");
-
-            return missiles.entrySet().stream()
-                    .filter(a -> shipClassType.suitsShipClassType(a.getKey().getShipClassType()))
-                    .filter(a -> a.getKey().getWeaponType() == weaponType)
-                    .findFirst().orElse(null);
-        }
-
-        @Nonnull
-        public Propulsion getProp(@Nonnull final ETechnologyType technologyType) {
-            Preconditions.checkNotNull(technologyType, "technologyType must not be empty");
-
-            return propulsions.stream()
-                    .sorted(Comparator.comparing(Propulsion::getHyperBand))
-                    .filter(p -> p.getTechnologyType() == technologyType)
-                    .reduce((o1, o2) -> o2).orElseThrow(NullPointerException::new);
         }
     }
 }

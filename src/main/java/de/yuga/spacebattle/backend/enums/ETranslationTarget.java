@@ -37,6 +37,7 @@ public enum ETranslationTarget {
         return clazz;
     }
 
+    @Nonnull
     public static ETranslationTarget getByClazz(@Nonnull final Class<?> clazz) {
         Preconditions.checkNotNull(clazz, "clazz must not be empty");
 

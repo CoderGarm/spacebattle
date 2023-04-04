@@ -5,9 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
-import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
-import de.yuga.spacebattle.backend.enums.ETranslationTarget;
 import de.yuga.spacebattle.rest.dto.enums.HasIcon;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -78,31 +76,7 @@ public class Research {
             this.hasIcon = new HasIcon(eResourceType);
             return;
         }
-        final ETranslationTarget unlocks = research.getUnlocks();
-
-        switch (unlocks) {
-            case BUILDING:
-            case RESEARCH:
-            case PASSIVE_MODULE:
-                break;
-            case WEAPON:
-            case MISSILE:
-            case LAUNCHER:
-                this.hasIcon = new HasIcon(EModuleType.WEAPON);
-                break;
-            case ARMOR:
-                this.hasIcon = new HasIcon(EModuleType.ARMOR);
-                break;
-            case ELECTRONIC_WARFARE:
-                this.hasIcon = new HasIcon(EModuleType.ELECTRONIC_WARFARE);
-                break;
-            case PROPULSION:
-                this.hasIcon = new HasIcon(EModuleType.PROPULSION);
-                break;
-            case SIDEWALL:
-                this.hasIcon = new HasIcon(EModuleType.SIDEWALL);
-                break;
-        }
+        this.hasIcon = HasIcon.getBy(research.getUnlocks());
     }
 
     public int getIdResearch() {

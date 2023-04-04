@@ -5,8 +5,6 @@ import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.i18n.Translatable;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.i18n.TranslatableService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
@@ -222,19 +220,5 @@ public class AdminApi extends BaseApi {
         result.add(new FileUpload("missileMotors.csv", mm.convert(moduleService.findAllMissileMotors())));
           */
         return ResponseEntity.ok(result);
-    }
-
-    @Nonnull
-    private List<BaseModuleWithEffectValue> castEffectValue(@Nonnull final List<? extends BaseModuleWithEffectValue> list) {
-        Preconditions.checkNotNull(list, "list must not be empty");
-
-        return list.stream().map(m -> (BaseModuleWithEffectValue) m).collect(Collectors.toList());
-    }
-
-    @Nonnull
-    private List<BaseModule> cast(@Nonnull final List<? extends BaseModule> list) {
-        Preconditions.checkNotNull(list, "list must not be empty");
-
-        return list.stream().map(m -> (BaseModule) m).collect(Collectors.toList());
     }
 }

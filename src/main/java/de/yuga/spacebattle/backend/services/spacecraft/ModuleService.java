@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.spacecraft.Fitting;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
@@ -478,5 +479,17 @@ public class ModuleService {
         Preconditions.checkNotNull(baseModule, "baseModule must not be empty");
 
         namedTechLevelRepository.save(baseModule);
+    }
+
+    @Nonnull
+    public Fitting getFitting() {
+        final List<Propulsion> propulsions = propulsionRepository.findAll();
+        final List<Armor> armors = armorRepository.findAll();
+        final List<ElectronicWarfare> electronicWarfares = electronicWarfareRepository.findAll();
+        final List<Sidewall> sidewalls = sidewallRepository.findAll();
+        final List<Weapon> weapons = weaponRepository.findAll();
+        final List<Launcher> launchers = launcherRepository.findAll();
+        final List<PassiveModule> passiveModules = passiveModuleRepository.findAll();
+        return new Fitting(propulsions, armors, electronicWarfares, sidewalls, weapons, launchers, passiveModules);
     }
 }

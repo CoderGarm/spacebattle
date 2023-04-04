@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.misc.HasCosts;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.PassiveModule;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.ETranslationTarget;
@@ -17,9 +18,7 @@ import java.util.Set;
 
 @NamedQueries({
         @NamedQuery(name = "Research.getAll",
-                query = "SELECT p FROM Research p"),
-        @NamedQuery(name = "Research.getTreeAsTuple",
-                query = "SELECT new de.yuga.spacebattle.backend.dto.research.ResearchTreeElement(p.id, p.unlockedThrough.id) FROM Research p")
+                query = "SELECT p FROM Research p")
 })
 @Entity
 @Table(name = "research")
@@ -36,6 +35,10 @@ public class Research extends HasCosts {
     @Nonnull
     @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
     private final Set<Building> unlocksBuildings = new HashSet<>();
+
+    @Nonnull
+    @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
+    private final Set<PassiveModule> unlocksPassiveModules = new HashSet<>();
 
     @Nonnull
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
@@ -65,6 +68,16 @@ public class Research extends HasCosts {
     @Nonnull
     public Set<Building> getUnlocksBuildings() {
         return unlocksBuildings;
+    }
+
+    @Nonnull
+    public Set<PassiveModule> getUnlocksPassiveModules() {
+        return unlocksPassiveModules;
+    }
+
+    @Nonnull
+    public Set<NamedTechLevel> getUnlocksNamedTechLevel() {
+        return unlocksNamedTechLevel;
     }
 
     @Nonnull

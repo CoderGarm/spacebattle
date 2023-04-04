@@ -9,6 +9,8 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.rest.dto.enums.EShipClassType;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -57,9 +59,9 @@ public class BaseModule {
     protected BaseModule() {
     }
 
-    public BaseModule(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule module,
+    public BaseModule(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.PassiveModule module,
                       @Nonnull final String languageCode) {
-        Preconditions.checkNotNull(module, "module shouldn't be null!");
+        Preconditions.checkNotNull(module, "module must not be empty");
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
 
         this.idModule = module.getId();
@@ -68,12 +70,6 @@ public class BaseModule {
         this.tonnage = module.getTonnage();
         this.techLevel = module.getTechLevel();
         this.shipClassType = new EShipClassType(module.getShipClassType());
-    }
-
-    public BaseModule(@Nonnull final de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModuleWithEffectValue module,
-                      @Nonnull final String languageCode) {
-        this((de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.BaseModule) module, languageCode);
-
         this.effectValue = module.getEffectValue();
     }
 
@@ -105,5 +101,21 @@ public class BaseModule {
     @JsonIgnore
     public int getIdModule() {
         return idModule;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final BaseModule that = (BaseModule) o;
+
+        return new EqualsBuilder().append(idModule, that.idModule).append(technicalTypeName, that.technicalTypeName).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(idModule).append(technicalTypeName).toHashCode();
     }
 }

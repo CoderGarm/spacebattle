@@ -175,7 +175,7 @@ public class WarshipHealthState implements Cloneable {
                     }
                     final Launcher launcher = fitting.getLauncher();
                     if (launcher != null) {
-                        final Missile missile = new ArrayList<>(launcher.getAllowedMissiles()).get(0); // fixme fix missile selection
+                        final Missile missile = launcher.getHeaviestMissile();
                         if (missileAmmunitionState.hasShotsLeft(missile)) {
                             damageProjectionRange = missile.getMaximumMissileRange();
                         }
@@ -209,7 +209,7 @@ public class WarshipHealthState implements Cloneable {
                     }
                     final Launcher launcher = fitting.getLauncher();
                     if (launcher != null) {
-                        final Missile missile = new ArrayList<>(launcher.getAllowedMissiles()).get(0); // fixme fix missile selection
+                        final Missile missile = launcher.getHeaviestMissile();
                         if (missileAmmunitionState.hasShotsLeft(missile)) {
                             damageProjectionRange = missile.getMaximumMissileRange();
                         }
@@ -239,7 +239,7 @@ public class WarshipHealthState implements Cloneable {
                 .filter(f -> {
                     if (f.getLauncher() != null) {
                         final Launcher launcher = f.getLauncher();
-                        return missileAmmunitionState.hasShotsLeft(new ArrayList<>(launcher.getAllowedMissiles()).get(0)); // fixme fix missile selection
+                        return missileAmmunitionState.hasShotsLeft(launcher.getHeaviestMissile());
                     }
                     return true;
                 })
@@ -260,7 +260,7 @@ public class WarshipHealthState implements Cloneable {
                 .filter(f -> {
                     if (f.getLauncher() != null) {
                         final Launcher launcher = f.getLauncher();
-                        return missileAmmunitionState.hasShotsLeft(new ArrayList<>(launcher.getAllowedMissiles()).get(0)); // fixme fix missile selection
+                        return missileAmmunitionState.hasShotsLeft(launcher.getHeaviestMissile());
                     }
                     return true;
                 })
@@ -278,8 +278,8 @@ public class WarshipHealthState implements Cloneable {
                     final Weapon weapon = fitting.getWeapon();
                     final Launcher launcher = fitting.getLauncher();
                     if (launcher != null) {
-                        if (missileAmmunitionState.hasShotsLeft(new ArrayList<>(launcher.getAllowedMissiles()).get(0))) { // fixme fix missile selection
-                            damageValue = new ArrayList<>(launcher.getAllowedMissiles()).get(0).getWarhead().getDamageValue(); // fixme fix missile selection
+                        if (missileAmmunitionState.hasShotsLeft(launcher.getHeaviestMissile())) {
+                            damageValue = launcher.getHeaviestMissile().getWarhead().getDamageValue();
                         }
                     } else if (weapon != null) {
                         damageValue = weapon.getEffectValue();

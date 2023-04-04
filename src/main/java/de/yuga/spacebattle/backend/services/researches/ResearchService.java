@@ -8,15 +8,12 @@ import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.repositories.researches.ResearchLevelRepository;
 import de.yuga.spacebattle.backend.repositories.researches.ResearchRepository;
 import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
-import de.yuga.spacebattle.rest.dto.researches.ResearchTree;
-import de.yuga.spacebattle.rest.dto.researches.ResearchTreeElement;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 public class ResearchService {
@@ -39,58 +36,6 @@ public class ResearchService {
     @Nonnull
     public List<Research> findAll() {
         return researchRepository.findAll();
-    }
-
-    @Nonnull
-    public ResearchTree getResearchTree(@Nonnull final String languageCode) {
-        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
-        final List<de.yuga.spacebattle.backend.dto.research.ResearchTreeElement> treeElements = findAllAsTuple();
-        final Set<Integer> idResearches = treeElements.stream().map(de.yuga.spacebattle.backend.dto.research.ResearchTreeElement::getIdResearch).collect(Collectors.toSet());
-        final List<de.yuga.spacebattle.rest.dto.researches.Research> researches = getResearchesAsDTOById(idResearches, languageCode);
-
-        final Map<Integer, ResearchTreeElement> treeLinkedElementByIdResearch = new HashMap<>();
-        // fill up the unlocks und create elements
-        for (final de.yuga.spacebattle.backend.dto.research.ResearchTreeElement treeElement : treeElements) {
-            final int idResearch = treeElement.getIdResearch();
-            final Integer idUnlockedBy = treeElement.getIdUnlockedBy();
-            if (idUnlockedBy != null) {
-                final ResearchTreeElement element = treeLinkedElementByIdResearch.getOrDefault(idUnlockedBy, new ResearchTreeElement(idUnlockedBy));
-                element.setIdUnlocks(idResearch);
-                treeLinkedElementByIdResearch.put(idUnlockedBy, element);
-            } else {
-                treeLinkedElementByIdResearch.put(idResearch, new ResearchTreeElement(idResearch));
-            }
-        }
-        // fill up reverse unlocked by
-        final Map<Integer, ResearchTreeElement> avoidConcurrentModification = new HashMap<>();
-        for (final ResearchTreeElement treeElement : treeLinkedElementByIdResearch.values()) {
-            final Integer idUnlocks = treeElement.getIdUnlocks();
-            if (idUnlocks != null) {
-                final ResearchTreeElement researchTreeElement = treeLinkedElementByIdResearch.getOrDefault(idUnlocks, new ResearchTreeElement(idUnlocks));
-                researchTreeElement.setIdUnlockedBy(treeElement.getIdResearch());
-                avoidConcurrentModification.put(idUnlocks, researchTreeElement);
-            }
-        }
-        treeLinkedElementByIdResearch.putAll(avoidConcurrentModification);
-
-        return new ResearchTree(treeLinkedElementByIdResearch.values(), researches);
-    }
-
-    @Nonnull
-    protected List<de.yuga.spacebattle.backend.dto.research.ResearchTreeElement> findAllAsTuple() {
-        return researchRepository.findAllAsTuple();
-    }
-
-    @Nonnull
-    protected List<de.yuga.spacebattle.rest.dto.researches.Research> getResearchesAsDTOById(@Nonnull final Collection<Integer> idResearches,
-                                                                                            @Nonnull final String languageCode) {
-        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
-        Preconditions.checkNotNull(idResearches, "idResearches shouldn't be null!");
-
-        final Iterable<Research> allById = researchRepository.findAllById(idResearches);
-        return StreamSupport.stream(allById.spliterator(), false)
-                .map(r -> new de.yuga.spacebattle.rest.dto.researches.Research(r, languageCode))
-                .collect(Collectors.toList());
     }
 
     @Nullable
@@ -228,9 +173,9 @@ public class ResearchService {
     }
 
     @Deprecated(since = MasterOfTheUniverseService.BALANCING_ISSUES)
-    public void save(@Nonnull final Research research) {
+    public Research save(@Nonnull final Research research) {
         Preconditions.checkNotNull(research, "research must not be empty");
 
-        researchRepository.save(research);
+        return researchRepository.save(research);
     }
 }

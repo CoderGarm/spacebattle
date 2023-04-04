@@ -19,10 +19,4 @@ public class CustomResearchRepositoryImpl implements CustomResearchRepository {
     public List<Research> findAll() {
         return em.createNamedQuery("Research.getAll", Research.class).getResultList();
     }
-
-    @Nonnull
-    @Override
-    public List<de.yuga.spacebattle.backend.dto.research.ResearchTreeElement> findAllAsTuple() {
-        return em.createNamedQuery("Research.getTreeAsTuple", de.yuga.spacebattle.backend.dto.research.ResearchTreeElement.class).getResultList();
-    }
 }

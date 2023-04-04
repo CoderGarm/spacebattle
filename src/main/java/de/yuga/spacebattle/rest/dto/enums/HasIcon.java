@@ -1,10 +1,12 @@
 package de.yuga.spacebattle.rest.dto.enums;
 
-import de.yuga.spacebattle.backend.enums.EIconPath;
-import de.yuga.spacebattle.backend.enums.HasIconName;
+import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.enums.EModuleType;
+import de.yuga.spacebattle.backend.enums.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 @Schema(description = ".")
 public class HasIcon extends HasTypeName {
@@ -38,5 +40,33 @@ public class HasIcon extends HasTypeName {
     @Nonnull
     public String getFolder() {
         return folder;
+    }
+
+
+    @Nullable
+    public static HasIcon getBy(@Nonnull final ETranslationTarget translationTarget) {
+        Preconditions.checkNotNull(translationTarget, "translationTarget must not be empty");
+
+        switch (translationTarget) {
+            case WEAPON:
+            case MISSILE:
+            case LAUNCHER:
+                return new HasIcon(de.yuga.spacebattle.backend.enums.EModuleType.WEAPON);
+            case ARMOR:
+                return new HasIcon(de.yuga.spacebattle.backend.enums.EModuleType.ARMOR);
+            case ELECTRONIC_WARFARE:
+                return new HasIcon(de.yuga.spacebattle.backend.enums.EModuleType.ELECTRONIC_WARFARE);
+            case PROPULSION:
+                return new HasIcon(de.yuga.spacebattle.backend.enums.EModuleType.PROPULSION);
+            case SIDEWALL:
+                return new HasIcon(EModuleType.SIDEWALL);
+            case BUILDING:
+                return new HasIcon(EBuildingType.BUILDING);
+            case RESEARCH:
+            case PASSIVE_MODULE:
+            default:
+                break;
+        }
+        return null;
     }
 }

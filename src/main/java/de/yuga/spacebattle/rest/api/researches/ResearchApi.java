@@ -10,6 +10,7 @@ import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
+import de.yuga.spacebattle.backend.services.researches.TechTreeService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -61,11 +62,15 @@ public class ResearchApi extends BaseApi {
     @Nonnull
     private final PlanetService planetService;
 
+    @Nonnull
+    private final TechTreeService techTreeService;
+
     @Autowired
     public ResearchApi(@Nonnull final ResearchService researchService,
                        @Nonnull final UserService userService,
                        @Nonnull final JobService jobService,
-                       @Nonnull final PlanetService planetService) {
+                       @Nonnull final PlanetService planetService,
+                       @Nonnull final TechTreeService techTreeService) {
         Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
         Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
@@ -75,6 +80,7 @@ public class ResearchApi extends BaseApi {
         this.userService = userService;
         this.jobService = jobService;
         this.planetService = planetService;
+        this.techTreeService = techTreeService;
     }
 
     @GetMapping(value = BY_USER_ENDPOINT)
@@ -158,7 +164,7 @@ public class ResearchApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getTree() {
-        return ResponseEntity.ok(researchService.getResearchTree(getPreferredLanguage()));
+        return ResponseEntity.ok(techTreeService.getResearchTree(getPreferredLanguage()));
     }
 
     @GetMapping(value = RESEARCH_POSSIBLE_FOR_USER_ENDPOINT)

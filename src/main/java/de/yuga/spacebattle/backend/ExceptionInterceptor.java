@@ -23,7 +23,7 @@ public class ExceptionInterceptor {
         this.mailService = Preconditions.checkNotNull(mailService, "mailService must not be empty");
     }
 
-    //@AfterThrowing(pointcut = "execution(* de.yuga.spacebattle..* (..))", throwing = "ex") /* fixme tomcat didn't start */
+    //@AfterThrowing(pointcut = "execution(* de.yuga.spacebattle..* (..))", throwing = "ex") /* todo tomcat didn't start */
     public void handleError(Exception ex) {
         if (mailExceptions) {
             mailService.sendExceptionMail(ex);

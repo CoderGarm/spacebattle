@@ -288,8 +288,7 @@ public class MasterOfTheUniverseServiceTest {
         final Planet planet = planetService.find(idPlanet);
         assertNotNull(planet);
         assertNotNull(planet.getOwner());
-        final Set<ResearchLevel> researchesForUser = researchService.getResearchesForUser(planet.getOwner().getId());
-        return constructionService.getUpgradeableConstructions(planet, researchesForUser);
+        return constructionService.getUpgradeableConstructions(planet);
     }
 
     private boolean isConstructionPossibleOnPlanet(final int idPlanet) {

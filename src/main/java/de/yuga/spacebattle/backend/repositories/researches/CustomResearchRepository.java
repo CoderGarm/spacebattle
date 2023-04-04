@@ -9,7 +9,4 @@ public interface CustomResearchRepository {
 
     @Nonnull
     List<Research> findAll();
-
-    @Nonnull
-    List<de.yuga.spacebattle.backend.dto.research.ResearchTreeElement> findAllAsTuple();
 }

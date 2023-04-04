@@ -27,6 +27,8 @@ Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 Gameplay:
 
 1. Auf der StarMap verändert sich der Cursor, wenn man etwas anklicken kann.
+2. Gebäude und Module mit dem Ziel überarbeitet, es insgesamt etwas "runder" zu machen.
+3. Der TechTree folgt nun einem levelbasierten Konzept. Das jeweils nächste Gebäudelevel muss frei geforscht werden.
 
 ----------------- Bugs fixed -----------
 
@@ -34,20 +36,14 @@ Gameplay:
 
 ----------------- next steps -----------
 
-todo. research tree per svg malen
-
-todo. schiffstypen nachbauen und daraus die Werte ableiten um Sinnnhaftigkeit zu prüfen
-todo. gebäude redaktionell überarbeiten
-
-todo. interaktive karte als iframe bereitstellen, zentrierung auf namen
-
+- interaktive karte als iframe bereitstellen, zentrierung auf namen
 - request im frontend mit parametern z.B. primary highlighted system, secondary highlighted systems, draggable / scrollable, custom text fields (where to place), system names on
   hover or always on
+- Sternenkarte beim Download der Koordinaten
+
+todo. schiffstypen nachbauen und daraus die Werte ableiten, um Sinnhaftigkeit zu prüfen
 
 todo. ressourcen- bzw worker anzeige im ship fitting überdenken
-
-todo. changelog mit highlight auf versions-button
-todo. change table names to use derby for useful tests?
 
 - look & feel wie in büchern
 - emission spectra als gimmick
@@ -80,7 +76,6 @@ todo. kein alter Menüpunkt mehr ausgewählt wenn man sich wieder einloggt
 todo. Exception per mail an webmaster
 todo. Userliste
 todo. restart backend
-todo. StarMap beim Download der Koordinaten?
 
 todo. combat aufhübschen and more infos
 
@@ -101,6 +96,8 @@ todo. spinner abbrechen
 todo. wormholes (see mapdata.js file)
 
 todo. fleets in motion needs nav point icon
+
+todo. diagramme mit apache echart einbauen, z.B. in Flotten Anzahl nach Klasse o.ä.
 
 todo. population balancing broken
 

@@ -46,6 +46,11 @@ public class HasNamedTechLevel extends AbstractEntityKey {
     }
 
     @Nonnull
+    public NamedTechLevel getNamedTechLevel() {
+        return namedTechLevel;
+    }
+
+    @Nonnull
     public String getName(@Nonnull final String languageCode) {
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
 

@@ -27,7 +27,7 @@ public enum EMassMetric {
     final int digitCount;
 
     /**
-     * The amount of decimal places which represents 100 000 km.
+     * The amount of decimal places which represents 1 kg.
      */
     final int scale;
 

@@ -40,4 +40,12 @@ public class CustomBuildingRepositoryImpl implements CustomBuildingRepository {
                 .getResultList();
 
     }
+
+    @Nonnull
+    @Override
+    public List<Building> findAllByUser(final int idUser) {
+        return em.createNamedQuery("Building.getAllByResearches", Building.class)
+                .setParameter("idUser", idUser)
+                .getResultList();
+    }
 }
