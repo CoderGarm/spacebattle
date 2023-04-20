@@ -30,16 +30,19 @@ Gameplay:
 2. Gebäude und Module mit dem Ziel überarbeitet, es insgesamt etwas "runder" zu machen.
 3. Der TechTree folgt nun einem levelbasierten Konzept. Das jeweils nächste Gebäudelevel muss frei geforscht werden.
 
+Diverses:
+
+1. Es gibt eine interaktive Karte als IFrame, die über https://www.battleforhonor.de/external-star-map-manager oder über das Burger-Menü erreicht werden kann.  
+   Über den Manager kann man Kartenausschnitte erzeugen und per URL bookmarken.  
+   Es wird auch ein IFrame angeboten, dass man auf anderen Webseiten einbinden kann.
+2. Ein Radien-Tool ermöglicht es, die groben Koordinaten von unbekannt gelegenen Systemen herauszufinden.    
+   Dabei sei erwähnt, dass die Entfernung in der Romanreihe alle mit sehr viel kreativer Freiheit verwendet werden.
+
 ----------------- Bugs fixed -----------
 
 1. Der Bau-Button in der Werft war fälschlicherweise disabled.
 
 ----------------- next steps -----------
-
-- interaktive karte als iframe bereitstellen, zentrierung auf namen
-- request im frontend mit parametern z.B. primary highlighted system, secondary highlighted systems, draggable / scrollable, custom text fields (where to place), system names on
-  hover or always on
-- Sternenkarte beim Download der Koordinaten
 
 todo. schiffstypen nachbauen und daraus die Werte ableiten, um Sinnhaftigkeit zu prüfen
 

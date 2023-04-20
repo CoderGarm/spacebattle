@@ -51,6 +51,7 @@ import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -995,12 +996,24 @@ public class MasterOfTheUniverseService {
     }
 
     public static class Coords {
+
         @JsonProperty
-        int x;
+        @Schema(required = true)
+        private final int x;
+
         @JsonProperty
-        int y;
+        @Schema(required = true)
+        private final int y;
+
         @JsonProperty
-        String name;
+        @Schema(required = true)
+        private final String name;
+
+        /*
+        @Nonnull
+        @Schema(required = true, description = "The stellar class of the star of this system.")
+        private final de.yuga.spacebattle.rest.dto.enums.EStarClassType starClassType= new de.yuga.spacebattle.rest.dto.enums.EStarClassType(EStarClassType.CLASS_G3);
+        */
 
         /**
          * Reads the cartesian coordinates and flips the y-axis in order to display the coords directly to the screen.
