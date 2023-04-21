@@ -44,12 +44,6 @@ Diverses:
 
 ----------------- next steps -----------
 
-todo. schiffstypen nachbauen und daraus die Werte ableiten, um Sinnhaftigkeit zu prüfen
-
-todo. ressourcen- bzw worker anzeige im ship fitting überdenken
-
-- look & feel wie in büchern
-- emission spectra als gimmick
 
 Thema: NPC, Handel und Missionen
 
@@ -75,10 +69,14 @@ todo. im profil opt-in ob man infos zur neuen season möchte
 8. Änderungen in der Spielmechanik, z.B. dass die Leistung des Antriebs im Verhältnis zur Schiffsmasse steht -> erneutes Rebalancing der Module
 9. mich endlich mal um die "corporate identity" kümmern, also eigene Icons, Symbole, Benennungen usw erzeugen
 
+todo. schiffstypen nachbauen und daraus die Werte ableiten, um Sinnhaftigkeit zu prüfen
 todo. kein alter Menüpunkt mehr ausgewählt wenn man sich wieder einloggt
 todo. Exception per mail an webmaster
 todo. Userliste
 todo. restart backend
+
+- look & feel wie in büchern
+- emission spectra als gimmick
 
 todo. combat aufhübschen and more infos
 

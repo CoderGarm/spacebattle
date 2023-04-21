@@ -1,6 +1,8 @@
 package de.yuga.spacebattle.rest.api.account;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.account.UserPoints;
+import de.yuga.spacebattle.backend.services.account.UserPointsService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -40,13 +42,15 @@ public class UserApi {
     private final UserService service;
 
     @Nonnull
+    private final UserPointsService userPointsService;
+
+    @Nonnull
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     @Autowired
-    public UserApi(@Nonnull final UserService userService) {
-        Preconditions.checkNotNull(userService, "userService shouldn't be null!");
-
-        this.service = userService;
+    public UserApi(@Nonnull final UserService userService, final UserPointsService userPointsService) {
+        this.service = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
+        this.userPointsService = Preconditions.checkNotNull(userPointsService, "userPointsService must not be empty");
     }
 
     @GetMapping
@@ -62,6 +66,23 @@ public class UserApi {
             }
     )
     public ResponseEntity<?> findAll() {
+        return ResponseEntity.ok(service.findAll().stream().map(UserJson::new).collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = "/points/{idUser}")
+    @Operation(summary = "Get the list of users", operationId = "getUsersPoints",
+            description = "Get the list of users registered in the system",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = UserJson.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getUsersPoints(@PathVariable("idUser") final int idUser) {
+        final UserPoints points = userPointsService.getPoints(idUser);
         return ResponseEntity.ok(service.findAll().stream().map(UserJson::new).collect(Collectors.toList()));
     }
 
