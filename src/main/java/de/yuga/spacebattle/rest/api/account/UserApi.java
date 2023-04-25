@@ -74,16 +74,14 @@ public class UserApi {
             description = "Get the list of users registered in the system",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = UserJson.class))
-                            )),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserPoints.class))),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getUsersPoints(@PathVariable("idUser") final int idUser) {
         final UserPoints points = userPointsService.getPoints(idUser);
-        return ResponseEntity.ok(service.findAll().stream().map(UserJson::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(points);
     }
 
     @DeleteMapping(value = "/{idUser}")

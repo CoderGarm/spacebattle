@@ -97,6 +97,14 @@ public class WarShip extends Operationable {
         return warshipHealthState;
     }
 
+    public boolean isActive() {
+        return warshipHealthState.isFightingCapable();
+    }
+
+    public boolean isInactive() {
+        return !warshipHealthState.isFightingCapable();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

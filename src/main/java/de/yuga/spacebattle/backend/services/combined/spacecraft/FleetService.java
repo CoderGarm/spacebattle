@@ -268,6 +268,13 @@ public class FleetService {
     }
 
     @Nonnull
+    public List<Fleet> findAllFleetsByUser(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+
+        return fleetRepository.findAllFleetsBy(user.getId());
+    }
+
+    @Nonnull
     public List<Fleet> findAllFleetsByUser(final int idUser) {
         return fleetRepository.findAllFleetsBy(idUser);
     }

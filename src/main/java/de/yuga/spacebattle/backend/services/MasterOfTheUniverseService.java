@@ -228,7 +228,8 @@ public class MasterOfTheUniverseService {
 
         //noinspection OptionalGetWithoutIsPresent
         final User flashkid = userService.findByUsername(FLASHKID).get().getUser();
-        final User pirate = userService.createUser(DEFEATED_OPPONENT, "12457aA!", "mail3", EWebUserRole.USER);
+        //noinspection OptionalGetWithoutIsPresent
+        final User pirate = userService.findByUsername(DEFEATED_OPPONENT).get().getUser();
         LOGGER.info("Users created");
 
         final Alliance a1 = allianceService.createAlliance("Argonauten", "A", flashkid);

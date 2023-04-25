@@ -28,7 +28,12 @@ Gameplay:
 
 1. Auf der StarMap verändert sich der Cursor, wenn man etwas anklicken kann.
 2. Gebäude und Module mit dem Ziel überarbeitet, es insgesamt etwas "runder" zu machen.
+
+- Es gibt jetzt z.B. Fracht- und Passagiermodule.
+- Die Supportmodule wurden zunächst entfernt, kommen aber wieder.
+
 3. Der TechTree folgt nun einem levelbasierten Konzept. Das jeweils nächste Gebäudelevel muss frei geforscht werden.
+4. Es gibt eine Übersicht aller Imperien inklusive eines einfachen Punktesystems.
 
 Diverses:
 
@@ -41,19 +46,23 @@ Diverses:
 ----------------- Bugs fixed -----------
 
 1. Der Bau-Button in der Werft war fälschlicherweise disabled.
+2. Im Login-Feld wurde das Passwort aufgedeckt, wenn man Enter drückt.
 
 ----------------- next steps -----------
 
-
 Thema: NPC, Handel und Missionen
 
-todo. Bestenliste mit Punkten pro Leistungsfeld  
+done. Bestenliste mit Punkten pro Leistungsfeld  
 todo. Marktplatz und NPC-Handelssystem  
 todo. interne Sektoraufteilung der Map nach Entfernung um wirtschaftliche Leistungszentren  
 todo. NPC-Konzept für Systeme und systemfreie NPC (Piraten, fliegende Händler ...)  
 todo. Konzept für Missionen und NPC-Missionen
 
-todo. im profil opt-in ob man infos zur neuen season möchte
+todo. radius tool fixen
+todo. im profil opt-in ob man infos zur neuen season möchte (inkl "send changelog button" für spiele-admins aus Forum)
+todo. implement freight and passenger modules, check "unload the own crew"-problem
+todo. balance kosten vs nutzen bei modulen
+todo. schiffstypen nachbauen und daraus die Werte ableiten, um Sinnhaftigkeit zu prüfen
 
 ----------------- bugs -----------------
 
@@ -69,7 +78,6 @@ todo. im profil opt-in ob man infos zur neuen season möchte
 8. Änderungen in der Spielmechanik, z.B. dass die Leistung des Antriebs im Verhältnis zur Schiffsmasse steht -> erneutes Rebalancing der Module
 9. mich endlich mal um die "corporate identity" kümmern, also eigene Icons, Symbole, Benennungen usw erzeugen
 
-todo. schiffstypen nachbauen und daraus die Werte ableiten, um Sinnhaftigkeit zu prüfen
 todo. kein alter Menüpunkt mehr ausgewählt wenn man sich wieder einloggt
 todo. Exception per mail an webmaster
 todo. Userliste

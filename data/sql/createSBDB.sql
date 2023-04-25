@@ -1563,7 +1563,8 @@
        foreign key (idCosts) 
        references resourceDeposit (idResourceDeposit);
 
-INSERT INTO user (createdAt, email, gameUserRoles, password, userRole, username) VALUES ('2022-08-24 20:29:15.693', 'mail', 'FORUM_WRITE|WIKI_ADMIN|FORUM_READ|ALLIANCE_ADMIN', '49675c186a6c1b1d10cb800e2792ebabd6abd8597bcef2fcaa99bfc813a6f1868b7dc91812ac66718c4fefd59daafa6a658901b7356b3b65fa5528419a93a7a4', 'ADMIN', 'Flashkid');
+INSERT INTO user (username, email, gameUserRoles, userRole, password, createdAt) VALUES ('Flashkid', 'webmaster@battleforhonor.de', 'FORUM_WRITE|WIKI_ADMIN|FORUM_READ|ALLIANCE_ADMIN', 'ADMIN', '49675c186a6c1b1d10cb800e2792ebabd6abd8597bcef2fcaa99bfc813a6f1868b7dc91812ac66718c4fefd59daafa6a658901b7356b3b65fa5528419a93a7a4', now());
+INSERT INTO user (username, email,  createdAt, password) VALUES ('Defeated Opponent', 'mail', now(), '49675c186a6c1b1d10cb800e2792ebabd6abd8597bcef2fcaa99bfc813a6f1868b7dc91812ac66718c4fefd59daafa6a658901b7356b3b65fa5528419a93a7a4');
 
 
 INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('en', 'Welcome to the battlefield', 'WELCOME_MESSAGE', null);

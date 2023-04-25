@@ -46,6 +46,14 @@ public class ResearchService {
     }
 
     @Nonnull
+    public Set<ResearchLevel> getResearchesForUser(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+
+        final Set<ResearchLevel> allForUser = levelRepository.getAllForUser(user.getId());
+        return Objects.requireNonNullElse(allForUser, new HashSet<>());
+    }
+
+    @Nonnull
     public Set<ResearchLevel> getResearchesForUser(final int idUser) {
         final Set<ResearchLevel> allForUser = levelRepository.getAllForUser(idUser);
         return Objects.requireNonNullElse(allForUser, new HashSet<>());

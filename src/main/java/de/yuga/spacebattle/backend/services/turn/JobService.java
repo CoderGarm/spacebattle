@@ -336,6 +336,12 @@ public class JobService {
     }
 
     @Nonnull
+    public List<Job> findAllJobsForUser(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+        return jobRepository.findAllJobsForUser(user.getId());
+    }
+
+    @Nonnull
     public List<Job> findAllJobsForUser(final int idUser) {
         return jobRepository.findAllJobsForUser(idUser);
     }
