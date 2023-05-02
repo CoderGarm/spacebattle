@@ -25,7 +25,7 @@ public class CustomForumMessageRepositoryImpl implements CustomForumMessageRepos
 
     @Nonnull
     @Override
-    public List<ForumMessage> findReportsWithUserWithPaging(final int idForumThread, final int page, final int size) {
+    public List<ForumMessage> findMessagesWithPaging(final int idForumThread, final int page, final int size) {
         final int startPosition = page * size;
         final int endPosition = page * size + size;
         return em.createNamedQuery("ForumMessage.findPagedMessages", ForumMessage.class)

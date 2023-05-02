@@ -12,36 +12,42 @@ Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
    - Es wird nicht mehr zwischen Breitseiten- und Jagdwaffen unterschieden - ein Waffensystem ist universell benutzbar.
    - Eine Breitseitenwaffe wird immer zweimal gefittet - eine pro Breitseite.
 3. Die Schiffshüllen wurden entfernt.  
-   Ganz nach dem Rollenverständnis der RMN folgen Schiffstypen einer Funktion und nicht einer Klassifizierung nach Masse.
+   Ganz nach dem Rollenverständnis der RMN folgen Schiffstypen einer Funktion und nicht einer Klassifizierung nach
+   Masse.
    - Die einzelnen Module sind weiterhin einer Klasse als Sortier- und Vergleichskriterium zugeordnet.
    - Das Fitting einer Schiffsklasse entscheidet darüber, wie viel Tonnage das Schiff im Ganzen besitzt.  
-     Das beinhaltet den physikalischen Zwang, dass in den Bug- und Hecksektionen nur ein gewisser Prozentsatz des Schiffsvolumens und der Schiffsmasse zur Verfügung steht.
+     Das beinhaltet den physikalischen Zwang, dass in den Bug- und Hecksektionen nur ein gewisser Prozentsatz des
+     Schiffsvolumens und der Schiffsmasse zur Verfügung steht.
       - https://honor-harrington.fandom.com/de/wiki/Hammerkopf
 4. Berechnung der Tonnage
    - Siehe oben, die Gesamtmasse eines Schiffes definiert sich über die Anforderungen des Impellerantriebs.  
-     Damit ergibt sich spielerisch das Konzept der toten Tonnage. Massetechnisch asymmetrisch gefittete Hammerköpfe benötigen eine identische Masseverteilung, dass bedeutet,
-     dass der "leere" Hammerkopf mit Superstruktur aufgefüllt wird, um den physikalischen Anforderungen zu entsprechen.  
-     Analoges gilt für schwere Hammerköpfe und eine gewissermaßen leere Breitseite. Dann muss die Breitseite mit bzw. der Modulraum des Schiffes mit inaktiver Masse gefüllt
+     Damit ergibt sich spielerisch das Konzept der toten Tonnage. Massetechnisch asymmetrisch gefittete Hammerköpfe
+     benötigen eine identische Masseverteilung, dass bedeutet,
+     dass der "leere" Hammerkopf mit Superstruktur aufgefüllt wird, um den physikalischen Anforderungen zu
+     entsprechen.  
+     Analoges gilt für schwere Hammerköpfe und eine gewissermaßen leere Breitseite. Dann muss die Breitseite mit bzw.
+     der Modulraum des Schiffes mit inaktiver Masse gefüllt
      werden.
 
 Gameplay:
 
 1. Auf der StarMap verändert sich der Cursor, wenn man etwas anklicken kann.
 2. Gebäude und Module mit dem Ziel überarbeitet, es insgesamt etwas "runder" zu machen.
-
-- Es gibt jetzt z.B. Fracht- und Passagiermodule.
-- Die Supportmodule wurden zunächst entfernt, kommen aber wieder.
-
+   - Es gibt jetzt z.B. Fracht- und Passagiermodule.
+   - Die Supportmodule wurden zunächst entfernt, kommen aber wieder.
 3. Der TechTree folgt nun einem levelbasierten Konzept. Das jeweils nächste Gebäudelevel muss frei geforscht werden.
 4. Es gibt eine Übersicht aller Imperien inklusive eines einfachen Punktesystems.
 
 Diverses:
 
-1. Es gibt eine interaktive Karte als IFrame, die über https://www.battleforhonor.de/external-star-map-manager oder über das Burger-Menü erreicht werden kann.  
+1. Es gibt eine interaktive Karte als IFrame, die über https://www.battleforhonor.de/external-star-map-manager oder über
+   das Burger-Menü erreicht werden kann.  
    Über den Manager kann man Kartenausschnitte erzeugen und per URL bookmarken.  
    Es wird auch ein IFrame angeboten, dass man auf anderen Webseiten einbinden kann.
-2. Ein Radien-Tool ermöglicht es, die groben Koordinaten von unbekannt gelegenen Systemen herauszufinden.    
+2. Ein Radien-Tool ermöglicht es, die groben Koordinaten von unbekannt gelegenen Systemen herauszufinden.  
    Dabei sei erwähnt, dass die Entfernung in der Romanreihe alle mit sehr viel kreativer Freiheit verwendet werden.
+3. Im Profil kann man entscheiden, ob man Mails über neue Releases bekommen möchte (Opt-In) und man sieht den Status der
+   eigenen eMail-Adresse.
 
 ----------------- Bugs fixed -----------
 
@@ -59,7 +65,6 @@ todo. NPC-Konzept für Systeme und systemfreie NPC (Piraten, fliegende Händler 
 todo. Konzept für Missionen und NPC-Missionen
 
 todo. radius tool fixen
-todo. im profil opt-in ob man infos zur neuen season möchte (inkl "send changelog button" für spiele-admins aus Forum)
 todo. implement freight and passenger modules, check "unload the own crew"-problem
 todo. balance kosten vs nutzen bei modulen
 todo. schiffstypen nachbauen und daraus die Werte ableiten, um Sinnhaftigkeit zu prüfen
@@ -73,9 +78,11 @@ todo. schiffstypen nachbauen und daraus die Werte ableiten, um Sinnhaftigkeit zu
 3. Population balancing
 5. Das man Kolonisierungen planen kann
 6. Rework der Flottenbewegungen (nice to have)
-7. mich den spannenden Aufgaben widmen: ein NPC-System, Missionen, simulierte Handelsflotten, Piraten und sowas (multi-combat wäre wohl sehr sinnvoll -> Darstellung des Kampfes
+7. mich den spannenden Aufgaben widmen: ein NPC-System, Missionen, simulierte Handelsflotten, Piraten und sowas (
+   multi-combat wäre wohl sehr sinnvoll -> Darstellung des Kampfes
    muss erkennbaren Mehrwert bringen)
-8. Änderungen in der Spielmechanik, z.B. dass die Leistung des Antriebs im Verhältnis zur Schiffsmasse steht -> erneutes Rebalancing der Module
+8. Änderungen in der Spielmechanik, z.B. dass die Leistung des Antriebs im Verhältnis zur Schiffsmasse steht -> erneutes
+   Rebalancing der Module
 9. mich endlich mal um die "corporate identity" kümmern, also eigene Icons, Symbole, Benennungen usw erzeugen
 
 todo. kein alter Menüpunkt mehr ausgewählt wenn man sich wieder einloggt

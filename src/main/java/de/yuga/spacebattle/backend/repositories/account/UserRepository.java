@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public interface UserRepository extends CrudRepository<User, Integer>, CustomUserRepository {
 
@@ -24,4 +25,12 @@ public interface UserRepository extends CrudRepository<User, Integer>, CustomUse
     @Nullable
     @Query("SELECT u.gameUserRoles FROM User u WHERE u.id = :idUser")
     String findGameUserRoles(final int idUser);
+
+    @Nullable
+    @Query("SELECT u.email FROM User u " +
+            "WHERE u.userSetting.receiveChangelogInfos = true " +
+            "AND u.userSetting.isEMailVerified = true " +
+            "AND u.userSetting.noEMailWanted = false " +
+            "AND u.userSetting.isLoginForbidden = false")
+    Set<String> getEMailAddressesForReleaseRecipients();
 }

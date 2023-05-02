@@ -2,14 +2,16 @@ package de.yuga.spacebattle.backend.services.account;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.converter.EGameUserRolesConverter;
+import de.yuga.spacebattle.backend.dto.account.UserSettings;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.UserSetting;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import de.yuga.spacebattle.backend.repositories.account.UserRepository;
-import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import de.yuga.spacebattle.backend.repositories.account.UserSettingRepository;
 import de.yuga.spacebattle.rest.config.security.WebUserDetails;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,39 +27,14 @@ public class UserService {
     @Nonnull
     private final UserRepository userRepository;
 
-    @Nullable
-    private User login;
+    @Nonnull
+    private final UserSettingRepository userSettingRepository;
 
     @Autowired
-    public UserService(@Nonnull final UserRepository userRepository) {
-        Preconditions.checkNotNull(userRepository, "userRepository shouldn't be null!");
-
-        this.userRepository = userRepository;
-    }
-
-    /**
-     * Refreshes the logged in user;
-     *
-     * @return the re-fetched logged in user
-     */
-    @Nonnull
-    public User refresh() {
-        if (login == null) {
-            throw new NotifyWebUserException("you should be logged in, think about that.");
-        }
-        return find(login).orElse(login);
-    }
-
-    public void setLogin(@Nullable final User login) {
-        this.login = login;
-    }
-
-    @Nullable
-    public User login(@Nonnull final String username, @Nonnull final String password) {
-        Preconditions.checkNotNull(username, "username shouldn't be null!");
-        Preconditions.checkNotNull(password, "password shouldn't be null!");
-
-        return userRepository.login(username, password);
+    public UserService(@Nonnull final UserRepository userRepository,
+                       @Nonnull final UserSettingRepository userSettingRepository) {
+        this.userRepository = Preconditions.checkNotNull(userRepository, "userRepository shouldn't be null!");
+        this.userSettingRepository = Preconditions.checkNotNull(userSettingRepository, "userSettingRepository must not be empty");
     }
 
     @Nonnull
@@ -231,7 +208,7 @@ public class UserService {
     public void verifyEmail(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
-        user.setEMailVerified(true);
+        user.getUserSetting().setEMailVerified(true);
         save(user);
     }
 
@@ -241,5 +218,26 @@ public class UserService {
 
         user.setPassword(newPassword);
         save(user);
+    }
+
+    public void updateSettings(@Nonnull final UserSettings settings, final int idUser) {
+        Preconditions.checkNotNull(settings, "settings must not be empty");
+
+        final User user = find(idUser);
+        Preconditions.checkNotNull(user, "user must not be empty");
+
+        final UserSetting userSetting = user.getUserSetting();
+        userSetting.setReceiveChangelogInfos(settings.isReceiveChangelogInfos());
+        userSettingRepository.save(userSetting);
+    }
+
+    @Nonnull
+    public UserSetting getSettings(final int idUser) {
+        return Objects.requireNonNull(userSettingRepository.getForUser(idUser));
+    }
+
+    @Nonnull
+    public Set<String> findReleaseRecipients() {
+        return Objects.requireNonNullElse(userRepository.getEMailAddressesForReleaseRecipients(), new HashSet<>());
     }
 }

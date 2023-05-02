@@ -5,6 +5,7 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import de.yuga.spacebattle.backend.repositories.account.UserRepository;
+import de.yuga.spacebattle.backend.repositories.account.UserSettingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -23,11 +24,14 @@ public class UserServiceTest extends BaseTestCase {
     @Mock
     private UserRepository userRepositoryMock;
 
+    @Mock
+    private UserSettingRepository userSettingRepositoryMock;
+
     private UserService testObject;
 
     @BeforeEach
     public void beforeClass() {
-        testObject = new UserService(userRepositoryMock);
+        testObject = new UserService(userRepositoryMock, userSettingRepositoryMock);
     }
 
     @Test

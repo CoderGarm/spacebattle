@@ -12,7 +12,7 @@ public interface CustomForumMessageRepository {
     List<IdToId> findAllMessageIdsForThreadId(List<Integer> idForumThreads);
 
     @Nonnull
-    List<ForumMessage> findReportsWithUserWithPaging(int idForumThread, int page, int size);
+    List<ForumMessage> findMessagesWithPaging(int idForumThread, int page, int size);
 
     int countMessagesInThreadById(int idForumThread);
 }

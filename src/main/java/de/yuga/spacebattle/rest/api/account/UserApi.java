@@ -2,8 +2,11 @@ package de.yuga.spacebattle.rest.api.account;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.account.UserPoints;
+import de.yuga.spacebattle.backend.dto.account.UserSettings;
+import de.yuga.spacebattle.backend.entities.account.UserSetting;
 import de.yuga.spacebattle.backend.services.account.UserPointsService;
 import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
@@ -33,13 +36,13 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 @Tag(name = "UserApi")
 @RolesAllowed("USER")
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + UserApi.ENDPOINT + "/")
-public class UserApi {
+public class UserApi extends BaseApi {
 
     @Nonnull
     public static final String ENDPOINT = "user";
 
     @Nonnull
-    private final UserService service;
+    private final UserService userService;
 
     @Nonnull
     private final UserPointsService userPointsService;
@@ -49,7 +52,7 @@ public class UserApi {
 
     @Autowired
     public UserApi(@Nonnull final UserService userService, final UserPointsService userPointsService) {
-        this.service = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
+        this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.userPointsService = Preconditions.checkNotNull(userPointsService, "userPointsService must not be empty");
     }
 
@@ -66,7 +69,7 @@ public class UserApi {
             }
     )
     public ResponseEntity<?> findAll() {
-        return ResponseEntity.ok(service.findAll().stream().map(UserJson::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(userService.findAll().stream().map(UserJson::new).collect(Collectors.toList()));
     }
 
     @GetMapping(value = "/points/{idUser}")
@@ -84,6 +87,38 @@ public class UserApi {
         return ResponseEntity.ok(points);
     }
 
+    @GetMapping(value = "/settings")
+    @Operation(summary = "Changes settings for the user.", operationId = "getSettings",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserSettings.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getSettings() {
+        final UserSetting userSetting = this.userService.getSettings(getIdUser());
+
+        return ResponseEntity.ok(new UserSettings(userSetting));
+    }
+
+    @PutMapping(value = "/settings", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Changes settings for the user.", operationId = "changeSettings",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> changeSettings(@RequestBody @Nonnull final UserSettings settings) {
+        PreconditionWebHelper.checkNotNull(settings, "settings must not be empty");
+
+        this.userService.updateSettings(settings, getIdUser());
+
+        return ResponseEntity.ok(true);
+    }
+
     @DeleteMapping(value = "/{idUser}")
     @Operation(summary = "Deletes a single user", operationId = "deleteUser",
             description = "Deletes a user which is not any longer registered in the system",
@@ -98,7 +133,7 @@ public class UserApi {
         PreconditionWebHelper.checkNotNull(idUser, "The idUser shouldn't be null!");
         PreconditionWebHelper.checkArgument(idUser < -1 || idUser == 0, "The idUser must be valid");
 
-        boolean delete = service.delete(idUser);
+        boolean delete = userService.delete(idUser);
         if (!delete) {
             throw new NotifyWebUserException("User wasn't deleted for idUser '" + idUser + "'.");
         }
@@ -120,6 +155,6 @@ public class UserApi {
         if (StringUtils.isBlank(username)) {
             return ResponseEntity.ok().build();
         }
-        return ResponseEntity.ok(service.findLikeUsername(username).stream().map(UserJson::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(userService.findLikeUsername(username).stream().map(UserJson::new).collect(Collectors.toList()));
     }
 }

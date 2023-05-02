@@ -13,6 +13,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import java.util.Set;
 
 @Service
 public class MailService {
@@ -30,7 +31,7 @@ public class MailService {
     public void sendMailVerificationMessage(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
-        if (user.isNoEMailWanted()) {
+        if (user.getUserSetting().isNoEMailWanted()) {
             LOGGER.info("eMail verification will not processed for '" + user.getUsername() + "'");
             return;
         }
@@ -42,7 +43,7 @@ public class MailService {
     public void sendMailChangePasswordMessage(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
-        if (user.isNoEMailWanted() || !user.isEMailVerified() || user.isLoginForbidden()) {
+        if (user.getUserSetting().isNoEMailWanted() || !user.getUserSetting().isEMailVerified() || user.getUserSetting().isLoginForbidden()) {
             LOGGER.info("Password change eMail will not processed for '" + user.getUsername() + "'");
             return;
         }
@@ -140,6 +141,37 @@ public class MailService {
         message.setText(ExceptionUtils.getStackTrace(ex));
 
         return message;
+    }
+
+    @Nonnull
+    private SimpleMailMessage templateMailRelease(@Nonnull final String title,
+                                                  @Nonnull final String description,
+                                                  @Nonnull final String text,
+                                                  @Nonnull final Set<String> recipients) {
+        Preconditions.checkNotNull(title, "title must not be empty");
+        Preconditions.checkNotNull(description, "description must not be empty");
+        Preconditions.checkNotNull(text, "text must not be empty");
+        Preconditions.checkNotNull(recipients, "recipients must not be empty");
+
+        final SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("noreply@battleforhonor.de");
+        message.setBcc(recipients.toArray(String[]::new));
+        message.setSubject("Battle for Honor Release - " + title);
+        message.setText(text);
+        return message;
+    }
+
+    public void sendRelease(@Nonnull final String title,
+                            @Nonnull final String description,
+                            @Nonnull final String message,
+                            @Nonnull final Set<String> recipients) {
+        Preconditions.checkNotNull(title, "title must not be empty");
+        Preconditions.checkNotNull(description, "description must not be empty");
+        Preconditions.checkNotNull(message, "message must not be empty");
+        Preconditions.checkNotNull(recipients, "recipients must not be empty");
+
+        final SimpleMailMessage mailException = templateMailRelease(title, description, message, recipients);
+        emailSender.send(mailException);
     }
 
     public static class VerificationParameter {

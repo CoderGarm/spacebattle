@@ -442,4 +442,23 @@ public class ForumApi extends BaseApi {
         forumService.markMessageRead(idForum, idForumThread, idForumMessage, idUser);
         return ResponseEntity.ok(true);
     }
+
+    @AllowedRoles(roles = EGameUserRole.FORUM_WRITE)
+    @RolesAllowed("ADMIN")
+    @PutMapping("/distributeRelease/{idForumThread}")
+    @Operation(summary = "Creates a chat message", operationId = "distributeRelease",
+            description = "Creates a chat message",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> distributeRelease(@PathVariable("idForumThread") final int idForumThread) {
+
+        final Set<String> recipients = userService.findReleaseRecipients();
+        forumService.sendRelease(recipients, idForumThread);
+        return ResponseEntity.ok(true);
+    }
 }

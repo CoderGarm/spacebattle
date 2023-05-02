@@ -30,22 +30,6 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
 
     @Nullable
     @Override
-    public User login(@Nonnull final String username, @Nonnull final String password) {
-        Preconditions.checkNotNull(username, "username shouldn't be null!");
-        Preconditions.checkNotNull(password, "password shouldn't be null!");
-
-        try {
-            return em.createNamedQuery("User.login", User.class)
-                    .setParameter("username", username)
-                    .setParameter("password", password)
-                    .getSingleResult();
-        } catch (final NoResultException e) {
-            return null;
-        }
-    }
-
-    @Nullable
-    @Override
     public User findByUsernameAndEmail(@Nonnull final String username, @Nonnull final String email) {
         Preconditions.checkNotNull(username, "username shouldn't be null!");
         Preconditions.checkNotNull(email, "email shouldn't be null!");

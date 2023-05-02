@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
         @NamedQuery(name = "User.getAll", query = "SELECT u FROM User u WHERE u.id != 2"),
         @NamedQuery(name = "User.findByLikeUsername", query = "SELECT u FROM User u WHERE UPPER(u.username) LIKE UPPER(:username)"),
         @NamedQuery(name = "User.findByUsernameAndEmail", query = "SELECT u FROM User u WHERE UPPER(u.username) = UPPER(:username) AND UPPER(u.email) = UPPER(:email)"),
-        @NamedQuery(name = "User.login", query = "SELECT u FROM User u LEFT JOIN FETCH u.ownedPlanets p LEFT JOIN FETCH u.alliance a LEFT JOIN FETCH u.researches r WHERE UPPER(u.username) = :username AND UPPER(u.password) = UPPER(:password)"),
         @NamedQuery(name = "User.getWithResearchesAndJobs", query = "SELECT u FROM User u LEFT JOIN FETCH u.researches r LEFT JOIN FETCH u.jobs j WHERE u.id = :idUser"),
         @NamedQuery(name = "User.getWithKnownStarSystems", query = "SELECT u FROM User u LEFT JOIN FETCH u.knownStarSystems r WHERE u.id = :idUser"),
         @NamedQuery(name = "User.getColonizations", query = "SELECT u FROM User u LEFT JOIN FETCH u.colonizations r WHERE u = :user"),
@@ -122,7 +121,6 @@ public class User extends AbstractEntityKey {
      * Compare:<br>
      * - {@link ColonizationService#startColonizingPlanet(User, Planet)}<br>
      * - {@link PlanetService#createPlanet(String, StarSystem, Orbit)}<br>
-     * - {@link PlanetService#createPlanet(String, StarSystem, Integer, Integer)}
      * </p>
      */
     @Nonnull
@@ -137,24 +135,11 @@ public class User extends AbstractEntityKey {
     @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, mappedBy = "user")
     private final Set<Colonization> colonizations = new HashSet<>();
 
-    /**
-     * Marks if the user must not log in.
-     */
-    @Column(columnDefinition = "boolean not null default false")
-    private final boolean isLoginForbidden = false;
-
-
-    /**
-     * Marks if the user don't want to provide an eMail.
-     */
-    @Column(columnDefinition = "boolean not null default false")
-    private boolean noEMailWanted = false;
-
-    /**
-     * Marks if the user has already verified it's eMail.
-     */
-    @Column(columnDefinition = "boolean not null default false")
-    private boolean isEMailVerified = false;
+    @Nonnull
+    @NotNull
+    @JoinColumn(name = "idUser")
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    private UserSetting userSetting;
 
     @Nonnull
     @NotNull
@@ -177,7 +162,7 @@ public class User extends AbstractEntityKey {
         this.username = username;
         this.password = password;
         this.email = email;
-        this.noEMailWanted = noEMailWanted;
+        this.userSetting = new UserSetting(this, noEMailWanted);
         this.userRole = role;
         if (gameUserRoles != null) {
             this.gameUserRoles.addAll(Arrays.stream(gameUserRoles).collect(Collectors.toSet()));
@@ -280,25 +265,14 @@ public class User extends AbstractEntityKey {
         return knownStarSystems;
     }
 
-    public boolean isLoginForbidden() {
-        return isLoginForbidden;
-    }
-
-    public boolean isNoEMailWanted() {
-        return noEMailWanted;
-    }
-
-    public boolean isEMailVerified() {
-        return isEMailVerified;
-    }
-
-    public void setEMailVerified(final boolean EMailVerified) {
-        isEMailVerified = EMailVerified;
-    }
-
     @Nonnull
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    @Nonnull
+    public UserSetting getUserSetting() {
+        return userSetting;
     }
 
     @Override

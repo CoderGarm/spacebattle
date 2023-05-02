@@ -167,7 +167,7 @@ public class AuthApi {
 
             final WebUserDetails webUser = (WebUserDetails) authenticate.getPrincipal();
             final User user = webUser.getUser();
-            if (user.isLoginForbidden()) {
+            if (user.getUserSetting().isLoginForbidden()) {
                 throw new NotifyWebUserException("Your login is prohibited.");
             }
             final String accessToken = jwtTokenUtil.generateAccessToken(user);

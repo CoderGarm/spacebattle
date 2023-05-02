@@ -12,13 +12,13 @@ import de.yuga.spacebattle.backend.repositories.account.ForumMessageReadReposito
 import de.yuga.spacebattle.backend.repositories.account.ForumMessageRepository;
 import de.yuga.spacebattle.backend.repositories.account.ForumRepository;
 import de.yuga.spacebattle.backend.repositories.account.ForumThreadRepository;
+import de.yuga.spacebattle.backend.services.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -37,20 +37,20 @@ public class ForumService {
     @Nonnull
     private final ForumMessageReadRepository messageReadRepository;
 
+    @Nonnull
+    private final MailService mailService;
+
     @Autowired
     public ForumService(@Nonnull final ForumRepository forumRepository,
                         @Nonnull final ForumThreadRepository forumThreadRepository,
                         @Nonnull final ForumMessageRepository forumMessageRepository,
-                        @Nonnull final ForumMessageReadRepository messageReadRepository) {
-        Preconditions.checkNotNull(forumRepository, "forumRepository shouldn't be null!");
-        Preconditions.checkNotNull(forumThreadRepository, "forumThreadRepository shouldn't be null!");
-        Preconditions.checkNotNull(forumMessageRepository, "forumMessageRepository shouldn't be null!");
-        Preconditions.checkNotNull(messageReadRepository, "messageReadRepository shouldn't be null!");
-
-        this.forumRepository = forumRepository;
-        this.forumThreadRepository = forumThreadRepository;
-        this.forumMessageRepository = forumMessageRepository;
-        this.messageReadRepository = messageReadRepository;
+                        @Nonnull final ForumMessageReadRepository messageReadRepository,
+                        @Nonnull final MailService mailService) {
+        this.forumRepository = Preconditions.checkNotNull(forumRepository, "forumRepository shouldn't be null!");
+        this.forumThreadRepository = Preconditions.checkNotNull(forumThreadRepository, "forumThreadRepository shouldn't be null!");
+        this.forumMessageRepository = Preconditions.checkNotNull(forumMessageRepository, "forumMessageRepository shouldn't be null!");
+        this.messageReadRepository = Preconditions.checkNotNull(messageReadRepository, "messageReadRepository shouldn't be null!");
+        this.mailService = Preconditions.checkNotNull(mailService, "mailService must not be empty");
     }
 
     @Nonnull
@@ -128,7 +128,7 @@ public class ForumService {
 
     @Nonnull
     public List<ForumMessage> findMessagesInForumThread(final int idForumThread, final int page, final int size) {
-        return forumMessageRepository.findReportsWithUserWithPaging(idForumThread, page, size);
+        return forumMessageRepository.findMessagesWithPaging(idForumThread, page, size);
     }
 
     @Nonnull
@@ -220,5 +220,19 @@ public class ForumService {
     @Nullable
     public ForumMessage findMessage(final int idForumMessage) {
         return forumMessageRepository.findById(idForumMessage).orElse(null);
+    }
+
+    public void sendRelease(Set<String> recipients, int idForumThread) {
+        final ForumThread thread = forumThreadRepository.findById(idForumThread).orElse(null);
+        if (thread == null) {
+            return;
+        }
+
+        final String title = thread.getTitle();
+        final String description = thread.getDescription();
+        final List<ForumMessage> messages = Objects.requireNonNullElse(findMessagesInForumThread(idForumThread, 0, 1), new ArrayList<>());
+        if (!messages.isEmpty()) {
+            mailService.sendRelease(title, description, messages.get(0).getMessage(), recipients);
+        }
     }
 }

@@ -14,9 +14,6 @@ public interface CustomUserRepository {
     @Nonnull
     List<User> findAllUsers();
 
-    @Nullable
-    User login(@Nonnull String username, @Nonnull String password);
-
     /**
      * Check if a user with this username <b>OR</b> this email address already exists.
      *
