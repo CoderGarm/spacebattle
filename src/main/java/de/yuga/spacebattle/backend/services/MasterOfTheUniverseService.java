@@ -708,8 +708,9 @@ public class MasterOfTheUniverseService {
         researchService.save(research);
 
         final List<PassiveModule> result = new ArrayList<>();
-        PassiveModule passiveModule =
-                /*moduleService.createPassiveModule("Armor increasement Mk I", "Increases the armor value.", research,
+
+        /*
+        PassiveModule passiveModule = moduleService.createPassiveModule("Armor increasement Mk I", "Increases the armor value.", research,
                 ESupportType.ARMOR, ECalculationType.ADD, 10, 10, EShipClassType.CL, ETechLevel.TECH_I, CrewRequirement.of(XS_CREW));
         amendTranslation(passiveModule, "Verstärkung der Panzerung Mk I", "Verstärkt die Panzerung.");
         result.add(moduleService.save(passiveModule));
@@ -727,15 +728,36 @@ public class MasterOfTheUniverseService {
         passiveModule = moduleService.createPassiveModule("Electronic warfare increasement Mk I", "Increases the electronic warfare value.", research,
                 ESupportType.ELECTRONIC_WARFARE, ECalculationType.ADD, 2, 5, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(S_CREW));
         amendTranslation(passiveModule, "Verstärkung der Eloka Mk I", "Verstärkt die Eloka.");
-        result.add(moduleService.save(passiveModule));*/
+        result.add(moduleService.save(passiveModule));
+        */
 
-                passiveModule = moduleService.createPassiveModule("Freight module", "A simple cargo hold.", research,
-                        ESupportType.FREIGHT, ECalculationType.ADD, 750, 500, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(S_CREW));
+        PassiveModule passiveModule = moduleService.createPassiveModule("Freight module", "A simple cargo hold.", research,
+                ESupportType.FREIGHT, ECalculationType.ADD, 750, 500, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(XXS_CREW));
+        amendTranslation(passiveModule, "Frachtmodul", "Ein einfaches Frachtmodul.");
+        result.add(moduleService.save(passiveModule));
+
+        passiveModule = moduleService.createPassiveModule("Freight module", "A simple cargo hold.", research,
+                ESupportType.FREIGHT, ECalculationType.ADD, 2000, 1500, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(XS_CREW));
+        amendTranslation(passiveModule, "Frachtmodul", "Ein einfaches Frachtmodul.");
+        result.add(moduleService.save(passiveModule));
+
+        passiveModule = moduleService.createPassiveModule("Freight module", "A simple cargo hold.", research,
+                ESupportType.FREIGHT, ECalculationType.ADD, 22000, 15000, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(S_CREW));
         amendTranslation(passiveModule, "Frachtmodul", "Ein einfaches Frachtmodul.");
         result.add(moduleService.save(passiveModule));
 
         passiveModule = moduleService.createPassiveModule("Passenger module", "A simple passenger module.", research,
-                ESupportType.PASSENGER, ECalculationType.ADD, 300, 25, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(S_CREW));
+                ESupportType.PASSENGER, ECalculationType.ADD, 300, 25, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(XXS_CREW));
+        amendTranslation(passiveModule, "Passagiermodul", "Ein einfaches Passagiermodul.");
+        result.add(moduleService.save(passiveModule));
+
+        passiveModule = moduleService.createPassiveModule("Passenger module", "A simple passenger module.", research,
+                ESupportType.PASSENGER, ECalculationType.ADD, 500, 50, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(XS_CREW));
+        amendTranslation(passiveModule, "Passagiermodul", "Ein einfaches Passagiermodul.");
+        result.add(moduleService.save(passiveModule));
+
+        passiveModule = moduleService.createPassiveModule("Passenger module", "A simple passenger module.", research,
+                ESupportType.PASSENGER, ECalculationType.ADD, 1100, 125, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(S_CREW));
         amendTranslation(passiveModule, "Passagiermodul", "Ein einfaches Passagiermodul.");
         result.add(moduleService.save(passiveModule));
         return result;
