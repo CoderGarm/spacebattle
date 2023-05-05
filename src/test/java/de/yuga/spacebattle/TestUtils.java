@@ -158,19 +158,21 @@ public final class TestUtils {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void writeString(final String dir, final String fileName, final String string) {
+        final String name = dir + fileName.replaceAll("\\s", "-");
         try {
             new File(dir).mkdirs();
-            final File file = new File(dir + fileName.replaceAll("\\s", "-"));
+            final File file = new File(name);
             if (file.exists()) {
                 file.delete();
             } else {
                 file.createNewFile();
             }
-            final FileOutputStream outputStream = new FileOutputStream(dir + fileName.replaceAll("\\s", "-"));
+            final FileOutputStream outputStream = new FileOutputStream(name);
             byte[] strToBytes = string.getBytes();
             outputStream.write(strToBytes);
             outputStream.close();
         } catch (final IOException e) {
+            System.out.println("Error creating file: " + name);
             e.printStackTrace();
         }
     }

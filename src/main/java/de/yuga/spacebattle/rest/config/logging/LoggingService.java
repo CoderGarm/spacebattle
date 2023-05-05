@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
-import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import de.yuga.spacebattle.rest.*;
 import de.yuga.spacebattle.rest.api.EndpointDefinition;
 import de.yuga.spacebattle.rest.dto.account.AuthRequest;
@@ -13,6 +12,7 @@ import de.yuga.spacebattle.rest.dto.account.chat.ChatMessage;
 import de.yuga.spacebattle.rest.dto.account.forum.ForumMessage;
 import de.yuga.spacebattle.rest.dto.enums.HasIcon;
 import de.yuga.spacebattle.rest.dto.enums.HasTypeName;
+import de.yuga.spacebattle.rest.dto.misc.CoordsBlob;
 import de.yuga.spacebattle.rest.dto.orbitals.StarSystem;
 import de.yuga.spacebattle.rest.dto.turn.battle.BattleReport;
 import org.slf4j.Logger;
@@ -44,7 +44,7 @@ public class LoggingService {
             .registerTypeAdapter(StarSystem.class, new StarSystemAdapter())
             .registerTypeAdapter(UserReq.class, new UserReqAdapter())
             .registerTypeAdapter(BattleReport.class, new BattleReportAdapter())
-            .registerTypeAdapter(MasterOfTheUniverseService.CoordsBlob.class, new CoordAdapter())
+            .registerTypeAdapter(CoordsBlob.class, new CoordAdapter())
             .setPrettyPrinting()
             .create();
     @Nonnull

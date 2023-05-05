@@ -1,0 +1,61 @@
+Roulette, 63 LY Beowulf, 100 LY Sol
+Monica, 60 LY Meyers
+Genovese, 20 LY Zunker
+Cyclops, 35 LY Beowulf
+Joshua, 359 LY Erewhon
+Megan, 8 LY Manticore
+Poul, 40 LY Maya
+New-Tuscany, 360 LY Meyers
+Calvin, 201 LY Sol, 350 LY Manticore, 600 LY Haven
+J-156-18(L), 72 LY Haven, 653 LY Calvin
+Robert, 60  LY Maya
+Refuge, 10 LY Calvin, 350 LY Manticore, 600 LY Haven
+Isaac, 100 LY Maya
+Lucastra, 70 LY Sol
+Agueda, 350 LY Sol
+Nuncio, 180 LY Spindle, 300 LY Lynx
+Strathmore, 35 LY Beowulf
+Nolan, 650 LY Manticore, 200 LY Sol
+Lynx, 4 LY Lynx-Terminus
+Casca, 22 LY Jelzins-Stern
+Haven, 667 LY Sol
+Felix, 10 LY Mannerheim, 130 LY Darius
+Basilisk, 210 LY Manticore
+Tequila, 55 LY Haven
+Murray, 130 LY Maya
+Meyers, 50 LY McIntosh, 60 LY Monica, 360 LY New-Tuscany
+Kenichi, 35 LY Beowulf
+Tau-Ceti, 12 LY Sol
+Tiberian, 300 LY Manticore
+MQ-L-1792-46A, 4 LY Lynx
+70-Virginis, 59 LY Sol
+Cachalot, 50 LY Beowulf
+Neu-Berlin, 49 LY Gregor
+Jelzins-Stern, 31 LY Manticore, 500 LY Sol
+Durandel, 332 LY Asgard
+Prime, 21 LY Agueda
+Delta-Draconis, 75 LY Sol
+Matapan, 412 LY Manticore
+Yasotaro, 50 LY Calvin
+Visigoth, 60 LY Beowulf
+Randal, 100 LY Maya
+McIntosh, 50 LY Meyers
+Conestoga, 50 LY Calvin
+Balcescu, 200 LY Erewhon
+Sprague, 40 LY Maya
+Edwin, 50 LY Maya
+Olivia, 480 LY Hainuwele
+Barca, 268 LY Manticore, 400 LY Sol
+Bryant, 50 LY Calvin
+Endicott, 15 LY Jelzins-Stern, 38 LY Manticore
+Asgard, 332 LY Durandel
+Kumang, 64 LY Montana
+Zoraster, 25 LY Marsh
+Lovat, 50 LY Haven
+Tasmania, 400 LY Manticore
+Beowulf, 40 LY Sol, 475 LY Manticore, 60 LY Visigoth
+Trombone, 35 LY Beowulf
+Dzung, 70 LY Sol
+Gregor, 170 LY Manticore
+Manticore, 512 LY Sol
+Yildun, 183 LY Sol

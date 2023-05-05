@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.misc;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.yuga.spacebattle.rest.dto.misc.Position;
 import org.junit.platform.commons.util.StringUtils;
 
 public class CoordinateElement {

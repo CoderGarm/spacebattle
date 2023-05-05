@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.backend.services;
 
+import de.yuga.spacebattle.rest.dto.misc.Coords;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.StringUtils;
 
@@ -29,7 +30,7 @@ class ResourceServiceTest {
 
     @Test
     void getCoords() {
-        final List<MasterOfTheUniverseService.Coords> result = new ResourceService().readStarSystems();
+        final List<Coords> result = new ResourceService().readStarSystems();
         assertNotNull(result);
         assertFalse(result.isEmpty());
     }

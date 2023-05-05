@@ -3,19 +3,19 @@ package de.yuga.spacebattle.misc.fandom;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.TestUtils;
 import de.yuga.spacebattle.misc.CoordinateElement;
-import de.yuga.spacebattle.misc.fandom.spacecraft.dto.WikiShipClass;
+import de.yuga.spacebattle.rest.dto.misc.DistanceElement;
+import de.yuga.spacebattle.rest.dto.misc.Position;
 import io.github.fastily.jwiki.core.MQuery;
 import io.github.fastily.jwiki.core.Wiki;
-import okhttp3.HttpUrl;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import javax.annotation.Nonnull;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * <b>Attention:</b> Please be kind, do not create more than necessary traffic.
@@ -23,106 +23,91 @@ import static org.junit.jupiter.api.Assertions.fail;
 @Disabled("no test")
 public class FandomWikiQueryTest {
 
-    private static final String URL_EN = "https://honorverse.fandom.com/api.php";
-    private static final String URL_DE = "https://honor-harrington.fandom.com/de/api.php"; // no api available?
-
-    private static final Wiki WIKI = new Wiki.Builder()
-            .withApiEndpoint(HttpUrl.get(URL_DE))
-            .build();
-
-    private static final Map<String, String> CATEGORIES = Map.of(
-            "Planets", "/planets/",
-            "Systems", "/systems/",
-            "Asteroid_Belts", "/belts/"
-    );
-
-    private static final Map<String, String> CATEGORIES_FOR_TITLES_ONLY = Map.of(
-            "Naval_Ships_of_Manticore", "/ships/names/",
-            "Naval_Ships_of_Haven", "/ships/names/",
-            "Naval_Ships_of_the_Anderman_Empire", "/ships/names/",
-            "Naval_Ships_of_Silesia", "/ships/names/",
-            "Naval_Ships_of_the_Solarian_League", "/ships/names/"
-    );
-
-    public static final String WIKI_SHIPS_DIR = "wiki-ships/";
-    public static final String WIKI_SHIPS_EVAL_DIR = "wiki-ships/";
-
-    public static final String DIR = "/home/karsten/Desktop/map/fandom/";
+    private static final String USR_HOME = System.getProperty("user.home");
+    private static final String FS = File.separator;
+    public static final String DIR = USR_HOME + FS + "Desktop" + FS + "fandom" + FS;
 
     @Test
-    void fetchCategoriesAndTextsFromWiki() {
+    void fetchAllFromWiki() {
 
-        CATEGORIES.forEach((category, folder) -> {
-            System.out.println("Writing '" + category + "'");
-            final List<String> categoryMembers = WIKI.getCategoryMembers(category);
-            final Map<String, String> texts = MQuery.getPageText(WIKI, categoryMembers);
-            texts.forEach((key, value) -> TestUtils.writeString(DIR + folder, key, value));
-        });
-    }
-
-    @Test
-    void fetchShipClasses() {
-        final String category = "Raumschiffsklassen";
-        System.out.println("Writing '" + category + "'");
-        final List<String> categoryMembers = WIKI.getCategoryMembers(category);
-        categoryMembers.forEach(categoryMember -> {
-            try {
-                final String wikiPageText = WIKI.getPageText(categoryMember);
-                if (wikiPageText.contains("{{")) {
-                    final WikiShipClass wikiShipClass = new WikiShipClass(wikiPageText);
-                    if (wikiShipClass.isValid()) {
-                        TestUtils.writeShipClass(DIR + WIKI_SHIPS_DIR, categoryMember + ".csv", wikiShipClass);
-                    }
+        EWikiConfig.get().forEach(config -> {
+            final Wiki wiki = config.getWiki();
+            final List<EWikiCategories> categories = EWikiCategories.get();
+            for (final EWikiCategories eWikiCategory : categories) {
+                final String category = eWikiCategory.getCategory(config);
+                if (category == null) {
+                    System.out.println("Category empty: " + eWikiCategory + " for language: " + config.getLanguage());
+                    continue;
                 }
-            } catch (final Exception e) {
-                fail(e);
+                final String folder = eWikiCategory.getFolder(config);
+                final List<String> categoryMembers = wiki.getCategoryMembers(category);
+                final Map<String, String> texts = MQuery.getPageText(wiki, categoryMembers);
+                texts.forEach((key, value) -> TestUtils.writeString(DIR + folder, key, value));
             }
         });
     }
 
     @Test
-    void fetchShipNames() {
-        CATEGORIES_FOR_TITLES_ONLY.forEach((category, folder) -> {
-            System.out.println("Writing '" + category + "'");
-            final List<String> categoryMembers = WIKI.getCategoryMembers(category);
-            final String join = String.join("\n", categoryMembers);
-            TestUtils.writeString(DIR + folder, category, join);
-        });
-    }
-
-    @Test
-    void fetchCategoryNames() {
-        final String category = "Planets";
-        final String folder = "";
-
-        System.out.println("Writing '" + category + "'");
-        final List<String> categoryMembers = WIKI.getCategoryMembers(category);
-        final String join = String.join("\n", categoryMembers);
-        TestUtils.writeString(DIR + folder, category, join);
-    }
-
-    @Test
-    void readFiles() {
+    void checkDistances() {
+        final List<DistanceElement> distanceElements = readDistances();
+        assertNotNull(distanceElements);
 
         final List<CoordinateElement> coordinateElements = readStarSystems();
-        final Set<String> knownSystemNames = coordinateElements.stream().map(CoordinateElement::getName).collect(Collectors.toSet());
+        distanceElements.forEach(d -> {
+            coordinateElements.stream().filter(c -> c.getName().equals(d.getName())).findFirst().ifPresent(c -> d.setPosition(c.getPosition()));
+        });
 
-        CATEGORIES.forEach((category, folder) -> {
-            System.out.println("Reading '" + category + "'");
-            final Map<String, String> texts = getContent(DIR, CATEGORIES.get("Planets"));
-            texts.forEach((name, text) -> {
-                for (final String knownSystemName : knownSystemNames) {
-                    final String[] split = text.split(" ");
-                    for (final String word : split) {
-                        final String sanitized = word.replaceAll("[^A-Za-z]+", "");
-                        if (sanitized.equals(knownSystemName)) {
-                            System.out.println("Found system name: " + knownSystemName + "\n");
-                            System.out.println("In " + category + " text:\n" + text);
-                        }
-                    }
+        final List<DistanceElement> without = distanceElements.stream().filter(d -> d.getPosition() == null).sorted().collect(Collectors.toList());
+        final List<DistanceElement> with = distanceElements.stream().filter(d -> d.getPosition() != null).sorted().collect(Collectors.toList());
+        System.out.println("With: " + with.size() + ", without: " + without.size());
+
+        final Set<String> known = new HashSet<>();
+        with.forEach(distanceElement -> {
+            final String distanceElementName = distanceElement.getName();
+            final Position position = distanceElement.getPosition();
+            final Map<DistanceElement, Integer> connectionsWithCoordinates = distanceElement.getConnectionsWithCoordinates();
+            connectionsWithCoordinates.forEach((connectedElement, canonicalDistance) -> {
+                final Position connectedPosition = connectedElement.getPosition();
+                assert position != null;
+                assert connectedPosition != null;
+                final int distance = getDistance(position, connectedPosition);
+                final String connectedElementName = connectedElement.getName();
+                final String o1 = distanceElementName + connectedElementName;
+                final String o2 = connectedElementName + distanceElementName;
+                if (!known.contains(o1) && !known.contains(o2)) {
+                    final double scale = ((double) distance) / ((double) canonicalDistance);
+                    final double round = Math.round(scale * 100.0) / 100.0;
+                    System.out.println(distanceElementName + " to " + connectedElementName + ", distance of " + distance + " by canonical distance of " + canonicalDistance + " with scale " + round);
+                    known.add(o1);
+                    known.add(o2);
                 }
             });
         });
+    }
+
+    private int getDistance(@Nonnull final Position orbit1, @Nonnull final Position orbit2) {
+        Preconditions.checkNotNull(orbit1, "orbit1 shouldn't be null!");
+        Preconditions.checkNotNull(orbit2, "orbit2 shouldn't be null!");
+
+        final int x1 = orbit1.getX();
+        final int y1 = orbit1.getY();
+
+        final int x2 = orbit2.getX();
+        final int y2 = orbit2.getY();
+
+        return getDistance(x2 - x1, y2 - y1);
+    }
+
+    public int getDistance(final int firstCoord, final int secondCoord) {
+        final double x = Math.pow(firstCoord, 2);
+        final double y = Math.pow(secondCoord, 2);
+        return ((Double) (Math.sqrt(x + y))).intValue();
+    }
+
+    @Test
+    void readCoordinates() {
+        final List<CoordinateElement> coordinateElements = readStarSystems();
+        final Set<String> knownSystemNames = coordinateElements.stream().map(CoordinateElement::getName).collect(Collectors.toSet());
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -133,15 +118,13 @@ public class FandomWikiQueryTest {
     }
 
     private List<CoordinateElement> readStarSystems() {
-
         final List<CoordinateElement> coordinateWthNames = new ArrayList<>();
-
-        InputStream mapDataStream = null;
+        InputStream stream = null;
         String line = null;
         try {
-            mapDataStream = this.getClass().getResourceAsStream("/map-data.csv");
-            Preconditions.checkNotNull(mapDataStream, "mapDataStream must not be empty");
-            final BufferedReader br = new BufferedReader(new InputStreamReader(mapDataStream));
+            stream = this.getClass().getResourceAsStream("/map-data.csv");
+            Preconditions.checkNotNull(stream, "stream must not be empty");
+            final BufferedReader br = new BufferedReader(new InputStreamReader(stream));
             while ((line = br.readLine()) != null) {
                 final CoordinateElement coordinateWthName = new CoordinateElement(line.split(","));
                 coordinateWthNames.add(coordinateWthName);
@@ -151,14 +134,61 @@ public class FandomWikiQueryTest {
             System.out.println(line);
             e.printStackTrace();
         } finally {
-            if (mapDataStream != null) {
+            if (stream != null) {
                 try {
-                    mapDataStream.close();
+                    stream.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }
         return coordinateWthNames;
+    }
+
+    private List<DistanceElement> readDistances() {
+        final Set<DistanceElement> distanceElements = new HashSet<>();
+        InputStream stream = null;
+        String line = null;
+        try {
+            stream = this.getClass().getResourceAsStream("/distance.txt");
+            Preconditions.checkNotNull(stream, "stream must not be empty");
+            final BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+            while ((line = br.readLine()) != null) {
+                final String[] split = line.split("\\,");
+                final String name = split[0];
+                final DistanceElement distanceElement = requireNonNullElse(distanceElements, name);
+                for (int i = 1; i < split.length; i++) {
+                    final String elem = split[i];
+                    final String[] strings = elem.replaceAll("\\s", "").split("LY");
+                    final int distance = Integer.parseInt(strings[0]);
+                    final String connectedToName = strings[1];
+                    final DistanceElement connectedElement = requireNonNullElse(distanceElements, connectedToName);
+                    distanceElements.add(connectedElement);
+                    distanceElement.add(connectedElement, distance);
+                    connectedElement.add(distanceElement, distance);
+                }
+                distanceElements.add(distanceElement);
+            }
+
+        } catch (Exception e) {
+            System.out.println(line);
+            e.printStackTrace();
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return distanceElements.stream().sorted().collect(Collectors.toList());
+    }
+
+    @Nonnull
+    private static DistanceElement requireNonNullElse(final Collection<DistanceElement> distanceElements, final String name) {
+        return Objects.requireNonNullElse(
+                distanceElements.stream().filter(d -> d.getName().equals(name)).findFirst().orElse(null),
+                new DistanceElement(name));
     }
 }

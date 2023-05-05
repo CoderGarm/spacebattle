@@ -64,7 +64,6 @@ todo. interne Sektoraufteilung der Map nach Entfernung um wirtschaftliche Leistu
 todo. NPC-Konzept für Systeme und systemfreie NPC (Piraten, fliegende Händler ...)  
 todo. Konzept für Missionen und NPC-Missionen
 
-todo. radius tool fixen
 todo. implement freight and passenger modules, check "unload the own crew"-problem
 todo. balance kosten vs nutzen bei modulen
 todo. schiffstypen nachbauen und daraus die Werte ableiten, um Sinnhaftigkeit zu prüfen

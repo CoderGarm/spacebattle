@@ -1,16 +1,23 @@
-package de.yuga.spacebattle.misc;
+package de.yuga.spacebattle.rest.dto.misc;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
 
 public class Position {
 
+    @JsonProperty
+    @Schema(required = true)
     private int x;
-    private int y;
 
     @JsonProperty
+    @Schema(required = true)
+    private int y;
+
+    @JsonIgnore
     private int z = 0;
 
     public Position(final int x, final int y) {
@@ -24,26 +31,32 @@ public class Position {
     }
 
 
+    @JsonIgnore
     public void invertYAxis() {
         y = y * -1;
     }
 
+    @JsonIgnore
     public int getX() {
         return x;
     }
 
+    @JsonIgnore
     public int getY() {
         return y;
     }
 
+    @JsonIgnore
     public void setX(final int x) {
         this.x = x;
     }
 
+    @JsonIgnore
     public void setY(final int y) {
         this.y = y;
     }
 
+    @JsonIgnore
     public int getDistance(final Position that) {
         final BigDecimal xThis = new BigDecimal(this.x);
         final BigDecimal yThis = new BigDecimal(this.y);
@@ -53,14 +66,17 @@ public class Position {
         return DistanceCalculator.getDistance(xThat.subtract(xThis), yThat.subtract(yThis)).intValue();
     }
 
+    @JsonIgnore
     public double getR() {
         return Math.sqrt(((double) x * (double) x) + ((double) y * (double) y));
     }
 
+    @JsonIgnore
     public double getTheta() {
         return flippedAtan2(y, x);
     }
 
+    @JsonIgnore
     public double bearingTo(Position target) {
         return flippedAtan2(target.getY() - y, target.getX() - x);
     }
@@ -84,6 +100,7 @@ public class Position {
     }
 
     @Override
+    @JsonIgnore
     public String toString() {
         return "x " + x + ", y " + y;
     }

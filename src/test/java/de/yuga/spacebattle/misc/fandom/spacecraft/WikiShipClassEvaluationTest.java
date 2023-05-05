@@ -5,6 +5,8 @@ import com.google.common.base.Strings;
 import de.yuga.spacebattle.TestUtils;
 import de.yuga.spacebattle.backend.enums.EShipClassType;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
+import de.yuga.spacebattle.misc.fandom.EWikiCategories;
+import de.yuga.spacebattle.misc.fandom.EWikiConfig;
 import de.yuga.spacebattle.misc.fandom.FandomWikiQueryTest;
 import de.yuga.spacebattle.misc.fandom.spacecraft.dto.FieldName;
 import de.yuga.spacebattle.misc.fandom.spacecraft.dto.Weaponry;
@@ -34,10 +36,8 @@ public class WikiShipClassEvaluationTest {
     @Test
     void evaluateShipClasses() {
 
-        final List<WikiShipClass> wikiShipClasses = TestUtils.readShipClasses(FandomWikiQueryTest.DIR, FandomWikiQueryTest.WIKI_SHIPS_DIR).stream()
-                //.filter(e -> e.getName().equals("Invictus Klasse") || e.getName().equals("Courageous Klasse"))
-                //.filter(e -> e.getName().equals("Bastogne-Klasse") || e.getName().equals("Desforge-Klasse"))
-                .collect(Collectors.toList());
+        final List<WikiShipClass> wikiShipClasses = TestUtils.readShipClasses(FandomWikiQueryTest.DIR,
+                EWikiCategories.SHIP_CLASSES.getFolder(EWikiConfig.DE)).stream().collect(Collectors.toList());
 
         assertFalse(wikiShipClasses.isEmpty());
         //createTimeChart(wikiShipClasses);

@@ -32,6 +32,7 @@ import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStateService;
 import de.yuga.spacebattle.backend.transformer.BuildingCsvTransformer;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import de.yuga.spacebattle.rest.dto.misc.Coords;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,7 +179,7 @@ public class MasterOfTheUniverseServiceTest {
 
     @Test
     void readMap() {
-        final List<MasterOfTheUniverseService.Coords> coords = resourceService.readStarSystems();
+        final List<Coords> coords = resourceService.readStarSystems();
         assertNotNull(coords);
     }
 

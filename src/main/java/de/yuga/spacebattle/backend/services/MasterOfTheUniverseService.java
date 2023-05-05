@@ -1,6 +1,5 @@
 package de.yuga.spacebattle.backend.services;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
@@ -51,7 +50,7 @@ import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
-import io.swagger.v3.oas.annotations.media.Schema;
+import de.yuga.spacebattle.rest.dto.misc.Coords;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -834,8 +833,8 @@ public class MasterOfTheUniverseService {
 
     protected void createStarSystems(@Nonnull final List<Coords> coords) {
         final Set<StarSystem> newStarSystems = coords.stream().map(coord -> {
-            final Orbit orbit = new Orbit(new Distance(coord.x, STAR_SYSTEM_STANDARD_METRIC), new Distance(coord.y, STAR_SYSTEM_STANDARD_METRIC));
-            return starsystemService.createStarSystem(coord.name, orbit);
+            final Orbit orbit = new Orbit(new Distance(coord.getX(), STAR_SYSTEM_STANDARD_METRIC), new Distance(coord.getY(), STAR_SYSTEM_STANDARD_METRIC));
+            return starsystemService.createStarSystem(coord.getName(), orbit);
         }).collect(Collectors.toSet());
         LOGGER.info("New star systems generated");
 
@@ -987,42 +986,5 @@ public class MasterOfTheUniverseService {
         battleService.runBattleAtPlanet(today, homePlanet);
     }
 
-    public static class CoordsBlob extends ArrayList<MasterOfTheUniverseService.Coords> {
 
-        public CoordsBlob(@Nonnull final List<Coords> coords) {
-            Preconditions.checkNotNull(coords, "coords must not be empty");
-
-            super.addAll(coords);
-        }
-    }
-
-    public static class Coords {
-
-        @JsonProperty
-        @Schema(required = true)
-        private final int x;
-
-        @JsonProperty
-        @Schema(required = true)
-        private final int y;
-
-        @JsonProperty
-        @Schema(required = true)
-        private final String name;
-
-        /*
-        @Nonnull
-        @Schema(required = true, description = "The stellar class of the star of this system.")
-        private final de.yuga.spacebattle.rest.dto.enums.EStarClassType starClassType= new de.yuga.spacebattle.rest.dto.enums.EStarClassType(EStarClassType.CLASS_G3);
-        */
-
-        /**
-         * Reads the cartesian coordinates and flips the y-axis in order to display the coords directly to the screen.
-         */
-        public Coords(final String[] split) {
-            this.name = split[0];
-            this.x = Integer.parseInt(split[1].replace("x", "").replaceAll(" ", ""));
-            this.y = Integer.parseInt(split[2].replace("y", "").replaceAll(" ", "")) * -1;
-        }
-    }
 }

@@ -1,6 +1,9 @@
 package de.yuga.spacebattle.backend.services;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.rest.dto.misc.Coords;
+import de.yuga.spacebattle.rest.dto.misc.DistanceElement;
+import de.yuga.spacebattle.rest.dto.misc.Position;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -8,22 +11,127 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Service
 public class ResourceService {
 
-    public List<MasterOfTheUniverseService.Coords> readStarSystems() {
+    @Nonnull
+    public List<Coords> readStarSystems() {
         final List<String> lst = new ArrayList<>();
         getFileLineByLine("/", "map-data.csv", lst);
-        return lst.stream().map(line -> new MasterOfTheUniverseService.Coords(line.split(","))).collect(Collectors.toList());
+        return lst.stream().map(line -> new Coords(line.split(","))).collect(Collectors.toList());
     }
 
+    @Nonnull
+    public List<DistanceElement> getAllDistances() {
+        return collectDistanceElements();
+    }
+
+    private List<DistanceElement> collectDistanceElements() {
+        final List<DistanceElement> distanceElements = readDistances();
+
+        final List<Coords> coordinateElements = readStarSystems();
+        distanceElements.forEach(d -> {
+            coordinateElements.stream().filter(c -> c.getName().equals(d.getName())).findFirst().ifPresent(c -> d.setPosition(c.getPosition()));
+        });
+
+        final List<DistanceElement> without = distanceElements.stream().filter(d -> d.getPosition() == null).sorted().collect(Collectors.toList());
+        final List<DistanceElement> with = distanceElements.stream().filter(d -> d.getPosition() != null).sorted().collect(Collectors.toList());
+
+        final Set<String> known = new HashSet<>();
+        with.forEach(distanceElement -> {
+            final String distanceElementName = distanceElement.getName();
+            final Position position = distanceElement.getPosition();
+            final Map<DistanceElement, Integer> connectionsWithCoordinates = distanceElement.getConnectionsWithCoordinates();
+            connectionsWithCoordinates.forEach((connectedElement, canonicalDistance) -> {
+                final Position connectedPosition = connectedElement.getPosition();
+                assert position != null;
+                assert connectedPosition != null;
+                final int distance = getDistance(position, connectedPosition);
+                final String connectedElementName = connectedElement.getName();
+                final String o1 = distanceElementName + connectedElementName;
+                final String o2 = connectedElementName + distanceElementName;
+                if (!known.contains(o1) && !known.contains(o2)) {
+                    final double scale = ((double) distance) / ((double) canonicalDistance);
+                    final double round = Math.round(scale * 100.0) / 100.0;
+                    known.add(o1);
+                    known.add(o2);
+                }
+            });
+        });
+        return distanceElements;
+    }
+
+    private int getDistance(@Nonnull final Position orbit1, @Nonnull final Position orbit2) {
+        Preconditions.checkNotNull(orbit1, "orbit1 shouldn't be null!");
+        Preconditions.checkNotNull(orbit2, "orbit2 shouldn't be null!");
+
+        final int x1 = orbit1.getX();
+        final int y1 = orbit1.getY();
+
+        final int x2 = orbit2.getX();
+        final int y2 = orbit2.getY();
+
+        return getDistance(x2 - x1, y2 - y1);
+    }
+
+    public int getDistance(final int firstCoord, final int secondCoord) {
+        final double x = Math.pow(firstCoord, 2);
+        final double y = Math.pow(secondCoord, 2);
+        return ((Double) (Math.sqrt(x + y))).intValue();
+    }
+
+    private List<DistanceElement> readDistances() {
+        final Set<DistanceElement> distanceElements = new HashSet<>();
+        InputStream stream = null;
+        String line = null;
+        try {
+            stream = this.getClass().getResourceAsStream("/distance.txt");
+            Preconditions.checkNotNull(stream, "stream must not be empty");
+            final BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+            while ((line = br.readLine()) != null) {
+                final String[] split = line.split("\\,");
+                final String name = split[0];
+                final DistanceElement distanceElement = requireNonNullElse(distanceElements, name);
+                for (int i = 1; i < split.length; i++) {
+                    final String elem = split[i];
+                    final String[] strings = elem.replaceAll("\\s", "").split("LY");
+                    final int distance = Integer.parseInt(strings[0]);
+                    final String connectedToName = strings[1];
+                    final DistanceElement connectedElement = requireNonNullElse(distanceElements, connectedToName);
+                    distanceElements.add(connectedElement);
+                    distanceElement.add(connectedElement, distance);
+                    connectedElement.add(distanceElement, distance);
+                }
+                distanceElements.add(distanceElement);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return distanceElements.stream().sorted().collect(Collectors.toList());
+    }
+
+
+    @Nonnull
+    private static DistanceElement requireNonNullElse(final Collection<DistanceElement> distanceElements, final String name) {
+        return Objects.requireNonNullElse(
+                distanceElements.stream().filter(d -> d.getName().equals(name)).findFirst().orElse(null),
+                new DistanceElement(name));
+    }
+
+    @Nonnull
     public List<String> readAllShipNames() {
 
         final String dir = "ship-names";

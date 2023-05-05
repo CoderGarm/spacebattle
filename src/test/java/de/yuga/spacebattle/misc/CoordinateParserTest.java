@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.mifmif.common.regex.Generex;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.enums.EStarSystemCatalogue;
+import de.yuga.spacebattle.rest.dto.misc.Position;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.StringUtils;
