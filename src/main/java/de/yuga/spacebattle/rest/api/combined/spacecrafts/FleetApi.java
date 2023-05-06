@@ -12,6 +12,7 @@ import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import de.yuga.spacebattle.rest.dto.AbstractId;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.*;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.Move;
@@ -196,7 +197,7 @@ public class FleetApi extends BaseApi {
     )
     public ResponseEntity<?> getFleetDistribution() {
 
-        final int idUser = getIdUser();
+        final int idUser = getIdUser(); /* fixme */
         final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> byUser = fleetService.findAllFleetsByUser(idUser);
 
         final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> fleets = new HashSet<>();
@@ -227,20 +228,14 @@ public class FleetApi extends BaseApi {
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = Fleet.class))
+                                    schema = @Schema(implementation = AbstractId.class))
                             )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getFleetsForUser() {
-
-        final int idUser = getIdUser();
-        final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> allFleetsByUser = fleetService.findAllFleetsByUser(idUser);
-        final List<Fleet> result = allFleetsByUser.stream()
-                .map(f -> new Fleet(f, getPreferredLanguage()))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(fleetService.findAllAliveFleetsBy(getIdUser()));
     }
 
     @GetMapping(value = MOVING_FLEET_PER_USER_ENDPOINT)

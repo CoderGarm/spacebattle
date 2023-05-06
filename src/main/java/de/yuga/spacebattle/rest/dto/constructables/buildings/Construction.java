@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.rest.dto.constructables.buildings;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.buildings.Building;
@@ -29,6 +30,10 @@ public class Construction {
     private int level;
 
     @JsonProperty
+    @Schema(required = true, description = "If there is a next level.")
+    private boolean nextLevel = false;
+
+    @JsonProperty
     @Schema(required = true, description = "The active level of this construction.")
     private int operationalLevel;
 
@@ -44,5 +49,10 @@ public class Construction {
         this.building = new Building(construction.getBuilding(), languageCode);
         this.level = construction.getLevel();
         this.operationalLevel = construction.getOperationalLevel();
+    }
+
+    @JsonIgnore
+    public void activateNextLevel() {
+        this.nextLevel = true;
     }
 }

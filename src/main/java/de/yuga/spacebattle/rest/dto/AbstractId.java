@@ -34,6 +34,13 @@ public class AbstractId {
         this.name = name;
     }
 
+    public AbstractId(final int entityKey, @Nonnull final String name) {
+        Preconditions.checkNotNull(name, "name must not be empty");
+
+        this.id = entityKey;
+        this.name = name;
+    }
+
     public AbstractId(final int id) {
         this.id = id;
     }

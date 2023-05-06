@@ -448,6 +448,7 @@
         shipClassType varchar(255) not null,
         supportType varchar(255) not null,
         tonnage varchar(255) not null,
+        unlockedThroughLevel integer not null,
         idTranslatableDescription integer not null,
         idTranslatableName integer not null,
         idCosts integer not null,
@@ -1582,8 +1583,8 @@
     INSERT INTO userSetting (idUserSetting, isEMailVerified, isLoginForbidden, noEMailWanted, receiveChangelogInfos,
                              idUser) VALUE (null, 1, 0, 0, 1, 1);
 
-    INSERT INTO user (username, email, createdAt, password)
-    VALUES ('Defeated Opponent', 'mail', now(),
+    INSERT INTO user (username, email, userRole, createdAt, password)
+    VALUES ('Defeated Opponent', 'mail', 'USER', now(),
             '49675c186a6c1b1d10cb800e2792ebabd6abd8597bcef2fcaa99bfc813a6f1868b7dc91812ac66718c4fefd59daafa6a658901b7356b3b65fa5528419a93a7a4');
     INSERT INTO userSetting (idUserSetting, isEMailVerified, isLoginForbidden, noEMailWanted, receiveChangelogInfos,
                              idUser) VALUE (null, 0, 1, 1, 0, 2);

@@ -112,8 +112,8 @@ public class ResearchTreeElement {
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
 
         this.languageCode = languageCode;
-        research.getUnlocksBuildings().forEach(b -> add(1, b));
-        research.getUnlocksPassiveModules().forEach(b -> add(1, b));
+        research.getUnlocksBuildings().forEach(b -> add(b.getUnlockedThroughLevel(), b));
+        research.getUnlocksPassiveModules().forEach(b -> add(b.getUnlockedThroughLevel(), b));
 
         final Set<NamedTechLevel> unlocksNamedTechLevel = research.getUnlocksNamedTechLevel();
         final Map<ETranslationTarget, List<NamedTechLevel>> byType = unlocksNamedTechLevel.stream().collect(Collectors.groupingBy(NamedTechLevel::getTranslationTarget, Collectors.toList()));

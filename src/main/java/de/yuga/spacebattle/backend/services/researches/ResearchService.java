@@ -59,6 +59,13 @@ public class ResearchService {
         return Objects.requireNonNullElse(allForUser, new HashSet<>());
     }
 
+    public Set<ResearchLevel> getResearchesForUser(final int idUser, @Nonnull final Set<Research> researches) {
+        Preconditions.checkNotNull(researches, "researches must not be empty");
+
+        final Set<ResearchLevel> allForUser = levelRepository.getResearchLevelsFor(idUser, researches.stream().map(Research::getId).collect(Collectors.toSet()));
+        return Objects.requireNonNullElse(allForUser, new HashSet<>());
+    }
+
     /**
      * Returns all researchable researches for the given user.
      * Return includes researches which:

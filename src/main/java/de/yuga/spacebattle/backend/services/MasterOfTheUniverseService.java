@@ -297,7 +297,7 @@ public class MasterOfTheUniverseService {
         final Research civilConstructions = researchService.save(research);
 
         Building b = building("Construction Yard", "Useful to build ground constructions.",
-                100, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, CONSTRUCTION_YARD_PT, research, 1);
+                30, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, CONSTRUCTION_YARD_PT, research, 1);
         amendTranslation(b, "Bauhof", "Nützlich für Gebäude.");
         buildingService.save(b);
 
@@ -703,60 +703,37 @@ public class MasterOfTheUniverseService {
     }
 
     private List<PassiveModule> createPassiveModules() {
-        Research research = research("Support modules", "Unlocks improvements for combat and non-combat supportive.", 1, ETechLevel.TECH_I, null);
+        Research research = research("Support modules", "Unlocks improvements for combat and non-combat supportive.", 6, ETechLevel.TECH_I, null);
         amendTranslation(research, "Unterstützungsmodule", "Ermöglicht Verbesserungen von Schiffsmodulen.");
         researchService.save(research);
 
         final List<PassiveModule> result = new ArrayList<>();
-
-        /*
-        PassiveModule passiveModule = moduleService.createPassiveModule("Armor increasement Mk I", "Increases the armor value.", research,
-                ESupportType.ARMOR, ECalculationType.ADD, 10, 10, EShipClassType.CL, ETechLevel.TECH_I, CrewRequirement.of(XS_CREW));
-        amendTranslation(passiveModule, "Verstärkung der Panzerung Mk I", "Verstärkt die Panzerung.");
-        result.add(moduleService.save(passiveModule));
-
-        passiveModule = moduleService.createPassiveModule("Sidewall increasement Mk I", "Increases the sidewall value.", research,
-                ESupportType.ARMOR, ECalculationType.ADD, 10, 6, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(S_CREW));
-        amendTranslation(passiveModule, "Verstärkung des Seitenschilds Mk I", "Verstärkt den Seitenschild.");
-        result.add(moduleService.save(passiveModule));
-
-        passiveModule = moduleService.createPassiveModule("Sidewall increasement Mk I", "Increases the sidewall value.", research,
-                ESupportType.SIDEWALL, ECalculationType.ADD, 10, 6, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(S_CREW));
-        amendTranslation(passiveModule, "Verstärkung des Seitenschilds Mk I", "Verstärkt den Seitenschild.");
-        result.add(moduleService.save(passiveModule));
-
-        passiveModule = moduleService.createPassiveModule("Electronic warfare increasement Mk I", "Increases the electronic warfare value.", research,
-                ESupportType.ELECTRONIC_WARFARE, ECalculationType.ADD, 2, 5, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(S_CREW));
-        amendTranslation(passiveModule, "Verstärkung der Eloka Mk I", "Verstärkt die Eloka.");
-        result.add(moduleService.save(passiveModule));
-        */
-
-        PassiveModule passiveModule = moduleService.createPassiveModule("Freight module", "A simple cargo hold.", research,
+        PassiveModule passiveModule = moduleService.createPassiveModule("Freight module", "A simple cargo hold.", research, 1,
                 ESupportType.FREIGHT, ECalculationType.ADD, 750, 500, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(XXS_CREW));
         amendTranslation(passiveModule, "Frachtmodul", "Ein einfaches Frachtmodul.");
         result.add(moduleService.save(passiveModule));
 
-        passiveModule = moduleService.createPassiveModule("Freight module", "A simple cargo hold.", research,
+        passiveModule = moduleService.createPassiveModule("Freight module", "A simple cargo hold.", research, 3,
                 ESupportType.FREIGHT, ECalculationType.ADD, 2000, 1500, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(XS_CREW));
         amendTranslation(passiveModule, "Frachtmodul", "Ein einfaches Frachtmodul.");
         result.add(moduleService.save(passiveModule));
 
-        passiveModule = moduleService.createPassiveModule("Freight module", "A simple cargo hold.", research,
+        passiveModule = moduleService.createPassiveModule("Freight module", "A simple cargo hold.", research, 5,
                 ESupportType.FREIGHT, ECalculationType.ADD, 22000, 15000, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(S_CREW));
         amendTranslation(passiveModule, "Frachtmodul", "Ein einfaches Frachtmodul.");
         result.add(moduleService.save(passiveModule));
 
-        passiveModule = moduleService.createPassiveModule("Passenger module", "A simple passenger module.", research,
+        passiveModule = moduleService.createPassiveModule("Passenger module", "A simple passenger module.", research, 1,
                 ESupportType.PASSENGER, ECalculationType.ADD, 300, 25, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(XXS_CREW));
         amendTranslation(passiveModule, "Passagiermodul", "Ein einfaches Passagiermodul.");
         result.add(moduleService.save(passiveModule));
 
-        passiveModule = moduleService.createPassiveModule("Passenger module", "A simple passenger module.", research,
+        passiveModule = moduleService.createPassiveModule("Passenger module", "A simple passenger module.", research, 4,
                 ESupportType.PASSENGER, ECalculationType.ADD, 500, 50, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(XS_CREW));
         amendTranslation(passiveModule, "Passagiermodul", "Ein einfaches Passagiermodul.");
         result.add(moduleService.save(passiveModule));
 
-        passiveModule = moduleService.createPassiveModule("Passenger module", "A simple passenger module.", research,
+        passiveModule = moduleService.createPassiveModule("Passenger module", "A simple passenger module.", research, 6,
                 ESupportType.PASSENGER, ECalculationType.ADD, 1100, 125, EShipClassType.FR, ETechLevel.TECH_I, CrewRequirement.of(S_CREW));
         amendTranslation(passiveModule, "Passagiermodul", "Ein einfaches Passagiermodul.");
         result.add(moduleService.save(passiveModule));
@@ -938,7 +915,7 @@ public class MasterOfTheUniverseService {
     @Deprecated(since = "productive environment")
     private void addUnlockedResearches(User user) {
         final List<Research> researchesWithoutPrecondition = researchService.getResearchesWithoutPrecondition();
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 1; i <= 1; i++) {
             // add up to all DD-level stuff
             researchService.addResearch(user, researchesWithoutPrecondition);
         }

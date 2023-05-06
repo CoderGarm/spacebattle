@@ -20,7 +20,8 @@ import javax.validation.constraints.NotNull;
 
 @NamedQueries({
         @NamedQuery(name = "PassiveModule.getAll", query = "SELECT a FROM PassiveModule a"),
-        @NamedQuery(name = "PassiveModule.getAllByResearches", query = "SELECT a FROM PassiveModule a WHERE a.unlockedThrough IN (:researches) OR a.unlockedThrough IS NULL")
+        @NamedQuery(name = "PassiveModule.getAllByResearches",
+                query = "SELECT a FROM PassiveModule a LEFT JOIN ResearchLevel rl ON (rl.research = a.unlockedThrough AND rl.user.id = :idUser) WHERE rl IS NOT NULL AND rl.level >= a.unlockedThroughLevel")
 })
 @Entity
 @Table(name = "passiveModule")
@@ -32,6 +33,8 @@ public class PassiveModule extends HasCosts implements HasEffectValue {
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "idResearch")
     private Research unlockedThrough;
+
+    private int unlockedThroughLevel;
 
     /**
      * The capacity represents the capacity in metric tons which will be occupied if build in.<br>
@@ -74,6 +77,7 @@ public class PassiveModule extends HasCosts implements HasEffectValue {
     public PassiveModule(@Nonnull final String name,
                          @Nonnull final String description,
                          @Nonnull final Research unlockedThrough,
+                         final int unlockedThroughLevel,
                          final int tonnage,
                          final int effectValue,
                          @Nonnull final EShipClassType shipClassType,
@@ -87,6 +91,7 @@ public class PassiveModule extends HasCosts implements HasEffectValue {
         this.calculationType = calculationType;
         this.effectValue = effectValue;
         this.unlockedThrough = unlockedThrough;
+        this.unlockedThroughLevel = unlockedThroughLevel;
         this.tonnage = new Mass(tonnage, EMassMetric.T);
         this.shipClassType = shipClassType;
         this.getCosts().setCrewRequirement(crewRequirement);
@@ -123,6 +128,10 @@ public class PassiveModule extends HasCosts implements HasEffectValue {
     @Nonnull
     public Research getUnlockedThrough() {
         return unlockedThrough;
+    }
+
+    public int getUnlockedThroughLevel() {
+        return unlockedThroughLevel;
     }
 
     @Nonnull

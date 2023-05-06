@@ -216,6 +216,7 @@ public class ModuleService {
     public PassiveModule createPassiveModule(@Nonnull final String name,
                                              @Nonnull final String description,
                                              @Nonnull final Research unlockedThrough,
+                                             final int unlockedThroughLevel,
                                              @Nonnull final ESupportType supportType,
                                              @Nonnull final ECalculationType calculationType,
                                              final int tonnage,
@@ -228,7 +229,7 @@ public class ModuleService {
         Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        return passiveModuleRepository.save(new PassiveModule(name, description, unlockedThrough, tonnage, value, shipClassType, techLevel, supportType, calculationType, crewRequirement));
+        return passiveModuleRepository.save(new PassiveModule(name, description, unlockedThrough, unlockedThroughLevel, tonnage, value, shipClassType, techLevel, supportType, calculationType, crewRequirement));
     }
 
     @Nonnull

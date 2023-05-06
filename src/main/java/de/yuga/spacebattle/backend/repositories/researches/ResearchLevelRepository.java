@@ -6,6 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Set;
 
 public interface ResearchLevelRepository extends CrudRepository<ResearchLevel, Integer>, CustomResearchLevelRepository {
@@ -34,4 +35,8 @@ public interface ResearchLevelRepository extends CrudRepository<ResearchLevel, I
     @Nullable
     @Query("SELECT r FROM ResearchLevel r WHERE r.user.id = :idUser AND r.research.id = :idResearch")
     ResearchLevel getResearchLevelFor(@Param("idUser") final int idUser, @Param("idResearch") final int idResearch);
+
+    @Nullable
+    @Query("SELECT r FROM ResearchLevel r WHERE r.user.id = :idUser AND r.research.id IN (:researchIds)")
+    Set<ResearchLevel> getResearchLevelsFor(@Param("idUser") final int idUser, @Param("researchIds") final Collection<Integer> researchIds);
 }

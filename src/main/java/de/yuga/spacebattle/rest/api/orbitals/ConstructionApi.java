@@ -1,8 +1,11 @@
 package de.yuga.spacebattle.rest.api.orbitals;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.researches.ResearchLevel;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
@@ -80,10 +83,18 @@ public class ConstructionApi extends BaseApi {
         if (planet == null || planet.getOwner() == null) {
             throw new NotifyWebUserException("This planet is not colonized");
         }
+
         final Set<Construction> upgradeableConstructions = constructionService.getUpgradeableConstructions(planet);
+        final Set<Research> researches = upgradeableConstructions.stream().map(Construction::getBuilding).map(Building::getUnlockedThrough).collect(Collectors.toSet());
+        final Set<ResearchLevel> levels = researchService.getResearchesForUser(getIdUser(), researches);
+
         final Set<de.yuga.spacebattle.rest.dto.constructables.buildings.Construction> possibleConstructions = upgradeableConstructions
                 .stream()
-                .map(e -> new de.yuga.spacebattle.rest.dto.constructables.buildings.Construction(e, getPreferredLanguage()))
+                .map(e -> {
+                    final de.yuga.spacebattle.rest.dto.constructables.buildings.Construction construction = new de.yuga.spacebattle.rest.dto.constructables.buildings.Construction(e, getPreferredLanguage());
+                    levels.stream().filter(l -> l.getResearch().equals(e.getBuilding().getUnlockedThrough())).findFirst().filter(l -> l.getLevel() > e.getLevel()).ifPresent(l -> construction.activateNextLevel());
+                    return construction;
+                })
                 .collect(Collectors.toSet());
 
         return ResponseEntity.ok(possibleConstructions);

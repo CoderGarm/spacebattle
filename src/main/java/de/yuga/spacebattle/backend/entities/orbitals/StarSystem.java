@@ -50,7 +50,8 @@ public class StarSystem extends AbstractEntityKey {
     private final Set<Planet> planets = new HashSet<>();
 
     @Nonnull
-    @OneToMany(mappedBy = "orbit.system", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    //@OneToMany(mappedBy = "orbit.system", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST) fixme replace completely
+    @Transient
     private Set<Fleet> fleets = new HashSet<>();
 
     @Nonnull
@@ -92,12 +93,6 @@ public class StarSystem extends AbstractEntityKey {
     @Nonnull
     public Set<Fleet> getFleets() {
         return fleets.stream().filter(Fleet::isAlive).collect(Collectors.toSet());
-    }
-
-    public void setFleets(@Nonnull final Set<Fleet> fleets) {
-        Preconditions.checkNotNull(fleets, "fleets shouldn't be null!");
-
-        this.fleets = fleets;
     }
 
     public void setOrbit(@Nonnull final Orbit orbit) {

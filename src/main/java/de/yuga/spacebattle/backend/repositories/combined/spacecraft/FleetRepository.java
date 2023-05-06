@@ -1,9 +1,11 @@
 package de.yuga.spacebattle.backend.repositories.combined.spacecraft;
 
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.rest.dto.AbstractId;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nullable;
@@ -33,4 +35,8 @@ public interface FleetRepository extends CrudRepository<Fleet, Integer>, CustomF
     @Nullable
     @Query("SELECT f FROM Fleet f WHERE f.isDeleted = false")
     List<Fleet> findAllAliveFleets();
+
+    @Nullable
+    @Query("SELECT new de.yuga.spacebattle.rest.dto.AbstractId(f.id, f.name) FROM Fleet f WHERE f.isDeleted = false AND f.owner.id = :idUser")
+    List<AbstractId> findAllAliveFleetsBy(@Param("idUser") final int idUser);
 }

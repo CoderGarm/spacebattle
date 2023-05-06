@@ -441,7 +441,7 @@ public class TestDataProviderUtils {
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
 
-        final PassiveModule passiveModule = new PassiveModule(name, description, research(), tonnage, value, HULL_TYPE, techLevel, supportType, calculationType, crewRequirement);
+        final PassiveModule passiveModule = new PassiveModule(name, description, research(), 1, tonnage, value, HULL_TYPE, techLevel, supportType, calculationType, crewRequirement);
         setId(passiveModule);
         return passiveModule;
     }

@@ -64,6 +64,7 @@ todo. interne Sektoraufteilung der Map nach Entfernung um wirtschaftliche Leistu
 todo. NPC-Konzept für Systeme und systemfreie NPC (Piraten, fliegende Händler ...)  
 todo. Konzept für Missionen und NPC-Missionen
 
+todo. long running query is fleets in star system -> organize it better and replace fleet selection by fetching names
 todo. balance kosten vs nutzen bei modulen
 todo. schiffstypen nachbauen und daraus die Werte ableiten, um Sinnhaftigkeit zu prüfen
 

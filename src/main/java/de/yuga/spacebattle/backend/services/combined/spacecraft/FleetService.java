@@ -13,6 +13,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.repositories.combined.spacecraft.FleetRepository;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import de.yuga.spacebattle.rest.dto.AbstractId;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMerge;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMergeResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -277,6 +278,11 @@ public class FleetService {
     @Nonnull
     public List<Fleet> findAllFleetsByUser(final int idUser) {
         return fleetRepository.findAllFleetsBy(idUser);
+    }
+
+    @Nonnull
+    public List<AbstractId> findAllAliveFleetsBy(final int idUser) {
+        return Objects.requireNonNullElse(fleetRepository.findAllAliveFleetsBy(idUser), new ArrayList<>());
     }
 
     @Nonnull
