@@ -8,7 +8,9 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -35,6 +37,10 @@ public interface FleetRepository extends CrudRepository<Fleet, Integer>, CustomF
     @Nullable
     @Query("SELECT f FROM Fleet f WHERE f.isDeleted = false")
     List<Fleet> findAllAliveFleets();
+
+    @Nullable
+    @Query("SELECT DISTINCT f FROM Fleet f WHERE f.isDeleted = false AND f.orbit.system.id IN (:systemIds)")
+    List<Fleet> findAllAliveFleetsInSystems(@Param("systemIds") @Nonnull final Collection<Integer> systemIds);
 
     @Nullable
     @Query("SELECT new de.yuga.spacebattle.rest.dto.AbstractId(f.id, f.name) FROM Fleet f WHERE f.isDeleted = false AND f.owner.id = :idUser")

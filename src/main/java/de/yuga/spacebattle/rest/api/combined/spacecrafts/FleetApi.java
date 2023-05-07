@@ -98,7 +98,8 @@ public class FleetApi extends BaseApi {
         } else if (fleet.getOwner().getId() != getIdUser() && fleet.getOrbit() != null) {
             final StarSystem system = fleet.getOrbit().getSystem();
             if (system != null) {
-                final boolean userHasFleetInSystem = system.getFleets().stream().anyMatch(f -> f.getOwner().getId() == getIdUser());
+                final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> allAliveFleetsInSystems = fleetService.findAllAliveFleetsInSystems(List.of(system.getId()));
+                final boolean userHasFleetInSystem = allAliveFleetsInSystems.stream().anyMatch(f -> f.getOwner().getId() == getIdUser());
                 if (!userHasFleetInSystem) {
                     errorMessage = "There is an intelligence service which prevents to gather the information.";
                 }
@@ -129,7 +130,7 @@ public class FleetApi extends BaseApi {
         if (starSystem == null) {
             throw new NotifyWebUserException("There should be a star system, you searches for.");
         }
-        final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> fleets = starSystem.getFleets();
+        final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> fleets = fleetService.findAllAliveFleetsInSystems(List.of(idStarSystem));
         final int idUser = getIdUser();
         final boolean ownsPlanet = starSystem.getPlanets().stream().filter(p -> p.getOwner() != null).anyMatch(p -> p.getOwner().getId() == idUser);
         final boolean hasFleetInside = fleets.stream().anyMatch(f -> f.getOwner().getId() == idUser);
@@ -197,28 +198,25 @@ public class FleetApi extends BaseApi {
     )
     public ResponseEntity<?> getFleetDistribution() {
 
-        final int idUser = getIdUser(); /* fixme */
+        final int idUser = getIdUser();
         final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> byUser = fleetService.findAllFleetsByUser(idUser);
 
         final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> fleets = new HashSet<>();
 
-        final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> collect = byUser.stream()
+        final List<Planet> allColonizedBy = planetService.findAllColonizedBy(idUser);
+        final Set<Integer> systemIDsWithColonies = allColonizedBy.stream().map(Planet::getSystem).map(StarSystem::getId).collect(Collectors.toSet());
+        final Set<Integer> systemIDsWithPresence = byUser.stream()
                 .filter(f -> f.getOrbit() != null)
                 .filter(f -> f.getOrbit().getSystem() != null)
-                .map(f -> f.getOrbit().getSystem().getFleets())
-                .flatMap(Collection::stream)
+                .map(f -> f.getOrbit().getSystem())
+                .map(StarSystem::getId)
                 .collect(Collectors.toSet());
 
-        final List<Planet> allColonizedBy = planetService.findAllColonizedBy(idUser);
-        final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> collect1 = allColonizedBy.stream()
-                .map(Planet::getSystem)
-                .map(StarSystem::getFleets)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+        systemIDsWithColonies.addAll(systemIDsWithPresence);
+        final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> allAliveFleetsInSystemsWithColonies = fleetService.findAllAliveFleetsInSystems(systemIDsWithColonies);
 
         fleets.addAll(byUser);
-        fleets.addAll(collect);
-        fleets.addAll(collect1);
+        fleets.addAll(allAliveFleetsInSystemsWithColonies);
 
         return ResponseEntity.ok(fleets.stream().map(FleetMarker::new).collect(Collectors.toSet()));
     }

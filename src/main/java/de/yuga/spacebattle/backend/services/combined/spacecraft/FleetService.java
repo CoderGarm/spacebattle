@@ -199,6 +199,13 @@ public class FleetService {
         return Objects.requireNonNullElse(fleetRepository.findAllAliveFleets(), new ArrayList<>());
     }
 
+    @Nonnull
+    public List<Fleet> findAllAliveFleetsInSystems(@Nonnull final Collection<Integer> systemIds) {
+        Preconditions.checkNotNull(systemIds, "systemIds must not be empty");
+
+        return Objects.requireNonNullElse(fleetRepository.findAllAliveFleetsInSystems(systemIds), new ArrayList<>());
+    }
+
     /**
      * Removes all fleets without warships.
      *
@@ -217,11 +224,6 @@ public class FleetService {
 
         toRemove.forEach(Fleet::delete);
         fleetRepository.saveAll(toRemove);
-    }
-
-    @Nonnull
-    public Set<Fleet> findAllFleetsWithoutInterstellarMovement(final int idUser) {
-        return fleetRepository.findAllFleetsWithoutInterstellarMovement(idUser);
     }
 
     @Nonnull
