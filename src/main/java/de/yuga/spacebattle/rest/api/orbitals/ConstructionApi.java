@@ -92,7 +92,10 @@ public class ConstructionApi extends BaseApi {
                 .stream()
                 .map(e -> {
                     final de.yuga.spacebattle.rest.dto.constructables.buildings.Construction construction = new de.yuga.spacebattle.rest.dto.constructables.buildings.Construction(e, getPreferredLanguage());
-                    levels.stream().filter(l -> l.getResearch().equals(e.getBuilding().getUnlockedThrough())).findFirst().filter(l -> l.getLevel() > e.getLevel()).ifPresent(l -> construction.activateNextLevel());
+                    final boolean canUpgrade = levels.stream().filter(l -> l.getResearch().equals(e.getBuilding().getUnlockedThrough())).findFirst().filter(l -> l.getLevel() > e.getLevel()).isPresent();
+                    if (canUpgrade) {
+                        construction.activateNextLevel();
+                    }
                     return construction;
                 })
                 .collect(Collectors.toSet());

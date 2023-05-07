@@ -105,12 +105,12 @@ public class MasterOfTheUniverseService {
     private static final Map<EEducationType, Long> XXXS_CREW = Map.of(EEducationType.ENLISTED, 1L);
     private static final Map<EEducationType, Long> XXS_CREW = Map.of(EEducationType.ENLISTED, 3L);
     private static final Map<EEducationType, Long> XS_CREW = Map.of(EEducationType.ENLISTED, 5L, EEducationType.OFFICER, 1L);
-    private static final Map<EEducationType, Long> S_CREW = Map.of(EEducationType.ENLISTED, 8L, EEducationType.OFFICER, 2L);
-    private static final Map<EEducationType, Long> M_CREW = Map.of(EEducationType.ENLISTED, 12L, EEducationType.OFFICER, 3L);
-    private static final Map<EEducationType, Long> L_CREW = Map.of(EEducationType.ENLISTED, 18L, EEducationType.OFFICER, 6L);
-    private static final Map<EEducationType, Long> XL_CREW = Map.of(EEducationType.ENLISTED, 20L, EEducationType.OFFICER, 9L);
-    private static final Map<EEducationType, Long> XXL_CREW = Map.of(EEducationType.ENLISTED, 300L, EEducationType.OFFICER, 100L);
-    private static final Map<EEducationType, Long> XXXL_CREW = Map.of(EEducationType.ENLISTED, 500L, EEducationType.OFFICER, 180L);
+    private static final Map<EEducationType, Long> S_CREW = Map.of(EEducationType.ENLISTED, 8L, EEducationType.OFFICER, 1L);
+    private static final Map<EEducationType, Long> M_CREW = Map.of(EEducationType.ENLISTED, 12L, EEducationType.OFFICER, 1L);
+    private static final Map<EEducationType, Long> L_CREW = Map.of(EEducationType.ENLISTED, 18L, EEducationType.OFFICER, 2L);
+    private static final Map<EEducationType, Long> XL_CREW = Map.of(EEducationType.ENLISTED, 20L, EEducationType.OFFICER, 3L);
+    private static final Map<EEducationType, Long> XXL_CREW = Map.of(EEducationType.ENLISTED, 300L, EEducationType.OFFICER, 30L);
+    private static final Map<EEducationType, Long> XXXL_CREW = Map.of(EEducationType.ENLISTED, 500L, EEducationType.OFFICER, 50L);
 
     public static final String FLASHKID = "Flashkid";
 
@@ -325,7 +325,7 @@ public class MasterOfTheUniverseService {
         amendTranslation(research, "Gesundheit und Wohnen", "Verbessert die Möglichkeiten des allgemeinen Lebens.");
         researchService.save(research);
 
-        b = building("Residential and housing", "Everyone needs a home.", 1000, 15, EEducationType.COLLEGE, ETechLevel.TECH_I, LIVING_PT, research, 1);
+        b = building("Residential and housing", "Everyone needs a home.", 10000, 150, EEducationType.COLLEGE, ETechLevel.TECH_I, LIVING_PT, research, 1);
         amendTranslation(b, "Wohnräume", "Jeder braucht ein zuhause.");
         buildingService.save(b);
 
@@ -340,7 +340,7 @@ public class MasterOfTheUniverseService {
         final Research civilEducation = researchService.save(research);
 
         b = building("Research Laboratories", "Brings light into the dark.",
-                10, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, RESEARCH_LAB_PT, research, 1);
+                25, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, RESEARCH_LAB_PT, research, 1);
         amendTranslation(b, "Forschungslabore", "Bringt Licht ins Dunkel.");
         buildingService.save(b);
 
@@ -389,7 +389,7 @@ public class MasterOfTheUniverseService {
         Preconditions.checkNotNull(f, "f must not be empty");
 
         final EShipClassType shipClassType = EShipClassType.DD;
-        final ShipClass shipClass = new ShipClass(owner, "Song");
+        final ShipClass shipClass = new ShipClass(owner, "Songbird");
         shipClass.setShipClassType(shipClassType);
 
         final Armor a = f.getByType(shipClassType, f.getArmors());
@@ -425,6 +425,12 @@ public class MasterOfTheUniverseService {
                 ),
                 Set.of());
 
+        final List<PassiveModule> passiveModules = f.getPassiveModules();
+        final PassiveModule freightModule = passiveModules.stream().filter(pa -> pa.getSupportType() == ESupportType.FREIGHT).findFirst().orElseThrow(NullPointerException::new);
+        final PassiveModule passengerModule = passiveModules.stream().filter(pa -> pa.getSupportType() == ESupportType.PASSENGER).findFirst().orElseThrow(NullPointerException::new);
+        shipClass.setSupportFittings(Set.of(
+                new SupportFitting(freightModule, 2),
+                new SupportFitting(passengerModule, 2)));
 
         final Set<ConstraintViolation<ShipClass>> validate = validator.validate(shipClass);
         if (!validate.isEmpty()) {
@@ -624,10 +630,10 @@ public class MasterOfTheUniverseService {
         result.add(moduleService.createWeapon(namedTechLevel, 1, 350, 65, EShipClassType.LAC, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(XXS_CREW)));
 
         result.add(moduleService.createWeapon(namedTechLevel, 2, 450, 80, EShipClassType.DD, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(XXS_CREW)));
-        result.add(moduleService.createWeapon(namedTechLevel, 3, 600, 90, EShipClassType.CL, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(S_CREW)));
+        result.add(moduleService.createWeapon(namedTechLevel, 3, 600, 90, EShipClassType.CL, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(XS_CREW)));
 
-        result.add(moduleService.createWeapon(namedTechLevel, 4, 800, 110, EShipClassType.CA, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(S_CREW)));
-        result.add(moduleService.createWeapon(namedTechLevel, 4, 1500, 160, EShipClassType.CA, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(M_CREW)));
+        result.add(moduleService.createWeapon(namedTechLevel, 4, 800, 110, EShipClassType.CA, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(XS_CREW)));
+        result.add(moduleService.createWeapon(namedTechLevel, 4, 1500, 160, EShipClassType.CA, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(S_CREW)));
 
         research = research("Graser",
                 "Grasers were lasers operating in the gamma ray range. Considered vastly superior in both strength and size when compared to lasers, grasers were often only seen in small numbers in smaller ships, due to their larger mass.",
@@ -641,13 +647,13 @@ public class MasterOfTheUniverseService {
         amendTranslation(namedTechLevel, "Graser", "Graser sind wie die Laser lichtschnelle Waffen, die aber im Gegensatz zu diesen nicht im Bereich des Lichts, sondern im Bereich der Gamma-Strahlung operieren.");
         moduleService.save(namedTechLevel);
 
-        result.add(moduleService.createWeapon(namedTechLevel, 1, 1900, 200, EShipClassType.CL, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(XXS_CREW)));
-        result.add(moduleService.createWeapon(namedTechLevel, 1, 2600, 350, EShipClassType.CL, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(XS_CREW)));
-        result.add(moduleService.createWeapon(namedTechLevel, 2, 3100, 400, EShipClassType.CA, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(S_CREW)));
+        result.add(moduleService.createWeapon(namedTechLevel, 1, 1900, 200, EShipClassType.CL, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(XXXS_CREW)));
+        result.add(moduleService.createWeapon(namedTechLevel, 1, 2600, 350, EShipClassType.CL, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(XXS_CREW)));
+        result.add(moduleService.createWeapon(namedTechLevel, 2, 3100, 400, EShipClassType.CA, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(XS_CREW)));
         result.add(moduleService.createWeapon(namedTechLevel, 3, 3600, 500, EShipClassType.BC, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(M_CREW)));
         result.add(moduleService.createWeapon(namedTechLevel, 4, 6600, 850, EShipClassType.BB, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(M_CREW)));
         result.add(moduleService.createWeapon(namedTechLevel, 5, 9800, 1100, EShipClassType.DN, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(L_CREW)));
-        result.add(moduleService.createWeapon(namedTechLevel, 6, 12200, 1450, EShipClassType.SD, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(XL_CREW)));
+        result.add(moduleService.createWeapon(namedTechLevel, 6, 12200, 1450, EShipClassType.SD, beamDistance, 1, EWeaponType.BEAM, CrewRequirement.of(L_CREW)));
         return result;
     }
 

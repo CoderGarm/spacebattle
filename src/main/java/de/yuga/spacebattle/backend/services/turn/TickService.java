@@ -147,7 +147,7 @@ public class TickService {
     }
 
     @PostConstruct
-    private void load() {
+    private void loadTick() {
 
         this.today = getToday();
     }
@@ -162,6 +162,7 @@ public class TickService {
         final long startB = Calendar.getInstance().getTimeInMillis();
 
         try {
+            loadTick();
             LOGGER.info("Tick scheduled");
             // block all rest endpoints while ticking
             isTicking = true;
@@ -559,7 +560,6 @@ public class TickService {
         Preconditions.checkNotNull(demand, "demand must not be empty");
         Preconditions.checkNotNull(utilization, "utilization must not be empty");
 
-        final List<Construction> ops = new ArrayList<>();
         // prio 1: military stuff, prio 2: higher tech level
         final List<Construction> supplyNeeded = planet.getConstructions().stream()
                 .filter(c -> c.getOperationalLevel() < c.getLevel())
@@ -576,7 +576,10 @@ public class TickService {
                     return Integer.compare(o1.getBuilding().getTechLevel().ordinal(), o2.getBuilding().getTechLevel().ordinal());
                 })
                 .collect(Collectors.toList());
+
         Collections.reverse(supplyNeeded);
+
+        final List<Construction> ops = new ArrayList<>();
         for (final Construction inoperational : supplyNeeded) {
             final ResourceDeposit costs = inoperational.getBuilding().getCosts();
             final int activeLevel = inoperational.getOperationalLevel();
@@ -590,7 +593,6 @@ public class TickService {
                     utilization.updateCrew(costsForLevel, ECalculationType.ADD);
 
                     inoperational.setOperationalLevel(i);
-                    ops.remove(inoperational);
                     ops.add(inoperational);
                 }
             }

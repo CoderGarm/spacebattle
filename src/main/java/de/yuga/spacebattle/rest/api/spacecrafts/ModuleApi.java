@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.rest.api.spacecrafts;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.rest.api.BaseApi;
@@ -40,7 +39,6 @@ public class ModuleApi extends BaseApi {
     private static final String LAUNCHER_ENDPOINT = "launcher";
     private static final String SIDEWALL_ENDPOINT = "sidewall";
     private static final String PROPULSION_ENDPOINT = "propulsion";
-    private static final String HULL_ENDPOINT = "hull";
     private static final String ELOKA_ENDPOINT = "eloka";
     private static final String PASSIVE_ENDPOINT = "passive";
 
@@ -166,8 +164,115 @@ public class ModuleApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getPassiveModulesByUser() {
-        final User owner = userService.findWithResearches(getIdUser());
+        return ResponseEntity.ok(moduleService.findAllPassiveModuleByUser(getIdUser()).stream().map(p -> new PassiveModule(p, getPreferredLanguage())).collect(Collectors.toList()));
+    }
 
-        return ResponseEntity.ok(moduleService.findAllPassiveModuleByUser(owner).stream().map(p -> new PassiveModule(p, getPreferredLanguage())).collect(Collectors.toList()));
+    @GetMapping(value = ARMOR_ENDPOINT + "/all")
+    @Operation(summary = "Get all unlocked armors for the owner .", operationId = "getArmors",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Armor.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getArmors() {
+        return ResponseEntity.ok(moduleService.findAllArmors().stream().map(a -> new Armor(a, getPreferredLanguage())).collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = WEAPON_ENDPOINT + "/all")
+    @Operation(summary = "Get all unlocked weapons for the owner .", operationId = "getWeapons",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Weapon.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getWeapons() {
+        final List<de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon> allWeapon = moduleService.findAllWeapons();
+        final List<de.yuga.spacebattle.rest.dto.spacecrafts.modules.Weapon> weaponList = allWeapon.stream()
+                .map(w -> new de.yuga.spacebattle.rest.dto.spacecrafts.modules.Weapon(w, getPreferredLanguage()))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(weaponList);
+    }
+
+    @GetMapping(value = LAUNCHER_ENDPOINT + "/all")
+    @Operation(summary = "Get all unlocked weapons for the owner .", operationId = "getLaunchers",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Launcher.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getLaunchers() {
+        return ResponseEntity.ok(moduleService.findAllLaunchers().stream().map(l -> new Launcher(l, getPreferredLanguage())).collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = SIDEWALL_ENDPOINT + "/all")
+    @Operation(summary = "Get all unlocked sidewalls for the owner .", operationId = "getSidewalls",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Sidewall.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getSidewalls() {
+        return ResponseEntity.ok(moduleService.findAllSidewalls().stream().map(s -> new Sidewall(s, getPreferredLanguage())).collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = PROPULSION_ENDPOINT + "/all")
+    @Operation(summary = "Get all unlocked propulsions for the owner .", operationId = "getPropulsions",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Propulsion.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getPropulsions() {
+        return ResponseEntity.ok(moduleService.findAllPropulsions().stream().map(p -> new Propulsion(p, getPreferredLanguage())).collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = ELOKA_ENDPOINT + "/all")
+    @Operation(summary = "Get all unlocked electronic warfare for the owner .", operationId = "getElectronicWarfare",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = ElectronicWarfare.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getElectronicWarfares() {
+        return ResponseEntity.ok(moduleService.findAllElectronicWarfare().stream().map(e -> new ElectronicWarfare(e, getPreferredLanguage())).collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = PASSIVE_ENDPOINT + "/all")
+    @Operation(summary = "Get all unlocked passive modules for the owner .", operationId = "getPassiveModules",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = PassiveModule.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getPassiveModules() {
+        return ResponseEntity.ok(moduleService.findAllPassiveModules().stream().map(p -> new PassiveModule(p, getPreferredLanguage())).collect(Collectors.toList()));
     }
 }

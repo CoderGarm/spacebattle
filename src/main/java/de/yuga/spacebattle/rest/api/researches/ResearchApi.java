@@ -191,7 +191,7 @@ public class ResearchApi extends BaseApi {
         if (facility == null) {
             return ResponseEntity.ok(false);
         }
-        boolean researchPossible = facility.getJobs().isEmpty();
+        boolean researchPossible = facility.getOperationalLevel() > 0 && facility.getJobs().isEmpty();
         return ResponseEntity.ok(researchPossible);
     }
 }

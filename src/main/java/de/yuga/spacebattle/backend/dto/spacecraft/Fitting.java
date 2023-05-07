@@ -108,7 +108,10 @@ public class Fitting {
         Preconditions.checkNotNull(shipClassType, "shipClassType must not be empty");
         Preconditions.checkNotNull(elements, "elements must not be empty");
 
-        return elements.stream().sorted(Comparator.comparingInt(HasCostsByOwn::getEffectValue)).filter(a -> a.getShipClassType().suitsShipClassType(shipClassType)).findFirst().orElse(null);
+        return elements.stream()
+                .sorted(Comparator.comparingInt(HasCostsByOwn::getEffectValue))
+                .filter(a -> a.getShipClassType().suitsShipClassType(shipClassType))
+                .findFirst().orElse(null);
     }
 
     @Nullable

@@ -63,9 +63,16 @@ public class Commissioning {
         return planet;
     }
 
+    public void addConstructions(@Nonnull final Set<Construction> operationals) {
+        Preconditions.checkNotNull(operationals, "operationals must not be empty");
 
-    public void setConstructions(@Nonnull final Set<Construction> operationals) {
-        this.constructions = Preconditions.checkNotNull(operationals, "operationals must not be empty");
+        operationals.forEach(operational -> {
+            final Construction known = this.constructions.stream().filter(c -> c.getOperationalLevel() < operational.getOperationalLevel()).findFirst().orElse(null);
+            if (known != null) {
+                this.constructions.remove(known);
+                this.constructions.add(operational);
+            }
+        });
     }
 
     @Nonnull

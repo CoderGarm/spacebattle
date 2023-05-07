@@ -1,7 +1,5 @@
 package de.yuga.spacebattle.backend.repositories.spacecraft.modules.custom.impl;
 
-import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.PassiveModule;
 import de.yuga.spacebattle.backend.repositories.spacecraft.modules.custom.CustomPassiveModuleRepository;
 import org.springframework.stereotype.Service;
@@ -25,11 +23,9 @@ public class CustomPassiveModuleRepositoryImpl implements CustomPassiveModuleRep
 
     @Nonnull
     @Override
-    public List<PassiveModule> findAllByUser(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-
+    public List<PassiveModule> findAllByUser(final int idUser) {
         return em.createNamedQuery("PassiveModule.getAllByResearches", PassiveModule.class)
-                .setParameter("idUser", user.getId())
+                .setParameter("idUser", idUser)
                 .getResultList();
     }
 }

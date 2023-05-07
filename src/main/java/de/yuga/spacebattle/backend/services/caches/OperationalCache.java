@@ -18,17 +18,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
-public class OperationalCache {
+public class OperationalCache extends BaseCache {
 
     @Nonnull
-    private final CacheStore<Integer, Set<Commissioning>> cache = new CacheStore<>(2, TimeUnit.DAYS);
+    private final CacheStore<String, Set<Commissioning>> cache = new CacheStore<>(2, TimeUnit.DAYS);
 
     @Nonnull
     public Set<Commissioning> getOperationals(@Nonnull final Tick today,
                                               final int idUser) {
         Preconditions.checkNotNull(today, "today must not be empty");
 
-        return Objects.requireNonNullElse(cache.get(idUser), new HashSet<Commissioning>()).stream().filter(t -> t.isToday(today)).collect(Collectors.toSet());
+        final String cacheKey = getCacheKey(today, idUser);
+        return Objects.requireNonNullElse(cache.get(cacheKey), new HashSet<Commissioning>()).stream().filter(t -> t.isToday(today)).collect(Collectors.toSet());
     }
 
     @Nonnull
@@ -37,10 +38,11 @@ public class OperationalCache {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(user, "user must not be empty");
 
-        Set<Commissioning> commissionings = cache.get(user.getId());
+        final String cacheKey = getCacheKey(today, user);
+        Set<Commissioning> commissionings = cache.get(cacheKey);
         if (commissionings == null) {
             commissionings = new HashSet<>();
-            cache.add(user.getId(), commissionings);
+            cache.add(cacheKey, commissionings);
         }
         return commissionings;
     }
@@ -50,6 +52,7 @@ public class OperationalCache {
                                  @Nonnull final List<WarShip> operationals) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(planet.getOwner(), "planet.getOwner() must not be empty");
         Preconditions.checkNotNull(operationals, "operationals must not be empty");
 
         final Set<Commissioning> commissionings = getTodayCommissioning(today, planet.getOwner());
@@ -65,13 +68,14 @@ public class OperationalCache {
                                       @Nonnull final Set<Construction> operationals) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(planet.getOwner(), "planet.getOwner() must not be empty");
         Preconditions.checkNotNull(operationals, "operationals must not be empty");
 
         final Set<Commissioning> commissionings = getTodayCommissioning(today, planet.getOwner());
         commissionings.stream()
                 .filter(c -> c.getPlanet().equals(planet))
                 .findFirst()
-                .ifPresentOrElse(commissioning -> commissioning.setConstructions(operationals),
+                .ifPresentOrElse(commissioning -> commissioning.addConstructions(operationals),
                         () -> commissionings.add(new Commissioning(today, planet, operationals)));
     }
 }

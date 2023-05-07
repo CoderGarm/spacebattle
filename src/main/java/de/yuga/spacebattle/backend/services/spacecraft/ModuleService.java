@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.spacecraft.Fitting;
-import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.MissileMotor;
@@ -263,10 +262,8 @@ public class ModuleService {
     }
 
     @Nonnull
-    public List<PassiveModule> findAllPassiveModuleByUser(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-
-        return passiveModuleRepository.findAllByUser(user);
+    public List<PassiveModule> findAllPassiveModuleByUser(final int idUser) {
+        return passiveModuleRepository.findAllByUser(idUser);
     }
 
     @Nullable

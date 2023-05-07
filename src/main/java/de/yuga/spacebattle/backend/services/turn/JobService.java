@@ -191,14 +191,16 @@ public class JobService {
         if (planet == null || planet.getOwner() == null || building == null) {
             throw new NotifyWebUserException("not that way!");
         }
-        if (!researchService.isResearchUnlocked(planet.getOwner(), building.getUnlockedThrough())) {
-            throw new NotifyWebUserException("You can't do that - first you have to research the '" + building.getUnlockedThrough().getName(Translation.DEFAULT_LANGUAGE) + "' research.");
-        }
 
         final Set<Construction> constructions = planet.getConstructions();
         final Construction existingC = constructions.stream()
                 .filter(construction -> construction.getBuilding().equals(building))
                 .findFirst().orElse(null);
+
+        final int level = researchService.getLevelForResearch(planet.getOwner(), building.getUnlockedThrough());
+        if (existingC != null && existingC.getLevel() >= level) {
+            throw new NotifyWebUserException("You can't do that - first you have to research the '" + building.getUnlockedThrough().getName(Translation.DEFAULT_LANGUAGE) + "' research.");
+        }
 
         final int targetLevel = existingC != null ? existingC.getLevel() + 1 : 1;
         final Constructable constructable = new Constructable(building, targetLevel);
@@ -220,22 +222,11 @@ public class JobService {
         return entity;
     }
 
-
-    /**
-     * Creates a entity by {@link Research#getId()} and {@link Planet#getId()}.
-     * The research's level will be incremented by 1 in every {@link Job}.
-     * <p>
-     * The research is mapped to the planet with the lowest ID and a research facility.
-     *
-     * @param user     the planet where the entity should be executed
-     * @param research the research which should be researches
-     * @return the created entity
-     */
     public Job createResearchJob(@Nonnull final User user, @Nonnull final Research research) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
         Preconditions.checkNotNull(research, "research shouldn't be null!");
 
-        if (researchService.isResearchUnlocked(user, research)) {
+        if (researchService.isResearchAtLevelCap(user, research)) {
             throw new NotifyWebUserException("You can't do that - you already have the '" + research.getName(Translation.DEFAULT_LANGUAGE) + "' research.");
         }
 
@@ -259,11 +250,6 @@ public class JobService {
         return entity;
     }
 
-    /**
-     * Checks if the pointed facility is in use.
-     *
-     * @param facility the facility which could be in use
-     */
     private void checkIfFree(@Nullable final Construction facility) {
         if (facility == null) {
             throw new NotifyWebUserException("not here, buddy!");

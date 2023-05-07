@@ -22,7 +22,7 @@ public interface ResearchLevelRepository extends CrudRepository<ResearchLevel, I
      * @param idResearch the research id
      * @return <code>true</code> if the user already has this research unlocked, <code>false</code> otherwise
      */
-    @Query("SELECT CASE WHEN (COUNT(r) > 0) THEN TRUE ELSE FALSE END FROM ResearchLevel r WHERE r.user.id = :idUser AND r.research.id = :idResearch AND r.level > 0")
+    @Query("SELECT CASE WHEN (COUNT(r) > 0) THEN TRUE ELSE FALSE END FROM ResearchLevel r WHERE r.user.id = :idUser AND r.research.id = :idResearch AND r.level >= r.research.levelCap")
     boolean isResearchUnlocked(@Param("idUser") final int idUser, @Param("idResearch") final int idResearch);
 
     /**
