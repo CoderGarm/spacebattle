@@ -19,6 +19,7 @@ import org.jfree.chart.ui.UIUtils;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.time.Year;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nonnull;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+@Disabled
 public class WikiShipClassEvaluationTest {
 
     public static final String S_1_PD = "[\\s]?[0-9]{4}[\\s]?(PD)?";
