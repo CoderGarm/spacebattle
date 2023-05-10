@@ -11,13 +11,10 @@ Gameplay:
 
 Diverses:
 
-1.
+1. Die Foren und Fäden sind nicht mehr nur an der Überschrift auswählbar. Der Cursor ändert sich entsprechend.
+2. Der Sonderfall "Das Journal kann nicht scrollen" ist behoben.
 
 ----------------- Bugs fixed -----------
-
-done. empire bug
-todo. forum cursor clickable
-todo. overflow hidden bei map und journal
 
 ----------------- next steps -----------
 
