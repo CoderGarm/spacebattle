@@ -1,6 +1,8 @@
 package de.yuga.spacebattle.rest.config.logging;
 
 import com.google.common.base.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
@@ -17,6 +19,9 @@ import javax.annotation.Nullable;
 
 @ControllerAdvice
 public class CustomResponseBodyAdviceAdapter implements ResponseBodyAdvice<Object> {
+
+    @Nonnull
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomResponseBodyAdviceAdapter.class);
 
     @Nonnull
     private final LoggingService loggingService;
@@ -50,11 +55,15 @@ public class CustomResponseBodyAdviceAdapter implements ResponseBodyAdvice<Objec
         Preconditions.checkNotNull(serverHttpRequest, "serverHttpRequest shouldn't be null!");
         Preconditions.checkNotNull(serverHttpResponse, "serverHttpResponse shouldn't be null!");
 
-        if (serverHttpRequest instanceof ServletServerHttpRequest &&
-                serverHttpResponse instanceof ServletServerHttpResponse) {
-            loggingService.logResponse(
-                    ((ServletServerHttpRequest) serverHttpRequest).getServletRequest(),
-                    ((ServletServerHttpResponse) serverHttpResponse).getServletResponse(), o);
+        try {
+            if (serverHttpRequest instanceof ServletServerHttpRequest &&
+                    serverHttpResponse instanceof ServletServerHttpResponse) {
+                loggingService.logResponse(
+                        ((ServletServerHttpRequest) serverHttpRequest).getServletRequest(),
+                        ((ServletServerHttpResponse) serverHttpResponse).getServletResponse(), o);
+            }
+        } catch (final RuntimeException e) {
+            LOGGER.warn("Error while logging: ", e.fillInStackTrace());
         }
 
         return o;

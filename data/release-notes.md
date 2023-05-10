@@ -3,56 +3,21 @@ Thema: NPC, Handel und Missionen
 
 Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
-1. Das Antriebsmodell entspricht jetzt dem Honorverse.
-   - https://honor-harrington.fandom.com/de/wiki/Impellerantrieb
-   - https://honor-harrington.fandom.com/de/wiki/Warshawski-Segel
-
-2. Das Konzept von Jagd- und Breitseitenbewaffnung wurde geändert.
-   - Es bleibt (vorerst) dabei, dass Bug- und Heck-Bewaffnung manuell gefittet werden muss.
-   - Es wird nicht mehr zwischen Breitseiten- und Jagdwaffen unterschieden - ein Waffensystem ist universell benutzbar.
-   - Eine Breitseitenwaffe wird immer zweimal gefittet - eine pro Breitseite.
-3. Die Schiffshüllen wurden entfernt.  
-   Ganz nach dem Rollenverständnis der RMN folgen Schiffstypen einer Funktion und nicht einer Klassifizierung nach
-   Masse.
-   - Die einzelnen Module sind weiterhin einer Klasse als Sortier- und Vergleichskriterium zugeordnet.
-   - Das Fitting einer Schiffsklasse entscheidet darüber, wie viel Tonnage das Schiff im Ganzen besitzt.  
-     Das beinhaltet den physikalischen Zwang, dass in den Bug- und Hecksektionen nur ein gewisser Prozentsatz des
-     Schiffsvolumens und der Schiffsmasse zur Verfügung steht.
-      - https://honor-harrington.fandom.com/de/wiki/Hammerkopf
-4. Berechnung der Tonnage
-   - Siehe oben, die Gesamtmasse eines Schiffes definiert sich über die Anforderungen des Impellerantriebs.  
-     Damit ergibt sich spielerisch das Konzept der toten Tonnage. Massetechnisch asymmetrisch gefittete Hammerköpfe
-     benötigen eine identische Masseverteilung, dass bedeutet,
-     dass der "leere" Hammerkopf mit Superstruktur aufgefüllt wird, um den physikalischen Anforderungen zu
-     entsprechen.  
-     Analoges gilt für schwere Hammerköpfe und eine gewissermaßen leere Breitseite. Dann muss die Breitseite mit bzw.
-     der Modulraum des Schiffes mit inaktiver Masse gefüllt
-     werden.
+1.
 
 Gameplay:
 
-1. Auf der StarMap verändert sich der Cursor, wenn man etwas anklicken kann.
-2. Gebäude und Module mit dem Ziel überarbeitet, es insgesamt etwas "runder" zu machen.
-   - Es gibt jetzt z.B. Fracht- und Passagiermodule.
-   - Die Supportmodule wurden zunächst entfernt, kommen aber wieder.
-3. Der TechTree folgt nun einem levelbasierten Konzept. Das jeweils nächste Gebäudelevel muss frei geforscht werden.
-4. Es gibt eine Übersicht aller Imperien inklusive eines einfachen Punktesystems.
+1.
 
 Diverses:
 
-1. Es gibt eine interaktive Karte als IFrame, die über https://www.battleforhonor.de/external-star-map-manager oder über
-   das Burger-Menü erreicht werden kann.  
-   Über den Manager kann man Kartenausschnitte erzeugen und per URL bookmarken.  
-   Es wird auch ein IFrame angeboten, dass man auf anderen Webseiten einbinden kann.
-2. Ein Radien-Tool ermöglicht es, die groben Koordinaten von unbekannt gelegenen Systemen herauszufinden.  
-   Dabei sei erwähnt, dass die Entfernung in der Romanreihe alle mit sehr viel kreativer Freiheit verwendet werden.
-3. Im Profil kann man entscheiden, ob man Mails über neue Releases bekommen möchte (Opt-In) und man sieht den Status der
-   eigenen eMail-Adresse.
+1.
 
 ----------------- Bugs fixed -----------
 
-1. Der Bau-Button in der Werft war fälschlicherweise disabled.
-2. Im Login-Feld wurde das Passwort aufgedeckt, wenn man Enter drückt.
+done. empire bug
+todo. forum cursor clickable
+todo. overflow hidden bei map und journal
 
 ----------------- next steps -----------
 
