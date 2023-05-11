@@ -1,10 +1,12 @@
 package de.yuga.spacebattle.rest.dto.buildings;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.rest.dto.enums.ERefinementSequence;
 import de.yuga.spacebattle.rest.dto.enums.EResourceType;
+import de.yuga.spacebattle.rest.dto.researches.Research;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -14,47 +16,45 @@ import javax.annotation.Nullable;
 public class Building {
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The ID.")
     private Integer idBuilding;
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The name of this building.")
     private String name;
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The description.")
     private String description;
 
-    /**
-     * The basic effect value at level 1.
-     */
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The unlocking research name.")
+    private String unlockedThrough;
+
+    @JsonProperty
     @Schema(required = true, description = "The production amount at first level.")
     private int baseValue;
 
-    /**
-     * The increasement of value for the next level.
-     */
+    @JsonProperty
     @Schema(required = true, description = "The modification factor per level.")
     private double increasingFactorPerLevel;
 
-    /**
-     * What this building is working on.
-     */
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The subject of this building.")
     private EResourceType productionTarget;
 
-    /**
-     * What is the task of this building.
-     */
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The action this building is for.")
     private EProductionCategory productionCategory;
 
-    /**
-     * In case of a refinement task - here is the workflow.
-     */
     @Nullable
+    @JsonProperty
     @Schema(description = "In case of a refinement building - this is the defines sequence.")
     private ERefinementSequence refinementSequence;
 
@@ -66,9 +66,11 @@ public class Building {
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(building, "building shouldn't be null!");
 
+
         idBuilding = building.getId();
         name = building.getName(languageCode);
         description = building.getDescription(languageCode);
+        this.unlockedThrough = new Research(building.getUnlockedThrough(), languageCode).getName();
         baseValue = building.getBaseValue();
         increasingFactorPerLevel = building.getIncreasingFactorPerLevel().doubleValue();
         final ProductionType productionType = building.getProductionType();

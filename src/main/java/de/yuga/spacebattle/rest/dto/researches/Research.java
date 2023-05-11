@@ -82,4 +82,9 @@ public class Research {
     public int getIdResearch() {
         return idResearch;
     }
+
+    @Nonnull
+    public String getName() {
+        return name;
+    }
 }

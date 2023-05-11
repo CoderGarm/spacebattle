@@ -13,6 +13,7 @@ Diverses:
 
 1. Die Foren und Fäden sind nicht mehr nur an der Überschrift auswählbar. Der Cursor ändert sich entsprechend.
 2. Der Sonderfall "Das Journal kann nicht scrollen" ist behoben.
+3. Man erkennt am Gebäude, welche Forschung für das nächste level notwendig ist.
 
 ----------------- Bugs fixed -----------
 
