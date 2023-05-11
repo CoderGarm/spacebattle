@@ -102,7 +102,7 @@ public class Job {
         this.user = new UserJson(job.getOwner());
         this.facility = new Construction(job.getFacility(), languageCode);
         this.facilityPlanet = new Planet(job.getFacility().getPlanet());
-        this.ticksLeft = job.getJobDoneAtZero();
+        this.ticksLeft = job.getTicksLeft();
         this.priority = job.getPriority().name();
         final Constructable constructable = job.getConstructable();
         this.resourceType = new EResourceType(constructable.getResourceType());

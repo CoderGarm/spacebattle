@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.enums.ECollectableType.*;
 
@@ -82,5 +83,11 @@ public enum EResourceType implements HasIconName {
 
     public static EResourceType[] valuesWhichForfeits() {
         return Arrays.stream(EResourceType.values()).filter(e -> FORFEITABLE == e.getCollectableType()).toArray(EResourceType[]::new);
+    }
+
+    public static boolean isCollectable(@Nonnull final EResourceType resourceType) {
+        Preconditions.checkNotNull(resourceType, "resourceType must not be empty");
+
+        return Arrays.stream(valuesWhichAreCollectable()).collect(Collectors.toSet()).contains(resourceType);
     }
 }

@@ -26,7 +26,7 @@ public class ResourceAmount {
     public ResourceAmount(@Nonnull final de.yuga.spacebattle.backend.enums.EResourceType realResourceType, final long amount) {
         Preconditions.checkNotNull(realResourceType, "resourceType shouldn't be null!");
 
-        resourceType = new EResourceType(realResourceType);
+        this.resourceType = new EResourceType(realResourceType);
         this.amount = amount;
     }
 

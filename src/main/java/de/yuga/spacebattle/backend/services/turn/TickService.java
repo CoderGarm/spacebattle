@@ -20,6 +20,7 @@ import de.yuga.spacebattle.backend.entities.turn.*;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.repositories.turn.TickRepository;
 import de.yuga.spacebattle.backend.services.MailService;
@@ -34,10 +35,12 @@ import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
 import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStateService;
+import de.yuga.spacebattle.backend.services.turn.resources.MarketplaceService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -109,6 +112,9 @@ public class TickService {
     @Nonnull
     private final MailService mailService;
 
+    @Nonnull
+    private final MarketplaceService marketplaceService;
+
     private boolean isTicking = false;
 
     @Autowired
@@ -127,7 +133,8 @@ public class TickService {
                        @Nonnull final WarShipService warShipService,
                        @Nonnull final WarshipHealthStateService warshipHealthStateService,
                        @Nonnull final BattleService battleService,
-                       @Nonnull final MailService mailService) {
+                       @Nonnull final MailService mailService,
+                       @Nonnull final MarketplaceService marketplaceService) {
         this.transportationCache = Preconditions.checkNotNull(transportationCache, "transportationCache must not be empty");
         this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
         this.colonizationCache = Preconditions.checkNotNull(colonizationCache, "colonizationCache must not be empty");
@@ -144,11 +151,11 @@ public class TickService {
         this.warshipHealthStateService = Preconditions.checkNotNull(warshipHealthStateService, "warshipHealthStateService must not be empty");
         this.battleService = Preconditions.checkNotNull(battleService, "battleService must not be empty");
         this.mailService = Preconditions.checkNotNull(mailService, "mailService must not be empty");
+        this.marketplaceService = Preconditions.checkNotNull(marketplaceService, "marketplaceService must not be empty");
     }
 
     @PostConstruct
     private void loadTick() {
-
         this.today = getToday();
     }
 
@@ -173,6 +180,8 @@ public class TickService {
             tickTransportations();
             LOGGER.info(start + " migration.");
             tickMigrations();
+            LOGGER.info(start + " tradings.");
+            tickTrades();
             LOGGER.info(start + " planets.");
             tickPlanets();
             LOGGER.info(start + " movements.");
@@ -194,6 +203,41 @@ public class TickService {
             LOGGER.info("{} takes {} seconds", today, duration);
             isTicking = false;
         }
+    }
+
+    private void tickTrades() {
+        final List<TradedResource> trades = marketplaceService.findAllUnfinishedTrades();
+        final Set<TradedResource> arrivals = trades.stream().filter(t -> t.getTicksLeft() == 1).collect(Collectors.toSet());
+        final Map<Integer, Planet> toStore = new HashMap<>();
+        for (final TradedResource tradedResource : arrivals) {
+            tradedResource.setFinished(today);
+            transferTradedPayload(toStore, tradedResource);
+            transferTradePayment(toStore, tradedResource);
+        }
+        planetService.saveAll(toStore.values());
+
+        trades.stream().filter(t -> t.getTicksLeft() > 0).forEach(TradedResource::tick);
+        marketplaceService.save(trades);
+    }
+
+    private void transferTradePayment(@Nonnull final Map<Integer, Planet> toStore, @Nonnull final TradedResource tradedResource) {
+        Preconditions.checkNotNull(toStore, "toStore must not be empty");
+        Preconditions.checkNotNull(tradedResource, "tradedResource must not be empty");
+
+        Planet origin = tradedResource.getOrigin();
+        origin = toStore.getOrDefault(origin.getId(), origin);
+        origin.getResourceDeposit().updateResource(EResourceType.CREDITS, tradedResource.getPrice());
+        toStore.put(origin.getId(), origin);
+    }
+
+    private void transferTradedPayload(@Nonnull final Map<Integer, Planet> toStore, @Nonnull final TradedResource tradedResource) {
+        Preconditions.checkNotNull(toStore, "toStore must not be empty");
+        Preconditions.checkNotNull(tradedResource, "tradedResource must not be empty");
+
+        Planet destination = tradedResource.getDestination();
+        destination = toStore.getOrDefault(destination.getId(), destination);
+        destination.getResourceDeposit().updateResource(tradedResource.getResourceType(), tradedResource.getAmount());
+        toStore.put(destination.getId(), destination);
     }
 
     /**
@@ -485,7 +529,7 @@ public class TickService {
      * This includes the amount of generated resources and the calculations of jobs which could be successfully ended.
      */
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
-    void tickPlanet(@Nonnull Planet planet) {
+    public void tickPlanet(@Nonnull Planet planet) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkState(planet.getOwner() != null, "The owner must be set, otherwise there is nothing to do.");
 
@@ -810,7 +854,7 @@ public class TickService {
     }
 
     /**
-     * Counts down the remaining {@link Job#getJobDoneAtZero()}.
+     * Counts down the remaining {@link Job#getTicksLeft()}.
      *
      * @param job the {@link Job} to do
      * @return <code>true</code> if the job is done
@@ -819,7 +863,7 @@ public class TickService {
         Preconditions.checkNotNull(job, "job shouldn't be null!");
 
         job.tick();
-        return job.getJobDoneAtZero() <= 0;
+        return job.getTicksLeft() <= 0;
     }
 
     @Nonnull
@@ -845,5 +889,9 @@ public class TickService {
 
     public boolean isTicking() {
         return isTicking;
+    }
+
+    public List<Tick> getTimeframe(final int pastTicks) {
+        return tickRepository.findLastTicks(PageRequest.of(0, pastTicks));
     }
 }

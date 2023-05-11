@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.rest;
+package de.yuga.spacebattle.rest.dto.serializer;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;

@@ -3,29 +3,40 @@ Thema: NPC, Handel und Missionen
 
 Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
-1.
+1. Es gibt einen Marktplatz am Planeten. Dort können Handelsaufträge für Ressourcen erstellt oder Angebote angenommen
+   werden.
 
 Gameplay:
 
-1.
-
-Diverses:
-
-1. Die Foren und Fäden sind nicht mehr nur an der Überschrift auswählbar. Der Cursor ändert sich entsprechend.
-2. Der Sonderfall "Das Journal kann nicht scrollen" ist behoben.
-3. Man erkennt am Gebäude, welche Forschung für das nächste level notwendig ist.
+1. Man erkennt am Gebäude, welche Forschung für das nächste Level notwendig ist.
+2. Die Foren und Fäden sind nicht mehr nur an der Überschrift auswählbar. Der Cursor ändert sich entsprechend.
+3. Der Liste der aktiven Jobs auf einem Planeten wurde ins planetare Dashboard verschoben. Stattdessen gibt es dort
+   jetzt den Marktplatz.
+   todo. wurmlochbrücken
+   todo. anzahl beim fitting eingeben können
+   todo. ressi anzeige rows einfärben, auch bei pop development auf planis
 
 ----------------- Bugs fixed -----------
 
+todo. techtree verschieben funzt nicht richtig
+
 ----------------- next steps -----------
 
-Thema: NPC, Handel und Missionen
-
+Thema: Handel
 done. Bestenliste mit Punkten pro Leistungsfeld  
-todo. Marktplatz und NPC-Handelssystem  
-todo. interne Sektoraufteilung der Map nach Entfernung um wirtschaftliche Leistungszentren  
+done. Marktplatz
+
+Thema: NPC und Missionen
 todo. NPC-Konzept für Systeme und systemfreie NPC (Piraten, fliegende Händler ...)  
+todo. interne Sektoraufteilung der Map nach Entfernung um wirtschaftliche Leistungszentren  
+todo. NPC-Handelssystem
 todo. Konzept für Missionen und NPC-Missionen
+
+Thema: Spionage
+todo. Spionagegebäude, pro Level gibt es einen Spion
+todo. Spion im Einsatz bringt 50% Genauigkeit bei den Punkten (pro Einsatzfeld?)
+todo. Erfahrungslevel trainieren -> verbessert Genauigkeit
+todo. Counter-Spionage, Spione umdrehen (unbenutze Spionage-Slots)
 
 ----------------- bugs -----------------
 
@@ -42,6 +53,7 @@ todo. Konzept für Missionen und NPC-Missionen
 8. Änderungen in der Spielmechanik, z.B. dass die Leistung des Antriebs im Verhältnis zur Schiffsmasse steht -> erneutes
    Rebalancing der Module
 9. mich endlich mal um die "corporate identity" kümmern, also eigene Icons, Symbole, Benennungen usw erzeugen
+10. spionage
 
 todo. kein alter Menüpunkt mehr ausgewählt wenn man sich wieder einloggt
 todo. Exception per mail an webmaster

@@ -23,7 +23,7 @@ class DBPatchServiceTest {
     private static final String STATEMENT_SUFFIX = ";";
 
     @Test
-    void checkDBPatches() {
+    void checkDBPatchesForInsertStatement() {
 
         final List<File> patchFiles = getPatchFiles();
         final List<List<String>> patchContentByFile = patchFiles.stream().map(this::readFile)
@@ -35,7 +35,14 @@ class DBPatchServiceTest {
     private List<File> getPatchFiles() {
         final File dir = new File("data/sql/delta/");
         assertNotNull(dir);
-        final List<File> subFolders = Arrays.stream(Objects.requireNonNull(dir.listFiles()))
+        final Set<File> seasonFolders = Arrays.stream(Objects.requireNonNull(dir.listFiles()))
+                .filter(File::isDirectory)
+                .map(File::listFiles)
+                .filter(Objects::nonNull)
+                .map(files -> Arrays.stream(files).collect(Collectors.toSet()))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+        final List<File> subFolders = seasonFolders.stream()
                 .filter(f -> f.getName().startsWith("SB"))
                 .collect(Collectors.toList());
 

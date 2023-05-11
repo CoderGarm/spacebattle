@@ -4,14 +4,12 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
-import de.yuga.spacebattle.backend.entities.misc.Deletable;
+import de.yuga.spacebattle.backend.entities.misc.Completable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.EJobPriority;
-import de.yuga.spacebattle.backend.enums.EResourceType;
 import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
@@ -29,7 +27,7 @@ import javax.validation.constraints.NotNull;
 @Check(constraints = "(idBuilding IS NOT NULL AND targetLevel IS NOT NULL) " +
         "OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) " +
         "OR (idFleet IS NOT NULL) ")
-public class Job extends Deletable implements Comparable<Job> {
+public class Job extends Completable implements Comparable<Job> {
 
     @Nonnull
     @NotNull
@@ -46,23 +44,6 @@ public class Job extends Deletable implements Comparable<Job> {
     @Nonnull
     @Embedded
     private Constructable constructable;
-
-    /**
-     * Principle: Countdown ticks to zero -> job done.<br>
-     * Explanation change to tick: You cannot improve the production while you build a constructable.<br>
-     * "Construction points based" (construction yard, shipyard or laboratories) for<br>
-     * {@link EResourceType#CONSTRUCTION}<br>
-     * {@link EResourceType#ORBITAL_CONSTRUCTION}<br>
-     * {@link EResourceType#RESEARCH}
-     */
-    @NotNull
-    @Column(columnDefinition = "decimal(19, 0)")
-    private int jobDoneAtZero;
-
-    @Nullable
-    @ManyToOne
-    @JoinColumn(name = "idTick")
-    private Tick finished;
 
     @Nonnull
     @NotNull
@@ -88,7 +69,7 @@ public class Job extends Deletable implements Comparable<Job> {
         this.owner = planet.getOwner();
         this.facility = facility;
         this.constructable = constructable;
-        this.jobDoneAtZero = JobCostsCalculator.calculateRemainingTicks(facility, constructable);
+        this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(facility, constructable);
     }
 
     @Nonnull
@@ -118,10 +99,6 @@ public class Job extends Deletable implements Comparable<Job> {
         this.constructable = constructable;
     }
 
-    public int getJobDoneAtZero() {
-        return jobDoneAtZero;
-    }
-
     @Nonnull
     public EJobPriority getPriority() {
         return priority;
@@ -133,27 +110,9 @@ public class Job extends Deletable implements Comparable<Job> {
         return this.priority == priority;
     }
 
-    public void setFinished(@Nonnull final Tick finishedAt) {
-        Preconditions.checkNotNull(finishedAt, "finishedAt must not be empty");
-
-        this.finished = finishedAt;
-        delete();
-    }
-
-    public void delete() {
-        this.jobDoneAtZero = 0;
-        super.delete();
-    }
 
     public void setPriority(@Nonnull final EJobPriority priority) {
         this.priority = priority;
-    }
-
-    /**
-     * A job is done at zero and needed to be counted down.
-     */
-    public void tick() {
-        this.jobDoneAtZero--;
     }
 
     @Override
@@ -168,7 +127,7 @@ public class Job extends Deletable implements Comparable<Job> {
             return 1;
         }
 
-        return Integer.compare(getJobDoneAtZero(), o.getJobDoneAtZero());
+        return Integer.compare(getTicksLeft(), o.getTicksLeft());
     }
 
     @Override

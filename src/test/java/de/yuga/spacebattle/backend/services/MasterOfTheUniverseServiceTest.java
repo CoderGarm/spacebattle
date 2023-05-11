@@ -262,7 +262,7 @@ public class MasterOfTheUniverseServiceTest {
 
     private long runGroundConstruction(final Planet mainPlanet, final Building college) {
         final Job constructionYardJob = jobService.createConstructionYardJob(mainPlanet.getId(), college.getId());
-        final long jobDoneAtZero = constructionYardJob.getJobDoneAtZero();
+        final long jobDoneAtZero = constructionYardJob.getTicksLeft();
 
         assertTrue(jobDoneAtZero >= 0);
 

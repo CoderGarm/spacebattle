@@ -124,7 +124,7 @@ public class JobService {
             return;
         }
 
-        if (doDelete.getJobDoneAtZero() > 0 && EResourceType.RESEARCH != doDelete.getConstructable().getResourceType()) {
+        if (doDelete.getTicksLeft() > 0 && EResourceType.RESEARCH != doDelete.getConstructable().getResourceType()) {
             // if reached job is not done -> payback the paycheck
             // not reached if the job is a research
             final ResourceDeposit jobCosts = job.getConstructable().getJobCosts();
@@ -147,7 +147,7 @@ public class JobService {
             }
             planetService.save(planet);
         }
-        doDelete.delete();
+        doDelete.complete();
         jobRepository.save(doDelete);
     }
 

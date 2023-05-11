@@ -30,10 +30,16 @@ public class DBPatchService {
     @Nonnull
     private final String dbPatchFolder;
 
+    /* todo could be removed by "order alphabetically and take last folder" if the naming as season-n is stable */
+    @Nonnull
+    private final String seasonFolder;
+
     public DBPatchService(@Nonnull @Value("${db-patch-folder}") final String dbPatchFolder,
+                          @Nonnull @Value("${sb.season}") final String season,
                           @Nonnull final DBPatchRepository dbPatchRepository) {
         this.dbPatchRepository = Preconditions.checkNotNull(dbPatchRepository, "dbPatchRepository must not be empty");
         this.dbPatchFolder = Preconditions.checkNotNull(dbPatchFolder, "dbPatchFolder must not be empty");
+        this.seasonFolder = Preconditions.checkNotNull(season, "season must not be empty");
     }
 
     /**
@@ -53,9 +59,9 @@ public class DBPatchService {
 
 
     private List<String> fetchDBPatchVersions() {
-        final File dir = new File(dbPatchFolder);
+        final File dir = new File(dbPatchFolder + File.separator + seasonFolder);
         final File[] files = dir.listFiles();
-        final List<File> subFolders = Arrays.stream(files)
+        final List<File> subFolders = Arrays.stream(Objects.requireNonNull(files))
                 .filter(f -> f.getName().startsWith("SB"))
                 .collect(Collectors.toList());
 

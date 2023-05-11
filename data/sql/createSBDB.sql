@@ -267,16 +267,16 @@
     create table job (
        idJob integer not null auto_increment,
         isDeleted boolean not null default false,
+        ticksLeft decimal(19, 0) not null,
         isRepairJob boolean not null default false,
         resourceType varchar(255),
         targetLevel integer,
-        jobDoneAtZero decimal(19, 0) not null,
         priority varchar(255) not null,
+        idTickCompleted integer,
         idBuilding integer,
         idFleet integer,
         idResearch integer,
         idFacility integer not null,
-        idTick integer,
         idOwner integer not null,
         primary key (idJob),
         constraint job_CHECK check ((idBuilding IS NOT NULL AND targetLevel IS NOT NULL) OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) OR (idFleet IS NOT NULL) )
@@ -617,6 +617,30 @@
         primary key (idTick)
     ) engine=InnoDB;
 
+    create table tradedResource (
+       idTradedResource integer not null auto_increment,
+        isDeleted boolean not null default false,
+        ticksLeft decimal(19, 0) not null,
+        idTickCompleted integer,
+        idBuyer integer not null,
+        idDestination integer not null,
+        idTickInitiated integer not null,
+        idTradeOffer integer,
+        primary key (idTradedResource)
+    ) engine=InnoDB;
+
+    create table tradeOffer (
+       idTradeOffer integer not null auto_increment,
+        isDeleted boolean not null default false,
+        amount bigint not null,
+        price bigint not null,
+        resourceType varchar(255) not null,
+        idOrigin integer,
+        idSeller integer,
+        idTickInitiated integer not null,
+        primary key (idTradeOffer)
+    ) engine=InnoDB;
+
     create table translatable (
        idTranslatable integer not null auto_increment,
         idParent integer not null,
@@ -723,7 +747,7 @@
     ) engine=InnoDB;
 
     alter table alliance
-        add constraint UK_h7jfng3csi7xy8d1r3dqe07lo unique (code);
+       add constraint UK_h7jfng3csi7xy8d1r3dqe07lo unique (code);
 
     alter table alliance
         add constraint UK_7nuq4ufi5qsmpn1u6i8n2nxot unique (name);
@@ -1082,6 +1106,11 @@
                 references resourceDeposit (idResourceDeposit);
 
     alter table job
+       add constraint FK9is567pcts10d2t0ciolkwt7p 
+       foreign key (idTickCompleted) 
+       references tick (idTick);
+
+    alter table job 
         add constraint FK7otfjvk4vhy0gt0m3hnyam6au
             foreign key (idBuilding)
                 references building (idBuilding);
@@ -1100,11 +1129,6 @@
         add constraint FK4ewa76co5drr08nptgdmax8d6
             foreign key (idFacility)
                 references construction (idConstruction);
-
-    alter table job
-        add constraint FKe2jgcwt8phugfp1aj5bu76132
-            foreign key (idTick)
-                references tick (idTick);
 
     alter table job
         add constraint FK3urqlpl2jmbxlfk4q88i9i5tb
@@ -1496,6 +1520,46 @@
             foreign key (idShipClass)
                 references shipClass (idShipClass);
 
+    alter table tradedResource
+       add constraint FKnd475bqr8f5kdwemu760355mq 
+       foreign key (idTickCompleted) 
+       references tick (idTick);
+
+    alter table tradedResource 
+       add constraint FK8i0ewnl7jdr7irx9pmilmq7ge 
+            foreign key (idBuyer)
+                references user (idUser);
+
+    alter table tradedResource
+       add constraint FKcsfo7nv11frvg320e28xpoldi 
+       foreign key (idDestination) 
+       references planet (idPlanet);
+
+    alter table tradedResource 
+       add constraint FKabd9jeuxd64c5r489056kpp17 
+       foreign key (idTickInitiated) 
+       references tick (idTick);
+
+    alter table tradedResource 
+       add constraint FK5qw2mbtgucyq10mdhxc2ho72t 
+       foreign key (idTradeOffer) 
+       references tradeOffer (idTradeOffer);
+
+    alter table tradeOffer 
+       add constraint FK48vicymhu5tup2co4k91e2urw 
+       foreign key (idOrigin) 
+       references planet (idPlanet);
+
+    alter table tradeOffer 
+       add constraint FKi02ss97mli085wfdg9ngg49ja 
+            foreign key (idSeller)
+                references user (idUser);
+
+    alter table tradeOffer 
+       add constraint FKfs5vnnx3isy8srun4xll4rw0i 
+       foreign key (idTickInitiated) 
+                references tick (idTick);
+
     alter table translation
         add constraint FK6y0ph13exuqqae7sowcvxac93
             foreign key (idTranslatable)
@@ -1613,7 +1677,7 @@ INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES 
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (1, '---', 'INSERT', 1);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (1, '', 'INSERT', 2);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (1, '**Battle for honor** is a classic, tick-based 4X browsergame.  ', 'INSERT', 3);
-INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (1, 'Start with your first colony to _Explore_ the galaxy. _Exploit_ the resources of your star system and _Expand_ your', 'INSERT', 4);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (1, 'Start with your first colony to _Explore_ the galaxy. _Exploit_ the resources of your star system and _Expand_ your empire.', 'INSERT', 4);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (1, '', 'INSERT', 5);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (1, 'Send your diplomats to make friends, fight pirates and discover your enemies.  ', 'INSERT', 6);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (1, 'Build a superior fleet and _Exterminate_ the latter. Take control of their systems and planets.', 'INSERT', 7);
@@ -1621,7 +1685,7 @@ INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES 
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (1, '### Background', 'INSERT', 9);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (1, '', 'INSERT', 10);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (1, 'This game is based on the space opera _Honor Harrington_ by David Weber and Friends.  ', 'INSERT', 11);
-INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (1, 'Besides the strong recommendation to read the opera it could be useful but is not necessary to understand the principles', 'INSERT', 12);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (1, 'Besides the strong recommendation to read the opera it could be useful but is not necessary to understand the principles of the honorverse.', 'INSERT', 12);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (1, '', 'INSERT', 13);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (1, 'Battle for Honor is tick-based and a tick starts and ends at midnight - obviously not at the same days.  ', 'INSERT', 14);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (1, 'The consequences of your actions will be realized at the end of a tick.', 'INSERT', 15);
@@ -1887,3 +1951,5 @@ INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArti
 INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (3, 3);
 INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (4, 4);
 INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (5, 5);
+
+insert into dbPatch values (null, now(), 'add traded resource', '0.1.1-1');

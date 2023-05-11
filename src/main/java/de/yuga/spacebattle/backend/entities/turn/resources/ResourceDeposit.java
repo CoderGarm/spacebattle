@@ -135,18 +135,13 @@ public class ResourceDeposit extends AbstractEntityKey {
      * @param amount       the amount
      * @return <code>true</code> if it can be paid, <code>false</code> otherwise
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean isReducingResourcePossible(@Nonnull final EResourceType resourceType, final long amount) {
         Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
 
         return getResourceAmountByType(resourceType) >= amount;
     }
 
-    /**
-     * Checks if paying the costs is possible.
-     *
-     * @param costs the costs
-     * @return <code>true</code> if it can be paid, <code>false</code> otherwise
-     */
     public PayingPossibleResult isPayingPossible(@Nonnull final ResourceDeposit costs) {
         Preconditions.checkNotNull(costs, "costs shouldn't be null!");
         Preconditions.checkArgument(COSTS == costs.getSubType(), "costs must be flagged as costs!");
@@ -157,6 +152,16 @@ public class ResourceDeposit extends AbstractEntityKey {
             if (debit > 0 && !isReducingResourcePossible(resourceType, debit)) {
                 result.addProblem(resourceType);
             }
+        }
+        return result;
+    }
+
+    public PayingPossibleResult isPayingPossible(@Nonnull final EResourceType resourceType, final long amount) {
+        Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
+
+        final PayingPossibleResult result = new PayingPossibleResult();
+        if (amount > 0 && !isReducingResourcePossible(resourceType, amount)) {
+            result.addProblem(resourceType);
         }
         return result;
     }
@@ -175,19 +180,21 @@ public class ResourceDeposit extends AbstractEntityKey {
         return result;
     }
 
-    /**
-     * Reduces the amount of this by the costs in order to pay a job.
-     *
-     * @param costs the costs
-     */
     public void pay(@Nonnull final ResourceDeposit costs) {
         Preconditions.checkNotNull(costs, "costs shouldn't be null!");
         Preconditions.checkArgument(COSTS == costs.getSubType(), "costs must be flagged as costs!");
 
         for (final EResourceType resourceType : EResourceType.valuesWhichAreCollectable()) {
             final long debit = costs.getResourceAmountByType(resourceType) * -1;
-            updateResource(resourceType, debit);
+            pay(resourceType, debit);
         }
+    }
+
+    public void pay(@Nonnull final EResourceType resourceType, final long amount) {
+        Preconditions.checkNotNull(resourceType, "resourceType must not be empty");
+
+        final long debit = Math.min(amount, -amount);
+        updateResource(resourceType, debit);
     }
 
     @Nonnull
@@ -316,13 +323,6 @@ public class ResourceDeposit extends AbstractEntityKey {
 
     }
 
-    /**
-     * Will update the population.<br>
-     * Will add the given amount to the current amount.<br>
-     *
-     * @param educationType the education
-     * @param totalAmount   the total amount
-     */
     public void setAbsolutePopulation(@Nonnull final EEducationType educationType,
                                       final long totalAmount) {
         Preconditions.checkNotNull(educationType, "educationType shouldn't be null!");
