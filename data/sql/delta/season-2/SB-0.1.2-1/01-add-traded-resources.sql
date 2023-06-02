@@ -56,5 +56,4 @@ ALTER TABLE job RENAME COLUMN idTick TO idTickCompleted;
 alter table job
     add constraint FK9is567pcts10d2t0ciolkwt7p foreign key (idTickCompleted) references tick (idTick);
 
-insert into dbPatch
-values (null, now(), 'add traded resource', '0.1.2-1');
+insert into dbPatch values (null, now(), 'add traded resource', '0.1.2-1');
