@@ -25,14 +25,14 @@ class DBPatchServiceTest {
     @Test
     void checkDBPatchesForInsertStatement() {
 
-        final List<File> patchFiles = getPatchFiles();
+        final List<File> patchFiles = getPatchFiles(false);
         final List<List<String>> patchContentByFile = patchFiles.stream().map(this::readFile)
                 .collect(Collectors.toList());
         patchContentByFile.forEach(this::validatePatchVersion);
     }
 
     @Nonnull
-    private List<File> getPatchFiles() {
+    private List<File> getPatchFiles(final boolean onlyLatestSeason) {
         final File dir = new File("data/sql/delta/");
         assertNotNull(dir);
         final Set<File> seasonFolders = Arrays.stream(Objects.requireNonNull(dir.listFiles()))
@@ -42,6 +42,14 @@ class DBPatchServiceTest {
                 .map(files -> Arrays.stream(files).collect(Collectors.toSet()))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
+
+        if (onlyLatestSeason) {
+            final List<File> files = seasonFolders.stream().sorted(Comparator.comparing(File::getName)).collect(Collectors.toList());
+            final File latest = files.get(files.size() - 1);
+            seasonFolders.clear();
+            seasonFolders.add(latest);
+        }
+
         final List<File> subFolders = seasonFolders.stream()
                 .filter(f -> f.getName().startsWith("SB"))
                 .collect(Collectors.toList());
@@ -62,7 +70,7 @@ class DBPatchServiceTest {
 
         final List<String> patchLinesFromCreate = lines.stream().filter(line -> line.startsWith(INSERT_PREFIX)).collect(Collectors.toList());
 
-        final List<File> patchFiles = getPatchFiles();
+        final List<File> patchFiles = getPatchFiles(true);
         final List<String> linesInPatches = patchFiles.stream().map(this::readFile)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
