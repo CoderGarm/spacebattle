@@ -3,25 +3,34 @@ Thema: NPC, Handel und Missionen
 
 Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
-1. Es gibt einen Marktplatz am Planeten.  
-   Dort können Handelsaufträge für Ressourcen erstellt oder Angebote angenommen werden.  
-   Wichtig ist, man handelt lokal. Es gelten also die Ressourcen vor Ort.
+todo. NPCs als Handelspartner
+
+1. territorial npc (manticore, haven ...)
+
+- classical user without login
+- by tick every time 50% more level as the highest after ticking
+- drop fleets as all players combined
+- doesn't colonize planets
+
+2. non-territorial npc (pirates)
+
+- npc user with static fleet
+- npc has no home base, exists only on fleets
+- random spawns at third fleet points per player
+- raids planets randomly near the player
+- disappears if fleet is gone
 
 Gameplay:
 
-1. Man erkennt am Gebäude, welche Forschung für das nächste Level notwendig ist.
-2. Die Foren und Fäden sind nicht mehr nur an der Überschrift auswählbar. Der Cursor ändert sich entsprechend.
-3. Der Liste der aktiven Jobs auf einem Planeten wurde ins planetare Dashboard verschoben. Stattdessen gibt es dort
-   jetzt den Marktplatz.
-4. Man kann die Anzahl der Waffensysteme und Raketen jetzt auch eintippen.  
-   Es wurde auf die Eingabe der Salvenanzahl umgestellt, weg von der Menge der Raketen.
-5. Cursor im Expansion Segment zeigt nun an, dass man auf die Reihen der Tabelle klicken kann.
-6. Die Resourcenanzeige hat nun eine grün eingefärbte Reihe um das Display besser lesbar zu machen.
+todo. gebäudeoutput steigern
+todo. Gebäude markieren die ausgebaut werden können.
+todo. Dauer der Forschungen, Forschungslevel und aktuelles Level beim Starten von Forschungen anzeigen
+todo. Forum: Thema sperren
 
 ----------------- Bugs fixed -----------
 
-1. Die vorausgewählte Sortierung nach Distanz im Expansion Manager funktioniert nun wie angezeigt.
-2. Der Glitch beim Bewegen des Research-Trees ist behoben.
+todo. Der Expansion Manager doppelt Einträge beim Reload.
+todo. Grenzfall bei Sortierung im Expansion Manager auflösen
 
 ----------------- next steps -----------
 
