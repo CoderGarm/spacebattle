@@ -1942,14 +1942,24 @@ INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES 
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, 'The transport companies of your empire will execute the jobs, searching the best routes and deliver at the time.', 'INSERT', 7);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, '', 'INSERT', 8);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, '---', 'INSERT', 9);
-INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, 'For obvious reasons you can command your military, but not your civilians.  ', 'INSERT', 10);
-INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, 'They will detect opportunities on other planets on their own and will move to planets with better working conditions.', 'INSERT', 11);
+    INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo)
+    VALUES (5, 'For obvious reasons you can command your military, but not your civilians.  ', 'INSERT', 10);
+    INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo)
+    VALUES (5,
+            'They will detect opportunities on other planets on their own and will move to planets with better working conditions.',
+            'INSERT', 11);
 
 
-INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (1, 1);
-INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (2, 2);
-INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (3, 3);
-INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (4, 4);
-INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (5, 5);
+    INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision)
+    VALUES (1, 1);
+    INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision)
+    VALUES (2, 2);
+    INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision)
+    VALUES (3, 3);
+    INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision)
+    VALUES (4, 4);
+    INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision)
+    VALUES (5, 5);
 
-insert into dbPatch values (null, now(), 'add traded resource', '0.1.1-1');
+    insert into dbPatch
+    values (null, now(), 'add traded resource', '0.1.2-1');

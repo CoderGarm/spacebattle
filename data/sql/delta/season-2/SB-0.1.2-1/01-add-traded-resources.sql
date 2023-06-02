@@ -45,13 +45,16 @@ alter table tradeOffer
    references user (idUser);
 
 alter table tradeOffer
-   add constraint FKfs5vnnx3isy8srun4xll4rw0i
-   foreign key (idTickInitiated)
-   references tick (idTick);
+    add constraint FKfs5vnnx3isy8srun4xll4rw0i
+        foreign key (idTickInitiated)
+            references tick (idTick);
 
 ALTER TABLE job RENAME COLUMN jobDoneAtZero TO ticksLeft;
-ALTER TABLE job DROP FOREIGN KEY FKe2jgcwt8phugfp1aj5bu76132;
+ALTER TABLE job
+    DROP FOREIGN KEY FKe2jgcwt8phugfp1aj5bu76132;
 ALTER TABLE job RENAME COLUMN idTick TO idTickCompleted;
-alter table job add constraint FK9is567pcts10d2t0ciolkwt7p foreign key (idTickCompleted) references tick (idTick);
+alter table job
+    add constraint FK9is567pcts10d2t0ciolkwt7p foreign key (idTickCompleted) references tick (idTick);
 
-insert into dbPatch values (null, now(), 'add traded resource', '0.1.1-1');
+insert into dbPatch
+values (null, now(), 'add traded resource', '0.1.2-1');
