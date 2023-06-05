@@ -96,6 +96,18 @@ public class JobCostsCalculator {
         return ticksNeeded.get();
     }
 
+    public static int calculateRemainingTicks(@Nonnull final BigDecimal empireWideResearchPoints,
+                                              @Nonnull final Constructable constructable) {
+        Preconditions.checkNotNull(empireWideResearchPoints, "empireWideResearchPoints must not be empty");
+        Preconditions.checkNotNull(constructable, "constructable must not be empty");
+
+        final long cost = constructable.getJobCosts().getResourceAmountByType(EResourceType.RESEARCH);
+
+        //noinspection UnnecessaryLocalVariable
+        final int ticks = BigDecimal.valueOf(cost).divide(empireWideResearchPoints, RoundingMode.CEILING).intValue();
+        return ticks;
+    }
+
     public static ResourceDeposit calculateJobCost(@Nonnull final Fleet fleet, final boolean isRepairJob) {
         Preconditions.checkNotNull(fleet, "fleet must not be empty");
 
@@ -138,5 +150,4 @@ public class JobCostsCalculator {
             deposit.updateResource(r, (long) (portionFactor * (double) toAddAmount));
         });
     }
-
 }

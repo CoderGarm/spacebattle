@@ -24,6 +24,7 @@ import de.yuga.spacebattle.backend.repositories.turn.JobRepository;
 import de.yuga.spacebattle.backend.services.ResourceService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
+import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
@@ -35,6 +36,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.math.BigDecimal;
 import java.util.*;
 
 @Service
@@ -52,6 +54,9 @@ public class JobService {
     private final BuildingService buildingService;
 
     @Nonnull
+    private final ConstructionService constructionService;
+
+    @Nonnull
     private final ResearchService researchService;
 
     @Nonnull
@@ -67,6 +72,7 @@ public class JobService {
     public JobService(@Nonnull final JobRepository jobRepository,
                       @Nonnull final PlanetService planetService,
                       @Nonnull final BuildingService buildingService,
+                      @Nonnull final ConstructionService constructionService,
                       @Nonnull final ResearchService researchService,
                       @Nonnull final WarShipService warShipService,
                       @Nonnull final ResourceService resourceService,
@@ -74,6 +80,7 @@ public class JobService {
         this.jobRepository = Preconditions.checkNotNull(jobRepository, "jobC shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.buildingService = Preconditions.checkNotNull(buildingService, "buildingService shouldn't be null!");
+        this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
         this.researchService = Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
@@ -235,7 +242,6 @@ public class JobService {
         if (level > levelCap) {
             throw new NotifyWebUserException("no way!");
         }
-        final Constructable constructable = new Constructable(research, level);
         final Planet researchPlanet = planetService.findResearchPlanet(user);
         if (researchPlanet == null) {
             throw new NotifyWebUserException("You need a research facility on at leas one planet.");
@@ -245,6 +251,9 @@ public class JobService {
                 .stream().findFirst().orElse(null);
         checkIfFree(facility);
 
+        final BigDecimal empireWideResearchPoints = planetService.getEmpireWideResearchPoints(user.getId());
+
+        final Constructable constructable = new Constructable(research, level, empireWideResearchPoints);
         final Job entity = new Job(researchPlanet, facility, constructable);
         jobRepository.save(entity);
         return entity;

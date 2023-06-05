@@ -23,14 +23,14 @@ public class ConstructionService {
 
     @Nonnull
     private final ConstructionRepository constructionRepository;
+
+    @Nonnull
     private final BuildingService buildingService;
 
     @Autowired
-    public ConstructionService(@Nonnull final ConstructionRepository constructionRepository, final BuildingService buildingService) {
-        Preconditions.checkNotNull(constructionRepository, "constructionRepository shouldn't be null!");
-
-        this.constructionRepository = constructionRepository;
-        this.buildingService = buildingService;
+    public ConstructionService(@Nonnull final ConstructionRepository constructionRepository, @Nonnull final BuildingService buildingService) {
+        this.constructionRepository = Preconditions.checkNotNull(constructionRepository, "constructionRepository must not be empty");
+        this.buildingService = Preconditions.checkNotNull(buildingService, "buildingService must not be empty");
     }
 
     @Nonnull

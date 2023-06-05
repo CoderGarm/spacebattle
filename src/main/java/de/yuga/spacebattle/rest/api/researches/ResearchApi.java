@@ -1,10 +1,12 @@
 package de.yuga.spacebattle.rest.api.researches;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.turn.Constructable;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.account.UserService;
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -149,8 +152,18 @@ public class ResearchApi extends BaseApi {
         final int idUser = getIdUser();
         final List<Research> jobActiveFor = jobService.getResearchesFromActiveJobs(idUser);
         final Map<Research, Integer> researchesForUser = researchService.getUnlockableResearches(idUser, jobActiveFor);
+
+        final BigDecimal empireWideResearchPoints = planetService.getEmpireWideResearchPoints(idUser);
+
+
         final List<ResearchLevel> researchLevels = researchesForUser.entrySet().stream()
-                .map(entry -> new ResearchLevel(entry.getKey(), entry.getValue(), getPreferredLanguage())).collect(Collectors.toList());
+                .map(entry -> {
+                    final Research research = entry.getKey();
+                    final Integer level = entry.getValue();
+                    final Constructable constructable = new Constructable(research, level, empireWideResearchPoints);
+                    final int remainingTicks = JobCostsCalculator.calculateRemainingTicks(empireWideResearchPoints, constructable);
+                    return new ResearchLevel(research, level, remainingTicks, getPreferredLanguage());
+                }).collect(Collectors.toList());
         return ResponseEntity.ok(researchLevels);
     }
 

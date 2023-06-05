@@ -74,7 +74,7 @@ public class ResearchService {
      * - have fulfilled restrictions
      *
      * @param idUser the id of the user
-     * @return all possible researches with their current level
+     * @return all possible researches with their next level
      */
     public Map<Research, Integer> getUnlockableResearches(final int idUser, final List<Research> jobActiveFor) {
 
@@ -99,7 +99,7 @@ public class ResearchService {
         });
         return fullResearchList.stream().collect(Collectors.toMap(research -> research, research -> {
             final Integer level = levelsByResearch.get(research);
-            return Objects.requireNonNullElse(level, 0);
+            return Objects.requireNonNullElse(level, 0) + 1;
         }));
     }
 

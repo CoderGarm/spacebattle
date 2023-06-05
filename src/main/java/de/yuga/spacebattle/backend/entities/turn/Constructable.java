@@ -55,6 +55,10 @@ public class Constructable {
     @Column(columnDefinition = "boolean not null default false")
     private boolean isRepairJob = false;
 
+    @Nullable
+    @Transient
+    private BigDecimal empireWideResearchPoints;
+
     public Constructable() {
     }
 
@@ -68,7 +72,7 @@ public class Constructable {
         this.resourceType = EResourceType.CONSTRUCTION;
     }
 
-    public Constructable(@Nonnull final Research research, @Nonnull final Integer targetLevel) {
+    public Constructable(@Nonnull final Research research, @Nonnull final Integer targetLevel, @Nonnull final BigDecimal empireWideResearchPoints) {
         Preconditions.checkNotNull(research, "research shouldn't be null!");
         Preconditions.checkNotNull(targetLevel, "targetLevel shouldn't be null!");
         Preconditions.checkArgument(targetLevel > 0, "targetLevel shouldn't be lower than one!");
@@ -76,6 +80,7 @@ public class Constructable {
         this.research = research;
         this.targetLevel = targetLevel;
         this.resourceType = EResourceType.RESEARCH;
+        this.empireWideResearchPoints = empireWideResearchPoints;
     }
 
     public Constructable(@Nonnull final Fleet fleet, final boolean isRepairJob) {
@@ -145,5 +150,8 @@ public class Constructable {
         throw new NotifyWebUserException("You have tried something interesting. May be you should talk to an admin.");
     }
 
-
+    @Nullable
+    public BigDecimal getEmpireWideResearchPoints() {
+        return empireWideResearchPoints;
+    }
 }

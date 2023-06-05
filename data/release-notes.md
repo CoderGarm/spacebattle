@@ -22,15 +22,18 @@ todo. NPCs als Handelspartner
 
 Gameplay:
 
-todo. gebäudeoutput steigern
-todo. Gebäude markieren die ausgebaut werden können.
-todo. Dauer der Forschungen, Forschungslevel und aktuelles Level beim Starten von Forschungen anzeigen
-todo. Forum: Thema sperren
+1. Bei den Ground Constructions kann man nun zu teure Bauten auf Wunsch ausgrauen.
+2. Dauer der Forschung und nächstes Level werden beim Starten von Forschungen angezeigt.
+   todo. Forum: Thema sperren
+   todo. gebäudeoutput steigern
 
 ----------------- Bugs fixed -----------
 
-todo. Der Expansion Manager doppelt Einträge beim Reload.
-todo. Grenzfall bei Sortierung im Expansion Manager auflösen
+1. Bei den Ground Constructions werden die verfügbaren Pops angezeigt, nicht mehr die Summe der verfügbaren Pops und
+   derjenigen mit Jobs.
+   todo. ground constructions show non-collectables correctly
+   todo. Der Expansion Manager doppelt Einträge beim Reload.
+   todo. Grenzfall bei Sortierung im Expansion Manager auflösen
 
 ----------------- next steps -----------
 

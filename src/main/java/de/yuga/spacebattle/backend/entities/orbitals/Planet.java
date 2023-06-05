@@ -106,7 +106,7 @@ public class Planet extends AbstractEntityKey {
     @JoinColumn(name = "idResourceTransportationDelivery", updatable = false)
     private final ResourceDeposit resourceTransportationDelivery = new ResourceDeposit(EDepositType.TRANSPORTATION_DELIVERY);
 
-    @Nonnull
+    @Nonnull /* todo remove eager and replace by direct fetching */
     @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, mappedBy = "planet")
     private final Set<Construction> constructions = new HashSet<>();
 
@@ -297,6 +297,7 @@ public class Planet extends AbstractEntityKey {
                         Collectors.mapping(Function.identity(), Collectors.toList())));
 
         final List<Construction> populationConstruction = resourceConstructionsByType.getOrDefault(EResourceType.POPULATION, new ArrayList<>());
+        //noinspection DataFlowIssue
         final Map<ERefinementSequence, List<Construction>> constructionsByRefinementSequence = populationConstruction.stream()
                 .filter(c -> c.getBuilding().getProductionType().getProductionCategory() == EProductionCategory.REFINEMENT)
                 .collect(Collectors.groupingBy(c -> c.getBuilding().getProductionType().getRefinementSequence(),

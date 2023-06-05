@@ -69,7 +69,11 @@ public class Job extends Completable implements Comparable<Job> {
         this.owner = planet.getOwner();
         this.facility = facility;
         this.constructable = constructable;
-        this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(facility, constructable);
+        if (constructable.getEmpireWideResearchPoints() != null) {
+            this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(constructable.getEmpireWideResearchPoints(), constructable);
+        } else {
+            this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(facility, constructable);
+        }
     }
 
     @Nonnull
