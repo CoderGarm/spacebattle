@@ -31,9 +31,8 @@ Gameplay:
 
 1. Bei den Ground Constructions werden die verfügbaren Pops angezeigt, nicht mehr die Summe der verfügbaren Pops und
    derjenigen mit Jobs.
-   todo. ground constructions show non-collectables correctly
-   todo. Der Expansion Manager doppelt Einträge beim Reload.
-   todo. Grenzfall bei Sortierung im Expansion Manager auflösen
+2. Der Expansion Manager verdoppelt die Einträge beim Kolonisieren nicht mehr.
+3. Die falsche Sortierung der Kolonien im Expansion Manager ist behoben.
 
 ----------------- next steps -----------
 
@@ -99,6 +98,8 @@ todo. wormholes (see mapdata.js file)
 todo. fleets in motion needs nav point icon
 
 todo. diagramme mit apache echart einbauen, z.B. in Flotten Anzahl nach Klasse o.ä.
+
+todo. ground constructions show non-collectables correctly
 
 todo. population balancing broken
 
