@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services.account;
 
 import de.yuga.spacebattle.BaseTestCase;
+import de.yuga.spacebattle.TestUtils;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.enums.EWebUserRole;
@@ -103,8 +104,8 @@ public class UserServiceTest extends BaseTestCase {
         final String username = "user";
         final String email = "email";
         final User user = createUser(1);
-        user.setUsername(username);
-        user.setEmail(email);
+        TestUtils.setFieldValue(user, "username", username);
+        user.getUserSetting().setEmail(email);
         // prepare mocks
         when(userRepositoryMock.findByUsernameAndEmail(username, email)).thenReturn(user);
         // test method

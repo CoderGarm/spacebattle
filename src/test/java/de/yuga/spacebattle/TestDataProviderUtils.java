@@ -121,7 +121,7 @@ public class TestDataProviderUtils {
     public static Fleet fleet(final int effectFTLValue, final Planet planetStart) {
         final User user = user();
         final Fleet fleet = new Fleet();
-        fleet.setOwner(user);
+        TestUtils.setFieldValue(fleet, "owner", user);
         setId(fleet);
         final ShipClass shipClass = shipClass(effectFTLValue);
         final Set<WarShip> warShips = new HashSet<>();

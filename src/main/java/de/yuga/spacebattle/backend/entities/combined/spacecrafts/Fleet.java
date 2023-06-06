@@ -139,12 +139,6 @@ public class Fleet extends Operationable {
         this.name = name;
     }
 
-    public void setOwner(@Nonnull final User owner) {
-        Preconditions.checkNotNull(owner, "owner shouldn't be null!");
-
-        this.owner = owner;
-    }
-
     @Nonnull
     public User getOwner() {
         return owner;

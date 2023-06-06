@@ -2,16 +2,11 @@ package de.yuga.spacebattle.backend.entities.account;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.converter.EGameUserRolesConverter;
-import de.yuga.spacebattle.backend.converter.PasswordConverter;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
-import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
-import de.yuga.spacebattle.backend.entities.researches.ResearchLevel;
-import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
-import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
@@ -20,11 +15,7 @@ import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.*;
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,31 +24,18 @@ import java.util.stream.Collectors;
 @NamedQueries({
         @NamedQuery(name = "User.getAll", query = "SELECT u FROM User u WHERE u.id != 2"),
         @NamedQuery(name = "User.findByLikeUsername", query = "SELECT u FROM User u WHERE UPPER(u.username) LIKE UPPER(:username)"),
-        @NamedQuery(name = "User.findByUsernameAndEmail", query = "SELECT u FROM User u WHERE UPPER(u.username) = UPPER(:username) AND UPPER(u.email) = UPPER(:email)"),
-        @NamedQuery(name = "User.getWithResearchesAndJobs", query = "SELECT u FROM User u LEFT JOIN FETCH u.researches r LEFT JOIN FETCH u.jobs j WHERE u.id = :idUser"),
+        @NamedQuery(name = "User.findByUsernameAndEmail", query = "SELECT u FROM User u WHERE UPPER(u.username) = UPPER(:username) AND UPPER(u.userSetting.email) = UPPER(:email)"),
         @NamedQuery(name = "User.getWithKnownStarSystems", query = "SELECT u FROM User u LEFT JOIN FETCH u.knownStarSystems r WHERE u.id = :idUser"),
-        @NamedQuery(name = "User.getColonizations", query = "SELECT u FROM User u LEFT JOIN FETCH u.colonizations r WHERE u = :user"),
-        @NamedQuery(name = "User.findByUsernameExact", query = "SELECT u.id FROM User u WHERE UPPER(u.username) = UPPER(:username)"),
-        @NamedQuery(name = "User.findByEMailExact", query = "SELECT u.id FROM User u WHERE UPPER(u.email) = UPPER(:email)"),
+        @NamedQuery(name = "User.findByUsernameExact", query = "SELECT u.id FROM User u WHERE UPPER(u.username) = UPPER(:username)"), /* fixme reduce to boolean */
+        @NamedQuery(name = "User.findByEMailExact", query = "SELECT u.id FROM User u WHERE UPPER(u.userSetting.email) = UPPER(:email)"), /* fixme reduce to boolean */
         @NamedQuery(name = "User.findByUsername", query = "SELECT u FROM User u WHERE UPPER(u.username) = UPPER(:username)"),
         @NamedQuery(name = "User.findAllianceAdminByAlliance", query = "SELECT u FROM User u WHERE u.alliance = :alliance AND :gameUserRole IN (u.gameUserRoles)")
 })
 @Entity
-@Table(name = "user",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "USERNAME_UK", columnNames = {"username"}),
-                @UniqueConstraint(name = "EMAIL_UK", columnNames = {"email"})
-        })
-@AttributeOverride(name = "id", column = @Column(name = "idUser"))
-public class User extends AbstractEntityKey {
+@DiscriminatorValue("USER")
+public class User extends Owner {
 
-    @Nonnull
     @NotNull
-    @Pattern(regexp = "[a-zA-Z0-9]{3,30}", message = "must contain of 3 to 30 characters of numbers or letters")
-    @Size(min = 3, max = 30)
-    @Column(unique = true)
-    private String username;
-
     @Nonnull
     @Enumerated(EnumType.STRING)
     private EWebUserRole userRole;
@@ -66,51 +44,10 @@ public class User extends AbstractEntityKey {
     @Convert(converter = EGameUserRolesConverter.class)
     private final Set<EGameUserRole> gameUserRoles = new HashSet<>();
 
-    @Nonnull
-    @NotNull
-    @Column
-    @Pattern(regexp = "((?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,30})", message = "must contain of 8 to 30 characters of numbers, letters, capital letters and special characters")
-    @Convert(converter = PasswordConverter.class)
-    private String password;
-
-    @Nonnull
-    @NotNull
-    @Email
-    @Size(min = 3, max = 50)
-    private String email;
-
     @Nullable
     @ManyToOne
     @JoinColumn(name = "idAlliance")
     private Alliance alliance;
-
-    @Nonnull
-    @NotNull
-    @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, mappedBy = "owner")
-    private final Set<Planet> ownedPlanets = new HashSet<>();
-
-    /**
-     * All already finished researches for the user.
-     */
-    @Nonnull
-    @NotNull
-    @OneToMany
-    @JoinColumn(name = "idUser")
-    private final Set<ResearchLevel> researches = new HashSet<>();
-
-    /**
-     * The currently running jobs for the user.
-     */
-    @Nonnull
-    @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, mappedBy = "owner")
-    private final Set<Job> jobs = new HashSet<>();
-
-    /**
-     * The ship classes which was created by the user.
-     */
-    @Nonnull
-    @OneToMany(cascade = CascadeType.MERGE, orphanRemoval = true, mappedBy = "owner")
-    private final Set<ShipClass> shipClasses = new HashSet<>();
 
     /**
      * Represents all star systems which information was bought by the user in order to colonize them.<br>
@@ -141,10 +78,6 @@ public class User extends AbstractEntityKey {
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     private UserSetting userSetting;
 
-    @Nonnull
-    @NotNull
-    private final LocalDateTime createdAt = LocalDateTime.now();
-
     public User() {
     }
 
@@ -154,30 +87,16 @@ public class User extends AbstractEntityKey {
                 @Nonnull final EWebUserRole role,
                 final boolean noEMailWanted,
                 @Nullable final EGameUserRole... gameUserRoles) {
-        Preconditions.checkNotNull(username, "username shouldn't be null!");
+        super(username);
         Preconditions.checkNotNull(password, "password shouldn't be null!");
         Preconditions.checkNotNull(email, "email shouldn't be null!");
         Preconditions.checkNotNull(role, "role shouldn't be null!");
 
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.userSetting = new UserSetting(this, noEMailWanted);
+        this.userSetting = new UserSetting(this, email, password, noEMailWanted);
         this.userRole = role;
         if (gameUserRoles != null) {
             this.gameUserRoles.addAll(Arrays.stream(gameUserRoles).collect(Collectors.toSet()));
         }
-    }
-
-    @Nonnull
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(@Nonnull final String username) {
-        Preconditions.checkNotNull(username, "username shouldn't be null!");
-
-        this.username = username;
     }
 
     @Nonnull
@@ -202,26 +121,6 @@ public class User extends AbstractEntityKey {
         this.gameUserRoles.remove(gameUserRole);
     }
 
-    @Nonnull
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(@Nonnull final String password) {
-        Preconditions.checkNotNull(password, "password shouldn't be null!");
-
-        this.password = password;
-    }
-
-    @Nonnull
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(@Nonnull String email) {
-        this.email = email;
-    }
-
     @Nullable
     public Alliance getAlliance() {
         return alliance;
@@ -229,26 +128,6 @@ public class User extends AbstractEntityKey {
 
     public void setAlliance(@Nullable final Alliance alliance) {
         this.alliance = alliance;
-    }
-
-    @Nonnull
-    public Set<Planet> getOwnedPlanets() {
-        return ownedPlanets;
-    }
-
-    @Nonnull
-    public Set<ResearchLevel> getResearches() {
-        return researches;
-    }
-
-    @Nonnull
-    public Set<Job> getJobs() {
-        return jobs;
-    }
-
-    @Nonnull
-    public Set<ShipClass> getShipClasses() {
-        return shipClasses;
     }
 
     @Nonnull
@@ -266,29 +145,7 @@ public class User extends AbstractEntityKey {
     }
 
     @Nonnull
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    @Nonnull
     public UserSetting getUserSetting() {
         return userSetting;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof User)) return false;
-
-        User user = (User) o;
-
-        return username.equals(user.username);
-    }
-
-    @Override
-    @SuppressWarnings("ConstantValue")
-    public int hashCode() {
-        return username != null ? username.hashCode() : 0;
-    }
-
 }

@@ -1,8 +1,8 @@
 package de.yuga.spacebattle.rest.api.account;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.account.MessageThread;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.chat.MessageThread;
 import de.yuga.spacebattle.backend.services.account.ChatService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.rest.api.BaseApi;

@@ -36,7 +36,7 @@ public class MailService {
             return;
         }
 
-        sendMail(user.getEmail(), templateMailVerification(user));
+        sendMail(user.getUserSetting().getEmail(), templateMailVerification(user));
     }
 
 
@@ -48,7 +48,7 @@ public class MailService {
             return;
         }
 
-        sendMail(user.getEmail(), templatePasswordChange(user));
+        sendMail(user.getUserSetting().getEmail(), templatePasswordChange(user));
     }
 
     @Nonnull
@@ -103,7 +103,7 @@ public class MailService {
     private String getUserIdentificationCode(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
-        final String hash = user.getPassword();
+        final String hash = user.getUserSetting().getPassword();
         final int id = user.getId();
         return hash + "-" + id;
     }
@@ -194,7 +194,7 @@ public class MailService {
         public boolean verifyUser(@Nonnull final User user) {
             Preconditions.checkNotNull(user, "user must not be empty");
 
-            return password.equals(user.getPassword());
+            return password.equals(user.getUserSetting().getPassword());
         }
     }
 }

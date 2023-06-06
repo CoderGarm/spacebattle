@@ -54,6 +54,7 @@ public class DBPatchService {
                 .map(DBPatch::getVersion)
                 .collect(Collectors.toSet());
         dbPatchVersions.removeAll(versionStrings);
+        dbPatchVersions.forEach(ver -> LOGGER.warn("DBPatch missing:" + ver));
         return dbPatchVersions.isEmpty();
     }
 

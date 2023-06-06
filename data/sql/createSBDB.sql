@@ -658,13 +658,11 @@
     ) engine=InnoDB;
 
     create table user (
+       dType varchar(31) not null,
        idUser integer not null auto_increment,
-        createdAt datetime(6) not null,
-        email varchar(50) not null,
-        gameUserRoles varchar(255),
-        password varchar(255) not null,
-        userRole varchar(255),
         username varchar(30) not null,
+        gameUserRoles varchar(255),
+        userRole varchar(255),
         idAlliance integer,
         primary key (idUser)
     ) engine=InnoDB;
@@ -681,9 +679,12 @@
 
     create table userSetting (
        idUserSetting integer not null auto_increment,
+        createdAt datetime(6) not null,
+        email varchar(50) not null,
         isEMailVerified boolean not null default false,
         isLoginForbidden boolean not null default false,
         noEMailWanted boolean not null default false,
+        password varchar(255) not null,
         receiveChangelogInfos boolean not null default false,
         idUser integer not null,
         primary key (idUserSetting)
@@ -792,13 +793,13 @@
         add constraint UK_nd3dfq3yjyhaauawah5lm5mj2 unique (idShipKillerHit);
 
     alter table starSystem
-        add constraint COORDINATE_UK unique (xCoordinate, yCoordinate);
-
-    alter table user
-        add constraint EMAIL_UK unique (email);
+        add constraint COORDINATE_UK unique (xCoordinate, yCoordinate);  
 
     alter table user
         add constraint UK_sb8bbouer5wak8vyiiy4pf2bx unique (username);
+
+    alter table userSetting 
+       add constraint EMAIL_UK unique (email);
 
     alter table activeFittings
         add constraint FK9kawhm3fqubxvebrl8pjl10lv
@@ -1954,3 +1955,4 @@ INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArti
 
 insert into dbPatch values (null, now(), 'add traded resource', '0.1.2-1');
 insert into dbPatch values (null, now(), 'rebalance buildings', '0.1.2-2');
+insert into dbPatch values (null, now(), 'implement npc entity structure', '0.1.3-1');

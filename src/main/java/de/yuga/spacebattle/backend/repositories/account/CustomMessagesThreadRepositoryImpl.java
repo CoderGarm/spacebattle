@@ -1,6 +1,6 @@
 package de.yuga.spacebattle.backend.repositories.account;
 
-import de.yuga.spacebattle.backend.entities.account.MessageThread;
+import de.yuga.spacebattle.backend.entities.account.chat.MessageThread;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;

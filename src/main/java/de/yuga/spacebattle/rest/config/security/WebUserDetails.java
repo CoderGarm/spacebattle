@@ -34,7 +34,7 @@ public class WebUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return user.getUserSetting().getPassword();
     }
 
     @Override

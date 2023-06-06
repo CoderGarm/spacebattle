@@ -18,6 +18,7 @@ import io.swagger.v3.oas.models.servers.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -56,14 +57,19 @@ public class SpacebattleApplication implements Jackson2ObjectMapperBuilderCustom
     private static final String dropPath = tmpdir + separator + "dropSBDB.sql";
 
     @Nonnull
+    private final String applicationVersion;
+
+    @Nonnull
     private final DBPatchService dbPatchService;
 
     @Nonnull
     private final ApplicationContext context;
 
     @Autowired
-    public SpacebattleApplication(@Nonnull final DBPatchService dbPatchService,
+    public SpacebattleApplication(@Nonnull @Value("${sb.version:nope}") final String version,
+                                  @Nonnull final DBPatchService dbPatchService,
                                   @Nonnull final ApplicationContext context) {
+        this.applicationVersion = Preconditions.checkNotNull(version, "version must not be empty");
         this.dbPatchService = Preconditions.checkNotNull(dbPatchService, "dbPatchService must not be empty");
         this.context = Preconditions.checkNotNull(context, "context must not be empty");
     }
@@ -113,8 +119,8 @@ public class SpacebattleApplication implements Jackson2ObjectMapperBuilderCustom
         return new OpenAPI()
                 .info(new Info().title("BoF REST API")
                         .description("Battle for honor interface")
-                        .contact(new Contact().email("bla@bla.com"))
-                        .version("0.0.1")
+                        .contact(new Contact().email("webmaster@batleforhonor.de"))
+                        .version(this.applicationVersion)
                         .license(new License()
                                 .name("Apache 2.0")
                                 .url("https://www.apache.org/licenses/LICENSE-2.0")))

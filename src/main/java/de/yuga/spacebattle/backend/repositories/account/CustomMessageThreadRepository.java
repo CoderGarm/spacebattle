@@ -1,6 +1,6 @@
 package de.yuga.spacebattle.backend.repositories.account;
 
-import de.yuga.spacebattle.backend.entities.account.MessageThread;
+import de.yuga.spacebattle.backend.entities.account.chat.MessageThread;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

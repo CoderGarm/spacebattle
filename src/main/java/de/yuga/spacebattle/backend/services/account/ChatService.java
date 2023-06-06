@@ -1,9 +1,9 @@
 package de.yuga.spacebattle.backend.services.account;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.account.MessageThread;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.entities.account.UserMessage;
+import de.yuga.spacebattle.backend.entities.account.chat.MessageThread;
+import de.yuga.spacebattle.backend.entities.account.chat.UserMessage;
 import de.yuga.spacebattle.backend.repositories.account.MessageThreadRepository;
 import de.yuga.spacebattle.backend.repositories.account.UserMessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,20 +44,6 @@ public class ChatService {
         Preconditions.checkNotNull(user2, "user2 shouldn't be null!");
 
         return messageThreadRepository.findMessagesBetween(user1.getId(), user2.getId());
-    }
-
-    /**
-     * Searches all users which had a chat with the reference user.<br>
-     * The result does NOT contain the reference user.
-     *
-     * @param user the user who had chats
-     * @return all users who were the other side of the chat
-     */
-    @Nonnull
-    public List<MessageThread> findThreadsWithUser(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-
-        return messageThreadRepository.findThreadsWithUser(user.getId());
     }
 
     /**

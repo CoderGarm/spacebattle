@@ -1,6 +1,6 @@
 package de.yuga.spacebattle.backend.repositories.account;
 
-import de.yuga.spacebattle.backend.entities.account.UserMessage;
+import de.yuga.spacebattle.backend.entities.account.chat.UserMessage;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;

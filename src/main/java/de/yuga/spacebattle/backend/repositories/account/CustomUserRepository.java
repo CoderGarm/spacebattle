@@ -2,7 +2,6 @@ package de.yuga.spacebattle.backend.repositories.account;
 
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
-import de.yuga.spacebattle.backend.entities.turn.Colonization;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,17 +23,11 @@ public interface CustomUserRepository {
     @Nullable
     User findByUsernameAndEmail(@Nonnull String username, @Nonnull String email);
 
-    @Nonnull
-    User findWithResearchesAndJobs(int idUser);
-
     @Nullable
     User findWithKnownStarSystems(int idUser);
 
     @Nonnull
     Set<StarSystem> getKnownStarSystems(int idUser);
-
-    @Nonnull
-    Set<Colonization> getColonizations(@Nonnull User user);
 
     /**
      * Searches for all users which has the param as left-search-string.

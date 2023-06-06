@@ -1,14 +1,21 @@
 package de.yuga.spacebattle.backend.entities.account;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.converter.PasswordConverter;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "userSetting")
+@Table(name = "userSetting", uniqueConstraints = {
+        @UniqueConstraint(name = "EMAIL_UK", columnNames = {"email"})
+})
 @AttributeOverride(name = "id", column = @Column(name = "idUserSetting"))
 public class UserSetting extends AbstractEntityKey {
 
@@ -17,6 +24,23 @@ public class UserSetting extends AbstractEntityKey {
     @ManyToOne(optional = false)
     @JoinColumn(name = "idUser")
     private User user;
+
+    @Nonnull
+    @NotNull
+    @Column
+    @Pattern(regexp = "((?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,30})", message = "must contain of 8 to 30 characters of numbers, letters, capital letters and special characters")
+    @Convert(converter = PasswordConverter.class)
+    private String password;
+
+    @Nonnull
+    @NotNull
+    @Email
+    @Size(min = 3, max = 50)
+    private String email;
+
+    @Nonnull
+    @NotNull
+    private final LocalDateTime createdAt = LocalDateTime.now();
 
     /**
      * Marks if the user must not log in.
@@ -45,9 +69,39 @@ public class UserSetting extends AbstractEntityKey {
     public UserSetting() {
     }
 
-    public UserSetting(@Nonnull final User user, final boolean noEMailWanted) {
+    public UserSetting(@Nonnull final User user,
+                       @Nonnull final String email,
+                       @Nonnull final String password,
+                       final boolean noEMailWanted) {
+        this.email = Preconditions.checkNotNull(email, "email must not be empty");
+        this.password = Preconditions.checkNotNull(password, "password must not be empty");
         this.user = Preconditions.checkNotNull(user, "user must not be empty");
         this.noEMailWanted = noEMailWanted;
+    }
+
+    @Nonnull
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(@Nonnull final String password) {
+        Preconditions.checkNotNull(password, "password shouldn't be null!");
+
+        this.password = password;
+    }
+
+    @Nonnull
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(@Nonnull String email) {
+        this.email = email;
+    }
+
+    @Nonnull
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     public boolean isLoginForbidden() {

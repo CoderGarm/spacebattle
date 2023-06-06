@@ -1,6 +1,7 @@
-package de.yuga.spacebattle.backend.entities.account;
+package de.yuga.spacebattle.backend.entities.account.chat;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 
 import javax.annotation.Nonnull;
@@ -15,10 +16,8 @@ import java.util.stream.Collectors;
 @NamedQueries({
         @NamedQuery(name = "MessageThread.findThreadsWithUser",
                 query = "SELECT DISTINCT mt FROM MessageThread mt WHERE mt.userTwo.id = :idUser OR mt.userOne.id = :idUser"),
-
         @NamedQuery(name = "MessageThread.findMessagesBetween",
                 query = "SELECT DISTINCT mt FROM MessageThread mt LEFT JOIN FETCH mt.messages WHERE (mt.userTwo.id = :idUser1 OR mt.userOne.id = :idUser1) AND (mt.userTwo.id = :idUser2 OR mt.userOne.id = :idUser2) "),
-
         @NamedQuery(name = "MessageThread.findByIdWithMessages",
                 query = "SELECT DISTINCT mt FROM MessageThread mt LEFT JOIN FETCH mt.messages WHERE mt.id=:idMessageThread"),
 })

@@ -3,7 +3,6 @@ package de.yuga.spacebattle.backend.repositories.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
-import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -44,14 +43,6 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
         }
     }
 
-    @Nonnull
-    @Override
-    public User findWithResearchesAndJobs(final int idUser) {
-        return em.createNamedQuery("User.getWithResearchesAndJobs", User.class)
-                .setParameter("idUser", idUser)
-                .getSingleResult();
-    }
-
     @Nullable
     @Override
     public User findWithKnownStarSystems(final int idUser) {
@@ -66,14 +57,6 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
         return em.createNamedQuery("User.getWithKnownStarSystems", User.class)
                 .setParameter("idUser", idUser)
                 .getSingleResult().getKnownStarSystems();
-    }
-
-    @Nonnull
-    @Override
-    public Set<Colonization> getColonizations(@Nonnull User user) {
-        return em.createNamedQuery("User.getColonizations", User.class)
-                .setParameter("user", user)
-                .getSingleResult().getColonizations();
     }
 
     @Nonnull

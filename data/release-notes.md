@@ -20,6 +20,17 @@ todo. NPCs als Handelspartner
 - raids planets randomly near the player
 - disappears if fleet is gone
 
+technical:
+
+- incremental table "existent entity" includes user or npc
+- needed in
+    - planet
+    - tradeoffer
+    - tradedresource
+    - shipclass
+    - fleet
+    - fleetsnapshot
+
 Gameplay:
 
 1. Bei den Ground Constructions kann man nun zu teure Bauten auf Wunsch ausgrauen.
@@ -33,6 +44,7 @@ Gameplay:
    derjenigen mit Jobs.
 2. Der Expansion Manager verdoppelt die Einträge beim Kolonisieren nicht mehr.
 3. Die falsche Sortierung der Kolonien im Expansion Manager ist behoben.
+   todo. marketplace price per unit und price wird an irgendeiner stelle vermischt
 
 ----------------- next steps -----------
 

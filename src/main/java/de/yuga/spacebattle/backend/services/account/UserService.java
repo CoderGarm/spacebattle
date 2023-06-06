@@ -7,7 +7,6 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.account.UserSetting;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
-import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import de.yuga.spacebattle.backend.repositories.account.UserRepository;
@@ -67,11 +66,6 @@ public class UserService {
     }
 
     @Nonnull
-    public User findWithResearches(final int idUser) {
-        return Objects.requireNonNull(userRepository.findWithResearchesAndJobs(idUser));
-    }
-
-    @Nonnull
     public Set<StarSystem> getKnownStarSystems(final int idUser) {
         return userRepository.getKnownStarSystems(idUser);
     }
@@ -124,12 +118,6 @@ public class UserService {
         Preconditions.checkNotNull(role, "role shouldn't be null!");
 
         return this.save(new User(username, password, email, role, false, gameUserRoles));
-    }
-
-    public Set<Colonization> getColonizations(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-
-        return userRepository.getColonizations(user);
     }
 
     @Nonnull
@@ -216,7 +204,7 @@ public class UserService {
         Preconditions.checkNotNull(user, "user must not be empty");
         Preconditions.checkNotNull(newPassword, "newPassword must not be empty");
 
-        user.setPassword(newPassword);
+        user.getUserSetting().setPassword(newPassword);
         save(user);
     }
 

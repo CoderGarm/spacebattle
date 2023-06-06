@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.rest.dto.account.chat;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.account.MessageThread;
+import de.yuga.spacebattle.backend.entities.account.chat.MessageThread;
 import de.yuga.spacebattle.rest.dto.account.UserJson;
 import io.swagger.v3.oas.annotations.media.Schema;
 

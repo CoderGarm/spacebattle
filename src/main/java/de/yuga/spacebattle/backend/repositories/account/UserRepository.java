@@ -16,10 +16,11 @@ public interface UserRepository extends CrudRepository<User, Integer>, CustomUse
 
     @Nullable
     @Query(name = "User.findAllianceAdminByAlliance")
-    List<User> findAllianceAdminByAlliance(@Param("alliance") @Nonnull final Alliance alliance, @Param("gameUserRole") @Nonnull final EGameUserRole gameUserRole);
+    List<User> findAllianceAdminByAlliance(@Param("alliance") @Nonnull final Alliance alliance,
+                                           @Param("gameUserRole") @Nonnull final EGameUserRole gameUserRole);
 
     @Nullable
-    @Query("SELECT u FROM User u WHERE u.username = :username OR u.email = :eMail")
+    @Query("SELECT u FROM User u WHERE u.username = :username OR u.userSetting.email = :eMail")
     User findByUsernameOrEMail(@Nullable final String username, @Nullable final String eMail);
 
     @Nullable
@@ -27,7 +28,7 @@ public interface UserRepository extends CrudRepository<User, Integer>, CustomUse
     String findGameUserRoles(final int idUser);
 
     @Nullable
-    @Query("SELECT u.email FROM User u " +
+    @Query("SELECT u.userSetting.email FROM User u " +
             "WHERE u.userSetting.receiveChangelogInfos = true " +
             "AND u.userSetting.isEMailVerified = true " +
             "AND u.userSetting.noEMailWanted = false " +

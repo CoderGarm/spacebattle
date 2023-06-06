@@ -95,7 +95,7 @@ public class JwtTokenUtil {
             final Integer userID = claims.get(USER_ID_CLAIM, Integer.class);
             final String hashedPassword = claims.get(PASSWORD_CLAIM, String.class);
             final User user = userService.find(userID);
-            if (user != null && user.getPassword().equals(hashedPassword) && user.getUsername().equals(claims.getSubject())) {
+            if (user != null && user.getUserSetting().getPassword().equals(hashedPassword) && user.getUsername().equals(claims.getSubject())) {
                 return user;
             }
         } catch (final Exception e) {
@@ -166,7 +166,7 @@ public class JwtTokenUtil {
 
         Claims claims = Jwts.claims().setSubject(user.getUsername());
         claims.put(USER_ID_CLAIM, user.getId());
-        claims.put(PASSWORD_CLAIM, user.getPassword());
+        claims.put(PASSWORD_CLAIM, user.getUserSetting().getPassword());
 
         return Jwts.builder()
                 .setClaims(claims)

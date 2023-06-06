@@ -58,7 +58,7 @@ public class UserPoints {
     public UserPoints(@Nonnull final User user) {
         this.transientUser = Preconditions.checkNotNull(user, "user must not be empty");
         this.user = new UserJson(user);
-        this.createdAt = user.getCreatedAt();
+        this.createdAt = user.getUserSetting().getCreatedAt();
     }
 
     private void sumUpPoints() {

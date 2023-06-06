@@ -1,6 +1,7 @@
-package de.yuga.spacebattle.backend.entities.account;
+package de.yuga.spacebattle.backend.entities.account.chat;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 
 import javax.annotation.Nonnull;
