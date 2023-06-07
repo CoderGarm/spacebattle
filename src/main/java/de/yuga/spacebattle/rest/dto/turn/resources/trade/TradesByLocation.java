@@ -74,14 +74,14 @@ public class TradesByLocation {
         final LocalDateTime tickStarts = tick.getTickStarts().plusDays(ticksLeft);
 
 
-        final Tick tickytacki = new Tick(tickNo, tickStarts);
+        final Tick deliveryAt = new Tick(tickNo, tickStarts);
         final Trade trade = new Trade(price, eResourceType, amount);
         TradesByTick byTick = tradesByTick.stream()
-                .filter(t -> t.matchesTick(tickytacki))
+                .filter(t -> t.matchesTick(deliveryAt))
                 .findFirst()
                 .orElse(null);
         if (byTick == null) {
-            byTick = new TradesByTick(tick);
+            byTick = new TradesByTick(deliveryAt);
             this.tradesByTick.add(byTick);
         }
         byTick.add(trade);

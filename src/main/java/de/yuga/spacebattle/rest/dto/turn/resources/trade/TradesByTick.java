@@ -43,6 +43,12 @@ public class TradesByTick {
         this.tick = new Tick(tick);
     }
 
+    public TradesByTick(@Nonnull final Tick tick) {
+        Preconditions.checkNotNull(tick, "tick must not be empty");
+
+        this.tick = tick;
+    }
+
     @JsonIgnore
     public boolean matchesTick(@Nonnull final Tick tick) {
         Preconditions.checkNotNull(tick, "tick must not be empty");
