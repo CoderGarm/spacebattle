@@ -78,6 +78,7 @@ public class ResourceDepositInitializerCalculator {
 
         switch (clazz) {
             case BUILDING:
+                return 1000;
             case RESEARCH:
             default:
                 return 10;
@@ -94,6 +95,7 @@ public class ResourceDepositInitializerCalculator {
 
         switch (clazz) {
             case BUILDING:
+                return 5100;
             case RESEARCH:
             default:
                 return 51;

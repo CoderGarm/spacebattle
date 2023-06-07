@@ -297,27 +297,27 @@ public class MasterOfTheUniverseService {
         final Research civilConstructions = researchService.save(research);
 
         Building b = building("Construction Yard", "Useful to build ground constructions.",
-                30, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, CONSTRUCTION_YARD_PT, research, 1);
+                15000, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, CONSTRUCTION_YARD_PT, research, 1);
         amendTranslation(b, "Bauhof", "Nützlich für Gebäude.");
         buildingService.save(b);
 
         b = building("Financial markets", "A mixture from public investments and tax systems to create income.",
-                100, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, MARKET_PT, research, 1);
+                5000, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, MARKET_PT, research, 1);
         amendTranslation(b, "Finanzmärkte", "Eine Mixtur aus öffentlichen Investitionen und Steuern um Einkommen zu generieren.");
         buildingService.save(b);
 
         b = building("Metal works", "Produces the most basic materials, from rubber in shoes to special alloys for spacecrafts.",
-                250, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, METAL_WORKS, research, 1);
+                12500, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, METAL_WORKS, research, 1);
         amendTranslation(b, "Metallwerke", "Produziert grundlegende Materialien, von Gummi für Schuhe bis zu speziellen Legierungen für die Raumfahrt.");
         buildingService.save(b);
 
         b = building("Orbital ore factory", "Produces some asteroid-based materials and farms gas from the giants and clouds in the system.",
-                200, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_II, HEAVY_METALS_WORK_PT, research, 7);
+                5000, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_II, HEAVY_METALS_WORK_PT, research, 7);
         amendTranslation(b, "Orbitale Metallwerke", "Baut Ressourcen und Gase ab, die hauptsächlich außerhalb des Planeten zu finden sind.");
         buildingService.save(b);
 
         b = building("Nanofarm", "Produces rare elements and combines them to specialized molycircs and complex nano structures.",
-                100, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_III, RARE_ELEMENTS_PT, research, 10);
+                10000, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_III, RARE_ELEMENTS_PT, research, 10);
         amendTranslation(b, "Nanofarm", "Produziert die notwendigen Rohstoffe für Molycircs und komplexe Nanostrukturen.");
         buildingService.save(b);
 
@@ -363,7 +363,7 @@ public class MasterOfTheUniverseService {
         researchService.save(research);
 
         b = building("Orbitals Construction Yard", "The construction yard construct orbital constructions.",
-                100, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, SHIPYARD_PT, research, 1);
+                3000, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, SHIPYARD_PT, research, 1);
         amendTranslation(b, "", "");
         buildingService.save(b);
         /* military constructions */

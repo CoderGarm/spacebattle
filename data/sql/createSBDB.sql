@@ -1953,3 +1953,4 @@ INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArti
 INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (5, 5);
 
 insert into dbPatch values (null, now(), 'add traded resource', '0.1.2-1');
+insert into dbPatch values (null, now(), 'rebalance buildings', '0.1.2-2');
