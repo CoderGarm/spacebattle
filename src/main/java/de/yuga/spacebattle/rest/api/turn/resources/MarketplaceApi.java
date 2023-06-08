@@ -107,12 +107,13 @@ public class MarketplaceApi extends BaseApi {
     public ResponseEntity<?> getTradesForUser() {
         final Tick today = tickService.getToday();
         final List<TradedResource> trades = marketplaceService.findFinishedAndPendingTradesForUser(today, getIdUser());
-        final List<TradesByLocation> result = mapTradeContracts(trades);
+        final List<TradesByLocation> result = mapTradeContracts(today, trades);
         return ResponseEntity.ok(result);
     }
 
     @Nonnull
-    private List<TradesByLocation> mapTradeContracts(@Nonnull final List<TradedResource> trades) {
+    private List<TradesByLocation> mapTradeContracts(@Nonnull final Tick today, @Nonnull final List<TradedResource> trades) {
+        Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(trades, "trades must not be empty");
 
         final int idUser = getIdUser();
@@ -131,14 +132,14 @@ public class MarketplaceApi extends BaseApi {
             purchases.forEach(p -> {
                 final String key = "P-" + p.getDestination().getId();
                 final TradesByLocation byLocation = result.getOrDefault(key, new TradesByLocation(null, p.getDestination()));
-                byLocation.add(p.getTick(), p.getTicksLeft(), eResourceType, p.getPrice(), p.getAmount());
+                byLocation.add(today, p.getTicksLeft(), eResourceType, p.getPrice(), p.getAmount());
                 result.put(key, byLocation);
             });
 
             sales.forEach(s -> {
                 final String key = "S-" + s.getOrigin().getId();
                 final TradesByLocation byLocation = result.getOrDefault(key, new TradesByLocation(s.getOrigin(), null));
-                byLocation.add(s.getTick(), s.getTicksLeft(), eResourceType, s.getPrice(), s.getAmount());
+                byLocation.add(today, s.getTicksLeft(), eResourceType, s.getPrice(), s.getAmount());
                 result.put(key, byLocation);
             });
 
