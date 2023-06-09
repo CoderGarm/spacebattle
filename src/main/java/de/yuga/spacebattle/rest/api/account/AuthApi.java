@@ -273,7 +273,7 @@ public class AuthApi {
             ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserJson.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Player.class))),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
@@ -313,7 +313,7 @@ public class AuthApi {
         });
 
         masterOfTheUniverseService.createOpponentAndFightAsync(saved);
-        return ResponseEntity.ok(new UserJson(saved));
+        return ResponseEntity.ok(new Player(saved));
     }
 
     @PostMapping("/checkUsername/{userName}")

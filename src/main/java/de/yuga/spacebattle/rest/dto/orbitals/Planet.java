@@ -3,7 +3,7 @@ package de.yuga.spacebattle.rest.dto.orbitals;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.EPlanetClassType;
-import de.yuga.spacebattle.rest.dto.account.UserJson;
+import de.yuga.spacebattle.rest.dto.account.Player;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -19,7 +19,7 @@ public class Planet {
 
     @Nullable
     @Schema(description = "The owner of this planet, if already colonized.")
-    private UserJson owner;
+    private Player owner;
 
     @JsonProperty
     @Schema(required = true, description = "If this planet is the main planet of the owner.")
@@ -56,7 +56,7 @@ public class Planet {
         this.orbit = new Orbit(planet.getOrbit());
 
         if (planet.getOwner() != null) {
-            this.owner = new UserJson(planet.getOwner());
+            this.owner = new Player(planet.getOwner());
             this.colonizedAt = planet.getColonizedAt();
             this.isMain = planet.isMain();
         }
@@ -68,7 +68,7 @@ public class Planet {
     }
 
     @Nullable
-    public UserJson getOwner() {
+    public Player getOwner() {
         return owner;
     }
 

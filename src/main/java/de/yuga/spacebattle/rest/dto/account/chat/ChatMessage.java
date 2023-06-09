@@ -2,7 +2,7 @@ package de.yuga.spacebattle.rest.dto.account.chat;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.chat.UserMessage;
-import de.yuga.spacebattle.rest.dto.account.UserJson;
+import de.yuga.spacebattle.rest.dto.account.Player;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -18,7 +18,7 @@ public class ChatMessage {
 
     @Nullable
     @Schema(required = true, description = "The message's sender.")
-    private UserJson sender;
+    private Player sender;
 
     @Nullable
     @Schema(required = true, description = "The message itself")
@@ -39,7 +39,7 @@ public class ChatMessage {
         Preconditions.checkNotNull(userMessage, "userMessage shouldn't be null!");
 
         this.idUserMessage = userMessage.getId();
-        this.sender = new UserJson(userMessage.getSender());
+        this.sender = new Player(userMessage.getSender());
         this.message = userMessage.getMessage();
         this.sentAt = userMessage.getSentAt();
         this.receivedAt = userMessage.getReceivedAt();
@@ -51,7 +51,7 @@ public class ChatMessage {
     }
 
     @Nullable
-    public UserJson getSender() {
+    public Player getSender() {
         return sender;
     }
 

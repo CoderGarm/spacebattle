@@ -99,7 +99,7 @@ public class TestDataProviderUtils {
         final Orbit random = orbit(0, 0, Planet.PLANET_STANDARD_METRIC);
         final StarSystem sys = system(x, y);
         setId(sys);
-        final Planet planet = new Planet(null, "name1", sys, random);
+        final Planet planet = new Planet("name1", sys, random);
         setId(planet);
         return planet;
     }

@@ -24,7 +24,7 @@ technical:
 
 - incremental table "existent entity" includes user or npc
 - needed in
-    - planet
+    - planet (check)
     - tradeoffer
     - tradedresource
     - shipclass
@@ -36,7 +36,9 @@ Gameplay:
 1. Bei den Ground Constructions kann man nun zu teure Bauten auf Wunsch ausgrauen.
 2. Dauer der Forschung und nächstes Level werden beim Starten von Forschungen angezeigt.
    todo. Forum: Thema sperren
-   todo. gebäudeoutput steigern
+   todo. Aufklappgedöns im dashboard ersetzen
+   todo. gebäudeoutput beobachten, population balancen
+   todo. Usernamen und Namen des Imperiums trennen, Herrschertitel, Navy-Prefix
 
 ----------------- Bugs fixed -----------
 
@@ -53,7 +55,7 @@ done. Bestenliste mit Punkten pro Leistungsfeld
 done. Marktplatz
 
 Thema: NPC und Missionen
-todo. NPC-Konzept für Systeme und systemfreie NPC (Piraten, fliegende Händler ...)  
+done. NPC-Konzept für Systeme und systemfreie NPC (Piraten, fliegende Händler ...)  
 todo. interne Sektoraufteilung der Map nach Entfernung um wirtschaftliche Leistungszentren  
 todo. NPC-Handelssystem
 todo. Konzept für Missionen und NPC-Missionen

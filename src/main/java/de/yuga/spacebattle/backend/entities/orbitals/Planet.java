@@ -4,9 +4,12 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.PopulationControlCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.TickOutputCalculator;
+import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 import de.yuga.spacebattle.backend.entities.turn.resources.MiningFactors;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
@@ -27,7 +30,7 @@ import java.util.stream.Collectors;
 
 @NamedQueries({
         @NamedQuery(name = "Planet.getAll", query = "SELECT p FROM Planet p"),
-        @NamedQuery(name = "Planet.getAllOwned", query = "SELECT p FROM Planet p WHERE p.owner IS NOT NULL"),
+        @NamedQuery(name = "Planet.getAllOwned", query = "SELECT p FROM Planet p WHERE p.owner IS NOT NULL AND p.owner.dType = de.yuga.spacebattle.backend.enums.OwnerType.USER"),
         @NamedQuery(name = "Planet.getAllOwnedBy", query = "SELECT p FROM Planet p WHERE p.owner.id = :idOwner ORDER BY p.colonizedAt"),
         @NamedQuery(name = "Planet.getPlanetsWithBuildingsForResourceType",
                 query = "SELECT p FROM Planet p LEFT JOIN FETCH p.constructions c WHERE p.owner = :owner AND c.building.productionType.productionTarget = :resourceType"),
@@ -39,7 +42,7 @@ import java.util.stream.Collectors;
         uniqueConstraints =
         @UniqueConstraint(name = "PLANET_UK", columnNames = {"idStarSystem", "idPlanet", "xCoordinate", "yCoordinate"}))
 @AttributeOverride(name = "id", column = @Column(name = "idPlanet"))
-public class Planet extends AbstractEntityKey {
+public class Planet extends AbstractEntityKey implements HasOwner {
 
     @Nonnull
     @Transient
@@ -48,7 +51,7 @@ public class Planet extends AbstractEntityKey {
     @Nullable
     @ManyToOne(cascade = {CascadeType.MERGE})
     @JoinColumn(name = "idOwner")
-    private User owner;
+    private Owner owner;
 
     @Nonnull
     @NotNull
@@ -126,15 +129,13 @@ public class Planet extends AbstractEntityKey {
     public Planet() {
     }
 
-    public Planet(@Nullable final User owner,
-                  @Nonnull final String name,
+    public Planet(@Nonnull final String name,
                   @Nonnull final StarSystem system,
                   @Nonnull final Orbit orbit) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(system, "system shouldn't be null!");
         Preconditions.checkNotNull(orbit, "orbit shouldn't be null!");
 
-        this.owner = owner;
         this.colonizedAt = owner != null ? LocalDateTime.now() : null;
         this.name = name;
         this.system = system;
@@ -142,11 +143,30 @@ public class Planet extends AbstractEntityKey {
     }
 
     @Nullable
-    public User getOwner() {
+    @Override
+    public Owner getOwner() {
         return owner;
     }
 
-    public void setOwner(@Nonnull final User owner) {
+    @Nullable
+    @Override
+    public User getHumanOwner() {
+        if (!(owner instanceof User)) {
+            return null;
+        }
+        return (User) owner;
+    }
+
+    @Nullable
+    @Override
+    public NonPlayerCharacter getNpcOwner() {
+        if (!(owner instanceof NonPlayerCharacter)) {
+            return null;
+        }
+        return (NonPlayerCharacter) owner;
+    }
+
+    public void setOwner(@Nonnull final Owner owner) {
         Preconditions.checkNotNull(owner, "owner shouldn't be null!");
 
         colonizedAt = LocalDateTime.now();

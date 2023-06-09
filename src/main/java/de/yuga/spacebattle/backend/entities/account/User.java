@@ -9,6 +9,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.enums.EWebUserRole;
+import de.yuga.spacebattle.backend.enums.OwnerType;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 
@@ -22,7 +23,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @NamedQueries({
-        @NamedQuery(name = "User.getAll", query = "SELECT u FROM User u WHERE u.id != 2"),
+        @NamedQuery(name = "User.getAll", query = "SELECT u FROM User u WHERE u.id != 2 AND u.dType = de.yuga.spacebattle.backend.enums.OwnerType.USER"), /* fixme exclude defeated opponent id */
         @NamedQuery(name = "User.findByLikeUsername", query = "SELECT u FROM User u WHERE UPPER(u.username) LIKE UPPER(:username)"),
         @NamedQuery(name = "User.findByUsernameAndEmail", query = "SELECT u FROM User u WHERE UPPER(u.username) = UPPER(:username) AND UPPER(u.userSetting.email) = UPPER(:email)"),
         @NamedQuery(name = "User.getWithKnownStarSystems", query = "SELECT u FROM User u LEFT JOIN FETCH u.knownStarSystems r WHERE u.id = :idUser"),
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
         @NamedQuery(name = "User.findAllianceAdminByAlliance", query = "SELECT u FROM User u WHERE u.alliance = :alliance AND :gameUserRole IN (u.gameUserRoles)")
 })
 @Entity
-@DiscriminatorValue("USER")
+@DiscriminatorValue(OwnerType.USER)
 public class User extends Owner {
 
     @NotNull

@@ -3,7 +3,7 @@ package de.yuga.spacebattle.rest.dto.turn.battle;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.AbstractId;
-import de.yuga.spacebattle.rest.dto.account.UserJson;
+import de.yuga.spacebattle.rest.dto.account.Player;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -17,7 +17,7 @@ public class LossRole {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The user which is affected by the loss.")
-    private UserJson owner;
+    private Player owner;
 
     @Nonnull
     @JsonProperty
@@ -54,7 +54,7 @@ public class LossRole {
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(lossRole, "lossRole shouldn't be null!");
 
-        this.owner = new UserJson(lossRole.getShipClass().getOwner());
+        this.owner = new Player(lossRole.getShipClass().getOwner());
         this.fleet = new AbstractId(lossRole.getFleet(), lossRole.getFleet().getName());
         this.warShipName = lossRole.getWarShipName();
         this.warship = new AbstractId(lossRole.getIdWarship());

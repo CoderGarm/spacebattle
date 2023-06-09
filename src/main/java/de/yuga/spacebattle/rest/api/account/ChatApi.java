@@ -7,7 +7,7 @@ import de.yuga.spacebattle.backend.services.account.ChatService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
-import de.yuga.spacebattle.rest.dto.account.UserJson;
+import de.yuga.spacebattle.rest.dto.account.Player;
 import de.yuga.spacebattle.rest.dto.account.chat.ChatHistory;
 import de.yuga.spacebattle.rest.dto.account.chat.ChatMessage;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
@@ -170,7 +170,7 @@ public class ChatApi extends BaseApi {
         final int idUserByToken = getIdUser();
 
         final String chatMessage = message.getMessage();
-        final UserJson senderJ = message.getSender();
+        final Player senderJ = message.getSender();
         final Integer idUserMessage = message.getIdUserMessage();
         if (idUserMessage == null) {
             throw new NotifyWebUserException("You should try to send the first message another way - please contact the administrator!");

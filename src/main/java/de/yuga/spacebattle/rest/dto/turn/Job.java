@@ -3,7 +3,7 @@ package de.yuga.spacebattle.rest.dto.turn;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
-import de.yuga.spacebattle.rest.dto.account.UserJson;
+import de.yuga.spacebattle.rest.dto.account.Player;
 import de.yuga.spacebattle.rest.dto.buildings.Building;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.rest.dto.constructables.buildings.Construction;
@@ -25,7 +25,7 @@ public class Job {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The owner.")
-    private UserJson user;
+    private Player user;
 
     @Nonnull
     @JsonProperty
@@ -99,7 +99,7 @@ public class Job {
         Preconditions.checkNotNull(job, "job shouldn't be null!");
 
         this.idJob = job.getId();
-        this.user = new UserJson(job.getOwner());
+        this.user = new Player(job.getOwner());
         this.facility = new Construction(job.getFacility(), languageCode);
         this.facilityPlanet = new Planet(job.getFacility().getPlanet());
         this.ticksLeft = job.getTicksLeft();

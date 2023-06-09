@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.dto.account;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -13,11 +14,15 @@ import javax.validation.constraints.Pattern;
  * The simplest representation of a user.
  */
 @Schema(description = ".")
-public class UserJson {
+public class Player {
 
-    @Nullable
+    @JsonProperty
     @Schema(required = true, description = "The user's database id.")
-    private Integer idUser;
+    private int idUser;
+
+    @JsonProperty
+    @Schema(required = true, description = "If the player is NPC or human.")
+    private boolean isNpc;
 
     @Nullable
     @JsonProperty
@@ -35,20 +40,23 @@ public class UserJson {
     @Schema(description = "The user's role.")
     private String role;
 
-    public UserJson() {
+    public Player() {
     }
 
-    public UserJson(@Nonnull final User user) {
+    public Player(@Nonnull final Owner user) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
 
         this.idUser = user.getId();
         this.username = user.getUsername();
-        this.idAlliance = user.getAlliance() != null ? user.getAlliance().getId() : null;
-        this.role = user.getUserRole().getName();
+        if (user instanceof User) {
+            this.idAlliance = ((User) user).getAlliance() != null ? ((User) user).getAlliance().getId() : null;
+            this.role = ((User) user).getUserRole().getName();
+        } else {
+            isNpc = true;
+        }
     }
 
-    @Nullable
-    public Integer getIdUser() {
+    public int getIdUser() {
         return idUser;
     }
 }

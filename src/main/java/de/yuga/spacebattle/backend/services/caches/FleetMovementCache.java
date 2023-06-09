@@ -44,10 +44,10 @@ public class FleetMovementCache {
         Preconditions.checkNotNull(destination, "destination must not be empty");
 
         final User notificationTarget;
-        if (destination.getOwner() == null || fleet.getOwner().equals(destination.getOwner())) {
+        if (destination.getHumanOwner() == null || fleet.getOwner().equals(destination.getOwner())) {
             notificationTarget = fleet.getOwner();
         } else {
-            notificationTarget = destination.getOwner();
+            notificationTarget = destination.getHumanOwner();
             notifyFleetOwner(today, fleet, new FleetMovement(today, fleet, origin, destination, move));
         }
 
@@ -66,7 +66,7 @@ public class FleetMovementCache {
         Preconditions.checkNotNull(destinationSystem, "destinationSystem must not be empty");
 
         final Set<User> owners = destinationSystem.getPlanets().stream()
-                .map(Planet::getOwner)
+                .map(Planet::getHumanOwner)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 

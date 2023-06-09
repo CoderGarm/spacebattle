@@ -52,10 +52,10 @@ public class OperationalCache extends BaseCache {
                                  @Nonnull final List<WarShip> operationals) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
-        Preconditions.checkNotNull(planet.getOwner(), "planet.getOwner() must not be empty");
+        Preconditions.checkNotNull(planet.getHumanOwner(), "planet.getOwner() must not be empty");
         Preconditions.checkNotNull(operationals, "operationals must not be empty");
 
-        final Set<Commissioning> commissionings = getTodayCommissioning(today, planet.getOwner());
+        final Set<Commissioning> commissionings = getTodayCommissioning(today, planet.getHumanOwner());
         commissionings.stream()
                 .filter(c -> c.getPlanet().equals(planet))
                 .findFirst()
@@ -68,10 +68,10 @@ public class OperationalCache extends BaseCache {
                                       @Nonnull final Set<Construction> operationals) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
-        Preconditions.checkNotNull(planet.getOwner(), "planet.getOwner() must not be empty");
+        Preconditions.checkNotNull(planet.getHumanOwner(), "planet.getOwner() must not be empty");
         Preconditions.checkNotNull(operationals, "operationals must not be empty");
 
-        final Set<Commissioning> commissionings = getTodayCommissioning(today, planet.getOwner());
+        final Set<Commissioning> commissionings = getTodayCommissioning(today, planet.getHumanOwner());
         commissionings.stream()
                 .filter(c -> c.getPlanet().equals(planet))
                 .findFirst()

@@ -2,7 +2,7 @@ package de.yuga.spacebattle.rest.dto.combined.spacecrafts;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.rest.dto.account.UserJson;
+import de.yuga.spacebattle.rest.dto.account.Player;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.rest.dto.orbitals.FleetOrbit;
 import de.yuga.spacebattle.rest.dto.turn.Move;
@@ -29,7 +29,7 @@ public class Fleet {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The owner of the fleet")
-    private UserJson owner;
+    private Player owner;
 
     @Nonnull
     @JsonProperty
@@ -98,7 +98,7 @@ public class Fleet {
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
 
         this.idFleet = fleet.getId();
-        this.owner = new UserJson(fleet.getOwner());
+        this.owner = new Player(fleet.getOwner());
         this.name = fleet.getName();
         this.orbit = fleet.getOrbit() != null ? new FleetOrbit(fleet.getOrbit()) : null;
         this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;
@@ -117,7 +117,7 @@ public class Fleet {
 
         final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetSnapshot.getFleet();
         this.idFleet = fleet.getId();
-        this.owner = new UserJson(fleet.getOwner());
+        this.owner = new Player(fleet.getOwner());
         this.name = fleet.getName();
         this.orbit = fleet.getOrbit() != null ? new FleetOrbit(fleet.getOrbit()) : null;
         this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;

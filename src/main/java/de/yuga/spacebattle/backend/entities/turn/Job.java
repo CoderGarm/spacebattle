@@ -64,9 +64,9 @@ public class Job extends Completable implements Comparable<Job> {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkNotNull(facility, "facility shouldn't be null!");
         Preconditions.checkNotNull(constructable, "constructable shouldn't be null!");
-        Preconditions.checkArgument(planet.getOwner() != null, "planet must be colonized!");
+        Preconditions.checkArgument(planet.getHumanOwner() != null, "planet must be colonized!");
 
-        this.owner = planet.getOwner();
+        this.owner = planet.getHumanOwner();
         this.facility = facility;
         this.constructable = constructable;
         if (constructable.getEmpireWideResearchPoints() != null) {

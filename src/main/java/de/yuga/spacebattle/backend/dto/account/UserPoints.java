@@ -12,7 +12,7 @@ import de.yuga.spacebattle.backend.entities.researches.ResearchLevel;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.enums.EResourceType;
-import de.yuga.spacebattle.rest.dto.account.UserJson;
+import de.yuga.spacebattle.rest.dto.account.Player;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -32,7 +32,7 @@ public class UserPoints {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "the user.")
-    private final UserJson user;
+    private final Player user;
 
     @Nonnull
     @JsonProperty
@@ -57,7 +57,7 @@ public class UserPoints {
 
     public UserPoints(@Nonnull final User user) {
         this.transientUser = Preconditions.checkNotNull(user, "user must not be empty");
-        this.user = new UserJson(user);
+        this.user = new Player(user);
         this.createdAt = user.getUserSetting().getCreatedAt();
     }
 

@@ -10,7 +10,7 @@ import de.yuga.spacebattle.backend.services.combined.account.AllianceService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.config.role.AllowedRoles;
-import de.yuga.spacebattle.rest.dto.account.UserJson;
+import de.yuga.spacebattle.rest.dto.account.Player;
 import de.yuga.spacebattle.rest.dto.combined.account.Alliance;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import io.swagger.v3.oas.annotations.Operation;
@@ -105,7 +105,7 @@ public class AllianceApi extends BaseApi {
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = UserJson.class))
+                                    schema = @Schema(implementation = Player.class))
                             )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
@@ -116,7 +116,7 @@ public class AllianceApi extends BaseApi {
         if (alliance == null) {
             return ResponseEntity.ok().build();
         }
-        return ResponseEntity.ok(alliance.getMembers().stream().map(UserJson::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(alliance.getMembers().stream().map(Player::new).collect(Collectors.toList()));
     }
 
     @GetMapping("forUser")
@@ -202,7 +202,7 @@ public class AllianceApi extends BaseApi {
     @Operation(summary = "Fetches the applications of users to the alliance of the ally admin.", operationId = "getApplicationsForMembership",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = UserJson.class)))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = Player.class)))),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
@@ -211,7 +211,7 @@ public class AllianceApi extends BaseApi {
 
         final int idUser = getIdUser();
         final Set<User> applications = allianceService.findOpenApplicationsForAlliance(idUser);
-        return ResponseEntity.ok(applications.stream().map(UserJson::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(applications.stream().map(Player::new).collect(Collectors.toList()));
     }
 
     @GetMapping(APPLY_FOR_MEMBERSHIP + "/isApplicant")

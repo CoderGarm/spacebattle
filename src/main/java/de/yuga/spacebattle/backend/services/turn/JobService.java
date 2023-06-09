@@ -195,7 +195,7 @@ public class JobService {
 
         final Planet planet = planetService.find(idPlanet);
         final Building building = buildingService.find(idBuilding);
-        if (planet == null || planet.getOwner() == null || building == null) {
+        if (planet == null || planet.getHumanOwner() == null || building == null) {
             throw new NotifyWebUserException("not that way!");
         }
 
@@ -204,7 +204,7 @@ public class JobService {
                 .filter(construction -> construction.getBuilding().equals(building))
                 .findFirst().orElse(null);
 
-        final int level = researchService.getLevelForResearch(planet.getOwner(), building.getUnlockedThrough());
+        final int level = researchService.getLevelForResearch(planet.getHumanOwner(), building.getUnlockedThrough());
         if (existingC != null && existingC.getLevel() >= level) {
             throw new NotifyWebUserException("You can't do that - first you have to research the '" + building.getUnlockedThrough().getName(Translation.DEFAULT_LANGUAGE) + "' research.");
         }
@@ -272,7 +272,7 @@ public class JobService {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkNotNull(shipJobPayload, "shipJobPayload shouldn't be null!");
 
-        final User owner = planet.getOwner();
+        final User owner = planet.getHumanOwner();
         if (owner == null) {
             throw new NotifyWebUserException("You should own this planet, buddy.");
         }

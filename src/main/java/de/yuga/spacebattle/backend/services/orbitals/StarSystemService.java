@@ -101,4 +101,11 @@ public class StarSystemService {
 
         starsystemRepository.saveAll(modified);
     }
+
+    @Nullable
+    public StarSystem findByName(@Nonnull final String name) {
+        Preconditions.checkNotNull(name, "name must not be empty");
+
+        return starsystemRepository.findByName(name);
+    }
 }

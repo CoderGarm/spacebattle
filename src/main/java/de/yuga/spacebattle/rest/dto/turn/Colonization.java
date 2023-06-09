@@ -2,7 +2,7 @@ package de.yuga.spacebattle.rest.dto.turn;
 
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.rest.dto.account.UserJson;
+import de.yuga.spacebattle.rest.dto.account.Player;
 import de.yuga.spacebattle.rest.dto.orbitals.Planet;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -16,7 +16,7 @@ public class Colonization {
 
     @Nonnull
     @Schema(required = true, description = "The user who runs the colonization.")
-    private UserJson user;
+    private Player user;
 
     @Nonnull
     @Schema(required = true, description = "The planet which is the target of the colonization.")
@@ -36,7 +36,7 @@ public class Colonization {
         Preconditions.checkNotNull(colonization, "colonization shouldn't be null!");
 
         this.idColonization = colonization.getId();
-        this.user = new UserJson(colonization.getUser());
+        this.user = new Player(colonization.getUser());
         this.target = new Planet(colonization.getTarget());
         this.doneAtZero = colonization.getDoneAtZero();
     }
@@ -46,7 +46,7 @@ public class Colonization {
     }
 
     @Nonnull
-    public UserJson getUser() {
+    public Player getUser() {
         return user;
     }
 

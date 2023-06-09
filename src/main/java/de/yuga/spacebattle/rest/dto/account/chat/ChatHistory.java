@@ -2,7 +2,7 @@ package de.yuga.spacebattle.rest.dto.account.chat;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.chat.MessageThread;
-import de.yuga.spacebattle.rest.dto.account.UserJson;
+import de.yuga.spacebattle.rest.dto.account.Player;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -20,11 +20,11 @@ public class ChatHistory {
 
     @Nullable
     @Schema(required = true, description = "One of the involved users.")
-    private UserJson userOne;
+    private Player userOne;
 
     @Nullable
     @Schema(required = true, description = "The other involved user.")
-    private UserJson userTwo;
+    private Player userTwo;
 
     @Nonnull
     @Schema(required = true, description = "The amount of messages.")
@@ -37,8 +37,8 @@ public class ChatHistory {
         Preconditions.checkNotNull(messageThread, "messageThread shouldn't be null!");
 
         this.idChatHistory = messageThread.getId();
-        this.userOne = new UserJson(messageThread.getUserOne());
-        this.userTwo = new UserJson(messageThread.getUserTwo());
+        this.userOne = new Player(messageThread.getUserOne());
+        this.userTwo = new Player(messageThread.getUserTwo());
         if (messageThread.hasMessagesInitialized()) {
             messageThread.getMessages().stream().map(ChatMessage::new).forEach(this.messages::add);
         }
@@ -50,12 +50,12 @@ public class ChatHistory {
     }
 
     @Nonnull
-    public UserJson getUserOne() {
+    public Player getUserOne() {
         return Objects.requireNonNull(userOne);
     }
 
     @Nonnull
-    public UserJson getUserTwo() {
+    public Player getUserTwo() {
         return Objects.requireNonNull(userTwo);
     }
 

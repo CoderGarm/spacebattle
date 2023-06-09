@@ -68,7 +68,7 @@ public class FleetMovement {
 
         if (movement.getDestinationPlanet() != null) {
             this.destinationPlanet = movement.getDestinationPlanet().getName();
-            final User owner = movement.getDestinationPlanet().getOwner();
+            final User owner = movement.getDestinationPlanet().getHumanOwner();
             if (owner != null) {
                 this.destinationPlanetOwner = owner.getUsername();
             }

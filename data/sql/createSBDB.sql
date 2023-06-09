@@ -1641,36 +1641,29 @@
             foreign key (idCosts)
                 references resourceDeposit (idResourceDeposit);
 
-    INSERT INTO user (username, email, gameUserRoles, userRole, password, createdAt)
-    VALUES ('Flashkid', 'webmaster@battleforhonor.de', 'FORUM_WRITE|WIKI_ADMIN|FORUM_READ|ALLIANCE_ADMIN', 'ADMIN',
-            '49675c186a6c1b1d10cb800e2792ebabd6abd8597bcef2fcaa99bfc813a6f1868b7dc91812ac66718c4fefd59daafa6a658901b7356b3b65fa5528419a93a7a4',
-            now());
-    INSERT INTO userSetting (idUserSetting, isEMailVerified, isLoginForbidden, noEMailWanted, receiveChangelogInfos,
-                             idUser) VALUE (null, 1, 0, 0, 1, 1);
+INSERT INTO user (username, gameUserRoles, userRole, dType)
+VALUES ('Flashkid', 'FORUM_WRITE|WIKI_ADMIN|FORUM_READ|ALLIANCE_ADMIN', 'ADMIN', 'USER');
+INSERT INTO userSetting (idUserSetting, email, password, createdAt, isEMailVerified, isLoginForbidden, noEMailWanted, receiveChangelogInfos, idUser) VALUE
+                        (null, 'webmaster@battleforhonor.de',
+                        '49675c186a6c1b1d10cb800e2792ebabd6abd8597bcef2fcaa99bfc813a6f1868b7dc91812ac66718c4fefd59daafa6a658901b7356b3b65fa5528419a93a7a4',
+                        now(), 1, 0, 0, 1, 1);
 
-    INSERT INTO user (username, email, userRole, createdAt, password)
-    VALUES ('Defeated Opponent', 'mail', 'USER', now(),
-            '49675c186a6c1b1d10cb800e2792ebabd6abd8597bcef2fcaa99bfc813a6f1868b7dc91812ac66718c4fefd59daafa6a658901b7356b3b65fa5528419a93a7a4');
-    INSERT INTO userSetting (idUserSetting, isEMailVerified, isLoginForbidden, noEMailWanted, receiveChangelogInfos,
-                             idUser) VALUE (null, 0, 1, 1, 0, 2);
+INSERT INTO user (username, userRole, dType)
+VALUES ('Defeated Opponent', 'USER', 'USER');
+INSERT INTO userSetting (idUserSetting, email, password, createdAt, isEMailVerified, isLoginForbidden, noEMailWanted, receiveChangelogInfos,
+                         idUser) VALUE (null, 'mail',
+                         '49675c186a6c1b1d10cb800e2792ebabd6abd8597bcef2fcaa99bfc813a6f1868b7dc91812ac66718c4fefd59daafa6a658901b7356b3b65fa5528419a93a7a4',
+                         now(), 0, 1, 1, 0, 2);
 
-    INSERT INTO article (langCode, title, wikiCategory, idBase)
-    VALUES ('en', 'Welcome to the battlefield', 'WELCOME_MESSAGE', null);
-    INSERT INTO article (langCode, title, wikiCategory, idBase)
-    VALUES ('de', 'Willkommen auf dem Schlachtfeld', 'WELCOME_MESSAGE', 1);
-    INSERT INTO article (langCode, title, wikiCategory, idBase)
-    VALUES ('en', 'Population', 'GAME_MECHANICS', null);
-    INSERT INTO article (langCode, title, wikiCategory, idBase)
-    VALUES ('en', 'Combat and missions', 'GAME_MECHANICS', null);
-    INSERT INTO article (langCode, title, wikiCategory, idBase)
-    VALUES ('en', 'Transport and Migration', 'GAME_MECHANICS', null);
+INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('en', 'Welcome to the battlefield', 'WELCOME_MESSAGE', null);
+INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('de', 'Willkommen auf dem Schlachtfeld', 'WELCOME_MESSAGE', 1);
+INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('en', 'Population', 'GAME_MECHANICS', null);
+INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('en', 'Combat and missions', 'GAME_MECHANICS', null);
+INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('en', 'Transport and Migration', 'GAME_MECHANICS', null);
 
-    INSERT INTO articleRevision (version, idArticle, idAuthor)
-    VALUES (1, 1, 1);
-    INSERT INTO articleRevision (version, idArticle, idAuthor)
-    VALUES (1, 2, 1);
-    INSERT INTO articleRevision (version, idArticle, idAuthor)
-    VALUES (1, 3, 1);
+INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, 1, 1);
+INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, 2, 1);
+INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, 3, 1);
 INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, 4, 1);
 INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, 5, 1);
 

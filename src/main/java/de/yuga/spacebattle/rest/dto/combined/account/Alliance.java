@@ -3,7 +3,7 @@ package de.yuga.spacebattle.rest.dto.combined.account;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.rest.dto.account.UserJson;
+import de.yuga.spacebattle.rest.dto.account.Player;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -29,7 +29,7 @@ public class Alliance {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The founder of the alliance.")
-    private UserJson founder;
+    private Player founder;
 
     @Nullable
     @JsonProperty
@@ -45,7 +45,7 @@ public class Alliance {
         this.idAlliance = alliance.getId();
         this.name = alliance.getName();
         this.code = alliance.getCode();
-        this.founder = new UserJson(alliance.getFounder());
+        this.founder = new Player(alliance.getFounder());
     }
 
     public Alliance(@Nonnull final de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance, final int membersAmount) {
@@ -54,7 +54,7 @@ public class Alliance {
         this.idAlliance = alliance.getId();
         this.name = alliance.getName();
         this.code = alliance.getCode();
-        this.founder = new UserJson(alliance.getFounder());
+        this.founder = new Player(alliance.getFounder());
         this.membersAmount = membersAmount;
     }
 }

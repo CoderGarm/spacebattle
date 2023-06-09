@@ -457,8 +457,8 @@ public class TickService {
     private Map<User, Set<Planet>> getPlanetsByUser() {
         final List<Planet> planets = planetService.findAllColonized();
         return planets.stream()
-                .filter(p -> Objects.nonNull(p.getOwner()))
-                .collect(Collectors.groupingBy(Planet::getOwner,
+                .filter(p -> Objects.nonNull(p.getHumanOwner()))
+                .collect(Collectors.groupingBy(Planet::getHumanOwner,
                         Collectors.mapping(Function.identity(), Collectors.toSet())));
     }
 
@@ -719,7 +719,7 @@ public class TickService {
             return;
         }
 
-        final User owner = planet.getOwner();
+        final User owner = planet.getHumanOwner();
         assert owner != null : "There must be a planet's owner.";
         if (constructable.isRepairJob()) {
             realizeFleetRepair(planet, owner, constructable, job);
@@ -811,7 +811,7 @@ public class TickService {
 
         log(planet, job, "Start processing research job.");
         final Constructable constructable = job.getConstructable();
-        final User owner = planet.getOwner();
+        final User owner = planet.getHumanOwner();
         if (owner == null) {
             throw new NotifyWebUserException("There must be a planet's owner.");
         }

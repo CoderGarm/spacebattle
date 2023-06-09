@@ -17,8 +17,4 @@ alter table user drop column email;
 alter table user drop column password;
 alter table user drop column createdAt;
 
-insert into user (idUser, username, dType) values (NULL, 'Star kingdom of Manticore', 'NPC'), (NULL, 'Solarian League', 'NPC'), (NULL, 'Haven Republic', 'NPC'), (NULL, 'Anderman Empire', 'NPC');
-
-/* fixme add defeated opponent */
-
 insert into dbPatch values (null, now(), 'implement npc entity structure', '0.1.3-1');

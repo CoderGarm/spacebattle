@@ -124,7 +124,7 @@ public class PlanetService {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(system, "system shouldn't be null!");
 
-        return planetRepository.save(new Planet(null, name, system, new Orbit(new Distance(xCoordinate, Planet.PLANET_STANDARD_METRIC), new Distance(yCoordinate, Planet.PLANET_STANDARD_METRIC))));
+        return planetRepository.save(new Planet(name, system, new Orbit(new Distance(xCoordinate, Planet.PLANET_STANDARD_METRIC), new Distance(yCoordinate, Planet.PLANET_STANDARD_METRIC))));
     }
 
     @Nonnull
@@ -136,7 +136,7 @@ public class PlanetService {
         Preconditions.checkNotNull(system, "system shouldn't be null!");
         Preconditions.checkNotNull(orbit, "orbit shouldn't be null!");
 
-        return planetRepository.save(new Planet(null, name, system, orbit));
+        return planetRepository.save(new Planet(name, system, orbit));
     }
 
     public Planet save(@Nonnull final Planet entity) {

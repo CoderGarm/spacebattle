@@ -37,10 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -281,6 +278,11 @@ public class ColonizationService {
         final List<StarSystem> allColonizable = starSystemService.findAllColonizable();
         // remove systems which are already colonized
         allColonizable.removeIf(s -> s.getPlanets().stream().anyMatch(p -> !p.isColonizable()));
+
+        // remove systems which have a colonization in progress
+        final Set<StarSystem> coloInProgress = findAll().stream().map(c -> c.getTarget().getSystem()).collect(Collectors.toSet());
+        allColonizable.removeIf(coloInProgress::contains);
+
         if (allColonizable.isEmpty()) {
             LOGGER.warn("THERE ARE NO FREE PLANETS! It would be great if we could create new systems and planets!");
             throw new NotifyWebUserException("Sorry, but we have to make some more universe - ours is done for now.");

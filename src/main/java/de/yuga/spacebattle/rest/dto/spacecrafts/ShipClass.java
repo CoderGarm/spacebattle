@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.EModuleType;
-import de.yuga.spacebattle.rest.dto.account.UserJson;
+import de.yuga.spacebattle.rest.dto.account.Player;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapabilities;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapacityAreas;
 import de.yuga.spacebattle.rest.dto.enums.EShipClassType;
@@ -43,7 +43,7 @@ public class ShipClass implements ShipClassData {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The owner of this class.")
-    private UserJson owner;
+    private Player owner;
 
     @Nonnull
     @JsonProperty
@@ -139,7 +139,7 @@ public class ShipClass implements ShipClassData {
         Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
 
         this.idShipClass = shipClass.getId();
-        this.owner = new UserJson(shipClass.getOwner());
+        this.owner = new Player(shipClass.getOwner());
         this.name = shipClass.getName();
         this.shipClassType = new EShipClassType(shipClass.getShipClassType());
         fittings.addAll(shipClass.getFittings().stream().map(a -> new AlignedFitting(a, languageCode)).collect(Collectors.toList()));
@@ -176,7 +176,7 @@ public class ShipClass implements ShipClassData {
     }
 
     @Nonnull
-    public UserJson getOwner() {
+    public Player getOwner() {
         return owner;
     }
 

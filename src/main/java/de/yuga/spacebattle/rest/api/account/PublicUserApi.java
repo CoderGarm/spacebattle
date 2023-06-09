@@ -3,7 +3,7 @@ package de.yuga.spacebattle.rest.api.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.services.account.UserService;
-import de.yuga.spacebattle.rest.dto.account.UserJson;
+import de.yuga.spacebattle.rest.dto.account.Player;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -42,7 +42,7 @@ public class PublicUserApi {
             description = "Returns a user which is  registered in the system",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserJson.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Player.class))),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
@@ -53,6 +53,6 @@ public class PublicUserApi {
         if (foundUser == null) {
             return ResponseEntity.ok().build();
         }
-        return ResponseEntity.ok(new UserJson(foundUser));
+        return ResponseEntity.ok(new Player(foundUser));
     }
 }

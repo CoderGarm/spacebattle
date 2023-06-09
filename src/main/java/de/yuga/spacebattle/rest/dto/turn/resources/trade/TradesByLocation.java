@@ -3,7 +3,7 @@ package de.yuga.spacebattle.rest.dto.turn.resources.trade;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.rest.dto.AbstractId;
@@ -51,12 +51,12 @@ public class TradesByLocation {
     public TradesByLocation(@Nullable final Planet origin, @Nullable final Planet destination) {
         if (origin != null) {
             this.origin = new AbstractId(origin, origin.getName());
-            final User owner = origin.getOwner();
+            final Owner owner = origin.getOwner();
             this.seller = new AbstractId(Objects.requireNonNull(owner), owner.getUsername());
         }
         if (destination != null) {
             this.destination = new AbstractId(destination, destination.getName());
-            final User owner = destination.getOwner();
+            final Owner owner = destination.getOwner();
             this.buyer = new AbstractId(Objects.requireNonNull(owner), owner.getUsername());
         }
     }

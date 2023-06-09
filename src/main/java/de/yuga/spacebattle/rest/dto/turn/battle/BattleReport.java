@@ -3,7 +3,7 @@ package de.yuga.spacebattle.rest.dto.turn.battle;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.rest.dto.account.UserJson;
+import de.yuga.spacebattle.rest.dto.account.Player;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.rest.dto.turn.battle.combat.*;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -29,7 +29,7 @@ public class BattleReport {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The participating users.")
-    private final Set<UserJson> participatingUsers = new HashSet<>();
+    private final Set<Player> participatingUsers = new HashSet<>();
 
     @Nonnull
     @JsonProperty
@@ -75,7 +75,7 @@ public class BattleReport {
         Preconditions.checkNotNull(battleReport, "battleReport shouldn't be null!");
 
         this.battleReportStatistics = new BattleReportStatistics(battleReport);
-        this.participatingUsers.addAll(battleReport.getParticipatingUsers().stream().map(UserJson::new).collect(Collectors.toSet()));
+        this.participatingUsers.addAll(battleReport.getParticipatingUsers().stream().map(Player::new).collect(Collectors.toSet()));
         this.participatingFleets.addAll(battleReport.getParticipatingFleets().stream().map(f -> new Fleet(f, languageCode)).collect(Collectors.toList()));
         this.lossRole.addAll(battleReport.getLossRole().stream().map(l -> new LossRole(l, languageCode)).collect(Collectors.toList()));
         this.movementActions.addAll(battleReport.getMovementActions().stream().map(m -> new MovementAction(m, languageCode, battleReport.getParticipatingFleets())).collect(Collectors.toList()));
