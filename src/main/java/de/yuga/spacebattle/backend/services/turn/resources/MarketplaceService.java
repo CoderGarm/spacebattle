@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services.turn.resources;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.turn.resources.trade.TradesInTimeframe;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
@@ -12,7 +13,9 @@ import de.yuga.spacebattle.backend.repositories.turn.resource.trade.TradeOfferRe
 import de.yuga.spacebattle.backend.repositories.turn.resource.trade.TradedResourceRepository;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import de.yuga.spacebattle.rest.dto.turn.resources.trade.TakeSpotOffer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,10 +24,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Service
 public class MarketplaceService {
+
+    @Nonnull
+    private final TickService tickService;
 
     @Nonnull
     private final UserService userService;
@@ -39,10 +46,12 @@ public class MarketplaceService {
     private final TradeOfferRepository tradeOfferRepository;
 
     @Autowired
-    public MarketplaceService(@Nonnull final UserService userService,
+    public MarketplaceService(@Nonnull final TickService tickService,
+                              @Nonnull final UserService userService,
                               @Nonnull final PlanetService planetService,
                               @Nonnull final TradedResourceRepository tradedResourceRepository,
                               @Nonnull final TradeOfferRepository tradeOfferRepository) {
+        this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
         this.userService = Preconditions.checkNotNull(userService, "userService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.tradedResourceRepository = Preconditions.checkNotNull(tradedResourceRepository, "tradedResourceRepository shouldn't be null!");
@@ -50,25 +59,26 @@ public class MarketplaceService {
     }
 
     @Nonnull
-    public List<TradedResource> findForTicks(@Nonnull final List<Tick> timeframe) {
-        Preconditions.checkNotNull(timeframe, "timeframe must not be empty");
-
+    public TradesInTimeframe findForTicks(final int pastTicks) {
+        final List<Tick> timeframe = tickService.getTimeframe(pastTicks);
         final List<Integer> ticks = timeframe.stream().map(Tick::getNo).collect(Collectors.toList());
-        return Objects.requireNonNullElse(tradedResourceRepository.findForTicks(ticks), new ArrayList<>());
+        final List<TradedResource> trades = Objects.requireNonNullElse(tradedResourceRepository.findForTicks(ticks), new ArrayList<>());
+
+        return new TradesInTimeframe(timeframe, trades);
     }
 
     @Nonnull
-    public List<TradedResource> findFinishedAndPendingTradesForUser(@Nonnull final Tick tick, final int idUser) {
-        Preconditions.checkNotNull(tick, "tick must not be empty");
-
-        return Objects.requireNonNullElse(tradedResourceRepository.findFinishedAndPendingTradesForUser(tick.getNo(), idUser), new ArrayList<>());
+    public TradesInTimeframe findFinishedAndPendingTradesForUser(final int idUser) {
+        final Tick today = tickService.getToday();
+        final List<TradedResource> trades = Objects.requireNonNullElse(tradedResourceRepository.findFinishedAndPendingTradesForUser(today.getNo(), idUser), new ArrayList<>());
+        return new TradesInTimeframe(List.of(today), trades);
     }
 
 
     @Nonnull
-    public TradedResource takeOffer(@Nonnull final Tick today, final int idTradeOffer, final int idBuyer, final int idPlanetDestination) {
-        Preconditions.checkNotNull(today, "today must not be empty");
+    public TradedResource takeOffer(final int idTradeOffer, final int idBuyer, final int idPlanetDestination) {
 
+        final Tick today = tickService.getToday();
         final TradeOffer tradeOffer = tradeOfferRepository.findById(idTradeOffer).orElseThrow(() -> new NotifyWebUserException("Hell no! You can only take an existing offer!"));
 
         final User seller = tradeOffer.getSeller();
@@ -127,23 +137,40 @@ public class MarketplaceService {
         return Objects.requireNonNullElse(tradeOfferRepository.findActiveOffers(), List.of());
     }
 
+    /**
+     * Takes the last n offers for the given resource which are not from the given user and creates the average.<br>
+     * If no offers are present, it will return a random number in a pseudo-realistic range.
+     */
+    public int findOfferSpotPrice(final int idUser, @Nonnull final EResourceType resourceType) {
+        Preconditions.checkNotNull(resourceType, "resourceType must not be empty");
+
+        final Tick today = tickService.getToday();
+        final int sinceTick = today.getNo() - 10;
+        final List<TradeOffer> offers = Objects.requireNonNullElse(tradeOfferRepository.findLatestOffer(idUser, sinceTick, resourceType), List.of());
+        if (offers.isEmpty()) {
+            return ThreadLocalRandom.current().nextInt(51, 102);
+        }
+        final List<Long> unitPrices = offers.stream().map(o -> o.getPrice() / o.getAmount()).collect(Collectors.toList());
+        final long averagePrice = unitPrices.stream().reduce(0L, Long::sum) / unitPrices.size();
+        return (int) averagePrice;
+    }
+
     @Nonnull
-    public TradeOffer createOffer(@Nonnull final Tick initialTick,
-                                  final int idSeller,
+    public TradeOffer createOffer(final int idSeller,
                                   final int idPlanetOrigin,
                                   @Nonnull final EResourceType resourceType,
                                   final long amount,
                                   final long price) {
-        Preconditions.checkNotNull(initialTick, "initialTick must not be empty");
         Preconditions.checkNotNull(resourceType, "resourceType must not be empty");
 
+        final Tick today = tickService.getToday();
         final User seller = userService.find(idSeller);
         final Planet origin = planetService.find(idPlanetOrigin);
         if ((origin == null || origin.getOwner() == null) || !origin.getOwner().equals(seller)) {
             throw new NotifyWebUserException("In the interests of good bookkeeping, you should leave it alone.");
         }
 
-        return checkAndAllocateOfferPayload(initialTick, seller, origin, resourceType, amount, price);
+        return checkAndAllocateOfferPayload(today, seller, origin, resourceType, amount, price);
     }
 
     @Nonnull
@@ -170,9 +197,9 @@ public class MarketplaceService {
     }
 
     @Nonnull
-    public TradeOffer updateOffer(@Nonnull final Tick today, final int idTradeOffer, final long newOfferAmount, final long price) {
-        Preconditions.checkNotNull(today, "today must not be empty");
+    public TradeOffer updateOffer(final int idTradeOffer, final long newOfferAmount, final long price) {
 
+        final Tick today = tickService.getToday();
         final TradeOffer offer = tradeOfferRepository.findById(idTradeOffer).orElse(null);
         Preconditions.checkNotNull(offer, "offer must not be empty");
 
@@ -198,5 +225,12 @@ public class MarketplaceService {
         offer.setAmount(newOfferAmount);
         offer.setPrice(price);
         return tradeOfferRepository.save(offer);
+    }
+
+    public void sellSpotOffer(final int idUser, @Nonnull final TakeSpotOffer takeSpotOffer) {
+        Preconditions.checkNotNull(takeSpotOffer, "takeSpotOffer must not be empty");
+
+        final int price = findOfferSpotPrice(idUser, takeSpotOffer.getResourceAmount().getRealType());
+        /* fixme create offer from user to NPC */
     }
 }

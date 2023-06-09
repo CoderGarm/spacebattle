@@ -1,10 +1,10 @@
 package de.yuga.spacebattle.rest.api.turn.resources;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.turn.resources.trade.TradesInTimeframe;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import de.yuga.spacebattle.backend.enums.EResourceType;
-import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.backend.services.turn.resources.MarketplaceService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
@@ -38,17 +38,13 @@ public class MarketplaceApi extends BaseApi {
     private static final String TRADE_HISTORY_ENDPOINT = "history";
     private static final String TRADE_HISTORY_FOR_USER_ENDPOINT = "historyForUser";
     private static final String OFFER_ENDPOINT = "offer";
-
-    @Nonnull
-    private final TickService tickService;
+    private static final String SPOT_ENDPOINT = "spot";
 
     @Nonnull
     private final MarketplaceService marketplaceService;
 
     @Autowired
-    public MarketplaceApi(@Nonnull final TickService tickService,
-                          @Nonnull final MarketplaceService marketplaceService) {
-        this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
+    public MarketplaceApi(@Nonnull final MarketplaceService marketplaceService) {
         this.marketplaceService = Preconditions.checkNotNull(marketplaceService, "tradedResourceService must not be empty");
     }
 
@@ -64,21 +60,19 @@ public class MarketplaceApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getTrades(@PathVariable("pastTicks") final int pastTicks) {
-        final List<Tick> timeframe = tickService.getTimeframe(pastTicks);
-        final List<TradedResource> trades = marketplaceService.findForTicks(timeframe);
-        final List<TradesByTick> result = mapTradesByTicks(timeframe, trades);
+        final TradesInTimeframe tradesInTimeframe = marketplaceService.findForTicks(pastTicks);
+        final List<TradesByTick> result = mapTradesByTicks(tradesInTimeframe);
         return ResponseEntity.ok(result);
     }
 
     @Nonnull
-    private List<TradesByTick> mapTradesByTicks(@Nonnull final List<Tick> timeframe, @Nonnull final List<TradedResource> trades) {
-        Preconditions.checkNotNull(timeframe, "timeframe must not be empty");
-        Preconditions.checkNotNull(trades, "trades must not be empty");
+    private List<TradesByTick> mapTradesByTicks(@Nonnull final TradesInTimeframe tradesInTimeframe) {
+        Preconditions.checkNotNull(tradesInTimeframe, "tradesInTimeframe must not be empty");
 
         final List<TradesByTick> result = new ArrayList<>();
-        for (final Tick tick : timeframe) {
+        for (final Tick tick : tradesInTimeframe.getTimeframe()) {
             final List<Trade> res = new ArrayList<>();
-            final Map<EResourceType, List<TradedResource>> tradedResourcesMap = trades.stream()
+            final Map<EResourceType, List<TradedResource>> tradedResourcesMap = tradesInTimeframe.getTrades().stream()
                     .filter(t -> t.getTick().equals(tick))
                     .collect(Collectors.groupingBy(TradedResource::getResourceType,
                             Collectors.mapping(Function.identity(), Collectors.toList())));
@@ -105,21 +99,21 @@ public class MarketplaceApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getTradesForUser() {
-        final Tick today = tickService.getToday();
-        final List<TradedResource> trades = marketplaceService.findFinishedAndPendingTradesForUser(today, getIdUser());
-        final List<TradesByLocation> result = mapTradeContracts(today, trades);
+        final TradesInTimeframe tradesInTimeframe = marketplaceService.findFinishedAndPendingTradesForUser(getIdUser());
+        final List<TradesByLocation> result = mapTradeContracts(tradesInTimeframe);
         return ResponseEntity.ok(result);
     }
 
     @Nonnull
-    private List<TradesByLocation> mapTradeContracts(@Nonnull final Tick today, @Nonnull final List<TradedResource> trades) {
-        Preconditions.checkNotNull(today, "today must not be empty");
-        Preconditions.checkNotNull(trades, "trades must not be empty");
+    private List<TradesByLocation> mapTradeContracts(@Nonnull final TradesInTimeframe tradesInTimeframe) {
+        Preconditions.checkNotNull(tradesInTimeframe, "tradesInTimeframe must not be empty");
 
         final int idUser = getIdUser();
 
+        // this case only has today as timeframe - recycling the dto
+        final Tick today = tradesInTimeframe.getTimeframe().get(0);
         final Map<String, TradesByLocation> result = new HashMap<>();
-        final Map<EResourceType, List<TradedResource>> tradedResourcesMap = trades.stream()
+        final Map<EResourceType, List<TradedResource>> tradedResourcesMap = tradesInTimeframe.getTrades().stream()
                 .collect(Collectors.groupingBy(TradedResource::getResourceType,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
 
@@ -166,13 +160,12 @@ public class MarketplaceApi extends BaseApi {
     public ResponseEntity<?> setOffer(@RequestBody @Nonnull final TradeOffer offer) {
         Preconditions.checkNotNull(offer, "offer must not be empty");
 
-        final Tick today = tickService.getToday();
         final Integer idTradeOffer = offer.getIdTradeOffer();
         final de.yuga.spacebattle.backend.entities.turn.resources.trade.TradeOffer result;
         if (idTradeOffer == null) {
-            result = marketplaceService.createOffer(today, getIdUser(), offer.getIdPlanetOrigin(), offer.getResourceAmount().getRealType(), offer.getResourceAmount().getAmount(), offer.getPrice());
+            result = marketplaceService.createOffer(getIdUser(), offer.getIdPlanetOrigin(), offer.getResourceAmount().getRealType(), offer.getResourceAmount().getAmount(), offer.getPrice());
         } else {
-            result = marketplaceService.updateOffer(today, idTradeOffer, offer.getResourceAmount().getAmount(), offer.getPrice());
+            result = marketplaceService.updateOffer(idTradeOffer, offer.getResourceAmount().getAmount(), offer.getPrice());
         }
         return ResponseEntity.ok(new TradeOffer(result));
     }
@@ -205,8 +198,39 @@ public class MarketplaceApi extends BaseApi {
     public ResponseEntity<?> takeOffer(@RequestBody @Nonnull final TakeOffer offer) {
         Preconditions.checkNotNull(offer, "offer must not be empty");
 
-        final Tick today = tickService.getToday();
-        final TradedResource trade = marketplaceService.takeOffer(today, offer.getIdTradeOffer(), getIdUser(), offer.getIdDestination());
+        final TradedResource trade = marketplaceService.takeOffer(offer.getIdTradeOffer(), getIdUser(), offer.getIdDestination());
         return ResponseEntity.ok(new TradeContract(trade));
+    }
+
+    @GetMapping(SPOT_ENDPOINT + "/pricePerUnit/{resourceType}")
+    @Operation(summary = "Get all EResourceTypes.", operationId = "getSpotPrice",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Integer.class))
+                    ),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getSpotPrice(@PathVariable("resourceType") @Nonnull final String resourceType) {
+        final EResourceType eResourceType = EResourceType.valueOf(resourceType);
+        final int price = marketplaceService.findOfferSpotPrice(getIdUser(), eResourceType);
+        return ResponseEntity.ok(price);
+    }
+
+    @PutMapping(SPOT_ENDPOINT + "/sell") /* fixme create buy on spot market */
+    @Operation(summary = "Get all EResourceTypes.", operationId = "sellAtSpotMarket",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))
+                    ),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getSpotPrice(@RequestBody @Nonnull final TakeSpotOffer takeSpotOffer) {
+
+        marketplaceService.sellSpotOffer(getIdUser(), takeSpotOffer);
+        return ResponseEntity.ok(true);
     }
 }
