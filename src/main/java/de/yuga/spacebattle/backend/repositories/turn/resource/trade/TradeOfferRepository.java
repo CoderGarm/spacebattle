@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.repositories.turn.resource.trade;
 
 import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradeOffer;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,6 +18,6 @@ public interface TradeOfferRepository extends JpaRepository<TradeOffer, Integer>
     List<TradeOffer> findActiveOffers();
 
     @Nullable
-    @Query("SELECT o FROm TradeOffer o WHERE o.resourceType = :resourceType AND o.tick.id >= :tickNo AND o.seller.id != :idUser")
-    List<TradeOffer> findLatestOffer(@Param("idUser") final int idUser, @Param("tickNo") final int tickNo, @Param("resourceType") @Nonnull final EResourceType resourceType);
+    @Query("SELECT o FROM TradeOffer o WHERE o.resourceType = :resourceType ORDER BY o.tick.id desc")
+    List<TradeOffer> findLatestOffer(@Param("resourceType") @Nonnull final EResourceType resourceType, @Nonnull final Pageable pageable);
 }

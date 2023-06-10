@@ -18,31 +18,31 @@ public class Trade {
     private ResourceAmount resourceAmount;
 
     @JsonProperty
-    @Schema(required = true, description = "The price for the traded amount.")
-    private long price;
+    @Schema(required = true, description = "The price per unit of the traded resource.")
+    private long pricePerUnit;
 
     public Trade() {
     }
 
-    public Trade(final long price, @Nonnull final de.yuga.spacebattle.backend.enums.EResourceType realResourceType, final long amount) {
+    public Trade(final long pricePerUnit, @Nonnull final de.yuga.spacebattle.backend.enums.EResourceType realResourceType, final long amount) {
         Preconditions.checkNotNull(realResourceType, "resourceType shouldn't be null!");
 
         this.resourceAmount = new ResourceAmount(realResourceType, amount);
-        this.price = price;
+        this.pricePerUnit = pricePerUnit;
     }
 
     public Trade(@Nonnull final TradeOffer offer) {
         Preconditions.checkNotNull(offer, "offer must not be empty");
 
         this.resourceAmount = new ResourceAmount(offer.getResourceType(), offer.getAmount());
-        this.price = offer.getPrice();
+        this.pricePerUnit = offer.getUnitPrice();
     }
 
     public Trade(@Nonnull final TradedResource tradedResource) {
         Preconditions.checkNotNull(tradedResource, "tradedResource must not be empty");
 
-        this.resourceAmount = new ResourceAmount(tradedResource.getResourceType(), tradedResource.getAmount());
-        this.price = tradedResource.getPrice();
+        this.resourceAmount = new ResourceAmount(tradedResource.getTradeOffer().getResourceType(), tradedResource.getTradeOffer().getAmount());
+        this.pricePerUnit = tradedResource.getTradeOffer().getUnitPrice();
     }
 
     @Nonnull
@@ -50,7 +50,7 @@ public class Trade {
         return resourceAmount;
     }
 
-    public long getPrice() {
-        return price;
+    public long getPricePerUnit() {
+        return pricePerUnit;
     }
 }

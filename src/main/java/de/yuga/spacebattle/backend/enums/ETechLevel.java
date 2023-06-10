@@ -1,5 +1,8 @@
 package de.yuga.spacebattle.backend.enums;
 
+import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -35,5 +38,21 @@ public enum ETechLevel {
     @Nonnull
     public Set<EResourceType> getIncludedResources() {
         return Arrays.stream(EResourceType.valuesWithoutPopulation()).filter(r -> !excludedResources.contains(r)).collect(Collectors.toSet());
+    }
+
+    @Nonnull
+    public static ETechLevel getTechLevelOf(@Nonnull final EResourceType resourceType) {
+        Preconditions.checkNotNull(resourceType, "resourceType must not be empty");
+
+        if (TECH_I.getIncludedResources().contains(resourceType)) {
+            return TECH_I;
+        }
+        if (TECH_II.getIncludedResources().contains(resourceType)) {
+            return TECH_II;
+        }
+        if (TECH_III.getIncludedResources().contains(resourceType)) {
+            return TECH_III;
+        }
+        throw new NotifyWebUserException("Please implement the missing case.");
     }
 }

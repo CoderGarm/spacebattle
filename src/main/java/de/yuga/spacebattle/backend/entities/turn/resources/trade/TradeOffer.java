@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.backend.entities.turn.resources.trade;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
@@ -27,7 +27,7 @@ public class TradeOffer extends Deletable {
     @Nonnull
     @ManyToOne
     @JoinColumn(name = "idSeller")
-    private User seller;
+    private Owner seller;
 
     @Nonnull
     @ManyToOne
@@ -41,23 +41,23 @@ public class TradeOffer extends Deletable {
 
     private long amount;
 
-    private long price;
+    private long unitPrice;
 
     public TradeOffer() {
     }
 
     public TradeOffer(@Nonnull final Tick today,
-                      @Nonnull final User seller,
+                      @Nonnull final Owner seller,
                       @Nonnull final Planet origin,
                       @Nonnull final EResourceType resourceType,
                       final long amount,
-                      final long price) {
+                      final long unitPrice) {
         this.tick = Preconditions.checkNotNull(today, "today must not be empty");
         this.seller = Preconditions.checkNotNull(seller, "seller must not be empty");
         this.origin = Preconditions.checkNotNull(origin, "origin must not be empty");
         this.resourceType = Preconditions.checkNotNull(resourceType, "resourceType must not be empty");
         this.amount = amount;
-        this.price = price;
+        this.unitPrice = unitPrice;
 
     }
 
@@ -69,8 +69,8 @@ public class TradeOffer extends Deletable {
         this.amount = amount;
     }
 
-    public void setPrice(long price) {
-        this.price = price;
+    public void setUnitPrice(long price) {
+        this.unitPrice = price;
     }
 
     @Nonnull
@@ -79,7 +79,7 @@ public class TradeOffer extends Deletable {
     }
 
     @Nonnull
-    public User getSeller() {
+    public Owner getSeller() {
         return seller;
     }
 
@@ -92,8 +92,8 @@ public class TradeOffer extends Deletable {
         return amount;
     }
 
-    public long getPrice() {
-        return price;
+    public long getUnitPrice() {
+        return unitPrice;
     }
 
     @Nonnull

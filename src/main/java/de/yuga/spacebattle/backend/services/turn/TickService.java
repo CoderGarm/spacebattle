@@ -223,9 +223,9 @@ public class TickService {
         Preconditions.checkNotNull(toStore, "toStore must not be empty");
         Preconditions.checkNotNull(tradedResource, "tradedResource must not be empty");
 
-        Planet origin = tradedResource.getOrigin();
+        Planet origin = tradedResource.getTradeOffer().getOrigin();
         origin = toStore.getOrDefault(origin.getId(), origin);
-        origin.getResourceDeposit().updateResource(EResourceType.CREDITS, tradedResource.getPrice());
+        origin.getResourceDeposit().updateResource(EResourceType.CREDITS, tradedResource.getTradeOffer().getUnitPrice());
         toStore.put(origin.getId(), origin);
     }
 
@@ -235,7 +235,7 @@ public class TickService {
 
         Planet destination = tradedResource.getDestination();
         destination = toStore.getOrDefault(destination.getId(), destination);
-        destination.getResourceDeposit().updateResource(tradedResource.getResourceType(), tradedResource.getAmount());
+        destination.getResourceDeposit().updateResource(tradedResource.getTradeOffer().getResourceType(), tradedResource.getTradeOffer().getAmount());
         toStore.put(destination.getId(), destination);
     }
 

@@ -27,6 +27,7 @@ public class TickTimeService {
         return tickRepository.getLatest();
     }
 
+    @Nonnull
     public List<Tick> getTimeframe(final int pastTicks) {
         return tickRepository.findLastTicks(PageRequest.of(0, pastTicks));
     }

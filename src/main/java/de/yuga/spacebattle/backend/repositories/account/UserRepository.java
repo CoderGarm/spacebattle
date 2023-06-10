@@ -3,8 +3,8 @@ package de.yuga.spacebattle.backend.repositories.account;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.enums.EGameUserRole;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import javax.annotation.Nonnull;
@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
-public interface UserRepository extends CrudRepository<User, Integer>, CustomUserRepository {
+public interface UserRepository extends JpaRepository<User, Integer>, CustomUserRepository {
 
     @Nullable
     @Query(name = "User.findAllianceAdminByAlliance")

@@ -2,10 +2,12 @@ package de.yuga.spacebattle.backend.entities.account;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -18,7 +20,7 @@ import javax.validation.constraints.Size;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "dType", discriminatorType = DiscriminatorType.STRING)
 @AttributeOverride(name = "id", column = @Column(name = "idUser"))
-public class Owner extends AbstractEntityKey {
+public class Owner extends AbstractEntityKey implements HasOwner {
 
     @Nonnull
     @NotNull
@@ -43,6 +45,30 @@ public class Owner extends AbstractEntityKey {
     @Nonnull
     public String getUsername() {
         return username;
+    }
+
+    @Nullable
+    @Override
+    public Owner getOwner() {
+        return this;
+    }
+
+    @Nullable
+    @Override
+    public User getHumanOwner() {
+        if (!(this instanceof User)) {
+            return null;
+        }
+        return (User) this;
+    }
+
+    @Nullable
+    @Override
+    public NonPlayerCharacter getNpcOwner() {
+        if (!(this instanceof NonPlayerCharacter)) {
+            return null;
+        }
+        return (NonPlayerCharacter) this;
     }
 
     @Override

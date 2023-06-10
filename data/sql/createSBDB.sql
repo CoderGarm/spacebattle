@@ -633,7 +633,7 @@
        idTradeOffer integer not null auto_increment,
         isDeleted boolean not null default false,
         amount bigint not null,
-        price bigint not null,
+        unitPrice bigint not null,
         resourceType varchar(255) not null,
         idOrigin integer,
         idSeller integer,

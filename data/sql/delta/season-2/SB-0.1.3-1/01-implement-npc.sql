@@ -17,4 +17,7 @@ alter table user drop column email;
 alter table user drop column password;
 alter table user drop column createdAt;
 
+update tradeOffer set price = price / tradeOffer.amount;
+alter table tradeOffer change column price unitPrice bigint not null;
+
 insert into dbPatch values (null, now(), 'implement npc entity structure', '0.1.3-1');

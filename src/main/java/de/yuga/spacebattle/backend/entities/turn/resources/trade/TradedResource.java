@@ -1,11 +1,10 @@
 package de.yuga.spacebattle.backend.entities.turn.resources.trade;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.misc.Completable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
-import de.yuga.spacebattle.backend.enums.EResourceType;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -33,7 +32,7 @@ public class TradedResource extends Completable {
     @NotNull
     @ManyToOne
     @JoinColumn(name = "idBuyer")
-    private User buyer;
+    private Owner buyer;
 
     @Nonnull
     @NotNull
@@ -47,7 +46,7 @@ public class TradedResource extends Completable {
     public TradedResource(@Nonnull final Tick today,
                           final int ticksLeft,
                           @Nonnull final TradeOffer tradeOffer,
-                          @Nonnull final User buyer,
+                          @Nonnull final Owner buyer,
                           @Nonnull final Planet destination) {
         this.tick = Preconditions.checkNotNull(today, "today must not be empty");
         this.ticksLeft = ticksLeft;
@@ -67,31 +66,8 @@ public class TradedResource extends Completable {
     }
 
     @Nonnull
-    public User getSeller() {
-        return tradeOffer.getSeller();
-    }
-
-    @Nonnull
-    public User getBuyer() {
+    public Owner getBuyer() {
         return buyer;
-    }
-
-    @Nonnull
-    public EResourceType getResourceType() {
-        return tradeOffer.getResourceType();
-    }
-
-    public long getAmount() {
-        return tradeOffer.getAmount();
-    }
-
-    public long getPrice() {
-        return tradeOffer.getPrice();
-    }
-
-    @Nonnull
-    public Planet getOrigin() {
-        return tradeOffer.getOrigin();
     }
 
     @Nonnull

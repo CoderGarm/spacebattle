@@ -63,6 +63,6 @@ public class TradeContract {
 
     @JsonIgnore
     public long getPrice() {
-        return offer.getPrice();
+        return offer.getPricePerUnit();
     }
 }

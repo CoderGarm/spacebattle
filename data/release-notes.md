@@ -3,7 +3,41 @@ Thema: NPC, Handel und Missionen
 
 Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
-todo. NPCs als Handelspartner
+Gameplay:
+
+1. NPCs als Handelspartner am Spotmarkt.  
+   Der Spotmarkt funktioniert ohne konkrete Angebotsstellung und einer der NPCs kauft bzw verkauft zum gesetzten
+   Preis.  
+   Der Preis setzt sich zum großen Teil aus dem Mittelwert der Preise der letzten Zeit zusammen.
+2. Bei den Ground Constructions kann man nun zu teure Bauten auf Wunsch ausgrauen.
+3. Dauer der Forschung und nächstes Level werden beim Starten von Forschungen angezeigt.
+4. Im Journal hat das Aufklappgedöns die richtige Hintergrundfarbe.
+
+----------------- Bugs fixed -----------
+
+1. Bei den Ground Constructions werden die verfügbaren Pops angezeigt, nicht mehr die Summe der verfügbaren Pops und
+   derjenigen mit Jobs.
+2. Der Expansion Manager verdoppelt die Einträge beim Kolonisieren nicht mehr.
+3. Die falsche Sortierung der Kolonien im Expansion Manager ist behoben.
+4. Planetary Marketplace: Es wird jetzt an allen Stellen korrekt zwischen "Preis pro Einheit" und "Gesamtpreis"
+   unterschieden.
+
+----------------- next steps -----------
+
+todo. Forum: Thema sperren
+todo. gebäudeoutput beobachten, population balancen
+todo. Gebäudegrundkosten zu hoch, Kostensteigerung pro Level zu gering
+todo. Usernamen und Namen des Imperiums trennen, Herrschertitel, Navy-Prefix
+
+Thema: Handel
+done. Bestenliste mit Punkten pro Leistungsfeld  
+done. Marktplatz
+
+Thema: NPC und Missionen
+done. NPC-Konzept für Systeme und systemfreie NPC (Piraten, fliegende Händler ...)  
+todo. interne Sektoraufteilung der Map nach Entfernung um wirtschaftliche Leistungszentren  
+todo. NPC-Handelssystem
+todo. Konzept für Missionen und NPC-Missionen
 
 1. territorial npc (manticore, haven ...)
 
@@ -31,36 +65,6 @@ technical:
     - fleet
     - fleetsnapshot
 
-Gameplay:
-
-1. Bei den Ground Constructions kann man nun zu teure Bauten auf Wunsch ausgrauen.
-2. Dauer der Forschung und nächstes Level werden beim Starten von Forschungen angezeigt.
-3. Im Journal hat das Aufklappgedöns die richtige Hintergrundfarbe.
-   todo. Forum: Thema sperren
-   todo. gebäudeoutput beobachten, population balancen
-   todo. Usernamen und Namen des Imperiums trennen, Herrschertitel, Navy-Prefix
-
------------------ Bugs fixed -----------
-
-1. Bei den Ground Constructions werden die verfügbaren Pops angezeigt, nicht mehr die Summe der verfügbaren Pops und
-   derjenigen mit Jobs.
-2. Der Expansion Manager verdoppelt die Einträge beim Kolonisieren nicht mehr.
-3. Die falsche Sortierung der Kolonien im Expansion Manager ist behoben.
-4. Planetary Marketplace: Es wird jetzt an allen Stellen korrekt zwischen "Preis pro Einheit" und "Gesamtpreis"
-   unterschieden.
-
------------------ next steps -----------
-
-Thema: Handel
-done. Bestenliste mit Punkten pro Leistungsfeld  
-done. Marktplatz
-
-Thema: NPC und Missionen
-done. NPC-Konzept für Systeme und systemfreie NPC (Piraten, fliegende Händler ...)  
-todo. interne Sektoraufteilung der Map nach Entfernung um wirtschaftliche Leistungszentren  
-todo. NPC-Handelssystem
-todo. Konzept für Missionen und NPC-Missionen
-
 Thema: Spionage
 todo. Spionagegebäude, pro Level gibt es einen Spion
 todo. Spion im Einsatz bringt 50% Genauigkeit bei den Punkten (pro Einsatzfeld?)
@@ -85,6 +89,7 @@ todo. Counter-Spionage, Spione umdrehen (unbenutze Spionage-Slots)
 10. spionage
 
 todo. wurmlochbrücken
+todo. population raiden
 
 todo. kein alter Menüpunkt mehr ausgewählt wenn man sich wieder einloggt
 todo. Exception per mail an webmaster

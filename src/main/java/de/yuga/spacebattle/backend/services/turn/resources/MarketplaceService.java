@@ -2,21 +2,25 @@ package de.yuga.spacebattle.backend.services.turn.resources;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.turn.resources.trade.TradesInTimeframe;
-import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.Owner;
+import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradeOffer;
 import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.repositories.turn.resource.trade.TradeOfferRepository;
 import de.yuga.spacebattle.backend.repositories.turn.resource.trade.TradedResourceRepository;
-import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.backend.services.account.OwnerService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
-import de.yuga.spacebattle.rest.dto.turn.resources.trade.TakeSpotOffer;
+import de.yuga.spacebattle.rest.dto.turn.resources.ResourceAmount;
+import de.yuga.spacebattle.rest.dto.turn.resources.trade.SpotOffer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -24,8 +28,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class MarketplaceService {
@@ -34,7 +38,7 @@ public class MarketplaceService {
     private final TickTimeService tickService;
 
     @Nonnull
-    private final UserService userService;
+    private final OwnerService ownerService;
 
     @Nonnull
     private final PlanetService planetService;
@@ -47,12 +51,12 @@ public class MarketplaceService {
 
     @Autowired
     public MarketplaceService(@Nonnull final TickTimeService tickService,
-                              @Nonnull final UserService userService,
+                              @Nonnull final OwnerService ownerService,
                               @Nonnull final PlanetService planetService,
                               @Nonnull final TradedResourceRepository tradedResourceRepository,
                               @Nonnull final TradeOfferRepository tradeOfferRepository) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
-        this.userService = Preconditions.checkNotNull(userService, "userService must not be empty");
+        this.ownerService = Preconditions.checkNotNull(ownerService, "ownerService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.tradedResourceRepository = Preconditions.checkNotNull(tradedResourceRepository, "tradedResourceRepository shouldn't be null!");
         this.tradeOfferRepository = Preconditions.checkNotNull(tradeOfferRepository, "tradeOfferRepository must not be empty");
@@ -81,8 +85,8 @@ public class MarketplaceService {
         final Tick today = tickService.getToday();
         final TradeOffer tradeOffer = tradeOfferRepository.findById(idTradeOffer).orElseThrow(() -> new NotifyWebUserException("Hell no! You can only take an existing offer!"));
 
-        final User seller = tradeOffer.getSeller();
-        final User buyer = userService.find(idBuyer);
+        final Owner seller = tradeOffer.getSeller();
+        final Owner buyer = ownerService.find(idBuyer);
         Preconditions.checkNotNull(buyer, "buyer must not be empty");
 
         if (buyer.equals(seller)) {
@@ -101,21 +105,28 @@ public class MarketplaceService {
     }
 
     @Nonnull
-    private TradedResource checkAndAllocatePayment(@Nonnull final Tick today, @Nonnull final TradeOffer tradeOffer, @Nonnull final User buyer, @Nonnull final Planet destination) {
+    private TradedResource checkAndAllocatePayment(@Nonnull final Tick today,
+                                                   @Nonnull final TradeOffer tradeOffer,
+                                                   @Nonnull final Owner buyer,
+                                                   @Nonnull final Planet destination) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(tradeOffer, "tradeOffer must not be empty");
         Preconditions.checkNotNull(buyer, "buyer must not be empty");
         Preconditions.checkNotNull(destination, "destination must not be empty");
 
-        final long price = tradeOffer.getPrice();
-        final PayingPossibleResult payingPossible = destination.getResourceDeposit().isPayingPossible(EResourceType.CREDITS, price);
-        if (!payingPossible.isValid()) {
-            throw new NotifyWebUserException("Not enough credits to take the offer.", payingPossible);
-        }
+        final long price = tradeOffer.getUnitPrice();
+        if (isHumanUser(buyer)) {
+            // paying is possible by default for NPCs
 
-        // the destination pays the bill
-        destination.getResourceDeposit().pay(EResourceType.CREDITS, price);
-        planetService.save(destination);
+            final PayingPossibleResult payingPossible = destination.getResourceDeposit().isPayingPossible(EResourceType.CREDITS, price);
+            if (!payingPossible.isValid()) {
+                throw new NotifyWebUserException("Not enough credits to take the offer.", payingPossible);
+            }
+
+            // the destination pays the bill
+            destination.getResourceDeposit().pay(EResourceType.CREDITS, price);
+            planetService.save(destination);
+        }
 
         final TradedResource tradedResource = new TradedResource(today, 10, tradeOffer, buyer, destination);
         return tradedResourceRepository.save(tradedResource);
@@ -144,15 +155,40 @@ public class MarketplaceService {
     public int findOfferSpotPrice(final int idUser, @Nonnull final EResourceType resourceType) {
         Preconditions.checkNotNull(resourceType, "resourceType must not be empty");
 
-        final Tick today = tickService.getToday();
-        final int sinceTick = today.getNo() - 10;
-        final List<TradeOffer> offers = Objects.requireNonNullElse(tradeOfferRepository.findLatestOffer(idUser, sinceTick, resourceType), List.of());
+        final List<TradeOffer> offers = Objects.requireNonNullElse(tradeOfferRepository.findLatestOffer(resourceType, PageRequest.of(0, 100)), List.of());
         if (offers.isEmpty()) {
-            return ThreadLocalRandom.current().nextInt(51, 102);
+            final ETechLevel techLevelOf = ETechLevel.getTechLevelOf(resourceType);
+            switch (techLevelOf) {
+                case TECH_I:
+                    return 50;
+                case TECH_II:
+                    return 75;
+                case TECH_III:
+                default:
+                    return 100;
+            }
         }
-        final List<Long> unitPrices = offers.stream().map(o -> o.getPrice() / o.getAmount()).collect(Collectors.toList());
-        final long averagePrice = unitPrices.stream().reduce(0L, Long::sum) / unitPrices.size();
-        return (int) averagePrice;
+
+        final long averagePriceClosed = getAverageUnitPrice(offers.stream().filter(Deletable::isDeleted));
+
+        final long averagePriceOpen = getAverageUnitPrice(offers.stream().filter(t -> t.getSeller().getId() != idUser).filter(Deletable::isAlive));
+        if (averagePriceOpen == 0 || averagePriceClosed == 0) {
+            return (int) Long.max(averagePriceOpen, averagePriceClosed);
+        }
+        // taken offers are more important than just existent offers
+        return (int) (averagePriceClosed + averagePriceClosed + averagePriceOpen) / 3;
+    }
+
+    private long getAverageUnitPrice(@Nonnull final Stream<TradeOffer> tradeOfferStream) {
+        Preconditions.checkNotNull(tradeOfferStream, "tradeOfferStream must not be empty");
+
+        final List<Long> unitPrices = new ArrayList<>();
+        tradeOfferStream.forEach(offer -> {
+            for (int i = 1; i < offer.getAmount(); i++) {
+                unitPrices.add(offer.getUnitPrice());
+            }
+        });
+        return unitPrices.isEmpty() ? 0 : unitPrices.stream().reduce(0L, Long::sum) / unitPrices.size();
     }
 
     @Nonnull
@@ -160,22 +196,22 @@ public class MarketplaceService {
                                   final int idPlanetOrigin,
                                   @Nonnull final EResourceType resourceType,
                                   final long amount,
-                                  final long price) {
+                                  final long pricePerUnit) {
         Preconditions.checkNotNull(resourceType, "resourceType must not be empty");
 
         final Tick today = tickService.getToday();
-        final User seller = userService.find(idSeller);
+        final Owner seller = ownerService.find(idSeller);
         final Planet origin = planetService.find(idPlanetOrigin);
         if ((origin == null || origin.getOwner() == null) || !origin.getOwner().equals(seller)) {
             throw new NotifyWebUserException("In the interests of good bookkeeping, you should leave it alone.");
         }
 
-        return checkAndAllocateOfferPayload(today, seller, origin, resourceType, amount, price);
+        return checkAndAllocateOfferPayload(today, seller, origin, resourceType, amount, pricePerUnit);
     }
 
     @Nonnull
     private TradeOffer checkAndAllocateOfferPayload(@Nonnull final Tick initialTick,
-                                                    @Nonnull final User seller,
+                                                    @Nonnull final Owner seller,
                                                     @Nonnull final Planet origin,
                                                     @Nonnull final EResourceType resourceType,
                                                     final long amount,
@@ -184,20 +220,30 @@ public class MarketplaceService {
         Preconditions.checkNotNull(seller, "seller must not be empty");
         Preconditions.checkNotNull(origin, "origin must not be empty");
 
-        final PayingPossibleResult payingPossible = origin.getResourceDeposit().isPayingPossible(resourceType, amount);
-        if (!payingPossible.isValid()) {
-            throw new NotifyWebUserException("Not enough resources for trade.", payingPossible);
-        }
+        if (isHumanUser(seller)) {
+            // paying is possible by default for NPCs
 
-        // payload is persisted in the offer and 'allocated'
-        origin.getResourceDeposit().pay(resourceType, amount);
-        planetService.save(origin);
+            final PayingPossibleResult payingPossible = origin.getResourceDeposit().isPayingPossible(resourceType, amount);
+            if (!payingPossible.isValid()) {
+                throw new NotifyWebUserException("Not enough resources for trade.", payingPossible);
+            }
+
+            // payload is persisted in the offer and 'allocated'
+            origin.getResourceDeposit().pay(resourceType, amount);
+            planetService.save(origin);
+        }
 
         return tradeOfferRepository.save(new TradeOffer(initialTick, seller, origin, resourceType, amount, price));
     }
 
+    private static boolean isHumanUser(@Nonnull final Owner owner) {
+        Preconditions.checkNotNull(owner, "owner must not be empty");
+
+        return owner.getHumanOwner() != null;
+    }
+
     @Nonnull
-    public TradeOffer updateOffer(final int idTradeOffer, final long newOfferAmount, final long price) {
+    public TradeOffer updateOffer(final int idTradeOffer, final long newOfferAmount, final long pricePerUnit) {
 
         final Tick today = tickService.getToday();
         final TradeOffer offer = tradeOfferRepository.findById(idTradeOffer).orElse(null);
@@ -223,14 +269,32 @@ public class MarketplaceService {
 
         offer.setTick(today);
         offer.setAmount(newOfferAmount);
-        offer.setPrice(price);
+        offer.setUnitPrice(pricePerUnit);
         return tradeOfferRepository.save(offer);
     }
 
-    public void sellSpotOffer(final int idUser, @Nonnull final TakeSpotOffer takeSpotOffer) {
-        Preconditions.checkNotNull(takeSpotOffer, "takeSpotOffer must not be empty");
+    public void sellSpotOffer(final int idUser, @Nonnull final SpotOffer spotOffer) {
+        Preconditions.checkNotNull(spotOffer, "spotOffer must not be empty");
 
-        final int price = findOfferSpotPrice(idUser, takeSpotOffer.getResourceAmount().getRealType());
-        /* fixme create offer from user to NPC */
+        final ResourceAmount resourceAmount = spotOffer.getResourceAmount();
+        final int price = findOfferSpotPrice(idUser, resourceAmount.getRealType());
+        final TradeOffer offer = createOffer(idUser, spotOffer.getIdPlanet(), resourceAmount.getRealType(), resourceAmount.getAmount(), price);
+
+        final Planet mainPlanet = planetService.findMainPlanet(ownerService.getRandomNPC());
+        takeOffer(offer.getId(), Objects.requireNonNull(mainPlanet.getNpcOwner()).getId(), mainPlanet.getId());
+    }
+
+    public void buySpotOffer(final int idUser, @Nonnull final SpotOffer spotOffer) {
+        Preconditions.checkNotNull(spotOffer, "spotOffer must not be empty");
+
+        final ResourceAmount resourceAmount = spotOffer.getResourceAmount();
+        final int price = findOfferSpotPrice(idUser, resourceAmount.getRealType());
+
+        final Planet mainPlanet = planetService.findMainPlanet(ownerService.getRandomNPC());
+
+        final int idNPC = Objects.requireNonNull(mainPlanet.getNpcOwner()).getId();
+        final TradeOffer offer = createOffer(idNPC, mainPlanet.getId(), resourceAmount.getRealType(), resourceAmount.getAmount(), price);
+
+        takeOffer(offer.getId(), idUser, spotOffer.getIdPlanet());
     }
 }

@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.services.orbitals;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.TickOutputCalculator;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
@@ -83,7 +84,7 @@ public class PlanetService {
     }
 
     @Nonnull
-    public Planet findMainPlanet(@Nonnull final User user) {
+    public Planet findMainPlanet(@Nonnull final Owner user) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
 
         return planetRepository.findMainPlanetForUser(user.getId());

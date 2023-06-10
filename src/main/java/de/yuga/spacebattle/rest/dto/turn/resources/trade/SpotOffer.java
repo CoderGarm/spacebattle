@@ -7,18 +7,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import javax.annotation.Nonnull;
 
 @Schema(description = ".")
-public class TakeSpotOffer {
+public class SpotOffer {
 
     @Nonnull
     @JsonProperty
-    @Schema(required = true, description = "The traded resource amount.")
+    @Schema(required = true, description = "The resource amount.")
     private ResourceAmount resourceAmount;
 
     @JsonProperty
-    @Schema(required = true, description = "The destination's planet id.")
-    private int idDestination;
+    @Schema(required = true, description = "The planet's id.")
+    private int idPlanet;
 
-    public TakeSpotOffer() {
+    public SpotOffer() {
     }
 
     @Nonnull
@@ -26,7 +26,7 @@ public class TakeSpotOffer {
         return resourceAmount;
     }
 
-    public int getIdDestination() {
-        return idDestination;
+    public int getIdPlanet() {
+        return idPlanet;
     }
 }

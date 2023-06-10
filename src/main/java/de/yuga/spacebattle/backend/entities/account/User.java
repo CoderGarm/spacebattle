@@ -27,8 +27,8 @@ import java.util.stream.Collectors;
         @NamedQuery(name = "User.findByLikeUsername", query = "SELECT u FROM User u WHERE UPPER(u.username) LIKE UPPER(:username)"),
         @NamedQuery(name = "User.findByUsernameAndEmail", query = "SELECT u FROM User u WHERE UPPER(u.username) = UPPER(:username) AND UPPER(u.userSetting.email) = UPPER(:email)"),
         @NamedQuery(name = "User.getWithKnownStarSystems", query = "SELECT u FROM User u LEFT JOIN FETCH u.knownStarSystems r WHERE u.id = :idUser"),
-        @NamedQuery(name = "User.findByUsernameExact", query = "SELECT u.id FROM User u WHERE UPPER(u.username) = UPPER(:username)"), /* fixme reduce to boolean */
-        @NamedQuery(name = "User.findByEMailExact", query = "SELECT u.id FROM User u WHERE UPPER(u.userSetting.email) = UPPER(:email)"), /* fixme reduce to boolean */
+        @NamedQuery(name = "User.findByUsernameExact", query = "SELECT u.id FROM User u WHERE UPPER(u.username) = UPPER(:username)"), /* todo reduce to boolean */
+        @NamedQuery(name = "User.findByEMailExact", query = "SELECT u.id FROM User u WHERE UPPER(u.userSetting.email) = UPPER(:email)"), /* todo reduce to boolean */
         @NamedQuery(name = "User.findByUsername", query = "SELECT u FROM User u WHERE UPPER(u.username) = UPPER(:username)"),
         @NamedQuery(name = "User.findAllianceAdminByAlliance", query = "SELECT u FROM User u WHERE u.alliance = :alliance AND :gameUserRole IN (u.gameUserRoles)")
 })

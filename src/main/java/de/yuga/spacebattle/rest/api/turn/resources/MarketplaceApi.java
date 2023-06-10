@@ -74,12 +74,12 @@ public class MarketplaceApi extends BaseApi {
             final List<Trade> res = new ArrayList<>();
             final Map<EResourceType, List<TradedResource>> tradedResourcesMap = tradesInTimeframe.getTrades().stream()
                     .filter(t -> t.getTick().equals(tick))
-                    .collect(Collectors.groupingBy(TradedResource::getResourceType,
+                    .collect(Collectors.groupingBy(tr -> tr.getTradeOffer().getResourceType(),
                             Collectors.mapping(Function.identity(), Collectors.toList())));
             for (final EResourceType eResourceType : EResourceType.valuesWithoutPopulation()) {
                 final List<TradedResource> tradedResources = tradedResourcesMap.getOrDefault(eResourceType, new ArrayList<>());
                 tradedResources.forEach(tradedResource -> {
-                    res.add(new Trade(tradedResource.getPrice(), eResourceType, tradedResource.getAmount()));
+                    res.add(new Trade(tradedResource.getTradeOffer().getUnitPrice(), eResourceType, tradedResource.getTradeOffer().getAmount()));
                 });
             }
             result.add(new TradesByTick(tick, res));
@@ -114,26 +114,26 @@ public class MarketplaceApi extends BaseApi {
         final Tick today = tradesInTimeframe.getTimeframe().get(0);
         final Map<String, TradesByLocation> result = new HashMap<>();
         final Map<EResourceType, List<TradedResource>> tradedResourcesMap = tradesInTimeframe.getTrades().stream()
-                .collect(Collectors.groupingBy(TradedResource::getResourceType,
+                .collect(Collectors.groupingBy(tr -> tr.getTradeOffer().getResourceType(),
                         Collectors.mapping(Function.identity(), Collectors.toList())));
 
         for (final EResourceType eResourceType : EResourceType.valuesWithoutPopulation()) {
             final List<TradedResource> tradedResources = tradedResourcesMap.getOrDefault(eResourceType, new ArrayList<>());
-            final Set<TradedResource> sales = tradedResources.stream().filter(tr -> tr.getSeller().getId() == idUser).collect(Collectors.toSet());
+            final Set<TradedResource> sales = tradedResources.stream().filter(tr -> tr.getTradeOffer().getSeller().getId() == idUser).collect(Collectors.toSet());
             final Set<TradedResource> purchases = new HashSet<>(tradedResources);
             purchases.removeAll(sales);
 
             purchases.forEach(p -> {
                 final String key = "P-" + p.getDestination().getId();
                 final TradesByLocation byLocation = result.getOrDefault(key, new TradesByLocation(null, p.getDestination()));
-                byLocation.add(today, p.getTicksLeft(), eResourceType, p.getPrice(), p.getAmount());
+                byLocation.add(today, p.getTicksLeft(), eResourceType, p.getTradeOffer().getUnitPrice(), p.getTradeOffer().getAmount());
                 result.put(key, byLocation);
             });
 
             sales.forEach(s -> {
-                final String key = "S-" + s.getOrigin().getId();
-                final TradesByLocation byLocation = result.getOrDefault(key, new TradesByLocation(s.getOrigin(), null));
-                byLocation.add(today, s.getTicksLeft(), eResourceType, s.getPrice(), s.getAmount());
+                final String key = "S-" + s.getTradeOffer().getOrigin().getId();
+                final TradesByLocation byLocation = result.getOrDefault(key, new TradesByLocation(s.getTradeOffer().getOrigin(), null));
+                byLocation.add(today, s.getTicksLeft(), eResourceType, s.getTradeOffer().getUnitPrice(), s.getTradeOffer().getAmount());
                 result.put(key, byLocation);
             });
 
@@ -141,7 +141,7 @@ public class MarketplaceApi extends BaseApi {
         return new ArrayList<>(result.values());
     }
 
-    @PutMapping(OFFER_ENDPOINT)
+    @PutMapping(value = OFFER_ENDPOINT)
     @Operation(summary = "Creates an offer", operationId = "setOffer",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
@@ -163,9 +163,9 @@ public class MarketplaceApi extends BaseApi {
         final Integer idTradeOffer = offer.getIdTradeOffer();
         final de.yuga.spacebattle.backend.entities.turn.resources.trade.TradeOffer result;
         if (idTradeOffer == null) {
-            result = marketplaceService.createOffer(getIdUser(), offer.getIdPlanetOrigin(), offer.getResourceAmount().getRealType(), offer.getResourceAmount().getAmount(), offer.getPrice());
+            result = marketplaceService.createOffer(getIdUser(), offer.getIdPlanetOrigin(), offer.getResourceAmount().getRealType(), offer.getResourceAmount().getAmount(), offer.getPricePerUnit());
         } else {
-            result = marketplaceService.updateOffer(idTradeOffer, offer.getResourceAmount().getAmount(), offer.getPrice());
+            result = marketplaceService.updateOffer(idTradeOffer, offer.getResourceAmount().getAmount(), offer.getPricePerUnit());
         }
         return ResponseEntity.ok(new TradeOffer(result));
     }
@@ -186,8 +186,14 @@ public class MarketplaceApi extends BaseApi {
         return ResponseEntity.ok(trades.stream().map(TradeOffer::new).collect(Collectors.toList()));
     }
 
-    @PostMapping(value = OFFER_ENDPOINT, consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all EResourceTypes.", operationId = "takeOffer",
+    @PostMapping(value = OFFER_ENDPOINT)
+    @Operation(summary = "Get all EResourceTypes.", operationId = "takeOffer", requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            required = true,
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = TakeOffer.class)
+            )
+    ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TradeContract.class))),
@@ -218,8 +224,15 @@ public class MarketplaceApi extends BaseApi {
         return ResponseEntity.ok(price);
     }
 
-    @PutMapping(SPOT_ENDPOINT + "/sell") /* fixme create buy on spot market */
+    @PutMapping(SPOT_ENDPOINT + "/sell")
     @Operation(summary = "Get all EResourceTypes.", operationId = "sellAtSpotMarket",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = SpotOffer.class)
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))
@@ -228,9 +241,32 @@ public class MarketplaceApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getSpotPrice(@RequestBody @Nonnull final TakeSpotOffer takeSpotOffer) {
+    public ResponseEntity<?> sellAtSpotMarket(@RequestBody @Nonnull final SpotOffer spotOffer) {
 
-        marketplaceService.sellSpotOffer(getIdUser(), takeSpotOffer);
+        marketplaceService.sellSpotOffer(getIdUser(), spotOffer);
+        return ResponseEntity.ok(true);
+    }
+
+    @PutMapping(SPOT_ENDPOINT + "/buy")
+    @Operation(summary = "Get all EResourceTypes.", operationId = "buyAtSpotMarket",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = SpotOffer.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))
+                    ),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> buyAtSpotMarket(@RequestBody @Nonnull final SpotOffer spotOffer) {
+
+        marketplaceService.buySpotOffer(getIdUser(), spotOffer);
         return ResponseEntity.ok(true);
     }
 }
