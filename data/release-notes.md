@@ -35,8 +35,8 @@ Gameplay:
 
 1. Bei den Ground Constructions kann man nun zu teure Bauten auf Wunsch ausgrauen.
 2. Dauer der Forschung und nächstes Level werden beim Starten von Forschungen angezeigt.
+3. Im Journal hat das Aufklappgedöns die richtige Hintergrundfarbe.
    todo. Forum: Thema sperren
-   todo. Aufklappgedöns im dashboard ersetzen
    todo. gebäudeoutput beobachten, population balancen
    todo. Usernamen und Namen des Imperiums trennen, Herrschertitel, Navy-Prefix
 
@@ -46,7 +46,8 @@ Gameplay:
    derjenigen mit Jobs.
 2. Der Expansion Manager verdoppelt die Einträge beim Kolonisieren nicht mehr.
 3. Die falsche Sortierung der Kolonien im Expansion Manager ist behoben.
-   todo. marketplace price per unit und price wird an irgendeiner stelle vermischt
+4. Planetary Marketplace: Es wird jetzt an allen Stellen korrekt zwischen "Preis pro Einheit" und "Gesamtpreis"
+   unterschieden.
 
 ----------------- next steps -----------
 
@@ -91,6 +92,8 @@ todo. Exception per mail an webmaster
 - look & feel wie in büchern
 - emission spectra als gimmick
 
+todo. better distinguish between tick-worker-service and tick-time-service
+
 todo. combat aufhübschen and more infos
 
 todo. fleet movement report im dashboard
@@ -104,8 +107,6 @@ todo. library for modules and hulls
 todo. provide alliance at account creation to place main planet by friends?
 
 todo. use context menu for star map?
-
-todo. spinner abbrechen
 
 todo. wormholes (see mapdata.js file)
 

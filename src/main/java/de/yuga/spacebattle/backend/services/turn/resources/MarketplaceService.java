@@ -13,7 +13,7 @@ import de.yuga.spacebattle.backend.repositories.turn.resource.trade.TradeOfferRe
 import de.yuga.spacebattle.backend.repositories.turn.resource.trade.TradedResourceRepository;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
-import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.turn.resources.trade.TakeSpotOffer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 public class MarketplaceService {
 
     @Nonnull
-    private final TickService tickService;
+    private final TickTimeService tickService;
 
     @Nonnull
     private final UserService userService;
@@ -46,7 +46,7 @@ public class MarketplaceService {
     private final TradeOfferRepository tradeOfferRepository;
 
     @Autowired
-    public MarketplaceService(@Nonnull final TickService tickService,
+    public MarketplaceService(@Nonnull final TickTimeService tickService,
                               @Nonnull final UserService userService,
                               @Nonnull final PlanetService planetService,
                               @Nonnull final TradedResourceRepository tradedResourceRepository,
