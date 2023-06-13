@@ -29,7 +29,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class MarketplaceService {
@@ -150,28 +149,30 @@ public class MarketplaceService {
 
     /**
      * Takes the last n offers for the given resource which are not from the given user and creates the average.<br>
-     * If no offers are present, it will return a random number in a pseudo-realistic range.
+     * If no offers are present, it will return a number from a pseudo-realistic range.
      */
     public int findOfferSpotPrice(final int idUser, @Nonnull final EResourceType resourceType) {
         Preconditions.checkNotNull(resourceType, "resourceType must not be empty");
 
         final List<TradeOffer> offers = Objects.requireNonNullElse(tradeOfferRepository.findLatestOffer(resourceType, PageRequest.of(0, 100)), List.of());
         if (offers.isEmpty()) {
-            final ETechLevel techLevelOf = ETechLevel.getTechLevelOf(resourceType);
-            switch (techLevelOf) {
-                case TECH_I:
-                    return 50;
-                case TECH_II:
-                    return 75;
-                case TECH_III:
-                default:
-                    return 100;
-            }
+            return getBaseSpotPrice(resourceType);
         }
 
-        final long averagePriceClosed = getAverageUnitPrice(offers.stream().filter(Deletable::isDeleted));
+        final List<TradeOffer> closedOffers = offers.stream()
+                .filter(Deletable::isDeleted)
+                .collect(Collectors.toList());
 
-        final long averagePriceOpen = getAverageUnitPrice(offers.stream().filter(t -> t.getSeller().getId() != idUser).filter(Deletable::isAlive));
+        final List<TradeOffer> openOffers = offers.stream()
+                .filter(t -> t.getSeller().getId() != idUser)
+                .filter(Deletable::isAlive)
+                .collect(Collectors.toList());
+
+        final long averagePriceClosed = getAverageUnitPrice(closedOffers);
+        final long averagePriceOpen = getAverageUnitPrice(openOffers);
+        if (averagePriceOpen == 0 && averagePriceClosed == 0) {
+            return getBaseSpotPrice(resourceType);
+        }
         if (averagePriceOpen == 0 || averagePriceClosed == 0) {
             return (int) Long.max(averagePriceOpen, averagePriceClosed);
         }
@@ -179,11 +180,24 @@ public class MarketplaceService {
         return (int) (averagePriceClosed + averagePriceClosed + averagePriceOpen) / 3;
     }
 
-    private long getAverageUnitPrice(@Nonnull final Stream<TradeOffer> tradeOfferStream) {
-        Preconditions.checkNotNull(tradeOfferStream, "tradeOfferStream must not be empty");
+    private int getBaseSpotPrice(final @Nonnull EResourceType resourceType) {
+        final ETechLevel techLevelOf = ETechLevel.getTechLevelOf(resourceType);
+        switch (techLevelOf) {
+            case TECH_I:
+                return 50;
+            case TECH_II:
+                return 75;
+            case TECH_III:
+            default:
+                return 100;
+        }
+    }
+
+    private long getAverageUnitPrice(@Nonnull final List<TradeOffer> tradeOffers) {
+        Preconditions.checkNotNull(tradeOffers, "tradeOffers must not be empty");
 
         final List<Long> unitPrices = new ArrayList<>();
-        tradeOfferStream.forEach(offer -> {
+        tradeOffers.forEach(offer -> {
             for (int i = 1; i < offer.getAmount(); i++) {
                 unitPrices.add(offer.getUnitPrice());
             }
