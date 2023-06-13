@@ -80,6 +80,7 @@ public class User extends Owner {
     private UserSetting userSetting;
 
     public User() {
+        this.userSetting = new UserSetting();
     }
 
     public User(@Nonnull final String username,
