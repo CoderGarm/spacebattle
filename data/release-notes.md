@@ -5,29 +5,16 @@ Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
 Gameplay:
 
-1. NPCs als Handelspartner am Spotmarkt.  
-   Der Spotmarkt funktioniert ohne konkrete Angebotsstellung und einer der NPCs kauft bzw verkauft zum gesetzten
-   Preis.  
-   Der Preis setzt sich zum großen Teil aus dem Mittelwert der Preise der letzten Zeit zusammen.
-2. Bei den Ground Constructions kann man nun zu teure Bauten auf Wunsch ausgrauen.
-3. Dauer der Forschung und nächstes Level werden beim Starten von Forschungen angezeigt.
-4. Im Journal hat das Aufklappgedöns die richtige Hintergrundfarbe.
+todo. NPC als Gegner
+
+todo. Die Aufteilung nach Ziel- bzw. Abflugort eines Handels macht im Dashboard so aktuell keinen Sinn.
+todo. preis history
 
 ----------------- Bugs fixed -----------
 
-1. Bei den Ground Constructions werden die verfügbaren Pops angezeigt, nicht mehr die Summe der verfügbaren Pops und
-   derjenigen mit Jobs.
-2. Der Expansion Manager verdoppelt die Einträge beim Kolonisieren nicht mehr.
-3. Die falsche Sortierung der Kolonien im Expansion Manager ist behoben.
-4. Planetary Marketplace: Es wird jetzt an allen Stellen korrekt zwischen "Preis pro Einheit" und "Gesamtpreis"
-   unterschieden.
+1. Startbutton für Gebäudebau wird nicht durch hovern über zu teures Gebäude entfernt.
 
 ----------------- next steps -----------
-
-todo. Forum: Thema sperren
-todo. gebäudeoutput beobachten, population balancen
-todo. Gebäudegrundkosten zu hoch, Kostensteigerung pro Level zu gering
-todo. Usernamen und Namen des Imperiums trennen, Herrschertitel, Navy-Prefix
 
 Thema: Handel
 done. Bestenliste mit Punkten pro Leistungsfeld  
@@ -35,8 +22,8 @@ done. Marktplatz
 
 Thema: NPC und Missionen
 done. NPC-Konzept für Systeme und systemfreie NPC (Piraten, fliegende Händler ...)  
+done. NPC-Handelssystem
 todo. interne Sektoraufteilung der Map nach Entfernung um wirtschaftliche Leistungszentren  
-todo. NPC-Handelssystem
 todo. Konzept für Missionen und NPC-Missionen
 
 1. territorial npc (manticore, haven ...)
@@ -58,12 +45,12 @@ technical:
 
 - incremental table "existent entity" includes user or npc
 - needed in
-    - planet (check)
-    - tradeoffer
-    - tradedresource
-    - shipclass
-    - fleet
-    - fleetsnapshot
+  - planet (check)
+  - tradeoffer (check)
+  - tradedresource (check)
+  - shipclass
+  - fleet
+  - fleetsnapshot
 
 Thema: Spionage
 todo. Spionagegebäude, pro Level gibt es einen Spion
@@ -80,14 +67,12 @@ todo. Counter-Spionage, Spione umdrehen (unbenutze Spionage-Slots)
 3. Population balancing
 5. Das man Kolonisierungen planen kann
 6. Rework der Flottenbewegungen (nice to have)
-7. mich den spannenden Aufgaben widmen: ein NPC-System, Missionen, simulierte Handelsflotten, Piraten und sowas (
-   multi-combat wäre wohl sehr sinnvoll -> Darstellung des Kampfes
-   muss erkennbaren Mehrwert bringen)
-8. Änderungen in der Spielmechanik, z.B. dass die Leistung des Antriebs im Verhältnis zur Schiffsmasse steht -> erneutes
-   Rebalancing der Module
-9. mich endlich mal um die "corporate identity" kümmern, also eigene Icons, Symbole, Benennungen usw erzeugen
-10. spionage
+7. mich endlich mal um die "corporate identity" kümmern, also eigene Icons, Symbole, Benennungen usw erzeugen
 
+todo. Forum: Thema sperren
+todo. gebäudeoutput beobachten, population balancen
+todo. Gebäudegrundkosten zu hoch, Kostensteigerung pro Level zu gering
+todo. Usernamen und Namen des Imperiums trennen, Herrschertitel, Navy-Prefix
 todo. wurmlochbrücken
 todo. population raiden
 
