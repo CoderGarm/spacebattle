@@ -62,20 +62,15 @@ public class TradesByLocation {
     }
 
     @JsonIgnore
-    public void add(@Nonnull final de.yuga.spacebattle.backend.entities.turn.Tick tick,
-                    final int ticksLeft,
-                    @Nonnull final EResourceType eResourceType,
-                    final long price,
-                    final long amount) {
+    private TradesByTick fetchOrCreate(@Nonnull final de.yuga.spacebattle.backend.entities.turn.Tick tick,
+                                       final int ticksLeft) {
         Preconditions.checkNotNull(tick, "tick must not be empty");
-        Preconditions.checkNotNull(eResourceType, "eResourceType must not be empty");
 
         final int tickNo = tick.getNo() + ticksLeft;
         final LocalDateTime tickStarts = tick.getTickStarts().plusDays(ticksLeft);
 
 
         final Tick deliveryAt = new Tick(tickNo, tickStarts);
-        final Trade trade = new Trade(price, eResourceType, amount);
         TradesByTick byTick = tradesByTick.stream()
                 .filter(t -> t.matchesTick(deliveryAt))
                 .findFirst()
@@ -84,6 +79,34 @@ public class TradesByLocation {
             byTick = new TradesByTick(deliveryAt);
             this.tradesByTick.add(byTick);
         }
-        byTick.add(trade);
+        return byTick;
+    }
+
+    @JsonIgnore
+    public void addPurchase(@Nonnull final de.yuga.spacebattle.backend.entities.turn.Tick tick,
+                            final int ticksLeft,
+                            @Nonnull final EResourceType eResourceType,
+                            final long price,
+                            final long amount) {
+        Preconditions.checkNotNull(tick, "tick must not be empty");
+        Preconditions.checkNotNull(eResourceType, "eResourceType must not be empty");
+
+        final Trade trade = new Trade(price, eResourceType, amount);
+        final TradesByTick byTick = fetchOrCreate(tick, ticksLeft);
+        byTick.addPurchase(trade);
+    }
+
+    @JsonIgnore
+    public void addSale(@Nonnull final de.yuga.spacebattle.backend.entities.turn.Tick tick,
+                        final int ticksLeft,
+                        @Nonnull final EResourceType eResourceType,
+                        final long price,
+                        final long amount) {
+        Preconditions.checkNotNull(tick, "tick must not be empty");
+        Preconditions.checkNotNull(eResourceType, "eResourceType must not be empty");
+
+        final Trade trade = new Trade(price, eResourceType, amount);
+        final TradesByTick byTick = fetchOrCreate(tick, ticksLeft);
+        byTick.addSale(trade);
     }
 }

@@ -7,8 +7,8 @@ Gameplay:
 
 todo. NPC als Gegner
 
-todo. Die Aufteilung nach Ziel- bzw. Abflugort eines Handels macht im Dashboard so aktuell keinen Sinn.
-todo. preis history
+1. Das Delivery-Dashboard sollte die Informationen über Käufe und Verkäufe nun transparenter darstellen.
+2. Die Preishistorie ist von der Übersicht des Handelsvolumens getrennt und zeigt auch wirklich die Preise an.
 
 ----------------- Bugs fixed -----------
 

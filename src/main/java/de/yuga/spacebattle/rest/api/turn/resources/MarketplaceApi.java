@@ -112,7 +112,7 @@ public class MarketplaceApi extends BaseApi {
 
         // this case only has today as timeframe - recycling the dto
         final Tick today = tradesInTimeframe.getTimeframe().get(0);
-        final Map<String, TradesByLocation> result = new HashMap<>();
+        final Map<Integer, TradesByLocation> result = new HashMap<>();
         final Map<EResourceType, List<TradedResource>> tradedResourcesMap = tradesInTimeframe.getTrades().stream()
                 .collect(Collectors.groupingBy(tr -> tr.getTradeOffer().getResourceType(),
                         Collectors.mapping(Function.identity(), Collectors.toList())));
@@ -124,16 +124,16 @@ public class MarketplaceApi extends BaseApi {
             purchases.removeAll(sales);
 
             purchases.forEach(p -> {
-                final String key = "P-" + p.getDestination().getId();
+                final int key = p.getDestination().getId();
                 final TradesByLocation byLocation = result.getOrDefault(key, new TradesByLocation(null, p.getDestination()));
-                byLocation.add(today, p.getTicksLeft(), eResourceType, p.getTradeOffer().getUnitPrice(), p.getTradeOffer().getAmount());
+                byLocation.addPurchase(today, p.getTicksLeft(), eResourceType, p.getTradeOffer().getUnitPrice(), p.getTradeOffer().getAmount());
                 result.put(key, byLocation);
             });
 
             sales.forEach(s -> {
-                final String key = "S-" + s.getTradeOffer().getOrigin().getId();
+                final int key = s.getTradeOffer().getOrigin().getId();
                 final TradesByLocation byLocation = result.getOrDefault(key, new TradesByLocation(s.getTradeOffer().getOrigin(), null));
-                byLocation.add(today, s.getTicksLeft(), eResourceType, s.getTradeOffer().getUnitPrice(), s.getTradeOffer().getAmount());
+                byLocation.addSale(today, s.getTicksLeft(), eResourceType, s.getTradeOffer().getUnitPrice(), s.getTradeOffer().getAmount());
                 result.put(key, byLocation);
             });
 

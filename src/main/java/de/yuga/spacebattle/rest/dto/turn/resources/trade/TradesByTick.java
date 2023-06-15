@@ -23,8 +23,19 @@ public class TradesByTick {
 
     @Nonnull
     @JsonProperty
-    @Schema(required = true, description = "The effective prices of the resources.")
+    @Schema(required = true, description = "The trades.")
     private List<Trade> trades = new ArrayList<>();
+
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The sales.")
+    private List<Trade> sales = new ArrayList<>();
+
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The purchases.")
+    private List<Trade> purchases = new ArrayList<>();
+
 
     public TradesByTick() {
     }
@@ -56,10 +67,17 @@ public class TradesByTick {
         return this.tick.getTickNo() == tick.getTickNo();
     }
 
-    public void add(@Nonnull final Trade trade) {
+
+    public void addPurchase(@Nonnull final Trade trade) {
         Preconditions.checkNotNull(trade, "trade must not be empty");
 
-        this.trades.add(trade);
+        this.purchases.add(trade);
+    }
+
+    public void addSale(@Nonnull final Trade trade) {
+        Preconditions.checkNotNull(trade, "trade must not be empty");
+
+        this.sales.add(trade);
     }
 
     @Override
