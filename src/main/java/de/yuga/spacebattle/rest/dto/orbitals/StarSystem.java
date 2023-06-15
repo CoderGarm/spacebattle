@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.rest.dto.orbitals;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -12,22 +13,27 @@ import java.util.stream.Collectors;
 public class StarSystem {
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The ID of this star system.")
     private Integer idStarSystem;
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The name of this star system.")
     private String name;
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The orbit of this star system.")
     private Orbit orbit;
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The stellar class of the star of this system.")
     private de.yuga.spacebattle.rest.dto.enums.EStarClassType starClassType;
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The bunch of planets as part of the system.")
     private final List<Planet> planets = new ArrayList<>();
 

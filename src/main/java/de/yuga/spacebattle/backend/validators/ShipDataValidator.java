@@ -4,7 +4,7 @@ package de.yuga.spacebattle.backend.validators;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 import org.apache.commons.lang3.StringUtils;
@@ -16,9 +16,6 @@ import javax.validation.ConstraintValidatorContext;
 
 @Transactional
 public class ShipDataValidator implements ConstraintValidator<ShipValidator, ShipClass> {
-
-    public void initialize(ShipValidator constraint) {
-    }
 
     public boolean isValid(@Nonnull final ShipClass shipClass, @Nonnull final ConstraintValidatorContext context) {
         Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
@@ -68,7 +65,7 @@ public class ShipDataValidator implements ConstraintValidator<ShipValidator, Shi
         Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
         Preconditions.checkNotNull(errorMap, "errorMap shouldn't be null!");
 
-        final User owner = shipClass.getOwner();
+        final Owner owner = shipClass.getOwner();
         final ShipClass predecessorShipClasses = shipClass.getPredecessor();
         if (predecessorShipClasses != null) {
             if (!predecessorShipClasses.getOwner().equals(owner)) {

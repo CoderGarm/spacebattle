@@ -21,8 +21,8 @@ public class UserSetting extends AbstractEntityKey {
 
     @Nonnull
     @NotNull
-    @ManyToOne(optional = false)
     @JoinColumn(name = "idUser")
+    @OneToOne(optional = false)
     private User user;
 
     @Nonnull

@@ -90,6 +90,12 @@ public class MasterOfTheUniverseServiceTest {
     private WarshipHealthStateService healthStateService;
 
     @Test
+    void t() {
+        final List<User> all = userService.findAll();
+        assertNotNull(all);
+    }
+
+    @Test
     void tick() {
         tickService.doTick();
     }

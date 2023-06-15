@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.api.account;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
+import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
@@ -9,6 +10,7 @@ import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.services.MailService;
 import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import de.yuga.spacebattle.backend.services.account.ChatService;
+import de.yuga.spacebattle.backend.services.account.NonPlayerCharacterService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
@@ -48,7 +50,6 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 import static de.yuga.spacebattle.backend.services.MasterOfTheUniverseService.DEFEATED_OPPONENT;
@@ -114,6 +115,9 @@ public class AuthApi {
     @Nonnull
     private final MailService mailService;
 
+    @Nonnull
+    private final NonPlayerCharacterService nonPlayerCharacterService;
+
     @Autowired
     public AuthApi(@Nonnull final AuthenticationManager authenticationManager,
                    @Nonnull final JwtTokenUtil jwtTokenUtil,
@@ -124,7 +128,8 @@ public class AuthApi {
                    @Nonnull final ChatService chatService,
                    @Nonnull final MasterOfTheUniverseService masterOfTheUniverseService,
                    @Nonnull final TickService tickService,
-                   @Nonnull final MailService mailService) {
+                   @Nonnull final MailService mailService,
+                   @Nonnull final NonPlayerCharacterService nonPlayerCharacterService) {
         this.authenticationManager = Preconditions.checkNotNull(authenticationManager, "authenticationManager shouldn't be null!");
         this.jwtTokenUtil = Preconditions.checkNotNull(jwtTokenUtil, "jwtTokenUtil shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
@@ -135,7 +140,7 @@ public class AuthApi {
         this.masterOfTheUniverseService = Preconditions.checkNotNull(masterOfTheUniverseService, "masterOfTheUniverseService must not be empty");
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
         this.mailService = Preconditions.checkNotNull(mailService, "mailService must not be empty");
-
+        this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
     }
 
     @PostMapping("/login")
@@ -295,7 +300,7 @@ public class AuthApi {
         final User entity = userJson.transform();
         final User saved = userService.save(entity);
 
-        mailService.sendMailVerificationMessage(Objects.requireNonNull(userService.find(saved.getId())));
+        mailService.sendMailVerificationMessage(Objects.requireNonNull(saved));
 
         final List<Research> researchesWithoutPrecondition = researchService.getResearchesWithoutPrecondition();
         researchService.addResearch(saved, researchesWithoutPrecondition);
@@ -306,11 +311,9 @@ public class AuthApi {
         planet = colonizationService.colonizePlanet(colonization);
         tickService.operateInoperationals(planet);
 
-        final Optional<WebUserDetails> sender = userService.findByUsername(DEFEATED_OPPONENT);
-        sender.ifPresent(flash -> {
-            final String replace = WELCOME_MESSAGE.replace(NAME_PLACEHOLDER, saved.getUsername());
-            chatService.createChatMessage(flash.getUser(), saved, replace);
-        });
+        final NonPlayerCharacter sender = nonPlayerCharacterService.findByUsername(DEFEATED_OPPONENT);
+        final String replace = WELCOME_MESSAGE.replace(NAME_PLACEHOLDER, saved.getUsername());
+        chatService.createChatMessage(sender, saved, replace);
 
         masterOfTheUniverseService.createOpponentAndFightAsync(saved);
         return ResponseEntity.ok(new Player(saved));

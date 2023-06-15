@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.spacecraft.Fitting;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.account.forum.Forum;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
@@ -38,6 +39,7 @@ import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
 import de.yuga.spacebattle.backend.services.account.ForumService;
 import de.yuga.spacebattle.backend.services.account.NonPlayerCharacterService;
+import de.yuga.spacebattle.backend.services.account.OwnerService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.combined.account.AllianceService;
@@ -165,7 +167,10 @@ public class MasterOfTheUniverseService {
     private final ResourceService resourceService;
 
     @Nonnull
-    private final NonPlayerCharacterService npcService;
+    private final NonPlayerCharacterService nonPlayerCharacterService;
+
+    @Nonnull
+    private final OwnerService ownerService;
 
     @Autowired
     public MasterOfTheUniverseService(@Nonnull final TickService tickService,
@@ -183,7 +188,8 @@ public class MasterOfTheUniverseService {
                                       @Nonnull final ColonizationService colonizationService,
                                       @Nonnull final BattleService battleService,
                                       @Nonnull final ResourceService resourceService,
-                                      @Nonnull final NonPlayerCharacterService npcService) {
+                                      @Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
+                                      @Nonnull final OwnerService ownerService) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.allianceService = Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");
@@ -199,7 +205,8 @@ public class MasterOfTheUniverseService {
         this.colonizationService = Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
         this.battleService = Preconditions.checkNotNull(battleService, "battleService must not be empty");
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
-        this.npcService = Preconditions.checkNotNull(npcService, "nonPlayerCharacterService must not be empty");
+        this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
+        this.ownerService = Preconditions.checkNotNull(ownerService, "ownerService must not be empty");
 
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
@@ -209,51 +216,21 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = npcService.findAll().isEmpty();
+        final List<NonPlayerCharacter> all = nonPlayerCharacterService.findAll();
+        all.removeIf(o -> o.getUsername().equals(DEFEATED_OPPONENT));
+        final List<Fleet> allFleetsByUser = fleetService.findAllFleetsByUser(all.get(0));
+        final boolean transformationNeeded = allFleetsByUser.isEmpty();
         if (transformationNeeded) {
-            /* fixme adapt create db script for defeated opponent as npc */
 
-            final StarSystem mSys = starsystemService.findByName("Manticore");
-            Preconditions.checkNotNull(mSys, "mSys must not be empty");
-            final Orbit mSysOrbit = mSys.getOrbit();
-
-            final List<StarSystem> allColonizable = starsystemService.findAllColonizable();
-            allColonizable.removeIf(s -> s.getPlanets().size() != 1);
-            allColonizable.removeIf(s -> s.getPlanets().stream().anyMatch(p -> !p.isColonizable()));
-
-            final Set<StarSystem> coloInProgress = colonizationService.findAll().stream().map(c -> c.getTarget().getSystem()).collect(Collectors.toSet());
-            allColonizable.removeIf(coloInProgress::contains);
-
-            allColonizable.sort(Comparator.comparing(o -> o.getOrbit().getDistance(mSysOrbit)));
-
-            final NonPlayerCharacter manticore = npcService.createNPC("Star Kingdom of Manticore");
-            colonizeNPC(allColonizable, manticore);
-            final NonPlayerCharacter solarianLeague = npcService.createNPC("Solarian League");
-            colonizeNPC(allColonizable, solarianLeague);
-            final NonPlayerCharacter havenRepublic = npcService.createNPC("Haven Republic");
-            colonizeNPC(allColonizable, havenRepublic);
-            final NonPlayerCharacter andermanEmpire = npcService.createNPC("Anderman Empire");
-            colonizeNPC(allColonizable, andermanEmpire);
-
+            for (final NonPlayerCharacter nonPlayerCharacter : all) {
+                createFleetForUser(nonPlayerCharacter);
+            }
 
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
         }
     }
-
-    private void colonizeNPC(@Nonnull final List<StarSystem> allColonizable,
-                             @Nonnull final NonPlayerCharacter owner) {
-        Preconditions.checkNotNull(allColonizable, "allColonizable must not be empty");
-        Preconditions.checkNotNull(owner, "owner must not be empty");
-
-        final int randomInt = getRandomInt(0, allColonizable.size() / 5);
-        final Planet planet = allColonizable.get(randomInt).getPlanets().stream().findFirst().orElseThrow(NullPointerException::new);
-        allColonizable.removeIf(sys -> sys.equals(planet.getSystem()));
-
-        colonizeNPC(planet, owner);
-    }
-
 
     private void colonizeNPC(@Nonnull final Planet planet,
                              @Nonnull final NonPlayerCharacter owner) {
@@ -290,8 +267,7 @@ public class MasterOfTheUniverseService {
 
         //noinspection OptionalGetWithoutIsPresent
         final User flashkid = userService.findByUsername(FLASHKID).get().getUser();
-        //noinspection OptionalGetWithoutIsPresent
-        final User pirate = userService.findByUsername(DEFEATED_OPPONENT).get().getUser();
+        final Owner pirate = ownerService.findByUsername(DEFEATED_OPPONENT);
         LOGGER.info("Users created");
 
         final Alliance a1 = allianceService.createAlliance("Argonauten", "A", flashkid);
@@ -335,7 +311,7 @@ public class MasterOfTheUniverseService {
         LOGGER.info("Researches populated");
 
         final Fitting fitting = new Fitting(propulsions, armors, eloka, sidewalls, weapons, missiles, passiveModules);
-        final ShipClass chanson = chansonDestroyer(pirate, fitting);
+        final ShipClass chanson = chansonDestroyer(Objects.requireNonNull(pirate), fitting);
         LOGGER.info("ShipClass created");
 
         createFleetForUser(flashkid);
@@ -351,22 +327,22 @@ public class MasterOfTheUniverseService {
 
     @SuppressWarnings("DataFlowIssue")
     private void createNPCs() {
-        NonPlayerCharacter npc = npcService.createNPC("Star Kingdom of Manticore");
+        NonPlayerCharacter npc = nonPlayerCharacterService.createNPC("Star Kingdom of Manticore");
         StarSystem sys = starsystemService.findByName("Manticore");
         Planet planet = sys.getPlanets().stream().findFirst().orElse(null);
         colonizeNPC(planet, npc);
 
-        npc = npcService.createNPC("Solarian League");
+        npc = nonPlayerCharacterService.createNPC("Solarian League");
         sys = starsystemService.findByName("Sol");
         planet = sys.getPlanets().stream().findFirst().orElse(null);
         colonizeNPC(planet, npc);
 
-        npc = npcService.createNPC("Haven Republic");
+        npc = nonPlayerCharacterService.createNPC("Haven Republic");
         sys = starsystemService.findByName("Haven");
         planet = sys.getPlanets().stream().findFirst().orElse(null);
         colonizeNPC(planet, npc);
 
-        npc = npcService.createNPC("Anderman Empire");
+        npc = nonPlayerCharacterService.createNPC("Anderman Empire");
         sys = starsystemService.findByName("Gregor");
         planet = sys.getPlanets().stream().findFirst().orElse(null);
         colonizeNPC(planet, npc);
@@ -465,7 +441,7 @@ public class MasterOfTheUniverseService {
         /* military education */
     }
 
-    private ShipClass chansonDestroyer(@Nonnull final User owner,
+    private ShipClass chansonDestroyer(@Nonnull final Owner owner,
                                        @Nonnull final Fitting f) {
         Preconditions.checkNotNull(owner, "owner must not be empty");
         Preconditions.checkNotNull(f, "f must not be empty");
@@ -983,7 +959,11 @@ public class MasterOfTheUniverseService {
     }
 
     @Nonnull
-    protected Fleet createFleet(User user, Planet planet, String name) {
+    protected Fleet createFleet(@Nonnull final Owner user, @Nonnull final Planet planet, @Nonnull final String name) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(name, "name must not be empty");
+
         FleetOrbit fleetOrbit = new FleetOrbit(planet.getOrbit(), planet.getSystem());
         Fleet fleet = new Fleet(name, user, fleetOrbit);
         fleet.setOperational();
@@ -1024,11 +1004,11 @@ public class MasterOfTheUniverseService {
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    public void createFleetForUser(@Nonnull final User user) {
+    public void createFleetForUser(@Nonnull final Owner user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
-        final User opponent = userService.findByUsername(DEFEATED_OPPONENT).get().getUser();
-        final List<ShipClass> classList = shipClassService.findAllLatestByOwner(opponent);
+        final NonPlayerCharacter opponent = nonPlayerCharacterService.findByUsername(DEFEATED_OPPONENT);
+        final List<ShipClass> classList = shipClassService.findAllLatestByOwner(Objects.requireNonNull(opponent));
         ShipClass ship = classList.get(0);
         ship = new ShipClass(user, ship);
         shipClassService.save(ship);
@@ -1052,8 +1032,8 @@ public class MasterOfTheUniverseService {
     public WarShip createOpponentFleetForUser(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
-        final User opponent = userService.findByUsername(DEFEATED_OPPONENT).get().getUser();
-        final List<ShipClass> classList = shipClassService.findAllLatestByOwner(opponent);
+        final NonPlayerCharacter opponent = nonPlayerCharacterService.findByUsername(DEFEATED_OPPONENT);
+        final List<ShipClass> classList = shipClassService.findAllLatestByOwner(Objects.requireNonNull(opponent));
         final ShipClass ship = classList.get(0);
 
         final Planet homePlanet = planetService.findMainPlanet(user);

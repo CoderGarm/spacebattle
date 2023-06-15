@@ -633,8 +633,8 @@
        idTradeOffer integer not null auto_increment,
         isDeleted boolean not null default false,
         amount bigint not null,
-        unitPrice bigint not null,
         resourceType varchar(255) not null,
+        unitPrice bigint not null,
         idOrigin integer,
         idSeller integer,
         idTickInitiated integer not null,
@@ -797,6 +797,9 @@
 
     alter table user
         add constraint UK_sb8bbouer5wak8vyiiy4pf2bx unique (username);
+
+    alter table userSetting 
+       add constraint UK_de78bv8lgkrdwqxfpqr8k3wfu unique (idUser);
 
     alter table userSetting 
        add constraint EMAIL_UK unique (email);

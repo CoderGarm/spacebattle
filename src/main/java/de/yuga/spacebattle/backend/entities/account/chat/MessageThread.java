@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.entities.account.chat;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 
@@ -30,13 +31,13 @@ public class MessageThread extends AbstractEntityKey {
     @NotNull
     @ManyToOne(optional = false)
     @JoinColumn(name = "idUserOne")
-    private User userOne;
+    private Owner userOne;
 
     @Nonnull
     @NotNull
     @ManyToOne(optional = false)
     @JoinColumn(name = "idUserTwo")
-    private User userTwo;
+    private Owner userTwo;
 
     @Nonnull
     @NotNull
@@ -47,7 +48,7 @@ public class MessageThread extends AbstractEntityKey {
     public MessageThread() {
     }
 
-    public MessageThread(@Nonnull final User userOne, @Nonnull final User userTwo) {
+    public MessageThread(@Nonnull final Owner userOne, @Nonnull final User userTwo) {
         Preconditions.checkNotNull(userOne, "userOne shouldn't be null!");
         Preconditions.checkNotNull(userTwo, "userTwo shouldn't be null!");
 
@@ -56,12 +57,12 @@ public class MessageThread extends AbstractEntityKey {
     }
 
     @Nonnull
-    public User getUserOne() {
+    public Owner getUserOne() {
         return userOne;
     }
 
     @Nonnull
-    public User getUserTwo() {
+    public Owner getUserTwo() {
         return userTwo;
     }
 

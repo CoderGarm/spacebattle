@@ -2,14 +2,18 @@ package de.yuga.spacebattle.backend.entities.combined.spacecrafts;
 
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.misc.Deletable;
+import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateSnapshot;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.HashSet;
@@ -19,7 +23,7 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "fleetSnapshot")
 @AttributeOverride(name = "id", column = @Column(name = "idFleetSnapshot"))
-public class FleetSnapshot extends Deletable {
+public class FleetSnapshot extends Deletable implements HasOwner {
 
     @Nonnull
     @NotNull
@@ -44,7 +48,7 @@ public class FleetSnapshot extends Deletable {
     @NotNull
     @ManyToOne
     @JoinColumn(name = "idOwner", updatable = false)
-    private User owner;
+    private Owner owner;
 
     @Nonnull
     @NotNull
@@ -82,9 +86,29 @@ public class FleetSnapshot extends Deletable {
         return name;
     }
 
+
     @Nonnull
-    public User getOwner() {
+    @Override
+    public Owner getOwner() {
         return owner;
+    }
+
+    @Nullable
+    @Override
+    public User getHumanOwner() {
+        if (!(owner instanceof User)) {
+            return null;
+        }
+        return (User) owner;
+    }
+
+    @Nullable
+    @Override
+    public NonPlayerCharacter getNpcOwner() {
+        if (!(owner instanceof NonPlayerCharacter)) {
+            return null;
+        }
+        return (NonPlayerCharacter) owner;
     }
 
     @Nonnull

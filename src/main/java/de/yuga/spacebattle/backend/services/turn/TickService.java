@@ -5,6 +5,7 @@ import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.PopulationControlCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceControlCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
+import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
@@ -16,6 +17,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.*;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
@@ -24,6 +26,9 @@ import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.repositories.turn.TickRepository;
 import de.yuga.spacebattle.backend.services.MailService;
+import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
+import de.yuga.spacebattle.backend.services.ResourceService;
+import de.yuga.spacebattle.backend.services.account.NonPlayerCharacterService;
 import de.yuga.spacebattle.backend.services.caches.ColonizationCache;
 import de.yuga.spacebattle.backend.services.caches.FleetMovementCache;
 import de.yuga.spacebattle.backend.services.caches.OperationalCache;
@@ -114,6 +119,12 @@ public class TickService {
     @Nonnull
     private final MarketplaceService marketplaceService;
 
+    @Nonnull
+    private final NonPlayerCharacterService nonPlayerCharacterService;
+
+    @Nonnull
+    private final ResourceService resourceService;
+
     private boolean isTicking = false;
 
     @Autowired
@@ -133,7 +144,9 @@ public class TickService {
                        @Nonnull final WarshipHealthStateService warshipHealthStateService,
                        @Nonnull final BattleService battleService,
                        @Nonnull final MailService mailService,
-                       @Nonnull final MarketplaceService marketplaceService) {
+                       @Nonnull final MarketplaceService marketplaceService,
+                       @Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
+                       @Nonnull final ResourceService resourceService) {
         this.transportationCache = Preconditions.checkNotNull(transportationCache, "transportationCache must not be empty");
         this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
         this.colonizationCache = Preconditions.checkNotNull(colonizationCache, "colonizationCache must not be empty");
@@ -151,6 +164,8 @@ public class TickService {
         this.battleService = Preconditions.checkNotNull(battleService, "battleService must not be empty");
         this.mailService = Preconditions.checkNotNull(mailService, "mailService must not be empty");
         this.marketplaceService = Preconditions.checkNotNull(marketplaceService, "marketplaceService must not be empty");
+        this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
+        this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
     }
 
     @PostConstruct
@@ -175,6 +190,8 @@ public class TickService {
             today = tickRepository.save(new Tick());
             LOGGER.info("Today is " + today);
             final String start = "Start ticking";
+            LOGGER.info(start + " upgrade npc fleets.");
+            upgradeNPCFleets();
             LOGGER.info(start + " transportation.");
             tickTransportations();
             LOGGER.info(start + " migration.");
@@ -201,6 +218,24 @@ public class TickService {
             final long duration = (end - startB) / 1000;
             LOGGER.info("{} takes {} seconds", today, duration);
             isTicking = false;
+        }
+    }
+
+    private void upgradeNPCFleets() {
+        final List<NonPlayerCharacter> all = nonPlayerCharacterService.findAll();
+        all.removeIf(o -> o.getUsername().equals(MasterOfTheUniverseService.DEFEATED_OPPONENT));
+
+        for (final NonPlayerCharacter nonPlayerCharacter : all) {
+
+            final Planet mainPlanet = planetService.findMainPlanet(nonPlayerCharacter);
+            final List<Fleet> allFleetsByUser = fleetService.findAllFleetsByUser(nonPlayerCharacter);
+            for (final Fleet fleet : allFleetsByUser) {
+                final ShipClass shipClass = fleet.getShipsByClass().keySet().stream().findFirst().orElseThrow(NullPointerException::new);
+                final String randomWarshipName = resourceService.getRandomWarshipName();
+                final WarShip warShip = new WarShip(randomWarshipName, mainPlanet, fleet, shipClass);
+                warShip.setOperational();
+                warShipService.save(warShip);
+            }
         }
     }
 

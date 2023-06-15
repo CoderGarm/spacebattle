@@ -1,12 +1,16 @@
 package de.yuga.spacebattle.backend.entities.turn.battle;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.Embeddable;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -15,12 +19,12 @@ import javax.persistence.ManyToOne;
  * Every loss role remembers to a defeated and destroyed war ship.
  */
 @Embeddable
-public class LossRole {
+public class LossRole implements HasOwner {
 
     @Nonnull
     @ManyToOne
     @JoinColumn(name = "idOwner")
-    private User owner;
+    private Owner owner;
 
     @Nonnull
     @ManyToOne
@@ -34,7 +38,6 @@ public class LossRole {
     @Nonnull
     private String warShipName;
 
-    @Nonnull
     private int idWarship;
 
     /**
@@ -59,9 +62,29 @@ public class LossRole {
         this.shipClass = warShip.getShipClass();
     }
 
+
     @Nonnull
-    public User getOwner() {
+    @Override
+    public Owner getOwner() {
         return owner;
+    }
+
+    @Nullable
+    @Override
+    public User getHumanOwner() {
+        if (!(owner instanceof User)) {
+            return null;
+        }
+        return (User) owner;
+    }
+
+    @Nullable
+    @Override
+    public NonPlayerCharacter getNpcOwner() {
+        if (!(owner instanceof NonPlayerCharacter)) {
+            return null;
+        }
+        return (NonPlayerCharacter) owner;
     }
 
     @Nonnull

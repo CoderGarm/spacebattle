@@ -10,8 +10,11 @@ import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Mass;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
+import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.misc.Deletable;
+import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AmmunitionFitting;
@@ -43,13 +46,13 @@ import java.util.stream.Collectors;
 @ShipValidator
 @Table(name = "shipClass")
 @AttributeOverride(name = "id", column = @Column(name = "idShipClass"))
-public class ShipClass extends Deletable {
+public class ShipClass extends Deletable implements HasOwner {
 
     @Nonnull
     @NotNull
     @ManyToOne(optional = false)
     @JoinColumn(name = "idOwner")
-    private User owner;
+    private Owner owner;
 
     /**
      * Must not unique or unique for user because at least the ships in an ancestry row could have the same names.
@@ -128,12 +131,12 @@ public class ShipClass extends Deletable {
     public ShipClass() {
     }
 
-    public ShipClass(@Nonnull final User owner,
+    public ShipClass(@Nonnull final Owner owner,
                      @Nonnull final String name) {
         this(owner, name, null);
     }
 
-    public ShipClass(@Nonnull final User owner,
+    public ShipClass(@Nonnull final Owner owner,
                      @Nonnull final String name,
                      @Nullable final ShipClass predecessor) {
         Preconditions.checkNotNull(owner, "owner shouldn't be null!");
@@ -147,7 +150,7 @@ public class ShipClass extends Deletable {
         }
     }
 
-    public ShipClass(@Nonnull final User owner,
+    public ShipClass(@Nonnull final Owner owner,
                      @Nonnull final ShipClass toCopy) {
         Preconditions.checkNotNull(owner, "owner must not be empty");
         Preconditions.checkNotNull(toCopy, "toCopy must not be empty");
@@ -165,8 +168,27 @@ public class ShipClass extends Deletable {
     }
 
     @Nonnull
-    public User getOwner() {
+    @Override
+    public Owner getOwner() {
         return owner;
+    }
+
+    @Nullable
+    @Override
+    public User getHumanOwner() {
+        if (!(owner instanceof User)) {
+            return null;
+        }
+        return (User) owner;
+    }
+
+    @Nullable
+    @Override
+    public NonPlayerCharacter getNpcOwner() {
+        if (!(owner instanceof NonPlayerCharacter)) {
+            return null;
+        }
+        return (NonPlayerCharacter) owner;
     }
 
     @Nonnull

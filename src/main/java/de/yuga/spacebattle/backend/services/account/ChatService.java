@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services.account;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.account.chat.MessageThread;
 import de.yuga.spacebattle.backend.entities.account.chat.UserMessage;
@@ -39,7 +40,7 @@ public class ChatService {
      * @return empty if no user is logged in or no messages were received.
      */
     @Nullable
-    public MessageThread findMessagesBetween(@Nonnull final User user1, @Nonnull final User user2) {
+    public MessageThread findMessagesBetween(@Nonnull final Owner user1, @Nonnull final Owner user2) {
         Preconditions.checkNotNull(user1, "user1 shouldn't be null!");
         Preconditions.checkNotNull(user2, "user2 shouldn't be null!");
 
@@ -90,7 +91,7 @@ public class ChatService {
     }
 
     @Nonnull
-    public MessageThread createChatMessage(final User sender, final User receiver, @Nonnull final String message) {
+    public MessageThread createChatMessage(final Owner sender, final User receiver, @Nonnull final String message) {
         Preconditions.checkNotNull(sender, "sender shouldn't be null!");
         Preconditions.checkNotNull(receiver, "receiver shouldn't be null!");
         Preconditions.checkNotNull(message, "message shouldn't be null!");

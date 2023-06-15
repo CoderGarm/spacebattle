@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services.constructables.spacecraft;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClassComparator;
@@ -60,7 +61,7 @@ public class ShipClassService {
      * @return the sorted list of classes
      */
     @Nonnull
-    public List<ShipClass> findAllLatestByOwner(@Nonnull final User owner) {
+    public List<ShipClass> findAllLatestByOwner(@Nonnull final Owner owner) {
         Preconditions.checkNotNull(owner, "owner shouldn't be null!");
 
         return sort(shipClassRepository.findAllLatestShipClassesByOwner(owner));

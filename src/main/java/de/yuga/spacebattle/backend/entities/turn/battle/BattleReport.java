@@ -10,7 +10,7 @@ import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.combat.round.MissileSalvoHealthState;
 import de.yuga.spacebattle.backend.converter.CombatRoundConverter;
-import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
@@ -71,7 +71,7 @@ public class BattleReport extends AbstractEntityKey {
             joinColumns = @JoinColumn(name = "idBattleReport"),
             inverseJoinColumns = @JoinColumn(name = "idUser"),
             uniqueConstraints = @UniqueConstraint(name = "participatingUsers_UC", columnNames = {"idUser", "idBattleReport"}))
-    private final Set<User> participatingUsers = new HashSet<>();
+    private final Set<Owner> participatingUsers = new HashSet<>();
 
     /**
      * The protagonists - and the antagonists.
@@ -174,7 +174,7 @@ public class BattleReport extends AbstractEntityKey {
     }
 
     @Nonnull
-    public Set<User> getParticipatingUsers() {
+    public Set<Owner> getParticipatingUsers() {
         return participatingUsers;
     }
 

@@ -7,9 +7,12 @@ import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.combat.dto.RangeDefinition;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.misc.Deletable;
+import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 import de.yuga.spacebattle.backend.entities.misc.Operationable;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
@@ -61,7 +64,7 @@ import static de.yuga.spacebattle.backend.calculator.FittingUtils.DEFENSIVE_FITT
 @Entity
 @Table(name = "fleet")
 @AttributeOverride(name = "id", column = @Column(name = "idFleet"))
-public class Fleet extends Operationable {
+public class Fleet extends Operationable implements HasOwner {
 
     @Nonnull
     @NotNull
@@ -71,7 +74,7 @@ public class Fleet extends Operationable {
     @NotNull
     @ManyToOne
     @JoinColumn(name = "idOwner", updatable = false)
-    private User owner;
+    private Owner owner;
 
     @Nonnull
     @NotNull
@@ -112,7 +115,7 @@ public class Fleet extends Operationable {
     public Fleet() {
     }
 
-    public Fleet(@Nonnull final String name, @Nonnull final User owner, @Nonnull final FleetOrbit orbit) {
+    public Fleet(@Nonnull final String name, @Nonnull final Owner owner, @Nonnull final FleetOrbit orbit) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(owner, "owner shouldn't be null!");
         Preconditions.checkNotNull(orbit, "orbit shouldn't be null!");
@@ -140,8 +143,27 @@ public class Fleet extends Operationable {
     }
 
     @Nonnull
-    public User getOwner() {
+    @Override
+    public Owner getOwner() {
         return owner;
+    }
+
+    @Nullable
+    @Override
+    public User getHumanOwner() {
+        if (!(owner instanceof User)) {
+            return null;
+        }
+        return (User) owner;
+    }
+
+    @Nullable
+    @Override
+    public NonPlayerCharacter getNpcOwner() {
+        if (!(owner instanceof NonPlayerCharacter)) {
+            return null;
+        }
+        return (NonPlayerCharacter) owner;
     }
 
     @Nonnull

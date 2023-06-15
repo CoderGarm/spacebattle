@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletResponse;
  * This defines the separation of endpoints for every BoF-API from every other endpoint will be used by vaadin.
  * <p>
  * - extend WebSecurityConfigurerAdapter to be able to define different security settings for UI and API
- * see https://www.baeldung.com/spring-security-multiple-entry-points
+ * see <a href="https://www.baeldung.com/spring-security-multiple-entry-points">...</a>
  */
 @Configuration
 @EnableWebSecurity

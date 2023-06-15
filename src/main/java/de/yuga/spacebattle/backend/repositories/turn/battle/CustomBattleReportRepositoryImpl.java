@@ -1,6 +1,6 @@
 package de.yuga.spacebattle.backend.repositories.turn.battle;
 
-import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User_;
 import de.yuga.spacebattle.backend.entities.turn.Tick_;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
@@ -59,7 +59,7 @@ public class CustomBattleReportRepositoryImpl implements CustomBattleReportRepos
         orderList.add(cb.desc(root.get(BattleReport_.tick)));
         orderList.add(cb.desc(root.get(Tick_.id)));
 
-        final SetJoin<BattleReport, User> userJoin = root.join(BattleReport_.participatingUsers);
+        final SetJoin<BattleReport, Owner> userJoin = root.join(BattleReport_.participatingUsers);
         userJoin.on(cb.equal(userJoin.get(User_.id), idUser));
         cq.select(root).where(userJoin.getOn());
 

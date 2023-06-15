@@ -23,7 +23,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @NamedQueries({
-        @NamedQuery(name = "User.getAll", query = "SELECT u FROM User u WHERE u.id != 2 AND u.dType = de.yuga.spacebattle.backend.enums.OwnerType.USER"), /* fixme exclude defeated opponent id */
+        @NamedQuery(name = "User.getAll", query = "SELECT u FROM User u WHERE u.dType = de.yuga.spacebattle.backend.enums.OwnerType.USER"),
         @NamedQuery(name = "User.findByLikeUsername", query = "SELECT u FROM User u WHERE UPPER(u.username) LIKE UPPER(:username)"),
         @NamedQuery(name = "User.findByUsernameAndEmail", query = "SELECT u FROM User u WHERE UPPER(u.username) = UPPER(:username) AND UPPER(u.userSetting.email) = UPPER(:email)"),
         @NamedQuery(name = "User.getWithKnownStarSystems", query = "SELECT u FROM User u LEFT JOIN FETCH u.knownStarSystems r WHERE u.id = :idUser"),
@@ -75,12 +75,10 @@ public class User extends Owner {
 
     @Nonnull
     @NotNull
-    @JoinColumn(name = "idUser")
-    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
-    private UserSetting userSetting;
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
+    private UserSetting userSetting = new UserSetting();
 
     public User() {
-        this.userSetting = new UserSetting();
     }
 
     public User(@Nonnull final String username,

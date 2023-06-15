@@ -1,7 +1,9 @@
 package de.yuga.spacebattle.backend.repositories.combined.spacecraft;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.CombatAllowanceCalculator;
 import de.yuga.spacebattle.backend.combat.dto.FleetClash;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
@@ -110,11 +112,21 @@ public class CustomFleetRepositoryImpl implements CustomFleetRepository {
         return fleetsToOrbit.entrySet().stream()
                 .filter(entry -> {
                     final List<Fleet> fleets = entry.getValue();
-                    final Set<User> users = fleets.stream().map(Fleet::getOwner).collect(Collectors.toSet());
-                    if (users.size() != 2) {
+                    final Set<Owner> owners = fleets.stream().map(Fleet::getOwner).collect(Collectors.toSet());
+                    if (!CombatAllowanceCalculator.isCombatAllowed(owners)) {
                         // todo implement 3-way combat anyhow
                         return false;
                     }
+                    final Set<User> users = owners.stream()
+                            .map(Owner::getHumanOwner)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toSet());
+
+                    if (owners.size() - users.size() == 1) {
+                        // single npc present
+                        return true;
+                    }
+
                     final boolean userWithAlliancePresent = users.stream().anyMatch(user -> user.getAlliance() != null);
                     final boolean userWithoutAlliancePresent = users.stream().anyMatch(user -> user.getAlliance() == null);
                     if (userWithAlliancePresent && userWithoutAlliancePresent) {
@@ -125,7 +137,7 @@ public class CustomFleetRepositoryImpl implements CustomFleetRepository {
                         return true;
                     }
                     final Set<User> usersWithoutAlliances = users.stream().filter(user -> user.getAlliance() == null).collect(Collectors.toSet());
-                    return usersWithoutAlliances.size() > 1;
+                    return CombatAllowanceCalculator.isCombatAllowed(usersWithoutAlliances);
                 })
                 .map(FleetClash::new).collect(Collectors.toList());
     }

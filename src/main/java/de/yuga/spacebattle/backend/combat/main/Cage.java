@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.combat.main;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.CombatAllowanceCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.Quadrant;
 import de.yuga.spacebattle.backend.calculator.resource.CoursePlot;
@@ -13,7 +14,7 @@ import de.yuga.spacebattle.backend.combat.round.FleetHealthState;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.combat.round.WarshipHealthState;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
-import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
@@ -124,8 +125,8 @@ public class Cage implements Future<Cage> {
         this.battleLogger = battleLogger;
         this.participatingFleets = fleetClash.getParticipatingFleets();
 
-        final Set<User> users = participatingFleets.stream().map(Fleet::getOwner).collect(Collectors.toSet());
-        if (users.size() != 2) {
+        final Set<Owner> users = participatingFleets.stream().map(Fleet::getOwner).collect(Collectors.toSet());
+        if (!CombatAllowanceCalculator.isCombatAllowed(users)) {
             // todo implement 3-way combat anyhow
             throw new NotifyWebUserException("Yeah probably you couldn't harm yourself!");
         }

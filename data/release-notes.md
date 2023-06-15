@@ -5,14 +5,21 @@ Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
 Gameplay:
 
-todo. NPC als Gegner
+1. NPC als Gegner.  
+   Das beinhaltet an dieser Stelle nur, dass NPCs Flotten besitzen und kämpfen können.  
+   Bislang sind sie vollkommen passiv und greifen niemanden an. Die Flottenstärke der NPCs wächst schneller als die von
+   Spielern.
+2. Das Delivery-Dashboard sollte die Informationen über Käufe und Verkäufe nun transparenter darstellen.
+3. Die Preishistorie ist von der Übersicht des Handelsvolumens getrennt und zeigt auch wirklich die Preise an.
 
-1. Das Delivery-Dashboard sollte die Informationen über Käufe und Verkäufe nun transparenter darstellen.
-2. Die Preishistorie ist von der Übersicht des Handelsvolumens getrennt und zeigt auch wirklich die Preise an.
+Diverses:
+
+1. Die Foren sind jetzt genauso breit wie die Fäden.
 
 ----------------- Bugs fixed -----------
 
 1. Startbutton für Gebäudebau wird nicht durch hovern über zu teures Gebäude entfernt.
+2. Der Button zum Löschen von Schiffsklassen tut nun, was er soll.
 
 ----------------- next steps -----------
 
@@ -39,18 +46,7 @@ todo. Konzept für Missionen und NPC-Missionen
 - npc has no home base, exists only on fleets
 - random spawns at third fleet points per player
 - raids planets randomly near the player
-- disappears if fleet is gone
 
-technical:
-
-- incremental table "existent entity" includes user or npc
-- needed in
-  - planet (check)
-  - tradeoffer (check)
-  - tradedresource (check)
-  - shipclass
-  - fleet
-  - fleetsnapshot
 
 Thema: Spionage
 todo. Spionagegebäude, pro Level gibt es einen Spion

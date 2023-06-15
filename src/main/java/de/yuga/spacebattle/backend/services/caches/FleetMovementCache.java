@@ -2,7 +2,7 @@ package de.yuga.spacebattle.backend.services.caches;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.turn.FleetMovement;
-import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
@@ -43,7 +43,7 @@ public class FleetMovementCache {
         Preconditions.checkNotNull(origin, "origin must not be empty");
         Preconditions.checkNotNull(destination, "destination must not be empty");
 
-        final User notificationTarget;
+        final Owner notificationTarget;
         if (destination.getHumanOwner() == null || fleet.getOwner().equals(destination.getOwner())) {
             notificationTarget = fleet.getOwner();
         } else {
@@ -65,7 +65,7 @@ public class FleetMovementCache {
         Preconditions.checkNotNull(move, "move must not be empty");
         Preconditions.checkNotNull(destinationSystem, "destinationSystem must not be empty");
 
-        final Set<User> owners = destinationSystem.getPlanets().stream()
+        final Set<Owner> owners = destinationSystem.getPlanets().stream()
                 .map(Planet::getHumanOwner)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
@@ -90,7 +90,7 @@ public class FleetMovementCache {
 
     @Nonnull
     private Set<FleetMovement> getTodayMovement(@Nonnull final Tick today,
-                                                @Nonnull final User user) {
+                                                @Nonnull final Owner user) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(user, "user must not be empty");
 

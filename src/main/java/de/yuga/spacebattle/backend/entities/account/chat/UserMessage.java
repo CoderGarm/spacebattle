@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.backend.entities.account.chat;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 
 import javax.annotation.Nonnull;
@@ -29,7 +29,7 @@ public class UserMessage extends AbstractEntityKey {
     @NotNull
     @ManyToOne(optional = false)
     @JoinColumn(name = "idUserSender")
-    private User sender;
+    private Owner sender;
 
     @Nonnull
     @NotNull
@@ -46,7 +46,7 @@ public class UserMessage extends AbstractEntityKey {
     public UserMessage() {
     }
 
-    public UserMessage(@Nonnull final MessageThread messageThread, @Nonnull final User sender, @Nonnull final String message) {
+    public UserMessage(@Nonnull final MessageThread messageThread, @Nonnull final Owner sender, @Nonnull final String message) {
         Preconditions.checkNotNull(messageThread, "messageThread shouldn't be null!");
         Preconditions.checkNotNull(sender, "sender shouldn't be null!");
         Preconditions.checkNotNull(message, "message shouldn't be null!");
@@ -63,7 +63,7 @@ public class UserMessage extends AbstractEntityKey {
     }
 
     @Nonnull
-    public User getSender() {
+    public Owner getSender() {
         return sender;
     }
 

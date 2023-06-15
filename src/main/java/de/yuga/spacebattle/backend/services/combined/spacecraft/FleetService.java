@@ -1,9 +1,10 @@
 package de.yuga.spacebattle.backend.services.combined.spacecraft;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.CombatAllowanceCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.combat.dto.FleetClash;
-import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
@@ -271,10 +272,10 @@ public class FleetService {
     }
 
     @Nonnull
-    public List<Fleet> findAllFleetsByUser(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user must not be empty");
+    public List<Fleet> findAllFleetsByUser(@Nonnull final Owner owner) {
+        Preconditions.checkNotNull(owner, "owner must not be empty");
 
-        return fleetRepository.findAllFleetsBy(user.getId());
+        return fleetRepository.findAllFleetsBy(owner.getId());
     }
 
     @Nonnull
@@ -325,8 +326,8 @@ public class FleetService {
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
         final Set<Fleet> allFleetsByPlanet = fleetRepository.findAllFleetsByPlanet(planet);
-        final Set<User> users = allFleetsByPlanet.stream().map(Fleet::getOwner).collect(Collectors.toSet());
-        if (users.size() != 2) {
+        final Set<Owner> users = allFleetsByPlanet.stream().map(Fleet::getOwner).collect(Collectors.toSet());
+        if (!CombatAllowanceCalculator.isCombatAllowed(users)) {
             // todo implement 3-way combat anyhow
             return null;
         }

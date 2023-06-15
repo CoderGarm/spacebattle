@@ -2,14 +2,18 @@ package de.yuga.spacebattle.backend.entities.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
+import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
@@ -20,13 +24,13 @@ import javax.validation.constraints.NotNull;
 @Table(name = "move")
 @Check(constraints = "xCoordinateOrigin != xCoordinateDestination AND yCoordinateOrigin != yCoordinateDestination")
 @AttributeOverride(name = "id", column = @Column(name = "idMove"))
-public class Move extends AbstractEntityKey {
+public class Move extends AbstractEntityKey implements HasOwner {
 
     @Nonnull
     @NotNull
     @OneToOne
     @JoinColumn(name = "idUser", updatable = false)
-    private User owner;
+    private Owner owner;
 
     @Nonnull
     @NotNull
@@ -94,12 +98,32 @@ public class Move extends AbstractEntityKey {
         this.originalDuration = originalDuration;
     }
 
+
     @Nonnull
-    public User getOwner() {
+    @Override
+    public Owner getOwner() {
         return owner;
     }
 
-    public void setOwner(@Nonnull final User owner) {
+    @Nullable
+    @Override
+    public User getHumanOwner() {
+        if (!(owner instanceof User)) {
+            return null;
+        }
+        return (User) owner;
+    }
+
+    @Nullable
+    @Override
+    public NonPlayerCharacter getNpcOwner() {
+        if (!(owner instanceof NonPlayerCharacter)) {
+            return null;
+        }
+        return (NonPlayerCharacter) owner;
+    }
+
+    public void setOwner(@Nonnull final Owner owner) {
         Preconditions.checkNotNull(owner, "owner shouldn't be null!");
 
         this.owner = owner;

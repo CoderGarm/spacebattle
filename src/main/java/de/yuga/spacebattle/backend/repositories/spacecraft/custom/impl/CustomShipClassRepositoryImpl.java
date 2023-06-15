@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.repositories.spacecraft.custom.impl;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.repositories.spacecraft.custom.CustomShipClassRepository;
@@ -35,7 +36,7 @@ public class CustomShipClassRepositoryImpl implements CustomShipClassRepository 
     }
 
     @Override
-    public List<ShipClass> findAllLatestShipClassesByOwner(@Nonnull final User user) {
+    public List<ShipClass> findAllLatestShipClassesByOwner(@Nonnull final Owner user) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
 
         return em.createNamedQuery("ShipClass.getAllLatestByOwner", ShipClass.class)
