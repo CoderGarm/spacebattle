@@ -1952,3 +1952,4 @@ INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArti
 insert into dbPatch values (null, now(), 'add traded resource', '0.1.2-1');
 insert into dbPatch values (null, now(), 'rebalance buildings', '0.1.2-2');
 insert into dbPatch values (null, now(), 'implement npc entity structure', '0.1.3-1');
+insert into dbPatch values (null, now(), 'adapt defeated opponent as npc', '0.1.4-1');
