@@ -11,10 +11,12 @@ Gameplay:
    Spielern.
 2. Das Delivery-Dashboard sollte die Informationen über Käufe und Verkäufe nun transparenter darstellen.
 3. Die Preishistorie ist von der Übersicht des Handelsvolumens getrennt und zeigt auch wirklich die Preise an.
+4. NPCs haben auf der Map eine andere Farbe.
 
 Diverses:
 
 1. Die Foren sind jetzt genauso breit wie die Fäden.
+2. Es gibt jetzt die ersten Wurmlöcher auf der externen Karte. Für andere fehlen leider noch Koordinaten.
 
 ----------------- Bugs fixed -----------
 
@@ -46,7 +48,6 @@ todo. Konzept für Missionen und NPC-Missionen
 - npc has no home base, exists only on fleets
 - random spawns at third fleet points per player
 - raids planets randomly near the player
-
 
 Thema: Spionage
 todo. Spionagegebäude, pro Level gibt es einen Spion

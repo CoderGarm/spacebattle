@@ -122,7 +122,7 @@ public class FandomWikiQueryTest {
         InputStream stream = null;
         String line = null;
         try {
-            stream = this.getClass().getResourceAsStream("/map-data.csv");
+            stream = this.getClass().getResourceAsStream("/systems.csv");
             Preconditions.checkNotNull(stream, "stream must not be empty");
             final BufferedReader br = new BufferedReader(new InputStreamReader(stream));
             while ((line = br.readLine()) != null) {

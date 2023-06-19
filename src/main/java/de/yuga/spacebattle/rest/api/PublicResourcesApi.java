@@ -6,6 +6,7 @@ import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.misc.Coords;
 import de.yuga.spacebattle.rest.dto.misc.CoordsBlob;
 import de.yuga.spacebattle.rest.dto.misc.DistanceElement;
+import de.yuga.spacebattle.rest.dto.misc.wormhole.Junction;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -49,6 +50,21 @@ public class PublicResourcesApi extends BaseApi {
     public ResponseEntity<?> getAllSystemCoordinates() {
         final List<Coords> coords = resourceService.readStarSystems();
         return ResponseEntity.ok(new CoordsBlob(coords));
+    }
+
+    @GetMapping("wormhole-junctions")
+    @Operation(summary = "Get star systems by coordinates.", operationId = "getAllWormholeJunctions",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Junction.class)))
+                    ),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getAllWormholeJunctions() {
+        return ResponseEntity.ok(resourceService.readWormholes());
     }
 
     @GetMapping("distances")

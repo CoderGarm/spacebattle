@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.misc.Coords;
 import de.yuga.spacebattle.rest.dto.misc.DistanceElement;
 import de.yuga.spacebattle.rest.dto.misc.Position;
+import de.yuga.spacebattle.rest.dto.misc.wormhole.Junction;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -21,7 +22,7 @@ public class ResourceService {
     @Nonnull
     public List<Coords> readStarSystems() {
         final List<String> lst = new ArrayList<>();
-        getFileLineByLine("/", "map-data.csv", lst);
+        getFileLineByLine("/", "systems.csv", lst);
         return lst.stream().map(line -> new Coords(line.split(","))).collect(Collectors.toList());
     }
 
@@ -149,7 +150,10 @@ public class ResourceService {
         return shipNames;
     }
 
-    private void getFileLineByLine(String dir, final String fileName, final Collection<String> content) {
+    private void getFileLineByLine(@Nonnull String dir, @Nonnull final String fileName, final Collection<String> content) {
+        Preconditions.checkNotNull(dir, "dir must not be empty");
+        Preconditions.checkNotNull(fileName, "fileName must not be empty");
+
         InputStream inputStream = null;
         String line = null;
         try {
@@ -221,5 +225,24 @@ public class ResourceService {
             names.add(strings.get(ThreadLocalRandom.current().nextInt(0, strings.size() - 1)));
         }
         return names;
+    }
+
+    @Nonnull
+    public Set<Junction> readWormholes() {
+        final List<String> lst = new ArrayList<>();
+        getFileLineByLine("/", "junctions.csv", lst);
+
+        final Map<Coords, Set<Coords>> junctions = new HashMap<>();
+        lst.forEach(line -> {
+            final String[] split = line.split("\\|");
+            final Coords junction = new Coords(split[0]);
+            final Set<Coords> termini = junctions.getOrDefault(junction, new HashSet<>());
+            for (int i = 1; i < split.length; i++) {
+                termini.add(new Coords(split[i]));
+            }
+            junctions.put(junction, termini);
+        });
+
+        return junctions.entrySet().stream().map(e -> new Junction(e.getKey(), e.getValue())).collect(Collectors.toSet());
     }
 }

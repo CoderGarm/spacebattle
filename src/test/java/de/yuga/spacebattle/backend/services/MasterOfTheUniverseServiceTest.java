@@ -33,6 +33,7 @@ import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStat
 import de.yuga.spacebattle.backend.transformer.BuildingCsvTransformer;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.misc.Coords;
+import de.yuga.spacebattle.rest.dto.misc.wormhole.Junction;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,8 +92,8 @@ public class MasterOfTheUniverseServiceTest {
 
     @Test
     void t() {
-        final List<User> all = userService.findAll();
-        assertNotNull(all);
+        final Set<Junction> junctions = resourceService.readWormholes();
+        assertNotNull(junctions);
     }
 
     @Test
