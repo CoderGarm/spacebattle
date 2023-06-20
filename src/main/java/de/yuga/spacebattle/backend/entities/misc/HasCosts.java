@@ -6,10 +6,10 @@ import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EResourceDemand;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @MappedSuperclass

@@ -3,10 +3,10 @@ package de.yuga.spacebattle.backend.entities.account.chat;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 

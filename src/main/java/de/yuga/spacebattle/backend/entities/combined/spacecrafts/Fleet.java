@@ -27,10 +27,10 @@ import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.ETechnologyType;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;

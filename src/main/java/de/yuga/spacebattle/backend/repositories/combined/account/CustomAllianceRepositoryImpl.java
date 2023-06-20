@@ -2,11 +2,11 @@ package de.yuga.spacebattle.backend.repositories.combined.account;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
 @Service

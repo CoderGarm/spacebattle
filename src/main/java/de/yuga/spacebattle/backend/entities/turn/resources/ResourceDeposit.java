@@ -9,10 +9,10 @@ import de.yuga.spacebattle.backend.entities.misc.HasCosts;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.MathContext;
 import java.math.RoundingMode;

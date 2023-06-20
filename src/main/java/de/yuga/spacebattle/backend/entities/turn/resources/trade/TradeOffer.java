@@ -6,11 +6,11 @@ import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Entity

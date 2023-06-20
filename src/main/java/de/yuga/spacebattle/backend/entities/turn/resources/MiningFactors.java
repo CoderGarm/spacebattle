@@ -3,10 +3,10 @@ package de.yuga.spacebattle.backend.entities.turn.resources;
 
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;

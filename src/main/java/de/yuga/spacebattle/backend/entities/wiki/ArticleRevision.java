@@ -4,11 +4,11 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.wiki.WikiCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Comparator;

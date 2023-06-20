@@ -1,9 +1,9 @@
 package de.yuga.spacebattle.rest.config;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 
 public class CorsFilterConfiguration implements CorsConfigurationSource {

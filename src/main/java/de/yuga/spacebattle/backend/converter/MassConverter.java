@@ -2,10 +2,10 @@ package de.yuga.spacebattle.backend.converter;
 
 
 import de.yuga.spacebattle.backend.dto.physics.Mass;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 
 import javax.annotation.Nullable;
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
 
 @Converter
 public class MassConverter implements AttributeConverter<Mass, String> {

@@ -24,10 +24,10 @@ import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
 import de.yuga.spacebattle.backend.validators.ShipValidator;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;

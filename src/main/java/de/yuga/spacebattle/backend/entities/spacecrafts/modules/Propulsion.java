@@ -11,9 +11,9 @@ import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.ETechnologyType;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
 import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.MathContext;

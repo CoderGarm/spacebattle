@@ -5,10 +5,9 @@ import de.yuga.spacebattle.backend.entities.account.forum.Forum;
 import de.yuga.spacebattle.backend.entities.account.forum.ForumMessage;
 import de.yuga.spacebattle.backend.entities.account.forum.ForumMessageRead;
 import de.yuga.spacebattle.backend.entities.account.forum.ForumThread;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 @Service
 public class CustomForumMessageReadRepositoryImpl implements CustomForumMessageReadRepository {

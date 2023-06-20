@@ -6,9 +6,9 @@ import de.yuga.spacebattle.backend.converter.UUIDConverter;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.UUID;
 

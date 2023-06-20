@@ -1,13 +1,13 @@
 package de.yuga.spacebattle.backend.entities.orbitals;
 
 import com.google.common.base.Preconditions;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 
 @Embeddable
 public class FleetOrbit {

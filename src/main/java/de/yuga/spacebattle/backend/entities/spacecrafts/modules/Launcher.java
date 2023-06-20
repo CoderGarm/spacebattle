@@ -7,10 +7,10 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.EShipClassType;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
+import jakarta.persistence.*;
 import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Comparator;
 import java.util.HashSet;

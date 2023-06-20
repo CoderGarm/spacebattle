@@ -15,6 +15,8 @@ import de.yuga.spacebattle.rest.dto.misc.CoordsBlob;
 import de.yuga.spacebattle.rest.dto.orbitals.StarSystem;
 import de.yuga.spacebattle.rest.dto.serializer.*;
 import de.yuga.spacebattle.rest.dto.turn.battle.BattleReport;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,8 +24,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Enumeration;

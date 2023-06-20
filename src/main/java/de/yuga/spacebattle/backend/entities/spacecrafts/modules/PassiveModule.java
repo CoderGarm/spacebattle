@@ -13,9 +13,9 @@ import de.yuga.spacebattle.backend.enums.ESupportType;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
 import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @NamedQueries({

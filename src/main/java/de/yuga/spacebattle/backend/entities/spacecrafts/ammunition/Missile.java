@@ -11,12 +11,12 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTech
 import de.yuga.spacebattle.backend.enums.EShipClassType;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @NamedQueries({

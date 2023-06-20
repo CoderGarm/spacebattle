@@ -1,10 +1,11 @@
 package de.yuga.spacebattle.backend.entities.misc;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+
 import javax.annotation.Nonnull;
-import javax.persistence.AttributeOverride;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 

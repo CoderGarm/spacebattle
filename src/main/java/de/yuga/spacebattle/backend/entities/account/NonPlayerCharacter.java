@@ -1,10 +1,10 @@
 package de.yuga.spacebattle.backend.entities.account;
 
 import de.yuga.spacebattle.backend.enums.OwnerType;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
 import javax.annotation.Nonnull;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
 
 @Entity
 @DiscriminatorValue(OwnerType.NPC)

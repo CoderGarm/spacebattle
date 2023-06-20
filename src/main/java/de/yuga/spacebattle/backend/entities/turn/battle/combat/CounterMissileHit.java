@@ -5,9 +5,9 @@ import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
 import de.yuga.spacebattle.backend.converter.UUIDConverter;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.UUID;
 

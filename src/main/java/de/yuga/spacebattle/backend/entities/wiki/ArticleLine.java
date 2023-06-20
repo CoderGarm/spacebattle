@@ -2,14 +2,14 @@ package de.yuga.spacebattle.backend.entities.wiki;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.EDiffDeltaType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 

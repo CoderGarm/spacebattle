@@ -3,11 +3,11 @@ package de.yuga.spacebattle.backend.entities.account.forum;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.rest.dto.account.forum.CreateForumThread;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.HashSet;

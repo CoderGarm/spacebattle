@@ -19,9 +19,9 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.*;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.function.Function;

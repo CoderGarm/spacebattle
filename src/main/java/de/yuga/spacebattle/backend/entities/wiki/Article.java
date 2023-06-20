@@ -9,13 +9,13 @@ import de.yuga.spacebattle.backend.enums.EWikiCategory;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.wiki.ArticleCreate;
 import de.yuga.spacebattle.rest.dto.wiki.ArticleEdit;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.HashSet;

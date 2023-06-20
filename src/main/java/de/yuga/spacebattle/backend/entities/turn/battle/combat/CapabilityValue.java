@@ -2,14 +2,14 @@ package de.yuga.spacebattle.backend.entities.turn.battle.combat;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.EModuleType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Map;

@@ -9,10 +9,10 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.PassiveModule;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.ETranslationTarget;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 

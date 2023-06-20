@@ -9,11 +9,11 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
 import de.yuga.spacebattle.backend.enums.EModuleType;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.HashSet;

@@ -1,10 +1,10 @@
 package de.yuga.spacebattle.backend.converter;
 
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 
 import javax.annotation.Nullable;
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
 
 @Converter
 public class CombatRoundConverter implements AttributeConverter<CombatRound, Integer> {

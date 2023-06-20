@@ -8,9 +8,9 @@ import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.ETranslatableType;
 import de.yuga.spacebattle.backend.enums.ETranslationTarget;
 import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @MappedSuperclass

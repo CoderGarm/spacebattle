@@ -5,11 +5,11 @@ import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.enums.ETranslatableType;
 import de.yuga.spacebattle.backend.enums.ETranslationTarget;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.HashSet;

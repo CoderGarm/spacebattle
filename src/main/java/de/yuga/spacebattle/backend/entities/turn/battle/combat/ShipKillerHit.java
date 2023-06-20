@@ -10,9 +10,9 @@ import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.turn.battle.LossRole;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.function.Function;

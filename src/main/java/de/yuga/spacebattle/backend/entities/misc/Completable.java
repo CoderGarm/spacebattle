@@ -3,13 +3,13 @@ package de.yuga.spacebattle.backend.entities.misc;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MappedSuperclass;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.Column;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
 
 /**

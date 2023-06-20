@@ -1,11 +1,11 @@
 package de.yuga.spacebattle.backend.repositories.researches;
 
 import de.yuga.spacebattle.backend.entities.researches.Research;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
 @Service

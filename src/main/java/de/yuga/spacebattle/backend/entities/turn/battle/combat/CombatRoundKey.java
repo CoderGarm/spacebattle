@@ -5,12 +5,12 @@ import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.converter.CombatRoundConverter;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
+import jakarta.persistence.Convert;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.MappedSuperclass;
 
 import javax.annotation.Nonnull;
-import javax.persistence.Convert;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
 
 @MappedSuperclass

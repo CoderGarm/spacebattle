@@ -9,11 +9,11 @@ import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;

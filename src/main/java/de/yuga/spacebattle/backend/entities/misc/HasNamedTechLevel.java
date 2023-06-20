@@ -3,12 +3,12 @@ package de.yuga.spacebattle.backend.entities.misc;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MappedSuperclass;
 
 import javax.annotation.Nonnull;
-import javax.persistence.CascadeType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
 
 @MappedSuperclass

@@ -1,8 +1,9 @@
 package de.yuga.spacebattle.backend.converter;
 
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
+
 import javax.annotation.Nullable;
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
 import java.util.UUID;
 
 @Converter

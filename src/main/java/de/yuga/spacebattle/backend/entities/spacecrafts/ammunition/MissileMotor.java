@@ -2,13 +2,13 @@ package de.yuga.spacebattle.backend.entities.spacecrafts.ammunition;
 
 import de.yuga.spacebattle.backend.converter.AccelerationConverter;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Embeddable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 
 @Embeddable

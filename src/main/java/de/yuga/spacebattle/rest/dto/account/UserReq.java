@@ -5,9 +5,9 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
 
 import javax.annotation.Nonnull;
-import javax.validation.constraints.Email;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 

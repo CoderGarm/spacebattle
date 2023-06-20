@@ -4,9 +4,9 @@ package de.yuga.spacebattle.backend.entities.combined.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;

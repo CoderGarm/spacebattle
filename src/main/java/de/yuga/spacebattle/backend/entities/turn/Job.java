@@ -7,10 +7,10 @@ import de.yuga.spacebattle.backend.entities.constructables.buildings.Constructio
 import de.yuga.spacebattle.backend.entities.misc.Completable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.EJobPriority;
+import jakarta.persistence.*;
 import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @NamedQueries({

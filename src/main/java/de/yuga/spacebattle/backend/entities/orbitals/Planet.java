@@ -16,10 +16,10 @@ import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;

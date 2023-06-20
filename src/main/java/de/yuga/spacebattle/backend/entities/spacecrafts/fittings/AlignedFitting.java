@@ -11,12 +11,12 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;

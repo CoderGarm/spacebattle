@@ -9,12 +9,12 @@ import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateSnapshot;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.Set;

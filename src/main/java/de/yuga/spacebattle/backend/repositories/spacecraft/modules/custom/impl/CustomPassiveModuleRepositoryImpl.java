@@ -2,11 +2,11 @@ package de.yuga.spacebattle.backend.repositories.spacecraft.modules.custom.impl;
 
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.PassiveModule;
 import de.yuga.spacebattle.backend.repositories.spacecraft.modules.custom.CustomPassiveModuleRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
 @Service

@@ -7,9 +7,9 @@ import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.misc.HasCostsByOwn;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.EShipClassType;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 
 @NamedQueries({
         @NamedQuery(name = "ElectronicWarfare.getAll", query = "SELECT a FROM ElectronicWarfare a"),

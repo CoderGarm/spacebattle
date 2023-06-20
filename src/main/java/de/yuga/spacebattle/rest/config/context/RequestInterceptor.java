@@ -2,13 +2,12 @@ package de.yuga.spacebattle.rest.config.context;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 public class RequestInterceptor extends HandlerInterceptorAdapter {
 

@@ -8,12 +8,12 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.Embeddable;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 
 /**
  * Every loss role remembers to a defeated and destroyed war ship.

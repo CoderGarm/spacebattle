@@ -3,10 +3,10 @@ package de.yuga.spacebattle.backend.entities.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.converter.PasswordConverter;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;

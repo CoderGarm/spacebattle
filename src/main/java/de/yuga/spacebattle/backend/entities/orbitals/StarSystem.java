@@ -4,9 +4,9 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.enums.EStarClassType;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.HashSet;

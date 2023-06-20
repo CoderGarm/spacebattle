@@ -7,12 +7,12 @@ import de.yuga.spacebattle.backend.converter.DistanceConverter;
 import de.yuga.spacebattle.backend.dto.physics.Direction;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Embeddable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
-import javax.persistence.Convert;
-import javax.persistence.Embeddable;
 import java.math.BigDecimal;
 
 import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC_HU;

@@ -12,10 +12,10 @@ import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import de.yuga.spacebattle.backend.enums.OwnerType;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 import java.util.HashSet;

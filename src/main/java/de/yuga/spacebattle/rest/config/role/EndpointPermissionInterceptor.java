@@ -5,6 +5,7 @@ import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.config.security.JwtTokenUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -17,7 +18,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;

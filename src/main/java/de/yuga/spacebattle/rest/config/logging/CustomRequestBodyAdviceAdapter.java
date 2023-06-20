@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.rest.config.logging;
 
 import com.google.common.base.Preconditions;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
@@ -9,7 +10,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdviceAdapter;
 
 import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Type;
 
 @ControllerAdvice

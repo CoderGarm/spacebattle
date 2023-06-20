@@ -6,9 +6,9 @@ import de.yuga.spacebattle.backend.converter.UUIDConverter;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
 import de.yuga.spacebattle.backend.enums.EHitArea;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.UUID;
 

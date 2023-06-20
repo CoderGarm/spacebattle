@@ -3,11 +3,11 @@ package de.yuga.spacebattle.backend.entities.spacecrafts.fittings;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.physics.Mass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.PassiveModule;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 import javax.annotation.Nonnull;
-import javax.persistence.Embeddable;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 

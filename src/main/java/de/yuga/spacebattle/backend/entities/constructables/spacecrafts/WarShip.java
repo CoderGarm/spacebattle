@@ -6,9 +6,9 @@ import de.yuga.spacebattle.backend.entities.misc.Operationable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @NamedQueries({

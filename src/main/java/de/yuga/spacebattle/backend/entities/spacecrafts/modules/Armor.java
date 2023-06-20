@@ -4,9 +4,9 @@ import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.misc.HasCostsByOwn;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.EShipClassType;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 
 @NamedQueries({
         @NamedQuery(name = "Armor.getAll", query = "SELECT a FROM Armor a"),

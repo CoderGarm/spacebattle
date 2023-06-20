@@ -2,13 +2,13 @@ package de.yuga.spacebattle.backend.converter;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.annotation.Nonnull;
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
 
 /**
  * Converts the password to a hashed representation.

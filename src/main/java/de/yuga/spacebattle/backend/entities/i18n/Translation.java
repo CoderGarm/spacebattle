@@ -2,11 +2,11 @@ package de.yuga.spacebattle.backend.entities.i18n;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.util.Arrays;
 import java.util.List;

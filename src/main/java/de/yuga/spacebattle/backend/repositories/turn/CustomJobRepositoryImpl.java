@@ -5,12 +5,12 @@ import de.yuga.spacebattle.backend.entities.constructables.buildings.Constructio
 import de.yuga.spacebattle.backend.entities.researches.ActiveResearchTuple;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Job;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
 @Service

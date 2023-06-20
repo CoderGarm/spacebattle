@@ -4,11 +4,11 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.converter.DistanceConverter;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.enums.EWarheadType;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Embeddable

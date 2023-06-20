@@ -11,9 +11,9 @@ import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EResourceDemand;
 import de.yuga.spacebattle.backend.enums.EShipClassType;
 import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
+import jakarta.persistence.*;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Map;
 
