@@ -60,6 +60,6 @@ public class OwnerService {
 
     @Nonnull
     public Owner getRandomNPC() {
-        return npcRepository.getNPC(PageRequest.of(0, 1)).get(0);
+        return npcRepository.getNPC(PageRequest.of(0, 2)).get(1);
     }
 }
