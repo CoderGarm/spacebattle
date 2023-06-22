@@ -2,28 +2,26 @@ package de.yuga.spacebattle.rest.config.security;
 
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.converter.PasswordConverter;
-import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.rest.config.CorsFilterConfiguration;
 import jakarta.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 
 /**
  * This defines the separation of endpoints for every BoF-API from every other endpoint will be used by vaadin.
@@ -33,52 +31,19 @@ import javax.annotation.Nonnull;
  */
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(
-        prePostEnabled = true,
-        jsr250Enabled = true)
-public class HttpSecurityConfiguration extends WebSecurityConfigurerAdapter {
-
-    @Nonnull
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpSecurityConfiguration.class);
-
-    @Nonnull
-    private final UserService userService;
+@EnableMethodSecurity(jsr250Enabled = true)
+public class HttpSecurityConfiguration {
 
     @Nonnull
     private final JwtTokenFilter jwtTokenFilter;
 
-    @Override
-    @Bean
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
-    }
-
     @Autowired
-    public HttpSecurityConfiguration(@Nonnull final UserService userService,
-                                     @Nonnull final JwtTokenFilter jwtTokenFilter) {
-        Preconditions.checkNotNull(userService, "userService shouldn't be null!");
-        Preconditions.checkNotNull(jwtTokenFilter, "jwtTokenFilter shouldn't be null!");
-
-        this.userService = userService;
-        this.jwtTokenFilter = jwtTokenFilter;
-    }
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(username -> userService
-                .findByUsername(username)
-                .orElseThrow(
-                        () -> new UsernameNotFoundException("User '" + username + "' could not be found."))
-        );
+    public HttpSecurityConfiguration(@Nonnull final JwtTokenFilter jwtTokenFilter) {
+        this.jwtTokenFilter = Preconditions.checkNotNull(jwtTokenFilter, "jwtTokenFilter shouldn't be null!");
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new PasswordConverter();
-    }
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors()
                 .configurationSource(new CorsFilterConfiguration())
                 .and()
@@ -86,12 +51,28 @@ public class HttpSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .disable()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .exceptionHandling()
+                .and().exceptionHandling()
                 .authenticationEntryPoint((request, response, ex) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage()))
                 .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), new AntPathRequestMatcher("/api/**"))
                 .accessDeniedHandler((request, response, ex) -> response.sendError(HttpServletResponse.SC_FORBIDDEN, ex.getMessage()))
                 .defaultAccessDeniedHandlerFor((request, response, ex) -> response.sendError(HttpServletResponse.SC_FORBIDDEN), new AntPathRequestMatcher("/api/**"));
+
+        return http.build();
+    }
+
+    @Bean
+    public RequestHeaderAuthenticationFilter requestHeaderAuthenticationFilter() {
+        RequestHeaderAuthenticationFilter filter = new RequestHeaderAuthenticationFilter();
+        filter.setPrincipalRequestHeader(HttpHeaders.AUTHORIZATION);
+        filter.setExceptionIfHeaderMissing(false);
+        filter.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/api/**"));
+        filter.setAuthenticationManager(authenticationManager());
+        return filter;
+    }
+
+    @Bean
+    protected AuthenticationManager authenticationManager() {
+        return new ProviderManager(Collections.singletonList(new RequestHeaderAuthenticationProvider(jwtTokenFilter)));
     }
 }
 

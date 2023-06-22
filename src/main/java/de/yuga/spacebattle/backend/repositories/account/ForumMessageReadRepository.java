@@ -3,13 +3,14 @@ package de.yuga.spacebattle.backend.repositories.account;
 import de.yuga.spacebattle.backend.entities.account.forum.ForumMessageRead;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.enums.EWebUserRole;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Set;
 
-public interface ForumMessageReadRepository extends PagingAndSortingRepository<ForumMessageRead, Integer>, CustomForumMessageReadRepository {
+public interface ForumMessageReadRepository extends PagingAndSortingRepository<ForumMessageRead, Integer>, JpaRepository<ForumMessageRead, Integer>, CustomForumMessageReadRepository {
 
     /**
      * Returns if the specific message was read or not.

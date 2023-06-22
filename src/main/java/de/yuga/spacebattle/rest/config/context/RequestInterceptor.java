@@ -5,11 +5,15 @@ import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class RequestInterceptor extends HandlerInterceptorAdapter {
+/**
+ * Holds some information like the jwt and the containing user id inside the context.
+ */
+public class RequestInterceptor implements HandlerInterceptor {
 
     @Nonnull
     private final RequestContext requestContext;

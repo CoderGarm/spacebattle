@@ -17,6 +17,11 @@ import javax.validation.ConstraintValidatorContext;
 @Transactional
 public class ShipDataValidator implements ConstraintValidator<ShipValidator, ShipClass> {
 
+    @Override
+    public void initialize(final ShipValidator constraintAnnotation) {
+
+    }
+
     public boolean isValid(@Nonnull final ShipClass shipClass, @Nonnull final ConstraintValidatorContext context) {
         Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
         Preconditions.checkNotNull(context, "context shouldn't be null!");
