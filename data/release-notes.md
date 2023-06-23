@@ -1,27 +1,20 @@
------------------ Features -------------  
+### Features
+
 Thema: NPC, Handel und Missionen
 
 Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
-Gameplay:
+##### Gameplay
 
-1. NPC als Gegner.  
-   Das beinhaltet an dieser Stelle nur, dass NPCs Flotten besitzen und kämpfen können.  
-   Bislang sind sie vollkommen passiv und greifen niemanden an. Die Flottenstärke der NPCs wächst schneller als die von
-   Spielern.
-2. Das Delivery-Dashboard sollte die Informationen über Käufe und Verkäufe nun transparenter darstellen.
-3. Die Preishistorie ist von der Übersicht des Handelsvolumens getrennt und zeigt auch wirklich die Preise an.
-4. NPCs haben auf der Map eine andere Farbe.
+todo. missionen piraten
 
-Diverses:
+#### Diverses
 
-1. Die Foren sind jetzt genauso breit wie die Fäden.
-2. Es gibt jetzt die ersten Wurmlöcher auf der externen Karte. Für andere fehlen leider noch Koordinaten.
+todo. Das man Kolonisierungen planen kann
+todo. group systems on map
+todo. optical rework map
 
------------------ Bugs fixed -----------
-
-1. Startbutton für Gebäudebau wird nicht durch hovern über zu teures Gebäude entfernt.
-2. Der Button zum Löschen von Schiffsklassen tut nun, was er soll.
+### Bugs fixed
 
 ----------------- next steps -----------
 
@@ -62,7 +55,6 @@ todo. Counter-Spionage, Spione umdrehen (unbenutze Spionage-Slots)
 1. Die Darstellung des Kampfes aufhübschen.
 2. Aktuell kann man nur 1on1 kämpfen, das muss aufgebohrt werden
 3. Population balancing
-5. Das man Kolonisierungen planen kann
 6. Rework der Flottenbewegungen (nice to have)
 7. mich endlich mal um die "corporate identity" kümmern, also eigene Icons, Symbole, Benennungen usw erzeugen
 
@@ -113,8 +105,6 @@ todo. combat with more then 2 opponents
 todo. inoperational flotten zerstören bei sieg oder beute?
 todo. im bau befindliche flotten während des Baus zerstören
 todo. Schiffe erbeuten?
-
-todo. kolonisierungen müssen demand erzeugen
 
 todo. Handelssystem
 todo. simulierter ziviler Handel - Kosten und Steuereinnahmen
