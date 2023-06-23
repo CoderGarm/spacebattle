@@ -28,6 +28,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,10 +47,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
-import javax.validation.Validation;
-import javax.validation.Validator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -101,7 +101,7 @@ public class AuthApi {
     private final MasterOfTheUniverseService masterOfTheUniverseService;
 
     @Nonnull
-    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    private final Validator validator;
 
     @Nonnull
     private final AuthenticationManager authenticationManager;
@@ -141,6 +141,9 @@ public class AuthApi {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
         this.mailService = Preconditions.checkNotNull(mailService, "mailService must not be empty");
         this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
+
+        //noinspection resource
+        this.validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 
     @PostMapping("/login")

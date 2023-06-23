@@ -30,12 +30,12 @@ import de.yuga.spacebattle.rest.dto.spacecrafts.fittings.SupportFitting;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.PassiveModule;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.Weapon;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics.BaseModule;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;

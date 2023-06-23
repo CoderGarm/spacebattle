@@ -4,17 +4,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 
 public class CorsFilterConfiguration implements CorsConfigurationSource {
+
     /**
      * todo heavily increase cors filter
-     *
-     * @param request
-     * @return
      */
     @Override
-    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+    public CorsConfiguration getCorsConfiguration(@Nonnull final HttpServletRequest request) {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.addAllowedOrigin("*");
         corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));

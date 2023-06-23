@@ -14,6 +14,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
@@ -35,23 +36,28 @@ import java.util.Collections;
 public class HttpSecurityConfiguration {
 
     @Nonnull
-    private final JwtTokenFilter jwtTokenFilter;
+    private final RequestHeaderAuthenticationProvider authenticationProvider;
 
     @Autowired
-    public HttpSecurityConfiguration(@Nonnull final JwtTokenFilter jwtTokenFilter) {
-        this.jwtTokenFilter = Preconditions.checkNotNull(jwtTokenFilter, "jwtTokenFilter shouldn't be null!");
+    public HttpSecurityConfiguration(@Nonnull final RequestHeaderAuthenticationProvider authenticationProvider) {
+        this.authenticationProvider = Preconditions.checkNotNull(authenticationProvider, "jwtTokenFilter shouldn't be null!");
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors()
-                .configurationSource(new CorsFilterConfiguration())
-                .and()
-                .csrf()
-                .disable()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and().exceptionHandling()
+        http.cors(httpSecurityCorsConfigurer -> new CorsFilterConfiguration())
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                /*.httpBasic((basic) -> basic
+                        .addObjectPostProcessor(new ObjectPostProcessor<BasicAuthenticationFilter>() {
+                            @Override
+                            public <O extends BasicAuthenticationFilter> O postProcess(O filter) {
+                                filter.setSecurityContextRepository(new HttpSessionSecurityContextRepository());
+                                return filter;
+                            }
+                        })
+                )*/
+                .exceptionHandling()
                 .authenticationEntryPoint((request, response, ex) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage()))
                 .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), new AntPathRequestMatcher("/api/**"))
                 .accessDeniedHandler((request, response, ex) -> response.sendError(HttpServletResponse.SC_FORBIDDEN, ex.getMessage()))
@@ -62,7 +68,7 @@ public class HttpSecurityConfiguration {
 
     @Bean
     public RequestHeaderAuthenticationFilter requestHeaderAuthenticationFilter() {
-        RequestHeaderAuthenticationFilter filter = new RequestHeaderAuthenticationFilter();
+        final RequestHeaderAuthenticationFilter filter = new RequestHeaderAuthenticationFilter();
         filter.setPrincipalRequestHeader(HttpHeaders.AUTHORIZATION);
         filter.setExceptionIfHeaderMissing(false);
         filter.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/api/**"));
@@ -72,7 +78,7 @@ public class HttpSecurityConfiguration {
 
     @Bean
     protected AuthenticationManager authenticationManager() {
-        return new ProviderManager(Collections.singletonList(new RequestHeaderAuthenticationProvider(jwtTokenFilter)));
+        return new ProviderManager(Collections.singletonList(authenticationProvider));
     }
 }
 

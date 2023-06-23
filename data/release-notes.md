@@ -5,23 +5,11 @@ Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
 Gameplay:
 
-1. NPC als Gegner.  
-   Das beinhaltet an dieser Stelle nur, dass NPCs Flotten besitzen und kämpfen können.  
-   Bislang sind sie vollkommen passiv und greifen niemanden an. Die Flottenstärke der NPCs wächst schneller als die von
-   Spielern.
-2. Das Delivery-Dashboard sollte die Informationen über Käufe und Verkäufe nun transparenter darstellen.
-3. Die Preishistorie ist von der Übersicht des Handelsvolumens getrennt und zeigt auch wirklich die Preise an.
-4. NPCs haben auf der Map eine andere Farbe.
+todo. kolo kann man planen
 
 Diverses:
 
-1. Die Foren sind jetzt genauso breit wie die Fäden.
-2. Es gibt jetzt die ersten Wurmlöcher auf der externen Karte. Für andere fehlen leider noch Koordinaten.
-
 ----------------- Bugs fixed -----------
-
-1. Startbutton für Gebäudebau wird nicht durch hovern über zu teures Gebäude entfernt.
-2. Der Button zum Löschen von Schiffsklassen tut nun, was er soll.
 
 ----------------- next steps -----------
 
@@ -34,20 +22,6 @@ done. NPC-Konzept für Systeme und systemfreie NPC (Piraten, fliegende Händler 
 done. NPC-Handelssystem
 todo. interne Sektoraufteilung der Map nach Entfernung um wirtschaftliche Leistungszentren  
 todo. Konzept für Missionen und NPC-Missionen
-
-1. territorial npc (manticore, haven ...)
-
-- classical user without login
-- by tick every time 50% more level as the highest after ticking
-- drop fleets as all players combined
-- doesn't colonize planets
-
-2. non-territorial npc (pirates)
-
-- npc user with static fleet
-- npc has no home base, exists only on fleets
-- random spawns at third fleet points per player
-- raids planets randomly near the player
 
 Thema: Spionage
 todo. Spionagegebäude, pro Level gibt es einen Spion

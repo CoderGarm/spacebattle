@@ -56,6 +56,9 @@ import de.yuga.spacebattle.backend.services.turn.TickService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.misc.Coords;
 import jakarta.annotation.PostConstruct;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -63,9 +66,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -208,6 +208,7 @@ public class MasterOfTheUniverseService {
         this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
         this.ownerService = Preconditions.checkNotNull(ownerService, "ownerService must not be empty");
 
+        //noinspection resource
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 
@@ -216,16 +217,8 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final List<NonPlayerCharacter> all = nonPlayerCharacterService.findAll();
-        all.removeIf(o -> o.getUsername().equals(DEFEATED_OPPONENT));
-        final List<Fleet> allFleetsByUser = fleetService.findAllFleetsByUser(all.get(0));
-        final boolean transformationNeeded = allFleetsByUser.isEmpty();
+        final boolean transformationNeeded = false;
         if (transformationNeeded) {
-
-            for (final NonPlayerCharacter nonPlayerCharacter : all) {
-                createFleetForUser(nonPlayerCharacter);
-            }
-
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");

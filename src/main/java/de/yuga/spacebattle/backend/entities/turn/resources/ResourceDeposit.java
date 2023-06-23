@@ -25,17 +25,6 @@ import static de.yuga.spacebattle.backend.enums.EResourceType.POPULATION;
 /**
  * The resource deposit itself represents a various uses, compare {@link EDepositType}.
  */
-@NamedQueries({
-        @NamedQuery(name = "ResourceDeposit.getAll",
-                query = "SELECT p FROM ResourceDeposit p"),
-        @NamedQuery(name = "ResourceDeposit.getCostsForBuilding",
-                query = "SELECT p FROM ResourceDeposit p " +
-                        "LEFT JOIN FETCH p.resources " +
-                        "LEFT JOIN FETCH p.humanResources " +
-                        "LEFT JOIN Building b ON (p.id = b.costs.id)" +
-                        "WHERE b.id = :idBuilding " +
-                        "AND p.subType = de.yuga.spacebattle.backend.enums.EDepositType.COSTS")
-})
 @Entity
 @Table(name = "resourceDeposit")
 @AttributeOverride(name = "id", column = @Column(name = "idResourceDeposit"))

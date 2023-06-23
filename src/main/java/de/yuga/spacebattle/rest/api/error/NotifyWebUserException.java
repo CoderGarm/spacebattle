@@ -2,10 +2,10 @@ package de.yuga.spacebattle.rest.api.error;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
+import jakarta.validation.ConstraintViolation;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.validation.ConstraintViolation;
 import java.util.HashSet;
 import java.util.Set;
 

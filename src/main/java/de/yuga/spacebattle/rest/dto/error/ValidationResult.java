@@ -2,9 +2,9 @@ package de.yuga.spacebattle.rest.dto.error;
 
 import com.google.common.base.Preconditions;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.ConstraintViolation;
 
 import javax.annotation.Nonnull;
-import javax.validation.ConstraintViolation;
 
 @Schema(description = ".")
 public class ValidationResult {

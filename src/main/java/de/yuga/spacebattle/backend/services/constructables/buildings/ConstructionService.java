@@ -100,7 +100,8 @@ public class ConstructionService {
     @Nullable
     public ResourceDeposit getCosts(final int idBuilding, final int targetLevel) {
 
-        final ResourceDeposit costs = constructionRepository.getCosts(idBuilding);
+        final int idCosts = Objects.requireNonNull(buildingService.find(idBuilding)).getCosts().getId();
+        final ResourceDeposit costs = constructionRepository.getCostsForBuilding(idCosts);
         if (costs == null) {
             return null;
         }
