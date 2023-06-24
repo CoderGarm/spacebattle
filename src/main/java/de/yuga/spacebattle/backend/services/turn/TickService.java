@@ -260,7 +260,7 @@ public class TickService {
 
         Planet origin = tradedResource.getTradeOffer().getOrigin();
         origin = toStore.getOrDefault(origin.getId(), origin);
-        origin.getResourceDeposit().updateResource(EResourceType.CREDITS, tradedResource.getTradeOffer().getUnitPrice());
+        origin.getResourceDeposit().updateResource(EResourceType.CREDITS, tradedResource.getTradeOffer().getFullPrice());
         toStore.put(origin.getId(), origin);
     }
 

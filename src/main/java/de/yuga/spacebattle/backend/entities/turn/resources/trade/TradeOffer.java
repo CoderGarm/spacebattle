@@ -96,6 +96,10 @@ public class TradeOffer extends Deletable {
         return unitPrice;
     }
 
+    public long getFullPrice() {
+        return unitPrice * amount;
+    }
+
     @Nonnull
     public Planet getOrigin() {
         return origin;
