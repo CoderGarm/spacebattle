@@ -125,6 +125,7 @@
     create table colonization (
        idColonization integer not null auto_increment,
         doneAtZero integer not null,
+        isPlanned bit not null,
         idCosts integer not null,
         idTarget integer not null,
         idUser integer not null,

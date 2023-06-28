@@ -18,8 +18,7 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 /**
- * Represents the payload of a job.
- *
+ * Represents the payload of a job.<br>
  * <code>What</code> is at work and <code>how much</code> will be constructed.
  * The parent {@link Job} contains the information about the <code>where</code> and <code>for whom</code>.
  */

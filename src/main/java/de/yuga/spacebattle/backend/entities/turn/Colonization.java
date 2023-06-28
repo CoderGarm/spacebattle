@@ -50,7 +50,19 @@ public class Colonization extends AbstractEntityKey {
      */
     private int doneAtZero;
 
+    private boolean isPlanned = false;
+
     public Colonization() {
+    }
+
+    public Colonization(@Nonnull final User user,
+                        @Nonnull final Planet target,
+                        @Nonnull final CrewRequirement crewRequirement,
+                        final int doneAtZero,
+                        final boolean isPlanned) {
+        this(user, target, crewRequirement, doneAtZero);
+
+        this.isPlanned = isPlanned;
     }
 
     public Colonization(@Nonnull final User user,
@@ -96,6 +108,14 @@ public class Colonization extends AbstractEntityKey {
             throw new NotifyWebUserException("You cannot increase the traffic time until you have warp scrambler");
         }
         this.doneAtZero = moveDoneAtZero;
+    }
+
+    public boolean isPlanned() {
+        return isPlanned;
+    }
+
+    public void start() {
+        this.isPlanned = false;
     }
 
     @Nonnull

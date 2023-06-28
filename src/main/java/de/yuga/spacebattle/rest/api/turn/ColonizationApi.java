@@ -99,6 +99,9 @@ public class ColonizationApi extends BaseApi {
         if (p == null) {
             throw new NotifyWebUserException("There must be a planet to colonize, as I said.");
         }
+        if (p.getOwner() != null) {
+            throw new NotifyWebUserException("The planet must not be colonized.");
+        }
         final User user = userService.findWithKnownStarSystems(idUser);
         if (user == null) {
             throw new NotifyWebUserException("There must be a user who buys the info.");
@@ -107,7 +110,7 @@ public class ColonizationApi extends BaseApi {
             throw new NotifyWebUserException("You can't colonize an unknown systems.");
         }
 
-        final de.yuga.spacebattle.backend.entities.turn.Colonization colonization = colonizationService.startColonizingPlanet(user, p);
+        final de.yuga.spacebattle.backend.entities.turn.Colonization colonization = colonizationService.initiateColonization(user, p);
         return ResponseEntity.ok(new Colonization(colonization));
     }
 

@@ -111,16 +111,8 @@ public class ColonizationService {
         repository.delete(entity);
     }
 
-    /**
-     * Starts a colonizing mission with the fixed duration of 10 ticks.
-     * todo ticks based on distance between whatever planets
-     *
-     * @param user       the user who starts the colonization
-     * @param toColonize the planet to colonize
-     * @return the created colonization
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public Colonization startColonizingPlanet(@Nonnull final User user, @Nonnull final Planet toColonize) {
+
+    public Colonization initiateColonization(@Nonnull final User user, @Nonnull final Planet toColonize) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
         Preconditions.checkNotNull(toColonize, "toColonize shouldn't be null!");
 
@@ -129,7 +121,49 @@ public class ColonizationService {
         final Planet mainPlanet = planetService.findMainPlanet(user);
         final ResourceDeposit debitorDeposit = mainPlanet.getResourceDeposit();
 
-        final PayingPossibleResult payingPossible = debitorDeposit.isPayingPossible(colonizationCosts);
+        final PayingPossibleResult payingPossible = debitorDeposit.isPayingPossible(colonizationCosts.getCrewRequirement());
+        if (!payingPossible.isValid()) {
+            return createPlannedColonization(mainPlanet, toColonize);
+        }
+
+        return startColonizingPlanet(user, toColonize);
+    }
+
+    private Colonization createPlannedColonization(@Nonnull final Planet planet, @Nonnull final Planet toColonize) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(toColonize, "toColonize must not be empty");
+
+
+        final ResourceDeposit colonizationCosts = ColonizationCostCalculator.getColonizationCosts(toColonize);
+        final CrewRequirement crewRequirement = colonizationCosts.getCrewRequirement();
+        planet.getResourceDemand().updateCrew(crewRequirement, ECalculationType.ADD);
+        planetService.save(planet);
+
+        final User owner = planet.getHumanOwner();
+        Preconditions.checkNotNull(owner, "owner must not be empty");
+        Colonization colonization = new Colonization(owner, toColonize, crewRequirement, 10, true);
+        colonization = save(colonization);
+        return colonization;
+    }
+
+    /**
+     * Starts a colonizing mission with the fixed duration of 10 ticks.
+     * todo ticks based on distance between whatever planets
+     *
+     * @param user       the user who starts the colonization
+     * @param toColonize the planet to colonize
+     * @return the created colonization
+     */
+    private Colonization startColonizingPlanet(@Nonnull final User user, @Nonnull final Planet toColonize) {
+        Preconditions.checkNotNull(user, "user shouldn't be null!");
+        Preconditions.checkNotNull(toColonize, "toColonize shouldn't be null!");
+
+        final ResourceDeposit colonizationCosts = ColonizationCostCalculator.getColonizationCosts(toColonize);
+
+        final Planet mainPlanet = planetService.findMainPlanet(user);
+        final ResourceDeposit debitorDeposit = mainPlanet.getResourceDeposit();
+
+        final PayingPossibleResult payingPossible = debitorDeposit.isPayingPossible(colonizationCosts.getCrewRequirement());
         if (!payingPossible.isValid()) {
             throw new NotifyWebUserException("This colonization is to expensive.", payingPossible);
         }
@@ -143,7 +177,6 @@ public class ColonizationService {
         userService.save(user);
         return colonization;
     }
-
 
     /**
      * Colonizes a planet for an owner.

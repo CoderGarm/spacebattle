@@ -10,9 +10,11 @@ todo. missionen piraten
 
 #### Diverses
 
-todo. Das man Kolonisierungen planen kann
-todo. group systems on map
-todo. optical rework map
+1. Externe Sternenkarte ausgelagert auf https://map.battleforhonor.de
+2. Kolonisierungen lassen sich nun planen.  
+   Das bedeutet (analog dem Operational-Konzept), dass ein Migrationsdruck erzeugt wird und
+   sich die benötigten Pops auf dem Hauptplaneten sammeln.  
+   Wenn nun genug Leute für die Kolonisierung beisammen sind, wird das Schiff losgeschickt.
 
 ### Bugs fixed
 

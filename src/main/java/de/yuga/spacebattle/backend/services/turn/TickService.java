@@ -278,7 +278,29 @@ public class TickService {
      * Runs the tick for all colonizations.
      */
     private void tickColonizations() {
-        final List<Colonization> colonizations = colonizationService.findAll();
+        final Set<Colonization> colonizations = new HashSet<>(colonizationService.findAll());
+
+        final Set<Colonization> planned = colonizations.stream().filter(Colonization::isPlanned).collect(Collectors.toSet());
+        colonizations.removeAll(planned);
+
+        final Map<User, Planet> mains = new HashMap<>();
+        planned.forEach(colonization -> {
+            final User user = colonization.getUser();
+            final Planet main = mains.getOrDefault(user, planetService.findMainPlanet(user));
+            mains.put(user, main);
+
+            final ResourceDeposit costs = colonization.getCosts();
+            costs.setSubType(EDepositType.COSTS);
+            final PayingPossibleResult payingPossible = main.getResourceDeposit().isPayingPossible(costs);
+            if (payingPossible.isValid()) {
+                colonization.start();
+                colonizations.add(colonization);
+                main.getResourceDeposit().pay(costs);
+                main.getResourceDeposit().updateCrew(costs.getCrewRequirement(), ECalculationType.SUBTRACT);
+            }
+        });
+        planetService.saveAll(mains.values());
+
         for (final Colonization colonization : colonizations) {
             int doneAtZero = colonization.getDoneAtZero();
             doneAtZero--;
