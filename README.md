@@ -94,4 +94,5 @@ Open the browser at the [start page](http://localhost:4200/#).
       2. dump database with [dumpSBDB.sh](scripts/dumpSBDB.sh)
       3. execute new patches from delta folder
    2. run [deployBackend.sh](scripts/deployBackend.sh)
-4. tag commit in git by pattern Release-x.x.x(-fix-xYz) 
+4. tag commit in git by pattern Release-x.x.x(-fix-xYz)
+5. delete feature branch locally and remote
