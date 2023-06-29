@@ -4,9 +4,9 @@ Thema: NPC, Handel und Missionen
 
 Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
-##### Gameplay
+#### Gameplay
 
-todo. missionen piraten
+leider nichts
 
 #### Diverses
 
@@ -14,11 +14,15 @@ todo. missionen piraten
 2. Kolonisierungen lassen sich nun planen.  
    Das bedeutet (analog dem Operational-Konzept), dass ein Migrationsdruck erzeugt wird und
    sich die benötigten Pops auf dem Hauptplaneten sammeln.  
-   Wenn nun genug Leute für die Kolonisierung beisammen sind, wird das Schiff losgeschickt.
+   Wenn man dann genug Leute für die Kolonisierung beisammen sind, wird das Schiff losgeschickt.
 
 ### Bugs fixed
 
------------------ next steps -----------
+1. Schiffsklassen kann man wieder modifiziert speichern.
+
+#### next steps -----------
+
+todo. missionen piraten
 
 Thema: Handel
 done. Bestenliste mit Punkten pro Leistungsfeld  

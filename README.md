@@ -83,3 +83,15 @@ Set up the frontend:
 3. run 'npm start' in base directory
 
 Open the browser at the [start page](http://localhost:4200/#).
+
+### Deployment
+
+1. rebase branch to origin/master and merge branch into master, commit, push
+2. run scripts [buildAndCopy.sh](buildAndCopy.sh)
+3. jump on medusa - all scripts are placed in home dir
+   1. if db patch necessary
+      1. run [stopSB.sh](scripts/stopSB.sh)
+      2. dump database with [dumpSBDB.sh](scripts/dumpSBDB.sh)
+      3. execute new patches from delta folder
+   2. run [deployBackend.sh](scripts/deployBackend.sh)
+4. tag commit in git by pattern Release-x.x.x(-fix-xYz) 

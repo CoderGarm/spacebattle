@@ -147,6 +147,7 @@ public class ShipClass extends Deletable implements HasOwner {
         if (predecessor != null) {
             this.predecessor = predecessor;
             this.predecessor.successor = this;
+            this.shipClassType = predecessor.getShipClassType();
         }
     }
 
