@@ -20,6 +20,14 @@ versionFile="version.txt"
 echo "$version" > $versionFile
 
 mvn clean install;
+check=$?
+if [ "$check" -eq 0 ]; then
+    echo 'build successful'
+else
+    echo 'build failure'; exit 1;
+fi
+
+
 scp "target/spacebattle-$version.jar" medusa:uploadTarget/
 scp $versionFile medusa:spacebattle/
 rsync -a --ignore-existing --progress data/sql/delta/ medusa:/home/karsten/uploadTarget/sql/delta/
