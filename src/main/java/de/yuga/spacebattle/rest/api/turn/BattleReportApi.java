@@ -89,8 +89,7 @@ public class BattleReportApi extends BaseApi {
     public ResponseEntity<?> getReportsWithUserWithPaging(@PathVariable("page") final int page,
                                                           @PathVariable("size") final int size) {
 
-        final int idUser = getIdUser();
-        final Collection<BattleReportStatistics> reports = battleReportService.findReportBasicInformationByPaging(idUser, page, size);
+        final Collection<BattleReportStatistics> reports = battleReportService.findReportBasicInformationByPaging(getIdUser(), page, size);
         return ResponseEntity.ok(reports);
     }
 

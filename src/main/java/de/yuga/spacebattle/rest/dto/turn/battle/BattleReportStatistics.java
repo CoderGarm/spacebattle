@@ -46,11 +46,4 @@ public class BattleReportStatistics {
         this.tick = new Tick(battleReport.getTick());
         this.orbit = new FleetOrbit(battleReport.getVenue());
     }
-
-    public BattleReportStatistics(final int idBattleReport, @Nonnull final Tick tick, @Nonnull final CombatRound lastRound, @Nonnull final FleetOrbit orbit) {
-        this.idBattleReport = idBattleReport;
-        this.tick = tick;
-        this.lastRound = lastRound;
-        this.orbit = orbit;
-    }
 }

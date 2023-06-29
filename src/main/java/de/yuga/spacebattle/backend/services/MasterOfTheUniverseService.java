@@ -216,16 +216,8 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final List<NonPlayerCharacter> all = nonPlayerCharacterService.findAll();
-        all.removeIf(o -> o.getUsername().equals(DEFEATED_OPPONENT));
-        final List<Fleet> allFleetsByUser = fleetService.findAllFleetsByUser(all.get(0));
-        final boolean transformationNeeded = allFleetsByUser.isEmpty();
+        final boolean transformationNeeded = false;
         if (transformationNeeded) {
-
-            for (final NonPlayerCharacter nonPlayerCharacter : all) {
-                createFleetForUser(nonPlayerCharacter);
-            }
-
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");

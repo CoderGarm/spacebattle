@@ -6,23 +6,16 @@ Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
 #### Gameplay
 
-leider nichts
+todo. missionen piraten
 
 #### Diverses
 
-1. Externe Sternenkarte ausgelagert auf https://map.battleforhonor.de
-2. Kolonisierungen lassen sich nun planen.  
-   Das bedeutet (analog dem Operational-Konzept), dass ein Migrationsdruck erzeugt wird und
-   sich die benötigten Pops auf dem Hauptplaneten sammeln.  
-   Wenn man dann genug Leute für die Kolonisierung beisammen sind, wird das Schiff losgeschickt.
+1. Die Sternenkarte hat Liebe erfahren.  
+   Es sind nun Wurmlöcher sichtbar, haben aber keine Funktion.
 
 ### Bugs fixed
 
-1. Schiffsklassen kann man wieder modifiziert speichern.
-
-#### next steps -----------
-
-todo. missionen piraten
+#### next steps
 
 Thema: Handel
 done. Bestenliste mit Punkten pro Leistungsfeld  
