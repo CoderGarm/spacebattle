@@ -20,12 +20,16 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class NPCFleetTickRunner implements TickRunner {
 
     @Nonnull
     private static final Logger LOGGER = LoggerFactory.getLogger(NPCFleetTickRunner.class);
+
+    @Nonnull
+    private static final Set<String> IGNORE_NPC_NAME = Set.of(MasterOfTheUniverseService.DEFEATED_OPPONENT, MasterOfTheUniverseService.PIRATE);
 
     @Nonnull
     private final NonPlayerCharacterService nonPlayerCharacterService;
@@ -63,7 +67,7 @@ public class NPCFleetTickRunner implements TickRunner {
 
     private void upgradeNPCFleets() {
         final List<NonPlayerCharacter> all = nonPlayerCharacterService.findAll();
-        all.removeIf(o -> o.getUsername().equals(MasterOfTheUniverseService.DEFEATED_OPPONENT));
+        all.removeIf(o -> IGNORE_NPC_NAME.contains(o.getUsername()));
 
         for (final NonPlayerCharacter nonPlayerCharacter : all) {
 

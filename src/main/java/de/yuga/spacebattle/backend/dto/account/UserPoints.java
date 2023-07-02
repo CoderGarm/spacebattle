@@ -61,6 +61,10 @@ public class UserPoints {
         this.createdAt = user.getUserSetting().getCreatedAt();
     }
 
+    public int getPlanetaryPoints() {
+        return planetaryPoints;
+    }
+
     private void sumUpPoints() {
         this.overallPoints = this.planetaryPoints + this.fleetPoints + this.researchPoints;
     }

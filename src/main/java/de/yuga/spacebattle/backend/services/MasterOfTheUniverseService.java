@@ -90,6 +90,7 @@ public class MasterOfTheUniverseService {
     public static final int STAR_RADIUS = 30;
 
     public static final String DEFEATED_OPPONENT = "Defeated Opponent";
+    public static final String PIRATE = "Scharteke";
 
     public static final ProductionType CONSTRUCTION_YARD_PT = new ProductionType(EResourceType.CONSTRUCTION, EProductionCategory.PRODUCE, null);
     public static final ProductionType SHIPYARD_PT = new ProductionType(EResourceType.ORBITAL_CONSTRUCTION, EProductionCategory.PRODUCE, null);
@@ -216,22 +217,74 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = false;
+        final boolean transformationNeeded = nonPlayerCharacterService.findByUsername(PIRATE) == null;
         if (transformationNeeded) {
+
+            final NonPlayerCharacter pirate = nonPlayerCharacterService.createNPC(PIRATE);
+            final Fitting fitting = new Fitting(moduleService.findAllPropulsions(), moduleService.findAllArmors(), moduleService.findAllElectronicWarfare(),
+                    moduleService.findAllSidewalls(), moduleService.findAllWeapons(), moduleService.findAllLaunchers(), moduleService.findAllPassiveModules());
+            createPirateShip(pirate, fitting);
+
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
         }
     }
 
-    private void colonizeNPC(@Nonnull final Planet planet,
-                             @Nonnull final NonPlayerCharacter owner) {
-        Preconditions.checkNotNull(planet, "planet must not be empty");
+    private void createPirateShip(@Nonnull final Owner owner,
+                                  @Nonnull final Fitting f) {
         Preconditions.checkNotNull(owner, "owner must not be empty");
+        Preconditions.checkNotNull(f, "f must not be empty");
 
-        planet.setOwner(owner);
-        planet.toggleMain();
-        planetService.save(planet);
+        final EShipClassType shipClassType = EShipClassType.VT;
+        final ShipClass shipClass = new ShipClass(owner, "War Goose");
+        shipClass.setShipClassType(shipClassType);
+
+        final Armor a = f.getByType(shipClassType, f.getArmors());
+        final Propulsion p = f.getProp(ETechnologyType.MILITARY);
+        final ElectronicWarfare e = f.getByType(shipClassType, f.getEloka());
+        final Sidewall s = f.getByType(shipClassType, f.getSidewalls());
+
+        final Weapon beam = f.getWeapon(shipClassType, EWeaponType.BEAM);
+        final Weapon pointDefense = f.getWeapon(shipClassType, EWeaponType.POINT_DEFENSE);
+
+        final Map.Entry<Launcher, Missile> shipKiller = f.getLauncher(shipClassType, EWeaponType.MISSILE);
+        final Map.Entry<Launcher, Missile> counterMissile = f.getLauncher(shipClassType, EWeaponType.COUNTER_MISSILE);
+
+        fit(shipClass, a, p, e, s,
+                Set.of(
+                        new AlignedFitting(EWeaponAlignment.BOW, Objects.requireNonNull(beam), 1),
+                        new AlignedFitting(EWeaponAlignment.BROADSIDE, Objects.requireNonNull(beam), 2),
+                        new AlignedFitting(EWeaponAlignment.STERN, Objects.requireNonNull(beam), 1),
+                        new AlignedFitting(EWeaponAlignment.BOW, Objects.requireNonNull(pointDefense), 1),
+                        new AlignedFitting(EWeaponAlignment.BROADSIDE, Objects.requireNonNull(pointDefense), 2),
+                        new AlignedFitting(EWeaponAlignment.STERN, Objects.requireNonNull(pointDefense), 1),
+
+                        new AlignedFitting(EWeaponAlignment.BOW, Objects.requireNonNull(shipKiller).getKey(), 1),
+                        new AlignedFitting(EWeaponAlignment.BROADSIDE, Objects.requireNonNull(shipKiller).getKey(), 2),
+                        new AlignedFitting(EWeaponAlignment.STERN, Objects.requireNonNull(shipKiller).getKey(), 1),
+                        new AlignedFitting(EWeaponAlignment.BOW, Objects.requireNonNull(counterMissile).getKey(), 1),
+                        new AlignedFitting(EWeaponAlignment.BROADSIDE, Objects.requireNonNull(counterMissile).getKey(), 2),
+                        new AlignedFitting(EWeaponAlignment.STERN, Objects.requireNonNull(counterMissile).getKey(), 1)
+                ),
+                Set.of(
+                        new AmmunitionFitting(shipKiller.getValue(), 30),
+                        new AmmunitionFitting(counterMissile.getValue(), 60)
+                ),
+                Set.of());
+
+        final List<PassiveModule> passiveModules = f.getPassiveModules();
+        final PassiveModule freightModule = passiveModules.stream().filter(pa -> pa.getSupportType() == ESupportType.FREIGHT).findFirst().orElseThrow(NullPointerException::new);
+        final PassiveModule passengerModule = passiveModules.stream().filter(pa -> pa.getSupportType() == ESupportType.PASSENGER).findFirst().orElseThrow(NullPointerException::new);
+        shipClass.setSupportFittings(Set.of(
+                new SupportFitting(freightModule, 3),
+                new SupportFitting(passengerModule, 3)));
+
+        final Set<ConstraintViolation<ShipClass>> validate = validator.validate(shipClass);
+        if (!validate.isEmpty()) {
+            throw new NotifyWebUserException("The provided class is not valid.", validate);
+        }
+        shipClassService.save(shipClass);
     }
 
     private void validateUniverse() {
@@ -338,6 +391,16 @@ public class MasterOfTheUniverseService {
         sys = starsystemService.findByName("Gregor");
         planet = sys.getPlanets().stream().findFirst().orElse(null);
         colonizeNPC(planet, npc);
+    }
+
+    private void colonizeNPC(@Nonnull final Planet planet,
+                             @Nonnull final NonPlayerCharacter owner) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(owner, "owner must not be empty");
+
+        planet.setOwner(owner);
+        planet.toggleMain();
+        planetService.save(planet);
     }
 
     private void createBuildings() {
@@ -956,8 +1019,8 @@ public class MasterOfTheUniverseService {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(name, "name must not be empty");
 
-        FleetOrbit fleetOrbit = new FleetOrbit(planet.getOrbit(), planet.getSystem());
-        Fleet fleet = new Fleet(name, user, fleetOrbit);
+        final FleetOrbit fleetOrbit = new FleetOrbit(planet.getOrbit(), planet.getSystem());
+        final Fleet fleet = new Fleet(name, user, fleetOrbit);
         fleet.setOperational();
         return fleetService.save(fleet);
     }
@@ -1020,6 +1083,7 @@ public class MasterOfTheUniverseService {
         warShipService.save(warShip);
     }
 
+    @Nonnull
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     public WarShip createOpponentFleetForUser(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user must not be empty");

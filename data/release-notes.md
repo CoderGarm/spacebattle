@@ -6,12 +6,13 @@ Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
 #### Gameplay
 
-todo. missionen piraten
+1. Piraten werden unregelmäßig zu Besuch kommen.
 
 #### Diverses
 
 1. Die Sternenkarte hat Liebe erfahren.  
    Es sind nun Wurmlöcher sichtbar, haben aber keine Funktion.
+2. Es gibt einen Tooltip, der auf das Ändern der Flottennamen hinweist.
 
 ### Bugs fixed
 
@@ -26,20 +27,6 @@ done. NPC-Konzept für Systeme und systemfreie NPC (Piraten, fliegende Händler 
 done. NPC-Handelssystem
 todo. interne Sektoraufteilung der Map nach Entfernung um wirtschaftliche Leistungszentren  
 todo. Konzept für Missionen und NPC-Missionen
-
-1. territorial npc (manticore, haven ...)
-
-- classical user without login
-- by tick every time 50% more level as the highest after ticking
-- drop fleets as all players combined
-- doesn't colonize planets
-
-2. non-territorial npc (pirates)
-
-- npc user with static fleet
-- npc has no home base, exists only on fleets
-- random spawns at third fleet points per player
-- raids planets randomly near the player
 
 Thema: Spionage
 todo. Spionagegebäude, pro Level gibt es einen Spion

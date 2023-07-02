@@ -6,7 +6,11 @@ import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Time;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
+import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
+import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.EModuleType;
+import de.yuga.spacebattle.backend.enums.EStarClassType;
 import de.yuga.spacebattle.backend.enums.ETechnologyType;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
@@ -22,6 +26,22 @@ import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator
 public class NavigationCalculator {
 
     private NavigationCalculator() {
+    }
+
+
+    @Nonnull
+    public static Orbit getPositionOnHyperlimit(@Nonnull final Fleet fleet, @Nonnull final FleetOrbit destination) {
+        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+        Preconditions.checkNotNull(destination, "destination shouldn't be null!");
+        Preconditions.checkArgument(destination.getSystem() != null, "destination system shouldn't be null!");
+        Preconditions.checkArgument(destination.getOrbit() != null, "destination orbit shouldn't be null!");
+        Preconditions.checkArgument(fleet.getOrbit() != null, "fleet's orbit shouldn't be null here");
+
+        final Quadrant quadrant = Quadrant.getByOrbit(destination.getOrbit());
+        final EStarClassType starClassType = destination.getSystem().getStarClassType();
+        final double radiusOfHyperLimit = starClassType.getLightMinutesToHyperLimit();
+
+        return DistanceCalculator.createByRadiusAndQuadrant(new BigDecimal(radiusOfHyperLimit), quadrant, Planet.PLANET_STANDARD_METRIC);
     }
 
     /**

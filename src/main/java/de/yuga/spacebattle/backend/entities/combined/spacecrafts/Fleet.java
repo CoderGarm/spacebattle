@@ -306,7 +306,6 @@ public class Fleet extends Operationable implements HasOwner {
             return Acceleration.ZERO;
         }
         final List<Acceleration> accelerations = shipClasses.stream()
-                .filter(sc -> sc.getPropulsion() != null)
                 .map(sc -> sc.getAcceleration(sc.getPropulsion().getHyperBand()))
                 .sorted(Comparator.comparing(Acceleration::getValue))
                 .collect(Collectors.toList());

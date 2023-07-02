@@ -129,18 +129,13 @@ public class DistanceCalculator {
     private static double getSubLightDurationFromHyperLimit(@Nonnull final Fleet fleet, @Nonnull final FleetOrbit destination) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
-        Preconditions.checkArgument(destination.getSystem() != null, "destination system shouldn't be null!");
         Preconditions.checkArgument(destination.getOrbit() != null, "destination orbit shouldn't be null!");
-        Preconditions.checkArgument(fleet.getOrbit() != null, "fleet's orbit shouldn't be null here");
 
-        final Quadrant quadrant = Quadrant.getByOrbit(destination.getOrbit());
-        final EStarClassType starClassType = destination.getSystem().getStarClassType();
-        final double radiusOfHyperLimit = starClassType.getLightMinutesToHyperLimit();
-
-        final Orbit positionOnHyperLimit = createByRadiusAndQuadrant(new BigDecimal(radiusOfHyperLimit), quadrant, Planet.PLANET_STANDARD_METRIC);
+        final Orbit positionOnHyperLimit = NavigationCalculator.getPositionOnHyperlimit(fleet, destination);
         // todo currently there are fixed entry points into a system - this must be changed
         return getDuration(EModuleType.PROPULSION, fleet, positionOnHyperLimit, destination.getOrbit());
     }
+
 
     /**
      * Calculates the time to travel from the current position of the fleet to the hyper limit of the star.<br>

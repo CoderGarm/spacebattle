@@ -21,12 +21,6 @@ public class FleetMovement {
     private final Fleet fleet;
 
     @Nonnull
-    private final StarSystem originSystem;
-
-    @Nullable
-    private final Planet originPlanet;
-
-    @Nonnull
     private final StarSystem destinationSystem;
 
     @Nullable
@@ -38,19 +32,15 @@ public class FleetMovement {
 
     public FleetMovement(@Nonnull final Tick today,
                          @Nonnull final Fleet fleet,
-                         @Nonnull final Planet originPlanet,
                          @Nonnull final Planet destinationPlanet,
                          @Nonnull final Move move) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(fleet, "fleet must not be empty");
-        Preconditions.checkNotNull(originPlanet, "origin must not be empty");
         Preconditions.checkNotNull(destinationPlanet, "destination must not be empty");
         Preconditions.checkNotNull(move, "move must not be empty");
 
         this.today = today;
         this.fleet = fleet;
-        this.originPlanet = originPlanet;
-        this.originSystem = originPlanet.getSystem();
         this.destinationPlanet = destinationPlanet;
         this.destinationSystem = destinationPlanet.getSystem();
         this.originalDuration = move.getOriginalDuration();
@@ -59,22 +49,17 @@ public class FleetMovement {
 
     public FleetMovement(@Nonnull final Tick today,
                          @Nonnull final Fleet fleet,
-                         @Nullable final Planet originPlanet,
-                         @Nonnull final StarSystem originSystem,
                          @Nonnull final StarSystem destinationSystem,
                          @Nonnull final Move move,
                          final boolean isForeignFleet) {
 
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(fleet, "fleet must not be empty");
-        Preconditions.checkNotNull(originSystem, "originSystem must not be empty");
         Preconditions.checkNotNull(destinationSystem, "destinationSystem must not be empty");
         Preconditions.checkNotNull(move, "move must not be empty");
 
         this.today = today;
         this.fleet = fleet;
-        this.originPlanet = originPlanet;
-        this.originSystem = originSystem;
         this.destinationPlanet = null;
         this.destinationSystem = destinationSystem;
         this.originalDuration = move.getOriginalDuration();
@@ -89,16 +74,6 @@ public class FleetMovement {
     @Nonnull
     public Fleet getFleet() {
         return fleet;
-    }
-
-    @Nonnull
-    public StarSystem getOriginSystem() {
-        return originSystem;
-    }
-
-    @Nullable
-    public Planet getOriginPlanet() {
-        return originPlanet;
     }
 
     @Nonnull

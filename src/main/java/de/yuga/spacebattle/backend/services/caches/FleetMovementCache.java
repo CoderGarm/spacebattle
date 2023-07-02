@@ -11,7 +11,6 @@ import de.yuga.spacebattle.backend.entities.turn.Tick;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -35,12 +34,10 @@ public class FleetMovementCache {
     public void add(@Nonnull final Tick today,
                     @Nonnull final Fleet fleet,
                     @Nonnull final Move move,
-                    @Nonnull final Planet origin,
                     @Nonnull final Planet destination) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(fleet, "fleet must not be empty");
         Preconditions.checkNotNull(move, "move must not be empty");
-        Preconditions.checkNotNull(origin, "origin must not be empty");
         Preconditions.checkNotNull(destination, "destination must not be empty");
 
         final Owner notificationTarget;
@@ -48,17 +45,15 @@ public class FleetMovementCache {
             notificationTarget = fleet.getOwner();
         } else {
             notificationTarget = destination.getHumanOwner();
-            notifyFleetOwner(today, fleet, new FleetMovement(today, fleet, origin, destination, move));
+            notifyFleetOwner(today, fleet, new FleetMovement(today, fleet, destination, move));
         }
 
-        getTodayMovement(today, notificationTarget).add(new FleetMovement(today, fleet, origin, destination, move));
+        getTodayMovement(today, notificationTarget).add(new FleetMovement(today, fleet, destination, move));
     }
 
     public void add(@Nonnull final Tick today,
                     @Nonnull final Fleet fleet,
                     @Nonnull final Move move,
-                    @Nullable final Planet originPlanet,
-                    @Nonnull final StarSystem originSystem,
                     @Nonnull final StarSystem destinationSystem) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(fleet, "fleet must not be empty");
@@ -72,11 +67,11 @@ public class FleetMovementCache {
 
         owners.forEach(notificationTarget -> {
             getTodayMovement(today, notificationTarget)
-                    .add(new FleetMovement(today, fleet, originPlanet, originSystem, destinationSystem, move, !fleet.getOwner().equals(notificationTarget)));
+                    .add(new FleetMovement(today, fleet, destinationSystem, move, !fleet.getOwner().equals(notificationTarget)));
         });
 
         if (!owners.contains(fleet.getOwner())) {
-            notifyFleetOwner(today, fleet, new FleetMovement(today, fleet, originPlanet, originSystem, destinationSystem, move, false));
+            notifyFleetOwner(today, fleet, new FleetMovement(today, fleet, destinationSystem, move, false));
         }
     }
 

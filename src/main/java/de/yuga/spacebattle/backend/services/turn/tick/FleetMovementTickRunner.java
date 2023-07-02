@@ -76,11 +76,11 @@ public class FleetMovementTickRunner implements TickRunner {
                 final Planet destinationPlanet = planetService.findByCoordinates(m.getDestinationOrbit());
                 if (originPlanet != null && destinationPlanet != null) {
                     // planet to planet travel
-                    fleetMovementCache.add(today, fleet, m, originPlanet, destinationPlanet);
+                    fleetMovementCache.add(today, fleet, m, destinationPlanet);
                 }
                 if (destinationPlanet == null && m.getOriginOrbit().getSystem() != null && m.getDestinationOrbit().getSystem() != null) {
                     // somewhere to hyperlimit travel
-                    fleetMovementCache.add(today, fleet, m, originPlanet, m.getOriginOrbit().getSystem(), m.getDestinationOrbit().getSystem());
+                    fleetMovementCache.add(today, fleet, m, m.getDestinationOrbit().getSystem());
                 }
             } else {
                 moveService.save(m);

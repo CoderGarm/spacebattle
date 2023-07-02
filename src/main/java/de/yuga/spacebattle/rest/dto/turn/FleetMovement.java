@@ -23,16 +23,6 @@ public class FleetMovement {
 
     @Nullable
     @JsonProperty
-    @Schema(description = "The origin planet's name.")
-    private String originPlanet = null;
-
-    @Nonnull
-    @JsonProperty
-    @Schema(required = true, description = "The origin systems's name.")
-    private String originSystem;
-
-    @Nullable
-    @JsonProperty
     @Schema(description = "The designation planet's name.")
     private String destinationPlanet = null;
 
@@ -59,12 +49,6 @@ public class FleetMovement {
 
         this.fleetName = movement.getFleet().getName();
         this.fleetOwnerName = movement.getFleet().getOwner().getUsername();
-
-        if (movement.getOriginPlanet() != null) {
-            this.originPlanet = movement.getOriginPlanet().getName();
-        }
-
-        this.originSystem = movement.getOriginSystem().getName();
 
         if (movement.getDestinationPlanet() != null) {
             this.destinationPlanet = movement.getDestinationPlanet().getName();
