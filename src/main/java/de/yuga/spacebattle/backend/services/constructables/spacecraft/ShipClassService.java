@@ -99,7 +99,7 @@ public class ShipClassService {
     public ShipClass save(@Nonnull final ShipClass entity) {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
 
-        return shipClassRepository.save(entity);
+        return shipClassRepository.saveAndFlush(entity);
     }
 
     /**
