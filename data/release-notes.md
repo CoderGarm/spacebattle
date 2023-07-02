@@ -6,7 +6,29 @@ Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
 #### Gameplay
 
-1. Piraten werden unregelmäßig zu Besuch kommen.
+1. Piraten werden unregelmäßig zu Besuch kommen.  
+   Damit das nicht so wild ist, bekommt jeder Spieler einen zusätzlichen Songbird-Zerstörer.
+
+missionen
+
+- müssen mit schiffen ausgestattet werden
+- haben einen task, zuerst nur anti-piraten-missionen
+- haben einen aktionszeitraum
+- ist die mission abgeschlossen, kommen die schiffe zurück
+
+aktive piraten
+
+- heatmap pro user, umso geringer die punkte im verhältnis zu anderen, umso wahrscheinlicher ein angriff (weniger punkte, mehr heat)
+- ein piratenangriff reduziert heat (addiert punkte)
+- ein anti-piraten-mission reduziert heat
+- eine stationierte flotte reduziert heat
+- angegriffen und geraidet wird der am schwächsten verteidigte planet
+
+passive piraten
+
+- jeder trade kann piraten triggern
+- erfolgsrate je nach anti-piraten-missionen beider teilnehmer und größe des trades
+- trade wird um erfolg des piraten reduziert
 
 #### Diverses
 

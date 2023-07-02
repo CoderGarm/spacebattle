@@ -37,10 +37,10 @@ import java.util.stream.Collectors;
 import static de.yuga.spacebattle.backend.services.MasterOfTheUniverseService.PIRATE;
 
 @Service
-public class PirateTickRunner implements TickRunner {
+public class PirateInitiatorTickRunner implements TickRunner {
 
     @Nonnull
-    private static final Logger LOGGER = LoggerFactory.getLogger(PirateTickRunner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PirateInitiatorTickRunner.class);
 
     @Nonnull
     private final UserService userService;
@@ -50,22 +50,34 @@ public class PirateTickRunner implements TickRunner {
 
     @Nonnull
     private final NonPlayerCharacterService nonPlayerCharacterService;
+
+    @Nonnull
     private final FleetService fleetService;
+
+    @Nonnull
     private final ShipClassService shipClassService;
+
+    @Nonnull
     private final WarShipService warShipService;
+
+    @Nonnull
     private final FleetMovementCache fleetMovementCache;
 
     @Autowired
-    public PirateTickRunner(@Nonnull final UserService userService,
-                            @Nonnull final PlanetService planetService,
-                            @Nonnull final NonPlayerCharacterService nonPlayerCharacterService, final FleetService fleetService, final ShipClassService shipClassService, final WarShipService warShipService, final FleetMovementCache fleetMovementCache) {
+    public PirateInitiatorTickRunner(@Nonnull final UserService userService,
+                                     @Nonnull final PlanetService planetService,
+                                     @Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
+                                     @Nonnull final FleetService fleetService,
+                                     @Nonnull final ShipClassService shipClassService,
+                                     @Nonnull final WarShipService warShipService,
+                                     @Nonnull final FleetMovementCache fleetMovementCache) {
         this.userService = Preconditions.checkNotNull(userService, "userService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
-        this.fleetService = fleetService;
-        this.shipClassService = shipClassService;
-        this.warShipService = warShipService;
-        this.fleetMovementCache = fleetMovementCache;
+        this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
+        this.shipClassService = Preconditions.checkNotNull(shipClassService, "shipClassService must not be empty");
+        this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
+        this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
     }
 
     @Override
@@ -79,7 +91,7 @@ public class PirateTickRunner implements TickRunner {
         final Map<User, Planet> targets = detectVictims();
         targets.forEach((user, planet) -> {
             final int planetaryPoints = new UserPoints(user).withPlanets(List.of(planet)).getPlanetaryPoints();
-            // todo how the planet strength impacts the opposite forces?
+            // fixme how the planet strength impacts the opposite forces?
             final int idFleet = createPirateFleet(user, planet);
             final Fleet pirateFleet = fleetService.find(idFleet);
             Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
@@ -93,6 +105,7 @@ public class PirateTickRunner implements TickRunner {
     }
 
     private Map<User, Planet> detectVictims() {
+        // fixme implement heat map
         final List<Planet> result = new ArrayList<>();
         final List<User> victims = userService.findAll();
         for (final User victim : victims) {
@@ -126,7 +139,7 @@ public class PirateTickRunner implements TickRunner {
         final Fleet fleet = new Fleet("Kersey Association", user, destination);
         fleet.setOperational();
 
-        final Orbit positionOnHyperlimit = NavigationCalculator.getPositionOnHyperlimit(fleet, destination);
+        final Orbit positionOnHyperlimit = NavigationCalculator.getPositionOnHyperlimit(fleet, destination); // fixme position is pretty funny on the map
         fleet.setOrbit(new FleetOrbit(positionOnHyperlimit, planet.getSystem()));
 
         return fleetService.save(fleet);

@@ -26,12 +26,13 @@ public interface TickRunner extends Comparable<TickRunner> {
                 PlanetTickRunner.class,
                 FleetMovementTickRunner.class,
                 ColonizationTickRunner.class,
-                PirateTickRunner.class
+                PirateInitiatorTickRunner.class,
+                PirateRaiderTickRunner.class
         );
 
         final int i = sequenceOfRunners.indexOf(this.getClass());
         final int i1 = sequenceOfRunners.indexOf(o.getClass());
-        if (i == -1 || i1 == -1) {
+        if (i == -1 || i1 == -1 || i == i1) {
             throw new NotImplementedException("You missed to sequencing a service, boy!");
         }
         return Integer.compare(i, i1);
