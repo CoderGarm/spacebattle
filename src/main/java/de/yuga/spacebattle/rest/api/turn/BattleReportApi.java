@@ -3,7 +3,7 @@ package de.yuga.spacebattle.rest.api.turn;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.services.caches.BattleReportCache;
-import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -46,14 +46,14 @@ public class BattleReportApi extends BaseApi {
     private final BattleReportService battleReportService;
 
     @Nonnull
-    private final TickService tickService;
+    private final TickTimeService tickService;
 
     @Nonnull
     private final BattleReportCache battleReportCache;
 
     @Autowired
     public BattleReportApi(@Nonnull final BattleReportService battleReportService,
-                           @Nonnull final TickService tickService,
+                           @Nonnull final TickTimeService tickService,
                            @Nonnull final BattleReportCache battleReportCache) {
         this.battleReportService = Preconditions.checkNotNull(battleReportService, "battleReportService must not be empty");
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");

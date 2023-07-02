@@ -8,7 +8,7 @@ import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.i18n.TranslatableService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
-import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.backend.services.turn.TickRunnerService;
 import de.yuga.spacebattle.backend.transformer.BuildingCsvTransformer;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
@@ -55,7 +55,7 @@ public class AdminApi extends BaseApi {
     private final String applicationVersion;
 
     @Nonnull
-    private final TickService tickController;
+    private final TickRunnerService tickController;
 
     @Nonnull
     private final TranslatableService translatableService;
@@ -68,7 +68,7 @@ public class AdminApi extends BaseApi {
 
     @Autowired
     public AdminApi(@Nonnull @Value("${sb.version:nope}") final String version,
-                    @Nonnull final TickService tickController,
+                    @Nonnull final TickRunnerService tickController,
                     @Nonnull final TranslatableService translatableService,
                     @Nonnull final BuildingService buildingService,
                     @Nonnull final ModuleService moduleService) {

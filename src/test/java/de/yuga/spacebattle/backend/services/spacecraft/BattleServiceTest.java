@@ -6,7 +6,7 @@ import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.CombatRoundKey;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction;
 import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
-import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ public class BattleServiceTest {
     private MasterOfTheUniverseService masterOfTheUniverseService;
 
     @Autowired
-    private TickService tickService;
+    private TickTimeService tickService;
 
     @Autowired
     private BattleService battleService;

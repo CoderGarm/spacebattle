@@ -10,7 +10,7 @@ import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.repositories.combined.account.AllianceApplicationRepository;
 import de.yuga.spacebattle.backend.repositories.combined.account.AllianceRepository;
 import de.yuga.spacebattle.backend.services.account.UserService;
-import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,14 +35,14 @@ public class AllianceService {
     private final UserService userService;
 
     @Nonnull
-    private final TickService tickService;
+    private final TickTimeService tickService;
 
     @Autowired
 
     public AllianceService(@Nonnull final AllianceRepository allianceRepository,
                            @Nonnull final AllianceApplicationRepository applicationRepository,
                            @Nonnull final UserService userService,
-                           @Nonnull final TickService tickService) {
+                           @Nonnull final TickTimeService tickService) {
         this.allianceRepository = Preconditions.checkNotNull(allianceRepository, "allianceRepository must not be empty");
         this.applicationRepository = Preconditions.checkNotNull(applicationRepository, "applicationRepository must not be empty");
         this.userService = Preconditions.checkNotNull(userService, "userService must not be empty");

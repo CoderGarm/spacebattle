@@ -7,7 +7,7 @@ import de.yuga.spacebattle.backend.services.caches.FleetMovementCache;
 import de.yuga.spacebattle.backend.services.caches.OperationalCache;
 import de.yuga.spacebattle.backend.services.caches.TransportationCache;
 import de.yuga.spacebattle.backend.services.turn.JobService;
-import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.*;
@@ -45,7 +45,7 @@ public class JournalApi extends BaseApi {
     private static final String OPERATIONALS_ENDPOINT = "operationals";
 
     @Nonnull
-    private final TickService tickService;
+    private final TickTimeService tickService;
 
     @Nonnull
     private final JobService jobService;
@@ -63,7 +63,7 @@ public class JournalApi extends BaseApi {
     private final OperationalCache operationalCache;
 
     @Autowired
-    public JournalApi(@Nonnull final TickService tickService,
+    public JournalApi(@Nonnull final TickTimeService tickService,
                       @Nonnull final JobService jobService,
                       @Nonnull final TransportationCache transportationCache,
                       @Nonnull final FleetMovementCache fleetMovementCache,

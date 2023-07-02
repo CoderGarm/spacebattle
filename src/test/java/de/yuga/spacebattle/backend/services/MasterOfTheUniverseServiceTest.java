@@ -28,7 +28,7 @@ import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
-import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.backend.services.turn.TickRunnerService;
 import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStateService;
 import de.yuga.spacebattle.backend.transformer.BuildingCsvTransformer;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -61,7 +61,7 @@ public class MasterOfTheUniverseServiceTest {
     private UserService userService;
 
     @Autowired
-    private TickService tickService;
+    private TickRunnerService tickService;
 
     @Autowired
     private JobService jobService;

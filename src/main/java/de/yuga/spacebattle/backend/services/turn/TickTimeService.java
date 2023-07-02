@@ -8,9 +8,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
-@Service /* todo better distinguish between tick-worker-service and tick-time-service */
+@Service
 public class TickTimeService {
 
     @Nonnull
@@ -30,5 +31,17 @@ public class TickTimeService {
     @Nonnull
     public List<Tick> getTimeframe(final int pastTicks) {
         return tickRepository.findLastTicks(PageRequest.of(0, pastTicks));
+    }
+
+    @Nonnull
+    public List<Tick> findAll() {
+        return tickRepository.findAllTicks();
+    }
+
+    @Nullable
+    public Tick find(@Nonnull final Integer idTick) {
+        Preconditions.checkNotNull(idTick, "idTick shouldn't be null!");
+
+        return tickRepository.findById(idTick).orElse(null);
     }
 }

@@ -15,7 +15,7 @@ import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
-import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.backend.services.turn.TickRunnerService;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.config.security.JwtTokenUtil;
@@ -110,7 +110,7 @@ public class AuthApi {
     private final JwtTokenUtil jwtTokenUtil;
 
     @Nonnull
-    private final TickService tickService;
+    private final TickRunnerService tickService;
 
     @Nonnull
     private final MailService mailService;
@@ -127,7 +127,7 @@ public class AuthApi {
                    @Nonnull final PlanetService planetService,
                    @Nonnull final ChatService chatService,
                    @Nonnull final MasterOfTheUniverseService masterOfTheUniverseService,
-                   @Nonnull final TickService tickService,
+                   @Nonnull final TickRunnerService tickService,
                    @Nonnull final MailService mailService,
                    @Nonnull final NonPlayerCharacterService nonPlayerCharacterService) {
         this.authenticationManager = Preconditions.checkNotNull(authenticationManager, "authenticationManager shouldn't be null!");

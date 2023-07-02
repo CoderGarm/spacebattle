@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.rest.config;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.backend.services.turn.TickRunnerService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -25,10 +25,10 @@ import javax.annotation.Nullable;
 public class EndpointPauseInterceptor {
 
     @Nonnull
-    private final TickService tickService;
+    private final TickRunnerService tickService;
 
     @Autowired
-    public EndpointPauseInterceptor(@Nonnull final TickService tickService) {
+    public EndpointPauseInterceptor(@Nonnull final TickRunnerService tickService) {
         Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
 
         this.tickService = tickService;

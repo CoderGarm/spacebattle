@@ -13,7 +13,7 @@ import de.yuga.spacebattle.backend.services.constructables.buildings.Constructio
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassCreationService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
-import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -91,7 +91,7 @@ public class ResourcesApi extends BaseApi {
     private final TransportationCache transportationCache;
 
     @Nonnull
-    private final TickService tickService;
+    private final TickTimeService tickService;
 
     @Autowired
     public ResourcesApi(@Nonnull final PlanetService planetService,
@@ -100,7 +100,7 @@ public class ResourcesApi extends BaseApi {
                         @Nonnull final ShipClassService shipClassService,
                         @Nonnull final FleetService fleetService,
                         @Nonnull final TransportationCache transportationCache,
-                        @Nonnull final TickService tickService) {
+                        @Nonnull final TickTimeService tickService) {
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
         this.shipClassCreationService = Preconditions.checkNotNull(shipClassCreationService, "shipClassCreationService shouldn't be null!");

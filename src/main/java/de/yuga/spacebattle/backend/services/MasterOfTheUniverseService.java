@@ -52,7 +52,7 @@ import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
-import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.backend.services.turn.TickRunnerService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.misc.Coords;
 import org.slf4j.LoggerFactory;
@@ -122,7 +122,7 @@ public class MasterOfTheUniverseService {
     private final Validator validator;
 
     @Nonnull
-    private final TickService tickService;
+    private final TickRunnerService tickService;
 
     @Nonnull
     private final UserService userService;
@@ -173,7 +173,7 @@ public class MasterOfTheUniverseService {
     private final OwnerService ownerService;
 
     @Autowired
-    public MasterOfTheUniverseService(@Nonnull final TickService tickService,
+    public MasterOfTheUniverseService(@Nonnull final TickRunnerService tickService,
                                       @Nonnull final UserService userService,
                                       @Nonnull final AllianceService allianceService,
                                       @Nonnull final StarSystemService starSystemService,
@@ -236,7 +236,7 @@ public class MasterOfTheUniverseService {
 
     private void validateUniverse() {
         LOGGER.info("---------------------------- validating the universe -----------------------------");
-        final boolean initiationNeeded = tickService.findAll().isEmpty();
+        final boolean initiationNeeded = tickService.isTickPresent();
         if (initiationNeeded) {
             LOGGER.info("---------------------------- creating the universe ----------------------------");
             createInitialDataPayload();

@@ -3,7 +3,7 @@ package de.yuga.spacebattle.backend.services.turn.battle;
 import de.yuga.spacebattle.SpringBootTestProfile;
 import de.yuga.spacebattle.TestUtils;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
-import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class BattleReportServiceTest {
 
     @Autowired
-    private TickService tickService;
+    private TickTimeService tickService;
 
     @Autowired
     private BattleReportService testObject;

@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.services.turn.TickService;
+import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.Tick;
@@ -36,10 +36,10 @@ public class TickApi {
     public static final String ENDPOINT = "tick";
 
     @Nonnull
-    private final TickService tickService;
+    private final TickTimeService tickService;
 
     @Autowired
-    public TickApi(@Nonnull final TickService tickService) {
+    public TickApi(@Nonnull final TickTimeService tickService) {
         Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
 
         this.tickService = tickService;
