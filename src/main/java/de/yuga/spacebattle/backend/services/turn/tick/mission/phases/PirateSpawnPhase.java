@@ -14,13 +14,14 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
+import de.yuga.spacebattle.backend.enums.EMissionType;
 import de.yuga.spacebattle.backend.services.account.NonPlayerCharacterService;
-import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.caches.FleetMovementCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.backend.services.turn.tick.mission.HeatMapService;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.MissionPhaseRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,9 +48,6 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(PirateSpawnPhase.class);
 
     @Nonnull
-    private final UserService userService;
-
-    @Nonnull
     private final PlanetService planetService;
 
     @Nonnull
@@ -67,21 +65,24 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
     @Nonnull
     private final FleetMovementCache fleetMovementCache;
 
+    @Nonnull
+    private final HeatMapService heatMapService;
+
     @Autowired
-    public PirateSpawnPhase(@Nonnull final UserService userService,
-                            @Nonnull final PlanetService planetService,
+    public PirateSpawnPhase(@Nonnull final PlanetService planetService,
                             @Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
                             @Nonnull final FleetService fleetService,
                             @Nonnull final ShipClassService shipClassService,
                             @Nonnull final WarShipService warShipService,
-                            @Nonnull final FleetMovementCache fleetMovementCache) {
-        this.userService = Preconditions.checkNotNull(userService, "userService must not be empty");
+                            @Nonnull final FleetMovementCache fleetMovementCache,
+                            @Nonnull final HeatMapService heatMapService) {
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
         this.shipClassService = Preconditions.checkNotNull(shipClassService, "shipClassService must not be empty");
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
+        this.heatMapService = Preconditions.checkNotNull(heatMapService, "heatMapService must not be empty");
     }
 
     @Override
@@ -93,7 +94,13 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
 
         final List<Move> resultingMoves = new ArrayList<>();
         final Map<User, Planet> targets = detectVictims();
-        targets.forEach((user, planet) -> {
+        heatMapService.reduceHeat(targets.keySet(), EMissionType.ACTIVE_PIRATE);
+
+        for (final Map.Entry<User, Planet> e : targets.entrySet()) {
+            final User user = e.getKey();
+            final Planet planet = e.getValue();
+            LOGGER.info("\tVisiting '" + user.getUsername() + "' at '" + planet.getName() + "'");
+
             final int planetaryPoints = new UserPoints(user).withPlanets(List.of(planet)).getPlanetaryPoints();
             // fixme how the planet strength impacts the opposite forces?
             final int idFleet = createPirateFleet(user, planet);
@@ -101,7 +108,7 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
             Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
             final Move move = new Move(pirateFleet, new FleetOrbit(planet.getOrbit(), planet.getSystem()));
             resultingMoves.add(move);
-        });
+        }
 
         final List<Fleet> fleets = fleetService.moveFleets(resultingMoves);
         //noinspection DataFlowIssue
@@ -109,9 +116,8 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
     }
 
     private Map<User, Planet> detectVictims() {
-        // fixme implement heat map
         final List<Planet> result = new ArrayList<>();
-        final List<User> victims = userService.findAll();
+        final List<User> victims = heatMapService.findHottestUsers(EMissionType.ACTIVE_PIRATE);
         for (final User victim : victims) {
             final Planet planet = planetService.findMainPlanet(victim);
             result.add(planet);

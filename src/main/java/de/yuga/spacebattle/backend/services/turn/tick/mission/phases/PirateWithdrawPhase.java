@@ -78,6 +78,11 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
         Preconditions.checkNotNull(fleets, "fleets must not be empty");
 
         fleetService.markAsDestroyed(fleets);
+        fleets.forEach(fleet -> {
+            assert fleet.getOrbit() != null;
+            assert fleet.getOrbit().getSystem() != null;
+            LOGGER.info("\tPirate fleet withdraws to hyper limit from '" + fleet.getOrbit().getSystem().getName() + "'");
+        });
     }
 
     private void retreatToHyperlimit(@Nonnull final Tick today, @Nonnull final List<Fleet> fleets) {
@@ -91,9 +96,10 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
                 final Planet target = planetService.findByCoordinates(Objects.requireNonNull(pirateFleet.getOrbit()));
                 if (target == null) {
                     // not in a planetary orbit
-                    LOGGER.warn("Pirate fleet with idFleet '" + pirateFleet.getId() + "' is not in a planetary orbit");
+                    LOGGER.warn("\t\tPirate fleet with idFleet '" + pirateFleet.getId() + "' is not in a planetary orbit");
                     continue;
                 }
+                LOGGER.info("\tPirate fleet withdraws to hyper limit from '" + target.getName() + "'");
                 final FleetOrbit destination = new FleetOrbit(target.getOrbit(), target.getSystem());
                 final Orbit positionOnHyperlimit = NavigationCalculator.getPositionOnHyperlimit(pirateFleet, destination); // fixme position is pretty funny on the map
                 final Move move = new Move(pirateFleet, new FleetOrbit(positionOnHyperlimit, target.getSystem()));

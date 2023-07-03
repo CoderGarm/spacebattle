@@ -165,7 +165,7 @@ public class DistanceCalculator {
         final EStarClassType starClassType = originSystem.getStarClassType();
         final double radiusOfHyperLimit = starClassType.getLightMinutesToHyperLimit();
 
-        final Orbit positionOnHyperLimit = createByRadiusAndQuadrant(new BigDecimal(radiusOfHyperLimit), quadrant, Planet.PLANET_STANDARD_METRIC);
+        final Orbit positionOnHyperLimit = createByRadiusAndQuadrant(new Distance(radiusOfHyperLimit, EDistanceMetric.LM), quadrant, Planet.PLANET_STANDARD_METRIC);
         return getDuration(EModuleType.PROPULSION, fleet, originOrbit, positionOnHyperLimit);
     }
 
@@ -177,7 +177,7 @@ public class DistanceCalculator {
      * @return the orbit
      */
     @Nonnull
-    public static Orbit createByRadiusAndQuadrant(@Nonnull final BigDecimal radius,
+    public static Orbit createByRadiusAndQuadrant(@Nonnull final Distance radius,
                                                   @Nonnull final Quadrant quadrant,
                                                   @Nonnull final EDistanceMetric metric) {
         Preconditions.checkNotNull(radius, "radius shouldn't be null!");
@@ -188,8 +188,8 @@ public class DistanceCalculator {
         final double toRadians = Math.toRadians(quadrant.getPhi());
         final double cosPhi = Math.cos(toRadians);
         final double sinPhi = Math.sin(toRadians);
-        final BigDecimal xCoord = radius.multiply(new BigDecimal(cosPhi));
-        final BigDecimal yCoord = radius.multiply(new BigDecimal(sinPhi));
+        final BigDecimal xCoord = radius.getCoordinateInMetric(metric).multiply(new BigDecimal(cosPhi));
+        final BigDecimal yCoord = radius.getCoordinateInMetric(metric).multiply(new BigDecimal(sinPhi));
         return new Orbit(new Distance(xCoord, metric), new Distance(yCoord, metric));
     }
 

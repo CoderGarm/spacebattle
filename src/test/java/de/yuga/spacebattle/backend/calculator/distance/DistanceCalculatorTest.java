@@ -126,16 +126,16 @@ public class DistanceCalculatorTest {
 
     private static Stream<Arguments> testCreateByRadiusAndQuadrant() {
         return Stream.of(
-                Arguments.of(bd(1), Q1, Orbit.getCenterOrbit()),
-                Arguments.of(bd(19.23), Q2, new Orbit(new Distance(-14, EDistanceMetric.M), new Distance(14, EDistanceMetric.M))),
-                Arguments.of(bd(24.11), Q3, new Orbit(new Distance(-17, EDistanceMetric.M), new Distance(-17, EDistanceMetric.M))),
-                Arguments.of(bd(99999221), Q4, new Orbit(new Distance(70710127, EDistanceMetric.M), new Distance(-70710127, EDistanceMetric.M)))
+                Arguments.of(dis(1, EDistanceMetric.LS), Q1, Orbit.getCenterOrbit()),
+                Arguments.of(dis(19.23, EDistanceMetric.LS), Q2, new Orbit(new Distance(-14, EDistanceMetric.M), new Distance(14, EDistanceMetric.M))),
+                Arguments.of(dis(24.11, EDistanceMetric.LS), Q3, new Orbit(new Distance(-17, EDistanceMetric.M), new Distance(-17, EDistanceMetric.M))),
+                Arguments.of(dis(99999221, EDistanceMetric.LS), Q4, new Orbit(new Distance(70710127, EDistanceMetric.M), new Distance(-70710127, EDistanceMetric.M)))
         );
     }
 
     @ParameterizedTest
     @MethodSource("testCreateByRadiusAndQuadrant")
-    void testCreateByRadiusAndQuadrant(final BigDecimal radius, final Quadrant quadrant, final Orbit expectation) {
+    void testCreateByRadiusAndQuadrant(final Distance radius, final Quadrant quadrant, final Orbit expectation) {
         final Orbit result = DistanceCalculator.createByRadiusAndQuadrant(radius, quadrant, EDistanceMetric.M);
         assertEquals(expectation, result);
     }

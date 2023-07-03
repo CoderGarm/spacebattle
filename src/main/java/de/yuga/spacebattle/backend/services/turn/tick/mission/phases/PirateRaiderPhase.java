@@ -75,6 +75,8 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
                     // not in a planetary orbit
                     continue;
                 }
+                assert target.getOwner() != null : "Should be nice.";
+                LOGGER.info("\tRaiding '" + target.getOwner().getUsername() + "' at '" + target.getName() + "'");
                 final ResourceDeposit raid = target.getResourceDeposit().raid(pirateFleet, freeCargoUnits);
                 planetToStore.add(target);
                 fleetToStore.add(pirateFleet);

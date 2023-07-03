@@ -323,8 +323,8 @@ public class Cage implements Future<Cage> {
         final BigDecimal initialCageDiameter = getInitialCageDiameter();
         final BigDecimal initialCageRadius = initialCageDiameter.divide(BigDecimal.valueOf(2), DistanceCalculator.MC_HU);
         System.out.println("Initial cage radius: " + initialCageRadius + " LS");
-        final Orbit fleetOneStartingOrbit = DistanceCalculator.createByRadiusAndQuadrant(initialCageRadius, Quadrant.Q1, Planet.PLANET_STANDARD_METRIC);
-        final Orbit fleetTwoStartingOrbit = DistanceCalculator.createByRadiusAndQuadrant(initialCageRadius, Quadrant.Q3, Planet.PLANET_STANDARD_METRIC);
+        final Orbit fleetOneStartingOrbit = DistanceCalculator.createByRadiusAndQuadrant(new Distance(initialCageRadius, LS), Quadrant.Q1, Planet.PLANET_STANDARD_METRIC);
+        final Orbit fleetTwoStartingOrbit = DistanceCalculator.createByRadiusAndQuadrant(new Distance(initialCageRadius, LS), Quadrant.Q3, Planet.PLANET_STANDARD_METRIC);
 
         roundStates.add(new FleetRoundState(this, fleetOne, fleetOneStartingOrbit));
         roundStates.add(new FleetRoundState(this, fleetTwo, fleetTwoStartingOrbit));

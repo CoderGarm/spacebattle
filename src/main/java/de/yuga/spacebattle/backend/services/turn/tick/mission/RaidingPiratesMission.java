@@ -26,6 +26,8 @@ public class RaidingPiratesMission implements MissionRunner {
 
     @Nonnull
     private final PirateRaiderPhase pirateRaiderPhase;
+
+    @Nonnull
     private final PirateWithdrawPhase pirateWithdrawPhase;
 
     @Autowired

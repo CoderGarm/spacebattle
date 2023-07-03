@@ -244,6 +244,14 @@
         primary key (idForumThread)
     ) engine=InnoDB;
 
+    create table heatMap (
+       idHeatMap integer not null auto_increment,
+        heat integer not null,
+        missionType varchar(255) not null,
+        idOwner integer not null,
+        primary key (idHeatMap)
+    ) engine=InnoDB;
+
     create table hitLog (
        idHitLog integer not null auto_increment,
         combatPhase varchar(255) not null,
@@ -1100,6 +1108,11 @@
             foreign key (idForum)
                 references forum (idForum);
 
+    alter table heatMap 
+       add constraint FK1uwloy48staea5okd5x30c0qt 
+       foreign key (idOwner) 
+       references user (idUser);
+
     alter table hitLog
         add constraint FK1pcr16gjbto8vd5g7v8hq14hw
             foreign key (idTarget)
@@ -1955,3 +1968,4 @@ insert into dbPatch values (null, now(), 'rebalance buildings', '0.1.2-2');
 insert into dbPatch values (null, now(), 'implement npc entity structure', '0.1.3-1');
 insert into dbPatch values (null, now(), 'adapt defeated opponent as npc', '0.1.4-1');
 insert into dbPatch values (null, now(), 'planned colonization', '0.1.5');
+insert into dbPatch values (null, now(), 'heat map', '0.1.6-1');

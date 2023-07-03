@@ -143,7 +143,7 @@ public class TestDataProviderUtils {
     }
 
     @Nonnull
-    public static Distance dis(final int value, EDistanceMetric metric) {
+    public static Distance dis(final double value, EDistanceMetric metric) {
         return new Distance(value, metric);
     }
 

@@ -41,7 +41,7 @@ public class NavigationCalculator {
         final EStarClassType starClassType = destination.getSystem().getStarClassType();
         final double radiusOfHyperLimit = starClassType.getLightMinutesToHyperLimit();
 
-        return DistanceCalculator.createByRadiusAndQuadrant(new BigDecimal(radiusOfHyperLimit), quadrant, Planet.PLANET_STANDARD_METRIC);
+        return DistanceCalculator.createByRadiusAndQuadrant(new Distance(radiusOfHyperLimit, EDistanceMetric.LM), quadrant, Planet.PLANET_STANDARD_METRIC);
     }
 
     /**

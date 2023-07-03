@@ -11,7 +11,9 @@ Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
 todo. songbird
 todo. map notch sci fi machen
+todo. spinner icon disable by key - make pretty overlay
 todo. wiki artikel zu piraten und missionen
+todo. fleet management - flotten aufteilen
 
 missionen
 
@@ -44,6 +46,7 @@ passive piraten
 1. Die Sternenkarte hat Liebe erfahren.  
    Es sind nun Wurmlöcher sichtbar, haben aber keine Funktion.
 2. Es gibt einen Tooltip, der auf das Ändern der Flottennamen hinweist.
+3. Die Scrollbars sind nun auch im Chrome firefox-like.
 
 ### Bugs fixed
 
