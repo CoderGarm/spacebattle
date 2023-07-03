@@ -279,6 +279,20 @@ public class FleetService {
     }
 
     @Nonnull
+    public List<Fleet> findAllFleetsInOrbitByUser(@Nonnull final Owner owner) {
+        Preconditions.checkNotNull(owner, "owner must not be empty");
+
+        return Objects.requireNonNullElse(fleetRepository.findAllFleetsInOrbitByUser(owner.getId()), new ArrayList<>());
+    }
+
+    @Nonnull
+    public List<Fleet> findAllFleetsWithoutMovementAtHyperlimitByUser(@Nonnull final Owner owner) {
+        Preconditions.checkNotNull(owner, "owner must not be empty");
+
+        return Objects.requireNonNullElse(fleetRepository.findAllFleetsAtHyperlimitByUser(owner.getId()), new ArrayList<>());
+    }
+
+    @Nonnull
     public List<Fleet> findAllFleetsByUser(final int idUser) {
         return fleetRepository.findAllFleetsBy(idUser);
     }

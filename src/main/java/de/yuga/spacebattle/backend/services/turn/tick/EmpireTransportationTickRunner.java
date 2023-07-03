@@ -78,7 +78,7 @@ public class EmpireTransportationTickRunner implements TickRunner {
                     .filter(p -> p.getResourceTransportationDemand().hasData())
                     .collect(Collectors.toMap(Function.identity(), p -> new ResourceDeposit(p.getResourceTransportationDemand())));
             demands.forEach((planet, demand) -> {
-                demand.resources().forEach((demandedType, demandedAmount) -> {
+                demand.getResources().forEach((demandedType, demandedAmount) -> {
                     if (demandedAmount > 0) {
                         for (final Map.Entry<Planet, ResourceDeposit> e : unusedMap.entrySet()) {
                             final Planet from = e.getKey();
@@ -105,7 +105,7 @@ public class EmpireTransportationTickRunner implements TickRunner {
                     }
                 });
 
-                demand.humanResources().forEach((demandedType, demandedAmount) -> {
+                demand.getHumanResources().forEach((demandedType, demandedAmount) -> {
                     if (demandedAmount > 0) {
                         for (final Map.Entry<Planet, ResourceDeposit> e : unusedMap.entrySet()) {
                             final Planet from = e.getKey();
@@ -169,12 +169,12 @@ public class EmpireTransportationTickRunner implements TickRunner {
             final ResourceDeposit orDefault = unusedMap.getOrDefault(planet, new ResourceDeposit(EDepositType.TRANSPORTATION_DELIVERY));
             unusedMap.put(planet, orDefault);
 
-            delivery.resources().forEach((eResourceType, deliveryAmount) -> {
+            delivery.getResources().forEach((eResourceType, deliveryAmount) -> {
                 final long presentAmount = deposit.getResourceAmountByType(eResourceType);
                 orDefault.setAbsoluteResourceValue(eResourceType, Long.min(deliveryAmount, presentAmount));
             });
 
-            delivery.humanResources().forEach((eEducationType, deliveryAmount) -> {
+            delivery.getHumanResources().forEach((eEducationType, deliveryAmount) -> {
                 final long presentAmount = deposit.getCrewAmountByType(eEducationType);
                 orDefault.setAbsoluteCrewRequirement(eEducationType, Long.min(deliveryAmount, presentAmount));
             });

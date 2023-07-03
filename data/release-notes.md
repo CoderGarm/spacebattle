@@ -9,10 +9,19 @@ Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 1. Piraten werden unregelmäßig zu Besuch kommen.  
    Damit das nicht so wild ist, bekommt jeder Spieler einen zusätzlichen Songbird-Zerstörer.
 
+todo. songbird
+todo. map notch sci fi machen
+todo. wiki artikel zu piraten und missionen
+
 missionen
 
 - müssen mit schiffen ausgestattet werden
-- haben einen task, zuerst nur anti-piraten-missionen
+- haben einen task
+    - counter mission
+        - anti-piraten-missionen (schutz vor passiven piraten im nahfeld)
+        - konvoischutz (schutz vor passiven piraten)
+    - active mission
+        - to be discussed
 - haben einen aktionszeitraum
 - ist die mission abgeschlossen, kommen die schiffe zurück
 
@@ -27,7 +36,7 @@ aktive piraten
 passive piraten
 
 - jeder trade kann piraten triggern
-- erfolgsrate je nach anti-piraten-missionen beider teilnehmer und größe des trades
+- erfolgsrate je nach anti-piraten-missionen/konvoi beider teilnehmer und größe des trades pro tick
 - trade wird um erfolg des piraten reduziert
 
 #### Diverses

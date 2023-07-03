@@ -93,6 +93,17 @@ public class SpacecraftCapacityAreas {
         return capacityValues;
     }
 
+    @Nonnull
+    @JsonIgnore
+    public Mass getCargoHold() {
+        return cargoHold;
+    }
+
+    @JsonIgnore
+    public int getPassengerSpace() {
+        return passengerSpace;
+    }
+
     public SpacecraftCapacityAreas withValues(@Nonnull final Map<ECapacityAreaType, CapacityValue> capacities) {
         Preconditions.checkNotNull(capacities, "capacities must not be empty");
 

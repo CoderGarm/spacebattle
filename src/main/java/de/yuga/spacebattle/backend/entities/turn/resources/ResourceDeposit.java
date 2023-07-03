@@ -4,6 +4,7 @@ package de.yuga.spacebattle.backend.entities.turn.resources;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.misc.HasCosts;
 import de.yuga.spacebattle.backend.enums.*;
@@ -20,7 +21,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.enums.EDepositType.*;
-import static de.yuga.spacebattle.backend.enums.EResourceType.POPULATION;
+import static de.yuga.spacebattle.backend.enums.EResourceType.*;
 
 /**
  * The resource deposit itself represents a various uses, compare {@link EDepositType}.
@@ -100,7 +101,7 @@ public class ResourceDeposit extends AbstractEntityKey {
     }
 
     public boolean hasData() {
-        return !resources().isEmpty() || !humanResources().isEmpty();
+        return !getResources().isEmpty() || !getHumanResources().isEmpty();
     }
 
     /**
@@ -277,7 +278,7 @@ public class ResourceDeposit extends AbstractEntityKey {
      * Returns a shallow copy.
      */
     @Nonnull
-    public Map<EResourceType, Long> resources() {
+    public Map<EResourceType, Long> getResources() {
         final Map<EResourceType, Long> map = resources.entrySet().stream().filter(e -> e.getValue() > 0).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         return new HashMap<>(map);
     }
@@ -286,7 +287,7 @@ public class ResourceDeposit extends AbstractEntityKey {
      * Returns a shallow copy.
      */
     @Nonnull
-    public Map<EEducationType, Long> humanResources() {
+    public Map<EEducationType, Long> getHumanResources() {
         final Map<EEducationType, Long> map = humanResources.entrySet().stream().filter(e -> e.getValue() > 0).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         return new HashMap<>(map);
     }
@@ -457,5 +458,37 @@ public class ResourceDeposit extends AbstractEntityKey {
         final boolean demandForHumans = humanResources.values().stream().anyMatch(amount -> amount > 0);
         final boolean demandForResources = resources.values().stream().anyMatch(amount -> amount > 0);
         return demandForHumans || demandForResources;
+    }
+
+    /**
+     * The fleet raids all resources which are fitting in the cargo hold.
+     */
+    public ResourceDeposit raid(@Nonnull final Fleet fleet, long units) {
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+
+        final ResourceDeposit resourceDeposit = new ResourceDeposit();
+        units = raidResource(fleet, CREDITS, resourceDeposit, units);
+        units = raidResource(fleet, METALORE, resourceDeposit, units);
+        units = raidResource(fleet, RARE_ELEMENTS, resourceDeposit, units);
+        raidResource(fleet, HEAVY_METALS, resourceDeposit, units);
+        return resourceDeposit;
+    }
+
+    private long raidResource(@Nonnull final Fleet fleet, @Nonnull final EResourceType resourceType, @Nonnull final ResourceDeposit resourceDeposit, long units) {
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+        Preconditions.checkNotNull(resourceType, "resourceType must not be empty");
+        Preconditions.checkNotNull(resourceDeposit, "resourceDeposit must not be empty");
+
+        if (units <= 0) {
+            return units;
+        }
+
+        final long amount = getResourceAmountByType(resourceType);
+        long take = Long.min(units, amount);
+        units -= take;
+        setAbsoluteResourceValue(resourceType, amount - take);
+        fleet.getResourceDeposit().updateResource(resourceType, take);
+        resourceDeposit.setAbsoluteResourceValue(resourceType, take);
+        return units;
     }
 }

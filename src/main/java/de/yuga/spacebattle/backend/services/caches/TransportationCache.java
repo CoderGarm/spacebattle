@@ -109,11 +109,11 @@ public class TransportationCache {
         }
 
         final OrbitalTransportJob job = getTodayOrbitalTransportJob(today, planet, fleet, transportType);
-        transferred.resources().forEach((resourceType, amount) -> {
+        transferred.getResources().forEach((resourceType, amount) -> {
             final long current = job.getResources().getOrDefault(resourceType, 0L);
             job.add(resourceType, amount + current);
         });
-        transferred.humanResources().forEach((educationType, amount) -> {
+        transferred.getHumanResources().forEach((educationType, amount) -> {
             final long current = job.getHumanResources().getOrDefault(educationType, 0L);
             job.add(educationType, amount + current);
         });

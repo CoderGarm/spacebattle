@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.backend.services.turn.tick;
+package de.yuga.spacebattle.backend.services.turn.tick.mission.phases;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
@@ -21,6 +21,7 @@ import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.backend.services.turn.tick.mission.MissionPhaseRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,11 +37,14 @@ import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.services.MasterOfTheUniverseService.PIRATE;
 
+/**
+ * Spawns a pirate fleet at the hyper limit of the main planet's system and approaches the main planet.
+ */
 @Service
-public class PirateInitiatorTickRunner implements TickRunner {
+public class PirateSpawnPhase implements MissionPhaseRunner {
 
     @Nonnull
-    private static final Logger LOGGER = LoggerFactory.getLogger(PirateInitiatorTickRunner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PirateSpawnPhase.class);
 
     @Nonnull
     private final UserService userService;
@@ -64,13 +68,13 @@ public class PirateInitiatorTickRunner implements TickRunner {
     private final FleetMovementCache fleetMovementCache;
 
     @Autowired
-    public PirateInitiatorTickRunner(@Nonnull final UserService userService,
-                                     @Nonnull final PlanetService planetService,
-                                     @Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
-                                     @Nonnull final FleetService fleetService,
-                                     @Nonnull final ShipClassService shipClassService,
-                                     @Nonnull final WarShipService warShipService,
-                                     @Nonnull final FleetMovementCache fleetMovementCache) {
+    public PirateSpawnPhase(@Nonnull final UserService userService,
+                            @Nonnull final PlanetService planetService,
+                            @Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
+                            @Nonnull final FleetService fleetService,
+                            @Nonnull final ShipClassService shipClassService,
+                            @Nonnull final WarShipService warShipService,
+                            @Nonnull final FleetMovementCache fleetMovementCache) {
         this.userService = Preconditions.checkNotNull(userService, "userService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
@@ -81,7 +85,7 @@ public class PirateInitiatorTickRunner implements TickRunner {
     }
 
     @Override
-    public void tick(@Nonnull final Tick today) {
+    public void executePhase(@Nonnull final Tick today) {
         LOGGER.info("Unleash the beast");
 
         final NonPlayerCharacter pirate = nonPlayerCharacterService.findByUsername(PIRATE);

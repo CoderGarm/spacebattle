@@ -241,6 +241,10 @@ public class Fleet extends Operationable implements HasOwner {
         this.orbit = orbit;
     }
 
+    public boolean isInMotion() {
+        return move != null;
+    }
+
     @Nullable
     public Move getMove() {
         return move;

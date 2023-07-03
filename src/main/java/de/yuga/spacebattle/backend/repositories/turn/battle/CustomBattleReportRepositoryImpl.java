@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.backend.repositories.turn.battle;
 
 import de.yuga.spacebattle.backend.entities.account.Owner;
-import de.yuga.spacebattle.backend.entities.account.User_;
+import de.yuga.spacebattle.backend.entities.account.Owner_;
 import de.yuga.spacebattle.backend.entities.turn.Tick_;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport_;
@@ -60,7 +60,7 @@ public class CustomBattleReportRepositoryImpl implements CustomBattleReportRepos
         orderList.add(cb.desc(root.get(Tick_.id)));
 
         final SetJoin<BattleReport, Owner> userJoin = root.join(BattleReport_.participatingUsers);
-        userJoin.on(cb.equal(userJoin.get(User_.id), idUser));
+        userJoin.on(cb.equal(userJoin.get(Owner_.id), idUser));
         cq.select(root).where(userJoin.getOn());
 
         cq.orderBy(orderList);
@@ -68,6 +68,6 @@ public class CustomBattleReportRepositoryImpl implements CustomBattleReportRepos
                 .setFirstResult(startPosition)
                 .setMaxResults(size);
         final List<BattleReport> resultList = query.getResultList();
-        return resultList.stream().filter(battleReport -> battleReport.getLastRound().getNo() > 1).map(BattleReportStatistics::new).collect(Collectors.toList());
+        return resultList.stream().map(BattleReportStatistics::new).collect(Collectors.toList());
     }
 }

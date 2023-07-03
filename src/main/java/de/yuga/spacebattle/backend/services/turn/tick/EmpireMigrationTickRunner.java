@@ -71,7 +71,7 @@ public class EmpireMigrationTickRunner implements TickRunner {
                     .collect(Collectors.toMap(Function.identity(), p -> new ResourceDeposit(p.getResourceDemand())));
 
             demands.forEach((planet, demand) -> {
-                demand.humanResources().forEach((demandedType, demandedAmount) -> {
+                demand.getHumanResources().forEach((demandedType, demandedAmount) -> {
                     if (demandedAmount > 0) {
                         for (final Map.Entry<Planet, ResourceDeposit> e : deposits.entrySet()) {
                             final Planet from = e.getKey();

@@ -25,9 +25,7 @@ public interface TickRunner extends Comparable<TickRunner> {
                 TradeTickRunner.class,
                 PlanetTickRunner.class,
                 FleetMovementTickRunner.class,
-                ColonizationTickRunner.class,
-                PirateInitiatorTickRunner.class,
-                PirateRaiderTickRunner.class
+                ColonizationTickRunner.class
         );
 
         final int i = sequenceOfRunners.indexOf(this.getClass());
@@ -35,6 +33,7 @@ public interface TickRunner extends Comparable<TickRunner> {
         if (i == -1 || i1 == -1 || i == i1) {
             throw new NotImplementedException("You missed to sequencing a service, boy!");
         }
+        //noinspection ComparatorMethodParameterNotUsed
         return Integer.compare(i, i1);
     }
 }

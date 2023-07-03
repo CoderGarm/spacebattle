@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.services.MailService;
 import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
 import de.yuga.spacebattle.backend.services.turn.tick.ColonizationTickRunner;
 import de.yuga.spacebattle.backend.services.turn.tick.TickRunner;
+import de.yuga.spacebattle.backend.services.turn.tick.mission.MissionRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,13 +47,18 @@ public class TickRunnerService {
     @Nonnull
     private final List<TickRunner> tickRunners;
 
+    @Nonnull
+    private final Set<MissionRunner> missionRunners;
+
     @Autowired
     public TickRunnerService(@Nonnull final Set<TickRunner> tickRunners,
+                             @Nonnull final Set<MissionRunner> missionRunners,
                              @Nonnull final TickRepository tickRepository,
                              @Nonnull final BattleService battleService,
                              @Nonnull final MailService mailService) {
         Preconditions.checkNotNull(tickRunners, "tickRunners must not be empty");
         this.tickRunners = tickRunners.stream().sorted((TickRunner::compareTo)).collect(Collectors.toList());
+        this.missionRunners = Preconditions.checkNotNull(missionRunners, "missionRunners must not be empty");
 
         this.tickRepository = Preconditions.checkNotNull(tickRepository, "tickRepository shouldn't be null!");
         this.battleService = Preconditions.checkNotNull(battleService, "battleService must not be empty");
@@ -83,6 +89,10 @@ public class TickRunnerService {
 
             for (final TickRunner tickRunner : tickRunners) {
                 tickRunner.tick(today);
+            }
+
+            for (final MissionRunner missionRunner : missionRunners) {
+                missionRunner.executeMission(today);
             }
 
             LOGGER.info(start + " battles.");

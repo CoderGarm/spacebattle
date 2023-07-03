@@ -16,7 +16,7 @@ import java.math.RoundingMode;
 
 public class SpacecraftTonnageCalculator {
 
-    private static final MathContext MC = new MathContext(8, RoundingMode.HALF_UP);
+    public static final MathContext MC = new MathContext(8, RoundingMode.HALF_UP);
 
     /**
      * A single(!) hammerhead section takes in average "this" space or mass as part in the ratio to the main "cigar" hull section.

@@ -24,4 +24,12 @@ public interface FleetRepository extends CrudRepository<Fleet, Integer>, CustomF
     @Nullable
     @Query("SELECT new de.yuga.spacebattle.rest.dto.AbstractId(f.id, f.name) FROM Fleet f WHERE f.isDeleted = false AND f.owner.id = :idUser")
     List<AbstractId> findAllAliveFleetsBy(@Param("idUser") final int idUser);
+
+    @Nullable
+    @Query("SELECT f FROM Fleet f WHERE f.owner.id = :idUser AND  f.isDeleted = false AND f.move IS NULL AND f.orbit IS NOT NULL AND f.orbit.orbit IS NOT NULL")
+    List<Fleet> findAllFleetsInOrbitByUser(@Param("idUser") final int idUser);
+
+    @Nullable
+    @Query("SELECT f FROM Fleet f WHERE f.owner.id = :idUser AND  f.isDeleted = false AND f.move IS NULL AND f.orbit IS NOT NULL AND f.orbit.orbit IS NULL")
+    List<Fleet> findAllFleetsAtHyperlimitByUser(@Param("idUser") final int idUser);
 }
