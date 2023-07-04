@@ -15,7 +15,5 @@ public interface CustomShipClassRepository {
 
     List<ShipClass> findAllLatestShipClassesByOwner(@Nonnull Owner user);
 
-    ShipClass saveAndFlush(@Nonnull ShipClass shipClass);
-
     boolean checkIfClassNameIsFree(int idOwner, @Nonnull String className);
 }

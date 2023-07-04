@@ -5,7 +5,6 @@ import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.repositories.spacecraft.custom.CustomShipClassRepository;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -41,32 +40,6 @@ public class CustomShipClassRepositoryImpl implements CustomShipClassRepository 
         return em.createNamedQuery("ShipClass.getAllLatestByOwner", ShipClass.class)
                 .setParameter("owner", user)
                 .getResultList();
-    }
-
-    /**
-     * <b>Attention:</b>
-     * <br>
-     * This is relevant and must not be changed until the transient issue is repaired.
-     * <br>
-     * <br>
-     * The normal {@link JpaRepository#save(Object)} is not definitely safe to return not null
-     * but storing the entity nevertheless. Strange but sadly true.
-     *
-     * @param shipClass the ship class to store
-     * @return the stored ship class
-     */
-    @Override
-    public ShipClass saveAndFlush(@Nonnull final ShipClass shipClass) {
-        Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
-
-        if (shipClass.getId() != -1) {
-            em.merge(shipClass);
-        } else {
-            em.persist(shipClass);
-
-        }
-        em.flush();
-        return shipClass;
     }
 
     /**
