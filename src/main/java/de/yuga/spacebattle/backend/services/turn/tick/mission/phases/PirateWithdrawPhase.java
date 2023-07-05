@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.services.turn.tick.mission.phases;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.CargoCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
@@ -91,20 +90,17 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
 
         final List<Move> resultingMoves = new ArrayList<>();
         for (final Fleet pirateFleet : fleets) {
-            final long freeCargoUnits = CargoCalculator.getFreeCargoUnits(pirateFleet);
-            if (freeCargoUnits == 0) {
-                final Planet target = planetService.findByCoordinates(Objects.requireNonNull(pirateFleet.getOrbit()));
-                if (target == null) {
-                    // not in a planetary orbit
-                    LOGGER.warn("\t\tPirate fleet with idFleet '" + pirateFleet.getId() + "' is not in a planetary orbit");
-                    continue;
-                }
-                LOGGER.info("\tPirate fleet withdraws to hyper limit from '" + target.getName() + "'");
-                final FleetOrbit destination = new FleetOrbit(target.getOrbit(), target.getSystem());
-                final Orbit positionOnHyperlimit = NavigationCalculator.getPositionOnHyperlimit(pirateFleet, destination); // fixme position is pretty funny on the map
-                final Move move = new Move(pirateFleet, new FleetOrbit(positionOnHyperlimit, target.getSystem()));
-                resultingMoves.add(move);
+            final Planet target = planetService.findByCoordinates(Objects.requireNonNull(pirateFleet.getOrbit()));
+            if (target == null) {
+                // not in a planetary orbit
+                LOGGER.warn("\t\tPirate fleet with idFleet '" + pirateFleet.getId() + "' is not in a planetary orbit");
+                continue;
             }
+            LOGGER.info("\tPirate fleet withdraws to hyper limit from '" + target.getName() + "'");
+            final FleetOrbit destination = new FleetOrbit(target.getOrbit(), target.getSystem());
+            final Orbit positionOnHyperlimit = NavigationCalculator.getPositionOnHyperlimit(pirateFleet, destination);
+            final Move move = new Move(pirateFleet, new FleetOrbit(positionOnHyperlimit, target.getSystem()));
+            resultingMoves.add(move);
         }
 
         //noinspection DataFlowIssue

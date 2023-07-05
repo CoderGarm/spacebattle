@@ -90,7 +90,7 @@ public class WarshipHealthState extends AbstractEntityKey implements WarshipHeal
                 this.capabilities.add(newCap);
             }
         }
-        isFightingCapable = warshipHealthState.isFightingCapable();
+        this.isFightingCapable = warshipHealthState.isFightingCapable();
         this.activeFittings.clear();
         this.activeFittings.addAll(warshipHealthState.getActiveFittings());
         this.remainingShots.clear();

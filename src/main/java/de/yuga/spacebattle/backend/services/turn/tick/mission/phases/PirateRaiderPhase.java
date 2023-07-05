@@ -7,10 +7,10 @@ import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
+import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
-import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateSnapshot;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.ETransportType;
 import de.yuga.spacebattle.backend.services.account.NonPlayerCharacterService;
@@ -19,17 +19,16 @@ import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.MissionPhaseRunner;
-import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import javax.annotation.Nullable;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.services.MasterOfTheUniverseService.PIRATE;
 
@@ -88,12 +87,18 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
                     // not in a planetary orbit
                     continue;
                 }
+                assert target.getOwner() != null : "Should be nice.";
 
-                final boolean userDefeated = fight(today, target);
+                final BattleReport battleReport = fight(today, target);
+                if (battleReport == null) {
+                    LOGGER.warn("\tNothings happen at '" + target.getOwner().getUsername() + "' at '" + target.getName() + "'");
+                    continue;
+                }
+
+                final boolean userDefeated = hasPirateWon(battleReport);
                 if (userDefeated) {
                     raidPlanet(today, planetToStore, fleetToStore, pirateFleet, freeCargoUnits, target);
                 } else {
-                    assert target.getOwner() != null : "Should be nice.";
                     LOGGER.info("\tPirates defeated from '" + target.getOwner().getUsername() + "' at '" + target.getName() + "'");
                 }
             }
@@ -102,32 +107,34 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
         fleetService.saveAll(fleetToStore);
     }
 
-    private boolean fight(final @Nonnull Tick today, final Planet target) {
-        final BattleReport battleReport = battleService.runBattleAtPlanet(today, target);
-        if (battleReport == null) {
-            return false;
-        }
+    @Nullable
+    private BattleReport fight(final @Nonnull Tick today, final Planet target) {
+        return battleService.runBattleAtPlanet(today, target);
+    }
 
-        int pirateShips = 0;
-        int userShips = 0;
+    private boolean hasPirateWon(@Nonnull final BattleReport battleReport) {
+        Preconditions.checkNotNull(battleReport, "battleReport must not be empty");
+
+        final Set<Integer> fleetIDs = battleReport.getParticipatingFleets().stream().map(FleetSnapshot::getFleet).map(AbstractEntityKey::getId).collect(Collectors.toSet());
+        final Map<Owner, List<Fleet>> byOwner = fleetService.findByIds(fleetIDs).stream().collect(Collectors.groupingBy(Fleet::getOwner,
+                Collectors.mapping(Function.identity(), Collectors.toList())));
+
+
+        int pirateFleetsAlive = 0;
+        int userFleetsAlive = 0;
         final Set<Owner> participatingUsers = battleReport.getParticipatingUsers();
         // makes no sense here, just to link all the places which must be "3 way fight" amended
         final boolean combatAllowed = CombatAllowanceCalculator.isCombatAllowed(participatingUsers);
         for (final Owner owner : participatingUsers) {
-            final FleetSnapshot fleetSnapshot = battleReport.getParticipatingFleets().stream()
-                    .filter(s -> s.getOwner().equals(owner))
-                    .findFirst()
-                    .orElseThrow(() -> new NotifyWebUserException("I hope this will never happen, reportId '" + battleReport.getId() + "'"));
 
-            final long capableShipsAmount = fleetSnapshot.getShips().stream().filter(WarshipHealthStateSnapshot::isFightingCapable).count();
+            final long fleets = byOwner.getOrDefault(owner, new ArrayList<>()).stream().filter(Fleet::isAlive).count();
             if (owner.getNpcOwner() != null) {
-                pirateShips += capableShipsAmount;
+                pirateFleetsAlive += fleets;
             } else {
-                userShips += capableShipsAmount;
+                userFleetsAlive += fleets;
             }
         }
-        return pirateShips > userShips;
-
+        return pirateFleetsAlive > userFleetsAlive;
     }
 
     private void raidPlanet(final @Nonnull Tick today, final List<Planet> planetToStore, final List<Fleet> fleetToStore, final Fleet pirateFleet, final long freeCargoUnits, final Planet target) {
@@ -136,6 +143,6 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
         final ResourceDeposit raid = target.getResourceDeposit().raid(pirateFleet, freeCargoUnits);
         planetToStore.add(target);
         fleetToStore.add(pirateFleet);
-        transportationCache.add(today, pirateFleet, target, raid, ETransportType.FLEET_TO_PLANET);
+        transportationCache.add(today, pirateFleet, target, raid, ETransportType.PLANET_TO_FLEET);
     }
 }

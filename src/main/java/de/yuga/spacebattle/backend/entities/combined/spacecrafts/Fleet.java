@@ -123,6 +123,7 @@ public class Fleet extends Operationable implements HasOwner {
     }
 
     public boolean isActive() {
+        // no rep job alive
         return jobs.stream().noneMatch(Deletable::isAlive) && isAlive() && isOperational();
     }
 

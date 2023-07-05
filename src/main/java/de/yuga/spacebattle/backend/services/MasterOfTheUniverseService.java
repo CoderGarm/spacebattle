@@ -277,8 +277,8 @@ public class MasterOfTheUniverseService {
         final PassiveModule freightModule = passiveModules.stream().filter(pa -> pa.getSupportType() == ESupportType.FREIGHT).findFirst().orElseThrow(NullPointerException::new);
         final PassiveModule passengerModule = passiveModules.stream().filter(pa -> pa.getSupportType() == ESupportType.PASSENGER).findFirst().orElseThrow(NullPointerException::new);
         shipClass.setSupportFittings(Set.of(
-                new SupportFitting(freightModule, 3),
-                new SupportFitting(passengerModule, 3)));
+                new SupportFitting(freightModule, 1),
+                new SupportFitting(passengerModule, 1)));
 
         final Set<ConstraintViolation<ShipClass>> validate = validator.validate(shipClass);
         if (!validate.isEmpty()) {
@@ -312,7 +312,7 @@ public class MasterOfTheUniverseService {
 
         //noinspection OptionalGetWithoutIsPresent
         final User flashkid = userService.findByUsername(FLASHKID).get().getUser();
-        final Owner pirate = ownerService.findByUsername(DEFEATED_OPPONENT);
+        Owner pirate = ownerService.findByUsername(DEFEATED_OPPONENT);
         LOGGER.info("Users created");
 
         final Alliance a1 = allianceService.createAlliance("Argonauten", "A", flashkid);
@@ -357,6 +357,9 @@ public class MasterOfTheUniverseService {
 
         final Fitting fitting = new Fitting(propulsions, armors, eloka, sidewalls, weapons, missiles, passiveModules);
         final ShipClass chanson = chansonDestroyer(Objects.requireNonNull(pirate), fitting);
+
+        pirate = nonPlayerCharacterService.createNPC(PIRATE);
+        createPirateShip(pirate, fitting);
         LOGGER.info("ShipClass created");
 
         createFleetForUser(flashkid);

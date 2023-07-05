@@ -85,6 +85,7 @@ todo. Usernamen und Namen des Imperiums trennen, Herrschertitel, Navy-Prefix
 todo. wurmlochbrücken
 todo. population raiden
 todo. spot offer hat nur so viel volumen wie die letzten 10 Tage insgesamt gehandelt wurde
+todo. warship health states not persisted
 
 todo. kein alter Menüpunkt mehr ausgewählt wenn man sich wieder einloggt
 todo. Exception per mail an webmaster
