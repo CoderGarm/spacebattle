@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -95,13 +96,14 @@ public class BattleService {
         battleReportService.saveAll(reports);
     }
 
-    public void runBattleAtPlanet(@Nonnull final Tick today, @Nonnull final Planet planet) {
+    @Nullable
+    public BattleReport runBattleAtPlanet(@Nonnull final Tick today, @Nonnull final Planet planet) {
         Preconditions.checkNotNull(today, "today shouldn't be null!");
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
         final FleetClash fleetClash = fleetService.findFleetClashesAtPlanet(planet);
         if (fleetClash == null) {
-            return;
+            return null;
         }
 
         final CompletableFuture<Cage> future = CompletableFuture.supplyAsync(() -> {
@@ -113,7 +115,7 @@ public class BattleService {
         try {
             // runs the fight
             final Cage cage = future.get();
-            processFightingResult(today, cage.getBattleResult());
+            return processFightingResult(today, cage.getBattleResult());
         } catch (final ExecutionException | InterruptedException e) {
             e.printStackTrace();
             throw new NotifyWebUserException(e.getMessage());

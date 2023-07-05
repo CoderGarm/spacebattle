@@ -87,6 +87,11 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
 
     @Override
     public void executePhase(@Nonnull final Tick today) {
+
+        if (today.getNo() % 3 != 0) {
+            LOGGER.info("Nothing will be unleashed today");
+            return;
+        }
         LOGGER.info("Unleash the beast");
 
         final NonPlayerCharacter pirate = nonPlayerCharacterService.findByUsername(PIRATE);
@@ -94,7 +99,7 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
 
         final List<Move> resultingMoves = new ArrayList<>();
         final Map<User, Planet> targets = detectVictims();
-        heatMapService.reduceHeat(targets.keySet(), EMissionType.ACTIVE_PIRATE);
+        heatMapService.reduceHeat(targets.keySet(), EMissionType.ACTIVE_PIRATE); /* fixme must be done after all actions in a mission clean up phase */
 
         for (final Map.Entry<User, Planet> e : targets.entrySet()) {
             final User user = e.getKey();

@@ -53,10 +53,7 @@ import static de.yuga.spacebattle.backend.calculator.FittingUtils.DEFENSIVE_FITT
         @NamedQuery(name = "Fleet.checkShipInUse",
                 query = "SELECT COUNT(f) FROM Fleet f LEFT JOIN f.ships s WHERE s.shipClass.id =:idShipClass AND f.isDeleted = false"),
         @NamedQuery(name = "Fleet.getAllForPlanet",
-                query = "SELECT f FROM Fleet f LEFT JOIN f.move  " +
-                        "WHERE f.isDeleted = false AND (f.orbit.system = :system AND f.orbit.orbit.xCoordinate = :xCoordinate  AND f.orbit.orbit.yCoordinate = :yCoordinate) " +
-                        "OR ( f.move.originOrbit.system = :system AND  f.move.originOrbit.orbit.xCoordinate = :xCoordinate AND f.move.originOrbit.orbit.yCoordinate = :yCoordinate) " +
-                        "OR (f.move.destinationOrbit.system = :system AND f.move.destinationOrbit.orbit.xCoordinate = :xCoordinate AND f.move.destinationOrbit.orbit.yCoordinate = :yCoordinate)"),
+                query = "SELECT f FROM Fleet f WHERE f.isDeleted = false AND f.orbit.system = :system AND f.orbit.orbit.xCoordinate = :xCoordinate  AND f.orbit.orbit.yCoordinate = :yCoordinate"),
         @NamedQuery(name = "Fleet.getAllAnchoredForPlanet",
                 query = "SELECT f FROM Fleet f LEFT JOIN f.move  " +
                         "WHERE f.isDeleted = false AND (f.orbit.system = :system AND f.orbit.orbit.xCoordinate = :xCoordinate  AND f.orbit.orbit.yCoordinate = :yCoordinate)")

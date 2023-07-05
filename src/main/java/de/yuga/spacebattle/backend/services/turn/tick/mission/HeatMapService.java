@@ -34,6 +34,7 @@ public class HeatMapService {
 
         final Set<HeatMap> heats = Objects.requireNonNullElse(heatMapRepository.findHeatForUser(users.stream().map(User::getId).collect(Collectors.toList()), eMissionType), new HashSet<>());
         heats.forEach(HeatMap::decrease);
+        heats.forEach(HeatMap::decrease);
         heatMapRepository.saveAll(heats);
     }
 }

@@ -64,9 +64,7 @@ public class SpacecraftCalculator {
         Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
 
         createBaseData();
-        final Map<ShipClass, Integer> shipClasses = new HashMap<>();
-        shipClasses.put(shipClass, 1);
-        setValue(shipClasses);
+        setValue(Map.of(shipClass, 1));
         return getSpacecraftCapabilities();
     }
 
@@ -177,7 +175,7 @@ public class SpacecraftCalculator {
         capacities = new HashMap<>();
         effectValueByModuleType = Arrays.stream(EModuleType.values())
                 .filter(type -> !PROPULSIONS.contains(type))
-                .collect(Collectors.toMap(Function.identity(), value -> BigDecimal.ZERO));
+                .collect(Collectors.toMap(Function.identity(), value -> BigDecimal.TEN));
     }
 
     private void setValue(@Nonnull final WarshipHealthStateAccessor warshipHealthState) {

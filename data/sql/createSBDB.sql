@@ -1969,3 +1969,4 @@ insert into dbPatch values (null, now(), 'implement npc entity structure', '0.1.
 insert into dbPatch values (null, now(), 'adapt defeated opponent as npc', '0.1.4-1');
 insert into dbPatch values (null, now(), 'planned colonization', '0.1.5');
 insert into dbPatch values (null, now(), 'heat map', '0.1.6-1');
+insert into dbPatch values (null, now(), 'update warship caps', '0.1.6-2');

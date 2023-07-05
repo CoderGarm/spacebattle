@@ -86,7 +86,6 @@ public class WarshipHealthState implements Cloneable {
 
         this.warShip = warShip;
         final ShipClass shipClass = warShip.getShipClass();
-        assert shipClass.getPropulsion() != null;
         this.propulsion = shipClass.getPropulsion();
         this.sidewall = shipClass.getSidewall();
         this.armor = shipClass.getArmor();
