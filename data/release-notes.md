@@ -8,11 +8,14 @@ Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
 1. Piraten werden unregelmäßig zu Besuch kommen.  
    Damit das nicht so wild ist, bekommt jeder Spieler einen zusätzlichen Songbird-Zerstörer.
+2. Es gibt Wiki-Artikel zu den Missionstypen und Piraterie.
 
+todo. heatmap change to planet or system
+todo. spielermissionen
+todo. operationsgebiet auf karte einzeichen -> systeme/planeten erkennen und für mission setzen
 todo. songbird
 todo. map notch sci fi machen
 todo. spinner icon disable by key - make pretty overlay
-todo. wiki artikel zu piraten und missionen
 todo. fleet management - flotten aufteilen
 
 missionen
@@ -59,8 +62,9 @@ done. Marktplatz
 Thema: NPC und Missionen
 done. NPC-Konzept für Systeme und systemfreie NPC (Piraten, fliegende Händler ...)  
 done. NPC-Handelssystem
+done. Konzept für Missionen und NPC-Missionen
 todo. interne Sektoraufteilung der Map nach Entfernung um wirtschaftliche Leistungszentren  
-todo. Konzept für Missionen und NPC-Missionen
+todo. aktiver NPC-Handel
 
 Thema: Spionage
 todo. Spionagegebäude, pro Level gibt es einen Spion
@@ -86,6 +90,7 @@ todo. wurmlochbrücken
 todo. population raiden
 todo. spot offer hat nur so viel volumen wie die letzten 10 Tage insgesamt gehandelt wurde
 todo. warship health states not persisted
+todo. reload trade offers and stuff after take one
 
 todo. kein alter Menüpunkt mehr ausgewählt wenn man sich wieder einloggt
 todo. Exception per mail an webmaster

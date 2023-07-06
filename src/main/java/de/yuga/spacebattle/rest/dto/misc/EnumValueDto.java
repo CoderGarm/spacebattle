@@ -41,6 +41,8 @@ public class EnumValueDto {
     @JsonProperty
     private de.yuga.spacebattle.backend.enums.EWikiCategory[] eWikiCategories;
     @JsonProperty
+    private de.yuga.spacebattle.backend.enums.EMissionType[] eMissionTypes;
+    @JsonProperty
     private de.yuga.spacebattle.backend.enums.ECapacityAreaType[] eCapacityAreaTypes;
     @JsonProperty
     private de.yuga.spacebattle.backend.enums.ETechnologyType[] eTechnologyTypes;

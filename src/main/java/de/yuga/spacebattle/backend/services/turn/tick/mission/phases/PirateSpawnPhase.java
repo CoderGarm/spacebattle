@@ -29,11 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
+import javax.annotation.Nullable;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.services.MasterOfTheUniverseService.PIRATE;
@@ -97,37 +94,65 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
         final NonPlayerCharacter pirate = nonPlayerCharacterService.findByUsername(PIRATE);
         Preconditions.checkNotNull(pirate, "pirate must not be empty");
 
+        final Set<Planet> targets = detectVictims();
         final List<Move> resultingMoves = new ArrayList<>();
-        final Map<User, Planet> targets = detectVictims();
-        heatMapService.reduceHeat(targets.keySet(), EMissionType.ACTIVE_PIRATE); /* fixme must be done after all actions in a mission clean up phase */
-
-        for (final Map.Entry<User, Planet> e : targets.entrySet()) {
-            final User user = e.getKey();
-            final Planet planet = e.getValue();
-            LOGGER.info("\tVisiting '" + user.getUsername() + "' at '" + planet.getName() + "'");
-
-            final int planetaryPoints = new UserPoints(user).withPlanets(List.of(planet)).getPlanetaryPoints();
-            // fixme how the planet strength impacts the opposite forces?
-            final int idFleet = createPirateFleet(user, planet);
-            final Fleet pirateFleet = fleetService.find(idFleet);
-            Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
-            final Move move = new Move(pirateFleet, new FleetOrbit(planet.getOrbit(), planet.getSystem()));
-            resultingMoves.add(move);
+        for (final Planet planet : targets) {
+            resultingMoves.add(approach(planet));
         }
 
+        final List<Move> moves = resultingMoves.stream().filter(Objects::nonNull).collect(Collectors.toList());
+        final Set<User> victims = moves.stream().map(Move::getFleet).map(Fleet::getHumanOwner).collect(Collectors.toSet());
+        heatMapService.reduceHeat(victims, EMissionType.PIRATE_RAID);
+        executeMovement(today, moves);
+    }
+
+    private void executeMovement(final @Nonnull Tick today, final List<Move> resultingMoves) {
         final List<Fleet> fleets = fleetService.moveFleets(resultingMoves);
         //noinspection DataFlowIssue
         fleets.forEach(fleet -> fleetMovementCache.add(today, fleet, fleet.getMove(), fleet.getMove().getDestinationOrbit().getSystem()));
     }
 
-    private Map<User, Planet> detectVictims() {
-        final List<Planet> result = new ArrayList<>();
-        final List<User> victims = heatMapService.findHottestUsers(EMissionType.ACTIVE_PIRATE);
+    @Nullable
+    private Move approach(@Nonnull final Planet planet) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+        final User user = planet.getHumanOwner();
+        Preconditions.checkNotNull(user, "user must not be empty");
+
+
+        final int idFleet = createPirateFleet(user, planet);
+        final Fleet pirateFleet = fleetService.find(idFleet);
+        Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
+
+        final boolean withdrawEarly = withdrawEarly(planet, pirateFleet);
+        if (!withdrawEarly) {
+            LOGGER.info("\tVisiting '" + user.getUsername() + "' at '" + planet.getName() + "'");
+            return new Move(pirateFleet, new FleetOrbit(planet.getOrbit(), planet.getSystem()));
+        }
+
+        LOGGER.info("\tWithdraw early against the strong opposite '" + user.getUsername() + "' at '" + planet.getName() + "'");
+        return null;
+    }
+
+    private boolean withdrawEarly(@Nonnull final Planet planet, @Nonnull final Fleet pirateFleet) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
+
+        final Set<Fleet> allAnchoredForPlanet = fleetService.findAllAnchoredForPlanet(planet);
+        assert planet.getOwner() != null;
+        final int planetaryPoints = new UserPoints(planet.getOwner()).withFleets(allAnchoredForPlanet).getFleetPoints();
+        final int piratePoints = new UserPoints(pirateFleet.getOwner()).withFleets(List.of(pirateFleet)).getFleetPoints();
+        return planetaryPoints >= piratePoints * 3;
+    }
+
+    private Set<Planet> detectVictims() {
+        final Set<Planet> result = new HashSet<>();
+        final List<User> victims = heatMapService.findHottestUsers(EMissionType.PIRATE_RAID);
         for (final User victim : victims) {
             final Planet planet = planetService.findMainPlanet(victim);
             result.add(planet);
         }
-        return result.stream().collect(Collectors.toMap(Planet::getHumanOwner, Function.identity()));
+        return result;
     }
 
     private int createPirateFleet(@Nonnull final User victim, @Nonnull final Planet target) {

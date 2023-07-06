@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.dto.account;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
@@ -17,8 +18,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,7 @@ public class UserPoints {
 
     @Nonnull
     @JsonIgnore
-    private final User transientUser;
+    private final Owner transientUser;
 
     @Nonnull
     @JsonProperty
@@ -55,14 +56,26 @@ public class UserPoints {
     @Schema(required = true, description = "The research related points.")
     private int researchPoints = 0;
 
-    public UserPoints(@Nonnull final User user) {
-        this.transientUser = Preconditions.checkNotNull(user, "user must not be empty");
-        this.user = new Player(user);
-        this.createdAt = user.getUserSetting().getCreatedAt();
+    public UserPoints(@Nonnull final Owner owner) {
+        this.transientUser = Preconditions.checkNotNull(owner, "owner must not be empty");
+        this.user = new Player(owner);
+        if (owner.getHumanOwner() != null) {
+            this.createdAt = ((User) owner).getUserSetting().getCreatedAt();
+        } else {
+            this.createdAt = LocalDateTime.ofEpochSecond(0, 0, ZoneOffset.MIN);
+        }
     }
 
     public int getPlanetaryPoints() {
         return planetaryPoints;
+    }
+
+    public int getFleetPoints() {
+        return fleetPoints;
+    }
+
+    public int getResearchPoints() {
+        return researchPoints;
     }
 
     private void sumUpPoints() {
@@ -74,7 +87,7 @@ public class UserPoints {
      * - Adds 5 point per construction level.
      */
     @Nonnull
-    public UserPoints withPlanets(@Nonnull final List<Planet> planets) {
+    public UserPoints withPlanets(@Nonnull final Collection<Planet> planets) {
         Preconditions.checkNotNull(planets, "planets must not be empty");
 
         this.planetaryPoints += planets.size() * 100;
@@ -92,7 +105,7 @@ public class UserPoints {
      * Adds 45 points per running colonization.
      */
     @Nonnull
-    public UserPoints withColonizations(@Nonnull final List<Colonization> runningColonizations) {
+    public UserPoints withColonizations(@Nonnull final Collection<Colonization> runningColonizations) {
         Preconditions.checkNotNull(runningColonizations, "runningColonizations must not be empty");
 
         this.planetaryPoints += runningColonizations.size() * 45;
@@ -105,7 +118,7 @@ public class UserPoints {
      * Adds 1 point per running job.
      */
     @Nonnull
-    public UserPoints withJobs(@Nonnull final List<Job> jobs) {
+    public UserPoints withJobs(@Nonnull final Collection<Job> jobs) {
         Preconditions.checkNotNull(jobs, "jobs must not be empty");
 
         this.planetaryPoints += (int) jobs.stream().filter(j -> j.getConstructable().getResourceType() == EResourceType.CONSTRUCTION).count();
@@ -120,7 +133,7 @@ public class UserPoints {
      * Adds 10 points per research level.
      */
     @Nonnull
-    public UserPoints withResearches(@Nonnull final Set<ResearchLevel> researches) {
+    public UserPoints withResearches(@Nonnull final Collection<ResearchLevel> researches) {
         Preconditions.checkNotNull(researches, "researches must not be empty");
 
         this.researchPoints += researches.stream().map(ResearchLevel::getLevel).reduce(0, Integer::sum) * 10;
@@ -134,7 +147,7 @@ public class UserPoints {
      * Adds 10 points per alive, inactive warship.
      */
     @Nonnull
-    public UserPoints withFleets(@Nonnull final List<Fleet> fleets) {
+    public UserPoints withFleets(@Nonnull final Collection<Fleet> fleets) {
         Preconditions.checkNotNull(fleets, "fleets must not be empty");
 
         final Set<WarShip> aliveShips = fleets.stream().map(Fleet::getAliveShips).flatMap(Collection::stream).filter(WarShip::isAlive).collect(Collectors.toSet());

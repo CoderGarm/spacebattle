@@ -1665,24 +1665,25 @@ INSERT INTO userSetting (idUserSetting, email, password, createdAt, isEMailVerif
                         '49675c186a6c1b1d10cb800e2792ebabd6abd8597bcef2fcaa99bfc813a6f1868b7dc91812ac66718c4fefd59daafa6a658901b7356b3b65fa5528419a93a7a4',
                         now(), 1, 0, 0, 1, 1);
 
-INSERT INTO user (username, userRole, dType)
-VALUES ('Defeated Opponent', 'USER', 'USER');
-INSERT INTO userSetting (idUserSetting, email, password, createdAt, isEMailVerified, isLoginForbidden, noEMailWanted, receiveChangelogInfos,
-                         idUser) VALUE (null, 'mail',
-                         '49675c186a6c1b1d10cb800e2792ebabd6abd8597bcef2fcaa99bfc813a6f1868b7dc91812ac66718c4fefd59daafa6a658901b7356b3b65fa5528419a93a7a4',
-                         now(), 0, 1, 1, 0, 2);
+INSERT INTO user (username, dType) VALUES ('Defeated Opponent', 'NPC');
 
 INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('en', 'Welcome to the battlefield', 'WELCOME_MESSAGE', null);
 INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('de', 'Willkommen auf dem Schlachtfeld', 'WELCOME_MESSAGE', 1);
 INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('en', 'Population', 'GAME_MECHANICS', null);
 INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('en', 'Combat and missions', 'GAME_MECHANICS', null);
 INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('en', 'Transport and Migration', 'GAME_MECHANICS', null);
+INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('en', 'Piracy', 'GAME_MECHANICS', null);
+INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('en', 'Pirate hunt', 'MISSION_TYPES', null);
+INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('en', 'Convoy protection', 'MISSION_TYPES', null);
 
 INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, 1, 1);
 INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, 2, 1);
 INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, 3, 1);
 INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, 4, 1);
 INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, 5, 1);
+INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, 6, 1);
+INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, 7, 1);
+INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, 8, 1);
 
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (1, '# Welcome to the battlefield', 'INSERT', 0);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (1, '---', 'INSERT', 1);
@@ -1942,7 +1943,6 @@ INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES 
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (4, '#### continue or abort a combat', 'INSERT', 166);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (4, '', 'INSERT', 167);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (4, '', 'INSERT', 168);
-
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, '# Transport and Migration', 'INSERT', 0);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, '---', 'INSERT', 1);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, '## Transport', 'INSERT', 2);
@@ -1955,18 +1955,60 @@ INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES 
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, '---', 'INSERT', 9);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, 'For obvious reasons you can command your military, but not your civilians.  ', 'INSERT', 10);
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (5, 'They will detect opportunities on other planets on their own and will move to planets with better working conditions.', 'INSERT', 11);
-
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (6, '# Piracy', 'INSERT', 0);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (6, '---', 'INSERT', 1);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (6, '### A dangerous galaxy', 'INSERT', 2);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (6, '', 'INSERT', 3);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (6, 'There are countless reasons for illegal activities and the space inhabited by humans is not necessarily safe.  ', 'INSERT', 4);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (6, 'In spacefare, pirates are a common threat and nearly everywhere.', 'INSERT', 5);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (6, '', 'INSERT', 6);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (6, 'Countless **officially uninhabited places** are hideouts for any kind of groups outside the civilized society.', 'INSERT', 7);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (6, '', 'INSERT', 8);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (6, '---', 'INSERT', 9);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (6, '', 'INSERT', 10);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (6, '#### Occurrence', 'INSERT', 11);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (6, '', 'INSERT', 12);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (6, 'Nearly every place will be visited by pirates as long as there are reasons for piracy.  ', 'INSERT', 13);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (6, 'The question unfortunately isn\'t how to redeem piracy, it it how to avoid and survive it.', 'INSERT', 14);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (6, '', 'INSERT', 15);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (6, 'To protect your commercial and private shipping, it is advisable to set up police forces.', 'INSERT', 16);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (7, '# Pirate hunt', 'INSERT', 0);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (7, '---', 'INSERT', 1);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (7, '### Goal', 'INSERT', 2);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (7, '', 'INSERT', 3);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (7, 'The **pirate hunt** will staff police forces in order to secure the space around the mission areas.  ', 'INSERT', 4);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (7, 'The forces sent will patrol the area and protect trade routes.', 'INSERT', 5);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (7, '', 'INSERT', 6);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (7, '#### Deployment of naval forces', 'INSERT', 7);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (7, '', 'INSERT', 8);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (7, 'Warships can be detached from fleets or a full fleet or flotilla can be taken to fulfil police missions.  ', 'INSERT', 9);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (7, 'The operation area must be defined and the forces will reduce the trade jamming activities in the area.', 'INSERT', 10);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (8, '# Convoy protection', 'INSERT', 0);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (8, '---', 'INSERT', 1);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (8, '### Goal', 'INSERT', 2);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (8, '', 'INSERT', 3);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (8, '**Convoy protection** will send fleets or flotillas along with trading or passenger ships to protect them on their ride from pirates.', 'INSERT', 4);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (8, '', 'INSERT', 5);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (8, '#### Deployment of naval forces', 'INSERT', 6);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (8, '', 'INSERT', 7);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (8, 'The designated ships will automatically pick up convoys and protect them.  ', 'INSERT', 8);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (8, 'If there are more convoys then available ships, the left over convoys will be travelling unprotected.', 'INSERT', 9);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (8, '', 'INSERT', 10);
 
 INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (1, 1);
 INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (2, 2);
 INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (3, 3);
 INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (4, 4);
 INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (5, 5);
+INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (6, 6);
+INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (7, 7);
+INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (8, 8);
 
 insert into dbPatch values (null, now(), 'add traded resource', '0.1.2-1');
 insert into dbPatch values (null, now(), 'rebalance buildings', '0.1.2-2');
 insert into dbPatch values (null, now(), 'implement npc entity structure', '0.1.3-1');
 insert into dbPatch values (null, now(), 'adapt defeated opponent as npc', '0.1.4-1');
-insert into dbPatch values (null, now(), 'planned colonization', '0.1.5');
+insert into dbPatch values (null, now(), 'planned colonization', '0.1.5-1');
 insert into dbPatch values (null, now(), 'heat map', '0.1.6-1');
 insert into dbPatch values (null, now(), 'update warship caps', '0.1.6-2');
+insert into dbPatch values (null, now(), 'piracy and missions wiki', '0.1.6-3');

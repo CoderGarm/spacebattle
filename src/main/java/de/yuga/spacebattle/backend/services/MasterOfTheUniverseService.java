@@ -298,7 +298,6 @@ public class MasterOfTheUniverseService {
         LOGGER.info("---------------------------- done validating --------------------------------------");
     }
 
-    @SuppressWarnings({"unused"})
     void createInitialDataPayload() {
         createBuildings();
         LOGGER.info("Buildings created");

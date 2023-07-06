@@ -12,7 +12,7 @@
        foreign key (idOwner)
        references user (idUser);
 
-INSERT INTO heatMap (heat, missionType, idOwner) SELECT 1, 'ACTIVE_PIRATE', idUser FROM user WHERE dType = 'USER';
+INSERT INTO heatMap (heat, missionType, idOwner) SELECT 1, 'PIRATE_RAID', idUser FROM user WHERE dType = 'USER';
 # noinspection SqlWithoutWhere
 update heatMap h set heat = (select count(f.idFleet) from fleet f where f.isDeleted = false and f.isOperational = true and h.idOwner = f.idOwner);
 
