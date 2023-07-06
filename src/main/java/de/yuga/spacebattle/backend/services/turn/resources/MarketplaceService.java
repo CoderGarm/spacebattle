@@ -84,6 +84,10 @@ public class MarketplaceService {
         final Tick today = tickService.getToday();
         final TradeOffer tradeOffer = tradeOfferRepository.findById(idTradeOffer).orElseThrow(() -> new NotifyWebUserException("Hell no! You can only take an existing offer!"));
 
+        if (tradeOffer.isDeleted()) {
+            throw new NotifyWebUserException("This offer is already taken.");
+        }
+
         final Owner seller = tradeOffer.getSeller();
         final Owner buyer = ownerService.find(idBuyer);
         Preconditions.checkNotNull(buyer, "buyer must not be empty");
