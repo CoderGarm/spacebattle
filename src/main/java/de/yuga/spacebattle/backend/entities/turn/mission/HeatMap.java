@@ -1,8 +1,8 @@
 package de.yuga.spacebattle.backend.entities.turn.mission;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.EMissionType;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -19,8 +19,8 @@ public class HeatMap extends AbstractEntityKey {
     @Nonnull
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "idOwner", updatable = false)
-    private Owner owner;
+    @JoinColumn(name = "idPlanet", updatable = false)
+    private Planet planet;
 
     @Nonnull
     @NotNull
@@ -32,15 +32,15 @@ public class HeatMap extends AbstractEntityKey {
     public HeatMap() {
     }
 
-    public HeatMap(@Nonnull final Owner owner, @Nonnull final EMissionType missionType, final int heat) {
-        this.owner = Preconditions.checkNotNull(owner, "owner must not be empty");
+    public HeatMap(@Nonnull final Planet planet, @Nonnull final EMissionType missionType, final int heat) {
+        this.planet = Preconditions.checkNotNull(planet, "planet must not be empty");
         this.missionType = Preconditions.checkNotNull(missionType, "missionType must not be empty");
         this.heat = heat;
     }
 
     @Nonnull
-    public Owner getOwner() {
-        return owner;
+    public Planet getPlanet() {
+        return planet;
     }
 
     @Nonnull
@@ -68,11 +68,11 @@ public class HeatMap extends AbstractEntityKey {
 
         final HeatMap heatMap = (HeatMap) o;
 
-        return new EqualsBuilder().append(owner, heatMap.owner).append(missionType, heatMap.missionType).isEquals();
+        return new EqualsBuilder().append(planet, heatMap.planet).append(missionType, heatMap.missionType).isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(owner).append(missionType).toHashCode();
+        return new HashCodeBuilder(17, 37).append(planet).append(missionType).toHashCode();
     }
 }

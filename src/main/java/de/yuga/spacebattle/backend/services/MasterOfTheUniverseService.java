@@ -314,7 +314,7 @@ public class MasterOfTheUniverseService {
         Owner pirate = ownerService.findByUsername(DEFEATED_OPPONENT);
         LOGGER.info("Users created");
 
-        final Alliance a1 = allianceService.createAlliance("Argonauten", "A", flashkid);
+        allianceService.createAlliance("Argonauten", "A", flashkid);
         LOGGER.info("Alliance created");
 
         createForums();
@@ -355,7 +355,7 @@ public class MasterOfTheUniverseService {
         LOGGER.info("Researches populated");
 
         final Fitting fitting = new Fitting(propulsions, armors, eloka, sidewalls, weapons, missiles, passiveModules);
-        final ShipClass chanson = chansonDestroyer(Objects.requireNonNull(pirate), fitting);
+        chansonDestroyer(Objects.requireNonNull(pirate), fitting);
 
         pirate = nonPlayerCharacterService.createNPC(PIRATE);
         createPirateShip(pirate, fitting);

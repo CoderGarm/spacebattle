@@ -30,8 +30,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 import static de.yuga.spacebattle.backend.services.MasterOfTheUniverseService.PIRATE;
 
@@ -94,19 +96,25 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
         final NonPlayerCharacter pirate = nonPlayerCharacterService.findByUsername(PIRATE);
         Preconditions.checkNotNull(pirate, "pirate must not be empty");
 
-        final Set<Planet> targets = detectVictims();
+        final List<Planet> targets = detectVictims();
         final List<Move> resultingMoves = new ArrayList<>();
+        final List<Planet> heating = new ArrayList<>();
         for (final Planet planet : targets) {
-            resultingMoves.add(approach(planet));
+            final Move approach = approach(planet);
+            if (approach != null) {
+                heating.add(planet);
+                resultingMoves.add(approach);
+            }
         }
 
-        final List<Move> moves = resultingMoves.stream().filter(Objects::nonNull).collect(Collectors.toList());
-        final Set<User> victims = moves.stream().map(Move::getFleet).map(Fleet::getHumanOwner).collect(Collectors.toSet());
-        heatMapService.reduceHeat(victims, EMissionType.PIRATE_RAID);
-        executeMovement(today, moves);
+        heatMapService.reduceHeat(heating, EMissionType.PIRATE_RAID);
+        executeMovement(today, resultingMoves);
     }
 
-    private void executeMovement(final @Nonnull Tick today, final List<Move> resultingMoves) {
+    private void executeMovement(@Nonnull final Tick today, @Nonnull final List<Move> resultingMoves) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(resultingMoves, "resultingMoves must not be empty");
+
         final List<Fleet> fleets = fleetService.moveFleets(resultingMoves);
         //noinspection DataFlowIssue
         fleets.forEach(fleet -> fleetMovementCache.add(today, fleet, fleet.getMove(), fleet.getMove().getDestinationOrbit().getSystem()));
@@ -124,6 +132,7 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
         final Fleet pirateFleet = fleetService.find(idFleet);
         Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
 
+        /* fixme amend uncolonized */
         final boolean withdrawEarly = withdrawEarly(planet, pirateFleet);
         if (!withdrawEarly) {
             LOGGER.info("\tVisiting '" + user.getUsername() + "' at '" + planet.getName() + "'");
@@ -145,14 +154,8 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
         return planetaryPoints >= piratePoints * 3;
     }
 
-    private Set<Planet> detectVictims() {
-        final Set<Planet> result = new HashSet<>();
-        final List<User> victims = heatMapService.findHottestUsers(EMissionType.PIRATE_RAID);
-        for (final User victim : victims) {
-            final Planet planet = planetService.findMainPlanet(victim);
-            result.add(planet);
-        }
-        return result;
+    private List<Planet> detectVictims() {
+        return heatMapService.findHottestPlanets(EMissionType.PIRATE_RAID);
     }
 
     private int createPirateFleet(@Nonnull final User victim, @Nonnull final Planet target) {

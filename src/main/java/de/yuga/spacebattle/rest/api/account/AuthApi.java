@@ -311,6 +311,8 @@ public class AuthApi {
         planet = colonizationService.colonizePlanet(colonization);
         tickService.operateInoperationals(planet);
 
+        /* fixme add heat map entries for near planets */
+
         final NonPlayerCharacter sender = nonPlayerCharacterService.findByUsername(DEFEATED_OPPONENT);
         final String replace = WELCOME_MESSAGE.replace(NAME_PLACEHOLDER, saved.getUsername());
         chatService.createChatMessage(sender, saved, replace);

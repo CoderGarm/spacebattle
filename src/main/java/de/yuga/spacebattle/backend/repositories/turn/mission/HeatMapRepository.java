@@ -1,6 +1,6 @@
 package de.yuga.spacebattle.backend.repositories.turn.mission;
 
-import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.mission.HeatMap;
 import de.yuga.spacebattle.backend.enums.EMissionType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,10 +15,10 @@ import java.util.Set;
 public interface HeatMapRepository extends JpaRepository<HeatMap, Integer> {
 
     @Nullable
-    @Query("SELECT h.owner FROM HeatMap h WHERE h.owner.dType = de.yuga.spacebattle.backend.enums.OwnerType.USER AND h.missionType = :missionType AND h.heat = (SELECT MAX(heat) from HeatMap  WHERE missionType = :missionType)")
-    List<User> findHottestUsers(@Nonnull @Param("missionType") final EMissionType missionType);
+    @Query("SELECT h.planet FROM HeatMap h WHERE h.missionType = :missionType AND h.heat = (SELECT MAX(heat) from HeatMap  WHERE missionType = :missionType)")
+    List<Planet> findHottestUsers(@Nonnull @Param("missionType") final EMissionType missionType);
 
     @Nullable
-    @Query("SELECT h FROM HeatMap h WHERE h.owner.id IN (:userIDs) AND h.missionType = :missionType")
-    Set<HeatMap> findHeatForUser(@Nonnull @Param("userIDs") final List<Integer> userIDs, @Nonnull @Param("missionType") final EMissionType missionType);
+    @Query("SELECT h FROM HeatMap h WHERE h.planet.id IN (:planetIDs) AND h.missionType = :missionType")
+    Set<HeatMap> findHeatForPlanet(@Nonnull @Param("planetIDs") final List<Integer> planetIDs, @Nonnull @Param("missionType") final EMissionType missionType);
 }

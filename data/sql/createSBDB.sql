@@ -248,7 +248,7 @@
        idHeatMap integer not null auto_increment,
         heat integer not null,
         missionType varchar(255) not null,
-        idOwner integer not null,
+        idPlanet integer not null,
         primary key (idHeatMap)
     ) engine=InnoDB;
 
@@ -1109,9 +1109,9 @@
                 references forum (idForum);
 
     alter table heatMap 
-       add constraint FK1uwloy48staea5okd5x30c0qt 
-       foreign key (idOwner) 
-       references user (idUser);
+       add constraint FKafi78glkfnkhp6l63bjifnuqr 
+       foreign key (idPlanet) 
+       references planet (idPlanet);
 
     alter table hitLog
         add constraint FK1pcr16gjbto8vd5g7v8hq14hw

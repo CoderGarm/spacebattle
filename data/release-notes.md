@@ -10,7 +10,7 @@ Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
    Damit das nicht so wild ist, bekommt jeder Spieler einen zusätzlichen Songbird-Zerstörer.
 2. Es gibt Wiki-Artikel zu den Missionstypen und Piraterie.
 
-todo. heatmap change to planet or system
+todo. heat map mechanism for uncolonized planets
 todo. spielermissionen
 todo. operationsgebiet auf karte einzeichen -> systeme/planeten erkennen und für mission setzen
 todo. songbird
@@ -32,7 +32,8 @@ missionen
 
 aktive piraten
 
-- heatmap pro user, umso geringer die punkte im verhältnis zu anderen, umso wahrscheinlicher ein angriff (weniger punkte, mehr heat)
+- heatmap pro user, umso geringer die punkte im verhältnis zu anderen, umso wahrscheinlicher ein angriff (weniger
+  punkte, mehr heat)
 - ein piratenangriff reduziert heat (addiert punkte)
 - ein anti-piraten-mission reduziert heat
 - eine stationierte flotte reduziert heat
@@ -50,6 +51,8 @@ passive piraten
    Es sind nun Wurmlöcher sichtbar, haben aber keine Funktion.
 2. Es gibt einen Tooltip, der auf das Ändern der Flottennamen hinweist.
 3. Die Scrollbars sind nun auch im Chrome firefox-like.
+4. Die Job-Liste im Dashboard ist etwas schlanker gestaltet und es gibt einen "Job finished"-Marker.
+5. Der Spinner zum Anzeigen von Wartezeit ist etwas schicker.
 
 ### Bugs fixed
 
