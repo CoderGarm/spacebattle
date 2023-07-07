@@ -117,7 +117,7 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
     private Move approach(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
-        final Owner owner = planet.getOwner() != null ? planet.getOwner() : new Owner("Uncolonized");
+        final Owner owner = planet.getOwner() != null ? planet.getOwner() : Owner.UNCOLONIZED;
 
         final int idFleet = createPirateFleet(planet);
         final Fleet pirateFleet = fleetService.find(idFleet);

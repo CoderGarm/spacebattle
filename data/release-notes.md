@@ -22,7 +22,7 @@ Also vielleicht sind sie nicht solche Mistkerle wie Warnecke damals in Marsh, ab
 todo. spielermissionen
 todo. songbird in mission
 todo. convoy raid mission
-todo. piraten müssen 1 tick pro aktion warten
+todo. raiding piraten müssen 1 tick pro aktion warten
 todo. operationsgebiet auf karte einzeichen -> systeme/planeten erkennen und für mission setzen
 todo. fleet management - flotten aufteilen
 
@@ -40,11 +40,10 @@ missionen
 
 aktive piraten
 
-- heatmap pro user, umso geringer die punkte im verhältnis zu anderen, umso wahrscheinlicher ein angriff (weniger
-  punkte, mehr heat)
-- ein piratenangriff reduziert heat (addiert punkte)
+- heatmap pro user, umso höher die punkte im verhältnis zu anderen, umso wahrscheinlicher ein angriff
+- ein piratenangriff reduziert heat
 - ein anti-piraten-mission reduziert heat
-- eine stationierte flotte reduziert heat
+- eine stationierte flotte kann piraten zur schnellen Flucht bewegen
 - angegriffen und geraidet wird der am schwächsten verteidigte planet
 
 passive piraten

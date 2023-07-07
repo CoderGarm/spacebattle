@@ -22,6 +22,12 @@ import javax.validation.constraints.Size;
 @AttributeOverride(name = "id", column = @Column(name = "idUser"))
 public class Owner extends AbstractEntityKey implements HasOwner {
 
+    /**
+     * If an uncolonized planet should be handled as it would be colonized by an NPC but isn't.
+     */
+    @Nonnull
+    public static final Owner UNCOLONIZED = new Owner("Uncolonized");
+
     @Nonnull
     @NotNull
     @Column(insertable = false, updatable = false, nullable = false)

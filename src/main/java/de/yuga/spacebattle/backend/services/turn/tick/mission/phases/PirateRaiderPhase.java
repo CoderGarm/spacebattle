@@ -78,7 +78,7 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
 
         final List<Planet> planetToStore = new ArrayList<>();
         final List<Fleet> fleetToStore = new ArrayList<>();
-        final List<Fleet> pirateFleets = fleetService.findAllFleetsInOrbitByUser(pirate);
+        final List<Fleet> pirateFleets = fleetService.findAllFleetsWithoutMovementByUser(pirate);
         for (final Fleet pirateFleet : pirateFleets) {
             final long freeCargoUnits = CargoCalculator.getFreeCargoUnits(pirateFleet);
             if (freeCargoUnits > 0) {
@@ -87,19 +87,20 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
                     // not in a planetary orbit
                     continue;
                 }
-                assert target.getOwner() != null : "Should be nice.";
 
                 final BattleReport battleReport = fight(today, target);
+                final Owner owner = target.getOwner() != null ? target.getOwner() : Owner.UNCOLONIZED;
+                boolean userDefeated = true;
                 if (battleReport == null) {
-                    LOGGER.warn("\tNothings happen at '" + target.getOwner().getUsername() + "' at '" + target.getName() + "'");
-                    continue;
+                    LOGGER.info("\tNo combat happen at '" + owner.getUsername() + "' at '" + target.getName() + "'");
+                } else {
+                    userDefeated = hasPirateWon(battleReport);
                 }
 
-                final boolean userDefeated = hasPirateWon(battleReport);
                 if (userDefeated) {
                     raidPlanet(today, planetToStore, fleetToStore, pirateFleet, freeCargoUnits, target);
                 } else {
-                    LOGGER.info("\tPirates defeated from '" + target.getOwner().getUsername() + "' at '" + target.getName() + "'");
+                    LOGGER.info("\tPirates defeated from '" + owner.getUsername() + "' at '" + target.getName() + "'");
                 }
             }
         }
@@ -108,7 +109,10 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
     }
 
     @Nullable
-    private BattleReport fight(final @Nonnull Tick today, final Planet target) {
+    private BattleReport fight(@Nonnull final Tick today, @Nonnull final Planet target) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(target, "target must not be empty");
+
         return battleService.runBattleAtPlanet(today, target);
     }
 
@@ -137,9 +141,20 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
         return pirateFleetsAlive > userFleetsAlive;
     }
 
-    private void raidPlanet(final @Nonnull Tick today, final List<Planet> planetToStore, final List<Fleet> fleetToStore, final Fleet pirateFleet, final long freeCargoUnits, final Planet target) {
-        assert target.getOwner() != null : "Should be nice.";
-        LOGGER.info("\tRaiding '" + target.getOwner().getUsername() + "' at '" + target.getName() + "'");
+    private void raidPlanet(@Nonnull final Tick today,
+                            @Nonnull final List<Planet> planetToStore,
+                            @Nonnull final List<Fleet> fleetToStore,
+                            @Nonnull final Fleet pirateFleet,
+                            final long freeCargoUnits,
+                            @Nonnull final Planet target) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(planetToStore, "planetToStore must not be empty");
+        Preconditions.checkNotNull(fleetToStore, "fleetToStore must not be empty");
+        Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
+        Preconditions.checkNotNull(target, "target must not be empty");
+
+        final Owner owner = target.getOwner() != null ? target.getOwner() : Owner.UNCOLONIZED;
+        LOGGER.info("\tRaiding '" + owner.getUsername() + "' at '" + target.getName() + "'");
         final ResourceDeposit raid = target.getResourceDeposit().raid(pirateFleet, freeCargoUnits);
         planetToStore.add(target);
         fleetToStore.add(pirateFleet);

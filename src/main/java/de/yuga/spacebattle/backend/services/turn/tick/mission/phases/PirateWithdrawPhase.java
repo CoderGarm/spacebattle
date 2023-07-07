@@ -65,11 +65,9 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
         final NonPlayerCharacter pirate = nonPlayerCharacterService.findByUsername(PIRATE);
         Preconditions.checkNotNull(pirate, "pirate must not be empty");
 
-        List<Fleet> pirateFleets = fleetService.findAllFleetsInOrbitByUser(pirate);
-        retreatToHyperlimit(today, pirateFleets);
-
-        pirateFleets = fleetService.findAllFleetsWithoutMovementAtHyperlimitByUser(pirate);
-        retreatToHyperspace(today, pirateFleets);
+        final List<Fleet> pirateFleets = fleetService.findAllFleetsWithoutMovementByUser(pirate);
+        final List<Fleet> toWithdraw = retreatToHyperlimit(today, pirateFleets);
+        retreatToHyperspace(today, toWithdraw);
     }
 
     private void retreatToHyperspace(@Nonnull final Tick today, @Nonnull final List<Fleet> fleets) {
@@ -80,20 +78,22 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
         fleets.forEach(fleet -> {
             assert fleet.getOrbit() != null;
             assert fleet.getOrbit().getSystem() != null;
-            LOGGER.info("\tPirate fleet withdraws to hyper limit from '" + fleet.getOrbit().getSystem().getName() + "'");
+            LOGGER.info("\tPirate fleet withdraws to hyper space from '" + fleet.getOrbit().getSystem().getName() + "'");
         });
     }
 
-    private void retreatToHyperlimit(@Nonnull final Tick today, @Nonnull final List<Fleet> fleets) {
+    private List<Fleet> retreatToHyperlimit(@Nonnull final Tick today, @Nonnull final List<Fleet> fleets) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(fleets, "fleets must not be empty");
 
         final List<Move> resultingMoves = new ArrayList<>();
+        final List<Fleet> toReturn = new ArrayList<>();
         for (final Fleet pirateFleet : fleets) {
             final Planet target = planetService.findByCoordinates(Objects.requireNonNull(pirateFleet.getOrbit()));
             if (target == null) {
                 // not in a planetary orbit
-                LOGGER.warn("\t\tPirate fleet with idFleet '" + pirateFleet.getId() + "' is not in a planetary orbit");
+                LOGGER.warn("\tPirate fleet with idFleet '" + pirateFleet.getId() + "' is not in a planetary orbit");
+                toReturn.add(pirateFleet);
                 continue;
             }
             LOGGER.info("\tPirate fleet withdraws to hyper limit from '" + target.getName() + "'");
@@ -105,5 +105,6 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
 
         //noinspection DataFlowIssue
         fleetService.moveFleets(resultingMoves).forEach(fleet -> fleetMovementCache.add(today, fleet, fleet.getMove(), fleet.getMove().getDestinationOrbit().getSystem()));
+        return toReturn;
     }
 }
