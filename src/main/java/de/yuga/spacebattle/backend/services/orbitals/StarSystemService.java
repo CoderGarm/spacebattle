@@ -2,7 +2,9 @@ package de.yuga.spacebattle.backend.services.orbitals;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.physics.OrbitalDistanceMarker;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
+import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.repositories.orbitals.StarSystemRepository;
@@ -10,7 +12,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -107,5 +112,37 @@ public class StarSystemService {
         Preconditions.checkNotNull(name, "name must not be empty");
 
         return starsystemRepository.findByName(name);
+    }
+
+    @Nonnull
+    public Set<Planet> findNeighbourPlanets(@Nonnull final StarSystem system) {
+        Preconditions.checkNotNull(system, "system must not be empty");
+
+        final Set<StarSystem> neighbours = findNeighbours(system);
+        return neighbours.stream()
+                .map(StarSystem::getPlanets)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+    }
+
+    @Nonnull
+    public Set<StarSystem> findNeighbours(@Nonnull final StarSystem system) {
+        Preconditions.checkNotNull(system, "system must not be empty");
+
+        final List<StarSystem> allColonizable = findAllColonizable();
+
+        final List<OrbitalDistanceMarker> marker = allColonizable.stream()
+                .map(s -> new OrbitalDistanceMarker(system.getOrbit(), s.getOrbit()))
+                .sorted(Comparator.comparing(OrbitalDistanceMarker::getDistance))
+                .collect(Collectors.toList());
+        marker.removeIf(s -> marker.indexOf(s) > 3);
+
+        final Set<Orbit> neighbourOrbits = marker.stream()
+                .map(OrbitalDistanceMarker::getSecond)
+                .collect(Collectors.toSet());
+
+        return allColonizable.stream()
+                .filter(s -> neighbourOrbits.contains(s.getOrbit()))
+                .collect(Collectors.toSet());
     }
 }

@@ -5,7 +5,6 @@ import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
 import de.yuga.spacebattle.backend.dto.account.UserPoints;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
-import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
@@ -20,7 +19,6 @@ import de.yuga.spacebattle.backend.services.caches.FleetMovementCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
-import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.HeatMapService;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.MissionPhaseRunner;
 import org.slf4j.Logger;
@@ -47,9 +45,6 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(PirateSpawnPhase.class);
 
     @Nonnull
-    private final PlanetService planetService;
-
-    @Nonnull
     private final NonPlayerCharacterService nonPlayerCharacterService;
 
     @Nonnull
@@ -68,14 +63,12 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
     private final HeatMapService heatMapService;
 
     @Autowired
-    public PirateSpawnPhase(@Nonnull final PlanetService planetService,
-                            @Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
+    public PirateSpawnPhase(@Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
                             @Nonnull final FleetService fleetService,
                             @Nonnull final ShipClassService shipClassService,
                             @Nonnull final WarShipService warShipService,
                             @Nonnull final FleetMovementCache fleetMovementCache,
                             @Nonnull final HeatMapService heatMapService) {
-        this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
         this.shipClassService = Preconditions.checkNotNull(shipClassService, "shipClassService must not be empty");
@@ -124,22 +117,19 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
     private Move approach(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
-        final User user = planet.getHumanOwner();
-        Preconditions.checkNotNull(user, "user must not be empty");
+        final Owner owner = planet.getOwner() != null ? planet.getOwner() : new Owner("Uncolonized");
 
-
-        final int idFleet = createPirateFleet(user, planet);
+        final int idFleet = createPirateFleet(planet);
         final Fleet pirateFleet = fleetService.find(idFleet);
         Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
 
-        /* fixme amend uncolonized */
         final boolean withdrawEarly = withdrawEarly(planet, pirateFleet);
         if (!withdrawEarly) {
-            LOGGER.info("\tVisiting '" + user.getUsername() + "' at '" + planet.getName() + "'");
+            LOGGER.info("\tVisiting '" + owner.getUsername() + "' at '" + planet.getName() + "'");
             return new Move(pirateFleet, new FleetOrbit(planet.getOrbit(), planet.getSystem()));
         }
 
-        LOGGER.info("\tWithdraw early against the strong opposite '" + user.getUsername() + "' at '" + planet.getName() + "'");
+        LOGGER.info("\tWithdraw early against the strong opposite '" + owner.getUsername() + "' at '" + planet.getName() + "'");
         return null;
     }
 
@@ -148,9 +138,8 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
         Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
 
         final Set<Fleet> allAnchoredForPlanet = fleetService.findAllAnchoredForPlanet(planet);
-        assert planet.getOwner() != null;
-        final int planetaryPoints = new UserPoints(planet.getOwner()).withFleets(allAnchoredForPlanet).getFleetPoints();
-        final int piratePoints = new UserPoints(pirateFleet.getOwner()).withFleets(List.of(pirateFleet)).getFleetPoints();
+        final int planetaryPoints = new UserPoints().withFleets(allAnchoredForPlanet).getFleetPoints();
+        final int piratePoints = new UserPoints().withFleets(List.of(pirateFleet)).getFleetPoints();
         return planetaryPoints >= piratePoints * 3;
     }
 
@@ -158,8 +147,7 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
         return heatMapService.findHottestPlanets(EMissionType.PIRATE_RAID);
     }
 
-    private int createPirateFleet(@Nonnull final User victim, @Nonnull final Planet target) {
-        Preconditions.checkNotNull(victim, "victim must not be empty");
+    private int createPirateFleet(@Nonnull final Planet target) {
         Preconditions.checkNotNull(target, "target must not be empty");
 
         final NonPlayerCharacter opponent = nonPlayerCharacterService.findByUsername(PIRATE);

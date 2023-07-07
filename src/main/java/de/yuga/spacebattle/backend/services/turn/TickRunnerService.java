@@ -100,6 +100,7 @@ public class TickRunnerService {
      * Workaround. Can be made better. todo
      */
     public void operateInoperationals(@Nonnull final Planet planet) {
+        Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
         final ColonizationTickRunner tickRunner = (ColonizationTickRunner) this.tickRunners.stream()
@@ -107,7 +108,7 @@ public class TickRunnerService {
                 .findFirst()
                 .orElse(null);
         Preconditions.checkNotNull(tickRunner, "tickRunner must not be empty");
-        tickRunner.operateInoperationals(planet);
+        tickRunner.operateInoperationals(today, planet);
     }
 
     public boolean isTickPresent() {

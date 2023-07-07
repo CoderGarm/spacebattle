@@ -6,7 +6,7 @@ import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.PopulationControlCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.TickOutputCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
-import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.physics.OrbitalDistanceMarker;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
@@ -326,12 +326,12 @@ public class ColonizationService {
         final List<OrbitalDistanceMarker> marker = new ArrayList<>();
         colonizableByOrbit.entrySet().removeIf(e -> e.getValue().getPlanets().size() < 3);
         colonizableByOrbit.keySet().forEach(colonizable -> colonizedByOrbit.keySet().forEach(colonized -> marker.add(new OrbitalDistanceMarker(colonizable, colonized))));
-        marker.sort(Comparator.comparing(o -> o.distance));
+        marker.sort(Comparator.comparing(OrbitalDistanceMarker::getDistance));
 
         StarSystem starSystem = null;
         for (int i = 0; i < marker.size() - 1; i += 2) {
-            final StarSystem starSystem1 = colonizableByOrbit.get(marker.get(0).first);
-            final StarSystem starSystem2 = colonizableByOrbit.get(marker.get(1).first);
+            final StarSystem starSystem1 = colonizableByOrbit.get(marker.get(0).getFirst());
+            final StarSystem starSystem2 = colonizableByOrbit.get(marker.get(1).getFirst());
             if (starSystem1 == null || starSystem2 == null) {
                 continue;
             }
@@ -356,18 +356,5 @@ public class ColonizationService {
         }
         final int randomIndex = ThreadLocalRandom.current().nextInt(0, planets.size() - 1);
         return planets.get(randomIndex);
-    }
-
-    private static class OrbitalDistanceMarker {
-
-        Orbit first;
-        Orbit second;
-        Distance distance;
-
-        public OrbitalDistanceMarker(final Orbit first, final Orbit second) {
-            this.first = first;
-            this.second = second;
-            this.distance = first.getDistance(second);
-        }
     }
 }

@@ -94,6 +94,8 @@ public class ColonizationTickRunner implements TickRunner {
      * Runs the tick for all colonizations.
      */
     private void tickColonizations() {
+        Preconditions.checkNotNull(today, "today must not be empty");
+
         final Set<Colonization> colonizations = new HashSet<>(colonizationService.findAll());
 
         final Set<Colonization> planned = colonizations.stream().filter(Colonization::isPlanned).collect(Collectors.toSet());
@@ -151,6 +153,7 @@ public class ColonizationTickRunner implements TickRunner {
                                       @Nonnull final ResourceDeposit deposit,
                                       @Nonnull final ResourceDeposit demand,
                                       @Nonnull final ResourceDeposit utilization) {
+        Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(deposit, "deposit must not be empty");
         Preconditions.checkNotNull(demand, "demand must not be empty");
@@ -202,6 +205,7 @@ public class ColonizationTickRunner implements TickRunner {
                                  @Nonnull final ResourceDeposit deposit,
                                  @Nonnull final ResourceDeposit demand,
                                  @Nonnull final ResourceDeposit utilization) {
+        Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(deposit, "deposit must not be empty");
         Preconditions.checkNotNull(demand, "demand must not be empty");
@@ -229,5 +233,13 @@ public class ColonizationTickRunner implements TickRunner {
             fleetService.saveAll(fleets);
             operationalCache.activateWarships(today, planet, operationals);
         }
+    }
+
+    public void operateInoperationals(@Nonnull final Tick today, @Nonnull final Planet planet) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+        this.today = today;
+        operateInoperationals(planet);
     }
 }

@@ -14,6 +14,7 @@ public class CustomStarSystemRepositoryImpl implements CustomStarSystemRepositor
     @PersistenceContext
     private EntityManager em;
 
+    @Nonnull
     @Override
     public List<StarSystem> findAllStarSystems() {
         return em.createNamedQuery("StarSystem.getAll", StarSystem.class).getResultList();

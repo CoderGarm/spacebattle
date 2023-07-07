@@ -20,5 +20,9 @@ public interface HeatMapRepository extends JpaRepository<HeatMap, Integer> {
 
     @Nullable
     @Query("SELECT h FROM HeatMap h WHERE h.planet.id IN (:planetIDs) AND h.missionType = :missionType")
-    Set<HeatMap> findHeatForPlanet(@Nonnull @Param("planetIDs") final List<Integer> planetIDs, @Nonnull @Param("missionType") final EMissionType missionType);
+    Set<HeatMap> findHeatForPlanets(@Nonnull @Param("planetIDs") final List<Integer> planetIDs, @Nonnull @Param("missionType") final EMissionType missionType);
+
+    @Nullable
+    @Query("SELECT h FROM HeatMap h WHERE h.planet.id IN (:planetIDs)")
+    Set<HeatMap> findHeatForPlanets(@Nonnull @Param("planetIDs") final List<Integer> planetIDs);
 }

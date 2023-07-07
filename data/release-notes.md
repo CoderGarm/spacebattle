@@ -4,18 +4,26 @@ Thema: NPC, Handel und Missionen
 
 Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
+###### Yeha, es ist vollbracht!
+
+Es gibt das erste PvE-Element und ich hoffe, es wird so richtig lästig!
+
+Piraten werden zu besuch kommen und sie werden mitgehen lassen, was möglich ist.  
+Sie werden dich berauben, deine Nachbarn brandschatzen und dir auflauern, wenn du es am wenigsten erwartest.
+
+Also vielleicht sind sie nicht solche Mistkerle wie Warnecke damals in Marsh, aber wer weiß...
+
 #### Gameplay
 
 1. Piraten werden unregelmäßig zu Besuch kommen.  
-   Damit das nicht so wild ist, bekommt jeder Spieler einen zusätzlichen Songbird-Zerstörer.
+   Jeder Spieler einen zusätzlichen Songbird-Zerstörer auf Piratenjagd.
 2. Es gibt Wiki-Artikel zu den Missionstypen und Piraterie.
 
-todo. heat map mechanism for uncolonized planets
 todo. spielermissionen
+todo. songbird in mission
+todo. convoy raid mission
+todo. piraten müssen 1 tick pro aktion warten
 todo. operationsgebiet auf karte einzeichen -> systeme/planeten erkennen und für mission setzen
-todo. songbird
-todo. map notch sci fi machen
-todo. spinner icon disable by key - make pretty overlay
 todo. fleet management - flotten aufteilen
 
 missionen

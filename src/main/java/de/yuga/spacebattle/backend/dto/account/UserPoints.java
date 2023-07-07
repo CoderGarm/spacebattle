@@ -28,12 +28,12 @@ public class UserPoints {
 
     @Nonnull
     @JsonIgnore
-    private final Owner transientUser;
+    private Owner transientUser;
 
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "the user.")
-    private final Player user;
+    private Player user;
 
     @Nonnull
     @JsonProperty
@@ -55,6 +55,10 @@ public class UserPoints {
     @JsonProperty
     @Schema(required = true, description = "The research related points.")
     private int researchPoints = 0;
+
+    public UserPoints() {
+        // lazy idea to use only points calculation without real usage of the class
+    }
 
     public UserPoints(@Nonnull final Owner owner) {
         this.transientUser = Preconditions.checkNotNull(owner, "owner must not be empty");
