@@ -56,7 +56,7 @@ passive piraten
 
 1. Die Sternenkarte hat Liebe erfahren.  
    Es sind nun Wurmlöcher sichtbar, haben aber keine Funktion.
-2. Es gibt einen Tooltip, der auf das Ändern der Flottennamen hinweist.
+2. Es gibt einen Tooltip in der Flottenverwaltung, der auf das Ändern der Flottennamen hinweist.
 3. Die Scrollbars sind nun auch im Chrome firefox-like.
 4. Die Job-Liste im Dashboard ist etwas schlanker gestaltet und es gibt einen "Job finished"-Marker.
 5. Der Spinner zum Anzeigen von Wartezeit ist etwas schicker.
