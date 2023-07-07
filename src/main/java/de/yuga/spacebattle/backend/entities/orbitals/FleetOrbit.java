@@ -13,7 +13,7 @@ import javax.persistence.ManyToOne;
 public class FleetOrbit {
 
     /**
-     * If the system is null the orbit is placed in the universe.<br>
+     * If the system is null the orbit is placed in the hyper space.<br>
      * Otherwise, the inertial system of the orbit is the defined system.
      */
     @Nullable

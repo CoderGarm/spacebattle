@@ -2012,3 +2012,4 @@ insert into dbPatch values (null, now(), 'planned colonization', '0.1.5-1');
 insert into dbPatch values (null, now(), 'heat map', '0.1.6-1');
 insert into dbPatch values (null, now(), 'update warship caps', '0.1.6-2');
 insert into dbPatch values (null, now(), 'piracy and missions wiki', '0.1.6-3');
+insert into dbPatch values (null, now(), 'naval amendments', '0.1.6-4');

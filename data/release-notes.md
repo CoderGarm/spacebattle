@@ -8,23 +8,27 @@ Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
 Es gibt das erste PvE-Element und ich hoffe, es wird so richtig lästig!
 
-Piraten werden zu besuch kommen und sie werden mitgehen lassen, was möglich ist.  
+Piraten werden dich besuchen und sie werden mitgehen lassen, was möglich ist.  
 Sie werden dich berauben, deine Nachbarn brandschatzen und dir auflauern, wenn du es am wenigsten erwartest.
 
 Also vielleicht sind sie nicht solche Mistkerle wie Warnecke damals in Marsh, aber wer weiß...
 
 #### Gameplay
 
-1. Piraten werden unregelmäßig zu Besuch kommen.  
+1. Piraten...  
    Jeder Spieler einen zusätzlichen Songbird-Zerstörer auf Piratenjagd.
 2. Es gibt Wiki-Artikel zu den Missionstypen und Piraterie.
 
 todo. spielermissionen
-todo. songbird in mission
+- display ships in pool
+-
 todo. convoy raid mission
+todo. songbird in mission
 todo. raiding piraten müssen 1 tick pro aktion warten
 todo. operationsgebiet auf karte einzeichen -> systeme/planeten erkennen und für mission setzen
+todo. counter missions must take effect in pirate raid
 todo. fleet management - flotten aufteilen
+todo. wiki-eintrag für flottenverwaltung
 
 missionen
 

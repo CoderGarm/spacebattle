@@ -6,8 +6,11 @@ import de.yuga.spacebattle.backend.entities.misc.Operationable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
+import de.yuga.spacebattle.backend.entities.turn.mission.Mission;
+import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
@@ -17,6 +20,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "warShip")
 @AttributeOverride(name = "id", column = @Column(name = "idWarShip"))
+@Check(constraints = "idFleet is not null OR idMission IS NOT NULL")
 public class WarShip extends Operationable {
 
     @Nonnull
@@ -29,11 +33,21 @@ public class WarShip extends Operationable {
     @JoinColumn(name = "idShipyard", updatable = false)
     private Planet shipyard;
 
-    @Nonnull
-    @NotNull
+    /**
+     * A warship can be part of a fleet or part of a mission or at shore leave.
+     */
+    @Nullable
     @ManyToOne
     @JoinColumn(name = "idFleet")
     private Fleet fleet;
+
+    /**
+     * A warship can be part of a fleet or part of a mission or at shore leave.
+     */
+    @Nullable
+    @ManyToOne
+    @JoinColumn(name = "idMission")
+    private Mission mission;
 
     @Nonnull
     @NotNull
