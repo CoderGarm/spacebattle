@@ -292,7 +292,8 @@ public class TickService {
             final ResourceDeposit costs = colonization.getCosts();
             costs.setSubType(EDepositType.COSTS);
             final PayingPossibleResult payingPossible = main.getResourceDeposit().isPayingPossible(costs);
-            if (payingPossible.isValid()) {
+            final PayingPossibleResult payingPossibleCrew = main.getResourceDeposit().isPayingPossible(costs.getCrewRequirement());
+            if (payingPossible.isValid() && payingPossibleCrew.isValid()) {
                 colonization.start();
                 colonizations.add(colonization);
                 main.getResourceDeposit().pay(costs);
