@@ -71,4 +71,8 @@ public class WarShip {
         this.shipClass = new de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass(warShip.getShipClass(), languageCode);
         this.warshipHealthState = new WarshipHealthState(stateSnapshot, languageCode);
     }
+
+    public int getIdWarship() {
+        return idWarship;
+    }
 }

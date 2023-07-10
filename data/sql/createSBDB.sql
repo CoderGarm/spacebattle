@@ -383,6 +383,17 @@
         primary key (idBattleReport, idMissileMovement)
     ) engine=InnoDB;
 
+    create table mission (
+       missionType varchar(31) not null,
+        idMission integer not null auto_increment,
+        isDeleted boolean not null default false,
+        idActor integer not null,
+        idTickStartedAt integer not null,
+        idTickStoppedAt integer,
+        idPlanet integer not null,
+        primary key (idMission)
+    ) engine=InnoDB;
+
     create table move (
        idMove integer not null auto_increment,
         xCoordinateDestination varchar(255),
@@ -704,10 +715,12 @@
         isDeleted boolean not null default false,
         isOperational boolean not null default false,
         name varchar(255) not null,
-        idFleet integer not null,
+        idFleet integer,
+        idMission integer,
         idShipClass integer not null,
         idShipyard integer not null,
-        primary key (idWarShip)
+        primary key (idWarShip),
+        constraint detachment_CHECK check (idFleet is not null OR idMission IS NOT NULL)
     ) engine=InnoDB;
 
     create table warshipCapabilities (
@@ -1243,6 +1256,26 @@
             foreign key (idBattleReport)
                 references battleReport (idBattleReport);
 
+    alter table mission 
+       add constraint FKbvhlv330gufbb2p7aeeyagtu8 
+       foreign key (idActor) 
+       references user (idUser);
+
+    alter table mission 
+       add constraint FKav28cevdimw8uypty1f3sgu3c 
+       foreign key (idTickStartedAt) 
+       references tick (idTick);
+
+    alter table mission 
+       add constraint FKfjo5uacvj75iku0n27y8f781q 
+       foreign key (idTickStoppedAt) 
+       references tick (idTick);
+
+    alter table mission 
+       add constraint FKholrjg4864rt9j8qqs349b7ue 
+       foreign key (idPlanet) 
+       references planet (idPlanet);
+
     alter table move
         add constraint FKmcefsl29wdpj7xqe9790o0mch
             foreign key (idStarSystemDestination)
@@ -1609,6 +1642,11 @@
                 references fleet (idFleet);
 
     alter table warShip
+       add constraint FKr1fjudewjfngri3nq6axpbf5r 
+       foreign key (idMission) 
+       references mission (idMission);
+
+    alter table warShip 
         add constraint FKjr13y2u3qkka7d3npp9omwdoa
             foreign key (idShipClass)
                 references shipClass (idShipClass);

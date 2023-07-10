@@ -31,7 +31,7 @@ public class WarShipService {
     }
 
     @Nonnull
-    public List<WarShip> findByIds(List<Integer> ids) {
+    public List<WarShip> findByIds(Collection<Integer> ids) {
         final Iterable<WarShip> allById = warShipRepository.findAllById(ids);
         return StreamSupport.stream(allById.spliterator(), false).collect(Collectors.toList());
     }

@@ -5,6 +5,7 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.misc.Operationable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.turn.Detachment;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.turn.mission.Mission;
 import org.hibernate.annotations.Check;
@@ -36,18 +37,10 @@ public class WarShip extends Operationable {
     /**
      * A warship can be part of a fleet or part of a mission or at shore leave.
      */
-    @Nullable
-    @ManyToOne
-    @JoinColumn(name = "idFleet")
-    private Fleet fleet;
-
-    /**
-     * A warship can be part of a fleet or part of a mission or at shore leave.
-     */
-    @Nullable
-    @ManyToOne
-    @JoinColumn(name = "idMission")
-    private Mission mission;
+    @Nonnull
+    @Embedded
+    @SuppressWarnings("FieldMayBeFinal")
+    private Detachment detachment = new Detachment();
 
     @Nonnull
     @NotNull
@@ -75,7 +68,7 @@ public class WarShip extends Operationable {
 
         this.name = name;
         this.shipyard = shipyard;
-        this.fleet = fleet;
+        this.detachment.setFleet(fleet);
         this.shipClass = shipClass;
         this.warshipHealthState = new WarshipHealthState(this);
     }
@@ -90,15 +83,27 @@ public class WarShip extends Operationable {
         return shipyard;
     }
 
-    @Nonnull
+    @Nullable
     public Fleet getFleet() {
-        return fleet;
+        return detachment.getFleet();
     }
 
-    public void setFleet(@Nonnull final Fleet fleet) {
-        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+    public void setFleet(@Nullable final Fleet fleet) {
+        this.detachment.setFleet(fleet);
+    }
 
-        this.fleet = fleet;
+    @Nullable
+    public Mission getMission() {
+        return detachment.getMission();
+    }
+
+    public void setMission(@Nullable final Mission mission) {
+        this.detachment.setMission(mission);
+    }
+
+    @Nonnull
+    public Detachment getDetachment() {
+        return detachment;
     }
 
     @Nonnull

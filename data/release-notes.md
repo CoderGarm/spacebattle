@@ -11,17 +11,20 @@ Es gibt das erste PvE-Element und ich hoffe, es wird so richtig lästig!
 Piraten werden dich besuchen und sie werden mitgehen lassen, was möglich ist.  
 Sie werden dich berauben, deine Nachbarn brandschatzen und dir auflauern, wenn du es am wenigsten erwartest.
 
-Also vielleicht sind sie nicht solche Mistkerle wie Warnecke damals in Marsh, aber wer weiß...
+Also vielleicht sind sie nicht solche Mistkerle wie Warnecke damals in Marsh, aber wer weiß ...  
+Auf jeden Fall solltest du Schiffe detachieren, um die Handelswege zu schützen.
 
 #### Gameplay
 
 1. Piraten...  
    Jeder Spieler einen zusätzlichen Songbird-Zerstörer auf Piratenjagd.
 2. Es gibt Wiki-Artikel zu den Missionstypen und Piraterie.
+   todo. beschreibung eingemottete schiffe = flottenpool
 
 todo. spielermissionen
 - display ships in pool
 -
+
 todo. convoy raid mission
 todo. songbird in mission
 todo. raiding piraten müssen 1 tick pro aktion warten
@@ -68,6 +71,10 @@ passive piraten
 ### Bugs fixed
 
 #### next steps
+
+1. Take a Tour als Werbung
+2. Reisezeit beim Handel inkl Tabellendarstellung
+3. Warnung für zu kleine Screens
 
 Thema: Handel
 done. Bestenliste mit Punkten pro Leistungsfeld  

@@ -8,4 +8,5 @@ import javax.persistence.Entity;
 @Entity
 @DiscriminatorValue(MissionType.PIRATE_HUNT)
 public class PirateHuntMission extends Mission {
+
 }
