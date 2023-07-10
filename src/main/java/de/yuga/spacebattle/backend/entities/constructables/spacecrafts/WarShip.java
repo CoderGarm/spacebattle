@@ -45,7 +45,7 @@ public class WarShip extends Operationable {
     @NotNull
     @OneToOne(mappedBy = "warShip", cascade = CascadeType.ALL)
     @JoinColumn(name = "idWarshipHealthState", updatable = false)
-    private WarshipHealthState warshipHealthState;
+    private WarshipHealthState warshipHealthState = new WarshipHealthState();
 
     public WarShip() {
     }

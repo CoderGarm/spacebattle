@@ -1011,7 +1011,7 @@ public class MasterOfTheUniverseService {
         final List<ShipClass> classList = shipClassService.findAllLatestByOwner(Objects.requireNonNull(opponent));
         ShipClass ship = classList.get(0);
         ship = new ShipClass(user, ship);
-        shipClassService.save(ship);
+        ship = shipClassService.save(ship);
 
         final Planet homePlanet = planetService.findMainPlanet(user);
         final Fleet fleet = createFleet(user, homePlanet, "Homefleet");
