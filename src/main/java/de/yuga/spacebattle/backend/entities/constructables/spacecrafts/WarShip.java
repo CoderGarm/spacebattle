@@ -8,7 +8,6 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Detachment;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.turn.mission.Mission;
-import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -21,7 +20,6 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "warShip")
 @AttributeOverride(name = "id", column = @Column(name = "idWarShip"))
-@Check(constraints = "idFleet is not null OR idMission IS NOT NULL")
 public class WarShip extends Operationable {
 
     @Nonnull
@@ -37,10 +35,10 @@ public class WarShip extends Operationable {
     /**
      * A warship can be part of a fleet or part of a mission or at shore leave.
      */
-    @Nonnull
+    @Nullable
     @Embedded
     @SuppressWarnings("FieldMayBeFinal")
-    private Detachment detachment = new Detachment();
+    private Detachment detachment;
 
     @Nonnull
     @NotNull
@@ -68,7 +66,7 @@ public class WarShip extends Operationable {
 
         this.name = name;
         this.shipyard = shipyard;
-        this.detachment.setFleet(fleet);
+        this.setFleet(fleet);
         this.shipClass = shipClass;
         this.warshipHealthState = new WarshipHealthState(this);
     }
@@ -85,23 +83,35 @@ public class WarShip extends Operationable {
 
     @Nullable
     public Fleet getFleet() {
+        if (detachment == null) {
+            return null;
+        }
         return detachment.getFleet();
     }
 
     public void setFleet(@Nullable final Fleet fleet) {
-        this.detachment.setFleet(fleet);
+        if (detachment == null) {
+            this.detachment = new Detachment();
+        }
+        detachment.setFleet(fleet);
     }
 
     @Nullable
     public Mission getMission() {
+        if (detachment == null) {
+            return null;
+        }
         return detachment.getMission();
     }
 
     public void setMission(@Nullable final Mission mission) {
-        this.detachment.setMission(mission);
+        if (detachment == null) {
+            this.detachment = new Detachment();
+        }
+        detachment.setMission(mission);
     }
 
-    @Nonnull
+    @Nullable
     public Detachment getDetachment() {
         return detachment;
     }
@@ -141,5 +151,9 @@ public class WarShip extends Operationable {
 
     public void createWarshipHealthState() {
         this.warshipHealthState = new WarshipHealthState(this);
+    }
+
+    public void sendToPool() {
+        detachment = null;
     }
 }

@@ -17,12 +17,17 @@ Auf jeden Fall solltest du Schiffe detachieren, um die Handelswege zu schützen.
 #### Gameplay
 
 1. Piraten...  
-   Jeder Spieler einen zusätzlichen Songbird-Zerstörer auf Piratenjagd.
+   Die Piraten werden im Laufe der Zeit erweitert werden, jetzt allerdings greifen sie Konvois an und suchen von Zeit zu Zeit nach lohnender Beute.  
+   Für die spontanen Unannehmlichkeiten erhält jeder Spieler einen zusätzlichen Songbird-Zerstörer auf Piratenjagd am Heimatplaneten.
 2. Es gibt Wiki-Artikel zu den Missionstypen und Piraterie.
-   todo. beschreibung eingemottete schiffe = flottenpool
+3. Schiffe detachieren und einmotten!
+   Deine Reserveflotte enthält nun alle Schiffe, die nicht in zu einer Flotte oder einer Mission zugewiesen wurden.  
+   Du kannst deine Missionen aus dem Pool heraus versorgen.
+4.
 
+todo. beschreibung eingemottete schiffe = flottenpool
 todo. spielermissionen
-- display ships in pool
+
 -
 
 todo. convoy raid mission
@@ -64,17 +69,23 @@ passive piraten
 1. Die Sternenkarte hat Liebe erfahren.  
    Es sind nun Wurmlöcher sichtbar, haben aber keine Funktion.
 2. Es gibt einen Tooltip in der Flottenverwaltung, der auf das Ändern der Flottennamen hinweist.
-3. Die Scrollbars sind nun auch im Chrome firefox-like.
+3. Die Scrollbars sind nun auch im Chrome firefox-like, etwas schlanker.
 4. Die Job-Liste im Dashboard ist etwas schlanker gestaltet und es gibt einen "Job finished"-Marker.
 5. Der Spinner zum Anzeigen von Wartezeit ist etwas schicker.
+6. Es gibt jetzt eine "Nimm mal lieber ein größeres Display"-Warnung bei Displays < 800 Pixel Breite.
 
 ### Bugs fixed
+
+todo. fleet loading stuff wird falsch berechnet
 
 #### next steps
 
 1. Take a Tour als Werbung
-2. Reisezeit beim Handel inkl Tabellendarstellung
-3. Warnung für zu kleine Screens
+2. Waiting for activation for operationals
+3. write cache to file on shutdown and read post construct
+4. Reisezeit beim Handel inkl Tabellendarstellung
+5. trade offers nach preis vorsortieren
+6. eingemottete Schiffe tatsächlich außer dienst nehmen
 
 Thema: Handel
 done. Bestenliste mit Punkten pro Leistungsfeld  
@@ -100,8 +111,8 @@ todo. Counter-Spionage, Spione umdrehen (unbenutze Spionage-Slots)
 1. Die Darstellung des Kampfes aufhübschen.
 2. Aktuell kann man nur 1on1 kämpfen, das muss aufgebohrt werden
 3. Population balancing
-6. Rework der Flottenbewegungen (nice to have)
-7. mich endlich mal um die "corporate identity" kümmern, also eigene Icons, Symbole, Benennungen usw erzeugen
+4. Rework der Flottenbewegungen (nice to have)
+5. mich endlich mal um die "corporate identity" kümmern, also eigene Icons, Symbole, Benennungen usw erzeugen
 
 todo. Forum: Thema sperren
 todo. gebäudeoutput beobachten, population balancen

@@ -719,8 +719,7 @@
         idMission integer,
         idShipClass integer not null,
         idShipyard integer not null,
-        primary key (idWarShip),
-        constraint detachment_CHECK check (idFleet is not null OR idMission IS NOT NULL)
+        primary key (idWarShip)
     ) engine=InnoDB;
 
     create table warshipCapabilities (

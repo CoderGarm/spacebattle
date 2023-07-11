@@ -1,8 +1,7 @@
 
-
+alter table warShip modify column idFleet integer;
 
 alter table warShip add column idMission integer after idFleet;
-ALTER TABLE warShip ADD constraint detachment_CHECK check (idFleet is not null OR idMission IS NOT NULL);
 
 create table mission (
    missionType varchar(31) not null,

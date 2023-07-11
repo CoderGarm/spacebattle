@@ -5,7 +5,6 @@ import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
-import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
@@ -14,6 +13,7 @@ import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.AbstractId;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.*;
+import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.Move;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,11 +49,13 @@ public class FleetApi extends BaseApi {
     private static final String FLEET_PER_USER_ENDPOINT = "perUser";
     private static final String MOVING_FLEET_PER_USER_ENDPOINT = "movingPerUser";
     private static final String MERGE_FLEETS_ENDPOINT = "merge";
+    private static final String SPLIT_FLEETS_ENDPOINT = "split";
     private static final String MOVE_FLEETS_ENDPOINT = "moveFleets";
     private static final String PLAN_MOVES_ENDPOINT = "planMoves";
     private static final String CANCEL_MOVES_ENDPOINT = "cancelMoves";
     private static final String FLEET_PER_USER_PER_SYSTEM_ENDPOINT = "fleetDistribution";
     private static final String RENAME_FLEET_ENDPOINT = "rename";
+    private static final String WARSHIP_POOLING_ENDPOINT = "pool";
 
     @Nonnull
     private final FleetService fleetService;
@@ -62,18 +64,13 @@ public class FleetApi extends BaseApi {
     private final StarSystemService starSystemService;
 
     @Nonnull
-    private final UserService userService;
-
-    @Nonnull
     private final PlanetService planetService;
 
     @Autowired
     public FleetApi(@Nonnull final FleetService fleetService,
-                    @Nonnull final UserService userService,
                     @Nonnull final StarSystemService starSystemService,
                     @Nonnull final PlanetService planetService) {
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
-        this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
     }
@@ -257,7 +254,7 @@ public class FleetApi extends BaseApi {
     }
 
     @PostMapping(value = MERGE_FLEETS_ENDPOINT)
-    @Operation(summary = "Merge two fleets of an owner.", operationId = "mergeFleets",
+    @Operation(summary = "Transfer the warships between existing fleets.", operationId = "mergeFleets",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
                     content = @Content(
@@ -276,6 +273,30 @@ public class FleetApi extends BaseApi {
         PreconditionWebHelper.checkNotNull(merge, "merge must not be empty");
 
         return ResponseEntity.ok(fleetService.mergeFleets(merge, getIdUser()));
+    }
+
+    @PostMapping(value = SPLIT_FLEETS_ENDPOINT)
+    @Operation(summary = "Split an existing fleet into multiple fleets.", operationId = "splitFleets",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = FleetSplit.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Fleet.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> splitFleets(@RequestBody @Nonnull final FleetSplit fleetSplit) {
+        PreconditionWebHelper.checkNotNull(fleetSplit, "fleetSplit must not be empty");
+
+        return ResponseEntity.ok(fleetService.splitFleets(fleetSplit, getIdUser()).stream().map(f -> new Fleet(f, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
     @PostMapping(value = MOVE_FLEETS_ENDPOINT)
@@ -359,7 +380,6 @@ public class FleetApi extends BaseApi {
                 .collect(Collectors.toList()));
     }
 
-
     @PutMapping(value = RENAME_FLEET_ENDPOINT + "/{idFleet}/{name}")
     @Operation(summary = "Renames a fleet.", operationId = "renameFleet",
             responses = {
@@ -379,6 +399,45 @@ public class FleetApi extends BaseApi {
         fleet.setName(name);
         fleetService.save(fleet);
         return ResponseEntity.ok(true);
+    }
+
+    @PutMapping(value = WARSHIP_POOLING_ENDPOINT)
+    @Operation(summary = "Send ships to the pool", operationId = "sendWarshipsToPool",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = Integer.class)))
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> sendWarshipsToPool(@RequestBody @Nonnull final List<Integer> warshipIDs) {
+        Preconditions.checkNotNull(warshipIDs, "warshipIDs must not be empty");
+
+        final int idUser = getIdUser();
+        fleetService.poolWarships(idUser, warshipIDs);
+        return ResponseEntity.ok(true);
+    }
+
+    @GetMapping(value = WARSHIP_POOLING_ENDPOINT)
+    @Operation(summary = "Renames a fleet.", operationId = "getPooledWarships",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = WarShip.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getPooledWarships() {
+        final int idUser = getIdUser();
+        final Set<de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip> pooledShips = fleetService.findPooledWarships(idUser);
+        return ResponseEntity.ok(pooledShips.stream().map(w -> new WarShip(w, w.getWarshipHealthState(), getPreferredLanguage())));
     }
 
     /**

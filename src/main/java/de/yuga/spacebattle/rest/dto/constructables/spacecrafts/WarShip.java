@@ -1,15 +1,19 @@
 package de.yuga.spacebattle.rest.dto.constructables.spacecrafts;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateAccessor;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateSnapshot;
+import de.yuga.spacebattle.backend.entities.turn.mission.Mission;
 import de.yuga.spacebattle.rest.dto.orbitals.Planet;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass;
 import de.yuga.spacebattle.rest.dto.turn.battle.combat.WarshipHealthState;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 @Schema(description = ".")
 public class WarShip {
@@ -30,8 +34,17 @@ public class WarShip {
 
     @Nonnull
     @JsonProperty
-    @Schema(required = true, description = "The fleet which this ship is part of.")
-    private int idFleet;
+    @Schema(description = "The fleet which this ship is part of.")
+    private Integer idFleet;
+
+    @Nullable
+    @JsonProperty
+    @Schema(description = "The mission which this ship is part of.")
+    private Integer idMission;
+
+    @JsonProperty
+    @Schema(required = true, description = "If the ship is part of the reserve.")
+    private boolean isPooled = true;
 
     @Nonnull
     @JsonProperty
@@ -56,9 +69,25 @@ public class WarShip {
         this.idWarship = warShip.getId();
         this.name = warShip.getName();
         this.shipyard = new de.yuga.spacebattle.rest.dto.orbitals.Planet(warShip.getShipyard());
-        this.idFleet = warShip.getFleet().getId();
+        setDetachment(warShip);
         this.shipClass = new de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass(warShip.getShipClass(), languageCode);
         this.warshipHealthState = new WarshipHealthState(healthState, languageCode);
+    }
+
+    @JsonIgnore
+    private void setDetachment(@Nonnull final de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip warShip) {
+        Preconditions.checkNotNull(warShip, "warShip must not be empty");
+
+        final Fleet fleet = warShip.getFleet();
+        if (fleet != null) {
+            this.idFleet = fleet.getId();
+            isPooled = false;
+        }
+        final Mission mission = warShip.getMission();
+        if (mission != null) {
+            this.idMission = mission.getId();
+            isPooled = false;
+        }
     }
 
     public WarShip(@Nonnull final WarshipHealthStateSnapshot stateSnapshot, @Nonnull final String languageCode) {
@@ -67,7 +96,7 @@ public class WarShip {
         this.idWarship = warShip.getId();
         this.name = warShip.getName();
         this.shipyard = new de.yuga.spacebattle.rest.dto.orbitals.Planet(warShip.getShipyard());
-        this.idFleet = warShip.getFleet().getId();
+        setDetachment(warShip);
         this.shipClass = new de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass(warShip.getShipClass(), languageCode);
         this.warshipHealthState = new WarshipHealthState(stateSnapshot, languageCode);
     }

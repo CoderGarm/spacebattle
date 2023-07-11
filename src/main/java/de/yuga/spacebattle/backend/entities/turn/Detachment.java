@@ -47,13 +47,4 @@ public class Detachment {
         }
         this.mission = mission;
     }
-
-    public void sendToPool() {
-        this.setMission(null);
-        this.setFleet(null);
-    }
-
-    public boolean isPoolShip() {
-        return mission == null && fleet == null;
-    }
 }

@@ -76,4 +76,14 @@ public class WarShipService {
     public List<WarShip> findAliveInoperationalForPlanet(final int idPlanet) {
         return Objects.requireNonNullElse(warShipRepository.findAliveInoperationalForPlanet(idPlanet), new ArrayList<>());
     }
+
+    @Nonnull
+    public Set<WarShip> findPooledShipsByUser(final int idUser) {
+        return Objects.requireNonNullElse(warShipRepository.findPooledShipsByUser(idUser), new HashSet<>());
+    }
+
+    @Nonnull
+    public Set<WarShip> findShipsByUser(final int idUser) {
+        return Objects.requireNonNullElse(warShipRepository.findShipsByUser(idUser), new HashSet<>());
+    }
 }

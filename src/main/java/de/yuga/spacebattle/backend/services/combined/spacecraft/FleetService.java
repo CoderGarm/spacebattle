@@ -11,12 +11,16 @@ import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.repositories.combined.spacecraft.FleetRepository;
+import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
+import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.AbstractId;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMerge;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMergeResult;
+import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetSplit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,16 +37,25 @@ public class FleetService {
     @Nonnull
     private final FleetRepository fleetRepository;
 
-    @Autowired
-    public FleetService(@Nonnull final FleetRepository fleetRepository) {
-        Preconditions.checkNotNull(fleetRepository, "fleetR shouldn't be null!");
+    @Nonnull
+    private final WarShipService warShipService;
 
-        this.fleetRepository = fleetRepository;
+    @Nonnull
+    private final PlanetService planetService;
+
+    @Autowired
+    public FleetService(@Nonnull final FleetRepository fleetRepository,
+                        @Nonnull final WarShipService warShipService,
+                        @Nonnull final PlanetService planetService) {
+        this.fleetRepository = Preconditions.checkNotNull(fleetRepository, "fleetR shouldn't be null!");
+        this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
+        this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
     }
 
     /**
      * Merges the second fleet into the first.
      */
+    @Nonnull
     public FleetMergeResult mergeFleets(@Nonnull final FleetMerge merge, final int idUser) {
         Preconditions.checkNotNull(merge, "merge must not be empty");
 
@@ -73,6 +86,52 @@ public class FleetService {
         return new FleetMergeResult(toStore, toMarkAsDeleted);
     }
 
+
+    public Set<Fleet> splitFleets(@Nonnull final FleetSplit fleetSplit, final int idUser) {
+        Preconditions.checkNotNull(fleetSplit, "fleetSplit must not be empty");
+
+        final Set<WarShip> shipsByUser = warShipService.findShipsByUser(idUser);
+        final Owner owner = shipsByUser.stream()
+                .findFirst()
+                .map(WarShip::getShipClass)
+                .map(ShipClass::getOwner)
+                .orElseThrow(() -> new NotifyWebUserException("Every fleet must have an owner."));
+
+        final Fleet toSplit = shipsByUser.stream().findFirst().map(WarShip::getFleet)
+                .orElseThrow(() -> new NotifyWebUserException("Every warship must have a fleet when splitting a fleet."));
+
+        assert toSplit.getOrbit() != null;
+        final Planet planet = planetService.findByCoordinates(toSplit.getOrbit());
+        assert planet != null;
+
+        final Set<Fleet> result = new HashSet<>();
+        fleetSplit.getFleetConstellations().forEach((name, warshipIDs) -> {
+            // the name is followed by a negative number to make the names unique
+            name = name.split("-")[0];
+            final Set<WarShip> warShips = shipsByUser.stream().filter(w -> warshipIDs.contains(w.getId())).collect(Collectors.toSet());
+            final Fleet fleet = createFleet(owner, planet, name);
+            warShips.forEach(w -> w.setFleet(fleet));
+            warShipService.saveAll(warShips);
+
+            result.add(fleetRepository.findById(fleet.getId()).orElseThrow(NullPointerException::new));
+        });
+
+        return result;
+    }
+
+    @Nonnull
+    public Fleet createFleet(@Nonnull final Owner user, @Nonnull final Planet planet, @Nonnull final String name) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(name, "name must not be empty");
+
+        final FleetOrbit fleetOrbit = new FleetOrbit(planet.getOrbit(), planet.getSystem());
+        final Fleet fleet = new Fleet(name, user, fleetOrbit);
+        fleet.setOperational();
+        return save(fleet);
+    }
+
+    @Nonnull
     public List<Fleet> moveFleets(@Nonnull final List<Move> moves) {
         Preconditions.checkNotNull(moves, "moves shouldn't be null!");
 
@@ -352,4 +411,23 @@ public class FleetService {
         final Iterable<Fleet> saveAll = fleetRepository.saveAll(fleets);
         return StreamSupport.stream(saveAll.spliterator(), false).collect(Collectors.toSet());
     }
+
+    /**
+     * Sends all the warships to the pool.
+     */
+    public void poolWarships(final int idUser, @Nonnull final List<Integer> warshipIDs) {
+        Preconditions.checkNotNull(warshipIDs, "warshipIDs must not be empty");
+
+        final Set<WarShip> warShips = warShipService.findByIds(warshipIDs).stream()
+                .filter(w -> w.getShipClass().getOwner().getId() == idUser)
+                .collect(Collectors.toSet());
+        warShips.forEach(WarShip::sendToPool);
+        warShipService.saveAll(warShips);
+    }
+
+    @Nonnull
+    public Set<WarShip> findPooledWarships(final int idUser) {
+        return warShipService.findPooledShipsByUser(idUser);
+    }
+
 }
