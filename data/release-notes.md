@@ -19,10 +19,10 @@ Auf jeden Fall solltest du Schiffe detachieren, um die Handelswege zu schützen.
 1. Piraten...  
    Die Piraten werden im Laufe der Zeit erweitert werden, jetzt allerdings greifen sie Konvois an und suchen von Zeit zu Zeit nach lohnender Beute.  
    Für die spontanen Unannehmlichkeiten erhält jeder Spieler einen zusätzlichen Songbird-Zerstörer auf Piratenjagd am Heimatplaneten.
-2. Es gibt Wiki-Artikel zu den Missionstypen und Piraterie.
-3. Schiffe detachieren und einmotten!
-   Deine Reserveflotte enthält nun alle Schiffe, die nicht in zu einer Flotte oder einer Mission zugewiesen wurden.  
-   Du kannst deine Missionen aus dem Pool heraus versorgen.
+2. Es gibt Wiki-Artikel zu den Missionstypen und Piraterie, auffindbar im BurgerMenü oben links.
+3. Du kannst im Flottenmenü Schiffe detachieren und einmotten!
+   Deine Reserveflotte wird nun alle Schiffe enthalten, die nicht in zu einer Flotte oder einer Mission zugewiesen wurden.  
+   Aus dem Pool heraus werden Missionen und Flotten ausgestattet.
 4.
 
 todo. beschreibung eingemottete schiffe = flottenpool
@@ -31,11 +31,10 @@ todo. spielermissionen
 -
 
 todo. convoy raid mission
-todo. songbird in mission
 todo. raiding piraten müssen 1 tick pro aktion warten
 todo. operationsgebiet auf karte einzeichen -> systeme/planeten erkennen und für mission setzen
 todo. counter missions must take effect in pirate raid
-todo. fleet management - flotten aufteilen
+todo. fleet management - flotten aufteilen neben flotten mergen
 todo. wiki-eintrag für flottenverwaltung
 
 missionen
@@ -76,7 +75,8 @@ passive piraten
 
 ### Bugs fixed
 
-todo. fleet loading stuff wird falsch berechnet
+1. Der Tech Tree kann nun auch anständig resized werden.
+   todo. fleet loading stuff wird falsch berechnet
 
 #### next steps
 

@@ -16,6 +16,7 @@ import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
+import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.misc.HasName;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
@@ -53,6 +54,7 @@ import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.TickRunnerService;
+import de.yuga.spacebattle.backend.services.turn.mission.MissionService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.misc.Coords;
 import org.slf4j.LoggerFactory;
@@ -173,6 +175,9 @@ public class MasterOfTheUniverseService {
     @Nonnull
     private final OwnerService ownerService;
 
+    @Nonnull
+    private final MissionService missionService;
+
     @Autowired
     public MasterOfTheUniverseService(@Nonnull final TickRunnerService tickService,
                                       @Nonnull final UserService userService,
@@ -190,7 +195,8 @@ public class MasterOfTheUniverseService {
                                       @Nonnull final BattleService battleService,
                                       @Nonnull final ResourceService resourceService,
                                       @Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
-                                      @Nonnull final OwnerService ownerService) {
+                                      @Nonnull final OwnerService ownerService,
+                                      @Nonnull final MissionService missionService) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.allianceService = Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");
@@ -208,6 +214,7 @@ public class MasterOfTheUniverseService {
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
         this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
         this.ownerService = Preconditions.checkNotNull(ownerService, "ownerService must not be empty");
+        this.missionService = Preconditions.checkNotNull(missionService, "missionService must not be empty");
 
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
@@ -224,6 +231,23 @@ public class MasterOfTheUniverseService {
             final Fitting fitting = new Fitting(moduleService.findAllPropulsions(), moduleService.findAllArmors(), moduleService.findAllElectronicWarfare(),
                     moduleService.findAllSidewalls(), moduleService.findAllWeapons(), moduleService.findAllLaunchers(), moduleService.findAllPassiveModules());
             createPirateShip(pirate, fitting);
+
+            final List<User> users = userService.findAll();
+            for (final User user : users) {
+                final Planet mainPlanet = planetService.findMainPlanet(user);
+
+
+                final ShipClass songbirdClass = shipClassService.findAllLatestByOwner(user).stream()
+                        .sorted(Comparator.comparingInt(AbstractEntityKey::getId))
+                        .collect(Collectors.toList()).get(0);
+
+                final String randomWarshipName = resourceService.getRandomWarshipName();
+                final WarShip warShip = new WarShip(randomWarshipName, mainPlanet, songbirdClass);
+                final WarShip save = warShipService.save(warShip);
+
+                missionService.createMission(user, EMissionType.PIRATE_HUNT, Set.of(save.getId()), mainPlanet);
+            }
+
 
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {

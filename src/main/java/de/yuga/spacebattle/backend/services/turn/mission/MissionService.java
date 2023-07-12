@@ -5,13 +5,16 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
+import de.yuga.spacebattle.backend.entities.turn.mission.ConvoyProtectionMission;
 import de.yuga.spacebattle.backend.entities.turn.mission.Mission;
+import de.yuga.spacebattle.backend.entities.turn.mission.PirateHuntMission;
 import de.yuga.spacebattle.backend.enums.EMissionType;
 import de.yuga.spacebattle.backend.repositories.turn.mission.ConvoyProtectionMissionRepository;
 import de.yuga.spacebattle.backend.repositories.turn.mission.MissionRepository;
 import de.yuga.spacebattle.backend.repositories.turn.mission.PirateHuntMissionRepository;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.turn.TickTimeService;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -76,12 +79,24 @@ public class MissionService {
 
         final Tick today = tickTimeService.getToday();
 
-        final Mission mission = missionRepository.save(new Mission(actor, today, planet));
+        Mission mission;
+        switch (missionType) {
+            case PIRATE_HUNT:
+                mission = pirateHuntMissionRepository.save(new PirateHuntMission(actor, today, planet));
+                break;
+            case CONVOY_PROTECTION:
+                mission = convoyProtectionMissionRepository.save(new ConvoyProtectionMission(actor, today, planet));
+                break;
+            case PIRATE_RAID:
+            default:
+                throw new NotifyWebUserException("This will not work, buddy. You are not a pirate!");
+        }
+
         return enrichWithShips(mission, warshipIDs);
     }
 
     @Nonnull
-    private Mission enrichWithShips(@Nonnull final Mission mission, @Nonnull final Set<Integer> warshipIDs) {
+    public Mission enrichWithShips(@Nonnull final Mission mission, @Nonnull final Set<Integer> warshipIDs) {
         Preconditions.checkNotNull(mission, "mission must not be empty");
         Preconditions.checkNotNull(warshipIDs, "warshipIDs must not be empty");
 

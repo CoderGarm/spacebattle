@@ -7,7 +7,6 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateAccessor;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateSnapshot;
 import de.yuga.spacebattle.backend.entities.turn.mission.Mission;
-import de.yuga.spacebattle.rest.dto.orbitals.Planet;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass;
 import de.yuga.spacebattle.rest.dto.turn.battle.combat.WarshipHealthState;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,11 +25,6 @@ public class WarShip {
     @JsonProperty
     @Schema(required = true, description = "The name of this individual ship.")
     private String name;
-
-    @Nonnull
-    @JsonProperty
-    @Schema(required = true, description = "The birthplace of this ship.")
-    private Planet shipyard;
 
     @Nonnull
     @JsonProperty
@@ -68,7 +62,6 @@ public class WarShip {
 
         this.idWarship = warShip.getId();
         this.name = warShip.getName();
-        this.shipyard = new de.yuga.spacebattle.rest.dto.orbitals.Planet(warShip.getShipyard());
         setDetachment(warShip);
         this.shipClass = new de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass(warShip.getShipClass(), languageCode);
         this.warshipHealthState = new WarshipHealthState(healthState, languageCode);
@@ -95,7 +88,6 @@ public class WarShip {
         final de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip warShip = stateSnapshot.getWarShip();
         this.idWarship = warShip.getId();
         this.name = warShip.getName();
-        this.shipyard = new de.yuga.spacebattle.rest.dto.orbitals.Planet(warShip.getShipyard());
         setDetachment(warShip);
         this.shipClass = new de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass(warShip.getShipClass(), languageCode);
         this.warshipHealthState = new WarshipHealthState(stateSnapshot, languageCode);

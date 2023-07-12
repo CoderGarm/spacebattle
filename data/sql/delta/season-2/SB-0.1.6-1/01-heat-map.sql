@@ -13,8 +13,6 @@
        references planet (idPlanet);
 
 INSERT INTO heatMap (heat, missionType, idPlanet) SELECT 1, 'PIRATE_RAID', idPlanet FROM planet WHERE idOwner IS NOT NULL;
-# noinspection SqlWithoutWhere
-
 
 DELIMITER |
 CREATE PROCEDURE setupHeatMap()
@@ -48,8 +46,5 @@ DELIMITER ;
 
 call setupHeatMap();
 drop procedure setupHeatMap;
-
-
-
 
 insert into dbPatch values (null, now(), 'heat map', '0.1.6-1');

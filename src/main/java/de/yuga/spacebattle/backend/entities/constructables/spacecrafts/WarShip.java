@@ -71,6 +71,35 @@ public class WarShip extends Operationable {
         this.warshipHealthState = new WarshipHealthState(this);
     }
 
+    public WarShip(@Nonnull final String name,
+                   @Nonnull final Planet shipyard,
+                   @Nonnull final Mission mission,
+                   @Nonnull final ShipClass shipClass) {
+        Preconditions.checkNotNull(name, "name shouldn't be null!");
+        Preconditions.checkNotNull(shipyard, "shipyard shouldn't be null!");
+        Preconditions.checkNotNull(mission, "mission shouldn't be null!");
+        Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
+
+        this.name = name;
+        this.shipyard = shipyard;
+        this.setMission(mission);
+        this.shipClass = shipClass;
+        this.warshipHealthState = new WarshipHealthState(this);
+    }
+
+    public WarShip(@Nonnull final String name,
+                   @Nonnull final Planet shipyard,
+                   @Nonnull final ShipClass shipClass) {
+        Preconditions.checkNotNull(name, "name shouldn't be null!");
+        Preconditions.checkNotNull(shipyard, "shipyard shouldn't be null!");
+        Preconditions.checkNotNull(shipClass, "shipClass shouldn't be null!");
+
+        this.name = name;
+        this.shipyard = shipyard;
+        this.shipClass = shipClass;
+        this.warshipHealthState = new WarshipHealthState(this);
+    }
+
     @Nonnull
     public String getName() {
         return name;
