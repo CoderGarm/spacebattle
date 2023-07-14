@@ -9,7 +9,6 @@ import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.backend.services.turn.mission.MissionService;
 import de.yuga.spacebattle.rest.api.BaseApi;
-import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.mission.Mission;
 import io.swagger.v3.oas.annotations.Operation;
@@ -100,8 +99,7 @@ public class MissionApi extends BaseApi {
     )
     public ResponseEntity<?> setupMission(@RequestBody @Nonnull final Mission mission) {
 
-
-        final Set<Integer> warshipIDs = mission.getShips().stream().map(WarShip::getIdWarship).collect(Collectors.toSet());
+        final Set<Integer> warshipIDs = mission.getWarShipIDs();
         if (mission.getIdMission() != null) {
             final de.yuga.spacebattle.backend.entities.turn.mission.Mission result = missionService.updateMission(mission.getIdMission(), warshipIDs);
             Preconditions.checkNotNull(result, "result must not be empty");

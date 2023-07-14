@@ -127,4 +127,8 @@ public class Mission extends Deletable {
     public void enrichWithShips(@Nonnull final List<WarShip> warShips) {
         this.ships.addAll(Preconditions.checkNotNull(warShips, "warShips must not be empty"));
     }
+
+    public void setMissionType(@Nonnull EMissionType missionType) {
+        this.missionType = Preconditions.checkNotNull(missionType, "missionType must not be empty");
+    }
 }

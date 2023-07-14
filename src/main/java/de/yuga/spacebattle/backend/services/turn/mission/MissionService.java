@@ -83,9 +83,11 @@ public class MissionService {
         switch (missionType) {
             case PIRATE_HUNT:
                 mission = pirateHuntMissionRepository.save(new PirateHuntMission(actor, today, planet));
+                mission.setMissionType(EMissionType.PIRATE_HUNT);
                 break;
             case CONVOY_PROTECTION:
                 mission = convoyProtectionMissionRepository.save(new ConvoyProtectionMission(actor, today, planet));
+                mission.setMissionType(EMissionType.CONVOY_PROTECTION);
                 break;
             case PIRATE_RAID:
             default:

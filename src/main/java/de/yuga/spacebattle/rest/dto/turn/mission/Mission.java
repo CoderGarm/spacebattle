@@ -9,7 +9,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,7 +36,12 @@ public class Mission {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The mission's individual war ships.")
-    private Set<WarShip> ships = new HashSet<>();
+    private List<WarShip> ships = new ArrayList<>();
+
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The mission's individual war ships.")
+    private Set<Integer> warShipIDs = new HashSet<>();
 
     public Mission() {
     }
@@ -43,9 +50,11 @@ public class Mission {
                    @Nonnull final String languageCode) {
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
 
+        this.idMission = mission.getId();
         this.missionType = mission.getMissionType();
         this.venue = new Planet(mission.getVenue());
-        this.ships = mission.getShips().stream().map(w -> new WarShip(w, w.getWarshipHealthState(), languageCode)).collect(Collectors.toSet());
+        this.ships = mission.getShips().stream().map(w -> new WarShip(w, w.getWarshipHealthState(), languageCode)).collect(Collectors.toList());
+        this.warShipIDs = this.ships.stream().map(WarShip::getIdWarship).collect(Collectors.toSet());
     }
 
     @Nullable
@@ -64,7 +73,12 @@ public class Mission {
     }
 
     @Nonnull
-    public Set<WarShip> getShips() {
+    public List<WarShip> getShips() {
         return ships;
+    }
+
+    @Nonnull
+    public Set<Integer> getWarShipIDs() {
+        return warShipIDs;
     }
 }

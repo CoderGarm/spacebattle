@@ -15,27 +15,30 @@ public class StateBlock {
 
     @JsonProperty
     @Schema(required = true, description = "If the spacecraft is marked as wrecked.")
-    private final boolean isDeleted;
+    private boolean isDeleted;
 
     @JsonProperty
     @Schema(required = true, description = "If the spacecraft is marked as active.")
-    private final boolean isOperational;
+    private boolean isOperational;
 
     @JsonProperty
     @Schema(required = true, description = "If the spacecraft can do actions.")
-    private final boolean isActive;
+    private boolean isActive;
 
     @JsonProperty
     @Schema(required = true, description = "If the spacecraft is able to fight.")
-    private final boolean isFightingCapable;
+    private boolean isFightingCapable;
 
     @JsonProperty
     @Schema(required = true, description = "If the spacecraft needs a repair.")
-    private final boolean needsRepair;
+    private boolean needsRepair;
 
     @JsonProperty
     @Schema(required = true, description = "If the spacecraft needs ammunition.")
-    private final boolean needsAmmunition;
+    private boolean needsAmmunition;
+
+    public StateBlock() {
+    }
 
     public StateBlock(@Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(fleet, "fleet must not be empty");
