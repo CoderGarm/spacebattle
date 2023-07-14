@@ -12,7 +12,8 @@ Piraten werden dich besuchen und sie werden mitgehen lassen, was möglich ist.
 Sie werden dich berauben, deine Nachbarn brandschatzen und dir auflauern, wenn du es am wenigsten erwartest.
 
 Also vielleicht sind sie nicht solche Mistkerle wie Warnecke damals in Marsh, aber wer weiß ...  
-Auf jeden Fall solltest du Schiffe detachieren, um die Handelswege zu schützen.
+Auf jeden Fall solltest du Schiffe detachieren, um die Handelswege zu schützen.  
+Die Admiralität ist der Meinung, es wäre gut die Systeme zu patrouillieren.
 
 #### Gameplay
 
@@ -21,9 +22,12 @@ Auf jeden Fall solltest du Schiffe detachieren, um die Handelswege zu schützen.
    Für die spontanen Unannehmlichkeiten erhält jeder Spieler einen zusätzlichen Songbird-Zerstörer auf Piratenjagd am Heimatplaneten.
 2. Es gibt Wiki-Artikel zu den Missionstypen und Piraterie, auffindbar im BurgerMenü oben links.
 3. Du kannst im Flottenmenü Schiffe detachieren und einmotten!
-   Deine Reserveflotte wird nun alle Schiffe enthalten, die nicht in zu einer Flotte oder einer Mission zugewiesen wurden.  
+   Deine Reserveflotte wird nun alle Schiffe enthalten, die nicht in zu einer Flotte oder einer Mission zugewiesen
+   wurden.  
    Aus dem Pool heraus werden Missionen und Flotten ausgestattet.
-4.
+4. Missionen!  
+   Die strategischen Operationen deines Reiches sorgen für sichere Handelswege und für ruhige Nachbarn.  
+   Nutze sie weise, um deine begrenzte Tonnage einzusetzen und das Maximum an Einfluss herauszuholen.
 
 todo. beschreibung eingemottete schiffe = flottenpool
 todo. spielermissionen

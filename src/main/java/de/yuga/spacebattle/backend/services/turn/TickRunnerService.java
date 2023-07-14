@@ -5,7 +5,6 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.repositories.turn.TickRepository;
 import de.yuga.spacebattle.backend.services.MailService;
-import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
 import de.yuga.spacebattle.backend.services.turn.tick.ColonizationTickRunner;
 import de.yuga.spacebattle.backend.services.turn.tick.TickRunner;
 import org.slf4j.Logger;
@@ -47,7 +46,6 @@ public class TickRunnerService {
     @Autowired
     public TickRunnerService(@Nonnull final Set<TickRunner> tickRunners,
                              @Nonnull final TickRepository tickRepository,
-                             @Nonnull final BattleService battleService,
                              @Nonnull final MailService mailService) {
         Preconditions.checkNotNull(tickRunners, "tickRunners must not be empty");
         this.tickRunners = tickRunners.stream().sorted((TickRunner::compareTo)).collect(Collectors.toList());

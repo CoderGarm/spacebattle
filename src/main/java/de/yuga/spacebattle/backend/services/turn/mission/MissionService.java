@@ -109,4 +109,11 @@ public class MissionService {
         mission.enrichWithShips(warShips);
         return mission;
     }
+
+    @Nonnull
+    public List<PirateHuntMission> findPirateHuntByPlanet(@Nonnull final Planet planet) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+        return Objects.requireNonNullElse(pirateHuntMissionRepository.findAllForPlanet(planet), new ArrayList<>());
+    }
 }
