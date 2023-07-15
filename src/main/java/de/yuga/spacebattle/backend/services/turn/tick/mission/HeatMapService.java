@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.entities.turn.mission.HeatMap;
 import de.yuga.spacebattle.backend.enums.EMissionType;
 import de.yuga.spacebattle.backend.repositories.turn.mission.HeatMapRepository;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -23,6 +24,7 @@ public class HeatMapService {
     @Nonnull
     private final StarSystemService starSystemService;
 
+    @Autowired
     public HeatMapService(@Nonnull final HeatMapRepository heatMapRepository,
                           @Nonnull final StarSystemService starSystemService) {
         this.heatMapRepository = Preconditions.checkNotNull(heatMapRepository, "heatMapRepository must not be empty");
@@ -52,6 +54,13 @@ public class HeatMapService {
         Preconditions.checkNotNull(eMissionType, "eMissionType must not be empty");
 
         return Objects.requireNonNullElse(heatMapRepository.findHeatForPlanets(planets.stream().map(AbstractEntityKey::getId).collect(Collectors.toList()), eMissionType), new HashSet<>());
+    }
+
+    @Nonnull
+    public Set<HeatMap> findHeatForMissionType(final @Nonnull EMissionType eMissionType) {
+        Preconditions.checkNotNull(eMissionType, "eMissionType must not be empty");
+
+        return Objects.requireNonNullElse(heatMapRepository.findHeatForMissionType(eMissionType), new HashSet<>());
     }
 
     public void createHeatForNeighbourhood(@Nonnull final Planet planet) {
@@ -101,5 +110,11 @@ public class HeatMapService {
     @Nonnull
     public Set<HeatMap> findHeatForPlanets(final Set<Planet> neighbours) {
         return Objects.requireNonNullElse(heatMapRepository.findHeatForPlanets(neighbours.stream().map(AbstractEntityKey::getId).collect(Collectors.toList())), new HashSet<>());
+    }
+
+    public void saveAll(@Nonnull final Collection<HeatMap> heatMaps) {
+        Preconditions.checkNotNull(heatMaps, "heatMaps must not be empty");
+
+        heatMapRepository.saveAll(heatMaps);
     }
 }

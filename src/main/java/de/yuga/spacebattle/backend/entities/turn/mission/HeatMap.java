@@ -60,6 +60,11 @@ public class HeatMap extends AbstractEntityKey {
         heat++;
     }
 
+
+    public void add(final int impact) {
+        heat += impact;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;

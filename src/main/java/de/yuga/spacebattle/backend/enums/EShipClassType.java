@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.enums;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
@@ -102,5 +103,32 @@ public enum EShipClassType implements HasIconName {
     @Nonnull
     public String getDescription() {
         return description;
+    }
+
+    /**
+     * States the impact of this class for a given mission.<br>
+     * That means
+     */
+    public int getHeatImpact(@Nonnull final EMissionType missionType) {
+        Preconditions.checkNotNull(missionType, "missionType must not be empty");
+
+        switch (missionType) {
+            case PIRATE_RAID:
+
+                if (isCivilShip()) {
+                    // I am prey
+                    return 3;
+                }
+                if (isAuxiliaryShip()) {
+                    // I am smaller prey
+                    return 1;
+                }
+                // I am reducing heat by fighting pirates
+                return -ordinal();
+            default:
+            case PIRATE_HUNT:
+            case CONVOY_PROTECTION:
+                throw new NotifyWebUserException("In this state I am supposed to be only used to state my impact as part of a counter mission.");
+        }
     }
 }

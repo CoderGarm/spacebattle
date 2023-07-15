@@ -13,7 +13,7 @@ Sie werden dich berauben, deine Nachbarn brandschatzen und dir auflauern, wenn d
 
 Also vielleicht sind sie nicht solche Mistkerle wie Warnecke damals in Marsh, aber wer weiß ...  
 Auf jeden Fall solltest du Schiffe detachieren, um die Handelswege zu schützen.  
-Die Admiralität ist der Meinung, es wäre gut die Systeme zu patrouillieren.
+Die Admiralität ist der Meinung, es wäre gut die Systeme regulär zu patrouillieren und dafür Kräfte freizustellen.
 
 #### Gameplay
 
@@ -29,17 +29,18 @@ Die Admiralität ist der Meinung, es wäre gut die Systeme zu patrouillieren.
    Die strategischen Operationen deines Reiches sorgen für sichere Handelswege und für ruhige Nachbarn.  
    Nutze sie weise, um deine begrenzte Tonnage einzusetzen und das Maximum an Einfluss herauszuholen.
 
-todo. beschreibung eingemottete schiffe = flottenpool
 todo. spielermissionen
 
 -
 
 todo. convoy raid mission
 todo. raiding piraten müssen 1 tick pro aktion warten
-todo. operationsgebiet auf karte einzeichen -> systeme/planeten erkennen und für mission setzen
 todo. counter missions must take effect in pirate raid
 todo. fleet management - flotten aufteilen neben flotten mergen
-todo. wiki-eintrag für flottenverwaltung
+todo. wiki-eintrag für flottenverwaltung, heatmap, mission und counter
+- nur reserveschiffe können missionen zugewiesen werden
+- jeder plani bekommt heat pro runde
+- counter mission reduziert um counter impact, flotten im orbit verbessern die heat nur zur hälfte, frachter im orbit sprechen sich rum
 
 missionen
 
@@ -127,9 +128,10 @@ todo. population raiden
 todo. spot offer hat nur so viel volumen wie die letzten 10 Tage insgesamt gehandelt wurde
 todo. warship health states not persisted
 todo. reload trade offers and stuff after take one
+todo. operationsgebiet auf karte einzeichen -> systeme/planeten erkennen und für mission setzen
 
 todo. kein alter Menüpunkt mehr ausgewählt wenn man sich wieder einloggt
-todo. Exception per mail an webmaster
+todo. Exception per mail an webmaster (warum funzt das nicht auf prod?)
 
 - look & feel wie in büchern
 - emission spectra als gimmick

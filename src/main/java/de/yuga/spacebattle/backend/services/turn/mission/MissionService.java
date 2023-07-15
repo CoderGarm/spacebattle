@@ -116,4 +116,11 @@ public class MissionService {
 
         return Objects.requireNonNullElse(pirateHuntMissionRepository.findAllForPlanet(planet), new ArrayList<>());
     }
+
+    @Nonnull
+    public List<PirateHuntMission> findPirateHuntByPlanets(@Nonnull final Set<Planet> planets) {
+        Preconditions.checkNotNull(planets, "planets must not be empty");
+
+        return Objects.requireNonNullElse(pirateHuntMissionRepository.findAllForPlanets(planets), new ArrayList<>());
+    }
 }
