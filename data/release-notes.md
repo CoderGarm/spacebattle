@@ -34,8 +34,7 @@ todo. spielermissionen
 -
 
 todo. convoy raid mission
-todo. raiding piraten müssen 1 tick pro aktion warten
-todo. counter missions must take effect in pirate raid
+done. counter missions must take effect in pirate raid
 todo. fleet management - flotten aufteilen neben flotten mergen
 todo. wiki-eintrag für flottenverwaltung, heatmap, mission und counter
 - nur reserveschiffe können missionen zugewiesen werden
@@ -77,11 +76,13 @@ passive piraten
 4. Die Job-Liste im Dashboard ist etwas schlanker gestaltet und es gibt einen "Job finished"-Marker.
 5. Der Spinner zum Anzeigen von Wartezeit ist etwas schicker.
 6. Es gibt jetzt eine "Nimm mal lieber ein größeres Display"-Warnung bei Displays < 800 Pixel Breite.
+7. Das Dashboard ist thematisch besser sortiert.
 
 ### Bugs fixed
 
 1. Der Tech Tree kann nun auch anständig resized werden.
    todo. fleet loading stuff wird falsch berechnet
+   todo. double planned colo problem
 
 #### next steps
 

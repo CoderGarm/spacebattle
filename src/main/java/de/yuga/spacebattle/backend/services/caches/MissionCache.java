@@ -6,7 +6,7 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
-import de.yuga.spacebattle.backend.enums.EMissionActions;
+import de.yuga.spacebattle.backend.enums.EMissionAction;
 import de.yuga.spacebattle.backend.enums.EMissionType;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +28,7 @@ public class MissionCache {
         Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
         Preconditions.checkNotNull(target, "target must not be empty");
 
-        final MissionItem missionItem = new MissionItem(today, pirateFleet, target, EMissionType.PIRATE_RAID, EMissionActions.SPAWN);
+        final MissionItem missionItem = new MissionItem(today, pirateFleet, target, EMissionType.PIRATE_RAID, EMissionAction.SPAWN);
         addItem(today, target, missionItem);
     }
 
@@ -37,7 +37,7 @@ public class MissionCache {
         Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
         Preconditions.checkNotNull(target, "target must not be empty");
 
-        final MissionItem missionItem = new MissionItem(today, pirateFleet, target, EMissionType.PIRATE_RAID, EMissionActions.APPROACH);
+        final MissionItem missionItem = new MissionItem(today, pirateFleet, target, EMissionType.PIRATE_RAID, EMissionAction.APPROACH);
         addItem(today, target, missionItem);
     }
 
@@ -46,7 +46,7 @@ public class MissionCache {
         Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
         Preconditions.checkNotNull(target, "target must not be empty");
 
-        final MissionItem missionItem = new MissionItem(today, pirateFleet, target, EMissionType.PIRATE_RAID, EMissionActions.WITHDRAW);
+        final MissionItem missionItem = new MissionItem(today, pirateFleet, target, EMissionType.PIRATE_RAID, EMissionAction.WITHDRAW);
         addItem(today, target, missionItem);
     }
 
@@ -55,7 +55,7 @@ public class MissionCache {
         Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
         Preconditions.checkNotNull(target, "target must not be empty");
 
-        final MissionItem missionItem = new MissionItem(today, pirateFleet, target, EMissionType.PIRATE_RAID, EMissionActions.LEAVE_ORBIT);
+        final MissionItem missionItem = new MissionItem(today, pirateFleet, target, EMissionType.PIRATE_RAID, EMissionAction.LEAVE_ORBIT);
         addItem(today, target, missionItem);
     }
 
@@ -64,12 +64,12 @@ public class MissionCache {
         Preconditions.checkNotNull(target, "target must not be empty");
 
         if (battleReport == null) {
-            final MissionItem missionItem = new MissionItem(today, pirateFleet, target, EMissionType.PIRATE_RAID, EMissionActions.NO_BATTLE);
+            final MissionItem missionItem = new MissionItem(today, pirateFleet, target, EMissionType.PIRATE_RAID, EMissionAction.NO_BATTLE);
             addItem(today, target, missionItem);
             return;
         }
 
-        final MissionItem missionItem = new MissionItem(today, pirateFleet, target, EMissionType.PIRATE_RAID, EMissionActions.BATTLE);
+        final MissionItem missionItem = new MissionItem(today, pirateFleet, target, EMissionType.PIRATE_RAID, EMissionAction.BATTLE);
         missionItem.setUserDefeated(userDefeated);
         missionItem.setBattleReport(battleReport);
         addItem(today, target, missionItem);
@@ -79,16 +79,15 @@ public class MissionCache {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(target, "target must not be empty");
 
-        final MissionItem missionItem = new MissionItem(today, pirateFleet, target, EMissionType.PIRATE_RAID, EMissionActions.RAID);
+        final MissionItem missionItem = new MissionItem(today, pirateFleet, target, EMissionType.PIRATE_RAID, EMissionAction.RAID);
         addItem(today, target, missionItem);
     }
 
     @Nonnull
-    public List<MissionItem> get(@Nonnull final Tick today, @Nonnull final Planet target) {
+    public List<MissionItem> get(@Nonnull final Tick today, final int idUser) {
         Preconditions.checkNotNull(today, "today must not be empty");
-        Preconditions.checkNotNull(target, "target must not be empty");
 
-        return Objects.requireNonNullElse(cache.get(getKey(today, target)), new ArrayList<>());
+        return Objects.requireNonNullElse(cache.get(getKey(today, idUser)), new ArrayList<>());
     }
 
     private void addItem(@Nonnull final Tick today, @Nonnull final Planet target, @Nonnull final MissionItem missionItem) {
@@ -106,12 +105,19 @@ public class MissionCache {
     }
 
     @Nonnull
+    private String getKey(@Nonnull final Tick today, final int idUser) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+
+        return today.getNo() + "|" + idUser;
+    }
+
+    @Nonnull
     private String getKey(@Nonnull final Tick today, @Nonnull final Planet target) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(target, "target must not be empty");
         Preconditions.checkNotNull(target.getOwner(), "target.getOwner() must not be empty");
 
-        return today.getNo() + "|" + target.getOwner().getId();
+        return getKey(today, target.getOwner().getId());
 
     }
 }

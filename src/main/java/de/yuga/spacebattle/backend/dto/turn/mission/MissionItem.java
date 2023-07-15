@@ -5,7 +5,7 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
-import de.yuga.spacebattle.backend.enums.EMissionActions;
+import de.yuga.spacebattle.backend.enums.EMissionAction;
 import de.yuga.spacebattle.backend.enums.EMissionType;
 
 import javax.annotation.Nonnull;
@@ -26,7 +26,7 @@ public class MissionItem {
     private final EMissionType eMissionType;
 
     @Nonnull
-    private final EMissionActions eMissionActions;
+    private final EMissionAction missionAction;
 
     private boolean userDefeated;
 
@@ -37,12 +37,12 @@ public class MissionItem {
                        @Nonnull final Fleet pirateFleet,
                        @Nonnull final Planet target,
                        @Nonnull final EMissionType eMissionType,
-                       @Nonnull final EMissionActions eMissionActions) {
+                       @Nonnull final EMissionAction missionAction) {
         this.today = Preconditions.checkNotNull(today, "today must not be empty");
         this.pirateFleet = Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
         this.target = Preconditions.checkNotNull(target, "target must not be empty");
         this.eMissionType = Preconditions.checkNotNull(eMissionType, "eMissionType must not be empty");
-        this.eMissionActions = Preconditions.checkNotNull(eMissionActions, "eMissionActions must not be empty");
+        this.missionAction = Preconditions.checkNotNull(missionAction, "eMissionActions must not be empty");
     }
 
     public void setUserDefeated(final boolean userDefeated) {
@@ -70,8 +70,8 @@ public class MissionItem {
     }
 
     @Nonnull
-    public EMissionActions geteMissionActions() {
-        return eMissionActions;
+    public EMissionAction getEMissionAction() {
+        return missionAction;
     }
 
     public boolean isUserDefeated() {

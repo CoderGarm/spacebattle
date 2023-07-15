@@ -1,16 +1,15 @@
 package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.turn.mission.MissionItem;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
-import de.yuga.spacebattle.backend.services.caches.ColonizationCache;
-import de.yuga.spacebattle.backend.services.caches.FleetMovementCache;
-import de.yuga.spacebattle.backend.services.caches.OperationalCache;
-import de.yuga.spacebattle.backend.services.caches.TransportationCache;
+import de.yuga.spacebattle.backend.services.caches.*;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.*;
+import de.yuga.spacebattle.rest.dto.turn.mission.MissionReport;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -43,6 +42,7 @@ public class JournalApi extends BaseApi {
     private static final String FINISHED_MOVEMENT_ENDPOINT = "finishedMovement";
     private static final String FINISHED_COLONIZATIONS_ENDPOINT = "finishedColonizations";
     private static final String OPERATIONALS_ENDPOINT = "operationals";
+    private static final String MISSIONS_ENDPOINT = "missions";
 
     @Nonnull
     private final TickTimeService tickService;
@@ -62,19 +62,24 @@ public class JournalApi extends BaseApi {
     @Nonnull
     private final OperationalCache operationalCache;
 
+    @Nonnull
+    private final MissionCache missionCache;
+
     @Autowired
     public JournalApi(@Nonnull final TickTimeService tickService,
                       @Nonnull final JobService jobService,
                       @Nonnull final TransportationCache transportationCache,
                       @Nonnull final FleetMovementCache fleetMovementCache,
                       @Nonnull final ColonizationCache colonizationCache,
-                      @Nonnull final OperationalCache operationalCache) {
+                      @Nonnull final OperationalCache operationalCache,
+                      @Nonnull final MissionCache missionCache) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
         this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
         this.transportationCache = Preconditions.checkNotNull(transportationCache, "transportationCache must not be empty");
         this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
         this.colonizationCache = Preconditions.checkNotNull(colonizationCache, "colonizationCache must not be empty");
         this.operationalCache = Preconditions.checkNotNull(operationalCache, "operationalCache must not be empty");
+        this.missionCache = Preconditions.checkNotNull(missionCache, "missionCache must not be empty");
     }
 
     @GetMapping(value = JOB_FINISHED_ENDPOINT)
@@ -174,5 +179,23 @@ public class JournalApi extends BaseApi {
         return ResponseEntity.ok(operationalCache.getOperationals(today, idUser).stream()
                 .map(o -> new Commissioning(o, getPreferredLanguage()))
                 .collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = MISSIONS_ENDPOINT)
+    @Operation(summary = "Get the today's mission results.", operationId = "getMissionResults",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = MissionReport.class))
+                    ),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getMissionResults() {
+        final int idUser = getIdUser();
+        final Tick today = tickService.getToday();
+
+        final List<MissionItem> missionItems = missionCache.get(today, idUser);
+        return ResponseEntity.ok(new MissionReport(missionItems, getPreferredLanguage()));
     }
 }

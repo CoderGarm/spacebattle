@@ -1,6 +1,6 @@
 package de.yuga.spacebattle.backend.enums;
 
-public enum EMissionActions {
+public enum EMissionAction {
 
     SPAWN,
     APPROACH,
