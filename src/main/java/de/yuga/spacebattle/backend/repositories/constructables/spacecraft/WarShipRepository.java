@@ -12,7 +12,7 @@ import java.util.Set;
 public interface WarShipRepository extends CrudRepository<WarShip, Integer> {
 
     @Nullable
-    @Query("SELECT w FROM WarShip w WHERE w.shipyard.id = :idPlanet AND w.isDeleted = false AND w.isOperational = false")
+    @Query("SELECT w FROM WarShip w WHERE w.shipyard.id = :idPlanet AND w.isDeleted = false AND w.isOperational = false AND w.detachment.fleet IS NOT NULL")
     List<WarShip> findAliveInoperationalForPlanet(@Param("idPlanet") final int idPlanet);
 
     @Nullable

@@ -30,9 +30,6 @@ Die Admiralität ist der Meinung, es wäre gut die Systeme regulär zu patrouill
    Nutze sie weise, um deine begrenzte Tonnage einzusetzen und das Maximum an Einfluss herauszuholen.
 
 todo. spielermissionen
-
--
-
 todo. convoy raid mission
 done. counter missions must take effect in pirate raid
 todo. fleet management - flotten aufteilen neben flotten mergen
