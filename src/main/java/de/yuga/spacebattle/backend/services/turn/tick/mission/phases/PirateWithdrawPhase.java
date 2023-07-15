@@ -11,6 +11,7 @@ import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.services.account.NonPlayerCharacterService;
 import de.yuga.spacebattle.backend.services.caches.FleetMovementCache;
+import de.yuga.spacebattle.backend.services.caches.MissionCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.MissionPhaseRunner;
@@ -47,15 +48,20 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
     @Nonnull
     private final FleetMovementCache fleetMovementCache;
 
+    @Nonnull
+    private final MissionCache missionCache;
+
     @Autowired
     public PirateWithdrawPhase(@Nonnull final PlanetService planetService,
                                @Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
                                @Nonnull final FleetService fleetService,
-                               @Nonnull final FleetMovementCache fleetMovementCache) {
+                               @Nonnull final FleetMovementCache fleetMovementCache,
+                               @Nonnull final MissionCache missionCache) {
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
         this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
+        this.missionCache = Preconditions.checkNotNull(missionCache, "missionCache must not be empty");
     }
 
     @Override
@@ -78,6 +84,7 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
         fleets.forEach(fleet -> {
             assert fleet.getOrbit() != null;
             assert fleet.getOrbit().getSystem() != null;
+            // no jump-into-hyperspace-sensors possible - no notification
             LOGGER.info("\tPirate fleet withdraws to hyper space from '" + fleet.getOrbit().getSystem().getName() + "'");
         });
     }
@@ -97,6 +104,7 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
                 continue;
             }
             LOGGER.info("\tPirate fleet withdraws to hyper limit from '" + target.getName() + "'");
+            missionCache.pirateRaidWithdrawFromOrbit(today, pirateFleet, target);
             final FleetOrbit destination = new FleetOrbit(target.getOrbit(), target.getSystem());
             final Orbit positionOnHyperlimit = NavigationCalculator.getPositionOnHyperlimit(pirateFleet, destination);
             final Move move = new Move(pirateFleet, new FleetOrbit(positionOnHyperlimit, target.getSystem()));

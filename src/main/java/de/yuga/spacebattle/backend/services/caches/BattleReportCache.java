@@ -26,6 +26,6 @@ public class BattleReportCache {
                                           final int idUser) {
         Preconditions.checkNotNull(today, "today must not be empty");
 
-        lastQueryBattleReportsCache.add(idUser, today);
+        lastQueryBattleReportsCache.put(idUser, today);
     }
 }

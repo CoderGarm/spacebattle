@@ -12,7 +12,9 @@ public class CacheStore<KEY, VALUE> {
 
     private final Cache<KEY, VALUE> cache;
 
-    public CacheStore(int expiryDuration, TimeUnit timeUnit) {
+    public CacheStore(final int expiryDuration, @Nonnull final TimeUnit timeUnit) {
+        Preconditions.checkNotNull(timeUnit, "timeUnit must not be empty");
+
         cache = CacheBuilder.newBuilder()
                 .expireAfterWrite(expiryDuration, timeUnit)
                 .concurrencyLevel(Runtime.getRuntime().availableProcessors())
@@ -26,7 +28,7 @@ public class CacheStore<KEY, VALUE> {
         return cache.getIfPresent(key);
     }
 
-    public void add(@Nonnull final KEY key, @Nonnull final VALUE value) {
+    public void put(@Nonnull final KEY key, @Nonnull final VALUE value) {
         Preconditions.checkNotNull(key, "key must not be empty");
         Preconditions.checkNotNull(value, "value must not be empty");
 

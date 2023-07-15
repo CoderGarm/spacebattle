@@ -73,25 +73,13 @@ public class HeatMapRunner implements TickRunner {
 
         pirateRaidHeatMap.forEach(heatMap -> {
             final List<PirateHuntMission> counterMissions = missions.stream().filter(m -> m.getVenue().equals(heatMap.getPlanet())).collect(Collectors.toList());
-            final int impact = counterMissions.stream()
-                    .map(PirateHuntMission::getShips)
-                    .flatMap(Collection::stream)
-                    .map(WarShip::getShipClass)
-                    .map(ShipClass::getShipClassType)
-                    .map(type -> type.getHeatImpact(pirateRaid))
-                    .reduce(BASIC_HEAT_INCREMENT, Integer::sum);
 
             // add heat from missions to the regular heat increasement
+            final int impact = BASIC_HEAT_INCREMENT + getImpactOfRaidCounter(counterMissions);
             heatMap.add(impact);
 
             final Set<Fleet> anchored = fleetService.findAllAnchoredForPlanet(heatMap.getPlanet());
-            int orbitalImpact = anchored.stream()
-                    .map(Fleet::getAliveShips)
-                    .flatMap(Collection::stream)
-                    .map(WarShip::getShipClass)
-                    .map(ShipClass::getShipClassType)
-                    .map(type -> type.getHeatImpact(pirateRaid))
-                    .reduce(0, Integer::sum);
+            int orbitalImpact = getOrbitalImpact(anchored);
 
             if (orbitalImpact > 0) {
                 // manual trade routes found? This is the biggest prey!
@@ -104,5 +92,28 @@ public class HeatMapRunner implements TickRunner {
         heatMapService.saveAll(pirateRaidHeatMap);
     }
 
+    public static int getOrbitalImpact(@Nonnull final Set<Fleet> anchoredFleets) {
+        Preconditions.checkNotNull(anchoredFleets, "anchoredFleets must not be empty");
+
+        return anchoredFleets.stream()
+                .map(Fleet::getAliveShips)
+                .flatMap(Collection::stream)
+                .map(WarShip::getShipClass)
+                .map(ShipClass::getShipClassType)
+                .map(type -> type.getHeatImpact(EMissionType.PIRATE_RAID))
+                .reduce(0, Integer::sum);
+    }
+
+    public static int getImpactOfRaidCounter(@Nonnull final List<PirateHuntMission> counterMissions) {
+        Preconditions.checkNotNull(counterMissions, "counterMissions must not be empty");
+
+        return counterMissions.stream()
+                .map(PirateHuntMission::getShips)
+                .flatMap(Collection::stream)
+                .map(WarShip::getShipClass)
+                .map(ShipClass::getShipClassType)
+                .map(type -> type.getHeatImpact(EMissionType.PIRATE_RAID))
+                .reduce(0, Integer::sum);
+    }
 
 }

@@ -85,7 +85,7 @@ public class TransportationCache {
         Set<TransportJob> transportJobs = transportCache.get(from.getOwner().getId());
         if (transportJobs == null) {
             transportJobs = new HashSet<>();
-            transportCache.add(from.getOwner().getId(), transportJobs);
+            transportCache.put(from.getOwner().getId(), transportJobs);
         }
         final TransportJob transportJob = new TransportJob(today, from, to);
         final TransportJob job = transportJobs.stream().filter(t -> t.equals(transportJob)).findFirst().orElse(transportJob);
@@ -133,7 +133,7 @@ public class TransportationCache {
         Set<OrbitalTransportJob> transportJobs = orbitalTransportCache.get(planet.getOwner().getId());
         if (transportJobs == null) {
             transportJobs = new HashSet<>();
-            orbitalTransportCache.add(planet.getOwner().getId(), transportJobs);
+            orbitalTransportCache.put(planet.getOwner().getId(), transportJobs);
         }
         final OrbitalTransportJob transportJob = new OrbitalTransportJob(today, planet, fleet, transportType);
         final OrbitalTransportJob job = transportJobs.stream().filter(t -> t.equals(transportJob)).findFirst().orElse(transportJob);

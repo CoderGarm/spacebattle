@@ -2,7 +2,6 @@ package de.yuga.spacebattle.backend.services.turn.tick.mission.phases;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
-import de.yuga.spacebattle.backend.dto.account.UserPoints;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
@@ -13,12 +12,16 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
+import de.yuga.spacebattle.backend.entities.turn.mission.PirateHuntMission;
 import de.yuga.spacebattle.backend.enums.EMissionType;
 import de.yuga.spacebattle.backend.services.account.NonPlayerCharacterService;
 import de.yuga.spacebattle.backend.services.caches.FleetMovementCache;
+import de.yuga.spacebattle.backend.services.caches.MissionCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
+import de.yuga.spacebattle.backend.services.turn.mission.MissionService;
+import de.yuga.spacebattle.backend.services.turn.tick.HeatMapRunner;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.HeatMapService;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.MissionPhaseRunner;
 import org.slf4j.Logger;
@@ -44,6 +47,9 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
     @Nonnull
     private static final Logger LOGGER = LoggerFactory.getLogger(PirateSpawnPhase.class);
 
+    @Nullable
+    private Tick today;
+
     @Nonnull
     private final NonPlayerCharacterService nonPlayerCharacterService;
 
@@ -62,23 +68,34 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
     @Nonnull
     private final HeatMapService heatMapService;
 
+    @Nonnull
+    private final MissionService missionService;
+
+    @Nonnull
+    private final MissionCache missionCache;
+
     @Autowired
     public PirateSpawnPhase(@Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
                             @Nonnull final FleetService fleetService,
                             @Nonnull final ShipClassService shipClassService,
                             @Nonnull final WarShipService warShipService,
                             @Nonnull final FleetMovementCache fleetMovementCache,
-                            @Nonnull final HeatMapService heatMapService) {
+                            @Nonnull final HeatMapService heatMapService,
+                            @Nonnull final MissionService missionService,
+                            @Nonnull final MissionCache missionCache) {
         this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
         this.shipClassService = Preconditions.checkNotNull(shipClassService, "shipClassService must not be empty");
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
         this.heatMapService = Preconditions.checkNotNull(heatMapService, "heatMapService must not be empty");
+        this.missionService = Preconditions.checkNotNull(missionService, "missionService must not be empty");
+        this.missionCache = Preconditions.checkNotNull(missionCache, "missionCache must not be empty");
     }
 
     @Override
     public void executePhase(@Nonnull final Tick today) {
+        this.today = Preconditions.checkNotNull(today, "today must not be empty");
 
         if (today.getNo() % 3 != 0) {
             LOGGER.info("Nothing will be unleashed today");
@@ -126,10 +143,12 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
         final boolean withdrawEarly = withdrawEarly(planet, pirateFleet);
         if (!withdrawEarly) {
             LOGGER.info("\tVisiting '" + owner.getUsername() + "' at '" + planet.getName() + "'");
+            missionCache.pirateRaidApproach(today, pirateFleet, planet);
             return new Move(pirateFleet, new FleetOrbit(planet.getOrbit(), planet.getSystem()));
         }
 
         LOGGER.info("\tWithdraw early against the strong opposite '" + owner.getUsername() + "' at '" + planet.getName() + "'");
+        missionCache.pirateRaidWithdraw(today, pirateFleet, planet);
         return null;
     }
 
@@ -137,10 +156,15 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
 
+        final List<PirateHuntMission> counterMissions = missionService.findPirateHuntByPlanet(planet);
+        final int impactOfRaidCounter = HeatMapRunner.getImpactOfRaidCounter(counterMissions);
+
         final Set<Fleet> allAnchoredForPlanet = fleetService.findAllAnchoredForPlanet(planet);
-        final int planetaryPoints = new UserPoints().withFleets(allAnchoredForPlanet).getFleetPoints();
-        final int piratePoints = new UserPoints().withFleets(List.of(pirateFleet)).getFleetPoints();
-        return planetaryPoints >= piratePoints * 3;
+        final int orbitalImpact = HeatMapRunner.getOrbitalImpact(allAnchoredForPlanet);
+
+        final int pirateImpact = HeatMapRunner.getOrbitalImpact(Set.of(pirateFleet));
+
+        return (impactOfRaidCounter + orbitalImpact) >= pirateImpact * 3;
     }
 
     private List<Planet> detectVictims() {
@@ -158,6 +182,7 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
         final WarShip warShip = new WarShip("Corsair", target, piratesFleet, ship);
         warShip.setOperational();
         warShipService.save(warShip);
+        missionCache.pirateRaidSpawn(today, piratesFleet, target);
         return piratesFleet.getId();
     }
 

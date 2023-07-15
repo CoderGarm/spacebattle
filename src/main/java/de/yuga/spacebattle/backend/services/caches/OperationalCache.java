@@ -42,7 +42,7 @@ public class OperationalCache extends BaseCache {
         Set<Commissioning> commissionings = cache.get(cacheKey);
         if (commissionings == null) {
             commissionings = new HashSet<>();
-            cache.add(cacheKey, commissionings);
+            cache.put(cacheKey, commissionings);
         }
         return commissionings;
     }

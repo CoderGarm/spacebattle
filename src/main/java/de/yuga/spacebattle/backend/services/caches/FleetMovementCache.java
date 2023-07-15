@@ -92,7 +92,7 @@ public class FleetMovementCache {
         Set<FleetMovement> movements = cache.get(user.getId());
         if (movements == null) {
             movements = new HashSet<>();
-            cache.add(user.getId(), movements);
+            cache.put(user.getId(), movements);
         }
         return movements;
     }
