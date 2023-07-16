@@ -78,7 +78,7 @@ passive piraten
 ### Bugs fixed
 
 1. Der Tech Tree kann nun auch anständig resized werden.
-   todo. fleet loading stuff wird falsch berechnet
+2. Der Laderaum von Schiffen wird jetzt richtig berechnet.
    todo. double planned colo problem
 
 #### next steps

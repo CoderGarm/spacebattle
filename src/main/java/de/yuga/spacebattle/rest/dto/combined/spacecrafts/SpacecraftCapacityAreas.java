@@ -11,6 +11,7 @@ import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateSnapshot;
 import de.yuga.spacebattle.backend.enums.ECapacityAreaType;
+import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -30,7 +31,7 @@ public class SpacecraftCapacityAreas {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The tonnage of freight which can be taken over.")
-    private Mass cargoHold;
+    private Mass cargoHold = new Mass(0, EMassMetric.T);
 
     @JsonProperty
     @Schema(required = true, description = "The amount of passengers can be taken over.")
@@ -83,7 +84,7 @@ public class SpacecraftCapacityAreas {
 
     @JsonIgnore
     private void addCargoHolds(@Nonnull final ShipClass shipClass) {
-        this.cargoHold = shipClass.getSupportFittings().stream().filter(f -> f.getPassiveModule().isCargo()).map(f -> f.getPassiveModule().getCargoCapacity().multiply(f.getAmount())).reduce(Mass.ZERO, Mass::add);
+        this.cargoHold = shipClass.getSupportFittings().stream().filter(f -> f.getPassiveModule().isCargo()).map(f -> f.getPassiveModule().getCargoCapacity().multiply(f.getAmount())).reduce(this.cargoHold, Mass::add);
         this.passengerSpace += shipClass.getSupportFittings().stream().filter(f -> f.getPassiveModule().isPassenger()).map(f -> f.getPassiveModule().getPassengers() * f.getAmount()).reduce(0, Integer::sum);
     }
 
