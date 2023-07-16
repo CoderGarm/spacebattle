@@ -49,4 +49,8 @@ public class RaidingPiratesMission implements MissionRunner {
         pirateRaiderPhase.executePhase(today);
         pirateWithdrawPhase.executePhase(today);
     }
+
+    public static boolean canRun(@Nonnull final Tick today) {
+        return today.getNo() % 3 == 0;
+    }
 }

@@ -38,13 +38,12 @@ public class HeatMapService {
         return Objects.requireNonNullElse(heatMapRepository.findHottestUsers(eMissionType), new ArrayList<>());
     }
 
-    public void reduceHeat(@Nonnull final Collection<Planet> planets, @Nonnull final EMissionType eMissionType) {
+    public void reduceHeat(@Nonnull final Collection<Planet> planets, @Nonnull final EMissionType eMissionType, final int heatAddition) {
         Preconditions.checkNotNull(planets, "planets must not be empty");
         Preconditions.checkNotNull(eMissionType, "eMissionType must not be empty");
 
         final Set<HeatMap> heats = findHeatForPlanets(planets, eMissionType);
-        heats.forEach(HeatMap::decrease);
-        heats.forEach(HeatMap::decrease);
+        heats.forEach(h -> h.add(heatAddition));
         heatMapRepository.saveAll(heats);
     }
 

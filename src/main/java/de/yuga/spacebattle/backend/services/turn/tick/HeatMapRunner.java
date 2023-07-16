@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services.turn.tick;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -65,6 +66,7 @@ public class HeatMapRunner implements TickRunner {
     }
 
     private void adjustPirateRaidHeatMap() {
+
         final EMissionType pirateRaid = EMissionType.PIRATE_RAID;
         final Set<HeatMap> pirateRaidHeatMap = heatMapService.findHeatForMissionType(pirateRaid);
 
@@ -76,7 +78,6 @@ public class HeatMapRunner implements TickRunner {
 
             // add heat from missions to the regular heat increasement
             final int impact = BASIC_HEAT_INCREMENT + getImpactOfRaidCounter(counterMissions);
-            heatMap.add(impact);
 
             final Set<Fleet> anchored = fleetService.findAllAnchoredForPlanet(heatMap.getPlanet());
             int orbitalImpact = getOrbitalImpact(anchored);
@@ -86,10 +87,20 @@ public class HeatMapRunner implements TickRunner {
                 orbitalImpact += BASIC_HEAT_INCREMENT;
             }
             // do not relatively reduce the mission effect more than necessary
-            heatMap.add(orbitalImpact / 2);
+            final int heat = impact + (orbitalImpact / 2);
+            final Owner owner = heatMap.getPlanet().getOwner() != null ? heatMap.getPlanet().getOwner() : Owner.UNCOLONIZED;
+            LOGGER.info("\t\t" + heat + " (" + impact + "/" + (orbitalImpact / 2) + ") to " + heatMap.getPlanet().getName() + " from " + owner.getUsername());
+            heatMap.add(heat);
         });
 
         heatMapService.saveAll(pirateRaidHeatMap);
+    }
+
+    /**
+     * Pirates are having kind of strong heat in order to compare it to the victims heat.
+     */
+    public static int getPirateImpact(@Nonnull final Fleet pirateFleet) {
+        return -getOrbitalImpact(Set.of(pirateFleet));
     }
 
     public static int getOrbitalImpact(@Nonnull final Set<Fleet> anchoredFleets) {

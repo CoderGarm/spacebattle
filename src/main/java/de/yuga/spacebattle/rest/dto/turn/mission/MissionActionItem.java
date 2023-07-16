@@ -24,12 +24,12 @@ public class MissionActionItem {
     private EMissionAction eMissionAction;
 
     @JsonProperty
-    @Schema(required = true, description = "If the user was defeated by the other.")
-    private boolean userDefeated = false;
+    @Schema(description = "If the user was defeated by the other.")
+    private Boolean userDefeated;
 
     @Nullable
     @JsonProperty
-    @Schema(required = true, description = "In case of a combat the result is noted in:")
+    @Schema(description = "In case of a combat the result is noted in:")
     private Integer idBattleReport;
 
     public MissionActionItem(@Nonnull final MissionItem item, @Nonnull final String preferredLanguage) {

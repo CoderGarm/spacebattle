@@ -89,6 +89,7 @@ passive piraten
 4. Reisezeit beim Handel inkl Tabellendarstellung
 5. trade offers nach preis vorsortieren
 6. eingemottete Schiffe tatsächlich außer dienst nehmen
+7. normale schlachten auch im mission report anzeigen
 
 Thema: Handel
 done. Bestenliste mit Punkten pro Leistungsfeld  

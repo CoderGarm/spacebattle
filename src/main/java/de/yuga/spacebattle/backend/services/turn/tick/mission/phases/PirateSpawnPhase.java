@@ -24,6 +24,7 @@ import de.yuga.spacebattle.backend.services.turn.mission.MissionService;
 import de.yuga.spacebattle.backend.services.turn.tick.HeatMapRunner;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.HeatMapService;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.MissionPhaseRunner;
+import de.yuga.spacebattle.backend.services.turn.tick.mission.RaidingPiratesMission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,7 +98,7 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
     public void executePhase(@Nonnull final Tick today) {
         this.today = Preconditions.checkNotNull(today, "today must not be empty");
 
-        if (today.getNo() % 3 != 0) {
+        if (!RaidingPiratesMission.canRun(today)) {
             LOGGER.info("Nothing will be unleashed today");
             return;
         }
@@ -117,7 +118,9 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
             }
         }
 
-        heatMapService.reduceHeat(heating, EMissionType.PIRATE_RAID);
+        // withdraw without a direct check in the orbit means kind of fear
+        final int heatAddition = -HeatMapRunner.BASIC_HEAT_INCREMENT * 3;
+        heatMapService.reduceHeat(heating, EMissionType.PIRATE_RAID, heatAddition);
         executeMovement(today, resultingMoves);
     }
 
@@ -162,7 +165,7 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
         final Set<Fleet> allAnchoredForPlanet = fleetService.findAllAnchoredForPlanet(planet);
         final int orbitalImpact = HeatMapRunner.getOrbitalImpact(allAnchoredForPlanet);
 
-        final int pirateImpact = HeatMapRunner.getOrbitalImpact(Set.of(pirateFleet));
+        final int pirateImpact = HeatMapRunner.getPirateImpact(pirateFleet);
 
         return (impactOfRaidCounter + orbitalImpact) >= pirateImpact * 3;
     }
