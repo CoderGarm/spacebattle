@@ -61,6 +61,7 @@ public class MissionCache {
 
     public void pirateRaidBattleResult(@Nonnull final Tick today, @Nonnull final Fleet pirateFleet, @Nonnull final Planet target, @Nullable final BattleReport battleReport, final boolean userDefeated) {
         Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
         Preconditions.checkNotNull(target, "target must not be empty");
 
         if (battleReport == null) {
@@ -77,9 +78,20 @@ public class MissionCache {
 
     public void pirateRaidTargetRaided(@Nonnull final Tick today, @Nonnull final Fleet pirateFleet, @Nonnull final Planet target) {
         Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
         Preconditions.checkNotNull(target, "target must not be empty");
 
         final MissionItem missionItem = new MissionItem(today, pirateFleet, target, EMissionType.PIRATE_RAID, EMissionAction.RAID);
+        addItem(today, target, missionItem);
+    }
+
+
+    public void pirateRaidWait(@Nonnull final Tick today, @Nonnull final Fleet pirateFleet, @Nonnull final Planet target) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
+        Preconditions.checkNotNull(target, "target must not be empty");
+
+        final MissionItem missionItem = new MissionItem(today, pirateFleet, target, EMissionType.PIRATE_RAID, EMissionAction.WAIT);
         addItem(today, target, missionItem);
     }
 

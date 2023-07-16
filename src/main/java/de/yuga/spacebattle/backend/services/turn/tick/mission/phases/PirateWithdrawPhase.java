@@ -9,9 +9,11 @@ import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
+import de.yuga.spacebattle.backend.enums.EMissionAction;
 import de.yuga.spacebattle.backend.services.account.NonPlayerCharacterService;
 import de.yuga.spacebattle.backend.services.caches.FleetMovementCache;
 import de.yuga.spacebattle.backend.services.caches.MissionCache;
+import de.yuga.spacebattle.backend.services.caches.RaidingPirateCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.MissionPhaseRunner;
@@ -50,18 +52,20 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
 
     @Nonnull
     private final MissionCache missionCache;
+    private final RaidingPirateCache raidingPirateCache;
 
     @Autowired
     public PirateWithdrawPhase(@Nonnull final PlanetService planetService,
                                @Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
                                @Nonnull final FleetService fleetService,
                                @Nonnull final FleetMovementCache fleetMovementCache,
-                               @Nonnull final MissionCache missionCache) {
+                               @Nonnull final MissionCache missionCache, final RaidingPirateCache raidingPirateCache) {
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
         this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
         this.missionCache = Preconditions.checkNotNull(missionCache, "missionCache must not be empty");
+        this.raidingPirateCache = raidingPirateCache;
     }
 
     @Override
@@ -72,7 +76,22 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
         Preconditions.checkNotNull(pirate, "pirate must not be empty");
 
         final List<Fleet> pirateFleets = fleetService.findAllFleetsWithoutMovementByUser(pirate);
+        pirateFleets.removeIf(fleet -> {
+            if (raidingPirateCache.isPhaseSequenceValid(fleet, EMissionAction.WAIT, EMissionAction.WITHDRAW)) {
+                raidingPirateCache.dropFirstActionItem(fleet, EMissionAction.WAIT);
+                return true;
+            }
+            return false;
+        });
+
         final List<Fleet> toWithdraw = retreatToHyperlimit(today, pirateFleets);
+        toWithdraw.removeIf(fleet -> {
+            if (raidingPirateCache.isPhaseSequenceValid(fleet, EMissionAction.WAIT, EMissionAction.LEAVE_ORBIT)) {
+                raidingPirateCache.dropFirstActionItem(fleet, EMissionAction.WAIT);
+                return true;
+            }
+            return false;
+        });
         retreatToHyperspace(today, toWithdraw);
     }
 
@@ -86,6 +105,7 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
             assert fleet.getOrbit().getSystem() != null;
             // no jump-into-hyperspace-sensors possible - no notification
             LOGGER.info("\tPirate fleet withdraws to hyper space from '" + fleet.getOrbit().getSystem().getName() + "'");
+            raidingPirateCache.dropFirstActionItem(fleet, EMissionAction.WITHDRAW);
         });
     }
 
@@ -107,10 +127,10 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
             missionCache.pirateRaidWithdrawFromOrbit(today, pirateFleet, target);
             final FleetOrbit destination = new FleetOrbit(target.getOrbit(), target.getSystem());
             final Orbit positionOnHyperlimit = NavigationCalculator.getPositionOnHyperlimit(pirateFleet, destination);
+            raidingPirateCache.dropFirstActionItem(pirateFleet, EMissionAction.LEAVE_ORBIT);
             final Move move = new Move(pirateFleet, new FleetOrbit(positionOnHyperlimit, target.getSystem()));
             resultingMoves.add(move);
         }
-
         //noinspection DataFlowIssue
         fleetService.moveFleets(resultingMoves).forEach(fleet -> fleetMovementCache.add(today, fleet, fleet.getMove(), fleet.getMove().getDestinationOrbit().getSystem()));
         return toReturn;

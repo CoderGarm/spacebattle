@@ -32,7 +32,7 @@ Die Admiralität ist der Meinung, es wäre gut die Systeme regulär zu patrouill
 todo. spielermissionen
 todo. convoy raid mission
 done. counter missions must take effect in pirate raid
-todo. fleet management - flotten aufteilen neben flotten mergen
+todo. piraten sollen 1 tick stehen bleiben (wer stehen bleibt, ist im heap oder mini cache)
 todo. wiki-eintrag für flottenverwaltung, heatmap, mission und counter
 - nur reserveschiffe können missionen zugewiesen werden
 - jeder plani bekommt heat pro runde
@@ -90,6 +90,7 @@ passive piraten
 5. trade offers nach preis vorsortieren
 6. eingemottete Schiffe tatsächlich außer dienst nehmen
 7. normale schlachten auch im mission report anzeigen
+8. fleet management - flotten aufteilen neben flotten mergen
 
 Thema: Handel
 done. Bestenliste mit Punkten pro Leistungsfeld  

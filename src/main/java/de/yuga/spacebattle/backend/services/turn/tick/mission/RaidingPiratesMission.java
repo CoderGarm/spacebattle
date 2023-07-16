@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.services.turn.tick.mission;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
+import de.yuga.spacebattle.backend.services.turn.tick.mission.phases.PirateApproachPhase;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.phases.PirateRaiderPhase;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.phases.PirateSpawnPhase;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.phases.PirateWithdrawPhase;
@@ -25,6 +26,9 @@ public class RaidingPiratesMission implements MissionRunner {
     private final PirateSpawnPhase pirateSpawnPhase;
 
     @Nonnull
+    private final PirateApproachPhase pirateApproachPhase;
+
+    @Nonnull
     private final PirateRaiderPhase pirateRaiderPhase;
 
     @Nonnull
@@ -33,10 +37,12 @@ public class RaidingPiratesMission implements MissionRunner {
     @Autowired
     public RaidingPiratesMission(@Nonnull final PirateSpawnPhase pirateSpawnPhase,
                                  @Nonnull final PirateRaiderPhase pirateRaiderPhase,
-                                 @Nonnull final PirateWithdrawPhase pirateWithdrawPhase) {
+                                 @Nonnull final PirateWithdrawPhase pirateWithdrawPhase,
+                                 @Nonnull final PirateApproachPhase pirateApproachPhase) {
         this.pirateSpawnPhase = Preconditions.checkNotNull(pirateSpawnPhase, "pirateSpawnPhase must not be empty");
         this.pirateRaiderPhase = Preconditions.checkNotNull(pirateRaiderPhase, "pirateRaiderPhase must not be empty");
         this.pirateWithdrawPhase = Preconditions.checkNotNull(pirateWithdrawPhase, "pirateWithdrawPhase must not be empty");
+        this.pirateApproachPhase = pirateApproachPhase;
     }
 
     @Override
@@ -46,6 +52,7 @@ public class RaidingPiratesMission implements MissionRunner {
         LOGGER.info("Active pirate mission started");
 
         pirateSpawnPhase.executePhase(today);
+        pirateApproachPhase.executePhase(today);
         pirateRaiderPhase.executePhase(today);
         pirateWithdrawPhase.executePhase(today);
     }
