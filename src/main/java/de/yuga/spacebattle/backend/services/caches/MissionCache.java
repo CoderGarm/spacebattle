@@ -229,17 +229,17 @@ public class MissionCache {
     }
 
     @Nonnull
-    private String toJson(@Nonnull final MissionItem missionItem) {
-        Preconditions.checkNotNull(missionItem, "missionItem must not be empty");
+    private String toJson(@Nonnull final MissionItem whatever) {
+        Preconditions.checkNotNull(whatever, "whatever must not be empty");
 
-        return new GsonBuilder().create().toJson(new MissionItemDto(missionItem));
+        return new GsonBuilder().create().toJson(new MissionItemDto(whatever));
     }
 
     @Nonnull
-    private MissionItemDto fromJson(@Nonnull final String missionItem) {
-        Preconditions.checkNotNull(missionItem, "missionItem must not be empty");
+    private MissionItemDto fromJson(@Nonnull final String string) {
+        Preconditions.checkNotNull(string, "string must not be empty");
 
-        return new GsonBuilder().create().fromJson(missionItem, MissionItemDto.class);
+        return new GsonBuilder().create().fromJson(string, MissionItemDto.class);
     }
 
     @Nonnull
@@ -260,10 +260,6 @@ public class MissionCache {
 
     private int getTickId(@Nonnull final String key) {
         return Integer.parseInt(key.split("\\|")[0]);
-    }
-
-    private int getUserId(@Nonnull final String key) {
-        return Integer.parseInt(key.split("\\|")[1]);
     }
 
     @Schema

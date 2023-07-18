@@ -12,9 +12,11 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.EMissionAction;
 import de.yuga.spacebattle.backend.enums.ETransportType;
 import de.yuga.spacebattle.backend.services.account.NonPlayerCharacterService;
 import de.yuga.spacebattle.backend.services.caches.MissionCache;
+import de.yuga.spacebattle.backend.services.caches.RaidingPirateCache;
 import de.yuga.spacebattle.backend.services.caches.TransportationCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
@@ -63,19 +65,24 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
     @Nonnull
     private final MissionCache missionCache;
 
+    @Nonnull
+    private final RaidingPirateCache raidingPirateCache;
+
     @Autowired
     public PirateRaiderPhase(@Nonnull final PlanetService planetService,
                              @Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
                              @Nonnull final FleetService fleetService,
                              @Nonnull final TransportationCache transportationCache,
                              @Nonnull final BattleService battleService,
-                             @Nonnull final MissionCache missionCache) {
+                             @Nonnull final MissionCache missionCache,
+                             @Nonnull final RaidingPirateCache raidingPirateCache) {
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
         this.transportationCache = Preconditions.checkNotNull(transportationCache, "transportationCache must not be empty");
         this.battleService = Preconditions.checkNotNull(battleService, "battleService must not be empty");
         this.missionCache = Preconditions.checkNotNull(missionCache, "missionCache must not be empty");
+        this.raidingPirateCache = Preconditions.checkNotNull(raidingPirateCache, "raidingPirateCache must not be empty");
     }
 
     @Override
@@ -173,5 +180,6 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
         fleetToStore.add(pirateFleet);
         transportationCache.add(today, pirateFleet, target, raid, ETransportType.PLANET_TO_FLEET);
         missionCache.pirateRaidTargetRaided(today, pirateFleet, target);
+        raidingPirateCache.executeNext(pirateFleet, EMissionAction.LEAVE_ORBIT, EMissionAction.WITHDRAW);
     }
 }
