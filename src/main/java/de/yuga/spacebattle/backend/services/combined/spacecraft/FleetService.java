@@ -430,4 +430,10 @@ public class FleetService {
         return warShipService.findPooledShipsByUser(idUser);
     }
 
+    @Nonnull
+    public List<Fleet> findAll(@Nonnull final Collection<Integer> idFleets) {
+        Preconditions.checkNotNull(idFleets, "idFleets must not be empty");
+
+        return Objects.requireNonNullElse(fleetRepository.findAllById(idFleets), new ArrayList<>());
+    }
 }

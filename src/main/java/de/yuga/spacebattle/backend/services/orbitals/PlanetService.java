@@ -17,9 +17,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -167,5 +165,12 @@ public class PlanetService {
         Preconditions.checkNotNull(modified, "modified must not be empty");
 
         planetRepository.saveAll(modified);
+    }
+
+    @Nonnull
+    public List<Planet> findAll(@Nonnull final Collection<Integer> idPlanets) {
+        Preconditions.checkNotNull(idPlanets, "idPlanets must not be empty");
+
+        return Objects.requireNonNullElse(planetRepository.findAllById(idPlanets), new ArrayList<>());
     }
 }

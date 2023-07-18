@@ -18,8 +18,10 @@ Die Admiralität ist der Meinung, es wäre gut die Systeme regulär zu patrouill
 #### Gameplay
 
 1. Piraten...  
-   Die Piraten werden im Laufe der Zeit erweitert werden, jetzt allerdings greifen sie Konvois an und suchen von Zeit zu Zeit nach lohnender Beute.  
-   Für die spontanen Unannehmlichkeiten erhält jeder Spieler einen zusätzlichen Songbird-Zerstörer auf Piratenjagd am Heimatplaneten.
+   Die Piraten werden im Laufe der Zeit erweitert werden, jetzt allerdings greifen sie Konvois an und suchen von Zeit zu
+   Zeit nach lohnender Beute.  
+   Für die spontanen Unannehmlichkeiten erhält jeder Spieler einen zusätzlichen Songbird-Zerstörer auf Piratenjagd am
+   Heimatplaneten.
 2. Es gibt Wiki-Artikel zu den Missionstypen und Piraterie, auffindbar im BurgerMenü oben links.
 3. Du kannst im Flottenmenü Schiffe detachieren und einmotten!
    Deine Reserveflotte wird nun alle Schiffe enthalten, die nicht in zu einer Flotte oder einer Mission zugewiesen
@@ -34,9 +36,11 @@ todo. convoy raid mission
 done. counter missions must take effect in pirate raid
 todo. piraten sollen 1 tick stehen bleiben (wer stehen bleibt, ist im heap oder mini cache)
 todo. wiki-eintrag für flottenverwaltung, heatmap, mission und counter
+
 - nur reserveschiffe können missionen zugewiesen werden
 - jeder plani bekommt heat pro runde
-- counter mission reduziert um counter impact, flotten im orbit verbessern die heat nur zur hälfte, frachter im orbit sprechen sich rum
+- counter mission reduziert um counter impact, flotten im orbit verbessern die heat nur zur hälfte, frachter im orbit
+  sprechen sich rum
 
 missionen
 
@@ -74,6 +78,8 @@ passive piraten
 5. Der Spinner zum Anzeigen von Wartezeit ist etwas schicker.
 6. Es gibt jetzt eine "Nimm mal lieber ein größeres Display"-Warnung bei Displays < 800 Pixel Breite.
 7. Das Dashboard ist thematisch besser sortiert.
+8. Beginnend bei den Missions-Items bleiben die Dashboard-Einträge über den Server Neustart hinaus bestehen.  
+   Im Laufe der Zeit werde ich das weiter führen.
 
 ### Bugs fixed
 

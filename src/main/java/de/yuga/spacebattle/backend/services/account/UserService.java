@@ -65,6 +65,14 @@ public class UserService {
         return userRepository.findById(user.getId());
     }
 
+
+    @Nonnull
+    public List<User> findAll(@Nonnull final Collection<Integer> idUsers) {
+        Preconditions.checkNotNull(idUsers, "idUsers must not be empty");
+
+        return Objects.requireNonNullElse(userRepository.findAllById(idUsers), new ArrayList<>());
+    }
+
     @Nonnull
     public Set<StarSystem> getKnownStarSystems(final int idUser) {
         return userRepository.getKnownStarSystems(idUser);

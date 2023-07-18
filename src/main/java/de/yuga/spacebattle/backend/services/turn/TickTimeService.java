@@ -9,7 +9,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class TickTimeService {
@@ -36,6 +39,13 @@ public class TickTimeService {
     @Nonnull
     public List<Tick> findAll() {
         return tickRepository.findAllTicks();
+    }
+
+    @Nonnull
+    public List<Tick> findAll(@Nonnull final Collection<Integer> idTicks) {
+        Preconditions.checkNotNull(idTicks, "idTicks must not be empty");
+
+        return Objects.requireNonNullElse(tickRepository.findAllById(idTicks), new ArrayList<>());
     }
 
     @Nullable

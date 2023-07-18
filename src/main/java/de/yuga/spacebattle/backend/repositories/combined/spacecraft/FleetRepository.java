@@ -2,8 +2,8 @@ package de.yuga.spacebattle.backend.repositories.combined.spacecraft;
 
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.rest.dto.AbstractId;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import javax.annotation.Nonnull;
@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 
-public interface FleetRepository extends CrudRepository<Fleet, Integer>, CustomFleetRepository {
+public interface FleetRepository extends JpaRepository<Fleet, Integer>, CustomFleetRepository {
 
     @Nullable
     @Query("SELECT f FROM Fleet f WHERE f.isDeleted = false")

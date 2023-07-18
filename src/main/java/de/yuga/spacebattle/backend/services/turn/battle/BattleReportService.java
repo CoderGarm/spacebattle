@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -39,6 +41,14 @@ public class BattleReportService {
         return battleReportRepository.findById(idBattleReport).orElse(null);
     }
 
+    @Nonnull
+    public List<BattleReport> findAll(@Nonnull final Collection<Integer> idBattleReports) {
+        Preconditions.checkNotNull(idBattleReports, "idBattleReports shouldn't be null!");
+
+        return Objects.requireNonNullElse(battleReportRepository.findAllById(idBattleReports), new ArrayList<>());
+    }
+
+    @Nonnull
     public BattleReport save(@Nonnull final BattleReport entity) {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
 

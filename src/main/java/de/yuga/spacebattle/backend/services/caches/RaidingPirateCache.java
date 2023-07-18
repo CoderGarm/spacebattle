@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -32,8 +33,9 @@ public class RaidingPirateCache {
         Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
         Preconditions.checkNotNull(missionAction, "missionAction must not be empty");
 
-        final List<EMissionAction> eMissionActions = doNotMoveCache.get(pirateFleet);
+        List<EMissionAction> eMissionActions = doNotMoveCache.get(pirateFleet);
         if (eMissionActions != null && missionAction == eMissionActions.get(0)) {
+            eMissionActions = new ArrayList<>(eMissionActions);
             eMissionActions.remove(0);
             doNotMoveCache.put(pirateFleet, eMissionActions);
         }
