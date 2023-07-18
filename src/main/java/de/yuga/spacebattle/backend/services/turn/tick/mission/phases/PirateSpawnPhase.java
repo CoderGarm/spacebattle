@@ -119,7 +119,7 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
 
             if (MissionRandomizer.shouldWait(EMissionType.PIRATE_RAID, pirateFleet, today)) {
                 LOGGER.info("\tWaiting for tomorrow with approaching '" + owner.getUsername() + "' at '" + target.getName() + "'");
-                raidingPirateCache.executeNext(pirateFleet, EMissionAction.WAIT, EMissionAction.APPROACH);
+                raidingPirateCache.executeNext(today, pirateFleet, EMissionAction.WAIT, EMissionAction.APPROACH);
                 missionCache.pirateRaidWait(today, pirateFleet, target);
             }
             // notify spawn
@@ -145,7 +145,7 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
         final ShipClass ship = classList.get(0);
 
         final Fleet pirateFleet = createFleet(opponent, target);
-        raidingPirateCache.setTarget(pirateFleet, target);
+        raidingPirateCache.setTarget(today, pirateFleet, target);
         final WarShip warShip = new WarShip("Corsair", target, pirateFleet, ship);
         warShip.setOperational();
         warShipService.save(warShip);

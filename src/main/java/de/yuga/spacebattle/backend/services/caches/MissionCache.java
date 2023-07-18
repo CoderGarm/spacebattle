@@ -87,12 +87,12 @@ public class MissionCache {
                 .collect(Collectors.toMap(AbstractEntityKey::getId, Function.identity()));
 
         LOGGER.info("\t...loading planets");
-        final Set<Integer> idPlanets = allItems.stream().map(MissionItemDto::getIdPlanetTarget).collect(Collectors.toSet());
+        final Set<Integer> idPlanets = allItems.stream().map(MissionItemDto::getIdPlanet).collect(Collectors.toSet());
         final Map<Integer, Planet> planets = planetService.findAll(idPlanets).stream()
                 .collect(Collectors.toMap(AbstractEntityKey::getId, Function.identity()));
 
         LOGGER.info("\t...loading fleets");
-        final Set<Integer> idFleets = allItems.stream().map(MissionItemDto::getIdPirateFleet).collect(Collectors.toSet());
+        final Set<Integer> idFleets = allItems.stream().map(MissionItemDto::getIdFleet).collect(Collectors.toSet());
         final Map<Integer, Fleet> fleets = fleetService.findAll(idFleets).stream()
                 .collect(Collectors.toMap(AbstractEntityKey::getId, Function.identity()));
 
@@ -110,8 +110,8 @@ public class MissionCache {
                     .map(s -> {
                                 final MissionItem item = new MissionItem(
                                         ticks.get(s.getTickNo()),
-                                        fleets.get(s.getIdPirateFleet()),
-                                        planets.get(s.getIdPlanetTarget()),
+                                        fleets.get(s.getIdFleet()),
+                                        planets.get(s.getIdPlanet()),
                                         s.geteMissionType(),
                                         s.getMissionAction());
                                 item.setUserDefeated(s.isUserDefeated());
@@ -268,11 +268,17 @@ public class MissionCache {
         @JsonProperty
         private int tickNo;
 
+        /**
+         * The acting fleet.
+         */
         @JsonProperty
-        private int idPirateFleet;
+        private int idFleet;
 
+        /**
+         * The target.
+         */
         @JsonProperty
-        private int idPlanetTarget;
+        private int idPlanet;
 
         @Nonnull
         @JsonProperty
@@ -282,8 +288,9 @@ public class MissionCache {
         @JsonProperty
         private EMissionAction missionAction;
 
+        @Nullable
         @JsonProperty
-        private boolean userDefeated;
+        private Boolean userDefeated;
 
         @Nullable
         @JsonProperty
@@ -296,8 +303,8 @@ public class MissionCache {
             Preconditions.checkNotNull(item, "item must not be empty");
 
             this.tickNo = item.getToday().getNo();
-            this.idPirateFleet = item.getPirateFleet().getId();
-            this.idPlanetTarget = item.getTarget().getId();
+            this.idFleet = item.getPirateFleet().getId();
+            this.idPlanet = item.getTarget().getId();
             this.eMissionType = item.geteMissionType();
             this.missionAction = item.getEMissionAction();
             this.userDefeated = item.isUserDefeated();
@@ -308,12 +315,12 @@ public class MissionCache {
             return tickNo;
         }
 
-        public int getIdPirateFleet() {
-            return idPirateFleet;
+        public int getIdFleet() {
+            return idFleet;
         }
 
-        public int getIdPlanetTarget() {
-            return idPlanetTarget;
+        public int getIdPlanet() {
+            return idPlanet;
         }
 
         @Nonnull
@@ -326,7 +333,8 @@ public class MissionCache {
             return missionAction;
         }
 
-        public boolean isUserDefeated() {
+        @Nullable
+        public Boolean isUserDefeated() {
             return userDefeated;
         }
 

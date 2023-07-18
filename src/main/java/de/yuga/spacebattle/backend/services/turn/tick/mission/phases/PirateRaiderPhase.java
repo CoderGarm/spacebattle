@@ -120,7 +120,7 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
                 } else {
                     pirateFleet.delete();
                     fleetService.save(pirateFleet);
-                    LOGGER.info("\tPirates defeated from '" + owner.getUsername() + "' at '" + target.getName() + "'");
+                    LOGGER.info("\tPirate fleet with idFleet '" + pirateFleet.getId() + "' defeated from '" + owner.getUsername() + "' at '" + target.getName() + "'");
                 }
             }
         }
@@ -180,6 +180,6 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
         fleetToStore.add(pirateFleet);
         transportationCache.add(today, pirateFleet, target, raid, ETransportType.PLANET_TO_FLEET);
         missionCache.pirateRaidTargetRaided(today, pirateFleet, target);
-        raidingPirateCache.executeNext(pirateFleet, EMissionAction.LEAVE_ORBIT, EMissionAction.WITHDRAW);
+        raidingPirateCache.executeNext(today, pirateFleet, EMissionAction.LEAVE_ORBIT, EMissionAction.WITHDRAW);
     }
 }

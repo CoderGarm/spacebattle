@@ -28,7 +28,8 @@ public class MissionItem {
     @Nonnull
     private final EMissionAction missionAction;
 
-    private boolean userDefeated;
+    @Nullable
+    private Boolean userDefeated;
 
     @Nullable
     private BattleReport battleReport;
@@ -45,7 +46,7 @@ public class MissionItem {
         this.missionAction = Preconditions.checkNotNull(missionAction, "eMissionActions must not be empty");
     }
 
-    public void setUserDefeated(final boolean userDefeated) {
+    public void setUserDefeated(@Nullable final Boolean userDefeated) {
         this.userDefeated = userDefeated;
     }
 
@@ -74,7 +75,7 @@ public class MissionItem {
         return missionAction;
     }
 
-    public boolean isUserDefeated() {
+    public Boolean isUserDefeated() {
         return userDefeated;
     }
 

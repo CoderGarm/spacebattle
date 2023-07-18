@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.services.turn.tick.mission.phases;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
@@ -25,7 +26,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.services.MasterOfTheUniverseService.PIRATE;
 
@@ -76,23 +77,44 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
         Preconditions.checkNotNull(pirate, "pirate must not be empty");
 
         final List<Fleet> pirateFleets = fleetService.findAllFleetsWithoutMovementByUser(pirate);
-        pirateFleets.removeIf(fleet -> {
-            if (raidingPirateCache.isPhaseSequenceValid(fleet, EMissionAction.WAIT, EMissionAction.WITHDRAW)) {
-                raidingPirateCache.dropFirstActionItem(fleet, EMissionAction.WAIT);
+        final List<Fleet> leaveOrbit = pirateFleets.stream().filter(fleet -> {
+            final Planet planet = raidingPirateCache.getTarget(fleet);
+            final boolean isInOrbitOfTarget = planet != null && fleet.getOrbit() != null && fleet.getOrbit().getOrbit() != null &&
+                    planet.getOrbit().getDistance(fleet.getOrbit().getOrbit()).equals(Distance.ZERO);
+            if (!isInOrbitOfTarget) {
+                return false;
+            }
+            if (raidingPirateCache.getNextActions(fleet).isEmpty()) {
+                // no instruction, just proceed and leave if in orbit of target
                 return true;
             }
-            return false;
-        });
-
-        final List<Fleet> toWithdraw = retreatToHyperlimit(today, pirateFleets);
-        toWithdraw.removeIf(fleet -> {
             if (raidingPirateCache.isPhaseSequenceValid(fleet, EMissionAction.WAIT, EMissionAction.LEAVE_ORBIT)) {
-                raidingPirateCache.dropFirstActionItem(fleet, EMissionAction.WAIT);
+                raidingPirateCache.dropFirstActionItem(today, fleet, EMissionAction.WAIT);
+                return false;
+            }
+            return raidingPirateCache.isPhaseSequenceValid(fleet, EMissionAction.LEAVE_ORBIT);
+
+        }).collect(Collectors.toList());
+        retreatToHyperlimit(today, leaveOrbit);
+
+        final List<Fleet> withdrawHyperspace = pirateFleets.stream().filter(fleet -> {
+            final Planet planet = raidingPirateCache.getTarget(fleet);
+            final boolean isInOrbitOfTarget = planet != null && fleet.getOrbit() != null && fleet.getOrbit().getOrbit() != null &&
+                    planet.getOrbit().getDistance(fleet.getOrbit().getOrbit()).equals(Distance.ZERO);
+            if (isInOrbitOfTarget) {
+                return false;
+            }
+            if (raidingPirateCache.getNextActions(fleet).isEmpty()) {
+                // no instruction, just proceed and leave if not in planetary orbit
                 return true;
             }
-            return false;
-        });
-        retreatToHyperspace(today, toWithdraw);
+            if (raidingPirateCache.isPhaseSequenceValid(fleet, EMissionAction.WAIT, EMissionAction.WITHDRAW)) {
+                raidingPirateCache.dropFirstActionItem(today, fleet, EMissionAction.WAIT);
+                return false;
+            }
+            return raidingPirateCache.isPhaseSequenceValid(fleet, EMissionAction.WITHDRAW);
+        }).collect(Collectors.toList());
+        retreatToHyperspace(today, withdrawHyperspace);
     }
 
     private void retreatToHyperspace(@Nonnull final Tick today, @Nonnull final List<Fleet> fleets) {
@@ -104,35 +126,33 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
             assert fleet.getOrbit() != null;
             assert fleet.getOrbit().getSystem() != null;
             // no jump-into-hyperspace-sensors possible - no notification
-            LOGGER.info("\tPirate fleet withdraws to hyper space from '" + fleet.getOrbit().getSystem().getName() + "'");
-            raidingPirateCache.dropFirstActionItem(fleet, EMissionAction.WITHDRAW);
+            LOGGER.info("\tPirate fleet with idFleet '" + fleet.getId() + "' withdraws to hyper space from '" + fleet.getOrbit().getSystem().getName() + "'");
         });
     }
 
-    private List<Fleet> retreatToHyperlimit(@Nonnull final Tick today, @Nonnull final List<Fleet> fleets) {
+    private void retreatToHyperlimit(@Nonnull final Tick today, @Nonnull final List<Fleet> fleets) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(fleets, "fleets must not be empty");
 
         final List<Move> resultingMoves = new ArrayList<>();
-        final List<Fleet> toReturn = new ArrayList<>();
         for (final Fleet pirateFleet : fleets) {
-            final Planet target = planetService.findByCoordinates(Objects.requireNonNull(pirateFleet.getOrbit()));
-            if (target == null) {
+            final Planet planet = raidingPirateCache.getTarget(pirateFleet);
+            final boolean isInOrbitOfTarget = planet != null && pirateFleet.getOrbit() != null && pirateFleet.getOrbit().getOrbit() != null &&
+                    planet.getOrbit().getDistance(pirateFleet.getOrbit().getOrbit()).equals(Distance.ZERO);
+            if (!isInOrbitOfTarget) {
                 // not in a planetary orbit
                 LOGGER.warn("\tPirate fleet with idFleet '" + pirateFleet.getId() + "' is not in a planetary orbit");
-                toReturn.add(pirateFleet);
                 continue;
             }
-            LOGGER.info("\tPirate fleet withdraws to hyper limit from '" + target.getName() + "'");
-            missionCache.pirateRaidWithdrawFromOrbit(today, pirateFleet, target);
-            final FleetOrbit destination = new FleetOrbit(target.getOrbit(), target.getSystem());
+            LOGGER.info("\tPirate fleet with idFleet '" + pirateFleet.getId() + "' withdraws to hyper limit from '" + planet.getName() + "'");
+            missionCache.pirateRaidWithdrawFromOrbit(today, pirateFleet, planet);
+            raidingPirateCache.dropFirstActionItem(today, pirateFleet, EMissionAction.LEAVE_ORBIT);
+            final FleetOrbit destination = new FleetOrbit(planet.getOrbit(), planet.getSystem());
             final Orbit positionOnHyperlimit = NavigationCalculator.getPositionOnHyperlimit(pirateFleet, destination);
-            raidingPirateCache.dropFirstActionItem(pirateFleet, EMissionAction.LEAVE_ORBIT);
-            final Move move = new Move(pirateFleet, new FleetOrbit(positionOnHyperlimit, target.getSystem()));
+            final Move move = new Move(pirateFleet, new FleetOrbit(positionOnHyperlimit, planet.getSystem()));
             resultingMoves.add(move);
         }
         //noinspection DataFlowIssue
         fleetService.moveFleets(resultingMoves).forEach(fleet -> fleetMovementCache.add(today, fleet, fleet.getMove(), fleet.getMove().getDestinationOrbit().getSystem()));
-        return toReturn;
     }
 }

@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.enums.EMissionAction;
 import de.yuga.spacebattle.backend.services.caches.file.CacheFileWriter;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
@@ -72,37 +73,41 @@ public class RaidingPirateCache {
                 .collect(Collectors.toList());
 
         LOGGER.info("\t...loading fleets");
-        final Set<Integer> idFleets = actionDtos.stream().map(MissionActionDto::getIdPirateFleet).collect(Collectors.toSet());
-        idFleets.addAll(targetDtos.stream().map(TargetDto::getIdPirateFleet).collect(Collectors.toSet()));
+        final Set<Integer> idFleets = actionDtos.stream().map(MissionActionDto::getIdFleet).collect(Collectors.toSet());
+        idFleets.addAll(targetDtos.stream().map(TargetDto::getIdFleet).collect(Collectors.toSet()));
         final Map<Integer, Fleet> fleets = fleetService.findAll(idFleets).stream()
                 .collect(Collectors.toMap(AbstractEntityKey::getId, Function.identity()));
 
         LOGGER.info("\t...loading planets");
-        final Set<Integer> idPlanets = targetDtos.stream().map(TargetDto::getIdTargetPlanet).collect(Collectors.toSet());
+        final Set<Integer> idPlanets = targetDtos.stream().map(TargetDto::getIdPlanet).collect(Collectors.toSet());
         final Map<Integer, Planet> planets = planetService.findAll(idPlanets).stream()
                 .collect(Collectors.toMap(AbstractEntityKey::getId, Function.identity()));
 
 
-        actionDtos.forEach(dto -> doNotMoveCache.put(fleets.get(dto.getIdPirateFleet()), dto.getActions()));
-        targetDtos.forEach(targetDto -> targetCache.put(fleets.get(targetDto.idPirateFleet), planets.get(targetDto.getIdTargetPlanet())));
+        actionDtos.forEach(dto -> doNotMoveCache.put(fleets.get(dto.getIdFleet()), dto.getActions()));
+        targetDtos.forEach(targetDto -> targetCache.put(fleets.get(targetDto.idFleet), planets.get(targetDto.getIdPlanet())));
     }
 
-    public void executeNext(@Nonnull final Fleet pirateFleet, @Nonnull final EMissionAction... missionAction) {
+    public void executeNext(@Nonnull final Tick today, @Nonnull final Fleet pirateFleet, @Nonnull final EMissionAction... missionAction) {
+        Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
         Preconditions.checkNotNull(missionAction, "missionAction must not be empty");
 
-        put(pirateFleet, Arrays.asList(missionAction));
+        put(today, pirateFleet, Arrays.asList(missionAction));
     }
 
-    private void put(@Nonnull final Fleet pirateFleet, @Nonnull final List<EMissionAction> missionActions) {
+    private void put(@Nonnull final Tick today, @Nonnull final Fleet pirateFleet, @Nonnull final List<EMissionAction> missionActions) {
+        Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
         Preconditions.checkNotNull(missionActions, "missionActions must not be empty");
 
         doNotMoveCache.put(pirateFleet, missionActions);
-        cacheFileWriter.writeToFile(RaidingPirateCache.MissionActionDto.class, String.valueOf(pirateFleet.getId()), toJson(pirateFleet, missionActions));
+        final String key = getKey(today, pirateFleet);
+        cacheFileWriter.writeToFile(RaidingPirateCache.MissionActionDto.class, key, toJson(pirateFleet, missionActions));
     }
 
-    public void dropFirstActionItem(@Nonnull final Fleet pirateFleet, @Nonnull final EMissionAction missionAction) {
+    public void dropFirstActionItem(@Nonnull final Tick today, @Nonnull final Fleet pirateFleet, @Nonnull final EMissionAction missionAction) {
+        Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
         Preconditions.checkNotNull(missionAction, "missionAction must not be empty");
 
@@ -110,7 +115,7 @@ public class RaidingPirateCache {
         if (eMissionActions != null && !eMissionActions.isEmpty() && missionAction == eMissionActions.get(0)) {
             eMissionActions = new ArrayList<>(eMissionActions);
             eMissionActions.remove(0);
-            put(pirateFleet, eMissionActions);
+            put(today, pirateFleet, eMissionActions);
         }
     }
 
@@ -139,7 +144,7 @@ public class RaidingPirateCache {
         return true;
     }
 
-    public void setTarget(@Nonnull final Fleet pirateFleet, @Nonnull final Planet target) {
+    public void setTarget(@Nonnull final Tick today, @Nonnull final Fleet pirateFleet, @Nonnull final Planet target) {
         Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
         Preconditions.checkNotNull(target, "target must not be empty");
 
@@ -187,11 +192,31 @@ public class RaidingPirateCache {
         return new GsonBuilder().create().fromJson(string, MissionActionDto.class);
     }
 
+    @Nonnull
+    private String getKey(@Nonnull final Tick today, final int idUser) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+
+        return today.getNo() + "|" + idUser;
+    }
+
+    @Nonnull
+    private String getKey(@Nonnull final Tick today, @Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+        Preconditions.checkNotNull(fleet.getOwner(), "fleet.getOwner() must not be empty");
+
+        return getKey(today, fleet.getOwner().getId());
+    }
+
+    private int getTickId(@Nonnull final String key) {
+        return Integer.parseInt(key.split("\\|")[0]);
+    }
+
     @Schema
     private static class MissionActionDto {
 
         @JsonProperty
-        private int idPirateFleet;
+        private int idFleet;
 
         @JsonProperty
         private List<EMissionAction> actions;
@@ -203,11 +228,11 @@ public class RaidingPirateCache {
             Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
             this.actions = Preconditions.checkNotNull(actions, "actions must not be empty");
 
-            this.idPirateFleet = pirateFleet.getId();
+            this.idFleet = pirateFleet.getId();
         }
 
-        public int getIdPirateFleet() {
-            return idPirateFleet;
+        public int getIdFleet() {
+            return idFleet;
         }
 
         public List<EMissionAction> getActions() {
@@ -219,10 +244,10 @@ public class RaidingPirateCache {
     private static class TargetDto {
 
         @JsonProperty
-        private int idPirateFleet;
+        private int idFleet;
 
         @JsonProperty
-        private int idTargetPlanet;
+        private int idPlanet;
 
 
         public TargetDto() {
@@ -232,16 +257,16 @@ public class RaidingPirateCache {
             Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
             Preconditions.checkNotNull(targetPlanet, "targetPlanet must not be empty");
 
-            this.idPirateFleet = pirateFleet.getId();
-            this.idTargetPlanet = targetPlanet.getId();
+            this.idFleet = pirateFleet.getId();
+            this.idPlanet = targetPlanet.getId();
         }
 
-        public int getIdPirateFleet() {
-            return idPirateFleet;
+        public int getIdFleet() {
+            return idFleet;
         }
 
-        public int getIdTargetPlanet() {
-            return idTargetPlanet;
+        public int getIdPlanet() {
+            return idPlanet;
         }
     }
 }

@@ -32,9 +32,7 @@ Die Admiralität ist der Meinung, es wäre gut die Systeme regulär zu patrouill
    Nutze sie weise, um deine begrenzte Tonnage einzusetzen und das Maximum an Einfluss herauszuholen.
 
 todo. spielermissionen
-todo. convoy raid mission
-done. counter missions must take effect in pirate raid
-todo. piraten sollen 1 tick stehen bleiben (wer stehen bleibt, ist im heap oder mini cache)
+
 todo. wiki-eintrag für flottenverwaltung, heatmap, mission und counter
 
 - nur reserveschiffe können missionen zugewiesen werden
@@ -85,18 +83,19 @@ passive piraten
 
 1. Der Tech Tree kann nun auch anständig resized werden.
 2. Der Laderaum von Schiffen wird jetzt richtig berechnet.
-   todo. double planned colo problem
+3. Man kann Kolonisierungen nicht mehr mehrfach starten.
 
 #### next steps
 
-1. Take a Tour als Werbung
-2. Waiting for activation for operationals
-3. write cache to file on shutdown and read post construct
-4. Reisezeit beim Handel inkl Tabellendarstellung
-5. trade offers nach preis vorsortieren
-6. eingemottete Schiffe tatsächlich außer dienst nehmen
-7. normale schlachten auch im mission report anzeigen
-8. fleet management - flotten aufteilen neben flotten mergen
+- Take a Tour als Werbung
+- Waiting for activation for operationals
+- write cache to file on shutdown and read post construct
+- Reisezeit beim Handel inkl Tabellendarstellung
+- trade offers nach preis vorsortieren
+- eingemottete Schiffe tatsächlich außer dienst nehmen
+- normale schlachten auch im mission report anzeigen
+- fleet management - flotten aufteilen neben flotten mergen
+- todo. convoy raid mission
 
 Thema: Handel
 done. Bestenliste mit Punkten pro Leistungsfeld  

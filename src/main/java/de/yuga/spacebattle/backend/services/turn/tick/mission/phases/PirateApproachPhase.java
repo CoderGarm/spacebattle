@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.services.turn.tick.mission.phases;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.MissionRandomizer;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
@@ -104,11 +105,15 @@ public class PirateApproachPhase implements MissionPhaseRunner {
 
         final List<Fleet> pirateFleets = fleetService.findAllFleetsWithoutMovementByUser(pirate);
         pirateFleets.removeIf(fleet -> {
+            if (raidingPirateCache.getNextActions(fleet).isEmpty()) {
+                // no instruction, just proceed
+                return false;
+            }
             if (raidingPirateCache.isPhaseSequenceValid(fleet, EMissionAction.WAIT, EMissionAction.APPROACH)) {
-                raidingPirateCache.dropFirstActionItem(fleet, EMissionAction.WAIT);
+                raidingPirateCache.dropFirstActionItem(today, fleet, EMissionAction.WAIT);
                 return true;
             }
-            return false;
+            return !raidingPirateCache.isPhaseSequenceValid(fleet, EMissionAction.APPROACH);
         });
 
         final List<Move> resultingMoves = new ArrayList<>();
@@ -117,14 +122,18 @@ public class PirateApproachPhase implements MissionPhaseRunner {
             final Planet planet = raidingPirateCache.getTarget(pirateFleet);
 
             if (planet == null) {
-                raidingPirateCache.executeNext(pirateFleet, EMissionAction.WITHDRAW);
+                raidingPirateCache.executeNext(today, pirateFleet, EMissionAction.WITHDRAW);
                 LOGGER.info("\tNo target found for idFleet '" + pirateFleet.getId() + "' - withdraw automatically.");
                 continue;
+            } else if (pirateFleet.getOrbit() != null && pirateFleet.getOrbit().getOrbit() != null &&
+                    planet.getOrbit().getDistance(pirateFleet.getOrbit().getOrbit()).equals(Distance.ZERO)) {
+                // is already in orbit
+                continue;
             }
-            raidingPirateCache.dropFirstActionItem(pirateFleet, EMissionAction.APPROACH);
 
             final Move approach = approach(today, pirateFleet, planet);
             if (approach != null) {
+                raidingPirateCache.dropFirstActionItem(today, pirateFleet, EMissionAction.APPROACH);
                 heating.add(planet);
                 resultingMoves.add(approach);
             }
@@ -156,18 +165,18 @@ public class PirateApproachPhase implements MissionPhaseRunner {
         if (!withdrawEarly) {
 
             if (MissionRandomizer.shouldWait(EMissionType.PIRATE_RAID, pirateFleet, today)) {
-                raidingPirateCache.executeNext(pirateFleet, EMissionAction.APPROACH);
-                LOGGER.info("\tWaiting for tomorrow with approaching '" + owner.getUsername() + "' at '" + planet.getName() + "'");
+                raidingPirateCache.executeNext(today, pirateFleet, EMissionAction.APPROACH);
+                LOGGER.info("\tPirate fleet with idFleet '" + pirateFleet.getId() + "' is waiting for tomorrow with approaching '" + owner.getUsername() + "' at '" + planet.getName() + "'");
                 missionCache.pirateRaidWait(today, pirateFleet, planet);
                 return null;
             }
 
-            LOGGER.info("\tVisiting '" + owner.getUsername() + "' at '" + planet.getName() + "'");
+            LOGGER.info("\tPirate fleet with idFleet '" + pirateFleet.getId() + "' visiting '" + owner.getUsername() + "' at '" + planet.getName() + "'");
             missionCache.pirateRaidApproach(today, pirateFleet, planet);
             return new Move(pirateFleet, new FleetOrbit(planet.getOrbit(), planet.getSystem()));
         }
 
-        LOGGER.info("\tWithdraw early against the strong opposite '" + owner.getUsername() + "' at '" + planet.getName() + "'");
+        LOGGER.info("\tPirate fleet with idFleet '" + pirateFleet.getId() + "' withdraw early against the strong opposite '" + owner.getUsername() + "' at '" + planet.getName() + "'");
         missionCache.pirateRaidWithdraw(today, pirateFleet, planet);
         return null;
     }
