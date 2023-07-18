@@ -11,13 +11,14 @@ import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
 import de.yuga.spacebattle.backend.enums.EMissionAction;
 import de.yuga.spacebattle.backend.enums.EMissionType;
-import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.caches.file.CacheFileWriter;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +34,9 @@ import java.util.stream.Collectors;
 public class MissionCache {
 
     @Nonnull
+    private static final Logger LOGGER = LoggerFactory.getLogger(MissionItem.class);
+
+    @Nonnull
     private final CacheStore<String, List<MissionItem>> cache = new CacheStore<>(10, TimeUnit.DAYS);
 
     @Nonnull
@@ -40,9 +44,6 @@ public class MissionCache {
 
     @Nonnull
     private final TickTimeService tickTimeService;
-
-    @Nonnull
-    private final UserService userService;
 
     @Nonnull
     private final BattleReportService battleReportService;
@@ -56,13 +57,11 @@ public class MissionCache {
     @Autowired
     public MissionCache(@Nonnull final CacheFileWriter cacheFileWriter,
                         @Nonnull final TickTimeService tickTimeService,
-                        @Nonnull final UserService userService,
                         @Nonnull final BattleReportService battleReportService,
                         @Nonnull final PlanetService planetService,
                         @Nonnull final FleetService fleetService) {
         this.cacheFileWriter = Preconditions.checkNotNull(cacheFileWriter, "cacheFileWriter must not be empty");
         this.tickTimeService = Preconditions.checkNotNull(tickTimeService, "tickTimeService must not be empty");
-        this.userService = Preconditions.checkNotNull(userService, "userService must not be empty");
         this.battleReportService = Preconditions.checkNotNull(battleReportService, "battleReportService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
@@ -70,6 +69,7 @@ public class MissionCache {
 
     @PostConstruct
     private void loadCache() {
+        LOGGER.info("Loading from persistent cache.");
 
         final Map<String, List<String>> fileCacheContent = cacheFileWriter.getFileCacheContent(this.getClass());
 
@@ -78,6 +78,7 @@ public class MissionCache {
                 .map(this::fromJson)
                 .collect(Collectors.toList());
 
+        LOGGER.info("\t...loading battle reports");
         final Set<Integer> idBattleReports = allItems.stream()
                 .map(MissionItemDto::getIdBattleReport)
                 .filter(Objects::nonNull)
@@ -85,14 +86,17 @@ public class MissionCache {
         final Map<Integer, BattleReport> battleReports = battleReportService.findAll(idBattleReports).stream()
                 .collect(Collectors.toMap(AbstractEntityKey::getId, Function.identity()));
 
+        LOGGER.info("\t...loading planets");
         final Set<Integer> idPlanets = allItems.stream().map(MissionItemDto::getIdPlanetTarget).collect(Collectors.toSet());
         final Map<Integer, Planet> planets = planetService.findAll(idPlanets).stream()
                 .collect(Collectors.toMap(AbstractEntityKey::getId, Function.identity()));
 
+        LOGGER.info("\t...loading fleets");
         final Set<Integer> idFleets = allItems.stream().map(MissionItemDto::getIdPirateFleet).collect(Collectors.toSet());
         final Map<Integer, Fleet> fleets = fleetService.findAll(idFleets).stream()
                 .collect(Collectors.toMap(AbstractEntityKey::getId, Function.identity()));
 
+        LOGGER.info("\t...loading ticks");
         final Set<Integer> idTicks = fileCacheContent.keySet().stream().map(this::getTickId).collect(Collectors.toSet());
         final Map<Integer, Tick> ticks = tickTimeService.findAll(idTicks).stream()
                 .collect(Collectors.toMap(AbstractEntityKey::getId, Function.identity()));
@@ -100,6 +104,7 @@ public class MissionCache {
         final Map<String, List<MissionItemDto>> result = fileCacheContent.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().stream().map(this::fromJson).collect(Collectors.toList())));
 
+        LOGGER.info("\t...constructing cache");
         result.forEach((key, serializedItems) -> {
             final List<MissionItem> lst = serializedItems.stream()
                     .map(s -> {
@@ -118,7 +123,7 @@ public class MissionCache {
                     ).collect(Collectors.toList());
             cache.put(key, lst);
         });
-
+        LOGGER.info("Done loading cache into heap.");
     }
 
     public void pirateRaidSpawn(@Nonnull final Tick today, @Nonnull final Fleet pirateFleet, @Nonnull final Planet target) {

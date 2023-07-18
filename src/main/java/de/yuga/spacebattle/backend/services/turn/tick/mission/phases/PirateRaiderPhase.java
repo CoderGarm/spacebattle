@@ -111,6 +111,8 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
                 if (userDefeated) {
                     raidPlanet(today, planetToStore, fleetToStore, pirateFleet, freeCargoUnits, target);
                 } else {
+                    pirateFleet.delete();
+                    fleetService.save(pirateFleet);
                     LOGGER.info("\tPirates defeated from '" + owner.getUsername() + "' at '" + target.getName() + "'");
                 }
             }
