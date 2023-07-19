@@ -22,7 +22,6 @@ import de.yuga.spacebattle.backend.services.caches.RaidingPirateCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
-import de.yuga.spacebattle.backend.services.turn.mission.MissionService;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.HeatMapService;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.MissionPhaseRunner;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.RaidingPiratesMission;
@@ -69,9 +68,6 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
     private final HeatMapService heatMapService;
 
     @Nonnull
-    private final MissionService missionService;
-
-    @Nonnull
     private final MissionCache missionCache;
 
     @Nonnull
@@ -84,7 +80,6 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
                             @Nonnull final WarShipService warShipService,
                             @Nonnull final FleetMovementCache fleetMovementCache,
                             @Nonnull final HeatMapService heatMapService,
-                            @Nonnull final MissionService missionService,
                             @Nonnull final MissionCache missionCache,
                             @Nonnull final RaidingPirateCache raidingPirateCache) {
         this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
@@ -93,7 +88,6 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
         this.heatMapService = Preconditions.checkNotNull(heatMapService, "heatMapService must not be empty");
-        this.missionService = Preconditions.checkNotNull(missionService, "missionService must not be empty");
         this.missionCache = Preconditions.checkNotNull(missionCache, "missionCache must not be empty");
         this.raidingPirateCache = Preconditions.checkNotNull(raidingPirateCache, "raidingPirateCache must not be empty");
     }

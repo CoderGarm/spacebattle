@@ -2041,6 +2041,61 @@ INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArti
 INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (7, 7);
 INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES (8, 8);
 
+
+INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('en', 'Missions', 'GAME_MECHANICS', null);
+INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, LAST_INSERT_ID(), 1);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(), '# Missions','INSERT',0);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(), '---','INSERT',1);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(), '#### Being an missions objective','INSERT',2);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(), '','INSERT',3);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(), 'Some situations will leave your empire as the **objective** of a foreign action.  ','INSERT',4);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(), 'Most of the time you can prevent dangerous with being attentive.','INSERT',5);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(), '','INSERT',6);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(), '#### Missions as counter measures','INSERT',7);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(), '','INSERT',8);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(), 'In most cases, the nature of the threat also includes its antidote.  ','INSERT',9);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(), 'It is completely mandatory to, for instance, combat piracy in order to have safe trade routes.','INSERT',10);
+INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES ((SELECT MAX(idArticle) from article), (SELECT MAX(idArticleRevision) from articleRevision));
+
+INSERT INTO article (langCode, title, wikiCategory, idBase) VALUES ('en', 'Strategic operations and fleet management', 'GAME_MECHANICS', null);
+INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, LAST_INSERT_ID(), 1);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'# Strategic operations and fleet management','INSERT',0);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'---','INSERT',1);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'#### Naval Operations','INSERT',2);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'','INSERT',3);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'In order to advance the interests of one\'s empire, it is necessary to project strength.','INSERT',4);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'','INSERT',5);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'This can be accomplished directly, such as by having fleets fielded by the most experienced commanders.  ','INSERT',6);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'Or more subtle, in which many small interventions are carried out instead of a few large ones.','INSERT',7);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'','INSERT',8);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'---','INSERT',9);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'#### Fleet management','INSERT',10);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'','INSERT',11);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'Of course, operational fleets must be assembled from serviced and munitioned, staffed warships.','INSERT',12);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'','INSERT',13);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'This can be long-term in the manner of a standing military or purposeful.  ','INSERT',14);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'In many situations it is helpful to keep some warships explicitly in reserve and then combine them into task forces or flotillas.','INSERT',15);
+INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES ((SELECT MAX(idArticle) from article), (SELECT MAX(idArticleRevision) from articleRevision));
+
+INSERT INTO article (langCode, title, wikiCategory, idBase) SELECT 'de', 'Strategische Operationen und Flottenverwaltung', 'GAME_MECHANICS', idArticle FROM article WHERE title = 'Strategic operations and fleet management';
+INSERT INTO articleRevision (version, idArticle, idAuthor) VALUES (1, LAST_INSERT_ID(), 1);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'# Strategische Operationen und Flottenverwaltung','INSERT',0);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'---','INSERT',1);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'#### Marineoperationen','INSERT',2);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'','INSERT',3);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'Um die Interessen seines Imperiums durchzusetzen ist es notwendig, Stärke zu projezieren.  ','INSERT',4);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'Das kann direkt erreicht werden, etwa in dem Flotten von den erfahrensten Kommandeuren ins Feld geführt werden.  ','INSERT',5);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'Oder aber subtiler, in dem statt wenigen großen Interventionen viele Kleine durchgeführt werden.','INSERT',6);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'','INSERT',7);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'---','INSERT',8);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'#### Flottenverwaltung','INSERT',9);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'','INSERT',10);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'Natürlich müssen einsatzbereite Flotten aus gewarteten und aufmunitionierten, mit Personal bestückten Kriegsschiffen zusammen gestellt werden.','INSERT',11);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'','INSERT',12);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'Dies kann langfristig in der Art eines stehenden Militärs geschehen oder zweckbezogen.  ','INSERT',13);
+INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'In vielen Situationen ist es hilfreich einige Kriegsschiffe explizit in Reserve zu halten um sie dann zu Einsatzgruppen oder Flotillen zusammenzufassen.','INSERT',14);
+INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES ((SELECT MAX(idArticle) from article), (SELECT MAX(idArticleRevision) from articleRevision));
+
 insert into dbPatch values (null, now(), 'add traded resource', '0.1.2-1');
 insert into dbPatch values (null, now(), 'rebalance buildings', '0.1.2-2');
 insert into dbPatch values (null, now(), 'implement npc entity structure', '0.1.3-1');

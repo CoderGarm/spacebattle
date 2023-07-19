@@ -36,13 +36,13 @@ public class RaidingPiratesMission implements MissionRunner {
 
     @Autowired
     public RaidingPiratesMission(@Nonnull final PirateSpawnPhase pirateSpawnPhase,
+                                 @Nonnull final PirateApproachPhase pirateApproachPhase,
                                  @Nonnull final PirateRaiderPhase pirateRaiderPhase,
-                                 @Nonnull final PirateWithdrawPhase pirateWithdrawPhase,
-                                 @Nonnull final PirateApproachPhase pirateApproachPhase) {
+                                 @Nonnull final PirateWithdrawPhase pirateWithdrawPhase) {
         this.pirateSpawnPhase = Preconditions.checkNotNull(pirateSpawnPhase, "pirateSpawnPhase must not be empty");
+        this.pirateApproachPhase = Preconditions.checkNotNull(pirateApproachPhase, "pirateApproachPhase must not be empty");
         this.pirateRaiderPhase = Preconditions.checkNotNull(pirateRaiderPhase, "pirateRaiderPhase must not be empty");
         this.pirateWithdrawPhase = Preconditions.checkNotNull(pirateWithdrawPhase, "pirateWithdrawPhase must not be empty");
-        this.pirateApproachPhase = pirateApproachPhase;
     }
 
     @Override

@@ -30,41 +30,7 @@ Die Admiralität ist der Meinung, es wäre gut die Systeme regulär zu patrouill
 4. Missionen!  
    Die strategischen Operationen deines Reiches sorgen für sichere Handelswege und für ruhige Nachbarn.  
    Nutze sie weise, um deine begrenzte Tonnage einzusetzen und das Maximum an Einfluss herauszuholen.
-
-todo. spielermissionen
-
-todo. wiki-eintrag für flottenverwaltung, heatmap, mission und counter
-
-- nur reserveschiffe können missionen zugewiesen werden
-- jeder plani bekommt heat pro runde
-- counter mission reduziert um counter impact, flotten im orbit verbessern die heat nur zur hälfte, frachter im orbit
-  sprechen sich rum
-
-missionen
-
-- müssen mit schiffen ausgestattet werden
-- haben einen task
-    - counter mission
-        - anti-piraten-missionen (schutz vor passiven piraten im nahfeld)
-        - konvoischutz (schutz vor passiven piraten)
-    - active mission
-        - to be discussed
-- haben einen aktionszeitraum
-- ist die mission abgeschlossen, kommen die schiffe zurück
-
-aktive piraten
-
-- heatmap pro user, umso höher die punkte im verhältnis zu anderen, umso wahrscheinlicher ein angriff
-- ein piratenangriff reduziert heat
-- ein anti-piraten-mission reduziert heat
-- eine stationierte flotte kann piraten zur schnellen Flucht bewegen
-- angegriffen und geraidet wird der am schwächsten verteidigte planet
-
-passive piraten
-
-- jeder trade kann piraten triggern
-- erfolgsrate je nach anti-piraten-missionen/konvoi beider teilnehmer und größe des trades pro tick
-- trade wird um erfolg des piraten reduziert
+   Momentan ist nur die **Piratenjagd** aktiv. Der **Konvoischutz** wird Teil des nächsten Releases sein.
 
 #### Diverses
 
@@ -96,6 +62,40 @@ passive piraten
 - normale schlachten auch im mission report anzeigen
 - fleet management - flotten aufteilen neben flotten mergen
 - todo. convoy raid mission
+- todo. aktive Spielermissionen
+
+missionen
+
+- nur reserveschiffe können missionen zugewiesen werden
+- jeder plani bekommt heat pro runde
+- counter mission reduziert um counter impact, flotten im orbit verbessern die heat nur zur hälfte, frachter im orbit
+  sprechen sich rum
+
+- müssen mit schiffen ausgestattet werden
+- haben einen task
+    - counter mission
+        - anti-piraten-missionen (schutz vor passiven piraten im nahfeld)
+        - konvoischutz (schutz vor passiven piraten)
+    - active mission
+        - to be discussed
+- haben einen aktionszeitraum
+- ist die mission abgeschlossen, kommen die schiffe zurück
+
+aktive piraten
+
+- heatmap pro user, umso höher die punkte im verhältnis zu anderen, umso wahrscheinlicher ein angriff
+- ein piratenangriff reduziert heat
+- ein anti-piraten-mission reduziert heat
+- eine stationierte flotte kann piraten zur schnellen Flucht bewegen
+- angegriffen und geraidet wird der am schwächsten verteidigte planet
+
+passive piraten
+
+- jeder trade kann piraten triggern
+- erfolgsrate je nach anti-piraten-missionen/konvoi beider teilnehmer und größe des trades pro tick
+- trade wird um erfolg des piraten reduziert
+
+
 
 Thema: Handel
 done. Bestenliste mit Punkten pro Leistungsfeld  
