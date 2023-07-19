@@ -4,17 +4,6 @@ Thema: NPC, Handel und Missionen
 
 Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
 
-###### Yeha, es ist vollbracht!
-
-Es gibt das erste PvE-Element und ich hoffe, es wird so richtig lästig!
-
-Piraten werden dich besuchen und sie werden mitgehen lassen, was möglich ist.  
-Sie werden dich berauben, deine Nachbarn brandschatzen und dir auflauern, wenn du es am wenigsten erwartest.
-
-Also vielleicht sind sie nicht solche Mistkerle wie Warnecke damals in Marsh, aber wer weiß ...  
-Auf jeden Fall solltest du Schiffe detachieren, um die Handelswege zu schützen.  
-Die Admiralität ist der Meinung, es wäre gut die Systeme regulär zu patrouillieren und dafür Kräfte freizustellen.
-
 #### Gameplay
 
 1.
@@ -25,16 +14,18 @@ Die Admiralität ist der Meinung, es wäre gut die Systeme regulär zu patrouill
 
 ### Bugs fixed
 
-1. Planeten, die von keiner Macht besetzt sind können Ziel von Raid-Missionen der Piraten werden.
-2. Im eigentlichen Sinne kein Bug, aber trotzdem ein bisher ungelöstes Problem: **3-way-combat**.  
-   Das Kampfsystem ist im Detail recht komplex, allerdings habe ich den vermeintlichen Grenzfall mehrerer gleichzeitig gegeneinander kämpfender Flotten außen vor gelassen.  
-   Problematisch ist das jetzt, weil es natürlich sehr einfach ist zwei Flotten im Orbit zu haben und ein Pirat schaut trotzdem mutig vorbei - oder irgendwann mal der Nachbar.  
-   Das ist vorerst so gelöst, dass es nur einen Kampf pro Orbit pro Tick gibt. Ein Kampf bis aufs Blut zwar, aber eine zweite Flotte muss warten bis sie an der Reihe ist.  
-   Diese schnelle Lösung ist nicht optimal, eröffnet allerdings interessante strategische Perspektiven und ist gewissermaßen keine Änderung zu vorher, da dieser Fall gewissermaßen
-   neu ist 😶‍🌫
+1. Der Tech Tree kann nun auch anständig resized werden.
+2. Der Laderaum von Schiffen wird jetzt richtig berechnet.
+3. Man kann Kolonisierungen nicht mehr mehrfach starten.
 
 #### next steps
 
+- mission overview
+- mission abbrechen
+- research in job liste extra machen
+- bug: repair needed bei allen flotten
+- bug: ftl möglich bei reserveflotte
+- bug: kein flottenname nötig zum submitten beim detachment
 - Take a Tour als Werbung
 - Waiting for activation for operationals
 - write cache to file on shutdown and read post construct
@@ -44,6 +35,7 @@ Die Admiralität ist der Meinung, es wäre gut die Systeme regulär zu patrouill
 - normale schlachten auch im mission report anzeigen
 - fleet management - flotten aufteilen neben flotten mergen
 - todo. convoy raid mission
+- todo. punkte für missionen
 - todo. aktive Spielermissionen
 
 missionen
