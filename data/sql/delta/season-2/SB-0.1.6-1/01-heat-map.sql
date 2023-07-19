@@ -53,5 +53,4 @@
 
 #--select p.idPlanet, p.name, username, heat from heatMap left join planet p on heatMap.idPlanet = p.idPlanet left join user u on p.idOwner = u.idUser order by heat desc;
 
-    insert into dbPatch
-    values (null, now(), 'heat map', '0.1.6-1');
+insert into dbPatch values (null, now(), 'heat map', '0.1.6-1');
