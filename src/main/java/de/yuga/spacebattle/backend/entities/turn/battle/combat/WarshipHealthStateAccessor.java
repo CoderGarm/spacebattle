@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.backend.entities.turn.battle.combat;
 
+import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.SpacecraftCalculator;
 import de.yuga.spacebattle.backend.combat.round.MissileAmmunitionState;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
@@ -48,10 +49,21 @@ public interface WarshipHealthStateAccessor {
         final ShipClass shipClass = getWarShip().getShipClass();
         final Set<CapabilityValue> capabilityValues = new SpacecraftCalculator().getCapabilityValues(shipClass);
 
-        return !(getStateByAsInt(EModuleType.ARMOR) == getInteger(capabilityValues, EModuleType.ARMOR)
-                && getStateByAsInt(EModuleType.ELECTRONIC_WARFARE) == getInteger(capabilityValues, EModuleType.ELECTRONIC_WARFARE)
-                && getStateByAsInt(EModuleType.SIDEWALL) == getInteger(capabilityValues, EModuleType.SIDEWALL)
-                && getStateByAsInt(EModuleType.PROPULSION) == getInteger(capabilityValues, EModuleType.PROPULSION));
+        return !(equalize10PointsOfDefaultStats(capabilityValues, EModuleType.ARMOR)
+                && equalize10PointsOfDefaultStats(capabilityValues, EModuleType.ELECTRONIC_WARFARE)
+                && equalize10PointsOfDefaultStats(capabilityValues, EModuleType.SIDEWALL)
+                && equalize10PointsOfDefaultStats(capabilityValues, EModuleType.PROPULSION));
+    }
+
+    /**
+     * If there is no module of a type the virtual default value is 10 instead of zero.<br>
+     * This a workaround for the combat system which thinks zero points in something means destroyed.
+     */
+    private boolean equalize10PointsOfDefaultStats(@Nonnull final Set<CapabilityValue> capabilityValues, @Nonnull final EModuleType moduleType) {
+        Preconditions.checkNotNull(capabilityValues, "capabilityValues must not be empty");
+        Preconditions.checkNotNull(moduleType, "moduleType must not be empty");
+
+        return Math.abs(getStateByAsInt(moduleType) - getInteger(capabilityValues, moduleType)) <= 10;
     }
 
     default boolean needsAmmunition() {
@@ -70,7 +82,10 @@ public interface WarshipHealthStateAccessor {
         });
     }
 
-    private int getInteger(final Set<CapabilityValue> capabilityValues, final EModuleType electronicWarfare) {
+    private int getInteger(@Nonnull final Set<CapabilityValue> capabilityValues, @Nonnull final EModuleType electronicWarfare) {
+        Preconditions.checkNotNull(capabilityValues, "capabilityValues must not be empty");
+        Preconditions.checkNotNull(electronicWarfare, "electronicWarfare must not be empty");
+
         return capabilityValues.stream().filter(c -> c.getModuleType() == electronicWarfare).findFirst().map(CapabilityValue::getValue).map(BigDecimal::intValue).orElse(0);
     }
 }

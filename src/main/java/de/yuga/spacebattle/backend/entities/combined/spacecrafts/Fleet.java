@@ -406,7 +406,6 @@ public class Fleet extends Operationable implements HasOwner {
                 .stream()
                 .filter(Operationable::isOperational)
                 .map(s -> s.getShipClass().getPropulsion())
-                .filter(Objects::nonNull)
                 .map(Propulsion::getTechnologyType)
                 .reduce((o1, o2) -> o1.getMaxVelocitySOL() < o2.getMaxVelocitySOL() ? o1 : o2)
                 .orElse(ETechnologyType.CIVIL);

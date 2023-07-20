@@ -2,41 +2,48 @@
 
 Thema: NPC, Handel und Missionen
 
-Alles, was unter diesem Thema kommt, ist ein Schritt zu einer lebenden Galaxie.
-
 #### Gameplay
 
 1.
 
+- mission overview
+- mission abbrechen
+
 #### Diverses
 
-1.
+1. Das Job-Dashboard ist noch etwas weiter gestrafft.
+2. Die Dashboard-Elemente sind standardmäßig aufgeklappt.
+3. Das Transportation-Dashboard ist etwas schlanker gestaltet.
+4. Trade Offers sind nach Preis pro Einheit vorsortiert.
+5. Viele kleine optische Anpassungen, damit es etwas runder aussieht.
+6. Take a Tour als Überblick.  
+   Das Ganze ist, wie alles, der erste Ansatz. Da ist viel Blindtext dabei und wirklich gut sieht es auch nicht aus.  
+   **Um das zu ändern, benötige ich eure Hilfe!**
 
 ### Bugs fixed
 
-1. Der Tech Tree kann nun auch anständig resized werden.
-2. Der Laderaum von Schiffen wird jetzt richtig berechnet.
-3. Man kann Kolonisierungen nicht mehr mehrfach starten.
+1. Schiffe werden nicht mehr fälschlich als reparaturbedürftig angezeigt.
+2. Man kann keine Flotten mehr detachieren ohne einen Namen anzugeben.
+3. Das Pop Cap Display zeigt keine negativen Ticks mehr an.
+
+- bug: stratOps kann mehre systeme klicken
 
 #### next steps
 
-- mission overview
-- mission abbrechen
-- research in job liste extra machen
-- bug: repair needed bei allen flotten
+- change items: https://game-icons.net/
+- change color to violet
+- bootstrap css nur bei markdown-editor möglich
 - bug: ftl möglich bei reserveflotte
-- bug: kein flottenname nötig zum submitten beim detachment
-- Take a Tour als Werbung
 - Waiting for activation for operationals
 - write cache to file on shutdown and read post construct
 - Reisezeit beim Handel inkl Tabellendarstellung
-- trade offers nach preis vorsortieren
 - eingemottete Schiffe tatsächlich außer dienst nehmen
 - normale schlachten auch im mission report anzeigen
 - fleet management - flotten aufteilen neben flotten mergen
 - todo. convoy raid mission
 - todo. punkte für missionen
-- todo. aktive Spielermissionen
+- todo. aktive Spielermissionen, e.g. provoke pirate raid at user or planet
+- todo. heat indicator on map
 
 missionen
 
