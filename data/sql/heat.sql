@@ -1,0 +1,1 @@
+select distinct idHeatMap, heat, missionType, p.idPlanet, p.name as planetName, u.username as userName from heatMap h left join planet p on (h.idPlanet = p.idPlanet) left join user u on (u.idUser = p.idOwner) order by heat, username;

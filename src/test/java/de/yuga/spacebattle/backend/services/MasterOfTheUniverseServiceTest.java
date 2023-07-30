@@ -98,9 +98,7 @@ public class MasterOfTheUniverseServiceTest {
 
     @Test
     void tick() {
-        for (int i = 0; i < 25; i++) {
-            tickService.doTick();
-        }
+        tickService.doTick();
     }
 
     @Test

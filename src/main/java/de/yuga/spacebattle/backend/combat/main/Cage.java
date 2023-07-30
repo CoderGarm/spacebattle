@@ -384,13 +384,16 @@ public class Cage implements Future<Cage> {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
         final CombatRound currentCombatRound = getCurrentCombatRound();
-        return roundStates.stream()
+        final FleetRoundState roundState = roundStates.stream()
                 .filter(fleetRoundState -> fleetRoundState.isEqualsByFleetAndRound(currentCombatRound, fleet))
                 .findFirst()
-                .orElseThrow(() -> {
-                    LOGGER.info("There is no fleet state for idFleet '" + fleet.getId() + "'.");
-                    return new NotifyWebUserException("No state present - please call the administrator.");
-                });
+                .orElse(null);
+        if (roundState != null) {
+            return roundState;
+        }
+
+        LOGGER.info("There is no fleet state for idFleet '" + fleet.getId() + "'.");
+        throw new NotifyWebUserException("No state present - please call the administrator.");
     }
 
     /**

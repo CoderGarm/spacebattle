@@ -10,6 +10,7 @@ import de.yuga.spacebattle.backend.services.turn.tick.TickRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,9 @@ public class TickRunnerService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TickRunnerService.class);
 
     @Nonnull
+    private final String server;
+
+    @Nonnull
     @SuppressWarnings("NotNullFieldNotInitialized")
     private Tick today;
 
@@ -44,12 +48,14 @@ public class TickRunnerService {
 
 
     @Autowired
-    public TickRunnerService(@Nonnull final Set<TickRunner> tickRunners,
+    public TickRunnerService(@Nonnull @Value("${sb.server:localhost}") final String server,
+                             @Nonnull final Set<TickRunner> tickRunners,
                              @Nonnull final TickRepository tickRepository,
                              @Nonnull final MailService mailService) {
         Preconditions.checkNotNull(tickRunners, "tickRunners must not be empty");
         this.tickRunners = tickRunners.stream().sorted((TickRunner::compareTo)).collect(Collectors.toList());
 
+        this.server = Preconditions.checkNotNull(server, "server must not be empty");
         this.tickRepository = Preconditions.checkNotNull(tickRepository, "tickRepository shouldn't be null!");
         this.mailService = Preconditions.checkNotNull(mailService, "mailService must not be empty");
     }
@@ -81,7 +87,9 @@ public class TickRunnerService {
 
             LOGGER.info("Tick done.");
         } catch (final Exception ex) {
-            mailService.sendExceptionMail(ex);
+            if (!this.server.equals("localhost")) {
+                mailService.sendExceptionMail(ex);
+            }
             throw ex;
         } finally {
             today.setTickEnds(LocalDateTime.now());

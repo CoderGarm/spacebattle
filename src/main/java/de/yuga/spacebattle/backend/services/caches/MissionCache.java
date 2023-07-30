@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import com.google.gson.GsonBuilder;
 import de.yuga.spacebattle.backend.dto.turn.mission.MissionItem;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -253,9 +254,9 @@ public class MissionCache {
     private String getKey(@Nonnull final Tick today, @Nonnull final Planet target) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(target, "target must not be empty");
-        Preconditions.checkNotNull(target.getOwner(), "target.getOwner() must not be empty");
 
-        return getKey(today, target.getOwner().getId());
+        final Owner owner = target.getOwner() != null ? target.getOwner() : Owner.UNCOLONIZED;
+        return getKey(today, owner.getId());
     }
 
     private int getTickId(@Nonnull final String key) {

@@ -23,6 +23,7 @@ java \
 -Dspring.datasource.username=sbdbuser \
 -Dspring.datasource.password=JYUiAsUkRQ9xQCeM \
 -Dsb.tick.cron='0 0 0 * * *' \
+-Dsb.server='medusa' \
 -Dlogging.battle-log.write=false \
 -Dlogging.rest.calls=false \
 -Dlogging.file.name=/home/karsten/spacebattle/log/spacebattle.log \

@@ -151,7 +151,7 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
         final boolean combatAllowed = CombatAllowanceCalculator.isCombatAllowed(participatingUsers);
         for (final Owner owner : participatingUsers) {
 
-            final long fleets = byOwner.getOrDefault(owner, new ArrayList<>()).stream().filter(Fleet::isAlive).count();
+            final int fleets = (int) byOwner.getOrDefault(owner, new ArrayList<>()).stream().filter(Fleet::isAlive).count();
             if (owner.getNpcOwner() != null) {
                 pirateFleetsAlive += fleets;
             } else {

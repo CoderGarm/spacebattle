@@ -17,39 +17,21 @@ Die Admiralität ist der Meinung, es wäre gut die Systeme regulär zu patrouill
 
 #### Gameplay
 
-1. Piraten...  
-   Die Piraten werden im Laufe der Zeit erweitert werden, jetzt allerdings greifen sie Konvois an und suchen von Zeit zu
-   Zeit nach lohnender Beute.  
-   Für die spontanen Unannehmlichkeiten erhält jeder Spieler einen zusätzlichen Songbird-Zerstörer auf Piratenjagd am
-   Heimatplaneten.
-2. Es gibt Wiki-Artikel zu den Missionstypen und Piraterie, auffindbar im BurgerMenü oben links.
-3. Du kannst im Flottenmenü Schiffe detachieren und einmotten!
-   Deine Reserveflotte wird nun alle Schiffe enthalten, die nicht in zu einer Flotte oder einer Mission zugewiesen
-   wurden.  
-   Aus dem Pool heraus werden Missionen und Flotten ausgestattet.
-4. Missionen!  
-   Die strategischen Operationen deines Reiches sorgen für sichere Handelswege und für ruhige Nachbarn.  
-   Nutze sie weise, um deine begrenzte Tonnage einzusetzen und das Maximum an Einfluss herauszuholen.
-   Momentan ist nur die **Piratenjagd** aktiv. Der **Konvoischutz** wird Teil des nächsten Releases sein.
+1.
 
 #### Diverses
 
-1. Die Sternenkarte hat Liebe erfahren.  
-   Es sind nun Wurmlöcher sichtbar, haben aber keine Funktion.
-2. Es gibt einen Tooltip in der Flottenverwaltung, der auf das Ändern der Flottennamen hinweist.
-3. Die Scrollbars sind nun auch im Chrome firefox-like, etwas schlanker.
-4. Die Job-Liste im Dashboard ist etwas schlanker gestaltet und es gibt einen "Job finished"-Marker.
-5. Der Spinner zum Anzeigen von Wartezeit ist etwas schicker.
-6. Es gibt jetzt eine "Nimm mal lieber ein größeres Display"-Warnung bei Displays < 800 Pixel Breite.
-7. Das Dashboard ist thematisch besser sortiert.
-8. Beginnend bei den Missions-Items bleiben die Dashboard-Einträge über den Server Neustart hinaus bestehen.  
-   Im Laufe der Zeit werde ich das weiter führen.
+1.
 
 ### Bugs fixed
 
-1. Der Tech Tree kann nun auch anständig resized werden.
-2. Der Laderaum von Schiffen wird jetzt richtig berechnet.
-3. Man kann Kolonisierungen nicht mehr mehrfach starten.
+1. Planeten, die von keiner Macht besetzt sind können Ziel von Raid-Missionen der Piraten werden.
+2. Im eigentlichen Sinne kein Bug, aber trotzdem ein bisher ungelöstes Problem: **3-way-combat**.  
+   Das Kampfsystem ist im Detail recht komplex, allerdings habe ich den vermeintlichen Grenzfall mehrerer gleichzeitig gegeneinander kämpfender Flotten außen vor gelassen.  
+   Problematisch ist das jetzt, weil es natürlich sehr einfach ist zwei Flotten im Orbit zu haben und ein Pirat schaut trotzdem mutig vorbei - oder irgendwann mal der Nachbar.  
+   Das ist vorerst so gelöst, dass es nur einen Kampf pro Orbit pro Tick gibt. Ein Kampf bis aufs Blut zwar, aber eine zweite Flotte muss warten bis sie an der Reihe ist.  
+   Diese schnelle Lösung ist nicht optimal, eröffnet allerdings interessante strategische Perspektiven und ist gewissermaßen keine Änderung zu vorher, da dieser Fall gewissermaßen
+   neu ist 😶‍🌫
 
 #### next steps
 
