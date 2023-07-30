@@ -37,7 +37,7 @@ public class CacheFileWriter { /* fixme cache cleanup after period of time */
         this.cacheDir = Preconditions.checkNotNull(cacheDir, "cacheDir shouldn't be null!");
     }
 
-
+    @Nonnull
     private BufferedWriter openStream(@Nonnull final String fileName) {
         Preconditions.checkNotNull(fileName, "fileName must not be empty");
 
@@ -90,6 +90,7 @@ public class CacheFileWriter { /* fixme cache cleanup after period of time */
         closeAndWrite(bufferedWriter);
     }
 
+    @Nonnull
     public Map<String, List<String>> getFileCacheContent(@Nonnull final Class<?> aClass) {
         Preconditions.checkNotNull(aClass, "aClass must not be empty");
 

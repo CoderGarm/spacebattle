@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 public class MissionCache {
 
     @Nonnull
-    private static final Logger LOGGER = LoggerFactory.getLogger(MissionItem.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MissionCache.class);
 
     @Nonnull
     private final CacheStore<String, List<MissionItem>> cache = new CacheStore<>(10, TimeUnit.DAYS);
