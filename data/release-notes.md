@@ -22,6 +22,8 @@ Thema: NPC, Handel und Missionen
    **Um das zu ändern, benötige ich eure Hilfe!**
 7. Das Theme ist etwas violetter geworden. Bitte lasst mich wissen, wie das wirkt und ob es euch gefällt.
 8. Es gibt Profil-Icons 🤩
+9. Es gibt neue Icon-Sets 🤩  
+   Leider noch nicht für alle Icons, aber ich arbeite daran :)
 
 ### Bugs fixed
 
