@@ -4,10 +4,11 @@ Thema: NPC, Handel und Missionen
 
 #### Gameplay
 
-1.
-
-- mission overview
-- mission abbrechen
+1. Es gibt einen Überblick über alle Missionen.  
+   Dabei kann man für alle Planeten, für die es noch keine Missionen gibt, eine starten.  
+   Inhaltlich ist das noch etwas dünn, es muss sich durch die Nutzen herausstellen, was man da besser machen kann.
+2. Man kann Missionen nun abbrechen.
+   Die Schiffe gehen zurück in die Reserve.
 
 #### Diverses
 
@@ -19,19 +20,18 @@ Thema: NPC, Handel und Missionen
 6. Take a Tour als Überblick.  
    Das Ganze ist, wie alles, der erste Ansatz. Da ist viel Blindtext dabei und wirklich gut sieht es auch nicht aus.  
    **Um das zu ändern, benötige ich eure Hilfe!**
+7. Das Theme ist etwas violetter geworden. Bitte lasst mich wissen, wie das wirkt und ob es euch gefällt.
 
 ### Bugs fixed
 
 1. Schiffe werden nicht mehr fälschlich als reparaturbedürftig angezeigt.
 2. Man kann keine Flotten mehr detachieren ohne einen Namen anzugeben.
 3. Das Pop Cap Display zeigt keine negativen Ticks mehr an.
-
-- bug: stratOps kann mehre systeme klicken
+4. Man kann bei StratOps nur noch ein System einkringeln.
 
 #### next steps
 
 - change items: https://game-icons.net/
-- change color to violet
 - bootstrap css nur bei markdown-editor möglich
 - bug: ftl möglich bei reserveflotte
 - Waiting for activation for operationals
@@ -75,8 +75,6 @@ passive piraten
 - jeder trade kann piraten triggern
 - erfolgsrate je nach anti-piraten-missionen/konvoi beider teilnehmer und größe des trades pro tick
 - trade wird um erfolg des piraten reduziert
-
-
 
 Thema: Handel
 done. Bestenliste mit Punkten pro Leistungsfeld  
