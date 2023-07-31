@@ -28,14 +28,22 @@ public class ForumMessage {
     @Schema(required = true, description = "The id of the author.")
     private int idAuthor;
 
+    @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The username of the author.")
     private String author;
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The user's profile pic.")
+    private String profilePic;
+
+    @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The message itself.")
     private String message;
 
+    @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The creation timestamp.")
     private LocalDateTime sentAt;
@@ -50,6 +58,7 @@ public class ForumMessage {
         this.idForumThread = message.getForumThread().getId();
         this.idForum = message.getForumThread().getForum().getId();
         this.idAuthor = message.getAuthor().getId();
+        this.profilePic = message.getAuthor().getUserSetting().getProfilePic();
         this.author = message.getAuthor().getUsername();
         this.message = message.getMessage();
         this.sentAt = message.getSentAt();

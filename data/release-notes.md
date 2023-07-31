@@ -21,6 +21,7 @@ Thema: NPC, Handel und Missionen
    Das Ganze ist, wie alles, der erste Ansatz. Da ist viel Blindtext dabei und wirklich gut sieht es auch nicht aus.  
    **Um das zu ändern, benötige ich eure Hilfe!**
 7. Das Theme ist etwas violetter geworden. Bitte lasst mich wissen, wie das wirkt und ob es euch gefällt.
+8. Es gibt Profil-Icons 🤩
 
 ### Bugs fixed
 
@@ -32,6 +33,7 @@ Thema: NPC, Handel und Missionen
 #### next steps
 
 - change items: https://game-icons.net/
+- sanitize markdown messages without unsafe message
 - bootstrap css nur bei markdown-editor möglich
 - bug: ftl möglich bei reserveflotte
 - Waiting for activation for operationals

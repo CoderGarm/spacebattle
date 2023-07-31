@@ -40,6 +40,11 @@ public class Player {
     @Schema(description = "The user's role.")
     private String role;
 
+    @Nullable
+    @JsonProperty
+    @Schema(description = "The user's profile pic.")
+    private String profilePic;
+
     public Player() {
     }
 
@@ -51,6 +56,7 @@ public class Player {
         if (user instanceof User) {
             this.idAlliance = ((User) user).getAlliance() != null ? ((User) user).getAlliance().getId() : null;
             this.role = ((User) user).getUserRole().getName();
+            this.profilePic = ((User) user).getUserSetting().getProfilePic();
         } else {
             isNpc = true;
         }

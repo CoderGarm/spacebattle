@@ -216,7 +216,8 @@ public class UserService {
         save(user);
     }
 
-    public void updateSettings(@Nonnull final UserSettings settings, final int idUser) {
+    @Nonnull
+    public UserSetting updateSettings(@Nonnull final UserSettings settings, final int idUser) {
         Preconditions.checkNotNull(settings, "settings must not be empty");
 
         final User user = find(idUser);
@@ -224,7 +225,8 @@ public class UserService {
 
         final UserSetting userSetting = user.getUserSetting();
         userSetting.setReceiveChangelogInfos(settings.isReceiveChangelogInfos());
-        userSettingRepository.save(userSetting);
+        userSetting.setProfilePic(settings.getProfilePic());
+        return userSettingRepository.save(userSetting);
     }
 
     @Nonnull

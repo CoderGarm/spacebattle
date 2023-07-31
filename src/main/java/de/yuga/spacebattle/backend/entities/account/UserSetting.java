@@ -66,6 +66,11 @@ public class UserSetting extends AbstractEntityKey {
     @Column(columnDefinition = "boolean not null default false")
     private boolean receiveChangelogInfos = false;
 
+    @Nonnull
+    @NotNull
+    @Size(min = 1, max = 30)
+    private String profilePic = "perspective-dice-six-faces-random";
+
     public UserSetting() {
     }
 
@@ -130,6 +135,15 @@ public class UserSetting extends AbstractEntityKey {
 
     public void setReceiveChangelogInfos(final boolean receiveChangelogInfos) {
         this.receiveChangelogInfos = receiveChangelogInfos;
+    }
+
+    @Nonnull
+    public String getProfilePic() {
+        return profilePic;
+    }
+
+    public void setProfilePic(@Nonnull final String pic) {
+        this.profilePic = Preconditions.checkNotNull(pic, "pic must not be empty");
     }
 
     @Override

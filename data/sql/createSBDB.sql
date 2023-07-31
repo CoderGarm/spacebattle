@@ -705,6 +705,7 @@
         isLoginForbidden boolean not null default false,
         noEMailWanted boolean not null default false,
         password varchar(255) not null,
+        profilePic varchar(30) not null,
         receiveChangelogInfos boolean not null default false,
         idUser integer not null,
         primary key (idUserSetting)
@@ -2105,3 +2106,4 @@ insert into dbPatch values (null, now(), 'heat map', '0.1.6-1');
 insert into dbPatch values (null, now(), 'update warship caps', '0.1.6-2');
 insert into dbPatch values (null, now(), 'piracy and missions wiki', '0.1.6-3');
 insert into dbPatch values (null, now(), 'naval amendments', '0.1.6-4');
+insert into dbPatch values (null, now(), 'profile pic', '0.1.7-1');

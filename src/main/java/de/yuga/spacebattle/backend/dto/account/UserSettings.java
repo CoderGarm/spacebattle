@@ -26,6 +26,11 @@ public class UserSettings {
     @Schema(required = true, description = "If the user does not want receive any mail.")
     private boolean noEMailWanted;
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The profile pic name.")
+    private String profilePic;
+
     public UserSettings() {
     }
 
@@ -36,9 +41,15 @@ public class UserSettings {
         this.loginForbidden = userSetting.isLoginForbidden();
         this.eMailVerified = userSetting.isEMailVerified();
         this.noEMailWanted = userSetting.isNoEMailWanted();
+        this.profilePic = userSetting.getProfilePic();
     }
 
     public boolean isReceiveChangelogInfos() {
         return receiveChangelogInfos;
+    }
+
+    @Nonnull
+    public String getProfilePic() {
+        return profilePic;
     }
 }

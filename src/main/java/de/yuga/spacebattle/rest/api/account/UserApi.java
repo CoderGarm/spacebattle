@@ -106,7 +106,7 @@ public class UserApi extends BaseApi {
     @Operation(summary = "Changes settings for the user.", operationId = "changeSettings",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserSettings.class))),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
@@ -114,9 +114,9 @@ public class UserApi extends BaseApi {
     public ResponseEntity<?> changeSettings(@RequestBody @Nonnull final UserSettings settings) {
         PreconditionWebHelper.checkNotNull(settings, "settings must not be empty");
 
-        this.userService.updateSettings(settings, getIdUser());
+        final UserSetting userSetting = this.userService.updateSettings(settings, getIdUser());
 
-        return ResponseEntity.ok(true);
+        return ResponseEntity.ok(new UserSettings(userSetting));
     }
 
     @DeleteMapping(value = "/{idUser}")
