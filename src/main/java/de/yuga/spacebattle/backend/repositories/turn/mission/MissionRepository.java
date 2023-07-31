@@ -13,4 +13,7 @@ public interface MissionRepository extends JpaRepository<Mission, Integer> {
     @Nullable
     @Query("SELECT m FROM Mission  m WHERE m.actor.id = :idUser AND m.isDeleted = false")
     List<Mission> findAllForUser(@Param("idUser") final int idUser);
+
+    @Query("SELECT CASE WHEN (COUNT(m) = 1) THEN TRUE ELSE FALSE END FROM Mission  m WHERE m.id = :idMission AND m.actor.id = :idUser AND m.isDeleted = false")
+    boolean missionExistsForActor(@Param("idMission") final int idMission, @Param("idUser") final int idUser);
 }

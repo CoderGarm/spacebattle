@@ -38,6 +38,7 @@ public class MissionApi extends BaseApi {
 
     @Nonnull
     public static final String ENDPOINT = "mission";
+    public static final String STOP_MISSION_ENDPOINT = "stop";
 
     @Nonnull
     private final FleetService fleetService;
@@ -114,5 +115,19 @@ public class MissionApi extends BaseApi {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         final de.yuga.spacebattle.backend.entities.turn.mission.Mission result = missionService.createMission(actor, mission.getMissionType(), warshipIDs, planet);
         return ResponseEntity.ok(new Mission(result, getPreferredLanguage()));
+    }
+
+    @PutMapping(STOP_MISSION_ENDPOINT + "/{idMission}")
+    @Operation(summary = "Stops a mission", operationId = "stopMission",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> stopMission(@PathVariable("idMission") final int idMission) {
+        missionService.stopMission(idMission, getIdUser());
+        return ResponseEntity.ok(true);
     }
 }

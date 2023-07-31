@@ -123,4 +123,10 @@ public class MissionService {
 
         return Objects.requireNonNullElse(pirateHuntMissionRepository.findAllForPlanets(planets), new ArrayList<>());
     }
+
+    public void stopMission(final int idMission, final int idUser) {
+        if (missionRepository.missionExistsForActor(idMission, idUser)) {
+            missionRepository.deleteById(idMission);
+        }
+    }
 }
