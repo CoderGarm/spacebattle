@@ -14,7 +14,6 @@ public enum EIconPath {
     PLANET("icons/planets/"),
     STAR("icons/stars/"),
     CREW("icons/crew/"),
-    FLEET("icons/fleets/"),
 
     ;
 
@@ -58,8 +57,6 @@ public enum EIconPath {
             directory = PLANET.getPath();
         } else if (isForEnum instanceof EEducationType) {
             directory = CREW.getPath();
-        } else if (isForEnum instanceof EFleetSizeType) {
-            directory = FLEET.getPath();
         } else if (isForEnum instanceof EStarClassType) {
             directory = STAR.getPath();
         } else {
@@ -88,8 +85,6 @@ public enum EIconPath {
             directory = PLANET.getPath();
         } else if (isForEnum instanceof EEducationType) {
             directory = CREW.getPath();
-        } else if (isForEnum instanceof EFleetSizeType) {
-            directory = FLEET.getPath();
         } else if (isForEnum instanceof EStarClassType) {
             directory = STAR.getPath();
         } else {

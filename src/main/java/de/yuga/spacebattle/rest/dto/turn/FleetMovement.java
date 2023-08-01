@@ -41,6 +41,10 @@ public class FleetMovement {
     private int duration;
 
     @JsonProperty
+    @Schema(required = true, description = "The size of the moving fleet.")
+    private int fleetSize;
+
+    @JsonProperty
     @Schema(required = true, description = "If the incoming fleet is from a foreign empire.")
     private boolean isForeignFleet;
 
@@ -49,6 +53,7 @@ public class FleetMovement {
 
         this.fleetName = movement.getFleet().getName();
         this.fleetOwnerName = movement.getFleet().getOwner().getUsername();
+        this.fleetSize = movement.getFleet().getAliveShips().size();
 
         if (movement.getDestinationPlanet() != null) {
             this.destinationPlanet = movement.getDestinationPlanet().getName();

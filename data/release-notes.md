@@ -23,7 +23,7 @@ Thema: NPC, Handel und Missionen
 7. Das Theme ist etwas violetter geworden. Bitte lasst mich wissen, wie das wirkt und ob es euch gefällt.
 8. Es gibt Profil-Icons 🤩
 9. Es gibt neue Icon-Sets 🤩  
-   Leider noch nicht für alle Icons, aber ich arbeite daran :)
+   Leider noch nicht für alle Aspekte, aber ich arbeite daran.
 
 ### Bugs fixed
 
@@ -31,10 +31,16 @@ Thema: NPC, Handel und Missionen
 2. Man kann keine Flotten mehr detachieren ohne einen Namen anzugeben.
 3. Das Pop Cap Display zeigt keine negativen Ticks mehr an.
 4. Man kann bei StratOps nur noch ein System einkringeln.
+   todo. überlichtreisen ohne ftl?
+   todo. prop capacity in fleet notch
+   todo. colo abbrechen wenn schon am laufen
+   todo. constraint [CONSTRUCTION_UK] bei Kolonisierung?
+
 
 #### next steps
 
 - change items: https://game-icons.net/
+- minimal intelligence on foreign fleet if visible
 - sanitize markdown messages without unsafe message
 - bootstrap css nur bei markdown-editor möglich
 - bug: ftl möglich bei reserveflotte
