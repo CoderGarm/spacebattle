@@ -19,7 +19,7 @@ public enum EModuleType implements HasIconName {
     /**
      * As coordinates are in light seconds it has the native metric of {@link EDistanceMetric#LY}.
      */
-    FTLPROPULSION("FTLPropulsion", "ftlpropulsion"),
+    FTLPROPULSION("FTLPropulsion", "propulsion"),
     ELECTRONIC_WARFARE("Electronic warfare", "scanner");
 
     @Nonnull
