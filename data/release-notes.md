@@ -17,7 +17,7 @@ Thema: NPC, Handel und Missionen
 3. Das Transportation-Dashboard ist etwas schlanker gestaltet.
 4. Trade Offers sind nach Preis pro Einheit vorsortiert.
 5. Viele kleine optische Anpassungen, damit es etwas runder aussieht.
-6. Take a Tour als Überblick.  
+6. Take a Tour als Überblick: https://www.battleforhonor.de/take-a-tour
    Das Ganze ist, wie alles, der erste Ansatz. Da ist viel Blindtext dabei und wirklich gut sieht es auch nicht aus.  
    Mal davon abgesehen, dass ich die Screens und gif's vor den folgenden Punkten erledigt habe 🥳  
    **Für die Texte benötige ich eure Hilfe und Ideen!**  
@@ -30,7 +30,7 @@ Thema: NPC, Handel und Missionen
 ### Bugs fixed
 
 1. Schiffe werden nicht mehr fälschlich als reparaturbedürftig angezeigt.
-2. Man kann keine Flotten mehr detachieren ohne einen Namen anzugeben.
+2. Man kann keine Flotten mehr detachieren ohne einen Namen anzugeben. Das grüne Icon zeigt **ok**.
 3. Das Pop Cap Display zeigt keine negativen Ticks mehr an.
 4. Man kann bei StratOps nur noch ein System einkringeln.
 5. überlichtreisen ohne Warshawski-Segel werfen nun keinen Fehler mehr, die sind einfach nur nicht mehr möglich.

@@ -85,7 +85,7 @@ public class Move extends AbstractEntityKey implements HasOwner {
         final StarSystem originSystem = orbit.getSystem();
         final StarSystem destinationSystem = destination.getSystem();
 
-        if (!StarSystem.equalsAtMap(originSystem, destinationSystem)) {
+        if (!ftlCapable && !StarSystem.equalsAtMap(originSystem, destinationSystem)) {
             // can not move
             this.moveDoneAtZero = -1;
         } else {
