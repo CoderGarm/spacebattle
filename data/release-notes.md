@@ -34,7 +34,7 @@ Thema: NPC, Handel und Missionen
 3. Das Pop Cap Display zeigt keine negativen Ticks mehr an.
 4. Man kann bei StratOps nur noch ein System einkringeln.
 5. überlichtreisen ohne Warshawski-Segel werfen nun keinen Fehler mehr, die sind einfach nur nicht mehr möglich.
-   todo. colo abbrechen wenn schon am laufen
+6. Man kann keinen Planeten mehr kolonisieren, der bereits eine geplante Kolo aufsitzen hat.
 
 #### next steps
 

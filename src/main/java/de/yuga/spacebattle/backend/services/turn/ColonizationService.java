@@ -357,4 +357,11 @@ public class ColonizationService {
         final int randomIndex = ThreadLocalRandom.current().nextInt(0, planets.size() - 1);
         return planets.get(randomIndex);
     }
+
+    @Nonnull
+    public List<Colonization> findAllForSystem(@Nonnull final StarSystem system) {
+        Preconditions.checkNotNull(system, "system must not be empty");
+
+        return Objects.requireNonNullElse(repository.findAllForSystem(system.getId()), new ArrayList<>());
+    }
 }

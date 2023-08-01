@@ -130,7 +130,7 @@ public class ColonizationApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> buyInformationForSystem(@RequestBody StarSystem starSystem) {
+    public ResponseEntity<?> buyInformationForSystem(@RequestBody @Nonnull final StarSystem starSystem) {
         PreconditionWebHelper.checkNotNull(starSystem, "There must be a system to buy infos for.");
 
         final int idUser = getIdUser();
@@ -145,6 +145,8 @@ public class ColonizationApi extends BaseApi {
         colonizationService.addToKnownSystems(user, system);
         final Set<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> knownStarSystems = userService.getKnownStarSystems(idUser);
         final List<de.yuga.spacebattle.backend.entities.turn.Colonization> colonizationsForUser = colonizationService.findAllForUser(idUser);
+        final List<de.yuga.spacebattle.backend.entities.turn.Colonization> c = colonizationService.findAllForSystem(system);
+        colonizationsForUser.addAll(c);
         final StarSystemColonization result = new StarSystemColonization(system, knownStarSystems, colonizationsForUser);
         return ResponseEntity.ok(result);
     }
@@ -199,7 +201,7 @@ public class ColonizationApi extends BaseApi {
         final int idUser = getIdUser();
         final List<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> all = starSystemService.findAllColonizable();
         final Set<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> knownStarSystems = userService.getKnownStarSystems(idUser);
-        final List<de.yuga.spacebattle.backend.entities.turn.Colonization> colonizationsForUser = colonizationService.findAllForUser(idUser);
+        final List<de.yuga.spacebattle.backend.entities.turn.Colonization> colonizationsForUser = colonizationService.findAll();
         return ResponseEntity.ok(StarSystemColonizationListConverter.create(all, knownStarSystems, colonizationsForUser));
     }
 
