@@ -26,9 +26,10 @@ public class TickTimeService {
     }
 
     @Nonnull
-    @SuppressWarnings("DataFlowIssue")
     public Tick getToday() {
-        return tickRepository.getLatest();
+        final Tick latest = tickRepository.getLatest();
+        // most edgy edge case on a fresh database setup - the tick will be created while startup but cache loading happens before
+        return Objects.requireNonNullElseGet(latest, Tick::new);
     }
 
     @Nonnull

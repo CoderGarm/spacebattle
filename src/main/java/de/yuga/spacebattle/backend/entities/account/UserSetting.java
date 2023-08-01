@@ -68,7 +68,7 @@ public class UserSetting extends AbstractEntityKey {
 
     @Nonnull
     @NotNull
-    @Size(min = 1, max = 30)
+    @Size(min = 1, max = 50)
     private String profilePic = "perspective-dice-six-faces-random";
 
     public UserSetting() {

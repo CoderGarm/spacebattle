@@ -101,6 +101,10 @@ public class JobCostsCalculator {
         Preconditions.checkNotNull(empireWideResearchPoints, "empireWideResearchPoints must not be empty");
         Preconditions.checkNotNull(constructable, "constructable must not be empty");
 
+        if (empireWideResearchPoints.compareTo(BigDecimal.ZERO) <= 0) {
+            return 999;
+        }
+
         final long cost = constructable.getJobCosts().getResourceAmountByType(EResourceType.RESEARCH);
 
         //noinspection UnnecessaryLocalVariable

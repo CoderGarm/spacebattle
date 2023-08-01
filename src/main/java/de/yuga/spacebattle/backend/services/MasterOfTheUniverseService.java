@@ -502,7 +502,7 @@ public class MasterOfTheUniverseService {
         researchService.save(research);
 
         b = building("Orbitals Construction Yard", "The construction yard construct orbital constructions.",
-                3000, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, SHIPYARD_PT, research, 1);
+                8000, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, SHIPYARD_PT, research, 1);
         amendTranslation(b, "", "");
         buildingService.save(b);
         /* military constructions */

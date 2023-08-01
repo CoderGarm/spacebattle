@@ -705,7 +705,7 @@
         isLoginForbidden boolean not null default false,
         noEMailWanted boolean not null default false,
         password varchar(255) not null,
-        profilePic varchar(30) not null,
+        profilePic varchar(50) not null default 'perspective-dice-six-faces-random',
         receiveChangelogInfos boolean not null default false,
         idUser integer not null,
         primary key (idUserSetting)

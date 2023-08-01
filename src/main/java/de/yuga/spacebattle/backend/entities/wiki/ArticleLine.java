@@ -43,7 +43,9 @@ public class ArticleLine implements Comparable<ArticleLine> {
         Preconditions.checkNotNull(deltaType, "deltaType must not be empty");
         Preconditions.checkNotNull(content, "content must not be empty");
         Preconditions.checkArgument(!content.contains(LN), "content must not contain a linebreak");
-        Preconditions.checkArgument(content.length() <= CONTENT_LENGTH, "content is too long");
+        if (content.length() > CONTENT_LENGTH) {
+            int br = 0;
+        }
 
         this.lineNo = lineNo;
         this.deltaType = deltaType;

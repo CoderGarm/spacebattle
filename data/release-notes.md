@@ -1,50 +1,17 @@
 ### Features
 
-Thema: NPC, Handel und Missionen
-
-Ursprünglich wollte ich gern die Missionen erweitern und dann fiel mir auf,
-dass ich eigentlich die Spielgeschwindigkeit etwas steigern wollte,
-nur um darüber darauf zu stoßen, dass es eigentlich ganz gut wäre
-die Piratenüberfälle besser zu balancen und die HeatMap auf der Missionskarte verfügbar zu machen.  
-Nur damit ich spontan auf den Gedanken komme, dass es vielleicht etwas mehr Spaß machen würde wenn wir nicht nur zu viert oder fünft hier rumidlen.
-
-Kurzum, das wird alles kommen, jetzt aber habe ich etwas an der Karosserie gespielt.  
-Das ganze sieht hoffentlich schnieke aus und macht euch Spaß.   
-Und vielleicht auch dem ein oder anderen neuem Gesicht, aber dazu mehr in Punkt 8!
-
 #### Gameplay
 
-1. Es gibt einen Überblick über alle Missionen.  
-   Dabei kann man für alle Planeten, für die es noch keine Missionen gibt, eine starten.  
-   Inhaltlich ist das noch etwas dünn, es muss sich durch die Nutzen herausstellen, was man da besser machen kann.
-2. Man kann Missionen nun abbrechen.
-   Die Schiffe gehen zurück in die Reserve.
+todo. baugeschwindigkeit steigern
+todo. forschungsgeschwindigkeit steigern
 
 #### Diverses
 
-1. Das Job-Dashboard ist noch etwas weiter gestrafft.
-2. Die Dashboard-Elemente sind standardmäßig aufgeklappt.
-3. Das Transportation-Dashboard ist etwas schlanker gestaltet.
-4. Trade Offers sind nach Preis pro Einheit vorsortiert.
-5. Viele kleine optische Anpassungen, damit es etwas runder aussieht.
-6. Take a Tour als Überblick: https://www.battleforhonor.de/take-a-tour.
-   Das Ganze ist, wie alles, der erste Ansatz. Da ist viel Blindtext dabei und wirklich gut sieht es auch nicht aus.  
-   Mal davon abgesehen, dass ich die Screens und gif's vor den folgenden Punkten erledigt habe 🥳.  
-   **Für die Texte benötige ich eure Hilfe und Ideen!**  
-   Auch bei der _Foliengestaltung_ an sich ist Luft nach oben.
-7. Das Theme ist etwas violetter und auch farbenfroher geworden. Bitte lasst mich wissen, wie das wirkt und ob es euch gefällt.
-8. Es gibt Profil-Icons 🤩
-9. Es gibt neue Icon-Sets 🤩  
-   Leider noch nicht für alle Aspekte, aber ich arbeite daran.
+1.
 
 ### Bugs fixed
 
-1. Schiffe werden nicht mehr fälschlich als reparaturbedürftig angezeigt.
-2. Man kann keine Flotten mehr detachieren ohne einen Namen anzugeben. Das grüne Icon zeigt **ok**.
-3. Das Pop Cap Display zeigt keine negativen Ticks mehr an.
-4. Man kann bei StratOps nur noch ein System einkringeln.
-5. überlichtreisen ohne Warshawski-Segel werfen nun keinen Fehler mehr, die sind einfach nur nicht mehr möglich.
-6. Man kann keinen Planeten mehr kolonisieren, der bereits eine geplante Kolo aufsitzen hat.
+todo. article edit stuff
 
 #### next steps
 

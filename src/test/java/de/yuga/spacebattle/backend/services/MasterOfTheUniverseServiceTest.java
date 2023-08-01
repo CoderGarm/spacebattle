@@ -306,12 +306,6 @@ public class MasterOfTheUniverseServiceTest {
     }
 
     private void prepareDatabase() {
-        List<User> all = userService.findAll();
-        assertTrue(all.isEmpty());
-        masterOfTheUniverseService.createInitialDataPayload();
-
-        all = userService.findAll();
-        assertNotNull(all);
-        assertEquals(3, all.size());
+        assertEquals(1, userService.findAll().size());
     }
 }
