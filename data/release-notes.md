@@ -2,6 +2,16 @@
 
 Thema: NPC, Handel und Missionen
 
+Ursprünglich wollte ich gern die Missionen erweitern und dann fiel mir auf,
+dass ich eigentlich die Spielgeschwindigkeit etwas steigern wollte,
+nur um darüber darauf zu stoßen, dass es eigentlich ganz gut wäre
+die Piratenüberfälle besser zu balancen und die HeatMap auf der Missionskarte verfügbar zu machen.  
+Nur damit ich spontan auf den Gedanken komme, dass es vielleicht etwas mehr Spaß machen würde wenn wir nicht nur zu viert oder fünft hier rumidlen.
+
+Kurzum, das wird alles kommen, jetzt aber habe ich etwas an der Karosserie gespielt.  
+Das ganze sieht hoffentlich schnieke aus und macht euch Spaß.   
+Und vielleicht auch dem ein oder anderen neuem Gesicht, aber dazu mehr in Punkt 8!
+
 #### Gameplay
 
 1. Es gibt einen Überblick über alle Missionen.  
@@ -17,9 +27,9 @@ Thema: NPC, Handel und Missionen
 3. Das Transportation-Dashboard ist etwas schlanker gestaltet.
 4. Trade Offers sind nach Preis pro Einheit vorsortiert.
 5. Viele kleine optische Anpassungen, damit es etwas runder aussieht.
-6. Take a Tour als Überblick: https://www.battleforhonor.de/take-a-tour
+6. Take a Tour als Überblick: https://www.battleforhonor.de/take-a-tour.
    Das Ganze ist, wie alles, der erste Ansatz. Da ist viel Blindtext dabei und wirklich gut sieht es auch nicht aus.  
-   Mal davon abgesehen, dass ich die Screens und gif's vor den folgenden Punkten erledigt habe 🥳  
+   Mal davon abgesehen, dass ich die Screens und gif's vor den folgenden Punkten erledigt habe 🥳.  
    **Für die Texte benötige ich eure Hilfe und Ideen!**  
    Auch bei der _Foliengestaltung_ an sich ist Luft nach oben.
 7. Das Theme ist etwas violetter und auch farbenfroher geworden. Bitte lasst mich wissen, wie das wirkt und ob es euch gefällt.
@@ -38,7 +48,6 @@ Thema: NPC, Handel und Missionen
 
 #### next steps
 
-- change items: https://game-icons.net/
 - minimal intelligence on foreign fleet if visible
 - sanitize markdown messages without unsafe message
 - bootstrap css nur bei markdown-editor möglich
