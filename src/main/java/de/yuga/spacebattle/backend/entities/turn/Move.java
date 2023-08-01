@@ -9,6 +9,7 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
+import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.hibernate.annotations.Check;
 
@@ -76,9 +77,20 @@ public class Move extends AbstractEntityKey implements HasOwner {
 
         this.owner = fleet.getOwner();
         this.fleet = fleet;
-        this.originOrbit = new FleetOrbit(fleet.getOrbit());
+        final FleetOrbit orbit = fleet.getOrbit();
+        this.originOrbit = new FleetOrbit(orbit);
         this.destinationOrbit = destination;
-        this.moveDoneAtZero = DistanceCalculator.calculateTimeToTravel(fleet, destination);
+
+        final boolean ftlCapable = fleet.isFTLCapable();
+        final StarSystem originSystem = orbit.getSystem();
+        final StarSystem destinationSystem = destination.getSystem();
+
+        if (!StarSystem.equalsAtMap(originSystem, destinationSystem)) {
+            // can not move
+            this.moveDoneAtZero = -1;
+        } else {
+            this.moveDoneAtZero = DistanceCalculator.calculateTimeToTravel(fleet, destination);
+        }
         this.originalDuration = this.moveDoneAtZero;
     }
 

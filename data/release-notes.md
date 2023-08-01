@@ -19,8 +19,10 @@ Thema: NPC, Handel und Missionen
 5. Viele kleine optische Anpassungen, damit es etwas runder aussieht.
 6. Take a Tour als Überblick.  
    Das Ganze ist, wie alles, der erste Ansatz. Da ist viel Blindtext dabei und wirklich gut sieht es auch nicht aus.  
-   **Um das zu ändern, benötige ich eure Hilfe!**
-7. Das Theme ist etwas violetter geworden. Bitte lasst mich wissen, wie das wirkt und ob es euch gefällt.
+   Mal davon abgesehen, dass ich die Screens und gif's vor den folgenden Punkten erledigt habe 🥳  
+   **Für die Texte benötige ich eure Hilfe und Ideen!**  
+   Auch bei der _Foliengestaltung_ an sich ist Luft nach oben.
+7. Das Theme ist etwas violetter und auch farbenfroher geworden. Bitte lasst mich wissen, wie das wirkt und ob es euch gefällt.
 8. Es gibt Profil-Icons 🤩
 9. Es gibt neue Icon-Sets 🤩  
    Leider noch nicht für alle Aspekte, aber ich arbeite daran.
@@ -31,11 +33,8 @@ Thema: NPC, Handel und Missionen
 2. Man kann keine Flotten mehr detachieren ohne einen Namen anzugeben.
 3. Das Pop Cap Display zeigt keine negativen Ticks mehr an.
 4. Man kann bei StratOps nur noch ein System einkringeln.
-   todo. überlichtreisen ohne ftl?
-   todo. prop capacity in fleet notch
+5. überlichtreisen ohne Warshawski-Segel werfen nun keinen Fehler mehr, die sind einfach nur nicht mehr möglich.
    todo. colo abbrechen wenn schon am laufen
-   todo. constraint [CONSTRUCTION_UK] bei Kolonisierung?
-
 
 #### next steps
 

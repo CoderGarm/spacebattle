@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.enums.EStarClassType;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -102,6 +103,22 @@ public class StarSystem extends AbstractEntityKey {
         StarSystem that = (StarSystem) o;
 
         return id == that.id;
+    }
+
+    public static boolean equalsAtMap(@Nullable final StarSystem o1, @Nullable final StarSystem o2) {
+
+        if (o1 != null && o2 == null) {
+            return false;
+        }
+        if (o1 == null && o2 != null) {
+            return false;
+        }
+        //noinspection ConstantValue
+        if (o1 == null && o2 == null) {
+            return false;
+        }
+
+        return o1.equals(o2);
     }
 
     @Override

@@ -441,7 +441,7 @@ public class FleetApi extends BaseApi {
     }
 
     /**
-     * Creates a list of moves for the given list of movements.
+     * Creates a list of moves for the given list of movements <b>but didn't persist them intentionally</b>.
      *
      * @param idUser the owner of the fleets
      * @param moves  the planned moves

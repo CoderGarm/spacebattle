@@ -279,7 +279,7 @@ public class Fleet extends Operationable implements HasOwner {
      * @return <code>true</code> if the fleet can drive faster than light, <code>false</code> otherwise
      */
     public boolean isFTLCapable() {
-        return ships.stream().map(WarShip::getShipClass).allMatch(ShipClass::isFTLCapable);
+        return getAliveShips().stream().map(WarShip::getShipClass).allMatch(ShipClass::isFTLCapable);
     }
 
     @Override
