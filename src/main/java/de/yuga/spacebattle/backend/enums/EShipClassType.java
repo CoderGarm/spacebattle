@@ -13,25 +13,25 @@ import java.util.Set;
 public enum EShipClassType implements HasIconName {
 
     // Warships
-    LAC("LAC", false, false, "fighter", "light attack craft (11 to 21 thousand tons, no hyper capability)"),
-    VT("VT", false, false, "corvette", "corvette"),
-    FG("FG", false, false, "cruiser", "frigate"),
-    DD("DD", false, false, "corvette", "destroyer (68 to 189 thousand tons)"),
-    CL("CL", false, false, "frigate", "light cruiser (88 to 147 thousand tons)"),
-    CA("CA", false, false, "frigate", "heavy cruiser (228 to 483 thousand tons)"),
-    BC("BC", false, false, "frigate", "battlecruiser (780 thousand to 2.5 million tons)"),
-    BCP("BC(P)", true, false, "frigate", "Battlecruiser pod-layer (1.7 million to 1.8 million tons)"),
-    BB("BB", false, false, "frigate", "battleship (2 to 4 million tons)"),
-    DN("DN", false, false, "frigate", "dreadnought (5 to 6.5 million tons)"),
-    CLAC("CLAC", false, false, "frigate", "LAC carrier (6.2 million tons)"),
-    SD("SD", false, false, "frigate", "super dreadnought (7 to 9 million tons)"),
-    SDP("SD(P)", true, false, "frigate", "super dreadnought pod-layer (8.5 to 8.7 million tons)"),
+    LAC("LAC", false, false, "lac", "light attack craft (11 to 21 thousand tons, no hyper capability)"),
+    VT("VT", false, false, "frigate", "corvette"),
+    FG("FG", false, false, "frigate", "frigate"),
+    DD("DD", false, false, "destroyer", "destroyer (68 to 189 thousand tons)"),
+    CL("CL", false, false, "destroyer", "light cruiser (88 to 147 thousand tons)"),
+    CA("CA", false, false, "cruiser", "heavy cruiser (228 to 483 thousand tons)"),
+    BC("BC", false, false, "cruiser", "battlecruiser (780 thousand to 2.5 million tons)"),
+    BCP("BC(P)", true, false, "cruiser", "Battlecruiser pod-layer (1.7 million to 1.8 million tons)"),
+    BB("BB", false, false, "battleship", "battleship (2 to 4 million tons)"),
+    DN("DN", false, false, "dreadnought", "dreadnought (5 to 6.5 million tons)"),
+    CLAC("CLAC", false, false, "dreadnought", "LAC carrier (6.2 million tons)"),
+    SD("SD", false, false, "superdreadnought", "super dreadnought (7 to 9 million tons)"),
+    SDP("SD(P)", true, false, "superdreadnought", "super dreadnought pod-layer (8.5 to 8.7 million tons)"),
 
     //Auxiliary Warship
-    AE("AE", false, true, "satellite", "ammunition ship"),
-    AR("AR", false, true, "satellite", "repair ship"),
-    FAT("FAT", false, true, "satellite", "fast attack transport"),
-    FR("FR", false, true, "satellite", "freighter"),
+    AE("AE", false, true, "militaryfreighter", "ammunition ship"),
+    AR("AR", false, true, "militaryfreighter", "repair ship"),
+    FAT("FAT", false, true, "militaryfreighter", "fast attack transport"),
+    FR("FR", false, true, "freighter", "freighter"),
     ;
 
     private static final Set<EShipClassType> CIVIL = Set.of(FR);
