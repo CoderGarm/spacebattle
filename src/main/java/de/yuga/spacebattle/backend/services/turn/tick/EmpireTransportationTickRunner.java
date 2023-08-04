@@ -87,6 +87,7 @@ public class EmpireTransportationTickRunner implements TickRunner {
                                 continue;
                             }
                             final long present = unused.getResourceAmountByType(demandedType);
+                            demandedAmount = demand.getResourceAmountByType(demandedType);
                             final long amount = Long.min(present, demandedAmount);
                             if (amount > 0) {
                                 // reduce the free amount of resources
@@ -114,6 +115,7 @@ public class EmpireTransportationTickRunner implements TickRunner {
                                 continue;
                             }
                             final long present = unused.getCrewAmountByType(demandedType);
+                            demandedAmount = demand.getCrewAmountByType(demandedType);
                             final long amount = Long.min(present, demandedAmount);
                             executeTransportation(toStore, planet, demand, demandedType, from, unused, amount);
                         }

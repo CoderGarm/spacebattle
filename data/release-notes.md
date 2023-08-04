@@ -11,7 +11,8 @@ todo. forschungsgeschwindigkeit steigern
 
 ### Bugs fixed
 
-todo. article edit stuff
+1. Manuell eingestellte Transporte werden nun aus mehreren Quellen versorgt.
+   todo. article edit stuff
 
 #### next steps
 
