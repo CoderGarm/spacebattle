@@ -4,15 +4,15 @@
 
 #### Diverses
 
-1.
+todo. crew display: show needed peoples
 
 ### Bugs fixed
 
+todo. check fleet separation
 todo. article edit stuff
 
 #### next steps
 
-- crew display: show needed peoples
 - minimal intelligence on foreign fleet if visible
 - sanitize markdown messages without unsafe message
 - bootstrap css nur bei markdown-editor möglich
