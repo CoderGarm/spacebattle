@@ -99,8 +99,8 @@ public class MasterOfTheUniverseService {
     public static final ProductionType RESEARCH_LAB_PT = new ProductionType(EResourceType.RESEARCH, EProductionCategory.PRODUCE, null);
     public static final ProductionType MARKET_PT = new ProductionType(EResourceType.CREDITS, EProductionCategory.PRODUCE, null);
     public static final ProductionType METAL_WORKS = new ProductionType(EResourceType.METALORE, EProductionCategory.PRODUCE, null);
-    public static final ProductionType HEAVY_METALS_WORK_PT = new ProductionType(EResourceType.RARE_ELEMENTS, EProductionCategory.PRODUCE, null);
-    public static final ProductionType RARE_ELEMENTS_PT = new ProductionType(EResourceType.HEAVY_METALS, EProductionCategory.PRODUCE, null);
+    public static final ProductionType HEAVY_METALS_WORK_PT = new ProductionType(EResourceType.HEAVY_METALS, EProductionCategory.PRODUCE, null);
+    public static final ProductionType RARE_ELEMENTS_PT = new ProductionType(EResourceType.RARE_ELEMENTS, EProductionCategory.PRODUCE, null);
     public static final ProductionType LIVING_PT = new ProductionType(EResourceType.POPULATION, EProductionCategory.CAPACITY, null);
     public static final ProductionType DOCTOR_PT = new ProductionType(EResourceType.POPULATION, EProductionCategory.PRODUCE, null);
     public static final ProductionType ELEMENTARY_SCHOOL_PT = new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_CIVIL_I);
@@ -446,17 +446,17 @@ public class MasterOfTheUniverseService {
         buildingService.save(b);
 
         b = building("Metal works", "Produces the most basic materials, from rubber in shoes to special alloys for spacecrafts.",
-                12500, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, METAL_WORKS, research, 1);
+                17500, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, METAL_WORKS, research, 1);
         amendTranslation(b, "Metallwerke", "Produziert grundlegende Materialien, von Gummi für Schuhe bis zu speziellen Legierungen für die Raumfahrt.");
         buildingService.save(b);
 
         b = building("Orbital ore factory", "Produces some asteroid-based materials and farms gas from the giants and clouds in the system.",
-                5000, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_II, HEAVY_METALS_WORK_PT, research, 7);
+                2000, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_II, HEAVY_METALS_WORK_PT, research, 7);
         amendTranslation(b, "Orbitale Metallwerke", "Baut Ressourcen und Gase ab, die hauptsächlich außerhalb des Planeten zu finden sind.");
         buildingService.save(b);
 
         b = building("Nanofarm", "Produces rare elements and combines them to specialized molycircs and complex nano structures.",
-                10000, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_III, RARE_ELEMENTS_PT, research, 10);
+                1000, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_III, RARE_ELEMENTS_PT, research, 10);
         amendTranslation(b, "Nanofarm", "Produziert die notwendigen Rohstoffe für Molycircs und komplexe Nanostrukturen.");
         buildingService.save(b);
 

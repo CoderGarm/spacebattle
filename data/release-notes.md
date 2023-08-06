@@ -2,20 +2,17 @@
 
 #### Gameplay
 
-todo. baugeschwindigkeit steigern
-todo. forschungsgeschwindigkeit steigern
-
 #### Diverses
 
 1.
 
 ### Bugs fixed
 
-1. Manuell eingestellte Transporte werden nun aus mehreren Quellen versorgt.
-   todo. article edit stuff
+todo. article edit stuff
 
 #### next steps
 
+- crew display: show needed peoples
 - minimal intelligence on foreign fleet if visible
 - sanitize markdown messages without unsafe message
 - bootstrap css nur bei markdown-editor möglich
