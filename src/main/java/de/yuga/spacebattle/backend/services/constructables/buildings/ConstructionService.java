@@ -119,4 +119,9 @@ public class ConstructionService {
     public List<Construction> findInoperationalForUser(final int idUser) {
         return Objects.requireNonNullElse(constructionRepository.findInoperationalForUser(idUser), new ArrayList<>());
     }
+
+    @Nonnull
+    public List<Construction> findInoperationalForPlanet(final int idPlanet) {
+        return Objects.requireNonNullElse(constructionRepository.findInoperationalForPlanet(idPlanet), new ArrayList<>());
+    }
 }

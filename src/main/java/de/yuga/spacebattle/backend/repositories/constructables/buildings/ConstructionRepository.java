@@ -13,4 +13,8 @@ public interface ConstructionRepository extends CrudRepository<Construction, Int
     @Nullable
     @Query("SELECT c FROM Construction c WHERE c.planet.owner.id = :idUser AND c.level > c.operationalLevel")
     List<Construction> findInoperationalForUser(@Param("idUser") final int idUser);
+
+    @Nullable
+    @Query("SELECT c FROM Construction c WHERE c.planet.id = :idPlanet AND c.level > c.operationalLevel")
+    List<Construction> findInoperationalForPlanet(@Param("idPlanet") final int idPlanet);
 }

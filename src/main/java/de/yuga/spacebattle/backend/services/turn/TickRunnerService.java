@@ -1,11 +1,9 @@
 package de.yuga.spacebattle.backend.services.turn;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.repositories.turn.TickRepository;
 import de.yuga.spacebattle.backend.services.MailService;
-import de.yuga.spacebattle.backend.services.turn.tick.ColonizationTickRunner;
 import de.yuga.spacebattle.backend.services.turn.tick.TickRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,21 +98,6 @@ public class TickRunnerService {
             LOGGER.info("{} takes {} seconds", today, duration);
             isTicking = false;
         }
-    }
-
-    /**
-     * Workaround. Can be made better. todo
-     */
-    public void operateInoperationals(@Nonnull final Planet planet) {
-        Preconditions.checkNotNull(today, "today must not be empty");
-        Preconditions.checkNotNull(planet, "planet must not be empty");
-
-        final ColonizationTickRunner tickRunner = (ColonizationTickRunner) this.tickRunners.stream()
-                .filter(t -> t.getClass().isAssignableFrom(ColonizationTickRunner.class))
-                .findFirst()
-                .orElse(null);
-        Preconditions.checkNotNull(tickRunner, "tickRunner must not be empty");
-        tickRunner.operateInoperationals(today, planet);
     }
 
     public boolean isTickPresent() {

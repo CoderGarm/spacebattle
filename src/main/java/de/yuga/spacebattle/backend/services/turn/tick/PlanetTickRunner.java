@@ -1,29 +1,24 @@
 package de.yuga.spacebattle.backend.services.turn.tick;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.PopulationControlCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceControlCalculator;
-import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
-import de.yuga.spacebattle.backend.entities.misc.Operationable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
-import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.enums.ECalculationType;
-import de.yuga.spacebattle.backend.enums.ERefinementSequence;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.caches.OperationalCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
+import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
@@ -38,7 +33,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,7 +57,6 @@ public class PlanetTickRunner implements TickRunner {
     @Nonnull
     private final PlanetService planetService;
 
-
     @Nonnull
     private final FleetService fleetService;
 
@@ -75,6 +72,9 @@ public class PlanetTickRunner implements TickRunner {
     @Nonnull
     private final WarshipHealthStateService warshipHealthStateService;
 
+    @Nonnull
+    private final OperationalService operationalService;
+
     @Autowired
     public PlanetTickRunner(@Nonnull final OperationalCache operationalCache,
                             @Nonnull final JobService jobService,
@@ -83,7 +83,8 @@ public class PlanetTickRunner implements TickRunner {
                             @Nonnull final ConstructionService constructionService,
                             @Nonnull final ResearchService researchService,
                             @Nonnull final WarShipService warShipService,
-                            @Nonnull final WarshipHealthStateService warshipHealthStateService) {
+                            @Nonnull final WarshipHealthStateService warshipHealthStateService,
+                            @Nonnull final OperationalService operationalService) {
         this.operationalCache = Preconditions.checkNotNull(operationalCache, "operationalCache must not be empty");
         this.jobService = Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
@@ -92,6 +93,7 @@ public class PlanetTickRunner implements TickRunner {
         this.researchService = Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.warshipHealthStateService = Preconditions.checkNotNull(warshipHealthStateService, "warshipHealthStateService must not be empty");
+        this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
     }
 
     @Override
@@ -142,7 +144,7 @@ public class PlanetTickRunner implements TickRunner {
         planet = updateResources(planet);
         log(planet, "Done updating resources");
         planet = runJobs(planet);
-        planet = operateInoperationals(planet);
+        operationalService.operateInoperationals(today, planet);
         log(planet, "Done tick planet.");
     }
 
@@ -184,105 +186,6 @@ public class PlanetTickRunner implements TickRunner {
         }
         return planetService.save(planet);
     }
-
-    @Nonnull
-    public Planet operateInoperationals(@Nonnull final Planet planet) {
-        Preconditions.checkNotNull(planet, "planet must not be empty");
-
-        final ResourceDeposit deposit = planet.getResourceDeposit();
-        final ResourceDeposit demand = planet.getResourceDemand();
-        final ResourceDeposit utilization = planet.getResourceUtilization();
-
-        activateWarships(planet, deposit, demand, utilization);
-        activateConstructions(planet, deposit, demand, utilization);
-
-        return planetService.save(planet);
-    }
-
-    public void activateConstructions(@Nonnull final Planet planet,
-                                      @Nonnull final ResourceDeposit deposit,
-                                      @Nonnull final ResourceDeposit demand,
-                                      @Nonnull final ResourceDeposit utilization) {
-        Preconditions.checkNotNull(planet, "planet must not be empty");
-        Preconditions.checkNotNull(deposit, "deposit must not be empty");
-        Preconditions.checkNotNull(demand, "demand must not be empty");
-        Preconditions.checkNotNull(utilization, "utilization must not be empty");
-
-        // prio 1: military stuff, prio 2: higher tech level
-        final List<Construction> supplyNeeded = planet.getConstructions().stream()
-                .filter(c -> c.getOperationalLevel() < c.getLevel())
-                .sorted((o1, o2) -> {
-                    final ERefinementSequence o1RS = o1.getBuilding().getProductionType().getRefinementSequence();
-                    final ERefinementSequence o2RS = o2.getBuilding().getProductionType().getRefinementSequence();
-                    if (o1RS != null && o2RS != null) {
-                        return Integer.compare(o1RS.getEducationPriority(), o2RS.getEducationPriority());
-                    }
-                    final ERefinementSequence valid = o1RS != null ? o1RS : o2RS;
-                    if (valid != null) {
-                        return valid.getEducationPriority() == 2 ? 1 : -1;
-                    }
-                    return Integer.compare(o1.getBuilding().getTechLevel().ordinal(), o2.getBuilding().getTechLevel().ordinal());
-                })
-                .collect(Collectors.toList());
-
-        Collections.reverse(supplyNeeded);
-
-        final List<Construction> ops = new ArrayList<>();
-        for (final Construction inoperational : supplyNeeded) {
-            final ResourceDeposit costs = inoperational.getBuilding().getCosts();
-            final int activeLevel = inoperational.getOperationalLevel();
-            final int level = inoperational.getLevel();
-            for (int i = activeLevel + 1; i <= level; i++) {
-                final CrewRequirement costsForLevel = JobCostsCalculator.getCostsForLevel(costs, i).getCrewRequirement();
-                final PayingPossibleResult result = deposit.isPayingPossible(costsForLevel);
-                if (result.isValidForPops()) {
-                    deposit.updateCrew(costsForLevel, ECalculationType.SUBTRACT);
-                    demand.updateCrew(costsForLevel, ECalculationType.SUBTRACT);
-                    utilization.updateCrew(costsForLevel, ECalculationType.ADD);
-
-                    inoperational.setOperationalLevel(i);
-                    ops.add(inoperational);
-                }
-            }
-        }
-        if (!ops.isEmpty()) {
-            operationalCache.activateConstructions(today, planet, constructionService.saveAll(ops));
-        }
-    }
-
-    public void activateWarships(@Nonnull final Planet planet,
-                                 @Nonnull final ResourceDeposit deposit,
-                                 @Nonnull final ResourceDeposit demand,
-                                 @Nonnull final ResourceDeposit utilization) {
-        Preconditions.checkNotNull(planet, "planet must not be empty");
-        Preconditions.checkNotNull(deposit, "deposit must not be empty");
-        Preconditions.checkNotNull(demand, "demand must not be empty");
-        Preconditions.checkNotNull(utilization, "utilization must not be empty");
-
-        final List<WarShip> operationals = new ArrayList<>();
-        final List<WarShip> inoperationals = warShipService.findAliveInoperationalForPlanet(planet.getId());
-        for (final WarShip inoperational : inoperationals) {
-            final CrewRequirement costs = inoperational.getShipClass().getCosts().getCrewRequirement();
-            final PayingPossibleResult result = deposit.isPayingPossible(costs);
-            if (result.isValidForPops()) {
-                deposit.updateCrew(costs, ECalculationType.SUBTRACT);
-                demand.updateCrew(costs, ECalculationType.SUBTRACT);
-                utilization.updateCrew(costs, ECalculationType.ADD);
-
-                inoperational.setOperational();
-                operationals.add(inoperational);
-            }
-        }
-        if (!operationals.isEmpty()) {
-            warShipService.saveAll(operationals);
-            Set<Fleet> fleets = operationals.stream().map(WarShip::getFleet).collect(Collectors.toSet());
-            fleets = fleets.stream().filter(f -> f.getAliveShips().stream().allMatch(Operationable::isOperational)).collect(Collectors.toSet());
-            fleets.forEach(Fleet::setOperational);
-            fleetService.saveAll(fleets);
-            operationalCache.activateWarships(today, planet, operationals);
-        }
-    }
-
 
     @Nonnull
     private Planet updateResources(@Nonnull final Planet planet) {
@@ -441,10 +344,11 @@ public class PlanetTickRunner implements TickRunner {
         Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
 
         final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
+        final ResourceDeposit demand = operationalService.getPopulationDemandForPlanet(planet.getId());
         switch (resourceType.getCollectableType()) {
             case VIABLE:
                 // do school
-                PopulationControlCalculator.educatePopulation(planet);
+                PopulationControlCalculator.educatePopulation(planet, demand);
                 // do birth
                 PopulationControlCalculator.populatePlanet(planet);
                 break;

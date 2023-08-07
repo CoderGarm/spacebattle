@@ -1,15 +1,36 @@
 package de.yuga.spacebattle.backend.services.constructables;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
+import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
+import de.yuga.spacebattle.backend.dto.turn.Commissioning;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.backend.entities.misc.Operationable;
+import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
+import de.yuga.spacebattle.backend.entities.turn.Colonization;
+import de.yuga.spacebattle.backend.entities.turn.Constructable;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
+import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.ECalculationType;
+import de.yuga.spacebattle.backend.enums.EDepositType;
+import de.yuga.spacebattle.backend.enums.ERefinementSequence;
+import de.yuga.spacebattle.backend.services.caches.OperationalCache;
+import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
+import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class OperationalService {
@@ -20,20 +41,252 @@ public class OperationalService {
     @Nonnull
     private final ConstructionService constructionService;
 
+    @Nonnull
+    private final FleetService fleetService;
+
+    @Nonnull
+    private final PlanetService planetService;
+
+    @Nonnull
+    private final ColonizationService colonizationService;
+
+    @Nonnull
+    private final OperationalCache operationalCache;
+
     @Autowired
     public OperationalService(@Nonnull final WarShipService warShipService,
-                              @Nonnull final ConstructionService constructionService) {
+                              @Nonnull final ConstructionService constructionService,
+                              @Nonnull final FleetService fleetService,
+                              @Nonnull final PlanetService planetService,
+                              @Nonnull final ColonizationService colonizationService,
+                              @Nonnull final OperationalCache operationalCache) {
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
+        this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
+        this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
+        this.colonizationService = Preconditions.checkNotNull(colonizationService, "colonizationService must not be empty");
+        this.operationalCache = Preconditions.checkNotNull(operationalCache, "operationalCache must not be empty");
     }
 
     @Nonnull
-    public List<WarShip> getPendingWarShips(final int idUser) {
-        return warShipService.findAliveInoperationalForUser(idUser);
+    public ResourceDeposit getPopulationDemandForUser(final int idUser) {
+        final ResourceDeposit resourceDemand = new ResourceDeposit(EDepositType.DEMAND);
+
+        warShipService.findAliveInoperationalForUser(idUser).stream()
+                .map(WarShip::getShipClass)
+                .map(ShipClass::getCosts)
+                .map(ResourceDeposit::getCrewRequirement)
+                .forEach(crewRequirement -> resourceDemand.updateCrew(crewRequirement, ECalculationType.ADD));
+        constructionService.findInoperationalForUser(idUser).stream().map(OperationalService::sumUpCosts)
+                .map(ResourceDeposit::getCrewRequirement)
+                .forEach(crewRequirement -> resourceDemand.updateCrew(crewRequirement, ECalculationType.ADD));
+
+        colonizationService.findAllPlannedForUser(idUser).stream().map(Colonization::getCosts).forEach(costs -> {
+            resourceDemand.updateCrew(costs.getCrewRequirement(), ECalculationType.ADD);
+        });
+        return resourceDemand;
     }
 
     @Nonnull
-    public List<Construction> getPendingConstructions(final int idUser) {
-        return constructionService.findInoperationalForUser(idUser);
+    public Map<Planet, ResourceDeposit> getPopulationDemandForUserByPlanet(final int idUser) {
+
+        final Map<Planet, ResourceDeposit> result = new HashMap<>();
+        warShipService.findAliveInoperationalForUser(idUser).forEach(warShip -> {
+            final ShipClass shipClass = warShip.getShipClass();
+            final Planet planet = warShip.getShipyard();
+            final ResourceDeposit demand = result.getOrDefault(planet, new ResourceDeposit(EDepositType.DEMAND));
+            demand.updateCrew(shipClass.getCosts().getCrewRequirement(), ECalculationType.ADD);
+            result.put(planet, demand);
+        });
+        constructionService.findInoperationalForUser(idUser).forEach(c -> {
+            final Planet planet = c.getPlanet();
+            final ResourceDeposit demand = result.getOrDefault(planet, new ResourceDeposit(EDepositType.DEMAND));
+            demand.updateCrew(sumUpCosts(c).getCrewRequirement(), ECalculationType.ADD);
+            result.put(planet, demand);
+        });
+        final List<Colonization> allPlannedForUser = colonizationService.findAllPlannedForUser(idUser);
+        if (!allPlannedForUser.isEmpty()) {
+            Planet main = result.keySet().stream().filter(Planet::isMain).findFirst().orElse(null);
+            if (main == null) {
+                planetService.findMainPlanet(idUser);
+            }
+            final ResourceDeposit demand = result.getOrDefault(main, new ResourceDeposit(EDepositType.DEMAND));
+            allPlannedForUser.stream().map(Colonization::getCosts).forEach(costs -> {
+                demand.updateCrew(costs.getCrewRequirement(), ECalculationType.ADD);
+            });
+            result.put(main, demand);
+        }
+        return result;
+    }
+
+
+    @Nonnull
+    public ResourceDeposit getPopulationDemandForPlanet(final int idPlanet) {
+        final ResourceDeposit resourceDemand = new ResourceDeposit(EDepositType.DEMAND);
+
+        final List<WarShip> aliveInoperationalForPlanet = warShipService.findAliveInoperationalForPlanet(idPlanet);
+        aliveInoperationalForPlanet.stream()
+                .map(WarShip::getShipClass)
+                .map(ShipClass::getCosts)
+                .map(ResourceDeposit::getCrewRequirement)
+                .forEach(crewRequirement -> resourceDemand.updateCrew(crewRequirement, ECalculationType.ADD));
+
+        final List<Construction> inoperationalForPlanet = constructionService.findInoperationalForPlanet(idPlanet);
+        inoperationalForPlanet.stream().map(OperationalService::sumUpCosts)
+                .map(ResourceDeposit::getCrewRequirement)
+                .forEach(crewRequirement -> resourceDemand.updateCrew(crewRequirement, ECalculationType.ADD));
+
+        final Integer idUser = planetService.getIdUserWhenMain(idPlanet);
+        if (idUser != null) {
+            colonizationService.findAllPlannedForUser(idUser).stream().map(Colonization::getCosts).forEach(costs -> {
+                resourceDemand.updateCrew(costs.getCrewRequirement(), ECalculationType.ADD);
+            });
+        }
+
+        return resourceDemand;
+    }
+
+    @Nonnull
+    private static ResourceDeposit sumUpCosts(@Nonnull final Construction construction) {
+        Preconditions.checkNotNull(construction, "construction must not be empty");
+
+        final ResourceDeposit fullCosts = new Constructable(construction.getBuilding(), construction.getLevel()).getJobCosts();
+        if (construction.getOperationalLevel() == 0) {
+            return fullCosts;
+        }
+        final ResourceDeposit paidCosts = new Constructable(construction.getBuilding(), construction.getOperationalLevel()).getJobCosts();
+        fullCosts.pay(paidCosts);
+        return fullCosts;
+    }
+
+    @Nonnull
+    public Map<Planet, Commissioning> getCommissioningForUser(@Nonnull final Tick today, final int idUser) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+
+        final Map<Planet, de.yuga.spacebattle.backend.dto.turn.Commissioning> commissioning = new HashMap<>();
+
+        final Map<Planet, Set<Construction>> pendingConstructionsByPlanet = constructionService.findInoperationalForUser(idUser).stream()
+                .collect(Collectors.groupingBy(Construction::getPlanet,
+                        Collectors.mapping(Function.identity(), Collectors.toSet())));
+        final Map<Planet, List<WarShip>> pendingShipsByYard = warShipService.findAliveInoperationalForUser(idUser).stream()
+                .collect(Collectors.groupingBy(WarShip::getShipyard,
+                        Collectors.mapping(Function.identity(), Collectors.toList())));
+
+        pendingConstructionsByPlanet.forEach((planet, constructions) -> {
+            de.yuga.spacebattle.backend.dto.turn.Commissioning orDefault = commissioning.get(planet);
+            if (orDefault == null) {
+                orDefault = new de.yuga.spacebattle.backend.dto.turn.Commissioning(today, planet, constructions);
+            } else {
+                orDefault.addConstructions(constructions);
+            }
+            commissioning.put(planet, orDefault);
+        });
+
+        pendingShipsByYard.forEach((planet, warShips) -> {
+            de.yuga.spacebattle.backend.dto.turn.Commissioning orDefault = commissioning.get(planet);
+            if (orDefault == null) {
+                orDefault = new de.yuga.spacebattle.backend.dto.turn.Commissioning(today, planet, warShips);
+            } else {
+                orDefault.setWarships(warShips);
+            }
+            commissioning.put(planet, orDefault);
+        });
+        return commissioning;
+    }
+
+    @Nonnull
+    private Set<Construction> activateConstructions(@Nonnull final Tick today,
+                                                    @Nonnull final Planet planet) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+        final ResourceDeposit deposit = planet.getResourceDeposit();
+        final ResourceDeposit utilization = planet.getResourceUtilization();
+
+        // prio 1: military stuff, prio 2: higher tech level
+        final List<Construction> supplyNeeded = planet.getConstructions().stream()
+                .filter(c -> c.getOperationalLevel() < c.getLevel())
+                .sorted((o1, o2) -> {
+                    final ERefinementSequence o1RS = o1.getBuilding().getProductionType().getRefinementSequence();
+                    final ERefinementSequence o2RS = o2.getBuilding().getProductionType().getRefinementSequence();
+                    if (o1RS != null && o2RS != null) {
+                        return Integer.compare(o1RS.getEducationPriority(), o2RS.getEducationPriority());
+                    }
+                    final ERefinementSequence valid = o1RS != null ? o1RS : o2RS;
+                    if (valid != null) {
+                        return valid.getEducationPriority() == 2 ? 1 : -1;
+                    }
+                    return Integer.compare(o1.getBuilding().getTechLevel().ordinal(), o2.getBuilding().getTechLevel().ordinal());
+                })
+                .collect(Collectors.toList());
+
+        Collections.reverse(supplyNeeded);
+
+        final List<Construction> ops = new ArrayList<>();
+        for (final Construction inoperational : supplyNeeded) {
+            final ResourceDeposit costs = inoperational.getBuilding().getCosts();
+            final int activeLevel = inoperational.getOperationalLevel();
+            final int level = inoperational.getLevel();
+            for (int i = activeLevel + 1; i <= level; i++) {
+                final CrewRequirement costsForLevel = JobCostsCalculator.getCostsForLevel(costs, i).getCrewRequirement();
+                final PayingPossibleResult result = deposit.isPayingPossible(costsForLevel);
+                if (result.isValidForPops()) {
+                    deposit.updateCrew(costsForLevel, ECalculationType.SUBTRACT);
+                    utilization.updateCrew(costsForLevel, ECalculationType.ADD);
+
+                    inoperational.setOperationalLevel(i);
+                    ops.add(inoperational);
+                }
+            }
+        }
+        planetService.save(planet);
+        return constructionService.saveAll(ops);
+    }
+
+    @Nonnull
+    private List<WarShip> activateWarships(@Nonnull final Tick today,
+                                           @Nonnull final Planet planet) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+        final ResourceDeposit deposit = planet.getResourceDeposit();
+        final ResourceDeposit utilization = planet.getResourceUtilization();
+        final List<WarShip> operationals = new ArrayList<>();
+        final List<WarShip> inoperationals = warShipService.findAliveInoperationalForPlanet(planet.getId());
+        for (final WarShip inoperational : inoperationals) {
+            final CrewRequirement costs = inoperational.getShipClass().getCosts().getCrewRequirement();
+            final PayingPossibleResult result = deposit.isPayingPossible(costs);
+            if (result.isValidForPops()) {
+                deposit.updateCrew(costs, ECalculationType.SUBTRACT);
+                utilization.updateCrew(costs, ECalculationType.ADD);
+
+                inoperational.setOperational();
+                operationals.add(inoperational);
+            }
+        }
+        if (!operationals.isEmpty()) {
+            warShipService.saveAll(operationals);
+            Set<Fleet> fleets = operationals.stream().map(WarShip::getFleet).collect(Collectors.toSet());
+            fleets = fleets.stream().filter(f -> f.getAliveShips().stream().allMatch(Operationable::isOperational)).collect(Collectors.toSet());
+            fleets.forEach(Fleet::setOperational);
+            fleetService.saveAll(fleets);
+        }
+        planetService.save(planet);
+        return operationals;
+    }
+
+    public void operateInoperationals(@Nonnull final Tick today, @Nonnull final Planet planet) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+        final List<WarShip> activated = activateWarships(today, planet);
+        if (!activated.isEmpty()) {
+            operationalCache.activateWarships(today, planet, activated);
+        }
+
+        final Set<Construction> alsoActivated = activateConstructions(today, planet);
+        if (!alsoActivated.isEmpty()) {
+            operationalCache.activateConstructions(today, planet, alsoActivated);
+        }
     }
 }

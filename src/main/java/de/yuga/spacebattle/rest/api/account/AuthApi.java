@@ -12,10 +12,11 @@ import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import de.yuga.spacebattle.backend.services.account.ChatService;
 import de.yuga.spacebattle.backend.services.account.NonPlayerCharacterService;
 import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
-import de.yuga.spacebattle.backend.services.turn.TickRunnerService;
+import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.HeatMapService;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -111,7 +112,7 @@ public class AuthApi {
     private final JwtTokenUtil jwtTokenUtil;
 
     @Nonnull
-    private final TickRunnerService tickService;
+    private final OperationalService operationalService;
 
     @Nonnull
     private final MailService mailService;
@@ -122,6 +123,9 @@ public class AuthApi {
     @Nonnull
     private final HeatMapService heatMapService;
 
+    @Nonnull
+    private final TickTimeService tickTimeService;
+
     @Autowired
     public AuthApi(@Nonnull final AuthenticationManager authenticationManager,
                    @Nonnull final JwtTokenUtil jwtTokenUtil,
@@ -131,10 +135,11 @@ public class AuthApi {
                    @Nonnull final PlanetService planetService,
                    @Nonnull final ChatService chatService,
                    @Nonnull final MasterOfTheUniverseService masterOfTheUniverseService,
-                   @Nonnull final TickRunnerService tickService,
+                   @Nonnull final OperationalService operationalService,
                    @Nonnull final MailService mailService,
                    @Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
-                   @Nonnull final HeatMapService heatMapService) {
+                   @Nonnull final HeatMapService heatMapService,
+                   @Nonnull final TickTimeService tickTimeService) {
         this.authenticationManager = Preconditions.checkNotNull(authenticationManager, "authenticationManager shouldn't be null!");
         this.jwtTokenUtil = Preconditions.checkNotNull(jwtTokenUtil, "jwtTokenUtil shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
@@ -143,10 +148,11 @@ public class AuthApi {
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.chatService = Preconditions.checkNotNull(chatService, "messageThreadService must not be empty");
         this.masterOfTheUniverseService = Preconditions.checkNotNull(masterOfTheUniverseService, "masterOfTheUniverseService must not be empty");
-        this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
+        this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
         this.mailService = Preconditions.checkNotNull(mailService, "mailService must not be empty");
         this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
         this.heatMapService = Preconditions.checkNotNull(heatMapService, "heatMapService must not be empty");
+        this.tickTimeService = Preconditions.checkNotNull(tickTimeService, "tickTimeService must not be empty");
     }
 
     @PostMapping("/login")
@@ -303,6 +309,7 @@ public class AuthApi {
         if (userService.existsUsername(userJson.getUsername())) {
             throw new NotifyWebUserException("Username is already in use.");
         }
+
         final User entity = userJson.transform();
         final User saved = userService.save(entity);
 
@@ -315,7 +322,7 @@ public class AuthApi {
         planet = planetService.save(planet);
         final Colonization colonization = new Colonization(saved, planet, ColonizationCostCalculator.getCrewRequirementForColonization(), 0);
         planet = colonizationService.colonizePlanet(colonization);
-        tickService.operateInoperationals(planet);
+        operationalService.operateInoperationals(tickTimeService.getToday(), planet);
 
         heatMapService.createHeatForNeighbourhood(planet);
 

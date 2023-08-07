@@ -230,7 +230,7 @@ public class ResourceDeposit extends AbstractEntityKey {
             value = amount;
         }
         if (value < 0) {
-            throw new NotifyWebUserException("No, you cannot do that.");
+            throw new NotifyWebUserException("No, you cannot reduce it below zero, even if it is " + resourceType + ".");
         }
         resources.put(resourceType, value);
     }
@@ -375,7 +375,7 @@ public class ResourceDeposit extends AbstractEntityKey {
             }
             final long currentAmount = getCrewAmountByType(educationType);
             final long newAmount = currentAmount + (calculationType.getMultiplier() * amountToAdd);
-            this.setAbsoluteCrewRequirement(educationType, newAmount);
+            setAbsoluteCrewRequirement(educationType, newAmount);
         });
     }
 

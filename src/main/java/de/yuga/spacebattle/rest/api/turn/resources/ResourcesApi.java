@@ -9,6 +9,7 @@ import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.ETransportType;
 import de.yuga.spacebattle.backend.services.caches.TransportationCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
+import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassCreationService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
@@ -93,6 +94,9 @@ public class ResourcesApi extends BaseApi {
     @Nonnull
     private final TickTimeService tickService;
 
+    @Nonnull
+    private final OperationalService operationalService;
+
     @Autowired
     public ResourcesApi(@Nonnull final PlanetService planetService,
                         @Nonnull final ConstructionService constructionService,
@@ -100,7 +104,8 @@ public class ResourcesApi extends BaseApi {
                         @Nonnull final ShipClassService shipClassService,
                         @Nonnull final FleetService fleetService,
                         @Nonnull final TransportationCache transportationCache,
-                        @Nonnull final TickTimeService tickService) {
+                        @Nonnull final TickTimeService tickService,
+                        @Nonnull final OperationalService operationalService) {
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
         this.shipClassCreationService = Preconditions.checkNotNull(shipClassCreationService, "shipClassCreationService shouldn't be null!");
@@ -108,6 +113,7 @@ public class ResourcesApi extends BaseApi {
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
         this.transportationCache = Preconditions.checkNotNull(transportationCache, "transportationCache must not be empty");
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
+        this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
     }
 
     @GetMapping(value = RESOURCE_TYPES_ENDPOINT)
@@ -170,10 +176,22 @@ public class ResourcesApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getResourceDemand(@PathVariable("idPlanet") final int idPlanet) {
+        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit demand = operationalService.getPopulationDemandForPlanet(idPlanet);
+        return ResponseEntity.ok(new ResourceDeposit(demand));
+    }
 
-        final Planet planet = planetService.find(idPlanet);
-        PreconditionWebHelper.checkNotNull(planet, "planet shouldn't be null!");
-        return ResponseEntity.ok(new ResourceDeposit(planet.getResourceDemand()));
+    @GetMapping(value = RESOURCE_DEMAND_ENDPOINT)
+    @Operation(summary = "Returns the demand of the user.", operationId = "getResourceDemandForUser",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceDeposit.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getResourceDemandForUser() {
+        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit demand = operationalService.getPopulationDemandForUser(getIdUser());
+        return ResponseEntity.ok(new ResourceDeposit(demand));
     }
 
     @GetMapping(value = RESOURCE_UTILIZATION_ENDPOINT + "/{idPlanet}")
@@ -190,6 +208,23 @@ public class ResourcesApi extends BaseApi {
         final Planet planet = planetService.find(idPlanet);
         PreconditionWebHelper.checkNotNull(planet, "planet shouldn't be null!");
         return ResponseEntity.ok(new ResourceDeposit(planet.getResourceUtilization()));
+    }
+
+    @GetMapping(value = RESOURCE_UTILIZATION_ENDPOINT)
+    @Operation(summary = "Returns the used population of the user.", operationId = "getResourceUtilizationForUser",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceDeposit.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getResourceUtilizationForUser() {
+
+        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit util = new de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit(EDepositType.UTILIZATION);
+        final List<Planet> planets = planetService.findAllColonizedBy(getIdUser());
+        planets.forEach(p -> util.add(p.getResourceUtilization()));
+        return ResponseEntity.ok(new ResourceDeposit(util));
     }
 
     @GetMapping(value = RESOURCE_DEPOSIT_ENDPOINT + "/{idPlanet}")
@@ -265,6 +300,22 @@ public class ResourcesApi extends BaseApi {
         PreconditionWebHelper.checkNotNull(planet, "planet shouldn't be null!");
 
         final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit ticklyIncome = planet.getTicklyIncome();
+        return ResponseEntity.ok(new ResourceDeposit(ticklyIncome));
+    }
+
+    @GetMapping(value = INCOME_ENDPOINT)
+    @Operation(summary = "Returns the income of the user.", operationId = "getIncomeForUser",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceDeposit.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getIncomeForUser() {
+        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit ticklyIncome = new de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit(EDepositType.INCOME);
+        final List<Planet> planets = planetService.findAllColonizedBy(getIdUser());
+        planets.forEach(p -> ticklyIncome.add(p.getTicklyIncome()));
         return ResponseEntity.ok(new ResourceDeposit(ticklyIncome));
     }
 

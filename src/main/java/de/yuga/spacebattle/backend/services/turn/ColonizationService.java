@@ -2,7 +2,6 @@ package de.yuga.spacebattle.backend.services.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
-import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.PopulationControlCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.TickOutputCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
@@ -111,7 +110,7 @@ public class ColonizationService {
         repository.delete(entity);
     }
 
-
+    @Nonnull
     public Colonization initiateColonization(@Nonnull final User user, @Nonnull final Planet toColonize) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
         Preconditions.checkNotNull(toColonize, "toColonize shouldn't be null!");
@@ -123,27 +122,19 @@ public class ColonizationService {
 
         final PayingPossibleResult payingPossible = debitorDeposit.isPayingPossible(colonizationCosts.getCrewRequirement());
         if (!payingPossible.isValid()) {
-            return createPlannedColonization(mainPlanet, toColonize);
+            return createPlannedColonization(user, toColonize);
         }
 
         return startColonizingPlanet(user, toColonize);
     }
 
-    private Colonization createPlannedColonization(@Nonnull final Planet planet, @Nonnull final Planet toColonize) {
-        Preconditions.checkNotNull(planet, "planet must not be empty");
+    @Nonnull
+    private Colonization createPlannedColonization(@Nonnull final User owner, @Nonnull final Planet toColonize) {
+        Preconditions.checkNotNull(owner, "owner must not be empty");
         Preconditions.checkNotNull(toColonize, "toColonize must not be empty");
 
-
-        final ResourceDeposit colonizationCosts = ColonizationCostCalculator.getColonizationCosts(toColonize);
-        final CrewRequirement crewRequirement = colonizationCosts.getCrewRequirement();
-        planet.getResourceDemand().updateCrew(crewRequirement, ECalculationType.ADD);
-        planetService.save(planet);
-
-        final User owner = planet.getHumanOwner();
-        Preconditions.checkNotNull(owner, "owner must not be empty");
-        Colonization colonization = new Colonization(owner, toColonize, crewRequirement, 10, true);
-        colonization = save(colonization);
-        return colonization;
+        final CrewRequirement crewRequirement = ColonizationCostCalculator.getColonizationCosts(toColonize).getCrewRequirement();
+        return save(new Colonization(owner, toColonize, crewRequirement, 10, true));
     }
 
     /**
@@ -154,6 +145,7 @@ public class ColonizationService {
      * @param toColonize the planet to colonize
      * @return the created colonization
      */
+    @Nonnull
     private Colonization startColonizingPlanet(@Nonnull final User user, @Nonnull final Planet toColonize) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
         Preconditions.checkNotNull(toColonize, "toColonize shouldn't be null!");
@@ -185,6 +177,7 @@ public class ColonizationService {
      * @param colonization the running colonization
      * @return the colonized planet
      */
+    @Nonnull
     @Transactional(propagation = Propagation.REQUIRED)
     public Planet colonizePlanet(@Nonnull final Colonization colonization) {
         Preconditions.checkNotNull(colonization, "colonization shouldn't be null!");
@@ -220,12 +213,7 @@ public class ColonizationService {
             } else {
                 level = 1;
             }
-            final Construction construction = new Construction(planet, building, level);
-
-            final ResourceDeposit costsForLevel = JobCostsCalculator.getCostsForLevel(building.getCosts(), level);
-            planet.getResourceDemand().updateCrew(costsForLevel.getCrewRequirement(), ECalculationType.ADD);
-
-            planet.getConstructions().add(construction);
+            planet.getConstructions().add(new Construction(planet, building, level));
         });
         owner.addKnownStarSystems(planet.getSystem());
         userService.save(owner);
@@ -288,6 +276,7 @@ public class ColonizationService {
      * @param starSystem the star system to buy information for
      * @return <code>true</code> if paying is possible, <code>false</code> otherwise
      */
+    @Nonnull
     public PayingPossibleResult validateCostsForSystemInformation(@Nonnull final Planet mainPlanet, @Nonnull final StarSystem starSystem) {
         Preconditions.checkNotNull(mainPlanet, "mainPlanet shouldn't be null!");
         Preconditions.checkNotNull(starSystem, "starSystem shouldn't be null!");
@@ -363,5 +352,10 @@ public class ColonizationService {
         Preconditions.checkNotNull(system, "system must not be empty");
 
         return Objects.requireNonNullElse(repository.findAllForSystem(system.getId()), new ArrayList<>());
+    }
+
+    @Nonnull
+    public List<Colonization> findAllPlannedForUser(final int idUser) {
+        return Objects.requireNonNullElse(repository.findAllPlannedForUser(idUser), new ArrayList<>());
     }
 }

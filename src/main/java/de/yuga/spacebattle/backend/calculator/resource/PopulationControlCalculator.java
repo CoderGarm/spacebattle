@@ -133,8 +133,9 @@ public class PopulationControlCalculator {
      *
      * @param planet the planet to educate
      */
-    public static void educatePopulation(@Nonnull final Planet planet) {
+    public static void educatePopulation(@Nonnull final Planet planet, @Nonnull final ResourceDeposit demand) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+        Preconditions.checkNotNull(demand, "demand must not be empty");
 
         final Set<Construction> constructionsByResource = planet.getConstructionByResource(EResourceType.POPULATION);
         final Map<ERefinementSequence, Long> educationCapacity = constructionsByResource.stream()
@@ -145,10 +146,10 @@ public class PopulationControlCalculator {
 
 
         final List<EducationAmountDTO> education = new ArrayList<>();
-        if (!planet.isDemandPresent()) {
+        if (!demand.isDemandPresent()) {
             doUnguidedEducation(planet, education, educationCapacity);
         } else {
-            doGuidedEducation(planet, education, educationCapacity);
+            doGuidedEducation(planet, demand, education, educationCapacity);
         }
         education.stream().filter(Objects::nonNull).forEach(dto -> PopulationControlCalculator.educate(planet, dto));
     }
@@ -158,15 +159,16 @@ public class PopulationControlCalculator {
      */
     @VisibleForTesting
     static void doGuidedEducation(@Nonnull final Planet planet,
+                                  @Nonnull final ResourceDeposit demand,
                                   @Nonnull final List<EducationAmountDTO> education,
                                   @Nonnull final Map<ERefinementSequence, Long> educationCapacity) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(demand, "demand must not be empty");
         Preconditions.checkNotNull(education, "education must not be empty");
         Preconditions.checkNotNull(educationCapacity, "educationCapacity must not be empty");
 
         final ResourceDeposit deposit = new ResourceDeposit(planet.getResourceDeposit());
-        final ResourceDeposit demand = new ResourceDeposit(planet.getResourceDemand());
-        UNRESTRICTED_EDUCATION.stream().filter(educationCapacity::containsKey).forEach(r -> setUnrestrictedEducation(education, deposit, demand, r, educationCapacity));
+        UNRESTRICTED_EDUCATION.stream().filter(educationCapacity::containsKey).forEach(r -> setUnrestrictedEducation(education, deposit, r, educationCapacity));
         GUIDED_EDUCATION.stream().filter(educationCapacity::containsKey).forEach(r -> calculateDemandWeightedEducation(education, deposit, demand, r, educationCapacity));
     }
 
@@ -196,12 +198,10 @@ public class PopulationControlCalculator {
 
     private static void setUnrestrictedEducation(@Nonnull final List<EducationAmountDTO> education,
                                                  @Nonnull final ResourceDeposit deposit,
-                                                 @Nonnull final ResourceDeposit demand,
                                                  @Nonnull final ERefinementSequence refinementSequence,
                                                  @Nonnull final Map<ERefinementSequence, Long> educationCapacity) {
         Preconditions.checkNotNull(education, "education must not be empty");
         Preconditions.checkNotNull(deposit, "deposit must not be empty");
-        Preconditions.checkNotNull(demand, "demand must not be empty");
         Preconditions.checkNotNull(refinementSequence, "refinementSequence must not be empty");
         Preconditions.checkNotNull(educationCapacity, "educationCapacity must not be empty");
 
@@ -210,7 +210,6 @@ public class PopulationControlCalculator {
         pupils = Long.min(pupils, cap);
         education.add(new EducationAmountDTO(pupils, refinementSequence));
         deposit.updateCrewRequirement(refinementSequence.getEduct(), -pupils);
-        demand.updateCrewRequirement(refinementSequence.getProduct(), -pupils);
     }
 
     private static void calculateDemandWeightedEducation(@Nonnull final List<EducationAmountDTO> education,
@@ -238,7 +237,6 @@ public class PopulationControlCalculator {
             educated = Math.min(educated, cap);
 
             deposit.updateCrewRequirement(refinementSequence.getEduct(), -educated);
-            demand.updateCrewRequirement(refinementSequence.getProduct(), -educated);
             education.add(new EducationAmountDTO(educated, refinementSequence));
         }
     }
@@ -309,7 +307,6 @@ public class PopulationControlCalculator {
         final EEducationType educationSource = educationAmountDTO.getEduct();
         final EEducationType educationGoal = educationAmountDTO.getProduct();
         final ResourceDeposit deposit = planet.getResourceDeposit();
-        final ResourceDeposit demand = planet.getResourceDemand();
         // just to check if the calculation went wrong
         final long sumOfPopulationBeforeEducation = deposit.getCrewRequirement().getSumOfPopulation();
         final long toUpgrade = educationAmountDTO.getHowManyPupils();
@@ -321,7 +318,6 @@ public class PopulationControlCalculator {
 
         deposit.updateCrewRequirement(educationGoal, toEducateAmount);
         deposit.updateCrewRequirement(educationSource, -toEducateAmount);
-        demand.updateCrewRequirement(educationGoal, -toEducateAmount);
 
         final long sumOfPopulationAfterEducation = deposit.getCrewRequirement().getSumOfPopulation();
         logInfo.appendLN("Full sum of before: " + sumOfPopulationBeforeEducation + " vs after education: " + sumOfPopulationAfterEducation);

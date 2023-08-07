@@ -3,7 +3,9 @@ package de.yuga.spacebattle.backend.calculator.resource;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.TestDataProviderUtils;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.ECalculationType;
+import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.ERefinementSequence;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,12 +44,13 @@ class PopulationControlCalculatorTest {
         Preconditions.checkNotNull(refinementSequence, "refinementSequence must not be empty");
 
         // create demand
-        planet.getResourceDemand().updateCrewRequirement(refinementSequence.getProduct(), 1);
+        final ResourceDeposit demand = new ResourceDeposit(EDepositType.DEMAND);
+        demand.updateCrewRequirement(refinementSequence.getProduct(), 1);
         // create capacity
         educationCapacity.put(refinementSequence, 1L);
 
         // test
-        PopulationControlCalculator.doGuidedEducation(planet, result, educationCapacity);
+        PopulationControlCalculator.doGuidedEducation(planet, demand, result, educationCapacity);
 
         validate(result, refinementSequence, 0);
     }
@@ -60,12 +63,13 @@ class PopulationControlCalculatorTest {
         // create population
         planet.getResourceDeposit().updateCrewRequirement(refinementSequence.getEduct(), 1);
         // create demand
-        planet.getResourceDemand().updateCrewRequirement(refinementSequence.getProduct(), 1);
+        final ResourceDeposit demand = new ResourceDeposit(EDepositType.DEMAND);
+        demand.updateCrewRequirement(refinementSequence.getProduct(), 1);
         // create capacity
         educationCapacity.put(refinementSequence, 1L);
 
         // test
-        PopulationControlCalculator.doGuidedEducation(planet, result, educationCapacity);
+        PopulationControlCalculator.doGuidedEducation(planet, demand, result, educationCapacity);
 
         validate(result, refinementSequence, 1L);
     }
@@ -75,13 +79,14 @@ class PopulationControlCalculatorTest {
         // create population
         planet.getResourceDeposit().updateCrewRequirement(COLLEGE, 3);
         // create demand
-        planet.getResourceDemand().updateCrewRequirement(COLLEGE, 3);
-        planet.getResourceDemand().updateCrewRequirement(UNIVERSITY, 1);
+        final ResourceDeposit demand = new ResourceDeposit(EDepositType.DEMAND);
+        demand.updateCrewRequirement(COLLEGE, 3);
+        demand.updateCrewRequirement(UNIVERSITY, 1);
         // create capacity
         educationCapacity.put(EDUCATION_CIVIL_III, 1L);
 
         // test
-        PopulationControlCalculator.doGuidedEducation(planet, result, educationCapacity);
+        PopulationControlCalculator.doGuidedEducation(planet, demand, result, educationCapacity);
 
         validate(result, EDUCATION_CIVIL_III, 0L);
     }
@@ -91,14 +96,15 @@ class PopulationControlCalculatorTest {
         // create population
         planet.getResourceDeposit().updateCrewRequirement(COLLEGE, 1);
         // create demand
-        planet.getResourceDemand().updateCrewRequirement(UNIVERSITY, 1);
-        planet.getResourceDemand().updateCrewRequirement(ENLISTED, 1);
+        final ResourceDeposit demand = new ResourceDeposit(EDepositType.DEMAND);
+        demand.updateCrewRequirement(UNIVERSITY, 1);
+        demand.updateCrewRequirement(ENLISTED, 1);
         // create capacity
         educationCapacity.put(EDUCATION_CIVIL_III, 1L);
         educationCapacity.put(EDUCATION_MILITARY_I, 1L);
 
         // test
-        PopulationControlCalculator.doGuidedEducation(planet, result, educationCapacity);
+        PopulationControlCalculator.doGuidedEducation(planet, demand, result, educationCapacity);
 
         validate(result, EDUCATION_MILITARY_I, 1L);
         validate(result, EDUCATION_CIVIL_II, 0L);

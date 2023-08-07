@@ -5,18 +5,28 @@
 #### Diverses
 
 1. Auf den Einsatz wartende Operationals sind nun im Dashboard sichtbar.
+2. Ebenfalls auf dem Infrastruktur-Dashboard ist das Bevölkerungschart für das gesamte Imperium zu bewundern.
+   todo. crew display + constructions: show needed peoples
+
 todo. retire fleet button, active ships back to pool fleet
-todo. crew display: show needed peoples
 todo. Reisezeit beim Handel inkl Tabellendarstellung
 todo. gebäudedarstellung für bau verbessern
 
 ### Bugs fixed
 
+1. Die benötigte Population war seit geraumer Zeit verbuggt und es ist mir nicht aufgefallen. Das sollte jetzt alles richtig berechnet werden.
 todo. check fleet separation
 todo. article edit stuff
 
+todo. Wenn man bei einem plani im Schiffsbau tab ist und dann zu einem plani wechselt bei dem es keine Werft gibt, kommt nen popup und es wird nicht zum anderen plani gewechselt.
+Da sollte man hinwechseln und dann beim dashboard landen.
+todo. Bug: 'Support modules' hat noch kein Icon bei der Forschuung
+todo. Ich habe point defense auf lvl 4, aber im techtree sieht man das noch nicht, die 4 ist noch nicht grün. -> level cap == statt >
+todo. Flotten teilen geht meistens nicht, wenn man erst ein Schiff rüberzieht und dann einen namen eingibt.
+
 #### next steps
 
+- menü als vertikaler slider
 - minimal intelligence on foreign fleet if visible
 - sanitize markdown messages without unsafe message
 - bootstrap css nur bei markdown-editor möglich

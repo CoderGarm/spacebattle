@@ -84,20 +84,12 @@ public class Planet extends AbstractEntityKey implements HasOwner {
     private final ResourceDeposit resourceDeposit = ResourceDepositInitializerCalculator.initializeResourceDeposit();
 
     /**
-     * The current need for resources and population for migrations.
-     */
-    @Nonnull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
-    @JoinColumn(name = "idResourceDemand", updatable = false)
-    private final ResourceDeposit resourceDemand = new ResourceDeposit(EDepositType.DEMAND);
-
-    /**
      * The current used resources.
      */
     @Nonnull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "idResourceUtilization", updatable = false)
-    private final ResourceDeposit resourceUtilization = new ResourceDeposit(EDepositType.UTILIZATION);
+    private final ResourceDeposit resourceUtilization = new ResourceDeposit(EDepositType.UTILIZATION); /* fixme replace also by on-the-fly calculation */
 
     @Nonnull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
@@ -176,11 +168,6 @@ public class Planet extends AbstractEntityKey implements HasOwner {
     @Nonnull
     public ResourceDeposit getResourceDeposit() {
         return resourceDeposit;
-    }
-
-    @Nonnull
-    public ResourceDeposit getResourceDemand() {
-        return resourceDemand;
     }
 
     @Nonnull
@@ -397,10 +384,6 @@ public class Planet extends AbstractEntityKey implements HasOwner {
         }
 
         return Integer.max(tickCounterCollectable, tickCounterForfeitable);
-    }
-
-    public boolean isDemandPresent() {
-        return resourceDemand.isDemandPresent();
     }
 
     @Nonnull

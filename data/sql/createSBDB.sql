@@ -485,7 +485,6 @@
         yCoordinate varchar(255),
         idMiningFactors integer not null,
         idOwner integer,
-        idResourceDemand integer,
         idResourceDeposit integer,
         idResourceTransportationDelivery integer,
         idResourceTransportationDemand integer,
@@ -1387,11 +1386,6 @@
                 references user (idUser);
 
     alter table planet
-        add constraint FKgayj6n1e1tkll78se8wj08yr9
-            foreign key (idResourceDemand)
-                references resourceDeposit (idResourceDeposit);
-
-    alter table planet
         add constraint FK9cd80e9yxwnobejr9twlcknab
             foreign key (idResourceDeposit)
                 references resourceDeposit (idResourceDeposit);
@@ -2107,3 +2101,4 @@ insert into dbPatch values (null, now(), 'update warship caps', '0.1.6-2');
 insert into dbPatch values (null, now(), 'piracy and missions wiki', '0.1.6-3');
 insert into dbPatch values (null, now(), 'naval amendments', '0.1.6-4');
 insert into dbPatch values (null, now(), 'profile pic', '0.1.7-1');
+insert into dbPatch values (null, now(), 'drop persisted demand', '0.1.8-1');

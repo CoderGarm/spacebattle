@@ -16,7 +16,6 @@ import de.yuga.spacebattle.backend.entities.turn.Constructable;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.enums.ECalculationType;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EJobPriority;
 import de.yuga.spacebattle.backend.enums.EResourceType;
@@ -136,7 +135,6 @@ public class JobService {
             // not reached if the job is a research
             final ResourceDeposit jobCosts = job.getConstructable().getJobCosts();
             final Planet planet = job.getFacility().getPlanet();
-            planet.getResourceDemand().updateCrew(jobCosts.getCrewRequirement(), ECalculationType.SUBTRACT);
 
             final Fleet fleet = doDelete.getConstructable().getFleet();
             if (fleet != null) {
@@ -178,7 +176,6 @@ public class JobService {
             throw new NotifyWebUserException("This job is to expensive!", result);
         }
         debtorDeposit.pay(costs);
-        planet.getResourceDemand().updateCrew(costs.getCrewRequirement(), ECalculationType.ADD);
     }
 
     /**

@@ -5,7 +5,7 @@ package de.yuga.spacebattle.backend.enums;
  */
 public enum ECalculationType {
 
-    NONE(1),
+    NONE(0),
     ADD(1),
     SUBTRACT(-1);
 

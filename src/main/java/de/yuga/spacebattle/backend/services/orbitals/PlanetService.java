@@ -173,4 +173,13 @@ public class PlanetService {
 
         return Objects.requireNonNullElse(planetRepository.findAllById(idPlanets), new ArrayList<>());
     }
+
+    /**
+     * Obscure method born by the wish to be done.<br>
+     * Returns the id of the owner if the given idPlanet points to the main planet of the owner.
+     */
+    @Nullable
+    public Integer getIdUserWhenMain(final int idPlanet) {
+        return planetRepository.findAllById(idPlanet);
+    }
 }

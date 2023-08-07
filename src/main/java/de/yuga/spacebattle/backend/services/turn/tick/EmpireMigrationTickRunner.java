@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.services.caches.TransportationCache;
+import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,11 +35,16 @@ public class EmpireMigrationTickRunner implements TickRunner {
     @Nonnull
     private final TransportationCache transportationCache;
 
+    @Nonnull
+    private final OperationalService operationalService;
+
     @Autowired
     public EmpireMigrationTickRunner(@Nonnull final PlanetService planetService,
-                                     @Nonnull final TransportationCache transportationCache) {
+                                     @Nonnull final TransportationCache transportationCache,
+                                     @Nonnull final OperationalService operationalService) {
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.transportationCache = Preconditions.checkNotNull(transportationCache, "transportationCache must not be empty");
+        this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
     }
 
     @Override
@@ -66,9 +72,7 @@ public class EmpireMigrationTickRunner implements TickRunner {
                     .filter(p -> p.getResourceDeposit().hasData())
                     .collect(Collectors.toMap(Function.identity(), Planet::getResourceDeposit));
 
-            final Map<Planet, ResourceDeposit> demands = planetSet.stream()
-                    .filter(p -> p.getResourceDemand().hasData())
-                    .collect(Collectors.toMap(Function.identity(), p -> new ResourceDeposit(p.getResourceDemand())));
+            final Map<Planet, ResourceDeposit> demands = operationalService.getPopulationDemandForUserByPlanet(user.getId());
 
             demands.forEach((planet, demand) -> {
                 demand.getHumanResources().forEach((demandedType, demandedAmount) -> {
@@ -80,7 +84,7 @@ public class EmpireMigrationTickRunner implements TickRunner {
                                 continue;
                             }
                             final long present = deposit.getCrewAmountByType(demandedType);
-                            final long demandFrom = from.getResourceDemand().getCrewAmountByType(demandedType);
+                            final long demandFrom = demand.getCrewAmountByType(demandedType);
                             final long amount = Long.min(present - demandFrom, demandedAmount);
                             executeTransportation(toStore, planet, demand, demandedType, from, deposit, amount);
                         }
@@ -114,8 +118,6 @@ public class EmpireMigrationTickRunner implements TickRunner {
             demand.updateCrewRequirement(demandedType, -amount);
             // reduce the real demand by updating the deposit
             planet.getResourceDeposit().updateCrewRequirement(demandedType, amount);
-            // reduce the persistent storage
-            planet.getResourceDemand().updateCrewRequirement(demandedType, -amount);
             // reduce the deposit of the sending planet
             from.getResourceDeposit().updateCrewRequirement(demandedType, -amount);
             toStore.add(from);
