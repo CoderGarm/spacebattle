@@ -2,8 +2,12 @@ package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.turn.mission.MissionItem;
+import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.services.caches.*;
+import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import de.yuga.spacebattle.rest.api.BaseApi;
@@ -25,7 +29,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
@@ -65,6 +73,9 @@ public class JournalApi extends BaseApi {
     @Nonnull
     private final MissionCache missionCache;
 
+    @Nonnull
+    private final OperationalService operationalService;
+
     @Autowired
     public JournalApi(@Nonnull final TickTimeService tickService,
                       @Nonnull final JobService jobService,
@@ -72,7 +83,8 @@ public class JournalApi extends BaseApi {
                       @Nonnull final FleetMovementCache fleetMovementCache,
                       @Nonnull final ColonizationCache colonizationCache,
                       @Nonnull final OperationalCache operationalCache,
-                      @Nonnull final MissionCache missionCache) {
+                      @Nonnull final MissionCache missionCache,
+                      @Nonnull final OperationalService operationalService) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
         this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
         this.transportationCache = Preconditions.checkNotNull(transportationCache, "transportationCache must not be empty");
@@ -80,6 +92,7 @@ public class JournalApi extends BaseApi {
         this.colonizationCache = Preconditions.checkNotNull(colonizationCache, "colonizationCache must not be empty");
         this.operationalCache = Preconditions.checkNotNull(operationalCache, "operationalCache must not be empty");
         this.missionCache = Preconditions.checkNotNull(missionCache, "missionCache must not be empty");
+        this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
     }
 
     @GetMapping(value = JOB_FINISHED_ENDPOINT)
@@ -177,6 +190,54 @@ public class JournalApi extends BaseApi {
         final int idUser = getIdUser();
         final Tick today = tickService.getToday();
         return ResponseEntity.ok(operationalCache.getOperationals(today, idUser).stream()
+                .map(o -> new Commissioning(o, getPreferredLanguage()))
+                .collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = OPERATIONALS_ENDPOINT + "/pending")
+    @Operation(summary = "Get all newly active operationals.", operationId = "getOperationalsWaitingForActivation",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Commissioning.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getOperationalsWaitingForActivation() {
+        final int idUser = getIdUser();
+        final Tick today = tickService.getToday();
+
+        final Map<Planet, Set<Construction>> pendingConstructionsByPlanet = operationalService.getPendingConstructions(idUser).stream()
+                .collect(Collectors.groupingBy(Construction::getPlanet,
+                        Collectors.mapping(Function.identity(), Collectors.toSet())));
+        final Map<Planet, List<WarShip>> pendingShipsByYard = operationalService.getPendingWarShips(idUser).stream()
+                .collect(Collectors.groupingBy(WarShip::getShipyard,
+                        Collectors.mapping(Function.identity(), Collectors.toList())));
+
+        final Map<Planet, de.yuga.spacebattle.backend.dto.turn.Commissioning> commissionings = new HashMap<>();
+        pendingConstructionsByPlanet.forEach((planet, constructions) -> {
+            de.yuga.spacebattle.backend.dto.turn.Commissioning orDefault = commissionings.get(planet);
+            if (orDefault == null) {
+                orDefault = new de.yuga.spacebattle.backend.dto.turn.Commissioning(today, planet, constructions);
+            } else {
+                orDefault.addConstructions(constructions);
+            }
+            commissionings.put(planet, orDefault);
+        });
+
+        pendingShipsByYard.forEach((planet, warShips) -> {
+            de.yuga.spacebattle.backend.dto.turn.Commissioning orDefault = commissionings.get(planet);
+            if (orDefault == null) {
+                orDefault = new de.yuga.spacebattle.backend.dto.turn.Commissioning(today, planet, warShips);
+            } else {
+                orDefault.setWarships(warShips);
+            }
+            commissionings.put(planet, orDefault);
+        });
+
+        return ResponseEntity.ok(commissionings.values().stream()
                 .map(o -> new Commissioning(o, getPreferredLanguage()))
                 .collect(Collectors.toList()));
     }

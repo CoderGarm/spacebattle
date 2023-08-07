@@ -114,4 +114,9 @@ public class ConstructionService {
         final Iterable<Construction> c = constructionRepository.saveAll(constructions);
         return StreamSupport.stream(c.spliterator(), false).collect(Collectors.toSet());
     }
+
+    @Nonnull
+    public List<Construction> findInoperationalForUser(final int idUser) {
+        return Objects.requireNonNullElse(constructionRepository.findInoperationalForUser(idUser), new ArrayList<>());
+    }
 }

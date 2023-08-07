@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -53,9 +54,19 @@ public class Commissioning {
         }
 
         final List<WarShip> warships = commissioning.getWarships();
-        warships.stream()
+        warships.stream().filter(w -> Objects.nonNull(w.getFleet()))
                 .collect(Collectors.groupingBy(WarShip::getFleet,
                         Collectors.mapping(Function.identity(), Collectors.toList())))
-                .forEach((fleet, warShips) -> this.warships.add(new WarshipsByFleet(fleet.getName(), warShips.stream().map(WarShip::getName).collect(Collectors.toList()))));
+                .forEach((fleet, warShips) -> this.warships.add(new WarshipsByFleet(fleet.getName(),
+                        warShips.stream().map(w -> new de.yuga.spacebattle.rest.dto.constructables.spacecrafts.WarShip(w, w.getWarshipHealthState(), preferredLanguage))
+                                .collect(Collectors.toList()))));
+
+        final List<WarShip> pooledShips = warships.stream().filter(w -> Objects.isNull(w.getFleet()))
+                .collect(Collectors.toList());
+        if (!pooledShips.isEmpty()) {
+            this.warships.add(new WarshipsByFleet("Reserve", pooledShips.stream()
+                    .map(w -> new de.yuga.spacebattle.rest.dto.constructables.spacecrafts.WarShip(w, w.getWarshipHealthState(), preferredLanguage))
+                    .collect(Collectors.toList())));
+        }
     }
 }

@@ -86,4 +86,9 @@ public class WarShipService {
     public Set<WarShip> findShipsByUser(final int idUser) {
         return Objects.requireNonNullElse(warShipRepository.findShipsByUser(idUser), new HashSet<>());
     }
+
+    @Nonnull
+    public List<WarShip> findAliveInoperationalForUser(final int idUser) {
+        return Objects.requireNonNullElse(warShipRepository.findAliveInoperationalForUser(idUser), new ArrayList<>());
+    }
 }

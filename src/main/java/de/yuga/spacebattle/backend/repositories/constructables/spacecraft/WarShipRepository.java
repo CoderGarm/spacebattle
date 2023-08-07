@@ -22,4 +22,8 @@ public interface WarShipRepository extends CrudRepository<WarShip, Integer> {
     @Nullable
     @Query("SELECT w FROM WarShip w WHERE  w.isDeleted = false AND w.isOperational = true AND w.shipClass.owner.id = :idUser")
     Set<WarShip> findShipsByUser(int idUser);
+
+    @Nullable
+    @Query("SELECT w FROM WarShip w WHERE w.shipyard.owner.id = :idUser AND w.isDeleted = false AND w.isOperational = false")
+    List<WarShip> findAliveInoperationalForUser(@Param("idUser") final int idUser);
 }

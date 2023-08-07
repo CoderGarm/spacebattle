@@ -247,7 +247,9 @@ public class SpacecraftCalculator {
         final List<Double> propValue = new ArrayList<>();
         final List<Double> ftlPropValue = new ArrayList<>();
         shipClasses.keySet().forEach(shipClass -> {
-            final Map<ESupportType, List<SupportFitting>> supportTypeToModule = shipClass.getSupportFittings().stream().collect(Collectors.groupingBy(c -> c.getPassiveModule().getSupportType(), Collectors.mapping(Function.identity(), Collectors.toList())));
+            final Map<ESupportType, List<SupportFitting>> supportTypeToModule = shipClass.getSupportFittings().stream()
+                    .collect(Collectors.groupingBy(c -> c.getPassiveModule().getSupportType(),
+                            Collectors.mapping(Function.identity(), Collectors.toList())));
             final Propulsion propulsion = shipClass.getPropulsion();
             addToIndividualPropulsionValues(EModuleType.PROPULSION, supportTypeToModule, propulsion, propValue);
             if (propulsion.isFtlCapable()) {

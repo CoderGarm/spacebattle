@@ -4,7 +4,11 @@
 
 #### Diverses
 
+1. Auf den Einsatz wartende Operationals sind nun im Dashboard sichtbar.
+todo. retire fleet button, active ships back to pool fleet
 todo. crew display: show needed peoples
+todo. Reisezeit beim Handel inkl Tabellendarstellung
+todo. gebäudedarstellung für bau verbessern
 
 ### Bugs fixed
 
@@ -17,9 +21,7 @@ todo. article edit stuff
 - sanitize markdown messages without unsafe message
 - bootstrap css nur bei markdown-editor möglich
 - bug: ftl möglich bei reserveflotte
-- Waiting for activation for operationals
 - write cache to file on shutdown and read post construct
-- Reisezeit beim Handel inkl Tabellendarstellung
 - eingemottete Schiffe tatsächlich außer dienst nehmen
 - normale schlachten auch im mission report anzeigen
 - fleet management - flotten aufteilen neben flotten mergen
