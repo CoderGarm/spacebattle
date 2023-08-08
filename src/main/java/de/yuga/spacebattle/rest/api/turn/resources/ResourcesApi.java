@@ -204,10 +204,7 @@ public class ResourcesApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getResourceUtilization(@PathVariable("idPlanet") final int idPlanet) {
-
-        final Planet planet = planetService.find(idPlanet);
-        PreconditionWebHelper.checkNotNull(planet, "planet shouldn't be null!");
-        return ResponseEntity.ok(new ResourceDeposit(planet.getResourceUtilization()));
+        return ResponseEntity.ok(new ResourceDeposit(operationalService.getUtilizedPopulationForPlanet(idPlanet)));
     }
 
     @GetMapping(value = RESOURCE_UTILIZATION_ENDPOINT)
@@ -220,11 +217,7 @@ public class ResourcesApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getResourceUtilizationForUser() {
-
-        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit util = new de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit(EDepositType.UTILIZATION);
-        final List<Planet> planets = planetService.findAllColonizedBy(getIdUser());
-        planets.forEach(p -> util.add(p.getResourceUtilization()));
-        return ResponseEntity.ok(new ResourceDeposit(util));
+        return ResponseEntity.ok(new ResourceDeposit(operationalService.getUtilizedPopulationForUser(getIdUser())));
     }
 
     @GetMapping(value = RESOURCE_DEPOSIT_ENDPOINT + "/{idPlanet}")
@@ -299,7 +292,7 @@ public class ResourcesApi extends BaseApi {
         final Planet planet = planetService.find(idPlanet);
         PreconditionWebHelper.checkNotNull(planet, "planet shouldn't be null!");
 
-        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit ticklyIncome = planet.getTicklyIncome();
+        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit ticklyIncome = planet.getTicklyIncome(operationalService.getUtilizedPopulationForPlanet(planet.getId()));
         return ResponseEntity.ok(new ResourceDeposit(ticklyIncome));
     }
 
@@ -315,7 +308,7 @@ public class ResourcesApi extends BaseApi {
     public ResponseEntity<?> getIncomeForUser() {
         final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit ticklyIncome = new de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit(EDepositType.INCOME);
         final List<Planet> planets = planetService.findAllColonizedBy(getIdUser());
-        planets.forEach(p -> ticklyIncome.add(p.getTicklyIncome()));
+        planets.forEach(p -> ticklyIncome.add(p.getTicklyIncome(operationalService.getUtilizedPopulationForPlanet(p.getId()))));
         return ResponseEntity.ok(new ResourceDeposit(ticklyIncome));
     }
 

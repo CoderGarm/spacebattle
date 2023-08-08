@@ -76,13 +76,16 @@ public class JobCostsCalculator {
      * @param constructable what will be produced
      * @return the amount of ticks
      */
-    public static int calculateRemainingTicks(@Nonnull final Construction facility, @Nonnull final Constructable constructable) {
+    public static int calculateRemainingTicks(@Nonnull final Construction facility,
+                                              @Nonnull final Constructable constructable,
+                                              @Nonnull final ResourceDeposit utilization) {
         Preconditions.checkNotNull(facility, "facility shouldn't be null!");
         Preconditions.checkNotNull(constructable, "constructable shouldn't be null!");
+        Preconditions.checkNotNull(utilization, "utilization must not be empty");
 
         final ResourceDeposit costs = constructable.getJobCosts();
         final AtomicInteger ticksNeeded = new AtomicInteger(1);
-        final ResourceDeposit ticklyIncome = facility.getPlanet().getTicklyIncome();
+        final ResourceDeposit ticklyIncome = facility.getPlanet().getTicklyIncome(utilization);
 
         costs.getForfeitableResource().forEach(r -> {
             final long cost = costs.getResourceAmountByType(r);

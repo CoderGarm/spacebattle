@@ -73,6 +73,7 @@ public class WarShipService {
         warShipRepository.saveAll(warShips);
     }
 
+    @Nonnull
     public List<WarShip> findAliveInoperationalForPlanet(final int idPlanet) {
         return Objects.requireNonNullElse(warShipRepository.findAliveInoperationalForPlanet(idPlanet), new ArrayList<>());
     }
@@ -90,5 +91,15 @@ public class WarShipService {
     @Nonnull
     public List<WarShip> findAliveInoperationalForUser(final int idUser) {
         return Objects.requireNonNullElse(warShipRepository.findAliveInoperationalForUser(idUser), new ArrayList<>());
+    }
+
+    @Nonnull
+    public List<WarShip> findAliveOperationalForUser(final int idUser) {
+        return Objects.requireNonNullElse(warShipRepository.findAliveOperationalForUser(idUser), new ArrayList<>());
+    }
+
+    @Nonnull
+    public List<WarShip> findAliveOperationalForPlanet(final int idPlanet) {
+        return Objects.requireNonNullElse(warShipRepository.findAliveOperationalForPlanet(idPlanet), new ArrayList<>());
     }
 }

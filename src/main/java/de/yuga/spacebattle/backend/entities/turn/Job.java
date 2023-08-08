@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.misc.Completable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EJobPriority;
 import org.hibernate.annotations.Check;
 
@@ -60,11 +61,15 @@ public class Job extends Completable implements Comparable<Job> {
      * @param facility      the facility if the job is located
      * @param constructable to job's content
      */
-    public Job(@Nonnull final Planet planet, @Nonnull final Construction facility, @Nonnull final Constructable constructable) {
+    public Job(@Nonnull final Planet planet,
+               @Nonnull final Construction facility,
+               @Nonnull final Constructable constructable,
+               @Nonnull final ResourceDeposit utilization) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkNotNull(facility, "facility shouldn't be null!");
         Preconditions.checkNotNull(constructable, "constructable shouldn't be null!");
         Preconditions.checkArgument(planet.getHumanOwner() != null, "planet must be colonized!");
+        Preconditions.checkNotNull(utilization, "utilization must not be empty");
 
         this.owner = planet.getHumanOwner();
         this.facility = facility;
@@ -72,7 +77,7 @@ public class Job extends Completable implements Comparable<Job> {
         if (constructable.getEmpireWideResearchPoints() != null) {
             this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(constructable.getEmpireWideResearchPoints(), constructable);
         } else {
-            this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(facility, constructable);
+            this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(facility, constructable, utilization);
         }
     }
 

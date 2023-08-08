@@ -22,6 +22,7 @@ import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.services.account.ForumService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
+import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
@@ -89,6 +90,9 @@ public class MasterOfTheUniverseServiceTest {
 
     @Autowired
     private WarshipHealthStateService healthStateService;
+
+    @Autowired
+    private OperationalService operationalService;
 
     @Test
     void t() {
@@ -247,7 +251,7 @@ public class MasterOfTheUniverseServiceTest {
         //costs.add(collegeCosts);
 
         try {
-            final int ticks = mainPlanet.calculateTicksToCollect(costs);
+            final int ticks = mainPlanet.calculateTicksToCollect(costs, operationalService.getUtilizedPopulationForPlanet(mainPlanet.getId()));
             System.out.println("Tick to done: " + ticks + jobDoneAtZero);
         } catch (final NotifyWebUserException e) {
             final PayingPossibleResult payingPossibleResult = e.getPayingPossibleResult();

@@ -350,7 +350,7 @@ public class PlanetTickRunner implements TickRunner {
                 // do school
                 PopulationControlCalculator.educatePopulation(planet, demand);
                 // do birth
-                PopulationControlCalculator.populatePlanet(planet);
+                PopulationControlCalculator.populatePlanet(planet, operationalService.getUtilizedPopulationForPlanet(planet.getId()));
                 break;
             case FORFEITABLE:
                 // only set new available points

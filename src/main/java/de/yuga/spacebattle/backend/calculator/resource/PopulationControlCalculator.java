@@ -51,12 +51,13 @@ public class PopulationControlCalculator {
      *
      * @param planet the planet which should be calculated
      */
-    public static long getTickOutputForPopulation(@Nonnull final Planet planet) {
+    public static long getTickOutputForPopulation(@Nonnull final Planet planet, @Nonnull final ResourceDeposit utilization) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+        Preconditions.checkNotNull(utilization, "utilization must not be empty");
 
         final Set<Construction> constructionsByResource = planet.getConstructionByResource(EResourceType.POPULATION);
         final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
-        final long sumOfPopulationUtilization = planet.getResourceUtilization().getCrewRequirement().getSumOfPopulation();
+        final long sumOfPopulationUtilization = utilization.getCrewRequirement().getSumOfPopulation();
         final long sumOfPopulation = resourceDeposit.getCrewRequirement().getSumOfPopulation() + sumOfPopulationUtilization;
         // collecting all possible producing building
         final Map<EProductionCategory, List<Construction>> constructionMap = getConstructionsMappedByProductionCategory(constructionsByResource);
@@ -118,11 +119,12 @@ public class PopulationControlCalculator {
      *
      * @param planet the planet to populate
      */
-    public static void populatePlanet(@Nonnull final Planet planet) {
+    public static void populatePlanet(@Nonnull final Planet planet, @Nonnull final ResourceDeposit utilization) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+        Preconditions.checkNotNull(utilization, "utilization must not be empty");
 
         final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
-        final long newbornChildren = getTickOutputForPopulation(planet);
+        final long newbornChildren = getTickOutputForPopulation(planet, utilization);
         if (newbornChildren > 0) {
             resourceDeposit.updateCrewRequirement(NONE, newbornChildren);
         }

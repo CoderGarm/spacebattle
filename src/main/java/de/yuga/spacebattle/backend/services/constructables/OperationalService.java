@@ -69,6 +69,53 @@ public class OperationalService {
     }
 
     @Nonnull
+    public ResourceDeposit getUtilizedPopulationForPlanet(final int idPlanet) {
+        final ResourceDeposit resourceDemand = new ResourceDeposit(EDepositType.UTILIZATION);
+
+        warShipService.findAliveOperationalForPlanet(idPlanet).stream()
+                .map(WarShip::getShipClass)
+                .map(ShipClass::getCosts)
+                .map(ResourceDeposit::getCrewRequirement)
+                .forEach(crewRequirement -> resourceDemand.updateCrew(crewRequirement, ECalculationType.ADD));
+
+        constructionService.findAllConstructionsOnPlanet(idPlanet).stream()
+                .map(c -> {
+                    final int operationalLevel = c.getOperationalLevel();
+                    if (operationalLevel == 0) {
+                        return new ResourceDeposit(EDepositType.UTILIZATION);
+                    }
+                    return new Constructable(c.getBuilding(), operationalLevel).getJobCosts();
+                })
+                .map(ResourceDeposit::getCrewRequirement)
+                .forEach(crewRequirement -> resourceDemand.updateCrew(crewRequirement, ECalculationType.ADD));
+        return resourceDemand;
+    }
+
+    @Nonnull
+    public ResourceDeposit getUtilizedPopulationForUser(final int idUser) {
+        final ResourceDeposit resourceDemand = new ResourceDeposit(EDepositType.UTILIZATION);
+        final List<WarShip> operationalForPlanet = warShipService.findAliveOperationalForUser(idUser);
+        operationalForPlanet.stream()
+                .map(WarShip::getShipClass)
+                .map(ShipClass::getCosts)
+                .map(ResourceDeposit::getCrewRequirement)
+                .forEach(crewRequirement -> resourceDemand.updateCrew(crewRequirement, ECalculationType.ADD));
+
+        final List<Construction> constructions = constructionService.findAllConstructionsForUser(idUser);
+        constructions.stream()
+                .map(c -> {
+                    final int operationalLevel = c.getOperationalLevel();
+                    if (operationalLevel == 0) {
+                        return new ResourceDeposit(EDepositType.UTILIZATION);
+                    }
+                    return new Constructable(c.getBuilding(), operationalLevel).getJobCosts();
+                })
+                .map(ResourceDeposit::getCrewRequirement)
+                .forEach(crewRequirement -> resourceDemand.updateCrew(crewRequirement, ECalculationType.ADD));
+        return resourceDemand;
+    }
+
+    @Nonnull
     public ResourceDeposit getPopulationDemandForUser(final int idUser) {
         final ResourceDeposit resourceDemand = new ResourceDeposit(EDepositType.DEMAND);
 
@@ -77,7 +124,8 @@ public class OperationalService {
                 .map(ShipClass::getCosts)
                 .map(ResourceDeposit::getCrewRequirement)
                 .forEach(crewRequirement -> resourceDemand.updateCrew(crewRequirement, ECalculationType.ADD));
-        constructionService.findInoperationalForUser(idUser).stream().map(OperationalService::sumUpCosts)
+        constructionService.findInoperationalForUser(idUser).stream()
+                .map(OperationalService::sumUpCosts)
                 .map(ResourceDeposit::getCrewRequirement)
                 .forEach(crewRequirement -> resourceDemand.updateCrew(crewRequirement, ECalculationType.ADD));
 
@@ -201,7 +249,6 @@ public class OperationalService {
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
         final ResourceDeposit deposit = planet.getResourceDeposit();
-        final ResourceDeposit utilization = planet.getResourceUtilization();
 
         // prio 1: military stuff, prio 2: higher tech level
         final List<Construction> supplyNeeded = planet.getConstructions().stream()
@@ -232,7 +279,6 @@ public class OperationalService {
                 final PayingPossibleResult result = deposit.isPayingPossible(costsForLevel);
                 if (result.isValidForPops()) {
                     deposit.updateCrew(costsForLevel, ECalculationType.SUBTRACT);
-                    utilization.updateCrew(costsForLevel, ECalculationType.ADD);
 
                     inoperational.setOperationalLevel(i);
                     ops.add(inoperational);
@@ -250,7 +296,6 @@ public class OperationalService {
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
         final ResourceDeposit deposit = planet.getResourceDeposit();
-        final ResourceDeposit utilization = planet.getResourceUtilization();
         final List<WarShip> operationals = new ArrayList<>();
         final List<WarShip> inoperationals = warShipService.findAliveInoperationalForPlanet(planet.getId());
         for (final WarShip inoperational : inoperationals) {
@@ -258,7 +303,6 @@ public class OperationalService {
             final PayingPossibleResult result = deposit.isPayingPossible(costs);
             if (result.isValidForPops()) {
                 deposit.updateCrew(costs, ECalculationType.SUBTRACT);
-                utilization.updateCrew(costs, ECalculationType.ADD);
 
                 inoperational.setOperational();
                 operationals.add(inoperational);

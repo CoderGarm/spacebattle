@@ -83,14 +83,6 @@ public class Planet extends AbstractEntityKey implements HasOwner {
     @JoinColumn(name = "idResourceDeposit", updatable = false)
     private final ResourceDeposit resourceDeposit = ResourceDepositInitializerCalculator.initializeResourceDeposit();
 
-    /**
-     * The current used resources.
-     */
-    @Nonnull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
-    @JoinColumn(name = "idResourceUtilization", updatable = false)
-    private final ResourceDeposit resourceUtilization = new ResourceDeposit(EDepositType.UTILIZATION); /* fixme replace also by on-the-fly calculation */
-
     @Nonnull
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "idResourceTransportationDemand", updatable = false)
@@ -296,7 +288,8 @@ public class Planet extends AbstractEntityKey implements HasOwner {
      * @return the income by tick
      */
     @Nonnull
-    public ResourceDeposit getTicklyIncome() {
+    public ResourceDeposit getTicklyIncome(@Nonnull final ResourceDeposit utilization) {
+        Preconditions.checkNotNull(utilization, "utilization must not be empty");
 
         final ResourceDeposit income = new ResourceDeposit(EDepositType.INCOME);
         final Map<EResourceType, List<Construction>> resourceConstructionsByType = getConstructions().stream()
@@ -322,7 +315,7 @@ public class Planet extends AbstractEntityKey implements HasOwner {
             income.setAbsolutePopulation(educationType, ticklyIncome.longValue());
         });
 
-        final long tickOutputForPopulation = PopulationControlCalculator.getTickOutputForPopulation(this);
+        final long tickOutputForPopulation = PopulationControlCalculator.getTickOutputForPopulation(this, utilization);
         income.setAbsolutePopulationValue(tickOutputForPopulation);
         income.setAbsolutePopulation(EEducationType.NONE, tickOutputForPopulation);
 
@@ -338,12 +331,14 @@ public class Planet extends AbstractEntityKey implements HasOwner {
         return getConstructionByResource(EResourceType.CONSTRUCTION).stream().anyMatch(c -> c.getJobs().isEmpty());
     }
 
-    public int calculateTicksToCollect(@Nonnull final ResourceDeposit costs) throws NotifyWebUserException {
+
+    public int calculateTicksToCollect(@Nonnull final ResourceDeposit costs, @Nonnull final ResourceDeposit utilization) {
         Preconditions.checkNotNull(costs, "costs must not be empty");
+        Preconditions.checkNotNull(utilization, "utilization must not be empty");
         Preconditions.checkArgument(costs.getSubType() == EDepositType.COSTS, "costs must not be costs");
 
         final ResourceDeposit cloneOfCosts = new ResourceDeposit(costs);
-        final ResourceDeposit ticklyIncome = getTicklyIncome();
+        final ResourceDeposit ticklyIncome = getTicklyIncome(utilization);
         cloneOfCosts.subtract(resourceDeposit);
 
         // check collectable resources
@@ -384,11 +379,6 @@ public class Planet extends AbstractEntityKey implements HasOwner {
         }
 
         return Integer.max(tickCounterCollectable, tickCounterForfeitable);
-    }
-
-    @Nonnull
-    public ResourceDeposit getResourceUtilization() {
-        return resourceUtilization;
     }
 
     @Nonnull

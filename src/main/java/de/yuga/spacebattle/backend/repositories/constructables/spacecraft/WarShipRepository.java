@@ -12,8 +12,12 @@ import java.util.Set;
 public interface WarShipRepository extends CrudRepository<WarShip, Integer> {
 
     @Nullable
-    @Query("SELECT w FROM WarShip w WHERE w.shipyard.id = :idPlanet AND w.isDeleted = false AND w.isOperational = false AND w.detachment.fleet IS NOT NULL")
+    @Query("SELECT w FROM WarShip w WHERE w.shipyard.id = :idPlanet AND w.isDeleted = false AND w.isOperational = false")
     List<WarShip> findAliveInoperationalForPlanet(@Param("idPlanet") final int idPlanet);
+
+    @Nullable
+    @Query("SELECT w FROM WarShip w WHERE w.shipyard.id = :idPlanet AND w.isDeleted = false AND w.isOperational = true")
+    List<WarShip> findAliveOperationalForPlanet(@Param("idPlanet") final int idPlanet);
 
     @Nullable
     @Query("SELECT w FROM WarShip w WHERE w.isDeleted = false AND w.isOperational = true AND w.detachment.fleet IS NULL AND w.detachment.mission IS NULL AND w.shipClass.owner.id = :idUser")
@@ -26,4 +30,8 @@ public interface WarShipRepository extends CrudRepository<WarShip, Integer> {
     @Nullable
     @Query("SELECT w FROM WarShip w WHERE w.shipyard.owner.id = :idUser AND w.isDeleted = false AND w.isOperational = false")
     List<WarShip> findAliveInoperationalForUser(@Param("idUser") final int idUser);
+
+    @Nullable
+    @Query("SELECT w FROM WarShip w WHERE w.shipyard.owner.id = :idUser AND w.isDeleted = false AND w.isOperational = true")
+    List<WarShip> findAliveOperationalForUser(@Param("idUser") final int idUser);
 }
