@@ -6,15 +6,19 @@
 
 1. Auf den Einsatz wartende Operationals sind nun im Dashboard sichtbar.
 2. Ebenfalls auf dem Infrastruktur-Dashboard ist das Bevölkerungschart für das gesamte Imperium zu bewundern.
-   todo. crew display + constructions: show needed peoples
+3. Ebenfalls im Infrastruktur-Dashboard gibt es die Ressourcen-Übersicht deines Reiches.
+4. Die Ground Constructions sehen jetzt etwas flotter aus.
 
 todo. retire fleet button, active ships back to pool fleet
+todo. schiff verschrotten
 todo. Reisezeit beim Handel inkl Tabellendarstellung
-todo. gebäudedarstellung für bau verbessern
+todo. crew display + constructions: show needed peoples
+todo. empire liste mit ally tag und profile pic
 
 ### Bugs fixed
 
 1. Die benötigte Population war seit geraumer Zeit verbuggt und es ist mir nicht aufgefallen. Das sollte jetzt alles richtig berechnet werden.
+2. Namen und Beschreibung der Schiffswerft angepasst bzw. hinzugefügt.
 todo. check fleet separation
 todo. article edit stuff
 
@@ -116,33 +120,17 @@ todo. Exception per mail an webmaster (warum funzt das nicht auf prod?)
 - emission spectra als gimmick
 
 todo. better distinguish between tick-worker-service and tick-time-service
-
 todo. combat aufhübschen and more infos
-
 todo. fleet movement report im dashboard
-
 todo. Wartung von Schiffen und Flotten -> Abnutzung der Impeller
-
 todo. warship icon instead of fleet shark
-
 todo. library for modules and hulls
-
 todo. provide alliance at account creation to place main planet by friends?
 
 todo. use context menu for star map?
-
-todo. wormholes (see mapdata.js file)
-
 todo. fleets in motion needs nav point icon
-
 todo. diagramme mit apache echart einbauen, z.B. in Flotten Anzahl nach Klasse o.ä.
-
 todo. ground constructions show non-collectables correctly
-
-todo. population balancing broken
-
-todo. scroll issue if the last page forbids overflow
-
 todo. switch to "calculate orbit in backend" while travelling
 
 todo. combat with more then 2 opponents
@@ -150,41 +138,21 @@ todo. inoperational flotten zerstören bei sieg oder beute?
 todo. im bau befindliche flotten während des Baus zerstören
 todo. Schiffe erbeuten?
 
-todo. Handelssystem
 todo. simulierter ziviler Handel - Kosten und Steuereinnahmen
 todo. Pläne von wo nach wo (Lieferzeit) festlegen
-todo. piraten plus Flotten zur Systemsicherung nutzen
-todo. anti-piraterie-mission schützt vor Diebstahl aus Orbit
 
 todo. wiki: list of contents (dynamically from markdown headlines)
 todo. wiki: images and position
-
 - file size?
 - stored in?
   todo. wiki: links between articles?
 - every article know their links and pass them by a keyword?
 
 todo. support module zum reduzieren der benötigten crew
-
 todo. researches: display what is the result
-
-todo. state that used images are borrowed by the icon page
-
-todo. synchronize enums in frontend
-todo. unify getLink for icons
-todo. unify mat-icons for purposes
-
 todo. sorting für resourcen, gebäudetype
-
 todo. Wurmlöcher
-
 todo. Forumsbeiträge müssen automatisch runter scrollen
-
 todo. leerzeichen im usernamen verbieten
 todo. Anzeigenamen für User plus Dienstgrad je nach Nation
-
-map:
-todo. look at the credits
-todo. take the style
-
 todo. google fonts selber hosten / per apache forwarden?

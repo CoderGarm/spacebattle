@@ -501,9 +501,9 @@ public class MasterOfTheUniverseService {
         amendTranslation(research, "Militärische Strukturen", "Erforscht und enthält das technische Wissen und Fähigkeiten für militärische Konstruktionen");
         researchService.save(research);
 
-        b = building("Orbitals Construction Yard", "The construction yard construct orbital constructions.",
+        b = building("Orbitals Construction Yard", "The shipyard constructs off-planet components, ships and space stations.",
                 8000, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, SHIPYARD_PT, research, 1);
-        amendTranslation(b, "", "");
+        amendTranslation(b, "Schiffswerft", "Die Schiffswerft konstruiert außerplanetare Bauteile, Schiffe und Raumstationen.");
         buildingService.save(b);
         /* military constructions */
 
