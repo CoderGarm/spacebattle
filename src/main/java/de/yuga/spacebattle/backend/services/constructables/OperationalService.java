@@ -310,8 +310,9 @@ public class OperationalService {
         }
         if (!operationals.isEmpty()) {
             warShipService.saveAll(operationals);
-            Set<Fleet> fleets = operationals.stream().map(WarShip::getFleet).collect(Collectors.toSet());
-            fleets = fleets.stream().filter(f -> f.getAliveShips().stream().allMatch(Operationable::isOperational)).collect(Collectors.toSet());
+            final Set<Fleet> fleets = operationals.stream().map(WarShip::getFleet).filter(Objects::nonNull).collect(Collectors.toSet()).stream()
+                    .filter(f -> f.getAliveShips().stream().allMatch(Operationable::isOperational))
+                    .collect(Collectors.toSet());
             fleets.forEach(Fleet::setOperational);
             fleetService.saveAll(fleets);
         }
