@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import static de.yuga.spacebattle.backend.enums.EIconPath.STATS;
+
 @Schema(description = ".")
 public class HasIcon extends HasTypeName {
 
@@ -30,6 +32,11 @@ public class HasIcon extends HasTypeName {
 
         iconName = enumValue.getIconName();
         folder = EIconPath.getFolder(enumValue);
+    }
+
+    public HasIcon(@Nonnull final String iconName, @Nonnull final String folder) {
+        this.iconName = Preconditions.checkNotNull(iconName, "iconName must not be empty");
+        this.folder = Preconditions.checkNotNull(folder, "folder must not be empty");
     }
 
     @Nonnull
@@ -64,6 +71,7 @@ public class HasIcon extends HasTypeName {
                 return new HasIcon(EBuildingType.BUILDING);
             case RESEARCH:
             case PASSIVE_MODULE:
+                return new HasIcon("support", STATS.getPath());
             default:
                 break;
         }

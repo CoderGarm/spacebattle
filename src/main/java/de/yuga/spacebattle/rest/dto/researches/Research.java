@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.enums.ETranslationTarget;
 import de.yuga.spacebattle.rest.dto.enums.HasIcon;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -76,6 +77,11 @@ public class Research {
             this.hasIcon = new HasIcon(eResourceType);
             return;
         }
+        if (!research.getUnlocksPassiveModules().isEmpty()) {
+            this.hasIcon = HasIcon.getBy(ETranslationTarget.PASSIVE_MODULE);
+            return;
+        }
+
         this.hasIcon = HasIcon.getBy(research.getUnlocks());
     }
 
