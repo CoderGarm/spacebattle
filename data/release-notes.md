@@ -11,6 +11,8 @@
 5. Ne ganze Menge anderer KRam sieht auch etwas fetziger aus.
 6. Die Empire- und Allianz-Listen enthalten nun das Profil-Icon.
 7. Man kann Flotten mit dem roten Button im Flottenmenü deaktivieren und die Schiffe in die Reserve schicken.
+   Dort kann man nun auch "über Bande" Flotten erzeugen, wenn man ein Schiff aus dem Mothball nimmt und in eine neue
+   Flotte tut.
 
 todo. schiff verschrotten
 todo. Reisezeit beim Handel inkl Tabellendarstellung

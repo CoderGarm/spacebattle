@@ -16,6 +16,7 @@ import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.repositories.combined.spacecraft.FleetRepository;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.AbstractId;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMerge;
@@ -43,13 +44,18 @@ public class FleetService {
     @Nonnull
     private final PlanetService planetService;
 
+    @Nonnull
+    private final StarSystemService starSystemService;
+
     @Autowired
     public FleetService(@Nonnull final FleetRepository fleetRepository,
                         @Nonnull final WarShipService warShipService,
-                        @Nonnull final PlanetService planetService) {
+                        @Nonnull final PlanetService planetService,
+                        @Nonnull final StarSystemService starSystemService) {
         this.fleetRepository = Preconditions.checkNotNull(fleetRepository, "fleetR shouldn't be null!");
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
+        this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService must not be empty");
     }
 
     /**
@@ -92,17 +98,23 @@ public class FleetService {
 
         final Set<Integer> warShipIDs = fleetSplit.getFleetConstellations().values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
         final List<WarShip> shipsByUser = warShipService.findByIds(warShipIDs);
+
+        if (shipsByUser.stream().anyMatch(w -> w.getShipClass().getOwner().getId() != idUser)) {
+            throw new NotifyWebUserException("You must not change foreign fleets, you little Hax0r!");
+        }
+
         final Owner owner = shipsByUser.stream()
                 .findFirst()
                 .map(WarShip::getShipClass)
                 .map(ShipClass::getOwner)
                 .orElseThrow(() -> new NotifyWebUserException("Every fleet must have an owner."));
 
-        final Fleet toSplit = shipsByUser.stream().findFirst().map(WarShip::getFleet)
-                .orElseThrow(() -> new NotifyWebUserException("Every warship must have a fleet when splitting a fleet."));
-
-        assert toSplit.getOrbit() != null;
-        final Planet planet = planetService.findByCoordinates(toSplit.getOrbit());
+        final de.yuga.spacebattle.rest.dto.orbitals.FleetOrbit orbit = fleetSplit.getOrbit();
+        assert orbit.getOrbit() != null;
+        assert orbit.getSystem() != null;
+        final StarSystem starSystem = starSystemService.find(orbit.getSystem().getIdStarSystem());
+        final FleetOrbit fleetOrbit = new FleetOrbit(new Orbit(orbit.getOrbit()), starSystem);
+        final Planet planet = planetService.findByCoordinates(fleetOrbit);
         assert planet != null;
 
         final Set<Fleet> result = new HashSet<>();
