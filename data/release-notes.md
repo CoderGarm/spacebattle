@@ -8,12 +8,13 @@
 2. Ebenfalls auf dem Infrastruktur-Dashboard ist das Bevölkerungschart für das gesamte Imperium zu bewundern.
 3. Ebenfalls im Infrastruktur-Dashboard gibt es die Ressourcen-Übersicht deines Reiches.
 4. Die Ground Constructions sehen jetzt etwas flotter aus.
+5. Ne ganze Menge anderer KRam sieht auch etwas fetziger aus.
+6. Die Empire- und Allianz-Listen enthalten nun das Profil-Icon.
+7. Man kann Flotten mit dem roten Button im Flottenmenü deaktivieren und die Schiffe in die Reserve schicken.
 
-todo. retire fleet button, active ships back to pool fleet
 todo. schiff verschrotten
 todo. Reisezeit beim Handel inkl Tabellendarstellung
 todo. crew display + constructions: show needed peoples
-todo. empire liste mit ally tag und profile pic
 
 ### Bugs fixed
 
@@ -24,9 +25,7 @@ todo. empire liste mit ally tag und profile pic
 4. Ja, von mir aus nen Bug: Nu hat das Supportmodul ein Icon! Ein Hoch auf Yufiel :)
 5. Man kann nun tatsächlich das maximale Forschungslevel erreichen.
 6. Man kann Flotten wieder teilen.
-   todo. check fleet separation
    todo. article edit stuff
-
 
 #### next steps
 
@@ -143,6 +142,7 @@ todo. Pläne von wo nach wo (Lieferzeit) festlegen
 
 todo. wiki: list of contents (dynamically from markdown headlines)
 todo. wiki: images and position
+
 - file size?
 - stored in?
   todo. wiki: links between articles?

@@ -56,6 +56,7 @@ public class FleetApi extends BaseApi {
     private static final String FLEET_PER_USER_PER_SYSTEM_ENDPOINT = "fleetDistribution";
     private static final String RENAME_FLEET_ENDPOINT = "rename";
     private static final String WARSHIP_POOLING_ENDPOINT = "pool";
+    private static final String RETIRE_FLEET_ENDPOINT = "retire";
 
     @Nonnull
     private final FleetService fleetService;
@@ -438,6 +439,26 @@ public class FleetApi extends BaseApi {
         final int idUser = getIdUser();
         final Set<de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip> pooledShips = fleetService.findPooledWarships(idUser);
         return ResponseEntity.ok(pooledShips.stream().map(w -> new WarShip(w, w.getWarshipHealthState(), getPreferredLanguage())));
+    }
+
+    @PutMapping(value = RETIRE_FLEET_ENDPOINT + "/{idFleet}")
+    @Operation(summary = "Renames a fleet.", operationId = "retireFleet",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> retireFleet(@PathVariable("idFleet") final int idFleet) {
+
+        final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetService.find(idFleet);
+        if (fleet == null || fleet.getOwner().getId() != getIdUser()) {
+            throw new NotifyWebUserException("Nope, I guess not.");
+        }
+
+        fleetService.markAsDestroyed(fleet);
+        return ResponseEntity.ok(true);
     }
 
     /**

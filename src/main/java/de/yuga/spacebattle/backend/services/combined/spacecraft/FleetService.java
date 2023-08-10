@@ -321,6 +321,7 @@ public class FleetService {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
         fleet.delete();
+        fleet.getAliveShips().forEach(s -> s.setFleet(null));
         fleetRepository.save(fleet);
     }
 
