@@ -22,11 +22,11 @@ todo. empire liste mit ally tag und profile pic
 2. Namen und Beschreibung der Schiffswerft angepasst bzw. hinzugefügt.
 3. Man switched zum Planetary Dashboard, wenn man in der Werft war und auf einen Planeten ohne Werft wechselt.
 4. Ja, von mir aus nen Bug: Nu hat das Supportmodul ein Icon! Ein Hoch auf Yufiel :)
+5. Man kann nun tatsächlich das maximale Forschungslevel erreichen.
+6. Man kann Flotten wieder teilen.
    todo. check fleet separation
    todo. article edit stuff
 
-todo. Ich habe point defense auf lvl 4, aber im techtree sieht man das noch nicht, die 4 ist noch nicht grün. -> level cap == statt >
-todo. Flotten teilen geht meistens nicht, wenn man erst ein Schiff rüberzieht und dann einen namen eingibt.
 
 #### next steps
 

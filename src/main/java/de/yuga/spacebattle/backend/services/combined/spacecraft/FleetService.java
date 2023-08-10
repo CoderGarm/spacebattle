@@ -90,7 +90,8 @@ public class FleetService {
     public Set<Fleet> splitFleets(@Nonnull final FleetSplit fleetSplit, final int idUser) {
         Preconditions.checkNotNull(fleetSplit, "fleetSplit must not be empty");
 
-        final Set<WarShip> shipsByUser = warShipService.findShipsByUser(idUser);
+        final Set<Integer> warShipIDs = fleetSplit.getFleetConstellations().values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
+        final List<WarShip> shipsByUser = warShipService.findByIds(warShipIDs);
         final Owner owner = shipsByUser.stream()
                 .findFirst()
                 .map(WarShip::getShipClass)
