@@ -2,23 +2,27 @@
 
 #### Gameplay
 
-#### Diverses
+1Man kann Flotten mit dem roten Button im Flottenmenü deaktivieren und die Schiffe in die Reserve schicken.
+Dort kann man nun auch "über Bande" Flotten erzeugen, wenn man ein Schiff aus dem Mothball nimmt und in eine neue
+Flotte tut.
 
-1. Auf den Einsatz wartende Operationals sind nun im Dashboard sichtbar.
-2. Ebenfalls auf dem Infrastruktur-Dashboard ist das Bevölkerungschart für das gesamte Imperium zu bewundern.
-3. Ebenfalls im Infrastruktur-Dashboard gibt es die Ressourcen-Übersicht deines Reiches.
-4. Die Ground Constructions sehen jetzt etwas flotter aus.
-5. Ne ganze Menge anderer KRam sieht auch etwas fetziger aus.
-6. Die Empire- und Allianz-Listen enthalten nun das Profil-Icon.
-7. Man kann Flotten mit dem roten Button im Flottenmenü deaktivieren und die Schiffe in die Reserve schicken.
-   Dort kann man nun auch "über Bande" Flotten erzeugen, wenn man ein Schiff aus dem Mothball nimmt und in eine neue
-   Flotte tut.
-8. Einzelne Kriegsschiffe können verschrottet werden. Momentan bekommt man dabei nur die Pops zurück.  
+2. Einzelne Kriegsschiffe können verschrottet werden. Momentan bekommt man dabei nur die Pops zurück.  
    Im Ausblick werden die Bauteile dabei eingelagert um sie wieder verwenden zu können.  
    Ist auch ein nachhaltiges Game, hier!
 
-todo. Reisezeit beim Handel inkl Tabellendarstellung
-todo. crew display + constructions: show needed peoples
+#### Diverses
+
+1. Auf den Einsatz wartende Operationals sind nun im Infrastruktur-Dashboard sichtbar.
+2. Ebenfalls auf dem Infrastruktur-Dashboard ist das Bevölkerungschart für das gesamte Imperium zu bewundern.
+3. Ebenfalls im Infrastruktur-Dashboard gibt es die Ressourcen-Übersicht deines Reiches.
+4. Die Ground Constructions sehen jetzt etwas flotter aus.
+5. Ne ganze Menge anderer Kram sieht auch etwas fetziger aus.
+6. Die Empire- und Allianz-Listen enthalten nun das Profil-Icon.
+7. Die Handelsofferten enthalten nun die Entfernung zum Verkaufsort.  
+   Normalerweise korreliert die Entfernung mehr oder minder direkt mit der Reisezeit - aber das wird erst später eine
+   Rolle spielen.
+   Aktuell dauern alle Trades 10 Ticks, genauso wie alle Kolonisierungen 10 Ticks dauern. Wenn ich dazu komme,
+   "Standardfrachter" einzubauen, wird die Entfernungsabhängigkeit auch eingebaut.
 
 ### Bugs fixed
 
@@ -29,10 +33,10 @@ todo. crew display + constructions: show needed peoples
 4. Ja, von mir aus nen Bug: Nu hat das Supportmodul ein Icon! Ein Hoch auf Yufiel :)
 5. Man kann nun tatsächlich das maximale Forschungslevel erreichen.
 6. Man kann Flotten wieder teilen.
-   todo. article edit stuff
 
 #### next steps
 
+- article edit stuff
 - menü als vertikaler slider
 - minimal intelligence on foreign fleet if visible
 - sanitize markdown messages without unsafe message

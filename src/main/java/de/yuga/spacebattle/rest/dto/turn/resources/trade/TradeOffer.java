@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.dto.AbstractId;
+import de.yuga.spacebattle.rest.dto.orbitals.Orbit;
 import de.yuga.spacebattle.rest.dto.turn.resources.ResourceAmount;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -29,6 +30,11 @@ public class TradeOffer {
 
     @Nonnull
     @JsonProperty
+    @Schema(required = true, description = "The origin planets orbit at the universe map.")
+    private Orbit originOrbit;
+
+    @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The traded resource amount.")
     private Trade trade;
 
@@ -41,6 +47,7 @@ public class TradeOffer {
         this.idTradeOffer = offer.getId();
         this.seller = new AbstractId(offer.getSeller(), offer.getSeller().getUsername());
         this.origin = new AbstractId(offer.getOrigin(), offer.getOrigin().getName());
+        this.originOrbit = new Orbit(offer.getOrigin().getOrbit());
         this.trade = new Trade(offer);
     }
 
