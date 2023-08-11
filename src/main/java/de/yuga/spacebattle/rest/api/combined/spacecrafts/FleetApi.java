@@ -6,6 +6,8 @@ import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
+import de.yuga.spacebattle.backend.services.constructables.OperationalService;
+import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.rest.api.BaseApi;
@@ -57,6 +59,7 @@ public class FleetApi extends BaseApi {
     private static final String RENAME_FLEET_ENDPOINT = "rename";
     private static final String WARSHIP_POOLING_ENDPOINT = "pool";
     private static final String RETIRE_FLEET_ENDPOINT = "retire";
+    private static final String RETIRE_WARSHIP_ENDPOINT = "retireWarship";
 
     @Nonnull
     private final FleetService fleetService;
@@ -67,13 +70,23 @@ public class FleetApi extends BaseApi {
     @Nonnull
     private final PlanetService planetService;
 
+    @Nonnull
+    private final WarShipService warShipService;
+
+    @Nonnull
+    private final OperationalService operationalService;
+
     @Autowired
     public FleetApi(@Nonnull final FleetService fleetService,
                     @Nonnull final StarSystemService starSystemService,
-                    @Nonnull final PlanetService planetService) {
+                    @Nonnull final PlanetService planetService,
+                    @Nonnull final WarShipService warShipService,
+                    @Nonnull final OperationalService operationalService) {
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
+        this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
+        this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
     }
 
     @GetMapping(value = "{idFleet}")
@@ -458,6 +471,29 @@ public class FleetApi extends BaseApi {
         }
 
         fleetService.markAsDestroyed(fleet);
+        return ResponseEntity.ok(true);
+    }
+
+    @PutMapping(value = RETIRE_WARSHIP_ENDPOINT + "/{idWarship}")
+    @Operation(summary = "Renames a fleet.", operationId = "retireWarship",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> retireWarship(@PathVariable("idWarship") final int idWarship) {
+
+        final de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip warShip = warShipService.findById(idWarship);
+        if (warShip == null) {
+            return ResponseEntity.ok(true);
+        }
+        if (warShip.getShipClass().getOwner().getId() != getIdUser()) {
+            throw new NotifyWebUserException("Nope, I guess not.");
+        }
+
+        operationalService.retire(warShip);
         return ResponseEntity.ok(true);
     }
 

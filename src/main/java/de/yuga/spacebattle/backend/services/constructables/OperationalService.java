@@ -334,4 +334,15 @@ public class OperationalService {
             operationalCache.activateConstructions(today, planet, alsoActivated);
         }
     }
+
+    public void retire(@Nonnull final WarShip warShip) {
+        Preconditions.checkNotNull(warShip, "warShip must not be empty");
+
+        warShip.delete();
+        final CrewRequirement crewRequirement = warShip.getShipClass().getCosts().getCrewRequirement();
+        final Planet shipyard = warShip.getShipyard();
+        shipyard.getResourceDeposit().updateCrew(crewRequirement, ECalculationType.ADD);
+        planetService.save(shipyard);
+        warShipService.save(warShip);
+    }
 }

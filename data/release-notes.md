@@ -13,8 +13,10 @@
 7. Man kann Flotten mit dem roten Button im Flottenmenü deaktivieren und die Schiffe in die Reserve schicken.
    Dort kann man nun auch "über Bande" Flotten erzeugen, wenn man ein Schiff aus dem Mothball nimmt und in eine neue
    Flotte tut.
+8. Einzelne Kriegsschiffe können verschrottet werden. Momentan bekommt man dabei nur die Pops zurück.  
+   Im Ausblick werden die Bauteile dabei eingelagert um sie wieder verwenden zu können.  
+   Ist auch ein nachhaltiges Game, hier!
 
-todo. schiff verschrotten
 todo. Reisezeit beim Handel inkl Tabellendarstellung
 todo. crew display + constructions: show needed peoples
 
