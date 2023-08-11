@@ -444,7 +444,7 @@ public class ResourceDeposit extends AbstractEntityKey {
                         if (ETechLevel.TECH_I.getExcludedResources().contains(eResourceType)) {
                             resources.put(eResourceType, 0L);
                         } else {
-                            resources.put(eResourceType, 1000L);
+                            resources.put(eResourceType, 150000L);
                         }
                     });
         }
