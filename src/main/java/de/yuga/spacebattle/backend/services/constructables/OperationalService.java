@@ -156,7 +156,7 @@ public class OperationalService {
         if (!allPlannedForUser.isEmpty()) {
             Planet main = result.keySet().stream().filter(Planet::isMain).findFirst().orElse(null);
             if (main == null) {
-                planetService.findMainPlanet(idUser);
+                main = planetService.findMainPlanet(idUser);
             }
             final ResourceDeposit demand = result.getOrDefault(main, new ResourceDeposit(EDepositType.DEMAND));
             allPlannedForUser.stream().map(Colonization::getCosts).forEach(costs -> {
