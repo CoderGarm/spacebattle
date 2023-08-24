@@ -30,6 +30,11 @@ public class JWT {
     @Schema(required = true, description = "The user's name.")
     private String username;
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The user's icon.")
+    private String profilePic;
+
     @JsonProperty
     @Schema(required = true, description = "The user's ID.")
     private int idUser;
@@ -58,6 +63,7 @@ public class JWT {
         Preconditions.checkNotNull(refreshToken, "refreshToken shouldn't be null!");
 
         this.username = user.getUsername();
+        this.profilePic = user.getUserSetting().getProfilePic();
         this.idUser = user.getId();
         if (user.getAlliance() != null) {
             this.idAlliance = user.getAlliance().getId();

@@ -2,39 +2,32 @@
 
 #### Gameplay
 
-1Man kann Flotten mit dem roten Button im Flottenmenü deaktivieren und die Schiffe in die Reserve schicken.
-Dort kann man nun auch "über Bande" Flotten erzeugen, wenn man ein Schiff aus dem Mothball nimmt und in eine neue
-Flotte tut.
-
-2. Einzelne Kriegsschiffe können verschrottet werden. Momentan bekommt man dabei nur die Pops zurück.  
-   Im Ausblick werden die Bauteile dabei eingelagert um sie wieder verwenden zu können.  
-   Ist auch ein nachhaltiges Game, hier!
+1. Unten rechts findet sich der neue Tutorial Button.
+   Damit lassen sich kontextbezogen ein paar relevante Informationen anzeigen.
+   Vorerst gibt es nur Tutorials für das Journal und Planeten - nach und nach wird dort mehr kommen. Bitte helft mir etwas dabei und erinnert mich ab nd zu daran, wo ein Tutorial
+   am dringendsten wäre :)
 
 #### Diverses
 
-1. Auf den Einsatz wartende Operationals sind nun im Infrastruktur-Dashboard sichtbar.
-2. Ebenfalls auf dem Infrastruktur-Dashboard ist das Bevölkerungschart für das gesamte Imperium zu bewundern.
-3. Ebenfalls im Infrastruktur-Dashboard gibt es die Ressourcen-Übersicht deines Reiches.
-4. Die Ground Constructions sehen jetzt etwas flotter aus.
-5. Ne ganze Menge anderer Kram sieht auch etwas fetziger aus.
-6. Die Empire- und Allianz-Listen enthalten nun das Profil-Icon.
-7. Die Handelsofferten enthalten nun die Entfernung zum Verkaufsort.  
-   Normalerweise korreliert die Entfernung mehr oder minder direkt mit der Reisezeit - aber das wird erst später eine
-   Rolle spielen.
-   Aktuell dauern alle Trades 10 Ticks, genauso wie alle Kolonisierungen 10 Ticks dauern. Wenn ich dazu komme,
-   "Standardfrachter" einzubauen, wird die Entfernungsabhängigkeit auch eingebaut.
+1. Die Buttons für Profil und Logout sind jetzt kleine Icons.
+2. Planetary Constructions: Die Gebäudeliste wählt automatisch das Gebäude an, wenn es eindeutig ist.
+3. Planetary Constructions: Die Gebäudeliste enthält eine Farbcodierung, siehe Tutorial.
 
 ### Bugs fixed
 
-1. Die benötigte Population war seit geraumer Zeit verbuggt und es ist mir nicht aufgefallen. Das sollte jetzt alles
-   richtig berechnet werden.
-2. Namen und Beschreibung der Schiffswerft angepasst bzw. hinzugefügt.
-3. Man switched zum Planetary Dashboard, wenn man in der Werft war und auf einen Planeten ohne Werft wechselt.
-4. Ja, von mir aus nen Bug: Nu hat das Supportmodul ein Icon! Ein Hoch auf Yufiel :)
-5. Man kann nun tatsächlich das maximale Forschungslevel erreichen.
-6. Man kann Flotten wieder teilen.
+1. Man landet nicht mehr im Ground Construction Tab, wenn man einen Planeten auswählt.
+2. Planetary Constructions: Zu teure Gebäude werden jetzt sofort beim Setzen des Häkchens ausgegraut.
+3. Planetary Constructions: Zu teure Gebäude sind nicht mehr von der gewählten Construction abhängig.
+
 
 #### next steps
+
+- Teams Rank School sollte mehr leute ausbilden als die officer school
+- die songbird klasse ist zu mächtig, entweden muss da ein einfacheres schiff hin oder es darf nicht gebaut werden. Den antrieb aus der klasse habe ich z.b. noch nicht erforscht,
+  kann solche schiffe aber bauen und benutzuen. Neue schiffe fliegen deutlich langsamer (weil impeller noch nicht auf dem niveu)
+- das journal verweist auf systeme, aber den namen sehe ich nicht wenn die planis anklicke. Kannst du den systemname noch oben beim dashboard hinzufügen?
+- außerdem auf dem dashboard wäre neben dem population development auch das ressourcen development interessant
+
 
 - article edit stuff
 - menü als vertikaler slider
