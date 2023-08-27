@@ -512,11 +512,11 @@ public class MasterOfTheUniverseService {
         amendTranslation(research, "Militärhistorie und moderne Taktiken", "Das Wissen über die Vergangenheit wird die Zukunft verbessern.");
         researchService.save(research);
 
-        b = building("Teams Rank School", "Trains ordinary people into crew people.", 50, 10, EEducationType.ENLISTED, ETechLevel.TECH_I, MILITARY_I_PT, research, 1);
+        b = building("Teams Rank School", "Trains ordinary people into crew people.", 15, 10, EEducationType.ENLISTED, ETechLevel.TECH_I, MILITARY_I_PT, research, 1);
         amendTranslation(b, "Mannschaftsschule", "Bildet gewöhnliche Leute zu Besatzungsmitgliedern aus.");
         buildingService.save(b);
 
-        b = building("Officer school", "Trains officers.", 50, 10, EEducationType.OFFICER, ETechLevel.TECH_I, MILITARY_II_PT, research, 1);
+        b = building("Officer school", "Trains officers.", 5, 10, EEducationType.OFFICER, ETechLevel.TECH_I, MILITARY_II_PT, research, 1);
         amendTranslation(b, "Offiziersschule", "Bildet Offiziere aus.");
         buildingService.save(b);
         /* military education */

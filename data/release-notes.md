@@ -12,6 +12,7 @@
 1. Die Buttons für Profil und Logout sind jetzt kleine Icons.
 2. Planetary Constructions: Die Gebäudeliste wählt automatisch das Gebäude an, wenn es eindeutig ist.
 3. Planetary Constructions: Die Gebäudeliste enthält eine Farbcodierung, siehe Tutorial.
+4. Education: Die militärischen Dienstgrade wurden generft und untereinander ausbalanciert.
 
 ### Bugs fixed
 
@@ -22,7 +23,6 @@
 
 #### next steps
 
-- Teams Rank School sollte mehr leute ausbilden als die officer school
 - die songbird klasse ist zu mächtig, entweden muss da ein einfacheres schiff hin oder es darf nicht gebaut werden. Den antrieb aus der klasse habe ich z.b. noch nicht erforscht,
   kann solche schiffe aber bauen und benutzuen. Neue schiffe fliegen deutlich langsamer (weil impeller noch nicht auf dem niveu)
 - das journal verweist auf systeme, aber den namen sehe ich nicht wenn die planis anklicke. Kannst du den systemname noch oben beim dashboard hinzufügen?
