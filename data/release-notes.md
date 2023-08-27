@@ -6,13 +6,20 @@
    Damit lassen sich kontextbezogen ein paar relevante Informationen anzeigen.
    Vorerst gibt es nur Tutorials für das Journal und Planeten - nach und nach wird dort mehr kommen. Bitte helft mir etwas dabei und erinnert mich ab nd zu daran, wo ein Tutorial
    am dringendsten wäre :)
+2. Man kann die Songbird Flight I-Klasse nicht mehr bauen.
+
+todo. Man kann alte Flights auf neue umrüsten.
+todo. Werft berechnet Baufortschritt eines Jobs neu
 
 #### Diverses
 
 1. Die Buttons für Profil und Logout sind jetzt kleine Icons.
-2. Planetary Constructions: Die Gebäudeliste wählt automatisch das Gebäude an, wenn es eindeutig ist.
-3. Planetary Constructions: Die Gebäudeliste enthält eine Farbcodierung, siehe Tutorial.
-4. Education: Die militärischen Dienstgrade wurden generft und untereinander ausbalanciert.
+2. Planetary Constructions:
+    - Die Gebäudeliste wählt automatisch das Gebäude an, wenn es eindeutig ist.
+    - Die Gebäudeliste enthält eine Farbcodierung, siehe Tutorial.
+3. Education: Die militärischen Dienstgrade wurden generft und untereinander ausbalanciert.
+4. Die eigenen Planeten sind im Menü nun nach dem Sternensystem gruppiert.
+   todo. transportation aufpolieren
 
 ### Bugs fixed
 
@@ -23,10 +30,6 @@
 
 #### next steps
 
-- die songbird klasse ist zu mächtig, entweden muss da ein einfacheres schiff hin oder es darf nicht gebaut werden. Den antrieb aus der klasse habe ich z.b. noch nicht erforscht,
-  kann solche schiffe aber bauen und benutzuen. Neue schiffe fliegen deutlich langsamer (weil impeller noch nicht auf dem niveu)
-- das journal verweist auf systeme, aber den namen sehe ich nicht wenn die planis anklicke. Kannst du den systemname noch oben beim dashboard hinzufügen?
-- außerdem auf dem dashboard wäre neben dem population development auch das ressourcen development interessant
 
 
 - article edit stuff
@@ -126,6 +129,7 @@ todo. Wartung von Schiffen und Flotten -> Abnutzung der Impeller
 todo. warship icon instead of fleet shark
 todo. library for modules and hulls
 todo. provide alliance at account creation to place main planet by friends?
+todo. außerdem auf dem dashboard wäre neben dem population development auch das ressourcen development interessant
 
 todo. use context menu for star map?
 todo. fleets in motion needs nav point icon
