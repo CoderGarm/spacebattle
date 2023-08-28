@@ -29,8 +29,7 @@ todo. suchfeld auf sternenkarte
 1. Man landet nicht mehr im Ground Construction Tab, wenn man einen Planeten auswählt.
 2. Planetary Constructions: Zu teure Gebäude werden jetzt sofort beim Setzen des Häkchens ausgegraut.
 3. Planetary Constructions: Zu teure Gebäude sind nicht mehr von der gewählten Construction abhängig.
-
-todo. keine verbesserungsanzeige durch gebäudebau auf hauptplani
+4. Beim Gebäudebau wird die Verbesserung des nächsten Levels wieder angezeigt.
 
 
 #### next steps
