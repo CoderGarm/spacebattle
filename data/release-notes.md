@@ -4,7 +4,8 @@
 
 1. Unten rechts findet sich der neue Tutorial Button.
    Damit lassen sich kontextbezogen ein paar relevante Informationen anzeigen.
-   Vorerst gibt es nur Tutorials für das Journal und Planeten - nach und nach wird dort mehr kommen. Bitte helft mir etwas dabei und erinnert mich ab nd zu daran, wo ein Tutorial
+   Vorerst gibt es nur Tutorials für das Journal, Planeten und Transporte - nach und nach wird dort mehr kommen. Bitte helft mir etwas dabei und erinnert mich ab nd zu daran, wo
+   ein Tutorial
    am dringendsten wäre :)
 2. Man kann die Songbird Flight I-Klasse nicht mehr bauen.
 
@@ -20,9 +21,8 @@ todo. Werft berechnet Baufortschritt eines Jobs neu
 3. Education: Die militärischen Dienstgrade wurden generft und untereinander ausbalanciert.
 4. Die eigenen Planeten sind im Menü nun nach dem Sternensystem gruppiert.
 5. In 'Organize Expansion' sind nun immer alle Systeme zu sehen, nicht mehr nur die mit kolonisierbaren Planeten.
-
-todo. transportation aufpolieren
-todo. suchfeld auf sternenkarte
+6. Die Transport-Sektion ist etwas aufgeräumter gestaltet und man muss nicht mehr manuell bestätigen, die Eingaben werden direkt übernommen.
+7. Auf der Sternenkarte kann man jetzt nach Systemen suchen. Wenn man eines auswählt, zoomt man aufs Ziel.
 
 ### Bugs fixed
 
