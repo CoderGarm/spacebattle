@@ -82,7 +82,7 @@ public class StarSystemColonization {
         final ResourceAmount costsDTO = ColonizationCostCalculator.calculateInformationCost(starSystem);
         final EResourceType resourceType = costsDTO.getRealType();
         final Long amountWithDiff = costsDTO.getAmount();
-        return amountWithDiff + " " + resourceType.getPluralName();
+        return amountWithDiff + " " + resourceType;
     }
 
     @Nonnull

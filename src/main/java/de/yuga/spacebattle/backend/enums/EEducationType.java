@@ -1,7 +1,5 @@
 package de.yuga.spacebattle.backend.enums;
 
-import com.google.common.base.Preconditions;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
@@ -14,32 +12,32 @@ public enum EEducationType implements HasIconName {
     /**
      * no explicit education
      */
-    NONE(null, "baby"),
+    NONE(null),
 
     /**
      * civil Mk I is kind of elementary school
      */
-    SCHOOL(EEducationType.NONE, "civilI"),
+    SCHOOL(EEducationType.NONE),
 
     /**
      * civil Mk II is kind of secondary school or untrained workers
      */
-    COLLEGE(EEducationType.SCHOOL, "civilII"),
+    COLLEGE(EEducationType.SCHOOL),
 
     /**
      * civil Mk III is kind of internship, vocational training or a university  education
      */
-    UNIVERSITY(EEducationType.COLLEGE, "civilIII"),
+    UNIVERSITY(EEducationType.COLLEGE),
 
     /**
      * military Mk I is a teams rank
      */
-    ENLISTED(EEducationType.COLLEGE, "soldier"),
+    ENLISTED(EEducationType.COLLEGE),
 
     /**
      * military Mk II is a officers rank
      */
-    OFFICER(EEducationType.UNIVERSITY, "officer"),
+    OFFICER(EEducationType.UNIVERSITY),
     ;
 
 
@@ -55,12 +53,9 @@ public enum EEducationType implements HasIconName {
     @Nonnull
     final String iconName;
 
-    EEducationType(@Nullable final EEducationType requirement,
-                   @Nonnull final String iconName) {
-        Preconditions.checkNotNull(iconName, "iconName shouldn't be null!");
-
+    EEducationType(@Nullable final EEducationType requirement) {
         this.requirement = requirement;
-        this.iconName = iconName;
+        this.iconName = this.name();
     }
 
     public boolean isWorkforce() {

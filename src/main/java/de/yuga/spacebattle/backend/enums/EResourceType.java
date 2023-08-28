@@ -10,21 +10,15 @@ import static de.yuga.spacebattle.backend.enums.ECollectableType.*;
 
 public enum EResourceType implements HasIconName {
 
-    CONSTRUCTION(FORFEITABLE, "Construction Point", "Construction Points", "construction"),
-    ORBITAL_CONSTRUCTION(FORFEITABLE, "Shipyard Construction Point", "Shipyard Construction Points", "orbitalconstruction"),
-    RESEARCH(FORFEITABLE, "Research Point", "Research Point", "research"),
-    CREDITS(COLLECTABLE, "Credit", "Credits", "credit"),
-    METALORE(COLLECTABLE, "Metalore", "Metalore", "metalore"),
-    RARE_ELEMENTS(COLLECTABLE, "Rare elements", "Rare elements", "mercurium"),
-    HEAVY_METALS(COLLECTABLE, "Heavy metal", "Heavy metals", "hyperonium"),
-    POPULATION(VIABLE, "Population", "Population", "population"),
+    CONSTRUCTION(FORFEITABLE),
+    ORBITAL_CONSTRUCTION(FORFEITABLE),
+    RESEARCH(FORFEITABLE),
+    CREDITS(COLLECTABLE),
+    METALORE(COLLECTABLE),
+    RARE_ELEMENTS(COLLECTABLE),
+    HEAVY_METALS(COLLECTABLE),
+    POPULATION(VIABLE),
     ;
-
-    @Nonnull
-    private final String singularName;
-
-    @Nonnull
-    private final String pluralName;
 
     @Nonnull
     final String iconName;
@@ -32,34 +26,16 @@ public enum EResourceType implements HasIconName {
     @Nonnull
     private final ECollectableType collectableType;
 
-    EResourceType(@Nonnull final ECollectableType collectableType,
-                  @Nonnull final String singularName,
-                  @Nonnull final String pluralName,
-                  @Nonnull final String iconName) {
+    EResourceType(@Nonnull final ECollectableType collectableType) {
         Preconditions.checkNotNull(collectableType, "collectableType shouldn't be null!");
-        Preconditions.checkNotNull(singularName, "singularName shouldn't be null!");
-        Preconditions.checkNotNull(pluralName, "pluralName shouldn't be null!");
-        Preconditions.checkNotNull(iconName, "iconName shouldn't be null!");
 
         this.collectableType = collectableType;
-        this.singularName = singularName;
-        this.pluralName = pluralName;
-        this.iconName = iconName;
+        this.iconName = this.name();
     }
 
     @Nonnull
     public ECollectableType getCollectableType() {
         return collectableType;
-    }
-
-    @Nonnull
-    public String getSingularName() {
-        return singularName;
-    }
-
-    @Nonnull
-    public String getPluralName() {
-        return pluralName;
     }
 
     @Nonnull
