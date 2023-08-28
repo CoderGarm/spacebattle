@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.repositories.orbitals.StarSystemRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -25,6 +26,7 @@ public class StarSystemService {
     @Nonnull
     private final StarSystemRepository starsystemRepository;
 
+    @Autowired
     public StarSystemService(@Nonnull final StarSystemRepository starsystemRepository) {
         Preconditions.checkNotNull(starsystemRepository, "starsystemRepository shouldn't be null!");
 

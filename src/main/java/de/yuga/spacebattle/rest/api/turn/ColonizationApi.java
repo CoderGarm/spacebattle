@@ -199,7 +199,7 @@ public class ColonizationApi extends BaseApi {
 
         // todo response to big
         final int idUser = getIdUser();
-        final List<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> all = starSystemService.findAllColonizable();
+        final List<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> all = starSystemService.findAll();
         final Set<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> knownStarSystems = userService.getKnownStarSystems(idUser);
         final List<de.yuga.spacebattle.backend.entities.turn.Colonization> colonizationsForUser = colonizationService.findAll();
         return ResponseEntity.ok(StarSystemColonizationListConverter.create(all, knownStarSystems, colonizationsForUser));

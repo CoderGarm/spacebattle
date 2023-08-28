@@ -19,13 +19,18 @@ todo. Werft berechnet Baufortschritt eines Jobs neu
     - Die Gebäudeliste enthält eine Farbcodierung, siehe Tutorial.
 3. Education: Die militärischen Dienstgrade wurden generft und untereinander ausbalanciert.
 4. Die eigenen Planeten sind im Menü nun nach dem Sternensystem gruppiert.
-   todo. transportation aufpolieren
+5. In 'Organize Expansion' sind nun immer alle Systeme zu sehen, nicht mehr nur die mit kolonisierbaren Planeten.
+
+todo. transportation aufpolieren
+todo. suchfeld auf sternenkarte
 
 ### Bugs fixed
 
 1. Man landet nicht mehr im Ground Construction Tab, wenn man einen Planeten auswählt.
 2. Planetary Constructions: Zu teure Gebäude werden jetzt sofort beim Setzen des Häkchens ausgegraut.
 3. Planetary Constructions: Zu teure Gebäude sind nicht mehr von der gewählten Construction abhängig.
+
+todo. keine verbesserungsanzeige durch gebäudebau auf hauptplani
 
 
 #### next steps
