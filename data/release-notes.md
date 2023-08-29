@@ -8,9 +8,9 @@
    ein Tutorial
    am dringendsten wäre :)
 2. Man kann die Songbird Flight I-Klasse nicht mehr bauen.
+3. Die Schiffswerft berechnet den Baufortschritt eines Jobs neu, wenn ein neues Level aktiviert wird.
 
 todo. Man kann alte Flights auf neue umrüsten.
-todo. Werft berechnet Baufortschritt eines Jobs neu
 
 #### Diverses
 
@@ -22,7 +22,7 @@ todo. Werft berechnet Baufortschritt eines Jobs neu
 4. Die eigenen Planeten sind im Menü nun nach dem Sternensystem gruppiert.
 5. In 'Organize Expansion' sind nun immer alle Systeme zu sehen, nicht mehr nur die mit kolonisierbaren Planeten.
 6. Die Transport-Sektion ist etwas aufgeräumter gestaltet und man muss nicht mehr manuell bestätigen, die Eingaben werden direkt übernommen.
-7. Auf der Sternenkarte kann man jetzt nach Systemen suchen. Wenn man eines auswählt, zoomt man aufs Ziel.
+7. Auf der Sternenkarte kann man jetzt nach Systemen suchen und zoomen.
 
 ### Bugs fixed
 

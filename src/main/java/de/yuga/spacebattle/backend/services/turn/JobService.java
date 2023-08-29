@@ -364,4 +364,10 @@ public class JobService {
         refundJobAndDelete(job);
         return true;
     }
+
+    public void saveAll(@Nonnull final List<Job> jobs) {
+        Preconditions.checkNotNull(jobs, "jobs must not be empty");
+
+        jobRepository.saveAll(jobs);
+    }
 }

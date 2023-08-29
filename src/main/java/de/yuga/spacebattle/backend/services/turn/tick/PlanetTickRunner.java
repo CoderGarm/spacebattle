@@ -15,12 +15,11 @@ import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.EResourceType;
-import de.yuga.spacebattle.backend.services.caches.OperationalCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
-import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
@@ -32,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -45,11 +43,8 @@ public class PlanetTickRunner implements TickRunner {
     @Nonnull
     private static final Logger LOGGER = LoggerFactory.getLogger(PlanetTickRunner.class);
 
-    @Nullable
-    private Tick today;
-
     @Nonnull
-    private final OperationalCache operationalCache;
+    private Tick today;
 
     @Nonnull
     private final JobService jobService;
@@ -67,31 +62,24 @@ public class PlanetTickRunner implements TickRunner {
     private final ResearchService researchService;
 
     @Nonnull
-    private final WarShipService warShipService;
-
-    @Nonnull
     private final WarshipHealthStateService warshipHealthStateService;
 
     @Nonnull
     private final OperationalService operationalService;
 
     @Autowired
-    public PlanetTickRunner(@Nonnull final OperationalCache operationalCache,
-                            @Nonnull final JobService jobService,
+    public PlanetTickRunner(@Nonnull final JobService jobService,
                             @Nonnull final PlanetService planetService,
                             @Nonnull final FleetService fleetService,
                             @Nonnull final ConstructionService constructionService,
                             @Nonnull final ResearchService researchService,
-                            @Nonnull final WarShipService warShipService,
                             @Nonnull final WarshipHealthStateService warshipHealthStateService,
                             @Nonnull final OperationalService operationalService) {
-        this.operationalCache = Preconditions.checkNotNull(operationalCache, "operationalCache must not be empty");
         this.jobService = Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
         this.researchService = Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
-        this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.warshipHealthStateService = Preconditions.checkNotNull(warshipHealthStateService, "warshipHealthStateService must not be empty");
         this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
     }
@@ -136,7 +124,7 @@ public class PlanetTickRunner implements TickRunner {
      * Calculates the tickly output of this planet.
      * This includes the amount of generated resources and the calculations of jobs which could be successfully ended.
      */
-    public void tickPlanet(@Nonnull Planet planet) {
+    private void tickPlanet(@Nonnull Planet planet) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkState(planet.getOwner() != null, "The owner must be set, otherwise there is nothing to do.");
 
@@ -144,8 +132,24 @@ public class PlanetTickRunner implements TickRunner {
         planet = updateResources(planet);
         log(planet, "Done updating resources");
         planet = runJobs(planet);
-        operationalService.operateInoperationals(today, planet);
+        final Set<Construction> constructions = operationalService.operateInoperationals(today, planet);
+        updateJobs(constructions);
+        log(planet, "Done updating jobs");
         log(planet, "Done tick planet.");
+    }
+
+    private void updateJobs(@Nonnull final Set<Construction> operatedConstructions) {
+        Preconditions.checkNotNull(operatedConstructions, "operatedConstructions must not be empty");
+
+        final Construction upgradedShipyard = operatedConstructions.stream().filter(c -> c.getBuilding().getProductionTarget() == EResourceType.ORBITAL_CONSTRUCTION && c.getBuilding().getProductionType().getProductionCategory() == EProductionCategory.PRODUCE).findFirst().orElse(null);
+        if (upgradedShipyard != null) {
+            final List<Job> jobsByPlanet = jobService.findAllJobsByPlanet(upgradedShipyard.getPlanet().getId()).stream()
+                    .filter(j -> j.getConstructable().getFleet() != null)
+                    .collect(Collectors.toList());
+
+            jobsByPlanet.forEach(j -> j.reduceRemainingTicksByLevelUpgrade(j.getFacility().getBuilding().getIncreasingFactorPerLevel()));
+            jobService.saveAll(jobsByPlanet);
+        }
     }
 
     private Planet runJobs(@Nonnull final Planet planet) {

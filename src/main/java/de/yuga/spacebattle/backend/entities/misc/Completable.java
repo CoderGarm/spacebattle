@@ -11,12 +11,17 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 
 /**
  * Simply the entity key.
  */
 @MappedSuperclass
 public class Completable extends Deletable {
+
+    private static final MathContext MATH_CONTEXT = new MathContext(4, RoundingMode.UP);
 
     /**
      * Principle: Countdown ticks to zero -> job done.<br>
@@ -47,6 +52,17 @@ public class Completable extends Deletable {
      */
     public void tick() {
         this.ticksLeft--;
+    }
+
+    public void reduceRemainingTicksByLevelUpgrade(@Nonnull final BigDecimal increasingFactorPerLevel) {
+        Preconditions.checkNotNull(increasingFactorPerLevel, "increasingFactorPerLevel must not be empty");
+
+        final int reduceAbout = BigDecimal.valueOf(this.ticksLeft).multiply(increasingFactorPerLevel, MATH_CONTEXT).intValue();
+        for (int i = 0; i < reduceAbout; i++) {
+            if (ticksLeft > 0) {
+                ticksLeft--;
+            }
+        }
     }
 
     public void setFinished(@Nonnull final Tick finishedAt) {

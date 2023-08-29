@@ -320,7 +320,8 @@ public class OperationalService {
         return operationals;
     }
 
-    public void operateInoperationals(@Nonnull final Tick today, @Nonnull final Planet planet) {
+    @Nonnull
+    public Set<Construction> operateInoperationals(@Nonnull final Tick today, @Nonnull final Planet planet) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
@@ -333,6 +334,7 @@ public class OperationalService {
         if (!alsoActivated.isEmpty()) {
             operationalCache.activateConstructions(today, planet, alsoActivated);
         }
+        return alsoActivated;
     }
 
     public void retire(@Nonnull final WarShip warShip) {
