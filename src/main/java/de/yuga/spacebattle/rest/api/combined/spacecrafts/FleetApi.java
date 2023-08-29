@@ -101,24 +101,8 @@ public class FleetApi extends BaseApi {
     public ResponseEntity<?> getFleet(@PathVariable("idFleet") final int idFleet) {
 
         final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetService.find(idFleet);
-        String errorMessage = null;
         if (fleet == null) {
-            errorMessage = "There should be the fleet, you searched for.";
-        } else if (fleet.getOwner().getId() != getIdUser() && fleet.getOrbit() == null) {
-            errorMessage = "There is an intelligence service which prevents to gather the information.";
-        } else if (fleet.getOwner().getId() != getIdUser() && fleet.getOrbit() != null) {
-            final StarSystem system = fleet.getOrbit().getSystem();
-            if (system != null) {
-                final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> allAliveFleetsInSystems = fleetService.findAllAliveFleetsInSystems(List.of(system.getId()));
-                final boolean userHasFleetInSystem = allAliveFleetsInSystems.stream().anyMatch(f -> f.getOwner().getId() == getIdUser());
-                if (!userHasFleetInSystem) {
-                    errorMessage = "There is an intelligence service which prevents to gather the information.";
-                }
-            }
-        }
-
-        if (errorMessage != null) {
-            throw new NotifyWebUserException(errorMessage);
+            throw new NotifyWebUserException("There should be the fleet, you searched for.");
         }
 
         return ResponseEntity.ok(new Fleet(fleet, getPreferredLanguage()));
