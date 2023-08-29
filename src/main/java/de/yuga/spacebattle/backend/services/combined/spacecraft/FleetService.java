@@ -329,6 +329,13 @@ public class FleetService {
         return fleetRepository.save(fleet);
     }
 
+    public void markAsInoperational(@Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+
+        fleet.setOperational(false);
+        save(fleet);
+    }
+
     public void markAsDestroyed(@Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 

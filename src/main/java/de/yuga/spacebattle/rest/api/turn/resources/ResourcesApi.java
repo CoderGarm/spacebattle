@@ -1,11 +1,13 @@
 package de.yuga.spacebattle.rest.api.turn.resources;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.enums.EDepositType;
+import de.yuga.spacebattle.backend.enums.EJobType;
 import de.yuga.spacebattle.backend.enums.ETransportType;
 import de.yuga.spacebattle.backend.services.caches.TransportationCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
@@ -379,6 +381,24 @@ public class ResourcesApi extends BaseApi {
         PreconditionWebHelper.checkNotNull(shipyardConstructionOrder, "Maybe there should be something like a request?!");
 
         return ResponseEntity.ok(new ResourceDeposit(shipClassCreationService.getCosts(shipyardConstructionOrder)));
+    }
+
+    @PostMapping(value = SHIPYARD_ORDER_COSTS_ENDPOINT + "/{idFleet}/{jobType}")
+    @Operation(summary = "Get the costs of the given shipyard order.", operationId = "getShipyardCosts",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceDeposit.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getShipyardCosts(@PathVariable("idFleet") final int idFleet, @PathVariable("jobType") final EJobType jobType) {
+        Preconditions.checkNotNull(jobType, "jobType must not be empty");
+
+        final Fleet fleet = fleetService.find(idFleet);
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+
+        return ResponseEntity.ok(new ResourceDeposit(JobCostsCalculator.calculateJobCost(fleet, jobType)));
     }
 
     @PostMapping(value = SHIP_CLASS_COSTS_ENDPOINT)

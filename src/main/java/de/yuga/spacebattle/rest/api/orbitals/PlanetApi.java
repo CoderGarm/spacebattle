@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.rest.api.orbitals;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
@@ -33,6 +34,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.security.RolesAllowed;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +59,7 @@ public class PlanetApi extends BaseApi {
     private static final String GET_PLANET_BY_COORDINATES_ENDPOINT = "byCoord";
     private static final String GET_MAIN_PLANET = "main";
     private static final String REPAIR_FLEET_ENDPOINT = SHIPYARD_BUILD_IT_ENDPOINT + "/repair";
+    private static final String UPGRADE_FLEET_ENDPOINT = SHIPYARD_BUILD_IT_ENDPOINT + "/upgrade";
     private static final String TRANSPORTATION_ENDPOINT = "transportation";
 
     @Nonnull
@@ -217,7 +220,7 @@ public class PlanetApi extends BaseApi {
         final Map<ShipClass, Integer> jobLoad = shipJobPayload.stream()
                 .collect(Collectors.toMap(entry -> foundClassesByID.get(entry.getIdShipClass()), ShipyardConstructionSelection::getAmount));
 
-        jobService.createShipyardJob(planet, jobLoad);
+        jobService.createShipyardRepairJob(planet, jobLoad);
         return ResponseEntity.ok(true);
     }
 
@@ -261,6 +264,43 @@ public class PlanetApi extends BaseApi {
         final int idUser = getIdUser();
         final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetService.find(idFleet);
         PreconditionWebHelper.checkNotNull(fleet, "fleet must not be empty");
+        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = getPlanetOrbitedByFleet(fleet);
+
+        if (planet == null || planet.getOwner() == null || (planet.getOwner().getId() != idUser || fleet.getOwner().getId() != idUser)) {
+            throw new NotifyWebUserException("This will not work that way.");
+        }
+
+        jobService.createShipyardRepairJob(planet, fleet);
+        return ResponseEntity.ok(true);
+    }
+
+    @PostMapping(value = UPGRADE_FLEET_ENDPOINT + "/{idFleet}")
+    @Operation(summary = "Upgrades the fleet to the last successor classes.", operationId = "upgradeFleets",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> upgradeFleets(@PathVariable("idFleet") final int idFleet) {
+
+        final int idUser = getIdUser();
+        final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetService.find(idFleet);
+        PreconditionWebHelper.checkNotNull(fleet, "fleet must not be empty");
+        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = getPlanetOrbitedByFleet(fleet);
+
+        if (planet == null || planet.getOwner() == null || (planet.getOwner().getId() != idUser || fleet.getOwner().getId() != idUser)) {
+            throw new NotifyWebUserException("This will not work that way.");
+        }
+
+        jobService.createShipyardUpgradeJob(planet, fleet);
+        return ResponseEntity.ok(true);
+    }
+
+    @Nullable
+    private de.yuga.spacebattle.backend.entities.orbitals.Planet getPlanetOrbitedByFleet(@Nonnull final Fleet fleet) {
+        PreconditionWebHelper.checkNotNull(fleet, "fleet must not be empty");
 
         final FleetOrbit orbit = fleet.getOrbit();
         PreconditionWebHelper.checkNotNull(orbit, "orbit must not be empty");
@@ -279,14 +319,7 @@ public class PlanetApi extends BaseApi {
                 .findFirst()
                 .orElseThrow(() -> new NotifyWebUserException("It would be pretty good if there is a planet."));
 
-        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetsByOrbit.get(foundPlanetaryOrbit);
-
-        if (planet == null || planet.getOwner() == null || (planet.getOwner().getId() != idUser || fleet.getOwner().getId() != idUser)) {
-            throw new NotifyWebUserException("This will not work that way.");
-        }
-
-        jobService.createShipyardJob(planet, fleet);
-        return ResponseEntity.ok(true);
+        return planetsByOrbit.get(foundPlanetaryOrbit);
     }
 
     @GetMapping(value = TRANSPORTATION_ENDPOINT + "/demand/{idPlanet}")

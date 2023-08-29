@@ -12,6 +12,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
+import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
@@ -119,7 +120,26 @@ public class OperationalService {
     public ResourceDeposit getPopulationDemandForUser(final int idUser) {
         final ResourceDeposit resourceDemand = new ResourceDeposit(EDepositType.DEMAND);
 
-        warShipService.findAliveInoperationalForUser(idUser).stream()
+        final List<WarShip> warShips = warShipService.findAliveInoperationalForUser(idUser);
+        final Set<WarShip> inUpgrade = warShips.stream()
+                .map(WarShip::getFleet)
+                .filter(Objects::nonNull)
+                .filter(fleet -> fleet.getJobs().stream().map(Job::getConstructable).anyMatch(Constructable::isUpgradeJob))
+                .map(Fleet::getAliveShips)
+                .flatMap(Collection::stream)
+                .filter(w -> w.getShipClass().hasSuccessor())
+                .collect(Collectors.toSet());
+        warShips.removeAll(inUpgrade);
+
+        inUpgrade.stream()
+                .map(WarShip::getShipClass)
+                .map(ShipClass::getLatestSuccessor)
+                .filter(Objects::nonNull)
+                .map(ShipClass::getCosts)
+                .map(ResourceDeposit::getCrewRequirement)
+                .forEach(crewRequirement -> resourceDemand.updateCrew(crewRequirement, ECalculationType.ADD));
+
+        warShips.stream()
                 .map(WarShip::getShipClass)
                 .map(ShipClass::getCosts)
                 .map(ResourceDeposit::getCrewRequirement)
@@ -139,8 +159,28 @@ public class OperationalService {
     public Map<Planet, ResourceDeposit> getPopulationDemandForUserByPlanet(final int idUser) {
 
         final Map<Planet, ResourceDeposit> result = new HashMap<>();
-        warShipService.findAliveInoperationalForUser(idUser).forEach(warShip -> {
-            final ShipClass shipClass = warShip.getShipClass();
+        final List<WarShip> warShips = warShipService.findAliveInoperationalForUser(idUser);
+
+        final Set<WarShip> inUpgrade = warShips.stream()
+                .map(WarShip::getFleet)
+                .filter(Objects::nonNull)
+                .filter(fleet -> fleet.getJobs().stream().map(Job::getConstructable).anyMatch(Constructable::isUpgradeJob))
+                .map(Fleet::getAliveShips)
+                .flatMap(Collection::stream)
+                .filter(w -> w.getShipClass().hasSuccessor())
+                .collect(Collectors.toSet());
+        warShips.removeAll(inUpgrade);
+
+        inUpgrade.forEach(warShip -> {
+            final ShipClass shipClass = warShip.getShipClass().getLatestSuccessor();
+            final Planet planet = warShip.getShipyard();
+            final ResourceDeposit demand = result.getOrDefault(planet, new ResourceDeposit(EDepositType.DEMAND));
+            demand.updateCrew(Objects.requireNonNull(shipClass).getCosts().getCrewRequirement(), ECalculationType.ADD);
+            result.put(planet, demand);
+        });
+
+        warShips.forEach(warShip -> {
+            ShipClass shipClass = warShip.getShipClass();
             final Planet planet = warShip.getShipyard();
             final ResourceDeposit demand = result.getOrDefault(planet, new ResourceDeposit(EDepositType.DEMAND));
             demand.updateCrew(shipClass.getCosts().getCrewRequirement(), ECalculationType.ADD);
@@ -172,8 +212,25 @@ public class OperationalService {
     public ResourceDeposit getPopulationDemandForPlanet(final int idPlanet) {
         final ResourceDeposit resourceDemand = new ResourceDeposit(EDepositType.DEMAND);
 
-        final List<WarShip> aliveInoperationalForPlanet = warShipService.findAliveInoperationalForPlanet(idPlanet);
-        aliveInoperationalForPlanet.stream()
+        final List<WarShip> warShips = warShipService.findAliveInoperationalForPlanet(idPlanet);
+        final Set<WarShip> inUpgrade = warShips.stream()
+                .map(WarShip::getFleet)
+                .filter(Objects::nonNull)
+                .filter(fleet -> fleet.getJobs().stream().map(Job::getConstructable).anyMatch(Constructable::isUpgradeJob))
+                .map(Fleet::getAliveShips)
+                .flatMap(Collection::stream)
+                .filter(w -> w.getShipClass().hasSuccessor())
+                .collect(Collectors.toSet());
+        warShips.removeAll(inUpgrade);
+
+        inUpgrade.stream()
+                .map(WarShip::getShipClass)
+                .map(ShipClass::getLatestSuccessor)
+                .filter(Objects::nonNull)
+                .map(ShipClass::getCosts)
+                .map(ResourceDeposit::getCrewRequirement)
+                .forEach(crewRequirement -> resourceDemand.updateCrew(crewRequirement, ECalculationType.ADD));
+        warShips.stream()
                 .map(WarShip::getShipClass)
                 .map(ShipClass::getCosts)
                 .map(ResourceDeposit::getCrewRequirement)
@@ -346,5 +403,23 @@ public class OperationalService {
         shipyard.getResourceDeposit().updateCrew(crewRequirement, ECalculationType.ADD);
         planetService.save(shipyard);
         warShipService.save(warShip);
+    }
+
+    public void disableFleet(@Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+
+        fleetService.markAsInoperational(fleet);
+        final Set<WarShip> ships = fleet.getAliveShips();
+        warShipService.markAsInoperational(ships);
+    }
+
+    public void transferCrewToPlanet(@Nonnull final Fleet fleet, @Nonnull final Planet planet) {
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+        final ResourceDeposit costs = new ResourceDeposit(EDepositType.COSTS);
+        fleet.getAliveShips().stream().map(WarShip::getShipClass).map(ShipClass::getCosts).forEach(rd -> costs.updateCrew(rd.getCrewRequirement(), ECalculationType.ADD));
+        planet.getResourceDeposit().updateCrew(costs.getCrewRequirement(), ECalculationType.ADD);
+        planetService.save(planet);
     }
 }

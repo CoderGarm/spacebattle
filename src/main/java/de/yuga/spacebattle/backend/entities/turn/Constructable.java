@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
+import de.yuga.spacebattle.backend.enums.EJobType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
@@ -16,6 +17,7 @@ import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.Objects;
 
 /**
  * Represents the payload of a job.<br>
@@ -51,8 +53,9 @@ public class Constructable {
     @JoinColumn(name = "idFleet", referencedColumnName = "idFleet")
     private Fleet fleet;
 
-    @Column(columnDefinition = "boolean not null default false")
-    private boolean isRepairJob = false;
+    @Nullable
+    @Enumerated(EnumType.STRING)
+    private EJobType jobType;
 
     @Nullable
     @Transient
@@ -82,12 +85,13 @@ public class Constructable {
         this.empireWideResearchPoints = empireWideResearchPoints;
     }
 
-    public Constructable(@Nonnull final Fleet fleet, final boolean isRepairJob) {
+    public Constructable(@Nonnull final Fleet fleet, @Nonnull final EJobType jobType) {
         Preconditions.checkNotNull(fleet, "toRepair must not be empty");
+        Preconditions.checkNotNull(jobType, "jobType must not be empty");
 
         this.fleet = fleet;
         this.resourceType = EResourceType.ORBITAL_CONSTRUCTION;
-        this.isRepairJob = isRepairJob;
+        this.jobType = jobType;
     }
 
     @Nullable
@@ -116,7 +120,11 @@ public class Constructable {
     }
 
     public boolean isRepairJob() {
-        return isRepairJob;
+        return EJobType.REPAIR == jobType;
+    }
+
+    public boolean isUpgradeJob() {
+        return EJobType.UPGRADE == jobType;
     }
 
     /**
@@ -143,7 +151,7 @@ public class Constructable {
         }
 
         if (fleet != null) {
-            return JobCostsCalculator.calculateJobCost(fleet, isRepairJob);
+            return JobCostsCalculator.calculateJobCost(fleet, Objects.requireNonNull(jobType));
         }
 
         throw new NotifyWebUserException("You have tried something interesting. May be you should talk to an admin.");

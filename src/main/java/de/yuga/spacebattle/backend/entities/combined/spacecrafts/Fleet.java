@@ -26,7 +26,6 @@ import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.ETechnologyType;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
-import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -183,34 +182,9 @@ public class Fleet extends Operationable implements HasOwner {
     }
 
 
-    /**
-     * Creates a new set of war ships by the given parameter.
-     *
-     * @param splitFleet the amount of ships by class as return
-     * @return the separated war ships
-     */
-    public Set<WarShip> separateShips(@Nonnull final Map<ShipClass, Integer> splitFleet) {
-        Preconditions.checkNotNull(splitFleet, "splitFleet shouldn't be null!");
-
-        // todo separate ships in ui
-        final Map<ShipClass, Integer> shipsByClass = getShipsByClass();
-        // check if enough ships are present
-        splitFleet.forEach((shipClass, amountToSeparate) -> {
-            final Integer availableAmount = shipsByClass.get(shipClass);
-            if (availableAmount < amountToSeparate) {
-                throw new NotifyWebUserException("There are not enough ships in the fleet do split them in that way.");
-            }
-        });
-        // separate ships
-        final Set<WarShip> toMove = new HashSet<>();
-        splitFleet.forEach((shipClass, amountToSeparate) -> {
-            final Set<WarShip> warShips = ships.stream()
-                    .filter(w -> w.getShipClass().equals(shipClass)).limit(amountToSeparate)
-                    .collect(Collectors.toSet());
-            toMove.addAll(warShips);
-        });
-        ships.removeAll(toMove);
-        return toMove;
+    @Nonnull
+    public Set<Job> getJobs() {
+        return jobs;
     }
 
     public void addShips(@Nonnull final Set<WarShip> warShips) {

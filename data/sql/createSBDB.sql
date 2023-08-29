@@ -277,7 +277,7 @@
        idJob integer not null auto_increment,
         isDeleted boolean not null default false,
         ticksLeft decimal(19, 0) not null,
-        isRepairJob boolean not null default false,
+        jobType varchar(255),
         resourceType varchar(255),
         targetLevel integer,
         priority varchar(255) not null,
@@ -488,7 +488,6 @@
         idResourceDeposit integer,
         idResourceTransportationDelivery integer,
         idResourceTransportationDemand integer,
-        idResourceUtilization integer,
         idStarSystem integer,
         primary key (idPlanet)
     ) engine=InnoDB;
@@ -704,7 +703,7 @@
         isLoginForbidden boolean not null default false,
         noEMailWanted boolean not null default false,
         password varchar(255) not null,
-        profilePic varchar(50) not null default 'perspective-dice-six-faces-random',
+        profilePic varchar(50) default 'perspective-dice-six-faces-random' not null,
         receiveChangelogInfos boolean not null default false,
         idUser integer not null,
         primary key (idUserSetting)
@@ -1398,11 +1397,6 @@
     alter table planet
         add constraint FKipb2odgmfpbftjlah8gxjh6fw
             foreign key (idResourceTransportationDemand)
-                references resourceDeposit (idResourceDeposit);
-
-    alter table planet
-        add constraint FKchm1nm87cpqlwgayp6vhl8vux
-            foreign key (idResourceUtilization)
                 references resourceDeposit (idResourceDeposit);
 
     alter table planet
@@ -2102,3 +2096,4 @@ insert into dbPatch values (null, now(), 'piracy and missions wiki', '0.1.6-3');
 insert into dbPatch values (null, now(), 'naval amendments', '0.1.6-4');
 insert into dbPatch values (null, now(), 'profile pic', '0.1.7-1');
 insert into dbPatch values (null, now(), 'drop persisted demand', '0.1.8-1');
+insert into dbPatch values (null, now(), 'switch to job type', '0.1.9-1');

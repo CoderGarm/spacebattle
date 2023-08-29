@@ -350,6 +350,15 @@ public class ShipClass extends Deletable implements HasOwner {
         return successor;
     }
 
+    @Nullable
+    public ShipClass getLatestSuccessor() {
+        ShipClass shipClass = getSuccessor();
+        while (Objects.requireNonNull(shipClass).hasSuccessor()) {
+            shipClass = shipClass.getSuccessor();
+        }
+        return shipClass;
+    }
+
     /**
      * Checks if this class has a successor.
      *

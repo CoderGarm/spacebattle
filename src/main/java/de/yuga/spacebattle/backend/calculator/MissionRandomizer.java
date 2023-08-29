@@ -115,46 +115,6 @@ public class MissionRandomizer {
         return nextActions.get(nexted);
     }
 
-    // fixme kann das weg?
-    private static int getOneOf(@Nonnull final List<Integer> possibleValues, @Nonnull final Fleet pirateFleet, @Nonnull final Tick today) {
-        Preconditions.checkNotNull(possibleValues, "possibleValues must not be empty");
-        Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
-        Preconditions.checkNotNull(today, "today must not be empty");
-
-        final int size = possibleValues.size();
-        final int lastIndex = size - 1;
-        if (size == 1) {
-            return possibleValues.get(lastIndex);
-        }
-
-        final int nexted = new Random().nextInt(lastIndex);
-        return possibleValues.get(nexted);
-/*
-        final boolean pirateEven = isEven(pirateFleet);
-        final boolean tickEven = isEven(today);
-
-        if (pirateEven && tickEven) {
-            // return last even indexed value
-            return possibleValues.stream().filter(MissionRandomizer::isEven).reduce((o1, o2) -> o2).orElseGet(() -> possibleValues.get(0));
-        }
-        //noinspection ConstantValue
-        if (pirateEven && !tickEven) {
-            // return second odd indexed value
-            return possibleValues.stream().filter(MissionRandomizer::isOdd).skip(1).findFirst().orElseGet(() -> possibleValues.get(lastIndex));
-        }
-        //noinspection ConstantValue
-        if (!pirateEven && tickEven) {
-            // return first even indexed value
-            return possibleValues.stream().filter(MissionRandomizer::isEven).findFirst().orElseGet(() -> possibleValues.get(0));
-        }
-        //noinspection ConstantValue
-        if (!pirateEven && !tickEven) {
-            // return first odd indexed value
-            return possibleValues.stream().filter(MissionRandomizer::isOdd).findFirst().orElseGet(() -> possibleValues.get(lastIndex));
-        }
-        throw new NotifyWebUserException("Not on my watch!");*/
-    }
-
     private static boolean isOdd(@Nonnull final AbstractEntityKey entityKey) {
         return !MissionRandomizer.isEven(entityKey);
     }

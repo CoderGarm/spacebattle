@@ -4,13 +4,14 @@
 
 1. Unten rechts findet sich der neue Tutorial Button.
    Damit lassen sich kontextbezogen ein paar relevante Informationen anzeigen.
-   Vorerst gibt es nur Tutorials für das Journal, Planeten und Transporte - nach und nach wird dort mehr kommen. Bitte helft mir etwas dabei und erinnert mich ab nd zu daran, wo
-   ein Tutorial
-   am dringendsten wäre :)
+   Es gibt noch keine Tutorials für alles, aber nach und nach wird dort mehr kommen.
+   Bitte helft mir etwas dabei und erinnert mich ab nd zu daran, wo ein Tutorial am dringendsten wäre :)
 2. Man kann die Songbird Flight I-Klasse nicht mehr bauen.
 3. Die Schiffswerft berechnet den Baufortschritt eines Jobs neu, wenn ein neues Level aktiviert wird.
-
-todo. Man kann alte Flights auf neue umrüsten.
+4. Schiffe lassen sich jetzt auf neue Flights umrüsten.
+   Dafür werden - wie für die Reparatur - Jobs mit hoher Priorität erzeugt und der aktuelle Bauauftrag unterbrochen.
+   Die Buttons für die Reparatur und das Upgraden sind jetzt in der planetaren Werft zu finden.
+5. Die UI-Elemente für Flotten sind etwas umgestaltet und hoffentlich nützlicher.
 
 #### Diverses
 
@@ -31,10 +32,7 @@ todo. Man kann alte Flights auf neue umrüsten.
 3. Planetary Constructions: Zu teure Gebäude sind nicht mehr von der gewählten Construction abhängig.
 4. Beim Gebäudebau wird die Verbesserung des nächsten Levels wieder angezeigt.
 
-
 #### next steps
-
-
 
 - article edit stuff
 - menü als vertikaler slider

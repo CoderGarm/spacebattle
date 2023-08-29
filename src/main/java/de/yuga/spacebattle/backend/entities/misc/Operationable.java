@@ -22,6 +22,10 @@ public class Operationable extends Deletable {
         isOperational = true;
     }
 
+    public void setOperational(final boolean isOperational) {
+        this.isOperational = isOperational;
+    }
+
     public boolean isOperational() {
         return isOperational;
     }

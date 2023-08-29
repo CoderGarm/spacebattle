@@ -18,6 +18,7 @@ import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EJobPriority;
+import de.yuga.spacebattle.backend.enums.EJobType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.turn.JobRepository;
 import de.yuga.spacebattle.backend.services.ResourceService;
@@ -271,7 +272,7 @@ public class JobService {
         }
     }
 
-    public void createShipyardJob(@Nonnull final Planet planet, @Nonnull final Map<ShipClass, Integer> shipJobPayload) {
+    public void createShipyardRepairJob(@Nonnull final Planet planet, @Nonnull final Map<ShipClass, Integer> shipJobPayload) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkNotNull(shipJobPayload, "shipJobPayload shouldn't be null!");
 
@@ -304,14 +305,33 @@ public class JobService {
         warShipService.saveAll(newFleetComposition);
 
         fleet = fleetService.find(fleet);
-        final Constructable constructable = new Constructable(fleet, false);
+        final Constructable constructable = new Constructable(fleet, EJobType.CONSTRUCTION);
         checkAndBalances(planet, constructable.getJobCosts());
         final Job job = new Job(planet, facility, constructable, operationalService.getUtilizedPopulationForPlanet(planet.getId()));
         jobRepository.save(job);
         planetService.save(planet);
     }
 
-    public void createShipyardJob(@Nonnull final Planet planet, @Nonnull final Fleet toRepair) {
+    public void createShipyardUpgradeJob(@Nonnull final Planet planet, @Nonnull final Fleet toUpgrade) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(toUpgrade, "toUpgrade must not be empty");
+
+        final Construction facility = planet.getConstructions().stream()
+                .filter(construction -> construction.getBuilding().getProductionTarget() == EResourceType.ORBITAL_CONSTRUCTION)
+                .findFirst().orElseThrow(() -> new NotifyWebUserException("If you want to repair a fleet, you need a shipyard."));
+
+        // do not check if free, the new job will squeeze in
+        final Constructable constructable = new Constructable(toUpgrade, EJobType.UPGRADE);
+        checkAndBalances(planet, constructable.getJobCosts());
+        final Job job = new Job(planet, facility, constructable, operationalService.getUtilizedPopulationForPlanet(planet.getId()));
+        job.setPriority(EJobPriority.PRIORITY);
+        jobRepository.save(job);
+        operationalService.disableFleet(toUpgrade);
+        operationalService.transferCrewToPlanet(toUpgrade, planet);
+        planetService.save(planet);
+    }
+
+    public void createShipyardRepairJob(@Nonnull final Planet planet, @Nonnull final Fleet toRepair) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(toRepair, "toRepair must not be empty");
 
@@ -320,11 +340,13 @@ public class JobService {
                 .findFirst().orElseThrow(() -> new NotifyWebUserException("If you want to repair a fleet, you need a shipyard."));
 
         // do not check if free, the new job will squeeze in
-        final Constructable constructable = new Constructable(toRepair, true);
+        final Constructable constructable = new Constructable(toRepair, EJobType.REPAIR);
         checkAndBalances(planet, constructable.getJobCosts());
         final Job job = new Job(planet, facility, constructable, operationalService.getUtilizedPopulationForPlanet(planet.getId()));
         job.setPriority(EJobPriority.PRIORITY);
         jobRepository.save(job);
+        operationalService.disableFleet(toRepair);
+        operationalService.transferCrewToPlanet(toRepair, planet);
         planetService.save(planet);
     }
 

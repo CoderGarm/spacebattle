@@ -11,6 +11,7 @@ import de.yuga.spacebattle.backend.entities.turn.Constructable;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EEducationType;
+import de.yuga.spacebattle.backend.enums.EJobType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 
 import javax.annotation.Nonnull;
@@ -115,15 +116,31 @@ public class JobCostsCalculator {
         return ticks;
     }
 
-    public static ResourceDeposit calculateJobCost(@Nonnull final Fleet fleet, final boolean isRepairJob) {
+    public static ResourceDeposit calculateJobCost(@Nonnull final Fleet fleet, @Nonnull final EJobType jobType) {
         Preconditions.checkNotNull(fleet, "fleet must not be empty");
-
-        if (isRepairJob) {
-            return calculateRepairJobCost(fleet);
+        Preconditions.checkNotNull(jobType, "jobType must not be empty");
+        final ResourceDeposit costs;
+        switch (jobType) {
+            case REPAIR:
+                return calculateRepairJobCost(fleet);
+            case UPGRADE:
+                costs = new ResourceDeposit(EDepositType.COSTS);
+                for (final ShipClass shipClass : fleet.getAliveShips().stream().map(WarShip::getShipClass).filter(ShipClass::hasSuccessor).collect(Collectors.toSet())) {
+                    // add the differences in cost for each successor to the current, already paid design
+                    ShipClass successor = shipClass.getSuccessor();
+                    while (successor != null) {
+                        costs.add(successor.getCosts());
+                        costs.subtract(shipClass.getCosts());
+                        successor = successor.getSuccessor();
+                    }
+                }
+                return costs;
+            default:
+            case CONSTRUCTION:
+                costs = new ResourceDeposit(EDepositType.COSTS);
+                fleet.getAllShips().stream().map(WarShip::getShipClass).map(ShipClass::getCosts).forEach(costs::add);
+                return costs;
         }
-        final ResourceDeposit costs = new ResourceDeposit(EDepositType.COSTS);
-        fleet.getAllShips().stream().map(WarShip::getShipClass).map(ShipClass::getCosts).forEach(costs::add);
-        return costs;
     }
 
 

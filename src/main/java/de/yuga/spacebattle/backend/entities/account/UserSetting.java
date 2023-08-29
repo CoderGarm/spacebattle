@@ -69,6 +69,7 @@ public class UserSetting extends AbstractEntityKey {
     @Nonnull
     @NotNull
     @Size(min = 1, max = 50)
+    @Column(columnDefinition = "varchar(50) default 'perspective-dice-six-faces-random'")
     private String profilePic = "perspective-dice-six-faces-random";
 
     public UserSetting() {

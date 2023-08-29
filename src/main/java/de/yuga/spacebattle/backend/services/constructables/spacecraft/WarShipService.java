@@ -102,4 +102,11 @@ public class WarShipService {
     public List<WarShip> findAliveOperationalForPlanet(final int idPlanet) {
         return Objects.requireNonNullElse(warShipRepository.findAliveOperationalForPlanet(idPlanet), new ArrayList<>());
     }
+
+    public void markAsInoperational(@Nonnull final Set<WarShip> ships) {
+        Preconditions.checkNotNull(ships, "ships must not be empty");
+
+        ships.forEach(s -> s.setOperational(false));
+        saveAll(ships);
+    }
 }

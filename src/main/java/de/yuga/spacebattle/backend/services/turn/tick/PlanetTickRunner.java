@@ -10,6 +10,7 @@ import de.yuga.spacebattle.backend.entities.constructables.buildings.Constructio
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
@@ -31,10 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import javax.annotation.Nullable;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,7 +42,7 @@ public class PlanetTickRunner implements TickRunner {
     @Nonnull
     private static final Logger LOGGER = LoggerFactory.getLogger(PlanetTickRunner.class);
 
-    @Nonnull
+    @Nullable
     private Tick today;
 
     @Nonnull
@@ -126,6 +125,7 @@ public class PlanetTickRunner implements TickRunner {
      */
     private void tickPlanet(@Nonnull Planet planet) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+        Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkState(planet.getOwner() != null, "The owner must be set, otherwise there is nothing to do.");
 
         log(planet, "Start updating resources.");
@@ -154,6 +154,7 @@ public class PlanetTickRunner implements TickRunner {
 
     private Planet runJobs(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(today, "today must not be empty");
 
         final Set<Construction> constructions = planet.getConstructions().stream()
                 .filter(c -> !c.getJobs().isEmpty())
@@ -235,11 +236,44 @@ public class PlanetTickRunner implements TickRunner {
         assert owner != null : "There must be a planet's owner.";
         if (constructable.isRepairJob()) {
             realizeFleetRepair(planet, owner, constructable, job);
+        }
+        if (constructable.isUpgradeJob()) {
+            realizeFleetUpgrade(planet, owner, constructable, job);
         } else {
             realizeShipProduction(planet, owner, constructable, job);
         }
 
         log(planet, job, "Done processing shipyard job.");
+    }
+
+    private void realizeFleetUpgrade(@Nonnull final Planet planet,
+                                     @Nonnull final User owner,
+                                     @Nonnull final Constructable constructable,
+                                     @Nonnull final Job job) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(owner, "owner must not be empty");
+        Preconditions.checkNotNull(constructable, "constructable must not be empty");
+        Preconditions.checkNotNull(job, "job must not be empty");
+        Preconditions.checkNotNull(constructable.getFleet(), "fleet must not be empty");
+
+        final Fleet fleet = constructable.getFleet();
+        log(planet, job, "Start upgrade fleet '" + fleet.getId() + "'.");
+        final Set<WarShip> withSuccessors = fleet.getAliveShips().stream()
+                .filter(w -> w.getShipClass().hasSuccessor())
+                .collect(Collectors.toSet());
+
+        withSuccessors.forEach(warShip -> {
+            // this is introducing a nice exploit by creating a new flight after paying the old one
+            final ShipClass shipClass = warShip.getShipClass();
+            ShipClass successor = shipClass.getSuccessor();
+            while (Objects.requireNonNull(successor).hasSuccessor()) {
+                successor = successor.getSuccessor();
+            }
+            warShip.upgrade(planet, successor);
+        });
+
+        fleetService.save(fleet);
+        log(planet, job, "Done upgrade fleet '" + fleet.getId() + "'.");
     }
 
     private void realizeFleetRepair(@Nonnull final Planet planet,

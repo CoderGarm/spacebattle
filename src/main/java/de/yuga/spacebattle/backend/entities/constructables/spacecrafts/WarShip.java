@@ -29,7 +29,7 @@ public class WarShip extends Operationable {
     @Nonnull
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "idShipyard", updatable = false)
+    @JoinColumn(name = "idShipyard")
     private Planet shipyard;
 
     /**
@@ -43,7 +43,7 @@ public class WarShip extends Operationable {
     @Nonnull
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "idShipClass", updatable = false)
+    @JoinColumn(name = "idShipClass")
     private ShipClass shipClass;
 
     @Nonnull
@@ -98,6 +98,15 @@ public class WarShip extends Operationable {
         this.shipyard = shipyard;
         this.shipClass = shipClass;
         this.warshipHealthState = new WarshipHealthState(this);
+    }
+
+    public void upgrade(@Nonnull final Planet shipyard, @Nonnull final ShipClass shipClass) {
+        Preconditions.checkNotNull(shipyard, "shipyard must not be empty");
+        Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
+
+        this.shipyard = shipyard;
+        this.shipClass = shipClass;
+        this.warshipHealthState.repair();
     }
 
     @Nonnull

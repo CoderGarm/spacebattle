@@ -58,4 +58,6 @@ public class EnumValueDto {
     private de.yuga.spacebattle.backend.enums.physics.ETimeMetric[] eTimeMetrics;
     @JsonProperty
     private de.yuga.spacebattle.backend.enums.EWebUserRole[] eWebUserRoles;
+    @JsonProperty
+    private de.yuga.spacebattle.backend.enums.EJobType[] eJobTypes;
 }
