@@ -28,7 +28,7 @@ class BattleReportServiceTest {
     void hasNewReportsSince() {
         final Tick tick = new Tick();
         TestUtils.setId(tick, 227);
-        final boolean b = testObject.hasNewReportsSince(1, tick);
+        final boolean b = testObject.hasNewReportsSince(1, tick.getNo());
         assertTrue(b);
     }
 
@@ -38,7 +38,7 @@ class BattleReportServiceTest {
     @Test
     void hasNoNewReportsSince() {
         final Tick tick = tickService.getToday();
-        final boolean b = testObject.hasNewReportsSince(1, tick);
+        final boolean b = testObject.hasNewReportsSince(1, tick.getNo());
         assertFalse(b);
     }
 }

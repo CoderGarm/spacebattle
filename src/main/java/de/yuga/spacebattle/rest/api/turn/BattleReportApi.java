@@ -125,9 +125,9 @@ public class BattleReportApi extends BaseApi {
 
         final int idUser = getIdUser();
         final Tick today = tickService.getToday();
-        final Tick lastQueried = battleReportCache.getLastQueryBattleReports(idUser);
+        final Integer lastQueried = battleReportCache.getLastQueryBattleReports(idUser);
         battleReportCache.setLastQueryBattleReports(today, idUser);
-        if (lastQueried == null || lastQueried.equals(today)) {
+        if (lastQueried == null || !lastQueried.equals(today.getNo())) {
             // has already asked today or never asked before
             return ResponseEntity.ok(false);
         }

@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class CacheFileWriter { /* todo cache cleanup after period of time */
+public class CacheFileWriter {
 
     @Nonnull
     private static final String USR_HOME = System.getProperty("user.home");

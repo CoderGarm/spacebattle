@@ -2,35 +2,27 @@
 
 #### Gameplay
 
-1. Unten rechts findet sich der neue Tutorial Button.
-   Damit lassen sich kontextbezogen ein paar relevante Informationen anzeigen.
-   Es gibt noch keine Tutorials für alles, aber nach und nach wird dort mehr kommen.
-   Bitte helft mir etwas dabei und erinnert mich ab nd zu daran, wo ein Tutorial am dringendsten wäre :)
-2. Man kann die Songbird Flight I-Klasse nicht mehr bauen.
-3. Die Schiffswerft berechnet den Baufortschritt eines Jobs neu, wenn ein neues Level aktiviert wird.
-4. Schiffe lassen sich jetzt auf neue Flights umrüsten.
-   Dafür werden - wie für die Reparatur - Jobs mit hoher Priorität erzeugt und der aktuelle Bauauftrag unterbrochen.
-   Die Buttons für die Reparatur und das Upgraden sind jetzt in der planetaren Werft zu finden.
-5. Die UI-Elemente für Flotten sind etwas umgestaltet und hoffentlich nützlicher.
+todo. convoy raid pirate mission
+todo. convoy protect mission
+
+todo. Pläne von wo nach wo (Lieferzeit) festlegen
+- NPC trader
+- default trading ship
+
+todo. punkte für missionen
+todo. aktive Spielermissionen, e.g. provoke pirate raid at user or planet
+todo. heat indicator on map
 
 #### Diverses
 
-1. Die Buttons für Profil und Logout sind jetzt kleine Icons.
-2. Planetary Constructions:
-    - Die Gebäudeliste wählt automatisch das Gebäude an, wenn es eindeutig ist.
-    - Die Gebäudeliste enthält eine Farbcodierung, siehe Tutorial.
-3. Education: Die militärischen Dienstgrade wurden generft und untereinander ausbalanciert.
-4. Die eigenen Planeten sind im Menü nun nach dem Sternensystem gruppiert.
-5. In 'Organize Expansion' sind nun immer alle Systeme zu sehen, nicht mehr nur die mit kolonisierbaren Planeten.
-6. Die Transport-Sektion ist etwas aufgeräumter gestaltet und man muss nicht mehr manuell bestätigen, die Eingaben werden direkt übernommen.
-7. Auf der Sternenkarte kann man jetzt nach Systemen suchen und zoomen.
+todo. persistent caches
+
+- battle report persistent
+- colo cahce
+- fleet movement
+- operational
 
 ### Bugs fixed
-
-1. Man landet nicht mehr im Ground Construction Tab, wenn man einen Planeten auswählt.
-2. Planetary Constructions: Zu teure Gebäude werden jetzt sofort beim Setzen des Häkchens ausgegraut.
-3. Planetary Constructions: Zu teure Gebäude sind nicht mehr von der gewählten Construction abhängig.
-4. Beim Gebäudebau wird die Verbesserung des nächsten Levels wieder angezeigt.
 
 #### next steps
 
@@ -44,10 +36,6 @@
 - eingemottete Schiffe tatsächlich außer dienst nehmen
 - normale schlachten auch im mission report anzeigen
 - fleet management - flotten aufteilen neben flotten mergen
-- todo. convoy raid mission
-- todo. punkte für missionen
-- todo. aktive Spielermissionen, e.g. provoke pirate raid at user or planet
-- todo. heat indicator on map
 
 missionen
 
@@ -145,7 +133,6 @@ todo. im bau befindliche flotten während des Baus zerstören
 todo. Schiffe erbeuten?
 
 todo. simulierter ziviler Handel - Kosten und Steuereinnahmen
-todo. Pläne von wo nach wo (Lieferzeit) festlegen
 
 todo. wiki: list of contents (dynamically from markdown headlines)
 todo. wiki: images and position
