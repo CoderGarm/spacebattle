@@ -6,6 +6,7 @@ todo. convoy raid pirate mission
 todo. convoy protect mission
 
 todo. Pläne von wo nach wo (Lieferzeit) festlegen
+
 - NPC trader
 - default trading ship
 
@@ -15,10 +16,7 @@ todo. heat indicator on map
 
 #### Diverses
 
-1. Die Infos auf dem Dashboard werden bei allen Themen einen Neustart überleben
-
-
-- fleet movement
+1. Die Dashboard-Informationen werden ab jetzt bei allen Themen einen Neustart überleben.
 
 ### Bugs fixed
 

@@ -14,6 +14,7 @@ import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.enums.ETransportType;
 import de.yuga.spacebattle.backend.services.caches.file.CacheFileWriter;
+import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import de.yuga.spacebattle.rest.dto.turn.resources.HumanResourceAmount;
@@ -51,53 +52,59 @@ public class TransportationCache {
 
     @Nonnull
     private final CacheFileWriter cacheFileWriter;
+    private final FleetService fleetService;
 
     @Autowired
     public TransportationCache(@Nonnull final TickTimeService tickTimeService,
                                @Nonnull final PlanetService planetService,
-                               @Nonnull final CacheFileWriter cacheFileWriter) {
+                               @Nonnull final CacheFileWriter cacheFileWriter, final FleetService fleetService) {
         this.tickTimeService = Preconditions.checkNotNull(tickTimeService, "tickTimeService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.cacheFileWriter = Preconditions.checkNotNull(cacheFileWriter, "cacheFileWriter must not be empty");
+        this.fleetService = fleetService;
     }
 
     @PostConstruct
     private void loadCache() {
         LOGGER.info("Loading from persistent cache.");
 
-        final Map<String, List<String>> fileCacheContent = cacheFileWriter.getFileCacheContent(TransportJob.class);
+        final Map<String, List<String>> transportJobCache = cacheFileWriter.getFileCacheContent(TransportJob.class);
+        final Map<String, List<String>> orbitalTransportJobCache = cacheFileWriter.getFileCacheContent(OrbitalTransportJob.class);
 
         LOGGER.info("\t...loading ticks");
-        final Tick today = tickTimeService.getToday();
-
-        final Set<Integer> idTicks = Set.of(today.getNo(), today.getNo() - 1, today.getNo() - 2); // two-day-cache
+        final Set<Integer> idTicks = transportJobCache.keySet().stream().map(this::getTickId).collect(Collectors.toSet());
+        idTicks.addAll(orbitalTransportJobCache.keySet().stream().map(this::getTickId).collect(Collectors.toSet()));
         final Map<Integer, Tick> tickMap = tickTimeService.findAll(idTicks).stream()
                 .collect(Collectors.toMap(AbstractEntityKey::getId, Function.identity()));
 
         LOGGER.info("\t...loading planets");
-        final Set<Integer> idPlanets = fileCacheContent.keySet()
+        final Set<Integer> idPlanets = transportJobCache.keySet()
                 .stream()
                 .map(this::getPlanetIDsFromKey)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
+        idPlanets.addAll(orbitalTransportJobCache.keySet()
+                .stream()
+                .map(this::getIdPlanetFrom)
+                .collect(Collectors.toSet()));
         final Map<Integer, Planet> planetMap = planetService.findAll(idPlanets).stream()
                 .collect(Collectors.toMap(AbstractEntityKey::getId, Function.identity()));
 
+
+        final Set<Integer> fleetIDs = orbitalTransportJobCache.keySet().stream().map(this::getFleetId).collect(Collectors.toSet());
+        final Map<Integer, Fleet> fleetMap = fleetService.findAll(fleetIDs).stream()
+                .collect(Collectors.toMap(AbstractEntityKey::getId, Function.identity()));
+
         LOGGER.info("\t...constructing cache");
-        for (final Map.Entry<String, List<String>> entry : fileCacheContent.entrySet()) {
+        for (final Map.Entry<String, List<String>> entry : orbitalTransportJobCache.entrySet()) {
             final String key = entry.getKey();
             final List<String> values = entry.getValue();
 
-            final int tickId = getTickId(key);
-            final Tick tick = tickMap.get(tickId);
-            if (tick == null) {
-                // too old - ignore
-                continue;
-            }
-
-            final Planet from = planetMap.get(getIdPlanetFrom(key));
-            final Planet to = planetMap.get(getIdPlanetTo(key));
-            final TransportJob job = getTodayTransportJob(today, from, to);
+            final OrbitalTransportJob job = getTodayOrbitalTransportJob(
+                    tickMap.get(getTickId(key)),
+                    planetMap.get(getIdPlanetFrom(key)),
+                    fleetMap.get(getFleetId(key)),
+                    getTransportType(key));
 
             values.stream()
                     .filter(value -> Arrays.stream(EResourceType.values()).anyMatch(eResourceType -> value.contains(eResourceType.name())))
@@ -112,6 +119,27 @@ public class TransportationCache {
                     .forEach(r -> job.add(r.getRealType(), r.getAmount()));
         }
 
+        for (final Map.Entry<String, List<String>> entry : transportJobCache.entrySet()) {
+            final String key = entry.getKey();
+            final List<String> values = entry.getValue();
+
+            final TransportJob job = getTodayTransportJob(
+                    tickMap.get(getTickId(key)),
+                    planetMap.get(getIdPlanetFrom(key)),
+                    planetMap.get(getIdPlanetTo(key)));
+
+            values.stream()
+                    .filter(value -> Arrays.stream(EResourceType.values()).anyMatch(eResourceType -> value.contains(eResourceType.name())))
+                    .map(this::fromJsonToR)
+                    .filter(Objects::nonNull)
+                    .forEach(r -> job.add(r.getRealType(), r.getAmount()));
+
+            values.stream()
+                    .filter(value -> Arrays.stream(EEducationType.values()).anyMatch(eResourceType -> value.contains(eResourceType.name())))
+                    .map(this::fromJsonToHR)
+                    .filter(Objects::nonNull)
+                    .forEach(r -> job.add(r.getRealType(), r.getAmount()));
+        }
         LOGGER.info("Done loading cache into heap.");
     }
 
@@ -124,6 +152,15 @@ public class TransportationCache {
 
     private int getTickId(@Nonnull final String key) {
         return Integer.parseInt(key.split("\\|")[0]);
+    }
+
+    private int getFleetId(@Nonnull final String key) {
+        return Integer.parseInt(key.split("\\|")[2]);
+    }
+
+    @Nonnull
+    private ETransportType getTransportType(@Nonnull final String key) {
+        return ETransportType.valueOf(ETransportType.class, key.split("\\|")[3]);
     }
 
     private int getIdPlanetFrom(@Nonnull final String key) {
@@ -240,15 +277,33 @@ public class TransportationCache {
             return;
         }
 
+
         final OrbitalTransportJob job = getTodayOrbitalTransportJob(today, planet, fleet, transportType);
         transferred.getResources().forEach((resourceType, amount) -> {
             final long current = job.getResources().getOrDefault(resourceType, 0L);
             job.add(resourceType, amount + current);
+            final String value = toJson(new ResourceAmount(resourceType, amount));
+            cacheFileWriter.writeToFile(OrbitalTransportJob.class, getKey(today, planet, fleet, transportType), value);
         });
         transferred.getHumanResources().forEach((educationType, amount) -> {
             final long current = job.getHumanResources().getOrDefault(educationType, 0L);
             job.add(educationType, amount + current);
+            final String value = toJson(new HumanResourceAmount(educationType, amount));
+            cacheFileWriter.writeToFile(OrbitalTransportJob.class, getKey(today, planet, fleet, transportType), value);
         });
+    }
+
+    @Nonnull
+    private String getKey(@Nonnull final Tick today,
+                          @Nonnull final Planet planet,
+                          @Nonnull final Fleet fleet,
+                          @Nonnull final ETransportType transportType) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+        Preconditions.checkNotNull(transportType, "transportType must not be empty");
+
+        return today.getNo() + "|" + planet.getId() + "|" + fleet.getId() + "|" + transportType;
     }
 
     @Nonnull
