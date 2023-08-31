@@ -128,10 +128,9 @@ public class BattleReportApi extends BaseApi {
         final Integer lastQueried = battleReportCache.getLastQueryBattleReports(idUser);
         battleReportCache.setLastQueryBattleReports(today, idUser);
         if (lastQueried != null && lastQueried.equals(today.getNo())) {
-            // has already asked today or never asked before
             return ResponseEntity.ok(false);
         }
-        final boolean hasNewReportsSince = battleReportService.hasNewReportsSince(idUser, lastQueried != null ? lastQueried : 0);
+        final boolean hasNewReportsSince = battleReportService.hasNewReportsSince(idUser, lastQueried != null ? lastQueried : today.getNo());
         return ResponseEntity.ok(hasNewReportsSince);
     }
 }

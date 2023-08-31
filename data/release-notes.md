@@ -18,7 +18,6 @@ todo. heat indicator on map
 1. Die Infos auf dem Dashboard werden bei allen Themen einen Neustart überleben
 
 
-- colo cahce
 - fleet movement
 
 ### Bugs fixed

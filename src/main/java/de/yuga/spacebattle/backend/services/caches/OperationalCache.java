@@ -98,7 +98,6 @@ public class OperationalCache extends BaseCache {
         return Objects.requireNonNullElse(cache.get(cacheKey), new HashSet<Commissioning>()).stream().filter(t -> t.isToday(today)).collect(Collectors.toSet());
     }
 
-
     private void dropAndWrite(@Nonnull final Tick today,
                               @Nonnull final User user) {
         Preconditions.checkNotNull(today, "today must not be empty");
@@ -110,7 +109,6 @@ public class OperationalCache extends BaseCache {
         cacheFileWriter.dropKeyFromFileCache(this.getClass(), cacheKey);
         cacheFileWriter.writeToFile(this.getClass(), cacheKey, toJson(today, user, commissionings));
     }
-
 
     @Nonnull
     private String toJson(@Nonnull final Tick today,
