@@ -84,6 +84,10 @@ public class Commissioning {
         this.warships = Preconditions.checkNotNull(warShips, "warShips must not be empty");
     }
 
+    public void addWarships(@Nonnull final List<WarShip> warShips) {
+        this.warships.addAll(Preconditions.checkNotNull(warShips, "warShips must not be empty"));
+    }
+
     @Nonnull
     public List<WarShip> getWarships() {
         return warships;

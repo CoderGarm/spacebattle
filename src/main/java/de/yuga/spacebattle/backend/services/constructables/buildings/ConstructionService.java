@@ -38,6 +38,14 @@ public class ConstructionService {
         return constructionRepository.findAllConstructions();
     }
 
+
+    @Nonnull
+    public List<Construction> findAll(@Nonnull final Collection<Integer> ids) {
+        Preconditions.checkNotNull(ids, "ids must not be empty");
+
+        return constructionRepository.findAllById(ids);
+    }
+
     @Nullable
     public Construction find(@Nonnull final Integer idConstruction) {
         Preconditions.checkNotNull(idConstruction, "idConstruction shouldn't be null!");

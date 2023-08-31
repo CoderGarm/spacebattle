@@ -23,4 +23,16 @@ public class BaseCache {
 
         return idUser + "-" + today.getId();
     }
+
+    public int getUserId(@Nonnull final String key) {
+        Preconditions.checkNotNull(key, "key must not be empty");
+
+        return Integer.parseInt(key.split("-")[0]);
+    }
+
+    public int getTickId(@Nonnull final String key) {
+        Preconditions.checkNotNull(key, "key must not be empty");
+
+        return Integer.parseInt(key.split("-")[1]);
+    }
 }

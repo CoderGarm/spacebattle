@@ -51,8 +51,7 @@ public class CacheFileWriter {
             final FileWriter fw = new FileWriter(path + PS + fileName, true);
             return new BufferedWriter(fw);
         } catch (IOException e) {
-            e.printStackTrace();
-            throw new NotifyWebUserException("CacheFileWriter receives an error on open" + e.getMessage());
+            throw new NotifyWebUserException("CacheFileWriter receives an error on open: " + e.getMessage());
         }
     }
 
@@ -63,7 +62,6 @@ public class CacheFileWriter {
             bw.write(msg);
             bw.newLine();
         } catch (IOException e) {
-            e.printStackTrace();
             throw new NotifyWebUserException("CacheFileWriter receives an error on write" + e.getMessage());
         }
     }
@@ -73,7 +71,6 @@ public class CacheFileWriter {
         try {
             bw.close();
         } catch (IOException e) {
-            e.printStackTrace();
             throw new NotifyWebUserException("CacheFileWriter receives an error on close " + e.getMessage());
         }
     }
@@ -88,6 +85,23 @@ public class CacheFileWriter {
         write(bufferedWriter, key + KEY_SEPARATOR_WRITER + value);
 
         closeAndWrite(bufferedWriter);
+    }
+
+    public void dropKeyFromFileCache(@Nonnull final Class<?> aClass, @Nonnull final String key) {
+        Preconditions.checkNotNull(aClass, "aClass must not be empty");
+        Preconditions.checkNotNull(key, "key must not be empty");
+
+        final String path = USR_HOME + PS + cacheDir + PS + aClass.getSimpleName();
+        final File dir = new File(path);
+        final List<String> strings = readFile(dir);
+        dir.delete();
+        strings.forEach(string -> {
+            final String[] split = string.split(KEY_SEPARATOR);
+            final String lineKey = split[0];
+            if (!key.equals(lineKey)) {
+                writeToFile(aClass, lineKey, split[1]);
+            }
+        });
     }
 
     @Nonnull
@@ -121,7 +135,6 @@ public class CacheFileWriter {
         try (final InputStream inputStream = Files.newInputStream(file.toPath())) {
             return readFromInputStream(inputStream);
         } catch (IOException e) {
-            e.printStackTrace();
             throw new AssertionError(e);
         }
     }

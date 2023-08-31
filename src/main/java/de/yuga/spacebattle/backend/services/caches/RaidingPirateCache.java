@@ -175,7 +175,6 @@ public class RaidingPirateCache {
         return new GsonBuilder().create().fromJson(string, TargetDto.class);
     }
 
-
     @Nonnull
     private String toJson(@Nonnull final Fleet pirateFleet,
                           @Nonnull final List<EMissionAction> actions) {

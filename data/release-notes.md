@@ -15,12 +15,11 @@ todo. heat indicator on map
 
 #### Diverses
 
-todo. persistent caches
+1. Die Infos auf dem Dashboard werden bei allen Themen einen Neustart überleben
 
-- battle report persistent
+
 - colo cahce
 - fleet movement
-- operational
 
 ### Bugs fixed
 

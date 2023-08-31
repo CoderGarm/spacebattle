@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.services.caches.file.CacheFileWriter;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -22,6 +23,7 @@ public class BattleReportCache {
     @Nonnull
     private final CacheFileWriter cacheFileWriter;
 
+    @Autowired
     public BattleReportCache(@Nonnull final CacheFileWriter cacheFileWriter) {
         this.cacheFileWriter = Preconditions.checkNotNull(cacheFileWriter, "cacheFileWriter must not be empty");
     }
@@ -49,6 +51,6 @@ public class BattleReportCache {
         Preconditions.checkNotNull(today, "today must not be empty");
 
         lastQueryBattleReportsCache.put(idUser, today.getNo());
-        cacheFileWriter.writeToFile(this.getClass(), idUser + "|" + today.getNo(), "random");
+        cacheFileWriter.writeToFile(this.getClass(), idUser + "-" + today.getNo(), "random");
     }
 }
