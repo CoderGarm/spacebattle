@@ -65,6 +65,8 @@ public class FleetMovementTickRunner implements TickRunner {
      * Runs the tick for all movements.
      */
     private void tickMovements() {
+        Preconditions.checkNotNull(today, "today must not be empty");
+
         final List<Move> movements = moveService.findAll();
         for (final Move m : movements) {
             boolean isDone = move(m);
@@ -72,9 +74,8 @@ public class FleetMovementTickRunner implements TickRunner {
                 Fleet fleet = m.getFleet();
                 fleet.setMove(null);
                 fleet = fleetService.save(fleet);
-                final Planet originPlanet = planetService.findByCoordinates(m.getOriginOrbit());
                 final Planet destinationPlanet = planetService.findByCoordinates(m.getDestinationOrbit());
-                if (originPlanet != null && destinationPlanet != null) {
+                if (destinationPlanet != null) {
                     // planet to planet travel
                     fleetMovementCache.add(today, fleet, m, destinationPlanet);
                 }

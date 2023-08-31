@@ -66,6 +66,20 @@ public class FleetMovement {
         this.isForeignFleet = isForeignFleet;
     }
 
+    public FleetMovement(@Nonnull final Tick tick,
+                         @Nonnull final Fleet fleet,
+                         @Nullable final Planet planet,
+                         @Nonnull final StarSystem starSystem,
+                         final int originalDuration,
+                         final boolean isForeignFleet) {
+        this.today = tick;
+        this.fleet = fleet;
+        this.destinationPlanet = planet;
+        this.destinationSystem = starSystem;
+        this.originalDuration = originalDuration;
+        this.isForeignFleet = isForeignFleet;
+    }
+
     @Nonnull
     public Tick getToday() {
         return today;

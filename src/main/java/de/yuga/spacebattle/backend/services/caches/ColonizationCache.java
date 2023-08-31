@@ -145,7 +145,7 @@ public class ColonizationCache extends BaseCache {
     }
 
     @Schema
-    public static class ColoDto {
+    private static class ColoDto {
 
         @Nonnull
         @JsonProperty

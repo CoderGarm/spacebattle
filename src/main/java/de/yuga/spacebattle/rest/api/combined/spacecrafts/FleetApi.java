@@ -511,7 +511,7 @@ public class FleetApi extends BaseApi {
         final List<Integer> targetSystemIds = moves.stream()
                 .map(FleetMove::getIdDestinationSystem)
                 .filter(Objects::nonNull).collect(Collectors.toList());
-        final Map<Integer, StarSystem> targetSystemsByIds = starSystemService.findByIds(targetSystemIds).stream().collect(Collectors.toMap(StarSystem::getId, Function.identity()));
+        final Map<Integer, StarSystem> targetSystemsByIds = starSystemService.findAll(targetSystemIds).stream().collect(Collectors.toMap(StarSystem::getId, Function.identity()));
 
         return moves.stream().map(move -> {
             final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetsToMoveById.get(move.getIdFleetToMove());

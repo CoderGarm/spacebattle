@@ -18,7 +18,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 public class StarSystemService {
@@ -39,9 +38,10 @@ public class StarSystemService {
     }
 
     @Nonnull
-    public List<StarSystem> findByIds(List<Integer> fleetIDs) {
-        final Iterable<StarSystem> allById = starsystemRepository.findAllById(fleetIDs);
-        return StreamSupport.stream(allById.spliterator(), false).collect(Collectors.toList());
+    public List<StarSystem> findAll(@Nonnull final Collection<Integer> ids) {
+        Preconditions.checkNotNull(ids, "ids must not be empty");
+
+        return starsystemRepository.findAllById(ids);
     }
 
     /**

@@ -232,7 +232,7 @@ public class OperationalCache extends BaseCache {
     }
 
     @Schema
-    public static class CommissioningDto {
+    private static class CommissioningDto {
 
         @Nonnull
         @JsonProperty
