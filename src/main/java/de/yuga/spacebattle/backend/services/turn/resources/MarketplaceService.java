@@ -24,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -77,6 +78,11 @@ public class MarketplaceService {
         return new TradesInTimeframe(List.of(today), trades);
     }
 
+    @Nonnull
+    public List<TradedResource> findTodayTradedResourceForUser(final int idUser) {
+        final Tick today = tickService.getToday();
+        return Objects.requireNonNullElse(tradedResourceRepository.findTradesStartedAtTickForUser(today.getNo(), idUser), new ArrayList<>());
+    }
 
     @Nonnull
     public TradedResource takeOffer(final int idTradeOffer, final int idBuyer, final int idPlanetDestination) {
@@ -314,5 +320,10 @@ public class MarketplaceService {
         final TradeOffer offer = createOffer(idNPC, mainPlanet.getId(), resourceAmount.getRealType(), resourceAmount.getAmount(), price);
 
         takeOffer(offer.getId(), idUser, spotOffer.getIdPlanet());
+    }
+
+    @Nullable
+    public TradedResource findTradedResource(final int idTradedResource) {
+        return tradedResourceRepository.findById(idTradedResource).orElse(null);
     }
 }

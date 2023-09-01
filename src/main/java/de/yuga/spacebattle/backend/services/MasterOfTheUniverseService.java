@@ -16,7 +16,6 @@ import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
-import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.misc.HasName;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
@@ -225,29 +224,12 @@ public class MasterOfTheUniverseService {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
         final boolean transformationNeeded = nonPlayerCharacterService.findByUsername(PIRATE) == null;
-        if (transformationNeeded) {
+        if (transformationNeeded) { /* fixme add trader? */
 
             final NonPlayerCharacter pirate = nonPlayerCharacterService.createNPC(PIRATE);
             final Fitting fitting = new Fitting(moduleService.findAllPropulsions(), moduleService.findAllArmors(), moduleService.findAllElectronicWarfare(),
                     moduleService.findAllSidewalls(), moduleService.findAllWeapons(), moduleService.findAllLaunchers(), moduleService.findAllPassiveModules());
-            createPirateShip(pirate, fitting);
-
-            final List<User> users = userService.findAll();
-            for (final User user : users) {
-                final Planet mainPlanet = planetService.findMainPlanet(user);
-
-
-                final ShipClass songbirdClass = shipClassService.findAllLatestByOwner(user).stream()
-                        .sorted(Comparator.comparingInt(AbstractEntityKey::getId))
-                        .collect(Collectors.toList()).get(0);
-
-                final String randomWarshipName = resourceService.getRandomWarshipName();
-                final WarShip warShip = new WarShip(randomWarshipName, mainPlanet, songbirdClass);
-                final WarShip save = warShipService.save(warShip);
-
-                missionService.createMission(user, EMissionType.PIRATE_HUNT, Set.of(save.getId()), mainPlanet);
-            }
-
+            createPirateShip(pirate, fitting); /* fixme add freighter */
 
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {

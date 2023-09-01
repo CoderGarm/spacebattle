@@ -88,7 +88,7 @@ public class MarketplaceApi extends BaseApi {
     }
 
     @GetMapping(TRADE_HISTORY_FOR_USER_ENDPOINT)
-    @Operation(summary = "Get all EResourceTypes.", operationId = "getTradesForUser",
+    @Operation(summary = "Get all today relevant trades.", operationId = "getTradesForUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
@@ -102,6 +102,23 @@ public class MarketplaceApi extends BaseApi {
         final TradesInTimeframe tradesInTimeframe = marketplaceService.findFinishedAndPendingTradesForUser(getIdUser());
         final List<TradesByLocation> result = mapTradeContracts(tradesInTimeframe);
         return ResponseEntity.ok(result);
+    }
+
+
+    @GetMapping(TRADE_HISTORY_FOR_USER_ENDPOINT + "/fresh")
+    @Operation(summary = "Get all today contracted trades.", operationId = "getFreshTradesForUser",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = TradeContract.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getFreshTradesForUser() {
+        final List<TradedResource> result = marketplaceService.findTodayTradedResourceForUser(getIdUser());
+        return ResponseEntity.ok(result.stream().map(TradeContract::new).collect(Collectors.toList()));
     }
 
     @Nonnull

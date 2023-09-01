@@ -26,6 +26,10 @@ public class StateBlock {
     private boolean isActive;
 
     @JsonProperty
+    @Schema(required = true, description = "If the fleet can run interstellar movements.")
+    private boolean isFTLCapable;
+
+    @JsonProperty
     @Schema(required = true, description = "If the spacecraft is able to fight.")
     private boolean isFightingCapable;
 
@@ -46,6 +50,7 @@ public class StateBlock {
         this.isDeleted = fleet.isDeleted();
         this.isOperational = fleet.isOperational();
         this.isActive = fleet.isActive();
+        this.isFTLCapable = fleet.isFTLCapable();
         this.needsRepair = fleet.isNeedsRepair();
         this.needsAmmunition = fleet.getAliveShips().stream().anyMatch(w -> w.getWarshipHealthState().needsAmmunition());
         this.isFightingCapable = fleet.isOperational();
@@ -57,6 +62,7 @@ public class StateBlock {
         this.isDeleted = !warShip.isAlive();
         this.isOperational = warShip.isOperational();
         this.isActive = warShip.isAlive();
+        this.isFTLCapable = warShip.getShipClass().isFTLCapable();
         final WarshipHealthState warshipHealthState = warShip.getWarshipHealthState();
         this.needsRepair = warshipHealthState.needsRepair();
         this.needsAmmunition = warshipHealthState.needsAmmunition();
@@ -69,6 +75,7 @@ public class StateBlock {
         this.isDeleted = !warshipHealthState.isAlive();
         this.isOperational = warshipHealthState.isOperational();
         this.isActive = warshipHealthState.isAlive();
+        this.isFTLCapable = warshipHealthState.getWarShip().getShipClass().isFTLCapable();
         this.needsRepair = warshipHealthState.needsRepair();
         this.needsAmmunition = warshipHealthState.needsAmmunition();
         this.isFightingCapable = warshipHealthState.isFightingCapable();

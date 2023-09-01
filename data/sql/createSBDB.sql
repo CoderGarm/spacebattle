@@ -390,7 +390,8 @@
         idActor integer not null,
         idTickStartedAt integer not null,
         idTickStoppedAt integer,
-        idPlanet integer not null,
+        idTradeResource integer,
+        idPlanet integer,
         primary key (idMission)
     ) engine=InnoDB;
 
@@ -1270,6 +1271,11 @@
        references tick (idTick);
 
     alter table mission 
+       add constraint FKgn39ow7ddmkf4bhyk50s47m1f 
+       foreign key (idTradeResource) 
+       references tradedResource (idTradedResource);
+
+    alter table mission 
        add constraint FKholrjg4864rt9j8qqs349b7ue 
        foreign key (idPlanet) 
        references planet (idPlanet);
@@ -2097,3 +2103,4 @@ insert into dbPatch values (null, now(), 'naval amendments', '0.1.6-4');
 insert into dbPatch values (null, now(), 'profile pic', '0.1.7-1');
 insert into dbPatch values (null, now(), 'drop persisted demand', '0.1.8-1');
 insert into dbPatch values (null, now(), 'switch to job type', '0.1.9-1');
+insert into dbPatch values (null, now(), 'add convoy mission', '0.1.10-1');

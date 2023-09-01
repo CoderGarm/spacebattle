@@ -8,13 +8,13 @@ import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.mission.ConvoyProtectionMission;
 import de.yuga.spacebattle.backend.entities.turn.mission.Mission;
 import de.yuga.spacebattle.backend.entities.turn.mission.PirateHuntMission;
+import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import de.yuga.spacebattle.backend.enums.EMissionType;
 import de.yuga.spacebattle.backend.repositories.turn.mission.ConvoyProtectionMissionRepository;
 import de.yuga.spacebattle.backend.repositories.turn.mission.MissionRepository;
 import de.yuga.spacebattle.backend.repositories.turn.mission.PirateHuntMissionRepository;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.turn.TickTimeService;
-import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -71,29 +71,26 @@ public class MissionService {
     }
 
     @Nonnull
-    public Mission createMission(@Nonnull final User actor, @Nonnull final EMissionType missionType, @Nonnull final Set<Integer> warshipIDs, @Nonnull final Planet planet) {
+    public Mission createPirateHuntMission(@Nonnull final User actor, @Nonnull final Set<Integer> warshipIDs, @Nonnull final Planet planet) {
         Preconditions.checkNotNull(actor, "actor must not be empty");
-        Preconditions.checkNotNull(missionType, "missionType must not be empty");
         Preconditions.checkNotNull(warshipIDs, "warshipIDs must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
         final Tick today = tickTimeService.getToday();
+        final Mission mission = pirateHuntMissionRepository.save(new PirateHuntMission(actor, today, planet));
+        mission.setMissionType(EMissionType.PIRATE_HUNT);
+        return enrichWithShips(mission, warshipIDs);
+    }
 
-        Mission mission;
-        switch (missionType) {
-            case PIRATE_HUNT:
-                mission = pirateHuntMissionRepository.save(new PirateHuntMission(actor, today, planet));
-                mission.setMissionType(EMissionType.PIRATE_HUNT);
-                break;
-            case CONVOY_PROTECTION:
-                mission = convoyProtectionMissionRepository.save(new ConvoyProtectionMission(actor, today, planet));
-                mission.setMissionType(EMissionType.CONVOY_PROTECTION);
-                break;
-            case PIRATE_RAID:
-            default:
-                throw new NotifyWebUserException("This will not work, buddy. You are not a pirate!");
-        }
+    @Nonnull
+    public Mission createConvoyProtectionMission(@Nonnull final User actor, @Nonnull final Set<Integer> warshipIDs, @Nonnull final TradedResource protectedTrade) {
+        Preconditions.checkNotNull(actor, "actor must not be empty");
+        Preconditions.checkNotNull(warshipIDs, "warshipIDs must not be empty");
+        Preconditions.checkNotNull(protectedTrade, "protectedTrade must not be empty");
 
+        final Tick today = tickTimeService.getToday();
+        final Mission mission = convoyProtectionMissionRepository.save(new ConvoyProtectionMission(actor, today, protectedTrade));
+        mission.setMissionType(EMissionType.CONVOY_PROTECTION);
         return enrichWithShips(mission, warshipIDs);
     }
 

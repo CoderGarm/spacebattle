@@ -2,9 +2,13 @@ package de.yuga.spacebattle.rest.dto.turn.mission;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.turn.mission.ConvoyProtectionMission;
+import de.yuga.spacebattle.backend.entities.turn.mission.PirateHuntMission;
 import de.yuga.spacebattle.backend.enums.EMissionType;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.rest.dto.orbitals.Planet;
+import de.yuga.spacebattle.rest.dto.turn.Tick;
+import de.yuga.spacebattle.rest.dto.turn.resources.trade.TradeContract;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -30,8 +34,23 @@ public class Mission {
 
     @Nonnull
     @JsonProperty
-    @Schema(required = true, description = "The venue of this mission.")
+    @Schema(required = true, description = "When the mission was started.")
+    private Tick started;
+
+    @Nullable
+    @JsonProperty
+    @Schema(description = "The venue of this mission.")
     private Planet venue;
+
+    @Nullable
+    @JsonProperty
+    @Schema(description = "The target when this mission is a convoy protection.")
+    private Integer idTradedResource;
+
+    @Nullable
+    @JsonProperty
+    @Schema(description = "The target when this mission is a convoy protection.")
+    private TradeContract tradeContract;
 
     @Nonnull
     @JsonProperty
@@ -52,7 +71,10 @@ public class Mission {
 
         this.idMission = mission.getId();
         this.missionType = mission.getMissionType();
-        this.venue = new Planet(mission.getVenue());
+        this.started = new Tick(mission.getStarted());
+        this.venue = mission instanceof PirateHuntMission ? new Planet(((PirateHuntMission) mission).getVenue()) : null;
+        this.idTradedResource = mission instanceof ConvoyProtectionMission ? ((ConvoyProtectionMission) mission).getProtectedTrade().getId() : null;
+        this.tradeContract = mission instanceof ConvoyProtectionMission ? new TradeContract(((ConvoyProtectionMission) mission).getProtectedTrade()) : null;
         this.ships = mission.getShips().stream().map(w -> new WarShip(w, w.getWarshipHealthState(), languageCode)).collect(Collectors.toList());
         this.warShipIDs = this.ships.stream().map(WarShip::getIdWarship).collect(Collectors.toSet());
     }
@@ -67,9 +89,14 @@ public class Mission {
         return missionType;
     }
 
-    @Nonnull
+    @Nullable
     public Planet getVenue() {
         return venue;
+    }
+
+    @Nullable
+    public Integer getIdTradedResource() {
+        return idTradedResource;
     }
 
     @Nonnull

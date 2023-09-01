@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.misc.Deletable;
-import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.enums.EMissionType;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -53,24 +52,12 @@ public class Mission extends Deletable {
     @JoinColumn(name = "idMission")
     private final Set<WarShip> ships = new HashSet<>();
 
-    /**
-     * The place to be.
-     */
-    @Nonnull
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "idPlanet")
-    private Planet venue;
-
     public Mission() {
     }
 
-    public Mission(@Nonnull final User actor,
-                   @Nonnull final Tick started,
-                   @Nonnull final Planet venue) {
+    public Mission(@Nonnull final User actor, @Nonnull final Tick started) {
         this.actor = Preconditions.checkNotNull(actor, "actor must not be empty");
         this.started = Preconditions.checkNotNull(started, "started must not be empty");
-        this.venue = Preconditions.checkNotNull(venue, "venue must not be empty");
     }
 
     @Nonnull
@@ -99,11 +86,6 @@ public class Mission extends Deletable {
     }
 
     @Nonnull
-    public Planet getVenue() {
-        return venue;
-    }
-
-    @Nonnull
     public EMissionType getMissionType() {
         return missionType;
     }
@@ -128,7 +110,7 @@ public class Mission extends Deletable {
         this.ships.addAll(Preconditions.checkNotNull(warShips, "warShips must not be empty"));
     }
 
-    public void setMissionType(@Nonnull EMissionType missionType) {
+    public void setMissionType(@Nonnull final EMissionType missionType) {
         this.missionType = Preconditions.checkNotNull(missionType, "missionType must not be empty");
     }
 }

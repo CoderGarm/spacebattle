@@ -2,13 +2,19 @@
 
 #### Gameplay
 
+1. Man kann seine Konvois nun per Mission schützen.
+   Es gibt auch ein Tutorial dazu!
+
+- jeder kann trades bewachen
+- nur FTL-Schiffe
+
 todo. convoy raid pirate mission
-todo. convoy protect mission
 
 todo. Pläne von wo nach wo (Lieferzeit) festlegen
 
 - NPC trader
 - default trading ship
+- lösegeld vs verlust
 
 todo. punkte für missionen
 todo. aktive Spielermissionen, e.g. provoke pirate raid at user or planet
@@ -17,11 +23,19 @@ todo. heat indicator on map
 #### Diverses
 
 1. Die Dashboard-Informationen werden ab jetzt bei allen Themen einen Neustart überleben.
+2. Die Tab-Reihenfolge bei StratOps ist getauscht. Damit muss man die Karte nur laden, wenn man die Karte auch braucht.
+   todo. starmap datenmenge reduzieren oder auf stream umstellen -> es wird pro Ladevorgang kumulativ oft geladen
+   todo. take-a-tour updaten
+   todo. tutorials mind. für missionen nachtragen
+   todo. gekaufte offers müssen aus der liste raus
 
 ### Bugs fixed
 
+1. Man kann einer Mission mehrere Schiffe zuweisen.
+
 #### next steps
 
+- ress verschieben per zahleneingabe
 - article edit stuff
 - menü als vertikaler slider
 - minimal intelligence on foreign fleet if visible

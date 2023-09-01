@@ -3,12 +3,15 @@ package de.yuga.spacebattle.rest.api.turn.mission;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.backend.services.turn.mission.MissionService;
+import de.yuga.spacebattle.backend.services.turn.resources.MarketplaceService;
 import de.yuga.spacebattle.rest.api.BaseApi;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.mission.Mission;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,17 +56,19 @@ public class MissionApi extends BaseApi {
     @Nonnull
     private final PlanetService planetService;
     private final UserService userService;
+    private final MarketplaceService marketplaceService;
 
     @Autowired
     public MissionApi(@Nonnull final FleetService fleetService,
                       @Nonnull final MissionService missionService,
                       @Nonnull final StarSystemService starSystemService,
-                      @Nonnull final PlanetService planetService, final UserService userService) {
+                      @Nonnull final PlanetService planetService, final UserService userService, final MarketplaceService marketplaceService) {
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         this.missionService = Preconditions.checkNotNull(missionService, "missionService shouldn't be null!");
         this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.userService = userService;
+        this.marketplaceService = marketplaceService;
     }
 
     @GetMapping()
@@ -110,10 +116,28 @@ public class MissionApi extends BaseApi {
         final User actor = userService.find(getIdUser());
         Preconditions.checkNotNull(actor, "actor must not be empty");
 
-
-        final Planet planet = planetService.find(mission.getVenue().getIdPlanet());
-        Preconditions.checkNotNull(planet, "planet must not be empty");
-        final de.yuga.spacebattle.backend.entities.turn.mission.Mission result = missionService.createMission(actor, mission.getMissionType(), warshipIDs, planet);
+        final de.yuga.spacebattle.backend.entities.turn.mission.Mission result;
+        switch (mission.getMissionType()) {
+            case PIRATE_HUNT:
+                final Planet planet = planetService.find(Objects.requireNonNull(mission.getVenue()).getIdPlanet());
+                Preconditions.checkNotNull(planet, "planet must not be empty");
+                result = missionService.createPirateHuntMission(actor, warshipIDs, planet);
+                break;
+            case CONVOY_PROTECTION:
+                final Integer idTradedResource = mission.getIdTradedResource();
+                if (idTradedResource == null) {
+                    throw new NotifyWebUserException("This will not work, sorry.");
+                }
+                final TradedResource tradedResource = marketplaceService.findTradedResource(idTradedResource);
+                if (tradedResource == null) {
+                    throw new NotifyWebUserException("This will not work, sorry.");
+                }
+                // yes, you can protect every trade if you can address them
+                result = missionService.createConvoyProtectionMission(actor, warshipIDs, tradedResource);
+                break;
+            default:
+                throw new NotifyWebUserException("This was a pretty nice try to break the rules.");
+        }
         return ResponseEntity.ok(new Mission(result, getPreferredLanguage()));
     }
 

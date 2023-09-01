@@ -62,10 +62,6 @@ public class FleetMarker {
     private Move move;
 
     @JsonProperty
-    @Schema(required = true, description = "If the fleet can run interstellar movements.")
-    private boolean isFTLCapable;
-
-    @JsonProperty
     @Schema(required = true, description = "The states of the fleet.")
     private StateBlock state;
 
@@ -81,7 +77,6 @@ public class FleetMarker {
         this.name = fleet.getName();
         this.orbit = fleet.getOrbit() != null ? new FleetOrbit(fleet.getOrbit()) : null;
         this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;
-        this.isFTLCapable = fleet.isFTLCapable();
         this.state = new StateBlock(fleet);
     }
 
@@ -95,7 +90,6 @@ public class FleetMarker {
         this.name = fleet.getName();
         this.orbit = fleet.getOrbit() != null ? new FleetOrbit(fleet.getOrbit()) : null;
         this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;
-        this.isFTLCapable = fleet.isFTLCapable();
         this.state = new StateBlock(fleet);
     }
 

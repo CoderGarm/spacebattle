@@ -20,6 +20,10 @@ public interface TradedResourceRepository extends JpaRepository<TradedResource, 
     List<TradedResource> findFinishedAndPendingTradesForUser(@Param("tickNo") final int tickNo, @Param("idUser") final int idUser);
 
     @Nullable
+    @Query("SELECT t FROM TradedResource t WHERE (t.buyer.id = :idUser OR t.tradeOffer.seller.id = :idUser) AND t.tick.id = :tickNo")
+    List<TradedResource> findTradesStartedAtTickForUser(@Param("tickNo") final int tickNo, @Param("idUser") final int idUser);
+
+    @Nullable
     @Query("SELECT t FROM TradedResource t WHERE t.isDeleted = false")
     List<TradedResource> findAllUnfinished();
 }

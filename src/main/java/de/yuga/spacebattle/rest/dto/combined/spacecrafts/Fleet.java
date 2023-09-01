@@ -73,10 +73,6 @@ public class Fleet {
     @Schema(required = true, description = "The capacities used per area.")
     private SpacecraftCapacityAreas spacecraftCapacityAreas;
 
-    @JsonProperty
-    @Schema(required = true, description = "If the fleet can run interstellar movements.")
-    private boolean isFTLCapable;
-
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The states of the fleet.")
@@ -106,7 +102,6 @@ public class Fleet {
         this.spacecraftCapabilities = new SpacecraftCapabilities(fleet);
         this.baseSpacecraftCapabilities = new SpacecraftCapabilities(fleet.getShipsByClass());
         this.spacecraftCapacityAreas = new SpacecraftCapacityAreas(fleet);
-        this.isFTLCapable = fleet.isFTLCapable();
         this.state = new StateBlock(fleet);
     }
 
@@ -125,7 +120,6 @@ public class Fleet {
         this.spacecraftCapabilities = new SpacecraftCapabilities(fleetSnapshot);
         this.baseSpacecraftCapabilities = new SpacecraftCapabilities(fleet.getShipsByClass());
         this.spacecraftCapacityAreas = new SpacecraftCapacityAreas(fleet);
-        this.isFTLCapable = fleet.isFTLCapable();
         this.state = new StateBlock(fleet);
     }
 }
