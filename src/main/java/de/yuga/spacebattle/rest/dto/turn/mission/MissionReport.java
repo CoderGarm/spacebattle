@@ -1,9 +1,11 @@
 package de.yuga.spacebattle.rest.dto.turn.mission;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.turn.mission.MissionItem;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
+import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import de.yuga.spacebattle.backend.enums.EMissionType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -20,9 +22,26 @@ public class MissionReport {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The by-venue grouped results.")
-    private List<MissionActionItemGroup> actionItemGroups = new ArrayList<>();
+    private List<PirateRaidActionItemGroup> actionItemGroups = new ArrayList<>();
 
-    public MissionReport(@Nonnull final List<MissionItem> missionItems, @Nonnull final String preferredLanguage) {
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The by-trade grouped results.")
+    private List<ConvoyRaidActionItemGroup> convoyActionItemGroups = new ArrayList<>();
+
+    public MissionReport(@Nonnull final List<MissionItem> missionItems,
+                         @Nonnull final List<TradedResource> finishedTrades,
+                         @Nonnull final String preferredLanguage) {
+        Preconditions.checkNotNull(missionItems, "missionItems must not be empty");
+        Preconditions.checkNotNull(finishedTrades, "finishedTrades must not be empty");
+        Preconditions.checkNotNull(preferredLanguage, "preferredLanguage must not be empty");
+
+        constructRaidItems(missionItems, preferredLanguage);
+        this.convoyActionItemGroups = finishedTrades.stream().map(ConvoyRaidActionItemGroup::new).collect(Collectors.toList());
+    }
+
+    @JsonIgnore
+    private void constructRaidItems(@Nonnull final List<MissionItem> missionItems, @Nonnull final String preferredLanguage) {
         Preconditions.checkNotNull(missionItems, "missionItems must not be empty");
         Preconditions.checkNotNull(preferredLanguage, "preferredLanguage must not be empty");
 
@@ -39,9 +58,8 @@ public class MissionReport {
                 items1.stream()
                         .collect(Collectors.groupingBy(MissionItem::getTarget,
                                 Collectors.mapping(Function.identity(), Collectors.toList())))
-                        .forEach((planet, itemsPerPlanet) -> actionItemGroups.add(new MissionActionItemGroup(missionType, planet, itemsPerPlanet, preferredLanguage)));
+                        .forEach((planet, itemsPerPlanet) -> actionItemGroups.add(new PirateRaidActionItemGroup(missionType, planet, itemsPerPlanet, preferredLanguage)));
             });
         });
-
     }
 }

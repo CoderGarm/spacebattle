@@ -5,9 +5,7 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import de.yuga.spacebattle.backend.services.account.UserService;
-import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
-import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.backend.services.turn.mission.MissionService;
 import de.yuga.spacebattle.backend.services.turn.resources.MarketplaceService;
 import de.yuga.spacebattle.rest.api.BaseApi;
@@ -45,30 +43,26 @@ public class MissionApi extends BaseApi {
     public static final String STOP_MISSION_ENDPOINT = "stop";
 
     @Nonnull
-    private final FleetService fleetService;
-
-    @Nonnull
-    private final StarSystemService starSystemService;
-
-    @Nonnull
     private final MissionService missionService;
 
     @Nonnull
     private final PlanetService planetService;
+
+    @Nonnull
     private final UserService userService;
+
+    @Nonnull
     private final MarketplaceService marketplaceService;
 
     @Autowired
-    public MissionApi(@Nonnull final FleetService fleetService,
-                      @Nonnull final MissionService missionService,
-                      @Nonnull final StarSystemService starSystemService,
-                      @Nonnull final PlanetService planetService, final UserService userService, final MarketplaceService marketplaceService) {
-        this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
+    public MissionApi(@Nonnull final MissionService missionService,
+                      @Nonnull final PlanetService planetService,
+                      @Nonnull final UserService userService,
+                      @Nonnull final MarketplaceService marketplaceService) {
         this.missionService = Preconditions.checkNotNull(missionService, "missionService shouldn't be null!");
-        this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
-        this.userService = userService;
-        this.marketplaceService = marketplaceService;
+        this.userService = Preconditions.checkNotNull(userService, "userService must not be empty");
+        this.marketplaceService = Preconditions.checkNotNull(marketplaceService, "marketplaceService must not be empty");
     }
 
     @GetMapping()

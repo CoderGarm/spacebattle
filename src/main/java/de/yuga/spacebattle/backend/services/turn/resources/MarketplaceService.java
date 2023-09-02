@@ -85,6 +85,12 @@ public class MarketplaceService {
     }
 
     @Nonnull
+    public List<TradedResource> findFinishedForUser(final int idUser) {
+        final Tick today = tickService.getToday();
+        return Objects.requireNonNullElse(tradedResourceRepository.findFinishedForUser(today.getNo(), idUser), new ArrayList<>());
+    }
+
+    @Nonnull
     public TradedResource takeOffer(final int idTradeOffer, final int idBuyer, final int idPlanetDestination) {
 
         final Tick today = tickService.getToday();
@@ -325,5 +331,15 @@ public class MarketplaceService {
     @Nullable
     public TradedResource findTradedResource(final int idTradedResource) {
         return tradedResourceRepository.findById(idTradedResource).orElse(null);
+    }
+
+    @Nonnull
+    public List<TradedResource> findTomorrowsTrades() {
+        return Objects.requireNonNullElse(tradedResourceRepository.findTomorrowsTrades(), new ArrayList<>());
+    }
+
+    public List<TradedResource> findTodayTrades() {
+        final Tick today = tickService.getToday();
+        return Objects.requireNonNullElse(tradedResourceRepository.findTodayTrades(today.getNo()), new ArrayList<>());
     }
 }

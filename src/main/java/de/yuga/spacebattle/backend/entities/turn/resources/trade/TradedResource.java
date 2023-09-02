@@ -5,12 +5,15 @@ import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.misc.Completable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
+import de.yuga.spacebattle.backend.entities.turn.mission.ConvoyProtectionMissionItem;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "tradedResource")
@@ -39,6 +42,10 @@ public class TradedResource extends Completable {
     @ManyToOne
     @JoinColumn(name = "idDestination")
     private Planet destination;
+
+    @Nonnull
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "affectedTrade")
+    private List<ConvoyProtectionMissionItem> convoyProtectionMissionItems = new ArrayList<>();
 
     public TradedResource() {
     }
@@ -89,5 +96,28 @@ public class TradedResource extends Completable {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37).append(id).toHashCode();
+    }
+
+    public long getFullPrice() {
+        final long amount = getTradedAmount();
+        return tradeOffer.getUnitPrice() * amount;
+    }
+
+    public long getTradedAmount() {
+        long amount = tradeOffer.getAmount();
+        if (!convoyProtectionMissionItems.isEmpty()) {
+            for (final ConvoyProtectionMissionItem item : convoyProtectionMissionItems) {
+                final int stolen = item.getPercentOfCargoLost();
+                if (stolen != 0) {
+                    amount = amount * stolen / 100;
+                }
+            }
+        }
+        return amount;
+    }
+
+    @Nonnull
+    public List<ConvoyProtectionMissionItem> getConvoyProtectionMissionItems() {
+        return convoyProtectionMissionItems;
     }
 }

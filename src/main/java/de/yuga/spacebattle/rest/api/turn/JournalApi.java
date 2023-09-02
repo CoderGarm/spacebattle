@@ -2,10 +2,12 @@ package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.turn.mission.MissionItem;
+import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import de.yuga.spacebattle.backend.services.caches.*;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.TickTimeService;
+import de.yuga.spacebattle.backend.services.turn.resources.MarketplaceService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.*;
@@ -68,6 +70,9 @@ public class JournalApi extends BaseApi {
     @Nonnull
     private final OperationalService operationalService;
 
+    @Nonnull
+    private final MarketplaceService marketplaceService;
+
     @Autowired
     public JournalApi(@Nonnull final TickTimeService tickService,
                       @Nonnull final JobService jobService,
@@ -76,7 +81,8 @@ public class JournalApi extends BaseApi {
                       @Nonnull final ColonizationCache colonizationCache,
                       @Nonnull final OperationalCache operationalCache,
                       @Nonnull final MissionCache missionCache,
-                      @Nonnull final OperationalService operationalService) {
+                      @Nonnull final OperationalService operationalService,
+                      @Nonnull final MarketplaceService marketplaceService) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
         this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
         this.transportationCache = Preconditions.checkNotNull(transportationCache, "transportationCache must not be empty");
@@ -85,6 +91,7 @@ public class JournalApi extends BaseApi {
         this.operationalCache = Preconditions.checkNotNull(operationalCache, "operationalCache must not be empty");
         this.missionCache = Preconditions.checkNotNull(missionCache, "missionCache must not be empty");
         this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
+        this.marketplaceService = Preconditions.checkNotNull(marketplaceService, "marketplaceService must not be empty");
     }
 
     @GetMapping(value = JOB_FINISHED_ENDPOINT)
@@ -208,6 +215,7 @@ public class JournalApi extends BaseApi {
     )
     public ResponseEntity<?> getMissionResults() {
         final List<MissionItem> missionItems = missionCache.get(tickService.getToday(), getIdUser());
-        return ResponseEntity.ok(new MissionReport(missionItems, getPreferredLanguage()));
+        final List<TradedResource> finishedTrades = marketplaceService.findFinishedForUser(getIdUser());
+        return ResponseEntity.ok(new MissionReport(missionItems, finishedTrades, getPreferredLanguage()));
     }
 }

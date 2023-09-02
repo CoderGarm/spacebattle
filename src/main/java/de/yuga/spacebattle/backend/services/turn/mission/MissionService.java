@@ -19,10 +19,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class MissionService {
@@ -125,5 +122,12 @@ public class MissionService {
         if (missionRepository.missionExistsForActor(idMission, idUser)) {
             missionRepository.deleteById(idMission);
         }
+    }
+
+    @Nonnull
+    public List<ConvoyProtectionMission> findConvoyProtectionForTrades(@Nonnull final Collection<Integer> tradedResourcesIDs) {
+        Preconditions.checkNotNull(tradedResourcesIDs, "tradedResourcesIDs must not be empty");
+
+        return Objects.requireNonNullElse(convoyProtectionMissionRepository.findConvoyProtectionForTrades(tradedResourcesIDs), new ArrayList<>());
     }
 }

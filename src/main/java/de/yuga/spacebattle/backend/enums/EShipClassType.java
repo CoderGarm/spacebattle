@@ -114,6 +114,7 @@ public enum EShipClassType implements HasIconName {
 
         switch (missionType) {
             case PIRATE_RAID:
+            case CONVOY_PROTECTION:
 
                 if (isCivilShip()) {
                     // I am prey
@@ -127,7 +128,6 @@ public enum EShipClassType implements HasIconName {
                 return -ordinal();
             default:
             case PIRATE_HUNT:
-            case CONVOY_PROTECTION:
                 throw new NotifyWebUserException("In this state I am supposed to be only used to state my impact as part of a counter mission.");
         }
     }

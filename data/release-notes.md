@@ -4,9 +4,11 @@
 
 1. Man kann seine Konvois nun per Mission schützen.
    todo. Es gibt auch ein Tutorial dazu!
+   Nachteil: Man muss seine Konvois mit Missionen schützen.
 
 - jeder kann trades bewachen
 - nur FTL-Schiffe
+- heat des systems bestimmt gefahr
 
 todo. convoy raid pirate mission
 
@@ -19,12 +21,14 @@ todo. Pläne von wo nach wo (Lieferzeit) festlegen
 todo. punkte für missionen
 todo. aktive Spielermissionen, e.g. provoke pirate raid at user or planet
 todo. heat indicator on map
+todo. -10 to 10 heat scale
 
 #### Diverses
 
 1. Die Dashboard-Informationen werden ab jetzt bei allen Themen einen Neustart überleben.
 2. Die Tab-Reihenfolge bei StratOps ist getauscht. Damit muss man die Karte nur laden, wenn man die Karte auch
    braucht.  
+   todo. traded in dashboard schicker machen, mehr infos rein
    todo. starmap datenmenge reduzieren oder auf stream umstellen -> es wird pro Ladevorgang kumulativ oft geladen
    todo. take-a-tour updaten
    todo. tutorials mind. für missionen und handel

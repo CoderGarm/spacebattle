@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Schema(description = ".")
-public class MissionActionItemGroup {
+public class PirateRaidActionItemGroup {
 
     @Nonnull
     @JsonProperty
@@ -28,13 +28,13 @@ public class MissionActionItemGroup {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The actions to report.")
-    private List<MissionActionItem> actionItems = new ArrayList<>();
+    private List<PirateRaidActionItem> actionItems = new ArrayList<>();
 
 
-    public MissionActionItemGroup(@Nonnull final EMissionType missionType,
-                                  @Nonnull final de.yuga.spacebattle.backend.entities.orbitals.Planet planet,
-                                  @Nonnull final List<MissionItem> items,
-                                  @Nonnull final String preferredLanguage) {
+    public PirateRaidActionItemGroup(@Nonnull final EMissionType missionType,
+                                     @Nonnull final de.yuga.spacebattle.backend.entities.orbitals.Planet planet,
+                                     @Nonnull final List<MissionItem> items,
+                                     @Nonnull final String preferredLanguage) {
         Preconditions.checkNotNull(missionType, "missionType must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(items, "items must not be empty");
@@ -42,6 +42,6 @@ public class MissionActionItemGroup {
 
         this.venue = new Planet(planet);
         this.missionType = missionType;
-        this.actionItems = items.stream().map(i -> new MissionActionItem(i, preferredLanguage)).collect(Collectors.toList());
+        this.actionItems = items.stream().map(i -> new PirateRaidActionItem(i, preferredLanguage)).collect(Collectors.toList());
     }
 }

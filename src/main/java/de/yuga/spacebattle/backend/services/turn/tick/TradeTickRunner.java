@@ -52,8 +52,11 @@ public class TradeTickRunner implements TickRunner {
 
 
     private void tickTrades() {
+        Preconditions.checkNotNull(today, "today must not be empty");
+
         final List<TradedResource> trades = marketplaceService.findAllUnfinishedTrades();
         final Set<TradedResource> arrivals = trades.stream().filter(t -> t.getTicksLeft() == 1).collect(Collectors.toSet());
+
         final Map<Integer, Planet> toStore = new HashMap<>();
         for (final TradedResource tradedResource : arrivals) {
             tradedResource.setFinished(today);
@@ -72,7 +75,7 @@ public class TradeTickRunner implements TickRunner {
 
         Planet origin = tradedResource.getTradeOffer().getOrigin();
         origin = toStore.getOrDefault(origin.getId(), origin);
-        origin.getResourceDeposit().updateResource(EResourceType.CREDITS, tradedResource.getTradeOffer().getFullPrice());
+        origin.getResourceDeposit().updateResource(EResourceType.CREDITS, tradedResource.getFullPrice());
         toStore.put(origin.getId(), origin);
     }
 
@@ -82,7 +85,7 @@ public class TradeTickRunner implements TickRunner {
 
         Planet destination = tradedResource.getDestination();
         destination = toStore.getOrDefault(destination.getId(), destination);
-        destination.getResourceDeposit().updateResource(tradedResource.getTradeOffer().getResourceType(), tradedResource.getTradeOffer().getAmount());
+        destination.getResourceDeposit().updateResource(tradedResource.getTradeOffer().getResourceType(), tradedResource.getTradedAmount());
         toStore.put(destination.getId(), destination);
     }
 }

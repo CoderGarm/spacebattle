@@ -395,6 +395,19 @@
         primary key (idMission)
     ) engine=InnoDB;
 
+    create table missionItem (
+       missionType varchar(31) not null,
+        idMissionItem integer not null auto_increment,
+        phase varchar(255),
+        isRansomPayment bit,
+        percentOfCargoLost integer,
+        piratedWithdraw bit,
+        piratedWithdrawAfterApproach bit,
+        idTickCreatedAt integer not null,
+        idTradeResource integer,
+        primary key (idMissionItem)
+    ) engine=InnoDB;
+
     create table move (
        idMove integer not null auto_increment,
         xCoordinateDestination varchar(255),
@@ -1279,6 +1292,16 @@
        add constraint FKholrjg4864rt9j8qqs349b7ue 
        foreign key (idPlanet) 
        references planet (idPlanet);
+
+    alter table missionItem 
+       add constraint FKjw6nl0yyik5mtyv227litad57 
+       foreign key (idTickCreatedAt) 
+       references tick (idTick);
+
+    alter table missionItem 
+       add constraint FKpiatw8caol0quww65cxgqeayc 
+       foreign key (idTradeResource) 
+       references tradedResource (idTradedResource);
 
     alter table move
         add constraint FKmcefsl29wdpj7xqe9790o0mch

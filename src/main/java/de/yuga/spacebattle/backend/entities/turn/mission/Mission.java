@@ -50,7 +50,7 @@ public class Mission extends Deletable {
     @NotNull
     @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "idMission")
-    private final Set<WarShip> ships = new HashSet<>();
+    private final Set<WarShip> ships = new HashSet<>(); // todo think about historizing which ship takes which mission
 
     public Mission() {
     }
@@ -112,5 +112,9 @@ public class Mission extends Deletable {
 
     public void setMissionType(@Nonnull final EMissionType missionType) {
         this.missionType = Preconditions.checkNotNull(missionType, "missionType must not be empty");
+    }
+
+    public void finish() {
+
     }
 }

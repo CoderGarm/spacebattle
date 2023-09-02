@@ -52,7 +52,8 @@ public class HeatMapService {
         Preconditions.checkNotNull(planets, "planets must not be empty");
         Preconditions.checkNotNull(eMissionType, "eMissionType must not be empty");
 
-        return Objects.requireNonNullElse(heatMapRepository.findHeatForPlanets(planets.stream().map(AbstractEntityKey::getId).collect(Collectors.toList()), eMissionType), new HashSet<>());
+        final List<Integer> iDs = planets.stream().map(AbstractEntityKey::getId).collect(Collectors.toList());
+        return Objects.requireNonNullElse(heatMapRepository.findHeatForPlanets(iDs, eMissionType), new HashSet<>());
     }
 
     @Nonnull
@@ -107,8 +108,11 @@ public class HeatMapService {
     }
 
     @Nonnull
-    public Set<HeatMap> findHeatForPlanets(final Set<Planet> neighbours) {
-        return Objects.requireNonNullElse(heatMapRepository.findHeatForPlanets(neighbours.stream().map(AbstractEntityKey::getId).collect(Collectors.toList())), new HashSet<>());
+    public Set<HeatMap> findHeatForPlanets(@Nonnull final Set<Planet> planets) {
+        Preconditions.checkNotNull(planets, "planets must not be empty");
+
+        final List<Integer> iDs = planets.stream().map(AbstractEntityKey::getId).collect(Collectors.toList());
+        return Objects.requireNonNullElse(heatMapRepository.findHeatForPlanets(iDs), new HashSet<>());
     }
 
     public void saveAll(@Nonnull final Collection<HeatMap> heatMaps) {

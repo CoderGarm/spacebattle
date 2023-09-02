@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 @Schema(description = ".")
-public class MissionActionItem {
+public class PirateRaidActionItem {
 
     @Nonnull
     @JsonProperty
@@ -32,7 +32,7 @@ public class MissionActionItem {
     @Schema(description = "In case of a combat the result is noted in:")
     private Integer idBattleReport;
 
-    public MissionActionItem(@Nonnull final MissionItem item, @Nonnull final String preferredLanguage) {
+    public PirateRaidActionItem(@Nonnull final MissionItem item, @Nonnull final String preferredLanguage) {
         Preconditions.checkNotNull(item, "item must not be empty");
         Preconditions.checkNotNull(preferredLanguage, "preferredLanguage must not be empty");
 
