@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,7 +45,8 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
     @Nonnull
     private static final Logger LOGGER = LoggerFactory.getLogger(PirateSpawnPhase.class);
 
-    @Nullable
+    @Nonnull
+    @SuppressWarnings("NotNullFieldNotInitialized")
     private Tick today;
 
     @Nonnull

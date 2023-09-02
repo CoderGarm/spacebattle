@@ -3,7 +3,7 @@
 #### Gameplay
 
 1. Man kann seine Konvois nun per Mission schützen.
-   Es gibt auch ein Tutorial dazu!
+   todo. Es gibt auch ein Tutorial dazu!
 
 - jeder kann trades bewachen
 - nur FTL-Schiffe
@@ -23,10 +23,11 @@ todo. heat indicator on map
 #### Diverses
 
 1. Die Dashboard-Informationen werden ab jetzt bei allen Themen einen Neustart überleben.
-2. Die Tab-Reihenfolge bei StratOps ist getauscht. Damit muss man die Karte nur laden, wenn man die Karte auch braucht.
+2. Die Tab-Reihenfolge bei StratOps ist getauscht. Damit muss man die Karte nur laden, wenn man die Karte auch
+   braucht.  
    todo. starmap datenmenge reduzieren oder auf stream umstellen -> es wird pro Ladevorgang kumulativ oft geladen
    todo. take-a-tour updaten
-   todo. tutorials mind. für missionen nachtragen
+   todo. tutorials mind. für missionen und handel
    todo. gekaufte offers müssen aus der liste raus
 
 ### Bugs fixed
@@ -35,6 +36,7 @@ todo. heat indicator on map
 
 #### next steps
 
+- cache in datenbank verschieben
 - ress verschieben per zahleneingabe
 - article edit stuff
 - menü als vertikaler slider

@@ -4,5 +4,7 @@ public enum EMissionType {
 
     PIRATE_RAID,
     PIRATE_HUNT,
-    CONVOY_PROTECTION
+    CONVOY_PROTECTION,
+    CONVOY_RAID,
+    ;
 }
