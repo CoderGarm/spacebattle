@@ -104,7 +104,6 @@ public class MarketplaceApi extends BaseApi {
         return ResponseEntity.ok(result);
     }
 
-
     @GetMapping(TRADE_HISTORY_FOR_USER_ENDPOINT + "/fresh")
     @Operation(summary = "Get all today contracted trades.", operationId = "getFreshTradesForUser",
             responses = {
@@ -201,6 +200,23 @@ public class MarketplaceApi extends BaseApi {
     public ResponseEntity<?> getOffers() {
         final List<de.yuga.spacebattle.backend.entities.turn.resources.trade.TradeOffer> trades = marketplaceService.findActiveOffers();
         return ResponseEntity.ok(trades.stream().map(TradeOffer::new).collect(Collectors.toList()));
+    }
+
+
+    @DeleteMapping(OFFER_ENDPOINT + "/{idTradeOffer}")
+    @Operation(summary = "Deletes an trade offer.", operationId = "deleteOffer",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Boolean.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> deleteOffer(@PathVariable("idTradeOffer") final int idTradeOffer) {
+        marketplaceService.deleteActiveOffer(getIdUser(), idTradeOffer);
+        return ResponseEntity.ok(true);
     }
 
     @PostMapping(value = OFFER_ENDPOINT)

@@ -60,7 +60,11 @@ public class HeatMap extends AbstractEntityKey {
      * Adds the heat uop to a max of 30.
      */
     public void add(final int impact) {
-        this.heat = Integer.signum(heat + impact) * Math.max(30, Math.abs(heat + impact));
+        if (Math.signum(impact) < 0) {
+            this.heat = Math.max(-30, this.heat + impact);
+        } else {
+            this.heat = Math.min(30, this.heat + impact);
+        }
     }
 
     @Override

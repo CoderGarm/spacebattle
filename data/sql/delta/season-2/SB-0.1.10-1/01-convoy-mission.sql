@@ -37,4 +37,10 @@ alter table missionItem
 update heatMap set heat = 30 where heat > 30;
 update heatMap set heat = -30 where heat < -30;
 
+update propulsion set unlockedThroughLevel = 1 where hyperBand in ('NONE','ALPHA','BETA','GAMMA');
+update propulsion set unlockedThroughLevel = 2 where hyperBand in ('DELTA');
+update propulsion set unlockedThroughLevel = 3 where hyperBand in ('EPSILON');
+update propulsion set unlockedThroughLevel = 4 where hyperBand in ('ZETA');
+update propulsion set unlockedThroughLevel = 5 where hyperBand in ('ETA', 'THETA');
+
 insert into dbPatch values (null, now(), 'add convoy mission', '0.1.10-1');

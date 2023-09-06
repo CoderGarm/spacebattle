@@ -7,12 +7,12 @@
    Nachteil: Man muss seine Konvois mit Missionen schützen.
 2. Die Piraten greifen sich nun auch Konvois.
    Sofern man seine Systeme nicht ausreichend schützt und die Piraten mit ihren Angriffen Erfolg haben, werden die Angriffe an der Hypergrenze häufiger.
+3. Die Anforderungen an das Level von Antrieben ist deutlich gesenkt.  
+   Damit kommt man schneller an sinnvolle Reisezeiten zu seinen Nachbarn. Und bei aller Liebe, da liegen wirklich zu
+   viele Ressourcen auf den Hauptplaneten rum!  
+   Das ist der Workaround, bis es einen Handel für Schiffsteile gibt.
 
 todo. Pläne von wo nach wo (Lieferzeit) festlegen
-
-- NPC trader
-- default trading ship
-- lösegeld vs verlust
 
 todo. heat indicator on map -> -30 to 30 heat scale
 
@@ -20,17 +20,19 @@ todo. heat indicator on map -> -30 to 30 heat scale
 
 1. Die Dashboard-Informationen werden ab jetzt bei allen Themen einen Neustart überleben.
 2. Die Reihenfolge der Tabs bei StratOps ist getauscht. Damit muss man die Karte nur laden, wenn man die Karte auch
-   braucht.  
-   todo. filter für available researches
-   todo. starmap datenmenge reduzieren oder auf stream umstellen -> es wird pro Ladevorgang kumulativ oft geladen
+   braucht.
+3. Die Forschungen lassen sich jetzt durchsuchen.
+4. Man kann seine Handelsangebote jetzt zurückziehen.
    todo. take-a-tour updaten
-   todo. tutorials mind. für missionen und handel
+   todo. tutorials für handel
    todo. gekaufte offers müssen aus der liste raus
+   todo. in job-dashboard immer alle planeten aufführen + filter
 
 ### Bugs fixed
 
 1. Man kann einer Mission mehrere Schiffe zuweisen.
 2. Man kann nun Forschungen tatsächlich auf das höchste Level erforschen.
+3. Mit jedem Mal, dass man die Sternenkarte geladen hat, hat es länger gedauert. Das isst jetzt nicht mehr so.
    todo. trade offers abbrechen
    todo. reserve fleet speicher issue wenn schon schiffe drin sind -> umbauen auf "nur wenn der lock-button gesetzt ist, darf man abschicken"
 

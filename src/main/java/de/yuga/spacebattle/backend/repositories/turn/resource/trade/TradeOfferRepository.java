@@ -20,4 +20,8 @@ public interface TradeOfferRepository extends JpaRepository<TradeOffer, Integer>
     @Nullable
     @Query("SELECT o FROM TradeOffer o WHERE o.resourceType = :resourceType ORDER BY o.tick.id desc")
     List<TradeOffer> findLatestOffer(@Param("resourceType") @Nonnull final EResourceType resourceType, @Nonnull final Pageable pageable);
+
+    @Nullable
+    @Query("SELECT o.id FROM TradeOffer  o WHERE o.isDeleted = false AND o.seller.id = :idUser AND o.id = :idTradeOffer")
+    Integer findActiveOffer(@Param("idUser") int idUser, @Param("idTradeOffer") int idTradeOffer);
 }

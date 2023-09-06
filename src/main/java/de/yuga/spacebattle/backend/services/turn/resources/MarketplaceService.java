@@ -343,4 +343,17 @@ public class MarketplaceService {
         final Tick today = tickService.getToday();
         return Objects.requireNonNullElse(tradedResourceRepository.findTodayTrades(today.getNo()), new ArrayList<>());
     }
+
+    public void deleteActiveOffer(final int idUser, final int idTradeOffer) {
+        final Integer offer = existsActiveOfferForUser(idUser, idTradeOffer);
+        if (offer != null) {
+            updateOffer(idTradeOffer, 0, 0);
+            tradeOfferRepository.deleteById(idTradeOffer);
+        }
+    }
+
+    @Nullable
+    private Integer existsActiveOfferForUser(final int idUser, final int idTradeOffer) {
+        return tradeOfferRepository.findActiveOffer(idUser, idTradeOffer);
+    }
 }

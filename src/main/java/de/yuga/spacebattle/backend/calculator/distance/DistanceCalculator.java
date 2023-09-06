@@ -12,7 +12,6 @@ import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.EStarClassType;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
-import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
@@ -109,13 +108,8 @@ public class DistanceCalculator {
             ticksToTravel += getDuration(EModuleType.PROPULSION, fleet, origin.getOrbit(), destination.getOrbit());
         }
 
-        final int rounded = (int) Math.round(ticksToTravel);
-        if (rounded == 0) {
-            return 1;
-        } else if (rounded < 0) {
-            throw new NotifyWebUserException("mathe genius, check that please");
-        }
-        return rounded;
+        final int rounded = BigDecimal.valueOf(ticksToTravel).setScale(0, RoundingMode.UP).intValue();
+        return Math.max(rounded, 1);
     }
 
     /**

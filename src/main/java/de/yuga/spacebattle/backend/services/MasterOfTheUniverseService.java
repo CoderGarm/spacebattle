@@ -223,14 +223,8 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = nonPlayerCharacterService.findByUsername(PIRATE) == null;
-        if (transformationNeeded) { /* fixme add trader? */
-
-            final NonPlayerCharacter pirate = nonPlayerCharacterService.createNPC(PIRATE);
-            final Fitting fitting = new Fitting(moduleService.findAllPropulsions(), moduleService.findAllArmors(), moduleService.findAllElectronicWarfare(),
-                    moduleService.findAllSidewalls(), moduleService.findAllWeapons(), moduleService.findAllLaunchers(), moduleService.findAllPassiveModules());
-            createPirateShip(pirate, fitting); /* fixme add freighter */
-
+        final boolean transformationNeeded = false;
+        if (transformationNeeded) {
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
@@ -631,18 +625,19 @@ public class MasterOfTheUniverseService {
         warshawskiSail.getDescription().updateOrCreate(Translation.SECOND_LANGUAGE, "Die Segel sind Teil des Impellerantriebs eines Schiffes und werden von den Alpha-Emittern erzeugt. Sie ermöglichen die Reise mit scheinbarer Überlichtgeschwindigkeit.");
         moduleService.save(warshawskiSail);
 
-        result.add(moduleService.createPropulsion(warshawskiSail, 1, 558, 36, EHyperBand.ALPHA, ETechnologyType.CIVIL));
-        result.add(moduleService.createPropulsion(warshawskiSail, 2, 558, 41, EHyperBand.ALPHA, ETechnologyType.MILITARY));
-        result.add(moduleService.createPropulsion(warshawskiSail, 2, 558, 39, EHyperBand.BETA, ETechnologyType.CIVIL));
-        result.add(moduleService.createPropulsion(warshawskiSail, 3, 558, 51, EHyperBand.BETA, ETechnologyType.MILITARY));
-        result.add(moduleService.createPropulsion(warshawskiSail, 2, 558, 44, EHyperBand.GAMMA, ETechnologyType.CIVIL));
-        result.add(moduleService.createPropulsion(warshawskiSail, 4, 558, 59, EHyperBand.GAMMA, ETechnologyType.MILITARY));
-        result.add(moduleService.createPropulsion(warshawskiSail, 3, 558, 52, EHyperBand.DELTA, ETechnologyType.CIVIL));
-        result.add(moduleService.createPropulsion(warshawskiSail, 6, 558, 62, EHyperBand.DELTA, ETechnologyType.MILITARY));
-        result.add(moduleService.createPropulsion(warshawskiSail, 7, 558, 68, EHyperBand.EPSILON, ETechnologyType.MILITARY));
-        result.add(moduleService.createPropulsion(warshawskiSail, 8, 558, 70, EHyperBand.ZETA, ETechnologyType.MILITARY));
-        result.add(moduleService.createPropulsion(warshawskiSail, 9, 558, 75, EHyperBand.ETA, ETechnologyType.MILITARY));
-        result.add(moduleService.createPropulsion(warshawskiSail, 10, 558, 80, EHyperBand.THETA, ETechnologyType.MILITARY));
+        // todo as far as buy ship parts is possible - revert it
+        result.add(moduleService.createPropulsion(warshawskiSail, 1,/*1,*/558, 36, EHyperBand.ALPHA, ETechnologyType.CIVIL));
+        result.add(moduleService.createPropulsion(warshawskiSail, 1,/*2,*/558, 41, EHyperBand.ALPHA, ETechnologyType.MILITARY));
+        result.add(moduleService.createPropulsion(warshawskiSail, 1,/*2,*/558, 39, EHyperBand.BETA, ETechnologyType.CIVIL));
+        result.add(moduleService.createPropulsion(warshawskiSail, 1,/*3,*/558, 51, EHyperBand.BETA, ETechnologyType.MILITARY));
+        result.add(moduleService.createPropulsion(warshawskiSail, 1,/*2,*/558, 44, EHyperBand.GAMMA, ETechnologyType.CIVIL));
+        result.add(moduleService.createPropulsion(warshawskiSail, 1,/*4,*/558, 59, EHyperBand.GAMMA, ETechnologyType.MILITARY));
+        result.add(moduleService.createPropulsion(warshawskiSail, 2,/*3,*/558, 52, EHyperBand.DELTA, ETechnologyType.CIVIL));
+        result.add(moduleService.createPropulsion(warshawskiSail, 2,/*6,*/558, 62, EHyperBand.DELTA, ETechnologyType.MILITARY));
+        result.add(moduleService.createPropulsion(warshawskiSail, 3,/*7,*/558, 68, EHyperBand.EPSILON, ETechnologyType.MILITARY));
+        result.add(moduleService.createPropulsion(warshawskiSail, 4,/*8,*/558, 70, EHyperBand.ZETA, ETechnologyType.MILITARY));
+        result.add(moduleService.createPropulsion(warshawskiSail, 5,/*9,*/558, 75, EHyperBand.ETA, ETechnologyType.MILITARY));
+        result.add(moduleService.createPropulsion(warshawskiSail, 5,/*10,*/ 558, 80, EHyperBand.THETA, ETechnologyType.MILITARY));
         return result;
     }
 
