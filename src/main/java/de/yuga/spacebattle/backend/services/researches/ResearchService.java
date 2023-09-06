@@ -116,7 +116,7 @@ public class ResearchService {
             if (researchLevel != null) {
                 final int currentLevel = researchLevel.getLevel();
                 final int nextLevel = currentLevel + 1;
-                if (nextLevel < research.getLevelCap()) {
+                if (nextLevel <= research.getLevelCap()) {
                     researchLevel.setLevel(nextLevel);
                 }
             } else {

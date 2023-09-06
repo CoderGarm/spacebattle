@@ -5,6 +5,8 @@
 1. Man kann seine Konvois nun per Mission schützen.
    todo. Es gibt auch ein Tutorial dazu!
    Nachteil: Man muss seine Konvois mit Missionen schützen.
+2. Die Piraten greifen sich nun auch Konvois.
+   Sofern man seine Systeme nicht ausreichend schützt und die Piraten mit ihren Angriffen Erfolg haben, werden die Angriffe an der Hypergrenze häufiger.
 
 - jeder kann trades bewachen
 - nur FTL-Schiffe
@@ -26,9 +28,10 @@ todo. -10 to 10 heat scale
 #### Diverses
 
 1. Die Dashboard-Informationen werden ab jetzt bei allen Themen einen Neustart überleben.
-2. Die Tab-Reihenfolge bei StratOps ist getauscht. Damit muss man die Karte nur laden, wenn man die Karte auch
+2. Die Reihenfolge der Tabs bei StratOps ist getauscht. Damit muss man die Karte nur laden, wenn man die Karte auch
    braucht.  
    todo. traded in dashboard schicker machen, mehr infos rein
+   todo. filter für available researches
    todo. starmap datenmenge reduzieren oder auf stream umstellen -> es wird pro Ladevorgang kumulativ oft geladen
    todo. take-a-tour updaten
    todo. tutorials mind. für missionen und handel
@@ -37,9 +40,13 @@ todo. -10 to 10 heat scale
 ### Bugs fixed
 
 1. Man kann einer Mission mehrere Schiffe zuweisen.
+2. Man kann nun Forschungen tatsächlich auf das höchste Level erforschen.
+   todo. trade offers abbrechen
+   todo. reserve fleet speicher issue wenn schon schiffe drin sind -> umbauen auf "nur wenn der lock-button gesetzt ist, darf man abschicken"
 
 #### next steps
 
+- unendliche forschungen kennzeichnen
 - cache in datenbank verschieben
 - ress verschieben per zahleneingabe
 - article edit stuff
