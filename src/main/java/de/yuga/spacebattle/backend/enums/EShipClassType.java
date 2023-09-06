@@ -125,7 +125,7 @@ public enum EShipClassType implements HasIconName {
                     return 1;
                 }
                 // I am reducing heat by fighting pirates
-                return -ordinal();
+                return -((ordinal() + 1) * 2);
             default:
             case PIRATE_HUNT:
                 throw new NotifyWebUserException("In this state I am supposed to be only used to state my impact as part of a counter mission.");

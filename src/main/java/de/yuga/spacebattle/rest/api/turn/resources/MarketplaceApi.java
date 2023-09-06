@@ -53,7 +53,7 @@ public class MarketplaceApi extends BaseApi {
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = TradesByTick.class))
+                                    schema = @Schema(implementation = ValueTradesByTick.class))
                             )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
@@ -61,15 +61,15 @@ public class MarketplaceApi extends BaseApi {
     )
     public ResponseEntity<?> getTrades(@PathVariable("pastTicks") final int pastTicks) {
         final TradesInTimeframe tradesInTimeframe = marketplaceService.findForTicks(pastTicks);
-        final List<TradesByTick> result = mapTradesByTicks(tradesInTimeframe);
+        final List<ValueTradesByTick> result = mapTradesByTicks(tradesInTimeframe);
         return ResponseEntity.ok(result);
     }
 
     @Nonnull
-    private List<TradesByTick> mapTradesByTicks(@Nonnull final TradesInTimeframe tradesInTimeframe) {
+    private List<ValueTradesByTick> mapTradesByTicks(@Nonnull final TradesInTimeframe tradesInTimeframe) {
         Preconditions.checkNotNull(tradesInTimeframe, "tradesInTimeframe must not be empty");
 
-        final List<TradesByTick> result = new ArrayList<>();
+        final List<ValueTradesByTick> result = new ArrayList<>();
         for (final Tick tick : tradesInTimeframe.getTimeframe()) {
             final List<Trade> res = new ArrayList<>();
             final Map<EResourceType, List<TradedResource>> tradedResourcesMap = tradesInTimeframe.getTrades().stream()
@@ -82,7 +82,7 @@ public class MarketplaceApi extends BaseApi {
                     res.add(new Trade(tradedResource.getTradeOffer().getUnitPrice(), eResourceType, tradedResource.getTradeOffer().getAmount()));
                 });
             }
-            result.add(new TradesByTick(tick, res));
+            result.add(new ValueTradesByTick(tick, res));
         }
         return result;
     }
@@ -143,14 +143,14 @@ public class MarketplaceApi extends BaseApi {
             purchases.forEach(p -> {
                 final int key = p.getDestination().getId();
                 final TradesByLocation byLocation = result.getOrDefault(key, new TradesByLocation(null, p.getDestination()));
-                byLocation.addPurchase(today, p.getTicksLeft(), eResourceType, p.getTradeOffer().getUnitPrice(), p.getTradeOffer().getAmount());
+                byLocation.addPurchase(today, p);
                 result.put(key, byLocation);
             });
 
             sales.forEach(s -> {
                 final int key = s.getTradeOffer().getOrigin().getId();
                 final TradesByLocation byLocation = result.getOrDefault(key, new TradesByLocation(s.getTradeOffer().getOrigin(), null));
-                byLocation.addSale(today, s.getTicksLeft(), eResourceType, s.getTradeOffer().getUnitPrice(), s.getTradeOffer().getAmount());
+                byLocation.addSale(today, s);
                 result.put(key, byLocation);
             });
 

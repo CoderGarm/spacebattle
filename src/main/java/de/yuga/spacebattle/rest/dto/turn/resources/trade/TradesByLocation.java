@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
-import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import de.yuga.spacebattle.rest.dto.AbstractId;
 import de.yuga.spacebattle.rest.dto.turn.Tick;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -84,29 +84,23 @@ public class TradesByLocation {
 
     @JsonIgnore
     public void addPurchase(@Nonnull final de.yuga.spacebattle.backend.entities.turn.Tick tick,
-                            final int ticksLeft,
-                            @Nonnull final EResourceType eResourceType,
-                            final long price,
-                            final long amount) {
+                            @Nonnull final TradedResource tradedResource) {
         Preconditions.checkNotNull(tick, "tick must not be empty");
-        Preconditions.checkNotNull(eResourceType, "eResourceType must not be empty");
+        Preconditions.checkNotNull(tradedResource, "tradedResource must not be empty");
 
-        final Trade trade = new Trade(price, eResourceType, amount);
-        final TradesByTick byTick = fetchOrCreate(tick, ticksLeft);
+        final TradeContract trade = new TradeContract(tradedResource);
+        final TradesByTick byTick = fetchOrCreate(tick, tradedResource.getTicksLeft());
         byTick.addPurchase(trade);
     }
 
     @JsonIgnore
     public void addSale(@Nonnull final de.yuga.spacebattle.backend.entities.turn.Tick tick,
-                        final int ticksLeft,
-                        @Nonnull final EResourceType eResourceType,
-                        final long price,
-                        final long amount) {
+                        @Nonnull final TradedResource tradedResource) {
         Preconditions.checkNotNull(tick, "tick must not be empty");
-        Preconditions.checkNotNull(eResourceType, "eResourceType must not be empty");
+        Preconditions.checkNotNull(tradedResource, "tradedResource must not be empty");
 
-        final Trade trade = new Trade(price, eResourceType, amount);
-        final TradesByTick byTick = fetchOrCreate(tick, ticksLeft);
+        final TradeContract trade = new TradeContract(tradedResource);
+        final TradesByTick byTick = fetchOrCreate(tick, tradedResource.getTicksLeft());
         byTick.addSale(trade);
     }
 }

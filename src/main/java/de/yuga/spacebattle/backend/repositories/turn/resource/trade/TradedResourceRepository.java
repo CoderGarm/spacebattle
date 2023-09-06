@@ -32,8 +32,8 @@ public interface TradedResourceRepository extends JpaRepository<TradedResource, 
     List<TradedResource> findAllUnfinished();
 
     @Nullable
-    @Query("SELECT t FROM TradedResource t WHERE t.ticksLeft = 1")
-    List<TradedResource> findTomorrowsTrades();
+    @Query("SELECT t FROM TradedResource t WHERE t.ticksLeft = 1 OR t.tick.id = :tickNo")
+    List<TradedResource> findTomorrowsTrades(@Param("tickNo") final int tickNo);
 
     @Nullable
     @Query("SELECT t FROM TradedResource t WHERE t.finished.id = :tickNo AND t.isDeleted = true")

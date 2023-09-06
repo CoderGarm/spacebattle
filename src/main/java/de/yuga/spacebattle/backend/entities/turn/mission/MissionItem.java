@@ -66,11 +66,13 @@ public class MissionItem extends AbstractEntityKey {
      * States that the escort ships are scary enough.
      */
     @Nonnull
-    public static ConvoyProtectionMissionItem convoyGuardedOnSight(@Nonnull final Tick tick, @Nonnull final TradedResource tradedResource) {
+    public static ConvoyProtectionMissionItem convoyGuardedOnSight(@Nonnull final Tick tick, @Nonnull final TradedResource tradedResource, @Nonnull final EMissionAction action) {
         Preconditions.checkNotNull(tick, "tick must not be empty");
         Preconditions.checkNotNull(tradedResource, "tradedResource must not be empty");
+        Preconditions.checkNotNull(action, "action must not be empty");
+        Preconditions.checkState(action == EMissionAction.BEGIN_OF_MISSION || action == EMissionAction.END_OF_MISSION, "action must not be chosen wisely");
 
-        final ConvoyProtectionMissionItem whatever = new ConvoyProtectionMissionItem(tick, tradedResource, EMissionAction.END_OF_MISSION);
+        final ConvoyProtectionMissionItem whatever = new ConvoyProtectionMissionItem(tick, tradedResource, action);
         whatever.setPiratedWithdraw();
         return whatever;
     }
@@ -79,11 +81,13 @@ public class MissionItem extends AbstractEntityKey {
      * States that the pirates take a try but accepted their failure.
      */
     @Nonnull
-    public static ConvoyProtectionMissionItem convoyGuardedWithShipContact(@Nonnull final Tick tick, @Nonnull final TradedResource tradedResource) {
+    public static ConvoyProtectionMissionItem convoyGuardedWithShipContact(@Nonnull final Tick tick, @Nonnull final TradedResource tradedResource, @Nonnull final EMissionAction action) {
         Preconditions.checkNotNull(tick, "tick must not be empty");
         Preconditions.checkNotNull(tradedResource, "tradedResource must not be empty");
+        Preconditions.checkNotNull(action, "action must not be empty");
+        Preconditions.checkState(action == EMissionAction.BEGIN_OF_MISSION || action == EMissionAction.END_OF_MISSION, "action must not be chosen wisely");
 
-        final ConvoyProtectionMissionItem whatever = new ConvoyProtectionMissionItem(tick, tradedResource, EMissionAction.END_OF_MISSION);
+        final ConvoyProtectionMissionItem whatever = new ConvoyProtectionMissionItem(tick, tradedResource, action);
         whatever.setPiratedWithdrawAfterApproach();
         return whatever;
     }

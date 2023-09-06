@@ -45,7 +45,7 @@ public class TradedResource extends Completable {
 
     @Nonnull
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "affectedTrade")
-    private List<ConvoyProtectionMissionItem> convoyProtectionMissionItems = new ArrayList<>();
+    private final List<ConvoyProtectionMissionItem> convoyProtectionMissionItems = new ArrayList<>();
 
     public TradedResource() {
     }

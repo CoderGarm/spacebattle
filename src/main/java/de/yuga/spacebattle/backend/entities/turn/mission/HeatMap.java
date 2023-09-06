@@ -9,6 +9,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 @Entity
@@ -27,6 +29,8 @@ public class HeatMap extends AbstractEntityKey {
     @Enumerated(EnumType.STRING)
     private EMissionType missionType;
 
+    @Min(-30)
+    @Max(30)
     private int heat;
 
     public HeatMap() {
@@ -35,7 +39,7 @@ public class HeatMap extends AbstractEntityKey {
     public HeatMap(@Nonnull final Planet planet, @Nonnull final EMissionType missionType, final int heat) {
         this.planet = Preconditions.checkNotNull(planet, "planet must not be empty");
         this.missionType = Preconditions.checkNotNull(missionType, "missionType must not be empty");
-        this.heat = heat;
+        this.heat = Integer.signum(heat) * Math.max(30, Math.abs(heat));
     }
 
     @Nonnull
@@ -52,17 +56,11 @@ public class HeatMap extends AbstractEntityKey {
         return heat;
     }
 
-    public void decrease() {
-        heat--;
-    }
-
-    public void increase() {
-        heat++;
-    }
-
-
+    /**
+     * Adds the heat uop to a max of 30.
+     */
     public void add(final int impact) {
-        heat += impact;
+        this.heat = Integer.signum(heat + impact) * Math.max(30, Math.abs(heat + impact));
     }
 
     @Override

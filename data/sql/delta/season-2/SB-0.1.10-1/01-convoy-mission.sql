@@ -34,4 +34,7 @@ alter table missionItem
    foreign key (idTradeResource)
    references tradedResource (idTradedResource);
 
+update heatMap set heat = 30 where heat > 30;
+update heatMap set heat = -30 where heat < -30;
+
 insert into dbPatch values (null, now(), 'add convoy mission', '0.1.10-1');

@@ -24,23 +24,23 @@ public class TradesByTick {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The trades.")
-    private List<Trade> trades = new ArrayList<>();
+    private List<TradeContract> trades = new ArrayList<>();
 
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The sales.")
-    private List<Trade> sales = new ArrayList<>();
+    private List<TradeContract> sales = new ArrayList<>();
 
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The purchases.")
-    private List<Trade> purchases = new ArrayList<>();
+    private List<TradeContract> purchases = new ArrayList<>();
 
 
     public TradesByTick() {
     }
 
-    public TradesByTick(@Nonnull final de.yuga.spacebattle.backend.entities.turn.Tick tick, @Nonnull final List<Trade> trades) {
+    public TradesByTick(@Nonnull final de.yuga.spacebattle.backend.entities.turn.Tick tick, @Nonnull final List<TradeContract> trades) {
         Preconditions.checkNotNull(tick, "tick must not be empty");
         Preconditions.checkNotNull(trades, "trades must not be empty");
 
@@ -68,13 +68,13 @@ public class TradesByTick {
     }
 
 
-    public void addPurchase(@Nonnull final Trade trade) {
+    public void addPurchase(@Nonnull final TradeContract trade) {
         Preconditions.checkNotNull(trade, "trade must not be empty");
 
         this.purchases.add(trade);
     }
 
-    public void addSale(@Nonnull final Trade trade) {
+    public void addSale(@Nonnull final TradeContract trade) {
         Preconditions.checkNotNull(trade, "trade must not be empty");
 
         this.sales.add(trade);

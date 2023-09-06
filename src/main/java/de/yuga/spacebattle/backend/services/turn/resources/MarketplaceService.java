@@ -334,8 +334,9 @@ public class MarketplaceService {
     }
 
     @Nonnull
-    public List<TradedResource> findTomorrowsTrades() {
-        return Objects.requireNonNullElse(tradedResourceRepository.findTomorrowsTrades(), new ArrayList<>());
+    public List<TradedResource> findTradesToAttack() {
+        final Tick today = tickService.getToday();
+        return Objects.requireNonNullElse(tradedResourceRepository.findTomorrowsTrades(today.getNo() - 1), new ArrayList<>());
     }
 
     public List<TradedResource> findTodayTrades() {

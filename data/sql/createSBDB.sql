@@ -398,9 +398,9 @@
     create table missionItem (
        missionType varchar(31) not null,
         idMissionItem integer not null auto_increment,
-        phase varchar(255),
         isRansomPayment bit,
         percentOfCargoLost integer,
+        phase varchar(255),
         piratedWithdraw bit,
         piratedWithdrawAfterApproach bit,
         idTickCreatedAt integer not null,

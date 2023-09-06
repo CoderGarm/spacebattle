@@ -3,16 +3,10 @@
 #### Gameplay
 
 1. Man kann seine Konvois nun per Mission schützen.
-   todo. Es gibt auch ein Tutorial dazu!
+   Es gibt auch ein kurzes Tutorial dazu!
    Nachteil: Man muss seine Konvois mit Missionen schützen.
 2. Die Piraten greifen sich nun auch Konvois.
    Sofern man seine Systeme nicht ausreichend schützt und die Piraten mit ihren Angriffen Erfolg haben, werden die Angriffe an der Hypergrenze häufiger.
-
-- jeder kann trades bewachen
-- nur FTL-Schiffe
-- heat des systems bestimmt gefahr
-
-todo. convoy raid pirate mission
 
 todo. Pläne von wo nach wo (Lieferzeit) festlegen
 
@@ -20,17 +14,13 @@ todo. Pläne von wo nach wo (Lieferzeit) festlegen
 - default trading ship
 - lösegeld vs verlust
 
-todo. punkte für missionen
-todo. aktive Spielermissionen, e.g. provoke pirate raid at user or planet
-todo. heat indicator on map
-todo. -10 to 10 heat scale
+todo. heat indicator on map -> -30 to 30 heat scale
 
 #### Diverses
 
 1. Die Dashboard-Informationen werden ab jetzt bei allen Themen einen Neustart überleben.
 2. Die Reihenfolge der Tabs bei StratOps ist getauscht. Damit muss man die Karte nur laden, wenn man die Karte auch
    braucht.  
-   todo. traded in dashboard schicker machen, mehr infos rein
    todo. filter für available researches
    todo. starmap datenmenge reduzieren oder auf stream umstellen -> es wird pro Ladevorgang kumulativ oft geladen
    todo. take-a-tour updaten
@@ -46,6 +36,9 @@ todo. -10 to 10 heat scale
 
 #### next steps
 
+- punkte für missionen
+- aktive Spielermissionen, e.g. provoke pirate raid at user or planet
+- allianz-feature: missionen auf allianzterritorium, z.B. pirate hunt für nen kumpel oder convoyschutz
 - unendliche forschungen kennzeichnen
 - cache in datenbank verschieben
 - ress verschieben per zahleneingabe

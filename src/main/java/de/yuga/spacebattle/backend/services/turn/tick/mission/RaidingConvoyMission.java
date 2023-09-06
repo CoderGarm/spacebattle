@@ -11,12 +11,14 @@ import de.yuga.spacebattle.backend.entities.turn.mission.ConvoyProtectionMission
 import de.yuga.spacebattle.backend.entities.turn.mission.ConvoyProtectionMissionItem;
 import de.yuga.spacebattle.backend.entities.turn.mission.HeatMap;
 import de.yuga.spacebattle.backend.entities.turn.mission.MissionItem;
+import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradeOffer;
 import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import de.yuga.spacebattle.backend.enums.EMissionAction;
 import de.yuga.spacebattle.backend.enums.EMissionType;
 import de.yuga.spacebattle.backend.services.turn.mission.MissionItemService;
 import de.yuga.spacebattle.backend.services.turn.mission.MissionService;
 import de.yuga.spacebattle.backend.services.turn.resources.MarketplaceService;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +71,7 @@ public class RaidingConvoyMission implements MissionRunner {
         this.today = Preconditions.checkNotNull(today, "today must not be empty");
 
         LOGGER.info("Passive pirate mission started");
-        attackArrivingConvoys();
+        attackConvoys();
         releaseAllShips();
         LOGGER.info("Passive pirate mission done");
     }
@@ -85,8 +87,8 @@ public class RaidingConvoyMission implements MissionRunner {
                         missionService.stopMission(m.getId(), userId)));
     }
 
-    private void attackArrivingConvoys() {
-        final List<TradedResource> trades = marketplaceService.findTomorrowsTrades();
+    private void attackConvoys() {
+        final List<TradedResource> trades = marketplaceService.findTradesToAttack();
         final Map<TradedResource, List<ConvoyProtectionMission>> missions = missionService.findConvoyProtectionForTrades(trades.stream()
                         .map(AbstractEntityKey::getId)
                         .collect(Collectors.toSet())).stream()
@@ -99,6 +101,15 @@ public class RaidingConvoyMission implements MissionRunner {
                 .map(StarSystem::getPlanets)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
+
+        planets.addAll(trades.stream()
+                .map(TradedResource::getTradeOffer)
+                .map(TradeOffer::getOrigin)
+                .map(Planet::getSystem)
+                .map(StarSystem::getPlanets)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet()));
+
         // take regional pirate activity
         final Map<Planet, HeatMap> heatMap = heatMapService.findHeatForPlanets(planets, EMissionType.PIRATE_RAID).stream()
                 .collect(Collectors.toMap(HeatMap::getPlanet, Function.identity()));
@@ -119,7 +130,18 @@ public class RaidingConvoyMission implements MissionRunner {
                 tradedResource.getTradeOffer().getOrigin().getOwner().getUsername(),
                 tradedResource.getDestination().getOwner().getUsername());
 
-        final Set<Planet> planets = tradedResource.getDestination().getSystem().getPlanets();
+        final EMissionAction phase = today.getNo() - tradedResource.getTick().getNo() <= 1 ? EMissionAction.BEGIN_OF_MISSION : EMissionAction.END_OF_MISSION;
+        final Set<Planet> planets;
+        switch (phase) {
+            case END_OF_MISSION:
+                planets = tradedResource.getDestination().getSystem().getPlanets();
+                break;
+            case BEGIN_OF_MISSION:
+                planets = tradedResource.getTradeOffer().getOrigin().getSystem().getPlanets();
+                break;
+            default:
+                throw new NotifyWebUserException("Please dont do this!");
+        }
 
         final Set<WarShip> defenders = protectionMissions.stream()
                 .map(ConvoyProtectionMission::getShips)
@@ -148,7 +170,7 @@ public class RaidingConvoyMission implements MissionRunner {
             boolean hasEvaded = evade <= chanceToEvade;
             if (hasEvaded) {
                 LOGGER.info("\t\t...but not well equipped");
-                whatever = MissionItem.convoyGuardedWithShipContact(today, tradedResource);
+                whatever = MissionItem.convoyGuardedWithShipContact(today, tradedResource, phase);
             } else {
                 final int pirateForce = systemsCumulatedHeat - defendersHeatImpact;
                 final int percentOfCargoLost;
@@ -159,11 +181,11 @@ public class RaidingConvoyMission implements MissionRunner {
                 }
                 final boolean isRansom = ThreadLocalRandom.current().nextInt(0, 100) >= 50;
                 LOGGER.info("\t\t...and they take {} {}", percentOfCargoLost, (isRansom ? " for ransom" : "on their own"));
-                whatever = MissionItem.convoyRaided(today, tradedResource, EMissionAction.END_OF_MISSION, percentOfCargoLost, isRansom);
+                whatever = MissionItem.convoyRaided(today, tradedResource, phase, percentOfCargoLost, isRansom);
             }
         } else {
             LOGGER.info("\tPirates are scared");
-            whatever = MissionItem.convoyGuardedOnSight(today, tradedResource);
+            whatever = MissionItem.convoyGuardedOnSight(today, tradedResource, phase);
         }
         missionItemService.save(whatever);
     }
