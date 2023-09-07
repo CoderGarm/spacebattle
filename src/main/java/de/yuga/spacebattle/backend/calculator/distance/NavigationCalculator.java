@@ -5,7 +5,6 @@ import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Time;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
-import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -28,14 +27,11 @@ public class NavigationCalculator {
     private NavigationCalculator() {
     }
 
-
     @Nonnull
-    public static Orbit getPositionOnHyperlimit(@Nonnull final Fleet fleet, @Nonnull final FleetOrbit destination) {
-        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+    public static Orbit getPositionOnHyperlimit(@Nonnull final FleetOrbit destination) {
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
         Preconditions.checkArgument(destination.getSystem() != null, "destination system shouldn't be null!");
         Preconditions.checkArgument(destination.getOrbit() != null, "destination orbit shouldn't be null!");
-        Preconditions.checkArgument(fleet.getOrbit() != null, "fleet's orbit shouldn't be null here");
 
         final Quadrant quadrant = Quadrant.getByOrbit(destination.getOrbit());
         final EStarClassType starClassType = destination.getSystem().getStarClassType();
@@ -57,16 +53,17 @@ public class NavigationCalculator {
      *
      * @param propulsionType               the prop type
      * @param targetedPercentageOfTopSpeed the percentage of top speed which should be left over at the end of the journey
-     * @param fleet                        the fleet which travels
      * @param distance                     the distance which has to be laid back
      * @return the amount of time which are needed for this distance, perhaps in seconds
      */
     public static int getDurationForTargetedEndSpeed(@Nonnull final EModuleType propulsionType,
                                                      final int targetedPercentageOfTopSpeed,
-                                                     @Nonnull final Fleet fleet,
+                                                     @Nonnull final ETechnologyType restrictingTechnologyType,
+                                                     @Nonnull final Acceleration acceleration,
                                                      @Nonnull final Distance distance) {
         Preconditions.checkNotNull(propulsionType, "propulsionType shouldn't be null!");
-        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+        Preconditions.checkNotNull(restrictingTechnologyType, "restrictingTechnologyType must not be empty");
+        Preconditions.checkNotNull(acceleration, "acceleration must not be empty");
         Preconditions.checkNotNull(distance, "distance shouldn't be null!");
         Preconditions.checkArgument(propulsionType == EModuleType.PROPULSION || propulsionType == EModuleType.FTLPROPULSION, "propulsionType must be a propulsion!");
         Preconditions.checkArgument(!(targetedPercentageOfTopSpeed > 100 || targetedPercentageOfTopSpeed < 0), "haha, good try. But no!");
@@ -76,8 +73,6 @@ public class NavigationCalculator {
         // s = 0,5 · a · t²
         // v = a · t
         // s = 0,5 · v · t
-        final ETechnologyType restrictingTechnologyType = fleet.getRestrictingTechnologyType();
-        final Acceleration acceleration = fleet.getAccelerationFor(propulsionType);
         final EHyperBand hyperBand = acceleration.getHyperBand();
         final BigDecimal vesselTopSpeed = hyperBand.getEffectiveTopSpeed(restrictingTechnologyType);
 

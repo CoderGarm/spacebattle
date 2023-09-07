@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.calculator.distance;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
@@ -11,6 +12,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.EStarClassType;
+import de.yuga.spacebattle.backend.enums.ETechnologyType;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 
 import javax.annotation.Nonnull;
@@ -73,7 +75,9 @@ public class DistanceCalculator {
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
         Preconditions.checkArgument(fleet.getOrbit() != null, "fleet should be placed at a location!");
 
-        return calculateTimeToTravel(fleet, fleet.getOrbit(), destination);
+        final ETechnologyType restrictingTechnologyType = fleet.getRestrictingTechnologyType();
+        final Acceleration acceleration = fleet.getAccelerationFor(EModuleType.FTLPROPULSION);
+        return calculateTimeToTravel(restrictingTechnologyType, acceleration, fleet.getOrbit(), destination);
     }
 
     /**
@@ -94,18 +98,35 @@ public class DistanceCalculator {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
         Preconditions.checkNotNull(origin, "origin shouldn't be null!");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
+        Preconditions.checkNotNull(fleet.getOrbit(), "fleet.getOrbit() must not be empty");
+
+        final ETechnologyType restrictingTechnologyType = fleet.getRestrictingTechnologyType();
+        final Acceleration acceleration = fleet.getAccelerationFor(EModuleType.FTLPROPULSION);
+        return calculateTimeToTravel(restrictingTechnologyType, acceleration, fleet.getOrbit(), destination);
+    }
+
+
+    public static int calculateTimeToTravel(@Nonnull final ETechnologyType restrictingTechnologyType,
+                                            @Nonnull final Acceleration acceleration,
+                                            @Nonnull final FleetOrbit origin,
+                                            @Nonnull final FleetOrbit destination) {
+        Preconditions.checkNotNull(restrictingTechnologyType, "restrictingTechnologyType must not be empty");
+        Preconditions.checkNotNull(acceleration, "acceleration must not be empty");
+        Preconditions.checkNotNull(origin, "origin shouldn't be null!");
+        Preconditions.checkNotNull(destination, "destination shouldn't be null!");
 
         double ticksToTravel = 0;
         final StarSystem originSystem = origin.getSystem();
         final StarSystem destinationSystem = destination.getSystem();
+
         if (originSystem != null && destinationSystem != null && !originSystem.equals(destinationSystem)) {
             // interstellar traveling
-            ticksToTravel += getSubLightDurationToHyperLimit(fleet, origin, destination);
-            ticksToTravel += getDuration(EModuleType.FTLPROPULSION, fleet, originSystem.getOrbit(), destinationSystem.getOrbit());
-            ticksToTravel += getSubLightDurationFromHyperLimit(fleet, destination);
+            ticksToTravel += getSubLightDurationToHyperLimit(restrictingTechnologyType, acceleration, origin, destination);
+            ticksToTravel += getDuration(EModuleType.FTLPROPULSION, restrictingTechnologyType, acceleration, originSystem.getOrbit(), destinationSystem.getOrbit());
+            ticksToTravel += getSubLightDurationFromHyperLimit(restrictingTechnologyType, acceleration, destination);
         } else if (origin.getOrbit() != null && destination.getOrbit() != null) {
             // interplanetary traveling
-            ticksToTravel += getDuration(EModuleType.PROPULSION, fleet, origin.getOrbit(), destination.getOrbit());
+            ticksToTravel += getDuration(EModuleType.PROPULSION, restrictingTechnologyType, acceleration, origin.getOrbit(), destination.getOrbit());
         }
 
         final int rounded = BigDecimal.valueOf(ticksToTravel).setScale(0, RoundingMode.UP).intValue();
@@ -115,19 +136,20 @@ public class DistanceCalculator {
     /**
      * Calculates the time to travel from the nearest point at the hyper limit to the given destination.<br>
      *
-     * @param fleet       the fleet which wants to travel
-     * @param destination the destination of the fleet
      * @return the time to travel from the current position of the fleet to the hyper limit
      */
     @VisibleForTesting
-    private static double getSubLightDurationFromHyperLimit(@Nonnull final Fleet fleet, @Nonnull final FleetOrbit destination) {
-        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+    private static double getSubLightDurationFromHyperLimit(@Nonnull final ETechnologyType restrictingTechnologyType,
+                                                            @Nonnull final Acceleration acceleration,
+                                                            @Nonnull final FleetOrbit destination) {
+        Preconditions.checkNotNull(restrictingTechnologyType, "restrictingTechnologyType must not be empty");
+        Preconditions.checkNotNull(acceleration, "acceleration must not be empty");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
         Preconditions.checkArgument(destination.getOrbit() != null, "destination orbit shouldn't be null!");
 
-        final Orbit positionOnHyperLimit = NavigationCalculator.getPositionOnHyperlimit(fleet, destination);
+        final Orbit positionOnHyperLimit = NavigationCalculator.getPositionOnHyperlimit(destination);
         // todo currently there are fixed entry points into a system - this must be changed
-        return getDuration(EModuleType.PROPULSION, fleet, positionOnHyperLimit, destination.getOrbit());
+        return getDuration(EModuleType.PROPULSION, restrictingTechnologyType, acceleration, positionOnHyperLimit, destination.getOrbit());
     }
 
 
@@ -135,13 +157,14 @@ public class DistanceCalculator {
      * Calculates the time to travel from the current position of the fleet to the hyper limit of the star.<br>
      * The fleet must be inside the hyper limit of a star.
      *
-     * @param fleet the fleet which wants to travel
      * @return the time to travel from the current position of the fleet to the hyper limit
      */
-    private static double getSubLightDurationToHyperLimit(@Nonnull final Fleet fleet,
+    private static double getSubLightDurationToHyperLimit(@Nonnull final ETechnologyType restrictingTechnologyType,
+                                                          @Nonnull final Acceleration acceleration,
                                                           @Nonnull final FleetOrbit origin,
                                                           @Nonnull final FleetOrbit destination) {
-        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+        Preconditions.checkNotNull(restrictingTechnologyType, "restrictingTechnologyType must not be empty");
+        Preconditions.checkNotNull(acceleration, "acceleration must not be empty");
         Preconditions.checkNotNull(origin, "origin shouldn't be null!");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
 
@@ -160,7 +183,7 @@ public class DistanceCalculator {
         final double radiusOfHyperLimit = starClassType.getLightMinutesToHyperLimit();
 
         final Orbit positionOnHyperLimit = createByRadiusAndQuadrant(new Distance(radiusOfHyperLimit, EDistanceMetric.LM), quadrant, Planet.PLANET_STANDARD_METRIC);
-        return getDuration(EModuleType.PROPULSION, fleet, originOrbit, positionOnHyperLimit);
+        return getDuration(EModuleType.PROPULSION, restrictingTechnologyType, acceleration, originOrbit, positionOnHyperLimit);
     }
 
     /**
@@ -191,23 +214,24 @@ public class DistanceCalculator {
      * Calculates the time to travel for journeys in ticks for given orbits and the given propulsion type.
      *
      * @param propulsionType if the travel is sub light or faster than light
-     * @param fleet          the fleet which should travel
      * @param origin         the origin
      * @param destination    the destination
      * @return the time to travel in ticks
      */
     private static double getDuration(@Nonnull final EModuleType propulsionType,
-                                      @Nonnull final Fleet fleet,
+                                      @Nonnull final ETechnologyType restrictingTechnologyType,
+                                      @Nonnull final Acceleration acceleration,
                                       @Nonnull final Orbit origin,
                                       @Nonnull final Orbit destination) {
         Preconditions.checkNotNull(propulsionType, "propulsionType shouldn't be null!");
-        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
+        Preconditions.checkNotNull(restrictingTechnologyType, "restrictingTechnologyType must not be empty");
+        Preconditions.checkNotNull(acceleration, "acceleration must not be empty");
         Preconditions.checkNotNull(origin, "origin shouldn't be null!");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
 
         final Distance distance = origin.getDistance(destination);
         final int targetedPercentageOfTopSpeed = propulsionType == EModuleType.FTLPROPULSION ? 100 : 8;
-        final int duration = NavigationCalculator.getDurationForTargetedEndSpeed(propulsionType, targetedPercentageOfTopSpeed, fleet, distance);
+        final int duration = NavigationCalculator.getDurationForTargetedEndSpeed(propulsionType, targetedPercentageOfTopSpeed, restrictingTechnologyType, acceleration, distance);
 
         return (double) duration / Tick.TICK_DURATION_IN_SECONDS;
     }

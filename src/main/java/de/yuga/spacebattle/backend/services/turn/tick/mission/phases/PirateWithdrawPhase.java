@@ -148,7 +148,7 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
             missionCache.pirateRaidWithdrawFromOrbit(today, pirateFleet, planet);
             raidingPirateCache.dropFirstActionItem(today, pirateFleet, EMissionAction.LEAVE_ORBIT);
             final FleetOrbit destination = new FleetOrbit(planet.getOrbit(), planet.getSystem());
-            final Orbit positionOnHyperlimit = NavigationCalculator.getPositionOnHyperlimit(pirateFleet, destination);
+            final Orbit positionOnHyperlimit = NavigationCalculator.getPositionOnHyperlimit(destination);
             final Move move = new Move(pirateFleet, new FleetOrbit(positionOnHyperlimit, planet.getSystem()));
             resultingMoves.add(move);
         }

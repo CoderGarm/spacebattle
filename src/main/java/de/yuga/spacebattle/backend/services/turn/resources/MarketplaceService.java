@@ -1,9 +1,12 @@
 package de.yuga.spacebattle.backend.services.turn.resources;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.turn.resources.trade.TradesInTimeframe;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.misc.Deletable;
+import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
@@ -11,6 +14,9 @@ import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradeOffer;
 import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
+import de.yuga.spacebattle.backend.enums.ETechnologyType;
+import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
+import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
 import de.yuga.spacebattle.backend.repositories.turn.resource.trade.TradeOfferRepository;
 import de.yuga.spacebattle.backend.repositories.turn.resource.trade.TradedResourceRepository;
 import de.yuga.spacebattle.backend.services.account.OwnerService;
@@ -119,6 +125,17 @@ public class MarketplaceService {
         return tradedResource;
     }
 
+    public static int getTimeToTravel(@Nonnull final TradeOffer tradeOffer,
+                                      @Nonnull final Planet target) {
+        Preconditions.checkNotNull(tradeOffer, "tradeOffer must not be empty");
+        Preconditions.checkNotNull(target, "target must not be empty");
+
+        final FleetOrbit origin = new FleetOrbit(tradeOffer.getOrigin().getOrbit(), tradeOffer.getOrigin().getSystem());
+        final FleetOrbit destination = new FleetOrbit(target.getOrbit(), target.getSystem());
+        // 154 gamma is so fucking slow
+        return DistanceCalculator.calculateTimeToTravel(ETechnologyType.MILITARY, new Acceleration(50000, EAccelerationMetric.G, EHyperBand.EPSILON), origin, destination);
+    }
+
     @Nonnull
     private TradedResource checkAndAllocatePayment(@Nonnull final Tick today,
                                                    @Nonnull final TradeOffer tradeOffer,
@@ -142,8 +159,8 @@ public class MarketplaceService {
             destination.getResourceDeposit().pay(EResourceType.CREDITS, price);
             planetService.save(destination);
         }
-
-        final TradedResource tradedResource = new TradedResource(today, 10, tradeOffer, buyer, destination);
+        final int toTravel = MarketplaceService.getTimeToTravel(tradeOffer, destination);
+        final TradedResource tradedResource = new TradedResource(today, toTravel, tradeOffer, buyer, destination);
         return tradedResourceRepository.save(tradedResource);
     }
 

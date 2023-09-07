@@ -38,6 +38,11 @@ public class TradeOffer {
     @Schema(required = true, description = "The traded resource amount.")
     private Trade trade;
 
+    @Nonnull
+    @JsonProperty
+    @Schema(description = "The distance in ticks travel time.")
+    private Integer travelTime;
+
     public TradeOffer() {
     }
 
@@ -53,6 +58,11 @@ public class TradeOffer {
 
     public Integer getIdTradeOffer() {
         return idTradeOffer;
+    }
+
+    @JsonIgnore
+    public void setTravelTime(@Nonnull final Integer travelTime) {
+        this.travelTime = Preconditions.checkNotNull(travelTime, "travelTime must not be empty");
     }
 
     @JsonIgnore

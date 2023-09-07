@@ -157,7 +157,7 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
         final Fleet fleet = new Fleet("Kersey Association", user, destination);
         fleet.setOperational();
 
-        final Orbit positionOnHyperlimit = NavigationCalculator.getPositionOnHyperlimit(fleet, destination);
+        final Orbit positionOnHyperlimit = NavigationCalculator.getPositionOnHyperlimit(destination);
         fleet.setOrbit(new FleetOrbit(positionOnHyperlimit, planet.getSystem()));
 
         return fleetService.save(fleet);

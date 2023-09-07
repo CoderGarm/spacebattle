@@ -2,11 +2,14 @@ package de.yuga.spacebattle.rest.api.turn.resources;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.turn.resources.trade.TradesInTimeframe;
+import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.resources.MarketplaceService;
 import de.yuga.spacebattle.rest.api.BaseApi;
+import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.resources.trade.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,9 +46,14 @@ public class MarketplaceApi extends BaseApi {
     @Nonnull
     private final MarketplaceService marketplaceService;
 
+    @Nonnull
+    private final PlanetService planetService;
+
     @Autowired
-    public MarketplaceApi(@Nonnull final MarketplaceService marketplaceService) {
+    public MarketplaceApi(@Nonnull final MarketplaceService marketplaceService,
+                          @Nonnull final PlanetService planetService) {
         this.marketplaceService = Preconditions.checkNotNull(marketplaceService, "tradedResourceService must not be empty");
+        this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
     }
 
     @GetMapping(TRADE_HISTORY_ENDPOINT + "/{pastTicks}")
@@ -186,7 +194,7 @@ public class MarketplaceApi extends BaseApi {
         return ResponseEntity.ok(new TradeOffer(result));
     }
 
-    @GetMapping(OFFER_ENDPOINT)
+    @GetMapping(OFFER_ENDPOINT + "/{idPlanet}")
     @Operation(summary = "Get all EResourceTypes.", operationId = "getOffers",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -197,9 +205,18 @@ public class MarketplaceApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getOffers() {
+    public ResponseEntity<?> getOffers(@PathVariable("idPlanet") final int idPlanet) {
         final List<de.yuga.spacebattle.backend.entities.turn.resources.trade.TradeOffer> trades = marketplaceService.findActiveOffers();
-        return ResponseEntity.ok(trades.stream().map(TradeOffer::new).collect(Collectors.toList()));
+
+        final Planet planet = planetService.find(idPlanet);
+        PreconditionWebHelper.checkNotNull(planet, "planet must not be empty");
+
+        return ResponseEntity.ok(trades.stream().map(tradeOffer -> {
+            final int toTravel = MarketplaceService.getTimeToTravel(tradeOffer, planet);
+            final TradeOffer offer = new TradeOffer(tradeOffer);
+            offer.setTravelTime(toTravel);
+            return offer;
+        }).collect(Collectors.toList()));
     }
 
 

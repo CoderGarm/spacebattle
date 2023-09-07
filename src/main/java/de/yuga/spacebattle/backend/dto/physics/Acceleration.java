@@ -45,6 +45,17 @@ public class Acceleration implements Cloneable, Comparable<Acceleration> {
         this.hyperBand = EHyperBand.NONE;
     }
 
+    public Acceleration(final int value,
+                        @Nonnull final EAccelerationMetric accelerationMetric,
+                        @Nonnull final EHyperBand hyperBand) {
+        Preconditions.checkNotNull(accelerationMetric, "lengthDefinition shouldn't be null!");
+        Preconditions.checkNotNull(hyperBand, "hyperBand must not be empty");
+
+        this.value = BigDecimal.valueOf(value);
+        this.accelerationMetric = accelerationMetric;
+        this.hyperBand = hyperBand;
+    }
+
     public Acceleration(@Nonnull final BigDecimal value,
                         @Nonnull final EAccelerationMetric accelerationMetric,
                         @Nonnull final EHyperBand hyperBand) {
