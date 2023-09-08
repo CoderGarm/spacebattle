@@ -4,13 +4,16 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
+import de.yuga.spacebattle.backend.enums.EMissionType;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.mission.MissionService;
 import de.yuga.spacebattle.backend.services.turn.resources.MarketplaceService;
+import de.yuga.spacebattle.backend.services.turn.tick.mission.HeatMapService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
+import de.yuga.spacebattle.rest.dto.turn.mission.HeatMap;
 import de.yuga.spacebattle.rest.dto.turn.mission.Mission;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -41,6 +44,7 @@ public class MissionApi extends BaseApi {
     @Nonnull
     public static final String ENDPOINT = "mission";
     public static final String STOP_MISSION_ENDPOINT = "stop";
+    public static final String HEAT_MAP_ENDPOINT = "heatMap";
 
     @Nonnull
     private final MissionService missionService;
@@ -54,15 +58,20 @@ public class MissionApi extends BaseApi {
     @Nonnull
     private final MarketplaceService marketplaceService;
 
+    @Nonnull
+    private final HeatMapService heatMapService;
+
     @Autowired
     public MissionApi(@Nonnull final MissionService missionService,
                       @Nonnull final PlanetService planetService,
                       @Nonnull final UserService userService,
-                      @Nonnull final MarketplaceService marketplaceService) {
+                      @Nonnull final MarketplaceService marketplaceService,
+                      @Nonnull final HeatMapService heatMapService) {
         this.missionService = Preconditions.checkNotNull(missionService, "missionService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.userService = Preconditions.checkNotNull(userService, "userService must not be empty");
         this.marketplaceService = Preconditions.checkNotNull(marketplaceService, "marketplaceService must not be empty");
+        this.heatMapService = Preconditions.checkNotNull(heatMapService, "heatMapService must not be empty");
     }
 
     @GetMapping()
@@ -80,6 +89,21 @@ public class MissionApi extends BaseApi {
 
         final List<de.yuga.spacebattle.backend.entities.turn.mission.Mission> missions = missionService.findAllMissions(getIdUser());
         return ResponseEntity.ok(missions.stream().map(m -> new Mission(m, getPreferredLanguage())).collect(Collectors.toList()));
+    }
+
+    @GetMapping(HEAT_MAP_ENDPOINT)
+    @Operation(summary = "Returns the full scale heat map.", operationId = "getHeatMap",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = HeatMap.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getHeatMap() {
+
+        final Set<de.yuga.spacebattle.backend.entities.turn.mission.HeatMap> heat = heatMapService.findHeatForMissionType(EMissionType.PIRATE_RAID);
+        return ResponseEntity.ok(new HeatMap(heat));
     }
 
     @PutMapping()

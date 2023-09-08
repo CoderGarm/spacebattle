@@ -14,11 +14,17 @@
    Das ist der Workaround, bis es einen Handel für Schiffsteile gibt.
 4. Handelsangebote haben eine entfernungsabhängige Reisezeit.  
    Da sich die Reisezeiten von regulären Konvois in Monaten bemisst, ist nur hervorragende Organisation geneigt, die
-   Bedürfnisse heutiger Imperatoren und Präsidenten zu befriedigen. Das geht dann alles etwas flotter.
+   Bedürfnisse heutiger Imperatoren und Präsidenten zu befriedigen. Das geht dann alles etwas flotter.  
+   Gleichzeitig wird erstmals das Konzept der Gleichzeitigkeit betrachtet. Da Ereignisse sehr weit weg passieren, wird
+   man auf Informationen warten müssen. Falls dein Konvoi überfallen wird, wirst du es erst mitbekommen, wenn er
+   eintrifft.
+5. Die Karte für strategische Operationen ("Mission Map") hat nun eine helle Farbgebung.  
+   Und das dahinter liegende Feature ist die Heat Map, die ... nun ja, die Hitze anzeigt, die verschiedene
+   Operationsgebiete akkumulieren.  
+   Anfangs bleibt sie beschränkt auf Piratenaktivität oder besser, die Angriffslust von Piraten.
 
 todo. heat indicator on map -> -30 to 30 heat scale
 todo. Pläne von wo nach wo (Lieferzeit) festlegen
-
 
 #### Diverses
 
@@ -26,8 +32,10 @@ todo. Pläne von wo nach wo (Lieferzeit) festlegen
 2. Die Reihenfolge der Tabs bei StratOps ist getauscht. Damit muss man die Karte nur laden, wenn man die Karte auch
    braucht.
 3. Die Forschungen lassen sich jetzt durchsuchen.
-   todo. take-a-tour updaten
-   todo. in job-dashboard immer alle planeten aufführen + filter
+
+todo. take-a-tour updaten
+todo. in job-dashboard immer alle planeten aufführen + filter
+todo. transportaufträge mit "immer nur einmal"-schalter
 
 ### Bugs fixed
 
