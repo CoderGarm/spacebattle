@@ -24,7 +24,7 @@
    Anfangs bleibt sie beschränkt auf Piratenaktivität oder besser, die Angriffslust von Piraten.
 
 todo. heat indicator on map -> -30 to 30 heat scale
-todo. Pläne von wo nach wo (Lieferzeit) festlegen
+todo. Pläne von wo nach wo (Lieferzeit) festlegen - spot market
 
 #### Diverses
 
@@ -43,6 +43,7 @@ todo. transportaufträge mit "immer nur einmal"-schalter
 2. Man kann nun Forschungen tatsächlich auf das höchste Level erforschen.
 3. Mit jedem Mal, dass man die Sternenkarte geladen hat, hat es länger gedauert. Das isst jetzt nicht mehr so.
 4. Man kann seine Handelsangebote jetzt zurückziehen.
+5. Das Problem mit dem Verifikationslink für die eMail-Adresse ist behoben.
 
 #### next steps
 

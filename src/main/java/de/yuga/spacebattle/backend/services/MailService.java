@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.converter.PasswordConverter;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -103,7 +104,7 @@ public class MailService {
     private String getUserIdentificationCode(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
-        final String hash = user.getUserSetting().getPassword();
+        final String hash = new PasswordConverter().convertToDatabaseColumn(user.getUserSetting().getPassword());
         final int id = user.getId();
         return hash + "-" + id;
     }
