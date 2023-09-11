@@ -18,12 +18,6 @@
    Gleichzeitig wird erstmals das Konzept der Gleichzeitigkeit betrachtet. Da Ereignisse sehr weit weg passieren, wird
    man auf Informationen warten müssen. Falls dein Konvoi überfallen wird, wirst du es erst mitbekommen, wenn er
    eintrifft.
-5. Die Karte für strategische Operationen ("Mission Map") hat nun eine helle Farbgebung.  
-   Und das dahinter liegende Feature ist die Heat Map, die ... nun ja, die Hitze anzeigt, die verschiedene
-   Operationsgebiete akkumulieren.  
-   Anfangs bleibt sie beschränkt auf Piratenaktivität oder besser, die Angriffslust von Piraten.
-
-todo. heat indicator on map -> -30 to 30 heat scale
 todo. Pläne von wo nach wo (Lieferzeit) festlegen - spot market
 
 #### Diverses
@@ -45,10 +39,21 @@ todo. transportaufträge mit "immer nur einmal"-schalter
 4. Man kann seine Handelsangebote jetzt zurückziehen.
 5. Das Problem mit dem Verifikationslink für die eMail-Adresse ist behoben.
 
+todo. migration ohne housing auf zielplani  
+todo. Das teilen der Flotten geht immer nur einmal. Danach muss man die seite neu laden, damit der teilen button wieder enabled wird.  
+todo. Ich würde gerne die Erstellung von geplanten Kolos abbrechen können.
+
 #### next steps
 
+todo. Die Karte für strategische Operationen ("Mission Map") hat nun eine helle Farbgebung.  
+Und das dahinter liegende Feature ist die Heat Map, die ... nun ja, die Hitze anzeigt, die verschiedene
+Operationsgebiete akkumulieren.  
+Anfangs bleibt sie beschränkt auf Piratenaktivität oder besser, die Angriffslust von Piraten.
+todo. heat indicator on map -> -30 to 30 heat scale -> d3 statt svgjs?
+
+- ressourcen müssen besser gebalanced werden
 - punkte für missionen
-- aktive Spielermissionen, e.g. provoke pirate raid at user or planet
+- aktive Spielermissionen, e.g. provoke pirate raid at user or planet (man kann heat für andere kaufen)
 - allianz-feature: missionen auf allianzterritorium, z.B. pirate hunt für nen kumpel oder convoyschutz
 - unendliche forschungen kennzeichnen
 - cache in datenbank verschieben
