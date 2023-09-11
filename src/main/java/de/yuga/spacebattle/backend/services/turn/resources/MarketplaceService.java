@@ -3,11 +3,14 @@ package de.yuga.spacebattle.backend.services.turn.resources;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.turn.resources.trade.TradesInTimeframe;
+import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradeOffer;
@@ -31,10 +34,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -327,8 +327,28 @@ public class MarketplaceService {
         final int price = findOfferSpotPrice(idUser, resourceAmount.getRealType());
         final TradeOffer offer = createOffer(idUser, spotOffer.getIdPlanet(), resourceAmount.getRealType(), resourceAmount.getAmount(), price);
 
-        final Planet mainPlanet = planetService.findMainPlanet(ownerService.getRandomNPC());
-        takeOffer(offer.getId(), Objects.requireNonNull(mainPlanet.getNpcOwner()).getId(), mainPlanet.getId());
+        final Planet playersPlanet = planetService.find(spotOffer.getIdPlanet());
+        Preconditions.checkNotNull(playersPlanet, "playersPlanet must not be empty");
+        final StarSystem playersSystem = playersPlanet.getSystem();
+        final List<NonPlayerCharacter> npclist = ownerService.findAllNPCWithPlanet();
+        final Map<NonPlayerCharacter, Planet> npcMap = npclist.stream()
+                .collect(Collectors.toMap(npc -> npc, npc -> planetService.findMainPlanet(npc.getId())));
+
+        Distance checker = null;
+        Planet mainPlanet = null;
+        for (final Map.Entry<NonPlayerCharacter, Planet> e : npcMap.entrySet()) {
+            final StarSystem starSystem = e.getValue().getSystem();
+
+            final Distance distance = starSystem.getOrbit().getDistance(playersSystem.getOrbit());
+            if (checker == null || distance.compareTo(checker) < 0) {
+                mainPlanet = e.getValue();
+                checker = distance;
+            }
+        }
+        Preconditions.checkNotNull(mainPlanet, "mainPlanet must not be empty");
+        Preconditions.checkNotNull(mainPlanet.getNpcOwner(), "mainPlanet.getNpcOwner() must not be empty");
+
+        takeOffer(offer.getId(), mainPlanet.getNpcOwner().getId(), mainPlanet.getId());
     }
 
     public void buySpotOffer(final int idUser, @Nonnull final SpotOffer spotOffer) {

@@ -17,8 +17,8 @@
    Bedürfnisse heutiger Imperatoren und Präsidenten zu befriedigen. Das geht dann alles etwas flotter.  
    Gleichzeitig wird erstmals das Konzept der Gleichzeitigkeit betrachtet. Da Ereignisse sehr weit weg passieren, wird
    man auf Informationen warten müssen. Falls dein Konvoi überfallen wird, wirst du es erst mitbekommen, wenn er
-   eintrifft.
-todo. Pläne von wo nach wo (Lieferzeit) festlegen - spot market
+   eintrifft.  
+   Für den Spot Market gilt, dass der dichteste Handelsplatz gewählt wird.
 
 #### Diverses
 

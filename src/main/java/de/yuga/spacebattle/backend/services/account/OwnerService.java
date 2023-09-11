@@ -1,9 +1,11 @@
 package de.yuga.spacebattle.backend.services.account;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.repositories.account.NonPlayerCharacterRepository;
 import de.yuga.spacebattle.backend.repositories.account.UserRepository;
+import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -13,6 +15,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OwnerService {
@@ -61,5 +64,18 @@ public class OwnerService {
     @Nonnull
     public Owner getRandomNPC() {
         return npcRepository.getNPC(PageRequest.of(0, 2)).get(1);
+    }
+
+    @Nonnull
+    public List<NonPlayerCharacter> findAllNPC() {
+        return npcRepository.findAll();
+    }
+
+    @Nonnull
+    public List<NonPlayerCharacter> findAllNPCWithPlanet() {
+        return npcRepository.findAll().stream()
+                .filter(npc -> !npc.getUsername().equals(MasterOfTheUniverseService.DEFEATED_OPPONENT))
+                .filter(npc -> !npc.getUsername().equals(MasterOfTheUniverseService.PIRATE))
+                .collect(Collectors.toList());
     }
 }
