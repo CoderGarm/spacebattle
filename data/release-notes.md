@@ -39,6 +39,8 @@ todo. transportaufträge mit "immer nur einmal"-schalter
 4. Man kann seine Handelsangebote jetzt zurückziehen.
 5. Das Problem mit dem Verifikationslink für die eMail-Adresse ist behoben.
 
+todo. housing left for x ticks - calc prüfen
+todo. tooltip overlay in construction ressis
 todo. migration ohne housing auf zielplani  
 todo. Das teilen der Flotten geht immer nur einmal. Danach muss man die seite neu laden, damit der teilen button wieder enabled wird.  
 todo. Ich würde gerne die Erstellung von geplanten Kolos abbrechen können.
