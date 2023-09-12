@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EEducationType;
+import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.caches.TransportationCache;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
@@ -74,23 +75,31 @@ public class EmpireMigrationTickRunner implements TickRunner {
 
             final Map<Planet, ResourceDeposit> demands = operationalService.getPopulationDemandForUserByPlanet(user.getId());
 
-            demands.forEach((planet, demand) -> {
-                demand.getHumanResources().forEach((demandedType, demandedAmount) -> {
-                    if (demandedAmount > 0) {
-                        for (final Map.Entry<Planet, ResourceDeposit> e : deposits.entrySet()) {
-                            final Planet from = e.getKey();
-                            final ResourceDeposit deposit = e.getValue();
-                            if (from.equals(planet)) {
-                                continue;
-                            }
-                            final long present = deposit.getCrewAmountByType(demandedType);
-                            final long demandFrom = demand.getCrewAmountByType(demandedType);
-                            final long amount = Long.min(present - demandFrom, demandedAmount);
-                            executeTransportation(toStore, planet, demand, demandedType, from, deposit, amount);
+            for (final Planet to : demands.keySet()) {
+                final ResourceDeposit demand = demands.get(to);
+                final Set<EEducationType> educationTypes = demand.getHumanResources().entrySet().stream()
+                        .filter(e -> e.getValue() > 0).map(Map.Entry::getKey)
+                        .collect(Collectors.toSet());
+
+                final Set<Planet> sources = deposits.keySet().stream().filter(p -> !to.equals(p)).collect(Collectors.toSet());
+                for (final Planet from : sources) {
+                    final ResourceDeposit deposit = from.getResourceDeposit();
+                    for (final EEducationType educationType : educationTypes) {
+                        final long demandedAmount = demand.getCrewAmountByType(educationType);
+
+                        final long present = deposit.getCrewAmountByType(educationType);
+                        long amount = Long.min(present, demandedAmount);
+                        long capacity = to.getResourceCapacity().getResourceAmountByType(EResourceType.POPULATION);
+                        final long currentPopulation = to.getResourceDeposit().getResourceAmountByType(EResourceType.POPULATION);
+                        capacity = capacity - currentPopulation;
+                        if (amount <= 0 || capacity <= 0) {
+                            continue;
                         }
+                        amount = Long.min(amount, capacity);
+                        executeTransportation(toStore, to, demand, educationType, from, deposit, amount);
                     }
-                });
-            });
+                }
+            }
         });
         if (!toStore.isEmpty()) {
             planetService.saveAll(toStore);

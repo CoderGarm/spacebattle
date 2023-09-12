@@ -38,10 +38,11 @@ todo. transportaufträge mit "immer nur einmal"-schalter
 3. Mit jedem Mal, dass man die Sternenkarte geladen hat, hat es länger gedauert. Das isst jetzt nicht mehr so.
 4. Man kann seine Handelsangebote jetzt zurückziehen.
 5. Das Problem mit dem Verifikationslink für die eMail-Adresse ist behoben.
+6. Die Migration innerhalb des eigenen Imperiums ist jetzt abhängig von der Menge an verfügbaren Wohnraum.
 
+todo. fetching mining factors prüfen - erzeugt last
 todo. housing left for x ticks - calc prüfen
 todo. tooltip overlay in construction ressis
-todo. migration ohne housing auf zielplani  
 todo. Das teilen der Flotten geht immer nur einmal. Danach muss man die seite neu laden, damit der teilen button wieder enabled wird.  
 todo. Ich würde gerne die Erstellung von geplanten Kolos abbrechen können.
 
