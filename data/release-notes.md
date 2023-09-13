@@ -29,7 +29,6 @@
 
 todo. take-a-tour updaten
 todo. in job-dashboard immer alle planeten aufführen + filter
-todo. transportaufträge mit "immer nur einmal"-schalter
 
 ### Bugs fixed
 
@@ -39,20 +38,25 @@ todo. transportaufträge mit "immer nur einmal"-schalter
 4. Man kann seine Handelsangebote jetzt zurückziehen.
 5. Das Problem mit dem Verifikationslink für die eMail-Adresse ist behoben.
 6. Die Migration innerhalb des eigenen Imperiums ist jetzt abhängig von der Menge an verfügbaren Wohnraum.
+7. Man kann geplante Kolonisierungen nun abbrechen. Wenn das Kolo-Schiff schon losgeflogen ist, ist es allerdings zu spät dafür.
 
 todo. fetching mining factors prüfen - erzeugt last
 todo. housing left for x ticks - calc prüfen
 todo. tooltip overlay in construction ressis
-todo. Das teilen der Flotten geht immer nur einmal. Danach muss man die seite neu laden, damit der teilen button wieder enabled wird.  
-todo. Ich würde gerne die Erstellung von geplanten Kolos abbrechen können.
+todo. Das teilen der Flotten geht immer nur einmal. Danach muss man die seite neu laden, damit der teilen button wieder enabled wird.
 
 #### next steps
 
+heatmap feature:
 todo. Die Karte für strategische Operationen ("Mission Map") hat nun eine helle Farbgebung.  
 Und das dahinter liegende Feature ist die Heat Map, die ... nun ja, die Hitze anzeigt, die verschiedene
 Operationsgebiete akkumulieren.  
 Anfangs bleibt sie beschränkt auf Piratenaktivität oder besser, die Angriffslust von Piraten.
 todo. heat indicator on map -> -30 to 30 heat scale -> d3 statt svgjs?
+
+todo. transportaufträge mit "immer nur einmal"-schalter
+
+- combat sim section: desgin enemy ship classes, create fleets of them and let them fight in combat theatre
 
 - ressourcen müssen besser gebalanced werden
 - punkte für missionen

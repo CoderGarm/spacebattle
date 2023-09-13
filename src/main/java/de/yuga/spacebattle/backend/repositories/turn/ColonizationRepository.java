@@ -1,14 +1,14 @@
 package de.yuga.spacebattle.backend.repositories.turn;
 
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public interface ColonizationRepository extends CrudRepository<Colonization, Integer>, CustomColonizationRepository {
+public interface ColonizationRepository extends JpaRepository<Colonization, Integer>, CustomColonizationRepository {
 
     @Nullable
     @Query("SELECT c FROM Colonization c WHERE c.target.system.id = :idStarSystem")

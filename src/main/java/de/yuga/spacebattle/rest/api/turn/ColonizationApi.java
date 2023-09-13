@@ -114,6 +114,21 @@ public class ColonizationApi extends BaseApi {
         return ResponseEntity.ok(new Colonization(colonization));
     }
 
+    @DeleteMapping("/{idColonization}")
+    @Operation(summary = "Stops the planned colonization of a planet for a user.", operationId = "stopPlannedColonization",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> stopPlannedColonization(@PathVariable final int idColonization) {
+        final int idUser = getIdUser();
+        colonizationService.stopPlannedColonization(idUser, idColonization);
+        return ResponseEntity.ok(true);
+    }
+
     @PostMapping(value = BUY_SYSTEM_INFO_ENDPOINT)
     @Operation(summary = "Get all not colonized but known systems for a user.", operationId = "buyInformationForSystem",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(

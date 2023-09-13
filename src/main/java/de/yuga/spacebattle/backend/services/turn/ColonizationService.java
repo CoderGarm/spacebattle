@@ -358,4 +358,13 @@ public class ColonizationService {
     public List<Colonization> findAllPlannedForUser(final int idUser) {
         return Objects.requireNonNullElse(repository.findAllPlannedForUser(idUser), new ArrayList<>());
     }
+
+    public void stopPlannedColonization(final int idUser, final int idColonization) {
+        final Colonization colonization = repository.findById(idColonization).orElse(null);
+        if (colonization == null || colonization.getUser().getId() != idUser) {
+            return;
+        }
+        /* todo payback the paycheck */
+        repository.delete(colonization);
+    }
 }
