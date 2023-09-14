@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.dto.turn;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
 import de.yuga.spacebattle.rest.dto.account.Player;
 import de.yuga.spacebattle.rest.dto.buildings.Building;
@@ -14,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Set;
 
 @Schema(description = ".")
 public class Job {
@@ -117,7 +119,8 @@ public class Job {
         final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = constructable.getFleet();
         this.isShipyardJob = fleet != null;
         if (isShipyardJob) {
-            this.fleet = new Fleet(fleet, fleet.getAllShips(), languageCode);
+            final Set<WarShip> ships = constructable.isUpgradeJob() ? fleet.getAliveShips() : fleet.getAllShips();
+            this.fleet = new Fleet(fleet, ships, languageCode);
             this.isRepairJob = job.getConstructable().isRepairJob();
         }
         this.targetLevel = constructable.getTargetLevel();

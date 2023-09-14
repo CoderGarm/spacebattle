@@ -2,40 +2,15 @@
 
 #### Gameplay
 
-1. Man kann seine Konvois nun per Mission schützen.
-   Es gibt auch ein kurzes Tutorial dazu!
-   Nachteil: Man muss seine Konvois mit Missionen schützen.
-2. Die Piraten greifen sich nun auch Konvois.
-   Sofern man seine Systeme nicht ausreichend schützt und die Piraten mit ihren Angriffen Erfolg haben, werden die
-   Angriffe an der Hypergrenze häufiger.
-3. Die Anforderungen an das Level von Antrieben ist deutlich gesenkt.  
-   Damit kommt man schneller an sinnvolle Reisezeiten zu seinen Nachbarn. Und bei aller Liebe, da liegen wirklich zu
-   viele Ressourcen auf den Hauptplaneten rum!  
-   Das ist der Workaround, bis es einen Handel für Schiffsteile gibt.
-4. Handelsangebote haben eine entfernungsabhängige Reisezeit.  
-   Da sich die Reisezeiten von regulären Konvois in Monaten bemisst, ist nur hervorragende Organisation geneigt, die
-   Bedürfnisse heutiger Imperatoren und Präsidenten zu befriedigen. Das geht dann alles etwas flotter.  
-   Gleichzeitig wird erstmals das Konzept der Gleichzeitigkeit betrachtet. Da Ereignisse sehr weit weg passieren, wird
-   man auf Informationen warten müssen. Falls dein Konvoi überfallen wird, wirst du es erst mitbekommen, wenn er
-   eintrifft.  
-   Für den Spot Market gilt, dass der dichteste Handelsplatz gewählt wird.
+todo.
 
 #### Diverses
 
-1. Die Dashboard-Informationen werden ab jetzt bei allen Themen einen Neustart überleben.
-2. Die Reihenfolge der Tabs bei StratOps ist getauscht. Damit muss man die Karte nur laden, wenn man die Karte auch
-   braucht.
-3. Die Forschungen lassen sich jetzt durchsuchen.
+todo.
 
 ### Bugs fixed
 
-1. Man kann einer Mission mehrere Schiffe zuweisen.
-2. Man kann nun Forschungen tatsächlich auf das höchste Level erforschen.
-3. Mit jedem Mal, dass man die Sternenkarte geladen hat, hat es länger gedauert. Das isst jetzt nicht mehr so.
-4. Man kann seine Handelsangebote jetzt zurückziehen.
-5. Das Problem mit dem Verifikationslink für die eMail-Adresse ist behoben.
-6. Die Migration innerhalb des eigenen Imperiums ist jetzt abhängig von der Menge an verfügbaren Wohnraum.
-7. Man kann geplante Kolonisierungen nun abbrechen. Wenn das Kolo-Schiff schon losgeflogen ist, ist es allerdings zu spät dafür.
+1. Die Werftarbeiten auf dem Job Dashboard zeigen nur noch die in Dienst befindlichen Schiffe an.
 
 #### next steps
 
