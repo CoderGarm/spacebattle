@@ -5,6 +5,7 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.caches.TransportationCache;
@@ -75,6 +76,9 @@ public class EmpireMigrationTickRunner implements TickRunner {
 
             final Map<Planet, ResourceDeposit> demands = operationalService.getPopulationDemandForUserByPlanet(user.getId());
 
+            final Map<Planet, ResourceDeposit> demandOfSourcePlanets = deposits.keySet().stream()
+                    .collect(Collectors.toMap(k -> k, k -> operationalService.getPopulationDemandForPlanet(k.getId())));
+
             for (final Planet to : demands.keySet()) {
                 final ResourceDeposit demand = demands.get(to);
                 final Set<EEducationType> educationTypes = demand.getHumanResources().entrySet().stream()
@@ -82,12 +86,16 @@ public class EmpireMigrationTickRunner implements TickRunner {
                         .collect(Collectors.toSet());
 
                 final Set<Planet> sources = deposits.keySet().stream().filter(p -> !to.equals(p)).collect(Collectors.toSet());
-                for (final Planet from : sources) {
-                    final ResourceDeposit deposit = from.getResourceDeposit();
+                for (final Planet source : sources) {
+                    final ResourceDeposit demandOfSource = demandOfSourcePlanets.getOrDefault(source, new ResourceDeposit(EDepositType.DEMAND));
+                    final ResourceDeposit deposit = source.getResourceDeposit();
                     for (final EEducationType educationType : educationTypes) {
                         final long demandedAmount = demand.getCrewAmountByType(educationType);
 
-                        final long present = deposit.getCrewAmountByType(educationType);
+                        final long present = deposit.getCrewAmountByType(educationType) - demandOfSource.getCrewAmountByType(educationType);
+                        if (present <= 0) {
+                            continue;
+                        }
                         long amount = Long.min(present, demandedAmount);
                         long capacity = to.getResourceCapacity().getResourceAmountByType(EResourceType.POPULATION);
                         final long currentPopulation = to.getResourceDeposit().getResourceAmountByType(EResourceType.POPULATION);
@@ -96,7 +104,7 @@ public class EmpireMigrationTickRunner implements TickRunner {
                             continue;
                         }
                         amount = Long.min(amount, capacity);
-                        executeTransportation(toStore, to, demand, educationType, from, deposit, amount);
+                        executeTransportation(toStore, to, demand, educationType, source, deposit, amount);
                     }
                 }
             }

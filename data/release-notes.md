@@ -11,6 +11,10 @@ todo.
 ### Bugs fixed
 
 1. Die Werftarbeiten auf dem Job Dashboard zeigen nur noch die in Dienst befindlichen Schiffe an.
+2. Planeten geben im Zuge der Migration nicht mehr Leute ab als sie selber benötigen.
+3. Das Resource-Display für Planeten ist aussagekräftiger geworden.
+    - Es gibt auch keine falsche Warnung mehr, wenn man zu viele freie Wohnungen hat.
+    - Der doppelte Tooltip ist gefixt.
 
 #### next steps
 
