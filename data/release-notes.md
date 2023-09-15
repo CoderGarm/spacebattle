@@ -6,22 +6,22 @@ todo.
 
 #### Diverses
 
-todo.
+todo. kapa und pop summe in pop development darstellen
+todo. Titel, Vor- und Nachname der "rollplay"-Version. Nen Kürzel für die Navy und evtl nen Kapalog an Schiffs- und Flottennamen
+todo. in job-dashboard immer alle planeten aufführen + filter
+todo. transportaufträge mit "immer nur einmal"-schalter
 
 ### Bugs fixed
 
-1. Die Werftarbeiten auf dem Job Dashboard zeigen nur noch die in Dienst befindlichen Schiffe an.
-2. Planeten geben im Zuge der Migration nicht mehr Leute ab als sie selber benötigen.
-3. Das Resource-Display für Planeten ist aussagekräftiger geworden.
-    - Es gibt auch keine falsche Warnung mehr, wenn man zu viele freie Wohnungen hat.
-    - Der doppelte Tooltip ist gefixt.
+todo. handel ist buggy, die kosten werden nicht mehr sofort abgezogen
+todo. einträge nach kauf sollen vor dem absetzen des calls verschwinden, nicht danach
+todo. Das teilen der Flotten geht immer nur einmal. Danach muss man die seite neu laden, damit der teilen button wieder enabled wird.
 
 #### next steps
 
 todo. fetching mining factors prüfen - erzeugt last
-todo. housing left for x ticks - calc prüfen
-todo. tooltip overlay in construction ressis
-todo. Das teilen der Flotten geht immer nur einmal. Danach muss man die seite neu laden, damit der teilen button wieder enabled wird.
+todo. housing left for x ticks - anzeige nach lastring ticks besser aufstellen
+
 
 heatmap feature:
 todo. Die Karte für strategische Operationen ("Mission Map") hat nun eine helle Farbgebung.  
@@ -31,8 +31,6 @@ Anfangs bleibt sie beschränkt auf Piratenaktivität oder besser, die Angriffslu
 todo. heat indicator on map -> -30 to 30 heat scale -> d3 statt svgjs?
 
 todo. take-a-tour updaten
-todo. in job-dashboard immer alle planeten aufführen + filter
-todo. transportaufträge mit "immer nur einmal"-schalter
 
 - combat sim section: desgin enemy ship classes, create fleets of them and let them fight in combat theatre
 
