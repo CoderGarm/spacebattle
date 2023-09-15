@@ -7,8 +7,10 @@ todo.
 #### Diverses
 
 1. Die Bevölkerungsentwicklung stellt nun die aufsummierten Pops dar und zeigt die Kapazität an.
+2. Das Job Dashboard zeigt nun alle Planeten an. Damit kann man besser sehen, welcher Planet noch Aufträge verkraften kann.
+
 todo. Titel, Vor- und Nachname der "rollplay"-Version. Nen Kürzel für die Navy und evtl nen Kapalog an Schiffs- und Flottennamen
-todo. in job-dashboard immer alle planeten aufführen + filter
+todo. mission dashboard: anzeigen welche Missionen gesetzt sein sollten (kind of mission advisor -> probably a good idea for the tutorials)
    todo. transportaufträge ändern zu "immer nur einmal"
    todo. forum und chat per handy
 
@@ -20,7 +22,7 @@ todo. Das teilen der Flotten geht immer nur einmal. Danach muss man die seite ne
 
 todo. fetching mining factors prüfen - erzeugt last
 todo. housing left for x ticks - anzeige nach lastring ticks besser aufstellen
-
+todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
 
 heatmap feature:
 todo. Die Karte für strategische Operationen ("Mission Map") hat nun eine helle Farbgebung.  
