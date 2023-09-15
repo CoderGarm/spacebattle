@@ -29,6 +29,7 @@ import de.yuga.spacebattle.rest.dto.enums.EResourceType;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClassMock;
 import de.yuga.spacebattle.rest.dto.turn.resources.MiningFactors;
+import de.yuga.spacebattle.rest.dto.turn.resources.PopulationOverview;
 import de.yuga.spacebattle.rest.dto.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.rest.dto.turn.resources.ResourceTransfer;
 import io.swagger.v3.oas.annotations.Operation;
@@ -67,6 +68,7 @@ public class ResourcesApi extends BaseApi {
     private static final String RESOURCE_UTILIZATION_ENDPOINT = "utilization";
     private static final String INCOME_ENDPOINT = "income";
     private static final String CAPACITY_ENDPOINT = "capacity";
+    private static final String POPULATION_OVERALL_ENDPOINT = "overallPops";
     private static final String COSTS_ENDPOINT = "costs";
     private static final String SHIPYARD_ORDER_COSTS_ENDPOINT = "costsShipyard";
     private static final String SHIP_CLASS_COSTS_ENDPOINT = "costsShipClass";
@@ -330,6 +332,32 @@ public class ResourcesApi extends BaseApi {
 
         final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit capacity = planet.getResourceCapacity();
         return ResponseEntity.ok(new ResourceDeposit(capacity));
+    }
+
+    @GetMapping(value = POPULATION_OVERALL_ENDPOINT)
+    @Operation(summary = "Returns the capacity of the planet.", operationId = "getPopOverview",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PopulationOverview.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getPopOverview() {
+
+        final List<Planet> planets = planetService.findAllColonizedBy(getIdUser());
+
+        final long utilizedPopulationForUser = operationalService.getUtilizedPopulationForUser(getIdUser()).getResourceAmountByType(de.yuga.spacebattle.backend.enums.EResourceType.POPULATION);
+        final PopulationOverview populationOverview = new PopulationOverview();
+        populationOverview.addPresent(utilizedPopulationForUser);
+
+        for (final Planet planet : planets) {
+            final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit resourceDeposit = planet.getResourceDeposit();
+            final long capacity = planet.getResourceCapacity().getResourceAmountByType(de.yuga.spacebattle.backend.enums.EResourceType.POPULATION);
+            populationOverview.addCapacity(capacity);
+            populationOverview.addPresent(resourceDeposit.getCrewRequirement().getSumOfPopulation());
+        }
+        return ResponseEntity.ok(populationOverview);
     }
 
     @PostMapping(value = COSTS_ENDPOINT)

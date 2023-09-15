@@ -6,15 +6,14 @@ todo.
 
 #### Diverses
 
-todo. kapa und pop summe in pop development darstellen
+1. Die Bevölkerungsentwicklung stellt nun die aufsummierten Pops dar und zeigt die Kapazität an.
 todo. Titel, Vor- und Nachname der "rollplay"-Version. Nen Kürzel für die Navy und evtl nen Kapalog an Schiffs- und Flottennamen
 todo. in job-dashboard immer alle planeten aufführen + filter
-todo. transportaufträge mit "immer nur einmal"-schalter
+   todo. transportaufträge ändern zu "immer nur einmal"
+   todo. forum und chat per handy
 
 ### Bugs fixed
 
-todo. handel ist buggy, die kosten werden nicht mehr sofort abgezogen
-todo. einträge nach kauf sollen vor dem absetzen des calls verschwinden, nicht danach
 todo. Das teilen der Flotten geht immer nur einmal. Danach muss man die seite neu laden, damit der teilen button wieder enabled wird.
 
 #### next steps
