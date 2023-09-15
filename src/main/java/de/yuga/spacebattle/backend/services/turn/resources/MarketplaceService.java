@@ -146,7 +146,7 @@ public class MarketplaceService {
         Preconditions.checkNotNull(buyer, "buyer must not be empty");
         Preconditions.checkNotNull(destination, "destination must not be empty");
 
-        final long price = tradeOffer.getUnitPrice();
+        final long price = tradeOffer.getFullPrice();
         if (isHumanUser(buyer)) {
             // paying is possible by default for NPCs
 
