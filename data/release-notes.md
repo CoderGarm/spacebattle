@@ -7,11 +7,12 @@ todo.
 #### Diverses
 
 1. Die Bevölkerungsentwicklung stellt nun die aufsummierten Pops dar und zeigt die Kapazität an.
-2. Das Job Dashboard zeigt nun alle Planeten an. Damit kann man besser sehen, welcher Planet noch Aufträge verkraften kann.
+2. Das Job-Dashboard zeigt nun alle Planeten an. Damit kann man besser sehen, welcher Planet noch Aufträge verkraften kann.
+3. Manuell eingestellte Transportaufträge werden ab jetzt nur noch einmal ausgeführt, danach werden Demand und Delivery genullt.
+   Es war immer lästig zu vergessen, die Daueraufträge abzustellen.
 
 todo. Titel, Vor- und Nachname der "rollplay"-Version. Nen Kürzel für die Navy und evtl nen Kapalog an Schiffs- und Flottennamen
 todo. mission dashboard: anzeigen welche Missionen gesetzt sein sollten (kind of mission advisor -> probably a good idea for the tutorials)
-   todo. transportaufträge ändern zu "immer nur einmal"
    todo. forum und chat per handy
 
 ### Bugs fixed

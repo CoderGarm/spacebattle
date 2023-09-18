@@ -39,8 +39,10 @@ public class PlanetService {
     }
 
     @Nonnull
-    public List<Planet> findByIds(List<Integer> fleetIDs) {
-        final Iterable<Planet> allById = planetRepository.findAllById(fleetIDs);
+    public List<Planet> findByIds(@Nonnull final Collection<Integer> planetIDs) {
+        Preconditions.checkNotNull(planetIDs, "planetIDs must not be empty");
+
+        final Iterable<Planet> allById = planetRepository.findAllById(planetIDs);
         return StreamSupport.stream(allById.spliterator(), false).collect(Collectors.toList());
     }
 
