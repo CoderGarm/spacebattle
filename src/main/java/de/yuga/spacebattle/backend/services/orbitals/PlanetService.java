@@ -80,7 +80,12 @@ public class PlanetService {
     public Planet findResearchPlanet(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
 
-        return planetRepository.findResearchPlanet(user);
+        return findResearchPlanet(user.getId());
+    }
+
+    @Nullable
+    public Planet findResearchPlanet(final int idUser) {
+        return planetRepository.findResearchPlanet(idUser);
     }
 
     @Nonnull

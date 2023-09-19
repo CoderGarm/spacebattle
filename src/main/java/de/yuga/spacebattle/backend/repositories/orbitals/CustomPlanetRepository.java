@@ -23,7 +23,7 @@ public interface CustomPlanetRepository {
     List<Planet> findAllPlanetsColonizedByID(final int idUser);
 
     @Nullable
-    Planet findResearchPlanet(@Nonnull final User owner);
+    Planet findResearchPlanet(final int idUser);
 
     @Nonnull
     Planet findMainPlanetForUser(final int idUser);

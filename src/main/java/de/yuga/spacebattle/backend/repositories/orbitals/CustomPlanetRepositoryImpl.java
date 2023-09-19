@@ -57,12 +57,10 @@ public class CustomPlanetRepositoryImpl implements CustomPlanetRepository {
 
     @Nullable
     @Override
-    public Planet findResearchPlanet(@Nonnull final User owner) {
-        Preconditions.checkNotNull(owner, "owner shouldn't be null!");
-
+    public Planet findResearchPlanet(final int idUser) {
         try {
             return em.createNamedQuery("Planet.getPlanetsWithBuildingsForResourceType", Planet.class)
-                    .setParameter("owner", owner)
+                    .setParameter("idUser", idUser)
                     .setParameter("resourceType", EResourceType.RESEARCH)
                     .getResultList().stream()
                     .filter(p -> Objects.nonNull(p.getColonizedAt()))

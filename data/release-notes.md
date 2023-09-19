@@ -4,24 +4,20 @@
 
 1. Das Advisory-Programm hat begonnen.  
    Es ist immer noch nicht einfach herauszufinden, was man eigentlich tun soll.  
-   Um das deutlicher zu machen gibt es auf den individuellen Dashboards einen Bereich für Ratschläge seitens z.B. des Militärs oder der Handelskartelle.
-
-todo: advisory board
-
-- mission dashboard: anzeigen welche Missionen gesetzt sein sollten (kind of mission advisor -> probably a good idea for the tutorials)
-- handel: konvoys setzen
-- jobs / buildings / planets: first steps to shipyard
+   Auf dem Dashboard gibt es einen neuen Bereich für Ratschläge seitens z.B. des Militärs oder der Handelskartelle.
+   Es wird im Wesentlichen der Weg bis zur Schiffswerft beschrieben und jeweils darüber informiert, wenn man Gebäude
+   bauen, forschen oder die Werft nutzen kann.
 
 #### Diverses
 
 1. Die Bevölkerungsentwicklung stellt nun die aufsummierten Pops dar und zeigt die Kapazität an.
-2. Das Job-Dashboard zeigt nun alle Planeten an. Damit kann man besser sehen, welcher Planet noch Aufträge verkraften kann.
-3. Manuell eingestellte Transportaufträge werden ab jetzt nur noch einmal ausgeführt, danach werden Demand und Delivery genullt.
-   Es war immer lästig zu vergessen, die Daueraufträge abzustellen.
-4. Das Job-Dashboard zeigt alle Planeten, egal ob sie laufende oder beendete Aufträge haben.
-   Das ist Teil des neuen Advisory-Programms.
+2. Das Job-Dashboard zeigt nun alle Planeten an. Damit kann man besser sehen, welcher Planet noch Aufträge verkraften
+   kann.
+3. Manuell eingestellte Transportaufträge werden ab jetzt nur noch einmal ausgeführt, danach werden Demand und Delivery
+   genullt. Es war immer lästig zu vergessen, die Daueraufträge abzustellen.
 
-todo. Titel, Vor- und Nachname der "roleplay"-Version. Nen Kürzel für die Navy und evtl. nen Katalog an Schiffs- und Flottennamen
+todo. Titel, Vor- und Nachname der "roleplay"-Version. Nen Kürzel für die Navy und evtl. nen Katalog an Schiffs- und
+Flottennamen
 todo. forum und chat per handy
 
 ### Bugs fixed
@@ -29,10 +25,14 @@ todo. forum und chat per handy
 1. Man kann keine Topics im Forum ohne Titel erzeugen.
 2. Man muss das Einmotten von Flotten und Schiffen nun bestätigen.
 
-todo. Das teilen der Flotten geht immer nur einmal. Danach muss man die seite neu laden, damit der teilen button wieder enabled wird.
+todo. Das teilen der Flotten geht immer nur einmal. Danach muss man die seite neu laden, damit der teilen button wieder
+enabled wird.
+todo. create new fleet
 
 #### next steps
 
+todo. async account creation
+todo. angular google SEO
 todo. fetching mining factors prüfen - erzeugt last
 todo. housing left for x ticks - anzeige nach lastring ticks besser aufstellen
 todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein

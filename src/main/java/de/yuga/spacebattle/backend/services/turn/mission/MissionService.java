@@ -112,7 +112,7 @@ public class MissionService {
     }
 
     @Nonnull
-    public List<PirateHuntMission> findPirateHuntByPlanets(@Nonnull final Set<Planet> planets) {
+    public List<PirateHuntMission> findPirateHuntByPlanets(@Nonnull final Collection<Planet> planets) {
         Preconditions.checkNotNull(planets, "planets must not be empty");
 
         return Objects.requireNonNullElse(pirateHuntMissionRepository.findAllForPlanets(planets), new ArrayList<>());
@@ -129,5 +129,16 @@ public class MissionService {
         Preconditions.checkNotNull(tradedResourcesIDs, "tradedResourcesIDs must not be empty");
 
         return Objects.requireNonNullElse(convoyProtectionMissionRepository.findConvoyProtectionForTrades(tradedResourcesIDs), new ArrayList<>());
+    }
+
+    @Nonnull
+    public Set<Planet> findAllPlanetsWithoutPirateHunt(final int idUser) {
+        return Objects.requireNonNullElse(pirateHuntMissionRepository.findAllPlanetsWithoutPirateHunt(idUser), new HashSet<>());
+    }
+
+    @Nonnull
+    public Set<TradedResource> findAllConvoysWithoutEscort(final int idUser) {
+        final Tick today = tickTimeService.getToday();
+        return Objects.requireNonNullElse(convoyProtectionMissionRepository.findAllConvoysWithoutEscort(today.getNo(), idUser), new HashSet<>());
     }
 }
