@@ -70,17 +70,22 @@ public class HeatMapService {
         neighbours.addAll(planet.getSystem().getPlanets());
         final Set<HeatMap> heatForPlanets = findHeatForPlanets(neighbours);
 
-        final List<HeatMap> sortedHeat = heatForPlanets.stream().sorted((Comparator.comparingInt(HeatMap::getHeat))).collect(Collectors.toList());
-        final int medianIndex = (sortedHeat.size() - 1) / 2;
-        final HeatMap medianHeatMap = sortedHeat.get(medianIndex);
+        // just randomly chosen values for the new players area
+        int medianHeat = -8;
+        int minHeat = -14;
+        int maxHeat = -6;
+        if (!heatForPlanets.isEmpty()) {
+            final List<HeatMap> sortedHeat = heatForPlanets.stream().sorted((Comparator.comparingInt(HeatMap::getHeat))).collect(Collectors.toList());
+            final int medianIndex = (sortedHeat.size() - 1) / 2;
+            final HeatMap medianHeatMap = sortedHeat.get(medianIndex);
 
-        final int medianHeat = medianHeatMap.getHeat();
-        final int minHeat = sortedHeat.get(0).getHeat();
-        final int maxHeat = sortedHeat.get(sortedHeat.size() - 1).getHeat();
+            medianHeat = medianHeatMap.getHeat();
+            minHeat = sortedHeat.get(0).getHeat();
+            maxHeat = sortedHeat.get(sortedHeat.size() - 1).getHeat();
 
-        final Set<Planet> planetsInHeat = heatForPlanets.stream().map(HeatMap::getPlanet).collect(Collectors.toSet());
-        neighbours.removeAll(planetsInHeat);
-
+            final Set<Planet> planetsInHeat = heatForPlanets.stream().map(HeatMap::getPlanet).collect(Collectors.toSet());
+            neighbours.removeAll(planetsInHeat);
+        }
         final List<Planet> planets = new ArrayList<>(neighbours);
         final List<HeatMap> newHeat = pseudoRandomizeHeatMap(medianHeat, minHeat, maxHeat, planets);
         heatMapRepository.saveAll(newHeat);
