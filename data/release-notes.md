@@ -7,6 +7,12 @@
    Auf dem Dashboard gibt es einen neuen Bereich für Ratschläge seitens z.B. des Militärs oder der Handelskartelle.
    Es wird im Wesentlichen der Weg bis zur Schiffswerft beschrieben und jeweils darüber informiert, wenn man Gebäude
    bauen, forschen oder die Werft nutzen kann.
+2. Der Autor ist nicht seine Figur - ab jetzt machen wir Kunst.  
+   Wer mag, kann ich im Profil einen Titel zulegen und seinem Alter Ego einen Namen geben.  
+   Der so vergebene Titel und Name wird zunächst im Forum verwendet werden - sofern man ihn denn vergibt.  
+   Die Idee dahinter ist etwas Roleplay zu ermöglichen.  
+   Es ist noch ein großes Segment mit Spionage und Diplomatie geplant und dabei könnte das ganz witzig werden.   
+   Man kann dort ebenfalls einen Katalog anlegen, nach dem die neu gebauten Schiffe benannt werden.
 
 #### Diverses
 
@@ -16,10 +22,10 @@
 3. Manuell eingestellte Transportaufträge werden ab jetzt nur noch einmal ausgeführt, danach werden Demand und Delivery
    genullt. Es war immer lästig zu vergessen, die Daueraufträge abzustellen.
 4. Ein paar kurze Infos zur Kolonisierung sind als Tutorial abrufbar.
+5. Der Fehlercode, der unten rechts angezeigt wird, ist nun etwas handlicher und nicht mehr so übertrieben lang.
 
-todo. Titel, Vor- und Nachname der "roleplay"-Version. Nen Kürzel für die Navy und evtl. nen Katalog an Schiffs- und
-Flottennamen
-todo. forum und chat per handy
+todo. unendliche researches darstellen
+
 
 ### Bugs fixed
 
@@ -32,6 +38,10 @@ todo. forum und chat per handy
 
 #### next steps
 
+todo. login log with timestamp (or better regex?)
+todo. exception via mail
+todo. research tree issue
+todo. forum und chat per handy
 todo. async account creation
 todo. angular google SEO
 todo. fetching mining factors prüfen - erzeugt last

@@ -1,6 +1,8 @@
 package de.yuga.spacebattle.backend.services;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.enums.EStarNation;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.misc.Coords;
 import de.yuga.spacebattle.rest.dto.misc.DistanceElement;
 import de.yuga.spacebattle.rest.dto.misc.Position;
@@ -147,6 +149,42 @@ public class ResourceService {
         for (final String shipNameFile : shipNameFiles) {
             getFileLineByLine(dir, shipNameFile, shipNames);
         }
+        return shipNames;
+    }
+
+
+    @Nonnull
+    public List<String> readShipNamesFromList(@Nonnull final EStarNation starNation) {
+        Preconditions.checkNotNull(starNation, "starNation must not be empty");
+
+        final String dir = "ship-names";
+        final String shipNameFile;
+
+        switch (starNation) {
+            case MANTICORE:
+                shipNameFile = "Naval_Ships_of_Manticore";
+                break;
+            case HAVEN:
+                shipNameFile = "Naval_Ships_of_Haven";
+                break;
+            case ANDERMAN:
+                shipNameFile = "Naval_Ships_of_the_Anderman_Empire";
+                break;
+            case SILESIA:
+                shipNameFile = "Naval_Ships_of_Silesia";
+                break;
+            case SOLARIAN_LEAGUE:
+                shipNameFile = "Naval_Ships_of_the_Solarian_League";
+                break;
+            default:
+                throw new NotifyWebUserException("Nope.");
+        }
+
+        final List<String> shipNames = new ArrayList<>();
+
+
+        getFileLineByLine(dir, shipNameFile, shipNames);
+
         return shipNames;
     }
 

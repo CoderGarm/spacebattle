@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import de.yuga.spacebattle.backend.repositories.account.UserRepository;
+import de.yuga.spacebattle.backend.repositories.account.UserRolePlaySettingRepository;
 import de.yuga.spacebattle.backend.repositories.account.UserSettingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,11 +29,17 @@ public class UserServiceTest extends BaseTestCase {
     @Mock
     private UserSettingRepository userSettingRepositoryMock;
 
+    @Mock
+    private UserRolePlaySettingRepository userRolePlaySettingRepositoryMock;
+
     private UserService testObject;
 
     @BeforeEach
     public void beforeClass() {
-        testObject = new UserService(userRepositoryMock, userSettingRepositoryMock);
+        testObject = new UserService(
+                userRepositoryMock,
+                userSettingRepositoryMock,
+                userRolePlaySettingRepositoryMock);
     }
 
     @Test

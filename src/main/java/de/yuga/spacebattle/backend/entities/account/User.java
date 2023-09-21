@@ -78,6 +78,11 @@ public class User extends Owner {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
     private UserSetting userSetting = new UserSetting();
 
+    @Nonnull
+    @NotNull
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
+    private RolePlaySetting rolePlaySetting = new RolePlaySetting();
+
     public User() {
     }
 
@@ -147,5 +152,10 @@ public class User extends Owner {
     @Nonnull
     public UserSetting getUserSetting() {
         return userSetting;
+    }
+
+    @Nonnull
+    public RolePlaySetting getRolePlaySetting() {
+        return rolePlaySetting;
     }
 }

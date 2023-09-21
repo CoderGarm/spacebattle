@@ -3,13 +3,16 @@ package de.yuga.spacebattle.backend.services.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.converter.EGameUserRolesConverter;
 import de.yuga.spacebattle.backend.dto.account.UserSettings;
+import de.yuga.spacebattle.backend.entities.account.RolePlaySetting;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.account.UserSetting;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.enums.EGameUserRole;
+import de.yuga.spacebattle.backend.enums.EStarNation;
 import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import de.yuga.spacebattle.backend.repositories.account.UserRepository;
+import de.yuga.spacebattle.backend.repositories.account.UserRolePlaySettingRepository;
 import de.yuga.spacebattle.backend.repositories.account.UserSettingRepository;
 import de.yuga.spacebattle.rest.config.security.WebUserDetails;
 import org.apache.commons.lang3.StringUtils;
@@ -29,11 +32,16 @@ public class UserService {
     @Nonnull
     private final UserSettingRepository userSettingRepository;
 
+    @Nonnull
+    private final UserRolePlaySettingRepository userRolePlaySettingRepository;
+
     @Autowired
     public UserService(@Nonnull final UserRepository userRepository,
-                       @Nonnull final UserSettingRepository userSettingRepository) {
+                       @Nonnull final UserSettingRepository userSettingRepository,
+                       @Nonnull final UserRolePlaySettingRepository userRolePlaySettingRepository) {
         this.userRepository = Preconditions.checkNotNull(userRepository, "userRepository shouldn't be null!");
         this.userSettingRepository = Preconditions.checkNotNull(userSettingRepository, "userSettingRepository must not be empty");
+        this.userRolePlaySettingRepository = Preconditions.checkNotNull(userRolePlaySettingRepository, "userRolePlaySettingRepository must not be empty");
     }
 
     @Nonnull
@@ -237,5 +245,23 @@ public class UserService {
     @Nonnull
     public Set<String> findReleaseRecipients() {
         return Objects.requireNonNullElse(userRepository.getEMailAddressesForReleaseRecipients(), new HashSet<>());
+    }
+
+    @Nonnull
+    public Set<String> getShipNamesFor(final int idUser) {
+        final RolePlaySetting rolePlaySetting = userRolePlaySettingRepository.findForUser(idUser);
+        if (rolePlaySetting == null) {
+            return new HashSet<>();
+        }
+        return rolePlaySetting.getShipNames();
+    }
+
+    @Nonnull
+    public Set<EStarNation> getShipNameTemplates(final int idUser) {
+        final RolePlaySetting rolePlaySetting = userRolePlaySettingRepository.findForUser(idUser);
+        if (rolePlaySetting == null) {
+            return new HashSet<>();
+        }
+        return rolePlaySetting.getShipNameTemplates();
     }
 }

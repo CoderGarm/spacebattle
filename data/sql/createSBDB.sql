@@ -583,6 +583,19 @@
         primary key (idResourceDeposit, resourceType)
     ) engine=InnoDB;
 
+    create table rolePlaySetting (
+       idRolePlaySetting integer not null auto_increment,
+        firstname varchar(50),
+        shipNameTemplates varchar(255) not null,
+        shipNames longtext,
+        shipPrefix varchar(6),
+        surname varchar(50),
+        title varchar(50),
+        titleAbbreviation varchar(8),
+        idUser integer not null,
+        primary key (idRolePlaySetting)
+    ) engine=InnoDB;
+
     create table shipClass (
        idShipClass integer not null auto_increment,
         isDeleted boolean not null default false,
@@ -816,6 +829,9 @@
 
     alter table releasesVolleys
         add constraint UK_hsr966dv9qpnj1i7nhg3nlbc6 unique (idReleasedVolley);
+
+    alter table rolePlaySetting 
+       add constraint UK_5sx33g2kpg6lhpamw75ibqb9i unique (idUser);
 
     alter table shipClass
         add constraint UK_4sgs4ew920mkttyjueq19n70q unique (idPredecessor);
@@ -1513,6 +1529,11 @@
             foreign key (idResourceDeposit)
                 references resourceDeposit (idResourceDeposit);
 
+    alter table rolePlaySetting 
+       add constraint FKhphq3ivotnm200m2l1h30rej4 
+       foreign key (idUser) 
+       references user (idUser);
+
     alter table shipClass
         add constraint FKouxjssb18x4jeutl5r1l0byeu
             foreign key (idArmor)
@@ -2127,3 +2148,4 @@ insert into dbPatch values (null, now(), 'profile pic', '0.1.7-1');
 insert into dbPatch values (null, now(), 'drop persisted demand', '0.1.8-1');
 insert into dbPatch values (null, now(), 'switch to job type', '0.1.9-1');
 insert into dbPatch values (null, now(), 'add convoy mission', '0.1.10-1');
+insert into dbPatch values (null, now(), 'add roleplay data', '0.1.11-1');

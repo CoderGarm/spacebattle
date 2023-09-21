@@ -34,7 +34,7 @@ public class RestControllerExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected ResponseEntity<FrontendError> handleConversion(@Nonnull final Exception ex) {
         final String stacktrace = ExceptionUtils.getStackTrace(ex);
-        final UUID uuid = UUID.randomUUID();
+        final String uuid = UUID.randomUUID().toString().split("-")[0];
         LOGGER.warn(uuid + "\n" + stacktrace);
         return new ResponseEntity<>(new FrontendError("Something went wrong. Send a mail and mention '" + uuid + "'."), HttpStatus.BAD_REQUEST);
     }

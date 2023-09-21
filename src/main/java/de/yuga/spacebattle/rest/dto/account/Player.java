@@ -45,6 +45,11 @@ public class Player {
     @Schema(description = "The user's profile pic.")
     private String profilePic;
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The user's rpg settings.")
+    private RolePlayData rolePlayData = new RolePlayData();
+
     public Player() {
     }
 
@@ -57,6 +62,9 @@ public class Player {
             this.idAlliance = ((User) user).getAlliance() != null ? ((User) user).getAlliance().getId() : null;
             this.role = ((User) user).getUserRole().getName();
             this.profilePic = ((User) user).getUserSetting().getProfilePic();
+            this.rolePlayData.setFirstname(((User) user).getRolePlaySetting().getFirstname());
+            this.rolePlayData.setSurname(((User) user).getRolePlaySetting().getSurname());
+            this.rolePlayData.setTitle(((User) user).getRolePlaySetting().getTitle());
         } else {
             isNpc = true;
         }
