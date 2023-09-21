@@ -119,6 +119,21 @@ public class PlanetApi extends BaseApi {
         return ResponseEntity.ok(new Planet(mainPlanet));
     }
 
+    @GetMapping(value = GET_MAIN_PLANET + "/coords")
+    @Operation(summary = "Get the main planet of a user.", operationId = "getMainPlanetCoords",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = de.yuga.spacebattle.rest.dto.orbitals.FleetOrbit.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getMainPlanetCoords() {
+        final int idUser = getIdUser();
+        final de.yuga.spacebattle.backend.entities.orbitals.Planet mainPlanet = planetService.findMainPlanet(idUser);
+        return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.orbitals.FleetOrbit(new FleetOrbit(mainPlanet.getOrbit(), mainPlanet.getSystem())));
+    }
+
     @GetMapping(value = GROUND_CONSTRUCTION_POSSIBLE_ENDPOINT + "/{idPlanet}")
     @Operation(summary = "Asks if a building could be build on this planet.", operationId = "isConstructionPossibleOnPlanet",
             responses = {

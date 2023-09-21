@@ -19,15 +19,16 @@
 todo. Titel, Vor- und Nachname der "roleplay"-Version. Nen Kürzel für die Navy und evtl. nen Katalog an Schiffs- und
 Flottennamen
 todo. forum und chat per handy
+todo. planned colo erklären
 
 ### Bugs fixed
 
 1. Man kann keine Topics im Forum ohne Titel erzeugen.
 2. Man muss das Einmotten von Flotten und Schiffen nun bestätigen.
+3. Man kann nun endlich eine neue Flotte erzeugen - und damit sind auch die lästigen Lock-Buttons verschwunden und die UI sollte wie erwartet funktionieren.
 
-todo. Das teilen der Flotten geht immer nur einmal. Danach muss man die seite neu laden, damit der teilen button wieder
-enabled wird.
-todo. create new fleet
+todo. alliance creation buggy
+todo. account creation must not be attacked by others in system or pirates
 
 #### next steps
 
