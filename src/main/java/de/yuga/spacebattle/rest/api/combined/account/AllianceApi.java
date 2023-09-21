@@ -159,6 +159,7 @@ public class AllianceApi extends BaseApi {
         de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance = new de.yuga.spacebattle.backend.entities.combined.account.Alliance(name, code, user);
         alliance = allianceService.save(alliance);
         user.setAlliance(alliance);
+        user.addGameUserRoles(EGameUserRole.ALLIANCE_ADMIN);
         userService.save(user);
         final Forum forum = new Forum(alliance, alliance.getName() + "'s forum", "The Forum for the " + alliance.getName());
         forumService.save(forum);

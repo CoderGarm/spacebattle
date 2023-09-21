@@ -15,19 +15,20 @@
    kann.
 3. Manuell eingestellte Transportaufträge werden ab jetzt nur noch einmal ausgeführt, danach werden Demand und Delivery
    genullt. Es war immer lästig zu vergessen, die Daueraufträge abzustellen.
+4. Ein paar kurze Infos zur Kolonisierung sind als Tutorial abrufbar.
 
 todo. Titel, Vor- und Nachname der "roleplay"-Version. Nen Kürzel für die Navy und evtl. nen Katalog an Schiffs- und
 Flottennamen
 todo. forum und chat per handy
-todo. planned colo erklären
 
 ### Bugs fixed
 
 1. Man kann keine Topics im Forum ohne Titel erzeugen.
 2. Man muss das Einmotten von Flotten und Schiffen nun bestätigen.
 3. Man kann nun endlich eine neue Flotte erzeugen - und damit sind auch die lästigen Lock-Buttons verschwunden und die UI sollte wie erwartet funktionieren.
+4. Möchte man eine Allianz erzeugen, geht das nun nur noch mit Namen und Ally-Tag.  
+   Um das Dashboard als Allianz-Admin zu sehen, muss man die Seite leider neu Laden - irgendetwas hakt da noch.
 
-todo. alliance creation buggy
 todo. account creation must not be attacked by others in system or pirates
 
 #### next steps
