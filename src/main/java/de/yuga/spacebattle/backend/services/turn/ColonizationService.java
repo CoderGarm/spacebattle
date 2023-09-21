@@ -23,6 +23,7 @@ import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.turn.ColonizationRepository;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
+import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -62,16 +63,21 @@ public class ColonizationService {
     @Nonnull
     private final BuildingService buildingService;
 
+    @Nonnull
+    private final FleetService fleetService;
+
     public ColonizationService(@Nonnull final ColonizationRepository repository,
                                @Nonnull final UserService userService,
                                @Nonnull final PlanetService planetService,
                                @Nonnull final StarSystemService starSystemService,
-                               @Nonnull final BuildingService buildingService) {
+                               @Nonnull final BuildingService buildingService,
+                               @Nonnull final FleetService fleetService) {
         this.repository = Preconditions.checkNotNull(repository, "colonizationRepository shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
         this.buildingService = Preconditions.checkNotNull(buildingService, "buildingService shouldn't be null!");
+        this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
     }
 
     @Nonnull
@@ -295,11 +301,17 @@ public class ColonizationService {
      */
     @Nonnull
     public Planet findPlanetForNewUser() {
+
+
         final List<StarSystem> allColonized = starSystemService.findAllColonized();
 
         final List<StarSystem> allColonizable = starSystemService.findAllColonizable();
         // remove systems which are already colonized
         allColonizable.removeIf(s -> s.getPlanets().stream().anyMatch(p -> !p.isColonizable()));
+
+        // remove all destinations or systems with foreign fleets
+        final Set<StarSystem> destinations = fleetService.findMovementDestinationsAndSojourns();
+        allColonizable.removeAll(destinations);
 
         // remove systems which have a colonization in progress
         final Set<StarSystem> coloInProgress = findAll().stream().map(c -> c.getTarget().getSystem()).collect(Collectors.toSet());

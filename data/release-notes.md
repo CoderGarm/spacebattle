@@ -28,8 +28,7 @@ todo. forum und chat per handy
 3. Man kann nun endlich eine neue Flotte erzeugen - und damit sind auch die lästigen Lock-Buttons verschwunden und die UI sollte wie erwartet funktionieren.
 4. Möchte man eine Allianz erzeugen, geht das nun nur noch mit Namen und Ally-Tag.  
    Um das Dashboard als Allianz-Admin zu sehen, muss man die Seite leider neu Laden - irgendetwas hakt da noch.
-
-todo. account creation must not be attacked by others in system or pirates
+5. Neue Accounts werden außerhalb der Reichweite von Flotten erzeugt.
 
 #### next steps
 

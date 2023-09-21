@@ -457,4 +457,11 @@ public class FleetService {
 
         return Objects.requireNonNullElse(fleetRepository.findAllById(idFleets), new ArrayList<>());
     }
+
+    @Nonnull
+    public Set<StarSystem> findMovementDestinationsAndSojourns() {
+        final Set<StarSystem> systems = Objects.requireNonNullElse(fleetRepository.findSojourns(), new HashSet<>());
+        systems.addAll(Objects.requireNonNullElse(fleetRepository.findMovementDestinations(), new HashSet<>()));
+        return systems;
+    }
 }

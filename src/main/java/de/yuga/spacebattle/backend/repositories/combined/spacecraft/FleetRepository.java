@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.repositories.combined.spacecraft;
 
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.rest.dto.AbstractId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,6 +11,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public interface FleetRepository extends JpaRepository<Fleet, Integer>, CustomFleetRepository {
 
@@ -28,4 +30,12 @@ public interface FleetRepository extends JpaRepository<Fleet, Integer>, CustomFl
     @Nullable
     @Query("SELECT f FROM Fleet f WHERE f.owner.id = :idUser AND  f.isDeleted = false AND f.move IS NULL AND f.orbit IS NOT NULL AND f.orbit.orbit IS NOT NULL")
     List<Fleet> findAllFleetsWithoutMovementByUser(@Param("idUser") final int idUser);
+
+    @Nullable
+    @Query("SELECT f.orbit.system FROM Fleet f WHERE f.isDeleted = false AND f.orbit IS NOT NULL AND f.orbit.system IS NOT NULL")
+    Set<StarSystem> findSojourns();
+
+    @Nullable
+    @Query("SELECT f.move.destinationOrbit.system FROM Fleet f WHERE f.isDeleted = false AND f.move IS NOT NULL")
+    Set<StarSystem> findMovementDestinations();
 }
