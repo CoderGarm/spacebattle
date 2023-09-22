@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.StringUtils;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,7 +16,7 @@ class ResourceServiceTest {
         final String result = new ResourceService().getRandomWarshipName();
         assertTrue(StringUtils.isNotBlank(result));
 
-        final List<String> results = new ResourceService().getRandomWarshipName(6);
+        final Set<String> results = new ResourceService().getRandomWarshipName(6);
         results.forEach(name -> assertTrue(StringUtils.isNotBlank(name)));
     }
 

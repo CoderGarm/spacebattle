@@ -1,6 +1,8 @@
 package de.yuga.spacebattle.backend.services;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.RolePlaySetting;
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.enums.EStarNation;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.misc.Coords;
@@ -20,6 +22,25 @@ import java.util.stream.Collectors;
 
 @Service
 public class ResourceService {
+
+
+    @Nonnull
+    public Set<String> getRandomShipNamesForOwner(@Nonnull final User owner, @Nonnull final Integer amount) {
+        final Set<String> randomNames;
+        final RolePlaySetting rolePlaySetting = owner.getRolePlaySetting();
+        final Set<String> shipNames = rolePlaySetting.getShipNames();
+        if (shipNames.isEmpty()) {
+            final Set<EStarNation> shipNameTemplates = rolePlaySetting.getShipNameTemplates();
+            if (shipNameTemplates.isEmpty()) {
+                randomNames = getRandomWarshipName(amount);
+            } else {
+                randomNames = getRandomWarshipNames(shipNameTemplates, amount);
+            }
+        } else {
+            randomNames = shipNames;
+        }
+        return randomNames;
+    }
 
     @Nonnull
     public List<Coords> readStarSystems() {
@@ -89,10 +110,8 @@ public class ResourceService {
 
     private List<DistanceElement> readDistances() {
         final Set<DistanceElement> distanceElements = new HashSet<>();
-        InputStream stream = null;
         String line = null;
-        try {
-            stream = this.getClass().getResourceAsStream("/distance.txt");
+        try (InputStream stream = this.getClass().getResourceAsStream("/distance.txt")) {
             Preconditions.checkNotNull(stream, "stream must not be empty");
             final BufferedReader br = new BufferedReader(new InputStreamReader(stream));
             while ((line = br.readLine()) != null) {
@@ -112,16 +131,7 @@ public class ResourceService {
                 distanceElements.add(distanceElement);
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+        } catch (Exception ignore) {
         }
         return distanceElements.stream().sorted().collect(Collectors.toList());
     }
@@ -210,13 +220,11 @@ public class ResourceService {
 
         } catch (Exception e) {
             System.out.println(line);
-            e.printStackTrace();
         } finally {
             if (inputStream != null) {
                 try {
                     inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (IOException ignore) {
                 }
             }
         }
@@ -231,9 +239,23 @@ public class ResourceService {
     }
 
     @Nonnull
-    public List<String> getRandomWarshipName(final int amount) {
+    public Set<String> getRandomWarshipNames(@Nonnull final Set<EStarNation> starNations, final int amount) {
+        Preconditions.checkNotNull(starNations, "starNations must not be empty");
+
+        final List<String> strings = new ArrayList<>();
+        starNations.forEach(nation -> strings.addAll(readShipNamesFromList(nation)));
+
+        final Set<String> names = new HashSet<>();
+        for (int i = 0; i < amount; i++) {
+            names.add(strings.get(ThreadLocalRandom.current().nextInt(0, strings.size() - 1)));
+        }
+        return names;
+    }
+
+    @Nonnull
+    public Set<String> getRandomWarshipName(final int amount) {
         final List<String> strings = readAllShipNames();
-        final List<String> names = new ArrayList<>();
+        final Set<String> names = new HashSet<>();
         for (int i = 0; i < amount; i++) {
             names.add(strings.get(ThreadLocalRandom.current().nextInt(0, strings.size() - 1)));
         }

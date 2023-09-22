@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Detachment;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.turn.mission.Mission;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -111,6 +112,11 @@ public class WarShip extends Operationable {
 
     @Nonnull
     public String getName() {
+        String name = "";
+        if (getShipClass().getHumanOwner() != null && StringUtils.isNotBlank(getShipClass().getHumanOwner().getRolePlaySetting().getShipPrefix())) {
+            name += getShipClass().getHumanOwner().getRolePlaySetting().getShipPrefix() + " ";
+        }
+        name += this.name;
         return name;
     }
 

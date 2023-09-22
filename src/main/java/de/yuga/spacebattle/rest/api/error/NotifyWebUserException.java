@@ -46,6 +46,10 @@ public class NotifyWebUserException extends RuntimeException {
         this.logInfo = logInfo;
     }
 
+    public <T> NotifyWebUserException(@Nonnull final Set<ConstraintViolation<T>> constraintViolations) {
+        this("Something went wrong.", constraintViolations);
+    }
+
     @Nonnull
     public Set<ConstraintViolation<?>> getConstraintViolations() {
         return constraintViolations;

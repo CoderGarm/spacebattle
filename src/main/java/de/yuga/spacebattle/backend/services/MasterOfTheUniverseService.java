@@ -1074,7 +1074,7 @@ public class MasterOfTheUniverseService {
         final Planet homePlanet = planetService.findMainPlanet(user);
         final Fleet fleet = createFleet(user, homePlanet, "Homefleet");
 
-        final List<String> randomWarshipName = resourceService.getRandomWarshipName(3);
+        final List<String> randomWarshipName = new ArrayList<>(resourceService.getRandomWarshipName(3));
         WarShip warShip = new WarShip(randomWarshipName.get(0), homePlanet, fleet, ship);
         warShip.setOperational();
         warShipService.save(warShip);

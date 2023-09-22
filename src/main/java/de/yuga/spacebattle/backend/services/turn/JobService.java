@@ -9,7 +9,6 @@ import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
-import de.yuga.spacebattle.backend.entities.researches.ActiveResearchTuple;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
@@ -25,7 +24,6 @@ import de.yuga.spacebattle.backend.services.ResourceService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
-import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
@@ -55,9 +53,6 @@ public class JobService {
     private final BuildingService buildingService;
 
     @Nonnull
-    private final ConstructionService constructionService;
-
-    @Nonnull
     private final ResearchService researchService;
 
     @Nonnull
@@ -76,7 +71,6 @@ public class JobService {
     public JobService(@Nonnull final JobRepository jobRepository,
                       @Nonnull final PlanetService planetService,
                       @Nonnull final BuildingService buildingService,
-                      @Nonnull final ConstructionService constructionService,
                       @Nonnull final ResearchService researchService,
                       @Nonnull final WarShipService warShipService,
                       @Nonnull final ResourceService resourceService,
@@ -85,7 +79,6 @@ public class JobService {
         this.jobRepository = Preconditions.checkNotNull(jobRepository, "jobC shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.buildingService = Preconditions.checkNotNull(buildingService, "buildingService shouldn't be null!");
-        this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
         this.researchService = Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
@@ -100,28 +93,8 @@ public class JobService {
         return jobRepository.save(entity);
     }
 
-    @Nonnull
-    public List<Job> findAllJobsForConstruction(@Nonnull final Construction facility) {
-        Preconditions.checkNotNull(facility, "facility shouldn't be null!");
-
-        return jobRepository.findAllJobsForConstruction(facility);
-    }
-
-    public boolean isJobActiveFor(@Nonnull final Research research) {
-        Preconditions.checkNotNull(research, "research shouldn't be null!");
-
-        return jobRepository.isJobActiveFor(research);
-    }
-
     public List<Research> getResearchesFromActiveJobs(final int idUser) {
         return jobRepository.getResearchesFromActiveJobs(idUser);
-    }
-
-    @Nonnull
-    public List<ActiveResearchTuple> isJobActiveFor(@Nonnull final List<Research> researches) {
-        Preconditions.checkNotNull(researches, "researches shouldn't be null!");
-
-        return Objects.requireNonNullElse(jobRepository.isJobActiveFor(researches), new ArrayList<>());
     }
 
     /**
@@ -294,7 +267,8 @@ public class JobService {
         for (final Map.Entry<ShipClass, Integer> entry : shipJobPayload.entrySet()) {
             final ShipClass shipClass = entry.getKey();
             final Integer amount = entry.getValue();
-            final List<String> randomNames = resourceService.getRandomWarshipName(amount);
+
+            final Set<String> randomNames = resourceService.getRandomShipNamesForOwner(owner, amount);
             for (final String randomName : randomNames) {
                 final WarShip warShip = new WarShip(randomName, planet, fleet, shipClass);
                 // analogous behavior like at the 'delete' fleet
@@ -372,10 +346,6 @@ public class JobService {
 
     public List<Job> findTodayFinishedJobsForUser(final int idUser) {
         return Objects.requireNonNullElse(jobRepository.findTodayFinishedJobsForUser(idUser), new ArrayList<>());
-    }
-
-    public boolean areTodayFinishedJobsForUserPresent(final int idUser) {
-        return jobRepository.areTodayFinishedJobsForUserPresent(idUser);
     }
 
     public boolean cancelJob(final int idUser, final int idJob) {

@@ -25,23 +25,23 @@ public class RolePlaySetting extends AbstractEntityKey {
     private User user;
 
     @Nullable
-    @Size(min = 3, max = 50)
+    @Size(max = 50)
     private String title;
 
     @Nullable
-    @Size(min = 3, max = 8)
+    @Size(max = 8)
     private String titleAbbreviation;
 
     @Nullable
-    @Size(min = 3, max = 50)
+    @Size(max = 50)
     private String firstname;
 
     @Nullable
-    @Size(min = 3, max = 50)
+    @Size(max = 50)
     private String surname;
 
     @Nullable
-    @Size(min = 3, max = 6)
+    @Size(max = 6)
     private String shipPrefix;
 
     @Nonnull
@@ -62,9 +62,17 @@ public class RolePlaySetting extends AbstractEntityKey {
         return title;
     }
 
+    public void setTitle(@Nullable final String title) {
+        this.title = title;
+    }
+
     @Nullable
     public String getTitleAbbreviation() {
         return titleAbbreviation;
+    }
+
+    public void setTitleAbbreviation(@Nullable final String titleAbbreviation) {
+        this.titleAbbreviation = titleAbbreviation;
     }
 
     @Nullable
@@ -72,9 +80,17 @@ public class RolePlaySetting extends AbstractEntityKey {
         return firstname;
     }
 
+    public void setFirstname(@Nullable final String firstname) {
+        this.firstname = firstname;
+    }
+
     @Nullable
     public String getSurname() {
         return surname;
+    }
+
+    public void setSurname(@Nullable final String surname) {
+        this.surname = surname;
     }
 
     @Nullable
@@ -82,14 +98,26 @@ public class RolePlaySetting extends AbstractEntityKey {
         return shipPrefix;
     }
 
+    public void setShipPrefix(@Nullable final String shipPrefix) {
+        this.shipPrefix = shipPrefix;
+    }
+
     @Nonnull
     public Set<EStarNation> getShipNameTemplates() {
         return shipNameTemplates;
     }
 
+    public void setShipNameTemplates(@Nonnull final Set<EStarNation> shipNameTemplates) {
+        this.shipNameTemplates = shipNameTemplates;
+    }
+
     @Nonnull
     public Set<String> getShipNames() {
         return shipNames;
+    }
+
+    public void setShipNames(@Nonnull final Set<String> shipNames) {
+        this.shipNames = shipNames;
     }
 
     @Override

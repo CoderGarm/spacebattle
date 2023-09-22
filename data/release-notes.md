@@ -10,9 +10,14 @@
 2. Der Autor ist nicht seine Figur - ab jetzt machen wir Kunst.  
    Wer mag, kann ich im Profil einen Titel zulegen und seinem Alter Ego einen Namen geben.  
    Der so vergebene Titel und Name wird zunächst im Forum verwendet werden - sofern man ihn denn vergibt.  
-   Die Idee dahinter ist etwas Roleplay zu ermöglichen.  
-   Es ist noch ein großes Segment mit Spionage und Diplomatie geplant und dabei könnte das ganz witzig werden.   
-   Man kann dort ebenfalls einen Katalog anlegen, nach dem die neu gebauten Schiffe benannt werden.
+   Die Idee dahinter ist etwas Roleplay zu ermöglichen und falls ihr Ideen habt, dann raus damit!  
+   Es ist noch ein großes Segment mit Spionage und Diplomatie geplant und dabei könnte das ganz witzig werden.
+3. Die zweite Komponente des ganzen sind individualisierte Schiffsnamen.  
+   Im Profil gibt es nun die Möglichkeit für zukünftige Neubauten eine Namensliste anzulegen.  
+   Dabei gilt: Nur die Namensliste wird verwendet, nur wenn die Liste leer ist, werden die gewählten Sternennationen als Quelle herangezogen.  
+   Bitte beachtet: Das sind exklusive oder (XOR).  
+   Neue Spieler starten by default mit allen Nationen ausgewählt, das ist das bisherige Verhalten.
+   Man kann dort ebenfalls das Präfix seiner Navy anlegen.
 
 #### Diverses
 
@@ -59,6 +64,8 @@ todo. heat indicator on map -> -30 to 30 heat scale -> d3 statt svgjs?
 todo. take-a-tour updaten
 
 - combat sim section: desgin enemy ship classes, create fleets of them and let them fight in combat theatre
+
+todo. Planeten nach Systemnamen durchnummerieren
 
 - ressourcen müssen besser gebalanced werden
 - punkte für missionen
