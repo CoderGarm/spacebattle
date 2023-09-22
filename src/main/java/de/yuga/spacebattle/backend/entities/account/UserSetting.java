@@ -20,6 +20,9 @@ import java.time.LocalDateTime;
 public class UserSetting extends AbstractEntityKey {
 
     @Nonnull
+    public static final String DEFAULT_PROFILE_PIC = "perspective-dice-six-faces-random";
+
+    @Nonnull
     @NotNull
     @JoinColumn(name = "idUser")
     @OneToOne(optional = false)
@@ -70,7 +73,7 @@ public class UserSetting extends AbstractEntityKey {
     @NotNull
     @Size(min = 1, max = 50)
     @Column(columnDefinition = "varchar(50) default 'perspective-dice-six-faces-random'")
-    private String profilePic = "perspective-dice-six-faces-random";
+    private String profilePic = DEFAULT_PROFILE_PIC;
 
     public UserSetting() {
     }

@@ -29,7 +29,7 @@ public class UserSettings {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The profile pic name.")
-    private String profilePic;
+    private String profilePic = UserSetting.DEFAULT_PROFILE_PIC;
 
     public UserSettings() {
     }
