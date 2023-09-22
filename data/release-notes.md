@@ -25,6 +25,7 @@
 5. Der Fehlercode, der unten rechts angezeigt wird, ist nun etwas handlicher und nicht mehr so übertrieben lang.
 
 todo. unendliche researches darstellen
+todo. research punkte als tooltip
 
 
 ### Bugs fixed

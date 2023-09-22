@@ -264,4 +264,44 @@ public class UserService {
         }
         return rolePlaySetting.getShipNameTemplates();
     }
+
+    public void addShipNamesForIndividualList(final int idUser, @Nonnull final String shipName) {
+        Preconditions.checkNotNull(shipName, "shipName must not be empty");
+
+        final RolePlaySetting forUser = userRolePlaySettingRepository.findForUser(idUser);
+        if (forUser != null) {
+            forUser.getShipNames().add(shipName);
+            userRolePlaySettingRepository.save(forUser);
+        }
+    }
+
+    public void removeShipNamesForIndividualList(final int idUser, @Nonnull final String shipName) {
+        Preconditions.checkNotNull(shipName, "shipName must not be empty");
+
+        final RolePlaySetting forUser = userRolePlaySettingRepository.findForUser(idUser);
+        if (forUser != null) {
+            forUser.getShipNames().remove(shipName);
+            userRolePlaySettingRepository.save(forUser);
+        }
+    }
+
+    public void addShipNamesTemplate(final int idUser, @Nonnull final EStarNation starNation) {
+        Preconditions.checkNotNull(starNation, "starNation must not be empty");
+
+        final RolePlaySetting forUser = userRolePlaySettingRepository.findForUser(idUser);
+        if (forUser != null) {
+            forUser.getShipNameTemplates().add(starNation);
+            userRolePlaySettingRepository.save(forUser);
+        }
+    }
+
+    public void removeShipNamesTemplate(final int idUser, @Nonnull final EStarNation starNation) {
+        Preconditions.checkNotNull(starNation, "starNation must not be empty");
+
+        final RolePlaySetting forUser = userRolePlaySettingRepository.findForUser(idUser);
+        if (forUser != null) {
+            forUser.getShipNameTemplates().remove(starNation);
+            userRolePlaySettingRepository.save(forUser);
+        }
+    }
 }

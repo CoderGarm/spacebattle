@@ -2,11 +2,11 @@ package de.yuga.spacebattle.backend.converter;
 
 import org.apache.commons.lang3.StringUtils;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,19 +30,22 @@ public class EStringSetConverter implements AttributeConverter<Set<String>, Stri
 
     @Override
     public Set<String> convertToEntityAttribute(@Nullable final String dbData) {
+        final String[] result = EStringSetConverter.getStringsFromDBData(dbData);
+        return Arrays.stream(result).collect(Collectors.toSet());
+    }
+
+    @Nonnull
+    public static String[] getStringsFromDBData(@Nullable final String dbData) {
+        final String[] result;
         if (StringUtils.isBlank(dbData)) {
-            return new HashSet<>();
-        }
-
-        String[] result = {};
-        if (dbData.contains(COMMA_REGEX)) {
+            result = new String[]{};
+        } else if (dbData.contains(COMMA_REGEX)) {
             result = dbData.split(COMMA_REGEX);
-        }
-        if (dbData.contains(PIPE)) {
+        } else if (dbData.contains(PIPE)) {
             result = dbData.split(PIPE_REGEX);
+        } else {
+            result = new String[]{dbData};
         }
-
-        return Arrays.stream(result)
-                .collect(Collectors.toSet());
+        return result;
     }
 }
