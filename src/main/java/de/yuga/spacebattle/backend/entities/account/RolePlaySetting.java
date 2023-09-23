@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.backend.entities.account;
 
+import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.converter.EStarNationConverter;
 import de.yuga.spacebattle.backend.converter.EStringSetConverter;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
@@ -55,6 +56,10 @@ public class RolePlaySetting extends AbstractEntityKey {
     private Set<String> shipNames = new HashSet<>();
 
     public RolePlaySetting() {
+    }
+
+    public RolePlaySetting(@Nonnull final User user) {
+        this.user = Preconditions.checkNotNull(user, "user must not be empty");
     }
 
     @Nullable

@@ -98,7 +98,7 @@ public class User extends Owner {
         Preconditions.checkNotNull(role, "role shouldn't be null!");
 
         this.userSetting = new UserSetting(this, email, password, noEMailWanted);
-        this.rolePlaySetting = new RolePlaySetting();
+        this.rolePlaySetting = new RolePlaySetting(this);
         this.userRole = role;
         if (gameUserRoles != null) {
             this.gameUserRoles.addAll(Arrays.stream(gameUserRoles).collect(Collectors.toSet()));
