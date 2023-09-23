@@ -84,8 +84,8 @@ public class OperationalCache extends BaseCache {
             final Set<Construction> constructions = dto.getConstructions().stream().map(constructionMap::get).collect(Collectors.toSet());
             final List<WarShip> warships = dto.getWarships().stream().map(warShipMap::get).collect(Collectors.toList());
 
-            constructions.forEach(c -> addConstruction(tick, c.getPlanet(), c));
-            warships.forEach(c -> addWarship(tick, c.getShipyard(), c));
+            constructions.stream().filter(Objects::nonNull).forEach(c -> addConstruction(tick, c.getPlanet(), c));
+            warships.stream().filter(Objects::nonNull).forEach(c -> addWarship(tick, c.getShipyard(), c));
         }));
     }
 
