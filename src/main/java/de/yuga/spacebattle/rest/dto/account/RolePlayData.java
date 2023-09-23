@@ -1,6 +1,8 @@
 package de.yuga.spacebattle.rest.dto.account;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.RolePlaySetting;
 import de.yuga.spacebattle.backend.enums.EStarNation;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -55,6 +57,15 @@ public class RolePlayData {
     public RolePlayData() {
     }
 
+    public RolePlayData(@Nonnull final RolePlaySetting rolePlaySetting) {
+        Preconditions.checkNotNull(rolePlaySetting, "rolePlaySetting must not be empty");
+
+        this.title = rolePlaySetting.getTitle();
+        this.titleAbbreviation = rolePlaySetting.getTitleAbbreviation();
+        this.firstname = rolePlaySetting.getFirstname();
+        this.surname = rolePlaySetting.getSurname();
+    }
+
     public void setTitle(@Nullable final String title) {
         this.title = title;
     }
@@ -81,5 +92,40 @@ public class RolePlayData {
 
     public void setShipNames(@Nonnull final Set<String> shipNames) {
         this.shipNames = shipNames;
+    }
+
+    @Nullable
+    public String getTitle() {
+        return title;
+    }
+
+    @Nullable
+    public String getTitleAbbreviation() {
+        return titleAbbreviation;
+    }
+
+    @Nullable
+    public String getFirstname() {
+        return firstname;
+    }
+
+    @Nullable
+    public String getSurname() {
+        return surname;
+    }
+
+    @Nullable
+    public String getShipPrefix() {
+        return shipPrefix;
+    }
+
+    @Nonnull
+    public Set<EStarNation> getShipNameTemplates() {
+        return shipNameTemplates;
+    }
+
+    @Nonnull
+    public Set<String> getShipNames() {
+        return shipNames;
     }
 }

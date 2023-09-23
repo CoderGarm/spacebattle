@@ -33,7 +33,7 @@ public class Player {
     @Nullable
     @JsonProperty
     @Schema(description = "The user's alliance.")
-    private Integer idAlliance;
+    private String allianceTag;
 
     @Nullable
     @JsonProperty
@@ -59,7 +59,7 @@ public class Player {
         this.idUser = user.getId();
         this.username = user.getUsername();
         if (user instanceof User) {
-            this.idAlliance = ((User) user).getAlliance() != null ? ((User) user).getAlliance().getId() : null;
+            this.allianceTag = ((User) user).getAlliance() != null ? ((User) user).getAlliance().getCode() : null;
             this.role = ((User) user).getUserRole().getName();
             this.profilePic = ((User) user).getUserSetting().getProfilePic();
             this.rolePlayData.setFirstname(((User) user).getRolePlaySetting().getFirstname());

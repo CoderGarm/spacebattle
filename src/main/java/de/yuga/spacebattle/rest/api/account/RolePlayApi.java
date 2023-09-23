@@ -61,6 +61,57 @@ public class RolePlayApi extends BaseApi {
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
     }
 
+    @GetMapping
+    @Operation(summary = "Get the rpg data", operationId = "getRPGData",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = RolePlayData.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getRPGData() {
+        final User user = userService.find(getIdUser());
+        if (user == null) {
+            throw new NotifyWebUserException("Nothing there, mate!");
+        }
+        return ResponseEntity.ok(new RolePlayData(user.getRolePlaySetting()));
+    }
+
+    @PutMapping
+    @Operation(summary = "Get the rpg data", operationId = "setRPGData",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = RolePlayData.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> setRPGData(@RequestBody @Nonnull final RolePlayData data) {
+        Preconditions.checkNotNull(data, "data must not be empty");
+
+        final User user = userService.find(getIdUser());
+        if (user == null) {
+            throw new NotifyWebUserException("Nothing there, mate!");
+        }
+
+        final RolePlaySetting rolePlaySetting = user.getRolePlaySetting();
+        rolePlaySetting.setTitle(data.getTitle());
+        rolePlaySetting.setTitleAbbreviation(data.getTitleAbbreviation());
+        rolePlaySetting.setFirstname(data.getFirstname());
+        rolePlaySetting.setSurname(data.getSurname());
+        userService.save(user);
+
+        return ResponseEntity.ok(true);
+    }
+
     @GetMapping("/" + SHIP_NAMES_ENDPOINT + "/{starNation}")
     @Operation(summary = "Get the list of ship names", operationId = "getShipNamesFor",
             responses = {

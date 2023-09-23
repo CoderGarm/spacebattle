@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.dto.account.forum;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.rest.dto.account.Player;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -25,13 +26,8 @@ public class ForumMessage {
     private int idForum;
 
     @JsonProperty
-    @Schema(required = true, description = "The id of the author.")
-    private int idAuthor;
-
-    @Nonnull
-    @JsonProperty
-    @Schema(required = true, description = "The username of the author.")
-    private String author;
+    @Schema(required = true, description = "The author.")
+    private Player author;
 
     @Nonnull
     @JsonProperty
@@ -57,9 +53,8 @@ public class ForumMessage {
         this.idForumMessage = message.getId();
         this.idForumThread = message.getForumThread().getId();
         this.idForum = message.getForumThread().getForum().getId();
-        this.idAuthor = message.getAuthor().getId();
         this.profilePic = message.getAuthor().getUserSetting().getProfilePic();
-        this.author = message.getAuthor().getUsername();
+        this.author = new Player(message.getAuthor());
         this.message = message.getMessage();
         this.sentAt = message.getSentAt();
     }

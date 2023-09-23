@@ -42,6 +42,8 @@ todo. research punkte als tooltip
    Um das Dashboard als Allianz-Admin zu sehen, muss man die Seite leider neu Laden - irgendetwas hakt da noch.
 5. Neue Accounts werden außerhalb der Reichweite von Flotten erzeugt.
 
+todo. no orbit in fleet split
+
 #### next steps
 
 todo. login log with timestamp (or better regex?)
