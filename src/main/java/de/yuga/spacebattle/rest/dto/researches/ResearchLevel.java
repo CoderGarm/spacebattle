@@ -3,6 +3,8 @@ package de.yuga.spacebattle.rest.dto.researches;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
+import de.yuga.spacebattle.backend.enums.EResourceType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -24,6 +26,11 @@ public class ResearchLevel {
     @JsonProperty
     @Schema(description = "The amount of ticks.")
     private Integer ticksToComplete;
+
+    @Nullable
+    @JsonProperty
+    @Schema(description = "The amount of research points needed.")
+    private Integer researchPoints;
 
     public ResearchLevel() {
     }
@@ -48,6 +55,7 @@ public class ResearchLevel {
         this.research = new Research(research, languageCode);
         this.level = level;
         this.ticksToComplete = remainingTicks;
+        this.researchPoints = (int) JobCostsCalculator.getCostsForLevel(research.getCosts(), level).getResourceAmountByType(EResourceType.RESEARCH);
     }
 
     public ResearchLevel(@Nonnull final de.yuga.spacebattle.backend.entities.researches.ResearchLevel researchLevel,

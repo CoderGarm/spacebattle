@@ -28,9 +28,7 @@
    genullt. Es war immer lästig zu vergessen, die Daueraufträge abzustellen.
 4. Ein paar kurze Infos zur Kolonisierung sind als Tutorial abrufbar.
 5. Der Fehlercode, der unten rechts angezeigt wird, ist nun etwas handlicher und nicht mehr so übertrieben lang.
-
-todo. unendliche researches darstellen
-todo. research punkte als tooltip
+6. Die Forschungen stellen die benötigten Punkte und das maximale Level als Tooltip dar.
 
 
 ### Bugs fixed
@@ -41,8 +39,7 @@ todo. research punkte als tooltip
 4. Möchte man eine Allianz erzeugen, geht das nun nur noch mit Namen und Ally-Tag.  
    Um das Dashboard als Allianz-Admin zu sehen, muss man die Seite leider neu Laden - irgendetwas hakt da noch.
 5. Neue Accounts werden außerhalb der Reichweite von Flotten erzeugt.
-
-todo. no orbit in fleet split
+6. Es gab einen Fehler beim Detachieren von Flotten. Sie sind von der Karte verschwunden, waren aber noch in der Liste. Der Fehler ist behoben.
 
 #### next steps
 
