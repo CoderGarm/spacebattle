@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.combat.dto.FleetClash;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -68,12 +69,19 @@ public class FleetService {
 
         final Map<Integer, List<Integer>> fleetConstellations = merge.getFleetConstellations();
         final List<Fleet> fleets = findByIds(fleetConstellations.keySet());
+        final Set<WarShip> knownWarShips = fleets.stream().map(Fleet::getAliveShips).flatMap(Collection::stream).collect(Collectors.toSet());
+        final Set<Integer> poolShipsToFetch = fleetConstellations.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
+        poolShipsToFetch.removeAll(knownWarShips.stream().map(AbstractEntityKey::getId).collect(Collectors.toSet()));
+
+        final List<WarShip> pooledShips = warShipService.findByIds(poolShipsToFetch);
+        knownWarShips.addAll(pooledShips);
+
         final Set<Fleet> foreign = fleets.stream().filter(f -> f.getOwner().getId() != idUser).collect(Collectors.toSet());
         if (!foreign.isEmpty()) {
             throw new NotifyWebUserException("You must own all the merged fleets.");
         }
 
-        final Map<Integer, WarShip> warshipsById = fleets.stream().map(Fleet::getAliveShips).flatMap(Collection::stream).collect(Collectors.toMap(WarShip::getId, Function.identity()));
+        final Map<Integer, WarShip> warshipsById = knownWarShips.stream().collect(Collectors.toMap(WarShip::getId, Function.identity()));
         fleetConstellations.forEach((idFleet, warshipIDs) -> {
             final Fleet fleet = fleets.stream().filter(f -> f.getId() == idFleet).findFirst().orElse(null);
             assert fleet != null : "Would be good at this stage.";
@@ -110,8 +118,9 @@ public class FleetService {
                 .orElseThrow(() -> new NotifyWebUserException("Every fleet must have an owner."));
 
         final de.yuga.spacebattle.rest.dto.orbitals.FleetOrbit orbit = fleetSplit.getOrbit();
-        assert orbit.getOrbit() != null;
-        assert orbit.getSystem() != null;
+        if (orbit.getOrbit() == null || orbit.getSystem() == null) {
+            throw new NotifyWebUserException("Sorry, but this will not work. You need a place to be!");
+        }
         final StarSystem starSystem = starSystemService.find(orbit.getSystem().getIdStarSystem());
         final FleetOrbit fleetOrbit = new FleetOrbit(new Orbit(orbit.getOrbit()), starSystem);
         final Planet planet = planetService.findByCoordinates(fleetOrbit);

@@ -1,5 +1,12 @@
 ### Features
 
+fixed. man kann schiffe nicht der ursprünglichen flotte hinzufügen
+todo. light theme
+todo. quoting in chat und forum
+todo. chat checken nach falschem empfänger
+todo. advisory board ist falsch
+todo. history for dashboard
+
 #### Gameplay
 
 1. Das Advisory-Programm hat begonnen.  

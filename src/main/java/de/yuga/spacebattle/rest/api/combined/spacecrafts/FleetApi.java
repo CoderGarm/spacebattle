@@ -50,6 +50,7 @@ public class FleetApi extends BaseApi {
     private static final String FLEET_PER_PLANET_ENDPOINT = "atPlanet";
     private static final String FLEET_PER_USER_ENDPOINT = "perUser";
     private static final String MOVING_FLEET_PER_USER_ENDPOINT = "movingPerUser";
+    private static final String MULTI_FLEET_ACTION_ENDPOINT = "multiaction";
     private static final String MERGE_FLEETS_ENDPOINT = "merge";
     private static final String SPLIT_FLEETS_ENDPOINT = "split";
     private static final String MOVE_FLEETS_ENDPOINT = "moveFleets";
@@ -249,6 +250,37 @@ public class FleetApi extends BaseApi {
                 .map(f -> new Fleet(f, getPreferredLanguage()))
                 .collect(Collectors.toList()));
 
+    }
+
+    @PostMapping(value = MULTI_FLEET_ACTION_ENDPOINT)
+    @Operation(summary = "Transfer the warships between existing fleets.", operationId = "multiActionFleetFormation",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = FleetFormationMultiAction.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FleetFormationMultiActionResult.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> multiActionFleetFormation(@RequestBody @Nonnull final FleetFormationMultiAction multiAction) {
+        PreconditionWebHelper.checkNotNull(multiAction, "multiAction must not be empty");
+
+        final FleetMerge fleetMerge = multiAction.getFleetMerge();
+        final FleetMergeResult fleetMergeResult = fleetMerge != null ? fleetService.mergeFleets(fleetMerge, getIdUser()) : null;
+
+        final List<Integer> warshipIDs = multiAction.getShipsToPool();
+        fleetService.poolWarships(getIdUser(), warshipIDs);
+
+        final FleetSplit fleetSplit = multiAction.getFleetSplit();
+        final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> splitFleets = fleetSplit != null ? fleetService.splitFleets(fleetSplit, getIdUser()) : Set.of();
+
+        return ResponseEntity.ok(new FleetFormationMultiActionResult(fleetMergeResult, splitFleets, getPreferredLanguage()));
     }
 
     @PostMapping(value = MERGE_FLEETS_ENDPOINT)
