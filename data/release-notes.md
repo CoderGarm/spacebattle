@@ -6,6 +6,7 @@ todo. quoting in chat und forum
 todo. chat checken nach falschem empfänger
 todo. advisory board ist falsch
 todo. history for dashboard
+todo. cache cleanup or only load last 3 ticks
 
 #### Gameplay
 
