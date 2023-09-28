@@ -86,11 +86,9 @@ public class FleetService {
             final Fleet fleet = fleets.stream().filter(f -> f.getId() == idFleet).findFirst().orElse(null);
             assert fleet != null : "Would be good at this stage.";
             final Map<Integer, WarShip> shipMap = fleet.getAliveShips().stream().collect(Collectors.toMap(WarShip::getId, Function.identity()));
-            final Set<WarShip> toRemove = shipMap.values().stream().filter(w -> !warshipIDs.contains(w.getId())).collect(Collectors.toSet());
             final Set<WarShip> toAdd = warshipsById.values().stream().filter(w -> warshipIDs.contains(w.getId())).collect(Collectors.toSet());
             toAdd.removeAll(shipMap.values());
             fleet.addShips(toAdd);
-            fleet.removeShips(toRemove);
         });
 
         final Set<Fleet> toStore = fleets.stream().filter(f -> !f.getAliveShips().isEmpty()).collect(Collectors.toSet());
@@ -105,6 +103,9 @@ public class FleetService {
         Preconditions.checkNotNull(fleetSplit, "fleetSplit must not be empty");
 
         final Set<Integer> warShipIDs = fleetSplit.getFleetConstellations().values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
+        if (warShipIDs.isEmpty()) {
+            return Set.of();
+        }
         final List<WarShip> shipsByUser = warShipService.findByIds(warShipIDs);
 
         if (shipsByUser.stream().anyMatch(w -> w.getShipClass().getOwner().getId() != idUser)) {
