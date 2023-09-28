@@ -1,6 +1,7 @@
 ### Features
 
 fixed. man kann schiffe nicht der ursprünglichen flotte hinzufügen
+todo. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
 todo. light theme
 todo. quoting in chat und forum
 todo. chat checken nach falschem empfänger
