@@ -1,54 +1,31 @@
 ### Features
 
-fixed. man kann schiffe nicht der ursprünglichen flotte hinzufügen
-todo. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
-todo. light theme
-todo. quoting in chat und forum
-todo. chat checken nach falschem empfänger
-todo. advisory board ist falsch
-todo. history for dashboard
-todo. cache cleanup or only load last 3 ticks
-
 #### Gameplay
 
-1. Das Advisory-Programm hat begonnen.  
-   Es ist immer noch nicht einfach herauszufinden, was man eigentlich tun soll.  
-   Auf dem Dashboard gibt es einen neuen Bereich für Ratschläge seitens z.B. des Militärs oder der Handelskartelle.
-   Es wird im Wesentlichen der Weg bis zur Schiffswerft beschrieben und jeweils darüber informiert, wenn man Gebäude
-   bauen, forschen oder die Werft nutzen kann.
-2. Der Autor ist nicht seine Figur - ab jetzt machen wir Kunst.  
-   Wer mag, kann ich im Profil einen Titel zulegen und seinem Alter Ego einen Namen geben.  
-   Der so vergebene Titel und Name wird zunächst im Forum verwendet werden - sofern man ihn denn vergibt.  
-   Die Idee dahinter ist etwas Roleplay zu ermöglichen und falls ihr Ideen habt, dann raus damit!  
-   Es ist noch ein großes Segment mit Spionage und Diplomatie geplant und dabei könnte das ganz witzig werden.
-3. Die zweite Komponente des ganzen sind individualisierte Schiffsnamen.  
-   Im Profil gibt es nun die Möglichkeit für zukünftige Neubauten eine Namensliste anzulegen.  
-   Dabei gilt: Nur die Namensliste wird verwendet, nur wenn die Liste leer ist, werden die gewählten Sternennationen als Quelle herangezogen.  
-   Bitte beachtet: Das sind exklusive oder (XOR).  
-   Neue Spieler starten by default mit allen Nationen ausgewählt, das ist das bisherige Verhalten.
-   Man kann dort ebenfalls das Präfix seiner Navy anlegen.
+todo. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
 
 #### Diverses
 
-1. Die Bevölkerungsentwicklung stellt nun die aufsummierten Pops dar und zeigt die Kapazität an.
-2. Das Job-Dashboard zeigt nun alle Planeten an. Damit kann man besser sehen, welcher Planet noch Aufträge verkraften
-   kann.
-3. Manuell eingestellte Transportaufträge werden ab jetzt nur noch einmal ausgeführt, danach werden Demand und Delivery
-   genullt. Es war immer lästig zu vergessen, die Daueraufträge abzustellen.
-4. Ein paar kurze Infos zur Kolonisierung sind als Tutorial abrufbar.
-5. Der Fehlercode, der unten rechts angezeigt wird, ist nun etwas handlicher und nicht mehr so übertrieben lang.
-6. Die Forschungen stellen die benötigten Punkte und das maximale Level als Tooltip dar.
+todo. job overview: show where a shipyard is
 
+todo. introduce fleet edit tab: rename, retire
+todo. make forum read
+todo. show unread-icons at specific posts
+todo. add "look here" icons to dashboard
+todo. light theme
+todo. quoting in chat und forum
+todo. history for dashboard
 
 ### Bugs fixed
 
-1. Man kann keine Topics im Forum ohne Titel erzeugen.
-2. Man muss das Einmotten von Flotten und Schiffen nun bestätigen.
-3. Man kann nun endlich eine neue Flotte erzeugen - und damit sind auch die lästigen Lock-Buttons verschwunden und die UI sollte wie erwartet funktionieren.
-4. Möchte man eine Allianz erzeugen, geht das nun nur noch mit Namen und Ally-Tag.  
-   Um das Dashboard als Allianz-Admin zu sehen, muss man die Seite leider neu Laden - irgendetwas hakt da noch.
-5. Neue Accounts werden außerhalb der Reichweite von Flotten erzeugt.
-6. Es gab einen Fehler beim Detachieren von Flotten. Sie sind von der Karte verschwunden, waren aber noch in der Liste. Der Fehler ist behoben.
+1. Der Beirat deutet den Forschungszustand nicht mehr falsch an.
+   todo. moving fleet locked for adding ships -> detachments
+   todo. detatching a inoperable ship from a fleet doesn't update the fleet as operable
+   todo. crew and ammo display in fleet tab right border
+   todo. fleet arrivals without ticksleft
+   todo. cache cleanup or only load last 3 ticks
+
+todo. chat checken nach falschem empfänger
 
 #### next steps
 

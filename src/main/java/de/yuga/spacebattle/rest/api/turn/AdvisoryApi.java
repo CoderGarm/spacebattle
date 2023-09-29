@@ -11,6 +11,7 @@ import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
+import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.mission.MissionService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.dto.buildings.Building;
@@ -63,15 +64,20 @@ public class AdvisoryApi extends BaseApi {
     @Nonnull
     private final ResearchService researchService;
 
+    @Nonnull
+    private final JobService jobService;
+
     @Autowired
     public AdvisoryApi(@Nonnull final MissionService missionService,
                        @Nonnull final ConstructionService constructionService,
                        @Nonnull final BuildingService buildingService,
-                       @Nonnull final ResearchService researchService) {
+                       @Nonnull final ResearchService researchService,
+                       @Nonnull final JobService jobService) {
         this.missionService = Preconditions.checkNotNull(missionService, "missionService must not be empty");
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
         this.buildingService = Preconditions.checkNotNull(buildingService, "buildingService must not be empty");
         this.researchService = Preconditions.checkNotNull(researchService, "researchService must not be empty");
+        this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
     }
 
     @GetMapping(value = PIRATE_HUNT_ENDPOINT)
@@ -134,10 +140,11 @@ public class AdvisoryApi extends BaseApi {
                 .orElse(null);
         // research lab build?
         if (researchLaboratory == null) {
-            checkConstructionAnNotify(EResourceType.RESEARCH, tickAdvice);
+            checkConstructionAndNotify(EResourceType.RESEARCH, tickAdvice);
         } else {
             // active research?
-            if (researchLaboratory.getJobs().isEmpty()) {
+            final List<Research> activeJobs = jobService.getResearchesFromActiveJobs(getIdUser());
+            if (activeJobs.isEmpty()) {
                 tickAdvice.setResearchPossible(true);
             }
             final Set<ResearchLevel> researchesForUser = researchService.getResearchesForUser(getIdUser());
@@ -155,16 +162,15 @@ public class AdvisoryApi extends BaseApi {
                         .anyMatch(c -> c.getBuilding().getProductionTarget() == EResourceType.ORBITAL_CONSTRUCTION);
                 // shipyard build?
                 if (!shipyardBuild) {
-                    checkConstructionAnNotify(EResourceType.ORBITAL_CONSTRUCTION, tickAdvice);
+                    checkConstructionAndNotify(EResourceType.ORBITAL_CONSTRUCTION, tickAdvice);
                 }
             }
         }
 
-
         return ResponseEntity.ok(tickAdvice);
     }
 
-    private void checkConstructionAnNotify(@Nonnull final EResourceType resourceType, @Nonnull final TickAdvice tickAdvice) {
+    private void checkConstructionAndNotify(@Nonnull final EResourceType resourceType, @Nonnull final TickAdvice tickAdvice) {
         Preconditions.checkNotNull(resourceType, "resourceType must not be empty");
         Preconditions.checkNotNull(tickAdvice, "tickAdvice must not be empty");
 
