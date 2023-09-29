@@ -8,7 +8,7 @@ todo. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
 
 1. Die Auftragsübersicht zeigt nun auch Schiffswerften ohne aktiven Job an.
 
-todo. introduce fleet edit tab: rename, retire
+todo. introduce fleet edit tab: rename, retire -> no edit when in move
 todo. make forum read
 todo. show unread-icons at specific posts
 todo. add "look here" icons to dashboard
@@ -19,11 +19,13 @@ todo. history for dashboard
 ### Bugs fixed
 
 1. Der Beirat deutet den Forschungszustand nicht mehr falsch an.
-   todo. moving fleet locked for adding ships -> detachments
-   todo. detatching a inoperable ship from a fleet doesn't update the fleet as operable
-   todo. crew and ammo display in fleet tab right border
-   todo. fleet arrivals without ticksleft
-   todo. cache cleanup or only load last 3 ticks
+2. Das Dashboard zeigt bei auf dem Weg befindlichen Flotten wieder die erwartete Ankunftszeit an.
+3. Auf dem Weg befindliche Flotten können nun nicht neu formiert werden.
+
+todo. detatching a inoperable ship from a fleet doesn't update the fleet as operable
+todo. cache cleanup or only load last 3 ticks
+todo. add heat map on colonization
+todo. heat must be used system wide not by planet -> user harassing by pirates at hyper limit
 
 todo. chat checken nach falschem empfänger
 
