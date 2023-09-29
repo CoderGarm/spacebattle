@@ -10,8 +10,6 @@ import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @NamedQueries({
         @NamedQuery(name = "ForumThread.findAllIdThreadForForums",
@@ -43,12 +41,6 @@ public class ForumThread extends AbstractEntityKey {
     @Nonnull
     @NotNull
     private LocalDateTime lastChanged;
-
-    @Nonnull
-    @NotNull
-    @OneToMany
-    @JoinColumn(name = "idForumThread")
-    private final Set<ForumMessage> messages = new HashSet<>();
 
     public ForumThread() {
     }

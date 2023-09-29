@@ -37,6 +37,9 @@ public class ForumMessageRead extends AbstractEntityKey {
     @JoinColumn(name = "idUser")
     private User user;
 
+    @Column(columnDefinition = "boolean not null default false")
+    private boolean isRead = false;
+
     public ForumMessageRead() {
     }
 
@@ -73,5 +76,13 @@ public class ForumMessageRead extends AbstractEntityKey {
     @Nonnull
     public User getUser() {
         return user;
+    }
+
+    public void setRead(final boolean read) {
+        isRead = read;
+    }
+
+    public boolean isRead() {
+        return isRead;
     }
 }

@@ -50,6 +50,7 @@ public class ForumApi extends BaseApi {
     private static final String CREATE_FORUM_THREAD_MESSAGE = "createThreadMessage";
     private static final String EDIT_FORUM_THREAD_MESSAGE = "editThreadMessage";
     private static final String BY_FORUM = "byForum";
+    public static final String MARK_FORUM_MESSAGE_READ_ENDPOINT = "markForumMessageRead";
 
     @Nonnull
     private final ForumService forumService;
@@ -418,9 +419,15 @@ public class ForumApi extends BaseApi {
     }
 
     @AllowedRoles(roles = EGameUserRole.FORUM_READ)
-    @PutMapping("/markForumMessageRead/{idForum}/{idForumThread}/{idForumMessage}")
-    @Operation(summary = "Creates a chat message", operationId = "markForumMessageRead",
-            description = "Creates a chat message",
+    @PutMapping(MARK_FORUM_MESSAGE_READ_ENDPOINT)
+    @Operation(summary = "Marks a message or thread or forum as read.", operationId = "markForumMessageRead",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ForumIdContainer.class)
+                    )
+            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
@@ -428,11 +435,12 @@ public class ForumApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> markForumMessageRead(@PathVariable("idForum") final int idForum,
-                                                  @PathVariable("idForumThread") final int idForumThread,
-                                                  @PathVariable("idForumMessage") final int idForumMessage) {
+    public ResponseEntity<?> markForumMessageRead(@RequestBody @Nonnull final ForumIdContainer container) {
 
         final int idUser = getIdUser();
+        final Integer idForum = container.getIdForum();
+        final Integer idForumThread = container.getIdThread();
+        final Integer idForumMessage = container.getIdMessage();
         forumService.markMessageRead(idForum, idForumThread, idForumMessage, idUser);
         return ResponseEntity.ok(true);
     }

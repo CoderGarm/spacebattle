@@ -7,14 +7,21 @@ todo. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
 #### Diverses
 
 1. Die Auftragsübersicht zeigt nun auch Schiffswerften ohne aktiven Job an.
-2. Im Forum werden auch ungelesene Nachrichten markiert, nicht nur Foren und Fäden.
+2. Im Forum werden nun bisher ungelesene Nachrichten markiert, nicht nur Foren und Fäden.
+3. Man kann nun ganze Foren oder ganze Fäden auf einmal als gelesen markieren.
+4. Das Löschen des Browsercaches sollte(!) jetzt nicht mehr notwendig sein.  
+   Ich kann dem Browser allerdings nur sagen "Bitte keinen Cache benutzen" - was daraus gemacht wird, liegt außerhalb meiner Kontrolle.
+5. Die Seite ist nun etwas besser mit einem Mobilgerät nutzbar.
+6. Das Journal hat Markierungen für neue, ungelesene und relevante Informationen bekommen.
 
-todo. make forum read
-todo. add "look here" icons to dashboard
+todo. advisory for first mission pirate hunt and LAC build
 todo. quoting in chat und forum
 todo. history for dashboard
 todo. light theme
 todo. introduce fleet edit tab: rename, retire -> no edit when in move
+todo. transportmente zusammenfassen und bilanz bilden
+todo. fight not inside alliance
+
 
 ### Bugs fixed
 
@@ -22,15 +29,19 @@ todo. introduce fleet edit tab: rename, retire -> no edit when in move
 2. Das Dashboard zeigt bei auf dem Weg befindlichen Flotten wieder die erwartete Ankunftszeit an.
 3. Auf dem Weg befindliche Flotten können nun nicht neu formiert werden.
 
+todo. issue in data consistence n frontend
+todo. fleet detachment without orbit
 todo. detatching a inoperable ship from a fleet doesn't update the fleet as operable
 todo. cache cleanup or only load last 3 ticks
 todo. add heat map on colonization
 todo. heat must be used system wide not by planet -> user harassing by pirates at hyper limit
-
 todo. chat checken nach falschem empfänger
+todo. fleet points
 
 #### next steps
 
+todo. lock forum threads for admin permission
+todo. forum admin area to remove forum_write
 todo. login log with timestamp (or better regex?)
 todo. exception via mail
 todo. research tree issue

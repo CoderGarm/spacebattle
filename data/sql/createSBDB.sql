@@ -227,6 +227,7 @@
 
     create table forumMessageRead (
        idForumMessageRead integer not null auto_increment,
+       isRead boolean NOT NULL DEFAULT FALSE,
         idForum integer not null,
         idForumMessage integer not null,
         idForumThread integer not null,
@@ -2135,6 +2136,42 @@ INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES 
 INSERT INTO articleLines (idArticleRevision, content, deltaType, lineNo) VALUES (LAST_INSERT_ID(),'In vielen Situationen ist es hilfreich einige Kriegsschiffe explizit in Reserve zu halten um sie dann zu Einsatzgruppen oder Flotillen zusammenzufassen.','INSERT',14);
 INSERT INTO article_articleRevisions (Article_idArticle, articleRevisions_idArticleRevision) VALUES ((SELECT MAX(idArticle) from article), (SELECT MAX(idArticleRevision) from articleRevision));
 
+DELIMITER //
+CREATE TRIGGER forum_message_read_after_insert_user_trigger
+    AFTER INSERT
+    ON user
+    FOR EACH ROW
+BEGIN
+    -- Insert into forumMessageRead for every existing forumMessage
+    INSERT INTO forumMessageRead (idUser, idForum, idForumThread, idForumMessage)
+    SELECT NEW.idUser, forumThread.idForum , forumThread.idForumThread, forumMessage.idForumMessage
+    FROM forumMessage
+             LEFT JOIN forumThread ON forumThread.idForumThread = forumMessage.idForumThread
+             LEFT JOIN forum on forum.idForum = forumThread.idForum
+                WHERE (forum.role IS NULL OR NEW.userRole LIKE CONCAT('%', forum.role, '%'))
+                    OR (forum.idAlliance IS NULL OR NEW.idAlliance = forum.idAlliance);
+END;
+//
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER forum_message_read_after_insert_forumMessage
+AFTER INSERT ON forumMessage
+FOR EACH ROW
+BEGIN
+    -- Insert into forumMessageRead for every existing user
+    INSERT INTO forumMessageRead (idUser, idForum, idForumThread, idForumMessage)
+    SELECT user.idUser, forumThread.idForum , forumThread.idForumThread, NEW.idForumMessage
+    FROM user
+        LEFT JOIN forumMessage ON forumMessage.idForumMessage = NEW.idForumMessage
+        LEFT JOIN forumThread ON forumThread.idForumThread = forumMessage.idForumThread
+        LEFT JOIN forum on forum.idForum = forumThread.idForum
+                WHERE (forum.role IS NULL OR user.userRole LIKE CONCAT('%', forum.role, '%'))
+                    OR (forum.idAlliance IS NULL OR user.idAlliance = forum.idAlliance);
+END;
+//
+DELIMITER ;
+
 insert into dbPatch values (null, now(), 'add traded resource', '0.1.2-1');
 insert into dbPatch values (null, now(), 'rebalance buildings', '0.1.2-2');
 insert into dbPatch values (null, now(), 'implement npc entity structure', '0.1.3-1');
@@ -2149,3 +2186,4 @@ insert into dbPatch values (null, now(), 'drop persisted demand', '0.1.8-1');
 insert into dbPatch values (null, now(), 'switch to job type', '0.1.9-1');
 insert into dbPatch values (null, now(), 'add convoy mission', '0.1.10-1');
 insert into dbPatch values (null, now(), 'add roleplay data', '0.1.11-1');
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'add forum message trigger', '0.1.12-1');

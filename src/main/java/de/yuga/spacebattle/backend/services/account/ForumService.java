@@ -198,15 +198,13 @@ public class ForumService {
         return messageReadRepository.hasUserUnread(idUser, userRoles, alliance);
     }
 
-    public void markMessageRead(final int idForum,
-                                final int idForumThread,
-                                final int idForumMessage,
+    public void markMessageRead(@Nullable final Integer idForum,
+                                @Nullable final Integer idForumThread,
+                                @Nullable final Integer idForumMessage,
                                 final int idUser) {
-        final boolean messageUnread = messageReadRepository.isMessageUnread(idForumThread, idForumMessage, idUser);
-        if (messageUnread) {
-            final ForumMessageRead forumMessageRead = messageReadRepository.create(idForum, idForumThread, idForumMessage, idUser);
-            messageReadRepository.save(forumMessageRead);
-        }
+        final List<ForumMessageRead> reads = Objects.requireNonNullElse(messageReadRepository.getReads(idForum, idForumThread, idForumMessage, idUser), new ArrayList<>());
+        reads.forEach(r -> r.setRead(true));
+        messageReadRepository.saveAll(reads);
     }
 
     @Nullable
@@ -214,7 +212,9 @@ public class ForumService {
         return forumMessageRepository.findById(idForumMessage).orElse(null);
     }
 
-    public void sendRelease(Set<String> recipients, int idForumThread) {
+    public void sendRelease(@Nonnull final Set<String> recipients, int idForumThread) {
+        Preconditions.checkNotNull(recipients, "recipients must not be empty");
+
         final ForumThread thread = forumThreadRepository.findById(idForumThread).orElse(null);
         if (thread == null) {
             return;
