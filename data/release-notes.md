@@ -6,7 +6,7 @@ todo. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
 
 #### Diverses
 
-todo. job overview: show where a shipyard is
+1. Die Auftragsübersicht zeigt nun auch Schiffswerften ohne aktiven Job an.
 
 todo. introduce fleet edit tab: rename, retire
 todo. make forum read

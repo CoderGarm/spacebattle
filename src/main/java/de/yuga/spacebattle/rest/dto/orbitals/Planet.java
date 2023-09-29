@@ -5,11 +5,14 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.EPlanetClassType;
 import de.yuga.spacebattle.rest.dto.AbstractId;
 import de.yuga.spacebattle.rest.dto.account.Player;
+import de.yuga.spacebattle.rest.dto.enums.EResourceType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Schema(description = ".")
 public class Planet {
@@ -53,6 +56,12 @@ public class Planet {
     @Schema(required = true, description = "The planet's class.")
     private de.yuga.spacebattle.rest.dto.enums.EPlanetClassType planetType = new de.yuga.spacebattle.rest.dto.enums.EPlanetClassType(EPlanetClassType.PLANET);
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The planet's usage capabilities.")
+    private Set<EResourceType> capabilities = new HashSet<>();
+
+
     public Planet() {
     }
 
@@ -70,6 +79,18 @@ public class Planet {
             this.isMain = planet.isMain();
         }
         planetType = new de.yuga.spacebattle.rest.dto.enums.EPlanetClassType(planet.getPlanetType());
+        planet.getConstructions().forEach(c -> {
+            final de.yuga.spacebattle.backend.enums.EResourceType productionTarget = c.getBuilding().getProductionTarget();
+            switch (productionTarget) {
+                case CONSTRUCTION:
+                case ORBITAL_CONSTRUCTION:
+                case RESEARCH:
+                    this.capabilities.add(new EResourceType(productionTarget));
+                    break;
+                default:
+                    break;
+            }
+        });
     }
 
     public int getIdPlanet() {
