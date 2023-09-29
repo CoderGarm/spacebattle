@@ -352,24 +352,6 @@ public class ForumApi extends BaseApi {
     }
 
     @AllowedRoles(roles = EGameUserRole.FORUM_READ)
-    @GetMapping("/isMessageUnread/{idForumThread}/{idForumMessage}")
-    @Operation(summary = "Returns if the chat has unread messages.", operationId = "isMessageUnread",
-            description = "Returns if the chat has unread messages.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
-                    @ApiResponse(responseCode = "400", description = "an error occurred",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
-            }
-    )
-    public ResponseEntity<?> isMessageUnread(@PathVariable("idForumThread") final int idForumThread,
-                                             @PathVariable("idForumMessage") final int idForumMessage) {
-        final int idUser = getIdUser();
-        final boolean hasUnread = forumService.isMessageUnread(idForumThread, idForumMessage, idUser);
-        return ResponseEntity.ok(hasUnread);
-    }
-
-    @AllowedRoles(roles = EGameUserRole.FORUM_READ)
     @GetMapping("/hasThreadUnread/{idForumThread}")
     @Operation(summary = "Returns if the chat has unread messages.", operationId = "hasThreadUnread",
             description = "Returns if the chat has unread messages.",
@@ -381,8 +363,7 @@ public class ForumApi extends BaseApi {
             }
     )
     public ResponseEntity<?> hasThreadUnread(@PathVariable("idForumThread") final int idForumThread) {
-        final int idUser = getIdUser();
-        final boolean hasUnread = forumService.hasThreadUnread(idForumThread, idUser);
+        final boolean hasUnread = forumService.hasThreadUnread(idForumThread, getIdUser());
         return ResponseEntity.ok(hasUnread);
     }
 
@@ -398,8 +379,7 @@ public class ForumApi extends BaseApi {
             }
     )
     public ResponseEntity<?> hasForumUnread(@PathVariable("idForum") final int idForum) {
-        final int idUser = getIdUser();
-        final boolean hasUnread = forumService.hasForumUnread(idForum, idUser);
+        final boolean hasUnread = forumService.hasForumUnread(idForum, getIdUser());
         return ResponseEntity.ok(hasUnread);
     }
 
@@ -415,11 +395,25 @@ public class ForumApi extends BaseApi {
             }
     )
     public ResponseEntity<?> hasUserUnreadMessages() {
-        final int idUser = getIdUser();
-        final User user = userService.find(idUser);
-        PreconditionWebHelper.checkNotNull(user, "user shouldn't be null!");
+        final boolean hasUnread = forumService.hasUserUnread(getIdUser());
+        return ResponseEntity.ok(hasUnread);
+    }
 
-        final boolean hasUnread = forumService.hasUserUnread(user);
+    @AllowedRoles(roles = EGameUserRole.FORUM_READ)
+    @GetMapping("/hasUnreadMessages/{idThread}")
+    @Operation(summary = "Returns if the chat has unread messages.", operationId = "getUnreadMessages",
+            description = "Returns if the chat has unread messages.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Integer.class)
+                            ))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getUnreadMessages(@PathVariable("idThread") final int idThread) {
+        final List<Integer> hasUnread = forumService.findUnreadMessages(idThread, getIdUser());
         return ResponseEntity.ok(hasUnread);
     }
 

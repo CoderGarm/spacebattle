@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.repositories.account;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.enums.EGameUserRole;
+import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -34,4 +35,12 @@ public interface UserRepository extends JpaRepository<User, Integer>, CustomUser
             "AND u.userSetting.noEMailWanted = false " +
             "AND u.userSetting.isLoginForbidden = false")
     Set<String> getEMailAddressesForReleaseRecipients();
+
+    @Nullable
+    @Query("SELECT u.userRole FROM User u WHERE u.id = :idUser")
+    EWebUserRole findWebUserRoles(int idUser);
+
+    @Nullable
+    @Query("SELECT u.alliance FROM User u WHERE u.id = :idUser")
+    Alliance findAlliance(int idUser);
 }

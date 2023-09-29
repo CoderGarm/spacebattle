@@ -304,4 +304,14 @@ public class UserService {
             userRolePlaySettingRepository.save(forUser);
         }
     }
+
+    @Nullable
+    public EWebUserRole findUserRole(final int idUser) {
+        return userRepository.findWebUserRoles(idUser);
+    }
+
+    @Nullable
+    public Alliance findAlliance(final int idUser) {
+        return userRepository.findAlliance(idUser);
+    }
 }

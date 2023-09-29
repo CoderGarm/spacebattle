@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
+import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Set;
 
 public interface ForumMessageReadRepository extends PagingAndSortingRepository<ForumMessageRead, Integer>, CustomForumMessageReadRepository {
@@ -70,4 +72,8 @@ public interface ForumMessageReadRepository extends PagingAndSortingRepository<F
             ")) THEN TRUE ELSE FALSE END FROM ForumMessageRead r " +
             "WHERE r.user.id = :idUser")
     boolean hasUserUnread(@Param("idUser") final int idUser, @Param("userRoles") final Set<EWebUserRole> userRoles, @Param("alliance") final Alliance alliance);
+
+    @Nullable
+    @Query("SELECT m.id FROM ForumMessage m WHERE m.forumThread.id = :idThread AND NOT EXISTS (SELECT r FROM ForumMessageRead r WHERE r.forumThread.id = :idThread AND r.user.id = :idUser)")
+    List<Integer> findUnreadMessages(int idThread, int idUser);
 }

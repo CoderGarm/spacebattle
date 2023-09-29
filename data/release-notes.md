@@ -7,14 +7,14 @@ todo. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
 #### Diverses
 
 1. Die Auftragsübersicht zeigt nun auch Schiffswerften ohne aktiven Job an.
+2. Im Forum werden auch ungelesene Nachrichten markiert, nicht nur Foren und Fäden.
 
-todo. introduce fleet edit tab: rename, retire -> no edit when in move
 todo. make forum read
-todo. show unread-icons at specific posts
 todo. add "look here" icons to dashboard
-todo. light theme
 todo. quoting in chat und forum
 todo. history for dashboard
+todo. light theme
+todo. introduce fleet edit tab: rename, retire -> no edit when in move
 
 ### Bugs fixed
 

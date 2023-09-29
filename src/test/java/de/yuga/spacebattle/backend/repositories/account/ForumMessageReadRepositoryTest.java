@@ -22,12 +22,6 @@ class ForumMessageReadRepositoryTest {
     private UserService userService;
 
     @Test
-    void testIsMessageUnread() {
-        final boolean result = forumService.isMessageUnread(1, 1, 1);
-        assertFalse(result);
-    }
-
-    @Test
     void testHasThreadUnread() {
         final boolean result = forumService.hasThreadUnread(1, 1);
         assertFalse(result);
@@ -43,7 +37,7 @@ class ForumMessageReadRepositoryTest {
     void testHasUserUnread() {
         final User user = userService.find(1);
         assertNotNull(user);
-        final boolean result = forumService.hasUserUnread(user);
+        final boolean result = forumService.hasUserUnread(1);
         assertFalse(result);
     }
 }

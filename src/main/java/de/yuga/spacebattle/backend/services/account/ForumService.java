@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.entities.account.forum.ForumMessage;
 import de.yuga.spacebattle.backend.entities.account.forum.ForumMessageRead;
 import de.yuga.spacebattle.backend.entities.account.forum.ForumThread;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
+import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import de.yuga.spacebattle.backend.repositories.account.ForumMessageReadRepository;
 import de.yuga.spacebattle.backend.repositories.account.ForumMessageRepository;
 import de.yuga.spacebattle.backend.repositories.account.ForumRepository;
@@ -40,17 +41,22 @@ public class ForumService {
     @Nonnull
     private final MailService mailService;
 
+    @Nonnull
+    private final UserService userService;
+
     @Autowired
     public ForumService(@Nonnull final ForumRepository forumRepository,
                         @Nonnull final ForumThreadRepository forumThreadRepository,
                         @Nonnull final ForumMessageRepository forumMessageRepository,
                         @Nonnull final ForumMessageReadRepository messageReadRepository,
-                        @Nonnull final MailService mailService) {
+                        @Nonnull final MailService mailService,
+                        @Nonnull final UserService userService) {
         this.forumRepository = Preconditions.checkNotNull(forumRepository, "forumRepository shouldn't be null!");
         this.forumThreadRepository = Preconditions.checkNotNull(forumThreadRepository, "forumThreadRepository shouldn't be null!");
         this.forumMessageRepository = Preconditions.checkNotNull(forumMessageRepository, "forumMessageRepository shouldn't be null!");
         this.messageReadRepository = Preconditions.checkNotNull(messageReadRepository, "messageReadRepository shouldn't be null!");
         this.mailService = Preconditions.checkNotNull(mailService, "mailService must not be empty");
+        this.userService = Preconditions.checkNotNull(userService, "userService must not be empty");
     }
 
     @Nonnull
@@ -161,18 +167,6 @@ public class ForumService {
     }
 
     /**
-     * Returns if the specific message was read or not.
-     *
-     * @param idForumThread  the thread
-     * @param idForumMessage the message
-     * @param idUser         the user
-     * @return <code>false</code> if it was read, <code>true</code> otherwise
-     */
-    public boolean isMessageUnread(final int idForumThread, final int idForumMessage, final int idUser) {
-        return messageReadRepository.isMessageUnread(idForumThread, idForumMessage, idUser);
-    }
-
-    /**
      * Returns if the specific thread contains unread messages.
      *
      * @param idForumThread the thread
@@ -196,14 +190,12 @@ public class ForumService {
 
     /**
      * Returns if the specific user has unread forum messages.
-     *
-     * @param user the user
-     * @return <code>false</code> if all messages of all forums were read, <code>true</code> otherwise
      */
-    public boolean hasUserUnread(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user shouldn't be null!");
-
-        return messageReadRepository.hasUserUnread(user.getId(), user.getUserRole().getAllowedRoles(), user.getAlliance());
+    public boolean hasUserUnread(final int idUser) {
+        final EWebUserRole role = userService.findUserRole(idUser);
+        final Alliance alliance = userService.findAlliance(idUser);
+        final Set<EWebUserRole> userRoles = role != null ? role.getAllowedRoles() : Set.of();
+        return messageReadRepository.hasUserUnread(idUser, userRoles, alliance);
     }
 
     public void markMessageRead(final int idForum,
@@ -234,5 +226,10 @@ public class ForumService {
         if (!messages.isEmpty()) {
             mailService.sendRelease(title, description, messages.get(0).getMessage(), recipients);
         }
+    }
+
+    @Nonnull
+    public List<Integer> findUnreadMessages(final int idThread, final int idUser) {
+        return Objects.requireNonNullElse(messageReadRepository.findUnreadMessages(idThread, idUser), new ArrayList<>());
     }
 }
