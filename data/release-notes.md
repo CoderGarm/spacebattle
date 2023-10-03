@@ -22,11 +22,10 @@ todo. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
 7. Der Beirat (Advisory Board) leitet nun detaillierter durch die Schritte zur Schiffswerft.
 
 todo. quoting in chat und forum
-todo. history for dashboard
 todo. light theme
 todo. introduce fleet edit tab: rename, retire -> no edit when in move
-todo. transportmente zusammenfassen und bilanz bilden
-todo. fight not inside alliance
+todo. history for dashboard
+todo. cache cleanup or only load last 3 ticks
 
 ### Bugs fixed
 
@@ -34,18 +33,19 @@ todo. fight not inside alliance
 2. Das Dashboard zeigt bei auf dem Weg befindlichen Flotten wieder die erwartete Ankunftszeit an.
 3. Auf dem Weg befindliche Flotten können nun nicht neu formiert werden.
 4. In manchen Fällen wurden Operationals nicht aktiv, obwohl genug Personal vorhanden war. Das betrifft Gebäude genauso wie Schiffe.
+5. Schiffe in Missionen und in der Reserve werden nun gepunktet.
 
+todo. zoom issue at map
 todo. issue in data consistence n frontend
 todo. fleet detachment without orbit
 todo. detatching a inoperable ship from a fleet doesn't update the fleet as operable
-todo. cache cleanup or only load last 3 ticks
 todo. add heat map on colonization
 todo. heat must be used system wide not by planet -> user harassing by pirates at hyper limit
 todo. chat checken nach falschem empfänger
-todo. fleet points
 
 #### next steps
 
+todo. transportmenge zusammenfassen und bilanz bilden
 todo. lock forum threads for admin permission
 todo. forum admin area to remove forum_write
 todo. login log with timestamp (or better regex?)

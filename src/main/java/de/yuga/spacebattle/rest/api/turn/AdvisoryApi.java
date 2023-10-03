@@ -161,15 +161,7 @@ public class AdvisoryApi extends BaseApi {
                     .map(ResearchLevel::getResearch)
                     .anyMatch(getResearchPredicateForShipyard());
             if (!shipyardResearched) {
-                final List<Research> researches = researchService.findAll();
-                final Research shipyardResearch = researches.stream().filter(getResearchPredicateForShipyard()).findFirst().orElseThrow(NullPointerException::new);
-                final Research unlockedThrough = shipyardResearch.getUnlockedThrough();
-                final boolean prerequisiteFulfilled = researchesForUser.stream().anyMatch(rl -> rl.getResearch().equals(unlockedThrough) && rl.getLevel() > 0);
-                if (prerequisiteFulfilled) {
-                    tickAdvice.setSuggestedResearch(new de.yuga.spacebattle.rest.dto.researches.Research(shipyardResearch, getPreferredLanguage()));
-                } else {
-                    tickAdvice.setSuggestedResearch(new de.yuga.spacebattle.rest.dto.researches.Research(unlockedThrough, getPreferredLanguage()));
-                }
+                setShipyardAdvice(researchesForUser, tickAdvice);
             } else {
                 final boolean shipyardBuild = allConstructionsForUser.stream()
                         .anyMatch(c -> c.getBuilding().getProductionTarget() == EResourceType.ORBITAL_CONSTRUCTION);
@@ -184,8 +176,22 @@ public class AdvisoryApi extends BaseApi {
                 }
             }
         }
-
         return ResponseEntity.ok(tickAdvice);
+    }
+
+    private void setShipyardAdvice(@Nonnull final Set<ResearchLevel> researchesForUser, @Nonnull final TickAdvice tickAdvice) {
+        Preconditions.checkNotNull(researchesForUser, "researchesForUser must not be empty");
+        Preconditions.checkNotNull(tickAdvice, "tickAdvice must not be empty");
+
+        final List<Research> researches = researchService.findAll();
+        final Research shipyardResearch = researches.stream().filter(getResearchPredicateForShipyard()).findFirst().orElseThrow(NullPointerException::new);
+        final Research unlockedThrough = shipyardResearch.getUnlockedThrough();
+        final boolean prerequisiteFulfilled = researchesForUser.stream().anyMatch(rl -> rl.getResearch().equals(unlockedThrough) && rl.getLevel() > 0);
+        if (prerequisiteFulfilled) {
+            tickAdvice.setSuggestedResearch(new de.yuga.spacebattle.rest.dto.researches.Research(shipyardResearch, getPreferredLanguage()));
+        } else if (unlockedThrough != null) {
+            tickAdvice.setSuggestedResearch(new de.yuga.spacebattle.rest.dto.researches.Research(unlockedThrough, getPreferredLanguage()));
+        }
     }
 
     private void checkConstructionAndNotify(@Nonnull final EResourceType resourceType, @Nonnull final TickAdvice tickAdvice) {

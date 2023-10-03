@@ -12,6 +12,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.ResearchLevel;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Job;
+import de.yuga.spacebattle.backend.entities.turn.mission.Mission;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.rest.dto.account.Player;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -154,9 +155,31 @@ public class UserPoints {
     public UserPoints withFleets(@Nonnull final Collection<Fleet> fleets) {
         Preconditions.checkNotNull(fleets, "fleets must not be empty");
 
-        final Set<WarShip> aliveShips = fleets.stream().map(Fleet::getAliveShips).flatMap(Collection::stream).filter(WarShip::isAlive).collect(Collectors.toSet());
-        this.fleetPoints += aliveShips.stream().filter(WarShip::isInactive).count() * 10;
-        this.fleetPoints += aliveShips.stream().filter(WarShip::isActive).count() * 25;
+        final Set<WarShip> warShips = fleets.stream().map(Fleet::getAliveShips).flatMap(Collection::stream).filter(WarShip::isAlive).collect(Collectors.toSet());
+        this.fleetPoints += (int) (warShips.stream().filter(WarShip::isInactive).count() * 10);
+        this.fleetPoints += (int) (warShips.stream().filter(WarShip::isActive).count() * 25);
+
+        sumUpPoints();
+        return this;
+    }
+
+    @Nonnull
+    public UserPoints withMissions(@Nonnull final Collection<Mission> fleets) {
+        Preconditions.checkNotNull(fleets, "fleets must not be empty");
+
+        final Set<WarShip> warShips = fleets.stream().map(Mission::getShips).flatMap(Collection::stream).collect(Collectors.toSet());
+        this.fleetPoints += (int) (warShips.stream().filter(WarShip::isActive).count() * 9);
+
+        sumUpPoints();
+        return this;
+    }
+
+    @Nonnull
+    public UserPoints withMothball(@Nonnull final Set<WarShip> warShips) {
+        Preconditions.checkNotNull(warShips, "warShips must not be empty");
+
+        this.fleetPoints += (int) (warShips.stream().filter(WarShip::isInactive).count() * 8);
+        this.fleetPoints += (int) (warShips.stream().filter(WarShip::isActive).count() * 20);
 
         sumUpPoints();
         return this;
