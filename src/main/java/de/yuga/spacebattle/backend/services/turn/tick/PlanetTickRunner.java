@@ -16,7 +16,6 @@ import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
@@ -33,7 +32,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -115,7 +117,6 @@ public class PlanetTickRunner implements TickRunner {
         for (final Planet p : planets) {
             log(p, "Start ticking planet");
             tickPlanet(p);
-            tickFleetsAtStarbase(p);
         }
     }
 
@@ -132,24 +133,7 @@ public class PlanetTickRunner implements TickRunner {
         planet = updateResources(planet);
         log(planet, "Done updating resources");
         planet = runJobs(planet);
-        final Set<Construction> constructions = operationalService.operateInoperationals(today, planet);
-        updateJobs(constructions);
-        log(planet, "Done updating jobs");
         log(planet, "Done tick planet.");
-    }
-
-    private void updateJobs(@Nonnull final Set<Construction> operatedConstructions) {
-        Preconditions.checkNotNull(operatedConstructions, "operatedConstructions must not be empty");
-
-        final Construction upgradedShipyard = operatedConstructions.stream().filter(c -> c.getBuilding().getProductionTarget() == EResourceType.ORBITAL_CONSTRUCTION && c.getBuilding().getProductionType().getProductionCategory() == EProductionCategory.PRODUCE).findFirst().orElse(null);
-        if (upgradedShipyard != null) {
-            final List<Job> jobsByPlanet = jobService.findAllJobsByPlanet(upgradedShipyard.getPlanet().getId()).stream()
-                    .filter(j -> j.getConstructable().getFleet() != null)
-                    .collect(Collectors.toList());
-
-            jobsByPlanet.forEach(j -> j.reduceRemainingTicksByLevelUpgrade(j.getFacility().getBuilding().getIncreasingFactorPerLevel()));
-            jobService.saveAll(jobsByPlanet);
-        }
     }
 
     private Planet runJobs(@Nonnull final Planet planet) {
@@ -201,24 +185,6 @@ public class PlanetTickRunner implements TickRunner {
         }
         LOGGER.info("Saving planet");
         return planetService.save(planet);
-    }
-
-    /**
-     * Refresh all ammunition for a fleet in a starbase orbit.
-     */
-    private void tickFleetsAtStarbase(@Nonnull final Planet planet) {
-        Preconditions.checkNotNull(planet, "planet must not be empty");
-
-        assert planet.getOwner() != null : "Please be colonized!";
-        final Set<Fleet> anchoredFleets = fleetService.findAllAnchoredForPlanet(planet);
-        final Set<WarshipHealthState> healthStates = anchoredFleets.stream()
-                .filter(f -> f.getOwner().getId() == planet.getOwner().getId())
-                .map(Fleet::getAliveShips)
-                .flatMap(Collection::stream)
-                .map(WarShip::getWarshipHealthState)
-                .collect(Collectors.toSet());
-        healthStates.forEach(WarshipHealthState::ammoUp);
-        warshipHealthStateService.saveAll(healthStates);
     }
 
     private void tickShipyard(@Nonnull final Planet planet, @Nonnull final Job job) {

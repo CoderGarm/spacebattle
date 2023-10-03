@@ -24,6 +24,7 @@ public interface TickRunner extends Comparable<TickRunner> {
                 EmpireMigrationTickRunner.class,
                 TradeTickRunner.class,
                 PlanetTickRunner.class,
+                OperationalTickRunner.class,
                 FleetMovementTickRunner.class,
                 ColonizationTickRunner.class,
                 NPCMissionRunner.class,

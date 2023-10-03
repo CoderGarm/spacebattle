@@ -29,7 +29,7 @@ todo. fight not inside alliance
 1. Der Beirat deutet den Forschungszustand nicht mehr falsch an.
 2. Das Dashboard zeigt bei auf dem Weg befindlichen Flotten wieder die erwartete Ankunftszeit an.
 3. Auf dem Weg befindliche Flotten können nun nicht neu formiert werden.
-4. In manchen Fällen wurden Operationals nicht aktiv, obwohl genug Personal vorhanden war.
+4. In manchen Fällen wurden Operationals nicht aktiv, obwohl genug Personal vorhanden war. Das betrifft Gebäude genauso wie Schiffe.
 
 todo. issue in data consistence n frontend
 todo. fleet detachment without orbit
