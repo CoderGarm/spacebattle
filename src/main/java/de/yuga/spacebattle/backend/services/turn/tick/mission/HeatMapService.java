@@ -89,6 +89,10 @@ public class HeatMapService {
         final List<Planet> planets = new ArrayList<>(neighbours);
         final List<HeatMap> newHeat = pseudoRandomizeHeatMap(medianHeat, minHeat, maxHeat, planets);
         heatMapRepository.saveAll(newHeat);
+
+        final Set<HeatMap> mainPlanetHeat = findHeatForPlanets(Set.of(planet));
+        mainPlanetHeat.forEach(HeatMap::setMainPlanet);
+        heatMapRepository.saveAll(mainPlanetHeat);
     }
 
     @Nonnull

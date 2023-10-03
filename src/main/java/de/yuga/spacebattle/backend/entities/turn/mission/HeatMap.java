@@ -67,6 +67,11 @@ public class HeatMap extends AbstractEntityKey {
         }
     }
 
+    public void setMainPlanet() {
+        this.heat = -15;
+    }
+
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;

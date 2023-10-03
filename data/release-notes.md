@@ -4,6 +4,7 @@
 
 1. Piraten raiden nur noch Planeten von NPCs und Spielern.  
    Sie sollen zwar die Umgebung gefährlich machen, aber Spielern nicht ihre anfängliche Möglichkeit an Reichtum zu kommen nehmen.
+2. Neue Spieler starten mit einem für Piraten sehr uninteressanten Hauptplaneten.
 
 todo. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
 
