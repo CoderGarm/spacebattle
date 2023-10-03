@@ -5,6 +5,8 @@
 1. Piraten raiden nur noch Planeten von NPCs und Spielern.  
    Sie sollen zwar die Umgebung gefährlich machen, aber Spielern nicht ihre anfängliche Möglichkeit an Reichtum zu kommen nehmen.
 2. Neue Spieler starten mit einem für Piraten sehr uninteressanten Hauptplaneten.
+3. Der Einfluss von Kriegsschiffen auf das nachbarschaftliche Verhältnis zu Piraten ist schwächer geworden.  
+   Das wirkt im ersten Moment widersinnig, allerdings haben Piraten verschiedene Aspekte im Spielgeschehen und ich möchte die vorsichtig ausbalancieren.
 
 todo. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
 

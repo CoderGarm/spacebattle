@@ -53,7 +53,6 @@ import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.TickRunnerService;
-import de.yuga.spacebattle.backend.services.turn.mission.MissionService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.misc.Coords;
 import org.slf4j.LoggerFactory;
@@ -174,9 +173,6 @@ public class MasterOfTheUniverseService {
     @Nonnull
     private final OwnerService ownerService;
 
-    @Nonnull
-    private final MissionService missionService;
-
     @Autowired
     public MasterOfTheUniverseService(@Nonnull final TickRunnerService tickService,
                                       @Nonnull final UserService userService,
@@ -194,8 +190,7 @@ public class MasterOfTheUniverseService {
                                       @Nonnull final BattleService battleService,
                                       @Nonnull final ResourceService resourceService,
                                       @Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
-                                      @Nonnull final OwnerService ownerService,
-                                      @Nonnull final MissionService missionService) {
+                                      @Nonnull final OwnerService ownerService) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.allianceService = Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");
@@ -213,7 +208,6 @@ public class MasterOfTheUniverseService {
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
         this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
         this.ownerService = Preconditions.checkNotNull(ownerService, "ownerService must not be empty");
-        this.missionService = Preconditions.checkNotNull(missionService, "missionService must not be empty");
 
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
