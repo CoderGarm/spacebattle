@@ -2,6 +2,9 @@
 
 #### Gameplay
 
+1. Piraten raiden nur noch Planeten von NPCs und Spielern.  
+   Sie sollen zwar die Umgebung gefährlich machen, aber Spielern nicht ihre anfängliche Möglichkeit an Reichtum zu kommen nehmen.
+
 todo. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
 
 #### Diverses
@@ -15,14 +18,12 @@ todo. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
 6. Das Journal hat Markierungen für neue, ungelesene und relevante Informationen bekommen.
 7. Der Beirat (Advisory Board) leitet nun detaillierter durch die Schritte zur Schiffswerft.
 
-
 todo. quoting in chat und forum
 todo. history for dashboard
 todo. light theme
 todo. introduce fleet edit tab: rename, retire -> no edit when in move
 todo. transportmente zusammenfassen und bilanz bilden
 todo. fight not inside alliance
-
 
 ### Bugs fixed
 

@@ -173,8 +173,12 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
         Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
         Preconditions.checkNotNull(target, "target must not be empty");
 
-        final Owner owner = target.getOwner() != null ? target.getOwner() : Owner.UNCOLONIZED;
-        LOGGER.info("\tRaiding '" + owner.getUsername() + "' at '" + target.getName() + "'");
+        if (target.getOwner() == null) {
+            LOGGER.info("\tNot raiding uncolonized planet at '" + target.getName() + "'");
+            return;
+        }
+
+        LOGGER.info("\tRaiding '" + target.getOwner().getUsername() + "' at '" + target.getName() + "'");
         final ResourceDeposit raid = target.getResourceDeposit().raid(pirateFleet, freeCargoUnits);
         planetToStore.add(target);
         fleetToStore.add(pirateFleet);
