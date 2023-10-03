@@ -1,10 +1,8 @@
 package de.yuga.spacebattle.rest.api.constructables.spacecrafts;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.EShipClassType;
-import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassCreationService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.rest.api.BaseApi;
@@ -52,9 +50,6 @@ public class ShipyardApi extends BaseApi {
     private final ShipClassService shipClassService;
 
     @Nonnull
-    private final UserService userService;
-
-    @Nonnull
     private final ShipClassCreationService shipClassCreationService;
 
     @Nonnull
@@ -62,14 +57,11 @@ public class ShipyardApi extends BaseApi {
 
     @Autowired
     public ShipyardApi(@Nonnull final ShipClassService shipClassService,
-                       @Nonnull final UserService userService,
                        @Nonnull final ShipClassCreationService shipClassCreationService) {
         Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
-        Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         Preconditions.checkNotNull(shipClassCreationService, "shipClassCreationService shouldn't be null!");
 
         this.shipClassService = shipClassService;
-        this.userService = userService;
         this.shipClassCreationService = shipClassCreationService;
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
@@ -86,12 +78,7 @@ public class ShipyardApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getShipClassesByUser() {
-        final int idUser = getIdUser();
-        final User owner = userService.find(idUser);
-        if (owner == null) {
-            throw new NotifyWebUserException("There should be a questioned user.");
-        }
-        final List<de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass> allLatestByOwner = shipClassService.findAllLatestByOwner(owner);
+        final List<de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass> allLatestByOwner = shipClassService.findAllLatestByOwner(getIdUser());
         final List<ShipClass> shipClasses = allLatestByOwner.stream().map(s -> new ShipClass(s, getPreferredLanguage())).collect(Collectors.toList());
         return ResponseEntity.ok(shipClasses);
     }

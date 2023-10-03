@@ -5,11 +5,14 @@ import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.researches.ResearchLevel;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.enums.EShipClassType;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
+import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.mission.MissionService;
@@ -67,17 +70,22 @@ public class AdvisoryApi extends BaseApi {
     @Nonnull
     private final JobService jobService;
 
+    @Nonnull
+    private final ShipClassService shipClassService;
+
     @Autowired
     public AdvisoryApi(@Nonnull final MissionService missionService,
                        @Nonnull final ConstructionService constructionService,
                        @Nonnull final BuildingService buildingService,
                        @Nonnull final ResearchService researchService,
-                       @Nonnull final JobService jobService) {
+                       @Nonnull final JobService jobService,
+                       @Nonnull final ShipClassService shipClassService) {
         this.missionService = Preconditions.checkNotNull(missionService, "missionService must not be empty");
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
         this.buildingService = Preconditions.checkNotNull(buildingService, "buildingService must not be empty");
         this.researchService = Preconditions.checkNotNull(researchService, "researchService must not be empty");
         this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
+        this.shipClassService = Preconditions.checkNotNull(shipClassService, "shipClassService must not be empty");
     }
 
     @GetMapping(value = PIRATE_HUNT_ENDPOINT)
@@ -153,16 +161,26 @@ public class AdvisoryApi extends BaseApi {
                     .map(ResearchLevel::getResearch)
                     .anyMatch(getResearchPredicateForShipyard());
             if (!shipyardResearched) {
-                final List<Research> researchesWithoutPrecondition = researchService.getResearchesWithoutPrecondition();
-                researchesWithoutPrecondition.stream().filter(getResearchPredicateForShipyard()).findFirst().ifPresent(shipyardResearch -> {
+                final List<Research> researches = researchService.findAll();
+                final Research shipyardResearch = researches.stream().filter(getResearchPredicateForShipyard()).findFirst().orElseThrow(NullPointerException::new);
+                final Research unlockedThrough = shipyardResearch.getUnlockedThrough();
+                final boolean prerequisiteFulfilled = researchesForUser.stream().anyMatch(rl -> rl.getResearch().equals(unlockedThrough) && rl.getLevel() > 0);
+                if (prerequisiteFulfilled) {
                     tickAdvice.setSuggestedResearch(new de.yuga.spacebattle.rest.dto.researches.Research(shipyardResearch, getPreferredLanguage()));
-                });
+                } else {
+                    tickAdvice.setSuggestedResearch(new de.yuga.spacebattle.rest.dto.researches.Research(unlockedThrough, getPreferredLanguage()));
+                }
             } else {
                 final boolean shipyardBuild = allConstructionsForUser.stream()
                         .anyMatch(c -> c.getBuilding().getProductionTarget() == EResourceType.ORBITAL_CONSTRUCTION);
                 // shipyard build?
                 if (!shipyardBuild) {
                     checkConstructionAndNotify(EResourceType.ORBITAL_CONSTRUCTION, tickAdvice);
+                } else {
+                    final List<ShipClass> shipClasses = shipClassService.findAllLatestByOwner(getIdUser());
+                    if (shipClasses.size() > 1) {
+                        tickAdvice.setSuggestedShipClass(EShipClassType.LAC);
+                    }
                 }
             }
         }

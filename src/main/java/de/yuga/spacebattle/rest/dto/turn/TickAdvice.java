@@ -1,7 +1,9 @@
 package de.yuga.spacebattle.rest.dto.turn;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.yuga.spacebattle.backend.enums.EMissionType;
 import de.yuga.spacebattle.rest.dto.buildings.Building;
+import de.yuga.spacebattle.rest.dto.enums.EShipClassType;
 import de.yuga.spacebattle.rest.dto.researches.Research;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -28,6 +30,14 @@ public class TickAdvice {
     @Schema(description = "The suggested research.")
     private Research suggestedResearch;
 
+    @JsonProperty
+    @Schema(description = "The suggested class to build up.")
+    private EShipClassType suggestedShipClass;
+
+    @JsonProperty
+    @Schema(description = "The suggested class to build up.")
+    private EMissionType suggestedMission;
+
     public void setResearchPossible(final boolean researchPossible) {
         this.researchPossible = researchPossible;
     }
@@ -46,5 +56,13 @@ public class TickAdvice {
 
     public void setSuggestedResearch(final Research suggestedResearch) {
         this.suggestedResearch = suggestedResearch;
+    }
+
+    public void setSuggestedShipClass(final de.yuga.spacebattle.backend.enums.EShipClassType suggestedShipClass) {
+        this.suggestedShipClass = new EShipClassType(suggestedShipClass);
+    }
+
+    public void setSuggestedMission(final EMissionType suggestedMission) {
+        this.suggestedMission = suggestedMission;
     }
 }

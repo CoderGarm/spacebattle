@@ -190,12 +190,7 @@ public class ResearchApi extends BaseApi {
             }
     )
     public ResponseEntity<?> researchPossibleForUser() {
-        final int idUser = getIdUser();
-        final User user = userService.find(idUser);
-        if (user == null) {
-            throw new NotifyWebUserException("No user found for id '" + idUser + "'");
-        }
-        final Planet researchPlanet = planetService.findResearchPlanet(user);
+        final Planet researchPlanet = planetService.findResearchPlanet(getIdUser());
         if (researchPlanet == null) {
             return ResponseEntity.ok(false);
         }

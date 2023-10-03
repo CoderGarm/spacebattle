@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @NamedQueries({
         @NamedQuery(name = "ShipClass.getAll", query = "SELECT a FROM ShipClass a WHERE a.isDeleted = false"),
         @NamedQuery(name = "ShipClass.getAllByOwner", query = "SELECT a FROM ShipClass a WHERE a.owner = :owner AND a.isDeleted = false"),
-        @NamedQuery(name = "ShipClass.getAllLatestByOwner", query = "SELECT a FROM ShipClass a WHERE a.owner = :owner AND a.successor IS NULL AND a.isDeleted = false"),
+        @NamedQuery(name = "ShipClass.getAllLatestByOwner", query = "SELECT a FROM ShipClass a WHERE a.owner.id = :idUser AND a.successor IS NULL AND a.isDeleted = false"),
         @NamedQuery(name = "ShipClass.checkIfNameIsFree", query = "SELECT COUNT(a) FROM ShipClass a WHERE a.owner.id = :idOwner AND UPPER(a.name) = UPPER(:className)"),
 })
 @Entity

@@ -13,8 +13,9 @@ todo. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
    Ich kann dem Browser allerdings nur sagen "Bitte keinen Cache benutzen" - was daraus gemacht wird, liegt außerhalb meiner Kontrolle.
 5. Die Seite ist nun etwas besser mit einem Mobilgerät nutzbar.
 6. Das Journal hat Markierungen für neue, ungelesene und relevante Informationen bekommen.
+7. Der Beirat (Advisory Board) leitet nun detaillierter durch die Schritte zur Schiffswerft.
 
-todo. advisory for first mission pirate hunt and LAC build
+
 todo. quoting in chat und forum
 todo. history for dashboard
 todo. light theme
@@ -28,6 +29,7 @@ todo. fight not inside alliance
 1. Der Beirat deutet den Forschungszustand nicht mehr falsch an.
 2. Das Dashboard zeigt bei auf dem Weg befindlichen Flotten wieder die erwartete Ankunftszeit an.
 3. Auf dem Weg befindliche Flotten können nun nicht neu formiert werden.
+4. In manchen Fällen wurden Operationals nicht aktiv, obwohl genug Personal vorhanden war.
 
 todo. issue in data consistence n frontend
 todo. fleet detachment without orbit

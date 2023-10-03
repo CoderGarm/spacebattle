@@ -1056,17 +1056,16 @@ public class MasterOfTheUniverseService {
                 runBattleForNewUser(saved);
             }).get();
         } catch (final ExecutionException | InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.error("createOpponentAndFightAsync", e);
             throw new NotifyWebUserException(e.getMessage());
         }
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public void createFleetForUser(@Nonnull final Owner user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
         final NonPlayerCharacter opponent = nonPlayerCharacterService.findByUsername(DEFEATED_OPPONENT);
-        final List<ShipClass> classList = shipClassService.findAllLatestByOwner(Objects.requireNonNull(opponent));
+        final List<ShipClass> classList = shipClassService.findAllLatestByOwner(Objects.requireNonNull(opponent).getId());
         ShipClass ship = classList.get(0);
         ship = new ShipClass(user, ship);
         ship = shipClassService.save(ship);
@@ -1087,12 +1086,11 @@ public class MasterOfTheUniverseService {
     }
 
     @Nonnull
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public WarShip createOpponentFleetForUser(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
         final NonPlayerCharacter opponent = nonPlayerCharacterService.findByUsername(DEFEATED_OPPONENT);
-        final List<ShipClass> classList = shipClassService.findAllLatestByOwner(Objects.requireNonNull(opponent));
+        final List<ShipClass> classList = shipClassService.findAllLatestByOwner(Objects.requireNonNull(opponent).getId());
         final ShipClass ship = classList.get(0);
 
         final Planet homePlanet = planetService.findMainPlanet(user);

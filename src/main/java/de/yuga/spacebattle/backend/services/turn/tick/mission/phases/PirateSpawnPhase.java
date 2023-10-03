@@ -135,7 +135,7 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
         final Owner owner = target.getOwner() != null ? target.getOwner() : Owner.UNCOLONIZED;
 
         final NonPlayerCharacter opponent = nonPlayerCharacterService.findByUsername(PIRATE);
-        final List<ShipClass> classList = shipClassService.findAllLatestByOwner(Objects.requireNonNull(opponent));
+        final List<ShipClass> classList = shipClassService.findAllLatestByOwner(Objects.requireNonNull(opponent).getId());
         final ShipClass ship = classList.get(0);
 
         final Fleet pirateFleet = createFleet(opponent, target);
