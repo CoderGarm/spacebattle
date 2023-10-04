@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -327,6 +328,30 @@ public class FleetApi extends BaseApi {
         PreconditionWebHelper.checkNotNull(fleetSplit, "fleetSplit must not be empty");
 
         return ResponseEntity.ok(fleetService.splitFleets(fleetSplit, getIdUser()).stream().map(f -> new Fleet(f, getPreferredLanguage())).collect(Collectors.toList()));
+    }
+
+    @PutMapping(value = RENAME_FLEET_ENDPOINT + "/warship")
+    @Operation(summary = "Rename a ship.", operationId = "renameWarship",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = AbstractId.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> renameWarship(@RequestBody @Nonnull final AbstractId warShip) {
+        PreconditionWebHelper.checkNotNull(warShip, "warShip shouldn't be null!");
+        Preconditions.checkArgument(StringUtils.isNotEmpty(warShip.getName()), "name must not be empty");
+
+        warShipService.rename(getIdUser(), warShip.getId(), warShip.getName());
+        return ResponseEntity.ok(true);
     }
 
     @PostMapping(value = MOVE_FLEETS_ENDPOINT)

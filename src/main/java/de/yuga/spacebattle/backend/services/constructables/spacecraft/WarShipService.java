@@ -109,4 +109,14 @@ public class WarShipService {
         ships.forEach(s -> s.setOperational(false));
         saveAll(ships);
     }
+
+    public void rename(final int idUser, final int idWarShip, @Nonnull final String shipName) {
+        Preconditions.checkNotNull(shipName, "shipName must not be empty");
+
+        final WarShip warShip = findById(idWarShip);
+        if (warShip != null && idUser == warShip.getShipClass().getOwner().getId()) {
+            warShip.setName(shipName);
+            save(warShip);
+        }
+    }
 }

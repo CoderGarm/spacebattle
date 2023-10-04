@@ -4,22 +4,23 @@
 
 1. Piraten raiden nur noch Planeten von NPCs und Spielern.  
    Sie sollen zwar die Umgebung gefährlich machen, aber Spielern nicht ihre anfängliche Möglichkeit an Reichtum zu kommen nehmen.
-2. Neue Spieler starten mit einem für Piraten sehr uninteressanten Hauptplaneten.
-3. Der Einfluss von Kriegsschiffen auf das nachbarschaftliche Verhältnis zu Piraten ist schwächer geworden.  
+2. Neue Spieler starten mit einem für Piraten sehr uninteressanten Hauptplaneten. Bisher wurde man irgendwo am Median der Umgebungshitze orientiert.
+3. Der abwehrende Einfluss von Schiffen auf das nachbarschaftliche Verhältnis zu Piraten ist schwächer geworden.  
    Das wirkt im ersten Moment widersinnig, allerdings haben Piraten verschiedene Aspekte im Spielgeschehen und ich möchte die vorsichtig ausbalancieren.
 
 #### Diverses
 
 1. Die Auftragsübersicht zeigt nun auch Schiffswerften ohne aktiven Job an.
-2. Im Forum werden nun bisher ungelesene Nachrichten markiert, nicht nur Foren und Fäden.
+2. Im Forum werden nun bisher ungelesene Nachrichten markiert, nicht nur Foren und Fäden, die ungelesene Nachrichten enthalten.
 3. Man kann nun ganze Foren oder ganze Fäden auf einmal als gelesen markieren.
 4. Das Löschen des Browsercaches sollte(!) jetzt nicht mehr notwendig sein.  
    Ich kann dem Browser allerdings nur sagen "Bitte keinen Cache benutzen" - was daraus gemacht wird, liegt außerhalb meiner Kontrolle.
 5. Die Seite ist nun etwas besser mit einem Mobilgerät nutzbar.
 6. Das Journal hat Markierungen für neue, ungelesene und relevante Informationen bekommen.
-7. Der Beirat (Advisory Board) leitet nun detaillierter durch die Schritte zur Schiffswerft.
+7. Der Beirat (Advisory Board) leitet nun detaillierter durch die Schritte zur ersten Schiffswerft.
+8. Man kann Änderungen an der Flotte im neuen 'Flotte verwalten'-Tab vornehmen.  
+   Dort ist es auch möglich Kriegsschiffe individuell zu benennen.
 
-todo. introduce fleet edit tab: rename, retire -> no edit when in move
 todo. history for dashboard
 todo. cache cleanup or only load last 3 ticks
 
@@ -27,13 +28,13 @@ todo. cache cleanup or only load last 3 ticks
 
 1. Der Beirat deutet den Forschungszustand nicht mehr falsch an.
 2. Das Dashboard zeigt bei auf dem Weg befindlichen Flotten wieder die erwartete Ankunftszeit an.
-3. Auf dem Weg befindliche Flotten können nun nicht neu formiert werden.
+3. Auf dem Weg befindliche Flotten können nicht neu formiert oder verwaltet werden.
 4. In manchen Fällen wurden Operationals nicht aktiv, obwohl genug Personal vorhanden war. Das betrifft Gebäude genauso wie Schiffe.
 5. Schiffe in Missionen und in der Reserve werden nun gepunktet.
 6. Der Status von Flotten wird nun nach jeder Änderung der Formation neu betrachtet.
+7. Dieses irritierende "Flottenflackern" oder "Planetenflackern" beim mehrfachen Laden von Flotten und/oder Planeten ist behoben.
 
 todo. zoom issue at map
-todo. issue in data consistence n frontend
 todo. fleet detachment without orbit
 
 #### next steps

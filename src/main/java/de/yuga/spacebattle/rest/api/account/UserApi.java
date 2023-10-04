@@ -26,8 +26,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
-import javax.validation.Validation;
-import javax.validation.Validator;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
@@ -46,9 +44,6 @@ public class UserApi extends BaseApi {
 
     @Nonnull
     private final UserPointsService userPointsService;
-
-    @Nonnull
-    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     @Autowired
     public UserApi(@Nonnull final UserService userService, final UserPointsService userPointsService) {

@@ -110,6 +110,10 @@ public class WarShip extends Operationable {
         this.warshipHealthState.repair();
     }
 
+    public void setName(@Nonnull final String name) {
+        this.name = Preconditions.checkNotNull(name, "name must not be empty");
+    }
+
     @Nonnull
     public String getName() {
         String name = "";
