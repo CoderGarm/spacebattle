@@ -29,4 +29,8 @@ public class Operationable extends Deletable {
     public boolean isOperational() {
         return isOperational;
     }
+
+    public boolean isOperationalFromSuper() {
+        return isOperational;
+    }
 }

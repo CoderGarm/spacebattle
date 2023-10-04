@@ -85,20 +85,19 @@ public class FleetService {
         fleetConstellations.forEach((idFleet, warshipIDs) -> {
             final Fleet fleet = fleets.stream().filter(f -> f.getId() == idFleet).findFirst().orElse(null);
             assert fleet != null : "Would be good at this stage.";
-            final Map<Integer, WarShip> shipMap = fleet.getAliveShips().stream().collect(Collectors.toMap(WarShip::getId, Function.identity()));
             final Set<WarShip> toAdd = warshipsById.values().stream().filter(w -> warshipIDs.contains(w.getId())).collect(Collectors.toSet());
-            toAdd.removeAll(shipMap.values());
             fleet.addShips(toAdd);
         });
 
-        final Set<Fleet> toStore = fleets.stream().filter(f -> !f.getAliveShips().isEmpty()).collect(Collectors.toSet());
+        Set<Fleet> toStore = fleets.stream().filter(f -> !f.getAliveShips().isEmpty()).collect(Collectors.toSet());
         saveAll(toStore);
         final Set<Fleet> toMarkAsDeleted = fleets.stream().filter(f -> f.getAliveShips().isEmpty()).collect(Collectors.toSet());
         markAsDestroyed(toMarkAsDeleted);
+        toStore = calculateFleetState(toStore.stream().map(AbstractEntityKey::getId).collect(Collectors.toSet()));
         return new FleetMergeResult(toStore, toMarkAsDeleted);
     }
 
-
+    @Nonnull
     public Set<Fleet> splitFleets(@Nonnull final FleetSplit fleetSplit, final int idUser) {
         Preconditions.checkNotNull(fleetSplit, "fleetSplit must not be empty");
 
@@ -107,6 +106,7 @@ public class FleetService {
             return Set.of();
         }
         final List<WarShip> shipsByUser = warShipService.findByIds(warShipIDs);
+        final Set<Integer> fleetIDs = shipsByUser.stream().map(WarShip::getFleet).filter(Objects::nonNull).map(AbstractEntityKey::getId).collect(Collectors.toSet());
 
         if (shipsByUser.stream().anyMatch(w -> w.getShipClass().getOwner().getId() != idUser)) {
             throw new NotifyWebUserException("You must not change foreign fleets, you little Hax0r!");
@@ -138,6 +138,13 @@ public class FleetService {
 
             result.add(fleetRepository.findById(fleet.getId()).orElseThrow(NullPointerException::new));
         });
+
+        final Set<Fleet> newStatedFleets = calculateFleetState(fleetIDs);
+
+        final Set<Fleet> known = result.stream().filter(newStatedFleets::contains).collect(Collectors.toSet());
+        final Set<Fleet> changed = newStatedFleets.stream().filter(known::contains).collect(Collectors.toSet());
+        result.removeAll(changed);
+        result.addAll(changed);
 
         return result;
     }
@@ -452,8 +459,25 @@ public class FleetService {
         final Set<WarShip> warShips = warShipService.findByIds(warshipIDs).stream()
                 .filter(w -> w.getShipClass().getOwner().getId() == idUser)
                 .collect(Collectors.toSet());
+
+        final Set<Integer> fleetIDs = warShips.stream().map(WarShip::getFleet).filter(Objects::nonNull).map(AbstractEntityKey::getId).collect(Collectors.toSet());
+
         warShips.forEach(WarShip::sendToPool);
         warShipService.saveAll(warShips);
+        calculateFleetState(fleetIDs);
+    }
+
+    @Nonnull
+    private Set<Fleet> calculateFleetState(@Nonnull final Set<Integer> fleetIDs) {
+        Preconditions.checkNotNull(fleetIDs, "fleetIDs must not be empty");
+
+        final List<Fleet> fleets = findAll(fleetIDs);
+        final Set<Fleet> toSetOperational = fleets.stream().filter(fleet -> {
+            final boolean isOperational = fleet.getAliveShips().stream().allMatch(WarShip::isOperational);
+            return isOperational && !fleet.isOperationalFromSuper();
+        }).collect(Collectors.toSet());
+        toSetOperational.forEach(Fleet::setOperational);
+        return Objects.requireNonNullElse(saveAll(toSetOperational), new HashSet<>());
     }
 
     @Nonnull

@@ -8,8 +8,6 @@
 3. Der Einfluss von Kriegsschiffen auf das nachbarschaftliche Verhältnis zu Piraten ist schwächer geworden.  
    Das wirkt im ersten Moment widersinnig, allerdings haben Piraten verschiedene Aspekte im Spielgeschehen und ich möchte die vorsichtig ausbalancieren.
 
-todo. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
-
 #### Diverses
 
 1. Die Auftragsübersicht zeigt nun auch Schiffswerften ohne aktiven Job an.
@@ -21,8 +19,6 @@ todo. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
 6. Das Journal hat Markierungen für neue, ungelesene und relevante Informationen bekommen.
 7. Der Beirat (Advisory Board) leitet nun detaillierter durch die Schritte zur Schiffswerft.
 
-todo. quoting in chat und forum
-todo. light theme
 todo. introduce fleet edit tab: rename, retire -> no edit when in move
 todo. history for dashboard
 todo. cache cleanup or only load last 3 ticks
@@ -34,17 +30,16 @@ todo. cache cleanup or only load last 3 ticks
 3. Auf dem Weg befindliche Flotten können nun nicht neu formiert werden.
 4. In manchen Fällen wurden Operationals nicht aktiv, obwohl genug Personal vorhanden war. Das betrifft Gebäude genauso wie Schiffe.
 5. Schiffe in Missionen und in der Reserve werden nun gepunktet.
+6. Der Status von Flotten wird nun nach jeder Änderung der Formation neu betrachtet.
 
 todo. zoom issue at map
 todo. issue in data consistence n frontend
 todo. fleet detachment without orbit
-todo. detatching a inoperable ship from a fleet doesn't update the fleet as operable
-todo. add heat map on colonization
-todo. heat must be used system wide not by planet -> user harassing by pirates at hyper limit
-todo. chat checken nach falschem empfänger
 
 #### next steps
 
+todo. light theme
+todo. quoting in chat und forum
 todo. transportmenge zusammenfassen und bilanz bilden
 todo. lock forum threads for admin permission
 todo. forum admin area to remove forum_write
@@ -57,6 +52,8 @@ todo. angular google SEO
 todo. fetching mining factors prüfen - erzeugt last
 todo. housing left for x ticks - anzeige nach lastring ticks besser aufstellen
 todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
+
+?. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
 
 heatmap feature:
 todo. Die Karte für strategische Operationen ("Mission Map") hat nun eine helle Farbgebung.  
