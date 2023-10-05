@@ -1,6 +1,14 @@
 ALTER TABLE forumMessageRead ADD COLUMN isRead boolean NOT NULL DEFAULT FALSE AFTER idForumMessageRead;
+
+create table forumMessageReadTEMP (
+        idForumMessage integer not null,
+        idUser integer not null
+    ) engine=InnoDB;
+
+insert INTO forumMessageReadTEMP SELECT idForumMessage, idUser from forumMessageRead;
+
 # noinspection SqlWithoutWhere
-update forumMessageRead set isRead = true;
+delete from forumMessageRead;
 
 DELIMITER |
     CREATE PROCEDURE createInitialReads()
@@ -15,14 +23,14 @@ DELIMITER |
 
             #@formatter:off
             if @dType ='USER' then
-                    INSERT INTO forumMessageRead (idUser, idForum, idForumThread, idForumMessage)
-                    SELECT @idUser, forumThread.idForum , forumThread.idForumThread, forumMessage.idForumMessage
+                    INSERT INTO forumMessageRead (idUser, idForum, idForumThread, idForumMessage, isRead)
+                    SELECT @idUser, forumThread.idForum , forumThread.idForumThread, forumMessage.idForumMessage,
+                    (SELECT IF((COUNT(x.idUser) > 0), TRUE, FALSE) FROM forumMessageReadTEMP x WHERE x.idForumMessage = forumMessage.idForumMessage AND x.idUser = @idUser)
                     FROM forumMessage
                              LEFT JOIN forumThread ON forumThread.idForumThread = forumMessage.idForumThread
                              LEFT JOIN forum on forum.idForum = forumThread.idForum
                                 WHERE (forum.role IS NULL OR @userRole LIKE CONCAT('%', forum.role, '%'))
-                                    OR (forum.idAlliance IS NULL OR @idAlliance = forum.idAlliance)
-                                    AND NOT EXISTS (SELECT null FROM forumMessageRead r WHERE r.idUser = @idUser AND r.idForumMessage = forumMessage.idForumMessage);
+                                    OR (forum.idAlliance IS NULL OR @idAlliance = forum.idAlliance);
             end if;
             #@formatter:on
 

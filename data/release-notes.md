@@ -23,7 +23,6 @@
 
 todo. retire warship didnt update fleet
 todo. behavior subject does not fire every time
-todo. check unread forum stuff with other accounts
 
 todo. email adresse im profil ändern
 todo. move fleet pre-selected
