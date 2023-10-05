@@ -3,7 +3,9 @@ package de.yuga.spacebattle.rest.api.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.account.UserPoints;
 import de.yuga.spacebattle.backend.dto.account.UserSettings;
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.account.UserSetting;
+import de.yuga.spacebattle.backend.services.MailService;
 import de.yuga.spacebattle.backend.services.account.UserPointsService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.rest.api.BaseApi;
@@ -26,6 +28,11 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
@@ -45,10 +52,19 @@ public class UserApi extends BaseApi {
     @Nonnull
     private final UserPointsService userPointsService;
 
+    @Nonnull
+    private final MailService mailService;
+
+    @Nonnull
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+
     @Autowired
-    public UserApi(@Nonnull final UserService userService, final UserPointsService userPointsService) {
+    public UserApi(@Nonnull final UserService userService,
+                   @Nonnull final UserPointsService userPointsService,
+                   @Nonnull final MailService mailService) {
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.userPointsService = Preconditions.checkNotNull(userPointsService, "userPointsService must not be empty");
+        this.mailService = Preconditions.checkNotNull(mailService, "mailService must not be empty");
     }
 
     @GetMapping
@@ -151,5 +167,33 @@ public class UserApi extends BaseApi {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.ok(userService.findLikeUsername(username).stream().map(Player::new).collect(Collectors.toList()));
+    }
+
+    @PostMapping(value = "/requestEMailChange/{eMail}")
+    @Operation(summary = "Triggers the password change mail.", operationId = "requestEMailChange",
+            description = "Triggers the eMail change mail.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public void requestEMailChange(@PathVariable @Nonnull final String eMail) {
+        PreconditionWebHelper.checkNotNull(eMail, "eMail shouldn't be null!");
+
+        final User user = userService.find(getIdUser());
+        if (user != null) {
+            user.getUserSetting().setEmail(eMail);
+            user.getUserSetting().setEMailVerified(false);
+            user.getUserSetting().setNoEMailWanted(false);
+            final Set<ConstraintViolation<UserSetting>> constraintViolations = validator.validateProperty(user.getUserSetting(), "email");
+            if (constraintViolations.isEmpty()) {
+                final User saved = userService.save(user);
+                mailService.sendMailVerificationMessage(Objects.requireNonNull(saved));
+            } else {
+                throw new NotifyWebUserException("Changing the eMail failed.", constraintViolations);
+            }
+        }
     }
 }

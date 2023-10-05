@@ -5,7 +5,8 @@
 1. Piraten raiden nur noch Planeten von NPCs und Spielern.  
    Sie sollen zwar die Umgebung gefährlich machen, aber Spielern nicht ihre anfängliche Möglichkeit an Reichtum zu kommen nehmen.
 2. Neue Spieler starten mit einem für Piraten sehr uninteressanten Hauptplaneten. Bisher wurde man irgendwo am Median der Umgebungshitze orientiert.
-3. Der abwehrende Einfluss von Schiffen auf das nachbarschaftliche Verhältnis zu Piraten ist schwächer geworden.  
+3. Der abwehrende Einfluss von Schiffen auf das nachbarschaftliche Verhältnis zu Piraten ist deutlich schwächer geworden, der anziehende von z.B. Handelsschiffen ist gleich
+   geblieben.  
    Das wirkt im ersten Moment widersinnig, allerdings haben Piraten verschiedene Aspekte im Spielgeschehen und ich möchte die vorsichtig ausbalancieren.
 
 #### Diverses
@@ -20,12 +21,10 @@
 7. Der Beirat (Advisory Board) leitet nun detaillierter durch die Schritte zur ersten Schiffswerft.
 8. Man kann Änderungen an der Flotte im neuen 'Flotte verwalten'-Tab vornehmen.  
    Dort ist es auch möglich Kriegsschiffe individuell zu benennen.
+9. Flottenbewegungen werden auf der Sternenkarte vorausgewählt, wenn sie möglich sind.
+10. Man kann nun die eMail Adresse im Profil ändern.
 
-todo. retire warship didnt update fleet
-todo. behavior subject does not fire every time
-
-todo. email adresse im profil ändern
-todo. move fleet pre-selected
+todo. pirate raid mission - check fleets in orbit
 todo. history for dashboard
 todo. cache cleanup or only load last 3 ticks
 
@@ -40,17 +39,16 @@ todo. cache cleanup or only load last 3 ticks
 7. Dieses irritierende "Flottenflackern" oder "Planetenflackern" beim mehrfachen Laden von Flotten und/oder Planeten ist behoben.
 8. Es gibt in den Schiffs- und Flottenstatistiken falsche Werte. Das wird leider für alle bestehenden Schiffe, Flotten und Kämpfe so bleiben. Neubauten sind von dem Problem jedoch
    nicht mehr nicht betroffen.
-
-todo. stop job loads all jobs
-todo. after login journal must be selected
-todo. junction ganz unten
-todo. zoom issue at map
-todo. fleet detachment without orbit
+9. Das Navigationsmenü ist nach dem erneuten Login immer geschlossen.
+10. Die planetare Job-List läd nicht mehr alle Jobs im Empire nach, wenn einer gecancelt wird.
+11. Auf der Sternenkarte überdecken nicht-interaktiven Elemente keine interaktiven Elemente mehr.
 
 #### next steps
 
+todo. apache caching nur für html ts und scss ausschalten
 todo. light theme
 todo. quoting in chat und forum
+todo. zoom issue at map
 todo. transportmenge zusammenfassen und bilanz bilden
 todo. lock forum threads for admin permission
 todo. forum admin area to remove forum_write

@@ -23,6 +23,10 @@ public class UserSettings {
     private boolean eMailVerified;
 
     @JsonProperty
+    @Schema(description = "The mail address.")
+    private String eMail;
+
+    @JsonProperty
     @Schema(required = true, description = "If the user does not want receive any mail.")
     private boolean noEMailWanted;
 
@@ -40,6 +44,7 @@ public class UserSettings {
         this.receiveChangelogInfos = userSetting.isReceiveChangelogInfos();
         this.loginForbidden = userSetting.isLoginForbidden();
         this.eMailVerified = userSetting.isEMailVerified();
+        this.eMail = userSetting.getEmail();
         this.noEMailWanted = userSetting.isNoEMailWanted();
         this.profilePic = userSetting.getProfilePic();
     }
