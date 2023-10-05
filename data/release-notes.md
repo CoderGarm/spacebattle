@@ -21,6 +21,12 @@
 8. Man kann Änderungen an der Flotte im neuen 'Flotte verwalten'-Tab vornehmen.  
    Dort ist es auch möglich Kriegsschiffe individuell zu benennen.
 
+todo. retire warship didnt update fleet
+todo. behavior subject does not fire every time
+todo. check unread forum stuff with other accounts
+
+todo. email adresse im profil ändern
+todo. move fleet pre-selected
 todo. history for dashboard
 todo. cache cleanup or only load last 3 ticks
 
@@ -33,7 +39,12 @@ todo. cache cleanup or only load last 3 ticks
 5. Schiffe in Missionen und in der Reserve werden nun gepunktet.
 6. Der Status von Flotten wird nun nach jeder Änderung der Formation neu betrachtet.
 7. Dieses irritierende "Flottenflackern" oder "Planetenflackern" beim mehrfachen Laden von Flotten und/oder Planeten ist behoben.
+8. Es gibt in den Schiffs- und Flottenstatistiken falsche Werte. Das wird leider für alle bestehenden Schiffe, Flotten und Kämpfe so bleiben. Neubauten sind von dem Problem jedoch
+   nicht mehr nicht betroffen.
 
+todo. stop job loads all jobs
+todo. after login journal must be selected
+todo. junction ganz unten
 todo. zoom issue at map
 todo. fleet detachment without orbit
 

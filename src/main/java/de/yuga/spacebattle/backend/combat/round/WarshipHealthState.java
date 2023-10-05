@@ -43,9 +43,19 @@ public class WarshipHealthState implements Cloneable {
     private int armorState;
 
     /**
+     * If the ship class has an armor.
+     */
+    private final boolean hasArmor;
+
+    /**
      * The state of the sidewall in percentages. If zero it is destroyed.
      */
     private int sidewallState;
+
+    /**
+     * If the ship class has a sidewall.
+     */
+    private final boolean hasSidewall;
 
     /**
      * The state of the propulsion system in percentages. If zero it is destroyed.
@@ -56,6 +66,11 @@ public class WarshipHealthState implements Cloneable {
      * The state of the electronic warfare systems in percentages. If zero it is destroyed.
      */
     private int elokaState;
+
+    /**
+     * If the ship class has eloka.
+     */
+    private final boolean hasEloka;
 
     /**
      * The activity state per weapon system. The value indicates if the weapon is active (<code>true</code>) or not.
@@ -92,11 +107,19 @@ public class WarshipHealthState implements Cloneable {
         this.electronicWarfare = shipClass.getElectronicWarfare();
 
         final de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState healthState = warShip.getWarshipHealthState();
-        armorState = healthState.getStateByAsInt(EModuleType.ARMOR);
-        hullState = healthState.getStateByAsInt(EModuleType.ARMOR);
-        sidewallState = healthState.getStateByAsInt(EModuleType.SIDEWALL);
+
         propulsionState = Integer.max(healthState.getStateByAsInt(EModuleType.PROPULSION), healthState.getStateByAsInt(EModuleType.FTLPROPULSION));
+
+        armorState = healthState.getStateByAsInt(EModuleType.ARMOR);
+        hasArmor = armorState > 0;
+        hullState = !hasArmor ? 100 : armorState;
+
+        sidewallState = healthState.getStateByAsInt(EModuleType.SIDEWALL);
+        hasSidewall = sidewallState > 0;
+
         elokaState = healthState.getStateByAsInt(EModuleType.ELECTRONIC_WARFARE);
+        hasEloka = elokaState > 0;
+
         final Set<AlignedFitting> activeFittings = healthState.getActiveFittings();
         shipClass.getFittings().forEach(fitting -> {
             final boolean active = activeFittings.contains(fitting);
@@ -119,6 +142,11 @@ public class WarshipHealthState implements Cloneable {
         return hullState > 0;
     }
 
+    private boolean isStatValueLost(final int value, final boolean hasModule) {
+        //noinspection SimplifiableConditionalExpression
+        return hasModule ? value <= 0 : false;
+    }
+
     /**
      * States if the war ship has any active weapon left.
      *
@@ -128,7 +156,7 @@ public class WarshipHealthState implements Cloneable {
         if (!isAlive()) {
             return false;
         }
-        if (armorState <= 0 || sidewallState <= 0 || propulsionState <= 0 || elokaState <= 0) return false;
+        if (isStatValueLost(armorState, hasArmor) || isStatValueLost(sidewallState, hasSidewall) || propulsionState <= 0 || isStatValueLost(elokaState, hasEloka)) return false;
         for (Boolean aBoolean : fittings.values()) {
             if (aBoolean) {
                 return true;

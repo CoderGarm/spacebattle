@@ -175,7 +175,7 @@ public class SpacecraftCalculator {
         capacities = new HashMap<>();
         effectValueByModuleType = Arrays.stream(EModuleType.values())
                 .filter(type -> !PROPULSIONS.contains(type))
-                .collect(Collectors.toMap(Function.identity(), value -> BigDecimal.TEN));
+                .collect(Collectors.toMap(Function.identity(), value -> BigDecimal.ZERO));
     }
 
     private void setValue(@Nonnull final WarshipHealthStateAccessor warshipHealthState) {
