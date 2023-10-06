@@ -175,7 +175,7 @@ class DBPatchServiceTest {
 
         boolean patchHasVersion = false;
         for (final String line : contentLines) {
-            if (line.startsWith(INSERT_PREFIX)) {
+            if (line.toLowerCase().startsWith(INSERT_PREFIX.toLowerCase())) {
                 final Matcher matcher = DB_PATCH_PATTERN.matcher(line);
                 if (matcher.find()) {
                     patchHasVersion = true;
