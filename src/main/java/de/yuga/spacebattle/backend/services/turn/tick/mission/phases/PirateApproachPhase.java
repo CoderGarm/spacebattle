@@ -91,7 +91,7 @@ public class PirateApproachPhase implements MissionPhaseRunner {
         final NonPlayerCharacter pirate = nonPlayerCharacterService.findByUsername(PIRATE);
         Preconditions.checkNotNull(pirate, "pirate must not be empty");
 
-        final List<Fleet> pirateFleets = fleetService.findAllFleetsWithoutMovementByUser(pirate);
+        final List<Fleet> pirateFleets = fleetService.findAllFleetsWithoutMovementByUser(pirate.getId());
         pirateFleets.removeIf(fleet -> {
             if (raidingPirateCache.getNextActions(fleet).isEmpty()) {
                 // no instruction, just proceed

@@ -95,7 +95,7 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
 
         final List<Planet> planetToStore = new ArrayList<>();
         final List<Fleet> fleetToStore = new ArrayList<>();
-        final List<Fleet> pirateFleets = fleetService.findAllFleetsWithoutMovementByUser(pirate);
+        final List<Fleet> pirateFleets = fleetService.findAllFleetsWithoutMovementByUser(pirate.getId());
         for (final Fleet pirateFleet : pirateFleets) {
             final long freeCargoUnits = CargoCalculator.getFreeCargoUnits(pirateFleet);
             if (freeCargoUnits > 0) {

@@ -21,4 +21,12 @@ public interface JobRepository extends CrudRepository<Job, Integer>, CustomJobRe
     @Nullable
     @Query("SELECT j FROM Job j WHERE j.owner.id = :idUser AND j.ticksLeft <= 0 AND j.finished.id = (SELECT MAX(today.id) FROM Tick today)")
     List<Job> findTodayFinishedJobsForUser(@Param("idUser") final int idUser);
+
+    @Nullable
+    @Query("SELECT j FROM Job j WHERE j.owner.id = :idUser AND j.ticksLeft > 0 AND j.finished IS NULL AND j.constructable.research IS NOT NULL")
+    Job findResearchJobForUser(@Param("idUser") final int idUser);
+
+    @Nullable
+    @Query("SELECT j FROM Job j WHERE j.ticksLeft > 0 AND j.finished IS NULL AND j.constructable.research IS NOT NULL")
+    List<Job> findResearchJobs();
 }

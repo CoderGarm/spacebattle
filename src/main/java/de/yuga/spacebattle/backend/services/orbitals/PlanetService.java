@@ -65,15 +65,32 @@ public class PlanetService {
 
     @Nonnull
     public BigDecimal getEmpireWideResearchPoints(final int idUser) {
+        return getEmpireWideResearchPoints(idUser, Map.of());
+    }
+
+    @Nonnull
+    public BigDecimal getEmpireWideResearchPoints(final int idUser, @Nonnull final Map<Construction, Integer> formerLaboratoryOperationalLevel) {
+        Preconditions.checkNotNull(formerLaboratoryOperationalLevel, "formerLaboratoryOperationalLevel must not be empty");
+
+        final List<Planet> allColonizedByWithResearchLab = findAllColonizedByWithResearchLab(idUser);
         //noinspection UnnecessaryLocalVariable
-        final BigDecimal empireWideResearchPoints = findAllColonizedBy(idUser).stream()
-                .filter(p -> !p.getConstructionByResource(EResourceType.RESEARCH).isEmpty())
+        final BigDecimal empireWideResearchPoints = allColonizedByWithResearchLab.stream()
                 .map(planet -> {
-                    final Set<Construction> constructionByResource = planet.getConstructionByResource(EResourceType.RESEARCH);
-                    return TickOutputCalculator.getTickOutput(constructionByResource);
+                    final Construction laboratory = planet.getConstructionByResource(EResourceType.RESEARCH).stream().findFirst().orElse(null);
+                    if (laboratory != null) {
+                        final int opLevel = formerLaboratoryOperationalLevel.getOrDefault(laboratory, laboratory.getOperationalLevel());
+                        laboratory.setOperationalLevel(opLevel);
+                        return TickOutputCalculator.getTickOutput(Set.of(laboratory));
+                    }
+                    return BigDecimal.valueOf(0);
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         return empireWideResearchPoints;
+    }
+
+    @Nonnull
+    List<Planet> findAllColonizedByWithResearchLab(final int idUser) {
+        return Objects.requireNonNullElse(planetRepository.findAllColonizedByWithResearchLab(idUser), List.of());
     }
 
     @Nullable

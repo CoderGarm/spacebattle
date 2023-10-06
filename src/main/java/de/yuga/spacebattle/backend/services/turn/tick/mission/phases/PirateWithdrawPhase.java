@@ -76,7 +76,7 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
         final NonPlayerCharacter pirate = nonPlayerCharacterService.findByUsername(PIRATE);
         Preconditions.checkNotNull(pirate, "pirate must not be empty");
 
-        final List<Fleet> pirateFleets = fleetService.findAllFleetsWithoutMovementByUser(pirate);
+        final List<Fleet> pirateFleets = fleetService.findAllFleetsWithoutMovementByUser(pirate.getId());
         final List<Fleet> leaveOrbit = pirateFleets.stream().filter(fleet -> {
             final Planet planet = raidingPirateCache.getTarget(fleet);
             final boolean isInOrbitOfTarget = planet != null && fleet.getOrbit() != null && fleet.getOrbit().getOrbit() != null &&

@@ -3,7 +3,7 @@
 #### Gameplay
 
 1. Piraten raiden nur noch Planeten von NPCs und Spielern.  
-   Sie sollen zwar die Umgebung gefährlich machen, aber Spielern nicht ihre anfängliche Möglichkeit an Reichtum zu kommen nehmen.
+   Sie sollen zwar die Umgebung gefährlich machen, aber Spielern nicht ihre anfängliche Möglichkeit, sich ein Zubrot zu verdienen, nehmen.
 2. Neue Spieler starten mit einem für Piraten sehr uninteressanten Hauptplaneten. Bisher wurde man irgendwo am Median der Umgebungshitze orientiert.
 3. Der abwehrende Einfluss von Schiffen auf das nachbarschaftliche Verhältnis zu Piraten ist deutlich schwächer geworden, der anziehende von z.B. Handelsschiffen ist gleich
    geblieben.  
@@ -23,8 +23,9 @@
    Dort ist es auch möglich Kriegsschiffe individuell zu benennen.
 9. Flottenbewegungen werden auf der Sternenkarte vorausgewählt, wenn sie möglich sind.
 10. Man kann nun die eMail Adresse im Profil ändern.
+11. Die Laufzeit von Forschungen wird einem frisch aktivierten Gebäudelevel reduziert.
 
-todo. pirate raid mission - check fleets in orbit
+todo. message sanitizing
 todo. history for dashboard
 todo. cache cleanup or only load last 3 ticks
 
@@ -45,7 +46,9 @@ todo. cache cleanup or only load last 3 ticks
 
 #### next steps
 
-todo. apache caching nur für html ts und scss ausschalten
+todo. wiki fertig machen und in tutorial nutzen -> taxonomie hinzufügen, links ermöglichen
+todo. multiple browser tabs
+todo. apache config saven
 todo. light theme
 todo. quoting in chat und forum
 todo. zoom issue at map

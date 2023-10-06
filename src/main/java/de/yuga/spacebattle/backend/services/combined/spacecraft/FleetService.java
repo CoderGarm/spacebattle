@@ -376,10 +376,8 @@ public class FleetService {
     }
 
     @Nonnull
-    public List<Fleet> findAllFleetsWithoutMovementByUser(@Nonnull final Owner owner) {
-        Preconditions.checkNotNull(owner, "owner must not be empty");
-
-        return Objects.requireNonNullElse(fleetRepository.findAllFleetsWithoutMovementByUser(owner.getId()), new ArrayList<>());
+    public List<Fleet> findAllFleetsWithoutMovementByUser(final int idOwner) {
+        return Objects.requireNonNullElse(fleetRepository.findAllFleetsWithoutMovementByUser(idOwner), new ArrayList<>());
     }
 
     @Nonnull

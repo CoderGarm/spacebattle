@@ -21,7 +21,8 @@ import java.math.RoundingMode;
 @MappedSuperclass
 public class Completable extends Deletable {
 
-    private static final MathContext MATH_CONTEXT = new MathContext(4, RoundingMode.UP);
+    @Nonnull
+    public static final MathContext MATH_CONTEXT = new MathContext(4, RoundingMode.UP);
 
     /**
      * Principle: Countdown ticks to zero -> job done.<br>
