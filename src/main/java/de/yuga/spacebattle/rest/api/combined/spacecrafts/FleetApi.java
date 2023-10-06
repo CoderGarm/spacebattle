@@ -215,7 +215,7 @@ public class FleetApi extends BaseApi {
         fleets.addAll(byUser);
         fleets.addAll(allAliveFleetsInSystemsWithColonies);
 
-        return ResponseEntity.ok(fleets.stream().map(FleetMarker::new).collect(Collectors.toSet()));
+        return ResponseEntity.ok(fleets.stream().filter(f -> !f.getAliveShips().isEmpty()).map(FleetMarker::new).collect(Collectors.toSet()));
     }
 
     @GetMapping(value = FLEET_PER_USER_ENDPOINT)

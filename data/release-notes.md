@@ -25,10 +25,6 @@
 10. Man kann nun die eMail Adresse im Profil ändern.
 11. Die Laufzeit von Forschungen wird einem frisch aktivierten Gebäudelevel reduziert.
 
-todo. message sanitizing
-todo. history for dashboard
-todo. cache cleanup or only load last 3 ticks
-
 ### Bugs fixed
 
 1. Der Beirat deutet den Forschungszustand nicht mehr falsch an.
@@ -43,9 +39,12 @@ todo. cache cleanup or only load last 3 ticks
 9. Das Navigationsmenü ist nach dem erneuten Login immer geschlossen.
 10. Die planetare Job-List läd nicht mehr alle Jobs im Empire nach, wenn einer gecancelt wird.
 11. Auf der Sternenkarte überdecken nicht-interaktiven Elemente keine interaktiven Elemente mehr.
+12. Flotten ohne Schiffe tauchen nicht mehr auf der Map auf.
 
 #### next steps
 
+todo. history for dashboard
+todo. cache cleanup or only load last 3 ticks
 todo. wiki fertig machen und in tutorial nutzen -> taxonomie hinzufügen, links ermöglichen
 todo. multiple browser tabs
 todo. apache config saven
