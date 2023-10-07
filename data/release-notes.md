@@ -2,69 +2,43 @@
 
 #### Gameplay
 
-1. Piraten raiden nur noch Planeten von NPCs und Spielern.  
-   Sie sollen zwar die Umgebung gefährlich machen, aber Spielern nicht ihre anfängliche Möglichkeit, sich ein Zubrot zu verdienen, nehmen.
-2. Neue Spieler starten mit einem für Piraten sehr uninteressanten Hauptplaneten. Bisher wurde man irgendwo am Median der Umgebungshitze orientiert.
-3. Der abwehrende Einfluss von Schiffen auf das nachbarschaftliche Verhältnis zu Piraten ist deutlich schwächer geworden, der anziehende von z.B. Handelsschiffen ist gleich
-   geblieben.  
-   Das wirkt im ersten Moment widersinnig, allerdings haben Piraten verschiedene Aspekte im Spielgeschehen und ich möchte die vorsichtig ausbalancieren.
 
 #### Diverses
 
-1. Die Auftragsübersicht zeigt nun auch Schiffswerften ohne aktiven Job an.
-2. Im Forum werden nun bisher ungelesene Nachrichten markiert, nicht nur Foren und Fäden, die ungelesene Nachrichten enthalten.
-3. Man kann nun ganze Foren oder ganze Fäden auf einmal als gelesen markieren.
-4. Das Löschen des Browsercaches sollte(!) jetzt nicht mehr notwendig sein.  
-   Ich kann dem Browser allerdings nur sagen "Bitte keinen Cache benutzen" - was daraus gemacht wird, liegt außerhalb meiner Kontrolle.
-5. Die Seite ist nun etwas besser mit einem Mobilgerät nutzbar.
-6. Das Journal hat Markierungen für neue, ungelesene und relevante Informationen bekommen.
-7. Der Beirat (Advisory Board) leitet nun detaillierter durch die Schritte zur ersten Schiffswerft.
-8. Man kann Änderungen an der Flotte im neuen 'Flotte verwalten'-Tab vornehmen.  
-   Dort ist es auch möglich Kriegsschiffe individuell zu benennen.
-9. Flottenbewegungen werden auf der Sternenkarte vorausgewählt, wenn sie möglich sind.
-10. Man kann nun die eMail Adresse im Profil ändern.
-11. Die Laufzeit von Forschungen wird einem frisch aktivierten Gebäudelevel reduziert.
+1. Es gibt einen light mode! Wenn der Browser auf den light mode eingestellt ist, wird der auch verwendet!  
+   Ich habe mit Sicherheit nicht alle Stellen erwischt, wenn also etwas undeutlich oder die Farbkombination unglücklich gewählt ist, dann sagt mir unbedingt Bescheid!
+
+todo. apache config saven
+todo. login log with timestamp (or better regex?)
+todo. player comment about the game in profile to display at take-a-tour
+todo. wiki fertig machen und in tutorial nutzen -> taxonomie hinzufügen, links ermöglichen
+- article edit stuff
+todo. quoting in chat und forum
+todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
 
 ### Bugs fixed
 
-1. Der Beirat deutet den Forschungszustand nicht mehr falsch an.
-2. Das Dashboard zeigt bei auf dem Weg befindlichen Flotten wieder die erwartete Ankunftszeit an.
-3. Auf dem Weg befindliche Flotten können nicht neu formiert oder verwaltet werden.
-4. In manchen Fällen wurden Operationals nicht aktiv, obwohl genug Personal vorhanden war. Das betrifft Gebäude genauso wie Schiffe.
-5. Schiffe in Missionen und in der Reserve werden nun gepunktet.
-6. Der Status von Flotten wird nun nach jeder Änderung der Formation neu betrachtet.
-7. Dieses irritierende "Flottenflackern" oder "Planetenflackern" beim mehrfachen Laden von Flotten und/oder Planeten ist behoben.
-8. Es gibt in den Schiffs- und Flottenstatistiken falsche Werte. Das wird leider für alle bestehenden Schiffe, Flotten und Kämpfe so bleiben. Neubauten sind von dem Problem jedoch
-   nicht mehr nicht betroffen.
-9. Das Navigationsmenü ist nach dem erneuten Login immer geschlossen.
-10. Die planetare Job-List läd nicht mehr alle Jobs im Empire nach, wenn einer gecancelt wird.
-11. Auf der Sternenkarte überdecken nicht-interaktiven Elemente keine interaktiven Elemente mehr.
-12. Flotten ohne Schiffe tauchen nicht mehr auf der Map auf.
+todo. zoom issue at map
+- fleetsharks at zoom and move
+todo. research tree issue
 
 #### next steps
 
-todo. history for dashboard
-todo. cache cleanup or only load last 3 ticks
-todo. wiki fertig machen und in tutorial nutzen -> taxonomie hinzufügen, links ermöglichen
+
 todo. multiple browser tabs
-todo. apache config saven
-todo. light theme
-todo. quoting in chat und forum
-todo. zoom issue at map
 todo. transportmenge zusammenfassen und bilanz bilden
 todo. lock forum threads for admin permission
 todo. forum admin area to remove forum_write
-todo. login log with timestamp (or better regex?)
 todo. exception via mail
-todo. research tree issue
-todo. forum und chat per handy
 todo. async account creation
 todo. angular google SEO
 todo. fetching mining factors prüfen - erzeugt last
 todo. housing left for x ticks - anzeige nach lastring ticks besser aufstellen
-todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
 
 ?. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
+?. history for dashboard
+- cache cleanup or only load last 3 ticks
+- cache in datenbank verschieben - mariadb json pointer useful?
 
 heatmap feature:
 todo. Die Karte für strategische Operationen ("Mission Map") hat nun eine helle Farbgebung.  
@@ -79,20 +53,13 @@ todo. take-a-tour updaten
 
 todo. Planeten nach Systemnamen durchnummerieren
 
-- ressourcen müssen besser gebalanced werden
-- punkte für missionen
 - aktive Spielermissionen, e.g. provoke pirate raid at user or planet (man kann heat für andere kaufen)
 - allianz-feature: missionen auf allianzterritorium, z.B. pirate hunt für nen kumpel oder convoyschutz
-- unendliche forschungen kennzeichnen
-- cache in datenbank verschieben
 - ress verschieben per zahleneingabe
-- article edit stuff
 - menü als vertikaler slider
 - minimal intelligence on foreign fleet if visible
-- sanitize markdown messages without unsafe message
-- bootstrap css nur bei markdown-editor möglich
-- bug: ftl möglich bei reserveflotte
-- write cache to file on shutdown and read post construct
+  ?. bootstrap css nur bei markdown-editor möglich
+- exploit: ftl möglich bei reserveflotte
 - eingemottete Schiffe tatsächlich außer dienst nehmen
 - normale schlachten auch im mission report anzeigen
 - fleet management - flotten aufteilen neben flotten mergen
