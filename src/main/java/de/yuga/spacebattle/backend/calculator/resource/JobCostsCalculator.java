@@ -66,6 +66,9 @@ public class JobCostsCalculator {
 
     @Nonnull
     private static BigDecimal getLevelCosts(final int targetLevel, final long amount) {
+        if (targetLevel == 1) {
+            return BigDecimal.valueOf(amount);
+        }
         return new BigDecimal(amount).add(new BigDecimal(amount).multiply(new BigDecimal(targetLevel).multiply(BigDecimal.valueOf(0.2)), ResourceDeposit.MATH_CONTEXT_INTEGER));
     }
 
