@@ -33,7 +33,10 @@ public class ShipClass implements ShipClassData {
      * The Types which must not be displayed as effect value in any statistics display.
      */
     @Nonnull
-    private static final Set<de.yuga.spacebattle.rest.dto.enums.EModuleType> FORBIDDEN_TYPES = Set.of(new de.yuga.spacebattle.rest.dto.enums.EModuleType(EModuleType.PROPULSION), new de.yuga.spacebattle.rest.dto.enums.EModuleType(EModuleType.FTLPROPULSION));
+    private static final Set<de.yuga.spacebattle.rest.dto.enums.EModuleType> FORBIDDEN_TYPES = Set.of(
+            new de.yuga.spacebattle.rest.dto.enums.EModuleType(EModuleType.PROPULSION),
+            new de.yuga.spacebattle.rest.dto.enums.EModuleType(EModuleType.FTLPROPULSION)
+    );
 
     @Nullable
     @JsonProperty

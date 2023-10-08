@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class DBPatchServiceTest {
 
-    private static final String INSERT_PREFIX = "insert into dbPatch values (null, now()";
+    private static final String INSERT_PREFIX = "insert into dbPatch";
     private static final Pattern DB_PATCH_PATTERN = Pattern.compile("[0-9]+\\.[0-9]+\\.[0-9]+-[0-9]+");
 
     private static final String CREATE_PREFIX = "create table ";
@@ -174,16 +175,29 @@ class DBPatchServiceTest {
         Preconditions.checkNotNull(contentLines, "contentLines must not be empty");
 
         boolean patchHasVersion = false;
-        for (final String line : contentLines) {
+        for (int i = 0; i < contentLines.size(); i++) {
+            final String line = contentLines.get(i);
             if (line.toLowerCase().startsWith(INSERT_PREFIX.toLowerCase())) {
-                final Matcher matcher = DB_PATCH_PATTERN.matcher(line);
-                if (matcher.find()) {
+                if (check(line)) {
                     patchHasVersion = true;
+                } else {
+                    final String nextLine = contentLines.get(i + 1);
+                    if (check(line + " " + nextLine)) {
+                        patchHasVersion = true;
+                    }
                 }
             }
         }
         if (!patchHasVersion) {
             fail("There are database patches that didn't have a version inside. Please correct it.");
         }
+    }
+
+    private boolean check(@Nullable final String line) {
+        if (StringUtils.isNotEmpty(line) && line.toLowerCase().startsWith(INSERT_PREFIX.toLowerCase())) {
+            final Matcher matcher = DB_PATCH_PATTERN.matcher(line);
+            return matcher.find();
+        }
+        return false;
     }
 }
