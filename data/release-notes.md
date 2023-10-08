@@ -5,26 +5,38 @@
 
 #### Diverses
 
-1. Es gibt einen light mode! Wenn der Browser auf den light mode eingestellt ist, wird der auch verwendet!  
-   Ich habe mit Sicherheit nicht alle Stellen erwischt, wenn also etwas undeutlich oder die Farbkombination unglücklich gewählt ist, dann sagt mir unbedingt Bescheid!
+1. Es gibt einen Light Mode! Wenn der Browser auf den Light Mode eingestellt ist, wird der auch verwendet!  
+   Ich habe mit Sicherheit nicht alle Stellen erwischt, wenn also etwas undeutlich oder die Farbkombination unglücklich gewählt ist, dann sagt mir unbedingt Bescheid!  
+   Darüber hinaus an dieser Stelle ein Shoutout an meine Frau, die sich positiv effektvoll in Sachen Farbauswahl eingemischt hat.  
+   Alternative Möglichkeiten wären gewesen https://media.battleforhonor.de/battle-for-pastell.png oder https://media.battleforhonor.de/schweinchen-for-honor.png
 
 todo. apache config saven
 todo. login log with timestamp (or better regex?)
 todo. player comment about the game in profile to display at take-a-tour
 todo. wiki fertig machen und in tutorial nutzen -> taxonomie hinzufügen, links ermöglichen
-- article edit stuff
+todo. article edit stuff -> fitting tips
 todo. quoting in chat und forum
 todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
 
 ### Bugs fixed
 
+todo. If you have several ship classes in your yard menu, the values for costs and crew will not refresh if you switch between them. They will stay at the values for the fisrt one
+you clicked.
+You have to leave the yard menu and enter again to load these values for another ship class.
+todo. There is an option in the yard to upgrade ships to the latest changes in the class. Makes sense with upgrades as you research.
+But it is unclear what this will cost. I have not found a display. How are the costs handled anyway? Is this a wholesale lump sum of orbital points or is this a detailed
+calculation?
+Also, I was wondering, what happens if you change the layout once you started a build. Will the ship reflect the layout at the start of the project or at the final tick?
+
 todo. zoom issue at map
-- fleetsharks at zoom and move
+todo. fleetsharks at zoom and move
 todo. research tree issue
 
 #### next steps
 
+todo. placing new players must be improved
 
+todo. battle reports mit anderen teilen
 todo. multiple browser tabs
 todo. transportmenge zusammenfassen und bilanz bilden
 todo. lock forum threads for admin permission
