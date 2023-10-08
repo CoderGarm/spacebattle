@@ -217,8 +217,15 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = false;
+        final boolean transformationNeeded = tickService.getToday().getNo() == 155;
         if (transformationNeeded) {
+            final Set<WarShip> warShips = warShipService.findAll().stream().filter(w -> !w.isDeleted()).collect(Collectors.toSet());
+            warShips.forEach(warShip -> {
+                warShip.getWarshipHealthState().repair();
+                warShip.getWarshipHealthState().ammoUp();
+                warShip.getWarshipHealthState().setFightingCapable(true);
+            });
+            warShipService.saveAll(warShips);
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
