@@ -19,6 +19,10 @@ import java.util.stream.Collectors;
 @Schema(description = ".")
 public class MissionReport {
 
+    @JsonProperty
+    @Schema(required = true, description = "If there were fights this tick.")
+    private final boolean newBattleReports;
+
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The by-venue grouped results.")
@@ -29,13 +33,15 @@ public class MissionReport {
     @Schema(required = true, description = "The by-trade grouped results.")
     private List<ConvoyRaidActionItemGroup> convoyActionItemGroups = new ArrayList<>();
 
-    public MissionReport(@Nonnull final List<MissionItem> missionItems,
+    public MissionReport(final boolean newBattleReports,
+                         @Nonnull final List<MissionItem> missionItems,
                          @Nonnull final List<TradedResource> finishedTrades,
                          @Nonnull final String preferredLanguage) {
         Preconditions.checkNotNull(missionItems, "missionItems must not be empty");
         Preconditions.checkNotNull(finishedTrades, "finishedTrades must not be empty");
         Preconditions.checkNotNull(preferredLanguage, "preferredLanguage must not be empty");
 
+        this.newBattleReports = newBattleReports;
         constructRaidItems(missionItems, preferredLanguage);
         this.convoyActionItemGroups = finishedTrades.stream().map(ConvoyRaidActionItemGroup::new).collect(Collectors.toList());
     }

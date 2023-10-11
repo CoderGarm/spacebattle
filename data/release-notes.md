@@ -22,7 +22,7 @@ todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehb
 
 1. Bei der planetaren Ressourcenanzeige wird der Zuwachs bei Produktionsgebäuden nun in Abhängigkeit von den Mining Factors dargestellt.
 2. Der Bedarf an Arbeitskräften wird wieder während des Baus festgestellt.
-   todo. normale schlachten auch im mission report anzeigen
+3. Der Mission Report sagt nun Bescheid, wenn es eine neue Schlacht gab.
 
 todo. If you have several ship classes in your yard menu, the values for costs and crew will not refresh if you switch between them. They will stay at the values for the fisrt one
 you clicked.

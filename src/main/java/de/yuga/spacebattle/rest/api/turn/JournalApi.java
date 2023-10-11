@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.services.caches.*;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.TickTimeService;
+import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
 import de.yuga.spacebattle.backend.services.turn.resources.MarketplaceService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
@@ -53,6 +54,9 @@ public class JournalApi extends BaseApi {
     private final JobService jobService;
 
     @Nonnull
+    private final BattleReportService battleReportService;
+
+    @Nonnull
     private final TransportationCache transportationCache;
 
     @Nonnull
@@ -76,6 +80,7 @@ public class JournalApi extends BaseApi {
     @Autowired
     public JournalApi(@Nonnull final TickTimeService tickService,
                       @Nonnull final JobService jobService,
+                      @Nonnull final BattleReportService battleReportService,
                       @Nonnull final TransportationCache transportationCache,
                       @Nonnull final FleetMovementCache fleetMovementCache,
                       @Nonnull final ColonizationCache colonizationCache,
@@ -85,6 +90,7 @@ public class JournalApi extends BaseApi {
                       @Nonnull final MarketplaceService marketplaceService) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
         this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
+        this.battleReportService = Preconditions.checkNotNull(battleReportService, "battleReportService must not be empty");
         this.transportationCache = Preconditions.checkNotNull(transportationCache, "transportationCache must not be empty");
         this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
         this.colonizationCache = Preconditions.checkNotNull(colonizationCache, "colonizationCache must not be empty");
@@ -214,8 +220,10 @@ public class JournalApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getMissionResults() {
-        final List<MissionItem> missionItems = missionCache.get(tickService.getToday(), getIdUser());
+        final de.yuga.spacebattle.backend.entities.turn.Tick today = tickService.getToday();
+        final boolean newBattleReports = battleReportService.hasNewReportsSince(getIdUser(), today.getNo() - 1);
+        final List<MissionItem> missionItems = missionCache.get(today, getIdUser());
         final List<TradedResource> finishedTrades = marketplaceService.findFinishedForUser(getIdUser());
-        return ResponseEntity.ok(new MissionReport(missionItems, finishedTrades, getPreferredLanguage()));
+        return ResponseEntity.ok(new MissionReport(newBattleReports, missionItems, finishedTrades, getPreferredLanguage()));
     }
 }
