@@ -571,11 +571,16 @@ public class FleetApi extends BaseApi {
         final Map<Integer, StarSystem> targetSystemsByIds = starSystemService.findAll(targetSystemIds).stream().collect(Collectors.toMap(StarSystem::getId, Function.identity()));
 
         return moves.stream().map(move -> {
-            final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetsToMoveById.get(move.getIdFleetToMove());
-            final StarSystem targetSystem = targetSystemsByIds.get(move.getIdDestinationSystem());
-            final Orbit targetOrbit = move.getDestinationOrbit() != null ? new Orbit(move.getDestinationOrbit()) : null;
-            final FleetOrbit destination = new FleetOrbit(targetOrbit, targetSystem);
-            return new de.yuga.spacebattle.backend.entities.turn.Move(fleet, destination);
-        }).collect(Collectors.toList());
+                    final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetsToMoveById.get(move.getIdFleetToMove());
+                    if (fleet.getMove() != null) {
+                        return null;
+                    }
+                    final StarSystem targetSystem = targetSystemsByIds.get(move.getIdDestinationSystem());
+                    final Orbit targetOrbit = move.getDestinationOrbit() != null ? new Orbit(move.getDestinationOrbit()) : null;
+                    final FleetOrbit destination = new FleetOrbit(targetOrbit, targetSystem);
+                    return new de.yuga.spacebattle.backend.entities.turn.Move(fleet, destination);
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 }

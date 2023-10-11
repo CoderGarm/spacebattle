@@ -9,11 +9,11 @@
    Darüber hinaus an dieser Stelle ein Shoutout an meine Frau, die sich positiv effektvoll in Sachen Farbauswahl eingemischt hat.  
    Alternative Möglichkeiten wären gewesen https://media.battleforhonor.de/battle-for-pastell.png oder https://media.battleforhonor.de/schweinchen-for-honor.png
 
-todo. apache config saven
+todo. article edit stuff -> fitting tips
+
 todo. login log with timestamp (or better regex?)
 todo. player comment about the game in profile to display at take-a-tour
 todo. wiki fertig machen und in tutorial nutzen -> taxonomie hinzufügen, links ermöglichen
-todo. article edit stuff -> fitting tips
 todo. quoting in chat und forum
 todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
 
@@ -25,13 +25,18 @@ todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehb
 4. Die Schiffswerft zeigt läd die Kosten der angezeigten Schiffe.
 5. Die Kosten von Flottenupgrades und -reparaturen werden wieder dargestellt.
 6. Der Tech Tree Bug ist behoben.
+   todo. cancel flight funny error
 
-todo. zoom issue at map
-todo. fleetsharks at zoom and move
+todo. forum message read melden aber icon weiter anzeigen
+todo. priorisierung bei pop demand und migration problematisch?
+todo. population problem bei Samovar - yufiel -> mind aber ein update-problem
 
 #### next steps
 
 todo. placing new players must be improved
+
+todo. zoom issue at map
+todo. fleetsharks at zoom and move
 
 todo. battle reports mit anderen teilen
 todo. multiple browser tabs
