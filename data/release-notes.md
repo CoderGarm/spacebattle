@@ -2,7 +2,6 @@
 
 #### Gameplay
 
-
 #### Diverses
 
 1. Es gibt einen Light Mode! Wenn der Browser auf den Light Mode eingestellt ist, wird der auch verwendet!  
@@ -22,19 +21,13 @@ todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehb
 
 1. Bei der planetaren Ressourcenanzeige wird der Zuwachs bei Produktionsgebäuden nun in Abhängigkeit von den Mining Factors dargestellt.
 2. Der Bedarf an Arbeitskräften wird wieder während des Baus festgestellt.
-3. Der Mission Report sagt nun Bescheid, wenn es eine neue Schlacht gab.
-
-todo. If you have several ship classes in your yard menu, the values for costs and crew will not refresh if you switch between them. They will stay at the values for the fisrt one
-you clicked.
-You have to leave the yard menu and enter again to load these values for another ship class.
-todo. There is an option in the yard to upgrade ships to the latest changes in the class. Makes sense with upgrades as you research.
-But it is unclear what this will cost. I have not found a display. How are the costs handled anyway? Is this a wholesale lump sum of orbital points or is this a detailed
-calculation?
-Also, I was wondering, what happens if you change the layout once you started a build. Will the ship reflect the layout at the start of the project or at the final tick?
+3. Das Journal sagt nun Bescheid, wenn es eine neue Schlacht gab.
+4. Die Schiffswerft zeigt läd die Kosten der angezeigten Schiffe.
+5. Die Kosten von Flottenupgrades und -reparaturen werden wieder dargestellt.
+6. Der Tech Tree Bug ist behoben.
 
 todo. zoom issue at map
 todo. fleetsharks at zoom and move
-todo. research tree issue
 
 #### next steps
 
@@ -53,6 +46,7 @@ todo. housing left for x ticks - anzeige nach lastring ticks besser aufstellen
 
 ?. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
 ?. history for dashboard
+
 - cache cleanup or only load last 3 ticks
 - cache in datenbank verschieben - mariadb json pointer useful?
 
