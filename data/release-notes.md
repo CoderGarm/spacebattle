@@ -20,6 +20,10 @@ todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehb
 
 ### Bugs fixed
 
+1. Bei der planetaren Ressourcenanzeige wird der Zuwachs bei Produktionsgebäuden nun in Abhängigkeit von den Mining Factors dargestellt.
+2. Der Bedarf an Arbeitskräften wird wieder während des Baus festgestellt.
+   todo. normale schlachten auch im mission report anzeigen
+
 todo. If you have several ship classes in your yard menu, the values for costs and crew will not refresh if you switch between them. They will stay at the values for the fisrt one
 you clicked.
 You have to leave the yard menu and enter again to load these values for another ship class.
@@ -73,7 +77,6 @@ todo. Planeten nach Systemnamen durchnummerieren
   ?. bootstrap css nur bei markdown-editor möglich
 - exploit: ftl möglich bei reserveflotte
 - eingemottete Schiffe tatsächlich außer dienst nehmen
-- normale schlachten auch im mission report anzeigen
 - fleet management - flotten aufteilen neben flotten mergen
 
 missionen

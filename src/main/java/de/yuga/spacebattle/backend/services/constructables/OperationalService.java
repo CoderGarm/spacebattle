@@ -19,6 +19,7 @@ import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.ECalculationType;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.ERefinementSequence;
+import de.yuga.spacebattle.backend.repositories.turn.JobRepository;
 import de.yuga.spacebattle.backend.services.caches.OperationalCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
@@ -54,19 +55,25 @@ public class OperationalService {
     @Nonnull
     private final OperationalCache operationalCache;
 
+    // todo at a given time separate responsibilities
+    @Nonnull
+    private final JobRepository jobRepository;
+
     @Autowired
     public OperationalService(@Nonnull final WarShipService warShipService,
                               @Nonnull final ConstructionService constructionService,
                               @Nonnull final FleetService fleetService,
                               @Nonnull final PlanetService planetService,
                               @Nonnull final ColonizationService colonizationService,
-                              @Nonnull final OperationalCache operationalCache) {
+                              @Nonnull final OperationalCache operationalCache,
+                              @Nonnull final JobRepository jobRepository) {
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.colonizationService = Preconditions.checkNotNull(colonizationService, "colonizationService must not be empty");
         this.operationalCache = Preconditions.checkNotNull(operationalCache, "operationalCache must not be empty");
+        this.jobRepository = Preconditions.checkNotNull(jobRepository, "jobService must not be empty");
     }
 
     @Nonnull
@@ -120,7 +127,27 @@ public class OperationalService {
     public ResourceDeposit getPopulationDemandForUser(final int idUser) {
         final ResourceDeposit resourceDemand = new ResourceDeposit(EDepositType.DEMAND);
 
+        final List<Job> constructions = Objects.requireNonNullElse(jobRepository.findAllConstructionJobsForUser(idUser), List.of());
+        constructions.stream()
+                .map(Job::getConstructable)
+                .map(Constructable::getFleet)
+                .filter(Objects::nonNull)
+                .map(Fleet::getAllShips)
+                .flatMap(Collection::stream)
+                .map(WarShip::getShipClass)
+                .map(ShipClass::getCosts)
+                .map(ResourceDeposit::getCrewRequirement)
+                .forEach(crewRequirement -> resourceDemand.updateCrew(crewRequirement, ECalculationType.ADD));
+        constructions.stream()
+                .filter(c -> c.getConstructable().getBuilding() != null)
+                .filter(c -> c.getConstructable().getTargetLevel() != null)
+                .map(c -> new Construction(c.getFacility().getPlanet(), c.getConstructable().getBuilding(), c.getConstructable().getTargetLevel()))
+                .map(OperationalService::sumUpCosts)
+                .map(ResourceDeposit::getCrewRequirement)
+                .forEach(crewRequirement -> resourceDemand.updateCrew(crewRequirement, ECalculationType.ADD));
+
         final List<WarShip> warShips = warShipService.findAliveInoperationalForUser(idUser);
+
         final Set<WarShip> inUpgrade = warShips.stream()
                 .map(WarShip::getFleet)
                 .filter(Objects::nonNull)
@@ -159,7 +186,28 @@ public class OperationalService {
     public Map<Planet, ResourceDeposit> getPopulationDemandForUserByPlanet(final int idUser) {
 
         final Map<Planet, ResourceDeposit> result = new HashMap<>();
+
+        final List<Job> constructions = Objects.requireNonNullElse(jobRepository.findAllConstructionJobsForUser(idUser), List.of());
+        final Set<WarShip> shipsFromJobs = constructions.stream()
+                .map(Job::getConstructable)
+                .map(Constructable::getFleet)
+                .filter(Objects::nonNull)
+                .map(Fleet::getAllShips)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+        constructions.stream()
+                .filter(c -> c.getConstructable().getBuilding() != null)
+                .filter(c -> c.getConstructable().getTargetLevel() != null)
+                .forEach(job -> {
+                    final Planet planet = job.getFacility().getPlanet();
+                    final ResourceDeposit demand = result.getOrDefault(planet, new ResourceDeposit(EDepositType.DEMAND));
+                    final Construction c = new Construction(job.getFacility().getPlanet(), job.getConstructable().getBuilding(), job.getConstructable().getTargetLevel());
+                    demand.updateCrew(sumUpCosts(c).getCrewRequirement(), ECalculationType.ADD);
+                    result.put(planet, demand);
+                });
+
         final List<WarShip> warShips = warShipService.findAliveInoperationalForUser(idUser);
+        warShips.addAll(shipsFromJobs);
 
         final Set<WarShip> inUpgrade = warShips.stream()
                 .map(WarShip::getFleet)
@@ -212,7 +260,27 @@ public class OperationalService {
     public ResourceDeposit getPopulationDemandForPlanet(final int idPlanet) {
         final ResourceDeposit resourceDemand = new ResourceDeposit(EDepositType.DEMAND);
 
+        final List<Job> constructions = Objects.requireNonNullElse(jobRepository.findAllConstructionJobsByPlanet(idPlanet), List.of());
+        constructions.stream()
+                .map(Job::getConstructable)
+                .map(Constructable::getFleet)
+                .filter(Objects::nonNull)
+                .map(Fleet::getAllShips)
+                .flatMap(Collection::stream)
+                .map(WarShip::getShipClass)
+                .map(ShipClass::getCosts)
+                .map(ResourceDeposit::getCrewRequirement)
+                .forEach(crewRequirement -> resourceDemand.updateCrew(crewRequirement, ECalculationType.ADD));
+        constructions.stream()
+                .filter(c -> c.getConstructable().getBuilding() != null)
+                .filter(c -> c.getConstructable().getTargetLevel() != null)
+                .map(c -> new Construction(c.getFacility().getPlanet(), c.getConstructable().getBuilding(), c.getConstructable().getTargetLevel()))
+                .map(OperationalService::sumUpCosts)
+                .map(ResourceDeposit::getCrewRequirement)
+                .forEach(crewRequirement -> resourceDemand.updateCrew(crewRequirement, ECalculationType.ADD));
+
         final List<WarShip> warShips = warShipService.findAliveInoperationalForPlanet(idPlanet);
+
         final Set<WarShip> inUpgrade = warShips.stream()
                 .map(WarShip::getFleet)
                 .filter(Objects::nonNull)

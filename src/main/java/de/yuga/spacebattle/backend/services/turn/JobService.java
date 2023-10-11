@@ -166,6 +166,7 @@ public class JobService {
      * @param idBuilding the building which should be build
      * @return the created entity
      */
+    @Nonnull
     public Job createConstructionYardJob(@Nonnull final Integer idPlanet, @Nonnull final Integer idBuilding) {
         Preconditions.checkNotNull(idPlanet, "idPlanet shouldn't be null!");
         Preconditions.checkNotNull(idBuilding, "idBuilding shouldn't be null!");
@@ -206,6 +207,7 @@ public class JobService {
         return entity;
     }
 
+    @Nonnull
     public Job createResearchJob(@Nonnull final User user, @Nonnull final Research research) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
         Preconditions.checkNotNull(research, "research shouldn't be null!");

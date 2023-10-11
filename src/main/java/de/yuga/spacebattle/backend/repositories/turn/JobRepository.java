@@ -29,4 +29,12 @@ public interface JobRepository extends CrudRepository<Job, Integer>, CustomJobRe
     @Nullable
     @Query("SELECT j FROM Job j WHERE j.ticksLeft > 0 AND j.finished IS NULL AND j.constructable.research IS NOT NULL")
     List<Job> findResearchJobs();
+
+    @Nullable
+    @Query("SELECT j FROM Job j WHERE j.ticksLeft > 0 AND j.finished IS NULL AND j.facility.planet.id = :idPlanet AND ((j.constructable.jobType = de.yuga.spacebattle.backend.enums.EJobType.CONSTRUCTION AND j.constructable.fleet IS NOT NULL) OR j.constructable.building IS NOT NULL)")
+    List<Job> findAllConstructionJobsByPlanet(@Param("idPlanet") final int idPlanet);
+
+    @Nullable
+    @Query("SELECT j FROM Job j WHERE j.ticksLeft > 0 AND j.finished IS NULL AND j.owner.id = :idUser AND ((j.constructable.jobType = de.yuga.spacebattle.backend.enums.EJobType.CONSTRUCTION AND j.constructable.fleet IS NOT NULL) OR j.constructable.building IS NOT NULL)")
+    List<Job> findAllConstructionJobsForUser(@Param("idUser") final int idUser);
 }
