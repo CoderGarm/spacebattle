@@ -256,7 +256,6 @@ public class FleetService {
         final FleetOrbit origin = new FleetOrbit(start, system);
         final FleetOrbit destination = new FleetOrbit(target, system);
 
-        fleet.setOrbit(new FleetOrbit(start, system));
         int calculateTimeToTravel = DistanceCalculator.calculateTimeToTravel(fleet, origin, destination);
 
         final int alreadyTravelled = calculateTimeToTravel - moveDoneAtZero;
@@ -268,12 +267,13 @@ public class FleetService {
 
         if (calculateTimeToTravel > 0) {
             // set move
+            fleet.setOrbit(origin);
             final Move move = new de.yuga.spacebattle.backend.entities.turn.Move(fleet, destination, calculateTimeToTravel, calculateTimeToTravel + moveDoneAtZero);
             fleet.setMove(move);
         } else {
             // set fleet in planetary orbit
             fleet.setMove(null);
-            fleet.setOrbit(new FleetOrbit(target, system));
+            fleet.setOrbit(origin);
         }
         fleetRepository.save(fleet);
         return fleet;

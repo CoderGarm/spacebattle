@@ -25,7 +25,7 @@ todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehb
 4. Die Schiffswerft zeigt läd die Kosten der angezeigten Schiffe.
 5. Die Kosten von Flottenupgrades und -reparaturen werden wieder dargestellt.
 6. Der Tech Tree Bug ist behoben.
-   todo. cancel flight funny error
+7. Eine Flotte fliegt wieder zum Ursprungsort zurück, wenn der Flug abgebrochen wird.
 
 todo. forum message read melden aber icon weiter anzeigen
 todo. priorisierung bei pop demand und migration problematisch?
