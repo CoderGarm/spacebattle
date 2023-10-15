@@ -2,12 +2,13 @@
 
 #### Gameplay
 
+todo. Gebäudeoutput muss deutlicher steigen
+todo. tech level 2 und 3 nutzen
+todo. placing new players must be improved
+todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt aus"
+
 #### Diverses
 
-1. Es gibt einen Light Mode! Wenn der Browser auf den Light Mode eingestellt ist, wird der auch verwendet!  
-   Ich habe mit Sicherheit nicht alle Stellen erwischt, wenn also etwas undeutlich oder die Farbkombination unglücklich gewählt ist, dann sagt mir unbedingt Bescheid!  
-   Darüber hinaus an dieser Stelle ein Shoutout an meine Frau, die sich positiv effektvoll in Sachen Farbauswahl eingemischt hat.  
-   Alternative Möglichkeiten wären gewesen https://media.battleforhonor.de/battle-for-pastell.png oder https://media.battleforhonor.de/schweinchen-for-honor.png
 
 todo. article edit stuff -> fitting tips
 
@@ -17,26 +18,43 @@ todo. wiki fertig machen und in tutorial nutzen -> taxonomie hinzufügen, links 
 todo. quoting in chat und forum
 todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
 
+todo. forum management
+todo. background color
+todo. black map more contrast
+todo. check fitting yard
+
+todo. zu teure gebäude per farbe anzeigen
+star map filter für flotten
+
+- eigene inop
+- fremde inop
+- moves ...
+
+todo. schiffe in reserveflotte müssen betriebsbereit werden -> pop demand
+todo. flottengröße und status in menü anzeigen
+
 ### Bugs fixed
 
-1. Bei der planetaren Ressourcenanzeige wird der Zuwachs bei Produktionsgebäuden nun in Abhängigkeit von den Mining Factors dargestellt.
-2. Der Bedarf an Arbeitskräften wird wieder während des Baus festgestellt.
-3. Das Journal sagt nun Bescheid, wenn es eine neue Schlacht gab.
-4. Die Schiffswerft zeigt läd die Kosten der angezeigten Schiffe.
-5. Die Kosten von Flottenupgrades und -reparaturen werden wieder dargestellt.
-6. Der Tech Tree Bug ist behoben.
-7. Eine Flotte fliegt wieder zum Ursprungsort zurück, wenn der Flug abgebrochen wird.
-
+todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen
 todo. forum message read melden aber icon weiter anzeigen
+todo. activating operationals
+todo. all shipyard jobs in pop demand
+
 todo. priorisierung bei pop demand und migration problematisch?
 todo. population problem bei Samovar - yufiel -> mind aber ein update-problem
 
-#### next steps
+Nachrichten:
 
-todo. placing new players must be improved
+- Das zeichen für neue nachrichten verschwindet nicht mehr
+- Ich habe keinen 'neue nachrichten marker' für den neuen 'battle report' bekommen
+- Laut meiner anzeige sind 2 Flotten von dir heute beim hypelimit aufgetaut. Tatsächlich ist eine da, aber die andere bereits beim plani.
+
+
+#### next steps
 
 todo. zoom issue at map
 todo. fleetsharks at zoom and move
+todo. durchsuchbare release notes?
 
 todo. battle reports mit anderen teilen
 todo. multiple browser tabs
