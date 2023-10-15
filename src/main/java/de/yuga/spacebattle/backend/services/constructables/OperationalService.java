@@ -30,9 +30,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit.MATH_CONTEXT_MORE_PRECISION;
 
 @Service
 public class OperationalService {
@@ -466,11 +469,28 @@ public class OperationalService {
         Preconditions.checkNotNull(warShip, "warShip must not be empty");
 
         warShip.delete();
+        final ResourceDeposit costs = warShip.getShipClass().getCosts();
+        final CrewRequirement crewRequirement = costs.getCrewRequirement();
+        final Planet shipyard = warShip.getShipyard();
+        shipyard.getResourceDeposit().updateCrew(crewRequirement, ECalculationType.ADD);
+        costs.getResources().forEach((resourceType, amount) -> {
+            final long cashBack = BigDecimal.valueOf(amount).multiply(BigDecimal.valueOf(0.5), MATH_CONTEXT_MORE_PRECISION).longValue();
+            shipyard.getResourceDeposit().updateResource(resourceType, cashBack);
+        });
+        planetService.save(shipyard);
+        warShipService.save(warShip);
+    }
+
+    public void mothballShip(@Nonnull final WarShip warShip) {
+        Preconditions.checkNotNull(warShip, "warShip must not be empty");
+
+        warShip.setFleet(null);
+        warShipService.save(warShip);
+
         final CrewRequirement crewRequirement = warShip.getShipClass().getCosts().getCrewRequirement();
         final Planet shipyard = warShip.getShipyard();
         shipyard.getResourceDeposit().updateCrew(crewRequirement, ECalculationType.ADD);
         planetService.save(shipyard);
-        warShipService.save(warShip);
     }
 
     public void disableFleet(@Nonnull final Fleet fleet) {

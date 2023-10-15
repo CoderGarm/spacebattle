@@ -193,7 +193,7 @@ public class JournalApi extends BaseApi {
     }
 
     @GetMapping(value = OPERATIONALS_ENDPOINT + "/pending")
-    @Operation(summary = "Get all newly active operationals.", operationId = "getOperationalsWaitingForActivation",
+    @Operation(summary = "Get all operationals which are awaiting activation.", operationId = "getOperationalsWaitingForActivation",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(

@@ -7,8 +7,25 @@ todo. tech level 2 und 3 nutzen
 todo. placing new players must be improved
 todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt aus"
 
-#### Diverses
+todo. schiffe in reserveflotte müssen betriebsbereit werden -> pop demand
+todo. activating operationals
 
+ops und mothball:
+
+- aktuelle retire-ship wird ressi zurück geben
+- neuer button: mothball ship -> wird reserve
+  -> Schiffe in reserve sind immer ohne crew -> werden sofort (!) mit crew ausgestattet wenn sie aktiviert werden, wenn crew da ist
+  -> die Schiffe werden an einer werft gemothballed (auswählbar machen)
+  -> crew muss beim aktivieren natürlich vorhanden sein, sonst muss man nen tick warten (reguläre mechanik)
+
+1. aktive und inaktive Kriegsschiffe in der Reserve und Flotten
+    - Für Kriegsschiffe die abgewrackt werden, bekommt man jetzt 50 % der Ressourcen zurück.
+    - Man kann Kriegsschiffe nun per Button direkt in die Reserve schicken.
+    - Schiffe in der Reserve haben keine aktive Crew mehr.
+    - todo. Sobald Schiffe der Reserve aktiviert werden und genug Crew auf dem Planeten ist, werden sie sofort aktiviert. Ist nicht genug Crew da, bleiben es beim bisherigen
+      Verhalten.
+
+#### Diverses
 
 todo. article edit stuff -> fitting tips
 
@@ -24,21 +41,21 @@ todo. black map more contrast
 todo. check fitting yard
 
 todo. zu teure gebäude per farbe anzeigen
-star map filter für flotten
+
+todo. star map filter für flotten
 
 - eigene inop
 - fremde inop
 - moves ...
 
-todo. schiffe in reserveflotte müssen betriebsbereit werden -> pop demand
 todo. flottengröße und status in menü anzeigen
+todo. jobs due-date nicht auf basis von ticks fest legen sondern die punkte werden runter gerechnet -> ticks left ist immer eine berechnung
 
 ### Bugs fixed
 
+todo. all shipyard jobs in pop demand
 todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen
 todo. forum message read melden aber icon weiter anzeigen
-todo. activating operationals
-todo. all shipyard jobs in pop demand
 
 todo. priorisierung bei pop demand und migration problematisch?
 todo. population problem bei Samovar - yufiel -> mind aber ein update-problem
@@ -48,7 +65,6 @@ Nachrichten:
 - Das zeichen für neue nachrichten verschwindet nicht mehr
 - Ich habe keinen 'neue nachrichten marker' für den neuen 'battle report' bekommen
 - Laut meiner anzeige sind 2 Flotten von dir heute beim hypelimit aufgetaut. Tatsächlich ist eine da, aber die andere bereits beim plani.
-
 
 #### next steps
 

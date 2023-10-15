@@ -11,7 +11,6 @@ import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.EResourceType;
-import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
@@ -53,22 +52,17 @@ public class OperationalTickRunner implements TickRunner {
     @Nonnull
     private final OperationalService operationalService;
 
-    @Nonnull
-    private final UserService userService;
-
     @Autowired
     public OperationalTickRunner(@Nonnull final JobService jobService,
                                  @Nonnull final PlanetService planetService,
                                  @Nonnull final FleetService fleetService,
                                  @Nonnull final WarshipHealthStateService warshipHealthStateService,
-                                 @Nonnull final OperationalService operationalService,
-                                 @Nonnull final UserService userService) {
+                                 @Nonnull final OperationalService operationalService) {
         this.jobService = Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         this.warshipHealthStateService = Preconditions.checkNotNull(warshipHealthStateService, "warshipHealthStateService must not be empty");
         this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
-        this.userService = Preconditions.checkNotNull(userService, "userService must not be empty");
     }
 
     @Override
@@ -95,7 +89,9 @@ public class OperationalTickRunner implements TickRunner {
         final Set<Construction> oldLaboratories = new HashSet<>();
         for (final Planet p : planets) {
             log(p, "Start ticking planet");
-            oldLaboratories.add(tickPlanet(p));
+            final Construction construction = tickPlanet(p);
+            oldLaboratories.add(construction);
+            tickFleetsAtStarbase(p);
             tickFleetsAtStarbase(p);
         }
         updateResearchJob(oldLaboratories.stream().filter(Objects::nonNull).collect(Collectors.toSet()));

@@ -61,7 +61,8 @@ public class FleetApi extends BaseApi {
     private static final String RENAME_FLEET_ENDPOINT = "rename";
     private static final String WARSHIP_POOLING_ENDPOINT = "pool";
     private static final String RETIRE_FLEET_ENDPOINT = "retire";
-    private static final String RETIRE_WARSHIP_ENDPOINT = "retireWarship";
+    private static final String WRECK_WARSHIP_ENDPOINT = "wreckWarship";
+    private static final String MOTHBALL_WARSHIP_ENDPOINT = "mothballWarship";
 
     @Nonnull
     private final FleetService fleetService;
@@ -515,8 +516,8 @@ public class FleetApi extends BaseApi {
         return ResponseEntity.ok(true);
     }
 
-    @PutMapping(value = RETIRE_WARSHIP_ENDPOINT + "/{idWarship}")
-    @Operation(summary = "Renames a fleet.", operationId = "retireWarship",
+    @PutMapping(value = MOTHBALL_WARSHIP_ENDPOINT + "/{idWarship}")
+    @Operation(summary = "Renames a fleet.", operationId = "mothballWarship",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
@@ -524,7 +525,29 @@ public class FleetApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> retireWarship(@PathVariable("idWarship") final int idWarship) {
+    public ResponseEntity<?> mothballWarship(@PathVariable("idWarship") final int idWarship) {
+
+        final de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip warShip = warShipService.findById(idWarship);
+        if (warShip == null) {
+            return ResponseEntity.ok(true);
+        }
+        if (warShip.getShipClass().getOwner().getId() != getIdUser()) {
+            throw new NotifyWebUserException("Nope, I guess not.");
+        }
+        operationalService.mothballShip(warShip);
+        return ResponseEntity.ok(true);
+    }
+
+    @PutMapping(value = WRECK_WARSHIP_ENDPOINT + "/{idWarship}")
+    @Operation(summary = "Renames a fleet.", operationId = "wreckWarship",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> wreckWarship(@PathVariable("idWarship") final int idWarship) {
 
         final de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip warShip = warShipService.findById(idWarship);
         if (warShip == null) {
