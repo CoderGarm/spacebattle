@@ -30,12 +30,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit.MATH_CONTEXT_MORE_PRECISION;
 
 @Service
 public class OperationalService {
@@ -130,12 +127,12 @@ public class OperationalService {
     public ResourceDeposit getPopulationDemandForUser(final int idUser) {
         final ResourceDeposit resourceDemand = new ResourceDeposit(EDepositType.DEMAND);
 
-        final List<Job> constructions = Objects.requireNonNullElse(jobRepository.findAllConstructionJobsForUser(idUser), List.of());
+        final List<Job> constructions = Objects.requireNonNullElse(jobRepository.findAllFleetOrBuildingJobsForUser(idUser), List.of());
         constructions.stream()
                 .map(Job::getConstructable)
                 .map(Constructable::getFleet)
                 .filter(Objects::nonNull)
-                .map(Fleet::getAllShips)
+                .map(Fleet::getAliveShips)
                 .flatMap(Collection::stream)
                 .map(WarShip::getShipClass)
                 .map(ShipClass::getCosts)
@@ -190,12 +187,12 @@ public class OperationalService {
 
         final Map<Planet, ResourceDeposit> result = new HashMap<>();
 
-        final List<Job> constructions = Objects.requireNonNullElse(jobRepository.findAllConstructionJobsForUser(idUser), List.of());
+        final List<Job> constructions = Objects.requireNonNullElse(jobRepository.findAllFleetOrBuildingJobsForUser(idUser), List.of());
         final Set<WarShip> shipsFromJobs = constructions.stream()
                 .map(Job::getConstructable)
                 .map(Constructable::getFleet)
                 .filter(Objects::nonNull)
-                .map(Fleet::getAllShips)
+                .map(Fleet::getAliveShips)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
         constructions.stream()
@@ -258,17 +255,16 @@ public class OperationalService {
         return result;
     }
 
-
     @Nonnull
     public ResourceDeposit getPopulationDemandForPlanet(final int idPlanet) {
         final ResourceDeposit resourceDemand = new ResourceDeposit(EDepositType.DEMAND);
 
-        final List<Job> constructions = Objects.requireNonNullElse(jobRepository.findAllConstructionJobsByPlanet(idPlanet), List.of());
+        final List<Job> constructions = Objects.requireNonNullElse(jobRepository.findAllFleetOrBuildingJobsByPlanet(idPlanet), List.of());
         constructions.stream()
                 .map(Job::getConstructable)
                 .map(Constructable::getFleet)
                 .filter(Objects::nonNull)
-                .map(Fleet::getAllShips)
+                .map(Fleet::getAliveShips)
                 .flatMap(Collection::stream)
                 .map(WarShip::getShipClass)
                 .map(ShipClass::getCosts)
@@ -463,51 +459,5 @@ public class OperationalService {
             operationalCache.activateConstructions(today, planet, alsoActivated);
         }
         return alsoActivated;
-    }
-
-    public void retire(@Nonnull final WarShip warShip) {
-        Preconditions.checkNotNull(warShip, "warShip must not be empty");
-
-        warShip.delete();
-        final ResourceDeposit costs = warShip.getShipClass().getCosts();
-        final CrewRequirement crewRequirement = costs.getCrewRequirement();
-        final Planet shipyard = warShip.getShipyard();
-        shipyard.getResourceDeposit().updateCrew(crewRequirement, ECalculationType.ADD);
-        costs.getResources().forEach((resourceType, amount) -> {
-            final long cashBack = BigDecimal.valueOf(amount).multiply(BigDecimal.valueOf(0.5), MATH_CONTEXT_MORE_PRECISION).longValue();
-            shipyard.getResourceDeposit().updateResource(resourceType, cashBack);
-        });
-        planetService.save(shipyard);
-        warShipService.save(warShip);
-    }
-
-    public void mothballShip(@Nonnull final WarShip warShip) {
-        Preconditions.checkNotNull(warShip, "warShip must not be empty");
-
-        warShip.setFleet(null);
-        warShipService.save(warShip);
-
-        final CrewRequirement crewRequirement = warShip.getShipClass().getCosts().getCrewRequirement();
-        final Planet shipyard = warShip.getShipyard();
-        shipyard.getResourceDeposit().updateCrew(crewRequirement, ECalculationType.ADD);
-        planetService.save(shipyard);
-    }
-
-    public void disableFleet(@Nonnull final Fleet fleet) {
-        Preconditions.checkNotNull(fleet, "fleet must not be empty");
-
-        fleetService.markAsInoperational(fleet);
-        final Set<WarShip> ships = fleet.getAliveShips();
-        warShipService.markAsInoperational(ships);
-    }
-
-    public void transferCrewToPlanet(@Nonnull final Fleet fleet, @Nonnull final Planet planet) {
-        Preconditions.checkNotNull(fleet, "fleet must not be empty");
-        Preconditions.checkNotNull(planet, "planet must not be empty");
-
-        final ResourceDeposit costs = new ResourceDeposit(EDepositType.COSTS);
-        fleet.getAliveShips().stream().map(WarShip::getShipClass).map(ShipClass::getCosts).forEach(rd -> costs.updateCrew(rd.getCrewRequirement(), ECalculationType.ADD));
-        planet.getResourceDeposit().updateCrew(costs.getCrewRequirement(), ECalculationType.ADD);
-        planetService.save(planet);
     }
 }

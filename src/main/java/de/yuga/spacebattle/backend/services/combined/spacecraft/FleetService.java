@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.CombatAllowanceCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.combat.dto.FleetClash;
+import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
@@ -14,6 +15,9 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Move;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.ECalculationType;
+import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.repositories.combined.spacecraft.FleetRepository;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
@@ -28,10 +32,13 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import static de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit.MATH_CONTEXT_MORE_PRECISION;
 
 @Service
 public class FleetService {
@@ -448,36 +455,6 @@ public class FleetService {
         return StreamSupport.stream(saveAll.spliterator(), false).collect(Collectors.toSet());
     }
 
-    /**
-     * Sends all the warships to the pool.
-     */
-    public void poolWarships(final int idUser, @Nonnull final List<Integer> warshipIDs) {
-        Preconditions.checkNotNull(warshipIDs, "warshipIDs must not be empty");
-
-        final Set<WarShip> warShips = warShipService.findByIds(warshipIDs).stream()
-                .filter(w -> w.getShipClass().getOwner().getId() == idUser)
-                .collect(Collectors.toSet());
-
-        final Set<Integer> fleetIDs = warShips.stream().map(WarShip::getFleet).filter(Objects::nonNull).map(AbstractEntityKey::getId).collect(Collectors.toSet());
-
-        warShips.forEach(WarShip::sendToPool);
-        warShipService.saveAll(warShips);
-        calculateFleetState(fleetIDs);
-    }
-
-    @Nonnull
-    private Set<Fleet> calculateFleetState(@Nonnull final Set<Integer> fleetIDs) {
-        Preconditions.checkNotNull(fleetIDs, "fleetIDs must not be empty");
-
-        final List<Fleet> fleets = findAll(fleetIDs);
-        final Set<Fleet> toSetOperational = fleets.stream().filter(fleet -> {
-            final boolean isOperational = fleet.getAliveShips().stream().allMatch(WarShip::isOperational);
-            return isOperational && !fleet.isOperationalFromSuper();
-        }).collect(Collectors.toSet());
-        toSetOperational.forEach(Fleet::setOperational);
-        return Objects.requireNonNullElse(saveAll(toSetOperational), new HashSet<>());
-    }
-
     @Nonnull
     public Set<WarShip> findPooledWarships(final int idUser) {
         return warShipService.findPooledShipsByUser(idUser);
@@ -495,5 +472,87 @@ public class FleetService {
         final Set<StarSystem> systems = Objects.requireNonNullElse(fleetRepository.findSojourns(), new HashSet<>());
         systems.addAll(Objects.requireNonNullElse(fleetRepository.findMovementDestinations(), new HashSet<>()));
         return systems;
+    }
+
+    /**
+     * Sends all the warships to the pool.
+     */
+    public void poolWarships(final int idUser, @Nonnull final List<Integer> warshipIDs) {
+        Preconditions.checkNotNull(warshipIDs, "warshipIDs must not be empty");
+
+        final Set<WarShip> warShips = warShipService.findByIds(warshipIDs).stream()
+                .filter(w -> w.getShipClass().getOwner().getId() == idUser)
+                .collect(Collectors.toSet());
+
+        final Set<Integer> fleetIDs = warShips.stream().map(WarShip::getFleet).filter(Objects::nonNull).map(AbstractEntityKey::getId).collect(Collectors.toSet());
+
+        warShips.forEach(WarShip::sendToPool);
+        warShipService.saveAll(warShips);
+        warShips.forEach(this::transferCrewToPlanet);
+        calculateFleetState(fleetIDs);
+    }
+
+    @Nonnull
+    private Set<Fleet> calculateFleetState(@Nonnull final Set<Integer> fleetIDs) {
+        Preconditions.checkNotNull(fleetIDs, "fleetIDs must not be empty");
+
+        final List<Fleet> fleets = findAll(fleetIDs);
+        final Set<Fleet> toSetOperational = fleets.stream().filter(fleet -> {
+            final boolean isOperational = fleet.getAliveShips().stream().allMatch(WarShip::isOperational);
+            return isOperational && !fleet.isOperationalFromSuper();
+        }).collect(Collectors.toSet());
+        toSetOperational.forEach(Fleet::setOperational);
+        return Objects.requireNonNullElse(saveAll(toSetOperational), new HashSet<>());
+    }
+
+    public void retire(@Nonnull final WarShip warShip) {
+        Preconditions.checkNotNull(warShip, "warShip must not be empty");
+
+        warShip.delete();
+        final ResourceDeposit costs = warShip.getShipClass().getCosts();
+        final CrewRequirement crewRequirement = costs.getCrewRequirement();
+        final Planet shipyard = warShip.getShipyard();
+        shipyard.getResourceDeposit().updateCrew(crewRequirement, ECalculationType.ADD);
+        costs.getResources().forEach((resourceType, amount) -> {
+            final long cashBack = BigDecimal.valueOf(amount).multiply(BigDecimal.valueOf(0.5), MATH_CONTEXT_MORE_PRECISION).longValue();
+            shipyard.getResourceDeposit().updateResource(resourceType, cashBack);
+        });
+        planetService.save(shipyard);
+        warShipService.save(warShip);
+    }
+
+    public void mothballShip(@Nonnull final WarShip warShip) {
+        Preconditions.checkNotNull(warShip, "warShip must not be empty");
+
+        warShip.setFleet(null);
+        warShipService.save(warShip);
+        transferCrewToPlanet(warShip);
+    }
+
+    private void transferCrewToPlanet(@Nonnull final WarShip warShip) {
+        Preconditions.checkNotNull(warShip, "warShip must not be empty");
+
+        final CrewRequirement crewRequirement = warShip.getShipClass().getCosts().getCrewRequirement();
+        final Planet shipyard = warShip.getShipyard();
+        shipyard.getResourceDeposit().updateCrew(crewRequirement, ECalculationType.ADD);
+        planetService.save(shipyard);
+    }
+
+    public void disableFleet(@Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+
+        markAsInoperational(fleet);
+        final Set<WarShip> ships = fleet.getAliveShips();
+        warShipService.markAsInoperational(ships);
+    }
+
+    public void transferCrewToPlanet(@Nonnull final Fleet fleet, @Nonnull final Planet planet) {
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+        final ResourceDeposit costs = new ResourceDeposit(EDepositType.COSTS);
+        fleet.getAliveShips().stream().map(WarShip::getShipClass).map(ShipClass::getCosts).forEach(rd -> costs.updateCrew(rd.getCrewRequirement(), ECalculationType.ADD));
+        planet.getResourceDeposit().updateCrew(costs.getCrewRequirement(), ECalculationType.ADD);
+        planetService.save(planet);
     }
 }

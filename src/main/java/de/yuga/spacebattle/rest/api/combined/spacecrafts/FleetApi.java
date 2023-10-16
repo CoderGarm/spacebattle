@@ -373,7 +373,7 @@ public class FleetApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> moveFleets(@RequestBody @Nonnull final List<FleetMove> moves) {
+    public ResponseEntity<?> moveFleets(@RequestBody @Nonnull final Set<FleetMove> moves) {
         PreconditionWebHelper.checkNotNull(moves, "moves shouldn't be null!");
 
         // todo validate interstellar flights with propulsion
@@ -401,7 +401,7 @@ public class FleetApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> planMovements(@RequestBody @Nonnull final List<FleetMove> moves) {
+    public ResponseEntity<?> planMovements(@RequestBody @Nonnull final Set<FleetMove> moves) {
         PreconditionWebHelper.checkNotNull(moves, "moves shouldn't be null!");
 
         // todo validate interstellar flights with propulsion
@@ -534,7 +534,7 @@ public class FleetApi extends BaseApi {
         if (warShip.getShipClass().getOwner().getId() != getIdUser()) {
             throw new NotifyWebUserException("Nope, I guess not.");
         }
-        operationalService.mothballShip(warShip);
+        fleetService.mothballShip(warShip);
         return ResponseEntity.ok(true);
     }
 
@@ -557,7 +557,7 @@ public class FleetApi extends BaseApi {
             throw new NotifyWebUserException("Nope, I guess not.");
         }
 
-        operationalService.retire(warShip);
+        fleetService.retire(warShip);
         return ResponseEntity.ok(true);
     }
 
@@ -569,10 +569,10 @@ public class FleetApi extends BaseApi {
      * @return the move
      */
     @Nonnull
-    private List<de.yuga.spacebattle.backend.entities.turn.Move> getMultiMove(final int idUser, @Nonnull final List<FleetMove> moves) {
+    private List<de.yuga.spacebattle.backend.entities.turn.Move> getMultiMove(final int idUser, @Nonnull final Set<FleetMove> moves) {
         Preconditions.checkNotNull(moves, "moves shouldn't be null!");
 
-        final List<Integer> fleetIdsToMove = moves.stream().map(FleetMove::getIdFleetToMove).collect(Collectors.toList());
+        final Set<Integer> fleetIdsToMove = moves.stream().map(FleetMove::getIdFleetToMove).collect(Collectors.toSet());
         final Map<Integer, de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> fleetsToMoveById = fleetService.findByIds(fleetIdsToMove)
                 .stream()
                 .collect(Collectors.toMap(de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet::getId, Function.identity()));

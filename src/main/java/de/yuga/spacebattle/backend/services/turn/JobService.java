@@ -302,8 +302,8 @@ public class JobService {
         final Job job = new Job(planet, facility, constructable, operationalService.getUtilizedPopulationForPlanet(planet.getId()));
         job.setPriority(EJobPriority.PRIORITY);
         jobRepository.save(job);
-        operationalService.disableFleet(toUpgrade);
-        operationalService.transferCrewToPlanet(toUpgrade, planet);
+        fleetService.disableFleet(toUpgrade);
+        fleetService.transferCrewToPlanet(toUpgrade, planet);
         planetService.save(planet);
     }
 
@@ -321,8 +321,8 @@ public class JobService {
         final Job job = new Job(planet, facility, constructable, operationalService.getUtilizedPopulationForPlanet(planet.getId()));
         job.setPriority(EJobPriority.PRIORITY);
         jobRepository.save(job);
-        operationalService.disableFleet(toRepair);
-        operationalService.transferCrewToPlanet(toRepair, planet);
+        fleetService.disableFleet(toRepair);
+        fleetService.transferCrewToPlanet(toRepair, planet);
         planetService.save(planet);
     }
 

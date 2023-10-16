@@ -19,9 +19,9 @@ ops und mothball:
   -> crew muss beim aktivieren natürlich vorhanden sein, sonst muss man nen tick warten (reguläre mechanik)
 
 1. aktive und inaktive Kriegsschiffe in der Reserve und Flotten
-    - Für Kriegsschiffe die abgewrackt werden, bekommt man jetzt 50 % der Ressourcen zurück.
+    - Für Kriegsschiffe die abgewrackt werden, bekommt man jetzt 50 % der Ressourcen zurück. Die Crew wird natürlich nicht dezimiert.
     - Man kann Kriegsschiffe nun per Button direkt in die Reserve schicken.
-    - Schiffe in der Reserve haben keine aktive Crew mehr.
+    - Schiffe in der Reserve haben keine aktive Crew mehr, die befindet sich auf dem Planeten, in dessen Orbit das Schiff eingemottet wurde.
     - todo. Sobald Schiffe der Reserve aktiviert werden und genug Crew auf dem Planeten ist, werden sie sofort aktiviert. Ist nicht genug Crew da, bleiben es beim bisherigen
       Verhalten.
 
@@ -53,8 +53,11 @@ todo. jobs due-date nicht auf basis von ticks fest legen sondern die punkte werd
 
 ### Bugs fixed
 
-todo. all shipyard jobs in pop demand
+1. Der Pop Demand zeigt nun auch den Bedarf von Flotten im Umbau oder in Reparatur an.
+
+todo. repair/upgrade job inaktiviert schiff nicht
 todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen
+
 todo. forum message read melden aber icon weiter anzeigen
 
 todo. priorisierung bei pop demand und migration problematisch?
