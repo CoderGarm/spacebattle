@@ -2194,5 +2194,5 @@ insert into dbPatch values (null, now(), 'switch to job type', '0.1.9-1');
 insert into dbPatch values (null, now(), 'add convoy mission', '0.1.10-1');
 insert into dbPatch values (null, now(), 'add roleplay data', '0.1.11-1');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'add forum message trigger', '0.1.12-1');
-INSERT INTO dbPatch VALUES (NULL, NOW(), 'planetary mothball', '0.1.13-1');
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'planetary mothball', '0.1.14-1');
 

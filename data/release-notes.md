@@ -7,29 +7,32 @@ todo. tech level 2 und 3 nutzen
 todo. placing new players must be improved
 todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt aus"
 
-todo. schiffe in reserveflotte müssen betriebsbereit werden -> pop demand
-todo. activating operationals
-
-ops und mothball:
-
-- aktuelle retire-ship wird ressi zurück geben
-- neuer button: mothball ship -> wird reserve
-  -> Schiffe in reserve sind immer ohne crew -> werden sofort (!) mit crew ausgestattet wenn sie aktiviert werden, wenn crew da ist
-  -> die Schiffe werden an einer werft gemothballed (auswählbar machen)
-  -> crew muss beim aktivieren natürlich vorhanden sein, sonst muss man nen tick warten (reguläre mechanik)
-
 1. aktive und inaktive Kriegsschiffe in der Reserve und Flotten
     - Für Kriegsschiffe die abgewrackt werden, bekommt man jetzt 50 % der Ressourcen zurück. Die Crew wird natürlich nicht dezimiert.
     - Man kann Kriegsschiffe nun per Button direkt in die Reserve schicken.
    - Man kann Schiffe nur auf Planeten mit Schiffswerften verschrotten oder einmotten. Dort lagern eingemottete Schiffe bis zur Wiederverwendung.
     - Schiffe in der Reserve haben keine aktive Crew mehr, die befindet sich auf dem Planeten, in dessen Orbit das Schiff eingemottet wurde.
-    - todo. Sobald Schiffe der Reserve aktiviert werden und genug Crew auf dem Planeten ist, werden sie sofort aktiviert. Ist nicht genug Crew da, bleiben es beim bisherigen
-      Verhalten.
+   - Schiffe können im Detachment Tab entmannt werden. Verzeiht den Wortwitz. Dort kann man sie, wenn genug Besatzung auf dem Planeten steht, direkt wieder aktivieren.
+   - Nur aktive Schiffe der Reserve können Missionen zugeteilt werden.
+   - Es gibt ein kurzes Tutorial dazu.
 
 #### Diverses
 
-todo. article edit stuff -> fitting tips
+todo. article edit stuff -> fitting tips, missionen ...
 
+---
+Das wichtigste ist, dass die Mission ohne Kampf wirkt.
+
+Die Mission reduziert die Heat des Planeten doppelt so stark wie die selben Schiffe ankernd im Orbit. Egal auf wie viele Missionen eine Anzahl an Schiffen aufgeteilt sind.
+
+Wenn Piraten spawnen gibt es mehrere Chancen dafür, dass sie Angst kriegen und abdrehen.
+Der Impact eines Schiffes (aktuell hart verdrahtet die definierte Klasse) im Orbit und auf Mission ist dabei gleich und letztlich checkt der Pirat "per Scanner aus der Distanz" mal
+eben ob die Menge an Schiffsrümpfen und Rumpfgrößen so aussehen, als sollte der Pirat Angst haben.
+Also wenn du ein LAC im Orbit hast muss der halt kurz husten, bei nem CL überlegt der sicher ob er das packt und bei nem Schlachtkreuzer malt der Stift.
+---
+
+todo. npc convoys are protected by them
+todo. mission items more roleplay "unprotected convoy changes signature of ship to warship and pirate fled ...""
 todo. login log with timestamp (or better regex?)
 todo. player comment about the game in profile to display at take-a-tour
 todo. wiki fertig machen und in tutorial nutzen -> taxonomie hinzufügen, links ermöglichen
@@ -37,7 +40,7 @@ todo. quoting in chat und forum
 todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
 
 todo. forum management
-todo. background color
+todo. light background color more pale?
 todo. black map more contrast
 todo. check fitting yard
 
@@ -55,18 +58,19 @@ todo. jobs due-date nicht auf basis von ticks fest legen sondern die punkte werd
 todo. schadensprofil von schiffsklassen und flotten darstellen
 todo. look & feel wie in büchern
 todo. emission spectra als gimmick
+todo. missionen sollten Rumpfmasse inkl Klasse beachten "großer Rumpf und Frachtertriebwerke sind kein Schlachtschiff"
 
 ### Bugs fixed
 
-todo. check transportation exception on tick?
-
 1. Der Pop Demand zeigt nun auch den Bedarf von Flotten im Umbau oder in Reparatur an.
 
+todo. job display only priority when multiple
 todo. battle reports notification wrong
 todo. repair/upgrade job inaktiviert schiff nicht
 todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen
+todo. spontan leere flotte muss von der map verschwinden
 
-todo. forum message read melden aber icon weiter anzeigen
+todo. forum message read melden aber icon weiter anzeigen -> mark read directly, not on destroy
 
 todo. priorisierung bei pop demand und migration problematisch?
 todo. population problem bei Samovar - yufiel -> mind aber ein update-problem
@@ -79,6 +83,7 @@ Nachrichten:
 
 #### next steps
 
+todo. ticksLeft nur noch implizit zeigen, immer auf Punktebasis rechnen (mehrere jobs pro tick möglich)
 todo. zoom issue at map
 todo. fleetsharks at zoom and move
 todo. durchsuchbare release notes?

@@ -93,7 +93,7 @@ public class Planet extends AbstractEntityKey implements HasOwner {
     @JoinColumn(name = "idResourceTransportationDelivery", updatable = false)
     private final ResourceDeposit resourceTransportationDelivery = new ResourceDeposit(EDepositType.TRANSPORTATION_DELIVERY);
 
-    @Nonnull /* todo remove eager and replace by direct fetching */
+    @Nonnull /* fixme remove eager and replace by direct fetching */
     @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, mappedBy = "planet")
     private final Set<Construction> constructions = new HashSet<>();
 

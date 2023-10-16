@@ -282,6 +282,8 @@ public class FleetApi extends BaseApi {
         final FleetSplit fleetSplit = multiAction.getFleetSplit();
         final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> splitFleets = fleetSplit != null ? fleetService.splitFleets(fleetSplit, getIdUser()) : Set.of();
 
+        fleetService.operateShips(multiAction.getOrderOperational(), multiAction.getOrderInoperational());
+
         return ResponseEntity.ok(new FleetFormationMultiActionResult(fleetMergeResult, splitFleets, getPreferredLanguage()));
     }
 
@@ -508,10 +510,14 @@ public class FleetApi extends BaseApi {
     public ResponseEntity<?> retireFleet(@PathVariable("idFleet") final int idFleet) {
 
         final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetService.find(idFleet);
-        if (fleet == null || fleet.getOwner().getId() != getIdUser()) {
+        if (fleet == null || fleet.getOwner().getId() != getIdUser() || fleet.getOrbit() == null) {
             throw new NotifyWebUserException("Nope, I guess not.");
         }
 
+        final Planet station = planetService.findByCoordinates(fleet.getOrbit());
+        final Set<de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip> ships = fleet.getAliveShips();
+        ships.forEach(w -> w.setMothball(Objects.requireNonNull(station)));
+        warShipService.saveAll(ships);
         fleetService.markAsDestroyed(fleet);
         return ResponseEntity.ok(true);
     }

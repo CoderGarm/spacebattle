@@ -9,6 +9,7 @@ import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.misc.Operationable;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -364,7 +365,6 @@ public class FleetService {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
         fleet.delete();
-        fleet.getAliveShips().forEach(s -> s.setFleet(null));
         fleetRepository.save(fleet);
     }
 
@@ -530,7 +530,7 @@ public class FleetService {
         final Planet mothball = planetService.findByCoordinates(orbit);
         Preconditions.checkNotNull(mothball, "mothball must not be empty");
 
-        warShip.sendToPool(mothball);
+        warShip.setMothball(mothball);
         warShipService.save(warShip);
         transferCrewToPlanet(warShip);
     }
@@ -560,5 +560,92 @@ public class FleetService {
         fleet.getAliveShips().stream().map(WarShip::getShipClass).map(ShipClass::getCosts).forEach(rd -> costs.updateCrew(rd.getCrewRequirement(), ECalculationType.ADD));
         planet.getResourceDeposit().updateCrew(costs.getCrewRequirement(), ECalculationType.ADD);
         planetService.save(planet);
+    }
+
+    public void operateShips(@Nonnull final List<Integer> orderOperational, @Nonnull final List<Integer> orderInoperational) {
+        Preconditions.checkNotNull(orderOperational, "orderOperational must not be empty");
+        Preconditions.checkNotNull(orderInoperational, "orderInoperational must not be empty");
+
+        final List<WarShip> warShips = fetchAllShips(orderOperational, orderInoperational);
+        final Planet planet = identifyPlanet(warShips);
+        if (planet != null) {
+            final Set<WarShip> toStore = inoperateShips(orderInoperational, warShips, planet);
+            toStore.addAll(operateShips(orderOperational, warShips, planet));
+            warShipService.saveAll(toStore);
+            planetService.save(planet);
+        }
+    }
+
+    @Nonnull
+    private List<WarShip> fetchAllShips(@Nonnull final List<Integer> orderOperational, @Nonnull final List<Integer> orderInoperational) {
+        Preconditions.checkNotNull(orderOperational, "orderOperational must not be empty");
+        Preconditions.checkNotNull(inoperateShips(), "inoperateShips() must not be empty");
+
+        final HashSet<Integer> ids = new HashSet<>(orderOperational);
+        ids.addAll(orderInoperational);
+        return warShipService.findByIds(ids);
+    }
+
+    @Nullable
+    private Planet identifyPlanet(@Nonnull final List<WarShip> warShips) {
+        Preconditions.checkNotNull(warShips, "warShips must not be empty");
+
+        Planet planet = warShips.stream()
+                .map(WarShip::getMothball)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+        if (planet == null) {
+            final FleetOrbit fleetOrbit = warShips.stream()
+                    .map(WarShip::getFleet)
+                    .filter(Objects::nonNull)
+                    .map(Fleet::getOrbit)
+                    .filter(Objects::nonNull)
+                    .findFirst().orElseThrow(NullPointerException::new);
+            planet = planetService.findByCoordinates(fleetOrbit);
+        }
+        return planet;
+    }
+
+    @Nonnull
+    private Set<WarShip> operateShips(@Nonnull final List<Integer> orderOperational, @Nonnull final List<WarShip> warShips, @Nonnull final Planet planet) {
+        Preconditions.checkNotNull(orderOperational, "orderOperational must not be empty");
+        Preconditions.checkNotNull(warShips, "warShips must not be empty");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+        final Set<WarShip> toStore = new HashSet<>();
+        final Set<WarShip> toOps = warShips.stream()
+                .filter(w -> orderOperational.contains(w.getId()))
+                .filter(w -> !w.isOperational())
+                .collect(Collectors.toSet());
+        for (final WarShip toOp : toOps) {
+            final CrewRequirement crewRequirement = toOp.getShipClass().getCosts().getCrewRequirement();
+            if (planet.getResourceDeposit().isPayingPossible(crewRequirement).isValid()) {
+                toOp.setOperational(true);
+                planet.getResourceDeposit().updateCrew(crewRequirement, ECalculationType.SUBTRACT);
+                toStore.add(toOp);
+            }
+        }
+        return toStore;
+    }
+
+    @Nonnull
+    private Set<WarShip> inoperateShips(final @Nonnull List<Integer> orderInoperational, @Nonnull final List<WarShip> warShips, @Nonnull final Planet planet) {
+        Preconditions.checkNotNull(orderInoperational, "orderInoperational must not be empty");
+        Preconditions.checkNotNull(warShips, "warShips must not be empty");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+        final Set<WarShip> toStore = new HashSet<>();
+        final Set<WarShip> toInOps = warShips.stream()
+                .filter(w -> orderInoperational.contains(w.getId()))
+                .filter(Operationable::isOperational)
+                .collect(Collectors.toSet());
+        for (final WarShip toInOp : toInOps) {
+            toInOp.setOperational(false);
+            final CrewRequirement crewRequirement = toInOp.getShipClass().getCosts().getCrewRequirement();
+            planet.getResourceDeposit().updateCrew(crewRequirement, ECalculationType.ADD);
+            toStore.add(toInOp);
+        }
+        return toStore;
     }
 }

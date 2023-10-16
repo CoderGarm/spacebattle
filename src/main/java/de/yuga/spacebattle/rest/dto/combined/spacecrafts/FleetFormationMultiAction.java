@@ -26,6 +26,16 @@ public class FleetFormationMultiAction {
     @Schema(required = true, description = "the id's of the warships which will be transferred to the reserve")
     private List<Integer> shipsToPool = new ArrayList<>();
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "the id's of the warships which must be operational")
+    private List<Integer> orderOperational = new ArrayList<>();
+
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "the id's of the warships which must be not operational")
+    private List<Integer> orderInoperational = new ArrayList<>();
+
     public FleetFormationMultiAction() {
     }
 
@@ -42,5 +52,15 @@ public class FleetFormationMultiAction {
     @Nonnull
     public List<Integer> getShipsToPool() {
         return shipsToPool;
+    }
+
+    @Nonnull
+    public List<Integer> getOrderOperational() {
+        return orderOperational;
+    }
+
+    @Nonnull
+    public List<Integer> getOrderInoperational() {
+        return orderInoperational;
     }
 }
