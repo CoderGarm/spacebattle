@@ -79,8 +79,8 @@ public class WarShipService {
     }
 
     @Nonnull
-    public Set<WarShip> findPooledShipsByUser(final int idUser) {
-        return Objects.requireNonNullElse(warShipRepository.findPooledShipsByUser(idUser), new HashSet<>());
+    public Set<WarShip> findPooledShipsByUser(final int idUser, @Nullable final Integer idPlanet) {
+        return Objects.requireNonNullElse(warShipRepository.findPooledShipsByUser(idUser, idPlanet), new HashSet<>());
     }
 
     @Nonnull

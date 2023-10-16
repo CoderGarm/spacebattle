@@ -65,7 +65,7 @@ public class UserPointsService {
                 .withColonizations(colonizationService.findAllForUser(user))
                 .withJobs(jobService.findAllJobsForUser(user))
                 .withFleets(fleetService.findAllFleetsByUser(user))
-                .withMothball(fleetService.findPooledWarships(user.getId()))
+                .withMothball(fleetService.findPooledWarships(user.getId(), null))
                 .withMissions(missionService.findAllMissions(user.getId()))
                 .withResearches(researchService.getResearchesForUser(user));
     }

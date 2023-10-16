@@ -21,6 +21,7 @@ ops und mothball:
 1. aktive und inaktive Kriegsschiffe in der Reserve und Flotten
     - Für Kriegsschiffe die abgewrackt werden, bekommt man jetzt 50 % der Ressourcen zurück. Die Crew wird natürlich nicht dezimiert.
     - Man kann Kriegsschiffe nun per Button direkt in die Reserve schicken.
+   - Man kann Schiffe nur auf Planeten mit Schiffswerften verschrotten oder einmotten. Dort lagern eingemottete Schiffe bis zur Wiederverwendung.
     - Schiffe in der Reserve haben keine aktive Crew mehr, die befindet sich auf dem Planeten, in dessen Orbit das Schiff eingemottet wurde.
     - todo. Sobald Schiffe der Reserve aktiviert werden und genug Crew auf dem Planeten ist, werden sie sofort aktiviert. Ist nicht genug Crew da, bleiben es beim bisherigen
       Verhalten.
@@ -41,6 +42,7 @@ todo. black map more contrast
 todo. check fitting yard
 
 todo. zu teure gebäude per farbe anzeigen
+todo. gebäde preselect wenn construction läuft
 
 todo. star map filter für flotten
 
@@ -50,11 +52,17 @@ todo. star map filter für flotten
 
 todo. flottengröße und status in menü anzeigen
 todo. jobs due-date nicht auf basis von ticks fest legen sondern die punkte werden runter gerechnet -> ticks left ist immer eine berechnung
+todo. schadensprofil von schiffsklassen und flotten darstellen
+todo. look & feel wie in büchern
+todo. emission spectra als gimmick
 
 ### Bugs fixed
 
+todo. check transportation exception on tick?
+
 1. Der Pop Demand zeigt nun auch den Bedarf von Flotten im Umbau oder in Reparatur an.
 
+todo. battle reports notification wrong
 todo. repair/upgrade job inaktiviert schiff nicht
 todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen
 
@@ -88,6 +96,8 @@ todo. housing left for x ticks - anzeige nach lastring ticks besser aufstellen
 
 ?. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
 ?. history for dashboard
+
+todo. fetch eager auf constructions weg vom planet
 
 - cache cleanup or only load last 3 ticks
 - cache in datenbank verschieben - mariadb json pointer useful?
@@ -180,17 +190,10 @@ todo. Usernamen und Namen des Imperiums trennen, Herrschertitel, Navy-Prefix
 todo. wurmlochbrücken
 todo. population raiden
 todo. spot offer hat nur so viel volumen wie die letzten 10 Tage insgesamt gehandelt wurde
-todo. warship health states not persisted
-todo. reload trade offers and stuff after take one
 todo. operationsgebiet auf karte einzeichen -> systeme/planeten erkennen und für mission setzen
 
-todo. kein alter Menüpunkt mehr ausgewählt wenn man sich wieder einloggt
 todo. Exception per mail an webmaster (warum funzt das nicht auf prod?)
 
-- look & feel wie in büchern
-- emission spectra als gimmick
-
-todo. better distinguish between tick-worker-service and tick-time-service
 todo. combat aufhübschen and more infos
 todo. fleet movement report im dashboard
 todo. Wartung von Schiffen und Flotten -> Abnutzung der Impeller

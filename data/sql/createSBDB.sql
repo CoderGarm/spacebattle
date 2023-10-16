@@ -227,7 +227,7 @@
 
     create table forumMessageRead (
        idForumMessageRead integer not null auto_increment,
-       isRead boolean NOT NULL DEFAULT FALSE,
+        isRead boolean not null default false,
         idForum integer not null,
         idForumMessage integer not null,
         idForumThread integer not null,
@@ -744,6 +744,7 @@
         name varchar(255) not null,
         idFleet integer,
         idMission integer,
+        idMothball integer,
         idShipClass integer not null,
         idShipyard integer not null,
         primary key (idWarShip)
@@ -1686,6 +1687,11 @@
        references mission (idMission);
 
     alter table warShip 
+       add constraint FKgxsukhuxoyaglnxcaawuyuh30 
+       foreign key (idMothball) 
+       references planet (idPlanet);
+
+    alter table warShip 
         add constraint FKjr13y2u3qkka7d3npp9omwdoa
             foreign key (idShipClass)
                 references shipClass (idShipClass);
@@ -2188,3 +2194,5 @@ insert into dbPatch values (null, now(), 'switch to job type', '0.1.9-1');
 insert into dbPatch values (null, now(), 'add convoy mission', '0.1.10-1');
 insert into dbPatch values (null, now(), 'add roleplay data', '0.1.11-1');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'add forum message trigger', '0.1.12-1');
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'planetary mothball', '0.1.13-1');
+

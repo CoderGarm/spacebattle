@@ -456,8 +456,8 @@ public class FleetService {
     }
 
     @Nonnull
-    public Set<WarShip> findPooledWarships(final int idUser) {
-        return warShipService.findPooledShipsByUser(idUser);
+    public Set<WarShip> findPooledWarships(final int idUser, @Nullable final Integer idPlanet) {
+        return warShipService.findPooledShipsByUser(idUser, idPlanet);
     }
 
     @Nonnull
@@ -486,7 +486,7 @@ public class FleetService {
 
         final Set<Integer> fleetIDs = warShips.stream().map(WarShip::getFleet).filter(Objects::nonNull).map(AbstractEntityKey::getId).collect(Collectors.toSet());
 
-        warShips.forEach(WarShip::sendToPool);
+        warShips.forEach(this::mothballShip);
         warShipService.saveAll(warShips);
         warShips.forEach(this::transferCrewToPlanet);
         calculateFleetState(fleetIDs);
@@ -523,8 +523,14 @@ public class FleetService {
 
     public void mothballShip(@Nonnull final WarShip warShip) {
         Preconditions.checkNotNull(warShip, "warShip must not be empty");
+        Preconditions.checkNotNull(warShip.getFleet(), "warShip.getFleet() must not be empty");
+        Preconditions.checkNotNull(warShip.getFleet().getOrbit(), "warShip.getFleet().getOrbit() must not be empty");
 
-        warShip.setFleet(null);
+        final FleetOrbit orbit = warShip.getFleet().getOrbit();
+        final Planet mothball = planetService.findByCoordinates(orbit);
+        Preconditions.checkNotNull(mothball, "mothball must not be empty");
+
+        warShip.sendToPool(mothball);
         warShipService.save(warShip);
         transferCrewToPlanet(warShip);
     }

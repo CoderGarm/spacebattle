@@ -479,7 +479,7 @@ public class FleetApi extends BaseApi {
         return ResponseEntity.ok(true);
     }
 
-    @GetMapping(value = WARSHIP_POOLING_ENDPOINT)
+    @GetMapping(value = WARSHIP_POOLING_ENDPOINT + "/{idPlanet}")
     @Operation(summary = "Renames a fleet.", operationId = "getPooledWarships",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -490,9 +490,9 @@ public class FleetApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getPooledWarships() {
+    public ResponseEntity<?> getPooledWarships(@PathVariable final int idPlanet) {
         final int idUser = getIdUser();
-        final Set<de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip> pooledShips = fleetService.findPooledWarships(idUser);
+        final Set<de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip> pooledShips = fleetService.findPooledWarships(idUser, idPlanet);
         return ResponseEntity.ok(pooledShips.stream().map(w -> new WarShip(w, w.getWarshipHealthState(), getPreferredLanguage())));
     }
 

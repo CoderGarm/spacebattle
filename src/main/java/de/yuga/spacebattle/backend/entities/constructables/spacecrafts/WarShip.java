@@ -159,6 +159,17 @@ public class WarShip extends Operationable {
         detachment.setMission(mission);
     }
 
+    public void sendToPool(@Nonnull final Planet planet) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+        if (detachment == null) {
+            this.detachment = new Detachment();
+        }
+        detachment.setMission(null);
+        detachment.setFleet(null);
+        detachment.setMothball(planet);
+    }
+
     @Nullable
     public Detachment getDetachment() {
         return detachment;
@@ -199,9 +210,5 @@ public class WarShip extends Operationable {
 
     public void createWarshipHealthState() {
         this.warshipHealthState = new WarshipHealthState(this);
-    }
-
-    public void sendToPool() {
-        detachment = null;
     }
 }

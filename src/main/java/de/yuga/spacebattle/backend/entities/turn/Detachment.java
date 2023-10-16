@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.entities.turn;
 
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.mission.Mission;
 
 import javax.annotation.Nullable;
@@ -25,6 +26,11 @@ public class Detachment {
     private Mission mission;
 
     @Nullable
+    @ManyToOne
+    @JoinColumn(name = "idMothball")
+    private Planet mothball;
+
+    @Nullable
     public Fleet getFleet() {
         return fleet;
     }
@@ -46,5 +52,14 @@ public class Detachment {
             this.fleet = null;
         }
         this.mission = mission;
+    }
+
+    @Nullable
+    public Planet getMothball() {
+        return mothball;
+    }
+
+    public void setMothball(@Nullable final Planet mothball) {
+        this.mothball = mothball;
     }
 }
