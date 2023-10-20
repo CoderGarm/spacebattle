@@ -247,7 +247,7 @@ public class JobService {
         }
     }
 
-    public void createShipyardRepairJob(@Nonnull final Planet planet, @Nonnull final Map<ShipClass, Integer> shipJobPayload) {
+    public void createShipyardJob(@Nonnull final Planet planet, @Nonnull final Map<ShipClass, Integer> shipJobPayload) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkNotNull(shipJobPayload, "shipJobPayload shouldn't be null!");
 

@@ -388,4 +388,8 @@ public class Fleet extends Operationable implements HasOwner {
     public boolean isNeedsRepair() {
         return getAliveShips().stream().anyMatch(s -> s.getWarshipHealthState().needsRepair());
     }
+
+    public boolean isInYard() {
+        return getJobs().stream().anyMatch(j -> !j.isDeleted());
+    }
 }

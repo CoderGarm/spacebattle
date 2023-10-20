@@ -9,6 +9,7 @@ import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStat
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 @Schema(description = "Contains the several states which can be taken from a spacecraft.")
 public class StateBlock {
@@ -38,6 +39,15 @@ public class StateBlock {
     private boolean needsRepair;
 
     @JsonProperty
+    @Schema(required = true, description = "If the spacecraft is in the shipyard.")
+    private boolean isInYard = false;
+
+    @Nullable
+    @JsonProperty
+    @Schema(description = "The amount of ships in the fleet.")
+    private Integer fleetSize;
+
+    @JsonProperty
     @Schema(required = true, description = "If the spacecraft needs ammunition.")
     private boolean needsAmmunition;
 
@@ -54,6 +64,8 @@ public class StateBlock {
         this.needsRepair = fleet.isNeedsRepair();
         this.needsAmmunition = fleet.getAliveShips().stream().anyMatch(w -> w.getWarshipHealthState().needsAmmunition());
         this.isFightingCapable = fleet.isOperational();
+        this.isInYard = fleet.isInYard();
+        this.fleetSize = fleet.getAliveShips().size();
     }
 
     public StateBlock(@Nonnull final WarShip warShip) {
@@ -67,6 +79,7 @@ public class StateBlock {
         this.needsRepair = warshipHealthState.needsRepair();
         this.needsAmmunition = warshipHealthState.needsAmmunition();
         this.isFightingCapable = warshipHealthState.isFightingCapable();
+        this.isInYard = warShip.getFleet() != null && warShip.getFleet().isInYard();
     }
 
     public StateBlock(@Nonnull final WarshipHealthStateAccessor warshipHealthState) {
@@ -79,5 +92,6 @@ public class StateBlock {
         this.needsRepair = warshipHealthState.needsRepair();
         this.needsAmmunition = warshipHealthState.needsAmmunition();
         this.isFightingCapable = warshipHealthState.isFightingCapable();
+        this.isInYard = warshipHealthState.getWarShip().getFleet() != null && warshipHealthState.getWarShip().getFleet().isInYard();
     }
 }

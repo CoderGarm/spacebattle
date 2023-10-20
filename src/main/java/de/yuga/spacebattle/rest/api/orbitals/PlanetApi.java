@@ -235,7 +235,7 @@ public class PlanetApi extends BaseApi {
         final Map<ShipClass, Integer> jobLoad = shipJobPayload.stream()
                 .collect(Collectors.toMap(entry -> foundClassesByID.get(entry.getIdShipClass()), ShipyardConstructionSelection::getAmount));
 
-        jobService.createShipyardRepairJob(planet, jobLoad);
+        jobService.createShipyardJob(planet, jobLoad);
         return ResponseEntity.ok(true);
     }
 

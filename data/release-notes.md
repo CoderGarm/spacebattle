@@ -2,22 +2,30 @@
 
 #### Gameplay
 
-todo. Gebäudeoutput muss deutlicher steigen
-todo. tech level 2 und 3 nutzen
 todo. placing new players must be improved
 todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt aus"
 
 1. Aktive und inaktive Kriegsschiffe in der Reserve und Flotten
     - Für Kriegsschiffe die abgewrackt werden, bekommt man jetzt 50 % der Ressourcen zurück. Die Crew wird natürlich nicht dezimiert.
     - Man kann Kriegsschiffe nun per Button direkt in die Reserve schicken.
-   - Man kann Schiffe nur auf Planeten mit Schiffswerften verschrotten oder einmotten. Dort lagern eingemottete Schiffe bis zur Wiederverwendung.
+    - Man kann Schiffe nur auf Planeten mit Schiffswerften verschrotten oder einmotten. Dort lagern eingemottete Schiffe bis zur Wiederverwendung.
     - Schiffe in der Reserve haben keine aktive Crew mehr, die befindet sich auf dem Planeten, in dessen Orbit das Schiff eingemottet wurde.
-   - Schiffe können im Detachment Tab entmannt werden. Verzeiht den Wortwitz. Dort kann man sie, wenn genug Besatzung auf dem Planeten steht, direkt wieder aktivieren.
-   - Nur aktive Schiffe der Reserve können Missionen zugeteilt werden.
-   - Es gibt ein kurzes Tutorial dazu.
+    - Schiffe können im Detachment Tab entmannt werden. Verzeiht den Wortwitz. Dort kann man sie, wenn genug Besatzung auf dem Planeten steht, direkt wieder aktivieren.
+    - Nur aktive Schiffe der Reserve können Missionen zugeteilt werden.
+    - Es gibt ein kurzes Tutorial dazu.
 2. Angriffe auf Handelskonvois passieren nun auch, wenn eine der großen Mächte im Spiel ist. Allerdings schützen sie ihren Teil des Konvois mit ausreichender Kapazität.
 
+todo. Gebäudeoutput muss deutlicher steigen
+todo. tech level 2 und 3 nutzen
+todo. Hyperabdruck im System bei aufkommenden Flotten
+
+- Emissionssignatur verrät ungefähre größe und anzahl (siehe "look & feel wie in büchern")
+- zwei gebäude (planetare antennen, orbitale antennen) und Eloka-Modul auf Schiffen erzeugen scan-punkte und verraten genauigkeit der ortung
+
 #### Diverses
+
+1. Es gibt jetzt individuelle Icons für die verschiedenen Stati von Flotten und Schiffen.
+2. Das Menü ist etwas ansprechender gestaltet, insbesondere enthält die Flottenauswahl nun mehr direkt sichtbare Informationen über Zusammensetzung und Status der Flotten.
 
 todo. article edit stuff -> fitting tips, missionen ...
 
@@ -62,12 +70,13 @@ todo. player comment about the game in profile to display at take-a-tour
 
 1. Der Pop Demand zeigt nun auch den Bedarf von Flotten im Umbau oder in Reparatur an.
 2. Das planetare Jobdisplay zeigt nun nur noch den aktuell laufenden Job an, nicht mehr die ganze Queue.
+   todo. upgrade/repair job muss dings einklappen und neu laden
+   todo. 10-points-problem das leftover
 
+todo. wrong password no second login attempt
 todo. battle reports notification wrong
-todo. repair/upgrade job inaktiviert schiff nicht
 todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen
 todo. spontan leere flotte muss von der map verschwinden
-
 
 todo. priorisierung bei pop demand und migration problematisch?
 todo. population problem bei Samovar - yufiel -> mind aber ein update-problem
