@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
+import de.yuga.spacebattle.backend.enums.EJobPriority;
 import de.yuga.spacebattle.rest.dto.account.Player;
 import de.yuga.spacebattle.rest.dto.buildings.Building;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
@@ -54,7 +55,7 @@ public class Job {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The priority of the job.")
-    private String priority;
+    private EJobPriority priority;
 
     @JsonProperty
     @Schema(required = true, description = "Is this a building job build.")
@@ -105,7 +106,7 @@ public class Job {
         this.facility = new Construction(job.getFacility(), languageCode);
         this.facilityPlanet = new Planet(job.getFacility().getPlanet());
         this.ticksLeft = job.getTicksLeft();
-        this.priority = job.getPriority().name();
+        this.priority = job.getPriority();
         final Constructable constructable = job.getConstructable();
         this.resourceType = new EResourceType(constructable.getResourceType());
         this.isBuildingJob = constructable.getBuilding() != null;

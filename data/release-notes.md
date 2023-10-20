@@ -7,7 +7,7 @@ todo. tech level 2 und 3 nutzen
 todo. placing new players must be improved
 todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt aus"
 
-1. aktive und inaktive Kriegsschiffe in der Reserve und Flotten
+1. Aktive und inaktive Kriegsschiffe in der Reserve und Flotten
     - Für Kriegsschiffe die abgewrackt werden, bekommt man jetzt 50 % der Ressourcen zurück. Die Crew wird natürlich nicht dezimiert.
     - Man kann Kriegsschiffe nun per Button direkt in die Reserve schicken.
    - Man kann Schiffe nur auf Planeten mit Schiffswerften verschrotten oder einmotten. Dort lagern eingemottete Schiffe bis zur Wiederverwendung.
@@ -15,6 +15,7 @@ todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt aus"
    - Schiffe können im Detachment Tab entmannt werden. Verzeiht den Wortwitz. Dort kann man sie, wenn genug Besatzung auf dem Planeten steht, direkt wieder aktivieren.
    - Nur aktive Schiffe der Reserve können Missionen zugeteilt werden.
    - Es gibt ein kurzes Tutorial dazu.
+2. Angriffe auf Handelskonvois passieren nun auch, wenn eine der großen Mächte im Spiel ist. Allerdings schützen sie ihren Teil des Konvois mit ausreichender Kapazität.
 
 #### Diverses
 
@@ -31,10 +32,7 @@ eben ob die Menge an Schiffsrümpfen und Rumpfgrößen so aussehen, als sollte d
 Also wenn du ein LAC im Orbit hast muss der halt kurz husten, bei nem CL überlegt der sicher ob er das packt und bei nem Schlachtkreuzer malt der Stift.
 ---
 
-todo. npc convoys are protected by them
 todo. mission items more roleplay "unprotected convoy changes signature of ship to warship and pirate fled ...""
-todo. login log with timestamp (or better regex?)
-todo. player comment about the game in profile to display at take-a-tour
 todo. wiki fertig machen und in tutorial nutzen -> taxonomie hinzufügen, links ermöglichen
 todo. quoting in chat und forum
 todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
@@ -54,23 +52,22 @@ todo. star map filter für flotten
 - moves ...
 
 todo. flottengröße und status in menü anzeigen
-todo. jobs due-date nicht auf basis von ticks fest legen sondern die punkte werden runter gerechnet -> ticks left ist immer eine berechnung
 todo. schadensprofil von schiffsklassen und flotten darstellen
 todo. look & feel wie in büchern
 todo. emission spectra als gimmick
 todo. missionen sollten Rumpfmasse inkl Klasse beachten "großer Rumpf und Frachtertriebwerke sind kein Schlachtschiff"
+todo. player comment about the game in profile to display at take-a-tour
 
 ### Bugs fixed
 
 1. Der Pop Demand zeigt nun auch den Bedarf von Flotten im Umbau oder in Reparatur an.
+2. Das planetare Jobdisplay zeigt nun nur noch den aktuell laufenden Job an, nicht mehr die ganze Queue.
 
-todo. job display only priority when multiple
 todo. battle reports notification wrong
 todo. repair/upgrade job inaktiviert schiff nicht
 todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen
 todo. spontan leere flotte muss von der map verschwinden
 
-todo. forum message read melden aber icon weiter anzeigen -> mark read directly, not on destroy
 
 todo. priorisierung bei pop demand und migration problematisch?
 todo. population problem bei Samovar - yufiel -> mind aber ein update-problem
@@ -83,7 +80,7 @@ Nachrichten:
 
 #### next steps
 
-todo. ticksLeft nur noch implizit zeigen, immer auf Punktebasis rechnen (mehrere jobs pro tick möglich)
+todo. jobs due-date nicht auf basis von ticks fest legen sondern die punkte werden runter gerechnet -> ticks left ist immer eine berechnung (mehrere jobs pro tick möglich)
 todo. zoom issue at map
 todo. fleetsharks at zoom and move
 todo. durchsuchbare release notes?

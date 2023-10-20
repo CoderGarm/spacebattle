@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services.turn.tick.mission;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -15,6 +16,7 @@ import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradeOffer;
 import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import de.yuga.spacebattle.backend.enums.EMissionAction;
 import de.yuga.spacebattle.backend.enums.EMissionType;
+import de.yuga.spacebattle.backend.enums.EShipClassType;
 import de.yuga.spacebattle.backend.services.turn.mission.MissionItemService;
 import de.yuga.spacebattle.backend.services.turn.mission.MissionService;
 import de.yuga.spacebattle.backend.services.turn.resources.MarketplaceService;
@@ -148,11 +150,13 @@ public class RaidingConvoyMission implements MissionRunner {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
 
-        final int defendersHeatImpact = defenders.stream()
+        int defendersHeatImpact = defenders.stream()
                 .map(WarShip::getShipClass)
                 .map(ShipClass::getShipClassType)
                 .map(eShipClassType -> eShipClassType.getHeatImpact(EMissionType.CONVOY_PROTECTION))
                 .reduce(0, Integer::sum);
+
+        defendersHeatImpact = setUpNPCProtection(defendersHeatImpact, protectionMissions);
 
         final int systemsCumulatedHeat = planets.stream()
                 .map(heatMap::get)
@@ -161,8 +165,7 @@ public class RaidingConvoyMission implements MissionRunner {
                 .reduce(0, Integer::sum);
 
         final ConvoyProtectionMissionItem whatever;
-        final boolean isPlayer = tradedResource.getDestination().getHumanOwner() != null;
-        if (isPlayer && systemsCumulatedHeat > defendersHeatImpact) {
+        if (systemsCumulatedHeat > defendersHeatImpact) {
             LOGGER.info("\tPirates are quarrelsome");
 
             final double chanceToEvade = (systemsCumulatedHeat + defendersHeatImpact) / 100D;
@@ -188,5 +191,17 @@ public class RaidingConvoyMission implements MissionRunner {
             whatever = MissionItem.convoyGuardedOnSight(today, tradedResource, phase);
         }
         missionItemService.save(whatever);
+    }
+
+    private int setUpNPCProtection(int defendersHeatImpact, @Nonnull final List<ConvoyProtectionMission> protectionMissions) {
+        Preconditions.checkNotNull(protectionMissions, "protectionMissions must not be empty");
+
+        defendersHeatImpact = protectionMissions.stream().map(m -> {
+            final NonPlayerCharacter buyer = m.getProtectedTrade().getBuyer().getNpcOwner();
+            final NonPlayerCharacter seller = m.getProtectedTrade().getTradeOffer().getSeller().getNpcOwner();
+            return buyer == null && seller == null ? 0 : (3 * EShipClassType.DD.getHeatImpact(EMissionType.CONVOY_PROTECTION)); // npc sends 3 destroyers
+        }).reduce(defendersHeatImpact, Integer::sum);
+
+        return defendersHeatImpact;
     }
 }

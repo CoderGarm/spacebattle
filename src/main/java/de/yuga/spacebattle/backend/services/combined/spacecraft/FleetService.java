@@ -579,7 +579,7 @@ public class FleetService {
     @Nonnull
     private List<WarShip> fetchAllShips(@Nonnull final List<Integer> orderOperational, @Nonnull final List<Integer> orderInoperational) {
         Preconditions.checkNotNull(orderOperational, "orderOperational must not be empty");
-        Preconditions.checkNotNull(inoperateShips(), "inoperateShips() must not be empty");
+        Preconditions.checkNotNull(orderInoperational, "orderInoperational must not be empty");
 
         final HashSet<Integer> ids = new HashSet<>(orderOperational);
         ids.addAll(orderInoperational);
