@@ -51,6 +51,10 @@ public class StateBlock {
     @Schema(required = true, description = "If the spacecraft needs ammunition.")
     private boolean needsAmmunition;
 
+    @JsonProperty
+    @Schema(required = true, description = "If the spacecraft is moving around.")
+    private boolean isInMotion;
+
     public StateBlock() {
     }
 
@@ -66,6 +70,7 @@ public class StateBlock {
         this.isFightingCapable = fleet.isOperational();
         this.isInYard = fleet.isInYard();
         this.fleetSize = fleet.getAliveShips().size();
+        this.isInMotion = fleet.isInMotion();
     }
 
     public StateBlock(@Nonnull final WarShip warShip) {
@@ -80,6 +85,7 @@ public class StateBlock {
         this.needsAmmunition = warshipHealthState.needsAmmunition();
         this.isFightingCapable = warshipHealthState.isFightingCapable();
         this.isInYard = warShip.getFleet() != null && warShip.getFleet().isInYard();
+        this.isInMotion = warShip.getFleet() != null && warShip.getFleet().isInMotion();
     }
 
     public StateBlock(@Nonnull final WarshipHealthStateAccessor warshipHealthState) {
@@ -93,5 +99,6 @@ public class StateBlock {
         this.needsAmmunition = warshipHealthState.needsAmmunition();
         this.isFightingCapable = warshipHealthState.isFightingCapable();
         this.isInYard = warshipHealthState.getWarShip().getFleet() != null && warshipHealthState.getWarShip().getFleet().isInYard();
+        this.isInMotion = warshipHealthState.getWarShip().getFleet() != null && warshipHealthState.getWarShip().getFleet().isInMotion();
     }
 }

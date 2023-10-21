@@ -26,8 +26,9 @@ todo. Hyperabdruck im System bei aufkommenden Flotten
 
 1. Es gibt jetzt individuelle Icons für die verschiedenen Stati von Flotten und Schiffen.
 2. Das Menü ist etwas ansprechender gestaltet, insbesondere enthält die Flottenauswahl nun mehr direkt sichtbare Informationen über Zusammensetzung und Status der Flotten.
+3. The map background is dark again.
 
-todo. article edit stuff -> fitting tips, missionen ...
+todo. article edit stuff -> fitting tips, missionen ... -> store full article as rev
 
 ---
 Das wichtigste ist, dass die Mission ohne Kampf wirkt.
@@ -59,7 +60,6 @@ todo. star map filter für flotten
 - fremde inop
 - moves ...
 
-todo. flottengröße und status in menü anzeigen
 todo. schadensprofil von schiffsklassen und flotten darstellen
 todo. look & feel wie in büchern
 todo. emission spectra als gimmick
