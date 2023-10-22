@@ -31,10 +31,10 @@ public interface JobRepository extends CrudRepository<Job, Integer>, CustomJobRe
     List<Job> findResearchJobs();
 
     @Nullable
-    @Query("SELECT j FROM Job j WHERE j.ticksLeft > 0 AND j.finished IS NULL AND j.facility.planet.id = :idPlanet AND j.constructable.fleet IS NOT NULL OR j.constructable.building IS NOT NULL")
+    @Query("SELECT j FROM Job j WHERE j.ticksLeft > 0 AND j.finished IS NULL AND j.facility.planet.id = :idPlanet AND (j.constructable.fleet IS NOT NULL OR j.constructable.building IS NOT NULL)")
     List<Job> findAllFleetOrBuildingJobsByPlanet(@Param("idPlanet") final int idPlanet);
 
     @Nullable
-    @Query("SELECT j FROM Job j WHERE j.ticksLeft > 0 AND j.finished IS NULL AND j.owner.id = :idUser AND j.constructable.fleet IS NOT NULL OR j.constructable.building IS NOT NULL")
+    @Query("SELECT j FROM Job j WHERE j.ticksLeft > 0 AND j.finished IS NULL AND j.owner.id = :idUser AND (j.constructable.fleet IS NOT NULL OR j.constructable.building IS NOT NULL)")
     List<Job> findAllFleetOrBuildingJobsForUser(@Param("idUser") final int idUser);
 }

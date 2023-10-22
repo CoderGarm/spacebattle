@@ -28,7 +28,7 @@ todo. Hyperabdruck im System bei aufkommenden Flotten
 2. Das Menü ist etwas ansprechender gestaltet, insbesondere enthält die Flottenauswahl nun mehr direkt sichtbare Informationen über Zusammensetzung und Status der Flotten.
 3. The map background is dark again.
 
-todo. article edit stuff -> fitting tips, missionen ... -> store full article as rev
+todo. wiki fertig machen und in tutorial nutzen -> taxonomie hinzufügen, links ermöglichen -> fitting tips, missionen ...
 
 ---
 Das wichtigste ist, dass die Mission ohne Kampf wirkt.
@@ -42,7 +42,6 @@ Also wenn du ein LAC im Orbit hast muss der halt kurz husten, bei nem CL überle
 ---
 
 todo. mission items more roleplay "unprotected convoy changes signature of ship to warship and pirate fled ...""
-todo. wiki fertig machen und in tutorial nutzen -> taxonomie hinzufügen, links ermöglichen
 todo. quoting in chat und forum
 todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
 
