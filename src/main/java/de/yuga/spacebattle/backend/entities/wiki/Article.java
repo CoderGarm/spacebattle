@@ -5,6 +5,7 @@ import de.yuga.spacebattle.backend.calculator.wiki.WikiCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.enums.EDiffDeltaType;
+import de.yuga.spacebattle.backend.enums.ETutorialCategory;
 import de.yuga.spacebattle.backend.enums.EWikiCategory;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.wiki.ArticleCreate;
@@ -49,6 +50,10 @@ public class Article extends AbstractEntityKey {
     @Enumerated(EnumType.STRING)
     private EWikiCategory wikiCategory;
 
+    @Nullable
+    @Enumerated(EnumType.STRING)
+    private ETutorialCategory tutorialCategory;
+
     @Nonnull
     @NotNull
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
@@ -64,6 +69,7 @@ public class Article extends AbstractEntityKey {
         this.title = article.getTitle();
         this.langCode = article.getLangCode();
         this.wikiCategory = article.getWikiCategory();
+        this.tutorialCategory = article.getTutorialCategory();
         this.articleRevisions.add(new ArticleRevision(author, 1, this, createArticleLines(article)));
     }
 
@@ -116,6 +122,11 @@ public class Article extends AbstractEntityKey {
     @Nonnull
     public EWikiCategory getWikiCategory() {
         return wikiCategory;
+    }
+
+    @Nullable
+    public ETutorialCategory getTutorialCategory() {
+        return tutorialCategory;
     }
 
     @Nonnull

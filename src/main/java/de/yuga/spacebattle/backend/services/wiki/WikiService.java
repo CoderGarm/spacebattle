@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.wiki.Article;
 import de.yuga.spacebattle.backend.entities.wiki.ArticleLine;
 import de.yuga.spacebattle.backend.entities.wiki.ArticleRevision;
+import de.yuga.spacebattle.backend.enums.ETutorialCategory;
 import de.yuga.spacebattle.backend.enums.EWikiCategory;
 import de.yuga.spacebattle.backend.repositories.wiki.ArticleRepository;
 import de.yuga.spacebattle.backend.repositories.wiki.ArticleRevisionRepository;
@@ -117,5 +118,21 @@ public class WikiService {
                 .filter(a -> a.getLangCode().equals(preferredLanguage))
                 .findFirst()
                 .orElse(null);
+    }
+
+    @Nullable
+    public ArticlePlainContent getTutorialArticle(@Nonnull final ETutorialCategory tutorialCategory, @Nonnull final String preferredLanguage) {
+        Preconditions.checkNotNull(tutorialCategory, "tutorialCategory must not be empty");
+        Preconditions.checkNotNull(preferredLanguage, "preferredLanguage must not be empty");
+
+        final Set<Article> basedOn = Objects.requireNonNullElse(articleRepository.findArticlesWithTypeAndTutorialCategory(EWikiCategory.GAME_MECHANICS, tutorialCategory), new HashSet<>());
+        Article languageBasedArticle = filterByLangCode(basedOn, preferredLanguage);
+        if (languageBasedArticle == null) {
+            languageBasedArticle = filterByLangCode(basedOn, Translation.DEFAULT_LANGUAGE);
+        }
+        if (languageBasedArticle != null) {
+            return findLatestContentForArticle(languageBasedArticle.getId());
+        }
+        return null;
     }
 }

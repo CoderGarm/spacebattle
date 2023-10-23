@@ -1,10 +1,12 @@
 package de.yuga.spacebattle.rest.dto.wiki;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.yuga.spacebattle.backend.enums.ETutorialCategory;
 import de.yuga.spacebattle.backend.enums.EWikiCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 @Schema(description = ".")
 public class ArticleCreate {
@@ -18,6 +20,11 @@ public class ArticleCreate {
     @JsonProperty
     @Schema(required = true, description = "The category")
     private EWikiCategory wikiCategory;
+
+    @Nullable
+    @JsonProperty
+    @Schema(description = "The tutorial category")
+    private ETutorialCategory tutorialCategory;
 
     @Nonnull
     @JsonProperty
@@ -40,6 +47,11 @@ public class ArticleCreate {
     @Nonnull
     public EWikiCategory getWikiCategory() {
         return wikiCategory;
+    }
+
+    @Nullable
+    public ETutorialCategory getTutorialCategory() {
+        return tutorialCategory;
     }
 
     @Nonnull

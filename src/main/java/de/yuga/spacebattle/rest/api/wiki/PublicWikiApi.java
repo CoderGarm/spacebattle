@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.api.wiki;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
+import de.yuga.spacebattle.backend.enums.ETutorialCategory;
 import de.yuga.spacebattle.backend.services.wiki.WikiService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
@@ -90,6 +91,20 @@ public class PublicWikiApi extends BaseApi {
         final ArticlePlainContent content = wikiService.findLatestContentForArticle(idArticle);
         PreconditionWebHelper.checkNotNull(content, "content must not be empty");
 
+        return ResponseEntity.ok(content);
+    }
+
+    @GetMapping(value = "tutorial/{tutorialCategory}")
+    @Operation(summary = "Returns the latest content of the requested article.", operationId = "getTutorialArticle",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ArticlePlainContent.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getTutorialArticle(@PathVariable("tutorialCategory") final ETutorialCategory tutorialCategory) {
+        final ArticlePlainContent content = wikiService.getTutorialArticle(tutorialCategory, getPreferredLanguage());
         return ResponseEntity.ok(content);
     }
 

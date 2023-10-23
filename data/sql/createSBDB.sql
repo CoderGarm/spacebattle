@@ -70,6 +70,7 @@
        idArticle integer not null auto_increment,
         langCode varchar(255) not null,
         title varchar(255) not null,
+        tutorialCategory varchar(255),
         wikiCategory varchar(255) not null,
         idBase integer,
         primary key (idArticle)
@@ -2195,4 +2196,4 @@ insert into dbPatch values (null, now(), 'add convoy mission', '0.1.10-1');
 insert into dbPatch values (null, now(), 'add roleplay data', '0.1.11-1');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'add forum message trigger', '0.1.12-1');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'planetary mothball', '0.1.14-1');
-
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'link wiki with tut', '0.1.14-2');

@@ -27,31 +27,19 @@ todo. Hyperabdruck im System bei aufkommenden Flotten
 1. Es gibt jetzt individuelle Icons für die verschiedenen Stati von Flotten und Schiffen.
 2. Das Menü ist etwas ansprechender gestaltet, insbesondere enthält die Flottenauswahl nun mehr direkt sichtbare Informationen über Zusammensetzung und Status der Flotten.
 3. The map background is dark again.
+4. Man kann nun Tutorialbeiträge im Wiki schreiben, die dann an den entsprechenden Tutorials angezeigt werden.  
+   Bitte sagt mir, wo am dringendsten Beiträge gebraucht werden. Das kann prinzipiell jeder User machen, der im Wiki editieren möchte.
+5. In den Gebäudebau wird nun der aktuell laufende Job vorausgewählt, damit man nicht mehr im Dashboard nachgucken muss.
+6. Ebenfalls werden nun Baubeschränkungen durch Preis oder Forschung direkt angezeigt. Das sollte einige unnötige Klickerei ersparen.
 
-todo. wiki fertig machen und in tutorial nutzen -> taxonomie hinzufügen, links ermöglichen -> fitting tips, missionen ...
-
----
-Das wichtigste ist, dass die Mission ohne Kampf wirkt.
-
-Die Mission reduziert die Heat des Planeten doppelt so stark wie die selben Schiffe ankernd im Orbit. Egal auf wie viele Missionen eine Anzahl an Schiffen aufgeteilt sind.
-
-Wenn Piraten spawnen gibt es mehrere Chancen dafür, dass sie Angst kriegen und abdrehen.
-Der Impact eines Schiffes (aktuell hart verdrahtet die definierte Klasse) im Orbit und auf Mission ist dabei gleich und letztlich checkt der Pirat "per Scanner aus der Distanz" mal
-eben ob die Menge an Schiffsrümpfen und Rumpfgrößen so aussehen, als sollte der Pirat Angst haben.
-Also wenn du ein LAC im Orbit hast muss der halt kurz husten, bei nem CL überlegt der sicher ob er das packt und bei nem Schlachtkreuzer malt der Stift.
----
-
-todo. mission items more roleplay "unprotected convoy changes signature of ship to warship and pirate fled ...""
+todo. mission items more role play "unprotected convoy changes signature of ship to warship and pirate fled ...""
 todo. quoting in chat und forum
 todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
 
 todo. forum management
 todo. light background color more pale?
-todo. black map more contrast
 todo. check fitting yard
 
-todo. zu teure gebäude per farbe anzeigen
-todo. gebäde preselect wenn construction läuft
 
 todo. star map filter für flotten
 

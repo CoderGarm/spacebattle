@@ -64,4 +64,6 @@ public class EnumValueDto {
     private de.yuga.spacebattle.backend.enums.EStarNation[] eStarNations;
     @JsonProperty
     private de.yuga.spacebattle.backend.enums.EJobPriority[] eJobPriorities;
+    @JsonProperty
+    private de.yuga.spacebattle.backend.enums.ETutorialCategory[] eTutorialCategories;
 }
