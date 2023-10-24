@@ -2,8 +2,7 @@
 
 #### Gameplay
 
-todo. placing new players must be improved
-todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt aus"
+todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt etwas aus", ansonsten beibehalten
 
 1. Aktive und inaktive Kriegsschiffe in der Reserve und Flotten
     - Für Kriegsschiffe die abgewrackt werden, bekommt man jetzt 50 % der Ressourcen zurück. Die Crew wird natürlich nicht dezimiert.
@@ -22,13 +21,14 @@ todo. Hyperabdruck im System bei aufkommenden Flotten
 - Emissionssignatur verrät ungefähre größe und anzahl (siehe "look & feel wie in büchern")
 - zwei gebäude (planetare antennen, orbitale antennen) und Eloka-Modul auf Schiffen erzeugen scan-punkte und verraten genauigkeit der ortung
 
+
 #### Diverses
 
 1. Es gibt jetzt individuelle Icons für die verschiedenen Stati von Flotten und Schiffen.
 2. Das Menü ist etwas ansprechender gestaltet, insbesondere enthält die Flottenauswahl nun mehr direkt sichtbare Informationen über Zusammensetzung und Status der Flotten.
 3. The map background is dark again.
 4. Man kann nun Tutorialbeiträge im Wiki schreiben, die dann an den entsprechenden Tutorials angezeigt werden.  
-   Bitte sagt mir, wo am dringendsten Beiträge gebraucht werden. Das kann prinzipiell jeder User machen, der im Wiki editieren möchte.
+   Bitte sagt mir, wo am dringendsten Beiträge gebraucht werden. Im Wiki schreiben kann prinzipiell allerdings jeder User, der im Wiki editieren möchte.
 5. In den Gebäudebau wird nun der aktuell laufende Job vorausgewählt, damit man nicht mehr im Dashboard nachgucken muss.
 6. Ebenfalls werden nun Baubeschränkungen durch Preis oder Forschung direkt angezeigt. Das sollte einige unnötige Klickerei ersparen.
 
@@ -37,7 +37,6 @@ todo. quoting in chat und forum
 todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
 
 todo. forum management
-todo. light background color more pale?
 todo. check fitting yard
 
 
@@ -55,33 +54,41 @@ todo. player comment about the game in profile to display at take-a-tour
 
 ### Bugs fixed
 
+Die Issues auf der Map (übergroße selection Marker, verschwundene Fleet sharks) entstehen durch übertriebene Zoom-Werte, wenn man zu schnell mit dem Mausrad zoomt und die "Bremse"
+nicht greift.  
+Diese Problematik habe ich raus priorisiert, da ich die ganze Map umbauen werde und ich hier sehr tief in die verwendete Library eingreifen müsste.  
+Der Workaround sollte in jedem der hiermit zusammenhängenden Probleme ein neues Laden der Map sein.
+
 1. Der Pop Demand zeigt nun auch den Bedarf von Flotten im Umbau oder in Reparatur an.
 2. Das planetare Jobdisplay zeigt nun nur noch den aktuell laufenden Job an, nicht mehr die ganze Queue.
+3. Ein Faden im Forum zeigt nun die Seite mit dem neusten, unbekannten Beitrag.
    todo. upgrade/repair job muss dings einklappen und neu laden
-   todo. 10-points-problem das leftover
 
 todo. wrong password no second login attempt
 todo. battle reports notification wrong
 todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen
-todo. spontan leere flotte muss von der map verschwinden
+todo. leer gesetzte flotte muss von der map verschwinden
 
-todo. priorisierung bei pop demand und migration problematisch?
+todo. priorisierung bei pop demand und migration problematisch? Thema: ich brauche college aber projekte kommen nicht voran - nicht plausibel
 todo. population problem bei Samovar - yufiel -> mind aber ein update-problem
 
-Nachrichten:
-
-- Das zeichen für neue nachrichten verschwindet nicht mehr
 - Ich habe keinen 'neue nachrichten marker' für den neuen 'battle report' bekommen
 - Laut meiner anzeige sind 2 Flotten von dir heute beim hypelimit aufgetaut. Tatsächlich ist eine da, aber die andere bereits beim plani.
 
 #### next steps
 
 todo. jobs due-date nicht auf basis von ticks fest legen sondern die punkte werden runter gerechnet -> ticks left ist immer eine berechnung (mehrere jobs pro tick möglich)
-todo. zoom issue at map
-todo. fleetsharks at zoom and move
-todo. durchsuchbare release notes?
+todo. set nav marker by "next stations" dialog?
 
+nope. zu weiter/schneller zoom removed flotten aus map
+nope. zoom issue at map -> warten auf d3 replacement
+nope. fleetsharks at zoom and move -> warten auf d3 replacement
+
+todo. durchsuchbare release notes?
 todo. battle reports mit anderen teilen
+
+todo. placing new players must be improved -> select cluster, by neighbour usw usw
+
 todo. multiple browser tabs
 todo. transportmenge zusammenfassen und bilanz bilden
 todo. lock forum threads for admin permission

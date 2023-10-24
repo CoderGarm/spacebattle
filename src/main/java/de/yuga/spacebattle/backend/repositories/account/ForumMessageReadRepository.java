@@ -28,8 +28,11 @@ public interface ForumMessageReadRepository extends PagingAndSortingRepository<F
     @Query("SELECT r.forumMessage.id FROM ForumMessageRead r WHERE r.forumThread.id = :idThread AND r.user.id = :idUser AND r.isRead = false")
     List<Integer> findUnreadMessages(final int idThread, final int idUser);
 
-
     @Nullable
     @Query("SELECT r FROM ForumMessageRead r WHERE r.user.id = :idUser AND r.isRead = false AND (r.forum.id = :idForum OR r.forumThread.id = :idForumThread OR r.forumMessage.id = :idForumMessage)")
     List<ForumMessageRead> getReads(@Nullable final Integer idForum, @Nullable final Integer idForumThread, @Nullable final Integer idForumMessage, final int idUser);
+
+    @Nullable
+    @Query("SELECT MIN(r.forumMessage.id) FROM ForumMessageRead r WHERE r.user.id = :idUser AND r.isRead = false AND r.forumThread.id = :idForumThread")
+    Integer findFirstUnreadMessageId(final int idForumThread, final int idUser);
 }

@@ -137,6 +137,19 @@ public class ForumService {
         return forumMessageRepository.findMessagesWithPaging(idForumThread, page, size);
     }
 
+    public int findPageWithFirstUnreadMessageInThread(final int idUser, final int idForumThread, final int size) {
+        final Integer firstUnreadMessageId = messageReadRepository.findFirstUnreadMessageId(idForumThread, idUser);
+        int numberOfStackToFirstUnread;
+        if (firstUnreadMessageId != null) {
+            numberOfStackToFirstUnread = forumMessageRepository.getThreadSizeUpToMessageId(idForumThread, firstUnreadMessageId);
+        } else {
+            numberOfStackToFirstUnread = countMessagesInForumThread(idForumThread);
+        }
+        //noinspection UnnecessaryLocalVariable
+        final int page = numberOfStackToFirstUnread / size;
+        return page;
+    }
+
     @Nonnull
     public List<Forum> findAll() {
         final Iterable<Forum> forums = forumRepository.findAll();

@@ -206,18 +206,22 @@ public class ForumApi extends BaseApi {
     @Operation(summary = "Get a list of forums which the given user is allowed to access.", operationId = "getMessagesInThread",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = ForumMessage.class)))
-                    ),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ForumMessageContainer.class)))
+                    ,
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
     public ResponseEntity<?> getMessagesInThread(@PathVariable("idForumThread") final int idForumThread,
-                                                 @PathVariable("page") final int page,
+                                                 @PathVariable("page") int page,
                                                  @PathVariable("size") final int size) {
 
         final int idUser = getIdUser();
+
+        if (page == 0) {
+            // fetch unread messages page
+            page = forumService.findPageWithFirstUnreadMessageInThread(idUser, idForumThread, size);
+        }
 
         final List<de.yuga.spacebattle.backend.entities.account.forum.ForumMessage> messagesInForumThread = forumService.findMessagesInForumThread(idForumThread, page, size)
                 .stream()
@@ -241,7 +245,7 @@ public class ForumApi extends BaseApi {
         final List<ForumMessage> forumMessages = messagesInForumThread.stream()
                 .map(ForumMessage::new)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(forumMessages);
+        return ResponseEntity.ok(new ForumMessageContainer(page, forumMessages));
     }
 
     @AllowedRoles(roles = EGameUserRole.FORUM_READ)
