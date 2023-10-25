@@ -6,7 +6,6 @@ import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
-import de.yuga.spacebattle.backend.entities.misc.PointsCompletable;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
@@ -89,7 +88,7 @@ public class JobCostsCalculator {
         Preconditions.checkNotNull(utilization, "utilization must not be empty");
 
         final ResourceDeposit costs = constructable.getJobCosts();
-        final AtomicInteger ticksNeeded = new AtomicInteger(1);
+        final AtomicInteger ticksNeeded = new AtomicInteger(0);
         final ResourceDeposit ticklyIncome = facility.getPlanet().getTicklyIncome(utilization);
 
         costs.getForfeitableResource().forEach(r -> {
@@ -104,19 +103,22 @@ public class JobCostsCalculator {
         return ticksNeeded.get();
     }
 
-    public static int calculateRemainingTicks(@Nonnull final BigDecimal empireWideResearchPoints,
+    public static int calculateRemainingTicks(final long empireWideResearchPoints,
+                                              final long empireWideResearchPointsLeftOver,
                                               @Nonnull final Constructable constructable) {
-        Preconditions.checkNotNull(empireWideResearchPoints, "empireWideResearchPoints must not be empty");
         Preconditions.checkNotNull(constructable, "constructable must not be empty");
 
-        if (empireWideResearchPoints.compareTo(BigDecimal.ZERO) <= 0) {
+        final long cost = constructable.getJobCosts().getResourceAmountByType(constructable.getResourceType());
+        if (empireWideResearchPoints <= 0 && cost > empireWideResearchPointsLeftOver) {
             return 999;
         }
 
-        final long cost = constructable.getJobCosts().getResourceAmountByType(EResourceType.RESEARCH);
+        if (cost <= empireWideResearchPointsLeftOver) {
+            return 0;
+        }
 
         //noinspection UnnecessaryLocalVariable
-        final int ticks = BigDecimal.valueOf(cost).divide(empireWideResearchPoints, PointsCompletable.MATH_CONTEXT).intValue();
+        final int ticks = BigDecimal.valueOf(cost - empireWideResearchPointsLeftOver).divide(BigDecimal.valueOf(empireWideResearchPoints), RoundingMode.CEILING).intValue();
         return ticks;
     }
 

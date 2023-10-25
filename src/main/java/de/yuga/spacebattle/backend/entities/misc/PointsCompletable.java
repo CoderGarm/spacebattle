@@ -11,14 +11,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
-import java.math.MathContext;
-import java.math.RoundingMode;
 
 @MappedSuperclass
 public class PointsCompletable extends Deletable {
-
-    @Nonnull
-    public static final MathContext MATH_CONTEXT = new MathContext(4, RoundingMode.UP);
 
     /**
      * Principle: countdown or research points to zero -> job done.<br>
@@ -28,7 +23,7 @@ public class PointsCompletable extends Deletable {
      */
     @NotNull
     @Column(columnDefinition = "decimal(19, 0)")
-    protected int pointsLeft;
+    protected long pointsLeft;
 
     @Nullable
     @ManyToOne
@@ -38,23 +33,24 @@ public class PointsCompletable extends Deletable {
     public PointsCompletable() {
     }
 
-    public int getPointsLeft() {
+    public long getPointsLeft() {
         return pointsLeft;
     }
 
     /**
      * A job is done at zero and needed to be counted down.
      *
-     * @return the leftover points will be returned to be used elsewhere that tick
+     * @return the used points will be returned
      */
-    public int tick(final int reduceAbout) {
-        if (reduceAbout > this.pointsLeft) {
-            final int leftOver = reduceAbout - this.pointsLeft;
+    public long tick(final long reduceAbout) {
+        long usedPoints = this.pointsLeft;
+        if (reduceAbout >= this.pointsLeft) {
             this.pointsLeft = 0;
-            return leftOver;
+        } else {
+            this.pointsLeft -= reduceAbout;
+            usedPoints = reduceAbout;
         }
-        this.pointsLeft = this.pointsLeft - reduceAbout;
-        return 0;
+        return usedPoints;
     }
 
     public void setFinished(@Nonnull final Tick finishedAt) {

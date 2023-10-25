@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.api.researches;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
+import de.yuga.spacebattle.backend.dto.research.EmpireResearchCapability;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -14,6 +15,8 @@ import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.researches.TechTreeService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
+import de.yuga.spacebattle.backend.services.turn.TickTimeService;
+import de.yuga.spacebattle.backend.services.turn.tick.PlanetTickRunner;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
@@ -32,7 +35,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,22 +70,27 @@ public class ResearchApi extends BaseApi {
     @Nonnull
     private final TechTreeService techTreeService;
 
+    @Nonnull
+    private final PlanetTickRunner planetTickRunner;
+
+    @Nonnull
+    private final TickTimeService tickTimeService;
+
     @Autowired
     public ResearchApi(@Nonnull final ResearchService researchService,
                        @Nonnull final UserService userService,
                        @Nonnull final JobService jobService,
                        @Nonnull final PlanetService planetService,
-                       @Nonnull final TechTreeService techTreeService) {
-        Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
-        Preconditions.checkNotNull(userService, "userService shouldn't be null!");
-        Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
-        Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
-
-        this.researchService = researchService;
-        this.userService = userService;
-        this.jobService = jobService;
-        this.planetService = planetService;
-        this.techTreeService = techTreeService;
+                       @Nonnull final TechTreeService techTreeService,
+                       @Nonnull final PlanetTickRunner planetTickRunner,
+                       @Nonnull final TickTimeService tickTimeService) {
+        this.researchService = Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
+        this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
+        this.jobService = Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
+        this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
+        this.techTreeService = Preconditions.checkNotNull(techTreeService, "techTreeService must not be empty");
+        this.planetTickRunner = Preconditions.checkNotNull(planetTickRunner, "planetTickRunner must not be empty");
+        this.tickTimeService = Preconditions.checkNotNull(tickTimeService, "tickTimeService must not be empty");
     }
 
     @GetMapping(value = BY_USER_ENDPOINT)
@@ -133,8 +140,13 @@ public class ResearchApi extends BaseApi {
             throw new NotifyWebUserException("No research was found.");
         }
         final Job researchJob = jobService.createResearchJob(user, research);
-        final BigDecimal empireWideResearchPoints = planetService.getEmpireWideResearchPoints(idUser);
-        return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(researchJob, empireWideResearchPoints, getPreferredLanguage()));
+        final EmpireResearchCapability capability = planetService.getEmpireWideResearchPoints(idUser);
+        if (researchJob.getPointsLeft() <= capability.getEmpireWideResearchPointsLeftOver()) {
+            final Job job = planetTickRunner.tickInstaResearch(researchJob, capability, tickTimeService.getToday());
+            return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(job, getPreferredLanguage()));
+        } else {
+            return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(researchJob, capability, getPreferredLanguage()));
+        }
     }
 
     @GetMapping(value = AVAILABLE_BY_USER_ENDPOINT)
@@ -154,14 +166,14 @@ public class ResearchApi extends BaseApi {
         final List<Research> jobActiveFor = jobService.getResearchesFromActiveJobs(idUser);
         final Map<Research, Integer> researchesForUser = researchService.getUnlockableResearches(idUser, jobActiveFor);
 
-        final BigDecimal empireWideResearchPoints = planetService.getEmpireWideResearchPoints(idUser);
+        final EmpireResearchCapability capability = planetService.getEmpireWideResearchPoints(idUser);
         final List<ResearchLevel> researchLevels = researchesForUser.entrySet().stream()
                 .map(entry -> {
                     final Research research = entry.getKey();
                     final Integer level = entry.getValue();
                     final Constructable constructable = new Constructable(research, level);
-                    final int remainingTicks = JobCostsCalculator.calculateRemainingTicks(empireWideResearchPoints, constructable);
-                    return new ResearchLevel(research, level, remainingTicks, getPreferredLanguage());
+                    final int remainingTicks = JobCostsCalculator.calculateRemainingTicks(capability.getEmpireWideResearchPoints(), capability.getEmpireWideResearchPointsLeftOver(), constructable);
+                    return new ResearchLevel(research, level, remainingTicks, capability.getEmpireWideResearchPointsLeftOver(), getPreferredLanguage());
                 }).collect(Collectors.toList());
         return ResponseEntity.ok(researchLevels);
     }

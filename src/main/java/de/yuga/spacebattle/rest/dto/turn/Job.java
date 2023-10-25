@@ -3,6 +3,7 @@ package de.yuga.spacebattle.rest.dto.turn;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
+import de.yuga.spacebattle.backend.dto.research.EmpireResearchCapability;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
@@ -18,7 +19,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.math.BigDecimal;
 import java.util.Set;
 
 @Schema(description = ".")
@@ -143,11 +143,13 @@ public class Job {
     }
 
     public Job(@Nonnull final de.yuga.spacebattle.backend.entities.turn.Job researchJob,
-               @Nonnull final BigDecimal empireWideResearchPoints,
+               @Nonnull final EmpireResearchCapability capability,
                @Nonnull final String preferredLanguage) {
         this(researchJob, preferredLanguage);
-        Preconditions.checkNotNull(empireWideResearchPoints, "empireWideResearchPoints must not be empty");
+        Preconditions.checkNotNull(capability, "capability must not be empty");
 
-        this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(empireWideResearchPoints, researchJob.getConstructable());
+        final long empireWideResearchPoints = capability.getEmpireWideResearchPoints();
+        final long empireWideResearchPointsLeftOver = capability.getEmpireWideResearchPointsLeftOver();
+        this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(empireWideResearchPoints, empireWideResearchPointsLeftOver, researchJob.getConstructable());
     }
 }

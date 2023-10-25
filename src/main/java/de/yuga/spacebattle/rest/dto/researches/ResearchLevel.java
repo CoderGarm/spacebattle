@@ -3,7 +3,7 @@ package de.yuga.spacebattle.rest.dto.researches;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
+import de.yuga.spacebattle.backend.entities.turn.Constructable;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -32,6 +32,11 @@ public class ResearchLevel {
     @Schema(description = "The amount of research points needed.")
     private Integer researchPoints;
 
+    @Nullable
+    @JsonProperty
+    @Schema(description = "The amount of research points available this tick.")
+    private Long researchPointsAvailable;
+
     public ResearchLevel() {
     }
 
@@ -48,6 +53,7 @@ public class ResearchLevel {
     public ResearchLevel(@Nonnull final de.yuga.spacebattle.backend.entities.researches.Research research,
                          final int level,
                          final int remainingTicks,
+                         final long researchPointsAvailable,
                          @Nonnull final String languageCode) {
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(research, "research shouldn't be null!");
@@ -55,7 +61,8 @@ public class ResearchLevel {
         this.research = new Research(research, languageCode);
         this.level = level;
         this.ticksToComplete = remainingTicks;
-        this.researchPoints = (int) JobCostsCalculator.getCostsForLevel(research.getCosts(), level).getResourceAmountByType(EResourceType.RESEARCH);
+        this.researchPointsAvailable = researchPointsAvailable;
+        this.researchPoints = (int) new Constructable(research, level).getJobCosts().getResourceAmountByType(EResourceType.RESEARCH);
     }
 
     public ResearchLevel(@Nonnull final de.yuga.spacebattle.backend.entities.researches.ResearchLevel researchLevel,
@@ -74,9 +81,5 @@ public class ResearchLevel {
 
     public int getLevel() {
         return level;
-    }
-
-    public void setTicksToComplete(@Nullable final Integer ticksToComplete) {
-        this.ticksToComplete = ticksToComplete;
     }
 }

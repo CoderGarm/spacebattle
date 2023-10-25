@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.research.EmpireResearchCapability;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
@@ -25,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -108,8 +108,8 @@ public class JobApi extends BaseApi {
                 .collect(Collectors.toList());
 
         if (!researchJobs.isEmpty()) {
-            final BigDecimal empireWideResearchPoints = planetService.getEmpireWideResearchPoints(idUser);
-            researchJobs.forEach(j -> result.add(new Job(j, empireWideResearchPoints, getPreferredLanguage())));
+            final EmpireResearchCapability capability = planetService.getEmpireWideResearchPoints(idUser);
+            researchJobs.forEach(j -> result.add(new Job(j, capability, getPreferredLanguage())));
         }
 
         return ResponseEntity.ok(result);

@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.services.turn.tick;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.PopulationControlCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceControlCalculator;
+import de.yuga.spacebattle.backend.dto.research.EmpireResearchCapability;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
@@ -113,6 +114,7 @@ public class PlanetTickRunner implements TickRunner {
      * Runs the tick for all planets.
      */
     private void tickPlanets() {
+        planetService.invalidateCache();
         final List<Planet> planets = planetService.findAllColonized();
         for (final Planet p : planets) {
             log(p, "Start ticking planet");
@@ -151,29 +153,36 @@ public class PlanetTickRunner implements TickRunner {
             final Job job = jobs.stream()
                     .min(Job::compareTo)
                     .orElseThrow(() -> new NotifyWebUserException("Yeah, shit happens. This can not happen."));
+            log(planet, job, "Start processing " + resourceType + " job.");
 
-            log(planet, job, "Start processing job.");
-            final long points = planet.getResourceDeposit().getResourceAmountByType(resourceType);
-            final int leftOverPoints = tickJob(job, (int) points);
-            planet.getResourceDeposit().setAbsoluteResourceValue(resourceType, leftOverPoints);
-            if (!job.isFinished()) {
-                jobService.save(job);
-                log(planet, job, "Shifting job for tick after " + today + ".");
-                continue;
+            if (resourceType == EResourceType.RESEARCH) {
+                final int idUser = Objects.requireNonNull(planet.getOwner()).getId();
+                final long empireWideResearchPointsLeftOver = planetService.getEmpireWideResearchPoints(idUser).getEmpireWideResearchPointsLeftOver();
+                final long usedPoints = tickJob(job, empireWideResearchPointsLeftOver);
+                if (!job.isFinished()) {
+                    jobService.save(job);
+                    log(planet, job, "Shifting job for tick after " + today + ".");
+                    continue;
+                }
+                completeResearch(planet, job, usedPoints, today);
+            } else {
+                final long points = planet.getResourceDeposit().getResourceAmountByType(resourceType);
+                final long usedPoints = tickJob(job, points);
+                planet.getResourceDeposit().updateResource(resourceType, -usedPoints);
+                if (!job.isFinished()) {
+                    jobService.save(job);
+                    log(planet, job, "Shifting job for tick after " + today + ".");
+                    continue;
+                }
+                switch (resourceType) {
+                    case CONSTRUCTION:
+                        completeConstruction(planet, planet.getConstructions(), job, today);
+                        break;
+                    case ORBITAL_CONSTRUCTION:
+                        completeShipyard(planet, job, today);
+                        break;
+                }
             }
-            log(planet, job, "Processing " + resourceType + " job.");
-            switch (resourceType) {
-                case RESEARCH:
-                    tickResearch(planet, job);
-                    break;
-                case CONSTRUCTION:
-                    tickConstruction(planet, planet.getConstructions(), job);
-                    break;
-                case ORBITAL_CONSTRUCTION:
-                    tickShipyard(planet, job);
-                    break;
-            }
-            job.setFinished(today);
         }
         return planetService.save(planet);
     }
@@ -189,9 +198,10 @@ public class PlanetTickRunner implements TickRunner {
         return planetService.save(planet);
     }
 
-    private void tickShipyard(@Nonnull final Planet planet, @Nonnull final Job job) {
+    private void completeShipyard(@Nonnull final Planet planet, @Nonnull final Job job, @Nonnull final Tick today) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(job, "job must not be empty");
+        Preconditions.checkNotNull(today, "today must not be empty");
 
         log(planet, job, "Start processing shipyard job .");
         final Constructable constructable = job.getConstructable();
@@ -202,6 +212,7 @@ public class PlanetTickRunner implements TickRunner {
 
         final User owner = planet.getHumanOwner();
         assert owner != null : "There must be a planet's owner.";
+        job.setFinished(today);
         if (constructable.isRepairJob()) {
             realizeFleetRepair(planet, owner, constructable, job);
         }
@@ -290,14 +301,17 @@ public class PlanetTickRunner implements TickRunner {
         log(planet, job, "Done creating warships.");
     }
 
-    private void tickConstruction(@Nonnull final Planet planet,
-                                  @Nonnull final Set<Construction> constructions,
-                                  @Nonnull final Job job) {
+    private void completeConstruction(@Nonnull final Planet planet,
+                                      @Nonnull final Set<Construction> constructions,
+                                      @Nonnull final Job job,
+                                      @Nonnull final Tick today) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(constructions, "constructions must not be empty");
         Preconditions.checkNotNull(job, "job must not be empty");
+        Preconditions.checkNotNull(today, "today must not be empty");
 
         log(planet, job, "Start processing construction job.");
+        job.setFinished(today);
         final Constructable constructable = job.getConstructable();
         final Integer targetLevel = constructable.getTargetLevel();
         final Building building = constructable.getBuilding();
@@ -320,11 +334,13 @@ public class PlanetTickRunner implements TickRunner {
         log(planet, job, "Done processing construction job.");
     }
 
-    private void tickResearch(@Nonnull final Planet planet, @Nonnull final Job job) {
+    private void completeResearch(@Nonnull final Planet planet, @Nonnull final Job job, final long usedPoints, @Nonnull final Tick today) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(job, "job must not be empty");
+        Preconditions.checkNotNull(today, "today must not be empty");
 
         log(planet, job, "Start processing research job.");
+        job.setFinished(today);
         final Constructable constructable = job.getConstructable();
         final User owner = planet.getHumanOwner();
         if (owner == null) {
@@ -335,6 +351,7 @@ public class PlanetTickRunner implements TickRunner {
             throw new NotifyWebUserException("Oh fuck, this should not happen while research whatever!");
         }
         researchService.addResearch(owner, List.of(research));
+        planetService.reduceResearchPoints(owner.getId(), usedPoints);
         log(planet, job, "Done processing research job.");
     }
 
@@ -358,8 +375,11 @@ public class PlanetTickRunner implements TickRunner {
                 // do birth
                 PopulationControlCalculator.populatePlanet(planet, operationalService.getUtilizedPopulationForPlanet(planet.getId()));
                 break;
-            default:
             case FORFEITABLE:
+                // only set new available points
+                resourceDeposit.setAbsoluteResourceValue(resourceType, ResourceControlCalculator.getTickOutput(planet, resourceType));
+                break;
+            default:
             case COLLECTABLE:
                 // add points to the old deposit
                 resourceDeposit.updateResource(resourceType, ResourceControlCalculator.getTickOutput(planet, resourceType));
@@ -371,11 +391,21 @@ public class PlanetTickRunner implements TickRunner {
      * Counts down the remaining {@link Job#getPointsLeft()}.
      *
      * @param job the {@link Job} to do
-     * @return the leftover points will be returned to be used elsewhere that tick
+     * @return the used points will be returned
      */
-    private int tickJob(@Nonnull final Job job, final int points) {
+    private long tickJob(@Nonnull final Job job, final long points) {
         Preconditions.checkNotNull(job, "job shouldn't be null!");
 
         return job.tick(points);
+    }
+
+    public Job tickInstaResearch(@Nonnull final Job job, @Nonnull final EmpireResearchCapability capability, @Nonnull final Tick today) {
+        Preconditions.checkNotNull(job, "job must not be empty");
+        Preconditions.checkNotNull(capability, "capability must not be empty");
+        Preconditions.checkNotNull(today, "today must not be empty");
+
+        final long usedPoints = tickJob(job, capability.getEmpireWideResearchPointsLeftOver());
+        completeResearch(job.getFacility().getPlanet(), job, usedPoints, today);
+        return jobService.save(job);
     }
 }

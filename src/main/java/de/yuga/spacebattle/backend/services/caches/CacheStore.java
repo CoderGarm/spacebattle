@@ -34,4 +34,8 @@ public class CacheStore<KEY, VALUE> {
 
         cache.put(key, value);
     }
+
+    public void invalidateAll() {
+        cache.invalidateAll();
+    }
 }

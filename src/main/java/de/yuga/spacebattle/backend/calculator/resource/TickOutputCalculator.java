@@ -3,15 +3,12 @@ package de.yuga.spacebattle.backend.calculator.resource;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
-import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit.MATH_CONTEXT_INTEGER;
 
@@ -27,13 +24,6 @@ public class TickOutputCalculator {
         if (constructions.isEmpty()) {
             return BigDecimal.ZERO;
         }
-
-        final Set<EResourceType> resourceTypes = constructions.stream().map(c -> c.getBuilding().getProductionTarget()).collect(Collectors.toSet());
-        Preconditions.checkArgument(resourceTypes.size() == 1, "resourceTypes must contain one element");
-        final Set<EProductionCategory> productionCategories = constructions.stream().map(c -> c.getBuilding().getProductionType().getProductionCategory()).collect(Collectors.toSet());
-        Preconditions.checkArgument(productionCategories.size() == 1, "productionCategories must contain one element");
-        final Set<Planet> planets = constructions.stream().map(Construction::getPlanet).collect(Collectors.toSet());
-        Preconditions.checkArgument(planets.size() == 1, "planets must contain one element");
 
         return constructions.stream().map(TickOutputCalculator::getTickOutput).reduce(BigDecimal.ZERO, BigDecimal::add);
     }

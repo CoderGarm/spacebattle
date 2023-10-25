@@ -131,7 +131,7 @@ public class Job extends PointsCompletable implements Comparable<Job> {
             return 1;
         }
 
-        return Integer.compare(getPointsLeft(), o.getPointsLeft());
+        return Long.compare(getPointsLeft(), o.getPointsLeft());
     }
 
     public boolean isFinished() {

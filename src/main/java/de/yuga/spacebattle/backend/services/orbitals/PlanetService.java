@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.services.orbitals;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.TickOutputCalculator;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.research.EmpireResearchCapability;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
@@ -12,17 +13,26 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.orbitals.PlanetRepository;
+import de.yuga.spacebattle.backend.services.caches.CacheStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Service
 public class PlanetService {
+
+    @Nonnull
+    private static final Logger LOGGER = LoggerFactory.getLogger(PlanetService.class);
+
+    @Nonnull
+    private final CacheStore<Integer, Long> empireResearchPointsCache = new CacheStore<>(24, TimeUnit.HOURS);
 
     @Nonnull
     private final PlanetRepository planetRepository;
@@ -64,28 +74,42 @@ public class PlanetService {
     }
 
     @Nonnull
-    public BigDecimal getEmpireWideResearchPoints(final int idUser) {
-        return getEmpireWideResearchPoints(idUser, Map.of());
+    public EmpireResearchCapability getEmpireWideResearchPoints(final int idUser) {
+        final long empireWideResearchPoints = getCachedEmpireWideResearchPoints(idUser);
+        final long empireWideResearchPointsLeftOver = planetRepository.findResourceDepositOfColonizedPlanets(idUser, EResourceType.RESEARCH.toString()).stream()
+                .map(de -> de.getResourceAmountByType(EResourceType.RESEARCH))
+                .reduce(0L, Long::sum);
+        return new EmpireResearchCapability(empireWideResearchPoints, empireWideResearchPointsLeftOver);
     }
 
-    @Nonnull
-    public BigDecimal getEmpireWideResearchPoints(final int idUser, @Nonnull final Map<Construction, Integer> formerLaboratoryOperationalLevel) {
-        Preconditions.checkNotNull(formerLaboratoryOperationalLevel, "formerLaboratoryOperationalLevel must not be empty");
-
-        final List<Planet> allColonizedByWithResearchLab = findAllColonizedByWithResearchLab(idUser);
-        //noinspection UnnecessaryLocalVariable
-        final BigDecimal empireWideResearchPoints = allColonizedByWithResearchLab.stream()
-                .map(planet -> {
-                    final Construction laboratory = planet.getConstructionByResource(EResourceType.RESEARCH).stream().findFirst().orElse(null);
-                    if (laboratory != null) {
-                        final int opLevel = formerLaboratoryOperationalLevel.getOrDefault(laboratory, laboratory.getOperationalLevel());
-                        laboratory.setOperationalLevel(opLevel);
-                        return TickOutputCalculator.getTickOutput(Set.of(laboratory));
-                    }
-                    return BigDecimal.valueOf(0);
-                })
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    private long getCachedEmpireWideResearchPoints(final int idUser) {
+        Long empireWideResearchPoints = empireResearchPointsCache.get(idUser);
+        if (empireWideResearchPoints == null) {
+            final List<Planet> allColonizedByWithResearchLab = findAllColonizedByWithResearchLab(idUser);
+            empireWideResearchPoints = allColonizedByWithResearchLab.stream()
+                    .map(planet -> {
+                        final Construction laboratory = planet.getConstructionByResource(EResourceType.RESEARCH).stream().findFirst().orElse(null);
+                        return laboratory != null ? TickOutputCalculator.getTickOutput(Set.of(laboratory)).longValue() : 0;
+                    })
+                    .reduce(0L, Long::sum);
+            empireResearchPointsCache.put(idUser, empireWideResearchPoints);
+        }
         return empireWideResearchPoints;
+    }
+
+    public void reduceResearchPoints(final int idUser, long toReduce) {
+        final List<Planet> allColonizedByWithResearchLab = findAllColonizedByWithResearchLab(idUser);
+        final Set<Planet> toStore = new HashSet<>();
+        for (final Planet planet : allColonizedByWithResearchLab) {
+            final long amount = planet.getResourceDeposit().getResourceAmountByType(EResourceType.RESEARCH);
+            if (amount > 0 && toReduce > 0) {
+                final long min = Long.min(amount, toReduce);
+                toReduce -= min;
+                planet.getResourceDeposit().updateResource(EResourceType.RESEARCH, -min);
+                toStore.add(planet);
+            }
+        }
+        saveAll(toStore);
     }
 
     @Nonnull
@@ -205,5 +229,9 @@ public class PlanetService {
     @Nullable
     public Integer getIdUserWhenMain(final int idPlanet) {
         return planetRepository.findAllById(idPlanet);
+    }
+
+    public void invalidateCache() {
+        empireResearchPointsCache.invalidateAll();
     }
 }

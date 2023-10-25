@@ -230,9 +230,7 @@ public class JobService {
         checkIfFree(facility);
 
         final Constructable constructable = new Constructable(research, level);
-        final Job entity = new Job(researchPlanet, facility, constructable, operationalService.getUtilizedPopulationForPlanet(researchPlanet.getId()));
-        jobRepository.save(entity);
-        return entity;
+        return jobRepository.save(new Job(researchPlanet, facility, constructable, operationalService.getUtilizedPopulationForPlanet(researchPlanet.getId())));
     }
 
     private void checkIfFree(@Nullable final Construction facility) {
@@ -373,5 +371,10 @@ public class JobService {
         Preconditions.checkNotNull(jobs, "jobs must not be empty");
 
         jobRepository.saveAll(jobs);
+    }
+
+    @Nullable
+    public Job findById(final int idJob) {
+        return jobRepository.findById(idJob).orElse(null);
     }
 }

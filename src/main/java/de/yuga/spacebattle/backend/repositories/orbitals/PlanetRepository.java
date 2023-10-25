@@ -2,10 +2,12 @@ package de.yuga.spacebattle.backend.repositories.orbitals;
 
 
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
@@ -20,4 +22,7 @@ public interface PlanetRepository extends JpaRepository<Planet, Integer>, Custom
             "AND true = (SELECT CASE WHEN (COUNT(c) > 0) THEN TRUE ELSE FALSE END FROM Construction c WHERE c.planet = p AND c.building.productionType.productionTarget = de.yuga.spacebattle.backend.enums.EResourceType.RESEARCH) " +
             "ORDER BY p.colonizedAt")
     List<Planet> findAllColonizedByWithResearchLab(@Param("idUser") final int idUser);
+
+    @Query("SELECT DISTINCT r FROM Planet p JOIN p.resourceDeposit r WHERE p.owner.id = :idUser AND :resourceType IN (KEY(r.resources))")
+    List<ResourceDeposit> findResourceDepositOfColonizedPlanets(final int idUser, @Nonnull final String resourceType);
 }

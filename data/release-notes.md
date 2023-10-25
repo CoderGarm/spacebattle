@@ -2,8 +2,8 @@
 
 #### Gameplay
 
-Die Änderungen um die Punkte 3., 4., 5. und 6. sollen die Spielgeschwindigkeit steigern. Die Idee ist natürlich, dass man schneller dazu kommt ein bisschen Action zu
-veranstalten ;)
+Die Änderungen um die Punkte 3., 4., 5. und 6. sollen die Spielgeschwindigkeit vorrangig im Early Game steigern.  
+Die Idee ist natürlich, dass man schneller dazu kommt ein bisschen Action zu veranstalten ;)
 
 todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt etwas aus", ansonsten beibehalten
 
@@ -24,9 +24,12 @@ todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt etwas a
 4. Der Gebäudeoutput für pro Level wird anders berechnet. Ein neues Level bringt jetzt mehr Output als vorher.
 5. Die Verbesserung pro Gebäudelevel in Bezug zur Bevölkerung ist verdoppelt. Ein neues Gebäudelevel bei z.B. Wohnraum nimmt den Vorteil aus 4. mit und bringt nun 40 % mehr statt
    wie vorher nur 20 % Verbesserung.
-6. Jobs haben keine festen Ticks mehr, die auf 0 gezählt werden müssen. Die zu erreichenden "Construction Points" werden direkt abgezogen, in der darstellung allerdings noch auf
+6. Jobs haben keine festen Ticks mehr, die auf 0 gezählt werden müssen. Die zu erreichenden "Construction Points" werden direkt abgezogen, in der Darstellung allerdings noch auf
    Ticks umgerechnet.  
-   Die Folge ist, dass man nun mehr als einen Job pro Tick beenden kann, wenn man genug Construction Points hat.
+   Die Folge ist, dass man nun mehr als einen Job pro Tick beenden kann, wenn man genug Construction Points vom Tick zuvor über hat.  
+   Diese "Insta Jobs" zeigen 0 Ticks Laufzeit an und lassen sich genauso starten wie alle anderen Jobs, sind dann halt nur sofort fertig.  
+   Man muss danach zunächst den Planeten bzw die Forschungsseite neu laden, damit man wieder einen neuen Job zu starten kann. Wie ich das in der UI handhabe, muss ich noch
+   herausfinden.
 
 todo. tech level 2 und 3 nutzen
 todo. Hyperabdruck im System bei aufkommenden Flotten
@@ -46,6 +49,7 @@ todo. Hyperabdruck im System bei aufkommenden Flotten
 
 todo. mission items more role play "unprotected convoy changes signature of ship to warship and pirate fled ...""
 todo. quoting in chat und forum
+todo. preview in chat und forum
 todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
 
 todo. forum management
@@ -57,7 +61,7 @@ todo. star map filter für flotten
 - fremde inop
 - moves ...
 
-todo. schadensprofil von schiffsklassen und flotten darstellen
+todo. schadensprofil von schiffsklassen und flotten darstellen, Bedienmannschaften von Modulen darstellen
 todo. look & feel wie in büchern
 todo. emission spectra als gimmick
 todo. missionen sollten Rumpfmasse inkl Klasse beachten "großer Rumpf und Frachtertriebwerke sind kein Schlachtschiff"
@@ -75,6 +79,7 @@ Der Workaround sollte in jedem der hiermit zusammenhängenden Probleme ein neues
 3. Ein Faden im Forum zeigt nun die Seite mit dem neusten, unbekannten Beitrag.
    todo. upgrade/repair job muss dings einklappen und neu laden
 
+todo. star map tabs fehlen manchmal
 todo. wrong password no second login attempt
 todo. battle reports notification wrong
 todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen
