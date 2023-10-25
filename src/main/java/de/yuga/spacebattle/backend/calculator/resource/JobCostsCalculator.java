@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.backend.entities.misc.PointsCompletable;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
@@ -115,7 +116,7 @@ public class JobCostsCalculator {
         final long cost = constructable.getJobCosts().getResourceAmountByType(EResourceType.RESEARCH);
 
         //noinspection UnnecessaryLocalVariable
-        final int ticks = BigDecimal.valueOf(cost).divide(empireWideResearchPoints, RoundingMode.CEILING).intValue();
+        final int ticks = BigDecimal.valueOf(cost).divide(empireWideResearchPoints, PointsCompletable.MATH_CONTEXT).intValue();
         return ticks;
     }
 
