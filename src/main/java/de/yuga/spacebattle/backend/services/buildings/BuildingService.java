@@ -60,13 +60,14 @@ public class BuildingService {
     /**
      * Creates a new {@link Building}.
      *
-     * @param name            the name of the planet
-     * @param description     the description
-     * @param baseValue       the amount of production per {@link Tick} multiplied with {@link Building#getIncreasingFactorPerLevel()}
-     * @param productionType  what does it produces
-     * @param educationType   the education type needed to run the building
-     * @param amountOfWorkers the amount of employees
-     * @param unlockedThrough the research which unlocks this building
+     * @param name                     the name of the planet
+     * @param description              the description
+     * @param baseValue                the amount of production per {@link Tick} multiplied with {@link Building#getIncreasingFactorPerLevel()}
+     * @param productionType           what does it produces
+     * @param educationType            the education type needed to run the building
+     * @param amountOfWorkers          the amount of employees
+     * @param unlockedThrough          the research which unlocks this building
+     * @param increasingFactorPerLevel
      * @return the new building
      */
     @Nonnull
@@ -79,7 +80,8 @@ public class BuildingService {
                                    @Nonnull final EEducationType educationType,
                                    final long amountOfWorkers,
                                    @Nonnull final Research unlockedThrough,
-                                   final int unlockedThroughLevel) {
+                                   final int unlockedThroughLevel,
+                                   final double increasingFactorPerLevel) {
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(techLevel, "techLevel shouldn't be null!");
@@ -88,7 +90,7 @@ public class BuildingService {
 
         final Map<EEducationType, Long> crewRequirement = new HashMap<>();
         crewRequirement.put(educationType, amountOfWorkers);
-        return buildingRepository.save(new Building(name, description, baseValue, techLevel, productionType, new CrewRequirement(crewRequirement, EDepositType.COSTS), unlockedThrough, unlockedThroughLevel));
+        return buildingRepository.save(new Building(name, description, baseValue, techLevel, increasingFactorPerLevel, productionType, new CrewRequirement(crewRequirement, EDepositType.COSTS), unlockedThrough, unlockedThroughLevel));
     }
 
     public List<Building> findBuildingByProductionType(@Nonnull final ProductionType productionType) {

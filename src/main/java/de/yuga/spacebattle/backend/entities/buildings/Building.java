@@ -38,9 +38,9 @@ public class Building extends HasCosts {
     private int baseValue;
 
     /**
-     * The increasement of value for the next level. todo
+     * The increasing of value for the next level.
      */
-    private final BigDecimal increasingFactorPerLevel = new BigDecimal("0.2");
+    private BigDecimal increasingFactorPerLevel;
 
     /**
      * Defines the job of this building.
@@ -65,6 +65,7 @@ public class Building extends HasCosts {
                     @Nonnull final String description,
                     final int baseValue,
                     @Nonnull final ETechLevel techLevel,
+                    final double increasingFactorPerLevel,
                     @Nonnull final ProductionType productionType,
                     @Nonnull final CrewRequirement crewRequirement,
                     @Nonnull final Research unlockedThrough,
@@ -79,6 +80,7 @@ public class Building extends HasCosts {
         this.baseValue = baseValue;
         this.productionType = productionType;
         this.getCosts().setCrewRequirement(crewRequirement);
+        this.increasingFactorPerLevel = new BigDecimal(increasingFactorPerLevel);
         this.unlockedThrough = unlockedThrough;
         this.unlockedThroughLevel = unlockedThroughLevel;
     }

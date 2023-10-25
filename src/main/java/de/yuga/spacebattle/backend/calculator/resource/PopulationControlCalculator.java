@@ -61,7 +61,6 @@ public class PopulationControlCalculator {
         final long sumOfPopulation = resourceDeposit.getCrewRequirement().getSumOfPopulation() + sumOfPopulationUtilization;
         // collecting all possible producing building
         final Map<EProductionCategory, List<Construction>> constructionMap = getConstructionsMappedByProductionCategory(constructionsByResource);
-        final List<Construction> reproductive = constructionMap.computeIfAbsent(EProductionCategory.PRODUCE, k -> new ArrayList<>());
         final List<Construction> capacity = constructionMap.computeIfAbsent(EProductionCategory.CAPACITY, k -> new ArrayList<>());
         final BigDecimal K = TickOutputCalculator.getTickOutput(capacity);
         if (K.compareTo(BigDecimal.ZERO) == 0) {
@@ -73,9 +72,9 @@ public class PopulationControlCalculator {
         // r equals to the maximal birth rate
         // K equals to the capacity
         final double miningFactor = planet.getMiningFactors().getMiningFactorByType(EResourceType.POPULATION);
-        final BigDecimal N = getVirtualAmountOfPops(miningFactor, sumOfPopulation);
+        final BigDecimal N = BigDecimal.valueOf(sumOfPopulation);
         // sum up all the output of the producing and capacity buildings
-        BigDecimal r = TickOutputCalculator.getTickOutput(reproductive).divide(BigDecimal.valueOf(100), MATH_CONTEXT_MORE_PRECISION);
+        BigDecimal r = BigDecimal.valueOf(miningFactor);
         if (r.compareTo(BigDecimal.valueOf(0.9)) > 0) {
             // maximum reproduction rate must not succeed 1 and is limited to 90 %
             r = BigDecimal.valueOf(0.9);
@@ -89,28 +88,6 @@ public class PopulationControlCalculator {
         final BigDecimal capacityLimitFactor = BigDecimal.ONE.subtract(N.divide(K, MATH_CONTEXT_MORE_PRECISION));
         // rounding down to long
         return increasingFactorByCurrentPopulation.multiply(capacityLimitFactor, MATH_CONTEXT_INTEGER).longValue();
-    }
-
-    /**
-     * Calculates the virtual amount of people on a planet.<br>
-     * The virtual amount is the real amount modified about the possibility of a planet to hold human life.
-     *
-     * @param miningFactor    the population mining factor
-     * @param sumOfPopulation the real amount of people on a planet
-     * @return the virtual amount
-     */
-    @Nonnull
-    public static BigDecimal getVirtualAmountOfPops(final double miningFactor, final long sumOfPopulation) {
-        BigDecimal popModifier = new BigDecimal(miningFactor);
-        final int compareTo = popModifier.compareTo(BigDecimal.ONE);
-        if (compareTo < 0) {
-            // bei 0,7 -> 1,3
-            popModifier = BigDecimal.ONE.add(BigDecimal.ONE.subtract(popModifier));
-        } else if (compareTo > 0) {
-            // bei 1,8 -> 0,8
-            popModifier = popModifier.subtract(BigDecimal.ONE);
-        }
-        return new BigDecimal(sumOfPopulation).multiply(popModifier);
     }
 
     /**

@@ -67,6 +67,6 @@ public class TickOutputCalculator {
         if (constructionLevel == 1) {
             return adjustedBaseValue;
         }
-        return adjustedBaseValue.add(adjustedBaseValue.multiply(increasingFactorPerLevel).multiply(level));
+        return adjustedBaseValue.add(adjustedBaseValue.multiply(increasingFactorPerLevel)).multiply(level);
     }
 }

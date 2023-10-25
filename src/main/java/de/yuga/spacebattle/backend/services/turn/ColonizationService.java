@@ -2,7 +2,6 @@ package de.yuga.spacebattle.backend.services.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
-import de.yuga.spacebattle.backend.calculator.resource.PopulationControlCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.TickOutputCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.OrbitalDistanceMarker;
@@ -215,7 +214,7 @@ public class ColonizationService {
             final boolean idPopulationCapacity = EResourceType.POPULATION == productionType.getProductionTarget() && EProductionCategory.CAPACITY == productionType.getProductionCategory();
             if (idPopulationCapacity) {
                 // calculate which level must a capacity construction have to suit all the people
-                level = detectPopCapStartingLevel(creditorDeposit, building, miningFactor);
+                level = detectPopCapStartingLevel(creditorDeposit, building);
             } else {
                 level = 1;
             }
@@ -226,7 +225,7 @@ public class ColonizationService {
         return planetService.save(planet);
     }
 
-    private static int detectPopCapStartingLevel(@Nonnull final ResourceDeposit creditorDeposit, @Nonnull final Building building, final double miningFactor) {
+    private static int detectPopCapStartingLevel(@Nonnull final ResourceDeposit creditorDeposit, @Nonnull final Building building) {
         Preconditions.checkNotNull(creditorDeposit, "creditorDeposit must not be empty");
         Preconditions.checkNotNull(building, "building must not be empty");
 
@@ -236,9 +235,9 @@ public class ColonizationService {
 
         final int maxLevel = 40;
         int levelTo = maxLevel; // fallback
-        final BigDecimal virtualSumOfPops = PopulationControlCalculator.getVirtualAmountOfPops(miningFactor, sumOfPopulation);
+        final BigDecimal virtualSumOfPops = BigDecimal.valueOf(sumOfPopulation);
         for (int virtualLevel = 1; virtualLevel <= maxLevel; virtualLevel++) {
-            final BigDecimal output = TickOutputCalculator.getOutput(baseValue, increasingFactorPerLevel, miningFactor, virtualLevel);
+            final BigDecimal output = TickOutputCalculator.getOutput(baseValue, increasingFactorPerLevel, 1, virtualLevel);
             if (output.compareTo(virtualSumOfPops) > 0) {
                 levelTo = virtualLevel;
                 break;

@@ -100,7 +100,6 @@ public class MasterOfTheUniverseService {
     public static final ProductionType HEAVY_METALS_WORK_PT = new ProductionType(EResourceType.HEAVY_METALS, EProductionCategory.PRODUCE, null);
     public static final ProductionType RARE_ELEMENTS_PT = new ProductionType(EResourceType.RARE_ELEMENTS, EProductionCategory.PRODUCE, null);
     public static final ProductionType LIVING_PT = new ProductionType(EResourceType.POPULATION, EProductionCategory.CAPACITY, null);
-    public static final ProductionType DOCTOR_PT = new ProductionType(EResourceType.POPULATION, EProductionCategory.PRODUCE, null);
     public static final ProductionType ELEMENTARY_SCHOOL_PT = new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_CIVIL_I);
     public static final ProductionType SECONDARY_SCHOOL_PT = new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_CIVIL_II);
     public static final ProductionType UNIVERSITY_PT = new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_CIVIL_III);
@@ -417,27 +416,27 @@ public class MasterOfTheUniverseService {
         final Research civilConstructions = researchService.save(research);
 
         Building b = building("Construction Yard", "Useful to build ground constructions.",
-                15000, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, CONSTRUCTION_YARD_PT, research, 1);
+                15000, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, CONSTRUCTION_YARD_PT, research, 1, 0.2);
         amendTranslation(b, "Bauhof", "Nützlich für Gebäude.");
         buildingService.save(b);
 
         b = building("Financial markets", "A mixture from public investments and tax systems to create income.",
-                5000, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, MARKET_PT, research, 1);
+                5000, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, MARKET_PT, research, 1, 0.2);
         amendTranslation(b, "Finanzmärkte", "Eine Mixtur aus öffentlichen Investitionen und Steuern um Einkommen zu generieren.");
         buildingService.save(b);
 
         b = building("Metal works", "Produces the most basic materials, from rubber in shoes to special alloys for spacecrafts.",
-                17500, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, METAL_WORKS, research, 1);
+                17500, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, METAL_WORKS, research, 1, 0.2);
         amendTranslation(b, "Metallwerke", "Produziert grundlegende Materialien, von Gummi für Schuhe bis zu speziellen Legierungen für die Raumfahrt.");
         buildingService.save(b);
 
         b = building("Orbital ore factory", "Produces some asteroid-based materials and farms gas from the giants and clouds in the system.",
-                2000, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_II, HEAVY_METALS_WORK_PT, research, 7);
+                2000, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_II, HEAVY_METALS_WORK_PT, research, 7, 0.2);
         amendTranslation(b, "Orbitale Metallwerke", "Baut Ressourcen und Gase ab, die hauptsächlich außerhalb des Planeten zu finden sind.");
         buildingService.save(b);
 
         b = building("Nanofarm", "Produces rare elements and combines them to specialized molycircs and complex nano structures.",
-                1000, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_III, RARE_ELEMENTS_PT, research, 10);
+                1000, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_III, RARE_ELEMENTS_PT, research, 10, 0.2);
         amendTranslation(b, "Nanofarm", "Produziert die notwendigen Rohstoffe für Molycircs und komplexe Nanostrukturen.");
         buildingService.save(b);
 
@@ -445,12 +444,8 @@ public class MasterOfTheUniverseService {
         amendTranslation(research, "Gesundheit und Wohnen", "Verbessert die Möglichkeiten des allgemeinen Lebens.");
         researchService.save(research);
 
-        b = building("Residential and housing", "Everyone needs a home.", 10000, 150, EEducationType.COLLEGE, ETechLevel.TECH_I, LIVING_PT, research, 1);
+        b = building("Residential and housing", "Everyone needs a home.", 10000, 150, EEducationType.COLLEGE, ETechLevel.TECH_I, LIVING_PT, research, 1, 0.4);
         amendTranslation(b, "Wohnräume", "Jeder braucht ein zuhause.");
-        buildingService.save(b);
-
-        b = building("Medical care", "Everyone needs a doctor.", 50, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, DOCTOR_PT, research, 1);
-        amendTranslation(b, "Medizinische Versorgung", "Jeder braucht mal einen Arzt.");
         buildingService.save(b);
         /* civil constructions */
 
@@ -460,19 +455,19 @@ public class MasterOfTheUniverseService {
         final Research civilEducation = researchService.save(research);
 
         b = building("Research Laboratories", "Brings light into the dark.",
-                25, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, RESEARCH_LAB_PT, research, 1);
+                25, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, RESEARCH_LAB_PT, research, 1, 0.2);
         amendTranslation(b, "Forschungslabore", "Bringt Licht ins Dunkel.");
         buildingService.save(b);
 
-        b = building("Elementary schools", "The first school.", 100, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, ELEMENTARY_SCHOOL_PT, research, 1);
+        b = building("Elementary schools", "The first school.", 100, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, ELEMENTARY_SCHOOL_PT, research, 1, 0.4);
         amendTranslation(b, "Grundschule", "Die erste Schule.");
         buildingService.save(b);
 
-        b = building("Secondary schools", "Prepares pupils for the workforce.", 100, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, SECONDARY_SCHOOL_PT, research, 1);
+        b = building("Secondary schools", "Prepares pupils for the workforce.", 100, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, SECONDARY_SCHOOL_PT, research, 1, 0.4);
         amendTranslation(b, "Weiterführende Schule", "Bereitet Schüler auf das Arbeitsleben vor.");
         buildingService.save(b);
 
-        b = building("University", "Prepares and trains people to be researchers.", 100, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, UNIVERSITY_PT, research, 1);
+        b = building("University", "Prepares and trains people to be researchers.", 100, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_I, UNIVERSITY_PT, research, 1, 0.4);
         amendTranslation(b, "Universität", "Bildet Forscher aus.");
         buildingService.save(b);
         /* civil education */
@@ -483,7 +478,7 @@ public class MasterOfTheUniverseService {
         researchService.save(research);
 
         b = building("Orbitals Construction Yard", "The shipyard constructs off-planet components, ships and space stations.",
-                8000, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, SHIPYARD_PT, research, 1);
+                8000, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, SHIPYARD_PT, research, 1, 0.2);
         amendTranslation(b, "Schiffswerft", "Die Schiffswerft konstruiert außerplanetare Bauteile, Schiffe und Raumstationen.");
         buildingService.save(b);
         /* military constructions */
@@ -493,11 +488,11 @@ public class MasterOfTheUniverseService {
         amendTranslation(research, "Militärhistorie und moderne Taktiken", "Das Wissen über die Vergangenheit wird die Zukunft verbessern.");
         researchService.save(research);
 
-        b = building("Teams Rank School", "Trains ordinary people into crew people.", 15, 10, EEducationType.ENLISTED, ETechLevel.TECH_I, MILITARY_I_PT, research, 1);
+        b = building("Teams Rank School", "Trains ordinary people into crew people.", 30, 10, EEducationType.ENLISTED, ETechLevel.TECH_I, MILITARY_I_PT, research, 1, 0.4);
         amendTranslation(b, "Mannschaftsschule", "Bildet gewöhnliche Leute zu Besatzungsmitgliedern aus.");
         buildingService.save(b);
 
-        b = building("Officer school", "Trains officers.", 5, 10, EEducationType.OFFICER, ETechLevel.TECH_I, MILITARY_II_PT, research, 1);
+        b = building("Officer school", "Trains officers.", 10, 10, EEducationType.OFFICER, ETechLevel.TECH_I, MILITARY_II_PT, research, 1, 0.4);
         amendTranslation(b, "Offiziersschule", "Bildet Offiziere aus.");
         buildingService.save(b);
         /* military education */
@@ -1007,8 +1002,9 @@ public class MasterOfTheUniverseService {
                                 final ETechLevel techLevel,
                                 final ProductionType productionType,
                                 final Research unlockedBy,
-                                final int unlockedThroughLevel) {
-        return buildingService.createBuilding(name, description, baseValue, techLevel, productionType, educationType, amountOfWorkers, unlockedBy, unlockedThroughLevel);
+                                final int unlockedThroughLevel,
+                                final double increasingFactorPerLevel) {
+        return buildingService.createBuilding(name, description, baseValue, techLevel, productionType, educationType, amountOfWorkers, unlockedBy, unlockedThroughLevel, increasingFactorPerLevel);
     }
 
 

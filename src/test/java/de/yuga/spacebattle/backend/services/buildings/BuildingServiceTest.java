@@ -71,11 +71,11 @@ public class BuildingServiceTest extends BaseTestCase {
         Map<EEducationType, Long> crewRequirement = new HashMap<>();
         crewRequirement.put(EEducationType.UNIVERSITY, 100L);
         CrewRequirement militaryCrew = new CrewRequirement(crewRequirement, EDepositType.COSTS);
-        final Building expectation = new Building(name, description, baseValue, ETechLevel.TECH_I, new ProductionType(researchType, EProductionCategory.PRODUCE, null), militaryCrew, unlockedThrough, 1);
+        final Building expectation = new Building(name, description, baseValue, ETechLevel.TECH_I, 0.2, new ProductionType(researchType, EProductionCategory.PRODUCE, null), militaryCrew, unlockedThrough, 1);
         // prepare mocks
         when(buildingRepositoryMock.save(expectation)).thenReturn(expectation);
         // test method
-        final Building result = testObject.createBuilding(name, description, baseValue, ETechLevel.TECH_I, new ProductionType(researchType, EProductionCategory.PRODUCE, null), EEducationType.UNIVERSITY, 100L, unlockedThrough, 1);
+        final Building result = testObject.createBuilding(name, description, baseValue, ETechLevel.TECH_I, new ProductionType(researchType, EProductionCategory.PRODUCE, null), EEducationType.UNIVERSITY, 100L, unlockedThrough, 1, 0.2);
         // check expectation
         assertNotNull(result);
         assertEquals(result, expectation);

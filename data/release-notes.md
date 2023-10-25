@@ -2,6 +2,9 @@
 
 #### Gameplay
 
+Die Änderungen um die Punkte 3., 4., 5. und 6. sollen die Spielgeschwindigkeit steigern. Die Idee ist natürlich, dass man schneller dazu kommt ein bisschen Action zu
+veranstalten ;)
+
 todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt etwas aus", ansonsten beibehalten
 
 1. Aktive und inaktive Kriegsschiffe in der Reserve und Flotten
@@ -13,6 +16,15 @@ todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt etwas a
     - Nur aktive Schiffe der Reserve können Missionen zugeteilt werden.
     - Es gibt ein kurzes Tutorial dazu.
 2. Angriffe auf Handelskonvois passieren nun auch, wenn eine der großen Mächte im Spiel ist. Allerdings schützen sie ihren Teil des Konvois mit ausreichender Kapazität.
+3. Das Krankenhaus-Gebäude ist entfernt worden. Es diente ursprünglich dazu, die Reproduktionsgleichung um den Reproduktionskoeffizienten zu bereichern, während der Mining Factor
+   dazu diente die Kapazität des Wohnraums zu begrenzen.  
+   Der Mining Factor der Population dient jetzt zur Bestimmung des Reproduktionskoeffizienten, ist also maßgeblich für das Bevölkerungswachstum verantwortlich. Die Gesamtmenge an
+   Wohnraum wird nicht mehr durch den Mining Factor beeinflusst.  
+   Das soll das Prinzip der Mining Factors angleichen und das Wachstumsprinzip der Bevölkerung gleich mit.
+4. Der Gebäudeoutput für pro Level wird anders berechnet. Ein neues Level bringt jetzt mehr Output als vorher.
+5. Die Verbesserung pro Gebäudelevel in Bezug zur Bevölkerung ist verdoppelt. Ein neues Gebäudelevel bei z.B. Wohnraum nimmt den Vorteil aus 4. mit und bringt nun 40 % mehr statt
+   wie vorher nur 20 % Verbesserung.
+   todo. jobs due-date nicht auf basis von ticks fest legen sondern die punkte werden runter gerechnet -> ticks left ist immer eine berechnung (mehrere jobs pro tick möglich)
 
 todo. Gebäudeoutput muss deutlicher steigen
 todo. tech level 2 und 3 nutzen
@@ -20,7 +32,6 @@ todo. Hyperabdruck im System bei aufkommenden Flotten
 
 - Emissionssignatur verrät ungefähre größe und anzahl (siehe "look & feel wie in büchern")
 - zwei gebäude (planetare antennen, orbitale antennen) und Eloka-Modul auf Schiffen erzeugen scan-punkte und verraten genauigkeit der ortung
-
 
 #### Diverses
 
@@ -38,7 +49,6 @@ todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehb
 
 todo. forum management
 todo. check fitting yard
-
 
 todo. star map filter für flotten
 
@@ -77,7 +87,6 @@ todo. population problem bei Samovar - yufiel -> mind aber ein update-problem
 
 #### next steps
 
-todo. jobs due-date nicht auf basis von ticks fest legen sondern die punkte werden runter gerechnet -> ticks left ist immer eine berechnung (mehrere jobs pro tick möglich)
 todo. set nav marker by "next stations" dialog?
 
 nope. zu weiter/schneller zoom removed flotten aus map
