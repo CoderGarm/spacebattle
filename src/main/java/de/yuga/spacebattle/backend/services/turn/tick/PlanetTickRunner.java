@@ -153,8 +153,10 @@ public class PlanetTickRunner implements TickRunner {
                     .orElseThrow(() -> new NotifyWebUserException("Yeah, shit happens. This can not happen."));
 
             log(planet, job, "Start processing job.");
-            planet.getResourceDeposit().setAbsoluteResourceValue(resourceType, 0);
-            if (!tickJob(job)) {
+            final long points = planet.getResourceDeposit().getResourceAmountByType(resourceType);
+            final int leftOverPoints = tickJob(job, (int) points);
+            planet.getResourceDeposit().setAbsoluteResourceValue(resourceType, leftOverPoints);
+            if (!job.isFinished()) {
                 jobService.save(job);
                 log(planet, job, "Shifting job for tick after " + today + ".");
                 continue;
@@ -348,19 +350,16 @@ public class PlanetTickRunner implements TickRunner {
         Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
 
         final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
-        final ResourceDeposit demand = operationalService.getPopulationDemandForPlanet(planet.getId());
         switch (resourceType.getCollectableType()) {
             case VIABLE:
                 // do school
+                final ResourceDeposit demand = operationalService.getPopulationDemandForPlanet(planet.getId());
                 PopulationControlCalculator.educatePopulation(planet, demand);
                 // do birth
                 PopulationControlCalculator.populatePlanet(planet, operationalService.getUtilizedPopulationForPlanet(planet.getId()));
                 break;
-            case FORFEITABLE:
-                // only set new available points
-                resourceDeposit.setAbsoluteResourceValue(resourceType, ResourceControlCalculator.getTickOutput(planet, resourceType));
-                break;
             default:
+            case FORFEITABLE:
             case COLLECTABLE:
                 // add points to the old deposit
                 resourceDeposit.updateResource(resourceType, ResourceControlCalculator.getTickOutput(planet, resourceType));
@@ -369,15 +368,14 @@ public class PlanetTickRunner implements TickRunner {
     }
 
     /**
-     * Counts down the remaining {@link Job#getTicksLeft()}.
+     * Counts down the remaining {@link Job#getPointsLeft()}.
      *
      * @param job the {@link Job} to do
-     * @return <code>true</code> if the job is done
+     * @return the leftover points will be returned to be used elsewhere that tick
      */
-    private boolean tickJob(@Nonnull final Job job) {
+    private int tickJob(@Nonnull final Job job, final int points) {
         Preconditions.checkNotNull(job, "job shouldn't be null!");
 
-        job.tick();
-        return job.getTicksLeft() <= 0;
+        return job.tick(points);
     }
 }

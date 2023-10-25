@@ -28,6 +28,7 @@ import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -74,6 +75,14 @@ public class OperationalService {
         this.colonizationService = Preconditions.checkNotNull(colonizationService, "colonizationService must not be empty");
         this.operationalCache = Preconditions.checkNotNull(operationalCache, "operationalCache must not be empty");
         this.jobRepository = Preconditions.checkNotNull(jobRepository, "jobService must not be empty");
+    }
+
+    @Nonnull
+    @Transactional
+    public Map<Planet, ResourceDeposit> getUtilizedPopulationForPlanets(@Nonnull final Set<Planet> planets) {
+        Preconditions.checkNotNull(planets, "planets must not be empty");
+
+        return planets.stream().collect(Collectors.toMap(Function.identity(), p -> getUtilizedPopulationForPlanet(p.getId())));
     }
 
     @Nonnull
@@ -445,7 +454,7 @@ public class OperationalService {
     }
 
     @Nonnull
-    public Set<Construction> operateInoperationals(@Nonnull final Tick today, @Nonnull final Planet planet) {
+    public void operateInoperationals(@Nonnull final Tick today, @Nonnull final Planet planet) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
@@ -458,6 +467,5 @@ public class OperationalService {
         if (!alsoActivated.isEmpty()) {
             operationalCache.activateConstructions(today, planet, alsoActivated);
         }
-        return alsoActivated;
     }
 }

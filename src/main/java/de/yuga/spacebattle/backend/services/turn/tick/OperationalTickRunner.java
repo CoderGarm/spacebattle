@@ -2,15 +2,10 @@ package de.yuga.spacebattle.backend.services.turn.tick;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
-import de.yuga.spacebattle.backend.entities.misc.Completable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
-import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
-import de.yuga.spacebattle.backend.enums.EProductionCategory;
-import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
@@ -23,9 +18,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.function.Function;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -86,70 +81,25 @@ public class OperationalTickRunner implements TickRunner {
      */
     private void tickPlanets() {
         final List<Planet> planets = planetService.findAllColonized();
-        final Set<Construction> oldLaboratories = new HashSet<>();
         for (final Planet p : planets) {
             log(p, "Start ticking planet");
-            final Construction construction = tickPlanet(p);
-            oldLaboratories.add(construction);
+            tickPlanet(p);
             tickFleetsAtStarbase(p);
             tickFleetsAtStarbase(p);
         }
-        updateResearchJob(oldLaboratories.stream().filter(Objects::nonNull).collect(Collectors.toSet()));
-    }
-
-    /**
-     * Reduces the ticksLeft if necessary by new operational level.
-     */
-    private void updateResearchJob(@Nonnull final Set<Construction> oldLaboratories) {
-        Preconditions.checkNotNull(oldLaboratories, "oldLaboratories must not be empty");
-
-        final List<Job> toStore = new ArrayList<>();
-        final List<Job> researchJobs = jobService.findResearchJobs();
-        for (final Job job : researchJobs) {
-            final Map<Construction, Integer> formerLaboratoryOperationalLevel = oldLaboratories.stream().collect(Collectors.toMap(Function.identity(), Construction::getOperationalLevel));
-            final int idUser = Objects.requireNonNull(job.getFacility().getPlanet().getOwner()).getId();
-            final BigDecimal formerEmpireWideResearchPoints = planetService.getEmpireWideResearchPoints(idUser, formerLaboratoryOperationalLevel);
-            final BigDecimal empireWideResearchPoints = planetService.getEmpireWideResearchPoints(idUser);
-            if (empireWideResearchPoints.compareTo(formerEmpireWideResearchPoints) > 0) {
-                job.reduceRemainingTicksByLevelUpgrade(empireWideResearchPoints.divide(formerEmpireWideResearchPoints, Completable.MATH_CONTEXT));
-                toStore.add(job);
-            }
-        }
-        jobService.saveAll(toStore);
     }
 
     /**
      * Activates all constructions when possible.
      */
-    @Nullable
-    private Construction tickPlanet(@Nonnull final Planet planet) {
+    private void tickPlanet(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkState(planet.getOwner() != null, "The owner must be set, otherwise there is nothing to do.");
 
         log(planet, "Start activating operationals.");
-
-        final Construction laboratory = planet.getConstructionByResource(EResourceType.RESEARCH).stream().findFirst().orElse(null);
-        final Set<Construction> constructions = operationalService.operateInoperationals(today, planet);
-        final Construction labWithNewLevel = constructions.stream().filter(c -> c.getBuilding().getProductionType().getProductionTarget() == EResourceType.RESEARCH).findFirst().orElse(null);
-
-        updateJobs(constructions);
+        operationalService.operateInoperationals(today, planet);
         log(planet, "Done activating operationals.");
-        return laboratory != null && labWithNewLevel != null && laboratory.getOperationalLevel() < labWithNewLevel.getOperationalLevel() ? laboratory : null;
-    }
-
-    private void updateJobs(@Nonnull final Set<Construction> operatedConstructions) {
-        Preconditions.checkNotNull(operatedConstructions, "operatedConstructions must not be empty");
-
-        final Construction upgradedShipyard = operatedConstructions.stream().filter(c -> c.getBuilding().getProductionTarget() == EResourceType.ORBITAL_CONSTRUCTION && c.getBuilding().getProductionType().getProductionCategory() == EProductionCategory.PRODUCE).findFirst().orElse(null);
-        if (upgradedShipyard != null) {
-            final List<Job> jobsByPlanet = jobService.findAllJobsByPlanet(upgradedShipyard.getPlanet().getId()).stream()
-                    .filter(j -> j.getConstructable().getFleet() != null)
-                    .collect(Collectors.toList());
-
-            jobsByPlanet.forEach(j -> j.reduceRemainingTicksByLevelUpgrade(j.getFacility().getBuilding().getIncreasingFactorPerLevel()));
-            jobService.saveAll(jobsByPlanet);
-        }
     }
 
     /**

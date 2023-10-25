@@ -133,7 +133,8 @@ public class ResearchApi extends BaseApi {
             throw new NotifyWebUserException("No research was found.");
         }
         final Job researchJob = jobService.createResearchJob(user, research);
-        return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(researchJob, getPreferredLanguage()));
+        final BigDecimal empireWideResearchPoints = planetService.getEmpireWideResearchPoints(idUser);
+        return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(researchJob, empireWideResearchPoints, getPreferredLanguage()));
     }
 
     @GetMapping(value = AVAILABLE_BY_USER_ENDPOINT)
@@ -154,13 +155,11 @@ public class ResearchApi extends BaseApi {
         final Map<Research, Integer> researchesForUser = researchService.getUnlockableResearches(idUser, jobActiveFor);
 
         final BigDecimal empireWideResearchPoints = planetService.getEmpireWideResearchPoints(idUser);
-
-
         final List<ResearchLevel> researchLevels = researchesForUser.entrySet().stream()
                 .map(entry -> {
                     final Research research = entry.getKey();
                     final Integer level = entry.getValue();
-                    final Constructable constructable = new Constructable(research, level, empireWideResearchPoints);
+                    final Constructable constructable = new Constructable(research, level);
                     final int remainingTicks = JobCostsCalculator.calculateRemainingTicks(empireWideResearchPoints, constructable);
                     return new ResearchLevel(research, level, remainingTicks, getPreferredLanguage());
                 }).collect(Collectors.toList());

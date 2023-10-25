@@ -2,8 +2,10 @@ package de.yuga.spacebattle.rest.dto.turn;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EJobPriority;
 import de.yuga.spacebattle.rest.dto.account.Player;
 import de.yuga.spacebattle.rest.dto.buildings.Building;
@@ -16,6 +18,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.math.BigDecimal;
 import java.util.Set;
 
 @Schema(description = ".")
@@ -97,6 +100,18 @@ public class Job {
     }
 
     public Job(@Nonnull final de.yuga.spacebattle.backend.entities.turn.Job job,
+               @Nonnull final ResourceDeposit utilization,
+               @Nonnull final String languageCode) {
+        this(job, languageCode);
+        Preconditions.checkNotNull(utilization, "utilization must not be empty");
+
+        this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(job.getFacility(), job.getConstructable(), utilization);
+    }
+
+    /**
+     * Creates a job with no ticks left!
+     */
+    public Job(@Nonnull final de.yuga.spacebattle.backend.entities.turn.Job job,
                @Nonnull final String languageCode) {
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(job, "job shouldn't be null!");
@@ -105,7 +120,7 @@ public class Job {
         this.user = new Player(job.getOwner());
         this.facility = new Construction(job.getFacility(), languageCode);
         this.facilityPlanet = new Planet(job.getFacility().getPlanet());
-        this.ticksLeft = job.getTicksLeft();
+        this.ticksLeft = 0;
         this.priority = job.getPriority();
         final Constructable constructable = job.getConstructable();
         this.resourceType = new EResourceType(constructable.getResourceType());
@@ -125,5 +140,14 @@ public class Job {
             this.isRepairJob = job.getConstructable().isRepairJob();
         }
         this.targetLevel = constructable.getTargetLevel();
+    }
+
+    public Job(@Nonnull final de.yuga.spacebattle.backend.entities.turn.Job researchJob,
+               @Nonnull final BigDecimal empireWideResearchPoints,
+               @Nonnull final String preferredLanguage) {
+        this(researchJob, preferredLanguage);
+        Preconditions.checkNotNull(empireWideResearchPoints, "empireWideResearchPoints must not be empty");
+
+        this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(empireWideResearchPoints, researchJob.getConstructable());
     }
 }

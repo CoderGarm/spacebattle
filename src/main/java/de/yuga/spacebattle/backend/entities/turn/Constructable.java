@@ -57,10 +57,6 @@ public class Constructable {
     @Enumerated(EnumType.STRING)
     private EJobType jobType;
 
-    @Nullable
-    @Transient
-    private BigDecimal empireWideResearchPoints;
-
     public Constructable() {
     }
 
@@ -74,7 +70,7 @@ public class Constructable {
         this.resourceType = EResourceType.CONSTRUCTION;
     }
 
-    public Constructable(@Nonnull final Research research, @Nonnull final Integer targetLevel, @Nonnull final BigDecimal empireWideResearchPoints) {
+    public Constructable(@Nonnull final Research research, @Nonnull final Integer targetLevel) {
         Preconditions.checkNotNull(research, "research shouldn't be null!");
         Preconditions.checkNotNull(targetLevel, "targetLevel shouldn't be null!");
         Preconditions.checkArgument(targetLevel > 0, "targetLevel shouldn't be lower than one!");
@@ -82,7 +78,6 @@ public class Constructable {
         this.research = research;
         this.targetLevel = targetLevel;
         this.resourceType = EResourceType.RESEARCH;
-        this.empireWideResearchPoints = empireWideResearchPoints;
     }
 
     public Constructable(@Nonnull final Fleet fleet, @Nonnull final EJobType jobType) {
@@ -157,8 +152,7 @@ public class Constructable {
         throw new NotifyWebUserException("You have tried something interesting. May be you should talk to an admin.");
     }
 
-    @Nullable
-    public BigDecimal getEmpireWideResearchPoints() {
-        return empireWideResearchPoints;
+    public boolean isResearchJob() {
+        return this.research != null;
     }
 }

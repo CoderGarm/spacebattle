@@ -35,7 +35,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.math.BigDecimal;
 import java.util.*;
 
 @Service
@@ -110,7 +109,7 @@ public class JobService {
             return;
         }
 
-        if (doDelete.getTicksLeft() > 0 && EResourceType.RESEARCH != doDelete.getConstructable().getResourceType()) {
+        if (doDelete.getPointsLeft() > 0 && EResourceType.RESEARCH != doDelete.getConstructable().getResourceType()) {
             // if reached job is not done -> payback the paycheck
             // not reached if the job is a research
             final ResourceDeposit jobCosts = job.getConstructable().getJobCosts();
@@ -230,9 +229,7 @@ public class JobService {
                 .stream().findFirst().orElse(null);
         checkIfFree(facility);
 
-        final BigDecimal empireWideResearchPoints = planetService.getEmpireWideResearchPoints(user.getId());
-
-        final Constructable constructable = new Constructable(research, level, empireWideResearchPoints);
+        final Constructable constructable = new Constructable(research, level);
         final Job entity = new Job(researchPlanet, facility, constructable, operationalService.getUtilizedPopulationForPlanet(researchPlanet.getId()));
         jobRepository.save(entity);
         return entity;

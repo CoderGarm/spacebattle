@@ -1,10 +1,9 @@
 package de.yuga.spacebattle.backend.entities.turn;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
-import de.yuga.spacebattle.backend.entities.misc.Completable;
+import de.yuga.spacebattle.backend.entities.misc.PointsCompletable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EJobPriority;
@@ -28,7 +27,7 @@ import javax.validation.constraints.NotNull;
 @Check(constraints = "(idBuilding IS NOT NULL AND targetLevel IS NOT NULL) " +
         "OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) " +
         "OR (idFleet IS NOT NULL) ")
-public class Job extends Completable implements Comparable<Job> {
+public class Job extends PointsCompletable implements Comparable<Job> {
 
     @Nonnull
     @NotNull
@@ -74,11 +73,7 @@ public class Job extends Completable implements Comparable<Job> {
         this.owner = planet.getHumanOwner();
         this.facility = facility;
         this.constructable = constructable;
-        if (constructable.getEmpireWideResearchPoints() != null) {
-            this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(constructable.getEmpireWideResearchPoints(), constructable);
-        } else {
-            this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(facility, constructable, utilization);
-        }
+        this.pointsLeft = (int) constructable.getJobCosts().getResourceAmountByType(constructable.getResourceType());
     }
 
     @Nonnull
@@ -136,7 +131,11 @@ public class Job extends Completable implements Comparable<Job> {
             return 1;
         }
 
-        return Integer.compare(getTicksLeft(), o.getTicksLeft());
+        return Integer.compare(getPointsLeft(), o.getPointsLeft());
+    }
+
+    public boolean isFinished() {
+        return pointsLeft <= 0;
     }
 
     @Override

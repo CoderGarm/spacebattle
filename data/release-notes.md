@@ -24,9 +24,10 @@ todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt etwas a
 4. Der Gebäudeoutput für pro Level wird anders berechnet. Ein neues Level bringt jetzt mehr Output als vorher.
 5. Die Verbesserung pro Gebäudelevel in Bezug zur Bevölkerung ist verdoppelt. Ein neues Gebäudelevel bei z.B. Wohnraum nimmt den Vorteil aus 4. mit und bringt nun 40 % mehr statt
    wie vorher nur 20 % Verbesserung.
-   todo. jobs due-date nicht auf basis von ticks fest legen sondern die punkte werden runter gerechnet -> ticks left ist immer eine berechnung (mehrere jobs pro tick möglich)
+6. Jobs haben keine festen Ticks mehr, die auf 0 gezählt werden müssen. Die zu erreichenden "Construction Points" werden direkt abgezogen, in der darstellung allerdings noch auf
+   Ticks umgerechnet.  
+   Die Folge ist, dass man nun mehr als einen Job pro Tick beenden kann, wenn man genug Construction Points hat.
 
-todo. Gebäudeoutput muss deutlicher steigen
 todo. tech level 2 und 3 nutzen
 todo. Hyperabdruck im System bei aufkommenden Flotten
 

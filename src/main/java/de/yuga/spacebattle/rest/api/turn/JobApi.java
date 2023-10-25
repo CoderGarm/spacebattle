@@ -1,6 +1,10 @@
 package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.services.constructables.OperationalService;
+import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
@@ -21,7 +25,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
@@ -40,9 +47,19 @@ public class JobApi extends BaseApi {
     @Nonnull
     private final JobService jobService;
 
+    @Nonnull
+    private final OperationalService operationalService;
+
+    @Nonnull
+    private final PlanetService planetService;
+
     @Autowired
-    public JobApi(@Nonnull final JobService jobService) {
+    public JobApi(@Nonnull final JobService jobService,
+                  @Nonnull final OperationalService operationalService,
+                  @Nonnull final PlanetService planetService) {
         this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
+        this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
+        this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
     }
 
     @GetMapping(value = JOB_RUNNING_AT_ENDPOINT + "/{idPlanet}")
@@ -58,8 +75,9 @@ public class JobApi extends BaseApi {
     )
     public ResponseEntity<?> getJobsOnPlanet(@PathVariable("idPlanet") final int idPlanet) {
         final List<de.yuga.spacebattle.backend.entities.turn.Job> allJobsByPlanet = jobService.findAllJobsByPlanet(idPlanet);
+        final ResourceDeposit utilizedPopulationForPlanet = operationalService.getUtilizedPopulationForPlanet(idPlanet);
         return ResponseEntity.ok(allJobsByPlanet.stream()
-                .map(j -> new Job(j, getPreferredLanguage()))
+                .map(j -> new Job(j, utilizedPopulationForPlanet, getPreferredLanguage()))
                 .collect(Collectors.toList()));
     }
 
@@ -77,9 +95,24 @@ public class JobApi extends BaseApi {
     public ResponseEntity<?> getJobsForEmpire() {
 
         final int idUser = getIdUser();
-        return ResponseEntity.ok(jobService.findAllJobsForUser(idUser).stream()
-                .map(j -> new Job(j, getPreferredLanguage()))
-                .collect(Collectors.toList()));
+        final List<de.yuga.spacebattle.backend.entities.turn.Job> jobs = jobService.findAllJobsForUser(idUser);
+
+        final Set<de.yuga.spacebattle.backend.entities.turn.Job> researchJobs = jobs.stream().filter(j -> j.getConstructable().isResearchJob()).collect(Collectors.toSet());
+        jobs.removeAll(researchJobs);
+
+        final Set<Planet> planets = jobs.stream().map(j -> j.getFacility().getPlanet()).collect(Collectors.toSet());
+        final Map<Planet, ResourceDeposit> utilitizationMap = operationalService.getUtilizedPopulationForPlanets(planets);
+
+        final List<Job> result = jobs.stream()
+                .map(j -> new Job(j, utilitizationMap.get(j.getFacility().getPlanet()), getPreferredLanguage()))
+                .collect(Collectors.toList());
+
+        if (!researchJobs.isEmpty()) {
+            final BigDecimal empireWideResearchPoints = planetService.getEmpireWideResearchPoints(idUser);
+            researchJobs.forEach(j -> result.add(new Job(j, empireWideResearchPoints, getPreferredLanguage())));
+        }
+
+        return ResponseEntity.ok(result);
     }
 
 
