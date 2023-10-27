@@ -110,6 +110,11 @@ public class PlanetService {
             }
         }
         saveAll(toStore);
+        invalidateEmpireResearchCacheKey(idUser);
+    }
+
+    public void invalidateEmpireResearchCacheKey(final int idUser) {
+        empireResearchPointsCache.invalidateKey(idUser);
     }
 
     @Nonnull

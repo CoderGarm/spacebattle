@@ -38,4 +38,10 @@ public class CacheStore<KEY, VALUE> {
     public void invalidateAll() {
         cache.invalidateAll();
     }
+
+    public void invalidateKey(@Nonnull final KEY key) {
+        Preconditions.checkNotNull(key, "key must not be empty");
+        
+        cache.invalidate(key);
+    }
 }

@@ -145,6 +145,7 @@ public class ResearchApi extends BaseApi {
             final Job job = planetTickRunner.tickInstaResearch(researchJob, capability, tickTimeService.getToday());
             return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(job, getPreferredLanguage()));
         } else {
+            planetService.invalidateEmpireResearchCacheKey(idUser);
             return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(researchJob, capability, getPreferredLanguage()));
         }
     }
