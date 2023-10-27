@@ -2,10 +2,8 @@
 
 #### Gameplay
 
-Die Änderungen um die Punkte 3., 4., 5. und 6. sollen die Spielgeschwindigkeit vorrangig im Early Game steigern.  
+Die Änderungen um die Punkte 3. bis 6. sollen die Spielgeschwindigkeit vorrangig im Early Game steigern.  
 Die Idee ist natürlich, dass man schneller dazu kommt ein bisschen Action zu veranstalten ;)
-
-todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt etwas aus", ansonsten beibehalten
 
 1. Aktive und inaktive Kriegsschiffe in der Reserve und Flotten
     - Für Kriegsschiffe die abgewrackt werden, bekommt man jetzt 50 % der Ressourcen zurück. Die Crew wird natürlich nicht dezimiert.
@@ -31,12 +29,6 @@ todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt etwas a
    Man muss danach zunächst den Planeten bzw die Forschungsseite neu laden, damit man wieder einen neuen Job zu starten kann. Wie ich das in der UI handhabe, will ich noch
    herausfinden.
 
-todo. tech level 2 und 3 nutzen
-todo. Hyperabdruck im System bei aufkommenden Flotten
-
-- Emissionssignatur verrät ungefähre größe und anzahl (siehe "look & feel wie in büchern")
-- zwei gebäude (planetare antennen, orbitale antennen) und Eloka-Modul auf Schiffen erzeugen scan-punkte und verraten genauigkeit der ortung
-
 #### Diverses
 
 1. Es gibt jetzt individuelle Icons für die verschiedenen Stati von Flotten und Schiffen.
@@ -46,6 +38,32 @@ todo. Hyperabdruck im System bei aufkommenden Flotten
    Bitte sagt mir, wo am dringendsten Beiträge gebraucht werden. Im Wiki schreiben kann prinzipiell allerdings jeder User, der im Wiki editieren möchte.
 5. In den Gebäudebau wird nun der aktuell laufende Job vorausgewählt, damit man nicht mehr im Dashboard nachgucken muss.
 6. Ebenfalls werden nun Baubeschränkungen durch Preis oder Forschung direkt angezeigt. Das sollte einige unnötige Klickerei ersparen.
+
+### Bugs fixed
+
+Die Issues der Sternenkarte - übergroße selection Marker und verschwundene Fleet sharks beim Zoomen - möchte ich vorerst nicht weiter verfolgen.  
+Da die Karte ein vollständiges Rework erfahren soll, möchte ich mich nicht mehrfach mit demselben Thema beschäftigen.
+
+1. Der Pop Demand zeigt nun auch den Bedarf von Flotten im Umbau oder in Reparatur an.
+2. Das planetare Jobdisplay zeigt nun nur noch den aktuell laufenden Job an, nicht mehr die ganze Queue.
+3. Ein Faden im Forum zeigt nun die Seite mit dem neusten, unbekannten Beitrag.
+4. Eine Flotte zu reparieren hat dazu geführt, dass die Schiffe in die größte Flotte vor Ort eingruppiert wurden. Das ist nicht mehr der Fall, reparierte Schiffe bleiben in der
+   ursprünglichen Flotte.
+5. Die Tabs auf der Sternenkarte sollten nun immer da sein.
+
+### follow up
+
+#### Gameplay
+
+todo. tech level 2 und 3 nutzen
+todo. Hyperabdruck im System bei aufkommenden Flotten
+
+- Emissionssignatur verrät ungefähre größe und anzahl (siehe "look & feel wie in büchern")
+- zwei gebäude (planetare antennen, orbitale antennen) und Eloka-Modul auf Schiffen erzeugen scan-punkte und verraten genauigkeit der ortung
+
+todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt etwas aus", ansonsten beibehalten
+
+#### Diverses
 
 todo. mission items more role play "unprotected convoy changes signature of ship to warship and pirate fled ...""
 todo. quoting in chat und forum
@@ -69,18 +87,8 @@ todo. player comment about the game in profile to display at take-a-tour
 
 ### Bugs fixed
 
-Die Issues auf der Map (übergroße selection Marker, verschwundene Fleet sharks) entstehen durch übertriebene Zoom-Werte, wenn man zu schnell mit dem Mausrad zoomt und die "Bremse"
-nicht greift.  
-Diese Problematik habe ich raus priorisiert, da ich die ganze Map umbauen werde und ich hier sehr tief in die verwendete Library eingreifen müsste.  
-Der Workaround sollte in jedem der hiermit zusammenhängenden Probleme ein neues Laden der Map sein.
-
-1. Der Pop Demand zeigt nun auch den Bedarf von Flotten im Umbau oder in Reparatur an.
-2. Das planetare Jobdisplay zeigt nun nur noch den aktuell laufenden Job an, nicht mehr die ganze Queue.
-3. Ein Faden im Forum zeigt nun die Seite mit dem neusten, unbekannten Beitrag.
-4. Eine Flotte zu reparieren hat dazu geführt, dass die Schiffe in die größte vor Ort eingruppiert wurden. Das ist behoben.
-   todo. upgrade/repair job muss dings einklappen und neu laden
-
-todo. star map tabs fehlen manchmal
+todo: JobRunr for running async jobs?
+todo. upgrade/repair job muss dings einklappen und neu laden
 todo. wrong password no second login attempt
 todo. battle reports notification wrong
 todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen
