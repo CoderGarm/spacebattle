@@ -28,7 +28,7 @@ todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt etwas a
    Ticks umgerechnet.  
    Die Folge ist, dass man nun mehr als einen Job pro Tick beenden kann, wenn man genug Construction Points vom Tick zuvor über hat.  
    Diese "Insta Jobs" zeigen 0 Ticks Laufzeit an und lassen sich genauso starten wie alle anderen Jobs, sind dann halt nur sofort fertig.  
-   Man muss danach zunächst den Planeten bzw die Forschungsseite neu laden, damit man wieder einen neuen Job zu starten kann. Wie ich das in der UI handhabe, muss ich noch
+   Man muss danach zunächst den Planeten bzw die Forschungsseite neu laden, damit man wieder einen neuen Job zu starten kann. Wie ich das in der UI handhabe, will ich noch
    herausfinden.
 
 todo. tech level 2 und 3 nutzen

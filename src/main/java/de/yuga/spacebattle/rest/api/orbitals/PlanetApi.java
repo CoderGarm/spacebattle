@@ -175,7 +175,10 @@ public class PlanetApi extends BaseApi {
     )
     public ResponseEntity<?> buildConstruction(@PathVariable("idPlanet") final int idPlanet, @PathVariable("idBuilding") final int idBuilding) {
         final Job job = jobService.createConstructionYardJob(idPlanet, idBuilding);
-        return ResponseEntity.ok(job != null);
+        if (JobService.isInstaJobPossible(job.getFacility().getPlanet(), job)) {
+            planetTickRunner.tickInstaConstruction(job, tickTimeService.getToday());
+        }
+        return ResponseEntity.ok(true);
     }
 
     @GetMapping(value = SHIPYARD_POSSIBLE_ENDPOINT + "/{idPlanet}")

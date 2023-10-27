@@ -415,8 +415,7 @@ public class PlanetTickRunner implements TickRunner {
         return job;
     }
 
-    @Nonnull
-    public Job tickInstaShipyard(@Nonnull Job job, @Nonnull final Tick today) {
+    public void tickInstaShipyard(@Nonnull Job job, @Nonnull final Tick today) {
         Preconditions.checkNotNull(job, "job must not be empty");
         Preconditions.checkNotNull(today, "today must not be empty");
 
@@ -430,8 +429,25 @@ public class PlanetTickRunner implements TickRunner {
             planet.getResourceDeposit().updateResource(EResourceType.ORBITAL_CONSTRUCTION, -usedPoints);
             completeShipyard(planet, job, today);
             planetService.save(planet);
-            return jobService.save(job);
+            jobService.save(job);
         }
-        return job;
+    }
+
+    public void tickInstaConstruction(@Nonnull Job job, @Nonnull final Tick today) {
+        Preconditions.checkNotNull(job, "job must not be empty");
+        Preconditions.checkNotNull(today, "today must not be empty");
+
+        job = jobService.findById(job.getId());
+        Preconditions.checkNotNull(job, "job must not be empty");
+
+        final Planet planet = job.getFacility().getPlanet();
+        if (JobService.isInstaJobPossible(planet, job)) {
+            final long points = planet.getResourceDeposit().getResourceAmountByType(EResourceType.CONSTRUCTION);
+            final long usedPoints = tickJob(job, points);
+            planet.getResourceDeposit().updateResource(EResourceType.CONSTRUCTION, -usedPoints);
+            completeConstruction(planet, planet.getConstructions(), job, today);
+            planetService.save(planet);
+            jobService.save(job);
+        }
     }
 }

@@ -163,7 +163,7 @@ public class JobService {
     }
 
     public static boolean isInstaJobPossible(final @Nonnull Planet planet, final Job job) {
-        return job.getPointsLeft() <= planet.getResourceDeposit().getResourceAmountByType(EResourceType.ORBITAL_CONSTRUCTION);
+        return job.getPointsLeft() <= planet.getResourceDeposit().getResourceAmountByType(job.getConstructable().getResourceType());
     }
 
 
@@ -204,16 +204,16 @@ public class JobService {
 
         checkIfFree(facility);
         checkAndBalances(planet, constructable.getJobCosts());
-        Job entity = new Job(planet, facility, constructable);
-        entity = save(entity);
+        Job job = new Job(planet, facility, constructable);
+        job = jobRepository.save(job);
 
-        LOGGER.info("Creating construction yard idJob '" + entity.getId() + "' " +
+        LOGGER.info("Creating construction yard idJob '" + job.getId() + "' " +
                 "for idBuilding: '" + building.getId() + "' " +
                 "with target level '" + constructable.getTargetLevel() + "' " +
                 "from level '" + (targetLevel - 1) + "'");
 
         planetService.save(planet);
-        return entity;
+        return job;
     }
 
     @Nonnull
