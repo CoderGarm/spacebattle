@@ -44,8 +44,8 @@ public class Job {
     private Planet facilityPlanet;
 
     @JsonProperty
-    @Schema(required = true, description = "The left duration of this job.")
-    private long ticksLeft;
+    @Schema(description = "The left duration of this job.")
+    private Integer ticksLeft;
 
     @JsonProperty
     @Schema(required = true, description = "The left construction points of this job.")
@@ -124,7 +124,6 @@ public class Job {
         this.user = new Player(job.getOwner());
         this.facility = new Construction(job.getFacility(), languageCode);
         this.facilityPlanet = new Planet(job.getFacility().getPlanet());
-        this.ticksLeft = 0;
         this.pointsLeft = job.getPointsLeft();
         this.priority = job.getPriority();
         final Constructable constructable = job.getConstructable();

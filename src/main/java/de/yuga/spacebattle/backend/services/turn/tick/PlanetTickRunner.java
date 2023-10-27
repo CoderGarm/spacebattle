@@ -215,8 +215,7 @@ public class PlanetTickRunner implements TickRunner {
         job.setFinished(today);
         if (constructable.isRepairJob()) {
             realizeFleetRepair(planet, owner, constructable, job);
-        }
-        if (constructable.isUpgradeJob()) {
+        } else if (constructable.isUpgradeJob()) {
             realizeFleetUpgrade(planet, owner, constructable, job);
         } else {
             realizeShipProduction(planet, owner, constructable, job);
@@ -399,13 +398,40 @@ public class PlanetTickRunner implements TickRunner {
         return job.tick(points);
     }
 
+    @Nonnull
     public Job tickInstaResearch(@Nonnull final Job job, @Nonnull final EmpireResearchCapability capability, @Nonnull final Tick today) {
         Preconditions.checkNotNull(job, "job must not be empty");
         Preconditions.checkNotNull(capability, "capability must not be empty");
         Preconditions.checkNotNull(today, "today must not be empty");
 
-        final long usedPoints = tickJob(job, capability.getEmpireWideResearchPointsLeftOver());
-        completeResearch(job.getFacility().getPlanet(), job, usedPoints, today);
-        return jobService.save(job);
+        final Planet planet = planetService.find(job.getFacility().getPlanet());
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+        if (JobService.checkCosts(planet, job.getConstructable().getJobCosts()) && JobService.isInstaJobPossible(planet, job)) {
+            final long usedPoints = tickJob(job, capability.getEmpireWideResearchPointsLeftOver());
+            completeResearch(job.getFacility().getPlanet(), job, usedPoints, today);
+            return jobService.save(job);
+        }
+        return job;
+    }
+
+    @Nonnull
+    public Job tickInstaShipyard(@Nonnull Job job, @Nonnull final Tick today) {
+        Preconditions.checkNotNull(job, "job must not be empty");
+        Preconditions.checkNotNull(today, "today must not be empty");
+
+        job = jobService.findById(job.getId());
+        Preconditions.checkNotNull(job, "job must not be empty");
+
+        final Planet planet = job.getFacility().getPlanet();
+        if (JobService.isInstaJobPossible(planet, job)) {
+            final long points = planet.getResourceDeposit().getResourceAmountByType(EResourceType.ORBITAL_CONSTRUCTION);
+            final long usedPoints = tickJob(job, points);
+            planet.getResourceDeposit().updateResource(EResourceType.ORBITAL_CONSTRUCTION, -usedPoints);
+            completeShipyard(planet, job, today);
+            planetService.save(planet);
+            return jobService.save(job);
+        }
+        return job;
     }
 }

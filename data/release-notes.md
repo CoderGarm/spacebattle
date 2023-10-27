@@ -77,6 +77,7 @@ Der Workaround sollte in jedem der hiermit zusammenhängenden Probleme ein neues
 1. Der Pop Demand zeigt nun auch den Bedarf von Flotten im Umbau oder in Reparatur an.
 2. Das planetare Jobdisplay zeigt nun nur noch den aktuell laufenden Job an, nicht mehr die ganze Queue.
 3. Ein Faden im Forum zeigt nun die Seite mit dem neusten, unbekannten Beitrag.
+4. Eine Flotte zu reparieren hat dazu geführt, dass die Schiffe in die größte vor Ort eingruppiert wurden. Das ist behoben.
    todo. upgrade/repair job muss dings einklappen und neu laden
 
 todo. star map tabs fehlen manchmal
@@ -92,6 +93,8 @@ todo. population problem bei Samovar - yufiel -> mind aber ein update-problem
 - Laut meiner anzeige sind 2 Flotten von dir heute beim hypelimit aufgetaut. Tatsächlich ist eine da, aber die andere bereits beim plani.
 
 #### next steps
+
+todo. increase performance by grpc calls over multiple rest calls?
 
 todo. set nav marker by "next stations" dialog?
 

@@ -23,14 +23,6 @@ public interface JobRepository extends JpaRepository<Job, Integer>, CustomJobRep
     List<Job> findTodayFinishedJobsForUser(@Param("idUser") final int idUser);
 
     @Nullable
-    @Query("SELECT j FROM Job j WHERE j.owner.id = :idUser AND j.pointsLeft > 0 AND j.finished IS NULL AND j.constructable.research IS NOT NULL")
-    Job findResearchJobForUser(@Param("idUser") final int idUser);
-
-    @Nullable
-    @Query("SELECT j FROM Job j WHERE j.pointsLeft > 0 AND j.finished IS NULL AND j.constructable.research IS NOT NULL")
-    List<Job> findResearchJobs();
-
-    @Nullable
     @Query("SELECT j FROM Job j WHERE j.pointsLeft > 0 AND j.finished IS NULL AND j.facility.planet.id = :idPlanet AND (j.constructable.fleet IS NOT NULL OR j.constructable.building IS NOT NULL)")
     List<Job> findAllFleetOrBuildingJobsByPlanet(@Param("idPlanet") final int idPlanet);
 

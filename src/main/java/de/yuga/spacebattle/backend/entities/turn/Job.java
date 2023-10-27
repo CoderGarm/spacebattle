@@ -5,7 +5,6 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.misc.PointsCompletable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
-import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EJobPriority;
 import org.hibernate.annotations.Check;
 
@@ -14,11 +13,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @NamedQueries({
-        @NamedQuery(name = "Job.getAll", query = "SELECT j FROM Job j"),
         @NamedQuery(name = "Job.getAllByOwner", query = "SELECT j FROM Job j WHERE j.isDeleted = false AND j.owner.id = :idUser"),
-        @NamedQuery(name = "Job.getAllForConstruction", query = "SELECT j FROM Job j WHERE j.isDeleted = false AND j.facility = :facility"),
-        @NamedQuery(name = "Job.isPresentForResearch", query = "SELECT CASE WHEN (COUNT(j) > 0)  THEN TRUE ELSE FALSE END FROM Job j WHERE j.isDeleted = false AND j.constructable.research = :research"),
-        @NamedQuery(name = "Job.isPresentForResearches", query = "SELECT new de.yuga.spacebattle.backend.entities.researches.ActiveResearchTuple(j.constructable.research, CASE WHEN (COUNT(j) > 0)  THEN TRUE ELSE FALSE END) FROM Job j WHERE j.isDeleted = false AND j.constructable.research IN (:researches)"),
         @NamedQuery(name = "Job.getAllForPlanet", query = "SELECT j FROM Job j WHERE j.isDeleted = false AND j.facility.planet.id = :idPlanet")
 })
 @Entity
@@ -62,13 +57,11 @@ public class Job extends PointsCompletable implements Comparable<Job> {
      */
     public Job(@Nonnull final Planet planet,
                @Nonnull final Construction facility,
-               @Nonnull final Constructable constructable,
-               @Nonnull final ResourceDeposit utilization) {
+               @Nonnull final Constructable constructable) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkNotNull(facility, "facility shouldn't be null!");
         Preconditions.checkNotNull(constructable, "constructable shouldn't be null!");
         Preconditions.checkArgument(planet.getHumanOwner() != null, "planet must be colonized!");
-        Preconditions.checkNotNull(utilization, "utilization must not be empty");
 
         this.owner = planet.getHumanOwner();
         this.facility = facility;

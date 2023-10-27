@@ -23,7 +23,6 @@ import de.yuga.spacebattle.backend.repositories.turn.JobRepository;
 import de.yuga.spacebattle.backend.services.ResourceService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
-import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
@@ -63,9 +62,6 @@ public class JobService {
     @Nonnull
     private final FleetService fleetService;
 
-    @Nonnull
-    private final OperationalService operationalService;
-
     @Autowired
     public JobService(@Nonnull final JobRepository jobRepository,
                       @Nonnull final PlanetService planetService,
@@ -73,8 +69,7 @@ public class JobService {
                       @Nonnull final ResearchService researchService,
                       @Nonnull final WarShipService warShipService,
                       @Nonnull final ResourceService resourceService,
-                      @Nonnull final FleetService fleetService,
-                      @Nonnull final OperationalService operationalService) {
+                      @Nonnull final FleetService fleetService) {
         this.jobRepository = Preconditions.checkNotNull(jobRepository, "jobC shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.buildingService = Preconditions.checkNotNull(buildingService, "buildingService shouldn't be null!");
@@ -82,7 +77,6 @@ public class JobService {
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
-        this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
     }
 
     @Nonnull
@@ -157,6 +151,22 @@ public class JobService {
         debtorDeposit.pay(costs);
     }
 
+    public static boolean checkCosts(@Nonnull final Planet planet,
+                                     @Nonnull final ResourceDeposit costs) {
+        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+        Preconditions.checkNotNull(costs, "costs shouldn't be null!");
+        Preconditions.checkArgument(EDepositType.COSTS == costs.getSubType(), "costs must be flagged as costs!");
+
+        final ResourceDeposit debtorDeposit = planet.getResourceDeposit();
+        final PayingPossibleResult result = debtorDeposit.isPayingPossible(costs);
+        return result.isValid();
+    }
+
+    public static boolean isInstaJobPossible(final @Nonnull Planet planet, final Job job) {
+        return job.getPointsLeft() <= planet.getResourceDeposit().getResourceAmountByType(EResourceType.ORBITAL_CONSTRUCTION);
+    }
+
+
     /**
      * Creates a entity by {@link Building#getId()} and {@link Planet#getId()}.
      * The building's level will be incremented by 1 in every {@link Job}.
@@ -194,7 +204,7 @@ public class JobService {
 
         checkIfFree(facility);
         checkAndBalances(planet, constructable.getJobCosts());
-        Job entity = new Job(planet, facility, constructable, operationalService.getUtilizedPopulationForPlanet(idPlanet));
+        Job entity = new Job(planet, facility, constructable);
         entity = save(entity);
 
         LOGGER.info("Creating construction yard idJob '" + entity.getId() + "' " +
@@ -230,7 +240,7 @@ public class JobService {
         checkIfFree(facility);
 
         final Constructable constructable = new Constructable(research, level);
-        return jobRepository.save(new Job(researchPlanet, facility, constructable, operationalService.getUtilizedPopulationForPlanet(researchPlanet.getId())));
+        return jobRepository.save(new Job(researchPlanet, facility, constructable));
     }
 
     private void checkIfFree(@Nullable final Construction facility) {
@@ -242,7 +252,8 @@ public class JobService {
         }
     }
 
-    public void createShipyardJob(@Nonnull final Planet planet, @Nonnull final Map<ShipClass, Integer> shipJobPayload) {
+    @Nonnull
+    public Job createShipyardJob(@Nonnull final Planet planet, @Nonnull final Map<ShipClass, Integer> shipJobPayload) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkNotNull(shipJobPayload, "shipJobPayload shouldn't be null!");
 
@@ -278,12 +289,14 @@ public class JobService {
         fleet = fleetService.find(fleet);
         final Constructable constructable = new Constructable(fleet, EJobType.CONSTRUCTION);
         checkAndBalances(planet, constructable.getJobCosts());
-        final Job job = new Job(planet, facility, constructable, operationalService.getUtilizedPopulationForPlanet(planet.getId()));
-        jobRepository.save(job);
+        Job job = new Job(planet, facility, constructable);
+        job = jobRepository.save(job);
         planetService.save(planet);
+        return job;
     }
 
-    public void createShipyardUpgradeJob(@Nonnull final Planet planet, @Nonnull final Fleet toUpgrade) {
+    @Nonnull
+    public Job createShipyardUpgradeJob(@Nonnull final Planet planet, @Nonnull final Fleet toUpgrade) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(toUpgrade, "toUpgrade must not be empty");
 
@@ -294,15 +307,17 @@ public class JobService {
         // do not check if free, the new job will squeeze in
         final Constructable constructable = new Constructable(toUpgrade, EJobType.UPGRADE);
         checkAndBalances(planet, constructable.getJobCosts());
-        final Job job = new Job(planet, facility, constructable, operationalService.getUtilizedPopulationForPlanet(planet.getId()));
+        Job job = new Job(planet, facility, constructable);
         job.setPriority(EJobPriority.PRIORITY);
-        jobRepository.save(job);
+        job = jobRepository.save(job);
         fleetService.disableFleet(toUpgrade);
         fleetService.transferCrewToPlanet(toUpgrade, planet);
         planetService.save(planet);
+        return job;
     }
 
-    public void createShipyardRepairJob(@Nonnull final Planet planet, @Nonnull final Fleet toRepair) {
+    @Nonnull
+    public Job startShipyardRepairJob(@Nonnull final Planet planet, @Nonnull final Fleet toRepair) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(toRepair, "toRepair must not be empty");
 
@@ -312,13 +327,15 @@ public class JobService {
 
         // do not check if free, the new job will squeeze in
         final Constructable constructable = new Constructable(toRepair, EJobType.REPAIR);
-        checkAndBalances(planet, constructable.getJobCosts());
-        final Job job = new Job(planet, facility, constructable, operationalService.getUtilizedPopulationForPlanet(planet.getId()));
+        Job job = new Job(planet, facility, constructable);
+
         job.setPriority(EJobPriority.PRIORITY);
-        jobRepository.save(job);
+        job = jobRepository.save(job);
+        checkAndBalances(planet, constructable.getJobCosts());
         fleetService.disableFleet(toRepair);
         fleetService.transferCrewToPlanet(toRepair, planet);
         planetService.save(planet);
+        return job;
     }
 
     @Nonnull
@@ -331,18 +348,6 @@ public class JobService {
         Preconditions.checkNotNull(user, "user must not be empty");
 
         return jobRepository.findAllJobsForUser(user.getId());
-    }
-
-    @Nullable
-    public Job findResearchJobForUser(@Nonnull final User user) {
-        Preconditions.checkNotNull(user, "user must not be empty");
-
-        return jobRepository.findResearchJobForUser(user.getId());
-    }
-
-    @Nonnull
-    public List<Job> findResearchJobs() {
-        return Objects.requireNonNullElse(jobRepository.findResearchJobs(), new ArrayList<>());
     }
 
     @Nonnull
