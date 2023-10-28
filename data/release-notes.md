@@ -1,57 +1,27 @@
 ### Features
 
-#### Gameplay
-
-Die Änderungen um die Punkte 3. bis 6. sollen die Spielgeschwindigkeit vorrangig im Early Game steigern.  
-Die Idee ist natürlich, dass man schneller dazu kommt ein bisschen Action zu veranstalten ;)
-
-1. Aktive und inaktive Kriegsschiffe in der Reserve und Flotten
-    - Für Kriegsschiffe die abgewrackt werden, bekommt man jetzt 50 % der Ressourcen zurück. Die Crew wird natürlich nicht dezimiert.
-    - Man kann Kriegsschiffe nun per Button direkt in die Reserve schicken.
-    - Man kann Schiffe nur auf Planeten mit Schiffswerften verschrotten oder einmotten. Dort lagern eingemottete Schiffe bis zur Wiederverwendung.
-    - Schiffe in der Reserve haben keine aktive Crew mehr, die befindet sich auf dem Planeten, in dessen Orbit das Schiff eingemottet wurde.
-    - Schiffe können im Detachment Tab entmannt werden. Verzeiht den Wortwitz. Dort kann man sie, wenn genug Besatzung auf dem Planeten steht, direkt wieder aktivieren.
-    - Nur aktive Schiffe der Reserve können Missionen zugeteilt werden.
-    - Es gibt ein kurzes Tutorial dazu.
-2. Angriffe auf Handelskonvois passieren nun auch, wenn eine der großen Mächte im Spiel ist. Allerdings schützen sie ihren Teil des Konvois mit ausreichender Kapazität.
-3. Das Krankenhaus-Gebäude ist entfernt worden. Es diente ursprünglich dazu, die Reproduktionsgleichung um den Reproduktionskoeffizienten zu bereichern, während der Mining Factor
-   dazu diente die Kapazität des Wohnraums zu begrenzen.  
-   Der Mining Factor der Population dient jetzt zur Bestimmung des Reproduktionskoeffizienten, ist also maßgeblich für das Bevölkerungswachstum verantwortlich. Die Gesamtmenge an
-   Wohnraum wird nicht mehr durch den Mining Factor beeinflusst.  
-   Das soll das Prinzip der Mining Factors angleichen und das Wachstumsprinzip der Bevölkerung gleich mit.
-4. Der Gebäudeoutput für pro Level wird anders berechnet. Ein neues Level bringt jetzt mehr Output als vorher.
-5. Die Verbesserung pro Gebäudelevel in Bezug zur Bevölkerung ist verdoppelt. Ein neues Gebäudelevel bei z.B. Wohnraum nimmt den Vorteil aus 4. mit und bringt nun 40 % mehr statt
-   wie vorher nur 20 % Verbesserung.
-6. Jobs haben keine festen Ticks mehr, die auf 0 gezählt werden müssen. Die zu erreichenden "Construction Points" werden direkt abgezogen, in der Darstellung allerdings noch auf
-   Ticks umgerechnet.  
-   Die Folge ist, dass man nun mehr als einen Job pro Tick beenden kann, wenn man genug Construction Points vom Tick zuvor über hat.  
-   Diese "Insta Jobs" zeigen 0 Ticks Laufzeit an und lassen sich genauso starten wie alle anderen Jobs, sind dann halt nur sofort fertig.  
-   Man muss danach zunächst den Planeten bzw die Forschungsseite neu laden, damit man wieder einen neuen Job zu starten kann. Wie ich das in der UI handhabe, will ich noch
-   herausfinden.
-
-#### Diverses
-
-1. Es gibt jetzt individuelle Icons für die verschiedenen Stati von Flotten und Schiffen.
-2. Das Menü ist etwas ansprechender gestaltet, insbesondere enthält die Flottenauswahl nun mehr direkt sichtbare Informationen über Zusammensetzung und Status der Flotten.
-3. The map background is dark again.
-4. Man kann nun Tutorialbeiträge im Wiki schreiben, die dann an den entsprechenden Tutorials angezeigt werden.  
-   Bitte sagt mir, wo am dringendsten Beiträge gebraucht werden. Im Wiki schreiben kann prinzipiell allerdings jeder User, der im Wiki editieren möchte.
-5. In den Gebäudebau wird nun der aktuell laufende Job vorausgewählt, damit man nicht mehr im Dashboard nachgucken muss.
-6. Ebenfalls werden nun Baubeschränkungen durch Preis oder Forschung direkt angezeigt. Das sollte einige unnötige Klickerei ersparen.
-
 ### Bugs fixed
 
-Die Issues der Sternenkarte - übergroße selection Marker und verschwundene Fleet sharks beim Zoomen - möchte ich vorerst nicht weiter verfolgen.  
-Da die Karte ein vollständiges Rework erfahren soll, möchte ich mich nicht mehrfach mit demselben Thema beschäftigen.
+1. Man kann wieder normal ausloggen, wenn man ungelesene Forumsbeiträge noch nicht als gelesen markiert hat.
+2. Die Sternenkarte im Light Mode sieht jetzt nicht mehr so edgy aus.
+3. Die Textfarbe auf der Karte im Light Mode ist wieder nutzbar.
+4. Neu geschriebene Forumsnachrichten werden jetzt direkt als gelesen markiert.
 
-1. Der Pop Demand zeigt nun auch den Bedarf von Flotten im Umbau oder in Reparatur an.
-2. Das planetare Jobdisplay zeigt nun nur noch den aktuell laufenden Job an, nicht mehr die ganze Queue.
-3. Ein Faden im Forum zeigt nun die Seite mit dem neusten, unbekannten Beitrag.
-4. Eine Flotte zu reparieren hat dazu geführt, dass die Schiffe in die größte Flotte vor Ort eingruppiert wurden. Das ist nicht mehr der Fall, reparierte Schiffe bleiben in der
-   ursprünglichen Flotte.
-5. Die Tabs auf der Sternenkarte sollten nun immer da sein.
+Answers:
+
+- Q: next level some buildings show me a negative increase of Metal, Gold, Research points and other ressources (not people)
+    - A: pic or didn't happen
+- Q: next level of living quarters shows the increased value of the building I clicked before
+    - A: could not reproduce
+- Q: I have over 900 research points available but could get only one research instantly (88 RP)
+    - A: no bug, reload research page
+- Q: manual transfer to fleet overrides capacity
+    - A: UI rework will solve it
 
 ### follow up
+
+article trading protection
+article + check ship returns from mission
 
 #### Gameplay
 
@@ -69,6 +39,8 @@ todo. mission items more role play "unprotected convoy changes signature of ship
 todo. quoting in chat und forum
 todo. preview in chat und forum
 todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
+todo. manual transfer to fleet overrides capacity
+todo. mat progress bar to indication network action?
 
 todo. forum management
 todo. check fitting yard

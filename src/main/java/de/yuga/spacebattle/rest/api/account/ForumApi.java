@@ -311,7 +311,7 @@ public class ForumApi extends BaseApi {
     @Operation(summary = "Get a list of forums which the given user is allowed to access.", operationId = "createThreadMessage",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ForumMessage.class))),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
@@ -325,8 +325,8 @@ public class ForumApi extends BaseApi {
         PreconditionWebHelper.checkNotNull(forumThread, "forumThread shouldn't be null!");
         final User user = validateAccessToForum(idUser, forumThread.getForum());
 
-        forumService.createForumMessage(forumThread, user, threadMessage.getMessage());
-        return ResponseEntity.ok(true);
+        final de.yuga.spacebattle.backend.entities.account.forum.ForumMessage forumMessage = forumService.createForumMessage(forumThread, user, threadMessage.getMessage());
+        return ResponseEntity.ok(new ForumMessage(forumMessage));
     }
 
     @AllowedRoles(roles = EGameUserRole.FORUM_WRITE)
