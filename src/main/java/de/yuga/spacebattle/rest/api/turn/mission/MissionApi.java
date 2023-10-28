@@ -169,7 +169,10 @@ public class MissionApi extends BaseApi {
             }
     )
     public ResponseEntity<?> stopMission(@PathVariable("idMission") final int idMission) {
-        missionService.stopMission(idMission, getIdUser());
+        final de.yuga.spacebattle.backend.entities.turn.mission.Mission mission = missionService.findById(idMission);
+        if (mission != null) {
+            missionService.stopMission(mission, getIdUser());
+        }
         return ResponseEntity.ok(true);
     }
 }

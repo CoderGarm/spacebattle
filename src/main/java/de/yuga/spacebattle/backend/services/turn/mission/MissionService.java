@@ -118,10 +118,46 @@ public class MissionService {
         return Objects.requireNonNullElse(pirateHuntMissionRepository.findAllForPlanets(planets), new ArrayList<>());
     }
 
-    public void stopMission(final int idMission, final int idUser) {
-        if (missionRepository.missionExistsForActor(idMission, idUser)) {
-            missionRepository.deleteById(idMission);
+    public void stopMission(@Nonnull final Mission mission, final int idUser) {
+        Preconditions.checkNotNull(mission, "mission must not be empty");
+
+        if (missionRepository.missionExistsForActor(mission.getId(), idUser)) {
+            if (mission instanceof ConvoyProtectionMission) {
+                resetShipsFromConvoyMission((ConvoyProtectionMission) mission, idUser);
+            } else {
+                resetShipsFromPirateHuntMission((PirateHuntMission) mission);
+            }
+            missionRepository.deleteById(mission.getId());
         }
+    }
+
+    private void resetShipsFromPirateHuntMission(@Nonnull final PirateHuntMission mission) {
+        Preconditions.checkNotNull(mission, "mission must not be empty");
+
+        final Planet venue = mission.getVenue();
+        final Set<WarShip> ships = mission.getShips();
+        setMothballAndSave(ships, venue);
+    }
+
+    private void resetShipsFromConvoyMission(@Nonnull final ConvoyProtectionMission mission, final int idUser) {
+        Preconditions.checkNotNull(mission, "mission must not be empty");
+
+        final Set<WarShip> ships = mission.getShips();
+        final Planet mothball;
+        if (mission.getProtectedTrade().getBuyer().getId() == idUser) {
+            mothball = mission.getProtectedTrade().getDestination();
+        } else {
+            mothball = mission.getProtectedTrade().getTradeOffer().getOrigin();
+        }
+        setMothballAndSave(ships, mothball);
+    }
+
+    private void setMothballAndSave(@Nonnull final Set<WarShip> ships, @Nonnull final Planet mothball) {
+        Preconditions.checkNotNull(ships, "ships must not be empty");
+        Preconditions.checkNotNull(mothball, "mothball must not be empty");
+
+        ships.forEach(s -> s.setMothball(mothball));
+        warShipService.saveAll(ships);
     }
 
     @Nonnull
@@ -140,5 +176,10 @@ public class MissionService {
     public Set<TradedResource> findAllConvoysWithoutEscort(final int idUser) {
         final Tick today = tickTimeService.getToday();
         return Objects.requireNonNullElse(convoyProtectionMissionRepository.findAllConvoysWithoutEscort(today.getNo(), idUser), new HashSet<>());
+    }
+
+    @Nullable
+    public Mission findById(final int idMission) {
+        return missionRepository.findById(idMission).orElse(null);
     }
 }

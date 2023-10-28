@@ -80,13 +80,12 @@ public class RaidingConvoyMission implements MissionRunner {
 
     private void releaseAllShips() {
         final List<TradedResource> trades = marketplaceService.findTodayTrades();
-        final Set<Integer> iDs = trades.stream().map(AbstractEntityKey::getId).collect(Collectors.toSet());
-        final Map<Integer, List<ConvoyProtectionMission>> missionsByActorId = missionService.findConvoyProtectionForTrades(iDs).stream()
+        final Set<Integer> tradeIDs = trades.stream().map(AbstractEntityKey::getId).collect(Collectors.toSet());
+        final Map<Integer, List<ConvoyProtectionMission>> missionsByActorId = missionService.findConvoyProtectionForTrades(tradeIDs).stream()
                 .collect(Collectors.groupingBy(m -> m.getActor().getId(),
                         Collectors.mapping(Function.identity(), Collectors.toList())));
         missionsByActorId.forEach((userId, missions) ->
-                missions.forEach(m ->
-                        missionService.stopMission(m.getId(), userId)));
+                missions.forEach(m -> missionService.stopMission(m, userId)));
     }
 
     private void attackConvoys() {
