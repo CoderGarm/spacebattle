@@ -1,29 +1,11 @@
 ### Features
 
-### Bugs fixed
-
-1. Man kann wieder normal ausloggen, wenn man ungelesene Forumsbeiträge noch nicht als gelesen markiert hat.
-2. Die Sternenkarte im Light Mode sieht jetzt nicht mehr so edgy aus.
-3. Die Textfarbe auf der Karte im Light Mode ist wieder nutzbar.
-4. Neu geschriebene Forumsnachrichten werden jetzt direkt als gelesen markiert.
-
-Answers:
-
-- Q: next level some buildings show me a negative increase of Metal, Gold, Research points and other ressources (not people)
-    - A: pic or didn't happen
-- Q: next level of living quarters shows the increased value of the building I clicked before
-    - A: could not reproduce
-- Q: I have over 900 research points available but could get only one research instantly (88 RP)
-    - A: no bug, reload research page
-- Q: manual transfer to fleet overrides capacity
-    - A: UI rework will solve it
-
-### follow up
-
 article trading protection
 article + check ship returns from mission
 
 #### Gameplay
+
+todo. schiffe in reserve zu anderen planeten transportieren wenn kein Hyperraumantrieb
 
 todo. tech level 2 und 3 nutzen
 todo. Hyperabdruck im System bei aufkommenden Flotten
