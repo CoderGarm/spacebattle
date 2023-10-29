@@ -126,26 +126,31 @@ public class FleetService {
                 .map(ShipClass::getOwner)
                 .orElseThrow(() -> new NotifyWebUserException("Every fleet must have an owner."));
 
-        final de.yuga.spacebattle.rest.dto.orbitals.FleetOrbit orbit = fleetSplit.getOrbit();
-        if (orbit.getOrbit() == null || orbit.getSystem() == null) {
-            throw new NotifyWebUserException("Sorry, but this will not work. You need a place to be!");
+        Planet planet = shipsByUser.stream().map(WarShip::getMothball).filter(Objects::nonNull).findFirst().orElse(null);
+        if (planet == null) {
+            final FleetOrbit fleetOrbit = shipsByUser.stream()
+                    .map(WarShip::getFleet)
+                    .filter(Objects::nonNull)
+                    .map(Fleet::getOrbit)
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .orElseThrow(() -> new NotifyWebUserException("Pretty sad to find no home."));
+            planet = planetService.findByCoordinates(fleetOrbit);
         }
-        final StarSystem starSystem = starSystemService.find(orbit.getSystem().getIdStarSystem());
-        final FleetOrbit fleetOrbit = new FleetOrbit(new Orbit(orbit.getOrbit()), starSystem);
-        final Planet planet = planetService.findByCoordinates(fleetOrbit);
-        assert planet != null;
 
         final Set<Fleet> result = new HashSet<>();
-        fleetSplit.getFleetConstellations().forEach((name, warshipIDs) -> {
+        for (final String key : fleetSplit.getFleetConstellations().keySet()) {
+            final List<Integer> warshipIDs = fleetSplit.getFleetConstellations().get(key);
+
             // the name is followed by a negative number to make the names unique
-            name = name.split("-")[0];
+            final String name = key.split("-")[0];
             final Set<WarShip> warShips = shipsByUser.stream().filter(w -> warshipIDs.contains(w.getId())).collect(Collectors.toSet());
-            final Fleet fleet = createFleet(owner, planet, name);
+            final Fleet fleet = createFleet(owner, Objects.requireNonNull(planet), name);
             warShips.forEach(w -> w.setFleet(fleet));
             warShipService.saveAll(warShips);
 
             result.add(fleetRepository.findById(fleet.getId()).orElseThrow(NullPointerException::new));
-        });
+        }
 
         final Set<Fleet> newStatedFleets = calculateFleetState(fleetIDs);
 
