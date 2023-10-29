@@ -218,7 +218,7 @@ public class ForumApi extends BaseApi {
 
         final int idUser = getIdUser();
 
-        if (page == 0) {
+        if (page == -1) {
             // fetch unread messages page
             page = forumService.findPageWithFirstUnreadMessageInThread(idUser, idForumThread, size);
         }
