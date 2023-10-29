@@ -15,6 +15,9 @@ todo. Hyperabdruck im System bei aufkommenden Flotten
 
 todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt etwas aus", ansonsten beibehalten
 
+- heat nur für bewohnte planeten, keine piraten für nachbarn
+- jeder sektor (? definiere) bekommt seinen eigenen piraten, der Unsinn anstellt
+
 #### Diverses
 
 todo. mission items more role play "unprotected convoy changes signature of ship to warship and pirate fled ...""
