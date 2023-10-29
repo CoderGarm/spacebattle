@@ -48,11 +48,11 @@ todo. player comment about the game in profile to display at take-a-tour
 1. Flotten, die nach einem Schiffstransfer leer sind, verschwinden auch ohne Neuladen von der Map.
 2. Die Flottenverwaltung kann auf Planeten ohne Werft aufgerufen werden, allerdings können dort keine Schiffe verschrottet werden.
 3. Detachierte Flotten entstehen wieder in dem Orbit, in dem sich auch die Schiffe befinden.
+4. Ein Flottenupgrade oder eine -reparatur collapsen die entsprechende Flotte nun. Die überpriorisierten Jobs der Werft werden mit Pause-icon statt ausgegraut angezeigt.
+   todo. kein demand durch jobs?
 
-todo. upgrade/repair job muss dings einklappen und neu laden
 todo. battle reports notification wrong
 todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen -> kein Unterschied zw ankunft und abflug
-todo. kein demand durch jobs?
 
 todo. wiki is broken -> store full text as easy solution?
 

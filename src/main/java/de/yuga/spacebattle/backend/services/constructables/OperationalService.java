@@ -136,8 +136,8 @@ public class OperationalService {
     public ResourceDeposit getPopulationDemandForUser(final int idUser) {
         final ResourceDeposit resourceDemand = new ResourceDeposit(EDepositType.DEMAND);
 
-        final List<Job> constructions = Objects.requireNonNullElse(jobRepository.findAllFleetOrBuildingJobsForUser(idUser), List.of());
-        constructions.stream()
+        final List<Job> jobs = Objects.requireNonNullElse(jobRepository.findAllFleetOrBuildingJobsForUser(idUser), List.of());
+        jobs.stream()
                 .map(Job::getConstructable)
                 .map(Constructable::getFleet)
                 .filter(Objects::nonNull)
@@ -147,7 +147,7 @@ public class OperationalService {
                 .map(ShipClass::getCosts)
                 .map(ResourceDeposit::getCrewRequirement)
                 .forEach(crewRequirement -> resourceDemand.updateCrew(crewRequirement, ECalculationType.ADD));
-        constructions.stream()
+        jobs.stream()
                 .filter(c -> c.getConstructable().getBuilding() != null)
                 .filter(c -> c.getConstructable().getTargetLevel() != null)
                 .map(c -> new Construction(c.getFacility().getPlanet(), c.getConstructable().getBuilding(), c.getConstructable().getTargetLevel()))
@@ -196,15 +196,15 @@ public class OperationalService {
 
         final Map<Planet, ResourceDeposit> result = new HashMap<>();
 
-        final List<Job> constructions = Objects.requireNonNullElse(jobRepository.findAllFleetOrBuildingJobsForUser(idUser), List.of());
-        final Set<WarShip> shipsFromJobs = constructions.stream()
+        final List<Job> jobs = Objects.requireNonNullElse(jobRepository.findAllFleetOrBuildingJobsForUser(idUser), List.of());
+        final Set<WarShip> shipsFromJobs = jobs.stream()
                 .map(Job::getConstructable)
                 .map(Constructable::getFleet)
                 .filter(Objects::nonNull)
                 .map(Fleet::getAliveShips)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
-        constructions.stream()
+        jobs.stream()
                 .filter(c -> c.getConstructable().getBuilding() != null)
                 .filter(c -> c.getConstructable().getTargetLevel() != null)
                 .forEach(job -> {
