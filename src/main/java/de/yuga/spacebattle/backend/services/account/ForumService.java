@@ -145,7 +145,7 @@ public class ForumService {
             numberOfStackToFirstUnread = countMessagesInForumThread(idForumThread);
         }
         //noinspection UnnecessaryLocalVariable
-        final int page = numberOfStackToFirstUnread / size;
+        final int page = numberOfStackToFirstUnread <= size ? 0 : numberOfStackToFirstUnread / size;
         return page;
     }
 

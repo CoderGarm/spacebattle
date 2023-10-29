@@ -77,6 +77,10 @@ public class Job {
     private boolean isRepairJob;
 
     @JsonProperty
+    @Schema(required = true, description = "Is this a upgrade job.")
+    private boolean isUpgradeJob;
+
+    @JsonProperty
     @Schema(required = true, description = "Is this a research job.")
     private boolean isResearchJob;
 
@@ -142,6 +146,7 @@ public class Job {
             final Set<WarShip> ships = constructable.isUpgradeJob() ? fleet.getAliveShips() : fleet.getAllShips();
             this.fleet = new Fleet(fleet, ships, languageCode);
             this.isRepairJob = job.getConstructable().isRepairJob();
+            this.isUpgradeJob = job.getConstructable().isUpgradeJob();
         }
         this.targetLevel = constructable.getTargetLevel();
     }
