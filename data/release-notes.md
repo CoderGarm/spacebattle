@@ -1,6 +1,7 @@
 ### Features
 
 article trading protection -> protecting-trades.md
+article priorisierung bei pop demand und migration
 article + check ship returns from mission
 
 #### Gameplay
@@ -50,17 +51,17 @@ todo. player comment about the game in profile to display at take-a-tour
 3. Detachierte Flotten entstehen wieder in dem Orbit, in dem sich auch die Schiffe befinden.
 4. Ein Flottenupgrade oder eine -reparatur collapsen die entsprechende Flotte nun. Die überpriorisierten Jobs der Werft werden mit Pause-icon statt ausgegraut angezeigt.
 5. Jobs erzeugen wieder Pop Demand.
+6. Die Paging-Bestimmung im Forum funktioniert wieder.
 
-todo. battle reports notification wrong
 todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen -> kein Unterschied zw ankunft und abflug
+-> Laut meiner anzeige sind 2 Flotten von dir heute beim hypelimit aufgetaut. Tatsächlich ist eine da, aber die andere bereits beim plani.
+
+- available research points checken, genug punkte übrig laut anzeige, aber job ist nicht insta
 
 todo. wiki is broken -> store full text as easy solution?
 
-todo. priorisierung bei pop demand und migration problematisch? Thema: ich brauche college aber projekte kommen nicht voran - nicht plausibel
-todo. population problem bei Samovar - yufiel -> mind aber ein update-problem
-
-- Ich habe keinen 'neue nachrichten marker' für den neuen 'battle report' bekommen
-- Laut meiner anzeige sind 2 Flotten von dir heute beim hypelimit aufgetaut. Tatsächlich ist eine da, aber die andere bereits beim plani.
+todo. battle reports notification wrong
+-> Ich habe keinen 'neue nachrichten marker' für den neuen 'battle report' bekommen
 
 #### next steps
 
