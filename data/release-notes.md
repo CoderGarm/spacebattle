@@ -49,7 +49,7 @@ todo. player comment about the game in profile to display at take-a-tour
 2. Die Flottenverwaltung kann auf Planeten ohne Werft aufgerufen werden, allerdings können dort keine Schiffe verschrottet werden.
 3. Detachierte Flotten entstehen wieder in dem Orbit, in dem sich auch die Schiffe befinden.
 4. Ein Flottenupgrade oder eine -reparatur collapsen die entsprechende Flotte nun. Die überpriorisierten Jobs der Werft werden mit Pause-icon statt ausgegraut angezeigt.
-   todo. kein demand durch jobs?
+5. Jobs erzeugen wieder Pop Demand.
 
 todo. battle reports notification wrong
 todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen -> kein Unterschied zw ankunft und abflug
