@@ -1,6 +1,6 @@
 ### Features
 
-article trading protection
+article trading protection -> protecting-trades.md
 article + check ship returns from mission
 
 #### Gameplay
@@ -15,14 +15,18 @@ todo. Hyperabdruck im System bei aufkommenden Flotten
 
 todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt etwas aus", ansonsten beibehalten
 
+- heat nur für bewohnte planeten, keine piraten für nachbarn
+- jeder sektor (? definiere) bekommt seinen eigenen piraten, der Unsinn anstellt
+
 #### Diverses
+
+todo. manual transfer to fleet overrides capacity
+todo. mat progress bar to indication network action?
 
 todo. mission items more role play "unprotected convoy changes signature of ship to warship and pirate fled ...""
 todo. quoting in chat und forum
 todo. preview in chat und forum
 todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
-todo. manual transfer to fleet overrides capacity
-todo. mat progress bar to indication network action?
 
 todo. forum management
 todo. check fitting yard
@@ -41,12 +45,14 @@ todo. player comment about the game in profile to display at take-a-tour
 
 ### Bugs fixed
 
-todo: JobRunr for running async jobs?
 todo. upgrade/repair job muss dings einklappen und neu laden
-todo. wrong password no second login attempt
 todo. battle reports notification wrong
-todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen
+todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen -> kein Unterschied zw ankunft und abflug
 todo. leer gesetzte flotte muss von der map verschwinden
+todo. flottenverwaltung nur mit werft aufrufbar
+todo. kein demand durch jobs?
+
+todo. wiki is broken -> store full text as easy solution?
 
 todo. priorisierung bei pop demand und migration problematisch? Thema: ich brauche college aber projekte kommen nicht voran - nicht plausibel
 todo. population problem bei Samovar - yufiel -> mind aber ein update-problem
@@ -69,15 +75,18 @@ todo. battle reports mit anderen teilen
 
 todo. placing new players must be improved -> select cluster, by neighbour usw usw
 
+todo. async account creation
+todo: JobRunr for running async jobs?
+
 todo. multiple browser tabs
 todo. transportmenge zusammenfassen und bilanz bilden
 todo. lock forum threads for admin permission
 todo. forum admin area to remove forum_write
 todo. exception via mail
-todo. async account creation
 todo. angular google SEO
 todo. fetching mining factors prüfen - erzeugt last
-todo. housing left for x ticks - anzeige nach lastring ticks besser aufstellen
+todo. housing left for x ticks - anzeige nach lasting ticks besser aufstellen
+todo. wrong password no second login attempt
 
 ?. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
 ?. history for dashboard
