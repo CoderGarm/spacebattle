@@ -220,7 +220,7 @@ public class JobService {
         if (level > levelCap) {
             throw new NotifyWebUserException("no way!");
         }
-        final Planet researchPlanet = planetService.findResearchPlanet(user); // fixme switch to idPlanet
+        final Planet researchPlanet = planetService.findResearchPlanet(user);
         if (researchPlanet == null) {
             throw new NotifyWebUserException("You need a research facility on at leas one planet.");
         }
@@ -251,7 +251,7 @@ public class JobService {
             throw new NotifyWebUserException("You should own this planet, buddy.");
         }
 
-        final Construction facility = constructionService.findByPlanetAndProductionType(planet.getId(), EResourceType.ORBITAL_CONSTRUCTION); /* fixme switch to idPlanet */
+        final Construction facility = constructionService.findByPlanetAndProductionType(planet.getId(), EResourceType.ORBITAL_CONSTRUCTION);
         checkIfFree(facility);
 
         Fleet fleet = new Fleet("Fresh Build @ " + planet.getName(), owner, new FleetOrbit(planet.getOrbit(), planet.getSystem()));
@@ -287,7 +287,7 @@ public class JobService {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(toUpgrade, "toUpgrade must not be empty");
 
-        final Construction facility = constructionService.findByPlanetAndProductionType(planet.getId(), EResourceType.ORBITAL_CONSTRUCTION); /* fixme switch to idPlanet */
+        final Construction facility = constructionService.findByPlanetAndProductionType(planet.getId(), EResourceType.ORBITAL_CONSTRUCTION);
 
         // do not check if free, the new job will squeeze in
         final Constructable constructable = new Constructable(toUpgrade, EJobType.UPGRADE);
@@ -306,7 +306,7 @@ public class JobService {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(toRepair, "toRepair must not be empty");
 
-        final Construction facility = constructionService.findByPlanetAndProductionType(planet.getId(), EResourceType.ORBITAL_CONSTRUCTION); /* fixme switch to idPlanet */
+        final Construction facility = constructionService.findByPlanetAndProductionType(planet.getId(), EResourceType.ORBITAL_CONSTRUCTION);
 
         // do not check if free, the new job will squeeze in
         final Constructable constructable = new Constructable(toRepair, EJobType.REPAIR);

@@ -35,4 +35,8 @@ public interface PlanetRepository extends JpaRepository<Planet, Integer>, Custom
     @Nullable
     @Query("SELECT p.miningFactors FROM Planet p WHERE p.id = :idPlanet")
     MiningFactors findMiningFactors(int idPlanet);
+
+    @Nullable
+    @Query("SELECT p.id FROM Planet p WHERE p.owner.id = :idUser")
+    List<Integer> findAllColonizedByForID(int idUser);
 }

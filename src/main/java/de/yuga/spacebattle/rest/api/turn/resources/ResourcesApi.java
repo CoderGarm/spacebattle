@@ -315,8 +315,7 @@ public class ResourcesApi extends BaseApi {
     )
     public ResponseEntity<?> getIncomeForUser() {
         final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit ticklyIncome = new de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit(EDepositType.INCOME);
-        final List<Planet> planets = planetService.findAllColonizedBy(getIdUser()); /* fixme switch to idplanets */
-        planets.forEach(p -> ticklyIncome.add(tickOutputCalculator.getTicklyIncome(p.getId())));
+        planetService.findAllColonizedByForID(getIdUser()).forEach(idPlanet -> ticklyIncome.add(tickOutputCalculator.getTicklyIncome(idPlanet)));
         return ResponseEntity.ok(new ResourceDeposit(ticklyIncome));
     }
 

@@ -1,6 +1,5 @@
 package de.yuga.spacebattle.backend.services.caclulator;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.crew.EducationAmountDTO;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
@@ -120,7 +119,7 @@ public class PopulationControlCalculator {
      *
      * @param planet the planet to populate
      */
-    public void populatePlanet(@Nonnull final Planet planet) { /* fixme switch idPlanet */
+    public void populatePlanet(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
 
         final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
@@ -159,11 +158,10 @@ public class PopulationControlCalculator {
     /**
      * Created an education plan which have a look at the current demand of education levels.
      */
-    @VisibleForTesting
-    static void doGuidedEducation(@Nonnull final Planet planet,
-                                  @Nonnull final ResourceDeposit demand,
-                                  @Nonnull final List<EducationAmountDTO> education,
-                                  @Nonnull final Map<ERefinementSequence, Long> educationCapacity) {
+    public static void doGuidedEducation(@Nonnull final Planet planet,
+                                         @Nonnull final ResourceDeposit demand,
+                                         @Nonnull final List<EducationAmountDTO> education,
+                                         @Nonnull final Map<ERefinementSequence, Long> educationCapacity) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(demand, "demand must not be empty");
         Preconditions.checkNotNull(education, "education must not be empty");
@@ -178,10 +176,9 @@ public class PopulationControlCalculator {
      * Created an education plan which educated the most out of the possible.<br>
      * The result will not pay attention to the current demand.
      */
-    @VisibleForTesting
-    static void doUnguidedEducation(@Nonnull final Planet planet,
-                                    @Nonnull final List<EducationAmountDTO> education,
-                                    @Nonnull final Map<ERefinementSequence, Long> educationCapacity) {
+    public static void doUnguidedEducation(@Nonnull final Planet planet,
+                                           @Nonnull final List<EducationAmountDTO> education,
+                                           @Nonnull final Map<ERefinementSequence, Long> educationCapacity) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(education, "education must not be empty");
         Preconditions.checkNotNull(educationCapacity, "educationCapacity must not be empty");
@@ -300,8 +297,7 @@ public class PopulationControlCalculator {
      *
      * @param educationAmountDTO the education parameters
      */
-    @VisibleForTesting
-    static void educate(@Nonnull final Planet planet, @Nonnull final EducationAmountDTO educationAmountDTO) {
+    public static void educate(@Nonnull final Planet planet, @Nonnull final EducationAmountDTO educationAmountDTO) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkNotNull(educationAmountDTO, "educationAmountDTO shouldn't be null!");
 

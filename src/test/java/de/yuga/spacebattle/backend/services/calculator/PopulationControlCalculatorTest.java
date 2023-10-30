@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.backend.calculator.resource;
+package de.yuga.spacebattle.backend.services.calculator;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.TestDataProviderUtils;

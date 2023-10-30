@@ -78,7 +78,7 @@ public class ConstructionService {
 
         final List<Building> unlockedBuildings = buildingService.findAllByUser(planet.getOwner().getId());
 
-        final Set<Construction> constructions = findAllConstructionsOnPlanet(planet.getId()); // fixme switch to idPlanet
+        final Set<Construction> constructions = findAllConstructionsOnPlanet(planet.getId());
 
         final Map<Building, Construction> constructionByBuilding = constructions.stream()
                 .collect(Collectors.toMap(Construction::getBuilding, Function.identity()));
@@ -130,7 +130,6 @@ public class ConstructionService {
 
     @Nonnull
     public List<Construction> findAllConstructionsForUser(final int idUser) {
-        /* fixme pretty bad performance */
         return Objects.requireNonNullElse(constructionRepository.findAllConstructionsForUser(idUser), new ArrayList<>());
     }
 
@@ -150,7 +149,6 @@ public class ConstructionService {
     public boolean isStandardJobForTargetPossibleAtPlanet(final int idPlanet, @Nonnull final EResourceType productionTarget) {
         Preconditions.checkNotNull(productionTarget, "productionTarget must not be empty");
 
-        /* fixme make better */
         final boolean hasPlanetProductionForTarget = hasPlanetProductionForTarget(idPlanet, productionTarget);
         final boolean activeJobPresentForTargetAtPlanet = constructionRepository.isActiveJobPresentForTargetAtPlanet(idPlanet, productionTarget, EProductionCategory.PRODUCE);
         return hasPlanetProductionForTarget && !activeJobPresentForTargetAtPlanet;

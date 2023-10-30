@@ -252,7 +252,6 @@ public class PlanetApi extends BaseApi {
         final Map<ShipClass, Integer> jobLoad = shipJobPayload.stream()
                 .collect(Collectors.toMap(entry -> foundClassesByID.get(entry.getIdShipClass()), ShipyardConstructionSelection::getAmount));
 
-        /* fixme reduce to idplanet */
         final Job job = jobService.createShipyardJob(planet, jobLoad);
         if (JobService.isLocalInstaJobPossible(planet, job)) {
             planetTickRunner.tickInstaShipyard(job, tickTimeService.getToday());

@@ -16,21 +16,14 @@ import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.orbitals.PlanetRepository;
 import de.yuga.spacebattle.backend.services.caclulator.TickOutputCalculator;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 public class PlanetService {
-
-    @Nonnull
-    private static final Logger LOGGER = LoggerFactory.getLogger(PlanetService.class);
 
     @Nonnull
     private final PlanetRepository planetRepository;
@@ -49,14 +42,6 @@ public class PlanetService {
     }
 
     @Nonnull
-    public List<Planet> findByIds(@Nonnull final Collection<Integer> planetIDs) {
-        Preconditions.checkNotNull(planetIDs, "planetIDs must not be empty");
-
-        final Iterable<Planet> allById = planetRepository.findAllById(planetIDs);
-        return StreamSupport.stream(allById.spliterator(), false).collect(Collectors.toList());
-    }
-
-    @Nonnull
     public List<Planet> findAllColonized() {
         return planetRepository.findAllOwnedPlanets();
     }
@@ -66,6 +51,11 @@ public class PlanetService {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
 
         return planetRepository.findAllPlanetsColonizedByUser(user);
+    }
+
+
+    public List<Integer> findAllColonizedByForID(final int idUser) {
+        return planetRepository.findAllColonizedByForID(idUser);
     }
 
     @Nonnull
@@ -85,7 +75,7 @@ public class PlanetService {
     }
 
     private long getCachedEmpireWideResearchPoints(final int idUser) {
-        final List<Planet> allColonizedByWithResearchLab = findAllColonizedByWithResearchLab(idUser); /* fixme switch to get aa user construction where research */
+        final List<Planet> allColonizedByWithResearchLab = findAllColonizedByWithResearchLab(idUser);
         //noinspection UnnecessaryLocalVariable
         final long empireWideResearchPoints = allColonizedByWithResearchLab.stream()
                 .map(planet -> {
@@ -113,7 +103,6 @@ public class PlanetService {
 
     @Nonnull
     List<Planet> findAllColonizedByWithResearchLab(final int idUser) {
-        /* fixme pretty bad performance */
         return Objects.requireNonNullElse(planetRepository.findAllColonizedByWithResearchLab(idUser), List.of());
     }
 
