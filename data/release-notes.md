@@ -49,16 +49,13 @@ todo. player comment about the game in profile to display at take-a-tour
 1. pooled ships
 2. research insta job
 3. mining factors in colonization
+4. performance by planetary constructions
+5. notch light mode text colors
+6. unify building output
 
-todo. performance by planetary constructions
-todo. unify building output
-
-todo. notch light mode text colors
 
 todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen -> kein Unterschied zw ankunft und abflug
 -> Laut meiner anzeige sind 2 Flotten von dir heute beim hypelimit aufgetaut. Tatsächlich ist eine da, aber die andere bereits beim plani.
-
-- available research points checken, genug punkte übrig laut anzeige, aber job ist nicht insta
 
 todo. wiki is broken -> store full text as easy solution?
 

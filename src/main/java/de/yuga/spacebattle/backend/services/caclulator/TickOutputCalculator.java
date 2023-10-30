@@ -174,7 +174,7 @@ public class TickOutputCalculator {
         final BigDecimal increasingFactorPerLevel = building.getIncreasingFactorPerLevel();
         final int constructionLevel = construction.getOperationalLevel();
         double miningFactor = construction.getPlanet().getMiningFactors().getMiningFactorByType(building.getProductionTarget());
-        if (EResourceType.POPULATION == building.getProductionTarget() && EProductionCategory.CAPACITY != building.getProductionType().getProductionCategory()) {
+        if (building.getProductionTarget() == EResourceType.POPULATION && building.getProductionType().getProductionCategory() != EProductionCategory.PRODUCE) {
             miningFactor = 1;
         }
         // the mining factor of the population affects only the capacity, not the production directly
