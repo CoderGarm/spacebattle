@@ -151,18 +151,10 @@ public class JobService {
         debtorDeposit.pay(costs);
     }
 
-    public static boolean checkCosts(@Nonnull final Planet planet,
-                                     @Nonnull final ResourceDeposit costs) {
-        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
-        Preconditions.checkNotNull(costs, "costs shouldn't be null!");
-        Preconditions.checkArgument(EDepositType.COSTS == costs.getSubType(), "costs must be flagged as costs!");
+    public static boolean isLocalInstaJobPossible(@Nonnull final Planet planet, @Nonnull final Job job) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(job, "job must not be empty");
 
-        final ResourceDeposit debtorDeposit = planet.getResourceDeposit();
-        final PayingPossibleResult result = debtorDeposit.isPayingPossible(costs);
-        return result.isValid();
-    }
-
-    public static boolean isInstaJobPossible(final @Nonnull Planet planet, final Job job) {
         return job.getPointsLeft() <= planet.getResourceDeposit().getResourceAmountByType(job.getConstructable().getResourceType());
     }
 

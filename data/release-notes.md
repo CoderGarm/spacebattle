@@ -46,12 +46,9 @@ todo. player comment about the game in profile to display at take-a-tour
 
 ### Bugs fixed
 
-1. Flotten, die nach einem Schiffstransfer leer sind, verschwinden auch ohne Neuladen von der Map.
-2. Die Flottenverwaltung kann auf Planeten ohne Werft aufgerufen werden, allerdings können dort keine Schiffe verschrottet werden.
-3. Detachierte Flotten entstehen wieder in dem Orbit, in dem sich auch die Schiffe befinden.
-4. Ein Flottenupgrade oder eine -reparatur collapsen die entsprechende Flotte nun. Die überpriorisierten Jobs der Werft werden mit Pause-icon statt ausgegraut angezeigt.
-5. Jobs erzeugen wieder Pop Demand.
-6. Die Paging-Bestimmung im Forum funktioniert wieder.
+1. pooled ships
+2. research insta job
+   todo. unify building output
 
 todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen -> kein Unterschied zw ankunft und abflug
 -> Laut meiner anzeige sind 2 Flotten von dir heute beim hypelimit aufgetaut. Tatsächlich ist eine da, aber die andere bereits beim plani.

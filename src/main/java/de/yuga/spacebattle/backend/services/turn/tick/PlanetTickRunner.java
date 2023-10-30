@@ -114,7 +114,6 @@ public class PlanetTickRunner implements TickRunner {
      * Runs the tick for all planets.
      */
     private void tickPlanets() {
-        planetService.invalidateCache();
         final List<Planet> planets = planetService.findAllColonized();
         for (final Planet p : planets) {
             log(p, "Start ticking planet");
@@ -407,7 +406,7 @@ public class PlanetTickRunner implements TickRunner {
         final Planet planet = planetService.find(job.getFacility().getPlanet());
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
-        if (JobService.checkCosts(planet, job.getConstructable().getJobCosts()) && JobService.isInstaJobPossible(planet, job)) {
+        if (job.getPointsLeft() <= capability.getEmpireWideResearchPointsLeftOver()) {
             final long usedPoints = tickJob(job, capability.getEmpireWideResearchPointsLeftOver());
             completeResearch(job.getFacility().getPlanet(), job, usedPoints, today);
             return jobService.save(job);
@@ -423,7 +422,7 @@ public class PlanetTickRunner implements TickRunner {
         Preconditions.checkNotNull(job, "job must not be empty");
 
         final Planet planet = job.getFacility().getPlanet();
-        if (JobService.isInstaJobPossible(planet, job)) {
+        if (JobService.isLocalInstaJobPossible(planet, job)) {
             final long points = planet.getResourceDeposit().getResourceAmountByType(EResourceType.ORBITAL_CONSTRUCTION);
             final long usedPoints = tickJob(job, points);
             planet.getResourceDeposit().updateResource(EResourceType.ORBITAL_CONSTRUCTION, -usedPoints);
@@ -441,7 +440,7 @@ public class PlanetTickRunner implements TickRunner {
         Preconditions.checkNotNull(job, "job must not be empty");
 
         final Planet planet = job.getFacility().getPlanet();
-        if (JobService.isInstaJobPossible(planet, job)) {
+        if (JobService.isLocalInstaJobPossible(planet, job)) {
             final long points = planet.getResourceDeposit().getResourceAmountByType(EResourceType.CONSTRUCTION);
             final long usedPoints = tickJob(job, points);
             planet.getResourceDeposit().updateResource(EResourceType.CONSTRUCTION, -usedPoints);

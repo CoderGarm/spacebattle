@@ -13,7 +13,6 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.orbitals.PlanetRepository;
-import de.yuga.spacebattle.backend.services.caches.CacheStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -30,9 +28,6 @@ public class PlanetService {
 
     @Nonnull
     private static final Logger LOGGER = LoggerFactory.getLogger(PlanetService.class);
-
-    @Nonnull
-    private final CacheStore<Integer, Long> empireResearchPointsCache = new CacheStore<>(24, TimeUnit.HOURS);
 
     @Nonnull
     private final PlanetRepository planetRepository;
@@ -83,17 +78,14 @@ public class PlanetService {
     }
 
     private long getCachedEmpireWideResearchPoints(final int idUser) {
-        Long empireWideResearchPoints = empireResearchPointsCache.get(idUser);
-        if (empireWideResearchPoints == null) {
-            final List<Planet> allColonizedByWithResearchLab = findAllColonizedByWithResearchLab(idUser);
-            empireWideResearchPoints = allColonizedByWithResearchLab.stream()
-                    .map(planet -> {
-                        final Construction laboratory = planet.getConstructionByResource(EResourceType.RESEARCH).stream().findFirst().orElse(null);
-                        return laboratory != null ? TickOutputCalculator.getTickOutput(Set.of(laboratory)).longValue() : 0;
-                    })
-                    .reduce(0L, Long::sum);
-            empireResearchPointsCache.put(idUser, empireWideResearchPoints);
-        }
+        final List<Planet> allColonizedByWithResearchLab = findAllColonizedByWithResearchLab(idUser);
+        //noinspection UnnecessaryLocalVariable
+        final long empireWideResearchPoints = allColonizedByWithResearchLab.stream()
+                .map(planet -> {
+                    final Construction laboratory = planet.getConstructionByResource(EResourceType.RESEARCH).stream().findFirst().orElse(null);
+                    return laboratory != null ? TickOutputCalculator.getTickOutput(Set.of(laboratory)).longValue() : 0;
+                })
+                .reduce(0L, Long::sum);
         return empireWideResearchPoints;
     }
 
@@ -110,11 +102,6 @@ public class PlanetService {
             }
         }
         saveAll(toStore);
-        invalidateEmpireResearchCacheKey(idUser);
-    }
-
-    public void invalidateEmpireResearchCacheKey(final int idUser) {
-        empireResearchPointsCache.invalidateKey(idUser);
     }
 
     @Nonnull
@@ -234,9 +221,5 @@ public class PlanetService {
     @Nullable
     public Integer getIdUserWhenMain(final int idPlanet) {
         return planetRepository.findAllById(idPlanet);
-    }
-
-    public void invalidateCache() {
-        empireResearchPointsCache.invalidateAll();
     }
 }

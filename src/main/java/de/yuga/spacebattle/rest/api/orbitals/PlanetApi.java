@@ -175,7 +175,7 @@ public class PlanetApi extends BaseApi {
     )
     public ResponseEntity<?> buildConstruction(@PathVariable("idPlanet") final int idPlanet, @PathVariable("idBuilding") final int idBuilding) {
         final Job job = jobService.createConstructionYardJob(idPlanet, idBuilding);
-        if (JobService.isInstaJobPossible(job.getFacility().getPlanet(), job)) {
+        if (JobService.isLocalInstaJobPossible(job.getFacility().getPlanet(), job)) {
             planetTickRunner.tickInstaConstruction(job, tickTimeService.getToday());
         }
         return ResponseEntity.ok(true);
@@ -251,7 +251,7 @@ public class PlanetApi extends BaseApi {
                 .collect(Collectors.toMap(entry -> foundClassesByID.get(entry.getIdShipClass()), ShipyardConstructionSelection::getAmount));
 
         final Job job = jobService.createShipyardJob(planet, jobLoad);
-        if (JobService.isInstaJobPossible(planet, job)) {
+        if (JobService.isLocalInstaJobPossible(planet, job)) {
             planetTickRunner.tickInstaShipyard(job, tickTimeService.getToday());
         }
         return ResponseEntity.ok(true);
@@ -297,7 +297,7 @@ public class PlanetApi extends BaseApi {
         final FleetPlanetDto fleetPlanetDto = getResult(idFleet);
 
         final Job job = jobService.startShipyardRepairJob(fleetPlanetDto.planet, fleetPlanetDto.fleet);
-        if (JobService.isInstaJobPossible(fleetPlanetDto.planet, job)) {
+        if (JobService.isLocalInstaJobPossible(fleetPlanetDto.planet, job)) {
             planetTickRunner.tickInstaShipyard(job, tickTimeService.getToday());
         }
         return ResponseEntity.ok(true);
@@ -340,7 +340,7 @@ public class PlanetApi extends BaseApi {
 
         final FleetPlanetDto fleetPlanetDto = getResult(idFleet);
         final Job job = jobService.createShipyardUpgradeJob(fleetPlanetDto.planet, fleetPlanetDto.fleet);
-        if (JobService.isInstaJobPossible(fleetPlanetDto.planet, job)) {
+        if (JobService.isLocalInstaJobPossible(fleetPlanetDto.planet, job)) {
             planetTickRunner.tickInstaShipyard(job, tickTimeService.getToday());
         }
         return ResponseEntity.ok(true);
