@@ -15,10 +15,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@NamedQueries({
-        @NamedQuery(name = "Construction.getAll", query = "SELECT a FROM Construction a"),
-        @NamedQuery(name = "Construction.getAllByPlanet", query = "SELECT a FROM Construction a WHERE a.planet.id = :idPlanet"),
-})
 @Entity
 @Table(name = "construction",
         uniqueConstraints = @UniqueConstraint(name = "CONSTRUCTION_UK", columnNames = {"idPlanet", "idBuilding"}))

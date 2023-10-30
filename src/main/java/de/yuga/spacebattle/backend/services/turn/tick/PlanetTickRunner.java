@@ -141,11 +141,10 @@ public class PlanetTickRunner implements TickRunner {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(today, "today must not be empty");
 
-        final Set<Construction> constructions = planet.getConstructions().stream()
-                .filter(c -> !c.getJobs().isEmpty())
-                .collect(Collectors.toSet());
+        final Set<Construction> constructions = constructionService.findAllConstructionsOnPlanetWithJobs(planet.getId());
 
-        for (final Construction facility : constructions) {
+        final Set<Construction> withJobs = constructions.stream().filter(c -> !c.getJobs().isEmpty()).collect(Collectors.toSet());
+        for (final Construction facility : withJobs) {
             final EResourceType resourceType = facility.getBuilding().getProductionTarget();
             final Set<Job> jobs = facility.getJobs();
 
@@ -175,7 +174,7 @@ public class PlanetTickRunner implements TickRunner {
                 }
                 switch (resourceType) {
                     case CONSTRUCTION:
-                        completeConstruction(planet, planet.getConstructions(), job, today);
+                        completeConstruction(planet, constructions, job, today);
                         break;
                     case ORBITAL_CONSTRUCTION:
                         completeShipyard(planet, job, today);
@@ -440,11 +439,12 @@ public class PlanetTickRunner implements TickRunner {
         Preconditions.checkNotNull(job, "job must not be empty");
 
         final Planet planet = job.getFacility().getPlanet();
+        final Set<Construction> constructions = constructionService.findAllConstructionsOnPlanet(planet.getId());
         if (JobService.isLocalInstaJobPossible(planet, job)) {
             final long points = planet.getResourceDeposit().getResourceAmountByType(EResourceType.CONSTRUCTION);
             final long usedPoints = tickJob(job, points);
             planet.getResourceDeposit().updateResource(EResourceType.CONSTRUCTION, -usedPoints);
-            completeConstruction(planet, planet.getConstructions(), job, today);
+            completeConstruction(planet, constructions, job, today);
             planetService.save(planet);
             jobService.save(job);
         }

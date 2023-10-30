@@ -361,7 +361,8 @@ public class OperationalService {
         final ResourceDeposit deposit = planet.getResourceDeposit();
 
         // prio 1: military stuff, prio 2: higher tech level
-        final List<Construction> supplyNeeded = planet.getConstructions().stream()
+        final Set<Construction> constructions = constructionService.findAllConstructionsOnPlanet(planet.getId());
+        final List<Construction> supplyNeeded = constructions.stream()
                 .filter(c -> c.getOperationalLevel() < c.getLevel())
                 .sorted((o1, o2) -> {
                     final ERefinementSequence o1RS = o1.getBuilding().getProductionType().getRefinementSequence();

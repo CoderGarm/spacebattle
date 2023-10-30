@@ -23,6 +23,7 @@ import de.yuga.spacebattle.backend.repositories.turn.ColonizationRepository;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
+import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -65,18 +66,23 @@ public class ColonizationService {
     @Nonnull
     private final FleetService fleetService;
 
+    @Nonnull
+    private final ConstructionService constructionService;
+
     public ColonizationService(@Nonnull final ColonizationRepository repository,
                                @Nonnull final UserService userService,
                                @Nonnull final PlanetService planetService,
                                @Nonnull final StarSystemService starSystemService,
                                @Nonnull final BuildingService buildingService,
-                               @Nonnull final FleetService fleetService) {
+                               @Nonnull final FleetService fleetService,
+                               @Nonnull final ConstructionService constructionService) {
         this.repository = Preconditions.checkNotNull(repository, "colonizationRepository shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
         this.buildingService = Preconditions.checkNotNull(buildingService, "buildingService shouldn't be null!");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
+        this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
     }
 
     @Nonnull
@@ -207,6 +213,7 @@ public class ColonizationService {
 
         final double miningFactor = planet.getMiningFactors().getMiningFactorByType(EResourceType.POPULATION);
 
+        final List<Construction> constructions = new ArrayList<>();
         final List<Building> basicBuildings = buildingService.findBasicBuildings();
         basicBuildings.forEach(building -> {
             final int level;
@@ -214,18 +221,19 @@ public class ColonizationService {
             final boolean idPopulationCapacity = EResourceType.POPULATION == productionType.getProductionTarget() && EProductionCategory.CAPACITY == productionType.getProductionCategory();
             if (idPopulationCapacity) {
                 // calculate which level must a capacity construction have to suit all the people
-                level = detectPopCapStartingLevel(creditorDeposit, building);
+                level = detectPopCapStartingLevel(creditorDeposit, building, miningFactor);
             } else {
                 level = 1;
             }
-            planet.getConstructions().add(new Construction(planet, building, level));
+            constructions.add(new Construction(planet, building, level));
         });
         owner.addKnownStarSystems(planet.getSystem());
         userService.save(owner);
+        constructionService.saveAll(constructions);
         return planetService.save(planet);
     }
 
-    private static int detectPopCapStartingLevel(@Nonnull final ResourceDeposit creditorDeposit, @Nonnull final Building building) {
+    private static int detectPopCapStartingLevel(@Nonnull final ResourceDeposit creditorDeposit, @Nonnull final Building building, final double miningFactor) {
         Preconditions.checkNotNull(creditorDeposit, "creditorDeposit must not be empty");
         Preconditions.checkNotNull(building, "building must not be empty");
 
@@ -237,7 +245,7 @@ public class ColonizationService {
         int levelTo = maxLevel; // fallback
         final BigDecimal virtualSumOfPops = BigDecimal.valueOf(sumOfPopulation);
         for (int virtualLevel = 1; virtualLevel <= maxLevel; virtualLevel++) {
-            final BigDecimal output = TickOutputCalculator.getOutput(baseValue, increasingFactorPerLevel, 1, virtualLevel);
+            final BigDecimal output = TickOutputCalculator.getOutput(baseValue, increasingFactorPerLevel, miningFactor, virtualLevel);
             if (output.compareTo(virtualSumOfPops) > 0) {
                 levelTo = virtualLevel;
                 break;

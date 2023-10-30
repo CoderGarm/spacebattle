@@ -6,6 +6,8 @@ import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.EProductionCategory;
+import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.constructables.buildings.ConstructionRepository;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,12 +36,6 @@ public class ConstructionService {
     }
 
     @Nonnull
-    public List<Construction> findAll() {
-        return constructionRepository.findAllConstructions();
-    }
-
-
-    @Nonnull
     public List<Construction> findAll(@Nonnull final Collection<Integer> ids) {
         Preconditions.checkNotNull(ids, "ids must not be empty");
 
@@ -65,15 +61,14 @@ public class ConstructionService {
         constructionRepository.delete(entity);
     }
 
-    /**
-     * Returns every constructed building on this planet.
-     *
-     * @param idPlanet this planet
-     * @return the constructions
-     */
     @Nonnull
-    public List<Construction> findAllConstructionsOnPlanet(final int idPlanet) {
-        return constructionRepository.findAllConstructionsOnPlanet(idPlanet);
+    public Set<Construction> findAllConstructionsOnPlanet(final int idPlanet) {
+        return Objects.requireNonNullElse(constructionRepository.findAllConstructionsOnPlanet(idPlanet), new HashSet<>());
+    }
+
+    @Nonnull
+    public Set<Construction> findAllConstructionsOnPlanetWithJobs(final int idPlanet) {
+        return Objects.requireNonNullElse(constructionRepository.findAllConstructionsOnPlanetWithJobs(idPlanet), new HashSet<>());
     }
 
     @Nonnull
@@ -83,7 +78,7 @@ public class ConstructionService {
 
         final List<Building> unlockedBuildings = buildingService.findAllByUser(planet.getOwner().getId());
 
-        final Set<Construction> constructions = planet.getConstructions();
+        final Set<Construction> constructions = findAllConstructionsOnPlanet(planet.getId()); // fixme switch to idPlanet
 
         final Map<Building, Construction> constructionByBuilding = constructions.stream()
                 .collect(Collectors.toMap(Construction::getBuilding, Function.identity()));
@@ -135,6 +130,34 @@ public class ConstructionService {
 
     @Nonnull
     public List<Construction> findAllConstructionsForUser(final int idUser) {
+        /* fixme pretty bad performance */
         return Objects.requireNonNullElse(constructionRepository.findAllConstructionsForUser(idUser), new ArrayList<>());
+    }
+
+    public boolean hasPlanetProductionForTarget(final int idPlanet, @Nonnull final EResourceType productionTarget) {
+        Preconditions.checkNotNull(productionTarget, "productionTarget must not be empty");
+
+        return constructionRepository.hasPlanetProductionType(idPlanet, productionTarget.name(), EProductionCategory.PRODUCE.name());
+    }
+
+    @Nullable
+    public Construction findByPlanetAndProductionType(final int idPlanet, @Nonnull final EResourceType productionTarget) {
+        Preconditions.checkNotNull(productionTarget, "productionTarget must not be empty");
+
+        return constructionRepository.findByPlanetProductionType(idPlanet, productionTarget.name(), EProductionCategory.PRODUCE.name());
+    }
+
+    public boolean isStandardJobForTargetPossibleAtPlanet(final int idPlanet, @Nonnull final EResourceType productionTarget) {
+        Preconditions.checkNotNull(productionTarget, "productionTarget must not be empty");
+
+        /* fixme make better */
+        final boolean hasPlanetProductionForTarget = hasPlanetProductionForTarget(idPlanet, productionTarget);
+        final boolean activeJobPresentForTargetAtPlanet = constructionRepository.isActiveJobPresentForTargetAtPlanet(idPlanet, productionTarget.name(), EProductionCategory.PRODUCE.name());
+        return hasPlanetProductionForTarget && !activeJobPresentForTargetAtPlanet;
+    }
+
+    @Nullable
+    public Construction findByPlanetAndBuilding(final int idPlanet, final int idBuilding) {
+        return constructionRepository.findByPlanetAndBuilding(idPlanet, idBuilding);
     }
 }

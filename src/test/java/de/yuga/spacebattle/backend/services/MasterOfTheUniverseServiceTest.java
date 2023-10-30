@@ -7,18 +7,12 @@ import de.yuga.spacebattle.backend.entities.account.forum.Forum;
 import de.yuga.spacebattle.backend.entities.account.forum.ForumMessage;
 import de.yuga.spacebattle.backend.entities.account.forum.ForumThread;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
-import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
-import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.researches.ResearchLevel;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
-import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
-import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
-import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.enums.*;
+import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import de.yuga.spacebattle.backend.services.account.ForumService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
@@ -32,7 +26,6 @@ import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.TickRunnerService;
 import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStateService;
 import de.yuga.spacebattle.backend.transformer.BuildingCsvTransformer;
-import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.misc.Coords;
 import de.yuga.spacebattle.rest.dto.misc.wormhole.Junction;
 import org.junit.jupiter.api.Disabled;
@@ -200,116 +193,5 @@ public class MasterOfTheUniverseServiceTest {
         assertNotNull(forum);
         final ForumThread forumThread = new ForumThread(forum, "Thread in " + forum.getTitle(), "Description in " + forum.getDescription());
         forumService.save(forumThread);
-    }
-
-    @Test
-    void benchmarkTimeToShipyard() {
-        prepareDatabase();
-
-        final User user = userService.find(1);
-        assertNotNull(user);
-        Planet mainPlanet = planetService.findMainPlanet(user);
-
-        final boolean isConstructionPossible = isConstructionPossibleOnPlanet(mainPlanet.getId());
-        assertTrue(isConstructionPossible);
-
-        final Set<ResearchLevel> researchesForUser = researchService.getResearchesForUser(user.getId());
-
-        final ProductionType researchPT = new ProductionType(EResourceType.RESEARCH, EProductionCategory.PRODUCE, null);
-        final List<Building> laboratories = buildingService.findBuildingByProductionType(researchPT);
-        final Building laboratory = laboratories.get(0);
-        final Research labResearch = laboratory.getUnlockedThrough();
-        final boolean hasLaboratoryResearch = researchesForUser.stream().anyMatch(f -> f.getResearch().equals(labResearch));
-        assertTrue(hasLaboratoryResearch);
-
-        final ProductionType shipyardPT = new ProductionType(EResourceType.ORBITAL_CONSTRUCTION, EProductionCategory.PRODUCE, null);
-        final List<Building> shipyards = buildingService.findBuildingByProductionType(shipyardPT);
-        final Building shipyard = shipyards.get(0);
-        final Research shipyardResearch = shipyard.getUnlockedThrough();
-        final boolean hasShipyardResearch = researchesForUser.stream().anyMatch(f -> f.getResearch().equals(shipyardResearch));
-        assertTrue(hasShipyardResearch);
-
-        final ProductionType collegePT = new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, ERefinementSequence.EDUCATION_CIVIL_II);
-        final List<Building> colleges = buildingService.findBuildingByProductionType(collegePT);
-        final Building college = colleges.get(0);
-        final Research collegeResearch = college.getUnlockedThrough();
-        final boolean hasCollegeResearch = researchesForUser.stream().anyMatch(f -> f.getResearch().equals(collegeResearch));
-        assertTrue(hasCollegeResearch);
-
-        long jobDoneAtZero = runGroundConstruction(mainPlanet, college);
-        jobDoneAtZero += runGroundConstruction(mainPlanet, laboratory);
-
-        mainPlanet = planetService.findMainPlanet(user);
-        final ResourceDeposit resourceDeposit = mainPlanet.getResourceDeposit();
-
-        final ResourceDeposit costs = new ResourceDeposit(EDepositType.COSTS);
-        final ResourceDeposit shipyardCosts = shipyard.getCosts();
-        final ResourceDeposit laboratoryCosts = laboratory.getCosts();
-        final ResourceDeposit collegeCosts = college.getCosts();
-        costs.add(shipyardCosts);
-        costs.add(laboratoryCosts);
-        //costs.add(collegeCosts);
-
-        try {
-            final int ticks = mainPlanet.calculateTicksToCollect(costs, operationalService.getUtilizedPopulationForPlanet(mainPlanet.getId()));
-            System.out.println("Tick to done: " + ticks + jobDoneAtZero);
-        } catch (final NotifyWebUserException e) {
-            final PayingPossibleResult payingPossibleResult = e.getPayingPossibleResult();
-            if (payingPossibleResult == null) {
-                e.printStackTrace();
-                return;
-            }
-            assertNotNull(payingPossibleResult.getResult());
-            System.out.println(String.join(",", payingPossibleResult.getResult()));
-        }
-
-        final boolean researchPossible = isResearchPossible(user);
-
-
-        getUpgradableConstructions(mainPlanet.getId());
-
-
-    }
-
-    private long runGroundConstruction(final Planet mainPlanet, final Building college) {
-        final Job constructionYardJob = jobService.createConstructionYardJob(mainPlanet.getId(), college.getId());
-        final long jobDoneAtZero = constructionYardJob.getPointsLeft();
-
-        assertTrue(jobDoneAtZero >= 0);
-
-        for (long i = jobDoneAtZero; i >= 0; i--) {
-            tickService.doTick();
-        }
-        return jobDoneAtZero;
-    }
-
-    private boolean isResearchPossible(final User user) {
-        final Planet researchPlanet = planetService.findResearchPlanet(user);
-        if (researchPlanet == null) {
-            return false;
-        }
-        final Construction facility = researchPlanet.getConstructionByResource(EResourceType.RESEARCH)
-                .stream().findFirst().orElse(null);
-        if (facility == null) {
-            return false;
-        }
-        return facility.getJobs().isEmpty();
-    }
-
-    private Set<Construction> getUpgradableConstructions(final int idPlanet) {
-        final Planet planet = planetService.find(idPlanet);
-        assertNotNull(planet);
-        assertNotNull(planet.getOwner());
-        return constructionService.getUpgradeableConstructions(planet);
-    }
-
-    private boolean isConstructionPossibleOnPlanet(final int idPlanet) {
-        final Planet planet = planetService.find(idPlanet);
-        assertNotNull(planet);
-        return planet.isConstructionPossible();
-    }
-
-    private void prepareDatabase() {
-        assertEquals(1, userService.findAll().size());
     }
 }

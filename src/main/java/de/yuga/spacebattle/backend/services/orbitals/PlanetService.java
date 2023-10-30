@@ -106,6 +106,7 @@ public class PlanetService {
 
     @Nonnull
     List<Planet> findAllColonizedByWithResearchLab(final int idUser) {
+        /* fixme pretty bad performance */
         return Objects.requireNonNullElse(planetRepository.findAllColonizedByWithResearchLab(idUser), List.of());
     }
 

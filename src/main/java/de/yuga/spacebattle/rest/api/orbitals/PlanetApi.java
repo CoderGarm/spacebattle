@@ -10,6 +10,7 @@ import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
+import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
@@ -82,19 +83,24 @@ public class PlanetApi extends BaseApi {
     @Nonnull
     private final TickTimeService tickTimeService;
 
+    @Nonnull
+    private final ConstructionService constructionService;
+
     @Autowired
     public PlanetApi(@Nonnull final PlanetService planetService,
                      @Nonnull final JobService jobService,
                      @Nonnull final ShipClassService shipClassService,
                      @Nonnull final FleetService fleetService,
                      @Nonnull final PlanetTickRunner planetTickRunner,
-                     @Nonnull final TickTimeService tickTimeService) {
+                     @Nonnull final TickTimeService tickTimeService,
+                     @Nonnull final ConstructionService constructionService) {
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.jobService = Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
         this.shipClassService = Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
         this.planetTickRunner = Preconditions.checkNotNull(planetTickRunner, "planetTickRunner must not be empty");
         this.tickTimeService = Preconditions.checkNotNull(tickTimeService, "tickTimeService must not be empty");
+        this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
     }
 
     @GetMapping
@@ -195,7 +201,7 @@ public class PlanetApi extends BaseApi {
         if (planet == null) {
             return ResponseEntity.ok(false);
         }
-        final boolean buildingPossible = planet.getConstructionByResource(EResourceType.ORBITAL_CONSTRUCTION).stream().anyMatch(c -> c.getJobs().isEmpty());
+        final boolean buildingPossible = constructionService.isStandardJobForTargetPossibleAtPlanet(idPlanet, EResourceType.ORBITAL_CONSTRUCTION);
         return ResponseEntity.ok(buildingPossible);
     }
 
@@ -213,7 +219,7 @@ public class PlanetApi extends BaseApi {
         if (planet == null) {
             return ResponseEntity.ok(false);
         }
-        final boolean exists = !planet.getConstructionByResource(EResourceType.ORBITAL_CONSTRUCTION).isEmpty();
+        final boolean exists = constructionService.hasPlanetProductionForTarget(idPlanet, EResourceType.ORBITAL_CONSTRUCTION);
         return ResponseEntity.ok(exists);
     }
 
@@ -250,6 +256,7 @@ public class PlanetApi extends BaseApi {
         final Map<ShipClass, Integer> jobLoad = shipJobPayload.stream()
                 .collect(Collectors.toMap(entry -> foundClassesByID.get(entry.getIdShipClass()), ShipyardConstructionSelection::getAmount));
 
+        /* fixme reduce to idplanet */
         final Job job = jobService.createShipyardJob(planet, jobLoad);
         if (JobService.isLocalInstaJobPossible(planet, job)) {
             planetTickRunner.tickInstaShipyard(job, tickTimeService.getToday());

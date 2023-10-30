@@ -65,6 +65,23 @@ public class Planet {
     public Planet() {
     }
 
+    public Planet(@Nonnull final de.yuga.spacebattle.backend.entities.orbitals.Planet planet, @Nonnull final Set<de.yuga.spacebattle.backend.enums.EResourceType> productionCapabilities) {
+        this(planet);
+        Preconditions.checkNotNull(productionCapabilities, "productionCapabilities must not be empty");
+
+        productionCapabilities.forEach(productionTarget -> {
+            switch (productionTarget) {
+                case CONSTRUCTION:
+                case ORBITAL_CONSTRUCTION:
+                case RESEARCH:
+                    this.capabilities.add(new EResourceType(productionTarget));
+                    break;
+                default:
+                    break;
+            }
+        });
+    }
+
     public Planet(@Nonnull final de.yuga.spacebattle.backend.entities.orbitals.Planet planet) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
 
@@ -79,18 +96,6 @@ public class Planet {
             this.isMain = planet.isMain();
         }
         planetType = new de.yuga.spacebattle.rest.dto.enums.EPlanetClassType(planet.getPlanetType());
-        planet.getConstructions().forEach(c -> {
-            final de.yuga.spacebattle.backend.enums.EResourceType productionTarget = c.getBuilding().getProductionTarget();
-            switch (productionTarget) {
-                case CONSTRUCTION:
-                case ORBITAL_CONSTRUCTION:
-                case RESEARCH:
-                    this.capabilities.add(new EResourceType(productionTarget));
-                    break;
-                default:
-                    break;
-            }
-        });
     }
 
     public int getIdPlanet() {

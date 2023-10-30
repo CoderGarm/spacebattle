@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.account.UserPoints;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
+import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
@@ -38,6 +39,9 @@ public class UserPointsService {
     @Nonnull
     private final MissionService missionService;
 
+    @Nonnull
+    private final ConstructionService constructionService;
+
     @Autowired
     public UserPointsService(@Nonnull final UserService userService,
                              @Nonnull final PlanetService planetService,
@@ -45,7 +49,8 @@ public class UserPointsService {
                              @Nonnull final JobService jobService,
                              @Nonnull final FleetService fleetService,
                              @Nonnull final ColonizationService colonizationService,
-                             @Nonnull final MissionService missionService) {
+                             @Nonnull final MissionService missionService,
+                             @Nonnull final ConstructionService constructionService) {
         this.userService = Preconditions.checkNotNull(userService, "userService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.colonizationService = Preconditions.checkNotNull(colonizationService, "colonizationService must not be empty");
@@ -53,6 +58,7 @@ public class UserPointsService {
         this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
         this.missionService = Preconditions.checkNotNull(missionService, "missionService must not be empty");
+        this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
     }
 
 
@@ -62,6 +68,7 @@ public class UserPointsService {
 
         return new UserPoints(user)
                 .withPlanets(planetService.findAllColonizedBy(user))
+                .withConstructions(constructionService.findAllConstructionsForUser(user.getId()))
                 .withColonizations(colonizationService.findAllForUser(user))
                 .withJobs(jobService.findAllJobsForUser(user))
                 .withFleets(fleetService.findAllFleetsByUser(user))

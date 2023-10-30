@@ -23,6 +23,7 @@ import de.yuga.spacebattle.backend.repositories.turn.JobRepository;
 import de.yuga.spacebattle.backend.services.ResourceService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
+import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
@@ -62,6 +63,9 @@ public class JobService {
     @Nonnull
     private final FleetService fleetService;
 
+    @Nonnull
+    private final ConstructionService constructionService;
+
     @Autowired
     public JobService(@Nonnull final JobRepository jobRepository,
                       @Nonnull final PlanetService planetService,
@@ -69,7 +73,8 @@ public class JobService {
                       @Nonnull final ResearchService researchService,
                       @Nonnull final WarShipService warShipService,
                       @Nonnull final ResourceService resourceService,
-                      @Nonnull final FleetService fleetService) {
+                      @Nonnull final FleetService fleetService,
+                      @Nonnull final ConstructionService constructionService) {
         this.jobRepository = Preconditions.checkNotNull(jobRepository, "jobC shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.buildingService = Preconditions.checkNotNull(buildingService, "buildingService shouldn't be null!");
@@ -77,6 +82,7 @@ public class JobService {
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
+        this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
     }
 
     @Nonnull
@@ -168,20 +174,14 @@ public class JobService {
      * @return the created entity
      */
     @Nonnull
-    public Job createConstructionYardJob(@Nonnull final Integer idPlanet, @Nonnull final Integer idBuilding) {
-        Preconditions.checkNotNull(idPlanet, "idPlanet shouldn't be null!");
-        Preconditions.checkNotNull(idBuilding, "idBuilding shouldn't be null!");
-
+    public Job createConstructionYardJob(final int idPlanet, final int idBuilding) {
         final Planet planet = planetService.find(idPlanet);
         final Building building = buildingService.find(idBuilding);
         if (planet == null || planet.getHumanOwner() == null || building == null) {
             throw new NotifyWebUserException("not that way!");
         }
 
-        final Set<Construction> constructions = planet.getConstructions();
-        final Construction existingC = constructions.stream()
-                .filter(construction -> construction.getBuilding().equals(building))
-                .findFirst().orElse(null);
+        final Construction existingC = constructionService.findByPlanetAndBuilding(idPlanet, idBuilding);
 
         final int level = researchService.getLevelForResearch(planet.getHumanOwner(), building.getUnlockedThrough());
         if (existingC != null && existingC.getLevel() >= level) {
@@ -190,9 +190,7 @@ public class JobService {
 
         final int targetLevel = existingC != null ? existingC.getLevel() + 1 : 1;
         final Constructable constructable = new Constructable(building, targetLevel);
-        final Construction facility = planet.getConstructions().stream()
-                .filter(construction -> construction.getBuilding().getProductionTarget() == EResourceType.CONSTRUCTION)
-                .findFirst().orElse(null);
+        final Construction facility = constructionService.findByPlanetAndProductionType(idPlanet, EResourceType.CONSTRUCTION);
 
         checkIfFree(facility);
         checkAndBalances(planet, constructable.getJobCosts());
@@ -222,13 +220,12 @@ public class JobService {
         if (level > levelCap) {
             throw new NotifyWebUserException("no way!");
         }
-        final Planet researchPlanet = planetService.findResearchPlanet(user);
+        final Planet researchPlanet = planetService.findResearchPlanet(user); // fixme switch to idPlanet
         if (researchPlanet == null) {
             throw new NotifyWebUserException("You need a research facility on at leas one planet.");
         }
 
-        final Construction facility = researchPlanet.getConstructionByResource(EResourceType.RESEARCH)
-                .stream().findFirst().orElse(null);
+        final Construction facility = constructionService.findByPlanetAndProductionType(researchPlanet.getId(), EResourceType.RESEARCH);
         checkIfFree(facility);
 
         final Constructable constructable = new Constructable(research, level);
@@ -254,11 +251,9 @@ public class JobService {
             throw new NotifyWebUserException("You should own this planet, buddy.");
         }
 
-        final Construction facility = planet.getConstructions().stream()
-                .filter(construction -> construction.getBuilding().getProductionTarget() == EResourceType.ORBITAL_CONSTRUCTION)
-                .findFirst().orElse(null);
-
+        final Construction facility = constructionService.findByPlanetAndProductionType(planet.getId(), EResourceType.ORBITAL_CONSTRUCTION); /* fixme switch to idPlanet */
         checkIfFree(facility);
+
         Fleet fleet = new Fleet("Fresh Build @ " + planet.getName(), owner, new FleetOrbit(planet.getOrbit(), planet.getSystem()));
         // small hack to don't display the new build fleet on map and in fleet list before "under construction handling"
         fleet.delete();
@@ -292,14 +287,12 @@ public class JobService {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(toUpgrade, "toUpgrade must not be empty");
 
-        final Construction facility = planet.getConstructions().stream()
-                .filter(construction -> construction.getBuilding().getProductionTarget() == EResourceType.ORBITAL_CONSTRUCTION)
-                .findFirst().orElseThrow(() -> new NotifyWebUserException("If you want to repair a fleet, you need a shipyard."));
+        final Construction facility = constructionService.findByPlanetAndProductionType(planet.getId(), EResourceType.ORBITAL_CONSTRUCTION); /* fixme switch to idPlanet */
 
         // do not check if free, the new job will squeeze in
         final Constructable constructable = new Constructable(toUpgrade, EJobType.UPGRADE);
         checkAndBalances(planet, constructable.getJobCosts());
-        Job job = new Job(planet, facility, constructable);
+        Job job = new Job(planet, Objects.requireNonNull(facility), constructable);
         job.setPriority(EJobPriority.PRIORITY);
         job = jobRepository.save(job);
         fleetService.disableFleet(toUpgrade);
@@ -313,14 +306,11 @@ public class JobService {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(toRepair, "toRepair must not be empty");
 
-        final Construction facility = planet.getConstructions().stream()
-                .filter(construction -> construction.getBuilding().getProductionTarget() == EResourceType.ORBITAL_CONSTRUCTION)
-                .findFirst().orElseThrow(() -> new NotifyWebUserException("If you want to repair a fleet, you need a shipyard."));
+        final Construction facility = constructionService.findByPlanetAndProductionType(planet.getId(), EResourceType.ORBITAL_CONSTRUCTION); /* fixme switch to idPlanet */
 
         // do not check if free, the new job will squeeze in
         final Constructable constructable = new Constructable(toRepair, EJobType.REPAIR);
-        Job job = new Job(planet, facility, constructable);
-
+        Job job = new Job(planet, Objects.requireNonNull(facility), constructable);
         job.setPriority(EJobPriority.PRIORITY);
         job = jobRepository.save(job);
         checkAndBalances(planet, constructable.getJobCosts());

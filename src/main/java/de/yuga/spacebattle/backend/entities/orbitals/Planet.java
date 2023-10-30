@@ -11,11 +11,9 @@ import de.yuga.spacebattle.backend.entities.constructables.buildings.Constructio
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 import de.yuga.spacebattle.backend.entities.turn.resources.MiningFactors;
-import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
-import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -93,8 +91,9 @@ public class Planet extends AbstractEntityKey implements HasOwner {
     @JoinColumn(name = "idResourceTransportationDelivery", updatable = false)
     private final ResourceDeposit resourceTransportationDelivery = new ResourceDeposit(EDepositType.TRANSPORTATION_DELIVERY);
 
-    @Nonnull /* todo remove eager and replace by direct fetching */
-    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, mappedBy = "planet")
+    @Nonnull
+    @SuppressWarnings("unused")
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, mappedBy = "planet")
     private final Set<Construction> constructions = new HashSet<>();
 
     @Nullable
@@ -163,11 +162,6 @@ public class Planet extends AbstractEntityKey implements HasOwner {
     }
 
     @Nonnull
-    public Set<Construction> getConstructions() {
-        return constructions;
-    }
-
-    @Nonnull
     public String getName() {
         return name;
     }
@@ -222,21 +216,6 @@ public class Planet extends AbstractEntityKey implements HasOwner {
     @Override
     public int hashCode() {
         return id * 7;
-    }
-
-    /**
-     * Returns the facility which produces the resource type.
-     *
-     * @param resourceType the requested resource type
-     * @return the facility
-     */
-    @Nonnull
-    public Set<Construction> getConstructionByResource(@Nonnull final EResourceType resourceType) {
-        Preconditions.checkNotNull(resourceType, "resourceType shouldn't be null!");
-
-        return getConstructions().stream()
-                .filter(construction -> construction.getBuilding().getProductionTarget() == resourceType)
-                .collect(Collectors.toSet());
     }
 
     /**
@@ -329,56 +308,6 @@ public class Planet extends AbstractEntityKey implements HasOwner {
      */
     public boolean isConstructionPossible() {
         return getConstructionByResource(EResourceType.CONSTRUCTION).stream().anyMatch(c -> c.getJobs().isEmpty());
-    }
-
-
-    public int calculateTicksToCollect(@Nonnull final ResourceDeposit costs, @Nonnull final ResourceDeposit utilization) {
-        Preconditions.checkNotNull(costs, "costs must not be empty");
-        Preconditions.checkNotNull(utilization, "utilization must not be empty");
-        Preconditions.checkArgument(costs.getSubType() == EDepositType.COSTS, "costs must not be costs");
-
-        final ResourceDeposit cloneOfCosts = new ResourceDeposit(costs);
-        final ResourceDeposit ticklyIncome = getTicklyIncome(utilization);
-        cloneOfCosts.subtract(resourceDeposit);
-
-        // check collectable resources
-        int tickCounterCollectable = 0;
-        final PayingPossibleResult payingPossible = getResourceDeposit().isPayingPossible(cloneOfCosts);
-        if (!payingPossible.isValid()) {
-            boolean isPayingPossible = false;
-            while (!isPayingPossible && tickCounterCollectable != 999) {
-                cloneOfCosts.subtract(ticklyIncome);
-                isPayingPossible = getResourceDeposit().isPayingPossible(cloneOfCosts).isValid();
-                tickCounterCollectable++;
-            }
-            if (tickCounterCollectable == 356) {
-                // stop if a year of game time is reached
-                final PayingPossibleResult result = getResourceDeposit().isPayingPossible(costs);
-                throw new NotifyWebUserException(result.getMessage(), result);
-            }
-        }
-
-        // check resources which cannot be collected
-        final PayingPossibleResult result = new PayingPossibleResult();
-        int tickCounterForfeitable = 0;
-        for (final EResourceType eResourceType : EResourceType.valuesWhichForfeits()) {
-            final long forfeitableIncome = ticklyIncome.getResourceAmountByType(eResourceType);
-            final long forfeitableCost = cloneOfCosts.getResourceAmountByType(eResourceType);
-            if (forfeitableCost == 0) {
-                continue;
-            }
-            if (forfeitableIncome == 0) {
-                result.addProblem(eResourceType);
-            } else {
-                final int ticksForForfeitable = (int) ((int) forfeitableCost / forfeitableIncome);
-                tickCounterForfeitable = Integer.max(ticksForForfeitable, tickCounterForfeitable);
-            }
-        }
-        if (!result.isValid()) {
-            throw new NotifyWebUserException(result.getMessage(), result);
-        }
-
-        return Integer.max(tickCounterCollectable, tickCounterForfeitable);
     }
 
     @Nonnull

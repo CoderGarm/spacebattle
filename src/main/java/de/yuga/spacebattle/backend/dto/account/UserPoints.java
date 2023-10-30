@@ -96,9 +96,19 @@ public class UserPoints {
         Preconditions.checkNotNull(planets, "planets must not be empty");
 
         this.planetaryPoints += planets.size() * 100;
+
+        sumUpPoints();
+        return this;
+    }
+
+    /**
+     * - Adds 5 point per construction level.
+     */
+    @Nonnull
+    public UserPoints withConstructions(@Nonnull final Collection<Construction> planets) {
+        Preconditions.checkNotNull(planets, "planets must not be empty");
+
         this.planetaryPoints += planets.stream()
-                .map(Planet::getConstructions)
-                .flatMap(Collection::stream)
                 .map(Construction::getLevel)
                 .reduce(0, Integer::sum) * 5;
 
