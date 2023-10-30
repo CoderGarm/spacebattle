@@ -3,6 +3,7 @@ package de.yuga.spacebattle.rest.api.turn.resources;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
@@ -10,6 +11,7 @@ import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EJobType;
 import de.yuga.spacebattle.backend.enums.ETransportType;
 import de.yuga.spacebattle.backend.services.caches.TransportationCache;
+import de.yuga.spacebattle.backend.services.caclulator.TickOutputCalculator;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
@@ -48,6 +50,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
@@ -101,6 +104,9 @@ public class ResourcesApi extends BaseApi {
     @Nonnull
     private final OperationalService operationalService;
 
+    @Nonnull
+    private final TickOutputCalculator tickOutputCalculator;
+
     @Autowired
     public ResourcesApi(@Nonnull final PlanetService planetService,
                         @Nonnull final ConstructionService constructionService,
@@ -109,7 +115,8 @@ public class ResourcesApi extends BaseApi {
                         @Nonnull final FleetService fleetService,
                         @Nonnull final TransportationCache transportationCache,
                         @Nonnull final TickTimeService tickService,
-                        @Nonnull final OperationalService operationalService) {
+                        @Nonnull final OperationalService operationalService,
+                        @Nonnull final TickOutputCalculator tickOutputCalculator) {
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
         this.shipClassCreationService = Preconditions.checkNotNull(shipClassCreationService, "shipClassCreationService shouldn't be null!");
@@ -118,6 +125,7 @@ public class ResourcesApi extends BaseApi {
         this.transportationCache = Preconditions.checkNotNull(transportationCache, "transportationCache must not be empty");
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
         this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
+        this.tickOutputCalculator = Preconditions.checkNotNull(tickOutputCalculator, "tickOutputCalculator must not be empty");
     }
 
     @GetMapping(value = RESOURCE_TYPES_ENDPOINT)
@@ -292,11 +300,7 @@ public class ResourcesApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getPlanetaryIncome(@PathVariable("idPlanet") final int idPlanet) {
-
-        final Planet planet = planetService.find(idPlanet);
-        PreconditionWebHelper.checkNotNull(planet, "planet shouldn't be null!");
-
-        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit ticklyIncome = planet.getTicklyIncome(operationalService.getUtilizedPopulationForPlanet(planet.getId()));
+        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit ticklyIncome = tickOutputCalculator.getTicklyIncome(idPlanet);
         return ResponseEntity.ok(new ResourceDeposit(ticklyIncome));
     }
 
@@ -311,8 +315,8 @@ public class ResourcesApi extends BaseApi {
     )
     public ResponseEntity<?> getIncomeForUser() {
         final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit ticklyIncome = new de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit(EDepositType.INCOME);
-        final List<Planet> planets = planetService.findAllColonizedBy(getIdUser());
-        planets.forEach(p -> ticklyIncome.add(p.getTicklyIncome(operationalService.getUtilizedPopulationForPlanet(p.getId()))));
+        final List<Planet> planets = planetService.findAllColonizedBy(getIdUser()); /* fixme switch to idplanets */
+        planets.forEach(p -> ticklyIncome.add(tickOutputCalculator.getTicklyIncome(p.getId())));
         return ResponseEntity.ok(new ResourceDeposit(ticklyIncome));
     }
 
@@ -326,11 +330,7 @@ public class ResourcesApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getPlanetaryCapacity(@PathVariable("idPlanet") final int idPlanet) {
-
-        final Planet planet = planetService.find(idPlanet);
-        PreconditionWebHelper.checkNotNull(planet, "planet shouldn't be null!");
-
-        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit capacity = planet.getResourceCapacity();
+        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit capacity = tickOutputCalculator.getResourceCapacity(idPlanet);
         return ResponseEntity.ok(new ResourceDeposit(capacity));
     }
 
@@ -351,9 +351,10 @@ public class ResourcesApi extends BaseApi {
         final PopulationOverview populationOverview = new PopulationOverview();
         populationOverview.addPresent(utilizedPopulationForUser);
 
+        final Map<Integer, de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit> resourceCapacities = tickOutputCalculator.getResourceCapacities(planets.stream().map(AbstractEntityKey::getId).collect(Collectors.toSet()));
         for (final Planet planet : planets) {
             final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit resourceDeposit = planet.getResourceDeposit();
-            final long capacity = planet.getResourceCapacity().getResourceAmountByType(de.yuga.spacebattle.backend.enums.EResourceType.POPULATION);
+            final long capacity = resourceCapacities.get(planet.getId()).getResourceAmountByType(de.yuga.spacebattle.backend.enums.EResourceType.POPULATION);
             populationOverview.addCapacity(capacity);
             populationOverview.addPresent(resourceDeposit.getCrewRequirement().getSumOfPopulation());
         }

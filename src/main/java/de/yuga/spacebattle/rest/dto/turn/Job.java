@@ -108,12 +108,14 @@ public class Job {
     }
 
     public Job(@Nonnull final de.yuga.spacebattle.backend.entities.turn.Job job,
-               @Nonnull final ResourceDeposit utilization,
+               @Nonnull final ResourceDeposit ticklyIncome,
+               @Nonnull final ResourceDeposit resourceDeposit,
                @Nonnull final String languageCode) {
         this(job, languageCode);
-        Preconditions.checkNotNull(utilization, "utilization must not be empty");
+        Preconditions.checkNotNull(ticklyIncome, "ticklyIncome must not be empty");
+        Preconditions.checkNotNull(resourceDeposit, "resourceDeposit must not be empty");
 
-        this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(job.getFacility(), job.getConstructable(), utilization);
+        this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(job.getFacility(), job.getConstructable(), ticklyIncome);
     }
 
     /**

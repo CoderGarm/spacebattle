@@ -137,14 +137,14 @@ public class ConstructionService {
     public boolean hasPlanetProductionForTarget(final int idPlanet, @Nonnull final EResourceType productionTarget) {
         Preconditions.checkNotNull(productionTarget, "productionTarget must not be empty");
 
-        return constructionRepository.hasPlanetProductionType(idPlanet, productionTarget.name(), EProductionCategory.PRODUCE.name());
+        return constructionRepository.hasPlanetProductionType(idPlanet, productionTarget, EProductionCategory.PRODUCE);
     }
 
     @Nullable
     public Construction findByPlanetAndProductionType(final int idPlanet, @Nonnull final EResourceType productionTarget) {
         Preconditions.checkNotNull(productionTarget, "productionTarget must not be empty");
 
-        return constructionRepository.findByPlanetProductionType(idPlanet, productionTarget.name(), EProductionCategory.PRODUCE.name());
+        return constructionRepository.findByPlanetProductionType(idPlanet, productionTarget, EProductionCategory.PRODUCE);
     }
 
     public boolean isStandardJobForTargetPossibleAtPlanet(final int idPlanet, @Nonnull final EResourceType productionTarget) {
@@ -152,12 +152,19 @@ public class ConstructionService {
 
         /* fixme make better */
         final boolean hasPlanetProductionForTarget = hasPlanetProductionForTarget(idPlanet, productionTarget);
-        final boolean activeJobPresentForTargetAtPlanet = constructionRepository.isActiveJobPresentForTargetAtPlanet(idPlanet, productionTarget.name(), EProductionCategory.PRODUCE.name());
+        final boolean activeJobPresentForTargetAtPlanet = constructionRepository.isActiveJobPresentForTargetAtPlanet(idPlanet, productionTarget, EProductionCategory.PRODUCE);
         return hasPlanetProductionForTarget && !activeJobPresentForTargetAtPlanet;
     }
 
     @Nullable
     public Construction findByPlanetAndBuilding(final int idPlanet, final int idBuilding) {
         return constructionRepository.findByPlanetAndBuilding(idPlanet, idBuilding);
+    }
+
+    @Nonnull
+    public Set<Construction> findConstructionsFor(final int idPlanet, @Nonnull final EResourceType productionTarget) {
+        Preconditions.checkNotNull(productionTarget, "productionTarget must not be empty");
+
+        return Objects.requireNonNullElse(constructionRepository.findAllConstructionsOnPlanetForTarget(idPlanet, productionTarget), new HashSet<>());
     }
 }

@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.backend.calculator.resource;
+package de.yuga.spacebattle.backend.dto.crew;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
@@ -15,7 +15,7 @@ public class EducationAmountDTO {
     @Nonnull
     private final ERefinementSequence refinementSequence;
 
-    EducationAmountDTO(final long howManyPupils, @Nonnull final ERefinementSequence refinementSequence) {
+    public EducationAmountDTO(final long howManyPupils, @Nonnull final ERefinementSequence refinementSequence) {
         Preconditions.checkNotNull(refinementSequence, "refinementSequence must not be empty");
 
         this.howManyPupils = howManyPupils;
@@ -23,11 +23,11 @@ public class EducationAmountDTO {
     }
 
 
-    long getHowManyPupils() {
+    public long getHowManyPupils() {
         return howManyPupils;
     }
 
-    EducationAmountDTO reduceAmountBy(@Nonnull final BigDecimal modifier) {
+    public EducationAmountDTO reduceAmountBy(@Nonnull final BigDecimal modifier) {
         Preconditions.checkNotNull(modifier, "modifier shouldn't be null!");
 
         final long reduceByAmount = new BigDecimal(howManyPupils).multiply(modifier, ResourceDeposit.MATH_CONTEXT_INTEGER).longValue();
@@ -35,12 +35,12 @@ public class EducationAmountDTO {
     }
 
     @Nonnull
-    EEducationType getEduct() {
+    public EEducationType getEduct() {
         return refinementSequence.getEduct();
     }
 
     @Nonnull
-    EEducationType getProduct() {
+    public EEducationType getProduct() {
         return refinementSequence.getProduct();
     }
 

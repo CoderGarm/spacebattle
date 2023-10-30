@@ -11,6 +11,7 @@ import de.yuga.spacebattle.backend.entities.turn.Constructable;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.researches.TechTreeService;
@@ -76,6 +77,9 @@ public class ResearchApi extends BaseApi {
     @Nonnull
     private final TickTimeService tickTimeService;
 
+    @Nonnull
+    private final ConstructionService constructionService;
+
     @Autowired
     public ResearchApi(@Nonnull final ResearchService researchService,
                        @Nonnull final UserService userService,
@@ -83,7 +87,8 @@ public class ResearchApi extends BaseApi {
                        @Nonnull final PlanetService planetService,
                        @Nonnull final TechTreeService techTreeService,
                        @Nonnull final PlanetTickRunner planetTickRunner,
-                       @Nonnull final TickTimeService tickTimeService) {
+                       @Nonnull final TickTimeService tickTimeService,
+                       @Nonnull final ConstructionService constructionService) {
         this.researchService = Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.jobService = Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
@@ -91,6 +96,7 @@ public class ResearchApi extends BaseApi {
         this.techTreeService = Preconditions.checkNotNull(techTreeService, "techTreeService must not be empty");
         this.planetTickRunner = Preconditions.checkNotNull(planetTickRunner, "planetTickRunner must not be empty");
         this.tickTimeService = Preconditions.checkNotNull(tickTimeService, "tickTimeService must not be empty");
+        this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
     }
 
     @GetMapping(value = BY_USER_ENDPOINT)
@@ -205,8 +211,7 @@ public class ResearchApi extends BaseApi {
         if (researchPlanet == null) {
             return ResponseEntity.ok(false);
         }
-        final Construction facility = researchPlanet.getConstructionByResource(EResourceType.RESEARCH)
-                .stream().findFirst().orElse(null);
+        final Construction facility = constructionService.findByPlanetAndProductionType(researchPlanet.getId(), EResourceType.RESEARCH);
         if (facility == null) {
             return ResponseEntity.ok(false);
         }

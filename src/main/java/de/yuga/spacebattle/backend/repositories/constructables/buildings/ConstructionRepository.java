@@ -1,6 +1,8 @@
 package de.yuga.spacebattle.backend.repositories.constructables.buildings;
 
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
+import de.yuga.spacebattle.backend.enums.EProductionCategory;
+import de.yuga.spacebattle.backend.enums.EResourceType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,6 +31,10 @@ public interface ConstructionRepository extends JpaRepository<Construction, Inte
     Set<Construction> findAllConstructionsOnPlanet(final int idPlanet);
 
     @Nullable
+    @Query("SELECT c FROM Construction c WHERE c.planet.id = :idPlanet AND c.building.productionType.productionTarget = :productionTarget")
+    Set<Construction> findAllConstructionsOnPlanetForTarget(final int idPlanet, @Nonnull final EResourceType productionTarget);
+
+    @Nullable
     @Query("SELECT c FROM Construction c LEFT JOIN FETCH c.jobs j WHERE c.planet.id = :idPlanet")
     Set<Construction> findAllConstructionsOnPlanetWithJobs(final int idPlanet);
 
@@ -36,14 +42,14 @@ public interface ConstructionRepository extends JpaRepository<Construction, Inte
             "WHERE c.planet.id = :idPlanet " +
             "AND c.building.productionType.productionTarget = :productionTarget " +
             "AND c.building.productionType.productionCategory = :productionCategory")
-    boolean hasPlanetProductionType(final int idPlanet, @Nonnull final String productionTarget, @Nonnull final String productionCategory);
+    boolean hasPlanetProductionType(final int idPlanet, @Nonnull final EResourceType productionTarget, @Nonnull final EProductionCategory productionCategory);
 
     @Query("SELECT CASE WHEN (COUNT(c) > 0) THEN TRUE ELSE FALSE END FROM Construction c LEFT JOIN c.jobs j " +
             "WHERE c.planet.id = :idPlanet " +
             "AND c.building.productionType.productionTarget = :productionTarget " +
             "AND c.building.productionType.productionCategory = :productionCategory " +
             "AND j.isDeleted = false ")
-    boolean isActiveJobPresentForTargetAtPlanet(final int idPlanet, @Nonnull final String productionTarget, @Nonnull final String productionCategory);
+    boolean isActiveJobPresentForTargetAtPlanet(final int idPlanet, @Nonnull final EResourceType productionTarget, @Nonnull final EProductionCategory productionCategory);
 
     @Nullable
     @Query("SELECT c FROM Construction c " +
@@ -58,5 +64,5 @@ public interface ConstructionRepository extends JpaRepository<Construction, Inte
             "WHERE c.planet.id = :idPlanet " +
             "AND c.building.productionType.productionTarget = :productionTarget " +
             "AND c.building.productionType.productionCategory = :productionCategory")
-    Construction findByPlanetProductionType(final int idPlanet, @Nonnull final String productionTarget, @Nonnull final String productionCategory);
+    Construction findByPlanetProductionType(final int idPlanet, @Nonnull final EResourceType productionTarget, @Nonnull final EProductionCategory productionCategory);
 }

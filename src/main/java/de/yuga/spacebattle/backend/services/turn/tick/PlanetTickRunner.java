@@ -1,8 +1,6 @@
 package de.yuga.spacebattle.backend.services.turn.tick;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.resource.PopulationControlCalculator;
-import de.yuga.spacebattle.backend.calculator.resource.ResourceControlCalculator;
 import de.yuga.spacebattle.backend.dto.research.EmpireResearchCapability;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
@@ -18,8 +16,9 @@ import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.services.caclulator.PopulationControlCalculator;
+import de.yuga.spacebattle.backend.services.caclulator.TickOutputCalculator;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
-import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
@@ -67,7 +66,10 @@ public class PlanetTickRunner implements TickRunner {
     private final WarshipHealthStateService warshipHealthStateService;
 
     @Nonnull
-    private final OperationalService operationalService;
+    private final PopulationControlCalculator populationControlCalculator;
+
+    @Nonnull
+    private final TickOutputCalculator tickOutputCalculator;
 
     @Autowired
     public PlanetTickRunner(@Nonnull final JobService jobService,
@@ -76,14 +78,16 @@ public class PlanetTickRunner implements TickRunner {
                             @Nonnull final ConstructionService constructionService,
                             @Nonnull final ResearchService researchService,
                             @Nonnull final WarshipHealthStateService warshipHealthStateService,
-                            @Nonnull final OperationalService operationalService) {
+                            @Nonnull final PopulationControlCalculator populationControlCalculator,
+                            @Nonnull final TickOutputCalculator tickOutputCalculator) {
         this.jobService = Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
         this.researchService = Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
         this.warshipHealthStateService = Preconditions.checkNotNull(warshipHealthStateService, "warshipHealthStateService must not be empty");
-        this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
+        this.populationControlCalculator = Preconditions.checkNotNull(populationControlCalculator, "populationControlCalculator must not be empty");
+        this.tickOutputCalculator = Preconditions.checkNotNull(tickOutputCalculator, "tickOutputCalculator must not be empty");
     }
 
     @Override
@@ -367,19 +371,18 @@ public class PlanetTickRunner implements TickRunner {
         switch (resourceType.getCollectableType()) {
             case VIABLE:
                 // do school
-                final ResourceDeposit demand = operationalService.getPopulationDemandForPlanet(planet.getId());
-                PopulationControlCalculator.educatePopulation(planet, demand);
+                populationControlCalculator.educatePopulation(planet);
                 // do birth
-                PopulationControlCalculator.populatePlanet(planet, operationalService.getUtilizedPopulationForPlanet(planet.getId()));
+                populationControlCalculator.populatePlanet(planet);
                 break;
             case FORFEITABLE:
                 // only set new available points
-                resourceDeposit.setAbsoluteResourceValue(resourceType, ResourceControlCalculator.getTickOutput(planet, resourceType));
+                resourceDeposit.setAbsoluteResourceValue(resourceType, tickOutputCalculator.getTickOutput(planet, resourceType));
                 break;
             default:
             case COLLECTABLE:
                 // add points to the old deposit
-                resourceDeposit.updateResource(resourceType, ResourceControlCalculator.getTickOutput(planet, resourceType));
+                resourceDeposit.updateResource(resourceType, tickOutputCalculator.getTickOutput(planet, resourceType));
                 break;
         }
     }

@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.services.orbitals;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.resource.TickOutputCalculator;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.research.EmpireResearchCapability;
 import de.yuga.spacebattle.backend.entities.account.Owner;
@@ -11,8 +10,12 @@ import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
+import de.yuga.spacebattle.backend.entities.turn.resources.MiningFactors;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.orbitals.PlanetRepository;
+import de.yuga.spacebattle.backend.services.caclulator.TickOutputCalculator;
+import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -32,10 +35,12 @@ public class PlanetService {
     @Nonnull
     private final PlanetRepository planetRepository;
 
-    public PlanetService(@Nonnull final PlanetRepository planetRepository) {
-        Preconditions.checkNotNull(planetRepository, "planetRepository shouldn't be null!");
+    @Nonnull
+    private final ConstructionService constructionService;
 
-        this.planetRepository = planetRepository;
+    public PlanetService(@Nonnull final PlanetRepository planetRepository, @Nonnull final ConstructionService constructionService) {
+        this.planetRepository = Preconditions.checkNotNull(planetRepository, "planetRepository shouldn't be null!");
+        this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
     }
 
     @Nonnull
@@ -71,18 +76,20 @@ public class PlanetService {
     @Nonnull
     public EmpireResearchCapability getEmpireWideResearchPoints(final int idUser) {
         final long empireWideResearchPoints = getCachedEmpireWideResearchPoints(idUser);
-        final long empireWideResearchPointsLeftOver = planetRepository.findResourceDepositOfColonizedPlanets(idUser, EResourceType.RESEARCH.toString()).stream()
+        final List<ResourceDeposit> researchPoints = Objects.requireNonNullElse(planetRepository.findResourceDepositOfColonizedPlanets(idUser, EResourceType.RESEARCH.toString()), new ArrayList<>());
+        final long empireWideResearchPointsLeftOver = researchPoints
+                .stream()
                 .map(de -> de.getResourceAmountByType(EResourceType.RESEARCH))
                 .reduce(0L, Long::sum);
         return new EmpireResearchCapability(empireWideResearchPoints, empireWideResearchPointsLeftOver);
     }
 
     private long getCachedEmpireWideResearchPoints(final int idUser) {
-        final List<Planet> allColonizedByWithResearchLab = findAllColonizedByWithResearchLab(idUser);
+        final List<Planet> allColonizedByWithResearchLab = findAllColonizedByWithResearchLab(idUser); /* fixme switch to get aa user construction where research */
         //noinspection UnnecessaryLocalVariable
         final long empireWideResearchPoints = allColonizedByWithResearchLab.stream()
                 .map(planet -> {
-                    final Construction laboratory = planet.getConstructionByResource(EResourceType.RESEARCH).stream().findFirst().orElse(null);
+                    final Construction laboratory = constructionService.findByPlanetAndProductionType(planet.getId(), EResourceType.RESEARCH);
                     return laboratory != null ? TickOutputCalculator.getTickOutput(Set.of(laboratory)).longValue() : 0;
                 })
                 .reduce(0L, Long::sum);
@@ -222,5 +229,29 @@ public class PlanetService {
     @Nullable
     public Integer getIdUserWhenMain(final int idPlanet) {
         return planetRepository.findAllById(idPlanet);
+    }
+
+    @Nullable
+    public ResourceDeposit findResourceDeposit(final int idPlanet) {
+        return planetRepository.findResourceDeposit(idPlanet);
+    }
+
+    @Nullable
+    public MiningFactors findMiningFactors(final int idPlanet) {
+        return planetRepository.findMiningFactors(idPlanet);
+    }
+
+    @Nonnull
+    public Map<Integer, ResourceDeposit> findResourceDepositsForPlanets(@Nonnull final Set<Integer> planetIDs) {
+        Preconditions.checkNotNull(planetIDs, "planetIDs must not be empty");
+
+        final HashMap<Integer, ResourceDeposit> result = new HashMap<>();
+        planetIDs.forEach(idPlanet -> {
+            final ResourceDeposit resourceDeposit = findResourceDeposit(idPlanet);
+            if (resourceDeposit != null) {
+                result.put(idPlanet, resourceDeposit);
+            }
+        });
+        return result;
     }
 }

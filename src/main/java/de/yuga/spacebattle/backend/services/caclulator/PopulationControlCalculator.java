@@ -1,18 +1,23 @@
-package de.yuga.spacebattle.backend.calculator.resource;
+package de.yuga.spacebattle.backend.services.caclulator;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.crew.EducationAmountDTO;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.turn.resources.MiningFactors;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.ERefinementSequence;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.services.constructables.OperationalService;
+import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
+import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.rest.api.error.LogInfo;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
@@ -28,15 +33,28 @@ import static de.yuga.spacebattle.backend.enums.ERefinementSequence.*;
 /**
  * Runs the calculations for a growing and educating population.
  */
+@Service
 public class PopulationControlCalculator {
-
-    @SuppressWarnings("unused")
-    private static final Logger LOGGER = LoggerFactory.getLogger(PopulationControlCalculator.class);
 
     private static final List<ERefinementSequence> UNRESTRICTED_EDUCATION = List.of(EDUCATION_CIVIL_II, EDUCATION_CIVIL_I);
     private static final List<ERefinementSequence> GUIDED_EDUCATION = List.of(EDUCATION_MILITARY_II, EDUCATION_MILITARY_I, EDUCATION_CIVIL_III);
 
-    private PopulationControlCalculator() {
+    @Nonnull
+    private final ConstructionService constructionService;
+
+    @Nonnull
+    private final OperationalService operationalService;
+
+    @Nonnull
+    private final PlanetService planetService;
+
+    @Autowired
+    public PopulationControlCalculator(@Nonnull final ConstructionService constructionService,
+                                       @Nonnull final OperationalService operationalService,
+                                       @Nonnull final PlanetService planetService) {
+        this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
+        this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
+        this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
     }
 
     /**
@@ -49,14 +67,16 @@ public class PopulationControlCalculator {
      * Collect all producing constructions and sum up their output by level -> producing {@link EEducationType#NONE}.<br>
      * Amount of new people will be calculated by the r/K selection theory of the special field of biology
      *
-     * @param planet the planet which should be calculated
+     * @param idPlanet the planet which should be calculated
      */
-    public static long getTickOutputForPopulation(@Nonnull final Planet planet, @Nonnull final ResourceDeposit utilization) {
-        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
-        Preconditions.checkNotNull(utilization, "utilization must not be empty");
+    public long getTickOutputForPopulation(final int idPlanet) {
 
-        final Set<Construction> constructionsByResource = planet.getConstructionByResource(EResourceType.POPULATION);
-        final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
+        final Set<Construction> constructionsByResource = constructionService.findConstructionsFor(idPlanet, EResourceType.POPULATION);
+        final ResourceDeposit resourceDeposit = planetService.findResourceDeposit(idPlanet);
+        if (resourceDeposit == null) {
+            return 0;
+        }
+        final ResourceDeposit utilization = operationalService.getUtilizedPopulationForPlanet(idPlanet);
         final long sumOfPopulationUtilization = utilization.getCrewRequirement().getSumOfPopulation();
         final long sumOfPopulation = resourceDeposit.getCrewRequirement().getSumOfPopulation() + sumOfPopulationUtilization;
         // collecting all possible producing building
@@ -71,7 +91,11 @@ public class PopulationControlCalculator {
         // N equals no the total population (ignoring the non-reproductive population)
         // r equals to the maximal birth rate
         // K equals to the capacity
-        final double miningFactor = planet.getMiningFactors().getMiningFactorByType(EResourceType.POPULATION);
+        final MiningFactors miningFactors = planetService.findMiningFactors(idPlanet);
+        if (miningFactors == null) {
+            return 0;
+        }
+        final double miningFactor = miningFactors.getMiningFactorByType(EResourceType.POPULATION);
         final BigDecimal N = BigDecimal.valueOf(sumOfPopulation);
         // sum up all the output of the producing and capacity buildings
         BigDecimal r = BigDecimal.valueOf(miningFactor);
@@ -96,12 +120,11 @@ public class PopulationControlCalculator {
      *
      * @param planet the planet to populate
      */
-    public static void populatePlanet(@Nonnull final Planet planet, @Nonnull final ResourceDeposit utilization) {
+    public void populatePlanet(@Nonnull final Planet planet) { /* fixme switch idPlanet */
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
-        Preconditions.checkNotNull(utilization, "utilization must not be empty");
 
         final ResourceDeposit resourceDeposit = planet.getResourceDeposit();
-        final long newbornChildren = getTickOutputForPopulation(planet, utilization);
+        final long newbornChildren = getTickOutputForPopulation(planet.getId());
         if (newbornChildren > 0) {
             resourceDeposit.updateCrewRequirement(NONE, newbornChildren);
         }
@@ -112,11 +135,11 @@ public class PopulationControlCalculator {
      *
      * @param planet the planet to educate
      */
-    public static void educatePopulation(@Nonnull final Planet planet, @Nonnull final ResourceDeposit demand) {
+    public void educatePopulation(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
-        Preconditions.checkNotNull(demand, "demand must not be empty");
 
-        final Set<Construction> constructionsByResource = planet.getConstructionByResource(EResourceType.POPULATION);
+        final ResourceDeposit demand = operationalService.getPopulationDemandForPlanet(planet.getId());
+        final Set<Construction> constructionsByResource = constructionService.findConstructionsFor(planet.getId(), EResourceType.POPULATION);
         final Map<ERefinementSequence, Long> educationCapacity = constructionsByResource.stream()
                 .filter(c -> c.getBuilding().getProductionTarget() == EResourceType.POPULATION)
                 .filter(c -> Objects.nonNull(c.getBuilding().getProductionType().getRefinementSequence()))

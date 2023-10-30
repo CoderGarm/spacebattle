@@ -1,9 +1,7 @@
 package de.yuga.spacebattle.backend.entities.orbitals;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.resource.PopulationControlCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.ResourceDepositInitializerCalculator;
-import de.yuga.spacebattle.backend.calculator.resource.TickOutputCalculator;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
@@ -12,7 +10,8 @@ import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 import de.yuga.spacebattle.backend.entities.turn.resources.MiningFactors;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.enums.*;
+import de.yuga.spacebattle.backend.enums.EDepositType;
+import de.yuga.spacebattle.backend.enums.EPlanetClassType;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 
 import javax.annotation.Nonnull;
@@ -20,11 +19,9 @@ import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.Set;
 
 @NamedQueries({
         @NamedQuery(name = "Planet.getAll", query = "SELECT p FROM Planet p"),
@@ -225,89 +222,6 @@ public class Planet extends AbstractEntityKey implements HasOwner {
      */
     public boolean isColonizable() {
         return owner == null;
-    }
-
-    /**
-     * Returns the capacity of {@link ECollectableType#COLLECTABLE} or {@link ECollectableType#VIABLE} which can be placed in the storages of the planet.<br>
-     * <br>
-     * If a resource type isn't present, it means that there is no capacity restriction.
-     */
-    public ResourceDeposit getResourceCapacity() {
-        final ResourceDeposit cap = new ResourceDeposit(EDepositType.CAPACITY);
-        final Set<Construction> capacityBuildings = getConstructions().stream()
-                .filter(construction -> EProductionCategory.CAPACITY == construction.getBuilding().getProductionType().getProductionCategory())
-                .collect(Collectors.toSet());
-
-        for (final EResourceType resourceType : EResourceType.values()) {
-            final Set<Construction> forResource = capacityBuildings.stream().filter(c -> resourceType == c.getBuilding().getProductionTarget()).collect(Collectors.toSet());
-            if (!forResource.isEmpty()) {
-                final BigDecimal capacityValue = TickOutputCalculator.getTickOutput(forResource);
-                cap.updateResource(resourceType, capacityValue.longValue());
-            }
-        }
-        return cap;
-    }
-
-    /**
-     * There are some strange rules running:<br>
-     * <br>
-     * All resources except {@link EResourceType#POPULATION} are normal, as always.<br>
-     * Applies to the pop:
-     * <ul>
-     *     <li>the amount of population is directly applied as resource type and ...
-     *     <ul>
-     *         <li>if it's below zero ... someone dies per tick</li>
-     *         <li>if it's above zero, it will be the amount of newborns per tick</li>
-     *     </ul>
-     *     </li>
-     *     <li>the education types represents a transition which is defined by the refinement type</li>
-     *     <li><b>except</b> if it's about {@link EEducationType#NONE} ... then it a a transition from the universe to population</li>
-     * </ul>
-     *
-     * @return the income by tick
-     */
-    @Nonnull
-    public ResourceDeposit getTicklyIncome(@Nonnull final ResourceDeposit utilization) {
-        Preconditions.checkNotNull(utilization, "utilization must not be empty");
-
-        final ResourceDeposit income = new ResourceDeposit(EDepositType.INCOME);
-        final Map<EResourceType, List<Construction>> resourceConstructionsByType = getConstructions().stream()
-                .collect(Collectors.groupingBy(c -> c.getBuilding().getProductionTarget(),
-                        Collectors.mapping(Function.identity(), Collectors.toList())));
-
-        final List<Construction> populationConstruction = resourceConstructionsByType.getOrDefault(EResourceType.POPULATION, new ArrayList<>());
-        //noinspection DataFlowIssue
-        final Map<ERefinementSequence, List<Construction>> constructionsByRefinementSequence = populationConstruction.stream()
-                .filter(c -> c.getBuilding().getProductionType().getProductionCategory() == EProductionCategory.REFINEMENT)
-                .collect(Collectors.groupingBy(c -> c.getBuilding().getProductionType().getRefinementSequence(),
-                        Collectors.mapping(Function.identity(), Collectors.toList())));
-
-        for (final EResourceType eResourceType : EResourceType.valuesWithoutPopulation()) {
-            final List<Construction> constructions = resourceConstructionsByType.getOrDefault(eResourceType, new ArrayList<>());
-            final BigDecimal ticklyIncome = TickOutputCalculator.getTickOutput(constructions);
-            income.setAbsoluteResourceValue(eResourceType, ticklyIncome.longValue());
-        }
-
-        constructionsByRefinementSequence.forEach((eRefinementSequence, refinementConstructions) -> {
-            final EEducationType educationType = eRefinementSequence.getProduct();
-            final BigDecimal ticklyIncome = TickOutputCalculator.getTickOutput(refinementConstructions);
-            income.setAbsolutePopulation(educationType, ticklyIncome.longValue());
-        });
-
-        final long tickOutputForPopulation = PopulationControlCalculator.getTickOutputForPopulation(this, utilization);
-        income.setAbsolutePopulationValue(tickOutputForPopulation);
-        income.setAbsolutePopulation(EEducationType.NONE, tickOutputForPopulation);
-
-        return income;
-    }
-
-    /**
-     * Indicates a ground construction job can be started.
-     *
-     * @return <code>true</code> if a job can be started, <code>false</code> otherwise
-     */
-    public boolean isConstructionPossible() {
-        return getConstructionByResource(EResourceType.CONSTRUCTION).stream().anyMatch(c -> c.getJobs().isEmpty());
     }
 
     @Nonnull

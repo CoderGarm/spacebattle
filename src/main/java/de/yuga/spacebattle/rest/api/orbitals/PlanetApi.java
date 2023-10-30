@@ -162,11 +162,7 @@ public class PlanetApi extends BaseApi {
             }
     )
     public ResponseEntity<?> isConstructionPossible(@PathVariable("idPlanet") final int idPlanet) {
-        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetService.find(idPlanet);
-        if (planet == null) {
-            return ResponseEntity.ok(false);
-        }
-        final boolean buildingPossible = planet.isConstructionPossible();
+        final boolean buildingPossible = constructionService.isStandardJobForTargetPossibleAtPlanet(idPlanet, EResourceType.CONSTRUCTION);
         return ResponseEntity.ok(buildingPossible);
     }
 

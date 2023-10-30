@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.services.turn.tick;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
@@ -9,6 +10,7 @@ import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.caches.TransportationCache;
+import de.yuga.spacebattle.backend.services.caclulator.TickOutputCalculator;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import org.slf4j.Logger;
@@ -40,13 +42,18 @@ public class EmpireMigrationTickRunner implements TickRunner {
     @Nonnull
     private final OperationalService operationalService;
 
+    @Nonnull
+    private final TickOutputCalculator tickOutputCalculator;
+
     @Autowired
     public EmpireMigrationTickRunner(@Nonnull final PlanetService planetService,
                                      @Nonnull final TransportationCache transportationCache,
-                                     @Nonnull final OperationalService operationalService) {
+                                     @Nonnull final OperationalService operationalService,
+                                     @Nonnull final TickOutputCalculator tickOutputCalculator) {
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.transportationCache = Preconditions.checkNotNull(transportationCache, "transportationCache must not be empty");
         this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
+        this.tickOutputCalculator = Preconditions.checkNotNull(tickOutputCalculator, "tickOutputCalculator must not be empty");
     }
 
     @Override
@@ -68,9 +75,9 @@ public class EmpireMigrationTickRunner implements TickRunner {
         final Set<Planet> toStore = new HashSet<>();
         planetsByUser.forEach((user, owned) -> {
             // fill the main planet's deposit at first
-            final List<Planet> planetSet = owned.stream().sorted((o1, o2) -> o1.isMain() ? -1 : o2.isMain() ? 1 : 0).collect(Collectors.toList());
+            final List<Planet> planets = owned.stream().sorted((o1, o2) -> o1.isMain() ? -1 : o2.isMain() ? 1 : 0).collect(Collectors.toList());
 
-            final Map<Planet, ResourceDeposit> deposits = planetSet.stream()
+            final Map<Planet, ResourceDeposit> deposits = planets.stream()
                     .filter(p -> p.getResourceDeposit().hasData())
                     .collect(Collectors.toMap(Function.identity(), Planet::getResourceDeposit));
 
@@ -79,6 +86,7 @@ public class EmpireMigrationTickRunner implements TickRunner {
             final Map<Planet, ResourceDeposit> demandOfSourcePlanets = deposits.keySet().stream()
                     .collect(Collectors.toMap(k -> k, k -> operationalService.getPopulationDemandForPlanet(k.getId())));
 
+            final Map<Integer, ResourceDeposit> resourceCapacities = tickOutputCalculator.getResourceCapacities(planets.stream().map(AbstractEntityKey::getId).collect(Collectors.toSet()));
             for (final Planet to : demands.keySet()) {
                 final ResourceDeposit demand = demands.get(to);
                 final Set<EEducationType> educationTypes = demand.getHumanResources().entrySet().stream()
@@ -97,8 +105,8 @@ public class EmpireMigrationTickRunner implements TickRunner {
                             continue;
                         }
                         long amount = Long.min(present, demandedAmount);
-                        long capacity = to.getResourceCapacity().getResourceAmountByType(EResourceType.POPULATION);
                         final long currentPopulation = to.getResourceDeposit().getResourceAmountByType(EResourceType.POPULATION);
+                        long capacity = resourceCapacities.get(to.getId()).getResourceAmountByType(EResourceType.POPULATION);
                         capacity = capacity - currentPopulation;
                         if (amount <= 0 || capacity <= 0) {
                             continue;

@@ -2,9 +2,10 @@ package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.research.EmpireResearchCapability;
+import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.services.constructables.OperationalService;
+import de.yuga.spacebattle.backend.services.caclulator.TickOutputCalculator;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.rest.api.BaseApi;
@@ -28,6 +29,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -48,18 +50,18 @@ public class JobApi extends BaseApi {
     private final JobService jobService;
 
     @Nonnull
-    private final OperationalService operationalService;
+    private final PlanetService planetService;
 
     @Nonnull
-    private final PlanetService planetService;
+    private final TickOutputCalculator tickOutputCalculator;
 
     @Autowired
     public JobApi(@Nonnull final JobService jobService,
-                  @Nonnull final OperationalService operationalService,
-                  @Nonnull final PlanetService planetService) {
+                  @Nonnull final PlanetService planetService,
+                  @Nonnull final TickOutputCalculator tickOutputCalculator) {
         this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
-        this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
+        this.tickOutputCalculator = Preconditions.checkNotNull(tickOutputCalculator, "tickOutputCalculator must not be empty");
     }
 
     @GetMapping(value = JOB_RUNNING_AT_ENDPOINT + "/{idPlanet}")
@@ -75,9 +77,8 @@ public class JobApi extends BaseApi {
     )
     public ResponseEntity<?> getJobsOnPlanet(@PathVariable("idPlanet") final int idPlanet) {
         final List<de.yuga.spacebattle.backend.entities.turn.Job> allJobsByPlanet = jobService.findAllJobsByPlanet(idPlanet);
-        final ResourceDeposit utilizedPopulationForPlanet = operationalService.getUtilizedPopulationForPlanet(idPlanet);
         return ResponseEntity.ok(allJobsByPlanet.stream()
-                .map(j -> new Job(j, utilizedPopulationForPlanet, getPreferredLanguage()))
+                .map(j -> new Job(j, tickOutputCalculator.getTicklyIncome(idPlanet), Objects.requireNonNull(planetService.findResourceDeposit(idPlanet)), getPreferredLanguage()))
                 .collect(Collectors.toList()));
     }
 
@@ -101,10 +102,16 @@ public class JobApi extends BaseApi {
         jobs.removeAll(researchJobs);
 
         final Set<Planet> planets = jobs.stream().map(j -> j.getFacility().getPlanet()).collect(Collectors.toSet());
-        final Map<Planet, ResourceDeposit> utilitizationMap = operationalService.getUtilizedPopulationForPlanets(planets);
+
+        final Map<Integer, ResourceDeposit> incomeMap = tickOutputCalculator.getTicklyIncomeForPlanets(planets.stream().map(AbstractEntityKey::getId).collect(Collectors.toSet()));
+        final Map<Integer, ResourceDeposit> depositMap = planetService.findResourceDepositsForPlanets(planets.stream().map(AbstractEntityKey::getId).collect(Collectors.toSet()));
 
         final List<Job> result = jobs.stream()
-                .map(j -> new Job(j, utilitizationMap.get(j.getFacility().getPlanet()), getPreferredLanguage()))
+                .map(j -> {
+                    final ResourceDeposit ticklyIncome = incomeMap.get(j.getFacility().getPlanet().getId());
+                    final ResourceDeposit resourceDeposit = depositMap.get(j.getFacility().getPlanet().getId());
+                    return new Job(j, ticklyIncome, resourceDeposit, getPreferredLanguage());
+                })
                 .collect(Collectors.toList());
 
         if (!researchJobs.isEmpty()) {
