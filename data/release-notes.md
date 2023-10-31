@@ -22,7 +22,7 @@ todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt etwas a
 #### Diverses
 
 todo. manual transfer to fleet overrides capacity
-todo. mat progress bar to indication network action?
+todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
 
 todo. mission items more role play "unprotected convoy changes signature of ship to warship and pirate fled ...""
 todo. quoting in chat und forum
@@ -45,7 +45,6 @@ todo. missionen sollten Rumpfmasse inkl Klasse beachten "großer Rumpf und Frach
 todo. player comment about the game in profile to display at take-a-tour
 todo. chat search: empire name, ingame name, username
 
-todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
 
 ### Bugs fixed
 

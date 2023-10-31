@@ -310,15 +310,15 @@ public class PlanetTickRunner implements TickRunner {
         Preconditions.checkNotNull(constructions, "constructions must not be empty");
         Preconditions.checkNotNull(job, "job must not be empty");
         Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(job.getConstructable().getBuilding(), "job.getConstructable().getBuilding() must not be empty");
+        Preconditions.checkNotNull(job.getConstructable().getTargetLevel(), "job.getConstructable().getTargetLevel() must not be empty");
 
         log(planet, job, "Start processing construction job.");
         job.setFinished(today);
         final Constructable constructable = job.getConstructable();
         final Integer targetLevel = constructable.getTargetLevel();
         final Building building = constructable.getBuilding();
-        if (building == null || targetLevel == null) {
-            throw new NotifyWebUserException("Oh fuck, this should not happen while constructing buildings!");
-        }
+
         Construction workInProgress = constructions.stream()
                 .filter(c -> c.getBuilding().equals(building)).findFirst().orElse(null);
         if (workInProgress != null) {
@@ -332,6 +332,7 @@ public class PlanetTickRunner implements TickRunner {
             workInProgress = new Construction(planet, building, 1);
         }
         constructionService.save(workInProgress);
+        jobService.save(job);
         log(planet, job, "Done processing construction job.");
     }
 
@@ -449,7 +450,6 @@ public class PlanetTickRunner implements TickRunner {
             planet.getResourceDeposit().updateResource(EResourceType.CONSTRUCTION, -usedPoints);
             completeConstruction(planet, constructions, job, today);
             planetService.save(planet);
-            jobService.save(job);
         }
     }
 }
