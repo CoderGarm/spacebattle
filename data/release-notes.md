@@ -43,15 +43,13 @@ todo. look & feel wie in büchern
 todo. emission spectra als gimmick
 todo. missionen sollten Rumpfmasse inkl Klasse beachten "großer Rumpf und Frachtertriebwerke sind kein Schlachtschiff"
 todo. player comment about the game in profile to display at take-a-tour
+todo. chat search: empire name, ingame name, username
+
+todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
 
 ### Bugs fixed
 
-1. pooled ships
-2. research insta job
-3. mining factors in colonization
-4. performance by planetary constructions
-5. notch light mode text colors
-6. unify building output
+todo. construction issue?
 
 
 todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen -> kein Unterschied zw ankunft und abflug
