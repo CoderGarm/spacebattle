@@ -111,14 +111,14 @@ public class PlanetTickRunner implements TickRunner {
         Preconditions.checkNotNull(job, "job must not be empty");
         Preconditions.checkNotNull(msg, "msg must not be empty");
 
-        LOGGER.info("[Planet #{}] [Job #{}] {}", planet.getId(), job.getId(), msg);
+        LOGGER.info("[Planet #{} - #{}] [Job #{}] {}", planet.getId(), planet.getName(), job.getId(), msg);
     }
 
     /**
      * Runs the tick for all planets.
      */
     private void tickPlanets() {
-        final List<Planet> planets = planetService.findAllColonized();
+        final List<Planet> planets = planetService.findAllForTick();
         for (final Planet p : planets) {
             log(p, "Start ticking planet");
             tickPlanet(p);
@@ -129,26 +129,26 @@ public class PlanetTickRunner implements TickRunner {
      * Calculates the tickly output of this planet.
      * This includes the amount of generated resources and the calculations of jobs which could be successfully ended.
      */
-    private void tickPlanet(@Nonnull Planet planet) {
+    private void tickPlanet(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkState(planet.getOwner() != null, "The owner must be set, otherwise there is nothing to do.");
 
         log(planet, "Start updating resources.");
-        planet = updateResources(planet);
+        updateResources(planet);
         log(planet, "Done updating resources");
-        planet = runJobs(planet);
+        runJobs(planet);
         log(planet, "Done tick planet.");
     }
 
-    private Planet runJobs(@Nonnull final Planet planet) {
+    private void runJobs(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(today, "today must not be empty");
 
-        final Set<Construction> constructions = constructionService.findAllConstructionsOnPlanetWithJobs(planet.getId());
-
-        final Set<Construction> withJobs = constructions.stream().filter(c -> !c.getJobs().isEmpty()).collect(Collectors.toSet());
-        for (final Construction facility : withJobs) {
+        final Set<Construction> constructions = planet.getConstructions().stream()
+                .filter(c -> !c.getJobs().isEmpty())
+                .collect(Collectors.toSet());
+        for (final Construction facility : constructions) {
             final EResourceType resourceType = facility.getBuilding().getProductionTarget();
             final Set<Job> jobs = facility.getJobs();
 
@@ -163,6 +163,7 @@ public class PlanetTickRunner implements TickRunner {
                 final long usedPoints = tickJob(job, empireWideResearchPointsLeftOver);
                 if (!job.isFinished()) {
                     jobService.save(job);
+                    planetService.reduceResearchPoints(planet.getOwner().getId(), usedPoints);
                     log(planet, job, "Shifting job for tick after " + today + ".");
                     continue;
                 }
@@ -173,12 +174,13 @@ public class PlanetTickRunner implements TickRunner {
                 planet.getResourceDeposit().updateResource(resourceType, -usedPoints);
                 if (!job.isFinished()) {
                     jobService.save(job);
+                    planetService.save(planet);
                     log(planet, job, "Shifting job for tick after " + today + ".");
                     continue;
                 }
                 switch (resourceType) {
                     case CONSTRUCTION:
-                        completeConstruction(planet, constructions, job, today);
+                        completeConstruction(planet, planet.getConstructions(), job, today);
                         break;
                     case ORBITAL_CONSTRUCTION:
                         completeShipyard(planet, job, today);
@@ -186,18 +188,17 @@ public class PlanetTickRunner implements TickRunner {
                 }
             }
         }
-        return planetService.save(planet);
+        planetService.save(planet);
     }
 
-    @Nonnull
-    private Planet updateResources(@Nonnull final Planet planet) {
+    private void updateResources(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
         for (final EResourceType resourceType : EResourceType.values()) {
             updateResourceDeposit(planet, resourceType);
         }
         LOGGER.info("Saving planet");
-        return planetService.save(planet);
+        planetService.save(planet);
     }
 
     private void completeShipyard(@Nonnull final Planet planet, @Nonnull final Job job, @Nonnull final Tick today) {

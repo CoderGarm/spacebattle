@@ -47,6 +47,11 @@ public class PlanetService {
     }
 
     @Nonnull
+    public List<Planet> findAllForTick() {
+        return Objects.requireNonNullElse(planetRepository.findAllForTick(), new ArrayList<>());
+    }
+
+    @Nonnull
     public List<Planet> findAllColonizedBy(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
 

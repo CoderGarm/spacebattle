@@ -4,10 +4,10 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.round.WarshipHealthState;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
+import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EEducationType;
@@ -76,29 +76,32 @@ public class JobCostsCalculator {
      * Calculates the tick amount which must be worked on this constructable.<br>
      * Takes all forfeit resources into account.
      *
-     * @param facility      the facility which will produce it
-     * @param constructable what will be produced
+     * @param resourceDeposit the available
      * @return the amount of ticks
      */
-    public static int calculateRemainingTicks(@Nonnull final Construction facility,
-                                              @Nonnull final Constructable constructable,
-                                              @Nonnull final ResourceDeposit ticklyIncome) {
-        Preconditions.checkNotNull(facility, "facility shouldn't be null!");
-        Preconditions.checkNotNull(constructable, "constructable shouldn't be null!");
+    public static int calculateRemainingTicks(@Nonnull final Job job,
+                                              @Nonnull final ResourceDeposit ticklyIncome,
+                                              @Nonnull final ResourceDeposit resourceDeposit) {
+        Preconditions.checkNotNull(job, "job must not be empty");
         Preconditions.checkNotNull(ticklyIncome, "ticklyIncome must not be empty");
+        Preconditions.checkNotNull(resourceDeposit, "resourceDeposit must not be empty");
 
-        final ResourceDeposit costs = constructable.getJobCosts();
+        final ResourceDeposit costs = job.getConstructable().getJobCosts();
         final AtomicInteger ticksNeeded = new AtomicInteger(0);
 
-        costs.getForfeitableResource().forEach(r -> {
-            final long cost = costs.getResourceAmountByType(r);
-            final long income = ticklyIncome.getResourceAmountByType(r);
+        final EResourceType resourceType = job.getConstructable().getResourceType();
+        costs.getForfeitableResource().stream()
+                .filter(rt -> rt == resourceType)
+                .forEach(r -> {
+                    final long cost = job.getPointsLeft();
+                    final long income = ticklyIncome.getResourceAmountByType(r);
+                    final long available = resourceDeposit.getResourceAmountByType(r);
 
-            final int ticks = BigDecimal.valueOf(cost).divide(BigDecimal.valueOf(income), RoundingMode.CEILING).intValue();
-            if (ticks > 0 && ticksNeeded.get() < ticks) {
-                ticksNeeded.set(ticks);
-            }
-        });
+                    final int ticks = BigDecimal.valueOf(cost - available).divide(BigDecimal.valueOf(income), RoundingMode.CEILING).intValue();
+                    if (ticks > 0 && ticksNeeded.get() < ticks) {
+                        ticksNeeded.set(ticks);
+                    }
+                });
         return ticksNeeded.get();
     }
 

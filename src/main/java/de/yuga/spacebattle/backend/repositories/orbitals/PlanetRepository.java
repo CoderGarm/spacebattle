@@ -39,4 +39,8 @@ public interface PlanetRepository extends JpaRepository<Planet, Integer>, Custom
     @Nullable
     @Query("SELECT p.id FROM Planet p WHERE p.owner.id = :idUser")
     List<Integer> findAllColonizedByForID(int idUser);
+
+    @Nullable
+    @Query("SELECT DISTINCT p FROM Planet p LEFT JOIN FETCH p.constructions c WHERE p.owner IS NOT NULL AND p.owner.dType = de.yuga.spacebattle.backend.enums.OwnerType.USER")
+    List<Planet> findAllForTick();
 }

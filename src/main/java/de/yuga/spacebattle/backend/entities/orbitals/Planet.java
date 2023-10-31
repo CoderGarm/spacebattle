@@ -90,7 +90,7 @@ public class Planet extends AbstractEntityKey implements HasOwner {
 
     @Nonnull
     @SuppressWarnings("unused")
-    @OneToMany
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, mappedBy = "planet")
     private final Set<Construction> constructions = new HashSet<>();
 
     @Nullable
@@ -198,6 +198,11 @@ public class Planet extends AbstractEntityKey implements HasOwner {
     @Nonnull
     public EPlanetClassType getPlanetType() {
         return planetType;
+    }
+
+    @Nonnull
+    public Set<Construction> getConstructions() {
+        return constructions;
     }
 
     @Override
