@@ -78,6 +78,12 @@ public class CombatHandler {
         final CoursePlot agentsCoursePlot = agentsState.getCoursePlot();
         final boolean creatingCoursePlotNeeded = agentsCoursePlot.isFreshPlotWithoutAnyMovement();
         final boolean hasPlotToBeRepainted = agentsCoursePlot.hasPlotExceeded();
+        final boolean ableToAttack = agentsState.isAbleToAttack();
+        if (!ableToAttack && (creatingCoursePlotNeeded || hasPlotToBeRepainted || cage.isActionHappened())) {
+            // actor has no weapons
+            agentsCoursePlot.createEscapeCourse(target);
+            return;
+        }
         // the current plan is to reach the best attack distance and then create the course round by round
         if (creatingCoursePlotNeeded) {
             // plot the course to attack the target

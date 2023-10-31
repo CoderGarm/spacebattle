@@ -100,6 +100,37 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         this.movementMotivation = movementMotivation;
     }
 
+    public void createEscapeCourse(@Nonnull final Fleet target) {
+        Preconditions.checkNotNull(target, "target shouldn't be null!");
+
+        this.target = target;
+        final FleetRoundState agentsState = cage.getCurrentStateByFleet(agent);
+        final Orbit agentsPosition = agentsState.getPosition();
+
+        final FleetRoundState targetsState = cage.getCurrentStateByFleet(target);
+        final Orbit targetsPosition = targetsState.getPosition();
+
+        final Velocity velocity = agentsState.getVelocity();
+        final Acceleration acceleration = agentsState.getAccelerationFor(EModuleType.PROPULSION);
+
+        final Direction direction = new Direction(targetsPosition, agentsPosition);
+        final Acceleration negate = acceleration.negate();
+        final Velocity resultingVelocity = velocity.getVelocityByAcceleration(negate, COMBAT_ROUND);
+
+
+        final Distance distanceByTime = acceleration.getDistanceByTime(COMBAT_ROUND, resultingVelocity, EDistanceMetric.LS);
+        final Orbit destination = agentsPosition.getDestinationBy(distanceByTime, direction);
+
+        this.agentsVelocity = resultingVelocity;
+        this.agentsDirection = direction;
+        this.origin = agentsPosition;
+        this.destination = targetsPosition;
+        this.courseDirection = direction;
+
+        // flee for 50 rounds
+        setCourseOrderElements(agentsPosition, destination, INCREASE_DISTANCE, velocity, acceleration, COMBAT_ROUND.multiply(50).getCoordinate());
+    }
+
     public void createNextAggressiveCourseElement(@Nonnull final Fleet target) {
         Preconditions.checkNotNull(target, "target shouldn't be null!");
 
@@ -626,7 +657,7 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
      * @return <code>true</code> if there are no course elements known, <code>false</code> otherwise
      */
     public boolean isFreshPlotWithoutAnyMovement() {
-        return courseOrderElements.size() == 0;
+        return courseOrderElements.isEmpty();
     }
 
     /**

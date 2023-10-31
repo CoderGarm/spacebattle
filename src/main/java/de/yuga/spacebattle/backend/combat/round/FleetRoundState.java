@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static de.yuga.spacebattle.backend.calculator.FittingUtils.DEFENSIVE_FITTING;
+import static de.yuga.spacebattle.backend.calculator.FittingUtils.OFFENSIVE_FITTING;
 import static de.yuga.spacebattle.backend.combat.enums.EMovementType.IMPELLER_WEDGE_PROTECTION;
 import static de.yuga.spacebattle.backend.combat.round.CombatRound.COMBAT_ROUND;
 
@@ -401,6 +402,16 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         return new CounterMissileWeaponry(alignedFittings);
     }
 
+    private boolean hasOffensiveWeaponry() {
+        final List<AlignedFitting> alignedFittings = getFightingWarShips()
+                .map(WarshipHealthState::getActiveFittings)
+                .filter(fittings -> !fittings.isEmpty())
+                .map(fittings -> fittings.stream().filter(OFFENSIVE_FITTING).findAny().orElse(null))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        return !alignedFittings.isEmpty();
+    }
+
     /**
      * Returns the range of the fleets electronic countermeasures.
      *
@@ -464,5 +475,9 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         final EHyperBand hyperBand = getLowestHyperBand();
         final BigDecimal vesselTopSpeed = hyperBand.getEffectiveTopSpeed(restrictingTechnologyType);
         return new Velocity(vesselTopSpeed, EDistanceMetric.M, ETimeMetric.SECOND);
+    }
+
+    public boolean isAbleToAttack() {
+        return hasOffensiveWeaponry();
     }
 }
