@@ -36,8 +36,6 @@ Und etwas fürs Auge gabs auch noch ;)
 article trading protection -> protecting-trades.md
 article priorisierung bei pop demand und migration
 article + check ship returns from mission
-article for pop development
--> The population growth depends on several factors, e.g. the planets population mining factor has a big influence to the pop growth.
 
 #### Gameplay
 
@@ -80,9 +78,11 @@ todo. missionen sollten Rumpfmasse inkl Klasse beachten "großer Rumpf und Frach
 todo. player comment about the game in profile to display at take-a-tour
 todo. chat search: empire name, ingame name, username
 
+
 ### Bugs fixed
 
 todo. construction issue?
+
 
 todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen -> kein Unterschied zw ankunft und abflug
 -> Laut meiner anzeige sind 2 Flotten von dir heute beim hypelimit aufgetaut. Tatsächlich ist eine da, aber die andere bereits beim plani.
