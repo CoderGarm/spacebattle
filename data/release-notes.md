@@ -56,14 +56,39 @@ todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt etwas a
 
 todo. manual transfer to fleet overrides capacity
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
+todo. chat search: empire name, ingame name, username
 
 todo. mission items more role play "unprotected convoy changes signature of ship to warship and pirate fled ...""
-todo. quoting in chat und forum
-todo. preview in chat und forum
 todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
 
-todo. forum management
 todo. check fitting yard
+todo. neue schiffe direkt in reserve
+
+
+### Bugs fixed
+
+1. Die planetaren Ressourcen werden beim Flottenwechsel im Flottenmenü aktualisiert.
+
+todo. keine jobs ohne aktiviertes gebäude (werft) -> division / 0 in calcRemainingTicks
+todo. negative pop development in UI
+todo. battlereport new advisory but no new present
+todo. no running job in journal
+todo. fleet update for state on every fleet action
+todo. migration must respect pop demand
+
+todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen -> kein Unterschied zw ankunft und abflug
+-> Laut meiner anzeige sind 2 Flotten von dir heute beim hypelimit aufgetaut. Tatsächlich ist eine da, aber die andere bereits beim plani.
+
+todo. wiki is broken -> store full text as easy solution?
+
+todo. add second map menu: manager only and map only
+todo. chats von anderen werden automatisch gelesen
+todo. fix crew exploit
+todo. unload fleet on ship transfer or something
+
+#### next steps
+
+todo. forum management
 
 todo. star map filter für flotten
 
@@ -87,6 +112,8 @@ todo. construction issue?
 todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen -> kein Unterschied zw ankunft und abflug
 -> Laut meiner anzeige sind 2 Flotten von dir heute beim hypelimit aufgetaut. Tatsächlich ist eine da, aber die andere bereits beim plani.
 
+todo. quoting in chat und forum
+todo. preview in chat und forum
 todo. wiki is broken -> store full text as easy solution?
 
 todo. battle reports notification wrong

@@ -1,6 +1,8 @@
 package de.yuga.spacebattle.misc.fandom;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import com.google.gson.Gson;
 import de.yuga.spacebattle.TestUtils;
 import de.yuga.spacebattle.misc.CoordinateElement;
 import de.yuga.spacebattle.rest.dto.misc.DistanceElement;
@@ -45,6 +47,33 @@ public class FandomWikiQueryTest {
                 texts.forEach((key, value) -> TestUtils.writeString(DIR + folder, key, value));
             }
         });
+    }
+
+    @Test
+    void sortStarSystems() {
+        final Gson gson = new Gson();
+        Set.of(EWikiCategories.SYSTEMS_MESA, EWikiCategories.SYSTEMS_HAVEN, EWikiCategories.SYSTEMS_SOLARIAN, EWikiCategories.SYSTEMS_GRAYSON, EWikiCategories.SYSTEMS_MANTICORE, EWikiCategories.SYSTEMS_ANDERMAN)
+                .forEach(wikiCategory -> {
+                    EWikiConfig config = EWikiConfig.EN;
+                    String category = wikiCategory.getCategory(config);
+                    if (category == null) {
+                        config = EWikiConfig.DE;
+                        category = wikiCategory.getCategory(config);
+                    }
+                    final String folder = wikiCategory.getFolder(config);
+                    final Set<String> fileNames = getContent(DIR + folder, "").keySet();
+                    final Set<WikiEntry> collect = fileNames.stream().map(WikiEntry::new).collect(Collectors.toSet());
+                    TestUtils.writeString(DIR + "systems/summary/", category + ".json ", gson.toJson(collect));
+                });
+    }
+
+    private static class WikiEntry {
+        @JsonProperty
+        String title;
+
+        public WikiEntry(final String title) {
+            this.title = title;
+        }
     }
 
     @Test
@@ -110,8 +139,9 @@ public class FandomWikiQueryTest {
         final Set<String> knownSystemNames = coordinateElements.stream().map(CoordinateElement::getName).collect(Collectors.toSet());
     }
 
+    @Nonnull
     @SuppressWarnings("SameParameterValue")
-    private Map<String, String> getContent(final String dir, final String filename) {
+    private Map<String, String> getContent(@Nonnull final String dir, @Nonnull final String filename) {
         final File[] files = new File(dir + filename).listFiles();
         assertNotNull(files);
         return Arrays.stream(files).collect(Collectors.toMap(File::getName, TestUtils::readFile));

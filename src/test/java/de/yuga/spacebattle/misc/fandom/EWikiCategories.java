@@ -13,6 +13,14 @@ public enum EWikiCategories {
     ASTEROID_BELTS("Asteroid_Belts", null, "belts/"),
     SHIP_CLASSES("Spacecraft", "Raumschiffsklassen", "ship-classes/"),
 
+    SYSTEMS_MANTICORE("Manticoran_Systems", "Manticoranische_Systeme", "systems/manticore/"),
+    SYSTEMS_HAVEN("Havenite_Systems", "Havenitische_Systeme", "systems/haven/"),
+    SYSTEMS_ANDERMAN("Andermani_Systems", "Andermanische_Systeme", "systems/anderman/"),
+    SYSTEMS_SILESIA("Silesian_Star_Systems", "Silesianische_Systeme", "systems/silesia/"),
+    SYSTEMS_SOLARIAN("Solarian_League_Systems", "Solarische_Systeme", "systems/solarian/"),
+    SYSTEMS_GRAYSON("Grayson_Systems", "Graysonitische_Systeme", "systems/grayson/"),
+    SYSTEMS_MESA(null, "Alignmentsysteme", "systems/mesa/"),
+
     WARSHIPS_MANTICORE("Naval_Ships_of_Manticore", "Manticoranische_Raumschiffe", "warships/manticore/"),
     WARSHIPS_HAVEN("Naval_Ships_of_Haven", "Havenitische_Raumschiffe", "warships/haven/"),
     WARSHIPS_ANDERMAN("Naval_Ships_of_the_Anderman_Empire", "Andermanische_Raumschiffe", "warships/anderman/"),
