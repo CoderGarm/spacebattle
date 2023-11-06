@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.repositories.turn.TickRepository;
 import de.yuga.spacebattle.backend.services.MailService;
+import de.yuga.spacebattle.backend.services.turn.tick.FleetMovementTickRunner;
 import de.yuga.spacebattle.backend.services.turn.tick.TickRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +80,8 @@ public class TickRunnerService {
             today = tickRepository.save(new Tick());
             LOGGER.info("Today is " + today);
 
-            for (final TickRunner tickRunner : tickRunners) {
+            for (final TickRunner tickRunner : tickRunners.stream().filter(tr -> tr instanceof FleetMovementTickRunner).collect(Collectors.toSet())) {
+                /* fixme remove */
                 tickRunner.tick(today);
             }
 

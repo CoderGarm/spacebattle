@@ -37,25 +37,18 @@ import java.util.stream.Collectors;
 import static de.yuga.spacebattle.backend.calculator.FittingUtils.DEFENSIVE_FITTING;
 
 @NamedQueries({
-        @NamedQuery(name = "Fleet.getAll",
-                query = "SELECT f FROM Fleet f WHERE f.isDeleted = false"),
         @NamedQuery(name = "Fleet.getAllWithMovement",
                 query = "SELECT f FROM Fleet f WHERE f.move IS NOT NULL AND f.owner.id = :idUser AND f.isDeleted = false"),
         @NamedQuery(name = "Fleet.getAllWithoutMovement",
                 query = "SELECT f FROM Fleet f WHERE f.move IS NULL AND f.isDeleted = false"),
-        @NamedQuery(name = "Fleet.getFleetsWithInterstellarMovement",
-                query = "SELECT f FROM Fleet f WHERE f.owner.id = :idUser AND  f.move IS NOT NULL AND f.move.originOrbit.system <> f.move.destinationOrbit.system AND f.isDeleted = false"),
         @NamedQuery(name = "Fleet.getAllByUser",
                 query = "SELECT f FROM Fleet f WHERE f.owner.id = :idUser AND  f.isDeleted = false"),
         @NamedQuery(name = "Fleet.getAllByUserAndSystem",
                 query = "SELECT f FROM Fleet f WHERE f.owner.id = :idOwner AND f.orbit.system.id = :idStarSystem AND f.isDeleted = false"),
-        @NamedQuery(name = "Fleet.checkShipInUse",
-                query = "SELECT COUNT(f) FROM Fleet f LEFT JOIN f.ships s WHERE s.shipClass.id =:idShipClass AND f.isDeleted = false"),
         @NamedQuery(name = "Fleet.getAllForPlanet",
-                query = "SELECT f FROM Fleet f WHERE f.isDeleted = false AND f.orbit.system = :system AND f.orbit.orbit.xCoordinate = :xCoordinate  AND f.orbit.orbit.yCoordinate = :yCoordinate"),
+                query = "SELECT f FROM Fleet f WHERE f.isDeleted = false AND f.orbit.planet = :planet"),
         @NamedQuery(name = "Fleet.getAllAnchoredForPlanet",
-                query = "SELECT f FROM Fleet f LEFT JOIN f.move  " +
-                        "WHERE f.isDeleted = false AND (f.orbit.system = :system AND f.orbit.orbit.xCoordinate = :xCoordinate  AND f.orbit.orbit.yCoordinate = :yCoordinate)")
+                query = "SELECT f FROM Fleet f WHERE f.isDeleted = false AND f.orbit.planet = :planet")
 })
 @Entity
 @Table(name = "fleet")
@@ -93,6 +86,7 @@ public class Fleet extends Operationable implements HasOwner {
     @Embedded
     @AttributeOverride(name = "orbit.xCoordinate", column = @Column(name = "xCoordinateLocation"))
     @AttributeOverride(name = "orbit.yCoordinate", column = @Column(name = "yCoordinateLocation"))
+    @AssociationOverride(name = "planet", joinColumns = @JoinColumn(name = "idPlanetLocation"))
     @AssociationOverride(name = "system", joinColumns = @JoinColumn(name = "idStarSystemLocation"))
     private FleetOrbit orbit;
 
@@ -100,11 +94,11 @@ public class Fleet extends Operationable implements HasOwner {
      * The move includes the origin and the destination if the start is different from the current {@link #orbit}.
      */
     @Nullable
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "idMove", unique = true)
     private Move move;
 
-    @Nonnull
+    @Nonnull /* todo remove eager */
     @OneToMany(mappedBy = "constructable.fleet", fetch = FetchType.EAGER, orphanRemoval = true)
     private final Set<Job> jobs = new HashSet<>();
 
@@ -244,7 +238,7 @@ public class Fleet extends Operationable implements HasOwner {
      * @return <code>true</code> if this fleet is in a planetary orbit, <code>false</code> otherwise
      */
     public boolean isInPlanetaryOrbit() {
-        return orbit != null && orbit.getSystem() != null && orbit.getOrbit() != null;
+        return orbit != null && orbit.getPlanet() != null;
     }
 
     /**

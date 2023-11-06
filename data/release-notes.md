@@ -68,6 +68,16 @@ todo. neue schiffe direkt in reserve
 ### Bugs fixed
 
 1. Die planetaren Ressourcen werden beim Flottenwechsel im Flottenmenü aktualisiert.
+2. Der Status einer Flotte wird nun bei jeder Änderung der Formation neu bestimmt.
+
+todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen -> kein Unterschied zw ankunft und abflug
+-> Laut meiner anzeige sind 2 Flotten von dir heute beim hypelimit aufgetaut. Tatsächlich ist eine da, aber die andere bereits beim plani.
+-> cancel flight testen -check
+-> alle flights testen -check
+-> piraten spawn testen
+
+todo. fleet detachment submit button disable when no change
+todo. research punkte -> sandkiste issue with 27 points left vs 160 from inop labs
 
 todo. keine jobs ohne aktiviertes gebäude (werft) -> division / 0 in calcRemainingTicks
 todo. negative pop development in UI
@@ -76,18 +86,16 @@ todo. no running job in journal
 todo. fleet update for state on every fleet action
 todo. migration must respect pop demand
 
-todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen -> kein Unterschied zw ankunft und abflug
--> Laut meiner anzeige sind 2 Flotten von dir heute beim hypelimit aufgetaut. Tatsächlich ist eine da, aber die andere bereits beim plani.
 
 todo. wiki is broken -> store full text as easy solution?
 
-todo. add second map menu: manager only and map only
 todo. chats von anderen werden automatisch gelesen
 todo. fix crew exploit
 todo. unload fleet on ship transfer or something
 
 #### next steps
 
+todo. researches müssen teurer sein
 todo. forum management
 
 todo. star map filter für flotten
@@ -149,8 +157,6 @@ todo. wrong password no second login attempt
 
 ?. gebäudelevel deaktivieren (bis auf level 1 für das saubermachen)
 ?. history for dashboard
-
-todo. fetch eager auf constructions weg vom planet
 
 - cache cleanup or only load last 3 ticks
 - cache in datenbank verschieben - mariadb json pointer useful?

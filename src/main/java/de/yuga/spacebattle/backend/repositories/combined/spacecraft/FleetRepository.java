@@ -16,10 +16,6 @@ import java.util.Set;
 public interface FleetRepository extends JpaRepository<Fleet, Integer>, CustomFleetRepository {
 
     @Nullable
-    @Query("SELECT f FROM Fleet f WHERE f.isDeleted = false")
-    List<Fleet> findAllAliveFleets();
-
-    @Nullable
     @Query("SELECT DISTINCT f FROM Fleet f WHERE f.isDeleted = false AND f.orbit.system.id IN (:systemIds)")
     List<Fleet> findAllAliveFleetsInSystems(@Param("systemIds") @Nonnull final Collection<Integer> systemIds);
 
@@ -38,4 +34,8 @@ public interface FleetRepository extends JpaRepository<Fleet, Integer>, CustomFl
     @Nullable
     @Query("SELECT f.move.destinationOrbit.system FROM Fleet f WHERE f.isDeleted = false AND f.move IS NOT NULL")
     Set<StarSystem> findMovementDestinations();
+
+    @Nullable
+    @Query("SELECT DISTINCT f.orbit.system.id FROM Fleet f WHERE f.owner.id = :idUser")
+    Set<Integer> findAllSystemIDsWithFleetsForUser(final int idUser);
 }

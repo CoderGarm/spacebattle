@@ -38,7 +38,7 @@ public class FleetMovementCache extends BaseCache {
     private static final Logger LOGGER = LoggerFactory.getLogger(FleetMovementCache.class);
 
     @Nonnull
-    private final CacheStore<Integer, Set<FleetMovement>> cache = new CacheStore<>(2, TimeUnit.DAYS);
+    private final CacheStore<Integer, Set<FleetMovement>> cache = new CacheStore<>(2, TimeUnit.DAYS); /* fixme remove me */
 
     @Nonnull
     private final CacheFileWriter cacheFileWriter;

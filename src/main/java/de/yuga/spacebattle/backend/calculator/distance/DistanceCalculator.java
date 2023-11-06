@@ -98,11 +98,10 @@ public class DistanceCalculator {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
         Preconditions.checkNotNull(origin, "origin shouldn't be null!");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
-        Preconditions.checkNotNull(fleet.getOrbit(), "fleet.getOrbit() must not be empty");
 
         final ETechnologyType restrictingTechnologyType = fleet.getRestrictingTechnologyType();
         final Acceleration acceleration = fleet.getAccelerationFor(EModuleType.FTLPROPULSION);
-        return calculateTimeToTravel(restrictingTechnologyType, acceleration, fleet.getOrbit(), destination);
+        return calculateTimeToTravel(restrictingTechnologyType, acceleration, origin, destination);
     }
 
 
@@ -124,9 +123,9 @@ public class DistanceCalculator {
             ticksToTravel += getSubLightDurationToHyperLimit(restrictingTechnologyType, acceleration, origin, destination);
             ticksToTravel += getDuration(EModuleType.FTLPROPULSION, restrictingTechnologyType, acceleration, originSystem.getOrbit(), destinationSystem.getOrbit());
             ticksToTravel += getSubLightDurationFromHyperLimit(restrictingTechnologyType, acceleration, destination);
-        } else if (origin.getOrbit() != null && destination.getOrbit() != null) {
+        } else if (origin.getResultingOrbit() != null && destination.getResultingOrbit() != null) {
             // interplanetary traveling
-            ticksToTravel += getDuration(EModuleType.PROPULSION, restrictingTechnologyType, acceleration, origin.getOrbit(), destination.getOrbit());
+            ticksToTravel += getDuration(EModuleType.PROPULSION, restrictingTechnologyType, acceleration, origin.getResultingOrbit(), destination.getResultingOrbit());
         }
 
         final int rounded = BigDecimal.valueOf(ticksToTravel).setScale(0, RoundingMode.UP).intValue();
@@ -145,11 +144,11 @@ public class DistanceCalculator {
         Preconditions.checkNotNull(restrictingTechnologyType, "restrictingTechnologyType must not be empty");
         Preconditions.checkNotNull(acceleration, "acceleration must not be empty");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
-        Preconditions.checkArgument(destination.getOrbit() != null, "destination orbit shouldn't be null!");
+        Preconditions.checkArgument(destination.getResultingOrbit() != null, "destination resulting orbit shouldn't be null!");
 
         final Orbit positionOnHyperLimit = NavigationCalculator.getPositionOnHyperlimit(destination);
         // todo currently there are fixed entry points into a system - this must be changed
-        return getDuration(EModuleType.PROPULSION, restrictingTechnologyType, acceleration, positionOnHyperLimit, destination.getOrbit());
+        return getDuration(EModuleType.PROPULSION, restrictingTechnologyType, acceleration, positionOnHyperLimit, destination.getResultingOrbit());
     }
 
 
@@ -169,12 +168,11 @@ public class DistanceCalculator {
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
 
         final StarSystem originSystem = origin.getSystem();
-        final Orbit originOrbit = origin.getOrbit();
+        final Orbit originOrbit = origin.getResultingOrbit();
         final StarSystem destinationSystem = destination.getSystem();
 
         final boolean outOfSystem = originSystem == null || destinationSystem == null;
-        final boolean noPositionSpecified = originOrbit == null;
-        if (outOfSystem || originSystem.equals(destinationSystem) || noPositionSpecified) {
+        if (outOfSystem || originSystem.equals(destinationSystem) || originOrbit == null) {
             return 0;
         }
 

@@ -3,9 +3,15 @@ package de.yuga.spacebattle.rest.api.turn;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.turn.mission.MissionItem;
 import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
-import de.yuga.spacebattle.backend.services.caches.*;
+import de.yuga.spacebattle.backend.services.caches.ColonizationCache;
+import de.yuga.spacebattle.backend.services.caches.MissionCache;
+import de.yuga.spacebattle.backend.services.caches.OperationalCache;
+import de.yuga.spacebattle.backend.services.caches.TransportationCache;
+import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
+import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
+import de.yuga.spacebattle.backend.services.turn.MoveService;
 import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
 import de.yuga.spacebattle.backend.services.turn.resources.MarketplaceService;
@@ -28,7 +34,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
@@ -60,9 +69,6 @@ public class JournalApi extends BaseApi {
     private final TransportationCache transportationCache;
 
     @Nonnull
-    private final FleetMovementCache fleetMovementCache;
-
-    @Nonnull
     private final ColonizationCache colonizationCache;
 
     @Nonnull
@@ -77,27 +83,40 @@ public class JournalApi extends BaseApi {
     @Nonnull
     private final MarketplaceService marketplaceService;
 
+    @Nonnull
+    private final MoveService moveService;
+
+    @Nonnull
+    private final PlanetService planetService;
+
+    @Nonnull
+    private final FleetService fleetService;
+
     @Autowired
     public JournalApi(@Nonnull final TickTimeService tickService,
                       @Nonnull final JobService jobService,
                       @Nonnull final BattleReportService battleReportService,
                       @Nonnull final TransportationCache transportationCache,
-                      @Nonnull final FleetMovementCache fleetMovementCache,
                       @Nonnull final ColonizationCache colonizationCache,
                       @Nonnull final OperationalCache operationalCache,
                       @Nonnull final MissionCache missionCache,
                       @Nonnull final OperationalService operationalService,
-                      @Nonnull final MarketplaceService marketplaceService) {
+                      @Nonnull final MarketplaceService marketplaceService,
+                      @Nonnull final MoveService moveService,
+                      @Nonnull final PlanetService planetService,
+                      @Nonnull final FleetService fleetService) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
         this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
         this.battleReportService = Preconditions.checkNotNull(battleReportService, "battleReportService must not be empty");
         this.transportationCache = Preconditions.checkNotNull(transportationCache, "transportationCache must not be empty");
-        this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
         this.colonizationCache = Preconditions.checkNotNull(colonizationCache, "colonizationCache must not be empty");
         this.operationalCache = Preconditions.checkNotNull(operationalCache, "operationalCache must not be empty");
         this.missionCache = Preconditions.checkNotNull(missionCache, "missionCache must not be empty");
         this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
         this.marketplaceService = Preconditions.checkNotNull(marketplaceService, "marketplaceService must not be empty");
+        this.moveService = Preconditions.checkNotNull(moveService, "moveService must not be empty");
+        this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
+        this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
     }
 
     @GetMapping(value = JOB_FINISHED_ENDPOINT)
@@ -155,9 +174,19 @@ public class JournalApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getFinishedMovements() {
-        return ResponseEntity.ok(fleetMovementCache.getMovements(tickService.getToday(), getIdUser()).stream()
-                .map(FleetMovement::new)
-                .collect(Collectors.toList()));
+        final int idUser = getIdUser();
+
+        final Set<Integer> systemIDs = planetService.findAllSystemIDsForUser(idUser);
+        systemIDs.addAll(fleetService.findAllSystemIDsWithFleetsForUser(idUser));
+
+        final de.yuga.spacebattle.backend.entities.turn.Tick today = tickService.getToday();
+        final List<de.yuga.spacebattle.backend.entities.turn.Move> finishedMovements = moveService.findFinishedInSystems(today, systemIDs);
+        final List<FleetMovement> result = new ArrayList<>();
+        finishedMovements.stream()
+                .filter(m -> Objects.nonNull(m.getFleetSnapshot())).forEach(move -> {
+                    result.add(new FleetMovement(move, getIdUser()));
+                });
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping(value = FINISHED_COLONIZATIONS_ENDPOINT)

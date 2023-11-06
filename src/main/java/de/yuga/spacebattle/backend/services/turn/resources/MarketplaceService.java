@@ -130,8 +130,8 @@ public class MarketplaceService {
         Preconditions.checkNotNull(tradeOffer, "tradeOffer must not be empty");
         Preconditions.checkNotNull(target, "target must not be empty");
 
-        final FleetOrbit origin = new FleetOrbit(tradeOffer.getOrigin().getOrbit(), tradeOffer.getOrigin().getSystem());
-        final FleetOrbit destination = new FleetOrbit(target.getOrbit(), target.getSystem());
+        final FleetOrbit origin = new FleetOrbit(tradeOffer.getOrigin());
+        final FleetOrbit destination = new FleetOrbit(target);
         // 154 gamma is so fucking slow
         return DistanceCalculator.calculateTimeToTravel(ETechnologyType.MILITARY, new Acceleration(50000, EAccelerationMetric.G, EHyperBand.EPSILON), origin, destination);
     }

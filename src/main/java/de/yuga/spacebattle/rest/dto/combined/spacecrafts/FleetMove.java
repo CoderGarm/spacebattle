@@ -21,6 +21,10 @@ public class FleetMove {
     private Orbit destinationOrbit;
 
     @Nullable
+    @Schema(description = "The planet which is the target of the movement.")
+    private Integer idDestinationPlanet;
+
+    @Nullable
     @Schema(description = "The system which is the target of the movement.")
     private Integer idDestinationSystem;
 
@@ -37,6 +41,11 @@ public class FleetMove {
     @Nullable
     public Orbit getDestinationOrbit() {
         return destinationOrbit;
+    }
+
+    @Nullable
+    public Integer getIdDestinationPlanet() {
+        return idDestinationPlanet;
     }
 
     @Nullable

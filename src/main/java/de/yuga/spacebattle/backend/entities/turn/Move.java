@@ -6,11 +6,14 @@ import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
+import de.yuga.spacebattle.backend.entities.misc.Completable;
 import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
@@ -18,14 +21,11 @@ import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-@NamedQueries({
-        @NamedQuery(name = "Move.getAll", query = "SELECT p FROM Move p")
-})
 @Entity
 @Table(name = "move")
 @Check(constraints = "xCoordinateOrigin != xCoordinateDestination AND yCoordinateOrigin != yCoordinateDestination")
 @AttributeOverride(name = "id", column = @Column(name = "idMove"))
-public class Move extends AbstractEntityKey implements HasOwner {
+public class Move extends Completable implements HasOwner {
 
     @Nonnull
     @NotNull
@@ -33,17 +33,22 @@ public class Move extends AbstractEntityKey implements HasOwner {
     @JoinColumn(name = "idUser", updatable = false)
     private Owner owner;
 
-    @Nonnull
-    @NotNull
+    @Nullable
     @OneToOne
-    @JoinColumn(name = "idFleet", updatable = false)
+    @JoinColumn(name = "idFleet")
     private Fleet fleet;
+
+    @Nullable
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "idFleetSnapshot")
+    private FleetSnapshot fleetSnapshot;
 
     @Nonnull
     @NotNull
     @Embedded
     @AttributeOverride(name = "orbit.xCoordinate", column = @Column(name = "xCoordinateOrigin"))
     @AttributeOverride(name = "orbit.yCoordinate", column = @Column(name = "yCoordinateOrigin"))
+    @AssociationOverride(name = "planet", joinColumns = @JoinColumn(name = "idPlanetOrigin"))
     @AssociationOverride(name = "system", joinColumns = @JoinColumn(name = "idStarSystemOrigin"))
     private FleetOrbit originOrbit;
 
@@ -52,13 +57,9 @@ public class Move extends AbstractEntityKey implements HasOwner {
     @Embedded
     @AttributeOverride(name = "orbit.xCoordinate", column = @Column(name = "xCoordinateDestination"))
     @AttributeOverride(name = "orbit.yCoordinate", column = @Column(name = "yCoordinateDestination"))
+    @AssociationOverride(name = "planet", joinColumns = @JoinColumn(name = "idPlanetDestination"))
     @AssociationOverride(name = "system", joinColumns = @JoinColumn(name = "idStarSystemDestination"))
     private FleetOrbit destinationOrbit;
-
-    /**
-     * Principle: Countdown to zero -> job done.
-     */
-    private int moveDoneAtZero;
 
     /**
      * The original duration without modification;
@@ -87,11 +88,11 @@ public class Move extends AbstractEntityKey implements HasOwner {
 
         if (!ftlCapable && !StarSystem.equalsAtMap(originSystem, destinationSystem)) {
             // can not move
-            this.moveDoneAtZero = -1;
+            this.ticksLeft = -1;
         } else {
-            this.moveDoneAtZero = DistanceCalculator.calculateTimeToTravel(fleet, destination);
+            this.ticksLeft = DistanceCalculator.calculateTimeToTravel(fleet, destination);
         }
-        this.originalDuration = this.moveDoneAtZero;
+        this.originalDuration = this.ticksLeft;
     }
 
     public Move(@Nonnull final Fleet fleet,
@@ -106,7 +107,7 @@ public class Move extends AbstractEntityKey implements HasOwner {
         this.fleet = fleet;
         this.originOrbit = new FleetOrbit(fleet.getOrbit());
         this.destinationOrbit = destination;
-        this.moveDoneAtZero = calculateTimeToTravel;
+        this.ticksLeft = calculateTimeToTravel;
         this.originalDuration = originalDuration;
     }
 
@@ -135,19 +136,18 @@ public class Move extends AbstractEntityKey implements HasOwner {
         return (NonPlayerCharacter) owner;
     }
 
-    public void setOwner(@Nonnull final Owner owner) {
-        Preconditions.checkNotNull(owner, "owner shouldn't be null!");
-
-        this.owner = owner;
-    }
-
     @Nonnull
+    @SuppressWarnings("DataFlowIssue")
     public Fleet getFleet() {
+        if (!isDeleted() && fleet == null) {
+            throw new NotifyWebUserException("Hell no! This is not valid.");
+        }
         return fleet;
     }
 
-    public void setFleet(@Nonnull final Fleet fleet) {
-        this.fleet = fleet;
+    @Nullable
+    public FleetSnapshot getFleetSnapshot() {
+        return fleetSnapshot;
     }
 
     @Nonnull
@@ -160,15 +160,11 @@ public class Move extends AbstractEntityKey implements HasOwner {
         return destinationOrbit;
     }
 
-    public int getMoveDoneAtZero() {
-        return moveDoneAtZero;
-    }
-
-    public void setMoveDoneAtZero(final int moveDoneAtZero) {
-        if (moveDoneAtZero >= this.moveDoneAtZero) {
+    public void setTicksLeft(final int moveDoneAtZero) {
+        if (moveDoneAtZero >= this.ticksLeft) {
             throw new NotifyWebUserException("You cannot increase the traffic time until you have warp scrambler");
         }
-        this.moveDoneAtZero = moveDoneAtZero;
+        this.ticksLeft = moveDoneAtZero;
     }
 
     public int getOriginalDuration() {
@@ -185,22 +181,28 @@ public class Move extends AbstractEntityKey implements HasOwner {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public void setFinished(@Nonnull final Tick finishedAt) {
+        Preconditions.checkNotNull(finishedAt, "finishedAt must not be empty");
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+
+        fleetSnapshot = new FleetSnapshot(fleet);
+        fleet = null;
+        super.setFinished(finishedAt);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
         if (this == o) return true;
-        if (!(o instanceof Move)) return false;
 
-        Move move = (Move) o;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        if (!fleet.equals(move.fleet)) return false;
-        if (!originOrbit.equals(move.originOrbit)) return false;
-        return destinationOrbit.equals(move.destinationOrbit);
+        final Move move = (Move) o;
+
+        return new EqualsBuilder().append(fleet, move.fleet).append(fleetSnapshot, move.fleetSnapshot).append(originOrbit, move.originOrbit).append(destinationOrbit, move.destinationOrbit).isEquals();
     }
 
     @Override
     public int hashCode() {
-        int result = fleet.hashCode();
-        result = 31 * result + originOrbit.hashCode();
-        result = 31 * result + destinationOrbit.hashCode();
-        return result;
+        return new HashCodeBuilder(17, 37).append(fleet).append(fleetSnapshot).append(originOrbit).append(destinationOrbit).toHashCode();
     }
 }

@@ -147,7 +147,7 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
             LOGGER.info("\tPirate fleet with idFleet '" + pirateFleet.getId() + "' withdraws to hyper limit from '" + planet.getName() + "'");
             missionCache.pirateRaidWithdrawFromOrbit(today, pirateFleet, planet);
             raidingPirateCache.dropFirstActionItem(today, pirateFleet, EMissionAction.LEAVE_ORBIT);
-            final FleetOrbit destination = new FleetOrbit(planet.getOrbit(), planet.getSystem());
+            final FleetOrbit destination = new FleetOrbit(planet);
             final Orbit positionOnHyperlimit = NavigationCalculator.getPositionOnHyperlimit(destination);
             final Move move = new Move(pirateFleet, new FleetOrbit(positionOnHyperlimit, planet.getSystem()));
             resultingMoves.add(move);

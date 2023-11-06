@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public interface PlanetRepository extends JpaRepository<Planet, Integer>, CustomPlanetRepository {
 
@@ -43,4 +44,8 @@ public interface PlanetRepository extends JpaRepository<Planet, Integer>, Custom
     @Nullable
     @Query("SELECT DISTINCT p FROM Planet p LEFT JOIN FETCH p.constructions c WHERE p.owner IS NOT NULL AND p.owner.dType = de.yuga.spacebattle.backend.enums.OwnerType.USER")
     List<Planet> findAllForTick();
+
+    @Nullable
+    @Query("SELECT DISTINCT p.system.id FROM Planet p WHERE p.owner.id = :idUser")
+    Set<Integer> findAllSystemIDsForUser(final int idUser);
 }

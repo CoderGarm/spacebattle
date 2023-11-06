@@ -103,6 +103,7 @@
         xCoordinate varchar(255),
         yCoordinate varchar(255),
         idTick integer not null,
+        idPlanet integer,
         idStarSystem integer,
         primary key (idBattleReport)
     ) engine=InnoDB;
@@ -190,6 +191,7 @@
         xCoordinateLocation varchar(255),
         yCoordinateLocation varchar(255),
         idMove integer,
+        idPlanetLocation integer,
         idStarSystemLocation integer,
         idOwner integer not null,
         idResourceDeposit integer,
@@ -200,7 +202,7 @@
        idFleetSnapshot integer not null auto_increment,
         isDeleted boolean not null default false,
         name varchar(255) not null,
-        idBattleReport integer not null,
+        idBattleReport integer,
         idFleet integer not null,
         idOwner integer not null,
         primary key (idFleetSnapshot)
@@ -412,14 +414,19 @@
 
     create table move (
        idMove integer not null auto_increment,
+        isDeleted boolean not null default false,
+        ticksLeft decimal(19, 0) not null,
         xCoordinateDestination varchar(255),
         yCoordinateDestination varchar(255),
-        moveDoneAtZero integer not null,
         xCoordinateOrigin varchar(255),
         yCoordinateOrigin varchar(255),
         originalDuration integer,
+        idTickCompleted integer,
+        idPlanetDestination integer,
         idStarSystemDestination integer,
         idFleet integer not null,
+        idFleetSnapshot integer,
+        idPlanetOrigin integer,
         idStarSystemOrigin integer,
         idUser integer not null,
         primary key (idMove),
@@ -993,6 +1000,11 @@
                 references tick (idTick);
 
     alter table battleReport
+       add constraint FKry6bc39fdk37dvtpfwtljucef
+       foreign key (idPlanet)
+       references planet (idPlanet);
+
+    alter table battleReport
         add constraint FKr6smkmpvrxxus80181d1gwekl
             foreign key (idStarSystem)
                 references starSystem (idStarSystem);
@@ -1081,6 +1093,11 @@
         add constraint FK5yy9whqh6562iaxuym0wrkjeq
             foreign key (idMove)
                 references move (idMove);
+
+    alter table fleet
+       add constraint FKjn1r1mte3awql1sp7a2sehrsv
+       foreign key (idPlanetLocation)
+       references planet (idPlanet);
 
     alter table fleet
         add constraint FK7p0cvm6ul1v1w1vqcljs63i61
@@ -1323,6 +1340,16 @@
        references tradedResource (idTradedResource);
 
     alter table move
+       add constraint FKhonj0ybwu1naypgp7b5d0cwip
+       foreign key (idTickCompleted)
+       references tick (idTick);
+
+    alter table move
+       add constraint FKpqyl1dnhe1gc67jbcsa6i10s9
+       foreign key (idPlanetDestination)
+       references planet (idPlanet);
+
+    alter table move
         add constraint FKmcefsl29wdpj7xqe9790o0mch
             foreign key (idStarSystemDestination)
                 references starSystem (idStarSystem);
@@ -1331,6 +1358,16 @@
         add constraint FKg65nht3m74odamnrqiv1cdyl6
             foreign key (idFleet)
                 references fleet (idFleet);
+
+    alter table move
+       add constraint FKuoi0o5abd3i359pmc4idclrx
+       foreign key (idFleetSnapshot)
+       references fleetSnapshot (idFleetSnapshot);
+
+    alter table move
+       add constraint FK1us3my5u8r5mv1jupu0xw33fp
+       foreign key (idPlanetOrigin)
+       references planet (idPlanet);
 
     alter table move
         add constraint FK1y6v1eof54uci3p3b6mduv6sr
@@ -2200,4 +2237,4 @@ INSERT INTO dbPatch VALUES (NULL, NOW(), 'link wiki with tut', '0.1.14-2');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'increase pop output', '0.1.14-3');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'exchange ticks left to points', '0.1.14-4');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'reduce education level NONE', '0.1.14-5');
-
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'completable fleet move', '0.1.15-1');

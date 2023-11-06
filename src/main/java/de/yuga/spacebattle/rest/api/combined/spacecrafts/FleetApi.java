@@ -605,8 +605,13 @@ public class FleetApi extends BaseApi {
                         return null;
                     }
                     final StarSystem targetSystem = targetSystemsByIds.get(move.getIdDestinationSystem());
+                    final Planet targetPlanet = move.getIdDestinationPlanet() != null ? targetSystem.getPlanets().stream()
+                            .filter(p -> p.getId() == move.getIdDestinationPlanet())
+                            .findFirst()
+                            .orElse(null) : null;
+
                     final Orbit targetOrbit = move.getDestinationOrbit() != null ? new Orbit(move.getDestinationOrbit()) : null;
-                    final FleetOrbit destination = new FleetOrbit(targetOrbit, targetSystem);
+                    final FleetOrbit destination = new FleetOrbit(targetOrbit, targetPlanet, targetSystem);
                     return new de.yuga.spacebattle.backend.entities.turn.Move(fleet, destination);
                 })
                 .filter(Objects::nonNull)

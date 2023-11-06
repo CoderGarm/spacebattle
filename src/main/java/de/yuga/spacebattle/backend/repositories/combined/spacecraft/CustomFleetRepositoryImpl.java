@@ -26,12 +26,6 @@ public class CustomFleetRepositoryImpl implements CustomFleetRepository {
 
     @Nonnull
     @Override
-    public List<Fleet> findAllFleets() {
-        return em.createNamedQuery("Fleet.getAll", Fleet.class).getResultList();
-    }
-
-    @Nonnull
-    @Override
     public List<Fleet> findAllFleetsWithoutMovement() {
         return em.createNamedQuery("Fleet.getAllWithoutMovement", Fleet.class).getResultList();
     }
@@ -40,14 +34,6 @@ public class CustomFleetRepositoryImpl implements CustomFleetRepository {
     @Override
     public List<Fleet> findAllFleetsWithMovement(final int idUser) {
         return em.createNamedQuery("Fleet.getAllWithMovement", Fleet.class)
-                .setParameter("idUser", idUser)
-                .getResultList();
-    }
-
-    @Nonnull
-    @Override
-    public List<Fleet> findAllFleetsWithInterstellarMovement(final int idUser) {
-        return em.createNamedQuery("Fleet.getFleetsWithInterstellarMovement", Fleet.class)
                 .setParameter("idUser", idUser)
                 .getResultList();
     }
@@ -73,9 +59,7 @@ public class CustomFleetRepositoryImpl implements CustomFleetRepository {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
 
         return new HashSet<>(em.createNamedQuery("Fleet.getAllForPlanet", Fleet.class)
-                .setParameter("xCoordinate", planet.getOrbit().getXCoordinate())
-                .setParameter("yCoordinate", planet.getOrbit().getYCoordinate())
-                .setParameter("system", planet.getSystem())
+                .setParameter("planet", planet)
                 .getResultList());
     }
 
@@ -85,19 +69,8 @@ public class CustomFleetRepositoryImpl implements CustomFleetRepository {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
 
         return new HashSet<>(em.createNamedQuery("Fleet.getAllAnchoredForPlanet", Fleet.class)
-                .setParameter("xCoordinate", planet.getOrbit().getXCoordinate())
-                .setParameter("yCoordinate", planet.getOrbit().getYCoordinate())
-                .setParameter("system", planet.getSystem())
+                .setParameter("planet", planet)
                 .getResultList());
-    }
-
-    @Override
-    public boolean isShipClassInUse(final int idShipClass) {
-        final Long amount = em.createNamedQuery("Fleet.checkShipInUse", Long.class)
-                .setParameter("idShipClass", idShipClass)
-                .getSingleResult();
-
-        return amount > 0;
     }
 
     @Nonnull

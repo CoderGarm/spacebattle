@@ -248,4 +248,9 @@ public class PlanetService {
         });
         return result;
     }
+
+    @Nonnull
+    public Set<Integer> findAllSystemIDsForUser(final int idUser) {
+        return Objects.requireNonNullElse(planetRepository.findAllSystemIDsForUser(idUser), new HashSet<>());
+    }
 }

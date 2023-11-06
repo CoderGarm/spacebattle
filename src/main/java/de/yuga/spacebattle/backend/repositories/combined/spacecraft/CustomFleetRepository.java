@@ -11,16 +11,10 @@ import java.util.Set;
 public interface CustomFleetRepository {
 
     @Nonnull
-    List<Fleet> findAllFleets();
-
-    @Nonnull
     List<Fleet> findAllFleetsWithoutMovement();
 
     @Nonnull
     List<Fleet> findAllFleetsWithMovement(final int idUser);
-
-    @Nonnull
-    List<Fleet> findAllFleetsWithInterstellarMovement(final int idUser);
 
     @Nonnull
     List<Fleet> findAllFleetsBy(final int idUser);
@@ -39,14 +33,6 @@ public interface CustomFleetRepository {
 
     @Nonnull
     Set<Fleet> findAllAnchoredForPlanet(@Nonnull Planet planet);
-
-    /**
-     * Checks if a ship class in part of a fleet and therefore 'in use'.
-     *
-     * @param idShipClass the id of the class
-     * @return <code>true</code> if the ship class is part of a fleet, <code>false</code> otherwise
-     */
-    boolean isShipClassInUse(final int idShipClass);
 
     /**
      * Returns all fleets sorted by the owner for every system in which

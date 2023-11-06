@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.entities.orbitals;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -21,32 +22,57 @@ public class FleetOrbit {
     @JoinColumn(name = "idStarSystem", referencedColumnName = "idStarSystem")
     private StarSystem system;
 
+    @Nullable
+    @ManyToOne
+    @JoinColumn(name = "idPlanet", referencedColumnName = "idPlanet")
+    private Planet planet;
+
     /**
      * The orbit could be null if the fleet is currently on a local movement.
      */
     @Nullable
     @Embedded
-    private Orbit orbit;
+    private Orbit orbit; /* fixme remove orbit when planet is present */
 
     public FleetOrbit() {
     }
 
-    /**
-     * The constructor.
-     *
-     * @param orbit  the necessary orbit
-     * @param system the system, if null the orbit is placed in the universe
-     */
+    public FleetOrbit(@Nullable final Orbit orbit, @Nullable final Planet planet, @Nullable final StarSystem system) {
+
+        if (orbit == null && planet == null) {
+            throw new NotifyWebUserException("You should relly select a destination.");
+        }
+
+        this.planet = planet;
+        if (this.planet == null) {
+            this.orbit = orbit != null ? orbit.clone() : null;
+        }
+        this.system = system;
+    }
+
     public FleetOrbit(@Nullable final Orbit orbit, @Nullable final StarSystem system) {
-        this.orbit = orbit;
+        Preconditions.checkNotNull(orbit, "orbit must not be empty");
+        Preconditions.checkNotNull(system, "system must not be empty");
+
+        this.orbit = orbit.clone();
         this.system = system;
     }
 
     public FleetOrbit(@Nonnull final FleetOrbit orbit) {
         Preconditions.checkNotNull(orbit, "orbit shouldn't be null!");
 
-        this.orbit = orbit.getOrbit() != null ? orbit.getOrbit().clone() : null;
+        this.planet = orbit.getPlanet();
+        if (this.planet == null) {
+            this.orbit = orbit.getOrbit() != null ? orbit.getOrbit().clone() : null;
+        }
         this.system = orbit.getSystem();
+    }
+
+    public FleetOrbit(@Nonnull final Planet planet) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+        this.planet = planet;
+        this.system = planet.getSystem();
     }
 
     @Nullable
@@ -55,7 +81,20 @@ public class FleetOrbit {
     }
 
     @Nullable
+    public Planet getPlanet() {
+        return planet;
+    }
+
+    @Nullable
     public Orbit getOrbit() {
+        return orbit;
+    }
+
+    @Nullable
+    public Orbit getResultingOrbit() {
+        if (planet != null) {
+            return planet.getOrbit();
+        }
         return orbit;
     }
 
@@ -63,7 +102,8 @@ public class FleetOrbit {
      * In case of starting a movement but stay in the system, the planet has to be null.
      */
     public void leavePlanet() {
-        this.orbit = null;
+        planet = null;
+        orbit = null;
     }
 
     @Override

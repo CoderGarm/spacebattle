@@ -254,7 +254,7 @@ public class JobService {
         final Construction facility = constructionService.findByPlanetAndProductionType(planet.getId(), EResourceType.ORBITAL_CONSTRUCTION);
         checkIfFree(facility);
 
-        Fleet fleet = new Fleet("Fresh Build @ " + planet.getName(), owner, new FleetOrbit(planet.getOrbit(), planet.getSystem()));
+        Fleet fleet = new Fleet("Fresh Build @ " + planet.getName(), owner, new FleetOrbit(planet));
         // small hack to don't display the new build fleet on map and in fleet list before "under construction handling"
         fleet.delete();
         fleet = fleetService.save(fleet);

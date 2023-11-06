@@ -1023,7 +1023,7 @@ public class MasterOfTheUniverseService {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(name, "name must not be empty");
 
-        final FleetOrbit fleetOrbit = new FleetOrbit(planet.getOrbit(), planet.getSystem());
+        final FleetOrbit fleetOrbit = new FleetOrbit(planet);
         final Fleet fleet = new Fleet(name, user, fleetOrbit);
         fleet.setOperational();
         return fleetService.save(fleet);

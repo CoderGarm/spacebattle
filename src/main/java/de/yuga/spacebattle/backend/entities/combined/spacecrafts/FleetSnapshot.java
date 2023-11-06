@@ -25,8 +25,7 @@ import java.util.stream.Collectors;
 @AttributeOverride(name = "id", column = @Column(name = "idFleetSnapshot"))
 public class FleetSnapshot extends Deletable implements HasOwner {
 
-    @Nonnull
-    @NotNull
+    @Nullable
     @ManyToOne
     @JoinColumn(name = "idBattleReport")
     private BattleReport battleReport;
@@ -61,17 +60,22 @@ public class FleetSnapshot extends Deletable implements HasOwner {
 
     public FleetSnapshot(@Nonnull final BattleReport battleReport,
                          @Nonnull final Fleet fleet) {
+        this(fleet);
         Preconditions.checkNotNull(battleReport, "battleReport must not be empty");
-        Preconditions.checkNotNull(fleet, "fleet must not be empty");
 
         this.battleReport = battleReport;
-        this.fleet = fleet;
-        this.owner = fleet.getOwner();
-        this.name = fleet.getName();
         this.ships.addAll(fleet.getAliveShips().stream().map(w -> new WarshipHealthStateSnapshot(this, battleReport, w)).collect(Collectors.toSet()));
     }
 
-    @Nonnull
+    public FleetSnapshot(@Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+
+        this.fleet = fleet;
+        this.owner = fleet.getOwner();
+        this.name = fleet.getName();
+    }
+
+    @Nullable
     public BattleReport getBattleReport() {
         return battleReport;
     }

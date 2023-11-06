@@ -2,7 +2,9 @@ package de.yuga.spacebattle.rest.dto.turn;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.Owner;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.turn.Move;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -48,23 +50,35 @@ public class FleetMovement {
     @Schema(required = true, description = "If the incoming fleet is from a foreign empire.")
     private boolean isForeignFleet;
 
-    public FleetMovement(@Nonnull final de.yuga.spacebattle.backend.dto.turn.FleetMovement movement) {
+    public FleetMovement(@Nonnull final Move movement, final int idUserRequestInformation) {
         Preconditions.checkNotNull(movement, "movement must not be empty");
+        Preconditions.checkNotNull(movement.getFleetSnapshot(), "movement.getFleetSnapshot() must not be empty");
+        Preconditions.checkNotNull(movement.getFleetSnapshot().getOwner(), "movement.getFleetSnapshot().getOwner() must not be empty");
 
-        this.fleetName = movement.getFleet().getName();
-        this.fleetOwnerName = movement.getFleet().getOwner().getUsername();
-        this.fleetSize = movement.getFleet().getAliveShips().size();
+        final Owner fleetOwner = movement.getFleetSnapshot().getOwner();
+        this.isForeignFleet = fleetOwner.getId() != idUserRequestInformation;
 
-        if (movement.getDestinationPlanet() != null) {
-            this.destinationPlanet = movement.getDestinationPlanet().getName();
-            final User owner = movement.getDestinationPlanet().getHumanOwner();
-            if (owner != null) {
-                this.destinationPlanetOwner = owner.getUsername();
-            }
+        if (movement.isDeleted()) {
+            this.fleetName = movement.getFleetSnapshot().getName();
+            this.fleetOwnerName = movement.getFleetSnapshot().getOwner().getUsername();
+            this.fleetSize = movement.getFleetSnapshot().getFleet().getAliveShips().size();
+        } else {
+            final Fleet fleet = movement.getFleet();
+            this.fleetName = fleet.getName();
+            this.fleetOwnerName = fleet.getOwner().getUsername();
+            this.fleetSize = fleet.getAliveShips().size();
         }
 
-        this.destinationSystem = movement.getDestinationSystem().getName();
+        if (movement.getDestinationOrbit().getPlanet() != null) {
+            this.destinationPlanet = movement.getDestinationOrbit().getPlanet().getName();
+            if (movement.getDestinationOrbit().getPlanet().getOwner() != null) {
+                this.destinationPlanetOwner = movement.getDestinationOrbit().getPlanet().getOwner().getUsername();
+            }
+        }
+        if (movement.getDestinationOrbit().getSystem() != null) {
+            this.destinationSystem = movement.getDestinationOrbit().getSystem().getName();
+        }
+
         this.duration = movement.getOriginalDuration();
-        this.isForeignFleet = movement.isForeignFleet();
     }
 }

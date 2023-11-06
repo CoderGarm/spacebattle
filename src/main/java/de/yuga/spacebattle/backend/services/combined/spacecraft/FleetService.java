@@ -11,7 +11,6 @@ import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.misc.Operationable;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
-import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
@@ -22,7 +21,8 @@ import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.repositories.combined.spacecraft.FleetRepository;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
-import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
+import de.yuga.spacebattle.backend.services.turn.MoveService;
+import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.AbstractId;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMerge;
@@ -54,17 +54,22 @@ public class FleetService {
     private final PlanetService planetService;
 
     @Nonnull
-    private final StarSystemService starSystemService;
+    private final TickTimeService tickTimeService;
+
+    @Nonnull
+    private final MoveService moveService;
 
     @Autowired
     public FleetService(@Nonnull final FleetRepository fleetRepository,
                         @Nonnull final WarShipService warShipService,
                         @Nonnull final PlanetService planetService,
-                        @Nonnull final StarSystemService starSystemService) {
+                        @Nonnull final TickTimeService tickTimeService,
+                        @Nonnull final MoveService moveService) {
         this.fleetRepository = Preconditions.checkNotNull(fleetRepository, "fleetR shouldn't be null!");
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
-        this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService must not be empty");
+        this.tickTimeService = Preconditions.checkNotNull(tickTimeService, "tickTimeService must not be empty");
+        this.moveService = Preconditions.checkNotNull(moveService, "moveService must not be empty");
     }
 
     /**
@@ -168,7 +173,7 @@ public class FleetService {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(name, "name must not be empty");
 
-        final FleetOrbit fleetOrbit = new FleetOrbit(planet.getOrbit(), planet.getSystem());
+        final FleetOrbit fleetOrbit = new FleetOrbit(planet);
         final Fleet fleet = new Fleet(name, user, fleetOrbit);
         fleet.setOperational();
         return save(fleet);
@@ -222,52 +227,10 @@ public class FleetService {
         Preconditions.checkArgument(fleet.getMove() != null, "fleet's move shouldn't be null!");
 
         final Move move = fleet.getMove();
-        final FleetOrbit targetOrbit = move.getDestinationOrbit();
-        final StarSystem targetSystem = move.getDestinationOrbit().getSystem();
-        final Orbit targetOrbitOrbit = targetOrbit.getOrbit();
+        final int moveDoneAtZero = move.getTicksLeft();
 
-        final FleetOrbit startOrbit = move.getOriginOrbit();
-        final StarSystem startSystem = move.getOriginOrbit().getSystem();
-        final Orbit startOrbitOrbit = startOrbit.getOrbit();
-
-        if (targetOrbitOrbit == null || startOrbitOrbit == null) {
-            throw new NotifyWebUserException("A movement must always have a beginning and a designated target.");
-        }
-        if (targetSystem == null || startSystem == null) {
-            throw new NotifyWebUserException("Sorry, but you can only cancel flights inside of a star system");
-        }
-        if (!targetSystem.equals(startSystem)) {
-            throw new NotifyWebUserException("Sorry, but you can only cancel flights inside the same system");
-        }
-
-        // permute origin and destination
-        return cancelFlight(fleet, targetOrbitOrbit, startOrbitOrbit, startSystem);
-    }
-
-    /**
-     * Sets a fleet in motion to the target. From an origin which differs from the currents fleet's position.
-     * That means that this should be used for things like "cancel a flight" but it can be used accidentally as god-like jump-drive.
-     * Pay attention.
-     *
-     * @param fleet  the fleet which knows it's position
-     * @param start  the start planet if it is different from the fleets current position
-     * @param target the target
-     * @param system the system in which the fleet will be relocated
-     * @return the fleet in motion
-     */
-    private Fleet cancelFlight(@Nonnull final Fleet fleet,
-                               @Nonnull final Orbit start,
-                               @Nonnull final Orbit target,
-                               @Nonnull final StarSystem system) {
-        Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
-        Preconditions.checkNotNull(start, "start shouldn't be null!");
-        Preconditions.checkNotNull(target, "target shouldn't be null!");
-        Preconditions.checkNotNull(system, "system shouldn't be null!");
-        Preconditions.checkArgument(fleet.getMove() != null, "fleet's move shouldn't be null!");
-
-        final int moveDoneAtZero = fleet.getMove().getMoveDoneAtZero();
-        final FleetOrbit origin = new FleetOrbit(start, system);
-        final FleetOrbit destination = new FleetOrbit(target, system);
+        final FleetOrbit origin = move.getOriginOrbit();
+        final FleetOrbit destination = move.getDestinationOrbit();
 
         int calculateTimeToTravel = DistanceCalculator.calculateTimeToTravel(fleet, origin, destination);
 
@@ -280,26 +243,17 @@ public class FleetService {
 
         if (calculateTimeToTravel > 0) {
             // set move
-            fleet.setOrbit(origin);
-            final Move move = new de.yuga.spacebattle.backend.entities.turn.Move(fleet, destination, calculateTimeToTravel, calculateTimeToTravel + moveDoneAtZero);
-            fleet.setMove(move);
+            fleet.setMove(new Move(fleet, destination, calculateTimeToTravel, calculateTimeToTravel + moveDoneAtZero));
+            fleet.setOrbit(null);
         } else {
             // set fleet in planetary orbit
             fleet.setMove(null);
             fleet.setOrbit(origin);
         }
-        fleetRepository.save(fleet);
-        return fleet;
-    }
 
-    @Nonnull
-    public List<Fleet> findAllFleets() {
-        return fleetRepository.findAllFleets();
-    }
-
-    @Nonnull
-    public List<Fleet> findAllAliveFleets() {
-        return Objects.requireNonNullElse(fleetRepository.findAllAliveFleets(), new ArrayList<>());
+        move.setFinished(tickTimeService.getToday());
+        moveService.save(move);
+        return fleetRepository.save(fleet);
     }
 
     @Nonnull
@@ -412,15 +366,6 @@ public class FleetService {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
 
         return fleetRepository.findAllAnchoredForPlanet(planet);
-    }
-
-    public boolean isShipClassInUse(final int idShipClass) {
-        return fleetRepository.isShipClassInUse(idShipClass);
-    }
-
-    @Nonnull
-    public List<Fleet> findAllFleetsWithInterstellarMovement(final int idUser) {
-        return fleetRepository.findAllFleetsWithInterstellarMovement(idUser);
     }
 
     @Nonnull
@@ -579,6 +524,8 @@ public class FleetService {
             warShipService.saveAll(toStore);
             planetService.save(planet);
         }
+        final Set<Integer> fleetIDs = warShips.stream().map(WarShip::getFleet).filter(Objects::nonNull).map(Fleet::getId).collect(Collectors.toSet());
+        calculateFleetState(fleetIDs);
     }
 
     @Nonnull
@@ -635,7 +582,7 @@ public class FleetService {
     }
 
     @Nonnull
-    private Set<WarShip> inoperateShips(final @Nonnull List<Integer> orderInoperational, @Nonnull final List<WarShip> warShips, @Nonnull final Planet planet) {
+    private Set<WarShip> inoperateShips(@Nonnull final List<Integer> orderInoperational, @Nonnull final List<WarShip> warShips, @Nonnull final Planet planet) {
         Preconditions.checkNotNull(orderInoperational, "orderInoperational must not be empty");
         Preconditions.checkNotNull(warShips, "warShips must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
@@ -652,5 +599,10 @@ public class FleetService {
             toStore.add(toInOp);
         }
         return toStore;
+    }
+
+    @Nonnull
+    public Set<Integer> findAllSystemIDsWithFleetsForUser(final int idUser) {
+        return Objects.requireNonNullElse(fleetRepository.findAllSystemIDsWithFleetsForUser(idUser), new HashSet<>());
     }
 }

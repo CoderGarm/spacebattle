@@ -97,7 +97,7 @@ public class Fleet {
         this.owner = new Player(fleet.getOwner());
         this.name = fleet.getName();
         this.orbit = fleet.getOrbit() != null ? new FleetOrbit(fleet.getOrbit()) : null;
-        this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;
+        this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null; /* fixme must be checked for deleted move */
         this.ships.addAll(containingShips.stream().map(w -> new WarShip(w, w.getWarshipHealthState(), languageCode)).collect(Collectors.toList()));
         this.spacecraftCapabilities = new SpacecraftCapabilities(fleet);
         this.baseSpacecraftCapabilities = new SpacecraftCapabilities(fleet.getShipsByClass());

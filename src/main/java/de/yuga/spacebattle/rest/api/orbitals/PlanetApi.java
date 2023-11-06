@@ -149,7 +149,7 @@ public class PlanetApi extends BaseApi {
     public ResponseEntity<?> getMainPlanetCoords() {
         final int idUser = getIdUser();
         final de.yuga.spacebattle.backend.entities.orbitals.Planet mainPlanet = planetService.findMainPlanet(idUser);
-        return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.orbitals.FleetOrbit(new FleetOrbit(mainPlanet.getOrbit(), mainPlanet.getSystem())));
+        return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.orbitals.FleetOrbit(new FleetOrbit(mainPlanet)));
     }
 
     @GetMapping(value = GROUND_CONSTRUCTION_POSSIBLE_ENDPOINT + "/{idPlanet}")
@@ -354,6 +354,10 @@ public class PlanetApi extends BaseApi {
 
         final FleetOrbit orbit = fleet.getOrbit();
         PreconditionWebHelper.checkNotNull(orbit, "orbit must not be empty");
+
+        if (orbit.getPlanet() != null) {
+            return orbit.getPlanet();
+        }
 
         final StarSystem system = orbit.getSystem();
         PreconditionWebHelper.checkNotNull(system, "system must not be empty");
