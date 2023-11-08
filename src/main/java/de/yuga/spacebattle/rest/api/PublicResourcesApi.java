@@ -1,12 +1,10 @@
 package de.yuga.spacebattle.rest.api;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.services.ResourceService;
+import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
-import de.yuga.spacebattle.rest.dto.misc.Coords;
-import de.yuga.spacebattle.rest.dto.misc.CoordsBlob;
-import de.yuga.spacebattle.rest.dto.misc.DistanceElement;
-import de.yuga.spacebattle.rest.dto.misc.wormhole.Junction;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,13 +15,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nonnull;
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PUBLIC_BASE_ENDPOINT;
 
-//@RestController
+@RestController
 @Tag(name = "PublicResourcesApi")
 @RequestMapping(value = "/" + PUBLIC_BASE_ENDPOINT + "/" + PublicResourcesApi.ENDPOINT + "/")
 public class PublicResourcesApi extends BaseApi {
@@ -33,10 +33,32 @@ public class PublicResourcesApi extends BaseApi {
     @Nonnull
     private final ResourceService resourceService;
 
-    public PublicResourcesApi(@Nonnull final ResourceService resourceService) {
+    @Nonnull
+    private final UserService userService;
+
+    public PublicResourcesApi(@Nonnull final ResourceService resourceService,
+                              @Nonnull final UserService userService) {
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
+        this.userService = Preconditions.checkNotNull(userService, "userService must not be empty");
     }
 
+    @GetMapping("user-names")
+    @Operation(summary = "Get all usernames.", operationId = "getUsernames",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = String.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getUsernames() {
+        final Set<String> names = userService.findAll().stream().map(User::getUsername).collect(Collectors.toSet());
+        return ResponseEntity.ok(names);
+    }
+
+    /*
     @GetMapping("system-coordinates")
     @Operation(summary = "Get star systems by coordinates.", operationId = "getAllSystemCoordinates",
             responses = {
@@ -81,4 +103,5 @@ public class PublicResourcesApi extends BaseApi {
         final List<DistanceElement> coords = resourceService.getAllDistances();
         return ResponseEntity.ok(coords);
     }
+    */
 }
