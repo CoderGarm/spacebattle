@@ -18,6 +18,8 @@ import javax.validation.constraints.NotNull;
 @AttributeOverride(name = "id", column = @Column(name = "idHeatMap"))
 public class HeatMap extends AbstractEntityKey {
 
+    public static final int STARTING_HEAT_FOR_MAIN_PLANET = -15;
+
     @Nonnull
     @NotNull
     @ManyToOne
@@ -68,7 +70,7 @@ public class HeatMap extends AbstractEntityKey {
     }
 
     public void setMainPlanet() {
-        this.heat = -15;
+        this.heat = STARTING_HEAT_FOR_MAIN_PLANET;
     }
 
 

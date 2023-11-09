@@ -1,13 +1,9 @@
 package de.yuga.spacebattle.backend.services.turn.tick;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
-import de.yuga.spacebattle.backend.services.caches.FleetMovementCache;
-import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
-import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.backend.services.spacecraft.FleetMovementExecutorService;
 import de.yuga.spacebattle.backend.services.turn.MoveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,23 +27,13 @@ public class FleetMovementTickRunner implements TickRunner {
     private final MoveService moveService;
 
     @Nonnull
-    private final FleetService fleetService;
-
-    @Nonnull
-    private final FleetMovementCache fleetMovementCache;
-
-    @Nonnull
-    private final PlanetService planetService;
+    private final FleetMovementExecutorService fleetMovementExecutorService;
 
     @Autowired
-    public FleetMovementTickRunner(@Nonnull final PlanetService planetService,
-                                   @Nonnull final MoveService moveService,
-                                   @Nonnull final FleetService fleetService,
-                                   @Nonnull final FleetMovementCache fleetMovementCache) {
-        this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
+    public FleetMovementTickRunner(@Nonnull final MoveService moveService,
+                                   @Nonnull final FleetMovementExecutorService fleetMovementExecutorService) {
         this.moveService = Preconditions.checkNotNull(moveService, "moveService must not be empty");
-        this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
-        this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
+        this.fleetMovementExecutorService = Preconditions.checkNotNull(fleetMovementExecutorService, "fleetMovementExecutorService must not be empty");
     }
 
     @Override
@@ -66,37 +52,7 @@ public class FleetMovementTickRunner implements TickRunner {
 
         final List<Move> movements = moveService.findAllUncompleted();
         for (final Move m : movements) {
-            final Fleet fleet = m.getFleet();
-            final FleetOrbit destinationOrbit = m.getDestinationOrbit();
-            boolean isDone = move(m);
-            moveService.save(m);
-            if (isDone) {
-                fleet.setOrbit(destinationOrbit);
-                fleet.setMove(null);
-                fleetService.save(fleet);
-            }
+            fleetMovementExecutorService.executeMove(m, today);
         }
     }
-
-    /**
-     * Processes a movement.
-     *
-     * @param move the movement to process
-     * @return <code>true</code> if the movement is done, <code>false</code> otherwise
-     */
-    private boolean move(@Nonnull final Move move) {
-        Preconditions.checkNotNull(move, "move shouldn't be null!");
-        Preconditions.checkNotNull(today, "today must not be empty");
-
-        int moveDoneAtZero = move.getTicksLeft();
-        moveDoneAtZero--;
-        if (moveDoneAtZero > 0) {
-            move.setTicksLeft(moveDoneAtZero);
-            // todo detect if fleet is in hyperspace and remove fleet orbit completely
-            return false;
-        }
-        move.setFinished(today);
-        return true;
-    }
-
 }

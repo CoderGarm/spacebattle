@@ -514,7 +514,7 @@ public class FleetApi extends BaseApi {
             throw new NotifyWebUserException("Nope, I guess not.");
         }
 
-        final Planet station = planetService.findByCoordinates(fleet.getOrbit());
+        final Planet station = fleet.getOrbit().getPlanet();
         final Set<de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip> ships = fleet.getAliveShips();
         ships.forEach(w -> w.setMothball(Objects.requireNonNull(station)));
         warShipService.saveAll(ships);

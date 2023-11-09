@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -36,7 +35,8 @@ public class HeatMapRunner implements TickRunner {
      */
     public static final int BASIC_HEAT_INCREMENT = 1;
 
-    @Nullable
+    @Nonnull
+    @SuppressWarnings("NotNullFieldNotInitialized")
     private Tick today;
 
     @Nonnull
@@ -89,7 +89,7 @@ public class HeatMapRunner implements TickRunner {
             // do not relatively reduce the mission effect more than necessary
             final int heat = impact + (orbitalImpact / 2);
             final Owner owner = heatMap.getPlanet().getOwner() != null ? heatMap.getPlanet().getOwner() : Owner.UNCOLONIZED;
-            LOGGER.info("\t\t" + heat + " (" + impact + "/" + (orbitalImpact / 2) + ") to " + heatMap.getPlanet().getName() + " from " + owner.getUsername());
+            LOGGER.trace("\t\t" + heat + " (" + impact + "/" + (orbitalImpact / 2) + ") to " + heatMap.getPlanet().getName() + " from " + owner.getUsername());
             heatMap.add(heat);
         });
 

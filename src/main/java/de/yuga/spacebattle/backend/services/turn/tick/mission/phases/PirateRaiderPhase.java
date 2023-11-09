@@ -29,7 +29,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -44,7 +47,8 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
     @Nonnull
     private static final Logger LOGGER = LoggerFactory.getLogger(PirateRaiderPhase.class);
 
-    @Nullable
+    @Nonnull
+    @SuppressWarnings("NotNullFieldNotInitialized")
     private Tick today;
 
     @Nonnull
@@ -95,16 +99,16 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
 
         final List<Planet> planetToStore = new ArrayList<>();
         final List<Fleet> fleetToStore = new ArrayList<>();
-        final List<Fleet> pirateFleets = fleetService.findAllFleetsWithoutMovementByUser(pirate.getId());
+        final List<Fleet> pirateFleets = fleetService.findAllFleetsWithoutMovementByUser(pirate.getId()).stream()
+                .filter(f -> f.getOrbit() != null)
+                .filter(f -> f.getOrbit().getPlanet() != null)
+                .collect(Collectors.toList());
         for (final Fleet pirateFleet : pirateFleets) {
             final long freeCargoUnits = CargoCalculator.getFreeCargoUnits(pirateFleet);
             if (freeCargoUnits > 0) {
-                final Planet target = planetService.findByCoordinates(Objects.requireNonNull(pirateFleet.getOrbit()));
-                if (target == null) {
-                    // not in a planetary orbit
-                    continue;
-                }
-
+                assert pirateFleet.getOrbit() != null;
+                assert pirateFleet.getOrbit().getPlanet() != null;
+                final Planet target = pirateFleet.getOrbit().getPlanet();
                 final BattleReport battleReport = fight(today, target);
                 final Owner owner = target.getOwner() != null ? target.getOwner() : Owner.UNCOLONIZED;
                 boolean userDefeated = true;

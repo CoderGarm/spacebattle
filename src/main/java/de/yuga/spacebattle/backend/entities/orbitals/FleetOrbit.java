@@ -32,7 +32,7 @@ public class FleetOrbit {
      */
     @Nullable
     @Embedded
-    private Orbit orbit; /* fixme remove orbit when planet is present */
+    private Orbit orbit;
 
     public FleetOrbit() {
     }

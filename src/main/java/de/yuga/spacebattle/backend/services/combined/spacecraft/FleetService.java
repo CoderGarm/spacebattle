@@ -140,7 +140,7 @@ public class FleetService {
                     .filter(Objects::nonNull)
                     .findFirst()
                     .orElseThrow(() -> new NotifyWebUserException("Pretty sad to find no home."));
-            planet = planetService.findByCoordinates(fleetOrbit);
+            planet = fleetOrbit.getPlanet();
         }
 
         final Set<Fleet> result = new HashSet<>();
@@ -190,8 +190,7 @@ public class FleetService {
             return fleet;
         }).collect(Collectors.toList());
 
-        fleetRepository.saveAll(fleets);
-        return fleets;
+        return fleetRepository.saveAll(fleets);
     }
 
     @Nonnull
@@ -475,12 +474,9 @@ public class FleetService {
         Preconditions.checkNotNull(warShip, "warShip must not be empty");
         Preconditions.checkNotNull(warShip.getFleet(), "warShip.getFleet() must not be empty");
         Preconditions.checkNotNull(warShip.getFleet().getOrbit(), "warShip.getFleet().getOrbit() must not be empty");
+        Preconditions.checkNotNull(warShip.getFleet().getOrbit().getPlanet(), "warShip.getFleet().getOrbit().getPlanet() must not be empty");
 
-        final FleetOrbit orbit = warShip.getFleet().getOrbit();
-        final Planet mothball = planetService.findByCoordinates(orbit);
-        Preconditions.checkNotNull(mothball, "mothball must not be empty");
-
-        warShip.setMothball(mothball);
+        warShip.setMothball(warShip.getFleet().getOrbit().getPlanet());
         warShipService.save(warShip);
         transferCrewToPlanet(warShip);
     }
@@ -554,7 +550,7 @@ public class FleetService {
                     .map(Fleet::getOrbit)
                     .filter(Objects::nonNull)
                     .findFirst().orElseThrow(NullPointerException::new);
-            planet = planetService.findByCoordinates(fleetOrbit);
+            planet = fleetOrbit.getPlanet();
         }
         return planet;
     }

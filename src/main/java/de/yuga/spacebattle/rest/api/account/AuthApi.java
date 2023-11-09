@@ -324,7 +324,7 @@ public class AuthApi {
         planet = colonizationService.colonizePlanet(colonization);
         operationalService.operateInoperationals(tickTimeService.getToday(), planet);
 
-        heatMapService.createHeatForNeighbourhood(planet);
+        heatMapService.createHeatForMainPlanet(planet);
 
         final NonPlayerCharacter sender = nonPlayerCharacterService.findByUsername(DEFEATED_OPPONENT);
         final String replace = WELCOME_MESSAGE.replace(NAME_PLACEHOLDER, saved.getUsername());

@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
+import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.researches.ResearchLevel;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
@@ -119,7 +120,8 @@ public class AdvisoryApi extends BaseApi {
                 .map(Fleet::getOrbit)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet()).stream()
-                .map(planetService::findByCoordinates)
+                .map(FleetOrbit::getPlanet)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         planets.removeAll(planetsWithAnchoredFleets);
         return ResponseEntity.ok(planets.stream().map(Planet::new).collect(Collectors.toList()));

@@ -1,15 +1,15 @@
 package de.yuga.spacebattle.backend.repositories.turn;
 
 import de.yuga.spacebattle.backend.entities.turn.Move;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
-public interface MoveRepository extends CrudRepository<Move, Integer> {
+public interface MoveRepository extends JpaRepository<Move, Integer> {
 
     @Nullable
     @Query("SELECT m FROM Move m WHERE m.isDeleted = false")

@@ -187,6 +187,7 @@ public class PlanetService {
     }
 
     @Nullable
+    @SuppressWarnings("unused") // it works - keep it
     public Planet findByCoordinates(@Nonnull final FleetOrbit fleetOrbit) {
         Preconditions.checkNotNull(fleetOrbit, "fleetOrbit must not be empty");
 

@@ -12,11 +12,10 @@ import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.enums.EMissionAction;
 import de.yuga.spacebattle.backend.services.account.NonPlayerCharacterService;
-import de.yuga.spacebattle.backend.services.caches.FleetMovementCache;
 import de.yuga.spacebattle.backend.services.caches.MissionCache;
 import de.yuga.spacebattle.backend.services.caches.RaidingPirateCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
-import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.backend.services.spacecraft.FleetMovementExecutorService;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.MissionPhaseRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +25,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.services.MasterOfTheUniverseService.PIRATE;
@@ -40,33 +40,31 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(PirateWithdrawPhase.class);
 
     @Nonnull
-    private final PlanetService planetService;
-
-    @Nonnull
     private final NonPlayerCharacterService nonPlayerCharacterService;
 
     @Nonnull
     private final FleetService fleetService;
 
     @Nonnull
-    private final FleetMovementCache fleetMovementCache;
+    private final MissionCache missionCache;
 
     @Nonnull
-    private final MissionCache missionCache;
     private final RaidingPirateCache raidingPirateCache;
 
+    @Nonnull
+    private final FleetMovementExecutorService movementExecutorService;
+
     @Autowired
-    public PirateWithdrawPhase(@Nonnull final PlanetService planetService,
-                               @Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
+    public PirateWithdrawPhase(@Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
                                @Nonnull final FleetService fleetService,
-                               @Nonnull final FleetMovementCache fleetMovementCache,
-                               @Nonnull final MissionCache missionCache, final RaidingPirateCache raidingPirateCache) {
-        this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
+                               @Nonnull final MissionCache missionCache,
+                               @Nonnull final RaidingPirateCache raidingPirateCache,
+                               @Nonnull final FleetMovementExecutorService movementExecutorService) {
         this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
-        this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
         this.missionCache = Preconditions.checkNotNull(missionCache, "missionCache must not be empty");
-        this.raidingPirateCache = raidingPirateCache;
+        this.raidingPirateCache = Preconditions.checkNotNull(raidingPirateCache, "raidingPirateCache must not be empty");
+        this.movementExecutorService = Preconditions.checkNotNull(movementExecutorService, "movementExecutorService must not be empty");
     }
 
     @Override
@@ -152,7 +150,17 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
             final Move move = new Move(pirateFleet, new FleetOrbit(positionOnHyperlimit, planet.getSystem()));
             resultingMoves.add(move);
         }
-        //noinspection DataFlowIssue
-        fleetService.moveFleets(resultingMoves).forEach(fleet -> fleetMovementCache.add(today, fleet, fleet.getMove(), fleet.getMove().getDestinationOrbit().getSystem()));
+        executeMovement(today, resultingMoves);
+    }
+
+    private void executeMovement(@Nonnull final Tick today, @Nonnull final List<Move> resultingMoves) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(resultingMoves, "resultingMoves must not be empty");
+
+        final List<Fleet> fleets = fleetService.moveFleets(resultingMoves);
+        fleets.stream()
+                .map(Fleet::getMove)
+                .filter(Objects::nonNull)
+                .forEach(move -> movementExecutorService.executeMove(move, today));
     }
 }

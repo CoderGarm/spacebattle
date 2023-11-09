@@ -97,7 +97,7 @@ public class Move extends Completable implements HasOwner {
 
     public Move(@Nonnull final Fleet fleet,
                 @Nonnull final FleetOrbit destination,
-                final int calculateTimeToTravel,
+                final int timeToTravel,
                 final int originalDuration) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
@@ -107,7 +107,7 @@ public class Move extends Completable implements HasOwner {
         this.fleet = fleet;
         this.originOrbit = new FleetOrbit(fleet.getOrbit());
         this.destinationOrbit = destination;
-        this.ticksLeft = calculateTimeToTravel;
+        this.ticksLeft = timeToTravel;
         this.originalDuration = originalDuration;
     }
 

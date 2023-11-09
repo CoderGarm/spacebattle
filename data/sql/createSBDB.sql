@@ -2238,3 +2238,4 @@ INSERT INTO dbPatch VALUES (NULL, NOW(), 'increase pop output', '0.1.14-3');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'exchange ticks left to points', '0.1.14-4');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'reduce education level NONE', '0.1.14-5');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'completable fleet move', '0.1.15-1');
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'drop heat from uncolonized planets', '0.1.15-2');

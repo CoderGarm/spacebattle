@@ -14,10 +14,10 @@ import de.yuga.spacebattle.backend.entities.turn.mission.PirateHuntMission;
 import de.yuga.spacebattle.backend.enums.EMissionAction;
 import de.yuga.spacebattle.backend.enums.EMissionType;
 import de.yuga.spacebattle.backend.services.account.NonPlayerCharacterService;
-import de.yuga.spacebattle.backend.services.caches.FleetMovementCache;
 import de.yuga.spacebattle.backend.services.caches.MissionCache;
 import de.yuga.spacebattle.backend.services.caches.RaidingPirateCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
+import de.yuga.spacebattle.backend.services.spacecraft.FleetMovementExecutorService;
 import de.yuga.spacebattle.backend.services.turn.mission.MissionService;
 import de.yuga.spacebattle.backend.services.turn.tick.HeatMapRunner;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.HeatMapService;
@@ -31,6 +31,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static de.yuga.spacebattle.backend.services.MasterOfTheUniverseService.PIRATE;
@@ -51,9 +52,6 @@ public class PirateApproachPhase implements MissionPhaseRunner {
     private final FleetService fleetService;
 
     @Nonnull
-    private final FleetMovementCache fleetMovementCache;
-
-    @Nonnull
     private final HeatMapService heatMapService;
 
     @Nonnull
@@ -65,21 +63,24 @@ public class PirateApproachPhase implements MissionPhaseRunner {
     @Nonnull
     private final RaidingPirateCache raidingPirateCache;
 
+    @Nonnull
+    private final FleetMovementExecutorService movementExecutorService;
+
     @Autowired
     public PirateApproachPhase(@Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
                                @Nonnull final FleetService fleetService,
-                               @Nonnull final FleetMovementCache fleetMovementCache,
                                @Nonnull final HeatMapService heatMapService,
                                @Nonnull final MissionService missionService,
                                @Nonnull final MissionCache missionCache,
-                               @Nonnull final RaidingPirateCache raidingPirateCache) {
+                               @Nonnull final RaidingPirateCache raidingPirateCache,
+                               @Nonnull final FleetMovementExecutorService movementExecutorService) {
         this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
-        this.fleetMovementCache = Preconditions.checkNotNull(fleetMovementCache, "fleetMovementCache must not be empty");
         this.heatMapService = Preconditions.checkNotNull(heatMapService, "heatMapService must not be empty");
         this.missionService = Preconditions.checkNotNull(missionService, "missionService must not be empty");
         this.missionCache = Preconditions.checkNotNull(missionCache, "missionCache must not be empty");
         this.raidingPirateCache = Preconditions.checkNotNull(raidingPirateCache, "raidingPirateCache must not be empty");
+        this.movementExecutorService = Preconditions.checkNotNull(movementExecutorService, "movementExecutorService must not be empty");
     }
 
     @Override
@@ -138,8 +139,10 @@ public class PirateApproachPhase implements MissionPhaseRunner {
         Preconditions.checkNotNull(resultingMoves, "resultingMoves must not be empty");
 
         final List<Fleet> fleets = fleetService.moveFleets(resultingMoves);
-        //noinspection DataFlowIssue
-        fleets.forEach(fleet -> fleetMovementCache.add(today, fleet, fleet.getMove(), fleet.getMove().getDestinationOrbit().getSystem()));
+        fleets.stream()
+                .map(Fleet::getMove)
+                .filter(Objects::nonNull)
+                .forEach(move -> movementExecutorService.executeMove(move, today));
     }
 
     @Nullable

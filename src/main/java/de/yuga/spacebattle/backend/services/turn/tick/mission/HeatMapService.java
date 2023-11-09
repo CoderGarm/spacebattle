@@ -6,14 +6,14 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.mission.HeatMap;
 import de.yuga.spacebattle.backend.enums.EMissionType;
 import de.yuga.spacebattle.backend.repositories.turn.mission.HeatMapRepository;
-import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+
+import static de.yuga.spacebattle.backend.entities.turn.mission.HeatMap.STARTING_HEAT_FOR_MAIN_PLANET;
 
 @Service
 public class HeatMapService {
@@ -21,18 +21,13 @@ public class HeatMapService {
     @Nonnull
     private final HeatMapRepository heatMapRepository;
 
-    @Nonnull
-    private final StarSystemService starSystemService;
-
     @Autowired
-    public HeatMapService(@Nonnull final HeatMapRepository heatMapRepository,
-                          @Nonnull final StarSystemService starSystemService) {
+    public HeatMapService(@Nonnull final HeatMapRepository heatMapRepository) {
         this.heatMapRepository = Preconditions.checkNotNull(heatMapRepository, "heatMapRepository must not be empty");
-        this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService must not be empty");
     }
 
     @Nonnull
-    public List<Planet> findHottestPlanets(@Nonnull final EMissionType eMissionType) {
+    public List<HeatMap> findHottestPlanets(@Nonnull final EMissionType eMissionType) {
         Preconditions.checkNotNull(eMissionType, "eMissionType must not be empty");
 
         return Objects.requireNonNullElse(heatMapRepository.findHottestUsers(eMissionType), new ArrayList<>());
@@ -63,65 +58,10 @@ public class HeatMapService {
         return Objects.requireNonNullElse(heatMapRepository.findHeatForMissionType(eMissionType), new HashSet<>());
     }
 
-    public void createHeatForNeighbourhood(@Nonnull final Planet planet) {
+    public void createHeatForMainPlanet(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
-        final Set<Planet> neighbours = starSystemService.findNeighbourPlanets(planet.getSystem());
-        neighbours.addAll(planet.getSystem().getPlanets());
-        final Set<HeatMap> heatForPlanets = findHeatForPlanets(neighbours);
-
-        // just randomly chosen values for the new players area
-        int medianHeat = -8;
-        int minHeat = -14;
-        int maxHeat = -6;
-        if (!heatForPlanets.isEmpty()) {
-            final List<HeatMap> sortedHeat = heatForPlanets.stream().sorted((Comparator.comparingInt(HeatMap::getHeat))).collect(Collectors.toList());
-            final int medianIndex = (sortedHeat.size() - 1) / 2;
-            final HeatMap medianHeatMap = sortedHeat.get(medianIndex);
-
-            medianHeat = medianHeatMap.getHeat();
-            minHeat = sortedHeat.get(0).getHeat();
-            maxHeat = sortedHeat.get(sortedHeat.size() - 1).getHeat();
-
-            final Set<Planet> planetsInHeat = heatForPlanets.stream().map(HeatMap::getPlanet).collect(Collectors.toSet());
-            neighbours.removeAll(planetsInHeat);
-        }
-        final List<Planet> planets = new ArrayList<>(neighbours);
-        final List<HeatMap> newHeat = pseudoRandomizeHeatMap(medianHeat, minHeat, maxHeat, planets);
-        heatMapRepository.saveAll(newHeat);
-
-        final Set<HeatMap> mainPlanetHeat = findHeatForPlanets(Set.of(planet));
-        mainPlanetHeat.forEach(HeatMap::setMainPlanet);
-        heatMapRepository.saveAll(mainPlanetHeat);
-    }
-
-    @Nonnull
-    private List<HeatMap> pseudoRandomizeHeatMap(final int medianHeat, final int minHeat, final int maxHeat, @Nonnull final List<Planet> planets) {
-        Preconditions.checkNotNull(planets, "planets must not be empty");
-
-        final List<HeatMap> newHeat = new ArrayList<>();
-        for (int i = 0; i < planets.size(); i++) {
-            final Planet p = planets.get(i);
-            int heat = medianHeat;
-            final int maxDeviance = Integer.max(Math.abs(maxHeat) - Math.abs(medianHeat), Math.abs(medianHeat) - Math.abs(minHeat));
-            if (i % 3 == 0) {
-                heat = maxDeviance > 1 ? ThreadLocalRandom.current().nextInt(medianHeat, maxHeat) : medianHeat - 1;
-            }
-            if (i % 2 == 0) {
-                heat = maxDeviance > 1 ? ThreadLocalRandom.current().nextInt(minHeat, maxHeat) : medianHeat + 1;
-            }
-
-            newHeat.add(new HeatMap(p, EMissionType.PIRATE_RAID, heat));
-        }
-        return newHeat;
-    }
-
-    @Nonnull
-    public Set<HeatMap> findHeatForPlanets(@Nonnull final Set<Planet> planets) {
-        Preconditions.checkNotNull(planets, "planets must not be empty");
-
-        final List<Integer> iDs = planets.stream().map(AbstractEntityKey::getId).collect(Collectors.toList());
-        return Objects.requireNonNullElse(heatMapRepository.findHeatForPlanets(iDs), new HashSet<>());
+        heatMapRepository.save(new HeatMap(planet, EMissionType.PIRATE_RAID, STARTING_HEAT_FOR_MAIN_PLANET));
     }
 
     public void saveAll(@Nonnull final Collection<HeatMap> heatMaps) {

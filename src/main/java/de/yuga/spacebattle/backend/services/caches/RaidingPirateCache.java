@@ -115,7 +115,12 @@ public class RaidingPirateCache {
         if (eMissionActions != null && !eMissionActions.isEmpty() && missionAction == eMissionActions.get(0)) {
             eMissionActions = new ArrayList<>(eMissionActions);
             eMissionActions.remove(0);
-            put(today, pirateFleet, eMissionActions);
+            if (eMissionActions.isEmpty()) {
+                final String key = getKey(today, pirateFleet);
+                cacheFileWriter.dropKeyFromFileCache(RaidingPirateCache.MissionActionDto.class, key);
+            } else {
+                put(today, pirateFleet, eMissionActions);
+            }
         }
     }
 

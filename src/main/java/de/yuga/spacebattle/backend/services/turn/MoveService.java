@@ -64,4 +64,11 @@ public class MoveService {
 
         return moves;
     }
+
+    @Nonnull
+    public List<Move> saveAll(@Nonnull final List<Move> moves) {
+        Preconditions.checkNotNull(moves, "moves must not be empty");
+
+        return moveRepository.saveAll(moves);
+    }
 }

@@ -39,6 +39,10 @@ article + check ship returns from mission
 
 #### Gameplay
 
+1. Piraten spawnen nicht mehr für Raids auf nicht kolonialisierte Planeten.  
+   Ursprünglich war die Idee dahinter, dass das Universum etwas lebendiger wirkt, weil man auch mal zwischendurch auf fremde Flotten treffen kann. Das Ergebnis war allerdings, dass
+   in einigen Systemen zwei, drei oder view Piratenflotten gespawnt sind und das irritiert mehr, als dass es lebendig wirkt.
+
 todo. schiffe in reserve zu anderen planeten transportieren wenn kein Hyperraumantrieb -> manual transportation
 
 todo. tech level 2 und 3 nutzen
@@ -64,17 +68,11 @@ todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehb
 todo. check fitting yard
 todo. neue schiffe direkt in reserve
 
-
 ### Bugs fixed
 
 1. Die planetaren Ressourcen werden beim Flottenwechsel im Flottenmenü aktualisiert.
 2. Der Status einer Flotte wird nun bei jeder Änderung der Formation neu bestimmt.
-
-todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen -> kein Unterschied zw ankunft und abflug
--> Laut meiner anzeige sind 2 Flotten von dir heute beim hypelimit aufgetaut. Tatsächlich ist eine da, aber die andere bereits beim plani.
--> cancel flight testen -check
--> alle flights testen -check
--> piraten spawn testen
+3. Flottenbewegungen wurden im Journal falsch angezeigt, ob eine Flotte ins System gesprungen oder den Planeten angeflogen hat, wurde nicht unterschieden. Das ist repariert.
 
 todo. fleet detachment submit button disable when no change
 todo. research punkte -> sandkiste issue with 27 points left vs 160 from inop labs
@@ -83,9 +81,7 @@ todo. keine jobs ohne aktiviertes gebäude (werft) -> division / 0 in calcRemain
 todo. negative pop development in UI
 todo. battlereport new advisory but no new present
 todo. no running job in journal
-todo. fleet update for state on every fleet action
 todo. migration must respect pop demand
-
 
 todo. wiki is broken -> store full text as easy solution?
 
