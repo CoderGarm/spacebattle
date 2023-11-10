@@ -20,15 +20,14 @@
    Diese Verteilung passt tatsächlich sehr gut zu der verwendeten Formel zum Bevölkerungswachstum (Stichwort: r-Strategen), ist aber für Menschen genauso ungeeignet wir für BfH.  
    Die Menge an Neugeborenen wurde auf die Gesamtmenge der sonstigen Bevölkerung reduziert.  
    Diese Änderung ist auf Planeten mit mehr als 1000 Neugeborenen beschränkt.
-
-todo. anzeige von negativer bevölkerung fixen
-
-todo. Dadurch haben sich auch Änderungen für neue Accounts ergeben, die im Advisory Board berücksichtigt sind.  
-Es gibt neue Vorschläge, je nachdem wie weit man im Spiel ist.
+3. Dadurch haben sich auch Änderungen für neue Accounts ergeben, die im Advisory Board berücksichtigt sind.  
+   Es gibt neue Vorschläge, je nachdem wie weit man im Spiel ist.
 
 Das Ergebnis der Punkte 1 und 2 wird sein, dass eine ganze Weile kein Bevölkerungswachstum stattfindet, also bitte wundert euch nicht darüber.  
 Die Idee dieses Lösungsansatzes ist es, freien Wohnraum dauerhaft zu ermöglichen, der nicht sofort belegt wird. Damit gewinnt das Thema Migration und Bildung eine größere
 Bedeutung - und ganz wichtig: Die Probleme bzw Deadlocks sollten damit alle beseitigt sein.
+
+Und etwas fürs Auge gabs auch noch ;)
 
 ----> wiki artikel nach release
 

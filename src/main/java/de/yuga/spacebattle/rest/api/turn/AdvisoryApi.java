@@ -9,6 +9,7 @@ import de.yuga.spacebattle.backend.entities.researches.ResearchLevel;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import de.yuga.spacebattle.backend.enums.EProductionCategory;
+import de.yuga.spacebattle.backend.enums.ERefinementSequence;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.enums.EShipClassType;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
@@ -149,26 +150,45 @@ public class AdvisoryApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getConstructionAdvice() { /* fixme add advisory for pops */
+    public ResponseEntity<?> getConstructionAdvice() {
         final TickAdvice tickAdvice = new TickAdvice();
 
-        final List<Construction> allConstructionsForUser = constructionService.findAllConstructionsForUser(getIdUser());
+        final List<Construction> constructions = constructionService.findAllConstructionsForUser(getIdUser());
 
-        final boolean groundFacilityWithoutJobPresent = allConstructionsForUser.stream()
-                .filter(c -> c.getBuilding().getProductionTarget() == EResourceType.CONSTRUCTION)
-                .anyMatch(facility -> facility.getJobs().isEmpty());
-        // construction possible?
-        if (groundFacilityWithoutJobPresent) {
-            tickAdvice.setConstructionPossible(true);
+        setConstructionPossibleAdvice(constructions, tickAdvice);
+
+        /* last comes, first serve */
+        setRefinementAdvisory(constructions, ERefinementSequence.EDUCATION_MILITARY_II, tickAdvice);
+        setRefinementAdvisory(constructions, ERefinementSequence.EDUCATION_MILITARY_I, tickAdvice);
+        setRefinementAdvisory(constructions, ERefinementSequence.EDUCATION_CIVIL_III, tickAdvice);
+
+        setResearchesToShipyardAdvice(constructions, tickAdvice);
+        setRefinementAdvisory(constructions, ERefinementSequence.EDUCATION_CIVIL_II, tickAdvice);
+        setRefinementAdvisory(constructions, ERefinementSequence.EDUCATION_CIVIL_I, tickAdvice);
+
+        return ResponseEntity.ok(tickAdvice);
+    }
+
+    private void setRefinementAdvisory(@Nonnull final List<Construction> constructions,
+                                       @Nonnull final ERefinementSequence refinementSequence,
+                                       @Nonnull final TickAdvice tickAdvice) {
+        Preconditions.checkNotNull(constructions, "constructions must not be empty");
+        Preconditions.checkNotNull(refinementSequence, "refinementSequence must not be empty");
+        Preconditions.checkNotNull(tickAdvice, "tickAdvice must not be empty");
+
+        if (constructions.stream().noneMatch(c -> c.getBuilding().getProductionType().getRefinementSequence() == refinementSequence)) {
+            createAdviceFor(refinementSequence, tickAdvice);
         }
+    }
 
-        final Construction researchLaboratory = allConstructionsForUser.stream()
-                .filter(c -> c.getBuilding().getProductionTarget() == EResourceType.RESEARCH)
-                .findFirst()
-                .orElse(null);
+    private void setResearchesToShipyardAdvice(@Nonnull final List<Construction> constructions, @Nonnull final TickAdvice tickAdvice) {
+        Preconditions.checkNotNull(constructions, "constructions must not be empty");
+        Preconditions.checkNotNull(tickAdvice, "tickAdvice must not be empty");
+
+        final boolean laboratoryBuild = isConstructionPresent(constructions, EResourceType.RESEARCH);
         // research lab build?
-        if (researchLaboratory == null) {
-            checkConstructionAndNotify(EResourceType.RESEARCH, tickAdvice);
+        if (!laboratoryBuild) {
+            createAdviceFor(EResourceType.RESEARCH, tickAdvice);
         } else {
             // active research?
             final List<Research> activeJobs = jobService.getResearchesFromActiveJobs(getIdUser());
@@ -183,11 +203,10 @@ public class AdvisoryApi extends BaseApi {
             if (!shipyardResearched) {
                 setShipyardAdvice(researchesForUser, tickAdvice);
             } else {
-                final boolean shipyardBuild = allConstructionsForUser.stream()
-                        .anyMatch(c -> c.getBuilding().getProductionTarget() == EResourceType.ORBITAL_CONSTRUCTION);
+                final boolean shipyardBuild = isConstructionPresent(constructions, EResourceType.ORBITAL_CONSTRUCTION);
                 // shipyard build?
                 if (!shipyardBuild) {
-                    checkConstructionAndNotify(EResourceType.ORBITAL_CONSTRUCTION, tickAdvice);
+                    createAdviceFor(EResourceType.ORBITAL_CONSTRUCTION, tickAdvice);
                 } else {
                     final List<ShipClass> shipClasses = shipClassService.findAllLatestByOwner(getIdUser());
                     if (shipClasses.size() > 1) {
@@ -196,7 +215,26 @@ public class AdvisoryApi extends BaseApi {
                 }
             }
         }
-        return ResponseEntity.ok(tickAdvice);
+    }
+
+    private static void setConstructionPossibleAdvice(@Nonnull final List<Construction> constructions, @Nonnull final TickAdvice tickAdvice) {
+        Preconditions.checkNotNull(constructions, "constructions must not be empty");
+        Preconditions.checkNotNull(tickAdvice, "tickAdvice must not be empty");
+
+        final boolean groundFacilityWithoutJobPresent = constructions.stream()
+                .filter(c -> c.getBuilding().getProductionTarget() == EResourceType.CONSTRUCTION)
+                .anyMatch(facility -> facility.getJobs().isEmpty());
+        // construction possible?
+        if (groundFacilityWithoutJobPresent) {
+            tickAdvice.setConstructionPossible(true);
+        }
+    }
+
+    private static boolean isConstructionPresent(@Nonnull final List<Construction> constructions, @Nonnull final EResourceType resourceType) {
+        Preconditions.checkNotNull(constructions, "constructions must not be empty");
+        Preconditions.checkNotNull(resourceType, "resourceType must not be empty");
+
+        return constructions.stream().anyMatch(c -> c.getBuilding().getProductionTarget() == resourceType);
     }
 
     private void setShipyardAdvice(@Nonnull final Set<ResearchLevel> researchesForUser, @Nonnull final TickAdvice tickAdvice) {
@@ -214,11 +252,20 @@ public class AdvisoryApi extends BaseApi {
         }
     }
 
-    private void checkConstructionAndNotify(@Nonnull final EResourceType resourceType, @Nonnull final TickAdvice tickAdvice) {
+    private void createAdviceFor(@Nonnull final EResourceType resourceType, @Nonnull final TickAdvice tickAdvice) {
         Preconditions.checkNotNull(resourceType, "resourceType must not be empty");
         Preconditions.checkNotNull(tickAdvice, "tickAdvice must not be empty");
 
         final ProductionType productionType = new ProductionType(resourceType, EProductionCategory.PRODUCE, null);
+        final List<de.yuga.spacebattle.backend.entities.buildings.Building> lab = buildingService.findBuildingByProductionType(productionType);
+        tickAdvice.setSuggestedBuilding(new Building(lab.get(0), getPreferredLanguage()));
+    }
+
+    private void createAdviceFor(@Nonnull final ERefinementSequence refinementSequence, @Nonnull final TickAdvice tickAdvice) {
+        Preconditions.checkNotNull(refinementSequence, "refinementSequence must not be empty");
+        Preconditions.checkNotNull(tickAdvice, "tickAdvice must not be empty");
+
+        final ProductionType productionType = new ProductionType(EResourceType.POPULATION, EProductionCategory.REFINEMENT, refinementSequence);
         final List<de.yuga.spacebattle.backend.entities.buildings.Building> lab = buildingService.findBuildingByProductionType(productionType);
         tickAdvice.setSuggestedBuilding(new Building(lab.get(0), getPreferredLanguage()));
     }
