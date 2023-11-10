@@ -211,8 +211,6 @@ public class ColonizationService {
         // set crew from the ship to the planet
         creditorDeposit.updateCrew(requiredCrew, ECalculationType.ADD);
 
-        final double miningFactor = planet.getMiningFactors().getMiningFactorByType(EResourceType.POPULATION);
-
         final List<Construction> constructions = new ArrayList<>();
         final List<Building> basicBuildings = buildingService.findBasicBuildings();
         basicBuildings.forEach(building -> {
@@ -221,7 +219,7 @@ public class ColonizationService {
             final boolean idPopulationCapacity = EResourceType.POPULATION == productionType.getProductionTarget() && EProductionCategory.CAPACITY == productionType.getProductionCategory();
             if (idPopulationCapacity) {
                 // calculate which level must a capacity construction have to suit all the people
-                level = detectPopCapStartingLevel(creditorDeposit, building, miningFactor);
+                level = detectPopCapStartingLevel(creditorDeposit, building);
             } else {
                 level = 1;
             }
@@ -233,7 +231,7 @@ public class ColonizationService {
         return planetService.save(planet);
     }
 
-    private static int detectPopCapStartingLevel(@Nonnull final ResourceDeposit creditorDeposit, @Nonnull final Building building, final double miningFactor) {
+    private static int detectPopCapStartingLevel(@Nonnull final ResourceDeposit creditorDeposit, @Nonnull final Building building) {
         Preconditions.checkNotNull(creditorDeposit, "creditorDeposit must not be empty");
         Preconditions.checkNotNull(building, "building must not be empty");
 
@@ -245,14 +243,14 @@ public class ColonizationService {
         int levelTo = maxLevel; // fallback
         final BigDecimal virtualSumOfPops = BigDecimal.valueOf(sumOfPopulation);
         for (int virtualLevel = 1; virtualLevel <= maxLevel; virtualLevel++) {
-            final BigDecimal output = TickOutputCalculator.getOutput(baseValue, increasingFactorPerLevel, miningFactor, virtualLevel);
-            if (output.compareTo(virtualSumOfPops) > 0) {
+            final BigDecimal capacityAtLevel = TickOutputCalculator.getOutput(baseValue, increasingFactorPerLevel, 1, virtualLevel);
+            if (capacityAtLevel.compareTo(virtualSumOfPops) > 0) {
                 levelTo = virtualLevel;
                 break;
             }
         }
         // be nice and add three levels - buildings on higher levels are not cheap
-        return levelTo + 4;
+        return levelTo;
     }
 
     /**

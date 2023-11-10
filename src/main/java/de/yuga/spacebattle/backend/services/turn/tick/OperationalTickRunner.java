@@ -9,7 +9,6 @@ import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStat
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
-import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +32,6 @@ public class OperationalTickRunner implements TickRunner {
     private Tick today;
 
     @Nonnull
-    private final JobService jobService;
-
-    @Nonnull
     private final PlanetService planetService;
 
     @Nonnull
@@ -48,12 +44,10 @@ public class OperationalTickRunner implements TickRunner {
     private final OperationalService operationalService;
 
     @Autowired
-    public OperationalTickRunner(@Nonnull final JobService jobService,
-                                 @Nonnull final PlanetService planetService,
+    public OperationalTickRunner(@Nonnull final PlanetService planetService,
                                  @Nonnull final FleetService fleetService,
                                  @Nonnull final WarshipHealthStateService warshipHealthStateService,
                                  @Nonnull final OperationalService operationalService) {
-        this.jobService = Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         this.warshipHealthStateService = Preconditions.checkNotNull(warshipHealthStateService, "warshipHealthStateService must not be empty");

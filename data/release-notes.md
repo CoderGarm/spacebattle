@@ -1,8 +1,44 @@
+### Änderungen in der Bevölkerungsentwicklung
+
+1. Die Berechnung zur Bevölkerungsentwicklung betrachtet nur noch die Bevölkerung im reproduktionsfähigen Alter und mit entsprechend dem Vorgang notwendigen Organen.  
+   Das hat zur Folge, dass die Menge an vorhandener Bevölkerung den größten Einfluss - neben dem Wohnraum - auf die Bevölkerungsentwicklung hat.  
+   Jede Altersstufe - ich impliziere ein gewisses Alter pro Education Level, obwohl das spieltechnisch etwas weit hergeholt ist - besitzt eine "Neigung" zur Reproduktion,
+   sozusagen:
+    - SCHOOL: 0.1
+    - COLLEGE: 1
+    - UNIVERSITY: 1
+    - ENLISTED: 0.4
+    - OFFICER: 0.3
+
+   Diese Koeffizienten bestimmen die Menge an reproduktionsbereiten Individuen.  
+   → 100 College (oder University) resultieren also in 50 reproduktionsbereiten Leuten mit entsprechenden biologischen Anlagen: 100 Leute · 1 = 100 Leute, 100 / 2 = 50 Leute
+   → 100 Enlisted resultieren in 20 Leuten: 100 · 0,4 = 40, 40 / 2 = 20
+
+   Dazu wird es nach dem nächsten Release Wiki-Artikel im Tutorial geben (ist noch buggy).
+2. Die vorhandene Bevölkerung im Zustand "frisch geboren" wurde angepasst.  
+   Das bisherige Bevölkerungswachstum hat dafür gesort, dass es etwa 4,5 Millionen Neugeborene im Universum gab, bei etwa 360 k Erwachsenen.  
+   Diese Verteilung passt tatsächlich sehr gut zu der verwendeten Formel zum Bevölkerungswachstum (Stichwort: r-Strategen), ist aber für Menschen genauso ungeeignet wir für BfH.  
+   Die Menge an Neugeborenen wurde auf die Gesamtmenge der sonstigen Bevölkerung reduziert.  
+   Diese Änderung ist auf Planeten mit mehr als 1000 Neugeborenen beschränkt.
+
+todo. anzeige von negativer bevölkerung fixen
+
+todo. Dadurch haben sich auch Änderungen für neue Accounts ergeben, die im Advisory Board berücksichtigt sind.  
+Es gibt neue Vorschläge, je nachdem wie weit man im Spiel ist.
+
+Das Ergebnis der Punkte 1 und 2 wird sein, dass eine ganze Weile kein Bevölkerungswachstum stattfindet, also bitte wundert euch nicht darüber.  
+Die Idee dieses Lösungsansatzes ist es, freien Wohnraum dauerhaft zu ermöglichen, der nicht sofort belegt wird. Damit gewinnt das Thema Migration und Bildung eine größere
+Bedeutung - und ganz wichtig: Die Probleme bzw Deadlocks sollten damit alle beseitigt sein.
+
+----> wiki artikel nach release
+
 ### Features
 
 article trading protection -> protecting-trades.md
 article priorisierung bei pop demand und migration
 article + check ship returns from mission
+article for pop development
+-> The population growth depends on several factors, e.g. the planets population mining factor has a big influence to the pop growth.
 
 #### Gameplay
 
@@ -45,11 +81,9 @@ todo. missionen sollten Rumpfmasse inkl Klasse beachten "großer Rumpf und Frach
 todo. player comment about the game in profile to display at take-a-tour
 todo. chat search: empire name, ingame name, username
 
-
 ### Bugs fixed
 
 todo. construction issue?
-
 
 todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen -> kein Unterschied zw ankunft und abflug
 -> Laut meiner anzeige sind 2 Flotten von dir heute beim hypelimit aufgetaut. Tatsächlich ist eine da, aber die andere bereits beim plani.

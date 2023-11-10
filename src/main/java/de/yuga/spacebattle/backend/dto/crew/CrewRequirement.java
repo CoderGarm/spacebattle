@@ -37,13 +37,15 @@ public class CrewRequirement {
         return subType;
     }
 
-    /**
-     * Returns the sum of all {@link EEducationType}s.
-     *
-     * @return the sum of all people
-     */
     public long getSumOfPopulation() {
         return crewRequirement.values().stream().reduce(0L, Long::sum);
+    }
+
+    public long getSumOfReproductivePopulation() {
+        return (long) (double) crewRequirement.entrySet().stream().map(e -> {
+            final double reproductionCoefficient = e.getKey().getReproductionCoefficient();
+            return reproductionCoefficient * e.getValue();
+        }).reduce(0D, Double::sum);
     }
 
     public long getCrewAmountByType(@Nonnull final EEducationType educationType) {

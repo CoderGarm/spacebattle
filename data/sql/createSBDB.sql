@@ -2199,3 +2199,5 @@ INSERT INTO dbPatch VALUES (NULL, NOW(), 'planetary mothball', '0.1.14-1');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'link wiki with tut', '0.1.14-2');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'increase pop output', '0.1.14-3');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'exchange ticks left to points', '0.1.14-4');
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'reduce education level NONE', '0.1.14-5');
+

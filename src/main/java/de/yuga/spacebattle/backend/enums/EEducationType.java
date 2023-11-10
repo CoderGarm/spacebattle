@@ -12,32 +12,32 @@ public enum EEducationType implements HasIconName {
     /**
      * no explicit education
      */
-    NONE(null),
+    NONE(null, 0),
 
     /**
      * civil Mk I is kind of elementary school
      */
-    SCHOOL(EEducationType.NONE),
+    SCHOOL(EEducationType.NONE, 0.1),
 
     /**
      * civil Mk II is kind of secondary school or untrained workers
      */
-    COLLEGE(EEducationType.SCHOOL),
+    COLLEGE(EEducationType.SCHOOL, 1),
 
     /**
      * civil Mk III is kind of internship, vocational training or a university  education
      */
-    UNIVERSITY(EEducationType.COLLEGE),
+    UNIVERSITY(EEducationType.COLLEGE, 1),
 
     /**
      * military Mk I is a teams rank
      */
-    ENLISTED(EEducationType.COLLEGE),
+    ENLISTED(EEducationType.COLLEGE, 0.4),
 
     /**
      * military Mk II is a officers rank
      */
-    OFFICER(EEducationType.UNIVERSITY),
+    OFFICER(EEducationType.UNIVERSITY, 0.3),
     ;
 
 
@@ -53,9 +53,12 @@ public enum EEducationType implements HasIconName {
     @Nonnull
     final String iconName;
 
-    EEducationType(@Nullable final EEducationType requirement) {
+    final double reproductionCoefficient;
+
+    EEducationType(@Nullable final EEducationType requirement, final double reproductionCoefficient) {
         this.requirement = requirement;
         this.iconName = this.name();
+        this.reproductionCoefficient = reproductionCoefficient;
     }
 
     public boolean isWorkforce() {
@@ -75,5 +78,9 @@ public enum EEducationType implements HasIconName {
     @Override
     public String getIconName() {
         return iconName;
+    }
+
+    public double getReproductionCoefficient() {
+        return reproductionCoefficient;
     }
 }

@@ -149,7 +149,7 @@ public class AdvisoryApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getConstructionAdvice() {
+    public ResponseEntity<?> getConstructionAdvice() { /* fixme add advisory for pops */
         final TickAdvice tickAdvice = new TickAdvice();
 
         final List<Construction> allConstructionsForUser = constructionService.findAllConstructionsForUser(getIdUser());

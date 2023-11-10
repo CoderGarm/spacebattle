@@ -76,8 +76,19 @@ public class PopulationControlCalculator {
             return 0;
         }
         final ResourceDeposit utilization = operationalService.getUtilizedPopulationForPlanet(idPlanet);
-        final long sumOfPopulationUtilization = utilization.getCrewRequirement().getSumOfPopulation();
-        final long sumOfPopulation = resourceDeposit.getCrewRequirement().getSumOfPopulation() + sumOfPopulationUtilization;
+        final long sumOfPopulation = resourceDeposit.getCrewRequirement().getSumOfPopulation() + utilization.getCrewRequirement().getSumOfPopulation();
+        final long sumOfReproductivePopulation
+                = ((resourceDeposit.getCrewRequirement().getSumOfReproductivePopulation()
+                + utilization.getCrewRequirement().getSumOfReproductivePopulation()) / 2)
+                - resourceDeposit.getCrewRequirement().getCrewAmountByType(NONE);
+        if (sumOfReproductivePopulation <= 0) {
+            // no bum no sum
+            return 0;
+        }
+        return calculateNewbornAmount(idPlanet, constructionsByResource, sumOfPopulation, sumOfReproductivePopulation);
+    }
+
+    private long calculateNewbornAmount(final int idPlanet, final Set<Construction> constructionsByResource, final long sumOfPopulation, final long sumOfReproductivePopulation) {
         // collecting all possible producing building
         final Map<EProductionCategory, List<Construction>> constructionMap = getConstructionsMappedByProductionCategory(constructionsByResource);
         final List<Construction> capacity = constructionMap.computeIfAbsent(EProductionCategory.CAPACITY, k -> new ArrayList<>());
@@ -94,21 +105,12 @@ public class PopulationControlCalculator {
         if (miningFactors == null) {
             return 0;
         }
-        final double miningFactor = miningFactors.getMiningFactorByType(EResourceType.POPULATION);
-        final BigDecimal N = BigDecimal.valueOf(sumOfPopulation);
-        // sum up all the output of the producing and capacity buildings
-        BigDecimal r = BigDecimal.valueOf(miningFactor);
-        if (r.compareTo(BigDecimal.valueOf(0.9)) > 0) {
-            // maximum reproduction rate must not succeed 1 and is limited to 90 %
-            r = BigDecimal.valueOf(0.9);
-        }
 
-        if (N.compareTo(BigDecimal.ZERO) == 0) {
-            // no bum no sum
-            return 0;
-        }
+        final BigDecimal r = BigDecimal.valueOf(miningFactors.getMiningFactorByType(EResourceType.POPULATION)); /* fixme check if ok */
+        final BigDecimal N = BigDecimal.valueOf(sumOfReproductivePopulation);
+
         final BigDecimal increasingFactorByCurrentPopulation = r.multiply(N);
-        final BigDecimal capacityLimitFactor = BigDecimal.ONE.subtract(N.divide(K, MATH_CONTEXT_MORE_PRECISION));
+        final BigDecimal capacityLimitFactor = BigDecimal.ONE.subtract(BigDecimal.valueOf(sumOfPopulation).divide(K, MATH_CONTEXT_MORE_PRECISION));
         // rounding down to long
         return increasingFactorByCurrentPopulation.multiply(capacityLimitFactor, MATH_CONTEXT_INTEGER).longValue();
     }
