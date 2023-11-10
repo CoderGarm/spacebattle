@@ -28,6 +28,7 @@ echo "start deployment"
 cd /home/karsten/spacebattle/ || exit
 echo "stop server"
 ./stopSB.sh
+#todo automate db patch execution ./dumpSBDB.sh "pre-deployment-$version"
 cp /home/karsten/uploadTarget/spacebattle-"$version".jar /home/karsten/spacebattle/
 echo "start server"
 ./startSB.sh
