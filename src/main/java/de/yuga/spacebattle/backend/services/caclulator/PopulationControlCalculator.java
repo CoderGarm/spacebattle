@@ -224,12 +224,13 @@ public class PopulationControlCalculator {
 
         final long productPresent = deposit.getCrewAmountByType(refinementSequence.getProduct());
         final long productNeeded = demand.getCrewAmountByType(refinementSequence.getProduct());
+        final boolean guidedEducationNeeded = productNeeded > productPresent;
 
         final long eductPresent = deposit.getCrewAmountByType(refinementSequence.getEduct());
         final long eductNeeded = demand.getCrewAmountByType(refinementSequence.getEduct());
 
         final long cap = educationCapacity.getOrDefault(refinementSequence, 0L);
-        if (productNeeded > productPresent) {
+        if (guidedEducationNeeded) {
             final long need = productNeeded - productPresent;
             final long free = Math.max(0, eductPresent - eductNeeded);
             long educated = Math.min(need, free);
@@ -237,6 +238,9 @@ public class PopulationControlCalculator {
 
             deposit.updateCrewRequirement(refinementSequence.getEduct(), -educated);
             education.add(new EducationAmountDTO(educated, refinementSequence));
+        } else {
+            // todo this quickfix should relax the pop situation - this must be cleared finally by checking that the guided education only avoid a deadlock
+            setUnrestrictedEducation(education, deposit, refinementSequence, educationCapacity);
         }
     }
 
