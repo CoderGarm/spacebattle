@@ -25,10 +25,21 @@ public class ResourceService {
 
 
     @Nonnull
-    public Set<String> getRandomShipNamesForOwner(@Nonnull final User owner, @Nonnull final Integer amount) {
-        final Set<String> randomNames;
+    public Set<String> getRandomShipNamesForOwner(@Nonnull final User owner, final int amount) {
+        Preconditions.checkNotNull(owner, "owner must not be empty");
+
         final RolePlaySetting rolePlaySetting = owner.getRolePlaySetting();
         final Set<String> shipNames = rolePlaySetting.getShipNames();
+
+        if (shipNames.size() == amount) {
+            return shipNames;
+        }
+
+        if (shipNames.size() > amount) {
+            return getRandomWarshipNameFrom(shipNames, amount);
+        }
+
+        final Set<String> randomNames;
         if (shipNames.isEmpty()) {
             final Set<EStarNation> shipNameTemplates = rolePlaySetting.getShipNameTemplates();
             if (shipNameTemplates.isEmpty()) {
@@ -37,7 +48,7 @@ public class ResourceService {
                 randomNames = getRandomWarshipNames(shipNameTemplates, amount);
             }
         } else {
-            randomNames = shipNames;
+            randomNames = getRandomWarshipNameFrom(shipNames, amount);
         }
         return randomNames;
     }
@@ -258,6 +269,22 @@ public class ResourceService {
         final Set<String> names = new HashSet<>();
         for (int i = 0; i < amount; i++) {
             names.add(strings.get(ThreadLocalRandom.current().nextInt(0, strings.size() - 1)));
+        }
+        return names;
+    }
+
+    @Nonnull
+    public Set<String> getRandomWarshipNameFrom(@Nonnull final Collection<String> strings, final int amount) {
+        Preconditions.checkNotNull(strings, "strings must not be empty");
+
+        if (strings.size() <= 1) {
+            return new HashSet<>(strings);
+        }
+
+        final List<String> list = new ArrayList<>(strings);
+        final Set<String> names = new HashSet<>();
+        for (int i = 0; i < amount; i++) {
+            names.add(list.get(ThreadLocalRandom.current().nextInt(0, strings.size() - 1)));
         }
         return names;
     }
