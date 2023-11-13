@@ -39,8 +39,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.security.RolesAllowed;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -118,7 +120,8 @@ public class PlanetApi extends BaseApi {
     public ResponseEntity<?> getPlanets() {
         final int idUser = getIdUser();
         final List<de.yuga.spacebattle.backend.entities.orbitals.Planet> all = planetService.findAllColonizedBy(idUser);
-        final List<Planet> planets = all.stream().map(Planet::new).collect(Collectors.toList());
+        final Map<Integer, Set<EResourceType>> productionCapabilities = planetService.findProductionCapabilities(all.stream().map(de.yuga.spacebattle.backend.entities.orbitals.Planet::getId).collect(Collectors.toSet()));
+        final List<Planet> planets = all.stream().map(p -> new Planet(p, productionCapabilities.getOrDefault(p.getId(), new HashSet<>()))).collect(Collectors.toList());
         return ResponseEntity.ok(planets);
     }
 

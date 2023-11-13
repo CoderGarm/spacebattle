@@ -65,4 +65,8 @@ public interface ConstructionRepository extends JpaRepository<Construction, Inte
             "AND c.building.productionType.productionTarget = :productionTarget " +
             "AND c.building.productionType.productionCategory = :productionCategory")
     Construction findByPlanetProductionType(final int idPlanet, @Nonnull final EResourceType productionTarget, @Nonnull final EProductionCategory productionCategory);
+
+    @Nullable
+    @Query("SELECT c.building.productionType.productionTarget FROM Construction c WHERE c.planet.id = :idPlanet AND c.building.productionType.productionCategory = de.yuga.spacebattle.backend.enums.EProductionCategory.PRODUCE")
+    Set<EResourceType> findProductionCapabilities(final int idPlanet);
 }

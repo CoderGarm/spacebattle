@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.dto.research.EmpireResearchCapability;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
+import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateSnapshot;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EJobPriority;
 import de.yuga.spacebattle.rest.dto.account.Player;
@@ -19,7 +21,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Schema(description = ".")
 public class Job {
@@ -142,11 +146,12 @@ public class Job {
         if (isResearchJob) {
             this.researchTarget = new Research(constructable.getResearch(), languageCode);
         }
-        final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = constructable.getFleet();
-        this.isShipyardJob = fleet != null;
+        this.isShipyardJob = constructable.isShipyardJob();
         if (isShipyardJob) {
-            final Set<WarShip> ships = constructable.isUpgradeJob() ? fleet.getAliveShips() : fleet.getAllShips();
-            this.fleet = new Fleet(fleet, ships, languageCode);
+            de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = constructable.getFleet();
+            final FleetSnapshot fleetSnapshot = constructable.getFleetSnapshot();
+            final Set<WarShip> ships = fleet != null ? fleet.getAliveShips() : Objects.requireNonNull(fleetSnapshot).getShips().stream().map(WarshipHealthStateSnapshot::getWarShip).collect(Collectors.toSet());
+            this.fleet = new Fleet(fleet != null ? fleet : fleetSnapshot.getFleet(), ships, languageCode);
             this.isRepairJob = job.getConstructable().isRepairJob();
             this.isUpgradeJob = job.getConstructable().isUpgradeJob();
         }

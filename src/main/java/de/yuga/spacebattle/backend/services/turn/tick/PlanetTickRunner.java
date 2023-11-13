@@ -20,6 +20,7 @@ import de.yuga.spacebattle.backend.services.caclulator.PopulationControlCalculat
 import de.yuga.spacebattle.backend.services.caclulator.TickOutputCalculator;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
+import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
@@ -32,7 +33,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -71,6 +71,9 @@ public class PlanetTickRunner implements TickRunner {
     @Nonnull
     private final TickOutputCalculator tickOutputCalculator;
 
+    @Nonnull
+    private final WarShipService warShipService;
+
     @Autowired
     public PlanetTickRunner(@Nonnull final JobService jobService,
                             @Nonnull final PlanetService planetService,
@@ -79,7 +82,8 @@ public class PlanetTickRunner implements TickRunner {
                             @Nonnull final ResearchService researchService,
                             @Nonnull final WarshipHealthStateService warshipHealthStateService,
                             @Nonnull final PopulationControlCalculator populationControlCalculator,
-                            @Nonnull final TickOutputCalculator tickOutputCalculator) {
+                            @Nonnull final TickOutputCalculator tickOutputCalculator,
+                            @Nonnull final WarShipService warShipService) {
         this.jobService = Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
@@ -88,6 +92,7 @@ public class PlanetTickRunner implements TickRunner {
         this.warshipHealthStateService = Preconditions.checkNotNull(warshipHealthStateService, "warshipHealthStateService must not be empty");
         this.populationControlCalculator = Preconditions.checkNotNull(populationControlCalculator, "populationControlCalculator must not be empty");
         this.tickOutputCalculator = Preconditions.checkNotNull(tickOutputCalculator, "tickOutputCalculator must not be empty");
+        this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
     }
 
     @Override
@@ -288,18 +293,16 @@ public class PlanetTickRunner implements TickRunner {
         Preconditions.checkNotNull(constructable.getFleet(), "fleet must not be empty");
 
         log(planet, job, "Start realizing warships.");
-        final Set<Fleet> anchoredFleets = fleetService.findAllAnchoredForPlanet(planet);
-        final Fleet biggestInOrbit = anchoredFleets.stream().sorted(Comparator.comparingInt(o -> o.getAliveShips().size())).reduce((o1, o2) -> o2).orElse(null);
-
+        // fleet is "destroyed" here
         final Fleet fleet = constructable.getFleet();
-        fleet.getAllShips().forEach(WarShip::animate);
-        if (biggestInOrbit != null) {
-            biggestInOrbit.addShips(fleet.getAllShips());
-            fleetService.save(biggestInOrbit);
-        } else {
-            fleet.animate();
-            fleetService.save(fleet);
-        }
+        final Set<WarShip> newShips = fleet.getAllShips();
+        newShips.forEach(WarShip::animate);
+        newShips.forEach(w -> w.setMothball(planet));
+        warShipService.saveAll(newShips);
+
+        job.getConstructable().snapshotFleet();
+        jobService.save(job);
+
         log(planet, job, "Done creating warships.");
     }
 

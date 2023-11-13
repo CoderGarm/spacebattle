@@ -165,4 +165,9 @@ public class ConstructionService {
 
         return Objects.requireNonNullElse(constructionRepository.findAllConstructionsOnPlanetForTarget(idPlanet, productionTarget), new HashSet<>());
     }
+
+    @Nonnull
+    public Set<EResourceType> findProductionCapabilities(final int idPlanet) {
+        return Objects.requireNonNullElse(constructionRepository.findProductionCapabilities(idPlanet), new HashSet<>());
+    }
 }

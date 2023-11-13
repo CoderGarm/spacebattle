@@ -21,7 +21,7 @@ import javax.validation.constraints.NotNull;
 @AttributeOverride(name = "id", column = @Column(name = "idJob"))
 @Check(constraints = "(idBuilding IS NOT NULL AND targetLevel IS NOT NULL) " +
         "OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) " +
-        "OR (idFleet IS NOT NULL) ")
+        "OR (idFleet IS NOT NULL OR idFleetSnapshot IS NOT NULL) ")
 public class Job extends PointsCompletable implements Comparable<Job> {
 
     @Nonnull

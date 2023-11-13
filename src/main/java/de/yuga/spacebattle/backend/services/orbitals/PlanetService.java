@@ -254,4 +254,15 @@ public class PlanetService {
     public Set<Integer> findAllSystemIDsForUser(final int idUser) {
         return Objects.requireNonNullElse(planetRepository.findAllSystemIDsForUser(idUser), new HashSet<>());
     }
+
+    @Nonnull
+    public Map<Integer, Set<EResourceType>> findProductionCapabilities(@Nonnull final Set<Integer> planetIDs) {
+        Preconditions.checkNotNull(planetIDs, "planetIDs must not be empty");
+
+        final HashMap<Integer, Set<EResourceType>> result = new HashMap<>();
+        planetIDs.forEach(idPlanet -> {
+            result.put(idPlanet, constructionService.findProductionCapabilities(idPlanet));
+        });
+        return result;
+    }
 }

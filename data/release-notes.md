@@ -36,12 +36,15 @@ Und etwas fürs Auge gabs auch noch ;)
 article trading protection -> protecting-trades.md
 article priorisierung bei pop demand und migration
 article + check ship returns from mission
+article für Bevölkerungsentwicklung
 
 #### Gameplay
 
-1. Piraten spawnen nicht mehr für Raids auf nicht kolonialisierte Planeten.  
+1. Die Änderungen in der Bevölkerungsentwicklung erwähne ich hier der Form halber.
+2. Piraten spawnen nicht mehr für Raids auf nicht kolonialisierte Planeten.  
    Ursprünglich war die Idee dahinter, dass das Universum etwas lebendiger wirkt, weil man auch mal zwischendurch auf fremde Flotten treffen kann. Das Ergebnis war allerdings, dass
    in einigen Systemen zwei, drei oder view Piratenflotten gespawnt sind und das irritiert mehr, als dass es lebendig wirkt.
+3. Neue Schiffe landen nun direkt in der Reserve und nicht in einer neuen Flotte. Im Kriegsfall werden unnötige Verluste sowie die Schadenfreude des Gegners vermieden.
 
 todo. schiffe in reserve zu anderen planeten transportieren wenn kein Hyperraumantrieb -> manual transportation
 
@@ -50,8 +53,6 @@ todo. Hyperabdruck im System bei aufkommenden Flotten
 
 - Emissionssignatur verrät ungefähre größe und anzahl (siehe "look & feel wie in büchern")
 - zwei gebäude (planetare antennen, orbitale antennen) und Eloka-Modul auf Schiffen erzeugen scan-punkte und verraten genauigkeit der ortung
-
-todo. heat mechanik muss für ganze systeme reduzierbar sein -> "strahlt etwas aus", ansonsten beibehalten
 
 - heat nur für bewohnte planeten, keine piraten für nachbarn
 - jeder sektor (? definiere) bekommt seinen eigenen piraten, der Unsinn anstellt
@@ -66,13 +67,13 @@ todo. mission items more role play "unprotected convoy changes signature of ship
 todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
 
 todo. check fitting yard
-todo. neue schiffe direkt in reserve
 
 ### Bugs fixed
 
 1. Die planetaren Ressourcen werden beim Flottenwechsel im Flottenmenü aktualisiert.
 2. Der Status einer Flotte wird nun bei jeder Änderung der Formation neu bestimmt.
 3. Flottenbewegungen wurden im Journal falsch angezeigt, ob eine Flotte ins System gesprungen oder den Planeten angeflogen hat, wurde nicht unterschieden. Das ist repariert.
+4. Schiffswerften ohne Auftrag werden wieder im Journal angezeigt.
 
 todo. fleet detachment submit button disable when no change
 todo. research punkte -> sandkiste issue with 27 points left vs 160 from inop labs
@@ -107,11 +108,9 @@ todo. missionen sollten Rumpfmasse inkl Klasse beachten "großer Rumpf und Frach
 todo. player comment about the game in profile to display at take-a-tour
 todo. chat search: empire name, ingame name, username
 
-
 ### Bugs fixed
 
 todo. construction issue?
-
 
 todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen -> kein Unterschied zw ankunft und abflug
 -> Laut meiner anzeige sind 2 Flotten von dir heute beim hypelimit aufgetaut. Tatsächlich ist eine da, aber die andere bereits beim plani.

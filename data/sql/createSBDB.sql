@@ -288,11 +288,12 @@
         idTickCompleted integer,
         idBuilding integer,
         idFleet integer,
+        idFleetSnapshot integer,
         idResearch integer,
         idFacility integer not null,
         idOwner integer not null,
         primary key (idJob),
-        constraint job_CHECK check ((idBuilding IS NOT NULL AND targetLevel IS NOT NULL) OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) OR (idFleet IS NOT NULL) )
+        constraint job_CHECK check ((idBuilding IS NOT NULL AND targetLevel IS NOT NULL) OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) OR (idFleet IS NOT NULL OR idFleetSnapshot IS NOT NULL) )
     ) engine=InnoDB;
 
     create table knownStarSystem (
@@ -424,7 +425,7 @@
         idTickCompleted integer,
         idPlanetDestination integer,
         idStarSystemDestination integer,
-        idFleet integer not null,
+        idFleet integer,
         idFleetSnapshot integer,
         idPlanetOrigin integer,
         idStarSystemOrigin integer,
@@ -782,7 +783,6 @@
         isDeleted boolean not null default false,
         isOperational boolean not null default false,
         isFightingCapable boolean not null default true,
-        idBattleReport integer not null,
         idFleetSnapshot integer not null,
         idWarship integer not null,
         primary key (idWarshipHealthStateSnapshot)
@@ -1200,6 +1200,11 @@
                 references fleet (idFleet);
 
     alter table job
+       add constraint FK7qelga4rbeqyxcbvr96lwcwh7 
+       foreign key (idFleetSnapshot) 
+       references fleetSnapshot (idFleetSnapshot);
+
+    alter table job 
         add constraint FKdno72guom99osq9f36eixsd87
             foreign key (idResearch)
                 references research (idResearch);
@@ -1755,11 +1760,6 @@
                 references warShip (idWarShip);
 
     alter table warshipHealthStateSnapshot
-        add constraint FKkohi791t1w85m3utjw493xcbe
-            foreign key (idBattleReport)
-                references battleReport (idBattleReport);
-
-    alter table warshipHealthStateSnapshot
         add constraint FKcjim226ew093h6wpualjjrodk
             foreign key (idFleetSnapshot)
                 references fleetSnapshot (idFleetSnapshot);
@@ -2239,3 +2239,4 @@ INSERT INTO dbPatch VALUES (NULL, NOW(), 'exchange ticks left to points', '0.1.1
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'reduce education level NONE', '0.1.14-5');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'completable fleet move', '0.1.15-1');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'drop heat from uncolonized planets', '0.1.15-2');
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'fleet snap in job', '0.1.15-3');

@@ -7,7 +7,6 @@ import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.misc.Operationable;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
-import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -24,12 +23,6 @@ import java.util.Set;
 @Table(name = "warshipHealthStateSnapshot")
 @AttributeOverride(name = "id", column = @Column(name = "idWarshipHealthStateSnapshot"))
 public class WarshipHealthStateSnapshot extends Operationable implements WarshipHealthStateAccessor {
-
-    @Nonnull
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "idBattleReport")
-    private BattleReport battleReport;
 
     /**
      * The war ship which is this snap for.
@@ -72,24 +65,17 @@ public class WarshipHealthStateSnapshot extends Operationable implements Warship
     public WarshipHealthStateSnapshot() {
     }
 
-    public WarshipHealthStateSnapshot(@Nonnull final FleetSnapshot fleetSnapshot, @Nonnull final BattleReport battleReport, @Nonnull final WarShip warship) {
+    public WarshipHealthStateSnapshot(@Nonnull final FleetSnapshot fleetSnapshot, @Nonnull final WarShip warship) {
         Preconditions.checkNotNull(fleetSnapshot, "fleetSnapshot must not be empty");
-        Preconditions.checkNotNull(battleReport, "battleReport must not be empty");
         Preconditions.checkNotNull(warship, "warship must not be empty");
 
         this.fleetSnapshot = fleetSnapshot;
-        this.battleReport = battleReport;
         this.warShip = warship;
         final WarshipHealthState healthState = warship.getWarshipHealthState();
         this.capabilities.addAll(new SpacecraftCalculator().getCapabilityValues(healthState));
         this.activeFittings.addAll(healthState.getActiveFittings());
         this.remainingShots.putAll(healthState.getRemainingShots());
         this.isFightingCapable = healthState.isFightingCapable();
-    }
-
-    @Nonnull
-    public BattleReport getBattleReport() {
-        return battleReport;
     }
 
     public double getStateByAsDouble(@Nonnull final EModuleType eModuleType) {
@@ -151,11 +137,11 @@ public class WarshipHealthStateSnapshot extends Operationable implements Warship
 
         final WarshipHealthStateSnapshot that = (WarshipHealthStateSnapshot) o;
 
-        return new EqualsBuilder().append(battleReport, that.battleReport).append(warShip, that.warShip).isEquals();
+        return new EqualsBuilder().append(fleetSnapshot, that.fleetSnapshot).append(warShip, that.warShip).isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(battleReport).append(warShip).toHashCode();
+        return new HashCodeBuilder(17, 37).append(fleetSnapshot).append(warShip).toHashCode();
     }
 }

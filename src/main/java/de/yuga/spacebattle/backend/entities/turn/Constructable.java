@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
@@ -52,6 +53,11 @@ public class Constructable {
     @OneToOne
     @JoinColumn(name = "idFleet", referencedColumnName = "idFleet")
     private Fleet fleet;
+
+    @Nullable
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "idFleetSnapshot")
+    private FleetSnapshot fleetSnapshot;
 
     @Nullable
     @Enumerated(EnumType.STRING)
@@ -109,6 +115,11 @@ public class Constructable {
         return fleet;
     }
 
+    @Nullable
+    public FleetSnapshot getFleetSnapshot() {
+        return fleetSnapshot;
+    }
+
     @Nonnull
     public EResourceType getResourceType() {
         return resourceType;
@@ -120,6 +131,10 @@ public class Constructable {
 
     public boolean isUpgradeJob() {
         return EJobType.UPGRADE == jobType;
+    }
+
+    public boolean isShipyardJob() {
+        return fleet != null || fleetSnapshot != null;
     }
 
     /**
@@ -154,5 +169,12 @@ public class Constructable {
 
     public boolean isResearchJob() {
         return this.research != null;
+    }
+
+    public void snapshotFleet() {
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+
+        fleetSnapshot = new FleetSnapshot(fleet, fleet.getAliveShips());
+        fleet = null;
     }
 }

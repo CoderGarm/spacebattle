@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
@@ -60,19 +61,20 @@ public class FleetSnapshot extends Deletable implements HasOwner {
 
     public FleetSnapshot(@Nonnull final BattleReport battleReport,
                          @Nonnull final Fleet fleet) {
-        this(fleet);
+        this(fleet, fleet.getAliveShips());
         Preconditions.checkNotNull(battleReport, "battleReport must not be empty");
 
         this.battleReport = battleReport;
-        this.ships.addAll(fleet.getAliveShips().stream().map(w -> new WarshipHealthStateSnapshot(this, battleReport, w)).collect(Collectors.toSet()));
     }
 
-    public FleetSnapshot(@Nonnull final Fleet fleet) {
+    public FleetSnapshot(@Nonnull final Fleet fleet, @Nonnull final Set<WarShip> ships) {
         Preconditions.checkNotNull(fleet, "fleet must not be empty");
+        Preconditions.checkNotNull(ships, "ships must not be empty");
 
         this.fleet = fleet;
         this.owner = fleet.getOwner();
         this.name = fleet.getName();
+        this.ships.addAll(ships.stream().map(w -> new WarshipHealthStateSnapshot(this, w)).collect(Collectors.toSet()));
     }
 
     @Nullable
@@ -89,7 +91,6 @@ public class FleetSnapshot extends Deletable implements HasOwner {
     public String getName() {
         return name;
     }
-
 
     @Nonnull
     @Override

@@ -185,7 +185,7 @@ public class Move extends Completable implements HasOwner {
         Preconditions.checkNotNull(finishedAt, "finishedAt must not be empty");
         Preconditions.checkNotNull(fleet, "fleet must not be empty");
 
-        fleetSnapshot = new FleetSnapshot(fleet);
+        fleetSnapshot = new FleetSnapshot(fleet, fleet.getAliveShips());
         fleet = null;
         super.setFinished(finishedAt);
     }
