@@ -109,7 +109,7 @@ public class TradedResource extends Completable {
             for (final ConvoyProtectionMissionItem item : convoyProtectionMissionItems) {
                 final int stolen = item.getPercentOfCargoLost();
                 if (stolen != 0) {
-                    amount = amount * stolen / 100;
+                    amount -= amount * stolen / 100;
                 }
             }
         }
