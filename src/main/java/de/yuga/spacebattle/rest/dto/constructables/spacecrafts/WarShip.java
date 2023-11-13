@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.turn.TransportJob;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateAccessor;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateSnapshot;
 import de.yuga.spacebattle.backend.entities.turn.mission.Mission;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Set;
 
 @Schema(description = ".")
 public class WarShip {
@@ -35,6 +37,11 @@ public class WarShip {
     @JsonProperty
     @Schema(description = "The mission which this ship is part of.")
     private Integer idMission;
+
+    @Nullable
+    @JsonProperty
+    @Schema(description = "If the ship is on transfer.")
+    private de.yuga.spacebattle.rest.dto.turn.TransportJob transportJob;
 
     @JsonProperty
     @Schema(required = true, description = "If the ship is part of the reserve.")
@@ -62,14 +69,16 @@ public class WarShip {
 
         this.idWarship = warShip.getId();
         this.name = warShip.getName();
-        setDetachment(warShip);
+        setDetachment(warShip, languageCode);
         this.shipClass = new de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass(warShip.getShipClass(), languageCode);
         this.warshipHealthState = new WarshipHealthState(healthState, languageCode);
     }
 
     @JsonIgnore
-    private void setDetachment(@Nonnull final de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip warShip) {
+    private void setDetachment(@Nonnull final de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip warShip,
+                               @Nonnull final String languageCode) {
         Preconditions.checkNotNull(warShip, "warShip must not be empty");
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
 
         final Fleet fleet = warShip.getFleet();
         if (fleet != null) {
@@ -81,6 +90,12 @@ public class WarShip {
             this.idMission = mission.getId();
             isPooled = false;
         }
+
+        final TransportJob transportJob = warShip.getTransportJob();
+        if (transportJob != null) {
+            isPooled = true;
+            this.transportJob = new de.yuga.spacebattle.rest.dto.turn.TransportJob(transportJob, Set.of(), languageCode);
+        }
     }
 
     public WarShip(@Nonnull final WarshipHealthStateSnapshot stateSnapshot, @Nonnull final String languageCode) {
@@ -88,7 +103,7 @@ public class WarShip {
         final de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip warShip = stateSnapshot.getWarShip();
         this.idWarship = warShip.getId();
         this.name = warShip.getName();
-        setDetachment(warShip);
+        setDetachment(warShip, languageCode);
         this.shipClass = new de.yuga.spacebattle.rest.dto.spacecrafts.ShipClass(warShip.getShipClass(), languageCode);
         this.warshipHealthState = new WarshipHealthState(stateSnapshot, languageCode);
     }

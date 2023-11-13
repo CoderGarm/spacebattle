@@ -4,11 +4,14 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
+import de.yuga.spacebattle.backend.entities.turn.TransportJob;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.services.caches.TransportationCache;
+import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.backend.services.turn.TransportJobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +38,21 @@ public class EmpireTransportationTickRunner implements TickRunner {
     @Nonnull
     private final TransportationCache transportationCache;
 
+    @Nonnull
+    private final TransportJobService transportJobService;
+
+    @Nonnull
+    private final FleetService fleetService;
+
     @Autowired
     public EmpireTransportationTickRunner(@Nonnull final PlanetService planetService,
-                                          @Nonnull final TransportationCache transportationCache) {
+                                          @Nonnull final TransportationCache transportationCache,
+                                          @Nonnull final TransportJobService transportJobService,
+                                          @Nonnull final FleetService fleetService) {
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.transportationCache = Preconditions.checkNotNull(transportationCache, "transportationCache must not be empty");
+        this.transportJobService = Preconditions.checkNotNull(transportJobService, "transportJobService must not be empty");
+        this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
     }
 
     @Override
@@ -48,6 +61,15 @@ public class EmpireTransportationTickRunner implements TickRunner {
 
         LOGGER.info("Move stuff in the empires");
         tickTransportations(today);
+        tickWarshipMoves();
+    }
+
+    private void tickWarshipMoves() {
+        Preconditions.checkNotNull(today, "today must not be empty");
+
+        final List<TransportJob> transportJobs = transportJobService.findAllForToday();
+        transportJobs.forEach(t -> fleetService.executeTransferPooledWarship(t.getOwner(), t.getShips(), t.getDestination()));
+        transportJobService.finishAll(today, transportJobs);
     }
 
     /**

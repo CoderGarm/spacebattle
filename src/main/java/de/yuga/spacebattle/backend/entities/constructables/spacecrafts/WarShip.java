@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.entities.misc.Operationable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Detachment;
+import de.yuga.spacebattle.backend.entities.turn.TransportJob;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.turn.mission.Mission;
 import org.apache.commons.lang3.StringUtils;
@@ -141,6 +142,10 @@ public class WarShip extends Operationable {
         if (detachment == null) {
             this.detachment = new Detachment();
         }
+
+        detachment.setTransportJob(null);
+        detachment.setMothball(null);
+        detachment.setMission(null);
         detachment.setFleet(fleet);
     }
 
@@ -152,10 +157,26 @@ public class WarShip extends Operationable {
         return detachment.getMission();
     }
 
+    @Nullable
+    public TransportJob getTransportJob() {
+        if (detachment == null) {
+            return null;
+        }
+        return detachment.getTransportJob();
+    }
+
+    @Nullable
+    public Planet getMothball() {
+        return detachment != null ? detachment.getMothball() : null;
+    }
+
     public void setMission(@Nullable final Mission mission) {
         if (detachment == null) {
             this.detachment = new Detachment();
         }
+        detachment.setFleet(null);
+        detachment.setTransportJob(null);
+        detachment.setMothball(null);
         detachment.setMission(mission);
     }
 
@@ -167,7 +188,21 @@ public class WarShip extends Operationable {
         }
         detachment.setMission(null);
         detachment.setFleet(null);
+        detachment.setTransportJob(null);
         detachment.setMothball(planet);
+    }
+
+    public void setTransportJob(@Nonnull final TransportJob transportJob) {
+        Preconditions.checkNotNull(transportJob, "transportJob must not be empty");
+
+        if (detachment == null) {
+            this.detachment = new Detachment();
+        }
+
+        detachment.setMission(null);
+        detachment.setFleet(null);
+        detachment.setMothball(null);
+        detachment.setTransportJob(transportJob);
     }
 
     @Nullable
@@ -208,12 +243,4 @@ public class WarShip extends Operationable {
         return id * 33;
     }
 
-    public void createWarshipHealthState() {
-        this.warshipHealthState = new WarshipHealthState(this);
-    }
-
-    @Nullable
-    public Planet getMothball() {
-        return detachment != null ? detachment.getMothball() : null;
-    }
 }

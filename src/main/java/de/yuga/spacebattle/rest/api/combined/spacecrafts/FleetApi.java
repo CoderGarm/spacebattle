@@ -6,10 +6,10 @@ import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
-import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
+import de.yuga.spacebattle.backend.services.turn.TransportJobService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -18,6 +18,7 @@ import de.yuga.spacebattle.rest.dto.combined.spacecrafts.*;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.Move;
+import de.yuga.spacebattle.rest.dto.turn.TransportJob;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -77,19 +78,19 @@ public class FleetApi extends BaseApi {
     private final WarShipService warShipService;
 
     @Nonnull
-    private final OperationalService operationalService;
+    private final TransportJobService transportJobService;
 
     @Autowired
     public FleetApi(@Nonnull final FleetService fleetService,
                     @Nonnull final StarSystemService starSystemService,
                     @Nonnull final PlanetService planetService,
                     @Nonnull final WarShipService warShipService,
-                    @Nonnull final OperationalService operationalService) {
+                    @Nonnull final TransportJobService transportJobService) {
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
-        this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
+        this.transportJobService = Preconditions.checkNotNull(transportJobService, "transportJobService must not be empty");
     }
 
     @GetMapping(value = "{idFleet}")
@@ -495,7 +496,36 @@ public class FleetApi extends BaseApi {
     public ResponseEntity<?> getPooledWarships(@PathVariable final int idPlanet) {
         final int idUser = getIdUser();
         final Set<de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip> pooledShips = fleetService.findPooledWarships(idUser, idPlanet);
-        return ResponseEntity.ok(pooledShips.stream().map(w -> new WarShip(w, w.getWarshipHealthState(), getPreferredLanguage())));
+
+        final Set<WarShip> result = pooledShips.stream().map(w -> new WarShip(w, w.getWarshipHealthState(), getPreferredLanguage())).collect(Collectors.toSet());
+
+        final List<de.yuga.spacebattle.backend.entities.turn.TransportJob> transportJobs = transportJobService.findAllForTodayFor(idUser, idPlanet);
+        final Set<WarShip> inTransport = transportJobs.stream()
+                .map(t -> t.getShips().stream()
+                        .map(w -> new WarShip(w, w.getWarshipHealthState(), getPreferredLanguage()))
+                        .collect(Collectors.toSet()))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+        result.addAll(inTransport);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping(value = WARSHIP_POOLING_ENDPOINT + "/{idWarship}/{idPlanet}")
+    @Operation(summary = "Renames a fleet.", operationId = "transferPooledWarship",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = de.yuga.spacebattle.rest.dto.turn.TransportJob.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> transferPooledWarship(@PathVariable final int idWarship, @PathVariable final int idPlanet) {
+        final de.yuga.spacebattle.backend.entities.turn.TransportJob transportJob = transportJobService.transferPooledWarship(getIdUser(), idWarship, idPlanet);
+        if (transportJob == null) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.ok(new TransportJob(transportJob, Set.of(), getPreferredLanguage()));
     }
 
     @PutMapping(value = RETIRE_FLEET_ENDPOINT + "/{idFleet}")

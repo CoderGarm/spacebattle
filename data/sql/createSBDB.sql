@@ -696,6 +696,12 @@
         primary key (idTradeOffer)
     ) engine=InnoDB;
 
+    create table transferredShips (
+       idTransportJob integer not null,
+        idWarship integer not null,
+        primary key (idTransportJob, idWarship)
+    ) engine=InnoDB;
+
     create table translatable (
        idTranslatable integer not null auto_increment,
         idParent integer not null,
@@ -710,6 +716,17 @@
         translation varchar(400),
         idTranslatable integer,
         primary key (idTranslation)
+    ) engine=InnoDB;
+
+    create table transportJob (
+       idTransportJob integer not null auto_increment,
+        isDeleted boolean not null default false,
+        ticksLeft decimal(19, 0) not null,
+        idTickCompleted integer,
+        idDestination integer not null,
+        idOrigin integer not null,
+        idOwner integer not null,
+        primary key (idTransportJob)
     ) engine=InnoDB;
 
     create table user (
@@ -754,6 +771,7 @@
         idFleet integer,
         idMission integer,
         idMothball integer,
+        idTransportJob integer,
         idShipClass integer not null,
         idShipyard integer not null,
         primary key (idWarShip)
@@ -1694,10 +1712,40 @@
        foreign key (idTickInitiated) 
                 references tick (idTick);
 
+    alter table transferredShips 
+       add constraint FKdi04kj2s8phv98b06t97b0g1b 
+       foreign key (idWarship) 
+       references warShip (idWarShip);
+
+    alter table transferredShips 
+       add constraint FK8nikh4493iao57u0gjtht1bkn 
+       foreign key (idTransportJob) 
+       references transportJob (idTransportJob);
+
     alter table translation
         add constraint FK6y0ph13exuqqae7sowcvxac93
             foreign key (idTranslatable)
                 references translatable (idTranslatable);
+
+    alter table transportJob 
+       add constraint FK3p8d8qmsdvengg6kmvnesqipi 
+       foreign key (idTickCompleted) 
+       references tick (idTick);
+
+    alter table transportJob 
+       add constraint FKq08wsniijayb6pwmfolhdphsl 
+       foreign key (idDestination) 
+       references planet (idPlanet);
+
+    alter table transportJob 
+       add constraint FKc0d66ie3d1ungo75ft5ntsjj 
+       foreign key (idOrigin) 
+       references planet (idPlanet);
+
+    alter table transportJob 
+       add constraint FK1t3cfowqftboj0yqntyki29fv 
+       foreign key (idOwner) 
+       references user (idUser);
 
     alter table user
         add constraint FKd0120p7tkvssh9r8hldenpw1w
@@ -1733,6 +1781,11 @@
        add constraint FKgxsukhuxoyaglnxcaawuyuh30 
        foreign key (idMothball) 
        references planet (idPlanet);
+
+    alter table warShip 
+       add constraint FKeyf0wphylpn2gwbgwtvvspw4h 
+       foreign key (idTransportJob) 
+       references transportJob (idTransportJob);
 
     alter table warShip 
         add constraint FKjr13y2u3qkka7d3npp9omwdoa
@@ -2240,3 +2293,4 @@ INSERT INTO dbPatch VALUES (NULL, NOW(), 'reduce education level NONE', '0.1.14-
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'completable fleet move', '0.1.15-1');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'drop heat from uncolonized planets', '0.1.15-2');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'fleet snap in job', '0.1.15-3');
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'transport job', '0.1.15-4');

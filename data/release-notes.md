@@ -40,13 +40,15 @@ article für Bevölkerungsentwicklung
 
 #### Gameplay
 
-1. Die Änderungen in der Bevölkerungsentwicklung erwähne ich hier der Form halber.
+1. Die Änderungen in der Bevölkerungsentwicklung erwähne ich hier der Form halber:  
+   Die Berechnung zur Bevölkerungsentwicklung betrachtet nur noch die Bevölkerung im reproduktionsfähigen Zustand.  
+   Durch die anderen Änderungen wurde es wichtig, deutlich früher im Gameplay bereits die Bildungseinrichtungen zu leveln. Dafür gibt es Advices im Advisory Board.
 2. Piraten spawnen nicht mehr für Raids auf nicht kolonialisierte Planeten.  
    Ursprünglich war die Idee dahinter, dass das Universum etwas lebendiger wirkt, weil man auch mal zwischendurch auf fremde Flotten treffen kann. Das Ergebnis war allerdings, dass
-   in einigen Systemen zwei, drei oder view Piratenflotten gespawnt sind und das irritiert mehr, als dass es lebendig wirkt.
+   in einigen Systemen zwei, drei oder view Piratenflotten gespawnt sind und das irritiert mehr, als dass es lebendig wirkt.  
+   Die Kersey Association wird euch also ihre ganze Aufmerksamkeit widmen ;)
 3. Neue Schiffe landen nun direkt in der Reserve und nicht in einer neuen Flotte. Im Kriegsfall werden unnötige Verluste sowie die Schadenfreude des Gegners vermieden.
-
-todo. schiffe in reserve zu anderen planeten transportieren wenn kein Hyperraumantrieb -> manual transportation
+4. Schiffe der Reserve können nun im Transport-Menü direkt zwischen eigenen Planeten transportiert werden. Das ganze passiert auf die gleiche magische Weise wie bei den Ressourcen.
 
 todo. tech level 2 und 3 nutzen
 todo. Hyperabdruck im System bei aufkommenden Flotten
@@ -54,10 +56,11 @@ todo. Hyperabdruck im System bei aufkommenden Flotten
 - Emissionssignatur verrät ungefähre größe und anzahl (siehe "look & feel wie in büchern")
 - zwei gebäude (planetare antennen, orbitale antennen) und Eloka-Modul auf Schiffen erzeugen scan-punkte und verraten genauigkeit der ortung
 
-- heat nur für bewohnte planeten, keine piraten für nachbarn
 - jeder sektor (? definiere) bekommt seinen eigenen piraten, der Unsinn anstellt
 
 #### Diverses
+
+1. Der Zustand von Schiffen im Transfer-Display der Sternenkarte wird per Farbkodierung "wie gewohnt" dargestellt.
 
 todo. manual transfer to fleet overrides capacity
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"

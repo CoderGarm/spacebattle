@@ -13,6 +13,7 @@ import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.MoveService;
 import de.yuga.spacebattle.backend.services.turn.TickTimeService;
+import de.yuga.spacebattle.backend.services.turn.TransportJobService;
 import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
 import de.yuga.spacebattle.backend.services.turn.resources.MarketplaceService;
 import de.yuga.spacebattle.rest.api.BaseApi;
@@ -92,6 +93,9 @@ public class JournalApi extends BaseApi {
     @Nonnull
     private final FleetService fleetService;
 
+    @Nonnull
+    private final TransportJobService transportJobService;
+
     @Autowired
     public JournalApi(@Nonnull final TickTimeService tickService,
                       @Nonnull final JobService jobService,
@@ -104,7 +108,8 @@ public class JournalApi extends BaseApi {
                       @Nonnull final MarketplaceService marketplaceService,
                       @Nonnull final MoveService moveService,
                       @Nonnull final PlanetService planetService,
-                      @Nonnull final FleetService fleetService) {
+                      @Nonnull final FleetService fleetService,
+                      @Nonnull final TransportJobService transportJobService) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
         this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
         this.battleReportService = Preconditions.checkNotNull(battleReportService, "battleReportService must not be empty");
@@ -117,6 +122,7 @@ public class JournalApi extends BaseApi {
         this.moveService = Preconditions.checkNotNull(moveService, "moveService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
+        this.transportJobService = Preconditions.checkNotNull(transportJobService, "transportJobService must not be empty");
     }
 
     @GetMapping(value = JOB_FINISHED_ENDPOINT)
@@ -159,6 +165,11 @@ public class JournalApi extends BaseApi {
         result.addAll(transportationCache.getOrbitalTransports(today, idUser).stream()
                 .map(TransportJob::new)
                 .collect(Collectors.toList()));
+
+        result.addAll(transportJobService.findFinishedFor(today, idUser).stream()
+                .map(t -> new TransportJob(t, t.getTransferredShips(), getPreferredLanguage()))
+                .collect(Collectors.toList()));
+
         return ResponseEntity.ok(result);
     }
 

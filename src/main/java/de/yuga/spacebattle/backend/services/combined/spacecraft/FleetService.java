@@ -15,6 +15,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Move;
+import de.yuga.spacebattle.backend.entities.turn.TransportJob;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.ECalculationType;
 import de.yuga.spacebattle.backend.enums.EDepositType;
@@ -23,6 +24,7 @@ import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipSer
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.MoveService;
 import de.yuga.spacebattle.backend.services.turn.TickTimeService;
+import de.yuga.spacebattle.backend.services.turn.TransportJobService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.AbstractId;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMerge;
@@ -59,17 +61,22 @@ public class FleetService {
     @Nonnull
     private final MoveService moveService;
 
+    @Nonnull
+    private final TransportJobService transportJobService;
+
     @Autowired
     public FleetService(@Nonnull final FleetRepository fleetRepository,
                         @Nonnull final WarShipService warShipService,
                         @Nonnull final PlanetService planetService,
                         @Nonnull final TickTimeService tickTimeService,
-                        @Nonnull final MoveService moveService) {
+                        @Nonnull final MoveService moveService,
+                        @Nonnull final TransportJobService transportJobService) {
         this.fleetRepository = Preconditions.checkNotNull(fleetRepository, "fleetR shouldn't be null!");
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.tickTimeService = Preconditions.checkNotNull(tickTimeService, "tickTimeService must not be empty");
         this.moveService = Preconditions.checkNotNull(moveService, "moveService must not be empty");
+        this.transportJobService = Preconditions.checkNotNull(transportJobService, "transportJobService must not be empty");
     }
 
     /**
@@ -94,12 +101,19 @@ public class FleetService {
             throw new NotifyWebUserException("You must own all the merged fleets.");
         }
 
+        final Set<TransportJob> toRemove = new HashSet<>();
         final Map<Integer, WarShip> warshipsById = knownWarShips.stream().collect(Collectors.toMap(WarShip::getId, Function.identity()));
         fleetConstellations.forEach((idFleet, warshipIDs) -> {
             final Fleet fleet = fleets.stream().filter(f -> f.getId() == idFleet).findFirst().orElse(null);
             assert fleet != null : "Would be good at this stage.";
             final Set<WarShip> toAdd = warshipsById.values().stream().filter(w -> warshipIDs.contains(w.getId())).collect(Collectors.toSet());
             fleet.addShips(toAdd);
+
+            final Set<TransportJob> transportJobs = toAdd.stream().map(WarShip::getTransportJob).filter(Objects::nonNull).collect(Collectors.toSet());
+            toAdd.forEach(w -> w.setFleet(fleet));
+
+            toAdd.forEach(ws -> transportJobs.forEach(t -> t.getShips().remove(ws)));
+            toRemove.addAll(transportJobs.stream().filter(t -> t.getShips().isEmpty()).collect(Collectors.toSet()));
         });
 
         Set<Fleet> toStore = fleets.stream().filter(f -> !f.getAliveShips().isEmpty()).collect(Collectors.toSet());
@@ -107,6 +121,7 @@ public class FleetService {
         final Set<Fleet> toMarkAsDeleted = fleets.stream().filter(f -> f.getAliveShips().isEmpty()).collect(Collectors.toSet());
         markAsDestroyed(toMarkAsDeleted);
         toStore = calculateFleetState(toStore.stream().map(AbstractEntityKey::getId).collect(Collectors.toSet()));
+        transportJobService.deleteAll(toRemove);
         return new FleetMergeResult(toStore, toMarkAsDeleted);
     }
 
@@ -133,6 +148,9 @@ public class FleetService {
 
         Planet planet = shipsByUser.stream().map(WarShip::getMothball).filter(Objects::nonNull).findFirst().orElse(null);
         if (planet == null) {
+            planet = shipsByUser.stream().map(WarShip::getTransportJob).filter(Objects::nonNull).map(TransportJob::getOrigin).findFirst().orElse(null);
+        }
+        if (planet == null) {
             final FleetOrbit fleetOrbit = shipsByUser.stream()
                     .map(WarShip::getFleet)
                     .filter(Objects::nonNull)
@@ -143,6 +161,7 @@ public class FleetService {
             planet = fleetOrbit.getPlanet();
         }
 
+        final Set<TransportJob> toRemove = new HashSet<>();
         final Set<Fleet> result = new HashSet<>();
         for (final String key : fleetSplit.getFleetConstellations().keySet()) {
             final List<Integer> warshipIDs = fleetSplit.getFleetConstellations().get(key);
@@ -151,10 +170,17 @@ public class FleetService {
             final String name = key.split("-")[0];
             final Set<WarShip> warShips = shipsByUser.stream().filter(w -> warshipIDs.contains(w.getId())).collect(Collectors.toSet());
             final Fleet fleet = createFleet(owner, Objects.requireNonNull(planet), name);
-            warShips.forEach(w -> w.setFleet(fleet));
+
+            final Set<TransportJob> transportJobs = warShips.stream().map(WarShip::getTransportJob).filter(Objects::nonNull).collect(Collectors.toSet());
+
+            warShips.forEach(w -> {
+                transportJobs.forEach(t -> t.getShips().remove(w));
+                w.setFleet(fleet);
+            });
             warShipService.saveAll(warShips);
 
             result.add(fleetRepository.findById(fleet.getId()).orElseThrow(NullPointerException::new));
+            toRemove.addAll(transportJobs.stream().filter(t -> t.getShips().isEmpty()).collect(Collectors.toSet()));
         }
 
         final Set<Fleet> newStatedFleets = calculateFleetState(fleetIDs);
@@ -164,6 +190,7 @@ public class FleetService {
         result.removeAll(changed);
         result.addAll(changed);
 
+        transportJobService.deleteAll(toRemove);
         return result;
     }
 
@@ -600,5 +627,16 @@ public class FleetService {
     @Nonnull
     public Set<Integer> findAllSystemIDsWithFleetsForUser(final int idUser) {
         return Objects.requireNonNullElse(fleetRepository.findAllSystemIDsWithFleetsForUser(idUser), new HashSet<>());
+    }
+
+    public void executeTransferPooledWarship(@Nonnull final Owner owner,
+                                             @Nonnull final Set<WarShip> warShips,
+                                             @Nonnull final Planet planet) {
+        Preconditions.checkNotNull(owner, "owner must not be empty");
+        Preconditions.checkNotNull(warShips, "warShips must not be empty");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+        warShips.forEach(warShip -> warShip.setMothball(planet));
+        warShipService.saveAll(warShips);
     }
 }

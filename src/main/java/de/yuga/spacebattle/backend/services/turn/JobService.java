@@ -86,7 +86,7 @@ public class JobService {
     }
 
     @Nonnull
-    public final Job save(@Nonnull final Job entity) {
+    public Job save(@Nonnull final Job entity) {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
 
         return jobRepository.save(entity);

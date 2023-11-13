@@ -106,7 +106,7 @@ public class PopulationControlCalculator {
             return 0;
         }
 
-        final BigDecimal r = BigDecimal.valueOf(miningFactors.getMiningFactorByType(EResourceType.POPULATION)); /* fixme check if ok */
+        final BigDecimal r = BigDecimal.valueOf(miningFactors.getMiningFactorByType(EResourceType.POPULATION));
         final BigDecimal N = BigDecimal.valueOf(sumOfReproductivePopulation);
 
         final BigDecimal increasingFactorByCurrentPopulation = r.multiply(N);

@@ -31,6 +31,11 @@ public class Detachment {
     private Planet mothball;
 
     @Nullable
+    @ManyToOne
+    @JoinColumn(name = "idTransportJob")
+    private TransportJob transportJob;
+
+    @Nullable
     public Fleet getFleet() {
         return fleet;
     }
@@ -61,5 +66,14 @@ public class Detachment {
 
     public void setMothball(@Nullable final Planet mothball) {
         this.mothball = mothball;
+    }
+
+    @Nullable
+    public TransportJob getTransportJob() {
+        return transportJob;
+    }
+
+    public void setTransportJob(@Nullable final TransportJob transportJob) {
+        this.transportJob = transportJob;
     }
 }
