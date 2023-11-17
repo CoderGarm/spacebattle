@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -100,7 +99,7 @@ public class PublicResourcesApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getArmors() {
-        return ResponseEntity.ok(moduleService.findAllArmors().stream().map(a -> new Armor(a, getPreferredLanguage())).collect(Collectors.toList()));
+        return ResponseEntity.ok(moduleService.findAllArmors().stream().map(a -> new Armor(a, getPreferredLanguage()).withCosts(a.getCosts())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = ModuleApi.WEAPON_ENDPOINT + "/all")
@@ -115,11 +114,9 @@ public class PublicResourcesApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getWeapons() {
-        final List<de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon> allWeapon = moduleService.findAllWeapons();
-        final List<de.yuga.spacebattle.rest.dto.spacecrafts.modules.Weapon> weaponList = allWeapon.stream()
-                .map(w -> new de.yuga.spacebattle.rest.dto.spacecrafts.modules.Weapon(w, getPreferredLanguage()))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(weaponList);
+        return ResponseEntity.ok(moduleService.findAllWeapons().stream()
+                .map(w -> new Weapon(w, getPreferredLanguage()).withCosts(w.getCosts()))
+                .collect(Collectors.toList()));
     }
 
     @GetMapping(value = ModuleApi.LAUNCHER_ENDPOINT + "/all")
@@ -134,7 +131,7 @@ public class PublicResourcesApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getLaunchers() {
-        return ResponseEntity.ok(moduleService.findAllLaunchers().stream().map(l -> new Launcher(l, getPreferredLanguage())).collect(Collectors.toList()));
+        return ResponseEntity.ok(moduleService.findAllLaunchers().stream().map(l -> new Launcher(l, getPreferredLanguage()).withCosts(l.getCosts())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = ModuleApi.SIDEWALL_ENDPOINT + "/all")
@@ -149,7 +146,7 @@ public class PublicResourcesApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getSidewalls() {
-        return ResponseEntity.ok(moduleService.findAllSidewalls().stream().map(s -> new Sidewall(s, getPreferredLanguage())).collect(Collectors.toList()));
+        return ResponseEntity.ok(moduleService.findAllSidewalls().stream().map(s -> new Sidewall(s, getPreferredLanguage()).withCosts(s.getCosts())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = ModuleApi.PROPULSION_ENDPOINT + "/all")
@@ -179,7 +176,7 @@ public class PublicResourcesApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getElectronicWarfares() {
-        return ResponseEntity.ok(moduleService.findAllElectronicWarfare().stream().map(e -> new ElectronicWarfare(e, getPreferredLanguage())).collect(Collectors.toList()));
+        return ResponseEntity.ok(moduleService.findAllElectronicWarfare().stream().map(e -> new ElectronicWarfare(e, getPreferredLanguage()).withCosts(e.getCosts())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = ModuleApi.PASSIVE_ENDPOINT + "/all")
@@ -194,7 +191,7 @@ public class PublicResourcesApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getPassiveModules() {
-        return ResponseEntity.ok(moduleService.findAllPassiveModules().stream().map(p -> new PassiveModule(p, getPreferredLanguage())).collect(Collectors.toList()));
+        return ResponseEntity.ok(moduleService.findAllPassiveModules().stream().map(p -> new PassiveModule(p, getPreferredLanguage()).withCosts(p.getCosts())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = "buildings/all")
@@ -209,7 +206,7 @@ public class PublicResourcesApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getAllBuildings() {
-        return ResponseEntity.ok(buildingService.findAll().stream().map(p -> new Building(p, getPreferredLanguage())).collect(Collectors.toList()));
+        return ResponseEntity.ok(buildingService.findAll().stream().map(p -> new Building(p, getPreferredLanguage()).withCosts(p.getCosts())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = RESOURCE_TYPES_ENDPOINT)

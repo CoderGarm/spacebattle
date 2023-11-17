@@ -43,7 +43,7 @@ article für Bevölkerungsentwicklung
 1. Die Änderungen in der Bevölkerungsentwicklung aus dem "Zwischenrelease" erwähne ich hier der Form halber:  
    Die Berechnung zur Bevölkerungsentwicklung betrachtet nur noch die Bevölkerung im reproduktionsfähigen Zustand.  
    Durch die anderen Änderungen wurde es wichtig, deutlich früher im Gameplay bereits die Bildungseinrichtungen zu leveln. Dafür gibt es Advices im Advisory Board.
-2. Operation Sonnenblume war erfolgreich, die Großmächte haben die meisten Basen ausgeräuchert. Aber eben nur die Basen, nicht alle Piraten wurden erwischt.  
+2. Operation Sonnenblume war erfolgreich, die Großmächte haben die meisten Piratenstützpunkte ausgeräuchert. Aber eben nur die Basen, nicht alle Piraten wurden erwischt.  
    Piraten spawnen nicht mehr für Raids auf nicht kolonialisierte Planeten.  
    Ursprünglich war die Idee dahinter, dass das Universum etwas lebendiger wirkt, weil man auch mal zwischendurch auf fremde Flotten treffen kann. Das Ergebnis war allerdings, dass
    in einigen Systemen zwei, drei oder vier Piratenflotten gespawnt sind und das irritiert mehr, als dass es lebendig wirkt.  
@@ -80,6 +80,7 @@ todo. check fitting yard
 2. Der Status einer Flotte wird nun bei jeder Änderung der Formation neu bestimmt.
 3. Flottenbewegungen wurden im Journal falsch angezeigt, ob eine Flotte ins System gesprungen oder den Planeten angeflogen hat, wurde nicht unterschieden. Das ist repariert.
 4. Schiffswerften ohne Auftrag werden wieder im Journal angezeigt.
+   todo. wiki is broken -> store full text as easy solution?
 
 todo. fleet detachment submit button disable when no change
 todo. research punkte -> sandkiste issue with 27 points left vs 160 from inop labs
@@ -90,7 +91,6 @@ todo. battlereport new advisory but no new present
 todo. no running job in journal
 todo. migration must respect pop demand
 
-todo. wiki is broken -> store full text as easy solution?
 
 todo. chats von anderen werden automatisch gelesen
 todo. fix crew exploit

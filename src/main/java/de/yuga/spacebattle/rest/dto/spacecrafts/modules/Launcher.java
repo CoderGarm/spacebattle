@@ -3,6 +3,7 @@ package de.yuga.spacebattle.rest.dto.spacecrafts.modules;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
+import de.yuga.spacebattle.rest.dto.WithCosts;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.basics.BaseModule;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Schema(description = ".")
-public class Launcher {
+public class Launcher extends WithCosts<Launcher> {
 
     @Nonnull
     @JsonProperty

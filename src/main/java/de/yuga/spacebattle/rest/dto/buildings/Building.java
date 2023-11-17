@@ -3,7 +3,9 @@ package de.yuga.spacebattle.rest.dto.buildings;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EProductionCategory;
+import de.yuga.spacebattle.rest.dto.WithCosts;
 import de.yuga.spacebattle.rest.dto.enums.ERefinementSequence;
 import de.yuga.spacebattle.rest.dto.enums.EResourceType;
 import de.yuga.spacebattle.rest.dto.researches.Research;
@@ -13,7 +15,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 @Schema(description = ".")
-public class Building {
+public class Building extends WithCosts<de.yuga.spacebattle.backend.entities.buildings.Building> {
 
     @Nonnull
     @JsonProperty
@@ -66,6 +68,7 @@ public class Building {
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(building, "building shouldn't be null!");
 
+        final ResourceDeposit costs = building.getCosts();
 
         idBuilding = building.getId();
         name = building.getName(languageCode);
