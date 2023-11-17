@@ -18,8 +18,7 @@ public class CustomArmorRepositoryImpl implements CustomArmorRepository {
     @Nonnull
     @Override
     public List<Armor> findAll() {
-        final List<Armor> resultList = em.createNamedQuery("Armor.getAll", Armor.class).getResultList();
-        return resultList;
+        return em.createNamedQuery("Armor.getAll", Armor.class).getResultList();
     }
 
     @Nonnull

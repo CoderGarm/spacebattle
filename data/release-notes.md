@@ -40,7 +40,7 @@ article für Bevölkerungsentwicklung
 
 #### Gameplay
 
-1. Die Änderungen in der Bevölkerungsentwicklung erwähne ich hier der Form halber:  
+1. Die Änderungen in der Bevölkerungsentwicklung aus dem "Zwischenrelease" erwähne ich hier der Form halber:  
    Die Berechnung zur Bevölkerungsentwicklung betrachtet nur noch die Bevölkerung im reproduktionsfähigen Zustand.  
    Durch die anderen Änderungen wurde es wichtig, deutlich früher im Gameplay bereits die Bildungseinrichtungen zu leveln. Dafür gibt es Advices im Advisory Board.
 2. Piraten spawnen nicht mehr für Raids auf nicht kolonialisierte Planeten.  
@@ -61,6 +61,8 @@ todo. Hyperabdruck im System bei aufkommenden Flotten
 #### Diverses
 
 1. Der Zustand von Schiffen im Transfer-Display der Sternenkarte wird per Farbkodierung "wie gewohnt" dargestellt.
+2. Es gibt eine Bibliothek aller Schiffskomponenten und Gebäude im Burgermenü.  
+   Die Bib ist, wie üblich, in Entwicklung und es muss noch klar werden, welche Informationen dort sinnvoll sind.
 
 todo. manual transfer to fleet overrides capacity
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"

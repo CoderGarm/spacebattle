@@ -5,8 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.physics.Mass;
 import de.yuga.spacebattle.backend.entities.misc.HasCostsByOwn;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
+import de.yuga.spacebattle.rest.dto.enums.EModuleType;
 import de.yuga.spacebattle.rest.dto.enums.EShipClassType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -56,6 +57,11 @@ public class BaseModule {
     @Schema(description = "The intended hull type of this module.")
     private EShipClassType shipClassType;
 
+    @Nullable
+    @JsonProperty
+    @Schema(description = "The module's type.")
+    private EModuleType moduleType;
+
     protected BaseModule() {
     }
 
@@ -86,6 +92,7 @@ public class BaseModule {
         this.tonnage = module.getTonnage();
         this.effectValue = module.getEffectValue();
         this.shipClassType = new EShipClassType(module.getShipClassType());
+        this.moduleType = BaseModule.getTypeBy(module);
     }
 
     public BaseModule(@Nonnull final Propulsion module, @Nonnull final String languageCode) {
@@ -96,6 +103,30 @@ public class BaseModule {
         this.name = module.getName(languageCode);
         this.description = module.getDescription(languageCode);
         this.techLevel = module.getTechLevel();
+        this.moduleType = new EModuleType(de.yuga.spacebattle.backend.enums.EModuleType.PROPULSION);
+    }
+
+    @Nullable
+    @JsonIgnore
+    private static EModuleType getTypeBy(@Nonnull final HasCostsByOwn module) {
+        Preconditions.checkNotNull(module, "module shouldn't be null!");
+
+        if (module instanceof Weapon || module instanceof Launcher) {
+            return new EModuleType(de.yuga.spacebattle.backend.enums.EModuleType.WEAPON);
+        }
+
+        if (module instanceof Armor) {
+            return new EModuleType(de.yuga.spacebattle.backend.enums.EModuleType.ARMOR);
+        }
+
+        if (module instanceof Sidewall) {
+            return new EModuleType(de.yuga.spacebattle.backend.enums.EModuleType.SIDEWALL);
+        }
+
+        if (module instanceof ElectronicWarfare) {
+            return new EModuleType(de.yuga.spacebattle.backend.enums.EModuleType.ELECTRONIC_WARFARE);
+        }
+        return null;
     }
 
     @JsonIgnore
