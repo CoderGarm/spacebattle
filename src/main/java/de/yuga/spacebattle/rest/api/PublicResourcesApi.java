@@ -2,12 +2,18 @@ package de.yuga.spacebattle.rest.api;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.enums.EModuleType;
+import de.yuga.spacebattle.backend.enums.EProductionCategory;
+import de.yuga.spacebattle.backend.enums.ERefinementSequence;
+import de.yuga.spacebattle.backend.enums.EShipClassType;
 import de.yuga.spacebattle.backend.services.ResourceService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.rest.api.spacecrafts.ModuleApi;
 import de.yuga.spacebattle.rest.dto.buildings.Building;
+import de.yuga.spacebattle.rest.dto.enums.EEducationType;
+import de.yuga.spacebattle.rest.dto.enums.EResourceType;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,6 +42,12 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PUBLIC_BASE_ENDPOI
 public class PublicResourcesApi extends BaseApi {
 
     public final static String ENDPOINT = "resources";
+    private static final String RESOURCE_TYPES_ENDPOINT = "types";
+    private static final String HUMAN_RESOURCE_TYPES_ENDPOINT = "educationTypes";
+    private static final String E_HULL_TYPE_ENDPOINT = "shipClassType";
+    private static final String E_MODULE_TYPE_ENDPOINT = "moduleType";
+    private static final String E_PRODUCTION_CATEGORY = "EProductionCategory";
+    private static final String E_REFINEMENT_SEQUENCE = "ERefinementSequence";
 
     @Nonnull
     private final ResourceService resourceService;
@@ -197,6 +210,100 @@ public class PublicResourcesApi extends BaseApi {
     )
     public ResponseEntity<?> getAllBuildings() {
         return ResponseEntity.ok(buildingService.findAll().stream().map(p -> new Building(p, getPreferredLanguage())).collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = RESOURCE_TYPES_ENDPOINT)
+    @Operation(summary = "Get all EResourceTypes.", operationId = "getEResourceTypes",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = EResourceType.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getEResourceTypes() {
+        return ResponseEntity.ok(Arrays.stream(de.yuga.spacebattle.backend.enums.EResourceType.values())
+                .map(EResourceType::new)
+                .collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = HUMAN_RESOURCE_TYPES_ENDPOINT)
+    @Operation(summary = "Get all EEducationTypes.", operationId = "getEEducationTypes",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = EEducationType.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getEEducationTypes() {
+        return ResponseEntity.ok(Arrays.stream(de.yuga.spacebattle.backend.enums.EEducationType.values())
+                .map(EEducationType::new)
+                .collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = E_HULL_TYPE_ENDPOINT)
+    @Operation(summary = "Get all EShipClassTypes.", operationId = "getEShipClassTypes",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = de.yuga.spacebattle.rest.dto.enums.EShipClassType.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getEShipClassTypes() {
+        return ResponseEntity.ok(Arrays.stream(EShipClassType.values()).map(de.yuga.spacebattle.rest.dto.enums.EShipClassType::new).collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = E_MODULE_TYPE_ENDPOINT)
+    @Operation(summary = "Get all EModuleType.", operationId = "getEModuleTypes",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = de.yuga.spacebattle.rest.dto.enums.EModuleType.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getEModuleTypes() {
+        return ResponseEntity.ok(Arrays.stream(EModuleType.values()).map(de.yuga.spacebattle.rest.dto.enums.EModuleType::new).collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = "/" + E_PRODUCTION_CATEGORY)
+    @Operation(summary = "Get all EProductionCategories.", operationId = "getEProductionCategories",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = EProductionCategory.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getEProductionCategories() {
+        return ResponseEntity.ok(Arrays.stream(EProductionCategory.values()).collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = "/" + E_REFINEMENT_SEQUENCE)
+    @Operation(summary = "Get all ERefinementSequences.", operationId = "getERefinementSequences",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = de.yuga.spacebattle.rest.dto.enums.ERefinementSequence.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getERefinementSequences() {
+        return ResponseEntity.ok(Arrays.stream(ERefinementSequence.values()).map(de.yuga.spacebattle.rest.dto.enums.ERefinementSequence::new).collect(Collectors.toList()));
     }
 
     /*

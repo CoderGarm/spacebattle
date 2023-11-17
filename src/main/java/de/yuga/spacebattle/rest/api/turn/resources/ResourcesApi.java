@@ -26,8 +26,6 @@ import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapabilities;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapacityAreas;
 import de.yuga.spacebattle.rest.dto.constructables.buildings.PlannedConstruction;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstructionSelection;
-import de.yuga.spacebattle.rest.dto.enums.EEducationType;
-import de.yuga.spacebattle.rest.dto.enums.EResourceType;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClassMock;
 import de.yuga.spacebattle.rest.dto.turn.resources.MiningFactors;
@@ -48,7 +46,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -63,8 +60,7 @@ public class ResourcesApi extends BaseApi {
 
     @Nonnull
     public static final String ENDPOINT = "resources";
-    private static final String RESOURCE_TYPES_ENDPOINT = "types";
-    private static final String HUMAN_RESOURCE_TYPES_ENDPOINT = "educationTypes";
+
     private static final String MINING_FACTORS_ENDPOINT = "miningFactors";
     private static final String RESOURCE_DEPOSIT_ENDPOINT = "deposit";
     private static final String RESOURCE_DEMAND_ENDPOINT = "demand";
@@ -126,40 +122,6 @@ public class ResourcesApi extends BaseApi {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
         this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
         this.tickOutputCalculator = Preconditions.checkNotNull(tickOutputCalculator, "tickOutputCalculator must not be empty");
-    }
-
-    @GetMapping(value = RESOURCE_TYPES_ENDPOINT)
-    @Operation(summary = "Get all EResourceTypes.", operationId = "getEResourceTypes",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = EResourceType.class))
-                            )),
-                    @ApiResponse(responseCode = "400", description = "an error occurred",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
-            }
-    )
-    public ResponseEntity<?> getEResourceTypes() {
-        return ResponseEntity.ok(Arrays.stream(de.yuga.spacebattle.backend.enums.EResourceType.values())
-                .map(EResourceType::new)
-                .collect(Collectors.toList()));
-    }
-
-    @GetMapping(value = HUMAN_RESOURCE_TYPES_ENDPOINT)
-    @Operation(summary = "Get all EEducationTypes.", operationId = "getEEducationTypes",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = EEducationType.class))
-                            )),
-                    @ApiResponse(responseCode = "400", description = "an error occurred",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
-            }
-    )
-    public ResponseEntity<?> getEEducationTypes() {
-        return ResponseEntity.ok(Arrays.stream(de.yuga.spacebattle.backend.enums.EEducationType.values())
-                .map(EEducationType::new)
-                .collect(Collectors.toList()));
     }
 
     @GetMapping(value = MINING_FACTORS_ENDPOINT + "/{idPlanet}")

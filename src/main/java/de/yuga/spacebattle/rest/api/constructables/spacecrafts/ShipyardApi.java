@@ -1,8 +1,6 @@
 package de.yuga.spacebattle.rest.api.constructables.spacecrafts;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.enums.EModuleType;
-import de.yuga.spacebattle.backend.enums.EShipClassType;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassCreationService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.rest.api.BaseApi;
@@ -29,7 +27,6 @@ import javax.annotation.security.RolesAllowed;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -43,8 +40,6 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 public class ShipyardApi extends BaseApi {
 
     public static final String ENDPOINT = "shipyard";
-    public static final String E_HULL_TYPE_ENDPOINT = "shipClassType";
-    public static final String E_MODULE_TYPE_ENDPOINT = "moduleType";
 
     @Nonnull
     private final ShipClassService shipClassService;
@@ -159,36 +154,6 @@ public class ShipyardApi extends BaseApi {
         }
         final int idUser = getIdUser();
         return ResponseEntity.ok(shipClassService.checkIfClassNameIsFree(idUser, className));
-    }
-
-    @GetMapping(value = E_HULL_TYPE_ENDPOINT)
-    @Operation(summary = "Get all EShipClassTypes.", operationId = "getEShipClassTypes",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = de.yuga.spacebattle.rest.dto.enums.EShipClassType.class))
-                            )),
-                    @ApiResponse(responseCode = "400", description = "an error occurred",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
-            }
-    )
-    public ResponseEntity<?> getEShipClassTypes() {
-        return ResponseEntity.ok(Arrays.stream(EShipClassType.values()).map(de.yuga.spacebattle.rest.dto.enums.EShipClassType::new).collect(Collectors.toList()));
-    }
-
-    @GetMapping(value = E_MODULE_TYPE_ENDPOINT)
-    @Operation(summary = "Get all EModuleType.", operationId = "getEModuleTypes",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = de.yuga.spacebattle.rest.dto.enums.EModuleType.class))
-                            )),
-                    @ApiResponse(responseCode = "400", description = "an error occurred",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
-            }
-    )
-    public ResponseEntity<?> getEModuleTypes() {
-        return ResponseEntity.ok(Arrays.stream(EModuleType.values()).map(de.yuga.spacebattle.rest.dto.enums.EModuleType::new).collect(Collectors.toList()));
     }
 
     @PutMapping(value = "propulsionCapacity/{idPropulsion}")

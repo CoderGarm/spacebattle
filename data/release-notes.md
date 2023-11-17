@@ -43,9 +43,10 @@ article für Bevölkerungsentwicklung
 1. Die Änderungen in der Bevölkerungsentwicklung aus dem "Zwischenrelease" erwähne ich hier der Form halber:  
    Die Berechnung zur Bevölkerungsentwicklung betrachtet nur noch die Bevölkerung im reproduktionsfähigen Zustand.  
    Durch die anderen Änderungen wurde es wichtig, deutlich früher im Gameplay bereits die Bildungseinrichtungen zu leveln. Dafür gibt es Advices im Advisory Board.
-2. Piraten spawnen nicht mehr für Raids auf nicht kolonialisierte Planeten.  
+2. Operation Sonnenblume war erfolgreich, die Großmächte haben die meisten Basen ausgeräuchert. Aber eben nur die Basen, nicht alle Piraten wurden erwischt.  
+   Piraten spawnen nicht mehr für Raids auf nicht kolonialisierte Planeten.  
    Ursprünglich war die Idee dahinter, dass das Universum etwas lebendiger wirkt, weil man auch mal zwischendurch auf fremde Flotten treffen kann. Das Ergebnis war allerdings, dass
-   in einigen Systemen zwei, drei oder view Piratenflotten gespawnt sind und das irritiert mehr, als dass es lebendig wirkt.  
+   in einigen Systemen zwei, drei oder vier Piratenflotten gespawnt sind und das irritiert mehr, als dass es lebendig wirkt.  
    Die Kersey Association wird euch also ihre ganze Aufmerksamkeit widmen ;)
 3. Neue Schiffe landen nun direkt in der Reserve und nicht in einer neuen Flotte. Im Kriegsfall werden unnötige Verluste sowie die Schadenfreude des Gegners vermieden.
 4. Schiffe der Reserve können nun im Transport-Menü direkt zwischen eigenen Planeten transportiert werden. Das ganze passiert auf die gleiche magische Weise wie bei den Ressourcen.
