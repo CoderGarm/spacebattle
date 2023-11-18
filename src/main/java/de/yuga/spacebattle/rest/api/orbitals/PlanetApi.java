@@ -233,7 +233,7 @@ public class PlanetApi extends BaseApi {
             ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "successfully started",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = de.yuga.spacebattle.rest.dto.turn.Job.class))),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
@@ -259,7 +259,7 @@ public class PlanetApi extends BaseApi {
         if (JobService.isLocalInstaJobPossible(planet, job)) {
             planetTickRunner.tickInstaShipyard(job, tickTimeService.getToday());
         }
-        return ResponseEntity.ok(true);
+        return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(job, getPreferredLanguage()));
     }
 
     @PostMapping(value = GET_PLANET_BY_COORDINATES_ENDPOINT + "/{idStarSystem}")

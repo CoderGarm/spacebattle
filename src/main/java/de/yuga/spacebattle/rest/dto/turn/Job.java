@@ -148,9 +148,9 @@ public class Job {
         }
         this.isShipyardJob = constructable.isShipyardJob();
         if (isShipyardJob) {
-            de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = constructable.getFleet();
+            final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = constructable.getFleet();
             final FleetSnapshot fleetSnapshot = constructable.getFleetSnapshot();
-            final Set<WarShip> ships = fleet != null ? fleet.getAliveShips() : Objects.requireNonNull(fleetSnapshot).getShips().stream().map(WarshipHealthStateSnapshot::getWarShip).collect(Collectors.toSet());
+            final Set<WarShip> ships = fleet != null ? (constructable.isUpgradeJob() ? fleet.getAliveShips() : fleet.getAllShips()) : Objects.requireNonNull(fleetSnapshot).getShips().stream().map(WarshipHealthStateSnapshot::getWarShip).collect(Collectors.toSet());
             this.fleet = new Fleet(fleet != null ? fleet : fleetSnapshot.getFleet(), ships, languageCode);
             this.isRepairJob = job.getConstructable().isRepairJob();
             this.isUpgradeJob = job.getConstructable().isUpgradeJob();
