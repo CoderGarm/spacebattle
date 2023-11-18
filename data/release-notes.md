@@ -64,6 +64,8 @@ todo. Hyperabdruck im System bei aufkommenden Flotten
 1. Der Zustand von Schiffen im Transfer-Display der Sternenkarte wird per Farbkodierung "wie gewohnt" dargestellt.
 2. Es gibt eine Bibliothek aller Schiffskomponenten und Gebäude im Burgermenü.  
    Die Bib ist, wie üblich, in Entwicklung und es muss noch klar werden, welche Informationen dort sinnvoll sind.
+3. Man muss die Forschungsseite nicht mehr neu laden, wenn eine Forschung sofort fertig wurde.
+4. Man muss die Gebäudeseite nicht mehr neu laden, wenn ein neues Gebäudelevel sofort fertig gestellt wurde.
 
 todo. manual transfer to fleet overrides capacity
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
