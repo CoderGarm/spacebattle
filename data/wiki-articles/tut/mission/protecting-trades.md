@@ -1,16 +1,16 @@
-### **Protecting Trade Convoys in Your Space Empire**
+# Protecting Trade Convoys in Your Space Empire
 
 Trade convoys are the lifeblood of your space empire, transporting valuable resources across the vast expanse of the cosmos. Unfortunately, these convoys often become the target of
 opportunistic pirates as they enter hyperspace, traverse gravitational waves, or transition into normal space. As a savvy space commander, it's crucial to understand why and how to
 protect these convoys. This guide will walk you through the essentials.
 
-### **Why Protect Trade Convoys?**
+### Why Protect Trade Convoys?
 
 Trade convoys are the backbone of your economy. They facilitate the flow of resources, goods, and credits that fuel your empire's growth. Disruptions in the convoy routes can lead
 to economic instability, reduced resource availability, and a weakened empire. Protecting trade convoys is not just a matter of safeguarding your profits; it's a strategic
 imperative for the stability and growth of your domain.
 
-### **How to Protect Trade Convoys**
+### How to Protect Trade Convoys
 
 Trade convoys can only be protected during the first tick of their journey by assigning them a "Convoy Protection" mission. Here's a step-by-step guide on how to achieve this:
 
@@ -26,26 +26,26 @@ Trade convoys can only be protected during the first tick of their journey by as
 Remember, the key to successful convoy protection is maintaining a well-equipped and responsive reserve fleet. Always be prepared to allocate enough ships to secure your trade
 routes.
 
-### **Conclusion**
+### Conclusion
 
 Protecting trade convoys is not just about ensuring the safe passage of goods but about safeguarding the prosperity and stability of your empire. By understanding the why and how
 of convoy protection, you can bolster your economy, keep your people happy, and solidify your dominance among the stars.
 
----
+---------------------------------------------------------------------------------------------------------
 
-### **Den Handelskonvoi in deinem Weltraumreich schützen**
+# Den Handelskonvoi in deinem Weltraumreich schützen
 
 Handelskonvois sind die Lebensader deines Weltraumreichs und transportieren wertvolle Ressourcen durch die Weiten des Kosmos. Leider werden diese Konvois oft zur Zielscheibe von
 Piraten, wenn sie in den Hyperraum eintreten, Gravitationswellen durchqueren oder in den Normalraum übergehen. Als kluger Raumkommandant ist es wichtig zu verstehen, warum und wie
 man diese Konvois schützen kann. Diese Anleitung führt dich durch die wichtigsten Informationen.
 
-### **Warum Handelskonvois schützen?**
+### Warum Handelskonvois schützen?
 
 Handelskonvois sind das Rückgrat deiner Wirtschaft. Sie erleichtern den Fluss von Ressourcen, Gütern und Credits, die das Wachstum deines Reichs antreiben. Störungen in den
 Konvoirouten können zu wirtschaftlicher Instabilität, reduzierter Ressourcenverfügbarkeit und einem geschwächten Reich führen. Den Schutz von Handelskonvois zu vernachlässigen,
 betrifft nicht nur deine Gewinne; es ist eine strategische Notwendigkeit für die Stabilität und das Wachstum deiner Herrschaft.
 
-### **Wie schützt du Handelskonvois?**
+### Wie schützt du Handelskonvois?
 
 Handelskonvois können nur während des ersten Ticks ihrer Reise geschützt werden, indem du ihnen die Mission "Konvoischutz" zuweist. Hier ist eine Schritt-für-Schritt-Anleitung, wie
 du das erreichen kannst:
@@ -62,7 +62,7 @@ du das erreichen kannst:
 Denke daran, der Schlüssel zum erfolgreichen Konvoischutz liegt darin, eine gut ausgerüstete und reaktionsschnelle Reserveflotte zu unterhalten. Sei immer bereit, genügend Schiffe
 zuzuweisen, um deine Handelsrouten zu sichern.
 
-### **Fazit**
+### Fazit
 
 Den Schutz von Handelskonvois geht es nicht nur um die sichere Passage von Gütern, sondern um die Sicherung des Wohlstands und der Stabilität deines Reiches. Indem du das Warum und
 Wie des Konvoischutzes verstehst, kannst du deine Wirtschaft stärken, deine Bevölkerung zufriedenstellen und deine Dominanz unter den Sternen festigen.

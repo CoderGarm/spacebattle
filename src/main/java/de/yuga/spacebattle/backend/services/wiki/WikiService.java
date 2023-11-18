@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.wiki.Article;
-import de.yuga.spacebattle.backend.entities.wiki.ArticleLine;
 import de.yuga.spacebattle.backend.entities.wiki.ArticleRevision;
 import de.yuga.spacebattle.backend.enums.ETutorialCategory;
 import de.yuga.spacebattle.backend.enums.EWikiCategory;
@@ -57,9 +56,8 @@ public class WikiService {
         final List<ArticleRevision> forArticle = revisions.stream()
                 .sorted()
                 .collect(Collectors.toList());
-        final List<ArticleLine> lines = article.getMergedArticleLines();
         final ArticleRevision latest = forArticle.get(forArticle.size() - 1);
-        final ArticleRevision result = new ArticleRevision(latest.getAuthor(), latest.getVersion(), latest.getArticle(), lines);
+        final ArticleRevision result = new ArticleRevision(latest.getAuthor(), latest.getVersion(), latest.getArticle(), latest.getArticleLines());
         return new ArticlePlainContent(result);
     }
 

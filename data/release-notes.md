@@ -34,9 +34,9 @@ Und etwas fürs Auge gabs auch noch ;)
 ### Features
 
 article trading protection -> protecting-trades.md
+article für Bevölkerungsentwicklung -> population-development.md
 article priorisierung bei pop demand und migration
 article + check ship returns from mission
-article für Bevölkerungsentwicklung
 
 #### Gameplay
 
@@ -80,7 +80,8 @@ todo. check fitting yard
 2. Der Status einer Flotte wird nun bei jeder Änderung der Formation neu bestimmt.
 3. Flottenbewegungen wurden im Journal falsch angezeigt, ob eine Flotte ins System gesprungen oder den Planeten angeflogen hat, wurde nicht unterschieden. Das ist repariert.
 4. Schiffswerften ohne Auftrag werden wieder im Journal angezeigt.
-   todo. wiki is broken -> store full text as easy solution?
+5. Die Probleme im Wiki sind behoben und es ist jetzt benutzbar.
+6. Die Textfarbe im Battle Report ist angepasst.
 
 todo. fleet detachment submit button disable when no change
 todo. research punkte -> sandkiste issue with 27 points left vs 160 from inop labs

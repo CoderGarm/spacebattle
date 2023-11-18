@@ -88,14 +88,13 @@ public class Article extends AbstractEntityKey {
         final String content = edit.getContent();
         if (StringUtils.isNotEmpty(content)) {
             final List<ArticleLine> articleLines = WikiCalculator.generateArticleLines(content);
-            final List<ArticleLine> changes = WikiCalculator.buildDiff(getMergedArticleLines(), articleLines);
 
             final ArticleRevision latestRev = getArticleRevisions().stream()
                     .sorted()
                     .reduce((o1, o2) -> o2)
                     .orElseThrow(NullPointerException::new);
             int version = latestRev.getVersion() + 1;
-            final ArticleRevision revision = new ArticleRevision(author, version, this, changes);
+            final ArticleRevision revision = new ArticleRevision(author, version, this, articleLines);
             addArticleRevisions(revision);
         }
     }
