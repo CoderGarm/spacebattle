@@ -25,8 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @Disabled("no test")
 public class FandomWikiQueryTest {
 
-    private static final String USR_HOME = System.getProperty("user.home");
-    private static final String FS = File.separator;
+    public static final String USR_HOME = System.getProperty("user.home");
+    public static final String FS = File.separator;
     public static final String DIR = USR_HOME + FS + "Desktop" + FS + "fandom" + FS;
 
     @Test
