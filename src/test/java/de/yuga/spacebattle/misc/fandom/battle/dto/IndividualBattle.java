@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.misc.fandom.battle.dto;
 
 import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -21,6 +22,28 @@ public class IndividualBattle {
         this.content = Preconditions.checkNotNull(content, "content must not be empty");
 
         battleBlock = parse();
+    }
+
+    @Nonnull
+    public String getName() {
+        return name;
+    }
+
+    @Nullable
+    public WikiBattleBlock getBattleBlock() {
+        return battleBlock;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("name: ", name)
+                .toString();
+    }
+
+    @Nullable
+    public IndividualBattle getValid() {
+        return battleBlock != null && battleBlock.isValid() ? this : null;
     }
 
     @Nullable

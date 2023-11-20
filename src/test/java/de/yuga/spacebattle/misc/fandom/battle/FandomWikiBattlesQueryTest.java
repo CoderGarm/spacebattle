@@ -58,8 +58,18 @@ public class FandomWikiBattlesQueryTest {
             final Map<String, String> content = getContent(dir, subDir);
             result.put(nationBattleCategory, content);
         }
-        final List<BattlesOfNation> battles = result.entrySet().stream().map(e -> new BattlesOfNation(e.getKey(), e.getValue())).collect(Collectors.toList());
+        final List<BattlesOfNation> battles = result.entrySet().stream()
+                .map(e -> new BattlesOfNation(e.getKey(), e.getValue())).collect(Collectors.toList());
         assertNotNull(battles);
+
+        battles.forEach(battlesOfNation -> {
+            final String nation = battlesOfNation.getNation();
+            battlesOfNation.getIndividualBattles().forEach(battle -> {
+                final String value = battle.getBattleBlock().printDe();
+                final String dir = FandomWikiQueryTest.DIR + FOLDER + "-output" + FandomWikiQueryTest.FS + nation + FandomWikiQueryTest.FS;
+                TestUtils.writeString(dir, battle.getName(), value);
+            });
+        });
     }
 
     @Nonnull
