@@ -4,8 +4,11 @@ import de.yuga.spacebattle.TestUtils;
 import de.yuga.spacebattle.misc.fandom.EWikiConfig;
 import de.yuga.spacebattle.misc.fandom.FandomWikiQueryTest;
 import de.yuga.spacebattle.misc.fandom.battle.dto.BattlesOfNation;
+import de.yuga.spacebattle.misc.fandom.battle.dto.IndividualBattle;
+import de.yuga.spacebattle.misc.fandom.battle.dto.WikiBattleBlock;
 import io.github.fastily.jwiki.core.MQuery;
 import io.github.fastily.jwiki.core.Wiki;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -50,7 +53,69 @@ public class FandomWikiBattlesQueryTest {
     }
 
     @Test
-    void readBattles() {
+    void readBattlesToJsonSortByDate() {
+        final Map<String, Map<String, String>> result = new HashMap<>();
+        for (final String nationBattleCategory : NATIONAL_BATTLES) {
+            final String dir = FandomWikiQueryTest.DIR + FOLDER + FandomWikiQueryTest.FS;
+            final String subDir = nationBattleCategory.replaceAll(" ", "-") + FandomWikiQueryTest.FS;
+            final Map<String, String> content = getContent(dir, subDir);
+            result.put(nationBattleCategory, content);
+        }
+        final List<BattlesOfNation> battles = result.entrySet().stream()
+                .map(e -> new BattlesOfNation(e.getKey(), e.getValue())).collect(Collectors.toList());
+        assertNotNull(battles);
+
+        final Map<String, List<WikiBattleBlock>> battlesByDate = new HashMap<>();
+        battles.forEach(battlesOfNation -> {
+            final List<IndividualBattle> individualBattles = battlesOfNation.getIndividualBattles();
+            individualBattles.forEach(battle -> {
+                final WikiBattleBlock battleBlock = battle.getBattleBlock();
+                String date = battleBlock.getDate();
+                if (StringUtils.isEmpty(date)) {
+                    date = "UNKNOWN";
+                }
+
+                final List<WikiBattleBlock> orDefault = battlesByDate.getOrDefault(date, new ArrayList<>());
+                orDefault.add(battleBlock);
+                battlesByDate.put(date, orDefault);
+            });
+        });
+        assertNotNull(battlesByDate);
+    }
+
+    @Test
+    void readBattlesToJsonSortByConflict() {
+        final Map<String, Map<String, String>> result = new HashMap<>();
+        for (final String nationBattleCategory : NATIONAL_BATTLES) {
+            final String dir = FandomWikiQueryTest.DIR + FOLDER + FandomWikiQueryTest.FS;
+            final String subDir = nationBattleCategory.replaceAll(" ", "-") + FandomWikiQueryTest.FS;
+            final Map<String, String> content = getContent(dir, subDir);
+            result.put(nationBattleCategory, content);
+        }
+        final List<BattlesOfNation> battles = result.entrySet().stream()
+                .map(e -> new BattlesOfNation(e.getKey(), e.getValue())).collect(Collectors.toList());
+        assertNotNull(battles);
+
+        final Map<String, List<WikiBattleBlock>> battlesByConflict = new HashMap<>();
+        battles.forEach(battlesOfNation -> {
+            final List<IndividualBattle> individualBattles = battlesOfNation.getIndividualBattles();
+            individualBattles.forEach(battle -> {
+                final WikiBattleBlock battleBlock = battle.getBattleBlock();
+                String conflict = battleBlock.getConflict();
+                if (StringUtils.isEmpty(conflict)) {
+                    conflict = "UNKNOWN";
+                }
+
+                final List<WikiBattleBlock> orDefault = battlesByConflict.getOrDefault(conflict, new ArrayList<>());
+                orDefault.add(battleBlock);
+                battlesByConflict.put(conflict, orDefault);
+            });
+        });
+        assertNotNull(battlesByConflict);
+    }
+
+    @Test
+    void readBattlesAndWrite() {
         final Map<String, Map<String, String>> result = new HashMap<>();
         for (final String nationBattleCategory : NATIONAL_BATTLES) {
             final String dir = FandomWikiQueryTest.DIR + FOLDER + FandomWikiQueryTest.FS;

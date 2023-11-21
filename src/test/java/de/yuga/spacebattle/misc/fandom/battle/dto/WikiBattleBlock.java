@@ -1,7 +1,12 @@
 package de.yuga.spacebattle.misc.fandom.battle.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
@@ -31,40 +36,61 @@ public class WikiBattleBlock {
     private static final Set<String> casualField = Set.of("casual", "VERLUSTE");
 
     @Nullable
+    @JsonIgnore
     private String battleBlockContent;
 
     @Nonnull
+    @JsonProperty
+    @Schema(required = true)
     @SuppressWarnings("NotNullFieldNotInitialized")
     private String name;
 
     @Nullable
+    @JsonProperty
+    @Schema
     private String image;
 
     @Nullable
+    @JsonProperty
+    @Schema
     private String conflict;
 
     @Nonnull
+    @JsonProperty
+    @Schema(required = true)
     @SuppressWarnings("NotNullFieldNotInitialized")
     private String date;
 
     @Nonnull
+    @JsonProperty
+    @Schema(required = true)
     @SuppressWarnings("NotNullFieldNotInitialized")
     private String place;
 
     @Nonnull
+    @JsonProperty
+    @Schema(required = true)
     @SuppressWarnings("NotNullFieldNotInitialized")
     private String result;
 
     @Nonnull
+    @JsonProperty
+    @Schema(required = true)
     private final List<String> side = new ArrayList<>();
 
     @Nonnull
+    @JsonProperty
+    @Schema(required = true)
     private final List<String> commander = new ArrayList<>();
 
     @Nonnull
+    @JsonProperty
+    @Schema(required = true)
     private final List<String> force = new ArrayList<>();
 
     @Nonnull
+    @JsonProperty
+    @Schema(required = true)
     private final List<String> casual = new ArrayList<>();
 
     public WikiBattleBlock(@Nonnull final String text) {
@@ -89,7 +115,7 @@ public class WikiBattleBlock {
         }
 
         final String[] keyValuePair = battleBlockContent
-                .replaceAll("\\|([a-zA-Z0-9]+)\\s*=\\s*", "\n|$1 = ")
+                .replaceAll("\\|([a-zA-Z0-9]+)\\s*=\\s*", "\n\n|$1 = ")
                 .split("\n\n");
 
         for (final String pair : keyValuePair) {
@@ -104,11 +130,11 @@ public class WikiBattleBlock {
                     .replaceAll("\n", "")
                     .trim();
             final String fieldValue = split[1].trim();
-            setDate(fieldName, fieldValue);
+            setData(fieldName, fieldValue);
         }
     }
 
-    private void setDate(@Nonnull final String fieldName, @Nonnull final String value) {
+    private void setData(@Nonnull final String fieldName, @Nonnull final String value) {
         Preconditions.checkNotNull(fieldName, "fieldName must not be empty");
         Preconditions.checkNotNull(value, "value must not be empty");
 
@@ -207,6 +233,27 @@ public class WikiBattleBlock {
                 ;
     }
 
+    @Override
+    public String toString() {
+        return toJson();
+    }
+
+    @Nonnull
+    public String toJson() {
+        if (!isValid()) {
+            throw new NotifyWebUserException("Nope.");
+        }
+        final Gson gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .create();
+
+        battleBlockContent = null;
+        return gson.toJson(this)
+                .replaceAll("\\[", "")
+                .replaceAll("\\]", "")
+                ;
+    }
+
     @Nonnull
     public String printEn() {
         if (!isValid()) {
@@ -256,7 +303,7 @@ public class WikiBattleBlock {
         result += ln("TEILVON = " + conflict);
         result += ln("DATUM = " + date);
         result += ln("ORT = " + place);
-        result += ln("AUSGANG = " + result);
+        result += ln("AUSGANG = " + this.result);
         for (int i = 0; i < side.size(); i++) {
             //noinspection StringConcatenationInLoop
             result += ln("KONTRAHENT" + (i + 1) + " = " + side.get(i));
