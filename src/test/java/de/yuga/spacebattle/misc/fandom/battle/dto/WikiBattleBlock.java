@@ -171,60 +171,72 @@ public class WikiBattleBlock {
     }
 
     @Nonnull
+    @JsonIgnore
     public String getName() {
         return name;
     }
 
     @Nullable
+    @JsonIgnore
     public String getImage() {
         return image;
     }
 
     @Nullable
+    @JsonIgnore
     public String getConflict() {
         return conflict;
     }
 
     @Nonnull
+    @JsonIgnore
     public String getDate() {
         return date;
     }
 
     @Nonnull
+    @JsonIgnore
     public String getPlace() {
         return place;
     }
 
     @Nonnull
+    @JsonIgnore
     public String getResult() {
         return result;
     }
 
     @Nonnull
+    @JsonIgnore
     public List<String> getSide() {
         return side;
     }
 
     @Nonnull
+    @JsonIgnore
     public List<String> getCommander() {
         return commander;
     }
 
     @Nonnull
+    @JsonIgnore
     public List<String> getForce() {
         return force;
     }
 
     @Nonnull
+    @JsonIgnore
     public List<String> getCasual() {
         return casual;
     }
 
     @Nullable
+    @JsonIgnore
     public WikiBattleBlock getValid() {
         return battleBlockContent != null ? this : null;
     }
 
+    @JsonIgnore
     public boolean isValid() {
         return StringUtils.isNotEmpty(name)
                 && StringUtils.isNotEmpty(date)
@@ -234,11 +246,13 @@ public class WikiBattleBlock {
     }
 
     @Override
+    @JsonIgnore
     public String toString() {
         return toJson();
     }
 
     @Nonnull
+    @JsonIgnore
     public String toJson() {
         if (!isValid()) {
             throw new NotifyWebUserException("Nope.");
@@ -247,14 +261,32 @@ public class WikiBattleBlock {
                 .setPrettyPrinting()
                 .create();
 
-        battleBlockContent = null;
-        return gson.toJson(this)
+        tidyUp();
+        return Objects.requireNonNull(sanitize(gson.toJson(this)));
+    }
+
+    @Nullable
+    public static String sanitize(@Nullable final String string) {
+
+        if (StringUtils.isBlank(string)) {
+            return null;
+        }
+
+        return string
                 .replaceAll("\\[", "")
                 .replaceAll("\\]", "")
+                .replaceAll("\\/", "_")
+                .replaceAll("\\/", "_")
+                .replaceAll("<br>", "\n")
+                .replaceAll("<br/>", "\n")
+                .replaceAll("<br-/>", "\n")
+                .replaceAll("<[^>]*>", "")
+                .replaceAll("\\u003C[^>]*\\u003e", "")
                 ;
     }
 
     @Nonnull
+    @JsonIgnore
     public String printEn() {
         if (!isValid()) {
             throw new NotifyWebUserException("Nope.");
@@ -290,6 +322,7 @@ public class WikiBattleBlock {
     }
 
     @Nonnull
+    @JsonIgnore
     public String printDe() {
         if (!isValid()) {
             throw new NotifyWebUserException("Nope.");
@@ -331,5 +364,32 @@ public class WikiBattleBlock {
             return string;
         }
         return string + "\n";
+    }
+
+    public void tidyUp() {
+        this.battleBlockContent = null;
+
+        name = Objects.requireNonNull(sanitize(name));
+        image = sanitize(image);
+        conflict = sanitize(conflict);
+        date = Objects.requireNonNull(sanitize(date));
+        place = Objects.requireNonNull(sanitize(place));
+        result = Objects.requireNonNull(sanitize(result));
+
+        List<String> sanitizedContentLines = side.stream().map(WikiBattleBlock::sanitize).collect(Collectors.toList());
+        side.clear();
+        side.addAll(sanitizedContentLines);
+
+        sanitizedContentLines = commander.stream().map(WikiBattleBlock::sanitize).collect(Collectors.toList());
+        commander.clear();
+        commander.addAll(sanitizedContentLines);
+
+        sanitizedContentLines = force.stream().map(WikiBattleBlock::sanitize).collect(Collectors.toList());
+        force.clear();
+        force.addAll(sanitizedContentLines);
+
+        sanitizedContentLines = casual.stream().map(WikiBattleBlock::sanitize).collect(Collectors.toList());
+        casual.clear();
+        casual.addAll(sanitizedContentLines);
     }
 }

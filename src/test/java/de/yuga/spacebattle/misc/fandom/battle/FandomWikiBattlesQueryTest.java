@@ -1,5 +1,7 @@
 package de.yuga.spacebattle.misc.fandom.battle;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import de.yuga.spacebattle.TestUtils;
 import de.yuga.spacebattle.misc.fandom.EWikiConfig;
 import de.yuga.spacebattle.misc.fandom.FandomWikiQueryTest;
@@ -101,7 +103,7 @@ public class FandomWikiBattlesQueryTest {
             final List<IndividualBattle> individualBattles = battlesOfNation.getIndividualBattles();
             individualBattles.forEach(battle -> {
                 final WikiBattleBlock battleBlock = battle.getBattleBlock();
-                String conflict = battleBlock.getConflict();
+                String conflict = WikiBattleBlock.sanitize(battleBlock.getConflict());
                 if (StringUtils.isEmpty(conflict)) {
                     conflict = "UNKNOWN";
                 }
@@ -112,6 +114,18 @@ public class FandomWikiBattlesQueryTest {
             });
         });
         assertNotNull(battlesByConflict);
+
+        final Gson gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .create();
+
+        battlesByConflict.forEach((conflict, battleBlocks) -> {
+            // hack to suppress printing the battle block content
+            battleBlocks.forEach(WikiBattleBlock::tidyUp);
+            final String value = gson.toJson(battleBlocks);
+            final String dir = FandomWikiQueryTest.DIR + FOLDER + "-by-conflict" + FandomWikiQueryTest.FS;
+            TestUtils.writeString(dir, conflict + ".json", value);
+        });
     }
 
     @Test

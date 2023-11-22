@@ -167,7 +167,7 @@ public final class TestUtils {
             } else {
                 file.createNewFile();
             }
-            final FileOutputStream outputStream = new FileOutputStream(name);
+            final FileOutputStream outputStream = new FileOutputStream(name, true);
             byte[] strToBytes = string.getBytes();
             outputStream.write(strToBytes);
             outputStream.close();
