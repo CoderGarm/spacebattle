@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.misc.fandom.battle.dto;
+package de.yuga.spacebattle.rest.dto.misc.wiki;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.builder.ToStringBuilder;

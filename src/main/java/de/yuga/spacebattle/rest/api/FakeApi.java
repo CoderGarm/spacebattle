@@ -24,4 +24,17 @@ public class FakeApi {
     public void getEnumValues() {
 
     }
+
+    /*
+    @GetMapping(value = "battleDto")
+    @Operation(summary = "Get all relevant enum values.", operationId = "getBattleDto",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = WikiBattleBlock.class)))
+            }
+    )
+    public void getBattleDto() {
+
+    }
+    */
 }

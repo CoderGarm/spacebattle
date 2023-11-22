@@ -33,7 +33,7 @@ todo. chat search: empire name, ingame name, username
 todo. mission items more role play "unprotected convoy changes signature of ship to warship and pirate fled ...""
 todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
 
-todo. check fitting yard
+todo. a real dashboard for fleet. where are they all and which are they designed for
 
 ### Bugs fixed
 

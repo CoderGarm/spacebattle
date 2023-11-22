@@ -1,4 +1,4 @@
-package de.yuga.spacebattle.misc.fandom.battle.dto;
+package de.yuga.spacebattle.rest.dto.misc.wiki;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -60,6 +60,11 @@ public class WikiBattleBlock {
     @Schema(required = true)
     @SuppressWarnings("NotNullFieldNotInitialized")
     private String date;
+
+    @Nullable
+    @JsonProperty
+    @Schema(required = true)
+    private DateBlock dateBlock;
 
     @Nonnull
     @JsonProperty
@@ -281,7 +286,7 @@ public class WikiBattleBlock {
                 .replaceAll("<br/>", "\n")
                 .replaceAll("<br-/>", "\n")
                 .replaceAll("<[^>]*>", "")
-                .replaceAll("\\u003C[^>]*\\u003e", "")
+                .replaceAll("[0-9]{2}th\\sCentury\\sPD\\|", "")
                 ;
     }
 
@@ -373,6 +378,7 @@ public class WikiBattleBlock {
         image = sanitize(image);
         conflict = sanitize(conflict);
         date = Objects.requireNonNull(sanitize(date));
+        dateBlock = new DateBlock(getDay(), getMonth(), getYearPD());
         place = Objects.requireNonNull(sanitize(place));
         result = Objects.requireNonNull(sanitize(result));
 
@@ -391,5 +397,50 @@ public class WikiBattleBlock {
         sanitizedContentLines = casual.stream().map(WikiBattleBlock::sanitize).collect(Collectors.toList());
         casual.clear();
         casual.addAll(sanitizedContentLines);
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public String getYearPD() {
+        String date = WikiBattleBlock.sanitize(getDate());
+
+        final String regex = "([a-zA-Z]*[0-9]{4}\\sPD)";
+        final Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
+        final Matcher matcher = pattern.matcher(date);
+        while (matcher.find()) {
+            date = matcher.group(1).trim();
+        }
+        return date;
+    }
+
+    @Nullable
+    @JsonIgnore
+    public String getMonth() {
+        String date = WikiBattleBlock.sanitize(getDate());
+
+        final String regex = "(\\b\\d{1,2}\\D{0,3})?\\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|(Nov|Dec)(?:ember)?)\\D?(\\d{1,2}\\D?)?\\D?((19[7-9]\\d|20\\d{2})|\\d{2})";
+        final Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
+        final Matcher matcher = pattern.matcher(date);
+        while (matcher.find()) {
+            return matcher.group(2).trim();
+        }
+        return null;
+    }
+
+    @Nullable
+    @JsonIgnore
+    public String getDay() {
+        String date = WikiBattleBlock.sanitize(getDate());
+
+        final String regex = "(\\b\\d{1,2}\\D{0,3})?\\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|(Nov|Dec)(?:ember)?)\\D?(\\d{1,2}\\D?)?\\D?((19[7-9]\\d|20\\d{2})|\\d{2})";
+        final Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
+        final Matcher matcher = pattern.matcher(date);
+        while (matcher.find()) {
+            final String first = matcher.group(1);
+            final String second = matcher.group(4);
+            final String result = first != null ? first : second;
+            return result != null ? result.trim().replaceAll(",", "") : null;
+        }
+        return null;
     }
 }

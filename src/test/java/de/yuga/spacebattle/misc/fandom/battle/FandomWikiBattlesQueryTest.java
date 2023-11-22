@@ -5,9 +5,9 @@ import com.google.gson.GsonBuilder;
 import de.yuga.spacebattle.TestUtils;
 import de.yuga.spacebattle.misc.fandom.EWikiConfig;
 import de.yuga.spacebattle.misc.fandom.FandomWikiQueryTest;
-import de.yuga.spacebattle.misc.fandom.battle.dto.BattlesOfNation;
-import de.yuga.spacebattle.misc.fandom.battle.dto.IndividualBattle;
-import de.yuga.spacebattle.misc.fandom.battle.dto.WikiBattleBlock;
+import de.yuga.spacebattle.rest.dto.misc.wiki.BattlesOfNation;
+import de.yuga.spacebattle.rest.dto.misc.wiki.IndividualBattle;
+import de.yuga.spacebattle.rest.dto.misc.wiki.WikiBattleBlock;
 import io.github.fastily.jwiki.core.MQuery;
 import io.github.fastily.jwiki.core.Wiki;
 import org.apache.commons.lang3.StringUtils;
@@ -103,16 +103,10 @@ public class FandomWikiBattlesQueryTest {
             final List<IndividualBattle> individualBattles = battlesOfNation.getIndividualBattles();
             individualBattles.forEach(battle -> {
                 final WikiBattleBlock battleBlock = battle.getBattleBlock();
-                String date = battleBlock.getDate();
-                System.out.println(date); /* fixme unify dates */
-
-                if (StringUtils.isEmpty(date)) {
-                    date = "UNKNOWN";
-                }
-
-                final List<WikiBattleBlock> orDefault = battlesByDate.getOrDefault(date, new ArrayList<>());
+                final String yearPD = battleBlock.getYearPD();
+                final List<WikiBattleBlock> orDefault = battlesByDate.getOrDefault(yearPD, new ArrayList<>());
                 orDefault.add(battleBlock);
-                battlesByDate.put(date, orDefault);
+                battlesByDate.put(yearPD, orDefault);
             });
         });
         assertNotNull(battlesByDate);
