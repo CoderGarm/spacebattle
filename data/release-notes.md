@@ -6,10 +6,15 @@ article + check ship returns from mission
 - combat theatre
     - battles by conflict and date
     - all battles by date
-- wiki mode in map
-    - open fandom system page in map by language
 
 #### Gameplay
+
+todo. distance based duration
+
+- all manual transfer stuff takes time
+- If pops and resource transfers between your own planets are difficult, you need another option to do it.
+  This option is the market place. Then this element become more important.
+  And what we need then is a way to let people migrate between the empires. This offers in the end a lot of diplomatic opportunities (migration treaty like in Stellaris e.g.)...
 
 todo. tech level 2 und 3 nutzen
 todo. Hyperabdruck im System bei aufkommenden Flotten
@@ -32,15 +37,15 @@ todo. check fitting yard
 
 ### Bugs fixed
 
+todo. battle replay tooltips
+todo. fleet status marker in inverted colorset
 todo. fleet detachment submit button disable when no change
 todo. research punkte -> sandkiste issue with 27 points left vs 160 from inop labs
 
 todo. keine jobs ohne aktiviertes gebäude (werft) -> division / 0 in calcRemainingTicks
 todo. negative pop development in UI
 todo. battlereport new advisory but no new present
-todo. no running job in journal
 todo. migration must respect pop demand
-
 
 todo. chats von anderen werden automatisch gelesen
 todo. fix crew exploit
@@ -65,11 +70,6 @@ todo. player comment about the game in profile to display at take-a-tour
 todo. chat search: empire name, ingame name, username
 
 ### Bugs fixed
-
-todo. construction issue?
-
-todo. fleet moves werden falsch angezeigt -> isDeletable auf entity und nicht mehr aus cache lesen -> kein Unterschied zw ankunft und abflug
--> Laut meiner anzeige sind 2 Flotten von dir heute beim hypelimit aufgetaut. Tatsächlich ist eine da, aber die andere bereits beim plani.
 
 todo. quoting in chat und forum
 todo. preview in chat und forum

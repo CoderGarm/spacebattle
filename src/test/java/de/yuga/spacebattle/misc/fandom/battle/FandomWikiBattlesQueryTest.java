@@ -28,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class FandomWikiBattlesQueryTest {
 
     private final String FOLDER = "battles";
+
     private final Set<String> NATIONAL_BATTLES = Set.of(
             "Andermani Battles",
             "Grayson Battles",
@@ -37,6 +38,36 @@ public class FandomWikiBattlesQueryTest {
             "Mesan Battles",
             "Solarian Battles"
     );
+
+    private static final Map<String, Set<String>> CONFLICT_NAMES = new HashMap<>();
+
+    static {
+        FandomWikiBattlesQueryTest.CONFLICT_NAMES.put("Axelrod Conspiracy", Set.of("Axelrod Conspiracy"));
+        FandomWikiBattlesQueryTest.CONFLICT_NAMES.put("Silesian Confederacy", Set.of("Silesian Confederacy|Silesian piracy"));
+        FandomWikiBattlesQueryTest.CONFLICT_NAMES.put("RMN anti-slavery operations", Set.of("RMN anti-slavery operations"));
+        FandomWikiBattlesQueryTest.CONFLICT_NAMES.put("RMN anti-piracy campaign", Set.of("RMN anti-piracy campaign", "Manticoran anti-piracy action"));
+        FandomWikiBattlesQueryTest.CONFLICT_NAMES.put("Anti-piracy action_Mesan Alignment operation", Set.of("Anti-piracy action_Mesan Alignment operation"));
+        FandomWikiBattlesQueryTest.CONFLICT_NAMES.put("Talbott Cluster conflict", Set.of("Talbott Cluster conflict"));
+        FandomWikiBattlesQueryTest.CONFLICT_NAMES.put("Solarian-Manticoran War", Set.of("Solarian-Manticoran War"));
+        FandomWikiBattlesQueryTest.CONFLICT_NAMES.put("Operation Ferret", Set.of("Operation Ferret"));
+        FandomWikiBattlesQueryTest.CONFLICT_NAMES.put("Maccabeus Campaign", Set.of("Maccabeus Campaign"));
+        FandomWikiBattlesQueryTest.CONFLICT_NAMES.put("First Havenite-Manticoran War", Set.of(
+                "Havenite Operation Perseus - First Havenite-Manticoran War",
+                "First Havenite-Manticoran War",
+                "First Manticoran-Havenite Waranti-piracy operations and commerce raiding in Silesian Confederacy|Silesia",
+                "Havenite Operation Perseus prior to the First Havenite-Manticoran War",
+                "People's Republic of Haven|Havenite pre-war attempt to seize the Basilisk Terminus|Basilisk terminus",
+                "Havenite Operation Perseus before the the First Havenite-Manticoran War",
+                "First Haven-Manticore WarOperation Perseus",
+                "First Haven-Manticore War"
+        ));
+        FandomWikiBattlesQueryTest.CONFLICT_NAMES.put("Second Havenite-Manticoran War", Set.of(
+                "Second Havenite-Manticoran War",
+                "Second Haven-Manticore War",
+                "Second Havenite-Manticoran WarOperation Cutworm II",
+                "Second Havenite-Manticoran WarOperation Cutworm"
+        ));
+    }
 
     @Test
     void fetchAllBattlesFromWiki() {
@@ -73,6 +104,8 @@ public class FandomWikiBattlesQueryTest {
             individualBattles.forEach(battle -> {
                 final WikiBattleBlock battleBlock = battle.getBattleBlock();
                 String date = battleBlock.getDate();
+                System.out.println(date); /* fixme unify dates */
+
                 if (StringUtils.isEmpty(date)) {
                     date = "UNKNOWN";
                 }
@@ -120,11 +153,12 @@ public class FandomWikiBattlesQueryTest {
                 .create();
 
         battlesByConflict.forEach((conflict, battleBlocks) -> {
+            final String unifiedConflictName = CONFLICT_NAMES.entrySet().stream().filter(e -> e.getValue().contains(conflict)).findFirst().map(Map.Entry::getKey).orElse("UNKNOWN");
             // hack to suppress printing the battle block content
             battleBlocks.forEach(WikiBattleBlock::tidyUp);
             final String value = gson.toJson(battleBlocks);
             final String dir = FandomWikiQueryTest.DIR + FOLDER + "-by-conflict" + FandomWikiQueryTest.FS;
-            TestUtils.writeString(dir, conflict + ".json", value);
+            TestUtils.writeString(dir, unifiedConflictName + ".json", value);
         });
     }
 
