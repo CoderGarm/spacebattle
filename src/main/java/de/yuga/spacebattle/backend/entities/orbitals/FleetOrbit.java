@@ -2,6 +2,8 @@ package de.yuga.spacebattle.backend.entities.orbitals;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -107,20 +109,33 @@ public class FleetOrbit {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
-        if (!(o instanceof FleetOrbit)) return false;
 
-        FleetOrbit that = (FleetOrbit) o;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        if (system != null ? !system.equals(that.system) : that.system != null) return false;
-        return orbit != null ? orbit.equals(that.orbit) : that.orbit == null;
+        final FleetOrbit that = (FleetOrbit) o;
+
+        final Orbit o1 = getExplicitOrbit(this);
+        final Orbit o2 = getExplicitOrbit(that);
+
+        return new EqualsBuilder().append(system, that.system).append(o1, o2).isEquals();
+    }
+
+    @Nullable
+    private static Orbit getExplicitOrbit(@Nonnull final FleetOrbit fleetOrbit) {
+        Preconditions.checkNotNull(fleetOrbit, "fleetOrbit must not be empty");
+
+        if (fleetOrbit.planet != null && fleetOrbit.orbit == null) {
+            return fleetOrbit.planet.getOrbit();
+        } else {
+            return fleetOrbit.orbit;
+        }
     }
 
     @Override
     public int hashCode() {
-        int result = system != null ? system.hashCode() : 0;
-        result = 31 * result + (orbit != null ? orbit.hashCode() : 0);
-        return result;
+        final Orbit o1 = getExplicitOrbit(this);
+        return new HashCodeBuilder(17, 37).append(system).append(o1).toHashCode();
     }
 }
