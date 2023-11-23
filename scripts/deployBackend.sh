@@ -20,7 +20,7 @@ mkdir -p /home/karsten/archive/"$date"/backend/"$time"/
 mv /home/karsten/spacebattle/spacebattle-*.jar /home/karsten/archive/"$date"/backend/"$time"/
 echo 'backend archived in ' + /home/karsten/archive/"$date"/backend/"$time"/
 
-./dumpSBDB.sh "pre-deployment-$version";
+./dumpSBDB.sh "pre-deployment-$version-$date-$time";
 echo "databases archived"
 
 # deployment
