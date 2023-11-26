@@ -51,6 +51,14 @@ todo. chats von anderen werden automatisch gelesen
 todo. fix crew exploit
 todo. unload fleet on ship transfer or something
 
+2023-11-26 01:06:02.550 WARN 20864 --- [http-nio-8081-exec-16] d.y.s.r.c.RestControllerExceptionHandler : f040772d
+java.lang.NullPointerException
+at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+at de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService.identifyPlanet(FleetService.java:579)
+at de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService.operateShips(FleetService.java:543)
+at de.yuga.spacebattle.rest.api.combined.spacecrafts.FleetApi.multiActionFleetFormation(FleetApi.java:286)
+
+
 #### next steps
 
 todo. researches müssen teurer sein

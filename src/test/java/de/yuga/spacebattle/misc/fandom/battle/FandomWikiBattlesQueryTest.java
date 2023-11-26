@@ -109,6 +109,12 @@ public class FandomWikiBattlesQueryTest {
                 battlesByDate.put(yearPD, orDefault);
             });
         });
+
+        final List<String> list = battlesByDate.keySet().stream().collect(Collectors.toList());
+        list.sort(String::compareTo);
+
+        list.forEach(s -> System.out.println(s));
+
         assertNotNull(battlesByDate);
     }
 
