@@ -35,6 +35,8 @@ todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehb
 
 todo. a real dashboard for fleet. where are they all and which are they designed for
 
+todo. spot market like: https://postimg.cc/QVHGk2SB
+
 ### Bugs fixed
 
 todo. battle replay tooltips
@@ -51,13 +53,32 @@ todo. chats von anderen werden automatisch gelesen
 todo. fix crew exploit
 todo. unload fleet on ship transfer or something
 
-2023-11-26 01:06:02.550 WARN 20864 --- [http-nio-8081-exec-16] d.y.s.r.c.RestControllerExceptionHandler : f040772d
+todo. f040772d
 java.lang.NullPointerException
 at java.base/java.util.Optional.orElseThrow(Optional.java:403)
 at de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService.identifyPlanet(FleetService.java:579)
 at de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService.operateShips(FleetService.java:543)
 at de.yuga.spacebattle.rest.api.combined.spacecrafts.FleetApi.multiActionFleetFormation(FleetApi.java:286)
 
+todo. ----
+Ok, this is another speciality of my brain of the past. And bug - bot at the same time.
+
+We have point defense clusters only for LAC and light cruisers - in the same way to have Anti-Missile tubes only categorized for LAC.
+
+Both sizes exists in the autocannon and laser variant, the AC size PD has 4 barrels and the CL size has 12 barrels. So 4 respectively 12 shots against anti missile per combat
+round. The laser variante has 8 respectively 16 laser emitter and a much larger range. This means a larger range - in "good geometric situations" it can fire twice per incoming
+salvo.
+
+There is an issue with display none of these informations and this is the major problem of this game, I would say.
+The bug in that case is that I switched the tonnage and damage value when I created the weapons.
+They have a damage value of 1 because they need only to hit -> all PDs have the same damage value.
+The tonnage should be 200/500 for the autocannon sizes and 400/800 for the laser cluster.
+
+I will change it with the release because the impact is only in the faster flight times due lower weight for the alpha and beta emitters. And the impact is the same for every
+player.
+
+But I will think about the information which are needed to display 🙈
+----
 
 #### next steps
 

@@ -68,7 +68,7 @@ public class Weapon extends HasCostsByOwn {
                   final int amountDamageEmitter,
                   @Nonnull final EWeaponType weaponType,
                   @Nonnull final CrewRequirement crewRequirement) {
-        super(baseModule, technicalTypeName, unlockedThroughLevel, tonnage, effectValue, shipClassType, crewRequirement);
+        super(baseModule, technicalTypeName, unlockedThroughLevel, effectValue, tonnage, shipClassType, crewRequirement);
         Preconditions.checkNotNull(damageProjectionRange, "damageProjectionRange shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "eWeaponType shouldn't be null!");
 
