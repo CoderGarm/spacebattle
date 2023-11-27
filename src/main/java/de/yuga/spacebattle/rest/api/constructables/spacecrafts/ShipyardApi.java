@@ -84,6 +84,8 @@ public class ShipyardApi extends BaseApi {
         return ResponseEntity.ok(shipClasses);
     }
 
+    /* fixme create get endpoint */
+
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all active ship classes for the owner .", operationId = "createShipClass",
             responses = {
