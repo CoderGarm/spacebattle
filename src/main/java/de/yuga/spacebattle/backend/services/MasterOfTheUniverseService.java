@@ -14,6 +14,7 @@ import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.OrbitalModule;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.misc.HasName;
@@ -44,6 +45,7 @@ import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.combined.account.AllianceService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
+import de.yuga.spacebattle.backend.services.combined.spacecraft.OrbitalModuleService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
@@ -113,7 +115,9 @@ public class MasterOfTheUniverseService {
     private static final Map<EEducationType, Long> M_CREW = Map.of(EEducationType.ENLISTED, 12L, EEducationType.OFFICER, 1L);
     private static final Map<EEducationType, Long> L_CREW = Map.of(EEducationType.ENLISTED, 18L, EEducationType.OFFICER, 2L);
     private static final Map<EEducationType, Long> XL_CREW = Map.of(EEducationType.ENLISTED, 20L, EEducationType.OFFICER, 3L);
+    private static final Map<EEducationType, Long> XL_ORBITAL_CREW = Map.of(EEducationType.ENLISTED, 48L, EEducationType.OFFICER, 9L);
     private static final Map<EEducationType, Long> XXL_CREW = Map.of(EEducationType.ENLISTED, 300L, EEducationType.OFFICER, 30L);
+    private static final Map<EEducationType, Long> XXL_ORBITAL_CREW = Map.of(EEducationType.ENLISTED, 64L, EEducationType.OFFICER, 11L);
     private static final Map<EEducationType, Long> XXXL_CREW = Map.of(EEducationType.ENLISTED, 500L, EEducationType.OFFICER, 50L);
 
     public static final String FLASHKID = "Flashkid";
@@ -172,6 +176,9 @@ public class MasterOfTheUniverseService {
     @Nonnull
     private final OwnerService ownerService;
 
+    @Nonnull
+    private final OrbitalModuleService orbitalModuleService;
+
     @Autowired
     public MasterOfTheUniverseService(@Nonnull final TickRunnerService tickService,
                                       @Nonnull final UserService userService,
@@ -189,7 +196,8 @@ public class MasterOfTheUniverseService {
                                       @Nonnull final BattleService battleService,
                                       @Nonnull final ResourceService resourceService,
                                       @Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
-                                      @Nonnull final OwnerService ownerService) {
+                                      @Nonnull final OwnerService ownerService,
+                                      @Nonnull final OrbitalModuleService orbitalModuleService) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.allianceService = Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");
@@ -207,6 +215,7 @@ public class MasterOfTheUniverseService {
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
         this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
         this.ownerService = Preconditions.checkNotNull(ownerService, "ownerService must not be empty");
+        this.orbitalModuleService = Preconditions.checkNotNull(orbitalModuleService, "orbitalModuleService must not be empty");
 
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
@@ -216,8 +225,9 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = false;
+        final boolean transformationNeeded = orbitalModuleService.findAll().isEmpty();
         if (transformationNeeded) {
+            createOrbitalModules();
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
@@ -342,6 +352,9 @@ public class MasterOfTheUniverseService {
         final List<ElectronicWarfare> eloka = createEloka();
         LOGGER.info("eloka created");
 
+        createOrbitalModules();
+        LOGGER.info("Orbital Modules created");
+
         final List<Sidewall> sidewalls = createSidewalls();
         LOGGER.info("sidewall created");
 
@@ -409,11 +422,42 @@ public class MasterOfTheUniverseService {
         planetService.save(planet);
     }
 
+    private void createOrbitalModules() {
+
+        Research research = moduleService.findAllElectronicWarfare().get(0).getNamedTechLevel().getUnlockedThrough();
+        Preconditions.checkNotNull(research, "research must not be empty");
+        research = research("Gravitic Anomaly Sensors", "Gravitic sensors are passive sensors which detect the presence of gravity waves and measure the influence of gravity on their surroundings.",
+                10, ETechLevel.TECH_II, research);
+        amendTranslation(research, "Gravimetrische Anomaliedetektoren", "Gravitationssensoren sind Sensoren zur Ortung von Gravitationsverzerrungen, die durch Impellerantriebe verursacht werden.");
+        researchService.save(research);
+
+        OrbitalModule m = orbitalModule("Low-altitude Gravitic Anomaly Detector Array", "Gravity sensors can be used to determine hyperprints more precisely.",
+                1000, L_CREW, ETechLevel.TECH_II, EModuleType.ELECTRONIC_WARFARE, research, 1);
+        amendTranslation(m, "Suborbitales Gravimetrisches Anomaliedetektor Array", "Mit Gravitationssensoren können Hyperabdrücke genauer bestimmt werden.");
+        orbitalModuleService.save(m);
+
+        m = orbitalModule("Enhanced Low Altitude Gravitic Anomaly Detector Array", "Gravity sensors can be used to determine hyperprints more precisely.",
+                1500, XL_CREW, ETechLevel.TECH_II, EModuleType.ELECTRONIC_WARFARE, research, 3);
+        amendTranslation(m, "Verbessertes suborbitales gravimetrisches Anomaliedetektor Array", "Mit Gravitationssensoren können Hyperabdrücke genauer bestimmt werden.");
+        orbitalModuleService.save(m);
+
+        m = orbitalModule("Orbital Gravitic Anomaly Detector Array", "Gravity sensors can be used to determine hyperprints more precisely.",
+                4500, XL_ORBITAL_CREW, ETechLevel.TECH_III, EModuleType.ELECTRONIC_WARFARE, research, 5);
+        amendTranslation(m, "Orbitales Gravitisches Anomalie Sensor Array", "Mit Gravitationssensoren können Hyperabdrücke genauer bestimmt werden.");
+        orbitalModuleService.save(m);
+
+        m = orbitalModule("Enhanced High orbital Gravitic Anomaly Detector Array", "Gravity sensors can be used to determine hyperprints more precisely.",
+                9500, XXL_ORBITAL_CREW, ETechLevel.TECH_III, EModuleType.ELECTRONIC_WARFARE, research, 10);
+        amendTranslation(m, "Verbessertes orbitales Gravitisches Anomalie Sensor Array", "Mit Gravitationssensoren können Hyperabdrücke genauer bestimmt werden.");
+        orbitalModuleService.save(m);
+    }
+
     private void createBuildings() {
         /* civil constructions */
         Research research = research("Civil facilities", "This contains every kind of technological and industrial knowledge and development.", ETechLevel.TECH_I, null);
         amendTranslation(research, "Zivile Anlagen", "Erforscht und enthält das technische Wissen und Fähigkeiten für zivile Konstruktionen.");
         final Research civilConstructions = researchService.save(research);
+
 
         Building b = building("Construction Yard", "Useful to build ground constructions.",
                 15000, 10, EEducationType.COLLEGE, ETechLevel.TECH_I, CONSTRUCTION_YARD_PT, research, 1, 0.2);
@@ -430,10 +474,13 @@ public class MasterOfTheUniverseService {
         amendTranslation(b, "Metallwerke", "Produziert grundlegende Materialien, von Gummi für Schuhe bis zu speziellen Legierungen für die Raumfahrt.");
         buildingService.save(b);
 
+
         b = building("Orbital ore factory", "Produces some asteroid-based materials and farms gas from the giants and clouds in the system.",
                 2000, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_II, HEAVY_METALS_WORK_PT, research, 7, 0.2);
         amendTranslation(b, "Orbitale Metallwerke", "Baut Ressourcen und Gase ab, die hauptsächlich außerhalb des Planeten zu finden sind.");
         buildingService.save(b);
+
+        /* fixme add habitat at level 7 */
 
         b = building("Nanofarm", "Produces rare elements and combines them to specialized molycircs and complex nano structures.",
                 1000, 10, EEducationType.UNIVERSITY, ETechLevel.TECH_III, RARE_ELEMENTS_PT, research, 10, 0.2);
@@ -1005,6 +1052,26 @@ public class MasterOfTheUniverseService {
                                 final int unlockedThroughLevel,
                                 final double increasingFactorPerLevel) {
         return buildingService.createBuilding(name, description, baseValue, techLevel, productionType, educationType, amountOfWorkers, unlockedBy, unlockedThroughLevel, increasingFactorPerLevel);
+    }
+
+
+    @Nonnull
+    private OrbitalModule orbitalModule(@Nonnull final String name,
+                                        @Nonnull final String description,
+                                        final int baseValue,
+                                        @Nonnull final Map<EEducationType, Long> crew,
+                                        @Nonnull final ETechLevel techLevel,
+                                        @Nonnull final EModuleType effect,
+                                        @Nonnull final Research unlockedBy,
+                                        final int unlockedThroughLevel) {
+        Preconditions.checkNotNull(name, "name must not be empty");
+        Preconditions.checkNotNull(description, "description must not be empty");
+        Preconditions.checkNotNull(crew, "crew must not be empty");
+        Preconditions.checkNotNull(techLevel, "techLevel must not be empty");
+        Preconditions.checkNotNull(effect, "effect must not be empty");
+        Preconditions.checkNotNull(unlockedBy, "unlockedBy must not be empty");
+
+        return orbitalModuleService.save(new OrbitalModule(name, description, baseValue, new CrewRequirement(crew, EDepositType.COSTS), techLevel, effect, unlockedBy, unlockedThroughLevel));
     }
 
 

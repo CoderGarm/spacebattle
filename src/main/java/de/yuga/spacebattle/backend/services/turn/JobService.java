@@ -5,6 +5,7 @@ import de.yuga.spacebattle.backend.dto.research.EmpireResearchCapability;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.OrbitalModule;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
@@ -282,6 +283,27 @@ public class JobService {
 
         fleet = fleetService.find(fleet);
         final Constructable constructable = new Constructable(fleet, EJobType.CONSTRUCTION);
+        checkAndBalances(planet, constructable.getJobCosts());
+        Job job = new Job(planet, facility, constructable);
+        job = jobRepository.save(job);
+        planetService.save(planet);
+        return job;
+    }
+
+
+    public Job createShipyardOrbitalModuleJob(@Nonnull final Planet planet, @Nonnull final Map<OrbitalModule, Integer> jobLoad) {
+        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+        Preconditions.checkNotNull(jobLoad, "jobLoad shouldn't be null!");
+
+        final User owner = planet.getHumanOwner();
+        if (owner == null) {
+            throw new NotifyWebUserException("You should own this planet, buddy.");
+        }
+
+        final Construction facility = constructionService.findByPlanetAndProductionType(planet.getId(), EResourceType.ORBITAL_CONSTRUCTION);
+        checkIfFree(facility);
+
+        final Constructable constructable = new Constructable(jobLoad, EJobType.CONSTRUCTION);
         checkAndBalances(planet, constructable.getJobCosts());
         Job job = new Job(planet, facility, constructable);
         job = jobRepository.save(job);

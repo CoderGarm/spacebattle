@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Mass;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.OrbitalModule;
 import de.yuga.spacebattle.backend.entities.misc.HasCostsByOwn;
 import de.yuga.spacebattle.backend.entities.misc.HasName;
 import de.yuga.spacebattle.backend.entities.misc.HasNamedTechLevel;
@@ -85,6 +86,12 @@ public class ResearchResult {
         if (refinementSequence != null) {
             add("refinementSequence", refinementSequence.name());
         }
+    }
+
+    public ResearchResult(final int unlockedThroughLevel, @Nonnull final OrbitalModule content, @Nonnull final String languageCode) {
+        this(unlockedThroughLevel, content, content.getClass(), languageCode);
+
+        add("effectValue", content.getBaseValue() + " kpi");
     }
 
     public ResearchResult(final int unlockedThroughLevel, @Nonnull final Propulsion content, @Nonnull final String languageCode) {

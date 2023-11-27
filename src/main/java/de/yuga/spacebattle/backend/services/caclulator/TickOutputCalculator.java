@@ -196,4 +196,9 @@ public class TickOutputCalculator {
         }
         return adjustedBaseValue.add(adjustedBaseValue.multiply(increasingFactorPerLevel)).multiply(level);
     }
+
+    @Nonnull
+    public static BigDecimal getResearchCosts(final long baseCosts, final int targetLevel) {
+        return TickOutputCalculator.getOutput(new BigDecimal(baseCosts), BigDecimal.valueOf(0.2), 1, targetLevel);
+    }
 }

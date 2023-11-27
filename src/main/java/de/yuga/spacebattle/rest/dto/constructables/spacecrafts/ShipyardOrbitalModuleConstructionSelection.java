@@ -3,19 +3,19 @@ package de.yuga.spacebattle.rest.dto.constructables.spacecrafts;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = ".")
-public class ShipyardConstructionSelection {
+public class ShipyardOrbitalModuleConstructionSelection {
 
-    @Schema(required = true, description = "The ship class which should be produced.")
-    private int idShipClass;
+    @Schema(required = true, description = "The module which should be produced.")
+    private int idOrbitalModule;
 
     @Schema(required = true, description = "The amount of the ship class which should be produced.")
     private int amount;
 
-    public ShipyardConstructionSelection() {
+    public ShipyardOrbitalModuleConstructionSelection() {
     }
 
-    public int getIdShipClass() {
-        return idShipClass;
+    public int getIdOrbitalModule() {
+        return idOrbitalModule;
     }
 
     public int getAmount() {

@@ -1,6 +1,8 @@
 package de.yuga.spacebattle.rest.api.constructables.spacecrafts;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.OrbitalModule;
+import de.yuga.spacebattle.backend.services.combined.spacecraft.OrbitalModuleService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassCreationService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.rest.api.BaseApi;
@@ -40,6 +42,7 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 public class ShipyardApi extends BaseApi {
 
     public static final String ENDPOINT = "shipyard";
+    public static final String ORBITAL_MODULE_ENDPOINT = "orbitals";
 
     @Nonnull
     private final ShipClassService shipClassService;
@@ -50,14 +53,17 @@ public class ShipyardApi extends BaseApi {
     @Nonnull
     private final Validator validator;
 
+    @Nonnull
+    private final OrbitalModuleService orbitalModuleService;
+
     @Autowired
     public ShipyardApi(@Nonnull final ShipClassService shipClassService,
-                       @Nonnull final ShipClassCreationService shipClassCreationService) {
-        Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
-        Preconditions.checkNotNull(shipClassCreationService, "shipClassCreationService shouldn't be null!");
+                       @Nonnull final ShipClassCreationService shipClassCreationService,
+                       @Nonnull final OrbitalModuleService orbitalModuleService) {
+        this.shipClassService = Preconditions.checkNotNull(shipClassService, "shipClassService must not be empty");
+        this.shipClassCreationService = Preconditions.checkNotNull(shipClassCreationService, "shipClassCreationService must not be empty");
+        this.orbitalModuleService = Preconditions.checkNotNull(orbitalModuleService, "orbitalModuleService must not be empty");
 
-        this.shipClassService = shipClassService;
-        this.shipClassCreationService = shipClassCreationService;
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 
@@ -178,5 +184,21 @@ public class ShipyardApi extends BaseApi {
         Preconditions.checkNotNull(classData, "classData must not be empty");
 
         return ResponseEntity.ok(shipClassCreationService.getPropulsionCapacity(classData, idPropulsion));
+    }
+
+    @GetMapping(ORBITAL_MODULE_ENDPOINT)
+    @Operation(summary = "Get all orbital modules.", operationId = "getOrbitalModulesByUser",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = de.yuga.spacebattle.rest.dto.spacecrafts.OrbitalModule.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getOrbitalModulesByUser() {
+        final Set<OrbitalModule> modules = orbitalModuleService.findOrbitalModulesByUser(getIdUser());
+        return ResponseEntity.ok(modules.stream().map(m -> new de.yuga.spacebattle.rest.dto.spacecrafts.OrbitalModule(m, getPreferredLanguage())).collect(Collectors.toList()));
     }
 }

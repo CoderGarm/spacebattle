@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.enums;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.OrbitalModule;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
@@ -21,7 +22,8 @@ public enum ETranslationTarget {
     PROPULSION(Propulsion.class),
     WEAPON(Weapon.class),
     PASSIVE_MODULE(PassiveModule.class),
-    SIDEWALL(Sidewall.class);
+    SIDEWALL(Sidewall.class),
+    ORBITAL_MODULE(OrbitalModule.class);
 
     @Nonnull
     private final Class<?> clazz;

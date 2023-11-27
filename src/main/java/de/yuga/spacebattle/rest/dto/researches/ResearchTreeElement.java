@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.spacecraft.Fitting;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.OrbitalModule;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
@@ -114,6 +115,7 @@ public class ResearchTreeElement {
         this.languageCode = languageCode;
         research.getUnlocksBuildings().forEach(b -> add(b.getUnlockedThroughLevel(), b));
         research.getUnlocksPassiveModules().forEach(b -> add(b.getUnlockedThroughLevel(), b));
+        research.getUnlocksOrbitalModules().forEach(b -> add(b.getUnlockedThroughLevel(), b));
 
         final Set<NamedTechLevel> unlocksNamedTechLevel = research.getUnlocksNamedTechLevel();
         final Map<ETranslationTarget, List<NamedTechLevel>> byType = unlocksNamedTechLevel.stream().collect(Collectors.groupingBy(NamedTechLevel::getTranslationTarget, Collectors.toList()));
@@ -160,6 +162,11 @@ public class ResearchTreeElement {
                 .collect(Collectors.toSet()).stream()
                 .sorted(Integer::compare)
                 .collect(Collectors.toList()));
+    }
+
+    private void add(final int unlockedThroughLevel, final OrbitalModule content) {
+        Preconditions.checkNotNull(content, "content must not be empty");
+        this.unlocks.add(new ResearchResult(unlockedThroughLevel, content, languageCode));
     }
 
     private void add(final int unlockedThroughLevel, final PassiveModule content) {

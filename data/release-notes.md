@@ -9,20 +9,59 @@ article + check ship returns from mission
 
 #### Gameplay
 
-todo. distance based duration
+In diesem Release geht es im Wesentlichen um die strategische Tiefe.  
+Auf Wunsch mehrerer Spieler wurde die Reisezeit bei Transfers aller Art analog dem Handelsplatz eingebaut.  
+Ebenfalls auf Vorschlag eines Spielers folgt allerdings eine noch tiefgreifendere Neuerung. Ich
 
-- all manual transfer stuff takes time
-- If pops and resource transfers between your own planets are difficult, you need another option to do it.
-  This option is the market place. Then this element become more important.
-  And what we need then is a way to let people migrate between the empires. This offers in the end a lot of diplomatic opportunities (migration treaty like in Stellaris e.g.)...
+1. Es gibt eine neue Forschung für Gravitationsanomaliedetektoren. Hat man die entsprechenden Level geforscht, kann man die verschiedenen Orbitalmodule bauen.
+2. Es gibt einen neuen Typ Gebäude... und auch gleichzeitig ein Raumschiff. Aber ohne Antrieb, wie ein Gebäude halt. Auf jeden Fall wird das später mal ein Raumfort.  
+   Jetzt ist es allerdings ein autarker Satellit, der für die Aufklärung der Hypergrenze zuständig ist.  
+   Umso stärker die Sensorleistung, umso genauer ist die Auflösung der Hyperabdrücke für einkommende Flotten. Natürlich haben Raumschiffe ebenfalls Gravitationssensoren, Teufel,
+   der ganze Antrieb ist ein Grav-Sensor.  
+   Beide Effekte interferieren nicht miteinander, aber der stärkere Sensor ist genauer.
+3. Damit gibt es nun auch einen Nutzen für die beiden bisher nicht verwendeten Ressourcen Rare Elements und Heavy Metals.
+4. Es gibt noch mehr orbitale Module als nur das GADA, man kann orbitale Habitate bauen.  
+   Die Habitate erhöhen den Pop Mining Factor des Planeten und auch den Wohnraum. Indirekt also die Geburtenrate.  
+   Dieser Effekt ist statistisch im **Journal of Orbital Science** beschrieben:
+   > Orbitin ist eine hypothetische Substanz, die in den äußeren Schichten von Orbiten vorkommt und sich mit der Zeit in orbitalen Habitaten ansammelt.  
+   > Diese Substanz wird durch die Wechselwirkungen zwischen der Atmosphäre des Planeten und den orbitalen Strukturen erzeugt.  
+   > Die Entdeckung von Orbitin erfolgte durch Raumsonden, die speziell dafür konzipiert wurden, Proben aus orbitalen Habitaten zu sammeln und zu analysieren.  
+   > Die Forschungsergebnisse, veröffentlicht im fiktiven "Journal of Orbital Science" (Band 42, Ausgabe 3, Seiten 245-259), legen nahe, dass Orbitin eine einzigartige Rolle bei
+   der Erhöhung der Lebensqualität auf dem Planeten spielt.  
+   > Die Substanz interagiert positiv mit biologischen Systemen und fördert das Wohlbefinden von Lebewesen, indem sie den Stoffwechsel verbessert, den Stressabbau unterstützt und
+   die kognitiven Funktionen stimuliert.  
+   > Die Quelle von Orbitin in orbitalen Habitaten könnte eine mögliche Erklärung für das allgemeine Wohlbefinden von Menschen und anderen Lebewesen in diesen Strukturen sein.  
+   > Darüber hinaus könnte die gezielte Freisetzung von Orbitin in die planetare Atmosphäre positive Effekte auf die Gesundheit der Bewohner haben.
+   >
+   > -- <cite>Δημιουργικό Προ-εκπαιδευμένος Μετασχηματιστής</cite>
+
+Abschließend ist zu sagen, dass diese Strukturen momentan nicht zerstört werden können. Da es sich gerade bei den Habitaten um zivile Einrichtungen mit besonderem Schutzbedürfnis
+handelt, sind vorher Schutzmöglichkeiten notwendig. Natürlich auch ein Flottenbefehl, zivile Einrichtungen nicht anzugreifen. Aber das folgt später.
+
+todo. orbitable stukturen inop setzen analog schiffen -> habitate hinzufügen, steigern geburtenrate und erhöhen wohnraum
 
 todo. tech level 2 und 3 nutzen
 todo. Hyperabdruck im System bei aufkommenden Flotten
 
 - Emissionssignatur verrät ungefähre größe und anzahl (siehe "look & feel wie in büchern")
 - zwei gebäude (planetare antennen, orbitale antennen) und Eloka-Modul auf Schiffen erzeugen scan-punkte und verraten genauigkeit der ortung
+- in system: sensorabdeckung
 
-- jeder sektor (? definiere) bekommt seinen eigenen piraten, der Unsinn anstellt
+todo. star map filter für flotten
+
+- eigene inop
+- fremde inop
+- moves ...
+- Sensorreichweite?
+
+todo. distance based duration
+
+- all manual transfer stuff takes time
+- If pops and resource transfers between your own planets are difficult, you need another option to do it.
+  This option is the market place. Then this element become more important.
+  And what we need then is a way to let people migrate between the empires. This offers in the end a lot of diplomatic opportunities (migration treaty like in Stellaris e.g.)...
+-
+- Raumforts an variablen Positionen?
 
 #### Diverses
 
@@ -33,7 +72,7 @@ todo. chat search: empire name, ingame name, username
 todo. mission items more role play "unprotected convoy changes signature of ship to warship and pirate fled ...""
 todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
 
-todo. a real dashboard for fleet. where are they all and which are they designed for
+todo. a overview dashboard for fleet. where are they all and which are they designed for
 
 todo. spot market like: https://postimg.cc/QVHGk2SB
 
@@ -44,11 +83,10 @@ todo. spot market like: https://postimg.cc/QVHGk2SB
 3. Forschungspunkte werden nun hoffentlich korrekt berechnet.
 4. Man kann keine Jobs in der Werft mehr starten, wenn die Werft nicht wenigstens auf Level 1 aktiv ist.
 
-
-
+todo. migration must respect pop demand on own planet and not exceed the others planet needs
+todo. education building shows income at level 0
 todo. negative pop development in UI
 todo. battlereport new advisory but no new present
-todo. migration must respect pop demand
 
 todo. chats von anderen werden automatisch gelesen
 todo. unload fleet on ship transfer or something
@@ -59,12 +97,6 @@ todo. display module properties like barrels, laser pd, autocannon pd ...
 
 todo. researches müssen teurer sein
 todo. forum management
-
-todo. star map filter für flotten
-
-- eigene inop
-- fremde inop
-- moves ...
 
 todo. schadensprofil von schiffsklassen und flotten darstellen, Bedienmannschaften von Modulen darstellen
 todo. look & feel wie in büchern
@@ -78,7 +110,6 @@ todo. chat search: empire name, ingame name, username
 todo. quoting in chat und forum
 todo. preview in chat und forum
 todo. fleet detachment submit button disable when no change
-
 
 #### next steps
 

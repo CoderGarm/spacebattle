@@ -62,6 +62,7 @@ public class HasIcon extends HasTypeName {
             case ARMOR:
                 return new HasIcon(de.yuga.spacebattle.backend.enums.EModuleType.ARMOR);
             case ELECTRONIC_WARFARE:
+            case ORBITAL_MODULE:
                 return new HasIcon(de.yuga.spacebattle.backend.enums.EModuleType.ELECTRONIC_WARFARE);
             case PROPULSION:
                 return new HasIcon(de.yuga.spacebattle.backend.enums.EModuleType.PROPULSION);

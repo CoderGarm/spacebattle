@@ -77,6 +77,7 @@ public class ResourceDepositInitializerCalculator {
         Preconditions.checkNotNull(clazz, "clazz must not be empty");
 
         switch (clazz) {
+            case ORBITAL_MODULE:
             case BUILDING:
                 return 1000;
             case RESEARCH:
@@ -94,6 +95,7 @@ public class ResourceDepositInitializerCalculator {
         Preconditions.checkNotNull(clazz, "clazz must not be empty");
 
         switch (clazz) {
+            case ORBITAL_MODULE:
             case BUILDING:
                 return 5100;
             case RESEARCH:

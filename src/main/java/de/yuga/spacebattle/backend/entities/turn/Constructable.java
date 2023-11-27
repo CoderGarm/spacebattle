@@ -6,11 +6,13 @@ import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.OrbitalModule;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EJobType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.services.caclulator.TickOutputCalculator;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
@@ -18,7 +20,11 @@ import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Represents the payload of a job.<br>
@@ -59,6 +65,12 @@ public class Constructable {
     @JoinColumn(name = "idFleetSnapshot")
     private FleetSnapshot fleetSnapshot;
 
+    @Nonnull
+    @NotNull
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "orbitalModuleJobElements", joinColumns = @JoinColumn(name = "idJob"))
+    private final Set<OrbitalModuleJobElement> orbitalModuleJobElements = new HashSet<>();
+
     @Nullable
     @Enumerated(EnumType.STRING)
     private EJobType jobType;
@@ -95,6 +107,15 @@ public class Constructable {
         this.jobType = jobType;
     }
 
+    public Constructable(@Nonnull final Map<OrbitalModule, Integer> jobLoad, @Nonnull final EJobType jobType) {
+        Preconditions.checkNotNull(jobLoad, "jobLoad must not be empty");
+        Preconditions.checkNotNull(jobType, "jobType must not be empty");
+
+        this.orbitalModuleJobElements.addAll(jobLoad.entrySet().stream().map(e -> new OrbitalModuleJobElement(e.getKey(), e.getValue())).collect(Collectors.toList()));
+        this.resourceType = EResourceType.ORBITAL_CONSTRUCTION;
+        this.jobType = jobType;
+    }
+
     @Nullable
     public Building getBuilding() {
         return building;
@@ -108,6 +129,11 @@ public class Constructable {
     @Nullable
     public Research getResearch() {
         return research;
+    }
+
+    @Nonnull
+    public Set<OrbitalModuleJobElement> getOrbitalModuleJobElements() {
+        return orbitalModuleJobElements;
     }
 
     @Nullable
@@ -145,11 +171,9 @@ public class Constructable {
     @Nonnull
     public ResourceDeposit getJobCosts() {
         if (research != null && targetLevel != null) {
-            final long amountByType = research.getCosts().getResourceAmountByType(EResourceType.RESEARCH);
-            final BigDecimal researchCosts = new BigDecimal(amountByType)
-                    .multiply(new BigDecimal(targetLevel, ResourceDeposit.MATH_CONTEXT_INTEGER));
-            final ResourceDeposit resources = new ResourceDeposit();
-            resources.setSubType(EDepositType.COSTS);
+            final long baseCosts = research.getCosts().getResourceAmountByType(EResourceType.RESEARCH);
+            final ResourceDeposit resources = new ResourceDeposit(EDepositType.COSTS);
+            final BigDecimal researchCosts = TickOutputCalculator.getResearchCosts(baseCosts, targetLevel);
             resources.updateResource(EResourceType.RESEARCH, researchCosts.longValue());
             return resources;
         }
@@ -162,6 +186,10 @@ public class Constructable {
 
         if (fleet != null) {
             return JobCostsCalculator.calculateJobCost(fleet, Objects.requireNonNull(jobType));
+        }
+
+        if (!orbitalModuleJobElements.isEmpty()) {
+            return JobCostsCalculator.calculateJobCost(orbitalModuleJobElements, Objects.requireNonNull(jobType));
         }
 
         throw new NotifyWebUserException("You have tried something interesting. May be you should talk to an admin.");

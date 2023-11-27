@@ -5,11 +5,13 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.OrbitalStructure;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
 import de.yuga.spacebattle.backend.entities.turn.Job;
+import de.yuga.spacebattle.backend.entities.turn.OrbitalModuleJobElement;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
@@ -18,6 +20,7 @@ import de.yuga.spacebattle.backend.services.caclulator.PopulationControlCalculat
 import de.yuga.spacebattle.backend.services.caclulator.TickOutputCalculator;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
+import de.yuga.spacebattle.backend.services.constructables.spacecraft.OrbitalStructureService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
@@ -68,6 +71,9 @@ public class PlanetTickRunner implements TickRunner {
     @Nonnull
     private final WarShipService warShipService;
 
+    @Nonnull
+    private final OrbitalStructureService orbitalStructureService;
+
     @Autowired
     public PlanetTickRunner(@Nonnull final JobService jobService,
                             @Nonnull final PlanetService planetService,
@@ -76,7 +82,8 @@ public class PlanetTickRunner implements TickRunner {
                             @Nonnull final WarshipHealthStateService warshipHealthStateService,
                             @Nonnull final PopulationControlCalculator populationControlCalculator,
                             @Nonnull final TickOutputCalculator tickOutputCalculator,
-                            @Nonnull final WarShipService warShipService) {
+                            @Nonnull final WarShipService warShipService,
+                            @Nonnull final OrbitalStructureService orbitalStructureService) {
         this.jobService = Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
@@ -85,6 +92,7 @@ public class PlanetTickRunner implements TickRunner {
         this.populationControlCalculator = Preconditions.checkNotNull(populationControlCalculator, "populationControlCalculator must not be empty");
         this.tickOutputCalculator = Preconditions.checkNotNull(tickOutputCalculator, "tickOutputCalculator must not be empty");
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
+        this.orbitalStructureService = Preconditions.checkNotNull(orbitalStructureService, "orbitalStructureService must not be empty");
     }
 
     @Override
@@ -201,11 +209,11 @@ public class PlanetTickRunner implements TickRunner {
         assert owner != null : "There must be a planet's owner.";
         job.setFinished(today);
         if (constructable.isRepairJob()) {
-            realizeFleetRepair(planet, owner, constructable, job);
+            realizeFleetRepair(planet, owner, job);
         } else if (constructable.isUpgradeJob()) {
-            realizeFleetUpgrade(planet, owner, constructable, job);
+            realizeFleetUpgrade(planet, owner, job);
         } else {
-            realizeShipProduction(planet, owner, constructable, job);
+            realizeShipyardProduction(planet, owner, job);
         }
 
         log(planet, job, "Done processing shipyard job.");
@@ -213,15 +221,15 @@ public class PlanetTickRunner implements TickRunner {
 
     private void realizeFleetUpgrade(@Nonnull final Planet planet,
                                      @Nonnull final User owner,
-                                     @Nonnull final Constructable constructable,
                                      @Nonnull final Job job) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(owner, "owner must not be empty");
-        Preconditions.checkNotNull(constructable, "constructable must not be empty");
         Preconditions.checkNotNull(job, "job must not be empty");
-        Preconditions.checkNotNull(constructable.getFleet(), "fleet must not be empty");
+        Preconditions.checkNotNull(job.getConstructable().getFleet(), "job.getConstructable().getFleet() must not be empty");
 
+        final Constructable constructable = job.getConstructable();
         final Fleet fleet = constructable.getFleet();
+
         log(planet, job, "Start upgrade fleet '" + fleet.getId() + "'.");
         final Set<WarShip> withSuccessors = fleet.getAliveShips().stream()
                 .filter(w -> w.getShipClass().hasSuccessor())
@@ -243,16 +251,14 @@ public class PlanetTickRunner implements TickRunner {
 
     private void realizeFleetRepair(@Nonnull final Planet planet,
                                     @Nonnull final User owner,
-                                    @Nonnull final Constructable constructable,
                                     @Nonnull final Job job) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(owner, "owner must not be empty");
-        Preconditions.checkNotNull(constructable, "constructable must not be empty");
         Preconditions.checkNotNull(job, "job must not be empty");
-        Preconditions.checkNotNull(constructable.getFleet(), "fleet must not be empty");
+        Preconditions.checkNotNull(job.getConstructable().getFleet(), "job.getConstructable().getFleet() must not be empty");
 
         log(planet, job, "Start repair fleet.");
-        final Fleet fleet = constructable.getFleet();
+        final Fleet fleet = job.getConstructable().getFleet();
         final Set<WarshipHealthState> toRepair = fleet.getAliveShips().stream()
                 .map(WarShip::getWarshipHealthState)
                 .collect(Collectors.toSet());
@@ -261,19 +267,45 @@ public class PlanetTickRunner implements TickRunner {
         log(planet, job, "Done repairing fleet.");
     }
 
-    private void realizeShipProduction(@Nonnull final Planet planet,
-                                       @Nonnull final User owner,
-                                       @Nonnull final Constructable constructable,
-                                       @Nonnull final Job job) {
+    private void realizeShipyardProduction(@Nonnull final Planet planet,
+                                           @Nonnull final User owner,
+                                           @Nonnull final Job job) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(owner, "owner must not be empty");
-        Preconditions.checkNotNull(constructable, "constructable must not be empty");
         Preconditions.checkNotNull(job, "job must not be empty");
-        Preconditions.checkNotNull(constructable.getFleet(), "fleet must not be empty");
 
-        log(planet, job, "Start realizing warships.");
+        log(planet, job, "Start realizing shipyard production.");
+
+        realizeWarships(planet, job);
+        realizeOrbitalModules(planet, job);
+    }
+
+    private void realizeOrbitalModules(@Nonnull final Planet planet, @Nonnull final Job job) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(job, "job must not be empty");
+
+        final Set<OrbitalModuleJobElement> orbitalModuleJobElements = job.getConstructable().getOrbitalModuleJobElements();
+        if (orbitalModuleJobElements.isEmpty()) {
+            return;
+        }
+
+        final List<OrbitalStructure> toStore = orbitalModuleJobElements.stream()
+                .map(e -> new OrbitalStructure(planet, e.getOrbitalModule(), e.getAmount()))
+                .collect(Collectors.toList());
+        orbitalStructureService.saveAll(toStore);
+
+        log(planet, job, "Done creating orbital modules.");
+    }
+
+    private void realizeWarships(@Nonnull final Planet planet, @Nonnull final Job job) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(job, "job must not be empty");
+
         // fleet is "destroyed" here
-        final Fleet fleet = constructable.getFleet();
+        final Fleet fleet = job.getConstructable().getFleet();
+        if (fleet == null) {
+            return;
+        }
         final Set<WarShip> newShips = fleet.getAllShips();
         newShips.forEach(WarShip::animate);
         newShips.forEach(w -> w.setMothball(planet));

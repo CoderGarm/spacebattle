@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.entities.researches;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.OrbitalModule;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.misc.HasCosts;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.PassiveModule;
@@ -41,6 +42,10 @@ public class Research extends HasCosts {
     private final Set<PassiveModule> unlocksPassiveModules = new HashSet<>();
 
     @Nonnull
+    @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
+    private final Set<OrbitalModule> unlocksOrbitalModules = new HashSet<>();
+
+    @Nonnull
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     @OneToMany(mappedBy = "unlockedThrough", fetch = FetchType.EAGER)
     private final Set<NamedTechLevel> unlocksNamedTechLevel = new HashSet<>();
@@ -73,6 +78,11 @@ public class Research extends HasCosts {
     @Nonnull
     public Set<PassiveModule> getUnlocksPassiveModules() {
         return unlocksPassiveModules;
+    }
+
+    @Nonnull
+    public Set<OrbitalModule> getUnlocksOrbitalModules() {
+        return unlocksOrbitalModules;
     }
 
     @Nonnull

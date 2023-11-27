@@ -4,20 +4,24 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.round.WarshipHealthState;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.OrbitalModule;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Job;
+import de.yuga.spacebattle.backend.entities.turn.OrbitalModuleJobElement;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EJobType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -123,12 +127,12 @@ public class JobCostsCalculator {
     public static ResourceDeposit calculateJobCost(@Nonnull final Fleet fleet, @Nonnull final EJobType jobType) {
         Preconditions.checkNotNull(fleet, "fleet must not be empty");
         Preconditions.checkNotNull(jobType, "jobType must not be empty");
-        final ResourceDeposit costs;
+
+        final ResourceDeposit costs = new ResourceDeposit(EDepositType.COSTS);
         switch (jobType) {
             case REPAIR:
                 return calculateRepairJobCost(fleet);
             case UPGRADE:
-                costs = new ResourceDeposit(EDepositType.COSTS);
                 for (final ShipClass shipClass : fleet.getAliveShips().stream().map(WarShip::getShipClass).filter(ShipClass::hasSuccessor).collect(Collectors.toSet())) {
                     // add the differences in cost for each successor to the current, already paid design
                     ShipClass successor = shipClass.getSuccessor();
@@ -138,15 +142,39 @@ public class JobCostsCalculator {
                         successor = successor.getSuccessor();
                     }
                 }
-                return costs;
+                break;
             default:
             case CONSTRUCTION:
-                costs = new ResourceDeposit(EDepositType.COSTS);
                 fleet.getAllShips().stream().map(WarShip::getShipClass).map(ShipClass::getCosts).forEach(costs::add);
-                return costs;
+                break;
         }
+        return costs;
     }
 
+    public static ResourceDeposit calculateJobCost(@Nonnull final Set<OrbitalModuleJobElement> jobElements, @Nonnull final EJobType jobType) {
+        Preconditions.checkNotNull(jobElements, "jobElements must not be empty");
+        Preconditions.checkNotNull(jobType, "jobType must not be empty");
+
+        final ResourceDeposit costs = new ResourceDeposit(EDepositType.COSTS);
+        switch (jobType) {
+            case REPAIR:
+            case UPGRADE:
+                throw new NotifyWebUserException("Not Implemented yet!");
+            default:
+            case CONSTRUCTION:
+                jobElements.stream().map(e -> {
+                    final ResourceDeposit inBetween = new ResourceDeposit(EDepositType.COSTS);
+                    final int amount = e.getAmount();
+                    final OrbitalModule orbitalModule = e.getOrbitalModule();
+                    for (int i = 0; i < amount; i++) {
+                        inBetween.add(orbitalModule.getCosts());
+                    }
+                    return inBetween;
+                }).forEach(costs::add);
+                break;
+        }
+        return costs;
+    }
 
     private static ResourceDeposit calculateRepairJobCost(@Nonnull final Fleet toRepair) {
         Preconditions.checkNotNull(toRepair, "toRepair must not be empty");

@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.api.orbitals;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.OrbitalModule;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
@@ -10,6 +11,7 @@ import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
+import de.yuga.spacebattle.backend.services.combined.spacecraft.OrbitalModuleService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
@@ -21,6 +23,7 @@ import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstructionOrder;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstructionSelection;
+import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardOrbitalModuleConstructionSelection;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.orbitals.Orbit;
 import de.yuga.spacebattle.rest.dto.orbitals.Planet;
@@ -61,6 +64,7 @@ public class PlanetApi extends BaseApi {
     private static final String SHIPYARD_POSSIBLE_ENDPOINT = "shipyardConstructionPossible";
     private static final String SHIPYARD_EXISTS_ENDPOINT = "shipyardExists";
     private static final String SHIPYARD_BUILD_IT_ENDPOINT = "shipyardConstructionBuild";
+    private static final String SHIPYARD_BUILD_ORBITAL_ENDPOINT = "shipyardConstructionOrbitalBuild";
     private static final String GET_PLANET_BY_COORDINATES_ENDPOINT = "byCoord";
     private static final String GET_MAIN_PLANET = "main";
     private static final String REPAIR_FLEET_ENDPOINT = SHIPYARD_BUILD_IT_ENDPOINT + "/repair";
@@ -88,6 +92,9 @@ public class PlanetApi extends BaseApi {
     @Nonnull
     private final ConstructionService constructionService;
 
+    @Nonnull
+    private final OrbitalModuleService orbitalModuleService;
+
     @Autowired
     public PlanetApi(@Nonnull final PlanetService planetService,
                      @Nonnull final JobService jobService,
@@ -95,7 +102,8 @@ public class PlanetApi extends BaseApi {
                      @Nonnull final FleetService fleetService,
                      @Nonnull final PlanetTickRunner planetTickRunner,
                      @Nonnull final TickTimeService tickTimeService,
-                     @Nonnull final ConstructionService constructionService) {
+                     @Nonnull final ConstructionService constructionService,
+                     @Nonnull final OrbitalModuleService orbitalModuleService) {
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.jobService = Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
         this.shipClassService = Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
@@ -103,6 +111,7 @@ public class PlanetApi extends BaseApi {
         this.planetTickRunner = Preconditions.checkNotNull(planetTickRunner, "planetTickRunner must not be empty");
         this.tickTimeService = Preconditions.checkNotNull(tickTimeService, "tickTimeService must not be empty");
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
+        this.orbitalModuleService = Preconditions.checkNotNull(orbitalModuleService, "orbitalModuleService must not be empty");
     }
 
     @GetMapping
@@ -484,5 +493,45 @@ public class PlanetApi extends BaseApi {
             final EEducationType realResourceType = res.getRealType();
             toUpdate.setAbsoluteCrewRequirement(realResourceType, res.getAmount());
         });
+    }
+
+    @PostMapping(value = SHIPYARD_BUILD_ORBITAL_ENDPOINT)
+    @Operation(summary = "Starts a construction on this planet.", operationId = "buildOrbitalModule",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ShipyardConstructionOrder.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successfully started",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = de.yuga.spacebattle.rest.dto.turn.Job.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> buildOrbitalModule(@RequestBody final ShipyardConstructionOrder shipyardConstructionOrder) {
+        Preconditions.checkNotNull(shipyardConstructionOrder, "shipyardConstructionOrder shouldn't be null!");
+
+        final int idPlanet = shipyardConstructionOrder.getIdPlanet();
+        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetService.find(idPlanet);
+        if (planet == null) {
+            throw new NotifyWebUserException("There is no planet, sorry");
+        }
+        final List<ShipyardOrbitalModuleConstructionSelection> jobPayload = shipyardConstructionOrder.getOrbitalsJobPayload();
+        final List<Integer> orbitalModuleIDs = jobPayload.stream().map(ShipyardOrbitalModuleConstructionSelection::getIdOrbitalModule).collect(Collectors.toList());
+
+        final List<OrbitalModule> foundClasses = orbitalModuleService.findAll(orbitalModuleIDs);
+        final Map<Integer, OrbitalModule> foundClassesByID = foundClasses.stream().collect(Collectors.toMap(AbstractEntityKey::getId, sc -> sc));
+
+        final Map<OrbitalModule, Integer> jobLoad = jobPayload.stream()
+                .collect(Collectors.toMap(entry -> foundClassesByID.get(entry.getIdOrbitalModule()), ShipyardOrbitalModuleConstructionSelection::getAmount));
+
+        final Job job = jobService.createShipyardOrbitalModuleJob(planet, jobLoad);
+        if (JobService.isLocalInstaJobPossible(planet, job)) {
+            planetTickRunner.tickInstaShipyard(job, tickTimeService.getToday());
+        }
+        return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(job, getPreferredLanguage()));
     }
 }

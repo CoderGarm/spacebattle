@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.enums;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.OrbitalModule;
 import de.yuga.spacebattle.backend.entities.misc.HasCosts;
 import de.yuga.spacebattle.backend.entities.misc.HasCostsByOwn;
 import de.yuga.spacebattle.backend.entities.researches.Research;
@@ -26,6 +27,7 @@ public enum EResourceDemand {
     BUILDING(Building.class, ORBITAL_CONSTRUCTION, EResourceType.RESEARCH),
     RESEARCH(Research.class, ORBITAL_CONSTRUCTION, CONSTRUCTION, CREDITS, METALORE, HEAVY_METALS, RARE_ELEMENTS, POPULATION),
     WEAPON_SYSTEM(HasCostsByOwn.class, CONSTRUCTION, EResourceType.RESEARCH),
+    ORBITAL_MODULE(OrbitalModule.class, CONSTRUCTION, EResourceType.RESEARCH),
     PASSIVE_MODULE(PassiveModule.class, CONSTRUCTION, EResourceType.RESEARCH),
     BASE_MODULE(BaseModule.class, PASSIVE_MODULE.getOverrideResources().toArray(EResourceType[]::new)),
     ;
