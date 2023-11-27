@@ -39,10 +39,14 @@ todo. spot market like: https://postimg.cc/QVHGk2SB
 
 ### Bugs fixed
 
-todo. battle replay tooltips
+1. Waffen haben nun die korrekte Tonnage und den korrekten Kampfwert.
+2. Tooltip bei den Schiffswerten des Battle Reports ist unterdrückt.
+
+todo. insta research zieht punkte nicht von übrigen punkten "für heute" ab
+todo. research punkte -> sandkiste issue with 27 points left vs 160 from inop labs
+
 todo. fleet status marker in inverted colorset
 todo. fleet detachment submit button disable when no change
-todo. research punkte -> sandkiste issue with 27 points left vs 160 from inop labs
 
 todo. keine jobs ohne aktiviertes gebäude (werft) -> division / 0 in calcRemainingTicks
 todo. negative pop development in UI
@@ -60,25 +64,7 @@ at de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService.identif
 at de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService.operateShips(FleetService.java:543)
 at de.yuga.spacebattle.rest.api.combined.spacecrafts.FleetApi.multiActionFleetFormation(FleetApi.java:286)
 
-todo. ----
-Ok, this is another speciality of my brain of the past. And bug - bot at the same time.
-
-We have point defense clusters only for LAC and light cruisers - in the same way to have Anti-Missile tubes only categorized for LAC.
-
-Both sizes exists in the autocannon and laser variant, the AC size PD has 4 barrels and the CL size has 12 barrels. So 4 respectively 12 shots against anti missile per combat
-round. The laser variante has 8 respectively 16 laser emitter and a much larger range. This means a larger range - in "good geometric situations" it can fire twice per incoming
-salvo.
-
-There is an issue with display none of these informations and this is the major problem of this game, I would say.
-The bug in that case is that I switched the tonnage and damage value when I created the weapons.
-They have a damage value of 1 because they need only to hit -> all PDs have the same damage value.
-The tonnage should be 200/500 for the autocannon sizes and 400/800 for the laser cluster.
-
-I will change it with the release because the impact is only in the faster flight times due lower weight for the alpha and beta emitters. And the impact is the same for every
-player.
-
-But I will think about the information which are needed to display 🙈
-----
+todo. display module properties like barrels, laser pd, autocannon pd ...
 
 #### next steps
 

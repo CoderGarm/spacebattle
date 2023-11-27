@@ -1,14 +1,12 @@
 package de.yuga.spacebattle.backend.services.turn.tick;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.dto.research.EmpireResearchCapability;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
-import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
 import de.yuga.spacebattle.backend.entities.turn.Job;
@@ -22,7 +20,6 @@ import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
-import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStateService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -60,9 +57,6 @@ public class PlanetTickRunner implements TickRunner {
     private final ConstructionService constructionService;
 
     @Nonnull
-    private final ResearchService researchService;
-
-    @Nonnull
     private final WarshipHealthStateService warshipHealthStateService;
 
     @Nonnull
@@ -79,7 +73,6 @@ public class PlanetTickRunner implements TickRunner {
                             @Nonnull final PlanetService planetService,
                             @Nonnull final FleetService fleetService,
                             @Nonnull final ConstructionService constructionService,
-                            @Nonnull final ResearchService researchService,
                             @Nonnull final WarshipHealthStateService warshipHealthStateService,
                             @Nonnull final PopulationControlCalculator populationControlCalculator,
                             @Nonnull final TickOutputCalculator tickOutputCalculator,
@@ -88,7 +81,6 @@ public class PlanetTickRunner implements TickRunner {
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
-        this.researchService = Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
         this.warshipHealthStateService = Preconditions.checkNotNull(warshipHealthStateService, "warshipHealthStateService must not be empty");
         this.populationControlCalculator = Preconditions.checkNotNull(populationControlCalculator, "populationControlCalculator must not be empty");
         this.tickOutputCalculator = Preconditions.checkNotNull(tickOutputCalculator, "tickOutputCalculator must not be empty");
@@ -162,35 +154,22 @@ public class PlanetTickRunner implements TickRunner {
                     .orElseThrow(() -> new NotifyWebUserException("Yeah, shit happens. This can not happen."));
             log(planet, job, "Start processing " + resourceType + " job.");
 
-            if (resourceType == EResourceType.RESEARCH) {
-                final int idUser = Objects.requireNonNull(planet.getOwner()).getId();
-                final long empireWideResearchPointsLeftOver = planetService.getEmpireWideResearchPoints(idUser).getEmpireWideResearchPointsLeftOver();
-                final long usedPoints = tickJob(job, empireWideResearchPointsLeftOver);
-                if (!job.isFinished()) {
-                    jobService.save(job);
-                    planetService.reduceResearchPoints(planet.getOwner().getId(), usedPoints);
-                    log(planet, job, "Shifting job for tick after " + today + ".");
-                    continue;
-                }
-                completeResearch(planet, job, usedPoints, today);
-            } else {
-                final long points = planet.getResourceDeposit().getResourceAmountByType(resourceType);
-                final long usedPoints = tickJob(job, points);
-                planet.getResourceDeposit().updateResource(resourceType, -usedPoints);
-                if (!job.isFinished()) {
-                    jobService.save(job);
-                    planetService.save(planet);
-                    log(planet, job, "Shifting job for tick after " + today + ".");
-                    continue;
-                }
-                switch (resourceType) {
-                    case CONSTRUCTION:
-                        completeConstruction(planet, planet.getConstructions(), job, today);
-                        break;
-                    case ORBITAL_CONSTRUCTION:
-                        completeShipyard(planet, job, today);
-                        break;
-                }
+            final long points = planet.getResourceDeposit().getResourceAmountByType(resourceType);
+            final long usedPoints = tickJob(job, points);
+            planet.getResourceDeposit().updateResource(resourceType, -usedPoints);
+            if (!job.isFinished()) {
+                jobService.save(job);
+                planetService.save(planet);
+                log(planet, job, "Shifting job for tick after " + today + ".");
+                continue;
+            }
+            switch (resourceType) {
+                case CONSTRUCTION:
+                    completeConstruction(planet, planet.getConstructions(), job, today);
+                    break;
+                case ORBITAL_CONSTRUCTION:
+                    completeShipyard(planet, job, today);
+                    break;
             }
         }
         planetService.save(planet);
@@ -340,28 +319,6 @@ public class PlanetTickRunner implements TickRunner {
         log(planet, job, "Done processing construction job.");
     }
 
-    private void completeResearch(@Nonnull final Planet planet, @Nonnull final Job job, final long usedPoints, @Nonnull final Tick today) {
-        Preconditions.checkNotNull(planet, "planet must not be empty");
-        Preconditions.checkNotNull(job, "job must not be empty");
-        Preconditions.checkNotNull(today, "today must not be empty");
-
-        log(planet, job, "Start processing research job.");
-        job.setFinished(today);
-        final Constructable constructable = job.getConstructable();
-        final User owner = planet.getHumanOwner();
-        if (owner == null) {
-            throw new NotifyWebUserException("There must be a planet's owner.");
-        }
-        final Research research = constructable.getResearch();
-        if (research == null) {
-            throw new NotifyWebUserException("Oh fuck, this should not happen while research whatever!");
-        }
-        researchService.addResearch(owner, List.of(research));
-        planetService.reduceResearchPoints(owner.getId(), usedPoints);
-        log(planet, job, "Done processing research job.");
-    }
-
-
     /**
      * Will update the resource deposit of a planet with the newly created stuff.
      *
@@ -402,23 +359,6 @@ public class PlanetTickRunner implements TickRunner {
         Preconditions.checkNotNull(job, "job shouldn't be null!");
 
         return job.tick(points);
-    }
-
-    @Nonnull
-    public Job tickInstaResearch(@Nonnull final Job job, @Nonnull final EmpireResearchCapability capability, @Nonnull final Tick today) {
-        Preconditions.checkNotNull(job, "job must not be empty");
-        Preconditions.checkNotNull(capability, "capability must not be empty");
-        Preconditions.checkNotNull(today, "today must not be empty");
-
-        final Planet planet = planetService.find(job.getFacility().getPlanet());
-        Preconditions.checkNotNull(planet, "planet must not be empty");
-
-        if (job.getPointsLeft() <= capability.getEmpireWideResearchPointsLeftOver()) {
-            final long usedPoints = tickJob(job, capability.getEmpireWideResearchPointsLeftOver());
-            completeResearch(job.getFacility().getPlanet(), job, usedPoints, today);
-            return jobService.save(job);
-        }
-        return job;
     }
 
     public void tickInstaShipyard(@Nonnull Job job, @Nonnull final Tick today) {

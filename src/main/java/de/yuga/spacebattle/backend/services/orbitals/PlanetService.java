@@ -70,7 +70,7 @@ public class PlanetService {
 
     @Nonnull
     public EmpireResearchCapability getEmpireWideResearchPoints(final int idUser) {
-        final long empireWideResearchPoints = getCachedEmpireWideResearchPoints(idUser);
+        final long empireWideResearchPoints = getEmpireWideResearchPointsPerTick(idUser);
         final List<ResourceDeposit> researchPoints = Objects.requireNonNullElse(planetRepository.findResourceDepositOfColonizedPlanets(idUser, EResourceType.RESEARCH.toString()), new ArrayList<>());
         final long empireWideResearchPointsLeftOver = researchPoints
                 .stream()
@@ -79,7 +79,7 @@ public class PlanetService {
         return new EmpireResearchCapability(empireWideResearchPoints, empireWideResearchPointsLeftOver);
     }
 
-    private long getCachedEmpireWideResearchPoints(final int idUser) {
+    private long getEmpireWideResearchPointsPerTick(final int idUser) {
         final List<Planet> allColonizedByWithResearchLab = findAllColonizedByWithResearchLab(idUser);
         //noinspection UnnecessaryLocalVariable
         final long empireWideResearchPoints = allColonizedByWithResearchLab.stream()
@@ -107,7 +107,7 @@ public class PlanetService {
     }
 
     @Nonnull
-    List<Planet> findAllColonizedByWithResearchLab(final int idUser) {
+    public List<Planet> findAllColonizedByWithResearchLab(final int idUser) {
         return Objects.requireNonNullElse(planetRepository.findAllColonizedByWithResearchLab(idUser), List.of());
     }
 

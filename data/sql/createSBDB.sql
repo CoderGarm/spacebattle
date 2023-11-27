@@ -1904,3 +1904,4 @@ INSERT INTO dbPatch VALUES (NULL, NOW(), 'drop heat from uncolonized planets', '
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'fleet snap in job', '0.1.15-3');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'transport job', '0.1.15-4');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'tidy up wiki', '0.1.15-5');
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'repair tonnage', '0.1.16-1');

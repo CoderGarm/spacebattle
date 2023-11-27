@@ -17,7 +17,7 @@ import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.researches.TechTreeService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.TickTimeService;
-import de.yuga.spacebattle.backend.services.turn.tick.PlanetTickRunner;
+import de.yuga.spacebattle.backend.services.turn.tick.ResearchTickRunner;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
@@ -72,7 +72,7 @@ public class ResearchApi extends BaseApi {
     private final TechTreeService techTreeService;
 
     @Nonnull
-    private final PlanetTickRunner planetTickRunner;
+    private final ResearchTickRunner researchTickRunner;
 
     @Nonnull
     private final TickTimeService tickTimeService;
@@ -86,7 +86,7 @@ public class ResearchApi extends BaseApi {
                        @Nonnull final JobService jobService,
                        @Nonnull final PlanetService planetService,
                        @Nonnull final TechTreeService techTreeService,
-                       @Nonnull final PlanetTickRunner planetTickRunner,
+                       @Nonnull final ResearchTickRunner researchTickRunner,
                        @Nonnull final TickTimeService tickTimeService,
                        @Nonnull final ConstructionService constructionService) {
         this.researchService = Preconditions.checkNotNull(researchService, "researchService shouldn't be null!");
@@ -94,7 +94,7 @@ public class ResearchApi extends BaseApi {
         this.jobService = Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.techTreeService = Preconditions.checkNotNull(techTreeService, "techTreeService must not be empty");
-        this.planetTickRunner = Preconditions.checkNotNull(planetTickRunner, "planetTickRunner must not be empty");
+        this.researchTickRunner = Preconditions.checkNotNull(researchTickRunner, "planetTickRunner must not be empty");
         this.tickTimeService = Preconditions.checkNotNull(tickTimeService, "tickTimeService must not be empty");
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
     }
@@ -145,10 +145,10 @@ public class ResearchApi extends BaseApi {
         if (research == null) {
             throw new NotifyWebUserException("No research was found.");
         }
-        final Job researchJob = jobService.createResearchJob(user, research);
+        final Job researchJob = jobService.createResearchJob(user, research); // fixme research points werden nicht abgezogen wenn kein insta -> andere jobs ebenfalls prüfen
         final EmpireResearchCapability capability = planetService.getEmpireWideResearchPoints(idUser);
         if (researchJob.getPointsLeft() <= capability.getEmpireWideResearchPointsLeftOver()) {
-            final Job job = planetTickRunner.tickInstaResearch(researchJob, capability, tickTimeService.getToday());
+            final Job job = researchTickRunner.tickInstaResearch(researchJob, capability, tickTimeService.getToday());
             return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(job, getPreferredLanguage()));
         } else {
             return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(researchJob, capability, getPreferredLanguage()));
