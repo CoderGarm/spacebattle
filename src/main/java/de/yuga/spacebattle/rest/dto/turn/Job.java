@@ -166,6 +166,6 @@ public class Job {
 
         final long empireWideResearchPoints = capability.getEmpireWideResearchPoints();
         final long empireWideResearchPointsLeftOver = capability.getEmpireWideResearchPointsLeftOver();
-        this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(empireWideResearchPoints, empireWideResearchPointsLeftOver, researchJob.getConstructable());
+        this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(empireWideResearchPoints, empireWideResearchPointsLeftOver, researchJob.getPointsLeft());
     }
 }

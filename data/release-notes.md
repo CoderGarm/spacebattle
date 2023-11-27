@@ -41,9 +41,7 @@ todo. spot market like: https://postimg.cc/QVHGk2SB
 
 1. Waffen haben nun die korrekte Tonnage und den korrekten Kampfwert.
 2. Tooltip bei den Schiffswerten des Battle Reports ist unterdrückt.
-
-todo. insta research zieht punkte nicht von übrigen punkten "für heute" ab
-todo. research punkte -> sandkiste issue with 27 points left vs 160 from inop labs
+3. Forschungspunkte werden nun hoffentlich korrekt berechnet.
 
 todo. fleet status marker in inverted colorset
 todo. fleet detachment submit button disable when no change

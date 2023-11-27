@@ -6,7 +6,6 @@ import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
-import de.yuga.spacebattle.backend.entities.turn.Constructable;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EDepositType;
@@ -107,10 +106,7 @@ public class JobCostsCalculator {
 
     public static int calculateRemainingTicks(final long empireWideResearchPoints,
                                               final long empireWideResearchPointsLeftOver,
-                                              @Nonnull final Constructable constructable) {
-        Preconditions.checkNotNull(constructable, "constructable must not be empty");
-
-        final long cost = constructable.getJobCosts().getResourceAmountByType(constructable.getResourceType());
+                                              final long cost) {
         if (empireWideResearchPoints <= 0 && cost > empireWideResearchPointsLeftOver) {
             return 999;
         }

@@ -145,7 +145,7 @@ public class ResearchApi extends BaseApi {
         if (research == null) {
             throw new NotifyWebUserException("No research was found.");
         }
-        final Job researchJob = jobService.createResearchJob(user, research); // fixme research points werden nicht abgezogen wenn kein insta -> andere jobs ebenfalls prüfen
+        final Job researchJob = jobService.createResearchJob(user, research);
         final EmpireResearchCapability capability = planetService.getEmpireWideResearchPoints(idUser);
         if (researchJob.getPointsLeft() <= capability.getEmpireWideResearchPointsLeftOver()) {
             final Job job = researchTickRunner.tickInstaResearch(researchJob, capability, tickTimeService.getToday());
@@ -178,7 +178,8 @@ public class ResearchApi extends BaseApi {
                     final Research research = entry.getKey();
                     final Integer level = entry.getValue();
                     final Constructable constructable = new Constructable(research, level);
-                    final int remainingTicks = JobCostsCalculator.calculateRemainingTicks(capability.getEmpireWideResearchPoints(), capability.getEmpireWideResearchPointsLeftOver(), constructable);
+                    final long cost = constructable.getJobCosts().getResourceAmountByType(constructable.getResourceType());
+                    final int remainingTicks = JobCostsCalculator.calculateRemainingTicks(capability.getEmpireWideResearchPoints(), capability.getEmpireWideResearchPointsLeftOver(), cost);
                     return new ResearchLevel(research, level, remainingTicks, capability.getEmpireWideResearchPointsLeftOver(), getPreferredLanguage());
                 }).collect(Collectors.toList());
         return ResponseEntity.ok(researchLevels);

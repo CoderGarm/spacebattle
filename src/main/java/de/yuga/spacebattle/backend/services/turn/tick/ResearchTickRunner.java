@@ -110,6 +110,7 @@ public class ResearchTickRunner implements TickRunner {
             return;
         }
         completeResearch(researchPlanet, researchJob, usedPoints, today);
+        jobService.save(researchJob);
     }
 
     private void completeResearch(@Nonnull final Planet planet, @Nonnull final Job job, final long usedPoints, @Nonnull final Tick today) {

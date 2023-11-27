@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services.turn;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.research.EmpireResearchCapability;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
@@ -229,7 +230,13 @@ public class JobService {
         checkIfFree(facility);
 
         final Constructable constructable = new Constructable(research, level);
-        return jobRepository.save(new Job(researchPlanet, facility, constructable));
+        final Job job = new Job(researchPlanet, facility, constructable);
+
+        final EmpireResearchCapability capability = planetService.getEmpireWideResearchPoints(user.getId());
+        final long usedPoints = job.tick(capability.getEmpireWideResearchPointsLeftOver());
+        planetService.reduceResearchPoints(user.getId(), usedPoints);
+
+        return jobRepository.save(job);
     }
 
     private void checkIfFree(@Nullable final Construction facility) {
