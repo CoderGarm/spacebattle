@@ -576,7 +576,8 @@ public class FleetService {
                     .filter(Objects::nonNull)
                     .map(Fleet::getOrbit)
                     .filter(Objects::nonNull)
-                    .findFirst().orElseThrow(NullPointerException::new);
+                    .findFirst()
+                    .orElseThrow(NullPointerException::new);
             planet = fleetOrbit.getPlanet();
         }
         return planet;

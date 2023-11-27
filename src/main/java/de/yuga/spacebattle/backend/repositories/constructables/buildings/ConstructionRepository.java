@@ -41,7 +41,8 @@ public interface ConstructionRepository extends JpaRepository<Construction, Inte
     @Query("SELECT CASE WHEN (COUNT(c) > 0) THEN TRUE ELSE FALSE END FROM Construction c " +
             "WHERE c.planet.id = :idPlanet " +
             "AND c.building.productionType.productionTarget = :productionTarget " +
-            "AND c.building.productionType.productionCategory = :productionCategory")
+            "AND c.building.productionType.productionCategory = :productionCategory " +
+            "AND c.operationalLevel >= 1")
     boolean hasPlanetProductionType(final int idPlanet, @Nonnull final EResourceType productionTarget, @Nonnull final EProductionCategory productionCategory);
 
     @Query("SELECT CASE WHEN (COUNT(c) > 0) THEN TRUE ELSE FALSE END FROM Construction c LEFT JOIN c.jobs j " +

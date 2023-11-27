@@ -42,25 +42,16 @@ todo. spot market like: https://postimg.cc/QVHGk2SB
 1. Waffen haben nun die korrekte Tonnage und den korrekten Kampfwert.
 2. Tooltip bei den Schiffswerten des Battle Reports ist unterdrückt.
 3. Forschungspunkte werden nun hoffentlich korrekt berechnet.
+4. Man kann keine Jobs in der Werft mehr starten, wenn die Werft nicht wenigstens auf Level 1 aktiv ist.
 
-todo. fleet status marker in inverted colorset
-todo. fleet detachment submit button disable when no change
 
-todo. keine jobs ohne aktiviertes gebäude (werft) -> division / 0 in calcRemainingTicks
+
 todo. negative pop development in UI
 todo. battlereport new advisory but no new present
 todo. migration must respect pop demand
 
 todo. chats von anderen werden automatisch gelesen
-todo. fix crew exploit
 todo. unload fleet on ship transfer or something
-
-todo. f040772d
-java.lang.NullPointerException
-at java.base/java.util.Optional.orElseThrow(Optional.java:403)
-at de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService.identifyPlanet(FleetService.java:579)
-at de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService.operateShips(FleetService.java:543)
-at de.yuga.spacebattle.rest.api.combined.spacecrafts.FleetApi.multiActionFleetFormation(FleetApi.java:286)
 
 todo. display module properties like barrels, laser pd, autocannon pd ...
 
@@ -86,10 +77,8 @@ todo. chat search: empire name, ingame name, username
 
 todo. quoting in chat und forum
 todo. preview in chat und forum
-todo. wiki is broken -> store full text as easy solution?
+todo. fleet detachment submit button disable when no change
 
-todo. battle reports notification wrong
--> Ich habe keinen 'neue nachrichten marker' für den neuen 'battle report' bekommen
 
 #### next steps
 
