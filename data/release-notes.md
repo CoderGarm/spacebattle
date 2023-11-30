@@ -66,7 +66,6 @@ todo. distance based duration
 #### Diverses
 
 1. Der Tech Tree ist in der Library zu sehen, dann kann man sich dort einen Überblick verschaffen, welche Forschungen für die Module notwendig sind.
-2. Die angezeigten Informationen für die Module sind etwas aussagekräftiger.
 
 todo. manual transfer to fleet overrides capacity
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"

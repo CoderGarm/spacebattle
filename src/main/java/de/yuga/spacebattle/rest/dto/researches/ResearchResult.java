@@ -91,6 +91,7 @@ public class ResearchResult {
     public ResearchResult(final int unlockedThroughLevel, @Nonnull final OrbitalModule content, @Nonnull final String languageCode) {
         this(unlockedThroughLevel, content, content.getClass(), languageCode);
 
+        add("effect", content.getEffect().name());
         add("effectValue", content.getBaseValue() + " kpi");
     }
 

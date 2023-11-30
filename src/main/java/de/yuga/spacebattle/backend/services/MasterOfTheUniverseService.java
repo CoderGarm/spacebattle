@@ -119,6 +119,9 @@ public class MasterOfTheUniverseService {
     private static final Map<EEducationType, Long> XXL_CREW = Map.of(EEducationType.ENLISTED, 300L, EEducationType.OFFICER, 30L);
     private static final Map<EEducationType, Long> XXL_ORBITAL_CREW = Map.of(EEducationType.ENLISTED, 64L, EEducationType.OFFICER, 11L);
     private static final Map<EEducationType, Long> XXXL_CREW = Map.of(EEducationType.ENLISTED, 500L, EEducationType.OFFICER, 50L);
+    private static final Map<EEducationType, Long> CIVIL_L_ORBITAL_CREW = Map.of(EEducationType.SCHOOL, 34L, EEducationType.UNIVERSITY, 12L);
+    private static final Map<EEducationType, Long> CIVIL_XL_ORBITAL_CREW = Map.of(EEducationType.SCHOOL, 51L, EEducationType.UNIVERSITY, 30L);
+    private static final Map<EEducationType, Long> CIVIL_XXL_ORBITAL_CREW = Map.of(EEducationType.SCHOOL, 150L, EEducationType.UNIVERSITY, 100L);
 
     public static final String FLASHKID = "Flashkid";
 
@@ -423,6 +426,7 @@ public class MasterOfTheUniverseService {
     }
 
     private void createOrbitalModules() {
+        /* military modules */
 
         Research research = moduleService.findAllElectronicWarfare().get(0).getNamedTechLevel().getUnlockedThrough();
         Preconditions.checkNotNull(research, "research must not be empty");
@@ -432,23 +436,42 @@ public class MasterOfTheUniverseService {
         researchService.save(research);
 
         OrbitalModule m = orbitalModule("Low-altitude Gravitic Anomaly Detector Array", "Gravity sensors can be used to determine hyperprints more precisely.",
-                1000, L_CREW, ETechLevel.TECH_II, EModuleType.ELECTRONIC_WARFARE, research, 1);
+                18000, 1000, L_CREW, ETechLevel.TECH_II, EModuleType.ELECTRONIC_WARFARE, research, 1);
         amendTranslation(m, "Suborbitales Gravimetrisches Anomaliedetektor Array", "Mit Gravitationssensoren können Hyperabdrücke genauer bestimmt werden.");
         orbitalModuleService.save(m);
 
         m = orbitalModule("Enhanced Low Altitude Gravitic Anomaly Detector Array", "Gravity sensors can be used to determine hyperprints more precisely.",
-                1500, XL_CREW, ETechLevel.TECH_II, EModuleType.ELECTRONIC_WARFARE, research, 3);
+                26000, 1500, XL_CREW, ETechLevel.TECH_II, EModuleType.ELECTRONIC_WARFARE, research, 3);
         amendTranslation(m, "Verbessertes suborbitales gravimetrisches Anomaliedetektor Array", "Mit Gravitationssensoren können Hyperabdrücke genauer bestimmt werden.");
         orbitalModuleService.save(m);
 
         m = orbitalModule("Orbital Gravitic Anomaly Detector Array", "Gravity sensors can be used to determine hyperprints more precisely.",
-                4500, XL_ORBITAL_CREW, ETechLevel.TECH_III, EModuleType.ELECTRONIC_WARFARE, research, 5);
+                75000, 4500, XL_ORBITAL_CREW, ETechLevel.TECH_III, EModuleType.ELECTRONIC_WARFARE, research, 5);
         amendTranslation(m, "Orbitales Gravitisches Anomalie Sensor Array", "Mit Gravitationssensoren können Hyperabdrücke genauer bestimmt werden.");
         orbitalModuleService.save(m);
 
         m = orbitalModule("Enhanced High orbital Gravitic Anomaly Detector Array", "Gravity sensors can be used to determine hyperprints more precisely.",
-                9500, XXL_ORBITAL_CREW, ETechLevel.TECH_III, EModuleType.ELECTRONIC_WARFARE, research, 10);
+                125000, 9500, XXL_ORBITAL_CREW, ETechLevel.TECH_III, EModuleType.ELECTRONIC_WARFARE, research, 10);
         amendTranslation(m, "Verbessertes orbitales Gravitisches Anomalie Sensor Array", "Mit Gravitationssensoren können Hyperabdrücke genauer bestimmt werden.");
+        orbitalModuleService.save(m);
+
+        /* civil modules */
+        research = buildingService.findBuildingByProductionType(LIVING_PT).get(0).getUnlockedThrough();
+        Preconditions.checkNotNull(research, "research must not be empty");
+
+        m = orbitalModule("Orbital habitat L", "A space habitat is a space station that is not primarily used for industrial or military purposes, but rather as permanent accommodation.",
+                250000, 1000, CIVIL_L_ORBITAL_CREW, ETechLevel.TECH_II, EResourceType.POPULATION, research, 4);
+        amendTranslation(m, "Weltraumhabitat L", "Ein Weltraumhabitat ist eine Raumstation, die nicht in erster Linie industriellen oder militärischen Zwecken dient, sondern als permanente Unterkunft.");
+        orbitalModuleService.save(m);
+
+        m = orbitalModule("Orbital habitat XL", "A space habitat is a space station that is not primarily used for industrial or military purposes, but rather as permanent accommodation.",
+                350000, 1900, CIVIL_XL_ORBITAL_CREW, ETechLevel.TECH_II, EResourceType.POPULATION, research, 6);
+        amendTranslation(m, "Weltraumhabitat XL", "Ein Weltraumhabitat ist eine Raumstation, die nicht in erster Linie industriellen oder militärischen Zwecken dient, sondern als permanente Unterkunft.");
+        orbitalModuleService.save(m);
+
+        m = orbitalModule("Orbital habitat XXL", "A space habitat is a space station that is not primarily used for industrial or military purposes, but rather as permanent accommodation.",
+                900000, 4500, CIVIL_XXL_ORBITAL_CREW, ETechLevel.TECH_III, EResourceType.POPULATION, research, 9);
+        amendTranslation(m, "Weltraumhabitat XXL", "Ein Weltraumhabitat ist eine Raumstation, die nicht in erster Linie industriellen oder militärischen Zwecken dient, sondern als permanente Unterkunft.");
         orbitalModuleService.save(m);
     }
 
@@ -1054,10 +1077,10 @@ public class MasterOfTheUniverseService {
         return buildingService.createBuilding(name, description, baseValue, techLevel, productionType, educationType, amountOfWorkers, unlockedBy, unlockedThroughLevel, increasingFactorPerLevel);
     }
 
-
     @Nonnull
     private OrbitalModule orbitalModule(@Nonnull final String name,
                                         @Nonnull final String description,
+                                        final int tonnage,
                                         final int baseValue,
                                         @Nonnull final Map<EEducationType, Long> crew,
                                         @Nonnull final ETechLevel techLevel,
@@ -1071,7 +1094,27 @@ public class MasterOfTheUniverseService {
         Preconditions.checkNotNull(effect, "effect must not be empty");
         Preconditions.checkNotNull(unlockedBy, "unlockedBy must not be empty");
 
-        return orbitalModuleService.save(new OrbitalModule(name, description, baseValue, new CrewRequirement(crew, EDepositType.COSTS), techLevel, effect, unlockedBy, unlockedThroughLevel));
+        return orbitalModuleService.save(new OrbitalModule(name, description, tonnage, baseValue, new CrewRequirement(crew, EDepositType.COSTS), techLevel, effect, unlockedBy, unlockedThroughLevel));
+    }
+
+    @Nonnull
+    private OrbitalModule orbitalModule(@Nonnull final String name,
+                                        @Nonnull final String description,
+                                        final int tonnage,
+                                        final int baseValue,
+                                        @Nonnull final Map<EEducationType, Long> crew,
+                                        @Nonnull final ETechLevel techLevel,
+                                        @Nonnull final EResourceType effect,
+                                        @Nonnull final Research unlockedBy,
+                                        final int unlockedThroughLevel) {
+        Preconditions.checkNotNull(name, "name must not be empty");
+        Preconditions.checkNotNull(description, "description must not be empty");
+        Preconditions.checkNotNull(crew, "crew must not be empty");
+        Preconditions.checkNotNull(techLevel, "techLevel must not be empty");
+        Preconditions.checkNotNull(effect, "effect must not be empty");
+        Preconditions.checkNotNull(unlockedBy, "unlockedBy must not be empty");
+
+        return orbitalModuleService.save(new OrbitalModule(name, description, tonnage, baseValue, new CrewRequirement(crew, EDepositType.COSTS), techLevel, effect, unlockedBy, unlockedThroughLevel));
     }
 
 

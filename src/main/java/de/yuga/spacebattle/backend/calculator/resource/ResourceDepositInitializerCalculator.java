@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -35,7 +36,7 @@ public class ResourceDepositInitializerCalculator {
         Preconditions.checkNotNull(techLevel, "techLevel shouldn't be null!");
         Preconditions.checkNotNull(clazz, "clazz shouldn't be null!");
 
-        final Set<EResourceType> overrideResources = clazz.getOverrideResources();
+        final Set<EResourceType> overrideResources = new HashSet<>(clazz.getOverrideResources());
         overrideResources.addAll(techLevel.getExcludedResources());
 
         final ResourceDeposit resourceDeposit = new ResourceDeposit(EDepositType.COSTS);
@@ -77,7 +78,6 @@ public class ResourceDepositInitializerCalculator {
         Preconditions.checkNotNull(clazz, "clazz must not be empty");
 
         switch (clazz) {
-            case ORBITAL_MODULE:
             case BUILDING:
                 return 1000;
             case RESEARCH:
@@ -88,6 +88,9 @@ public class ResourceDepositInitializerCalculator {
             case PASSIVE_MODULE:
                 Preconditions.checkNotNull(capacity, "capacity must not be empty");
                 return Integer.max(4, capacity / 10);
+            case ORBITAL_MODULE:
+                Preconditions.checkNotNull(capacity, "capacity must not be empty");
+                return Integer.max(capacity / 3, capacity);
         }
     }
 

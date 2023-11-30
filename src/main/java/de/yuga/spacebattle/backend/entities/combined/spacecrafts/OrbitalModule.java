@@ -6,11 +6,14 @@ import de.yuga.spacebattle.backend.entities.i18n.Translation;
 import de.yuga.spacebattle.backend.entities.misc.HasCosts;
 import de.yuga.spacebattle.backend.entities.researches.Research;
 import de.yuga.spacebattle.backend.enums.EModuleType;
+import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.enums.ESupportType;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.Objects;
 
 @Entity
 @Table(name = "orbitalModule")
@@ -22,7 +25,7 @@ public class OrbitalModule extends HasCosts {
     @Nonnull
     @NotNull
     @Enumerated(EnumType.STRING)
-    private EModuleType effect;
+    private ESupportType effect;
 
     @Nonnull
     @NotNull
@@ -37,13 +40,14 @@ public class OrbitalModule extends HasCosts {
 
     public OrbitalModule(@Nonnull final String name,
                          @Nonnull final String description,
+                         final int tonnage,
                          final int baseValue,
                          @Nonnull final CrewRequirement crewRequirement,
                          @Nonnull final ETechLevel techLevel,
                          @Nonnull final EModuleType effect,
                          @Nonnull final Research unlockedThrough,
                          final int unlockedThroughLevel) { // fixme check tonnage and price
-        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, null, OrbitalModule.class);
+        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, tonnage, OrbitalModule.class);
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
         Preconditions.checkNotNull(effect, "effect shouldn't be null!");
@@ -52,7 +56,30 @@ public class OrbitalModule extends HasCosts {
 
         this.baseValue = baseValue;
         this.getCosts().setCrewRequirement(crewRequirement);
-        this.effect = effect;
+        this.effect = Objects.requireNonNull(ESupportType.getByValue(effect));
+        this.unlockedThrough = unlockedThrough;
+        this.unlockedThroughLevel = unlockedThroughLevel;
+    }
+
+    public OrbitalModule(@Nonnull final String name,
+                         @Nonnull final String description,
+                         final int tonnage,
+                         final int baseValue,
+                         @Nonnull final CrewRequirement crewRequirement,
+                         @Nonnull final ETechLevel techLevel,
+                         @Nonnull final EResourceType effect,
+                         @Nonnull final Research unlockedThrough,
+                         final int unlockedThroughLevel) { // fixme check tonnage and price
+        super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, tonnage, OrbitalModule.class);
+        Preconditions.checkNotNull(name, "name shouldn't be null!");
+        Preconditions.checkNotNull(description, "description shouldn't be null!");
+        Preconditions.checkNotNull(effect, "effect shouldn't be null!");
+        Preconditions.checkNotNull(crewRequirement, "crewRequirement shouldn't be null!");
+        Preconditions.checkNotNull(unlockedThrough, "unlockedThrough shouldn't be null!");
+
+        this.baseValue = baseValue;
+        this.getCosts().setCrewRequirement(crewRequirement);
+        this.effect = Objects.requireNonNull(ESupportType.getByValue(effect));
         this.unlockedThrough = unlockedThrough;
         this.unlockedThroughLevel = unlockedThroughLevel;
     }
@@ -62,7 +89,7 @@ public class OrbitalModule extends HasCosts {
     }
 
     @Nonnull
-    public EModuleType getEffect() {
+    public ESupportType getEffect() {
         return effect;
     }
 
