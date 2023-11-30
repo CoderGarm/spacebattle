@@ -53,7 +53,7 @@ public class ResearchApi extends BaseApi {
     public static final String ENDPOINT = "research";
     private static final String BY_USER_ENDPOINT = "byUser";
     private static final String AVAILABLE_BY_USER_ENDPOINT = "availableByUser";
-    private static final String TREE_ENDPOINT = "tree";
+    public static final String TREE_ENDPOINT = "tree";
     private static final String RESEARCH_POSSIBLE_FOR_USER_ENDPOINT = "possibleForUser";
 
     @Nonnull

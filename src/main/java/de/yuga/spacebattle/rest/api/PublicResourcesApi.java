@@ -11,12 +11,15 @@ import de.yuga.spacebattle.backend.services.ResourceService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.OrbitalModuleService;
+import de.yuga.spacebattle.backend.services.researches.TechTreeService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
+import de.yuga.spacebattle.rest.api.researches.ResearchApi;
 import de.yuga.spacebattle.rest.api.spacecrafts.ModuleApi;
 import de.yuga.spacebattle.rest.dto.buildings.Building;
 import de.yuga.spacebattle.rest.dto.enums.EEducationType;
 import de.yuga.spacebattle.rest.dto.enums.EResourceType;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
+import de.yuga.spacebattle.rest.dto.researches.ResearchTree;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -66,16 +69,34 @@ public class PublicResourcesApi extends BaseApi {
     @Nonnull
     private final OrbitalModuleService orbitalModuleService;
 
+    @Nonnull
+    private final TechTreeService techTreeService;
+
     public PublicResourcesApi(@Nonnull final ResourceService resourceService,
                               @Nonnull final UserService userService,
                               @Nonnull final ModuleService moduleService,
                               @Nonnull final BuildingService buildingService,
-                              @Nonnull final OrbitalModuleService orbitalModuleService) {
+                              @Nonnull final OrbitalModuleService orbitalModuleService,
+                              @Nonnull final TechTreeService techTreeService) {
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
         this.userService = Preconditions.checkNotNull(userService, "userService must not be empty");
         this.moduleService = Preconditions.checkNotNull(moduleService, "moduleService must not be empty");
         this.buildingService = Preconditions.checkNotNull(buildingService, "buildingService must not be empty");
         this.orbitalModuleService = Preconditions.checkNotNull(orbitalModuleService, "orbitalModuleService must not be empty");
+        this.techTreeService = Preconditions.checkNotNull(techTreeService, "techTreeService must not be empty");
+    }
+
+    @GetMapping(value = ResearchApi.TREE_ENDPOINT)
+    @Operation(summary = "Get all researches with their unlocking research.", operationId = "getOpenTechTree",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResearchTree.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getOpenTechTree() {
+        return ResponseEntity.ok(techTreeService.getResearchTree(getPreferredLanguage()));
     }
 
     @GetMapping("user-names")
@@ -230,7 +251,7 @@ public class PublicResourcesApi extends BaseApi {
     )
     public ResponseEntity<?> getOrbitalModules() {
         final List<OrbitalModule> modules = orbitalModuleService.findAll();
-        return ResponseEntity.ok(modules.stream().map(m -> new de.yuga.spacebattle.rest.dto.spacecrafts.OrbitalModule(m, getPreferredLanguage())).collect(Collectors.toList()));
+        return ResponseEntity.ok(modules.stream().map(m -> new de.yuga.spacebattle.rest.dto.spacecrafts.OrbitalModule(m, getPreferredLanguage()).withCosts(m.getCosts())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = RESOURCE_TYPES_ENDPOINT)

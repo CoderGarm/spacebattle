@@ -119,7 +119,7 @@ public class Job {
         Preconditions.checkNotNull(ticklyIncome, "ticklyIncome must not be empty");
         Preconditions.checkNotNull(resourceDeposit, "resourceDeposit must not be empty");
 
-        this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(job, ticklyIncome, resourceDeposit);
+        this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(job, ticklyIncome, resourceDeposit); /* fixme add orbital dings */
     }
 
     /**
