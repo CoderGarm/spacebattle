@@ -110,6 +110,7 @@ public class BaseModule {
 
         this.idModule = module.getId();
         this.name = module.getName(languageCode);
+        this.technicalTypeName = module.getTechnicalTypeName();
         this.description = module.getDescription(languageCode);
         this.techLevel = module.getTechLevel();
         this.moduleType = new EModuleType(de.yuga.spacebattle.backend.enums.EModuleType.PROPULSION);

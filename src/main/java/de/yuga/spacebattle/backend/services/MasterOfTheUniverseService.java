@@ -1208,7 +1208,6 @@ public class MasterOfTheUniverseService {
         final Planet homePlanet = planetService.findMainPlanet(user);
         final Fleet opponentsFleet = createFleet(opponent, homePlanet, "Pirates bane");
 
-
         final WarShip warShip = new WarShip("Corsair", homePlanet, opponentsFleet, ship);
         warShip.setOperational();
         return warShipService.save(warShip);
@@ -1222,5 +1221,90 @@ public class MasterOfTheUniverseService {
         battleService.runBattleAtPlanet(today, homePlanet);
     }
 
+    public static String switchName(@Nonnull final String name) {
+        String result = "";
+        result = whenThen("Glyptodon", "A-I-CL", name);
+        result = whenThen("Armadillo", "A-I-CA", name);
+        result = whenThen("Porcupine", "A-I-BC", name);
+        result = whenThen("Seeigel", "A-I-BB", name);
+        result = whenThen("Dornenkopf", "A-I-DN", name);
+        result = whenThen("Stachelhummer", "A-I-SD", name);
+
+        result = whenThen("Owl", "E-I-LAC", name);
+        result = whenThen("Cheetah", "E-I-VT", name);
+        result = whenThen("Gargoyle", "E-I-FG", name);
+        result = whenThen("Zapper", "E-I-DD", name);
+        result = whenThen("Wasteland", "E-I-CL", name);
+        result = whenThen("Enclave", "E-I-CA", name);
+        result = whenThen("Mojave", "E-I-BC", name);
+        result = whenThen("Thumper", "E-I-BB", name);
+        result = whenThen("Dragonlance", "E-I-DN", name);
+        result = whenThen("Longbottom", "E-I-SD", name);
+
+        result = whenThen("Delta Dart", "L-LACIC", name);
+        result = whenThen("FarFire", "L-LACIM", name);
+        result = whenThen("Agni", "L-DDIM", name);
+        result = whenThen("Holly", "L-CAIM", name);
+        result = whenThen("Doombud", "L-DNIM", name);
+
+        result = whenThen("Scoreshot", "D-LACIP", name);
+        result = whenThen("StarGuard", "D-CLIP", name);
+        result = whenThen("ScatterGun", "D-LACIP", name);
+        result = whenThen("CrossBow", "D-CLIP", name);
+        result = whenThen("Zeus", "D-LACIB", name);
+        result = whenThen("StarFire", "D-LACIB", name);
+        result = whenThen("Alacorn", "D-DDIB", name);
+        result = whenThen("Ingrid", "D-CLIB", name);
+        result = whenThen("ExoStar", "D-CAIB", name);
+        result = whenThen("Myrmidon", "D-CAIB", name);
+        result = whenThen("Blankenburg", "D-CLIB", name);
+        result = whenThen("Martell-X", "D-CLIB", name);
+        result = whenThen("Shigunga", "D-CAIB", name);
+        result = whenThen("StarSlab", "D-BCIB", name);
+        result = whenThen("Padilla", "D-BBIB", name);
+        result = whenThen("DavyCrockett", "D-DNIB", name);
+        result = whenThen("ChisComp", "D-SDIB", name);
+
+        result = whenThen("Testudo", "S-I-LAC", name);
+        result = whenThen("Valiant", "S-I-VT", name);
+        result = whenThen("Luxor", "S-I-FG", name);
+        result = whenThen("Sentinel", "S-I-DD", name);
+        result = whenThen("Sipher", "S-I-CL", name);
+        result = whenThen("ArcShield", "S-I-CA", name);
+        result = whenThen("Cassius", "S-I-BC", name);
+        result = whenThen("Cataphract", "S-I-BB", name);
+        result = whenThen("Mycenaean", "S-I-DN", name);
+        result = whenThen("Hauberk", "S-I-SD", name);
+
+        result = whenThen("Dart", "M-LAC30-80-I-C", name);
+        result = whenThen("Spiculum", "M-LAC180-20-I-E", name);
+        result = whenThen("Javelin", "M-DD180-20-I-E", name);
+        result = whenThen("Pilum", "M-CA180-20-I-E", name);
+        result = whenThen("Manipel", "M-DN180-20-I-E", name);
+
+        result = whenThen("Breen", "P-NI-C", name);
+        result = whenThen("CoreTek", "P-NI-M", name);
+        result = whenThen("Defiance", "P-AI-C", name);
+        result = whenThen("Edasich", "P-AI-M", name);
+        result = whenThen("Galas", "P-BI-C", name);
+        result = whenThen("Hermes", "P-BI-M", name);
+        result = whenThen("Magna", "P-GI-C", name);
+        result = whenThen("Pitban", "P-GI-M", name);
+        result = whenThen("Shinobi", "P-DI-C", name);
+        result = whenThen("Vlar", "P-DI-M", name);
+        result = whenThen("Rawlings", "P-EI-M", name);
+        result = whenThen("Samarkand", "P-ZI-M", name);
+        result = whenThen("Irian", "P-EI-M", name);
+        result = whenThen("Kendall", "P-TI-M", name);
+        return result;
+    }
+
+    private static String whenThen(@Nonnull final String newName, @Nonnull final String oldName, @Nonnull final String name) {
+        Preconditions.checkNotNull(newName, "newName must not be empty");
+        Preconditions.checkNotNull(oldName, "oldName must not be empty");
+        Preconditions.checkNotNull(name, "name must not be empty");
+
+        return name.equals(oldName) ? newName : oldName;
+    }
 
 }

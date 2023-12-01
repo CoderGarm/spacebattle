@@ -63,22 +63,13 @@ todo. distance based duration
 #### Diverses
 
 1. Der Tech Tree ist in der Library zu sehen, dann kann man sich dort einen Überblick verschaffen, welche Forschungen für die Module notwendig sind.
-2. Die angezeigten Informationen für Schiffsmodule und die neuen orbitalen Strukturen enthalten jetzt alles Relevante. Bitte sagt Bescheid, wenn ich irgendwo übersehen habe
-   das anzeigen zu lassen.
-    - in der Library
-    - im Tech tree
-    - in der Schiffswerft
+2. Die Bibliothek und der Tech Tree enthalten für Schiffsmodule und die neuen orbitalen Strukturen jetzt alle relevanten Informationen. Die Schiffswerft ist momentan unverändert,
+   allerdings haben die Module zwecks besserem Überblick sprechende Namen bekommen.
 
+todo. spot market like: https://postimg.cc/QVHGk2SB
 todo. manual transfer to fleet overrides capacity
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
 todo. chat search: empire name, ingame name, username
-
-todo. mission items more role play "unprotected convoy changes signature of ship to warship and pirate fled ...""
-todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
-
-todo. a overview dashboard for fleet. where are they all and which are they designed for
-
-todo. spot market like: https://postimg.cc/QVHGk2SB
 
 ### Bugs fixed
 
@@ -99,6 +90,11 @@ todo. unload fleet on ship transfer or something
 todo. display module properties like barrels, laser pd, autocannon pd ...
 
 #### next steps
+
+todo. mission items more role play "unprotected convoy changes signature of ship to warship and pirate fled ...""
+todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
+
+todo. a overview dashboard for fleet. where are they all and which are they designed for
 
 todo. star map filter für flotten
 

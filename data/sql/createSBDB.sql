@@ -1989,3 +1989,4 @@ INSERT INTO dbPatch VALUES (NULL, NOW(), 'transport job', '0.1.15-4');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'tidy up wiki', '0.1.15-5');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'repair tonnage', '0.1.16-1');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'introduce orbital modules', '0.1.16-2');
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'change tech names', '0.1.16-3');
