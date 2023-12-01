@@ -18,9 +18,6 @@ public class Weapon extends WithCosts<Weapon> {
     @Schema(required = true, description = "The basic values of this module.")
     private BaseModule baseModule;
 
-    /**
-     * Defines the range of this weapon.
-     */
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The effective range of this weapon.")

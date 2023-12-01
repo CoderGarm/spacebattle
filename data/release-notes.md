@@ -20,8 +20,9 @@ Ebenfalls auf Vorschlag eines Spielers folgt allerdings eine noch tiefgreifender
    der ganze Antrieb ist ein Grav-Sensor.  
    Beide Effekte interferieren nicht miteinander, aber der stärkere Sensor ist genauer.
 3. Damit gibt es nun auch einen Nutzen für die beiden bisher nicht verwendeten Ressourcen Rare Elements und Heavy Metals.
-4. Es gibt noch mehr orbitale Module als nur das GADA, man kann orbitale Habitate bauen.  
-   Die Habitate erhöhen den Pop Mining Factor des Planeten und auch den Wohnraum. Indirekt also die Geburtenrate.  
+4. Es gibt noch mehr orbitale Module als nur das GADA (fachsprachlich: Gravitationsanomaliedetektorarray), man kann orbitale Habitate bauen.  
+   Die Habitate erhöhen den Pop Mining Factor des Planeten und auch den Wohnraum. Indirekt also die Geburtenrate, sozusagen den Pop Faktor. Für alle englisch sprechenden,
+   entschuldigt den fremdsprachlichen Wortwitz.  
    Dieser Effekt ist statistisch im **Journal of Orbital Science** beschrieben:
    > Orbitin ist eine hypothetische Substanz, die in den äußeren Schichten von Orbiten vorkommt und sich mit der Zeit in orbitalen Habitaten ansammelt.  
    > Diese Substanz wird durch die Wechselwirkungen zwischen der Atmosphäre des Planeten und den orbitalen Strukturen erzeugt.  
@@ -38,6 +39,9 @@ Ebenfalls auf Vorschlag eines Spielers folgt allerdings eine noch tiefgreifender
 Abschließend ist zu sagen, dass diese Strukturen momentan nicht zerstört werden können. Da es sich gerade bei den Habitaten um zivile Einrichtungen mit besonderem Schutzbedürfnis
 handelt, sind vorher Schutzmöglichkeiten notwendig. Natürlich auch ein Flottenbefehl, zivile Einrichtungen nicht anzugreifen. Aber das folgt später.
 
+5. Das bedeutet in letzter Konsequenz, dass die Genauigkeit in der Hyperabdruckauswertung vollkommen vom Eloka-Wert des Systems abhängig ist.  
+   Damit sind Wachschiffe im System von überragender aufklärerischer Bedeutung - egal ob sie auf Missionen sind oder sich im Orbit gefinden.
+
 todo. orbitable stukturen inop setzen analog schiffen -> habitate hinzufügen, steigern geburtenrate und erhöhen wohnraum
 
 todo. tech level 2 und 3 nutzen
@@ -46,13 +50,6 @@ todo. Hyperabdruck im System bei aufkommenden Flotten
 - Emissionssignatur verrät ungefähre größe und anzahl (siehe "look & feel wie in büchern")
 - zwei gebäude (planetare antennen, orbitale antennen) und Eloka-Modul auf Schiffen erzeugen scan-punkte und verraten genauigkeit der ortung
 - in system: sensorabdeckung
-
-todo. star map filter für flotten
-
-- eigene inop
-- fremde inop
-- moves ...
-- Sensorreichweite?
 
 todo. distance based duration
 
@@ -66,6 +63,11 @@ todo. distance based duration
 #### Diverses
 
 1. Der Tech Tree ist in der Library zu sehen, dann kann man sich dort einen Überblick verschaffen, welche Forschungen für die Module notwendig sind.
+2. Die angezeigten Informationen für Schiffsmodule und die neuen orbitalen Strukturen enthalten jetzt alles Relevante. Bitte sagt Bescheid, wenn ich irgendwo übersehen habe
+   das anzeigen zu lassen.
+    - in der Library
+    - im Tech tree
+    - in der Schiffswerft
 
 todo. manual transfer to fleet overrides capacity
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
@@ -85,7 +87,7 @@ todo. spot market like: https://postimg.cc/QVHGk2SB
 3. Forschungspunkte werden nun hoffentlich korrekt berechnet.
 4. Man kann keine Jobs in der Werft mehr starten, wenn die Werft nicht wenigstens auf Level 1 aktiv ist.
 
-todo. every instajob ctivates if possible
+todo. every instajob must be activated if possible
 todo. migration must respect pop demand on own planet and not exceed the others planet needs
 todo. education building shows income at level 0
 todo. negative pop development in UI
@@ -98,7 +100,13 @@ todo. display module properties like barrels, laser pd, autocannon pd ...
 
 #### next steps
 
-todo. researches müssen teurer sein
+todo. star map filter für flotten
+
+- eigene inop
+- fremde inop
+- moves ...
+- Sensorreichweite?
+
 todo. forum management
 
 todo. schadensprofil von schiffsklassen und flotten darstellen, Bedienmannschaften von Modulen darstellen
@@ -108,15 +116,17 @@ todo. missionen sollten Rumpfmasse inkl Klasse beachten "großer Rumpf und Frach
 todo. player comment about the game in profile to display at take-a-tour
 todo. chat search: empire name, ingame name, username
 
-### Bugs fixed
+### important issues
 
 todo. quoting in chat und forum
 todo. preview in chat und forum
 todo. fleet detachment submit button disable when no change
+todo. wurmlochbrücken nutzbar machen vor nächster season!
 
-#### next steps
+#### for later
 
-todo. increase performance by grpc calls over multiple rest calls?
+todo. schiffe am markt verkaufen
+todo. journal report via mail
 
 todo. set nav marker by "next stations" dialog?
 
@@ -233,7 +243,6 @@ todo. Forum: Thema sperren
 todo. gebäudeoutput beobachten, population balancen
 todo. Gebäudegrundkosten zu hoch, Kostensteigerung pro Level zu gering
 todo. Usernamen und Namen des Imperiums trennen, Herrschertitel, Navy-Prefix
-todo. wurmlochbrücken
 todo. population raiden
 todo. spot offer hat nur so viel volumen wie die letzten 10 Tage insgesamt gehandelt wurde
 todo. operationsgebiet auf karte einzeichen -> systeme/planeten erkennen und für mission setzen

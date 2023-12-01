@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.ESupportType;
 import de.yuga.spacebattle.rest.dto.WithCosts;
+import de.yuga.spacebattle.rest.dto.misc.descriptors.PropertyDescriptor;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -24,6 +25,11 @@ public class OrbitalModule extends WithCosts<OrbitalModule> {
     @Size(min = 3, max = 30, message = "name should be between 3 and 30 characters long")
     private String name;
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The description of this module.")
+    private String description;
+
     @JsonProperty
     @Schema(required = true, description = "The effect value of this module.")
     protected int effectValue;
@@ -32,6 +38,11 @@ public class OrbitalModule extends WithCosts<OrbitalModule> {
     @JsonProperty
     @Schema(required = true, description = "The effect of this module.")
     protected ESupportType effect;
+
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The specific properties of this module.")
+    private PropertyDescriptor propertyDescriptor;
 
     public OrbitalModule() {
     }
@@ -43,8 +54,9 @@ public class OrbitalModule extends WithCosts<OrbitalModule> {
 
         this.idOrbitalModule = orbitalModule.getId();
         this.name = orbitalModule.getName(languageCode);
+        this.description = orbitalModule.getDescription(languageCode);
         this.effectValue = orbitalModule.getBaseValue();
         this.effect = orbitalModule.getEffect();
-        /* fixme add parameter and also on other modules! */
+        this.propertyDescriptor = new PropertyDescriptor(orbitalModule);
     }
 }

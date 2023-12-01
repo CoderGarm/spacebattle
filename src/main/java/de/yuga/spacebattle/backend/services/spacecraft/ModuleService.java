@@ -262,6 +262,11 @@ public class ModuleService {
     }
 
     @Nonnull
+    public List<Missile> findAllMissilesByUser(final int idUser) {
+        return missileRepository.findAllByUser(idUser);
+    }
+
+    @Nonnull
     public List<PassiveModule> findAllPassiveModuleByUser(final int idUser) {
         return passiveModuleRepository.findAllByUser(idUser);
     }

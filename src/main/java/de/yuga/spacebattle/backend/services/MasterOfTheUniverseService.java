@@ -459,18 +459,19 @@ public class MasterOfTheUniverseService {
         research = buildingService.findBuildingByProductionType(LIVING_PT).get(0).getUnlockedThrough();
         Preconditions.checkNotNull(research, "research must not be empty");
 
+        // calculation is 30-40 BRT per passenger like a cruise liner
         m = orbitalModule("Orbital habitat L", "A space habitat is a space station that is not primarily used for industrial or military purposes, but rather as permanent accommodation.",
-                250000, 1000, CIVIL_L_ORBITAL_CREW, ETechLevel.TECH_II, EResourceType.POPULATION, research, 4);
+                70000, 1000, CIVIL_L_ORBITAL_CREW, ETechLevel.TECH_II, EResourceType.POPULATION, research, 4);
         amendTranslation(m, "Weltraumhabitat L", "Ein Weltraumhabitat ist eine Raumstation, die nicht in erster Linie industriellen oder militärischen Zwecken dient, sondern als permanente Unterkunft.");
         orbitalModuleService.save(m);
 
         m = orbitalModule("Orbital habitat XL", "A space habitat is a space station that is not primarily used for industrial or military purposes, but rather as permanent accommodation.",
-                350000, 1900, CIVIL_XL_ORBITAL_CREW, ETechLevel.TECH_II, EResourceType.POPULATION, research, 6);
+                130000, 1900, CIVIL_XL_ORBITAL_CREW, ETechLevel.TECH_II, EResourceType.POPULATION, research, 6);
         amendTranslation(m, "Weltraumhabitat XL", "Ein Weltraumhabitat ist eine Raumstation, die nicht in erster Linie industriellen oder militärischen Zwecken dient, sondern als permanente Unterkunft.");
         orbitalModuleService.save(m);
 
         m = orbitalModule("Orbital habitat XXL", "A space habitat is a space station that is not primarily used for industrial or military purposes, but rather as permanent accommodation.",
-                900000, 4500, CIVIL_XXL_ORBITAL_CREW, ETechLevel.TECH_III, EResourceType.POPULATION, research, 9);
+                400000, 4500, CIVIL_XXL_ORBITAL_CREW, ETechLevel.TECH_III, EResourceType.POPULATION, research, 9);
         amendTranslation(m, "Weltraumhabitat XXL", "Ein Weltraumhabitat ist eine Raumstation, die nicht in erster Linie industriellen oder militärischen Zwecken dient, sondern als permanente Unterkunft.");
         orbitalModuleService.save(m);
     }

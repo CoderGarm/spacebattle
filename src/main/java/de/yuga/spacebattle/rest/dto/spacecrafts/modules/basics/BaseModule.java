@@ -5,10 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.physics.Mass;
 import de.yuga.spacebattle.backend.entities.misc.HasCostsByOwn;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.rest.dto.enums.EModuleType;
 import de.yuga.spacebattle.rest.dto.enums.EShipClassType;
+import de.yuga.spacebattle.rest.dto.misc.descriptors.PropertyDescriptor;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -62,6 +64,11 @@ public class BaseModule {
     @Schema(description = "The module's type.")
     private EModuleType moduleType;
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The specific properties of this module.")
+    private PropertyDescriptor propertyDescriptor;
+
     protected BaseModule() {
     }
 
@@ -77,6 +84,7 @@ public class BaseModule {
         this.techLevel = module.getTechLevel();
         this.shipClassType = new EShipClassType(module.getShipClassType());
         this.effectValue = module.getEffectValue();
+        this.propertyDescriptor = new PropertyDescriptor(module);
     }
 
     public BaseModule(@Nonnull final HasCostsByOwn module,
@@ -93,6 +101,7 @@ public class BaseModule {
         this.effectValue = module.getEffectValue();
         this.shipClassType = new EShipClassType(module.getShipClassType());
         this.moduleType = BaseModule.getTypeBy(module);
+        this.propertyDescriptor = new PropertyDescriptor(module);
     }
 
     public BaseModule(@Nonnull final Propulsion module, @Nonnull final String languageCode) {
@@ -104,6 +113,7 @@ public class BaseModule {
         this.description = module.getDescription(languageCode);
         this.techLevel = module.getTechLevel();
         this.moduleType = new EModuleType(de.yuga.spacebattle.backend.enums.EModuleType.PROPULSION);
+        this.propertyDescriptor = new PropertyDescriptor(module);
     }
 
     @Nullable
@@ -111,7 +121,7 @@ public class BaseModule {
     private static EModuleType getTypeBy(@Nonnull final HasCostsByOwn module) {
         Preconditions.checkNotNull(module, "module shouldn't be null!");
 
-        if (module instanceof Weapon || module instanceof Launcher) {
+        if (module instanceof Weapon || module instanceof Launcher || module instanceof Missile) {
             return new EModuleType(de.yuga.spacebattle.backend.enums.EModuleType.WEAPON);
         }
 

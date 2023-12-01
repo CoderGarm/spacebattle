@@ -3,9 +3,6 @@ package de.yuga.spacebattle.rest.dto.researches;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.dto.physics.Acceleration;
-import de.yuga.spacebattle.backend.dto.physics.Distance;
-import de.yuga.spacebattle.backend.dto.physics.Mass;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.OrbitalModule;
@@ -13,8 +10,6 @@ import de.yuga.spacebattle.backend.entities.misc.HasCostsByOwn;
 import de.yuga.spacebattle.backend.entities.misc.HasName;
 import de.yuga.spacebattle.backend.entities.misc.HasNamedTechLevel;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
-import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.MissileMotor;
-import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Warhead;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
@@ -22,6 +17,7 @@ import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
 import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
 import de.yuga.spacebattle.rest.dto.enums.HasIcon;
+import de.yuga.spacebattle.rest.dto.misc.descriptors.PropertyDescriptor;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -73,6 +69,11 @@ public class ResearchResult {
     @Schema(required = true, description = "The description of this result.")
     private final Map<String, String> additionalProperties = new HashMap<>();
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The description of this result.")
+    private final PropertyDescriptor propertyDescriptor;
+
     public ResearchResult(final int unlockedThroughLevel, @Nonnull final Building content, @Nonnull final String languageCode) {
         this(unlockedThroughLevel, content, content.getClass(), languageCode);
 
@@ -91,7 +92,7 @@ public class ResearchResult {
     public ResearchResult(final int unlockedThroughLevel, @Nonnull final OrbitalModule content, @Nonnull final String languageCode) {
         this(unlockedThroughLevel, content, content.getClass(), languageCode);
 
-        add("effect", content.getEffect().name());
+        add("system wide effect", content.getEffect().name());
         add("effectValue", content.getBaseValue() + " kpi");
     }
 
@@ -109,45 +110,16 @@ public class ResearchResult {
     public ResearchResult(final int unlockedThroughLevel, @Nonnull final PassiveModule content, @Nonnull final String languageCode) {
         this(unlockedThroughLevel, content, content.getClass(), languageCode);
 
-        final ESupportType supportType = content.getSupportType();
-        add("supportType", supportType.name());
-        final int effectValue = content.getEffectValue();
-        final Mass cargoCapacity = content.getCargoCapacity();
-        final int passengers = content.getPassengers();
-        if (cargoCapacity.compareTo(Mass.ZERO) != 0) {
-            add("cargo tonnage", cargoCapacity.getCoordinateInMetric(E_MASS_METRIC) + " " + E_MASS_METRIC.getUnit());
-        } else if (passengers > 0) {
-            add("passengers", String.valueOf(passengers));
-        } else {
-            add("effectValue", String.valueOf(effectValue));
-        }
     }
 
     public ResearchResult(final int unlockedThroughLevel, @Nonnull final Missile content, @Nonnull final String languageCode) {
         this(unlockedThroughLevel, content, content.getClass(), languageCode);
 
-        final Warhead warhead = content.getWarhead();
-        final EWarheadType warheadType = warhead.getWarheadType();
-        add("warheadType", warheadType.name());
-        final long damageValue = warhead.getDamageValue();
-        add("damageValue", damageValue + " kpi");
-        final Distance damageProjectionRange = warhead.getDamageProjectionRange();
-
-        add("damageProjectionRange", damageProjectionRange.getCoordinateInMetric(E_DISTANCE_METRIC) + " " + E_DISTANCE_METRIC.getUnit());
-        final MissileMotor missileMotor = content.getMissileMotor();
-        final Acceleration acceleration = missileMotor.getAcceleration();
-        final int endurance = missileMotor.getEndurance();
-
-        add("acceleration", acceleration.getCoordinateInMetric(E_ACCELERATION_METRIC) + " " + E_ACCELERATION_METRIC.getUnit() + " for " + endurance);
-        final int elokaResistance = content.getElokaResistance();
-        add("elokaResistance", String.valueOf(elokaResistance));
     }
 
     public ResearchResult(final int unlockedThroughLevel, @Nonnull final Launcher content, @Nonnull final String languageCode) {
         this(unlockedThroughLevel, content, content.getClass(), languageCode);
 
-        final Missile heaviestMissile = content.getHeaviestMissile();
-        add("missile", heaviestMissile.getTechnicalTypeName());
     }
 
     public ResearchResult(final int unlockedThroughLevel, @Nonnull final Armor content, @Nonnull final String languageCode) {
@@ -163,12 +135,6 @@ public class ResearchResult {
     public ResearchResult(final int unlockedThroughLevel, @Nonnull final Weapon content, @Nonnull final String languageCode) {
         this(unlockedThroughLevel, content, content.getClass(), languageCode);
 
-        final EWeaponType weaponType = content.getWeaponType();
-        add("weaponType", weaponType.name());
-        final Distance damageProjectionRange = content.getDamageProjectionRange();
-        add("damageProjectionRange", damageProjectionRange.getCoordinateInMetric(E_DISTANCE_METRIC) + " " + E_DISTANCE_METRIC.getUnit());
-        final int amountDamageEmitter = content.getAmountDamageEmitter();
-        add("amountDamageEmitter", String.valueOf(amountDamageEmitter));
     }
 
     public ResearchResult(final int unlockedThroughLevel, @Nonnull final Sidewall content, @Nonnull final String languageCode) {
@@ -187,6 +153,7 @@ public class ResearchResult {
         this.hasIcon = HasIcon.getBy(this.translationTarget);
         this.name = content.getName(languageCode);
         this.description = content.getDescription(languageCode);
+        this.propertyDescriptor = new PropertyDescriptor(content);
     }
 
     private ResearchResult(final int unlockedThroughLevel, @Nonnull final HasNamedTechLevel content, @Nonnull final Class<?> clazz, @Nonnull final String languageCode) {
@@ -201,6 +168,8 @@ public class ResearchResult {
         this.name = content.getName(languageCode);
         this.technicalTypeName = content.getTechnicalTypeName();
         this.description = content.getDescription(languageCode);
+        this.propertyDescriptor = new PropertyDescriptor(content);
+
         if (content instanceof HasCostsByOwn) {
             add("designatedShipClass", ((HasCostsByOwn) content).getShipClassType().name());
             add("effectValue", ((HasCostsByOwn) content).getEffectValue() + " kpi");

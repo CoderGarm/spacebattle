@@ -20,6 +20,7 @@ import de.yuga.spacebattle.rest.dto.enums.EEducationType;
 import de.yuga.spacebattle.rest.dto.enums.EResourceType;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.researches.ResearchTree;
+import de.yuga.spacebattle.rest.dto.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -161,6 +162,21 @@ public class PublicResourcesApi extends BaseApi {
     )
     public ResponseEntity<?> getLaunchers() {
         return ResponseEntity.ok(moduleService.findAllLaunchers().stream().map(l -> new Launcher(l, getPreferredLanguage()).withCosts(l.getCosts())).collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = ModuleApi.MISSILE_ENDPOINT + "/all")
+    @Operation(summary = "Get all unlocked weapons for the owner .", operationId = "getMissiles",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Missile.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getMissiles() {
+        return ResponseEntity.ok(moduleService.findAllMissiles().stream().map(l -> new Missile(l, getPreferredLanguage()).withCosts(l.getCosts())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = ModuleApi.SIDEWALL_ENDPOINT + "/all")

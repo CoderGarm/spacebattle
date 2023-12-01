@@ -46,7 +46,7 @@ public class OrbitalModule extends HasCosts {
                          @Nonnull final ETechLevel techLevel,
                          @Nonnull final EModuleType effect,
                          @Nonnull final Research unlockedThrough,
-                         final int unlockedThroughLevel) { // fixme check tonnage and price
+                         final int unlockedThroughLevel) {
         super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, tonnage, OrbitalModule.class);
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
@@ -69,7 +69,7 @@ public class OrbitalModule extends HasCosts {
                          @Nonnull final ETechLevel techLevel,
                          @Nonnull final EResourceType effect,
                          @Nonnull final Research unlockedThrough,
-                         final int unlockedThroughLevel) { // fixme check tonnage and price
+                         final int unlockedThroughLevel) {
         super(new Translation(Translation.DEFAULT_LANGUAGE, name), new Translation(Translation.DEFAULT_LANGUAGE, description), techLevel, tonnage, OrbitalModule.class);
         Preconditions.checkNotNull(name, "name shouldn't be null!");
         Preconditions.checkNotNull(description, "description shouldn't be null!");
@@ -92,6 +92,26 @@ public class OrbitalModule extends HasCosts {
     public ESupportType getEffect() {
         return effect;
     }
+
+
+    public boolean isHabitat() {
+        return effect == ESupportType.POPULATION;
+    }
+
+    public int getInhabitants() {
+        if (!isHabitat()) {
+            return 0;
+        }
+        return baseValue;
+    }
+
+    public int getPopFactorIncreasement() {
+        if (!isHabitat()) {
+            return 0;
+        }
+        return baseValue / 500;
+    }
+
 
     @Nonnull
     public Research getUnlockedThrough() {

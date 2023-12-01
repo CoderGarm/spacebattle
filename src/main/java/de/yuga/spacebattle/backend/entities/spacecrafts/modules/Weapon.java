@@ -25,9 +25,6 @@ import javax.validation.constraints.NotNull;
 @AttributeOverride(name = "id", column = @Column(name = "idWeapon"))
 public class Weapon extends HasCostsByOwn {
 
-    /**
-     * Defines the range of this weapon in meter.
-     */
     @Nonnull
     @Convert(converter = DistanceConverter.class)
     private Distance damageProjectionRange;
@@ -47,9 +44,6 @@ public class Weapon extends HasCostsByOwn {
      */
     private int amountDamageEmitter;
 
-    /**
-     * Defines the main use-case for this weapon.
-     */
     @Nonnull
     @NotNull
     @Enumerated(EnumType.STRING)

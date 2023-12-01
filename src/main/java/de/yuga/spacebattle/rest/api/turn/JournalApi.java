@@ -187,7 +187,7 @@ public class JournalApi extends BaseApi {
     public ResponseEntity<?> getFinishedMovements() {
         final int idUser = getIdUser();
 
-        /* fixme introduce orbital scanner module as resolution */
+        /* fixme introduce orbital scanner module as resolution -> set ships in missions as scouts */
 
         final Set<Integer> systemIDs = planetService.findAllSystemIDsForUser(idUser);
         systemIDs.addAll(fleetService.findAllSystemIDsWithFleetsForUser(idUser));

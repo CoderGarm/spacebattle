@@ -5,6 +5,7 @@ import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
+import de.yuga.spacebattle.rest.dto.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.rest.dto.spacecrafts.modules.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -41,6 +42,7 @@ public class ModuleApi extends BaseApi {
     public static final String PROPULSION_ENDPOINT = "propulsion";
     public static final String ELOKA_ENDPOINT = "eloka";
     public static final String PASSIVE_ENDPOINT = "passive";
+    public static final String MISSILE_ENDPOINT = "missiles";
 
     @Nonnull
     private final ModuleService moduleService;
@@ -105,6 +107,21 @@ public class ModuleApi extends BaseApi {
     )
     public ResponseEntity<?> getLaunchersByUser() {
         return ResponseEntity.ok(moduleService.findAllLauncherByUser(getIdUser()).stream().map(l -> new Launcher(l, getPreferredLanguage())).collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = MISSILE_ENDPOINT)
+    @Operation(summary = "Get all unlocked weapons for the owner .", operationId = "getMissilesByUser",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = Missile.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getMissilesByUser() {
+        return ResponseEntity.ok(moduleService.findAllMissilesByUser(getIdUser()).stream().map(l -> new Missile(l, getPreferredLanguage())).collect(Collectors.toList()));
     }
 
     @GetMapping(value = SIDEWALL_ENDPOINT)
