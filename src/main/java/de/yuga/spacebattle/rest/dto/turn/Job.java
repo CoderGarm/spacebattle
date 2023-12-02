@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.dto.research.EmpireResearchCapability;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.turn.Constructable;
+import de.yuga.spacebattle.backend.entities.turn.OrbitalModuleJobElement;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateSnapshot;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EJobPriority;
@@ -14,6 +15,7 @@ import de.yuga.spacebattle.rest.dto.account.Player;
 import de.yuga.spacebattle.rest.dto.buildings.Building;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.rest.dto.constructables.buildings.Construction;
+import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.OrbitalStructures;
 import de.yuga.spacebattle.rest.dto.enums.EResourceType;
 import de.yuga.spacebattle.rest.dto.orbitals.Planet;
 import de.yuga.spacebattle.rest.dto.researches.Research;
@@ -21,6 +23,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -108,6 +112,11 @@ public class Job {
     @Schema(description = "The fleet which will be repaired in case of an shipyard job.")
     private Fleet fleet;
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The orbital structures, when build.")
+    private List<OrbitalStructures> orbitalStructures = new ArrayList<>();
+
     public Job() {
     }
 
@@ -119,7 +128,7 @@ public class Job {
         Preconditions.checkNotNull(ticklyIncome, "ticklyIncome must not be empty");
         Preconditions.checkNotNull(resourceDeposit, "resourceDeposit must not be empty");
 
-        this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(job, ticklyIncome, resourceDeposit); /* fixme add orbital dings */
+        this.ticksLeft = JobCostsCalculator.calculateRemainingTicks(job, ticklyIncome, resourceDeposit);
     }
 
     /**
@@ -148,12 +157,18 @@ public class Job {
         }
         this.isShipyardJob = constructable.isShipyardJob();
         if (isShipyardJob) {
-            final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = constructable.getFleet();
-            final FleetSnapshot fleetSnapshot = constructable.getFleetSnapshot();
-            final Set<WarShip> ships = fleet != null ? (constructable.isUpgradeJob() ? fleet.getAliveShips() : fleet.getAllShips()) : Objects.requireNonNull(fleetSnapshot).getShips().stream().map(WarshipHealthStateSnapshot::getWarShip).collect(Collectors.toSet());
-            this.fleet = new Fleet(fleet != null ? fleet : fleetSnapshot.getFleet(), ships, languageCode);
             this.isRepairJob = job.getConstructable().isRepairJob();
             this.isUpgradeJob = job.getConstructable().isUpgradeJob();
+
+            final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = constructable.getFleet();
+            final FleetSnapshot fleetSnapshot = constructable.getFleetSnapshot();
+            if (fleet != null | fleetSnapshot != null) {
+                final Set<WarShip> ships = fleet != null ? (constructable.isUpgradeJob() ? fleet.getAliveShips() : fleet.getAllShips()) : Objects.requireNonNull(fleetSnapshot).getShips().stream().map(WarshipHealthStateSnapshot::getWarShip).collect(Collectors.toSet());
+                this.fleet = new Fleet(fleet != null ? fleet : fleetSnapshot.getFleet(), ships, languageCode);
+            }
+
+            final Set<OrbitalModuleJobElement> orbitalModuleJobElements = job.getConstructable().getOrbitalModuleJobElements();
+            orbitalStructures.addAll(orbitalModuleJobElements.stream().map(e -> new OrbitalStructures(e, job.getFacility().getPlanet(), languageCode)).collect(Collectors.toList()));
         }
         this.targetLevel = constructable.getTargetLevel();
     }

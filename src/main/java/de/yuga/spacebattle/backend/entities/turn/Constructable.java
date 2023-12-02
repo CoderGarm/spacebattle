@@ -160,7 +160,7 @@ public class Constructable {
     }
 
     public boolean isShipyardJob() {
-        return fleet != null || fleetSnapshot != null;
+        return resourceType == EResourceType.ORBITAL_CONSTRUCTION;
     }
 
     /**

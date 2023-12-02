@@ -83,4 +83,6 @@ alter table orbitalStructure
    foreign key (idOwner)
    references user (idUser);
 
+alter table job drop constraint job_CHECK;
+
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'introduce orbital modules', '0.1.16-2');

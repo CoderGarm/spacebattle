@@ -72,5 +72,4 @@ update propulsion set technicalTypeName = 'Samarkand' where technicalTypeName = 
 update propulsion set technicalTypeName = 'Irian' where technicalTypeName = 'P-EI-M';
 update propulsion set technicalTypeName = 'Kendall' where technicalTypeName = 'P-TI-M';
 
-
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'change tech names', '0.1.16-3');

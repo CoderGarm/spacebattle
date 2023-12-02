@@ -292,8 +292,7 @@
         idResearch integer,
         idFacility integer not null,
         idOwner integer not null,
-        primary key (idJob),
-        constraint job_CHECK check ((idBuilding IS NOT NULL AND targetLevel IS NOT NULL) OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) OR (idFleet IS NOT NULL OR idFleetSnapshot IS NOT NULL) )
+        primary key (idJob)
     ) engine=InnoDB;
 
     create table knownStarSystem (

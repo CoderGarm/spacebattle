@@ -6,7 +6,6 @@ import de.yuga.spacebattle.backend.entities.constructables.buildings.Constructio
 import de.yuga.spacebattle.backend.entities.misc.PointsCompletable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.EJobPriority;
-import org.hibernate.annotations.Check;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -19,9 +18,10 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "job")
 @AttributeOverride(name = "id", column = @Column(name = "idJob"))
-@Check(constraints = "(idBuilding IS NOT NULL AND targetLevel IS NOT NULL) " +
+/* todo replace by validation necessary?
+    @Check(constraints = "(idBuilding IS NOT NULL AND targetLevel IS NOT NULL) " +
         "OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) " +
-        "OR (idFleet IS NOT NULL OR idFleetSnapshot IS NOT NULL) ")
+        "OR (idFleet IS NOT NULL OR idFleetSnapshot IS NOT NULL) ")*/
 public class Job extends PointsCompletable implements Comparable<Job> {
 
     @Nonnull
