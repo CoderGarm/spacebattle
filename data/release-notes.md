@@ -36,11 +36,14 @@ Ebenfalls auf Vorschlag eines Spielers folgt allerdings eine noch tiefgreifender
    >
    > -- <cite>Δημιουργικό Προ-εκπαιδευμένος Μετασχηματιστής</cite>
 
-Abschließend ist zu sagen, dass diese Strukturen momentan nicht zerstört werden können. Da es sich gerade bei den Habitaten um zivile Einrichtungen mit besonderem Schutzbedürfnis
-handelt, sind vorher Schutzmöglichkeiten notwendig. Natürlich auch ein Flottenbefehl, zivile Einrichtungen nicht anzugreifen. Aber das folgt später.
+   Abschließend ist zu sagen, dass diese Strukturen momentan nicht zerstört werden können. Da es sich gerade bei den Habitaten um zivile Einrichtungen mit besonderem
+   Schutzbedürfnis handelt, sind vorher Schutzmöglichkeiten notwendig. Natürlich auch ein Flottenbefehl, zivile Einrichtungen nicht anzugreifen. Aber das folgt später.
 
 5. Das bedeutet in letzter Konsequenz, dass die Genauigkeit in der Hyperabdruckauswertung vollkommen vom Eloka-Wert des Systems abhängig ist.  
-   Damit sind Wachschiffe im System von überragender aufklärerischer Bedeutung - egal ob sie auf Missionen sind oder sich im Orbit gefinden.
+   Damit sind Wachschiffe im System von überragender aufklärerischer Bedeutung - egal ob sie auf Missionen sind oder sich im Orbit befinden. Alle eigenen Schiffe und Module im
+   System beeinflussen die systemweite Aufklärung.
+6. Ein kleiner, aber wichtiger Change im Job-Modul: Die Konstruktionspunkte werden direkt beim Start eines Jobs abgezogen und auf die Konstruktionsleistung verrechnet.  
+   Auf absehbare Zeit bekommt man die Punkte nicht zurück, wenn man einen Job abbricht, die Ressourcen werden allerdings erstattet.
 
 todo. orbitable stukturen inop setzen analog schiffen -> habitate hinzufügen, steigern geburtenrate und erhöhen wohnraum
 
@@ -68,6 +71,10 @@ todo. distance based duration
 
 todo. spot market like: https://postimg.cc/QVHGk2SB
 todo. manual transfer to fleet overrides capacity
+
+todo. highlight searched star
+todo. star label at map clickable
+
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
 todo. chat search: empire name, ingame name, username
 

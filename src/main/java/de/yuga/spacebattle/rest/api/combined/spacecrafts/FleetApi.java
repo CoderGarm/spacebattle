@@ -1,11 +1,13 @@
 package de.yuga.spacebattle.rest.api.combined.spacecrafts;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.OrbitalStructure;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
+import de.yuga.spacebattle.backend.services.constructables.spacecraft.OrbitalStructureService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
@@ -15,6 +17,7 @@ import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.AbstractId;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.*;
+import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.OrbitalStructures;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.Move;
@@ -50,6 +53,7 @@ public class FleetApi extends BaseApi {
     public static final String ENDPOINT = "fleet";
     private static final String FLEET_PER_SYSTEM_ENDPOINT = "inSystem";
     private static final String FLEET_PER_PLANET_ENDPOINT = "atPlanet";
+    private static final String ORBITAL_STRUCTURES_PER_PLANET_ENDPOINT = "inOrbit";
     private static final String FLEET_PER_USER_ENDPOINT = "perUser";
     private static final String MOVING_FLEET_PER_USER_ENDPOINT = "movingPerUser";
     private static final String MULTI_FLEET_ACTION_ENDPOINT = "multiaction";
@@ -80,17 +84,22 @@ public class FleetApi extends BaseApi {
     @Nonnull
     private final TransportJobService transportJobService;
 
+    @Nonnull
+    private final OrbitalStructureService orbitalStructureService;
+
     @Autowired
     public FleetApi(@Nonnull final FleetService fleetService,
                     @Nonnull final StarSystemService starSystemService,
                     @Nonnull final PlanetService planetService,
                     @Nonnull final WarShipService warShipService,
-                    @Nonnull final TransportJobService transportJobService) {
+                    @Nonnull final TransportJobService transportJobService,
+                    @Nonnull final OrbitalStructureService orbitalStructureService) {
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.transportJobService = Preconditions.checkNotNull(transportJobService, "transportJobService must not be empty");
+        this.orbitalStructureService = Preconditions.checkNotNull(orbitalStructureService, "orbitalStructureService must not be empty");
     }
 
     @GetMapping(value = "{idFleet}")
@@ -162,6 +171,24 @@ public class FleetApi extends BaseApi {
                 .filter(f -> f.getOwner().getId() == idUser).collect(Collectors.toSet());
         return ResponseEntity.ok(allFleetsByPlanet.stream()
                 .map(f -> new Fleet(f, getPreferredLanguage()))
+                .collect(Collectors.toList()));
+    }
+
+    @GetMapping(value = ORBITAL_STRUCTURES_PER_PLANET_ENDPOINT + "/{idPlanet}")
+    @Operation(summary = "Get all fleets inside the orbit of a planet.", operationId = "getOrbitalStructuresByPlanet",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                                    schema = @Schema(implementation = OrbitalStructures.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getOrbitalStructuresByPlanet(@PathVariable("idPlanet") final int idPlanet) {
+        final List<OrbitalStructure> structures = orbitalStructureService.findByPlanet(idPlanet);
+        return ResponseEntity.ok(structures.stream()
+                .map(f -> new OrbitalStructures(f, getPreferredLanguage()))
                 .collect(Collectors.toList()));
     }
 

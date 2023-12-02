@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.dto.constructables.spacecrafts;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.OrbitalStructure;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.OrbitalModuleJobElement;
 import de.yuga.spacebattle.rest.dto.orbitals.FleetOrbit;
@@ -48,5 +49,10 @@ public class OrbitalStructures {
                              @Nonnull final Planet station,
                              @Nonnull final String languageCode) {
         this(jobElement.getOrbitalModule(), jobElement.getAmount(), new FleetOrbit(station), languageCode);
+    }
+
+    public OrbitalStructures(@Nonnull final OrbitalStructure structure, @Nonnull final String langCode) {
+        this(structure.getModule(), structure.getAmount(), new FleetOrbit(structure.getOrbit()), langCode);
+
     }
 }

@@ -7,8 +7,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class OrbitalStructureService {
@@ -51,5 +53,10 @@ public class OrbitalStructureService {
         Preconditions.checkNotNull(toStore, "toStore must not be empty");
 
         return orbitalStructureRepository.saveAll(toStore);
+    }
+
+    @Nonnull
+    public List<OrbitalStructure> findByPlanet(final int idPlanet) {
+        return Objects.requireNonNullElse(orbitalStructureRepository.findByPlanet(idPlanet), new ArrayList<>());
     }
 }
