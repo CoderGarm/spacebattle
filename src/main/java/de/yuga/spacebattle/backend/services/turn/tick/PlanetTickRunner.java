@@ -200,8 +200,7 @@ public class PlanetTickRunner implements TickRunner {
 
         log(planet, job, "Start processing shipyard job .");
         final Constructable constructable = job.getConstructable();
-        final Fleet fleet = constructable.getFleet();
-        if (fleet == null) {
+        if (constructable.getFleet() == null && constructable.getOrbitalModuleJobElements().isEmpty()) {
             return;
         }
 

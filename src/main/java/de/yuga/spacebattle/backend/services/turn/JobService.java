@@ -196,7 +196,7 @@ public class JobService {
 
         checkIfFree(facility);
         checkAndBalances(planet, constructable.getJobCosts());
-        Job job = new Job(planet, facility, constructable);
+        Job job = new Job(planet, facility, constructable, true);
         job = jobRepository.save(job);
 
         LOGGER.info("Creating construction yard idJob '" + job.getId() + "' " +
@@ -231,7 +231,7 @@ public class JobService {
         checkIfFree(facility);
 
         final Constructable constructable = new Constructable(research, level);
-        final Job job = new Job(researchPlanet, facility, constructable);
+        final Job job = new Job(researchPlanet, facility, constructable, false);
 
         final EmpireResearchCapability capability = planetService.getEmpireWideResearchPoints(user.getId());
         final long usedPoints = job.tick(capability.getEmpireWideResearchPointsLeftOver());
@@ -284,7 +284,7 @@ public class JobService {
         fleet = fleetService.find(fleet);
         final Constructable constructable = new Constructable(fleet, EJobType.CONSTRUCTION);
         checkAndBalances(planet, constructable.getJobCosts());
-        Job job = new Job(planet, facility, constructable);
+        Job job = new Job(planet, facility, constructable, true);
         job = jobRepository.save(job);
         planetService.save(planet);
         return job;
@@ -305,7 +305,7 @@ public class JobService {
 
         final Constructable constructable = new Constructable(jobLoad, EJobType.CONSTRUCTION);
         checkAndBalances(planet, constructable.getJobCosts());
-        Job job = new Job(planet, facility, constructable);
+        Job job = new Job(planet, facility, constructable, true);
         job = jobRepository.save(job);
         planetService.save(planet);
         return job;
@@ -321,7 +321,7 @@ public class JobService {
         // do not check if free, the new job will squeeze in
         final Constructable constructable = new Constructable(toUpgrade, EJobType.UPGRADE);
         checkAndBalances(planet, constructable.getJobCosts());
-        Job job = new Job(planet, Objects.requireNonNull(facility), constructable);
+        Job job = new Job(planet, Objects.requireNonNull(facility), constructable, true);
         job.setPriority(EJobPriority.PRIORITY);
         job = jobRepository.save(job);
         fleetService.disableFleet(toUpgrade);
@@ -339,7 +339,7 @@ public class JobService {
 
         // do not check if free, the new job will squeeze in
         final Constructable constructable = new Constructable(toRepair, EJobType.REPAIR);
-        Job job = new Job(planet, Objects.requireNonNull(facility), constructable);
+        Job job = new Job(planet, Objects.requireNonNull(facility), constructable, true);
         job.setPriority(EJobPriority.PRIORITY);
         job = jobRepository.save(job);
         checkAndBalances(planet, constructable.getJobCosts());

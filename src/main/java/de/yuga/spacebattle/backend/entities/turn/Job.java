@@ -57,7 +57,8 @@ public class Job extends PointsCompletable implements Comparable<Job> {
      */
     public Job(@Nonnull final Planet planet,
                @Nonnull final Construction facility,
-               @Nonnull final Constructable constructable) {
+               @Nonnull final Constructable constructable,
+               final boolean tickByPlanetsResources) {
         Preconditions.checkNotNull(planet, "planet shouldn't be null!");
         Preconditions.checkNotNull(facility, "facility shouldn't be null!");
         Preconditions.checkNotNull(constructable, "constructable shouldn't be null!");
@@ -67,6 +68,12 @@ public class Job extends PointsCompletable implements Comparable<Job> {
         this.facility = facility;
         this.constructable = constructable;
         this.pointsLeft = (int) constructable.getJobCosts().getResourceAmountByType(constructable.getResourceType());
+
+        if (tickByPlanetsResources) {
+            final long presentPoints = planet.getResourceDeposit().getResourceAmountByType(constructable.getResourceType());
+            final long usedPoints = tick(presentPoints);
+            planet.getResourceDeposit().updateResource(constructable.getResourceType(), -usedPoints);
+        }
     }
 
     @Nonnull
