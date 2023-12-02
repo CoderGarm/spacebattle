@@ -271,8 +271,6 @@ public class PlanetApi extends BaseApi {
         return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(job, getPreferredLanguage()));
     }
 
-    /* fixme create build endpoint and add to job */
-
     @PostMapping(value = GET_PLANET_BY_COORDINATES_ENDPOINT + "/{idStarSystem}")
     @Operation(summary = "Gets a planet which is matching to the given coordinates.", operationId = "getPlanetByCoordinates",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(

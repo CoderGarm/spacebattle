@@ -26,6 +26,7 @@ import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapabilities;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapacityAreas;
 import de.yuga.spacebattle.rest.dto.constructables.buildings.PlannedConstruction;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstructionSelection;
+import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardOrbitalModuleConstructionSelection;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClassMock;
 import de.yuga.spacebattle.rest.dto.turn.resources.MiningFactors;
@@ -371,6 +372,28 @@ public class ResourcesApi extends BaseApi {
         PreconditionWebHelper.checkNotNull(shipyardConstructionOrder, "Maybe there should be something like a request?!");
 
         return ResponseEntity.ok(new ResourceDeposit(shipClassCreationService.getCosts(shipyardConstructionOrder)));
+    }
+
+    @PostMapping(value = SHIPYARD_ORDER_COSTS_ENDPOINT + "/structure")
+    @Operation(summary = "Get the costs of the given shipyard order.", operationId = "getShipyardStructureOrderCosts",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = ShipyardOrbitalModuleConstructionSelection.class))
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceDeposit.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getShipyardStructureOrderCosts(@RequestBody @Nonnull final List<ShipyardOrbitalModuleConstructionSelection> shipyardConstructionOrder) {
+        PreconditionWebHelper.checkNotNull(shipyardConstructionOrder, "Maybe there should be something like a request?!");
+
+        return ResponseEntity.ok(new ResourceDeposit(shipClassCreationService.getCostsOrbital(shipyardConstructionOrder)));
     }
 
     @PostMapping(value = SHIPYARD_ORDER_COSTS_ENDPOINT + "/{idFleet}/{jobType}")

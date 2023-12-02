@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.calculator.SpacecraftTonnageCalculator;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.OrbitalModule;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Armor;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
@@ -15,11 +16,13 @@ import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
 import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.backend.services.combined.spacecraft.OrbitalModuleService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapabilities;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapacityAreas;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstructionSelection;
+import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardOrbitalModuleConstructionSelection;
 import de.yuga.spacebattle.rest.dto.spacecrafts.PropulsionCapacity;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClassData;
 import de.yuga.spacebattle.rest.dto.spacecrafts.ShipClassMock;
@@ -49,23 +52,24 @@ public class ShipClassCreationService {
     @Nonnull
     private final ModuleService moduleService;
 
-
     @Nonnull
     private final UserService userService;
 
     @Nonnull
     private final Validator validator;
 
+    @Nonnull
+    private final OrbitalModuleService orbitalModuleService;
+
     public ShipClassCreationService(@Nonnull final ShipClassService shipClassService,
                                     @Nonnull final ModuleService moduleService,
-                                    @Nonnull final UserService userService) {
-        Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
-        Preconditions.checkNotNull(moduleService, "moduleService shouldn't be null!");
-        Preconditions.checkNotNull(userService, "userService shouldn't be null!");
+                                    @Nonnull final UserService userService,
+                                    @Nonnull final OrbitalModuleService orbitalModuleService) {
+        this.shipClassService = Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
+        this.moduleService = Preconditions.checkNotNull(moduleService, "moduleService shouldn't be null!");
+        this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
+        this.orbitalModuleService = Preconditions.checkNotNull(orbitalModuleService, "orbitalModuleService must not be empty");
 
-        this.shipClassService = shipClassService;
-        this.moduleService = moduleService;
-        this.userService = userService;
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 
@@ -297,6 +301,34 @@ public class ShipClassCreationService {
         final Map<Integer, ResourceDeposit> resourceDepositMap = shipClassService.find(amountsByIdShipClasses.keySet())
                 .stream()
                 .collect(Collectors.toMap(ShipClass::getId, ShipClass::getCosts));
+
+        final ResourceDeposit jobCosts = new ResourceDeposit(EDepositType.COSTS);
+        resourceDepositMap.forEach((idShipClass, costs) -> {
+            final Integer amount = amountsByIdShipClasses.get(idShipClass);
+            Arrays.stream(EEducationType.values()).forEach(eEducationType -> {
+                long crewAmountByType = costs.getCrewRequirement().getCrewAmountByType(eEducationType);
+                jobCosts.updateCrewRequirement(eEducationType, crewAmountByType * amount);
+            });
+            Arrays.stream(EResourceType.values()).forEach(eResourceType -> {
+                long resourceAmountByType = costs.getResourceAmountByType(eResourceType);
+                jobCosts.updateResource(eResourceType, resourceAmountByType * amount);
+            });
+        });
+        return jobCosts;
+    }
+
+
+    @Nonnull
+    public ResourceDeposit getCostsOrbital(@Nonnull final List<ShipyardOrbitalModuleConstructionSelection> shipyardConstructionOrder) {
+        Preconditions.checkNotNull(shipyardConstructionOrder, "shipyardConstructionOrder shouldn't be null!");
+
+        final Map<Integer, Integer> amountsByIdShipClasses = shipyardConstructionOrder
+                .stream()
+                .collect(Collectors.toMap(ShipyardOrbitalModuleConstructionSelection::getIdOrbitalModule, ShipyardOrbitalModuleConstructionSelection::getAmount));
+
+        final Map<Integer, ResourceDeposit> resourceDepositMap = orbitalModuleService.findAll(amountsByIdShipClasses.keySet())
+                .stream()
+                .collect(Collectors.toMap(OrbitalModule::getId, OrbitalModule::getCosts));
 
         final ResourceDeposit jobCosts = new ResourceDeposit(EDepositType.COSTS);
         resourceDepositMap.forEach((idShipClass, costs) -> {
