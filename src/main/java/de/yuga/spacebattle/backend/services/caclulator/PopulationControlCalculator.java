@@ -2,7 +2,9 @@ package de.yuga.spacebattle.backend.services.caclulator;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.crew.EducationAmountDTO;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.OrbitalModule;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.OrbitalStructure;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.resources.MiningFactors;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
@@ -12,6 +14,7 @@ import de.yuga.spacebattle.backend.enums.ERefinementSequence;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
+import de.yuga.spacebattle.backend.services.constructables.spacecraft.OrbitalStructureService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.rest.api.error.LogInfo;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -47,13 +50,18 @@ public class PopulationControlCalculator {
     @Nonnull
     private final PlanetService planetService;
 
+    @Nonnull
+    private final OrbitalStructureService orbitalStructureService;
+
     @Autowired
     public PopulationControlCalculator(@Nonnull final ConstructionService constructionService,
                                        @Nonnull final OperationalService operationalService,
-                                       @Nonnull final PlanetService planetService) {
+                                       @Nonnull final PlanetService planetService,
+                                       @Nonnull final OrbitalStructureService orbitalStructureService) {
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
         this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
+        this.orbitalStructureService = Preconditions.checkNotNull(orbitalStructureService, "orbitalStructureService must not be empty");
     }
 
     /**
@@ -92,7 +100,12 @@ public class PopulationControlCalculator {
         // collecting all possible producing building
         final Map<EProductionCategory, List<Construction>> constructionMap = getConstructionsMappedByProductionCategory(constructionsByResource);
         final List<Construction> capacity = constructionMap.computeIfAbsent(EProductionCategory.CAPACITY, k -> new ArrayList<>());
-        final BigDecimal K = TickOutputCalculator.getTickOutput(capacity);
+
+        final List<OrbitalStructure> orbitalStructures = orbitalStructureService.findByPlanet(idPlanet);
+
+        BigDecimal K = TickOutputCalculator.getTickOutput(capacity);
+        K = K.add(new BigDecimal(calculateAdditionalPopulationCapacityFromStructures(orbitalStructures)));
+
         if (K.compareTo(BigDecimal.ZERO) == 0) {
             // if no housing presents, no more growth
             return 0;
@@ -102,17 +115,31 @@ public class PopulationControlCalculator {
         // r equals to the maximal birth rate
         // K equals to the capacity
         final MiningFactors miningFactors = planetService.findMiningFactors(idPlanet);
+
+
         if (miningFactors == null) {
             return 0;
         }
 
-        final BigDecimal r = BigDecimal.valueOf(miningFactors.getMiningFactorByType(EResourceType.POPULATION));
+        final BigDecimal r = BigDecimal.valueOf(miningFactors.getMiningFactorByType(EResourceType.POPULATION) + calculateAdditionalPopulationFactorIncreasement(orbitalStructures));
         final BigDecimal N = BigDecimal.valueOf(sumOfReproductivePopulation);
 
         final BigDecimal increasingFactorByCurrentPopulation = r.multiply(N);
         final BigDecimal capacityLimitFactor = BigDecimal.ONE.subtract(BigDecimal.valueOf(sumOfPopulation).divide(K, MATH_CONTEXT_MORE_PRECISION));
         // rounding down to long
         return increasingFactorByCurrentPopulation.multiply(capacityLimitFactor, MATH_CONTEXT_INTEGER).longValue();
+    }
+
+    public static int calculateAdditionalPopulationFactorIncreasement(@Nonnull final List<OrbitalStructure> orbitalStructures) {
+        Preconditions.checkNotNull(orbitalStructures, "orbitalStructures must not be empty");
+
+        return orbitalStructures.stream().map(OrbitalStructure::getModule).map(OrbitalModule::getPopFactorIncreasement).reduce(0, Integer::sum);
+    }
+
+    public static int calculateAdditionalPopulationCapacityFromStructures(@Nonnull final List<OrbitalStructure> orbitalStructures) {
+        Preconditions.checkNotNull(orbitalStructures, "orbitalStructures must not be empty");
+
+        return orbitalStructures.stream().map(OrbitalStructure::getModule).map(OrbitalModule::getInhabitants).reduce(0, Integer::sum);
     }
 
     /**

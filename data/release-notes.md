@@ -54,8 +54,9 @@ todo. Hyperabdruck im System bei aufkommenden Flotten
 - zwei gebäude (planetare antennen, orbitale antennen) und Eloka-Modul auf Schiffen erzeugen scan-punkte und verraten genauigkeit der ortung
 - in system: sensorabdeckung
 
-todo. distance based duration
+todo. more npc, silesia usw
 
+todo. distance based duration
 - all manual transfer stuff takes time
 - If pops and resource transfers between your own planets are difficult, you need another option to do it.
   This option is the market place. Then this element become more important.

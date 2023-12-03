@@ -224,6 +224,8 @@ public class FleetApi extends BaseApi {
     )
     public ResponseEntity<?> getFleetDistribution() {
 
+        /* fixme introduce orbital scanner module as resolution -> set ships in missions as scouts */
+
         final int idUser = getIdUser();
         final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> byUser = fleetService.findAllFleetsByUser(idUser);
 
