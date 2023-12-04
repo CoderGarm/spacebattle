@@ -7,14 +7,17 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Detachment;
 import de.yuga.spacebattle.backend.entities.turn.TransportJob;
+import de.yuga.spacebattle.backend.entities.turn.battle.combat.CapabilityValue;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.turn.mission.Mission;
+import de.yuga.spacebattle.backend.enums.EModuleType;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 
 @NamedQueries({
         @NamedQuery(name = "WarShip.getAll", query = "SELECT a FROM WarShip a WHERE a.isDeleted = false")
@@ -218,6 +221,16 @@ public class WarShip extends Operationable {
     @Nonnull
     public WarshipHealthState getWarshipHealthState() {
         return warshipHealthState;
+    }
+
+    public int getCapabilityValue(@Nonnull final EModuleType moduleType) {
+        Preconditions.checkNotNull(moduleType, "moduleType must not be empty");
+
+        return warshipHealthState.getCapabilities().stream()
+                .filter(c -> c.getModuleType() == moduleType).findFirst()
+                .map(CapabilityValue::getValue)
+                .map(BigDecimal::intValue)
+                .orElse(0);
     }
 
     public boolean isActive() {

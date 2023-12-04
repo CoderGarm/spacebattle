@@ -5,7 +5,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -36,6 +38,10 @@ public interface WarShipRepository extends CrudRepository<WarShip, Integer> {
     List<WarShip> findAliveInoperationalForUser(@Param("idUser") final int idUser);
 
     @Nullable
-    @Query("SELECT w FROM WarShip w WHERE w.shipyard.owner.id = :idUser AND w.isDeleted = false AND w.isOperational = true")
+    @Query("SELECT w FROM WarShip w WHERE w.shipClass.owner.id = :idUser AND w.isDeleted = false AND w.isOperational = true")
     List<WarShip> findAliveOperationalForUser(@Param("idUser") final int idUser);
+
+    @Nullable
+    @Query("SELECT w FROM WarShip w WHERE w.shipClass.owner.id = :idOwner AND w.isDeleted = false AND w.isOperational = true AND w.detachment.fleet.orbit.system.id IN (:starSystemIDs)")
+    List<WarShip> findActiveShipsBySystemForUser(@Nonnull final Collection<Integer> starSystemIDs, final int idOwner);
 }

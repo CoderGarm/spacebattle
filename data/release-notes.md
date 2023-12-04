@@ -1,7 +1,7 @@
 ### Features
 
 article priorisierung bei pop demand und migration
-article + check ship returns from mission
+article orbital modules
 
 - combat theatre
     - battles by conflict and date
@@ -9,17 +9,17 @@ article + check ship returns from mission
 
 #### Gameplay
 
-In diesem Release geht es im Wesentlichen um die strategische Tiefe.  
-Auf Wunsch mehrerer Spieler wurde die Reisezeit bei Transfers aller Art analog dem Handelsplatz eingebaut.  
-Ebenfalls auf Vorschlag eines Spielers folgt allerdings eine noch tiefgreifendere Neuerung. Ich
+In diesem Release geht es um die strategische Tiefe.
 
 1. Es gibt eine neue Forschung für Gravitationsanomaliedetektoren. Hat man die entsprechenden Level geforscht, kann man die verschiedenen Orbitalmodule bauen.
+
 2. Es gibt einen neuen Typ Gebäude... und auch gleichzeitig ein Raumschiff. Aber ohne Antrieb, wie ein Gebäude halt. Auf jeden Fall wird das später mal ein Raumfort.  
    Jetzt ist es allerdings ein autarker Satellit, der für die Aufklärung der Hypergrenze zuständig ist.  
    Umso stärker die Sensorleistung, umso genauer ist die Auflösung der Hyperabdrücke für einkommende Flotten. Natürlich haben Raumschiffe ebenfalls Gravitationssensoren, Teufel,
    der ganze Antrieb ist ein Grav-Sensor.  
    Beide Effekte interferieren nicht miteinander, aber der stärkere Sensor ist genauer.
 3. Damit gibt es nun auch einen Nutzen für die beiden bisher nicht verwendeten Ressourcen Rare Elements und Heavy Metals.
+
 4. Es gibt noch mehr orbitale Module als nur das GADA (fachsprachlich: Gravitationsanomaliedetektorarray), man kann orbitale Habitate bauen.  
    Die Habitate erhöhen den Pop Mining Factor des Planeten und auch den Wohnraum. Indirekt also die Geburtenrate, sozusagen den Pop Faktor. Für alle englisch sprechenden,
    entschuldigt den fremdsprachlichen Wortwitz.  
@@ -40,8 +40,24 @@ Ebenfalls auf Vorschlag eines Spielers folgt allerdings eine noch tiefgreifender
    Schutzbedürfnis handelt, sind vorher Schutzmöglichkeiten notwendig. Natürlich auch ein Flottenbefehl, zivile Einrichtungen nicht anzugreifen. Aber das folgt später.
 
 5. Das bedeutet in letzter Konsequenz, dass die Genauigkeit in der Hyperabdruckauswertung vollkommen vom Eloka-Wert des Systems abhängig ist.  
-   Damit sind Wachschiffe im System von überragender aufklärerischer Bedeutung - egal ob sie auf Missionen sind oder sich im Orbit befinden. Alle eigenen Schiffe und Module im
-   System beeinflussen die systemweite Aufklärung.
+   Damit sind Wachschiffe im System von überragender aufklärerischer Bedeutung - egal ob sie auf Missionen sind oder sich im Orbit befinden. Alle eigenen Schiffe und orbitale
+   Module im System beeinflussen die systemweite Aufklärung.
+
+   **Gibt es keine Ortung, gibt es keine Aufklärung. *Gar keine!***
+
+   Die neue Mechanik hat zwei Ebenen und eine strukturelle Komplexität:
+    - Höchste Eloka-Punkte im System / 10 (aufgerundet) = Anzahl der individuell auflösbaren Schiffe
+    - Höchste Eloka-Punkte im System * Kilotonne = auflösbare individuelle Tonnage
+    - Orbitale Sensorarrays sind so aufgebaut, dass einzelne Module kombiniert werden können. Das kennen wir z.B. vom VLA (very large array) Radio Telescope aus New Mexico von
+      Alterde. Deswegen werden die Sensorpunkte von Arrays addiert - im Gegensatz zu Schiffssystemen, die in sich abgeschlossen agieren und bei denen immer nur der genaueste Sensor
+      Informationen liefert.
+
+   Ein Beispiel:  
+   Das CA-Electronic Warfare-Modul hat 150 Eloka-Punkte und kann damit die Tonnage von Schiffe bis zu 150 Kilotonnen ungefähr einschätzen und 15 Punktquellen individuell
+   auflösen.  
+   Befindet sch ein orbitales Sensorarray mit 1000 Punkten im System, gilt ist natürlich die Bestimmung des Sensorarrays genauer und damit werden die Sensorwerte des schweren
+   Kreuzers aus dem Beispiel ignoriert.
+
 6. Ein kleiner, aber wichtiger Change im Job-Modul: Die Konstruktionspunkte werden direkt beim Start eines Jobs abgezogen und auf die Konstruktionsleistung verrechnet.  
    Auf absehbare Zeit bekommt man die Punkte nicht zurück, wenn man einen Job abbricht, die Ressourcen werden allerdings erstattet.
 
@@ -57,6 +73,7 @@ todo. Hyperabdruck im System bei aufkommenden Flotten
 todo. more npc, silesia usw
 
 todo. distance based duration
+
 - all manual transfer stuff takes time
 - If pops and resource transfers between your own planets are difficult, you need another option to do it.
   This option is the market place. Then this element become more important.
@@ -80,6 +97,10 @@ todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in 
 todo. chat search: empire name, ingame name, username
 
 ### Bugs fixed
+
+Corben1
+03.12.2023 21:34
+Ich gehe auf "Kolonisieren" -> "Kolonisierung planen" -> dann kommt die Fehlermeldung
 
 1. Waffen haben nun die korrekte Tonnage und den korrekten Kampfwert.
 2. Tooltip bei den Schiffswerten des Battle Reports ist unterdrückt.

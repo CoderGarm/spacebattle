@@ -119,4 +119,11 @@ public class WarShipService {
             save(warShip);
         }
     }
+
+    @Nonnull
+    public List<WarShip> findActiveShipsBySystemForUser(@Nonnull final Set<Integer> starSystemIDs, final int idOwner) {
+        Preconditions.checkNotNull(starSystemIDs, "starSystemIDs must not be empty");
+
+        return Objects.requireNonNullElse(warShipRepository.findActiveShipsBySystemForUser(starSystemIDs, idOwner), new ArrayList<>());
+    }
 }

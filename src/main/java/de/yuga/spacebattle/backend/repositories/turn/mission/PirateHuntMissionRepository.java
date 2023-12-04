@@ -29,4 +29,8 @@ public interface PirateHuntMissionRepository extends JpaRepository<PirateHuntMis
     @Nullable
     @Query("SELECT DISTINCT p FROM Planet p WHERE p.owner.id = :idUser AND p NOT IN (SELECT m.venue FROM PirateHuntMission m WHERE m.actor.id = :idUser AND m.isDeleted = false) ORDER BY p.colonizedAt")
     Set<Planet> findAllPlanetsWithoutPirateHunt(@Param("idUser") final int idUser);
+
+    @Nullable
+    @Query("SELECT m FROM PirateHuntMission m WHERE m.actor.id = :idOwner AND m.venue.system.id IN (:starSystemIDs)")
+    List<PirateHuntMission> findMissionsBySystemForUser(@Nonnull final Collection<Integer> starSystemIDs, final int idOwner);
 }

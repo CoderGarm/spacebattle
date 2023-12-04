@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
+import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.rest.dto.AbstractId;
 import de.yuga.spacebattle.rest.dto.orbitals.FleetOrbit;
 import de.yuga.spacebattle.rest.dto.turn.Move;
@@ -14,6 +15,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -65,6 +67,10 @@ public class FleetMarker {
     @Schema(required = true, description = "The states of the fleet.")
     private StateBlock state;
 
+    @JsonProperty
+    @Schema(required = true, description = "The value of the user's sensors in that system. Defines how good other ships can be seen.")
+    private int hyperPrintSensorValue = 0;
+
     public FleetMarker() {
     }
 
@@ -91,6 +97,16 @@ public class FleetMarker {
         this.orbit = fleet.getOrbit() != null ? new FleetOrbit(fleet.getOrbit()) : null;
         this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;
         this.state = new StateBlock(fleet);
+    }
+
+    public FleetMarker(@Nonnull final Fleet fleet, @Nonnull final Map<StarSystem, Integer> sensorStrength) {
+        this(fleet);
+        Preconditions.checkNotNull(sensorStrength, "sensorStrength must not be empty");
+
+        final de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit orbit = fleet.getOrbit();
+        if (orbit != null) {
+            this.hyperPrintSensorValue = sensorStrength.getOrDefault(orbit.getSystem(), 0);
+        }
     }
 
     @Override

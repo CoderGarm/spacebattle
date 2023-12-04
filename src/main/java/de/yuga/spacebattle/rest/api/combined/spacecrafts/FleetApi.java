@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
+import de.yuga.spacebattle.backend.services.constructables.spacecraft.HyperprintSensorService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.OrbitalStructureService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
@@ -87,19 +88,24 @@ public class FleetApi extends BaseApi {
     @Nonnull
     private final OrbitalStructureService orbitalStructureService;
 
+    @Nonnull
+    private final HyperprintSensorService hyperprintSensorService;
+
     @Autowired
     public FleetApi(@Nonnull final FleetService fleetService,
                     @Nonnull final StarSystemService starSystemService,
                     @Nonnull final PlanetService planetService,
                     @Nonnull final WarShipService warShipService,
                     @Nonnull final TransportJobService transportJobService,
-                    @Nonnull final OrbitalStructureService orbitalStructureService) {
+                    @Nonnull final OrbitalStructureService orbitalStructureService,
+                    @Nonnull final HyperprintSensorService hyperprintSensorService) {
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.transportJobService = Preconditions.checkNotNull(transportJobService, "transportJobService must not be empty");
         this.orbitalStructureService = Preconditions.checkNotNull(orbitalStructureService, "orbitalStructureService must not be empty");
+        this.hyperprintSensorService = Preconditions.checkNotNull(hyperprintSensorService, "hyperprintSensorService must not be empty");
     }
 
     @GetMapping(value = "{idFleet}")
@@ -224,16 +230,14 @@ public class FleetApi extends BaseApi {
     )
     public ResponseEntity<?> getFleetDistribution() {
 
-        /* fixme introduce orbital scanner module as resolution -> set ships in missions as scouts */
-
         final int idUser = getIdUser();
-        final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> byUser = fleetService.findAllFleetsByUser(idUser);
+        final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> ownedFleets = fleetService.findAllFleetsByUser(idUser);
 
         final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> fleets = new HashSet<>();
 
         final List<Planet> allColonizedBy = planetService.findAllColonizedBy(idUser);
         final Set<Integer> systemIDsWithColonies = allColonizedBy.stream().map(Planet::getSystem).map(StarSystem::getId).collect(Collectors.toSet());
-        final Set<Integer> systemIDsWithPresence = byUser.stream()
+        final Set<Integer> systemIDsWithPresence = ownedFleets.stream()
                 .filter(f -> f.getOrbit() != null)
                 .filter(f -> f.getOrbit().getSystem() != null)
                 .map(f -> f.getOrbit().getSystem())
@@ -243,10 +247,13 @@ public class FleetApi extends BaseApi {
         systemIDsWithColonies.addAll(systemIDsWithPresence);
         final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> allAliveFleetsInSystemsWithColonies = fleetService.findAllAliveFleetsInSystems(systemIDsWithColonies);
 
-        fleets.addAll(byUser);
+        fleets.addAll(ownedFleets);
         fleets.addAll(allAliveFleetsInSystemsWithColonies);
 
-        return ResponseEntity.ok(fleets.stream().filter(f -> !f.getAliveShips().isEmpty()).map(FleetMarker::new).collect(Collectors.toSet()));
+        final Map<StarSystem, Integer> sensorStrength = hyperprintSensorService.findHyperPrintSensorStrengthBySystemForUser(systemIDsWithColonies, idUser);
+        return ResponseEntity.ok(fleets.stream().filter(f -> !f.getAliveShips().isEmpty())
+                .map(f -> new FleetMarker(f, sensorStrength))
+                .collect(Collectors.toSet()));
     }
 
     @GetMapping(value = FLEET_PER_USER_ENDPOINT)

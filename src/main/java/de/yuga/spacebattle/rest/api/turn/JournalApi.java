@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.turn.mission.MissionItem;
+import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import de.yuga.spacebattle.backend.services.caches.ColonizationCache;
 import de.yuga.spacebattle.backend.services.caches.MissionCache;
@@ -9,6 +10,7 @@ import de.yuga.spacebattle.backend.services.caches.OperationalCache;
 import de.yuga.spacebattle.backend.services.caches.TransportationCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
+import de.yuga.spacebattle.backend.services.constructables.spacecraft.HyperprintSensorService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.MoveService;
@@ -35,10 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
@@ -96,6 +95,9 @@ public class JournalApi extends BaseApi {
     @Nonnull
     private final TransportJobService transportJobService;
 
+    @Nonnull
+    private final HyperprintSensorService hyperprintSensorService;
+
     @Autowired
     public JournalApi(@Nonnull final TickTimeService tickService,
                       @Nonnull final JobService jobService,
@@ -109,7 +111,8 @@ public class JournalApi extends BaseApi {
                       @Nonnull final MoveService moveService,
                       @Nonnull final PlanetService planetService,
                       @Nonnull final FleetService fleetService,
-                      @Nonnull final TransportJobService transportJobService) {
+                      @Nonnull final TransportJobService transportJobService,
+                      @Nonnull final HyperprintSensorService hyperprintSensorService) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
         this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
         this.battleReportService = Preconditions.checkNotNull(battleReportService, "battleReportService must not be empty");
@@ -123,6 +126,7 @@ public class JournalApi extends BaseApi {
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
         this.transportJobService = Preconditions.checkNotNull(transportJobService, "transportJobService must not be empty");
+        this.hyperprintSensorService = Preconditions.checkNotNull(hyperprintSensorService, "hyperprintSensorService must not be empty");
     }
 
     @GetMapping(value = JOB_FINISHED_ENDPOINT)
@@ -185,19 +189,22 @@ public class JournalApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getFinishedMovements() {
+
         final int idUser = getIdUser();
-
-        /* fixme introduce orbital scanner module as resolution -> set ships in missions as scouts */
-
         final Set<Integer> systemIDs = planetService.findAllSystemIDsForUser(idUser);
         systemIDs.addAll(fleetService.findAllSystemIDsWithFleetsForUser(idUser));
+
+        final Map<StarSystem, Integer> sensorStrength = hyperprintSensorService.findHyperPrintSensorStrengthBySystemForUser(systemIDs, idUser);
 
         final de.yuga.spacebattle.backend.entities.turn.Tick today = tickService.getToday();
         final List<de.yuga.spacebattle.backend.entities.turn.Move> finishedMovements = moveService.findFinishedInSystems(today, systemIDs);
         final List<FleetMovement> result = new ArrayList<>();
         finishedMovements.stream()
                 .filter(m -> Objects.nonNull(m.getFleetSnapshot())).forEach(move -> {
-                    result.add(new FleetMovement(move, getIdUser()));
+                    final StarSystem system = move.getDestinationOrbit().getSystem();
+                    if (sensorStrength.getOrDefault(system, 0) > 0) {
+                        result.add(new FleetMovement(move, getIdUser()));
+                    }
                 });
         return ResponseEntity.ok(result);
     }
