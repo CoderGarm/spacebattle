@@ -3,6 +3,7 @@ package de.yuga.spacebattle.rest.dto.spacecrafts;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Mass;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.rest.dto.account.Player;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.SpacecraftCapabilities;
@@ -133,6 +134,11 @@ public class ShipClass implements ShipClassData {
     @Schema(required = true, description = "The aggregated missile load out.")
     private MissileAmmunitionState ammunitionState;
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The used capacity in that area.")
+    private Mass tonnage;
+
     public ShipClass() {
     }
 
@@ -171,6 +177,7 @@ public class ShipClass implements ShipClassData {
         this.shipClassCapabilities.getCapabilities().removeIf(capabilityValue -> FORBIDDEN_TYPES.contains(capabilityValue.getModuleType()));
         this.spacecraftCapacityAreas = new SpacecraftCapacityAreas(shipClass);
         this.ammunitionState = new MissileAmmunitionState(shipClass.getAmmunitionFittings(), languageCode);
+        this.tonnage = shipClass.getTonnage();
     }
 
     @Nullable

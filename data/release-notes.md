@@ -9,7 +9,7 @@ article orbital modules
 
 #### Gameplay
 
-In diesem Release geht es um die strategische Tiefe.
+In diesem Release geht es um das Konzept der strategischen Tiefe.
 
 1. Es gibt eine neue Forschung für Gravitationsanomaliedetektoren. Hat man die entsprechenden Level geforscht, kann man die verschiedenen Orbitalmodule bauen.
 
@@ -39,13 +39,13 @@ In diesem Release geht es um die strategische Tiefe.
    Abschließend ist zu sagen, dass diese Strukturen momentan nicht zerstört werden können. Da es sich gerade bei den Habitaten um zivile Einrichtungen mit besonderem
    Schutzbedürfnis handelt, sind vorher Schutzmöglichkeiten notwendig. Natürlich auch ein Flottenbefehl, zivile Einrichtungen nicht anzugreifen. Aber das folgt später.
 
-5. Das bedeutet in letzter Konsequenz, dass die Genauigkeit in der Hyperabdruckauswertung vollkommen vom Eloka-Wert des Systems abhängig ist.  
+5. Das bedeutet in letzter Konsequenz, dass die **Genauigkeit in der Hyperabdruckauswertung** vollkommen vom Eloka-Wert des Systems abhängig ist.  
    Damit sind Wachschiffe im System von überragender aufklärerischer Bedeutung - egal ob sie auf Missionen sind oder sich im Orbit befinden. Alle eigenen Schiffe und orbitale
    Module im System beeinflussen die systemweite Aufklärung.
 
    **Gibt es keine Ortung, gibt es keine Aufklärung. *Gar keine!***
 
-   Die neue Mechanik hat zwei Ebenen und eine strukturelle Komplexität:
+   Die neue Mechanik hat zwei Ebenen und eine strukturelle Komplexität zur Auswertung von Hyperabdrücken:
     - Höchste Eloka-Punkte im System / 10 (aufgerundet) = Anzahl der individuell auflösbaren Schiffe
     - Höchste Eloka-Punkte im System * Kilotonne = auflösbare individuelle Tonnage
     - Orbitale Sensorarrays sind so aufgebaut, dass einzelne Module kombiniert werden können. Das kennen wir z.B. vom VLA (very large array) Radio Telescope aus New Mexico von
@@ -61,15 +61,6 @@ In diesem Release geht es um die strategische Tiefe.
 6. Ein kleiner, aber wichtiger Change im Job-Modul: Die Konstruktionspunkte werden direkt beim Start eines Jobs abgezogen und auf die Konstruktionsleistung verrechnet.  
    Auf absehbare Zeit bekommt man die Punkte nicht zurück, wenn man einen Job abbricht, die Ressourcen werden allerdings erstattet.
 
-todo. orbitable stukturen inop setzen analog schiffen -> habitate hinzufügen, steigern geburtenrate und erhöhen wohnraum
-
-todo. tech level 2 und 3 nutzen
-todo. Hyperabdruck im System bei aufkommenden Flotten
-
-- Emissionssignatur verrät ungefähre größe und anzahl (siehe "look & feel wie in büchern")
-- zwei gebäude (planetare antennen, orbitale antennen) und Eloka-Modul auf Schiffen erzeugen scan-punkte und verraten genauigkeit der ortung
-- in system: sensorabdeckung
-
 todo. more npc, silesia usw
 
 todo. distance based duration
@@ -78,7 +69,7 @@ todo. distance based duration
 - If pops and resource transfers between your own planets are difficult, you need another option to do it.
   This option is the market place. Then this element become more important.
   And what we need then is a way to let people migrate between the empires. This offers in the end a lot of diplomatic opportunities (migration treaty like in Stellaris e.g.)...
--
+
 - Raumforts an variablen Positionen?
 
 #### Diverses
@@ -106,9 +97,9 @@ Ich gehe auf "Kolonisieren" -> "Kolonisierung planen" -> dann kommt die Fehlerme
 2. Tooltip bei den Schiffswerten des Battle Reports ist unterdrückt.
 3. Forschungspunkte werden nun hoffentlich korrekt berechnet.
 4. Man kann keine Jobs in der Werft mehr starten, wenn die Werft nicht wenigstens auf Level 1 aktiv ist.
+   todo. migration must respect pop demand on own planet and not exceed the others planet needs
 
 todo. every instajob must be activated if possible
-todo. migration must respect pop demand on own planet and not exceed the others planet needs
 todo. education building shows income at level 0
 todo. negative pop development in UI
 todo. battlereport new advisory but no new present
@@ -120,6 +111,7 @@ todo. display module properties like barrels, laser pd, autocannon pd ...
 
 #### next steps
 
+todo. ally interner marktplatz
 todo. mission items more role play "unprotected convoy changes signature of ship to warship and pirate fled ...""
 todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
 
