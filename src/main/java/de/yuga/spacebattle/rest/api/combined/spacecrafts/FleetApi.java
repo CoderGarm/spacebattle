@@ -140,20 +140,12 @@ public class FleetApi extends BaseApi {
     )
     public ResponseEntity<?> getFleetsBySystem(@PathVariable("idStarSystem") final int idStarSystem) {
 
-        final StarSystem starSystem = starSystemService.find(idStarSystem);
-        if (starSystem == null) {
-            throw new NotifyWebUserException("There should be a star system, you searches for.");
-        }
-        final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> fleets = fleetService.findAllAliveFleetsInSystems(List.of(idStarSystem));
         final int idUser = getIdUser();
-        final boolean ownsPlanet = starSystem.getPlanets().stream().filter(p -> p.getOwner() != null).anyMatch(p -> p.getOwner().getId() == idUser);
-        final boolean hasFleetInside = fleets.stream().anyMatch(f -> f.getOwner().getId() == idUser);
-        if (!ownsPlanet && !hasFleetInside) {
-            return ResponseEntity.ok(new ArrayList<>());
-        }
+        final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> fleets = fleetService.findAllAliveFleetsInSystems(List.of(idStarSystem));
+        final Map<StarSystem, Integer> sensorStrength = hyperprintSensorService.findHyperPrintSensorStrengthBySystemForUser(idUser);
         return ResponseEntity.ok(fleets.stream()
                 .filter(de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet::isAlive)
-                .map(FleetMarker::new)
+                .map(f -> new FleetMarker(f, sensorStrength))
                 .collect(Collectors.toList()));
     }
 
@@ -198,25 +190,6 @@ public class FleetApi extends BaseApi {
                 .collect(Collectors.toList()));
     }
 
-    @GetMapping(value = FLEET_PER_SYSTEM_ENDPOINT + "/{idStarSystem}/" + FLEET_PER_USER_ENDPOINT + "/{idOwner}")
-    @Operation(summary = "Get all fleets inside of a star system for a specific user.", operationId = "getFleetsBySystemAndOwner",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = Fleet.class))
-                            )),
-                    @ApiResponse(responseCode = "400", description = "an error occurred",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
-            }
-    )
-    public ResponseEntity<?> getFleetsBySystemAndOwner(@PathVariable("idStarSystem") final int idStarSystem,
-                                                       @PathVariable("idOwner") final int idOwner) {
-
-        return ResponseEntity.ok(fleetService.findAllFleetsBy(idStarSystem, idOwner).stream()
-                .map(f -> new Fleet(f, getPreferredLanguage()))
-                .collect(Collectors.toList()));
-    }
-
     @GetMapping(value = FLEET_PER_USER_PER_SYSTEM_ENDPOINT)
     @Operation(summary = "Get all the star systems which are holding fleets with the fleet's owner.", operationId = "getFleetDistribution",
             responses = {
@@ -231,26 +204,9 @@ public class FleetApi extends BaseApi {
     public ResponseEntity<?> getFleetDistribution() {
 
         final int idUser = getIdUser();
-        final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> ownedFleets = fleetService.findAllFleetsByUser(idUser);
-
-        final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> fleets = new HashSet<>();
-
-        final List<Planet> allColonizedBy = planetService.findAllColonizedBy(idUser);
-        final Set<Integer> systemIDsWithColonies = allColonizedBy.stream().map(Planet::getSystem).map(StarSystem::getId).collect(Collectors.toSet());
-        final Set<Integer> systemIDsWithPresence = ownedFleets.stream()
-                .filter(f -> f.getOrbit() != null)
-                .filter(f -> f.getOrbit().getSystem() != null)
-                .map(f -> f.getOrbit().getSystem())
-                .map(StarSystem::getId)
-                .collect(Collectors.toSet());
-
-        systemIDsWithColonies.addAll(systemIDsWithPresence);
-        final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> allAliveFleetsInSystemsWithColonies = fleetService.findAllAliveFleetsInSystems(systemIDsWithColonies);
-
-        fleets.addAll(ownedFleets);
-        fleets.addAll(allAliveFleetsInSystemsWithColonies);
-
-        final Map<StarSystem, Integer> sensorStrength = hyperprintSensorService.findHyperPrintSensorStrengthBySystemForUser(systemIDsWithColonies, idUser);
+        final Map<StarSystem, Integer> sensorStrength = hyperprintSensorService.findHyperPrintSensorStrengthBySystemForUser(idUser);
+        final Set<Integer> systemIDs = sensorStrength.keySet().stream().map(StarSystem::getId).collect(Collectors.toSet());
+        final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> fleets = fleetService.findAllAliveFleetsInSystems(systemIDs);
         return ResponseEntity.ok(fleets.stream().filter(f -> !f.getAliveShips().isEmpty())
                 .map(f -> new FleetMarker(f, sensorStrength))
                 .collect(Collectors.toSet()));

@@ -191,12 +191,10 @@ public class JournalApi extends BaseApi {
     public ResponseEntity<?> getFinishedMovements() {
 
         final int idUser = getIdUser();
-        final Set<Integer> systemIDs = planetService.findAllSystemIDsForUser(idUser);
-        systemIDs.addAll(fleetService.findAllSystemIDsWithFleetsForUser(idUser));
-
-        final Map<StarSystem, Integer> sensorStrength = hyperprintSensorService.findHyperPrintSensorStrengthBySystemForUser(systemIDs, idUser);
-
         final de.yuga.spacebattle.backend.entities.turn.Tick today = tickService.getToday();
+
+        final Map<StarSystem, Integer> sensorStrength = hyperprintSensorService.findHyperPrintSensorStrengthBySystemForUser(idUser);
+        final Set<Integer> systemIDs = sensorStrength.keySet().stream().map(StarSystem::getId).collect(Collectors.toSet());
         final List<de.yuga.spacebattle.backend.entities.turn.Move> finishedMovements = moveService.findFinishedInSystems(today, systemIDs);
         final List<FleetMovement> result = new ArrayList<>();
         finishedMovements.stream()

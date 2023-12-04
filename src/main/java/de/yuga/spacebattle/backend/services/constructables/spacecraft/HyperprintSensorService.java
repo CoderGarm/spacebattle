@@ -31,16 +31,39 @@ public class HyperprintSensorService {
     }
 
     @Nonnull
-    public Map<StarSystem, Integer> findHyperPrintSensorStrengthBySystemForUser(@Nonnull final Set<Integer> starSystemIDs, final int idOwner) {
-        Preconditions.checkNotNull(starSystemIDs, "starSystemIDs must not be empty");
+    public Map<StarSystem, Integer> findHyperPrintSensorStrengthBySystemForUser(final int idOwner) {
+        final Map<StarSystem, List<OrbitalStructure>> structures = orbitalStructureRepository.findAllBySystemForUser(idOwner);
 
-        final Map<StarSystem, List<OrbitalStructure>> structures = orbitalStructureRepository.findAllBySystemForUser(starSystemIDs, idOwner);
+        final List<WarShip> ships = warShipService.findAliveOperationalForUser(idOwner);
+        final Set<WarShip> inSystem = ships.stream()
+                .filter(s -> s.getDetachment() != null)
+                .filter(s -> s.getDetachment().getFleet() != null)
+                .filter(s -> s.getDetachment().getFleet().getOrbit() != null)
+                .filter(s -> s.getDetachment().getFleet().getOrbit().getSystem() != null)
+                .collect(Collectors.toSet());
+
+        final Set<WarShip> interplanetaryMovement = ships.stream()
+                .filter(s -> s.getDetachment() != null)
+                .filter(s -> s.getDetachment().getFleet() != null)
+                .filter(s -> s.getDetachment().getFleet().getMove() != null)
+                .filter(s -> !s.getDetachment().getFleet().getMove().isInterstellarTravel())
+                .collect(Collectors.toSet());
+
+
         //noinspection DataFlowIssue
-        final Map<StarSystem, List<WarShip>> shipsBySystem = warShipService.findActiveShipsBySystemForUser(starSystemIDs, idOwner).stream()
+        final Map<StarSystem, List<WarShip>> shipsBySystem = inSystem.stream()
                 .collect(Collectors.groupingBy(a -> a.getDetachment().getFleet().getOrbit().getSystem(),
                         Collectors.mapping(Function.identity(), Collectors.toList())));
 
-        missionService.findMissionsBySystemForUser(starSystemIDs, idOwner).forEach(e -> {
+        interplanetaryMovement.forEach(w -> {
+            //noinspection DataFlowIssue
+            final StarSystem key = w.getDetachment().getFleet().getMove().getDestinationOrbit().getSystem();
+            final List<WarShip> orDefault = shipsBySystem.getOrDefault(key, new ArrayList<>());
+            orDefault.add(w);
+            shipsBySystem.put(key, orDefault);
+        });
+
+        missionService.findPirateHuntForUser(idOwner).forEach(e -> {
             final StarSystem key = e.getVenue().getSystem();
             final List<WarShip> orDefault = shipsBySystem.getOrDefault(key, new ArrayList<>());
             orDefault.addAll(e.getShips());
@@ -79,6 +102,6 @@ public class HyperprintSensorService {
             }
         });
 
-        return result;
+        return result.entrySet().stream().filter(e -> e.getValue() > 0).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

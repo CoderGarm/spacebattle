@@ -185,9 +185,7 @@ public class MissionService {
 
 
     @Nonnull
-    public List<PirateHuntMission> findMissionsBySystemForUser(@Nonnull final Set<Integer> starSystemIDs, final int idOwner) {
-        Preconditions.checkNotNull(starSystemIDs, "starSystemIDs must not be empty");
-
-        return Objects.requireNonNullElse(pirateHuntMissionRepository.findMissionsBySystemForUser(starSystemIDs, idOwner), new ArrayList<>());
+    public List<PirateHuntMission> findPirateHuntForUser(final int idOwner) {
+        return Objects.requireNonNullElse(pirateHuntMissionRepository.findPirateHuntForUser(idOwner), new ArrayList<>());
     }
 }

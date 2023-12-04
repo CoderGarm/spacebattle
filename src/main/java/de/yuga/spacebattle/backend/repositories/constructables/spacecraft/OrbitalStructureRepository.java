@@ -20,6 +20,6 @@ public interface OrbitalStructureRepository extends JpaRepository<OrbitalStructu
     List<OrbitalStructure> findAllBySystem(@Nonnull final Collection<Integer> starSystemIDs);
 
     @Nullable
-    @Query("SELECT s FROM OrbitalStructure s WHERE s.owner.id = :idOwner AND s.orbit.system.id IN (:starSystemIDs)")
-    List<OrbitalStructure> findAllBySystemForUser(@Nonnull final Collection<Integer> starSystemIDs, final int idOwner);
+    @Query("SELECT s FROM OrbitalStructure s WHERE s.owner.id = :idOwner")
+    List<OrbitalStructure> findAllForUser(final int idOwner);
 }

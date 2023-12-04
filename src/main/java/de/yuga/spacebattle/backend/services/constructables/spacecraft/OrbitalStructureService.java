@@ -71,11 +71,9 @@ public class OrbitalStructureService {
     }
 
     @Nonnull
-    public Map<StarSystem, List<OrbitalStructure>> findAllBySystemForUser(@Nonnull final Set<Integer> starSystemIDs, final int idOwner) {
-        Preconditions.checkNotNull(starSystemIDs, "starSystemIDs must not be empty");
-
+    public Map<StarSystem, List<OrbitalStructure>> findAllBySystemForUser(final int idOwner) {
         //noinspection DataFlowIssue
-        return Objects.requireNonNullElse(orbitalStructureRepository.findAllBySystemForUser(starSystemIDs, idOwner), new ArrayList<OrbitalStructure>()).stream()
+        return Objects.requireNonNullElse(orbitalStructureRepository.findAllForUser(idOwner), new ArrayList<OrbitalStructure>()).stream()
                 .collect(Collectors.groupingBy(a -> a.getOrbit().getSystem(),
                         Collectors.mapping(Function.identity(), Collectors.toList())));
     }
