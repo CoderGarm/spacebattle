@@ -404,6 +404,7 @@ public class MasterOfTheUniverseService {
         LOGGER.info("Modules created");
 
         addUnlockedResearches(flashkid);
+        addUnlockedResearches(flashkid);
         LOGGER.info("Researches populated");
 
         final Fitting fitting = new Fitting(propulsions, armors, eloka, sidewalls, weapons, missiles, passiveModules);

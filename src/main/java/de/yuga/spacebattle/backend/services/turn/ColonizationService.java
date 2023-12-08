@@ -133,19 +133,23 @@ public class ColonizationService {
 
         final PayingPossibleResult payingPossible = debitorDeposit.isPayingPossible(colonizationCosts.getCrewRequirement());
         if (!payingPossible.isValid()) {
-            return createPlannedColonization(user, toColonize);
+            return createPlannedColonization(user, mainPlanet, toColonize);
         }
 
         return startColonizingPlanet(user, toColonize);
     }
 
     @Nonnull
-    private Colonization createPlannedColonization(@Nonnull final User owner, @Nonnull final Planet toColonize) {
+    private Colonization createPlannedColonization(@Nonnull final User owner,
+                                                   @Nonnull final Planet mainPlanet,
+                                                   @Nonnull final Planet toColonize) {
         Preconditions.checkNotNull(owner, "owner must not be empty");
+        Preconditions.checkNotNull(mainPlanet, "mainPlanet must not be empty");
         Preconditions.checkNotNull(toColonize, "toColonize must not be empty");
 
+        final int timeToTravel = TransportJobService.getTimeToTravel(mainPlanet, toColonize); // fixme make it visible in the UI
         final CrewRequirement crewRequirement = ColonizationCostCalculator.getColonizationCosts(toColonize).getCrewRequirement();
-        return save(new Colonization(owner, toColonize, crewRequirement, 10, true));
+        return save(new Colonization(owner, toColonize, crewRequirement, timeToTravel, true));
     }
 
     /**

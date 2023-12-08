@@ -76,6 +76,8 @@ In diesem Release geht es um das Konzept der strategischen Tiefe.
    Anfang angetan haben und über zwei Wochen bis zur ersten Kolonie ausdauern mussten 🙈  
    Ich finds mega, dass ihr dabei seid und wie weit wir dieses Spiel gebracht haben** 🥳
 
+9. Neue Kolonien gibt es jetzt nur noch mit Reisezeit, siehe Punkt 7.
+
 #### Diverses
 
 1. Der Tech Tree ist in der Library zu sehen, dann kann man sich dort einen Überblick verschaffen, welche Forschungen für die Module notwendig sind.
@@ -85,8 +87,10 @@ In diesem Release geht es um das Konzept der strategischen Tiefe.
 4. Die Silesianische Konföderation ist nun Handelspartner für Spot Offers in ihrem Sektor.  
    Auch die Asgard Association, die Midgard Federation, der Handelsbund von Rembrandt und die neu gegründete Meroa Trading Association bieten ihre Dienst an. Damit sollte der Spot
    Markt an jedem Punkt der Galaxie verlässliche Reisezeiten für die Handelskonvois anbieten.
+5. Die Links zum Subreddit, der direkte Kartenzugriff und die Seite für die Karte im deutschen Fandom befinden sich nun im Burger Menü.
 
 todo. star label at map clickable
+todo. calculate pop deposit in demand calculation for displaying
 
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
 todo. chat search: empire name, ingame name, username
