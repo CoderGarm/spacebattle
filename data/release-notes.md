@@ -77,8 +77,11 @@ todo. distance based duration
 1. Der Tech Tree ist in der Library zu sehen, dann kann man sich dort einen Überblick verschaffen, welche Forschungen für die Module notwendig sind.
 2. Die Bibliothek und der Tech Tree enthalten für Schiffsmodule und die neuen orbitalen Strukturen jetzt alle relevanten Informationen. Die Schiffswerft ist momentan unverändert,
    allerdings haben die Module zwecks besserem Überblick sprechende Namen bekommen.
+3. Es gibt Hinweise zum Beschützen von Konvois direkt am Handelsplatz.
+4. Die Silesianische Konföderation ist nun Handelspartner für Spot Offers in ihrem Sektor.  
+   Auch die Asgard Association, die Midgard Federation, der Handelsbund von Rembrandt und die neu gegründete Meroa Trading Association bieten ihre Dienst an. Damit sollte der Spot
+   Markt an jedem Punkt der Galaxie verlässliche Reisezeiten für die Handelskonvois anbieten.
 
-todo. spot market like: https://postimg.cc/QVHGk2SB
 todo. manual transfer to fleet overrides capacity
 
 todo. highlight searched star

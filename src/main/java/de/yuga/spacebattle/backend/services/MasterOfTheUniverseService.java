@@ -231,10 +231,42 @@ public class MasterOfTheUniverseService {
         final boolean transformationNeeded = orbitalModuleService.findAll().isEmpty();
         if (transformationNeeded) {
             createOrbitalModules();
+            createMoreNPCs();
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
         }
+    }
+
+    private void createMoreNPCs() {
+        NonPlayerCharacter npc = nonPlayerCharacterService.createNPC("Silesia Confederacy");
+        StarSystem sys = starsystemService.findByName("Silesia");
+        Planet planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
+        if (planet == null) {
+            sys = starsystemService.findByName("Sachsen");
+            planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
+        }
+        colonizeNPC(planet, npc);
+
+        npc = nonPlayerCharacterService.createNPC("Midgard Federation");
+        sys = starsystemService.findByName("Midgard");
+        planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
+        colonizeNPC(planet, npc);
+
+        npc = nonPlayerCharacterService.createNPC("Asgard Association");
+        sys = starsystemService.findByName("Asgard");
+        planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
+        colonizeNPC(planet, npc);
+
+        npc = nonPlayerCharacterService.createNPC("Rembrandt Trade Union");
+        sys = starsystemService.findByName("Rembrandt");
+        planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
+        colonizeNPC(planet, npc);
+
+        npc = nonPlayerCharacterService.createNPC("Meroa Trading Association");
+        sys = starsystemService.findByName("Meroa");
+        planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
+        colonizeNPC(planet, npc);
     }
 
     @SuppressWarnings("unused")
@@ -412,6 +444,31 @@ public class MasterOfTheUniverseService {
         npc = nonPlayerCharacterService.createNPC("Anderman Empire");
         sys = starsystemService.findByName("Gregor");
         planet = sys.getPlanets().stream().findFirst().orElse(null);
+        colonizeNPC(planet, npc);
+
+        npc = nonPlayerCharacterService.createNPC("Silesia Confederacy");
+        sys = starsystemService.findByName("Silesia");
+        planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
+        colonizeNPC(planet, npc);
+
+        npc = nonPlayerCharacterService.createNPC("Midgard Federation");
+        sys = starsystemService.findByName("Midgard");
+        planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
+        colonizeNPC(planet, npc);
+
+        npc = nonPlayerCharacterService.createNPC("Asgard Association");
+        sys = starsystemService.findByName("Asgard");
+        planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
+        colonizeNPC(planet, npc);
+
+        npc = nonPlayerCharacterService.createNPC("Rembrandt Trade Union");
+        sys = starsystemService.findByName("Rembrandt");
+        planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
+        colonizeNPC(planet, npc);
+
+        npc = nonPlayerCharacterService.createNPC("Meroa Trading Association");
+        sys = starsystemService.findByName("Meroa");
+        planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
         colonizeNPC(planet, npc);
     }
 
