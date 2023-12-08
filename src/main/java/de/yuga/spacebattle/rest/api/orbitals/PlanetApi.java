@@ -8,10 +8,12 @@ import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Job;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.OrbitalModuleService;
+import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
@@ -95,6 +97,9 @@ public class PlanetApi extends BaseApi {
     @Nonnull
     private final OrbitalModuleService orbitalModuleService;
 
+    @Nonnull
+    private final OperationalService operationalService;
+
     @Autowired
     public PlanetApi(@Nonnull final PlanetService planetService,
                      @Nonnull final JobService jobService,
@@ -103,7 +108,8 @@ public class PlanetApi extends BaseApi {
                      @Nonnull final PlanetTickRunner planetTickRunner,
                      @Nonnull final TickTimeService tickTimeService,
                      @Nonnull final ConstructionService constructionService,
-                     @Nonnull final OrbitalModuleService orbitalModuleService) {
+                     @Nonnull final OrbitalModuleService orbitalModuleService,
+                     @Nonnull final OperationalService operationalService) {
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.jobService = Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
         this.shipClassService = Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
@@ -112,6 +118,7 @@ public class PlanetApi extends BaseApi {
         this.tickTimeService = Preconditions.checkNotNull(tickTimeService, "tickTimeService must not be empty");
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
         this.orbitalModuleService = Preconditions.checkNotNull(orbitalModuleService, "orbitalModuleService must not be empty");
+        this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
     }
 
     @GetMapping
@@ -189,8 +196,11 @@ public class PlanetApi extends BaseApi {
     )
     public ResponseEntity<?> buildConstruction(@PathVariable("idPlanet") final int idPlanet, @PathVariable("idBuilding") final int idBuilding) {
         final Job job = jobService.createConstructionYardJob(idPlanet, idBuilding);
-        if (JobService.isLocalInstaJobPossible(job.getFacility().getPlanet(), job)) {
-            planetTickRunner.tickInstaConstruction(job, tickTimeService.getToday());
+        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = job.getFacility().getPlanet();
+        if (JobService.isLocalInstaJobPossible(planet, job)) {
+            final Tick today = tickTimeService.getToday();
+            planetTickRunner.tickInstaConstruction(job, today);
+            operationalService.operateInoperationals(today, planet);
         }
         return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(job, getPreferredLanguage()));
     }

@@ -438,7 +438,10 @@ public class ResourceDeposit extends AbstractEntityKey {
      * The main planet must have the same amount of resources.
      */
     public void equalize(final boolean isMain) {
+        Arrays.stream(EResourceType.valuesWhichForfeits()).forEach(eResourceType -> resources.put(eResourceType, 100L));
+        Arrays.stream(EEducationType.values()).forEach(eEducationType -> humanResources.put(eEducationType, 0L));
         if (isMain) {
+            resources.put(CONSTRUCTION, 15000L);
             Arrays.stream(EResourceType.valuesWhichAreCollectable())
                     .forEach(eResourceType -> {
                         if (ETechLevel.TECH_I.getExcludedResources().contains(eResourceType)) {
@@ -448,8 +451,6 @@ public class ResourceDeposit extends AbstractEntityKey {
                         }
                     });
         }
-        Arrays.stream(EResourceType.valuesWhichForfeits()).forEach(eResourceType -> resources.put(eResourceType, 100L));
-        Arrays.stream(EEducationType.values()).forEach(eEducationType -> humanResources.put(eEducationType, 0L));
     }
 
     public boolean isDemandPresent() {

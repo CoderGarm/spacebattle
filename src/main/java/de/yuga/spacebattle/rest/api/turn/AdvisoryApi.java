@@ -17,7 +17,6 @@ import de.yuga.spacebattle.backend.services.buildings.BuildingService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassService;
-import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.mission.MissionService;
@@ -81,7 +80,6 @@ public class AdvisoryApi extends BaseApi {
 
     @Nonnull
     private final FleetService fleetService;
-    private final PlanetService planetService;
 
     @Autowired
     public AdvisoryApi(@Nonnull final MissionService missionService,
@@ -90,7 +88,7 @@ public class AdvisoryApi extends BaseApi {
                        @Nonnull final ResearchService researchService,
                        @Nonnull final JobService jobService,
                        @Nonnull final ShipClassService shipClassService,
-                       @Nonnull final FleetService fleetService, final PlanetService planetService) {
+                       @Nonnull final FleetService fleetService) {
         this.missionService = Preconditions.checkNotNull(missionService, "missionService must not be empty");
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
         this.buildingService = Preconditions.checkNotNull(buildingService, "buildingService must not be empty");
@@ -98,7 +96,6 @@ public class AdvisoryApi extends BaseApi {
         this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
         this.shipClassService = Preconditions.checkNotNull(shipClassService, "shipClassService must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
-        this.planetService = planetService;
     }
 
     @GetMapping(value = PIRATE_HUNT_ENDPOINT)
@@ -164,9 +161,9 @@ public class AdvisoryApi extends BaseApi {
         setRefinementAdvisory(constructions, ERefinementSequence.EDUCATION_MILITARY_I, tickAdvice);
         setRefinementAdvisory(constructions, ERefinementSequence.EDUCATION_CIVIL_III, tickAdvice);
 
-        setResearchesToShipyardAdvice(constructions, tickAdvice);
         setRefinementAdvisory(constructions, ERefinementSequence.EDUCATION_CIVIL_II, tickAdvice);
         setRefinementAdvisory(constructions, ERefinementSequence.EDUCATION_CIVIL_I, tickAdvice);
+        setResearchesToShipyardAdvice(constructions, tickAdvice);
 
         return ResponseEntity.ok(tickAdvice);
     }

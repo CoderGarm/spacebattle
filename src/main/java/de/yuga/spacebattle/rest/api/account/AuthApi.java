@@ -325,7 +325,7 @@ public class AuthApi {
         mailService.sendMailVerificationMessage(Objects.requireNonNull(saved));
 
         final List<Research> researchesWithoutPrecondition = researchService.getResearchesWithoutPrecondition();
-        researchService.addResearch(saved, researchesWithoutPrecondition);
+        researchService.addResearchForNewAccounts(saved, researchesWithoutPrecondition);
 
         Planet planet = colonizationService.findPlanetForNewUser();
         planet = planetService.save(planet);

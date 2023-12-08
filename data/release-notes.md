@@ -1,11 +1,13 @@
-### Features
-
 article priorisierung bei pop demand und migration
 article orbital modules
 
 - combat theatre
     - battles by conflict and date
     - all battles by date
+
+### Features
+
+Ok, ich bin vielleicht etwas eskaliert. Das Release hat es in sich!
 
 #### Gameplay
 
@@ -66,6 +68,14 @@ In diesem Release geht es um das Konzept der strategischen Tiefe.
    Alle anderen manuell eingerichteten Transporte werden ebenfalls eine entfernungsabhängige Zeitspanne zum Transfer benötigen. Dafür sind aber noch ein paar Vorarbeiten notwendig,
    um die ich mich in diesem Release nicht kümmern möchte.
 
+8. Neue Spieler haben es nun etwas leichter.  
+   Ein frisch kolonisierter Hauptplanet hat genug Baupunkte am Start, um damit die ersten Bildungsgebäude bauen zu können.  
+   Mit dieser und den Änderungen der letzten Releases kann man damit **im ersten Tick die erste Kolonie planen**.  
+   Die Idee dahinter ist natürlich, den bisher sehr zähen Anfang ganz krass zu reduzieren.  
+   **An dieser Stelle ein ganz großes Dankeschön an die alten Hasen, die sich den bisherigen
+   Anfang angetan haben und über zwei Wochen bis zur ersten Kolonie ausdauern mussten 🙈  
+   Ich finds mega, dass ihr dabei seid und wie weit wir dieses Spiel gebracht haben** 🥳
+
 #### Diverses
 
 1. Der Tech Tree ist in der Library zu sehen, dann kann man sich dort einen Überblick verschaffen, welche Forschungen für die Module notwendig sind.
@@ -87,10 +97,12 @@ todo. chat search: empire name, ingame name, username
 2. Tooltip bei den Schiffswerten des Battle Reports ist unterdrückt.
 3. Forschungspunkte werden nun hoffentlich korrekt berechnet.
 4. Man kann keine Jobs in der Werft mehr starten, wenn die Werft nicht wenigstens auf Level 1 aktiv ist.
-   todo. migration must respect pop demand on own planet and not exceed the others planet needs
+5. Instajobs für Gebäude aktivieren das Gebäude genauso als würden sie durch den Tickumbruch aktiviert werden.
+6. Die Gebäuderatschläge für neue Spieler haben nun die richtige Reihenfolge.
+
+todo. migration must respect pop demand on own planet and not exceed the others planet needs
 
 todo. manual transfer to fleet overrides capacity
-todo. every instajob must be activated if possible
 todo. education building shows income at level 0
 todo. negative pop development in UI
 todo. battlereport new advisory but no new present

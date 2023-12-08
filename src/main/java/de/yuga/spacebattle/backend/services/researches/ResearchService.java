@@ -103,6 +103,14 @@ public class ResearchService {
         }));
     }
 
+    public void addResearchForNewAccounts(@Nonnull final User entity, @Nonnull final List<Research> researches) {
+        Preconditions.checkNotNull(entity, "entity shouldn't be null!");
+        Preconditions.checkNotNull(researches, "researches shouldn't be null!");
+
+        addResearch(entity, researches);
+        addResearch(entity, researches);
+    }
+
     public void addResearch(@Nonnull final User entity, @Nonnull final List<Research> researches) {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
         Preconditions.checkNotNull(researches, "researches shouldn't be null!");
