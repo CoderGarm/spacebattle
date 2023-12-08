@@ -50,6 +50,8 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -61,6 +63,8 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PUBLIC_BASE_ENDPOI
 @Tag(name = "AuthApi")
 @RequestMapping(value = "/" + PUBLIC_BASE_ENDPOINT + "/" + AuthApi.ENDPOINT + "/")
 public class AuthApi {
+
+    private static SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy HH:mm");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthApi.class);
 
@@ -198,11 +202,16 @@ public class AuthApi {
                 LOGGER.error("Refresh token not valid by generation - check it!");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
-
+            LOGGER.info(">>>Login: {} at {}", request.getUsername(), getNow());
             return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, accessToken).body(new JWT(user, accessToken, refreshToken));
         } catch (BadCredentialsException ex) {
+            LOGGER.info(">>>FORBIDDEN: {} at {}", request.getUsername(), getNow());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+    }
+
+    private static String getNow() {
+        return SDF.format(Calendar.getInstance().getTime());
     }
 
     @GetMapping(value = "/refresh")
