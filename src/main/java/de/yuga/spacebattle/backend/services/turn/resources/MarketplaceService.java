@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 @Service
 public class MarketplaceService {
 
+    public static final Acceleration PUBLIC_TRANSPORT_ACCELERATION = new Acceleration(50000, EAccelerationMetric.G, EHyperBand.EPSILON);
     @Nonnull
     private final TickTimeService tickService;
 
@@ -133,7 +134,7 @@ public class MarketplaceService {
         final FleetOrbit origin = new FleetOrbit(tradeOffer.getOrigin());
         final FleetOrbit destination = new FleetOrbit(target);
         // 154 gamma is so fucking slow
-        return DistanceCalculator.calculateTimeToTravel(ETechnologyType.MILITARY, new Acceleration(50000, EAccelerationMetric.G, EHyperBand.EPSILON), origin, destination);
+        return DistanceCalculator.calculateTimeToTravel(ETechnologyType.MILITARY, PUBLIC_TRANSPORT_ACCELERATION, origin, destination);
     }
 
     @Nonnull

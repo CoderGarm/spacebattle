@@ -21,6 +21,12 @@ public class TransportJob extends Completable {
     @Nonnull
     @NotNull
     @ManyToOne
+    @JoinColumn(name = "idTickInitiated", referencedColumnName = "idTick")
+    private Tick tick;
+
+    @Nonnull
+    @NotNull
+    @ManyToOne
     @JoinColumn(name = "idOwner", updatable = false)
     private Owner owner;
 
@@ -55,12 +61,21 @@ public class TransportJob extends Completable {
     public TransportJob() {
     }
 
-    public TransportJob(@Nonnull final Planet destination, @Nonnull final WarShip warship) {
+    public TransportJob(@Nonnull final Tick today,
+                        @Nonnull final Planet destination,
+                        @Nonnull final WarShip warship,
+                        final int timeToTravel) {
+        this.tick = Preconditions.checkNotNull(today, "today must not be empty");
         this.destination = Preconditions.checkNotNull(destination, "destination must not be empty");
         final Planet reserveStation = Preconditions.checkNotNull(warship, "warship must not be empty").getMothball();
         this.origin = Objects.requireNonNull(reserveStation);
         this.owner = warship.getShipClass().getOwner();
-        this.ticksLeft = 1;
+        this.ticksLeft = timeToTravel;
+    }
+
+    @Nonnull
+    public Tick getTick() {
+        return tick;
     }
 
     @Nonnull

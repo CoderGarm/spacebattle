@@ -6,12 +6,14 @@ import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.HyperprintSensorService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.OrbitalStructureService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
+import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import de.yuga.spacebattle.backend.services.turn.TransportJobService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
@@ -91,6 +93,9 @@ public class FleetApi extends BaseApi {
     @Nonnull
     private final HyperprintSensorService hyperprintSensorService;
 
+    @Nonnull
+    private final TickTimeService tickTimeService;
+
     @Autowired
     public FleetApi(@Nonnull final FleetService fleetService,
                     @Nonnull final StarSystemService starSystemService,
@@ -98,7 +103,8 @@ public class FleetApi extends BaseApi {
                     @Nonnull final WarShipService warShipService,
                     @Nonnull final TransportJobService transportJobService,
                     @Nonnull final OrbitalStructureService orbitalStructureService,
-                    @Nonnull final HyperprintSensorService hyperprintSensorService) {
+                    @Nonnull final HyperprintSensorService hyperprintSensorService,
+                    @Nonnull final TickTimeService tickTimeService) {
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
@@ -106,6 +112,7 @@ public class FleetApi extends BaseApi {
         this.transportJobService = Preconditions.checkNotNull(transportJobService, "transportJobService must not be empty");
         this.orbitalStructureService = Preconditions.checkNotNull(orbitalStructureService, "orbitalStructureService must not be empty");
         this.hyperprintSensorService = Preconditions.checkNotNull(hyperprintSensorService, "hyperprintSensorService must not be empty");
+        this.tickTimeService = Preconditions.checkNotNull(tickTimeService, "tickTimeService must not be empty");
     }
 
     @GetMapping(value = "{idFleet}")
@@ -489,12 +496,13 @@ public class FleetApi extends BaseApi {
         final int idUser = getIdUser();
         final Set<de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip> pooledShips = fleetService.findPooledWarships(idUser, idPlanet);
 
-        final Set<WarShip> result = pooledShips.stream().map(w -> new WarShip(w, w.getWarshipHealthState(), getPreferredLanguage())).collect(Collectors.toSet());
+        final Tick today = tickTimeService.getToday();
+        final Set<WarShip> result = pooledShips.stream().map(w -> new WarShip(w, w.getWarshipHealthState(), getPreferredLanguage()).withEditableState(today)).collect(Collectors.toSet());
 
-        final List<de.yuga.spacebattle.backend.entities.turn.TransportJob> transportJobs = transportJobService.findAllForTodayFor(idUser, idPlanet);
+        final List<de.yuga.spacebattle.backend.entities.turn.TransportJob> transportJobs = transportJobService.findAllFor(idUser, idPlanet);
         final Set<WarShip> inTransport = transportJobs.stream()
                 .map(t -> t.getShips().stream()
-                        .map(w -> new WarShip(w, w.getWarshipHealthState(), getPreferredLanguage()))
+                        .map(w -> new WarShip(w, w.getWarshipHealthState(), getPreferredLanguage()).withEditableState(today))
                         .collect(Collectors.toSet()))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
@@ -517,7 +525,8 @@ public class FleetApi extends BaseApi {
         if (transportJob == null) {
             return ResponseEntity.ok().build();
         }
-        return ResponseEntity.ok(new TransportJob(transportJob, Set.of(), getPreferredLanguage()));
+        final Tick today = tickTimeService.getToday();
+        return ResponseEntity.ok(new TransportJob(today, transportJob, Set.of(), getPreferredLanguage()));
     }
 
     @PutMapping(value = RETIRE_FLEET_ENDPOINT + "/{idFleet}")

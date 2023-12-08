@@ -171,7 +171,7 @@ public class JournalApi extends BaseApi {
                 .collect(Collectors.toList()));
 
         result.addAll(transportJobService.findFinishedFor(today, idUser).stream()
-                .map(t -> new TransportJob(t, t.getTransferredShips(), getPreferredLanguage()))
+                .map(t -> new TransportJob(today, t, t.getTransferredShips(), getPreferredLanguage()))
                 .collect(Collectors.toList()));
 
         return ResponseEntity.ok(result);

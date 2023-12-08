@@ -758,6 +758,7 @@
         idDestination integer not null,
         idOrigin integer not null,
         idOwner integer not null,
+        idTickInitiated integer not null,
         primary key (idTransportJob)
     ) engine=InnoDB;
 
@@ -1829,6 +1830,11 @@
        foreign key (idOwner) 
        references user (idUser);
 
+    alter table transportJob 
+       add constraint FK9c2tnkoa6jp6j4hnqnpmstl16 
+       foreign key (idTickInitiated) 
+       references tick (idTick);
+
     alter table user
         add constraint FKd0120p7tkvssh9r8hldenpw1w
             foreign key (idAlliance)
@@ -1989,3 +1995,4 @@ INSERT INTO dbPatch VALUES (NULL, NOW(), 'tidy up wiki', '0.1.15-5');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'repair tonnage', '0.1.16-1');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'introduce orbital modules', '0.1.16-2');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'change tech names', '0.1.16-3');
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'add tick to transport job', '0.1.16-4');

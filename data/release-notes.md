@@ -61,16 +61,10 @@ In diesem Release geht es um das Konzept der strategischen Tiefe.
 6. Ein kleiner, aber wichtiger Change im Job-Modul: Die Konstruktionspunkte werden direkt beim Start eines Jobs abgezogen und auf die Konstruktionsleistung verrechnet.  
    Auf absehbare Zeit bekommt man die Punkte nicht zurück, wenn man einen Job abbricht, die Ressourcen werden allerdings erstattet.
 
-todo. more npc, silesia usw
-
-todo. distance based duration
-
-- all manual transfer stuff takes time
-- If pops and resource transfers between your own planets are difficult, you need another option to do it.
-  This option is the market place. Then this element become more important.
-  And what we need then is a way to let people migrate between the empires. This offers in the end a lot of diplomatic opportunities (migration treaty like in Stellaris e.g.)...
-
-- Raumforts an variablen Positionen?
+7. Schiffe, die mit zivilen Frachtern transferiert werden, benötigen - analog dem Marktplatz - eine Weile um anzukommen.  
+   Es geht an dieser Stelle nur um die Schiffe.  
+   Alle anderen manuell eingerichteten Transporte werden ebenfalls eine entfernungsabhängige Zeitspanne zum Transfer benötigen. Dafür sind aber noch ein paar Vorarbeiten notwendig,
+   um die ich mich in diesem Release nicht kümmern möchte.
 
 #### Diverses
 
@@ -82,9 +76,6 @@ todo. distance based duration
    Auch die Asgard Association, die Midgard Federation, der Handelsbund von Rembrandt und die neu gegründete Meroa Trading Association bieten ihre Dienst an. Damit sollte der Spot
    Markt an jedem Punkt der Galaxie verlässliche Reisezeiten für die Handelskonvois anbieten.
 
-todo. manual transfer to fleet overrides capacity
-
-todo. highlight searched star
 todo. star label at map clickable
 
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
@@ -92,16 +83,13 @@ todo. chat search: empire name, ingame name, username
 
 ### Bugs fixed
 
-Corben1
-03.12.2023 21:34
-Ich gehe auf "Kolonisieren" -> "Kolonisierung planen" -> dann kommt die Fehlermeldung
-
 1. Waffen haben nun die korrekte Tonnage und den korrekten Kampfwert.
 2. Tooltip bei den Schiffswerten des Battle Reports ist unterdrückt.
 3. Forschungspunkte werden nun hoffentlich korrekt berechnet.
 4. Man kann keine Jobs in der Werft mehr starten, wenn die Werft nicht wenigstens auf Level 1 aktiv ist.
    todo. migration must respect pop demand on own planet and not exceed the others planet needs
 
+todo. manual transfer to fleet overrides capacity
 todo. every instajob must be activated if possible
 todo. education building shows income at level 0
 todo. negative pop development in UI
@@ -110,9 +98,16 @@ todo. battlereport new advisory but no new present
 todo. chats von anderen werden automatisch gelesen
 todo. unload fleet on ship transfer or something
 
-todo. display module properties like barrels, laser pd, autocannon pd ...
-
 #### next steps
+
+todo. distance based duration
+
+- all manual transfer stuff takes time
+- If pops and resource transfers between your own planets are difficult, you need another option to do it.
+  This option is the market place. Then this element become more important.
+  And what we need then is a way to let people migrate between the empires. This offers in the end a lot of diplomatic opportunities (migration treaty like in Stellaris e.g.)...
+
+- Raumforts an variablen Positionen?
 
 todo. ally interner marktplatz
 todo. mission items more role play "unprotected convoy changes signature of ship to warship and pirate fled ...""

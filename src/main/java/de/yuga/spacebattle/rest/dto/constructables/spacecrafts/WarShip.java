@@ -94,11 +94,14 @@ public class WarShip {
         final TransportJob transportJob = warShip.getTransportJob();
         if (transportJob != null) {
             isPooled = true;
-            this.transportJob = new de.yuga.spacebattle.rest.dto.turn.TransportJob(transportJob, Set.of(), languageCode);
+            this.transportJob = new de.yuga.spacebattle.rest.dto.turn.TransportJob(null, transportJob, Set.of(), languageCode);
         }
     }
 
-    public WarShip(@Nonnull final WarshipHealthStateSnapshot stateSnapshot, @Nonnull final String languageCode) {
+    public WarShip(@Nonnull final WarshipHealthStateSnapshot stateSnapshot,
+                   @Nonnull final String languageCode) {
+        Preconditions.checkNotNull(stateSnapshot, "stateSnapshot must not be empty");
+        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
 
         final de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip warShip = stateSnapshot.getWarShip();
         this.idWarship = warShip.getId();
@@ -110,5 +113,14 @@ public class WarShip {
 
     public int getIdWarship() {
         return idWarship;
+    }
+
+    public WarShip withEditableState(@Nonnull final de.yuga.spacebattle.backend.entities.turn.Tick today) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+
+        if (transportJob != null) {
+            transportJob.reCalcEditableState(today);
+        }
+        return this;
     }
 }
