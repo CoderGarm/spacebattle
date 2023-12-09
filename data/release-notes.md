@@ -106,8 +106,10 @@ todo. orbitals aktivieren
    Da eine neue Kolonie sehr viele Personen bindet, kann dadurch die Aktivierung von Gebäuden und Schiffen gestört werden.
 7. Mit der Suche im Chat sucht man nun nach Spielern per Usernamen und den Rollenspiel-Namen.
 8. Wenn man auf der Sternenkarte ein System sucht und es auf der Liste wählt, wird es genauso ausgewählt, als würde man darauf klicken.
-
-todo. star label at map clickable
+9. Dicht zusammen stehende Sterne auf der Karte sind besser zum Klicken erreichbar.  
+   Ursprünglich sollten die Namen zum Anklicken und Selektieren der Sterne genutzt werden, aber das hat sich als nicht wirklich zielführend heraus gestellt, weil man dann das selbe
+   Problem hat.  
+   Deswegen sind nun alle Texte auf der Map im Hintergrund, man kann sie nicht mehr anklicken, das erleichtert hoffentlich die Systemauswahl.
 
 ### Bugs fixed
 
