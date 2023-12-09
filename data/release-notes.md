@@ -86,6 +86,9 @@ In diesem Release geht es um das Konzept der strategischen Tiefe.
    Weit entfernte Außenposten sind z.B. fehlende Aufmunitionierung und Reparatur des Angreifers effektiv unangreifbar. Unangreifbarkeit muss man teuer erkaufen, ab jetzt wird das
    über eine lange Wartezeit bis zur fertigen Kolonie passieren. Dem entgegen gibt es eine verkürzte Reisezeit des Kolonieschiffs, wenn man in der Nähe siedelt.
 
+10. Glückstreffer im Kampf sind ganz massiv generfed.  
+    Bisher war es möglich selbst den größten Superdreadnought per Glückstreffer in die Eloka oder den Antrieb auszuschalten.
+
 todo. orbitals auf map darstellen
 todo. orbitals aktivieren
 todo. besserer Schutz für eloka & Co im kampf

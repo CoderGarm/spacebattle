@@ -393,12 +393,14 @@ public class WarshipHealthState implements Cloneable {
                 hitLog.add(new HitLog(damageDealer, this, damageValue, sidewallState, attackedPart, isAlive(), isFightingCapable()));
                 break;
             case PROPULSION:
-                propulsionState = applyDamageToHitArea(propulsionState, damageValue, attackedPart, damageDealer);
-                hitLog.add(new HitLog(damageDealer, this, damageValue, propulsionState, attackedPart, isAlive(), isFightingCapable()));
+                long min = Math.min((long) (propulsionState * 0.1), damageValue);
+                propulsionState = applyDamageToHitArea(propulsionState, min, attackedPart, damageDealer);
+                hitLog.add(new HitLog(damageDealer, this, min, propulsionState, attackedPart, isAlive(), isFightingCapable()));
                 break;
             case ELOKA:
-                elokaState = applyDamageToHitArea(elokaState, damageValue, attackedPart, damageDealer);
-                hitLog.add(new HitLog(damageDealer, this, damageValue, elokaState, attackedPart, isAlive(), isFightingCapable()));
+                min = Math.min((long) (propulsionState * 0.1), damageValue);
+                elokaState = applyDamageToHitArea(elokaState, min, attackedPart, damageDealer);
+                hitLog.add(new HitLog(damageDealer, this, min, elokaState, attackedPart, isAlive(), isFightingCapable()));
                 break;
         }
     }
