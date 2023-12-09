@@ -105,6 +105,7 @@ todo. orbitals aktivieren
 6. Es gibt eine Infomeldung, wenn man eine Kolonie starten möchte.  
    Da eine neue Kolonie sehr viele Personen bindet, kann dadurch die Aktivierung von Gebäuden und Schiffen gestört werden.
 7. Mit der Suche im Chat sucht man nun nach Spielern per Usernamen und den Rollenspiel-Namen.
+8. Wenn man auf der Sternenkarte ein System sucht und es auf der Liste wählt, wird es genauso ausgewählt, als würde man darauf klicken.
 
 todo. star label at map clickable
 
