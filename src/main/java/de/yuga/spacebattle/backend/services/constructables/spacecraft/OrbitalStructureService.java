@@ -77,4 +77,9 @@ public class OrbitalStructureService {
                 .collect(Collectors.groupingBy(a -> a.getOrbit().getSystem(),
                         Collectors.mapping(Function.identity(), Collectors.toList())));
     }
+
+    @Nonnull
+    public List<OrbitalStructure> findAliveInoperationalForPlanet(final int idPlanet) {
+        return Objects.requireNonNullElse(orbitalStructureRepository.findAliveInoperationalForPlanet(idPlanet), new ArrayList<>());
+    }
 }

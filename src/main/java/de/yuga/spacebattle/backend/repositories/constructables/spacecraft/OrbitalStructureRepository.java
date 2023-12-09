@@ -22,4 +22,8 @@ public interface OrbitalStructureRepository extends JpaRepository<OrbitalStructu
     @Nullable
     @Query("SELECT s FROM OrbitalStructure s WHERE s.owner.id = :idOwner")
     List<OrbitalStructure> findAllForUser(final int idOwner);
+
+    @Nullable
+    @Query("SELECT s FROM OrbitalStructure s WHERE s.orbit.planet.id = :idPlanet AND s.isDeleted = false AND s.isOperational = false")
+    List<OrbitalStructure> findAliveInoperationalForPlanet(final int idPlanet);
 }

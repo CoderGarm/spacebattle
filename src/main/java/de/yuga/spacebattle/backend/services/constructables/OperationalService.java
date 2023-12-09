@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.turn.Commissioning;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.OrbitalStructure;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.misc.Operationable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -23,6 +24,7 @@ import de.yuga.spacebattle.backend.repositories.turn.JobRepository;
 import de.yuga.spacebattle.backend.services.caches.OperationalCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
+import de.yuga.spacebattle.backend.services.constructables.spacecraft.OrbitalStructureService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
@@ -60,6 +62,9 @@ public class OperationalService {
     @Nonnull
     private final JobRepository jobRepository;
 
+    @Nonnull
+    private final OrbitalStructureService orbitalStructureService;
+
     @Autowired
     public OperationalService(@Nonnull final WarShipService warShipService,
                               @Nonnull final ConstructionService constructionService,
@@ -67,7 +72,8 @@ public class OperationalService {
                               @Nonnull final PlanetService planetService,
                               @Nonnull final ColonizationService colonizationService,
                               @Nonnull final OperationalCache operationalCache,
-                              @Nonnull final JobRepository jobRepository) {
+                              @Nonnull final JobRepository jobRepository,
+                              @Nonnull final OrbitalStructureService orbitalStructureService) {
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
@@ -75,6 +81,7 @@ public class OperationalService {
         this.colonizationService = Preconditions.checkNotNull(colonizationService, "colonizationService must not be empty");
         this.operationalCache = Preconditions.checkNotNull(operationalCache, "operationalCache must not be empty");
         this.jobRepository = Preconditions.checkNotNull(jobRepository, "jobService must not be empty");
+        this.orbitalStructureService = Preconditions.checkNotNull(orbitalStructureService, "orbitalStructureService must not be empty");
     }
 
     @Nonnull
@@ -444,5 +451,35 @@ public class OperationalService {
         if (!alsoActivated.isEmpty()) {
             operationalCache.activateConstructions(today, planet, alsoActivated);
         }
+
+        final List<OrbitalStructure> activatedToo = activateOrbitalConstructions(today, planet);
+        if (!activatedToo.isEmpty()) {
+            operationalCache.activateOrbitalConstructions(today, planet, activatedToo);
+        }
+    }
+
+    @Nonnull
+    private List<OrbitalStructure> activateOrbitalConstructions(@Nonnull final Tick today,
+                                                                @Nonnull final Planet planet) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+        final ResourceDeposit deposit = planet.getResourceDeposit();
+        final List<OrbitalStructure> operationals = new ArrayList<>();
+        final List<OrbitalStructure> inoperationals = orbitalStructureService.findAliveInoperationalForPlanet(planet.getId());
+        for (final OrbitalStructure inoperational : inoperationals) {
+            final CrewRequirement costs = inoperational.getCosts().getCrewRequirement();
+            final PayingPossibleResult result = deposit.isPayingPossible(costs);
+            if (result.isValidForPops()) {
+                deposit.updateCrew(costs, ECalculationType.SUBTRACT);
+                inoperational.setOperational();
+                operationals.add(inoperational);
+            }
+        }
+        if (!operationals.isEmpty()) {
+            orbitalStructureService.saveAll(operationals);
+            planetService.save(planet);
+        }
+        return operationals;
     }
 }

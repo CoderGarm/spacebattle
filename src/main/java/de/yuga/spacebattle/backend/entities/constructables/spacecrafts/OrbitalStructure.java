@@ -9,6 +9,8 @@ import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 import de.yuga.spacebattle.backend.entities.misc.Operationable;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.EDepositType;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -22,7 +24,6 @@ import javax.validation.constraints.NotNull;
 @Table(name = "orbitalStructure")
 @AttributeOverride(name = "id", column = @Column(name = "idOrbitalStructure"))
 public class OrbitalStructure extends Operationable implements HasOwner {
-
 
     @Nonnull
     @NotNull
@@ -111,5 +112,14 @@ public class OrbitalStructure extends Operationable implements HasOwner {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37).append(id).toHashCode();
+    }
+
+    @Nonnull
+    public ResourceDeposit getCosts() {
+        final ResourceDeposit result = new ResourceDeposit(EDepositType.COSTS);
+        for (int i = 0; i < amount; i++) {
+            result.add(module.getCosts());
+        }
+        return result;
     }
 }

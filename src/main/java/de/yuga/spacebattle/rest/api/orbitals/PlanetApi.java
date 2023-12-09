@@ -276,7 +276,9 @@ public class PlanetApi extends BaseApi {
 
         final Job job = jobService.createShipyardJob(planet, jobLoad);
         if (JobService.isLocalInstaJobPossible(planet, job)) {
-            planetTickRunner.tickInstaShipyard(job, tickTimeService.getToday());
+            final Tick today = tickTimeService.getToday();
+            planetTickRunner.tickInstaShipyard(job, today);
+            operationalService.operateInoperationals(today, planet);
         }
         return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(job, getPreferredLanguage()));
     }

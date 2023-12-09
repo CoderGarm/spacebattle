@@ -3,7 +3,9 @@ package de.yuga.spacebattle.rest.dto.turn;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.OrbitalStructure;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.rest.dto.spacecrafts.OrbitalModule;
 import de.yuga.spacebattle.rest.dto.turn.resources.WarshipsByFleet;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -35,6 +37,11 @@ public class Commissioning {
 
     @Nonnull
     @JsonProperty
+    @Schema(required = true, description = "The orbital constructions which are newly active.")
+    private List<OrbitalModule> orbitalModules = new ArrayList<>();
+
+    @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The activated warships to their fleet.")
     private final List<WarshipsByFleet> warships = new ArrayList<>();
 
@@ -51,6 +58,17 @@ public class Commissioning {
             this.constructions = constructions.stream()
                     .map(c -> new de.yuga.spacebattle.rest.dto.constructables.buildings.Construction(c, preferredLanguage))
                     .collect(Collectors.toList());
+        }
+
+        final List<OrbitalStructure> orbitalStructures = commissioning.getOrbitalStructures();
+        if (!orbitalStructures.isEmpty()) {
+            for (final OrbitalStructure orbitalStructure : orbitalStructures) {
+                final de.yuga.spacebattle.backend.entities.combined.spacecrafts.OrbitalModule module = orbitalStructure.getModule();
+                final int amount = orbitalStructure.getAmount();
+                for (int i = 0; i < amount; i++) {
+                    this.orbitalModules.add(new OrbitalModule(module, preferredLanguage));
+                }
+            }
         }
 
         final List<WarShip> warships = commissioning.getWarships();

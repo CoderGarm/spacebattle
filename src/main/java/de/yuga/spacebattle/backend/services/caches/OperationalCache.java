@@ -6,12 +6,14 @@ import com.google.gson.GsonBuilder;
 import de.yuga.spacebattle.backend.dto.turn.Commissioning;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.OrbitalStructure;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.services.caches.file.CacheFileWriter;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
+import de.yuga.spacebattle.backend.services.constructables.spacecraft.OrbitalStructureService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -48,15 +50,20 @@ public class OperationalCache extends BaseCache {
     @Nonnull
     private final WarShipService warShipService;
 
+    @Nonnull
+    private final OrbitalStructureService orbitalStructureService;
+
     @Autowired
     public OperationalCache(@Nonnull final CacheFileWriter cacheFileWriter,
                             @Nonnull final TickTimeService tickTimeService,
                             @Nonnull final ConstructionService constructionService,
-                            @Nonnull final WarShipService warShipService) {
+                            @Nonnull final WarShipService warShipService,
+                            @Nonnull final OrbitalStructureService orbitalStructureService) {
         this.cacheFileWriter = Preconditions.checkNotNull(cacheFileWriter, "cacheFileWriter must not be empty");
         this.tickTimeService = Preconditions.checkNotNull(tickTimeService, "tickTimeService must not be empty");
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
+        this.orbitalStructureService = Preconditions.checkNotNull(orbitalStructureService, "orbitalStructureService must not be empty");
     }
 
     @PostConstruct
@@ -79,13 +86,19 @@ public class OperationalCache extends BaseCache {
         final Map<Integer, WarShip> warShipMap = warShipService.findByIds(warshipIDs).stream()
                 .collect(Collectors.toMap(AbstractEntityKey::getId, Function.identity()));
 
+        final Set<Integer> orbitalStructureIDs = dtos.values().stream().flatMap(Collection::stream).map(CommissioningDto::getWarships).flatMap(Collection::stream).collect(Collectors.toSet());
+        final Map<Integer, OrbitalStructure> orbitalStructureMap = orbitalStructureService.findAll(orbitalStructureIDs).stream()
+                .collect(Collectors.toMap(AbstractEntityKey::getId, Function.identity()));
+
         dtos.forEach((key, values) -> values.forEach(dto -> {
             final Tick tick = tickMap.get(getTickId(key));
             final Set<Construction> constructions = dto.getConstructions().stream().map(constructionMap::get).collect(Collectors.toSet());
             final List<WarShip> warships = dto.getWarships().stream().map(warShipMap::get).collect(Collectors.toList());
+            final List<OrbitalStructure> orbitalStructures = dto.getOrbitalConstructions().stream().map(orbitalStructureMap::get).collect(Collectors.toList());
 
             constructions.stream().filter(Objects::nonNull).forEach(c -> addConstruction(tick, c.getPlanet(), c));
             warships.stream().filter(Objects::nonNull).forEach(c -> addWarship(tick, c.getShipyard(), c));
+            orbitalStructures.stream().filter(Objects::nonNull).forEach(c -> addOrbitalStructure(tick, Objects.requireNonNull(c.getOrbit().getPlanet()), c));
         }));
     }
 
@@ -175,6 +188,18 @@ public class OperationalCache extends BaseCache {
         dropAndWrite(today, planet.getHumanOwner());
     }
 
+    public void activateOrbitalConstructions(@Nonnull final Tick today,
+                                             @Nonnull final Planet planet,
+                                             @Nonnull final List<OrbitalStructure> operationals) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(planet.getHumanOwner(), "planet.getOwner() must not be empty");
+        Preconditions.checkNotNull(operationals, "operationals must not be empty");
+
+        addOrbitalConstructions(today, planet, operationals);
+        dropAndWrite(today, planet.getHumanOwner());
+    }
+
     private void addConstructions(@Nonnull final Tick today, @Nonnull final Planet planet, @Nonnull final Set<Construction> operationals) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
@@ -186,6 +211,19 @@ public class OperationalCache extends BaseCache {
                 .findFirst()
                 .ifPresentOrElse(commissioning -> commissioning.addConstructions(operationals),
                         () -> commissionings.add(new Commissioning(today, planet, operationals)));
+    }
+
+    private void addOrbitalConstructions(@Nonnull final Tick today, @Nonnull final Planet planet, @Nonnull final List<OrbitalStructure> operationals) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(operationals, "operationals must not be empty");
+
+        final Set<Commissioning> commissionings = getTodayCommissioning(today, Objects.requireNonNull(planet.getHumanOwner()));
+        commissionings.stream()
+                .filter(c -> c.getPlanet().equals(planet))
+                .findFirst()
+                .ifPresentOrElse(commissioning -> commissioning.addOrbitalConstructions(operationals),
+                        () -> commissionings.add(new Commissioning(today, planet).withOrbitalStructures(operationals)));
     }
 
     private void addWarships(@Nonnull final Tick today, @Nonnull final Planet planet, @Nonnull final List<WarShip> operationals) {
@@ -231,20 +269,43 @@ public class OperationalCache extends BaseCache {
                         () -> commissionings.add(new Commissioning(today, planet, operationals)));
     }
 
+    private void addOrbitalStructure(@Nonnull final Tick today, @Nonnull final Planet planet, @Nonnull final OrbitalStructure operational) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(operational, "operational must not be empty");
+
+        final Set<Commissioning> commissionings = getTodayCommissioning(today, Objects.requireNonNull(planet.getHumanOwner()));
+        final List<OrbitalStructure> operationals = new ArrayList<>();
+        operationals.add(operational);
+        commissionings.stream()
+                .filter(c -> c.getPlanet().equals(planet))
+                .findFirst()
+                .ifPresentOrElse(commissioning -> commissioning.addOrbitalConstructions(operationals),
+                        () -> commissionings.add(new Commissioning(today, planet).withOrbitalStructures(operationals)));
+    }
+
     @Schema
     private static class CommissioningDto {
 
         @Nonnull
         @JsonProperty
-        private final List<Integer> constructions;
+        private List<Integer> constructions = new ArrayList<>();
 
         @Nonnull
         @JsonProperty
-        private final List<Integer> warships;
+        private List<Integer> warships = new ArrayList<>();
+
+        @Nonnull
+        @JsonProperty
+        private List<Integer> orbitalConstructions = new ArrayList<>();
+
+        public CommissioningDto() {
+        }
 
         public CommissioningDto(@Nonnull final Set<Commissioning> commissionings) {
             this.constructions = commissionings.stream().map(Commissioning::getConstructions).flatMap(Collection::stream).map(AbstractEntityKey::getId).collect(Collectors.toList());
             this.warships = commissionings.stream().map(Commissioning::getWarships).flatMap(Collection::stream).map(AbstractEntityKey::getId).collect(Collectors.toList());
+            this.orbitalConstructions = commissionings.stream().map(Commissioning::getOrbitalStructures).flatMap(Collection::stream).map(AbstractEntityKey::getId).collect(Collectors.toList());
         }
 
         @Nonnull
@@ -255,6 +316,11 @@ public class OperationalCache extends BaseCache {
         @Nonnull
         public List<Integer> getWarships() {
             return warships;
+        }
+
+        @Nonnull
+        public List<Integer> getOrbitalConstructions() {
+            return orbitalConstructions;
         }
     }
 }

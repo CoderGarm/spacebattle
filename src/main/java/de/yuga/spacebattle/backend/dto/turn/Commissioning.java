@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.dto.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.OrbitalStructure;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
@@ -28,8 +29,11 @@ public class Commissioning {
     @Nonnull
     private List<WarShip> warships = new ArrayList<>();
 
-    private Commissioning(@Nonnull final Tick today,
-                          @Nonnull final Planet planet) {
+    @Nonnull
+    private List<OrbitalStructure> orbitalStructures = new ArrayList<>();
+
+    public Commissioning(@Nonnull final Tick today,
+                         @Nonnull final Planet planet) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
@@ -54,6 +58,12 @@ public class Commissioning {
     }
 
     @Nonnull
+    public Commissioning withOrbitalStructures(@Nonnull final List<OrbitalStructure> operationals) {
+        this.orbitalStructures = Preconditions.checkNotNull(operationals, "operationals must not be empty");
+        return this;
+    }
+
+    @Nonnull
     public Tick getToday() {
         return today;
     }
@@ -75,6 +85,12 @@ public class Commissioning {
         });
     }
 
+    public void addOrbitalConstructions(@Nonnull final List<OrbitalStructure> operationals) {
+        Preconditions.checkNotNull(operationals, "operationals must not be empty");
+
+        this.orbitalStructures.addAll(operationals);
+    }
+
     @Nonnull
     public Set<Construction> getConstructions() {
         return constructions;
@@ -91,6 +107,11 @@ public class Commissioning {
     @Nonnull
     public List<WarShip> getWarships() {
         return warships;
+    }
+
+    @Nonnull
+    public List<OrbitalStructure> getOrbitalStructures() {
+        return orbitalStructures;
     }
 
     public boolean isToday(@Nonnull final Tick tick) {

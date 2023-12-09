@@ -14,6 +14,11 @@ Damit wird das Early-Game gestrafft ohne dem grundsätzlichen Ziel eines geruhsa
 Bisher habe ich es allerdings mit der Entschleunigung am Anfang fast bis zum Stillstand übertrieben. Das Early-Game bot viel zu wenig Möglichkeiten, etwas zu tun und war damit
 bestimmt etwas weniger anziehend, als es sein sollte.
 
+Dazu gab es einige coole Neuerungen an der Map.  
+Die wichtigste ist wohl, dass wir die jährlichen Änderungen der Systemzugehörigkeit sehen können.  
+Das ist der Grundstein für das geplante Combat Theater, bei dem alle relevanten - also im Wiki aufgezeichneten - Flottenbewegungen und Schlachten samt deren Ergebnisse zu sehen
+sein werden.
+
 #### Gameplay
 
 In diesem Release geht es um das Konzept der strategischen Tiefe.
@@ -88,9 +93,6 @@ In diesem Release geht es um das Konzept der strategischen Tiefe.
 
 10. Glückstreffer im Kampf sind ganz massiv generfed.  
     Bisher war es möglich selbst den größten Superdreadnought per Glückstreffer in die Eloka oder den Antrieb auszuschalten.
-
-todo. orbitals auf map darstellen
-todo. orbitals aktivieren
 
 #### Diverses
 
