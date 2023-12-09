@@ -11,8 +11,8 @@ Das erste Release im neuen Zyklus und es hat es in sich!
 Der wohl wichtigste Punkt für neue Spieler ist die Gameplay-8.  
 Damit wird das Early-Game gestrafft ohne dem grundsätzlichen Ziel eines geruhsamen, entschleunigendes Spiels ohne hektische Elemente, zuwider zu laufen.
 
-Bisher habe ich es mit der Entschleunigung fast bis zum Stillstand übertrieben. Das Early-Game bot viel zu wenig Möglichkeiten, etwas zu tun und war damit bestimmt etwas weniger
-anziehend, als es sein sollte.
+Bisher habe ich es allerdings mit der Entschleunigung am Anfang fast bis zum Stillstand übertrieben. Das Early-Game bot viel zu wenig Möglichkeiten, etwas zu tun und war damit
+bestimmt etwas weniger anziehend, als es sein sollte.
 
 #### Gameplay
 
@@ -91,7 +91,6 @@ In diesem Release geht es um das Konzept der strategischen Tiefe.
 
 todo. orbitals auf map darstellen
 todo. orbitals aktivieren
-todo. besserer Schutz für eloka & Co im kampf
 
 #### Diverses
 
@@ -105,11 +104,9 @@ todo. besserer Schutz für eloka & Co im kampf
 5. Die Links zum Subreddit, der direkte Kartenzugriff und die Seite für die Karte im deutschen Fandom befinden sich nun im Burger Menü.
 6. Es gibt eine Infomeldung, wenn man eine Kolonie starten möchte.  
    Da eine neue Kolonie sehr viele Personen bindet, kann dadurch die Aktivierung von Gebäuden und Schiffen gestört werden.
+7. Mit der Suche im Chat sucht man nun nach Spielern per Usernamen und den Rollenspiel-Namen.
 
 todo. star label at map clickable
-
-todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
-todo. chat search: empire name, ingame name, username
 
 ### Bugs fixed
 
@@ -128,7 +125,8 @@ todo. chat search: empire name, ingame name, username
 
 #### next steps
 
-todo. calculate pop deposit in demand calculation for displaying
+todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
+todo. calculate pop deposit in demand calculation for displaying?
 
 todo. manual transfer to fleet overrides capacity
 todo. education building shows income at level 0

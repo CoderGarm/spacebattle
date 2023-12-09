@@ -47,11 +47,8 @@ public class ChatApi extends BaseApi {
     @Autowired
     public ChatApi(@Nonnull final UserService userService,
                    @Nonnull final ChatService chatService) {
-        Preconditions.checkNotNull(userService, "userService shouldn't be null!");
-        Preconditions.checkNotNull(chatService, "messageThreadService shouldn't be null!");
-
-        this.userService = userService;
-        this.chatService = chatService;
+        this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
+        this.chatService = Preconditions.checkNotNull(chatService, "messageThreadService shouldn't be null!");
     }
 
     @GetMapping(value = "{idUser}")

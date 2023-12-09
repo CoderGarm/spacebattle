@@ -25,7 +25,11 @@ import java.util.stream.Collectors;
 
 @NamedQueries({
         @NamedQuery(name = "User.getAll", query = "SELECT u FROM User u WHERE u.dType = de.yuga.spacebattle.backend.enums.OwnerType.USER"),
-        @NamedQuery(name = "User.findByLikeUsername", query = "SELECT u FROM User u WHERE UPPER(u.username) LIKE UPPER(:username)"),
+        @NamedQuery(name = "User.findByLikeUsername", query = "SELECT u FROM User u WHERE (UPPER(u.username) LIKE UPPER(:username)) " +
+                "OR (UPPER(u.rolePlaySetting.firstname) LIKE UPPER(:username)) " +
+                "OR (UPPER(u.rolePlaySetting.surname) LIKE UPPER(:username)) " +
+                "OR (UPPER(u.rolePlaySetting.title) LIKE UPPER(:username)) " +
+                "OR (UPPER(u.rolePlaySetting.titleAbbreviation) LIKE UPPER(:username))"),
         @NamedQuery(name = "User.findByUsernameAndEmail", query = "SELECT u FROM User u WHERE UPPER(u.username) = UPPER(:username) AND UPPER(u.userSetting.email) = UPPER(:email)"),
         @NamedQuery(name = "User.getWithKnownStarSystems", query = "SELECT u FROM User u LEFT JOIN FETCH u.knownStarSystems r WHERE u.id = :idUser"),
         @NamedQuery(name = "User.findByUsernameExact", query = "SELECT u.id FROM User u WHERE UPPER(u.username) = UPPER(:username)"), /* todo reduce to boolean */
