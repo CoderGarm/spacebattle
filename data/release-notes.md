@@ -78,6 +78,9 @@ In diesem Release geht es um das Konzept der strategischen Tiefe.
 
 9. Neue Kolonien gibt es jetzt nur noch mit Reisezeit, siehe Punkt 7.
 
+todo. orbitals auf map darstellen
+todo. orbitals aktivieren
+
 #### Diverses
 
 1. Der Tech Tree ist in der Library zu sehen, dann kann man sich dort einen Überblick verschaffen, welche Forschungen für die Module notwendig sind.
@@ -89,8 +92,9 @@ In diesem Release geht es um das Konzept der strategischen Tiefe.
    Markt an jedem Punkt der Galaxie verlässliche Reisezeiten für die Handelskonvois anbieten.
 5. Die Links zum Subreddit, der direkte Kartenzugriff und die Seite für die Karte im deutschen Fandom befinden sich nun im Burger Menü.
 
-todo. star label at map clickable
+todo. info message on planning a colonization for heavy need of pops
 todo. calculate pop deposit in demand calculation for displaying
+todo. star label at map clickable
 
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
 todo. chat search: empire name, ingame name, username
