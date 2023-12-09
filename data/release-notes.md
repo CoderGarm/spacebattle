@@ -88,6 +88,7 @@ In diesem Release geht es um das Konzept der strategischen Tiefe.
 
 todo. orbitals auf map darstellen
 todo. orbitals aktivieren
+todo. besserer Schutz für eloka & Co im kampf
 
 #### Diverses
 
@@ -99,9 +100,9 @@ todo. orbitals aktivieren
    Auch die Asgard Association, die Midgard Federation, der Handelsbund von Rembrandt und die neu gegründete Meroa Trading Association bieten ihre Dienst an. Damit sollte der Spot
    Markt an jedem Punkt der Galaxie verlässliche Reisezeiten für die Handelskonvois anbieten.
 5. Die Links zum Subreddit, der direkte Kartenzugriff und die Seite für die Karte im deutschen Fandom befinden sich nun im Burger Menü.
+6. Es gibt eine Infomeldung, wenn man eine Kolonie starten möchte.  
+   Da eine neue Kolonie sehr viele Personen bindet, kann dadurch die Aktivierung von Gebäuden und Schiffen gestört werden.
 
-todo. info message on planning a colonization for heavy need of pops
-todo. calculate pop deposit in demand calculation for displaying
 todo. star label at map clickable
 
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
@@ -115,8 +116,16 @@ todo. chat search: empire name, ingame name, username
 4. Man kann keine Jobs in der Werft mehr starten, wenn die Werft nicht wenigstens auf Level 1 aktiv ist.
 5. Instajobs für Gebäude aktivieren das Gebäude genauso als würden sie durch den Tickumbruch aktiviert werden.
 6. Die Gebäuderatschläge für neue Spieler haben nun die richtige Reihenfolge.
+7. Die Migration ist angepasst. Das ist gewissermaßen das zweite Major-"Feature" dieses Releases.  
+   Ich bin damit nicht 100%ig zufrieden, aber ich hoffe, es ist ein Schritt in die richtige Richtung.  
+   Ein Planet wird keine Leute abgeben, die gebraucht werden. Ein Planet wird nur Leute aufnehmen, die wirklich benötigt werden. **Ich bitte euch da, ein Auge drauf zu haben!**  
+   Der "Auto-Mover" wird nicht von selbst priorisieren, alle planetaren Bedürfnisse sind gleichwertig.  
+   **Das ist ein sehr komplexe und schwer zu testende Mechanik, deswegen werde ich nach jeder Änderung erstmal lernen müssen, ob sie sich wie gewünscht ausgewirkt hat.  
+   Bis auf Weiteres bleibt deswegen der manuelle Pop-Transport aktiv.
 
-todo. migration must respect pop demand on own planet and not exceed the others planet needs
+#### next steps
+
+todo. calculate pop deposit in demand calculation for displaying
 
 todo. manual transfer to fleet overrides capacity
 todo. education building shows income at level 0
@@ -125,8 +134,6 @@ todo. battlereport new advisory but no new present
 
 todo. chats von anderen werden automatisch gelesen
 todo. unload fleet on ship transfer or something
-
-#### next steps
 
 todo. distance based duration
 
