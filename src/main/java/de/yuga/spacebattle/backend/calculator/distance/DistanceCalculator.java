@@ -13,7 +13,9 @@ import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.EStarClassType;
 import de.yuga.spacebattle.backend.enums.ETechnologyType;
+import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
+import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
@@ -28,6 +30,9 @@ import java.util.stream.Collectors;
 public class DistanceCalculator {
 
     public final static MathContext MC_HU = new MathContext(8, RoundingMode.HALF_UP);
+
+    @Nonnull
+    public static final Acceleration PUBLIC_TRANSPORT_ACCELERATION = new Acceleration(50000, EAccelerationMetric.G, EHyperBand.EPSILON);
 
     /**
      * Returns the amount of digits.
@@ -315,5 +320,27 @@ public class DistanceCalculator {
         }).ifPresent(e -> clone.convertToMetricWithScale(e.getKey()));
 
         return clone;
+    }
+
+    public static int getTimeToTravel(@Nonnull final StarSystem origin,
+                                      @Nonnull final StarSystem target) {
+        Preconditions.checkNotNull(origin, "origin must not be empty");
+        Preconditions.checkNotNull(target, "target must not be empty");
+
+        // 154 gamma is so fucking slow
+        return DistanceCalculator.calculateTimeToTravel(ETechnologyType.MILITARY, PUBLIC_TRANSPORT_ACCELERATION,
+                new FleetOrbit(Orbit.getCenterOrbit(), origin),
+                new FleetOrbit(Orbit.getCenterOrbit(), target));
+    }
+
+    public static int getTimeToTravel(@Nonnull final Planet origin,
+                                      @Nonnull final Planet target) {
+        Preconditions.checkNotNull(origin, "origin must not be empty");
+        Preconditions.checkNotNull(target, "target must not be empty");
+
+        // 154 gamma is so fucking slow
+        return DistanceCalculator.calculateTimeToTravel(ETechnologyType.MILITARY, PUBLIC_TRANSPORT_ACCELERATION,
+                new FleetOrbit(origin),
+                new FleetOrbit(target));
     }
 }

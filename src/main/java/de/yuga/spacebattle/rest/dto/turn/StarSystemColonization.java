@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.rest.dto.turn;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
@@ -25,22 +26,32 @@ import static de.yuga.spacebattle.backend.entities.orbitals.StarSystem.STAR_SYST
 public class StarSystemColonization {
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The star system to select for colonization.")
     private StarSystem starSystem;
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The star system with its distance to all known systems by id.")
     private Map<Integer, Distance> distanceMap;
 
     @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The star system with its travel time to all known systems by id.")
+    private Map<Integer, Integer> travelTimeMap;
+
+    @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The costs to buy the colonization information about the system.")
     private String costsToBuyColonizationInformation;
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The costs to colonize the planet by idPlanet.")
     private final Map<Integer, ResourceDeposit> costsToColonization = new HashMap<>();
 
     @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The costs to colonize the planet by idPlanet.")
     private Map<Integer, Colonization> colonizationsByPlanet;
 
@@ -59,6 +70,11 @@ public class StarSystemColonization {
                 .stream()
                 .collect(Collectors.toMap(AbstractEntityKey::getId,
                         sys -> DistanceCalculator.getOrbitalDistance(starSystem.getOrbit(), sys.getOrbit()).convertToMetric(STAR_SYSTEM_STANDARD_METRIC)));
+
+        this.travelTimeMap = knownSystems
+                .stream()
+                .collect(Collectors.toMap(AbstractEntityKey::getId,
+                        sys -> DistanceCalculator.getTimeToTravel(starSystem, sys)));
 
         costsToBuyColonizationInformation = setColoInformationCosts(starSystem);
         setColonizationCosts(starSystem);

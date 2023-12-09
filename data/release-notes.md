@@ -7,7 +7,12 @@ article orbital modules
 
 ### Features
 
-Ok, ich bin vielleicht etwas eskaliert. Das Release hat es in sich!
+Das erste Release im neuen Zyklus und es hat es in sich!  
+Der wohl wichtigste Punkt für neue Spieler ist die Gameplay-8.  
+Damit wird das Early-Game gestrafft ohne dem grundsätzlichen Ziel eines geruhsamen, entschleunigendes Spiels ohne hektische Elemente, zuwider zu laufen.
+
+Bisher habe ich es mit der Entschleunigung fast bis zum Stillstand übertrieben. Das Early-Game bot viel zu wenig Möglichkeiten, etwas zu tun und war damit bestimmt etwas weniger
+anziehend, als es sein sollte.
 
 #### Gameplay
 
@@ -76,7 +81,10 @@ In diesem Release geht es um das Konzept der strategischen Tiefe.
    Anfang angetan haben und über zwei Wochen bis zur ersten Kolonie ausdauern mussten 🙈  
    Ich finds mega, dass ihr dabei seid und wie weit wir dieses Spiel gebracht haben** 🥳
 
-9. Neue Kolonien gibt es jetzt nur noch mit Reisezeit, siehe Punkt 7.
+9. Neue Kolonien gibt es jetzt nur noch mit Reisezeit, siehe Punkt 7.  
+   Spielmechaniken müssen immer ausgeglichen sein, es muss Vorteile und Nachteile geben.  
+   Weit entfernte Außenposten sind z.B. fehlende Aufmunitionierung und Reparatur des Angreifers effektiv unangreifbar. Unangreifbarkeit muss man teuer erkaufen, ab jetzt wird das
+   über eine lange Wartezeit bis zur fertigen Kolonie passieren. Dem entgegen gibt es eine verkürzte Reisezeit des Kolonieschiffs, wenn man in der Nähe siedelt.
 
 todo. orbitals auf map darstellen
 todo. orbitals aktivieren

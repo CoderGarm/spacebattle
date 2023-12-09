@@ -4,11 +4,9 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
-import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.TransportJob;
-import de.yuga.spacebattle.backend.enums.ETechnologyType;
 import de.yuga.spacebattle.backend.repositories.turn.TransportJobRepository;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
@@ -21,8 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
-import static de.yuga.spacebattle.backend.services.turn.resources.MarketplaceService.PUBLIC_TRANSPORT_ACCELERATION;
 
 @Service
 public class TransportJobService {
@@ -101,7 +97,7 @@ public class TransportJobService {
 
         if (transportJob == null) {
             // create if not present or job is not unique for the ship
-            final int timeToTravel = TransportJobService.getTimeToTravel(origin, destination);
+            final int timeToTravel = DistanceCalculator.getTimeToTravel(origin, destination);
             transportJob = new TransportJob(today, destination, warShip, timeToTravel);
         }
 
@@ -129,17 +125,6 @@ public class TransportJobService {
             warShip.setMothball(destination);
             warShipService.save(warShip);
         }
-    }
-
-    public static int getTimeToTravel(@Nonnull final Planet origin,
-                                      @Nonnull final Planet target) {
-        Preconditions.checkNotNull(origin, "origin must not be empty");
-        Preconditions.checkNotNull(target, "target must not be empty");
-
-        // 154 gamma is so fucking slow
-        return DistanceCalculator.calculateTimeToTravel(ETechnologyType.MILITARY, PUBLIC_TRANSPORT_ACCELERATION,
-                new FleetOrbit(origin),
-                new FleetOrbit(target));
     }
 
     @Nullable

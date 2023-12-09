@@ -2,7 +2,6 @@ package de.yuga.spacebattle.backend.services.turn.resources;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
-import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.turn.resources.trade.TradesInTimeframe;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
@@ -18,8 +17,6 @@ import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.enums.ETechnologyType;
-import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
-import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
 import de.yuga.spacebattle.backend.repositories.turn.resource.trade.TradeOfferRepository;
 import de.yuga.spacebattle.backend.repositories.turn.resource.trade.TradedResourceRepository;
 import de.yuga.spacebattle.backend.services.account.OwnerService;
@@ -37,10 +34,11 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.PUBLIC_TRANSPORT_ACCELERATION;
+
 @Service
 public class MarketplaceService {
 
-    public static final Acceleration PUBLIC_TRANSPORT_ACCELERATION = new Acceleration(50000, EAccelerationMetric.G, EHyperBand.EPSILON);
     @Nonnull
     private final TickTimeService tickService;
 

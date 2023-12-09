@@ -35,9 +35,9 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
     public Orbit() {
     }
 
-    public Orbit(final Distance xCoordinate, final Distance yCoordinate) {
-        this.xCoordinate = xCoordinate.clone();
-        this.yCoordinate = yCoordinate.clone();
+    public Orbit(@Nonnull final Distance xCoordinate, @Nonnull final Distance yCoordinate) {
+        this.xCoordinate = Preconditions.checkNotNull(xCoordinate, "xCoordinate must not be empty").clone();
+        this.yCoordinate = Preconditions.checkNotNull(yCoordinate, "yCoordinate must not be empty").clone();
     }
 
     public Orbit(@Nonnull final de.yuga.spacebattle.rest.dto.orbitals.Orbit orbit) {

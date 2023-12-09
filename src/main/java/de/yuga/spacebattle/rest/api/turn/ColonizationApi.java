@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
+import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
@@ -112,6 +113,27 @@ public class ColonizationApi extends BaseApi {
 
         final de.yuga.spacebattle.backend.entities.turn.Colonization colonization = colonizationService.initiateColonization(user, p);
         return ResponseEntity.ok(new Colonization(colonization));
+    }
+
+    @GetMapping("duration/{idPlanet}")
+    @Operation(summary = "Fetches the time which is needed for the colonization of a planet.", operationId = "fetchColonizingTime",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Integer.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> fetchColonizingTime(@PathVariable final int idPlanet) {
+
+        final int idUser = getIdUser();
+        final Planet toColonize = planetService.find(idPlanet);
+        if (toColonize == null || toColonize.getOwner() != null) {
+            return ResponseEntity.ok(999);
+        }
+        final Planet mainPlanet = planetService.findMainPlanet(idUser);
+        final int timeToTravel = DistanceCalculator.getTimeToTravel(mainPlanet, toColonize);
+        return ResponseEntity.ok(timeToTravel);
     }
 
     @DeleteMapping("/{idColonization}")

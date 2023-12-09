@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.services.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
+import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.OrbitalDistanceMarker;
 import de.yuga.spacebattle.backend.entities.account.User;
@@ -147,19 +148,11 @@ public class ColonizationService {
         Preconditions.checkNotNull(mainPlanet, "mainPlanet must not be empty");
         Preconditions.checkNotNull(toColonize, "toColonize must not be empty");
 
-        final int timeToTravel = TransportJobService.getTimeToTravel(mainPlanet, toColonize); // fixme make it visible in the UI
+        final int timeToTravel = DistanceCalculator.getTimeToTravel(mainPlanet, toColonize);
         final CrewRequirement crewRequirement = ColonizationCostCalculator.getColonizationCosts(toColonize).getCrewRequirement();
         return save(new Colonization(owner, toColonize, crewRequirement, timeToTravel, true));
     }
 
-    /**
-     * Starts a colonizing mission with the fixed duration of 10 ticks.
-     * todo ticks based on distance between whatever planets
-     *
-     * @param user       the user who starts the colonization
-     * @param toColonize the planet to colonize
-     * @return the created colonization
-     */
     @Nonnull
     private Colonization startColonizingPlanet(@Nonnull final User user, @Nonnull final Planet toColonize) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
@@ -178,20 +171,14 @@ public class ColonizationService {
         final CrewRequirement crewRequirement = colonizationCosts.getCrewRequirement();
         debitorDeposit.updateCrew(crewRequirement, ECalculationType.SUBTRACT);
 
-        final Colonization colonization = new Colonization(user, toColonize, crewRequirement, 10);
+        final int timeToTravel = DistanceCalculator.getTimeToTravel(mainPlanet, toColonize);
+        final Colonization colonization = new Colonization(user, toColonize, crewRequirement, timeToTravel);
         save(colonization);
         planetService.save(mainPlanet);
         userService.save(user);
         return colonization;
     }
 
-    /**
-     * Colonizes a planet for an owner.
-     * Currently, this implies that the new owner will get all information about the system without buying it especially.
-     *
-     * @param colonization the running colonization
-     * @return the colonized planet
-     */
     @Nonnull
     @Transactional(propagation = Propagation.REQUIRED)
     public Planet colonizePlanet(@Nonnull final Colonization colonization) {

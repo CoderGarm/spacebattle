@@ -53,10 +53,9 @@ public class FleetOrbit {
     }
 
     public FleetOrbit(@Nullable final Orbit orbit, @Nullable final StarSystem system) {
-        Preconditions.checkNotNull(orbit, "orbit must not be empty");
         Preconditions.checkNotNull(system, "system must not be empty");
 
-        this.orbit = orbit.clone();
+        this.orbit = orbit != null ? orbit.clone() : null;
         this.system = system;
     }
 
