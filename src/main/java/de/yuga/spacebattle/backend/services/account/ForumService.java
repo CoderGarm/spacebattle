@@ -145,9 +145,10 @@ public class ForumService {
             numberOfStackToFirstUnread = countMessagesInForumThread(idForumThread);
         }
         // calculates the page index by accident -> if decimal place is present, type 'int' takes the integer part obviously
-        final int page = numberOfStackToFirstUnread <= size ? 0 : numberOfStackToFirstUnread / size;
+        int page = numberOfStackToFirstUnread <= size ? 0 : numberOfStackToFirstUnread / size;
         // if the last message of a page will be shown, this implicit integer part will not work because the answer is one number to big
-        return (numberOfStackToFirstUnread % size == 0) ? page - 1 : page;
+        page = (numberOfStackToFirstUnread % size == 0) ? page - 1 : page;
+        return Math.max(page, 0);
     }
 
     @Nonnull
