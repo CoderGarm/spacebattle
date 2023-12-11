@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.rest.api.combined.spacecrafts;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.OrbitalStructure;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
@@ -527,6 +528,28 @@ public class FleetApi extends BaseApi {
         }
         final Tick today = tickTimeService.getToday();
         return ResponseEntity.ok(new TransportJob(today, transportJob, Set.of(), getPreferredLanguage()));
+    }
+
+    @GetMapping(value = WARSHIP_POOLING_ENDPOINT + "/duration/{idWarship}/{idPlanet}")
+    @Operation(summary = "Renames a fleet.", operationId = "getTransferTime",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Integer.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getTransferTime(@PathVariable final int idWarship, @PathVariable final int idPlanet) {
+
+        final de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip warShip = warShipService.findById(idWarship);
+        final Planet destination = planetService.find(idPlanet);
+
+        Preconditions.checkNotNull(warShip, "warShip must not be empty");
+        Preconditions.checkNotNull(warShip.getMothball(), "warShip.getMothball() must not be empty");
+        Preconditions.checkNotNull(destination, "destination must not be empty");
+
+        final int timeToTravel = DistanceCalculator.getTimeToTravel(warShip.getMothball(), destination);
+        return ResponseEntity.ok(timeToTravel);
     }
 
     @PutMapping(value = RETIRE_FLEET_ENDPOINT + "/{idFleet}")
