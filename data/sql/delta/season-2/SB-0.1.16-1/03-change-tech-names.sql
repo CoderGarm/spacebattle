@@ -72,4 +72,18 @@ update propulsion set technicalTypeName = 'Samarkand' where technicalTypeName = 
 update propulsion set technicalTypeName = 'Irian' where technicalTypeName = 'P-EI-M';
 update propulsion set technicalTypeName = 'Kendall' where technicalTypeName = 'P-TI-M';
 
+-- rename again
+update launcher set technicalTypeName = 'Delta Dart AMM' where technicalTypeName = 'Delta Dart';
+update launcher set technicalTypeName = 'FarFire ASM' where technicalTypeName = 'FarFire';
+update launcher set technicalTypeName = 'Agni ASM' where technicalTypeName = 'Agni';
+update launcher set technicalTypeName = 'Holly ASM' where technicalTypeName = 'Holly';
+update launcher set technicalTypeName = 'Doombud ASM' where technicalTypeName = 'Doombud';
+
+
+update missile set technicalTypeName = 'Dart AMM' where technicalTypeName = 'Dart';
+update missile set technicalTypeName = 'Spiculum ASM' where technicalTypeName = 'Spiculum';
+update missile set technicalTypeName = 'Javelin ASM' where technicalTypeName = 'Javelin';
+update missile set technicalTypeName = 'Pilum ASM' where technicalTypeName = 'Pilum';
+update missile set technicalTypeName = 'Manipel ASM' where technicalTypeName = 'Manipel';
+
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'change tech names', '0.1.16-3');

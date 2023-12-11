@@ -228,45 +228,12 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = orbitalModuleService.findAll().isEmpty();
+        final boolean transformationNeeded = false;
         if (transformationNeeded) {
-            createOrbitalModules();
-            createMoreNPCs();
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
         }
-    }
-
-    private void createMoreNPCs() {
-        NonPlayerCharacter npc = nonPlayerCharacterService.createNPC("Silesia Confederacy");
-        StarSystem sys = starsystemService.findByName("Silesia");
-        Planet planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
-        if (planet == null) {
-            sys = starsystemService.findByName("Sachsen");
-            planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
-        }
-        colonizeNPC(planet, npc);
-
-        npc = nonPlayerCharacterService.createNPC("Midgard Federation");
-        sys = starsystemService.findByName("Midgard");
-        planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
-        colonizeNPC(planet, npc);
-
-        npc = nonPlayerCharacterService.createNPC("Asgard Association");
-        sys = starsystemService.findByName("Asgard");
-        planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
-        colonizeNPC(planet, npc);
-
-        npc = nonPlayerCharacterService.createNPC("Rembrandt Trade Union");
-        sys = starsystemService.findByName("Rembrandt");
-        planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
-        colonizeNPC(planet, npc);
-
-        npc = nonPlayerCharacterService.createNPC("Meroa Trading Association");
-        sys = starsystemService.findByName("Meroa");
-        planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
-        colonizeNPC(planet, npc);
     }
 
     @SuppressWarnings("unused")
@@ -1278,6 +1245,7 @@ public class MasterOfTheUniverseService {
     }
 
     public static String switchName(@Nonnull final String name) {
+        // todo please replace me!
         String result = "";
         result = whenThen("Glyptodon", "A-I-CL", name);
         result = whenThen("Armadillo", "A-I-CA", result);
@@ -1297,11 +1265,11 @@ public class MasterOfTheUniverseService {
         result = whenThen("Dragonlance", "E-I-DN", result);
         result = whenThen("Longbottom", "E-I-SD", result);
 
-        result = whenThen("Delta Dart", "L-LACIC", result);
-        result = whenThen("FarFire", "L-LACIM", result);
-        result = whenThen("Agni", "L-DDIM", result);
-        result = whenThen("Holly", "L-CAIM", result);
-        result = whenThen("Doombud", "L-DNIM", result);
+        result = whenThen("Delta Dart AMM", "L-LACIC", result);
+        result = whenThen("FarFire ASM", "L-LACIM", result);
+        result = whenThen("Agni ASM", "L-DDIM", result);
+        result = whenThen("Holly ASM", "L-CAIM", result);
+        result = whenThen("Doombud ASM", "L-DNIM", result);
 
         result = whenThen("Scoreshot", "D-LACIP", result);
         result = whenThen("StarGuard", "D-CLIP", result);
@@ -1332,11 +1300,11 @@ public class MasterOfTheUniverseService {
         result = whenThen("Mycenaean", "S-I-DN", result);
         result = whenThen("Hauberk", "S-I-SD", result);
 
-        result = whenThen("Dart", "M-LAC30-80-I-C", result);
-        result = whenThen("Spiculum", "M-LAC180-20-I-E", result);
-        result = whenThen("Javelin", "M-DD180-20-I-E", result);
-        result = whenThen("Pilum", "M-CA180-20-I-E", result);
-        result = whenThen("Manipel", "M-DN180-20-I-E", result);
+        result = whenThen("Dart AMM", "M-LAC30-80-I-C", result);
+        result = whenThen("Spiculum ASM", "M-LAC180-20-I-E", result);
+        result = whenThen("Javelin ASM", "M-DD180-20-I-E", result);
+        result = whenThen("Pilum ASM", "M-CA180-20-I-E", result);
+        result = whenThen("Manipel ASM", "M-DN180-20-I-E", result);
 
         result = whenThen("Breen", "P-NI-C", result);
         result = whenThen("CoreTek", "P-NI-M", result);

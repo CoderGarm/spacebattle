@@ -49,6 +49,13 @@ public class HyperprintSensorService {
                 .filter(s -> !s.getDetachment().getFleet().getMove().isInterstellarTravel())
                 .collect(Collectors.toSet());
 
+        final Set<WarShip> interSystemMovementBeforeStart = ships.stream()
+                .filter(s -> s.getDetachment() != null)
+                .filter(s -> s.getDetachment().getFleet() != null)
+                .filter(s -> s.getDetachment().getFleet().getMove() != null)
+                .filter(s -> s.getDetachment().getFleet().getMove().isInterstellarTravel())
+                .filter(s -> s.getDetachment().getFleet().getMove().getTicksLeft() == s.getDetachment().getFleet().getMove().getOriginalDuration())
+                .collect(Collectors.toSet());
 
         //noinspection DataFlowIssue
         final Map<StarSystem, List<WarShip>> shipsBySystem = inSystem.stream()
@@ -58,6 +65,14 @@ public class HyperprintSensorService {
         interplanetaryMovement.forEach(w -> {
             //noinspection DataFlowIssue
             final StarSystem key = w.getDetachment().getFleet().getMove().getDestinationOrbit().getSystem();
+            final List<WarShip> orDefault = shipsBySystem.getOrDefault(key, new ArrayList<>());
+            orDefault.add(w);
+            shipsBySystem.put(key, orDefault);
+        });
+
+        interSystemMovementBeforeStart.forEach(w -> {
+            //noinspection DataFlowIssue
+            final StarSystem key = w.getDetachment().getFleet().getMove().getOriginOrbit().getSystem();
             final List<WarShip> orDefault = shipsBySystem.getOrDefault(key, new ArrayList<>());
             orDefault.add(w);
             shipsBySystem.put(key, orDefault);

@@ -11,10 +11,9 @@ article orbital modules
 2. Ghost ships: Man kann eigene und alliierte Flotten auf der Karte unbeschränkt sehen.  
    Ja, ich weiß, wenn man den Transponder aktiv hat, kann jeder alles sehen. Aber für den ersten Schritt wird es ausreichen ;)
 3. Jedes Schiff hat nun Kraft seines Impellerantriebs die Fähigkeit Hyperabdrücke grundsätzlich aufzuspüren.
-
-todo. konfusion wg interplanetary (sensor ja) und intersystem (sensor nein) movement
-todo rename rockets AMM ASM
-
+4. Es werden keine "leeren Flotten" im Orbit mehr angezeigt, wenn man im Planeten-Dashboard ist.
+5. Die Namen von Raketen und Werfern weisen nur die Kürzel 'AMM' für Anti-Missile Missile und 'ASM' Anti-Ship Missile auf.
+6. Schiffe auf dem Weg in den Hyperraum steuern ihre Sensorstärke zur Systemaufklärung bei, sofern sie noch innerhalb des Systems sind - also im Tick des Losfliegens.
 
 ### Features
 
