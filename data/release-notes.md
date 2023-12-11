@@ -5,6 +5,17 @@ article orbital modules
     - battles by conflict and date
     - all battles by date
 
+### Issues fixed
+
+1. Die orbitalen Strukturen in planetaren Dashboard werden nun aktualisiert.
+2. Ghost ships: Man kann eigene und alliierte Flotten auf der Karte unbeschränkt sehen.  
+   Ja, ich weiß, wenn man den Transponder aktiv hat, kann jeder alles sehen. Aber für den ersten Schritt wird es ausreichen ;)
+3. Jedes Schiff hat nun Kraft seines Impellerantriebs die Fähigkeit Hyperabdrücke grundsätzlich aufzuspüren.
+
+todo. konfusion wg interplanetary (sensor ja) und intersystem (sensor nein) movement
+todo rename rockets AMM ASM
+
+
 ### Features
 
 Das erste Release im neuen Zyklus und es hat es in sich!  

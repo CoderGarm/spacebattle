@@ -70,13 +70,14 @@ public class HyperprintSensorService {
             shipsBySystem.put(key, orDefault);
         });
 
+        // 10 is base sensor value for every ship by design
         final Map<StarSystem, Integer> maxSensorStrengthByShip = shipsBySystem.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey,
                         e -> e.getValue().stream()
-                                .map(m -> m.getCapabilityValue(EModuleType.ELECTRONIC_WARFARE))
+                                .map(m -> m.getCapabilityValue(EModuleType.ELECTRONIC_WARFARE) > 0 ? m.getCapabilityValue(EModuleType.ELECTRONIC_WARFARE) : 10)
                                 .sorted(Integer::compare)
                                 .reduce((o1, o2) -> o2)
-                                .orElse(0)
+                                .orElse(10)
                 ));
 
         final Map<StarSystem, Integer> combinedSensorStrengthByArrayStructures = structures.entrySet().stream()
@@ -84,7 +85,7 @@ public class HyperprintSensorService {
                         e -> e.getValue().stream()
                                 .filter(m -> m.getModule().getEffect().getModifiedProperty() == EModuleType.ELECTRONIC_WARFARE)
                                 .map(m -> m.getModule().getBaseValue())
-                                .reduce(0, Integer::sum)
+                                .reduce(10, Integer::sum)
                 ));
 
         final Map<StarSystem, Integer> result = new HashMap<>();
