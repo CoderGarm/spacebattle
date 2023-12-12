@@ -5,138 +5,15 @@ article orbital modules
     - battles by conflict and date
     - all battles by date
 
-### Issues fixed
-
-1. Die orbitalen Strukturen in planetaren Dashboard werden nun aktualisiert.
-2. Ghost ships: Man kann eigene und alliierte Flotten auf der Karte unbeschränkt sehen.  
-   Ja, ich weiß, wenn man den Transponder aktiv hat, kann jeder alles sehen. Aber für den ersten Schritt wird es ausreichen ;)
-3. Jedes Schiff hat nun Kraft seines Impellerantriebs die Fähigkeit Hyperabdrücke grundsätzlich aufzuspüren.
-4. Es werden keine "leeren Flotten" im Orbit mehr angezeigt, wenn man im Planeten-Dashboard ist.
-5. Die Namen von Raketen und Werfern weisen nur die Kürzel 'AMM' für Anti-Missile Missile und 'ASM' Anti-Ship Missile auf.
-6. Schiffe auf dem Weg in den Hyperraum steuern ihre Sensorstärke zur Systemaufklärung bei, sofern sie noch innerhalb des Systems sind - also im Tick des Losfliegens.
-
 ### Features
-
-Das erste Release im neuen Zyklus und es hat es in sich!  
-Der wohl wichtigste Punkt für neue Spieler ist die Gameplay-8.  
-Damit wird das Early-Game gestrafft ohne dem grundsätzlichen Ziel eines geruhsamen, entschleunigendes Spiels ohne hektische Elemente, zuwider zu laufen.
-
-Bisher habe ich es allerdings mit der Entschleunigung am Anfang fast bis zum Stillstand übertrieben. Das Early-Game bot viel zu wenig Möglichkeiten, etwas zu tun und war damit
-bestimmt etwas weniger anziehend, als es sein sollte.
-
-Dazu gab es einige coole Neuerungen an der Map.  
-Die wichtigste ist wohl, dass wir die jährlichen Änderungen der Systemzugehörigkeit sehen können.  
-Das ist der Grundstein für das geplante Combat Theater, bei dem alle relevanten - also im Wiki aufgezeichneten - Flottenbewegungen und Schlachten samt deren Ergebnisse zu sehen
-sein werden.
 
 #### Gameplay
 
-In diesem Release geht es um das Konzept der strategischen Tiefe.
-
-1. Es gibt eine neue Forschung für Gravitationsanomaliedetektoren. Hat man die entsprechenden Level geforscht, kann man die verschiedenen Orbitalmodule bauen.
-
-2. Es gibt einen neuen Typ Gebäude... und auch gleichzeitig ein Raumschiff. Aber ohne Antrieb, wie ein Gebäude halt. Auf jeden Fall wird das später mal ein Raumfort.  
-   Jetzt ist es allerdings ein autarker Satellit, der für die Aufklärung der Hypergrenze zuständig ist.  
-   Umso stärker die Sensorleistung, umso genauer ist die Auflösung der Hyperabdrücke für einkommende Flotten. Natürlich haben Raumschiffe ebenfalls Gravitationssensoren, Teufel,
-   der ganze Antrieb ist ein Grav-Sensor.  
-   Beide Effekte interferieren nicht miteinander, aber der stärkere Sensor ist genauer.
-3. Damit gibt es nun auch einen Nutzen für die beiden bisher nicht verwendeten Ressourcen Rare Elements und Heavy Metals.
-
-4. Es gibt noch mehr orbitale Module als nur das GADA (fachsprachlich: Gravitationsanomaliedetektorarray), man kann orbitale Habitate bauen.  
-   Die Habitate erhöhen den Pop Mining Factor des Planeten und auch den Wohnraum. Indirekt also die Geburtenrate, sozusagen den Pop Faktor. Für alle englisch sprechenden,
-   entschuldigt den fremdsprachlichen Wortwitz.  
-   Dieser Effekt ist statistisch im **Journal of Orbital Science** beschrieben:
-   > Orbitin ist eine hypothetische Substanz, die in den äußeren Schichten von Orbiten vorkommt und sich mit der Zeit in orbitalen Habitaten ansammelt.  
-   > Diese Substanz wird durch die Wechselwirkungen zwischen der Atmosphäre des Planeten und den orbitalen Strukturen erzeugt.  
-   > Die Entdeckung von Orbitin erfolgte durch Raumsonden, die speziell dafür konzipiert wurden, Proben aus orbitalen Habitaten zu sammeln und zu analysieren.  
-   > Die Forschungsergebnisse, veröffentlicht im fiktiven "Journal of Orbital Science" (Band 42, Ausgabe 3, Seiten 245-259), legen nahe, dass Orbitin eine einzigartige Rolle bei
-   der Erhöhung der Lebensqualität auf dem Planeten spielt.  
-   > Die Substanz interagiert positiv mit biologischen Systemen und fördert das Wohlbefinden von Lebewesen, indem sie den Stoffwechsel verbessert, den Stressabbau unterstützt und
-   die kognitiven Funktionen stimuliert.  
-   > Die Quelle von Orbitin in orbitalen Habitaten könnte eine mögliche Erklärung für das allgemeine Wohlbefinden von Menschen und anderen Lebewesen in diesen Strukturen sein.  
-   > Darüber hinaus könnte die gezielte Freisetzung von Orbitin in die planetare Atmosphäre positive Effekte auf die Gesundheit der Bewohner haben.
-   >
-   > -- <cite>Δημιουργικό Προ-εκπαιδευμένος Μετασχηματιστής</cite>
-
-   Abschließend ist zu sagen, dass diese Strukturen momentan nicht zerstört werden können. Da es sich gerade bei den Habitaten um zivile Einrichtungen mit besonderem
-   Schutzbedürfnis handelt, sind vorher Schutzmöglichkeiten notwendig. Natürlich auch ein Flottenbefehl, zivile Einrichtungen nicht anzugreifen. Aber das folgt später.
-
-5. Das bedeutet in letzter Konsequenz, dass die **Genauigkeit in der Hyperabdruckauswertung** vollkommen vom Eloka-Wert des Systems abhängig ist.  
-   Damit sind Wachschiffe im System von überragender aufklärerischer Bedeutung - egal ob sie auf Missionen sind oder sich im Orbit befinden. Alle eigenen Schiffe und orbitale
-   Module im System beeinflussen die systemweite Aufklärung.
-
-   **Gibt es keine Ortung, gibt es keine Aufklärung. *Gar keine!***
-
-   Die neue Mechanik hat zwei Ebenen und eine strukturelle Komplexität zur Auswertung von Hyperabdrücken:
-    - Höchste Eloka-Punkte im System / 10 (aufgerundet) = Anzahl der individuell auflösbaren Schiffe
-    - Höchste Eloka-Punkte im System * Kilotonne = auflösbare individuelle Tonnage
-    - Orbitale Sensorarrays sind so aufgebaut, dass einzelne Module kombiniert werden können. Das kennen wir z.B. vom VLA (very large array) Radio Telescope aus New Mexico von
-      Alterde. Deswegen werden die Sensorpunkte von Arrays addiert - im Gegensatz zu Schiffssystemen, die in sich abgeschlossen agieren und bei denen immer nur der genaueste Sensor
-      Informationen liefert.
-
-   Ein Beispiel:  
-   Das CA-Electronic Warfare-Modul hat 150 Eloka-Punkte und kann damit die Tonnage von Schiffe bis zu 150 Kilotonnen ungefähr einschätzen und 15 Punktquellen individuell
-   auflösen.  
-   Befindet sch ein orbitales Sensorarray mit 1000 Punkten im System, gilt ist natürlich die Bestimmung des Sensorarrays genauer und damit werden die Sensorwerte des schweren
-   Kreuzers aus dem Beispiel ignoriert.
-
-6. Ein kleiner, aber wichtiger Change im Job-Modul: Die Konstruktionspunkte werden direkt beim Start eines Jobs abgezogen und auf die Konstruktionsleistung verrechnet.  
-   Auf absehbare Zeit bekommt man die Punkte nicht zurück, wenn man einen Job abbricht, die Ressourcen werden allerdings erstattet.
-
-7. Schiffe, die mit zivilen Frachtern transferiert werden, benötigen - analog dem Marktplatz - eine Weile um anzukommen.  
-   Es geht an dieser Stelle nur um die Schiffe.  
-   Alle anderen manuell eingerichteten Transporte werden ebenfalls eine entfernungsabhängige Zeitspanne zum Transfer benötigen. Dafür sind aber noch ein paar Vorarbeiten notwendig,
-   um die ich mich in diesem Release nicht kümmern möchte.
-
-8. Neue Spieler haben es nun etwas leichter.  
-   Ein frisch kolonisierter Hauptplanet hat genug Baupunkte am Start, um damit die ersten Bildungsgebäude bauen zu können.  
-   Mit dieser und den Änderungen der letzten Releases kann man damit **im ersten Tick die erste Kolonie planen**.  
-   Die Idee dahinter ist natürlich, den bisher sehr zähen Anfang ganz krass zu reduzieren.  
-   **An dieser Stelle ein ganz großes Dankeschön an die alten Hasen, die sich den bisherigen
-   Anfang angetan haben und über zwei Wochen bis zur ersten Kolonie ausdauern mussten 🙈  
-   Ich finds mega, dass ihr dabei seid und wie weit wir dieses Spiel gebracht haben** 🥳
-
-9. Neue Kolonien gibt es jetzt nur noch mit Reisezeit, siehe Punkt 7.  
-   Spielmechaniken müssen immer ausgeglichen sein, es muss Vorteile und Nachteile geben.  
-   Weit entfernte Außenposten sind z.B. fehlende Aufmunitionierung und Reparatur des Angreifers effektiv unangreifbar. Unangreifbarkeit muss man teuer erkaufen, ab jetzt wird das
-   über eine lange Wartezeit bis zur fertigen Kolonie passieren. Dem entgegen gibt es eine verkürzte Reisezeit des Kolonieschiffs, wenn man in der Nähe siedelt.
-
-10. Glückstreffer im Kampf sind ganz massiv generfed.  
-    Bisher war es möglich selbst den größten Superdreadnought per Glückstreffer in die Eloka oder den Antrieb auszuschalten.
-
 #### Diverses
-
-1. Der Tech Tree ist in der Library zu sehen, dann kann man sich dort einen Überblick verschaffen, welche Forschungen für die Module notwendig sind.
-2. Die Bibliothek und der Tech Tree enthalten für Schiffsmodule und die neuen orbitalen Strukturen jetzt alle relevanten Informationen. Die Schiffswerft ist momentan unverändert,
-   allerdings haben die Module zwecks besserem Überblick sprechende Namen bekommen.
-3. Es gibt Hinweise zum Beschützen von Konvois direkt am Handelsplatz.
-4. Die Silesianische Konföderation ist nun Handelspartner für Spot Offers in ihrem Sektor.  
-   Auch die Asgard Association, die Midgard Federation, der Handelsbund von Rembrandt und die neu gegründete Meroa Trading Association bieten ihre Dienst an. Damit sollte der Spot
-   Markt an jedem Punkt der Galaxie verlässliche Reisezeiten für die Handelskonvois anbieten.
-5. Die Links zum Subreddit, der direkte Kartenzugriff und die Seite für die Karte im deutschen Fandom befinden sich nun im Burger Menü.
-6. Es gibt eine Infomeldung, wenn man eine Kolonie starten möchte.  
-   Da eine neue Kolonie sehr viele Personen bindet, kann dadurch die Aktivierung von Gebäuden und Schiffen gestört werden.
-7. Mit der Suche im Chat sucht man nun nach Spielern per Usernamen und den Rollenspiel-Namen.
-8. Wenn man auf der Sternenkarte ein System sucht und es auf der Liste wählt, wird es genauso ausgewählt, als würde man darauf klicken.
-9. Dicht zusammen stehende Sterne auf der Karte sind besser zum Klicken erreichbar.  
-   Ursprünglich sollten die Namen zum Anklicken und Selektieren der Sterne genutzt werden, aber das hat sich als nicht wirklich zielführend heraus gestellt, weil man dann das selbe
-   Problem hat.  
-   Deswegen sind nun alle Texte auf der Map im Hintergrund, man kann sie nicht mehr anklicken, das erleichtert hoffentlich die Systemauswahl.
 
 ### Bugs fixed
 
-1. Waffen haben nun die korrekte Tonnage und den korrekten Kampfwert.
-2. Tooltip bei den Schiffswerten des Battle Reports ist unterdrückt.
-3. Forschungspunkte werden nun hoffentlich korrekt berechnet.
-4. Man kann keine Jobs in der Werft mehr starten, wenn die Werft nicht wenigstens auf Level 1 aktiv ist.
-5. Instajobs für Gebäude aktivieren das Gebäude genauso als würden sie durch den Tickumbruch aktiviert werden.
-6. Die Gebäuderatschläge für neue Spieler haben nun die richtige Reihenfolge.
-7. Die Migration ist angepasst. Das ist gewissermaßen das zweite Major-"Feature" dieses Releases.  
-   Ich bin damit nicht 100%ig zufrieden, aber ich hoffe, es ist ein Schritt in die richtige Richtung.  
-   Ein Planet wird keine Leute abgeben, die gebraucht werden. Ein Planet wird nur Leute aufnehmen, die wirklich benötigt werden. **Ich bitte euch da, ein Auge drauf zu haben!**  
-   Der "Auto-Mover" wird nicht von selbst priorisieren, alle planetaren Bedürfnisse sind gleichwertig.  
-   **Das ist ein sehr komplexe und schwer zu testende Mechanik, deswegen werde ich nach jeder Änderung erstmal lernen müssen, ob sie sich wie gewünscht ausgewirkt hat.  
-   Bis auf Weiteres bleibt deswegen der manuelle Pop-Transport aktiv.
+todo. ship move exploit: create fleet, switch plant, move ship to fleet, dann speichern
 
 #### next steps
 
