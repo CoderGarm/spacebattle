@@ -20,6 +20,10 @@ public interface TransportJobRepository extends JpaRepository<TransportJob, Inte
     List<TransportJob> findAllForToday();
 
     @Nullable
+    @Query("SELECT t FROM TransportJob t WHERE t.isDeleted = false")
+    List<TransportJob> findAllPending();
+
+    @Nullable
     @Query("SELECT t FROM TransportJob t WHERE t.isDeleted = false AND t.owner.id = :idUser AND t.origin.id = :idPlanet")
     List<TransportJob> findAllFor(final int idUser, final int idPlanet);
 

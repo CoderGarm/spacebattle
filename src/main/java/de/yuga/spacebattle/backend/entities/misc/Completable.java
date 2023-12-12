@@ -10,14 +10,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
-import java.math.MathContext;
-import java.math.RoundingMode;
 
 @MappedSuperclass
 public class Completable extends Deletable {
-
-    @Nonnull
-    public static final MathContext MATH_CONTEXT = new MathContext(4, RoundingMode.UP);
 
     @NotNull
     @Column(columnDefinition = "decimal(19, 0)")

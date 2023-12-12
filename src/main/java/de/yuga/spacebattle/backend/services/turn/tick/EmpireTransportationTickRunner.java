@@ -67,9 +67,22 @@ public class EmpireTransportationTickRunner implements TickRunner {
     private void tickWarshipMoves() {
         Preconditions.checkNotNull(today, "today must not be empty");
 
-        final List<TransportJob> transportJobs = transportJobService.findAllForToday();
-        transportJobs.forEach(t -> fleetService.executeTransferPooledWarship(t.getOwner(), t.getShips(), t.getDestination()));
-        transportJobService.finishAll(today, transportJobs);
+        final List<TransportJob> transportJobs = transportJobService.findAllPending();
+        final List<TransportJob> toExecute = new ArrayList<>();
+        final List<TransportJob> toStore = new ArrayList<>();
+        for (final TransportJob transportJob : transportJobs) {
+            transportJob.tick();
+            if (transportJob.getTicksLeft() <= 0) {
+                transportJob.setFinished(today);
+                toExecute.add(transportJob);
+            } else {
+                toStore.add(transportJob);
+            }
+        }
+
+        toExecute.forEach(t -> fleetService.executeTransferPooledWarship(t.getOwner(), t.getShips(), t.getDestination()));
+        transportJobService.finishAll(today, toExecute);
+        transportJobService.saveAll(toStore);
     }
 
     /**

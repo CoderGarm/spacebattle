@@ -15,10 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class TransportJobService {
@@ -156,6 +153,11 @@ public class TransportJobService {
     }
 
     @Nonnull
+    public List<TransportJob> findAllPending() {
+        return Objects.requireNonNullElse(transportJobRepository.findAllPending(), new ArrayList<>());
+    }
+
+    @Nonnull
     public List<TransportJob> findAllFor(final int idUser, final int idPlanet) {
         return Objects.requireNonNullElse(transportJobRepository.findAllFor(idUser, idPlanet), new ArrayList<>());
     }
@@ -171,5 +173,11 @@ public class TransportJobService {
         Preconditions.checkNotNull(toRemove, "toRemove must not be empty");
 
         transportJobRepository.deleteAll(toRemove);
+    }
+
+    public void saveAll(@Nonnull final Collection<TransportJob> toStore) {
+        Preconditions.checkNotNull(toStore, "toStore must not be empty");
+
+        transportJobRepository.saveAll(toStore);
     }
 }
