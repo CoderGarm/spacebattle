@@ -214,7 +214,9 @@ public class FleetApi extends BaseApi {
         final int idUser = getIdUser();
         final Map<StarSystem, Integer> sensorStrength = hyperprintSensorService.findHyperPrintSensorStrengthBySystemForUser(idUser);
         final Set<Integer> systemIDs = sensorStrength.keySet().stream().map(StarSystem::getId).collect(Collectors.toSet());
-        final List<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> fleets = fleetService.findAllAliveFleetsInSystems(systemIDs);
+        final Set<de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet> fleets = new HashSet<>(fleetService.findAllAliveFleetsInSystems(systemIDs));
+        fleets.addAll(fleetService.findAllFleetsWithMovement(idUser));
+
         return ResponseEntity.ok(fleets.stream().filter(f -> !f.getAliveShips().isEmpty())
                 .map(f -> new FleetMarker(f, sensorStrength))
                 .collect(Collectors.toSet()));

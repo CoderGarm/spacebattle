@@ -15,9 +15,7 @@ article orbital modules
 
 1. The shipyard's job payload will be cleared on selecting another planet.
 2. The colonizations travel time in the dialog will be shown correctly.
-
-todo. ship move exploit: create fleet, switch plant, move ship to fleet, dann speichern
-todo. fleet calc hyper limit position in backend - georges error
+3. Own fleet on interstellar flights will be shown again.
 
 #### next steps
 
@@ -79,6 +77,7 @@ todo. quoting in chat und forum
 todo. preview in chat und forum
 todo. fleet detachment submit button disable when no change
 todo. wurmlochbrücken nutzbar machen vor nächster season!
+todo. fleet calc hyper limit position in backend - georges error -> numeric overflow?
 
 #### for later
 
