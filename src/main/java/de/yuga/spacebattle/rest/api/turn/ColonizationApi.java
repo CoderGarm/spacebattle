@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -184,7 +185,13 @@ public class ColonizationApi extends BaseApi {
         final List<de.yuga.spacebattle.backend.entities.turn.Colonization> colonizationsForUser = colonizationService.findAllForUser(idUser);
         final List<de.yuga.spacebattle.backend.entities.turn.Colonization> c = colonizationService.findAllForSystem(system);
         colonizationsForUser.addAll(c);
-        final StarSystemColonization result = new StarSystemColonization(system, knownStarSystems, colonizationsForUser);
+
+        final de.yuga.spacebattle.backend.entities.orbitals.StarSystem homeSystem = knownStarSystems.stream()
+                .filter(sys -> sys.getPlanets().stream().anyMatch(planet -> planet.isMain() && Objects.requireNonNull(planet.getOwner()).getId() == idUser))
+                .findFirst()
+                .orElseThrow(() -> new NullPointerException("Oh my dear, you should live somewhere!"));
+
+        final StarSystemColonization result = new StarSystemColonization(system, knownStarSystems, colonizationsForUser, homeSystem);
         return ResponseEntity.ok(result);
     }
 
@@ -239,7 +246,7 @@ public class ColonizationApi extends BaseApi {
         final List<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> all = starSystemService.findAll();
         final Set<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> knownStarSystems = userService.getKnownStarSystems(idUser);
         final List<de.yuga.spacebattle.backend.entities.turn.Colonization> colonizationsForUser = colonizationService.findAll();
-        return ResponseEntity.ok(StarSystemColonizationListConverter.create(all, knownStarSystems, colonizationsForUser));
+        return ResponseEntity.ok(StarSystemColonizationListConverter.create(idUser, all, knownStarSystems, colonizationsForUser));
     }
 
     @GetMapping(value = ALL_PENDING_COLONIZATIONS_ENDPOINT)
@@ -261,7 +268,8 @@ public class ColonizationApi extends BaseApi {
         final Set<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> all = colonizationsForUser.stream()
                 .map(c -> c.getTarget().getSystem())
                 .collect(Collectors.toSet());
-        return ResponseEntity.ok(StarSystemColonizationListConverter.create(all, knownStarSystems, colonizationsForUser));
+
+        return ResponseEntity.ok(StarSystemColonizationListConverter.create(idUser, all, knownStarSystems, colonizationsForUser));
     }
 
     @GetMapping(value = FREE_SYSTEMS_ENDPOINT)

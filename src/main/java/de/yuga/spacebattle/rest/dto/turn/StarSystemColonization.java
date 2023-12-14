@@ -60,10 +60,12 @@ public class StarSystemColonization {
 
     public StarSystemColonization(@Nonnull final de.yuga.spacebattle.backend.entities.orbitals.StarSystem starSystem,
                                   @Nonnull final Collection<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> knownSystems,
-                                  @Nonnull final List<de.yuga.spacebattle.backend.entities.turn.Colonization> colonizations) {
+                                  @Nonnull final List<de.yuga.spacebattle.backend.entities.turn.Colonization> colonizations,
+                                  @Nonnull final de.yuga.spacebattle.backend.entities.orbitals.StarSystem homeSystem) {
         Preconditions.checkNotNull(starSystem, "starSystem shouldn't be null!");
         Preconditions.checkNotNull(knownSystems, "knownSystems shouldn't be null!");
         Preconditions.checkNotNull(colonizations, "colonizations shouldn't be null!");
+        Preconditions.checkNotNull(homeSystem, "homeSystem must not be empty");
 
         this.starSystem = new StarSystem(starSystem);
         this.distanceMap = knownSystems
@@ -74,7 +76,7 @@ public class StarSystemColonization {
         this.travelTimeMap = knownSystems
                 .stream()
                 .collect(Collectors.toMap(AbstractEntityKey::getId,
-                        sys -> DistanceCalculator.getTimeToTravel(starSystem, sys)));
+                        sys -> DistanceCalculator.getTimeToTravel(homeSystem, sys)));
 
         costsToBuyColonizationInformation = setColoInformationCosts(starSystem);
         setColonizationCosts(starSystem);

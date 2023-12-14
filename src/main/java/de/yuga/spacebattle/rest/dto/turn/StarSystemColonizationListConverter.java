@@ -6,10 +6,7 @@ import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -17,7 +14,8 @@ import java.util.stream.Collectors;
 public class StarSystemColonizationListConverter {
 
 
-    public static List<StarSystemColonization> create(@Nonnull final Collection<StarSystem> allSystems,
+    public static List<StarSystemColonization> create(final int idUser,
+                                                      @Nonnull final Collection<StarSystem> allSystems,
                                                       @Nonnull final Collection<StarSystem> knownStarSystems,
                                                       @Nonnull final Collection<Colonization> colonizationsForUser) {
         Preconditions.checkNotNull(allSystems, "allSystems shouldn't be null!");
@@ -29,11 +27,16 @@ public class StarSystemColonizationListConverter {
                 .collect(Collectors.groupingBy(c -> c.getTarget().getSystem(),
                         Collectors.mapping(Function.identity(), Collectors.toList())));
 
+        final StarSystem homeSystem = knownStarSystems.stream()
+                .filter(sys -> sys.getPlanets().stream().anyMatch(planet -> planet.isMain() && Objects.requireNonNull(planet.getOwner()).getId() == idUser))
+                .findFirst()
+                .orElseThrow(() -> new NullPointerException("Oh my dear, you should live somewhere!"));
+
         return allSystems
                 .stream()
                 .map(sys -> {
                     final List<Colonization> colonizations = starSystemColonizationMap.computeIfAbsent(sys, starSystem -> new ArrayList<>());
-                    return new StarSystemColonization(sys, knownStarSystems, colonizations);
+                    return new StarSystemColonization(sys, knownStarSystems, colonizations, homeSystem);
                 })
                 .collect(Collectors.toList());
     }

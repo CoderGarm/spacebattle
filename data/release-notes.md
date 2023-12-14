@@ -13,9 +13,23 @@ article orbital modules
 
 ### Bugs fixed
 
+1. The shipyard's job payload will be cleared on selecting another planet.
+2. The colonizations travel time in the dialog will be shown correctly.
+
 todo. ship move exploit: create fleet, switch plant, move ship to fleet, dann speichern
+todo. fleet calc hyper limit position in backend - georges error
 
 #### next steps
+
+---
+wormhole travel:
+berechne weg von ziel zu allen termini dichter als entfernung zum start
+berechne weg von start zu allen termini 'in reichweite'
+berechne normalen weg
+nimm was kürzer ist
+schiffe auf move tauchen auf keinen scannern auf?
+---
+
 
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
 todo. calculate pop deposit in demand calculation for displaying?
@@ -50,7 +64,7 @@ todo. star map filter für flotten
 - moves ...
 - Sensorreichweite?
 
-todo. forum management
+todo. forum management is more important, e.g. sticky posts
 
 todo. schadensprofil von schiffsklassen und flotten darstellen, Bedienmannschaften von Modulen darstellen
 todo. look & feel wie in büchern
