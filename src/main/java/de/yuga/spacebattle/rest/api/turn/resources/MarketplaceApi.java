@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.rest.api.turn.resources;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.dto.turn.resources.trade.TradesInTimeframe;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
@@ -212,7 +213,7 @@ public class MarketplaceApi extends BaseApi {
         PreconditionWebHelper.checkNotNull(planet, "planet must not be empty");
 
         return ResponseEntity.ok(trades.stream().map(tradeOffer -> {
-            final int toTravel = MarketplaceService.getTimeToTravel(tradeOffer, planet);
+            final int toTravel = DistanceCalculator.getTimeToTravel(tradeOffer.getOrigin(), planet);
             final TradeOffer offer = new TradeOffer(tradeOffer);
             offer.setTravelTime(toTravel);
             return offer;

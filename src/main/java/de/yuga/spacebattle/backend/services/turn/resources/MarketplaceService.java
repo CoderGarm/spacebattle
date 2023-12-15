@@ -7,7 +7,6 @@ import de.yuga.spacebattle.backend.dto.turn.resources.trade.TradesInTimeframe;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.misc.Deletable;
-import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
@@ -16,7 +15,6 @@ import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradeOffer;
 import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.enums.ETechLevel;
-import de.yuga.spacebattle.backend.enums.ETechnologyType;
 import de.yuga.spacebattle.backend.repositories.turn.resource.trade.TradeOfferRepository;
 import de.yuga.spacebattle.backend.repositories.turn.resource.trade.TradedResourceRepository;
 import de.yuga.spacebattle.backend.services.account.OwnerService;
@@ -33,8 +31,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.PUBLIC_TRANSPORT_ACCELERATION;
 
 @Service
 public class MarketplaceService {
@@ -124,17 +120,6 @@ public class MarketplaceService {
         return tradedResource;
     }
 
-    public static int getTimeToTravel(@Nonnull final TradeOffer tradeOffer,
-                                      @Nonnull final Planet target) {
-        Preconditions.checkNotNull(tradeOffer, "tradeOffer must not be empty");
-        Preconditions.checkNotNull(target, "target must not be empty");
-
-        final FleetOrbit origin = new FleetOrbit(tradeOffer.getOrigin());
-        final FleetOrbit destination = new FleetOrbit(target);
-        // 154 gamma is so fucking slow
-        return DistanceCalculator.calculateTimeToTravel(ETechnologyType.MILITARY, PUBLIC_TRANSPORT_ACCELERATION, origin, destination);
-    }
-
     @Nonnull
     private TradedResource checkAndAllocatePayment(@Nonnull final Tick today,
                                                    @Nonnull final TradeOffer tradeOffer,
@@ -158,7 +143,7 @@ public class MarketplaceService {
             destination.getResourceDeposit().pay(EResourceType.CREDITS, price);
             planetService.save(destination);
         }
-        final int toTravel = MarketplaceService.getTimeToTravel(tradeOffer, destination);
+        final int toTravel = DistanceCalculator.getTimeToTravel(tradeOffer.getOrigin(), destination);
         final TradedResource tradedResource = new TradedResource(today, toTravel, tradeOffer, buyer, destination);
         return tradedResourceRepository.save(tradedResource);
     }

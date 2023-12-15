@@ -18,12 +18,28 @@ nimm was kürzer ist
 schiffe auf move tauchen auf keinen scannern auf?
 ---
 
+---
+todo. distance based duration
+
+- all manual transfer stuff takes time
+- If pops and resource transfers between your own planets are difficult, you need another option to do it.
+  This option is the market place. Then this element become more important.
+  And what we need then is a way to let people migrate between the empires. This offers in the end a lot of diplomatic opportunities (migration treaty like in Stellaris e.g.)...
+
+---
+
 #### Diverses
 
 ### Bugs fixed
 
 #### next steps
 
+todo. star map filter für flotten
+
+- eigene inop
+- fremde inop
+- moves ...
+- Sensorreichweite?
 
 
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
@@ -37,13 +53,6 @@ todo. battlereport new advisory but no new present
 todo. chats von anderen werden automatisch gelesen
 todo. unload fleet on ship transfer or something
 
-todo. distance based duration
-
-- all manual transfer stuff takes time
-- If pops and resource transfers between your own planets are difficult, you need another option to do it.
-  This option is the market place. Then this element become more important.
-  And what we need then is a way to let people migrate between the empires. This offers in the end a lot of diplomatic opportunities (migration treaty like in Stellaris e.g.)...
-
 - Raumforts an variablen Positionen?
 
 todo. ally interner marktplatz
@@ -51,13 +60,6 @@ todo. mission items more role play "unprotected convoy changes signature of ship
 todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
 
 todo. a overview dashboard for fleet. where are they all and which are they designed for
-
-todo. star map filter für flotten
-
-- eigene inop
-- fremde inop
-- moves ...
-- Sensorreichweite?
 
 todo. forum management is more important, e.g. sticky posts
 
