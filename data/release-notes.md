@@ -9,16 +9,6 @@ article orbital modules
 
 #### Gameplay
 
-#### Diverses
-
-### Bugs fixed
-
-1. The shipyard's job payload will be cleared on selecting another planet.
-2. The colonizations travel time in the dialog will be shown correctly.
-3. Own fleet on interstellar flights will be shown again.
-
-#### next steps
-
 ---
 wormhole travel:
 berechne weg von ziel zu allen termini dichter als entfernung zum start
@@ -27,6 +17,13 @@ berechne normalen weg
 nimm was kürzer ist
 schiffe auf move tauchen auf keinen scannern auf?
 ---
+
+#### Diverses
+
+### Bugs fixed
+
+#### next steps
+
 
 
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
