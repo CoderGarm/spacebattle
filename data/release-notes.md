@@ -81,6 +81,7 @@ todo. fleet calc hyper limit position in backend - georges error -> numeric over
 #### for later
 
 todo. schiffe am markt verkaufen
+todo. schiffsbeute machen -> schiffsklasse muss erforscht werden
 todo. journal report via mail
 
 todo. set nav marker by "next stations" dialog?

@@ -1,9 +1,15 @@
 package de.yuga.spacebattle.backend.enums.space;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.rest.dto.misc.wormhole.WormholeNexus;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public enum EWormhole {
 
@@ -38,9 +44,27 @@ public enum EWormhole {
         this.wormhole = new WormholeNexus(nexusName, terminiNames);
     }
 
+    public static boolean areSystemsConnected(@Nonnull final StarSystem o1, @Nonnull final StarSystem o2) {
+        Preconditions.checkNotNull(o1, "o1 must not be empty");
+        Preconditions.checkNotNull(o2, "o2 must not be empty");
+
+        return Arrays.stream(EWormhole.values()).anyMatch(wormhole -> wormhole.getWormhole().areSystemsConnected(o1, o2));
+    }
+
     @Nonnull
     public WormholeNexus getWormhole() {
         return wormhole;
+    }
+
+    @Nonnull
+    public static Set<String> getWormholeNames() {
+        return Arrays.stream(EWormhole.values()).map(e -> {
+                    final Set<String> names = new HashSet<>(e.getWormhole().getTerminiNames());
+                    names.add(e.getWormhole().getNexusName());
+                    return names;
+                })
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
     }
 }
 

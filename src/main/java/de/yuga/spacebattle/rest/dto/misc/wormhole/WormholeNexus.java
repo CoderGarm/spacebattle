@@ -1,11 +1,13 @@
 package de.yuga.spacebattle.rest.dto.misc.wormhole;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,6 +35,18 @@ public class WormholeNexus {
     @Nonnull
     public Set<String> getTerminiNames() {
         return terminiNames;
+    }
+
+    public boolean areSystemsConnected(@Nonnull final StarSystem o1, @Nonnull final StarSystem o2) {
+        Preconditions.checkNotNull(o1, "o1 must not be empty");
+        Preconditions.checkNotNull(o2, "o2 must not be empty");
+
+        final String o1Name = o1.getName();
+        final String o2Name = o2.getName();
+        final Set<String> names = new HashSet<>(terminiNames);
+        names.add(nexusName);
+
+        return names.contains(o1Name) && names.contains(o2Name);
     }
 
     @Override

@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -114,6 +111,13 @@ public class StarSystemService {
         Preconditions.checkNotNull(name, "name must not be empty");
 
         return starsystemRepository.findByName(name);
+    }
+
+    @Nonnull
+    public Set<StarSystem> findByNames(@Nonnull final Set<String> systemNames) {
+        Preconditions.checkNotNull(systemNames, "systemNames must not be empty");
+
+        return Objects.requireNonNullElse(starsystemRepository.findByNames(systemNames), new HashSet<>());
     }
 
     @Nonnull
