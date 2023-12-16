@@ -219,6 +219,11 @@ public class Distance implements Cloneable, Comparable<Distance> {
     }
 
     @Nonnull
+    public Distance multiply(final int multiplier) {
+        return multiply(new Distance(multiplier, distanceMetric));
+    }
+
+    @Nonnull
     @JsonIgnore
     public Distance pow(final int o) {
         return new Distance(coordinate.pow(o), distanceMetric);

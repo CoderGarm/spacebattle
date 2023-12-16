@@ -25,10 +25,12 @@ todo. distance based duration
 - If pops and resource transfers between your own planets are difficult, you need another option to do it.
   This option is the market place. Then this element become more important.
   And what we need then is a way to let people migrate between the empires. This offers in the end a lot of diplomatic opportunities (migration treaty like in Stellaris e.g.)...
-
 ---
 
 #### Diverses
+
+zweistufige registrierung - während mail prefs abgefragt werden gibt es die account creation im hintergrund
+mails bei "nix mehr zu tun" schicken
 
 ### Bugs fixed
 

@@ -676,9 +676,9 @@ public class FleetApi extends BaseApi {
                     final Orbit targetOrbit = move.getDestinationOrbit() != null ? new Orbit(move.getDestinationOrbit()) : null;
                     final FleetOrbit destination = new FleetOrbit(targetOrbit, targetPlanet, targetSystem);
 
+                    final Tick today = tickTimeService.getToday();
                     final List<StarSystem> waypoints = navigationCalculatorService.getShortestWaypoints(fleet.getOrbit().getSystem(), targetSystem);
-
-                    return new de.yuga.spacebattle.backend.entities.turn.Move(fleet, destination, waypoints);
+                    return new de.yuga.spacebattle.backend.entities.turn.Move(today, fleet, destination, waypoints);
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());

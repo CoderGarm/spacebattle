@@ -164,7 +164,7 @@ public class PirateApproachPhase implements MissionPhaseRunner {
 
             LOGGER.info("\tPirate fleet with idFleet '" + pirateFleet.getId() + "' visiting '" + owner.getUsername() + "' at '" + planet.getName() + "'");
             missionCache.pirateRaidApproach(today, pirateFleet, planet);
-            return new Move(pirateFleet, new FleetOrbit(planet));
+            return new Move(today, pirateFleet, new FleetOrbit(planet), List.of());
         }
 
         LOGGER.info("\tPirate fleet with idFleet '" + pirateFleet.getId() + "' withdraw early against the strong opposite '" + owner.getUsername() + "' at '" + planet.getName() + "'");

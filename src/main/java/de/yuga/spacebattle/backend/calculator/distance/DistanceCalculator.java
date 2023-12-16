@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.calculator.distance;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
@@ -16,13 +17,16 @@ import de.yuga.spacebattle.backend.enums.ETechnologyType;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -31,6 +35,9 @@ public class DistanceCalculator {
 
     public final static MathContext MC_HU = new MathContext(8, RoundingMode.HALF_UP);
 
+    /**
+     * 154 g at gamma is so fucking slow
+     */
     @Nonnull
     public static final Acceleration PUBLIC_TRANSPORT_ACCELERATION = new Acceleration(50000, EAccelerationMetric.G, EHyperBand.EPSILON);
 
@@ -125,7 +132,7 @@ public class DistanceCalculator {
 
         if (originSystem != null && destinationSystem != null && !originSystem.equals(destinationSystem)) {
             // interstellar traveling
-            ticksToTravel += getSubLightDurationToHyperLimit(restrictingTechnologyType, acceleration, origin, destination);
+            ticksToTravel += getSubLightDurationToHyperLimit(restrictingTechnologyType, acceleration, origin);
             ticksToTravel += getDuration(EModuleType.FTLPROPULSION, restrictingTechnologyType, acceleration, originSystem.getOrbit(), destinationSystem.getOrbit());
             ticksToTravel += getSubLightDurationFromHyperLimit(restrictingTechnologyType, acceleration, destination);
         } else if (origin.getResultingOrbit() != null && destination.getResultingOrbit() != null) {
@@ -163,22 +170,17 @@ public class DistanceCalculator {
      *
      * @return the time to travel from the current position of the fleet to the hyper limit
      */
-    private static double getSubLightDurationToHyperLimit(@Nonnull final ETechnologyType restrictingTechnologyType,
-                                                          @Nonnull final Acceleration acceleration,
-                                                          @Nonnull final FleetOrbit origin,
-                                                          @Nonnull final FleetOrbit destination) {
+    public static double getSubLightDurationToHyperLimit(@Nonnull final ETechnologyType restrictingTechnologyType,
+                                                         @Nonnull final Acceleration acceleration,
+                                                         @Nonnull final FleetOrbit origin) {
         Preconditions.checkNotNull(restrictingTechnologyType, "restrictingTechnologyType must not be empty");
         Preconditions.checkNotNull(acceleration, "acceleration must not be empty");
         Preconditions.checkNotNull(origin, "origin shouldn't be null!");
-        Preconditions.checkNotNull(destination, "destination shouldn't be null!");
 
         final StarSystem originSystem = origin.getSystem();
         final Orbit originOrbit = origin.getResultingOrbit();
-        final StarSystem destinationSystem = destination.getSystem();
-
-        final boolean outOfSystem = originSystem == null || destinationSystem == null;
-        if (outOfSystem || originSystem.equals(destinationSystem) || originOrbit == null) {
-            return 0;
+        if (originOrbit == null || originSystem == null) {
+            throw new NotifyWebUserException("You must be in a system to travel to the hyper limit from the inwards.");
         }
 
         final Quadrant quadrant = Quadrant.getByOrbit(originOrbit);
@@ -221,11 +223,11 @@ public class DistanceCalculator {
      * @param destination    the destination
      * @return the time to travel in ticks
      */
-    private static double getDuration(@Nonnull final EModuleType propulsionType,
-                                      @Nonnull final ETechnologyType restrictingTechnologyType,
-                                      @Nonnull final Acceleration acceleration,
-                                      @Nonnull final Orbit origin,
-                                      @Nonnull final Orbit destination) {
+    public static double getDuration(@Nonnull final EModuleType propulsionType,
+                                     @Nonnull final ETechnologyType restrictingTechnologyType,
+                                     @Nonnull final Acceleration acceleration,
+                                     @Nonnull final Orbit origin,
+                                     @Nonnull final Orbit destination) {
         Preconditions.checkNotNull(propulsionType, "propulsionType shouldn't be null!");
         Preconditions.checkNotNull(restrictingTechnologyType, "restrictingTechnologyType must not be empty");
         Preconditions.checkNotNull(acceleration, "acceleration must not be empty");
@@ -327,7 +329,6 @@ public class DistanceCalculator {
         Preconditions.checkNotNull(origin, "origin must not be empty");
         Preconditions.checkNotNull(target, "target must not be empty");
 
-        // 154 gamma is so fucking slow
         return DistanceCalculator.calculateTimeToTravel(ETechnologyType.MILITARY, PUBLIC_TRANSPORT_ACCELERATION,
                 new FleetOrbit(Orbit.getCenterOrbit(), origin),
                 new FleetOrbit(Orbit.getCenterOrbit(), target));
@@ -338,9 +339,29 @@ public class DistanceCalculator {
         Preconditions.checkNotNull(origin, "origin must not be empty");
         Preconditions.checkNotNull(target, "target must not be empty");
 
-        // 154 gamma is so fucking slow
         return DistanceCalculator.calculateTimeToTravel(ETechnologyType.MILITARY, PUBLIC_TRANSPORT_ACCELERATION,
                 new FleetOrbit(origin),
                 new FleetOrbit(target));
+    }
+
+    public static List<Orbit> getWaypoints(@Nonnull final EModuleType propulsionType,
+                                           @Nonnull final ETechnologyType restrictingTechnologyType,
+                                           @Nonnull final Acceleration acceleration,
+                                           @Nonnull final Orbit origin,
+                                           @Nonnull final Orbit destination,
+                                           final int steps) {
+        Preconditions.checkNotNull(propulsionType, "propulsionType must not be empty");
+        Preconditions.checkNotNull(restrictingTechnologyType, "restrictingTechnologyType must not be empty");
+        Preconditions.checkNotNull(acceleration, "acceleration must not be empty");
+        Preconditions.checkNotNull(origin, "origin must not be empty");
+        Preconditions.checkNotNull(destination, "destination must not be empty");
+
+        final List<Orbit> result = new ArrayList<>();
+        final Distance distance = origin.getDistance(destination);
+        final Distance stepWith = new Distance(distance.getCoordinate().divide(BigDecimal.valueOf(steps), MC_HU), distance.getDistanceMetric());
+        for (int i = 1; i <= steps; i++) {
+            result.add(origin.move(EMovementType.REDUCE_DISTANCE, stepWith.multiply(i), destination));
+        }
+        return result;
     }
 }

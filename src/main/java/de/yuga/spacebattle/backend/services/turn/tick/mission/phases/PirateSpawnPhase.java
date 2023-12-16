@@ -151,7 +151,7 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
         final Orbit positionOnHyperlimit = NavigationCalculator.getPositionOnHyperlimit(planetsPosition);
         final FleetOrbit spawnPoint = new FleetOrbit(positionOnHyperlimit, target.getSystem());
 
-        final Move move = new Move(pirateFleet, spawnPoint, 1, 10);
+        final Move move = new Move(today, pirateFleet, spawnPoint, 1, 10);
         final Move save = moveService.save(move);
 
         fleetMovementExecutor.executeMove(save, today);

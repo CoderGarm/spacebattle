@@ -48,14 +48,12 @@ public class NavigationCalculatorService {
         Preconditions.checkNotNull(origin, "origin must not be empty");
         Preconditions.checkNotNull(destination, "destination must not be empty");
 
-
         final List<Node> shortestPath = getShortestPath(origin, destination);
 
         final List<String> toFind = shortestPath.stream().map(Node::getName)
                 .filter(name -> !name.equals(origin.getName()))
                 .collect(Collectors.toList());
         final Set<StarSystem> navPoints = starSystemService.findByNames(new HashSet<>(toFind));
-
 
         final List<StarSystem> resultingPath = new ArrayList<>();
         resultingPath.add(origin);

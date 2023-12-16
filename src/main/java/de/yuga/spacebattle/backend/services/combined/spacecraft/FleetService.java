@@ -15,6 +15,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Move;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.TransportJob;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.ECalculationType;
@@ -267,9 +268,10 @@ public class FleetService {
             calculateTimeToTravel = alreadyTravelled;
         }
 
+        final Tick today = tickTimeService.getToday();
         if (calculateTimeToTravel > 0) {
             // set move
-            fleet.setMove(new Move(fleet, destination, calculateTimeToTravel, calculateTimeToTravel + moveDoneAtZero));
+            fleet.setMove(new Move(today, fleet, destination, calculateTimeToTravel, calculateTimeToTravel + moveDoneAtZero));
             fleet.setOrbit(null);
         } else {
             // set fleet in planetary orbit
@@ -277,7 +279,7 @@ public class FleetService {
             fleet.setOrbit(origin);
         }
 
-        move.setFinished(tickTimeService.getToday());
+        move.setFinished(today);
         moveService.save(move);
         return fleetRepository.save(fleet);
     }
