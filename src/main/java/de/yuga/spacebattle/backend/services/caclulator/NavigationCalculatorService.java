@@ -29,10 +29,7 @@ public class NavigationCalculatorService {
     private final StarSystemService starSystemService;
 
     @Nonnull
-    private final Set<StarSystem> systems = new HashSet<>();
-
-    @Nonnull
-    private final Map<StarSystem, Node> systemNodes = new HashMap<>();
+    private final Set<StarSystem> wormholeSystems = new HashSet<>();
 
     @Autowired
     public NavigationCalculatorService(@Nonnull final StarSystemService starSystemService) {
@@ -42,18 +39,7 @@ public class NavigationCalculatorService {
     @PostConstruct
     public void loadSystems() {
         LOGGER.info("Loading Dijkstra");
-        this.systems.addAll(starSystemService.findAll());
-        this.systemNodes.putAll(systems.stream().collect(Collectors.toMap(Function.identity(), s -> new Node(s.getName()))));
-        this.systems.forEach(a ->
-                this.systems.stream()
-                        .filter(b -> !a.equals(b))
-                        .forEach(b -> {
-                            final Node nodeA = systemNodes.get(a);
-                            final Node nodeB = systemNodes.get(b);
-                            final int distance = EWormhole.areSystemsConnected(a, b) ? 0 : DistanceCalculator.getTimeToTravel(a, b);
-                            nodeA.addDestination(nodeB, distance);
-                        })
-        );
+        this.wormholeSystems.addAll(starSystemService.findByNames(EWormhole.getWormholeNames()));
         LOGGER.info("Finished loading Dijkstra");
     }
 
@@ -62,19 +48,8 @@ public class NavigationCalculatorService {
         Preconditions.checkNotNull(origin, "origin must not be empty");
         Preconditions.checkNotNull(destination, "destination must not be empty");
 
-        final Graph graph = new Graph();
-        graph.setNodes(new HashSet<>(systemNodes.values()));
-        // fixme this must be made reusable - creating the objects are fucking expensive - or calculating the distances -> store pure payload and recreate nodes every time
-        final Node nodeA = systemNodes.get(origin);
-        final Node nodeB = systemNodes.get(destination);
 
-        final Graph shortestPathFromSource = Dijkstra.calculateShortestPathFromSource(graph, nodeA);
-
-        final List<Node> shortestPath = shortestPathFromSource.getNodes().stream()
-                .filter(n -> n == nodeB)
-                .findFirst()
-                .orElseThrow(NullPointerException::new)
-                .getShortestPath();
+        final List<Node> shortestPath = getShortestPath(origin, destination);
 
         final List<String> toFind = shortestPath.stream().map(Node::getName)
                 .filter(name -> !name.equals(origin.getName()))
@@ -96,6 +71,52 @@ public class NavigationCalculatorService {
         }
         resultingPath.add(destination);
         return resultingPath;
+    }
+
+    @Nonnull
+    private List<Node> getShortestPath(@Nonnull final StarSystem origin, @Nonnull final StarSystem destination) {
+        Preconditions.checkNotNull(origin, "origin must not be empty");
+        Preconditions.checkNotNull(destination, "destination must not be empty");
+
+        final Map<StarSystem, Node> systemNodes = createNodes(origin, destination);
+        final Graph graph = new Graph();
+        graph.setNodes(new HashSet<>(systemNodes.values()));
+        final Node nodeA = systemNodes.get(origin);
+        final Node nodeB = systemNodes.get(destination);
+
+        final Graph shortestPathFromSource = Dijkstra.calculateShortestPathFromSource(graph, nodeA);
+
+        return shortestPathFromSource.getNodes().stream()
+                .filter(n -> n == nodeB)
+                .findFirst()
+                .orElseThrow(NullPointerException::new)
+                .getShortestPath();
+    }
+
+    @Nonnull
+    private Map<StarSystem, Node> createNodes(@Nonnull final StarSystem origin, @Nonnull final StarSystem destination) {
+        Preconditions.checkNotNull(origin, "origin must not be empty");
+        Preconditions.checkNotNull(destination, "destination must not be empty");
+
+        final Set<StarSystem> systemsOnTrack = new HashSet<>(wormholeSystems);
+        systemsOnTrack.add(origin);
+        systemsOnTrack.add(destination);
+
+        final Map<StarSystem, Node> systemNodes = new HashMap<>(systemsOnTrack.stream()
+                .collect(Collectors.toMap(Function.identity(), s -> new Node(s.getName()))));
+
+        // todo I can be build only for the origins node - nothing else is necessary
+        systemsOnTrack.forEach(a ->
+                systemsOnTrack.stream()
+                        .filter(b -> !a.equals(b))
+                        .forEach(b -> {
+                            final Node nodeA = systemNodes.get(a);
+                            final Node nodeB = systemNodes.get(b);
+                            final int distance = EWormhole.areSystemsConnected(a, b) ? 0 : DistanceCalculator.getTimeToTravel(a, b);
+                            nodeA.addDestination(nodeB, distance);
+                        })
+        );
+        return systemNodes;
     }
 
 }

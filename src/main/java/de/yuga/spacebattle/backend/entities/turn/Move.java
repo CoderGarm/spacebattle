@@ -20,6 +20,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Entity
 @Table(name = "move")
@@ -71,10 +72,14 @@ public class Move extends Completable implements HasOwner {
     }
 
     public Move(@Nonnull final Fleet fleet,
-                @Nonnull final FleetOrbit destination) {
+                @Nonnull final FleetOrbit destination,
+                @Nonnull final List<StarSystem> waypoints) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
         Preconditions.checkState(fleet.getOrbit() != null, "The fleet must have an orbit currently");
+        Preconditions.checkNotNull(waypoints, "waypoints must not be empty");
+
+        // fixme hier weiter - wegpunkte speichern und abfliegen
 
         this.owner = fleet.getOwner();
         this.fleet = fleet;

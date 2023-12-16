@@ -8,7 +8,7 @@ import java.util.Set;
 public class Dijkstra {
 
     public static Graph calculateShortestPathFromSource(Graph graph, Node source) {
-
+        // todo please clean me up - I was made without any refactoring and just taken from Baeldung
         source.setDistance(0);
 
         Set<Node> settledNodes = new HashSet<>();

@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
+import de.yuga.spacebattle.backend.services.caclulator.NavigationCalculatorService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.HyperprintSensorService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.OrbitalStructureService;
@@ -97,6 +98,9 @@ public class FleetApi extends BaseApi {
     @Nonnull
     private final TickTimeService tickTimeService;
 
+    @Nonnull
+    private final NavigationCalculatorService navigationCalculatorService;
+
     @Autowired
     public FleetApi(@Nonnull final FleetService fleetService,
                     @Nonnull final StarSystemService starSystemService,
@@ -105,7 +109,8 @@ public class FleetApi extends BaseApi {
                     @Nonnull final TransportJobService transportJobService,
                     @Nonnull final OrbitalStructureService orbitalStructureService,
                     @Nonnull final HyperprintSensorService hyperprintSensorService,
-                    @Nonnull final TickTimeService tickTimeService) {
+                    @Nonnull final TickTimeService tickTimeService,
+                    @Nonnull final NavigationCalculatorService navigationCalculatorService) {
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
@@ -114,6 +119,7 @@ public class FleetApi extends BaseApi {
         this.orbitalStructureService = Preconditions.checkNotNull(orbitalStructureService, "orbitalStructureService must not be empty");
         this.hyperprintSensorService = Preconditions.checkNotNull(hyperprintSensorService, "hyperprintSensorService must not be empty");
         this.tickTimeService = Preconditions.checkNotNull(tickTimeService, "tickTimeService must not be empty");
+        this.navigationCalculatorService = Preconditions.checkNotNull(navigationCalculatorService, "navigationCalculatorService must not be empty");
     }
 
     @GetMapping(value = "{idFleet}")
@@ -657,7 +663,8 @@ public class FleetApi extends BaseApi {
 
         return moves.stream().map(move -> {
                     final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetsToMoveById.get(move.getIdFleetToMove());
-                    if (fleet.getMove() != null) {
+                    final boolean stationedInSystem = fleet.getOrbit() != null && fleet.getOrbit().getSystem() != null;
+                    if (fleet.getMove() != null || !stationedInSystem) {
                         return null;
                     }
                     final StarSystem targetSystem = targetSystemsByIds.get(move.getIdDestinationSystem());
@@ -668,7 +675,10 @@ public class FleetApi extends BaseApi {
 
                     final Orbit targetOrbit = move.getDestinationOrbit() != null ? new Orbit(move.getDestinationOrbit()) : null;
                     final FleetOrbit destination = new FleetOrbit(targetOrbit, targetPlanet, targetSystem);
-                    return new de.yuga.spacebattle.backend.entities.turn.Move(fleet, destination);
+
+                    final List<StarSystem> waypoints = navigationCalculatorService.getShortestWaypoints(fleet.getOrbit().getSystem(), targetSystem);
+
+                    return new de.yuga.spacebattle.backend.entities.turn.Move(fleet, destination, waypoints);
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
