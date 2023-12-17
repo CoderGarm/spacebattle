@@ -7,17 +7,15 @@ article orbital modules
 
 ### Features
 
-todo. feature list
-
 #### Gameplay
 
 ---
 wormhole travel:
-berechne weg von ziel zu allen termini dichter als entfernung zum start
-berechne weg von start zu allen termini 'in reichweite'
-berechne normalen weg
-nimm was kürzer ist
 schiffe auf move tauchen auf keinen scannern auf?
+
+    → eine kleine Anpassung der Systemnamen
+    → wurmlöcher werden von handelsreisenden, für Kolonien und für den Transfer benutzt
+
 ---
 
 ---
@@ -34,10 +32,6 @@ todo. distance based duration
 zweistufige registrierung - während mail prefs abgefragt werden gibt es die account creation im hintergrund
 mails bei "nix mehr zu tun" schicken
 
-### Bugs fixed
-
-#### next steps
-
 todo. star map filter für flotten
 
 - eigene inop
@@ -45,6 +39,12 @@ todo. star map filter für flotten
 - moves ...
 - Sensorreichweite?
 
+### Bugs fixed
+
+todo. expansion list - travel time is always based on home planet
+todo. fix sensor display issue
+
+#### next steps
 
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
 todo. calculate pop deposit in demand calculation for displaying?

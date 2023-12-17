@@ -110,7 +110,7 @@ public class NavigationCalculatorService {
                         .forEach(b -> {
                             final Node nodeA = systemNodes.get(a);
                             final Node nodeB = systemNodes.get(b);
-                            final int distance = EWormhole.areSystemsConnected(a, b) ? 0 : DistanceCalculator.getTimeToTravel(a, b);
+                            final int distance = EWormhole.areSystemsConnected(a, b) ? EWormhole.getConnectionGrade(a, b) : DistanceCalculator.getTimeToTravel(a, b);
                             nodeA.addDestination(nodeB, distance);
                         })
         );

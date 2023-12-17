@@ -175,7 +175,7 @@ public class Move extends Completable implements HasOwner {
                     this.flightPlan.add(new FlightPlan(this, new FleetOrbit(n, null), index));
                 });
             }
-            travelTime += duration;
+            travelTime += duration; /* fixme something funny happens here */
         }
         this.ticksLeft = (int) Math.ceil(travelTime);
     }

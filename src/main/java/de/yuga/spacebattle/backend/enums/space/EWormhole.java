@@ -51,9 +51,44 @@ public enum EWormhole {
         return Arrays.stream(EWormhole.values()).anyMatch(wormhole -> wormhole.getWormhole().areSystemsConnected(o1, o2));
     }
 
+    public static int getConnectionGrade(@Nonnull final StarSystem o1, @Nonnull final StarSystem o2) {
+        Preconditions.checkNotNull(o1, "o1 must not be empty");
+        Preconditions.checkNotNull(o2, "o2 must not be empty");
+
+        if (!EWormhole.areSystemsConnected(o1, o2)) {
+            return Integer.MAX_VALUE;
+        }
+
+        final String o1Name = o1.getName();
+        final String o2Name = o2.getName();
+
+        final Set<EWormhole> wormholes = Arrays.stream(EWormhole.values())
+                .filter(wormhole -> wormhole.getWormhole().getTerminiNames().contains(o1Name) || wormhole.getWormhole().getTerminiNames().contains(o2Name))
+                .collect(Collectors.toSet());
+
+        if (wormholes.contains(EWormhole.CONGO) || wormholes.contains(EWormhole.FELIX)) {
+            // SGC-902-36-G Wormhole Anomaly
+            final boolean onlyCongo = EWormhole.CONGO.contains(o1Name) && EWormhole.CONGO.contains(o2Name);
+            final boolean onlyFelix = EWormhole.FELIX.contains(o1Name) && EWormhole.FELIX.contains(o2Name);
+            if (!onlyCongo && !onlyFelix) {
+                final boolean noNexusInvolved = "SGC-902-36-G".equals(o1Name) || "SGC-902-36-G".equals(o2Name);
+                return noNexusInvolved ? 1 : 0;
+            }
+        }
+
+        final boolean noNexusInvolved = wormholes.stream().noneMatch(w -> w.getWormhole().getNexusName().equals(o1Name) || w.getWormhole().getNexusName().equals(o2Name));
+        return noNexusInvolved ? 1 : 0;
+    }
+
     @Nonnull
     public WormholeNexus getWormhole() {
         return wormhole;
+    }
+
+    public boolean contains(@Nonnull final String name) {
+        Preconditions.checkNotNull(name, "name must not be empty");
+
+        return wormhole.getTerminiNames().contains(name);
     }
 
     @Nonnull

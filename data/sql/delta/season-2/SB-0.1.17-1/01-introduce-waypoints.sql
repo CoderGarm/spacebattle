@@ -1,4 +1,15 @@
 
+update starSystem set name = 'Ueshiba' where idStarSystem = 11;
+update starSystem set name = 'Homam' where idStarSystem = 132;
+update starSystem set name = 'Fedora' where idStarSystem = 77;
+update starSystem set name = 'Arch' where idStarSystem = 78;
+
+
+update starSystem set name = "Hannah's Star" where name = 'Hannah’s Star';
+update starSystem set name = "Sharon's Star" where name = 'Sharon’s Star';
+update starSystem set name = "Trevor's Star" where name = 'Trevor’s Star';
+update starSystem set name = "Typer's Star" where name = 'Tyler’s Star';
+
 create table flightPlan (
    idFlightPlan integer not null auto_increment,
     xCoordinate varchar(255),
