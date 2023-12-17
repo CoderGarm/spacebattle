@@ -16,6 +16,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.navigation.FlightPlan;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.ETechnologyType;
+import de.yuga.spacebattle.backend.enums.space.EWormhole;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -74,16 +75,20 @@ public class Move extends Completable implements HasOwner {
     @Column(updatable = false)
     private int originalDuration;
 
-    @Nullable
+    @Nonnull
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "idTickStarted", referencedColumnName = "idTick")
     private Tick started;
 
     @Nonnull
     @NotNull
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "flightPlan", joinColumns = @JoinColumn(name = "idMove"))
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "move")
     private final List<FlightPlan> flightPlan = new ArrayList<>();
+
+    @Nonnull
+    @Transient
+    private final List<StarSystem> waypoints = new ArrayList<>();
 
     public Move() {
     }
@@ -104,6 +109,7 @@ public class Move extends Completable implements HasOwner {
         final FleetOrbit orbit = fleet.getOrbit();
         this.originOrbit = new FleetOrbit(orbit);
         this.destinationOrbit = destination;
+        this.waypoints.addAll(waypoints);
 
         final boolean ftlCapable = fleet.isFTLCapable();
         final StarSystem originSystem = orbit.getSystem();
@@ -155,11 +161,14 @@ public class Move extends Completable implements HasOwner {
         // way from inner-system to hyper limit will be ignored - it's a too small potion of the time tick-wise
         travelTime += DistanceCalculator.getSubLightDurationToHyperLimit(restrictingTechnologyType, acceleration, fleet.getOrbit());
         for (int i = 1; i < waypoints.size(); i++) {
-            final Orbit beforeOrbit = waypoints.get(i - 1).getOrbit();
-            final Orbit waypointOrbit = waypoints.get(i).getOrbit();
-            final double duration = DistanceCalculator.getDuration(EModuleType.FTLPROPULSION, restrictingTechnologyType, acceleration, beforeOrbit, waypointOrbit);
-            if ((travelTime + duration) >= 1) {
-                final int steps = (int) (travelTime + duration) - (int) duration;
+            final StarSystem before = waypoints.get(i - 1);
+            final StarSystem waypoint = waypoints.get(i);
+            final Orbit beforeOrbit = before.getOrbit();
+            final Orbit waypointOrbit = waypoint.getOrbit();
+            final boolean systemsConnected = EWormhole.areSystemsConnected(before, waypoint);
+            final double duration = systemsConnected ? 0.1 : DistanceCalculator.getDuration(EModuleType.FTLPROPULSION, restrictingTechnologyType, acceleration, beforeOrbit, waypointOrbit);
+            final int steps = (int) (travelTime + duration) - (int) duration;
+            if (steps >= 1) {  /* fixme something funny happens here */
                 final List<Orbit> navPoints = DistanceCalculator.getWaypoints(EModuleType.FTLPROPULSION, restrictingTechnologyType, acceleration, beforeOrbit, waypointOrbit, steps);
                 navPoints.forEach(n -> {
                     final int index = this.flightPlan.size() + navPoints.indexOf(n) + 1;
@@ -169,6 +178,11 @@ public class Move extends Completable implements HasOwner {
             travelTime += duration;
         }
         this.ticksLeft = (int) Math.ceil(travelTime);
+    }
+
+    @Nonnull
+    public List<StarSystem> getWaypoints() {
+        return waypoints;
     }
 
     @Nonnull
@@ -247,6 +261,16 @@ public class Move extends Completable implements HasOwner {
         fleetSnapshot = new FleetSnapshot(fleet, fleet.getAliveShips());
         fleet = null;
         super.setFinished(finishedAt);
+    }
+
+    @Nonnull
+    public Tick getStarted() {
+        return started;
+    }
+
+    @Nonnull
+    public List<FlightPlan> getFlightPlan() {
+        return flightPlan;
     }
 
     @Override

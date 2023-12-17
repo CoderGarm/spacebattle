@@ -208,6 +208,17 @@
         primary key (idFleetSnapshot)
     ) engine=InnoDB;
 
+    create table flightPlan (
+       idFlightPlan integer not null auto_increment,
+        xCoordinate varchar(255),
+        yCoordinate varchar(255),
+        timeAfterStart decimal(3, 0),
+        idPlanet integer,
+        idStarSystem integer,
+        idMove integer,
+        primary key (idFlightPlan)
+    ) engine=InnoDB;
+
     create table forum (
        idForum integer not null auto_increment,
         createdAt datetime(6) not null,
@@ -429,6 +440,7 @@
         idPlanetOrigin integer,
         idStarSystemOrigin integer,
         idUser integer not null,
+        idTickStarted integer not null,
         primary key (idMove),
         constraint move_CHECK check (xCoordinateOrigin != xCoordinateDestination AND yCoordinateOrigin != yCoordinateDestination)
     ) engine=InnoDB;
@@ -1180,6 +1192,21 @@
             foreign key (idOwner)
                 references user (idUser);
 
+    alter table flightPlan 
+       add constraint FK5r9d4uu2n4b4twymkxbmg7x7b 
+       foreign key (idPlanet) 
+       references planet (idPlanet);
+
+    alter table flightPlan 
+       add constraint FKf4ew7t3sk8e7uid5vq61rm0qd 
+       foreign key (idStarSystem) 
+       references starSystem (idStarSystem);
+
+    alter table flightPlan 
+       add constraint FK8pnr4eib22sc2tyr556x0750w 
+       foreign key (idMove) 
+       references move (idMove);
+
     alter table forum
         add constraint FKbd3cwb6yurr6utojembdwjiy1
             foreign key (idAlliance)
@@ -1434,6 +1461,11 @@
         add constraint FKm0l3o2yx8pq8hu2bww8maoa98
             foreign key (idUser)
                 references user (idUser);
+
+    alter table move 
+       add constraint FK6f36ja23cxfke6ft2pu3j23fg 
+       foreign key (idTickStarted) 
+       references tick (idTick);
 
     alter table movementAction
         add constraint FK2fc6fy40a1twi3bedin6c2sr1

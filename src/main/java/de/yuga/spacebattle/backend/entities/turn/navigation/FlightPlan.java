@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.entities.turn.navigation;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -9,8 +10,10 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 
-@Embeddable
-public class FlightPlan {
+@Entity
+@Table(name = "flightPlan")
+@AttributeOverride(name = "id", column = @Column(name = "idFlightPlan"))
+public class FlightPlan extends AbstractEntityKey {
 
     @Nonnull
     @ManyToOne
@@ -22,7 +25,7 @@ public class FlightPlan {
     private int timeAfterStart;
 
     @Nonnull
-    @Embedded // fixme Could not determine type for: de.yuga.spacebattle.backend.dto.physics.Distance, at table:
+    @Embedded
     private FleetOrbit location;
 
     public FlightPlan() {

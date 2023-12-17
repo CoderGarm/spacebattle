@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.entities.orbitals;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -41,10 +40,6 @@ public class FleetOrbit {
 
     public FleetOrbit(@Nullable final Orbit orbit, @Nullable final Planet planet, @Nullable final StarSystem system) {
 
-        if (orbit == null && planet == null) {
-            throw new NotifyWebUserException("You should relly select a destination.");
-        }
-
         this.planet = planet;
         if (this.planet == null) {
             this.orbit = orbit != null ? orbit.clone() : null;
@@ -53,7 +48,6 @@ public class FleetOrbit {
     }
 
     public FleetOrbit(@Nullable final Orbit orbit, @Nullable final StarSystem system) {
-        Preconditions.checkNotNull(system, "system must not be empty");
 
         this.orbit = orbit != null ? orbit.clone() : null;
         this.system = system;

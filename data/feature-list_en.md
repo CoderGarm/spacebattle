@@ -1,69 +1,70 @@
 #### Feature List
 
-- **Turn-based and Tick-based System**
-    - Tick-based (1 tick = 1 day)
-    - Turn-based (Restart after one year)
+- Turn-based and Tick-based System
+    - 1 tick = 1 day
+    - Restart the season after one year
 
-- **Resource Management**
+- Resource Management
     - 7 Resources
     - 5 progressive education levels for the population
 
-- **Building Variety**
+- Building Variety
     - 13 different buildings, ranging from refineries to elementary schools
 
-- **Orbital Infrastructure**
+- Orbital Infrastructure
     - 2 different orbital infrastructures
         - Habitat and Gravitational Anomaly Detector for detecting hypertraces
 
-- **Research and Development**
+- Research and Development
     - 15 diverse research directions
 
-- **Spacecraft Customization**
+- Spacecraft Customization
     - 8 ship modules with variations for 11 ship classes (e.g., Frigate to Superdreadnought)
         - Examples: Cargo Holds, Anti-Missile Launchers, Side Shields
 
-- **Colonization**
+- Colonization
     - Establish and expand colonies
         - Gather information and choose your new colonies wisely
 
-- **Planetary Conditions**
+- Planetary Conditions
     - Not every planet is equally suitable; all planets have different life and production conditions
 
-- **Mission System and NPCs**
+- Mission System and NPCs
     - Protect planets and trade convoys from pirates
     - Encounter 9 NPCs, from Manticore to Silesia and the Trade Alliance of Rembrandt
 
-- **Resource Trading**
+- Resource Trading
     - Trade resources on the spot market, served by NPCs or through direct player-to-player trade
 
-- **Empire-wide Transfer System**
+- Empire-wide Transfer System
     - Transfer resources, populations, and entire ships across your empire
 
-- **Integrated Communication Tools**
+- Integrated Communication Tools
     - Integrated messaging system and forum
 
-- **Planetary Development**
+- Planetary Development
     - Customize and develop planets
 
-- **Wormhole Travel**
+- Wormhole Travel
     - Traverse a branched network of wormholes
 
-- **Ship Customization**
+- Ship Customization
     - Design your own ship types
-        - Construct ships ranging from Light Attack Craft (LAC) with 12,000 tons mass and a single Graser to Superdreadnoughts with 8 million tons and numerous missile launchers,
-          lasers, point defense systems, and passenger modules
+        - Construct ships ranging from Light Attack Craft (LAC) with 12,000 tons mass and a single Graser
+          to Superdreadnoughts with 8 million tons and numerous missile launchers, lasers, point defense systems
+          and passenger modules
 
-- **Alliances**
+- Alliances
 
-- **Fleet System**
+- Fleet System
     - Protect orbital structures, resource reserves, and populations
     - Occupy and plunder foreign planets
 
-- **Starmap**
+- Starmap
     - Gain an overview of the game world
     - Move your fleets strategically on the map
 
-- **Journal Feature**
+- Journal Feature
     - Step-by-step tutorial up to the first shipyard
     - Overview of your empire's current status
         - Instantly identify planets with no active orders

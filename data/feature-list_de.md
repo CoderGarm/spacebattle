@@ -1,44 +1,73 @@
 #### Featureliste
 
-- Tickbasiert (1 Tick = 1 Tag)
-- Rundenbasiert (Neustart nach einem Jahr)
-- 7 Rohstoffe
-- 5 aufeinander aufbauene Bildungsstufen der Bevölkerung
-- 13 verschiedene Gebäude von der Raffenerie bis zur Grundschule
-- 2 verschiedene orbitale Infrastrukturen
-  - das Habitat und das Gravitationsanomaliedetektor zum Aufspüren von Hyperabdrücken
-- 15 verschiedene Forschungsrichtungen
-- 8 Schiffsmodule in Ausprägungen für 11 Schiffsklassen von Fregatte bis Superdreadnought
-  - z.b. Frachträume, Antiraketenwerfer, Seitenschilde
-- Kolonien gründen und ausbauen
-  - verschaffe dir Informationen und wähle deine neue Kolonie weise
-- Planetare Bedingungen
-  - nicht jeder Planet ist gleich gut, alle Planeten haben unterschiedliche Lebens- und Produktionsbedingungen
-- Missionssystem und NPCs
-  - schütze deine Planeten und Handelskonvois vor Piraten
-  - 9 NPCs von Manticore bis Silesia und dem Handelsbund von Rembrandt
-- Rohstoffhandel am Spotmarkt, bedient von NPCs oder der direkte Handel mit anderen Spielern
-- Imperiumsweites Transfersystem für Ressourcen, Population und ganze Schiffe
-- Integriertes Nachrichtensystem und Forum
-- Planetenausbau
-- Wurmlochreisen in einem verzweigten Netzwerk
-- Eigene Schiffstypen zusammenstellen
-  - konstruiere Schiffe vom LAC mit 12.000 Tonnen Masse und nur einem Graser bis zum Superdreadnought von 8 Millionen Tonnen und dutzenden Raketenwerfern, Grasern, Point Defense,
-    Antiraketenwerfern und Passagiermodulen
-- Allianzen
-- Flottensystem
-  - beschütze deine Orbitalen Strukturen, Rohstoffreserven und Bevölkerung
-  - besetze und plündere fremde Planeten
-- Sternenkarte
-  - verschaffe dir auf der Karte einen überblick und bewege deine Flotten
+- Zeit- und Tick-basiertes System
+  - 1 Tick = 1 Tag
+  - Neustart der Season nach einem Jahr
 
+- Ressourcenmanagement
+  - 7 Rohstoffe
+  - 5 aufeinander aufbauende Bildungsstufen der Bevölkerung
+
+- Gebäudev Vielfalt
+  - 13 verschiedene Gebäude, von Raffinerien bis zu Grundschulen
+
+- Orbitale Infrastruktur
+  - 2 verschiedene orbitale Infrastrukturen
+    - Das Habitat und der Gravitationsanomaliedetektor zum Aufspüren von Hyperabdrücken
+
+- Forschung und Entwicklung
+  - 15 verschiedene Forschungsrichtungen
+
+- Raumschiffanpassung
+  - 8 Schiffsmodule in Ausprägungen für 11 Schiffsklassen (z. B. Fregatte bis Superdreadnought)
+    - Beispiele: Frachträume, Antiraketenwerfer, Seitenschilde
+
+- Kolonisierung
+  - Kolonien gründen und ausbauen
+    - Verschaffe dir Informationen und wähle deine neue Kolonie weise
+
+- Planetare Bedingungen
+  - Nicht jeder Planet ist gleich gut; alle Planeten haben unterschiedliche Lebens- und Produktionsbedingungen
+
+- Missionssystem und NPCs
+  - Schütze deine Planeten und Handelskonvois vor Piraten
+  - 9 NPCs von Manticore bis Silesia und dem Handelsbund von Rembrandt
+
+- Rohstoffhandel
+  - Handel am Spotmarkt, bedient von NPCs oder direkter Handel mit anderen Spielern
+
+- Imperiumsweites Transfersystem
+  - Transfer von Ressourcen, Bevölkerung und ganzen Schiffen im gesamten Imperium
+
+- Integriertes Nachrichtensystem und Forum
+
+- Planetenausbau
+  - Anpassung und Entwicklung von Planeten
+
+- Wurmlochreisen
+  - Reisen in einem verzweigten Netzwerk von Wurmlöchern
+
+- Eigene Schiffstypen zusammenstellen
+  - Konstruktion von Schiffen vom LAC mit 12.000 Tonnen Masse und nur einem Graser
+    bis zum Superdreadnought von 8 Millionen Tonnen mit dutzenden Raketenwerfern, Grasern, Point Defense,
+    Antiraketenwerfern und Passagiermodulen
+
+- Allianzen
+
+- Flottensystem
+  - Schutz orbitaler Strukturen, Rohstoffreserven und Bevölkerung
+  - Besetzung und Plünderung fremder Planeten
+
+- Sternenkarte
+  - Überblick über die Karte und Bewegung deiner Flotten
 
 - Das Journal
   - Schritt-für-Schritt-Tutorial bis zur ersten Schiffswerft
-  - verschaffe dir einen Überblick über die aktuelle Lage deines Imperiums
-    - sieh sofort, welche Planeten keine laufenden Aufträge bearbeiten
-    - welche Transfers wurden durchgeführt
-    - sieh, ob sich eine fremde Flotte in deine Systeme verirrt hat
-    - sieh, ob dich eine fremde Flotte bestohlen hat
-    - schaue dir an, ob alle Gebäude und Schiffe mit ausreichen Population versorgt und aktiv sind
+  - Überblick über die aktuelle Lage deines Imperiums
+    - Sofortige Identifikation von Planeten ohne laufende Aufträge
+    - Verfolgung durchgeführter Transfers
+    - Erkennung fremder Flotten in deinen Systemen
+    - Überprüfung, ob dich eine fremde Flotte bestohlen hat
+    - Überwachung der Population und Aktivitätsstatus von Gebäuden und Schiffen
+
 

@@ -42,4 +42,10 @@ public class FleetOrbit {
         this.planet = new Planet(planet);
         this.system = new StarSystem(planet.getSystem());
     }
+
+    public FleetOrbit(@Nonnull final de.yuga.spacebattle.backend.entities.orbitals.StarSystem starSystem) {
+        Preconditions.checkNotNull(starSystem, "starSystem must not be empty");
+
+        this.system = new StarSystem(starSystem);
+    }
 }
