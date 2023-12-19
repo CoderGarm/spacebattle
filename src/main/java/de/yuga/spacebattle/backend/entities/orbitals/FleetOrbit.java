@@ -101,20 +101,6 @@ public class FleetOrbit {
         orbit = null;
     }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-
-        if (o == null || getClass() != o.getClass()) return false;
-
-        final FleetOrbit that = (FleetOrbit) o;
-
-        final Orbit o1 = getExplicitOrbit(this);
-        final Orbit o2 = getExplicitOrbit(that);
-
-        return new EqualsBuilder().append(system, that.system).append(o1, o2).isEquals();
-    }
-
     @Nullable
     private static Orbit getExplicitOrbit(@Nonnull final FleetOrbit fleetOrbit) {
         Preconditions.checkNotNull(fleetOrbit, "fleetOrbit must not be empty");
@@ -127,8 +113,18 @@ public class FleetOrbit {
     }
 
     @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final FleetOrbit that = (FleetOrbit) o;
+
+        return new EqualsBuilder().append(system, that.system).append(planet, that.planet).append(orbit, that.orbit).isEquals();
+    }
+
+    @Override
     public int hashCode() {
-        final Orbit o1 = getExplicitOrbit(this);
-        return new HashCodeBuilder(17, 37).append(system).append(o1).toHashCode();
+        return new HashCodeBuilder(17, 37).append(system).append(planet).append(orbit).toHashCode();
     }
 }

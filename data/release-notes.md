@@ -43,6 +43,7 @@ todo. star map filter für flotten
 
 todo. expansion list - travel time is always based on home planet
 todo. fix sensor display issue
+todo. missile issue
 
 #### next steps
 

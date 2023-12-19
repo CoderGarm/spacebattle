@@ -288,4 +288,8 @@ public class Move extends Completable implements HasOwner {
     public int hashCode() {
         return new HashCodeBuilder(17, 37).append(fleet).append(fleetSnapshot).append(originOrbit).append(destinationOrbit).toHashCode();
     }
+
+    public int getMoveHash() {
+        return originOrbit.hashCode() + destinationOrbit.hashCode();
+    }
 }

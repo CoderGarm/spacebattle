@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
+import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.services.caclulator.NavigationCalculatorService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
@@ -25,7 +26,7 @@ import de.yuga.spacebattle.rest.dto.combined.spacecrafts.*;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.OrbitalStructures;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
-import de.yuga.spacebattle.rest.dto.turn.Move;
+import de.yuga.spacebattle.rest.dto.turn.ConfirmedMove;
 import de.yuga.spacebattle.rest.dto.turn.TransportJob;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -406,7 +407,7 @@ public class FleetApi extends BaseApi {
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = Move.class))
+                                    schema = @Schema(implementation = ConfirmedMove.class))
                             )),
                     @ApiResponse(responseCode = "400", description = "an error occurred",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
@@ -417,7 +418,10 @@ public class FleetApi extends BaseApi {
 
         // todo validate interstellar flights with propulsion
         final List<de.yuga.spacebattle.backend.entities.turn.Move> plannedMoves = getMultiMove(getIdUser(), moves);
-        return ResponseEntity.ok(plannedMoves.stream().map(Move::new).collect(Collectors.toList()));
+
+        final Map<Integer, List<Move>> routes = plannedMoves.stream().collect(Collectors.groupingBy(Move::getMoveHash,
+                Collectors.mapping(Function.identity(), Collectors.toList())));
+        return ResponseEntity.ok(routes.values().stream().map(ConfirmedMove::new).collect(Collectors.toList()));
     }
 
     @Parameter(name = "fleetIds", array = @ArraySchema(schema = @Schema(implementation = Integer.class)))
