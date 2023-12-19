@@ -44,6 +44,7 @@ todo. star map filter für flotten
 todo. expansion list - travel time is always based on home planet
 todo. fix sensor display issue
 todo. missile issue
+todo. fleet calc hyper limit position in backend - georges error -> numeric overflow?
 
 #### next steps
 
@@ -80,8 +81,6 @@ todo. chat search: empire name, ingame name, username
 todo. quoting in chat und forum
 todo. preview in chat und forum
 todo. fleet detachment submit button disable when no change
-todo. wurmlochbrücken nutzbar machen vor nächster season!
-todo. fleet calc hyper limit position in backend - georges error -> numeric overflow?
 
 #### for later
 
