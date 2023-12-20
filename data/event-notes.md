@@ -1,8 +1,3 @@
-------------
-chaviha will be replaced
-Fireflair will be transferred to shannon
-------------
-
 
 The upcoming release will introduce the wormholes, lets celebrate it with an event of epic proportions.  
 I would say, everyone should have the chance to conquer a planet.

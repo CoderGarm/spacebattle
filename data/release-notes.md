@@ -14,6 +14,8 @@ wormhole travel:
 schiffe auf move tauchen auf keinen scannern auf?
 
     → eine kleine Anpassung der Systemnamen
+    → neue bewegungsanimationen auf der map
+
     → wurmlöcher werden von handelsreisenden, für Kolonien und für den Transfer benutzt
 
 ---
@@ -45,6 +47,7 @@ todo. expansion list - travel time is always based on home planet
 todo. fix sensor display issue
 todo. missile issue
 todo. fleet calc hyper limit position in backend - georges error -> numeric overflow?
+todo. unlimied reasearch on colo?
 
 #### next steps
 
@@ -87,8 +90,6 @@ todo. fleet detachment submit button disable when no change
 todo. schiffe am markt verkaufen
 todo. schiffsbeute machen -> schiffsklasse muss erforscht werden
 todo. journal report via mail
-
-todo. set nav marker by "next stations" dialog?
 
 nope. zu weiter/schneller zoom removed flotten aus map
 nope. zoom issue at map -> warten auf d3 replacement
@@ -195,9 +196,6 @@ todo. Counter-Spionage, Spione umdrehen (unbenutze Spionage-Slots)
 
 1. Die Darstellung des Kampfes aufhübschen.
 2. Aktuell kann man nur 1on1 kämpfen, das muss aufgebohrt werden
-3. Population balancing
-4. Rework der Flottenbewegungen (nice to have)
-5. mich endlich mal um die "corporate identity" kümmern, also eigene Icons, Symbole, Benennungen usw erzeugen
 
 todo. Forum: Thema sperren
 todo. gebäudeoutput beobachten, population balancen

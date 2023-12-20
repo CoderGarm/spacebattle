@@ -30,9 +30,8 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "move")
@@ -88,11 +87,14 @@ public class Move extends Completable implements HasOwner {
 
     @Nonnull
     @NotNull
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "move")
-    private final List<FlightPlan> flightPlan = new ArrayList<>();
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "move", cascade = CascadeType.ALL)
+    private final Set<FlightPlan> flightPlan = new HashSet<>();
 
     @Nonnull
-    @Transient
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "waypoints",
+            joinColumns = @JoinColumn(name = "idMove"),
+            inverseJoinColumns = @JoinColumn(name = "idStarSystem"))
     private final List<StarSystem> waypoints = new ArrayList<>();
 
     public Move() {
@@ -114,7 +116,9 @@ public class Move extends Completable implements HasOwner {
         final FleetOrbit orbit = fleet.getOrbit();
         this.originOrbit = new FleetOrbit(orbit);
         this.destinationOrbit = destination;
-        this.waypoints.addAll(waypoints);
+        if (isInterstellarTravel()) {
+            this.waypoints.addAll(waypoints);
+        }
 
         final boolean ftlCapable = fleet.isFTLCapable();
         final StarSystem originSystem = orbit.getSystem();
@@ -176,7 +180,8 @@ public class Move extends Completable implements HasOwner {
 
             if (i == 1) {
                 // set initial flight plan element
-                final Orbit orbit = fleetOrbit.getGalacticResultingOrbit().clone().move(EMovementType.REDUCE_DISTANCE, Distance.valueOf("1 LY"), waypointOrbit);
+                final Distance distance = beforeOrbit.getDistance(waypointOrbit).multiply(0.5);
+                final Orbit orbit = fleetOrbit.getGalacticResultingOrbit().clone().move(EMovementType.REDUCE_DISTANCE, distance, waypointOrbit);
                 this.flightPlan.add(new FlightPlan(this, new FleetOrbit(orbit, null), 0));
             }
 
@@ -190,7 +195,7 @@ public class Move extends Completable implements HasOwner {
             if (steps >= 1) {
                 final List<Orbit> navPoints = DistanceCalculator.getWaypoints(EModuleType.FTLPROPULSION, restrictingTechnologyType, acceleration, beforeOrbit, waypointOrbit, steps);
                 navPoints.forEach(n -> {
-                    final int index = this.flightPlan.size() + navPoints.indexOf(n) + 1;
+                    final int index = this.flightPlan.size() + navPoints.indexOf(n);
                     this.flightPlan.add(new FlightPlan(this, new FleetOrbit(n, null), index));
                 });
             }
@@ -254,18 +259,22 @@ public class Move extends Completable implements HasOwner {
 
     @Nullable
     public FleetOrbit getCurrentOrbit() {
-        final BigDecimal alreadyTravelled = BigDecimal.valueOf(ticksLeft).divide(BigDecimal.valueOf(originalDuration), DistanceCalculator.MC_HU);
+        final boolean justOneTick = 1 == ticksLeft && 1 == originalDuration;
+        final double alreadyTravelled = justOneTick ? 0.3 : BigDecimal.valueOf(ticksLeft).divide(BigDecimal.valueOf(originalDuration), DistanceCalculator.MC_HU).doubleValue();
         FleetOrbit fleetOrbit;
         if (isInterstellarTravel()) {
             final Orbit origin = originOrbit.getGalacticResultingOrbit();
             final Orbit destination = destinationOrbit.getGalacticResultingOrbit();
-            final Orbit position = origin.move(EMovementType.REDUCE_DISTANCE, Distance.valueOf(alreadyTravelled.toPlainString() + " LY"), destination);
+            final Distance distance = origin.getDistance(destination).multiply(alreadyTravelled);
+            final Orbit position = origin.move(EMovementType.REDUCE_DISTANCE, distance, destination);
             fleetOrbit = new FleetOrbit(position, null);
         } else {
             final Orbit origin = originOrbit.getInterplanetaryResultingOrbit();
             final Orbit destination = destinationOrbit.getInterplanetaryResultingOrbit();
-            final Orbit position = Objects.requireNonNull(origin)
-                    .move(EMovementType.REDUCE_DISTANCE, Distance.valueOf(alreadyTravelled.toPlainString() + " LY"), Objects.requireNonNull(destination));
+            final Distance distance = Objects.requireNonNull(origin).getDistance(Objects.requireNonNull(destination))
+                    .multiply(alreadyTravelled);
+            final Orbit position = origin
+                    .move(EMovementType.REDUCE_DISTANCE, distance, destination);
             fleetOrbit = new FleetOrbit(position, null, originOrbit.getSystem());
         }
         return getFlightPlan().stream()
@@ -312,7 +321,7 @@ public class Move extends Completable implements HasOwner {
 
     @Nonnull
     public List<FlightPlan> getFlightPlan() {
-        return flightPlan;
+        return flightPlan.stream().sorted(Comparator.comparingInt(FlightPlan::getTimeAfterStart)).collect(Collectors.toList());
     }
 
     @Override

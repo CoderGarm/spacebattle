@@ -851,6 +851,11 @@
         primary key (idWarshipHealthStateSnapshot)
     ) engine=InnoDB;
 
+    create table waypoints (
+       idMove integer not null,
+        idStarSystem integer not null
+    ) engine=InnoDB;
+
     create table weapon (
        idWeapon integer not null auto_increment,
         technicalTypeName varchar(255) not null,
@@ -1941,6 +1946,16 @@
         add constraint FKboga6909c5cwey1d6ung5i8we
             foreign key (idWarship)
                 references warShip (idWarShip);
+
+    alter table waypoints 
+       add constraint FK6qisbho8xyd2p6jxmmdeh9es 
+       foreign key (idStarSystem) 
+       references starSystem (idStarSystem);
+
+    alter table waypoints 
+       add constraint FKclsqcqyw4yyytl2n84q0qk7pb 
+       foreign key (idMove) 
+       references move (idMove);
 
     alter table weapon
         add constraint FK65koohae6q4aft6chde2j86d9

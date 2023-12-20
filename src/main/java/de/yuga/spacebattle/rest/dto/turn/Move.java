@@ -61,7 +61,9 @@ public class Move {
         ticksLeft = move.getTicksLeft();
         originalDuration = move.getOriginalDuration();
         started = new Tick(move.getStarted());
-        waypoints.addAll(move.getWaypoints().stream().filter(Objects::nonNull).map(FleetOrbit::new).collect(Collectors.toList()));
+        if (move.isInterstellarTravel()) {
+            waypoints.addAll(move.getWaypoints().stream().filter(Objects::nonNull).map(FleetOrbit::new).collect(Collectors.toList()));
+        }
     }
 
     public int getIdFleetInMotion() {
