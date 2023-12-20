@@ -2,7 +2,9 @@ package de.yuga.spacebattle.backend.entities.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
+import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
@@ -26,8 +28,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "move")
@@ -159,23 +164,37 @@ public class Move extends Completable implements HasOwner {
         final ETechnologyType restrictingTechnologyType = fleet.getRestrictingTechnologyType();
         final Acceleration acceleration = fleet.getAccelerationFor(EModuleType.FTLPROPULSION);
         // way from inner-system to hyper limit will be ignored - it's a too small potion of the time tick-wise
-        travelTime += DistanceCalculator.getSubLightDurationToHyperLimit(restrictingTechnologyType, acceleration, fleet.getOrbit());
+        final FleetOrbit fleetOrbit = fleet.getOrbit();
+
+        travelTime += DistanceCalculator.getSubLightDurationToHyperLimit(restrictingTechnologyType, acceleration, fleetOrbit);
         for (int i = 1; i < waypoints.size(); i++) {
+            final boolean isLastElement = i == waypoints.size() - 1;
             final StarSystem before = waypoints.get(i - 1);
             final StarSystem waypoint = waypoints.get(i);
             final Orbit beforeOrbit = before.getOrbit();
             final Orbit waypointOrbit = waypoint.getOrbit();
+
+            if (i == 1) {
+                // set initial flight plan element
+                final Orbit orbit = fleetOrbit.getGalacticResultingOrbit().clone().move(EMovementType.REDUCE_DISTANCE, Distance.valueOf("1 LY"), waypointOrbit);
+                this.flightPlan.add(new FlightPlan(this, new FleetOrbit(orbit, null), 0));
+            }
+
             final boolean systemsConnected = EWormhole.areSystemsConnected(before, waypoint);
             final double duration = systemsConnected ? 0.1 : DistanceCalculator.getDuration(EModuleType.FTLPROPULSION, restrictingTechnologyType, acceleration, beforeOrbit, waypointOrbit);
-            final int steps = (int) (travelTime + duration) - (int) duration;
-            if (steps >= 1) {  /* fixme something funny happens here */
+
+            final BigDecimal durationWithLeftoverDecimals = BigDecimal.valueOf(travelTime)
+                    .subtract(BigDecimal.valueOf(BigDecimal.valueOf(travelTime).intValue()))
+                    .add(BigDecimal.valueOf(duration));
+            final int steps = !isLastElement ? durationWithLeftoverDecimals.intValue() : durationWithLeftoverDecimals.setScale(0, RoundingMode.CEILING).intValue();
+            if (steps >= 1) {
                 final List<Orbit> navPoints = DistanceCalculator.getWaypoints(EModuleType.FTLPROPULSION, restrictingTechnologyType, acceleration, beforeOrbit, waypointOrbit, steps);
                 navPoints.forEach(n -> {
                     final int index = this.flightPlan.size() + navPoints.indexOf(n) + 1;
                     this.flightPlan.add(new FlightPlan(this, new FleetOrbit(n, null), index));
                 });
             }
-            travelTime += duration; /* fixme something funny happens here */
+            travelTime += duration;
         }
         this.ticksLeft = (int) Math.ceil(travelTime);
     }
@@ -231,6 +250,29 @@ public class Move extends Completable implements HasOwner {
     @Nonnull
     public FleetOrbit getDestinationOrbit() {
         return destinationOrbit;
+    }
+
+    @Nullable
+    public FleetOrbit getCurrentOrbit() {
+        final BigDecimal alreadyTravelled = BigDecimal.valueOf(ticksLeft).divide(BigDecimal.valueOf(originalDuration), DistanceCalculator.MC_HU);
+        FleetOrbit fleetOrbit;
+        if (isInterstellarTravel()) {
+            final Orbit origin = originOrbit.getGalacticResultingOrbit();
+            final Orbit destination = destinationOrbit.getGalacticResultingOrbit();
+            final Orbit position = origin.move(EMovementType.REDUCE_DISTANCE, Distance.valueOf(alreadyTravelled.toPlainString() + " LY"), destination);
+            fleetOrbit = new FleetOrbit(position, null);
+        } else {
+            final Orbit origin = originOrbit.getInterplanetaryResultingOrbit();
+            final Orbit destination = destinationOrbit.getInterplanetaryResultingOrbit();
+            final Orbit position = Objects.requireNonNull(origin)
+                    .move(EMovementType.REDUCE_DISTANCE, Distance.valueOf(alreadyTravelled.toPlainString() + " LY"), Objects.requireNonNull(destination));
+            fleetOrbit = new FleetOrbit(position, null, originOrbit.getSystem());
+        }
+        return getFlightPlan().stream()
+                .filter(fp -> fp.getTimeAfterStart() == (originalDuration - ticksLeft))
+                .findFirst()
+                .map(FlightPlan::getLocation)
+                .orElse(fleetOrbit);
     }
 
     public void setTicksLeft(final int moveDoneAtZero) {

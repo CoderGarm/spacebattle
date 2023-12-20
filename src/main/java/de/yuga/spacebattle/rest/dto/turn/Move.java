@@ -49,11 +49,6 @@ public class Move {
     @Schema(required = true, description = "The waypoints of this move.")
     private List<FleetOrbit> waypoints = new ArrayList<>();
 
-    @Nonnull
-    @JsonProperty
-    @Schema(required = true, description = "The real flight plan of this move.")
-    private List<de.yuga.spacebattle.rest.dto.turn.FlightPlan> flightPlan = new ArrayList<>();
-
     public Move() {
     }
 
@@ -66,8 +61,7 @@ public class Move {
         ticksLeft = move.getTicksLeft();
         originalDuration = move.getOriginalDuration();
         started = new Tick(move.getStarted());
-        waypoints.addAll(move.getWaypoints().stream().map(s -> new FleetOrbit(s)).collect(Collectors.toList()));
-        flightPlan.addAll(move.getFlightPlan().stream().map(FlightPlan::new).collect(Collectors.toList()));
+        waypoints.addAll(move.getWaypoints().stream().filter(Objects::nonNull).map(FleetOrbit::new).collect(Collectors.toList()));
     }
 
     public int getIdFleetInMotion() {

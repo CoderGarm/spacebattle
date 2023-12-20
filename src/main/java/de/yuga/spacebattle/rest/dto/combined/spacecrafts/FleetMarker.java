@@ -41,12 +41,6 @@ public class FleetMarker {
     @Schema(required = true, description = "The fleet's individual war ships.")
     private final Set<AbstractId> ships = new HashSet<>();
 
-    /**
-     * The current location of this fleet. <br>
-     * <br>
-     * If null, then this is in hyper space.<br>
-     * The planet could be null if the fleet is on a local movement.
-     */
     @Nullable
     @JsonProperty
     @Schema(description = "The current location of this fleet.\n" +
@@ -54,6 +48,11 @@ public class FleetMarker {
             "     If null, then this is in hyper space.\n" +
             "     The planet could be null if the fleet is on a local movement.")
     private FleetOrbit orbit;
+
+    @Nullable
+    @JsonProperty
+    @Schema(description = "The location of this fleet when at move.")
+    private FleetOrbit currentOrbit;
 
     /**
      * The move includes the origin and the destination if the start is different from the current {@link #orbit}.
@@ -81,7 +80,8 @@ public class FleetMarker {
         this.owner = new AbstractId(fleet.getOwner(), fleet.getOwner().getUsername());
         this.ships.addAll(fleet.getAliveShips().stream().map(w -> new AbstractId(w, w.getName())).collect(Collectors.toSet()));
         this.name = fleet.getName();
-        this.orbit = fleet.getOrbit() != null ? new FleetOrbit(fleet.getOrbit()) : null;
+        this.currentOrbit = fleet.getCurrentOrbit() != null ? new FleetOrbit(fleet.getCurrentOrbit()) : null;
+        this.orbit = fleet.getCurrentOrbit() != null ? new FleetOrbit(fleet.getCurrentOrbit()) : null;
         this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;
         this.state = new StateBlock(fleet);
     }
@@ -94,7 +94,8 @@ public class FleetMarker {
         this.owner = new AbstractId(fleet.getOwner(), fleet.getOwner().getUsername());
         this.ships.addAll(fleetSnapshot.getShips().stream().map(w -> new AbstractId(w.getWarShip(), w.getWarShip().getName())).collect(Collectors.toSet()));
         this.name = fleet.getName();
-        this.orbit = fleet.getOrbit() != null ? new FleetOrbit(fleet.getOrbit()) : null;
+        this.currentOrbit = fleet.getCurrentOrbit() != null ? new FleetOrbit(fleet.getCurrentOrbit()) : null;
+        this.orbit = fleet.getCurrentOrbit() != null ? new FleetOrbit(fleet.getCurrentOrbit()) : null;
         this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;
         this.state = new StateBlock(fleet);
     }
@@ -103,7 +104,7 @@ public class FleetMarker {
         this(fleet);
         Preconditions.checkNotNull(sensorStrength, "sensorStrength must not be empty");
 
-        final de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit orbit = fleet.getOrbit();
+        final de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit orbit = fleet.getCurrentOrbit();
         if (orbit != null) {
             this.hyperPrintSensorValue = sensorStrength.getOrDefault(orbit.getSystem(), 0);
         }

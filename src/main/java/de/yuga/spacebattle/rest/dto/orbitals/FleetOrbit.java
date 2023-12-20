@@ -33,7 +33,7 @@ public class FleetOrbit {
 
         this.planet = fleetOrbit.getPlanet() != null ? new Planet(fleetOrbit.getPlanet()) : null;
         this.system = fleetOrbit.getSystem() != null ? new StarSystem(fleetOrbit.getSystem()) : null;
-        this.orbit = fleetOrbit.getResultingOrbit() != null ? new Orbit(fleetOrbit.getResultingOrbit()) : null;
+        this.orbit = fleetOrbit.getInterplanetaryResultingOrbit() != null ? new Orbit(fleetOrbit.getInterplanetaryResultingOrbit()) : null;
     }
 
     public FleetOrbit(@Nonnull final de.yuga.spacebattle.backend.entities.orbitals.Planet planet) {

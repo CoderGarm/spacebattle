@@ -203,6 +203,11 @@ public class Fleet extends Operationable implements HasOwner {
         return orbit;
     }
 
+    @Nullable
+    public FleetOrbit getCurrentOrbit() {
+        return this.move != null ? this.move.getCurrentOrbit() : orbit;
+    }
+
     public void setOrbit(@Nullable final FleetOrbit orbit) {
         this.orbit = orbit;
     }

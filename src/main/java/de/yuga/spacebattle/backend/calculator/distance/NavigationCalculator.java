@@ -31,9 +31,9 @@ public class NavigationCalculator {
     public static Orbit getPositionOnHyperlimit(@Nonnull final FleetOrbit destination) {
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
         Preconditions.checkArgument(destination.getSystem() != null, "destination system shouldn't be null!");
-        Preconditions.checkArgument(destination.getResultingOrbit() != null, "destination resulting orbit shouldn't be null!");
+        Preconditions.checkArgument(destination.getInterplanetaryResultingOrbit() != null, "destination resulting orbit shouldn't be null!");
 
-        final Quadrant quadrant = Quadrant.getByOrbit(destination.getResultingOrbit());
+        final Quadrant quadrant = Quadrant.getByOrbit(destination.getInterplanetaryResultingOrbit());
         final EStarClassType starClassType = destination.getSystem().getStarClassType();
         final double radiusOfHyperLimit = starClassType.getLightMinutesToHyperLimit();
 

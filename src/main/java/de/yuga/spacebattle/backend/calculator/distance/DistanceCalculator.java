@@ -135,9 +135,9 @@ public class DistanceCalculator {
             ticksToTravel += getSubLightDurationToHyperLimit(restrictingTechnologyType, acceleration, origin);
             ticksToTravel += getDuration(EModuleType.FTLPROPULSION, restrictingTechnologyType, acceleration, originSystem.getOrbit(), destinationSystem.getOrbit());
             ticksToTravel += getSubLightDurationFromHyperLimit(restrictingTechnologyType, acceleration, destination);
-        } else if (origin.getResultingOrbit() != null && destination.getResultingOrbit() != null) {
+        } else if (origin.getInterplanetaryResultingOrbit() != null && destination.getInterplanetaryResultingOrbit() != null) {
             // interplanetary traveling
-            ticksToTravel += getDuration(EModuleType.PROPULSION, restrictingTechnologyType, acceleration, origin.getResultingOrbit(), destination.getResultingOrbit());
+            ticksToTravel += getDuration(EModuleType.PROPULSION, restrictingTechnologyType, acceleration, origin.getInterplanetaryResultingOrbit(), destination.getInterplanetaryResultingOrbit());
         }
 
         final int rounded = BigDecimal.valueOf(ticksToTravel).setScale(0, RoundingMode.UP).intValue();
@@ -156,11 +156,11 @@ public class DistanceCalculator {
         Preconditions.checkNotNull(restrictingTechnologyType, "restrictingTechnologyType must not be empty");
         Preconditions.checkNotNull(acceleration, "acceleration must not be empty");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
-        Preconditions.checkArgument(destination.getResultingOrbit() != null, "destination resulting orbit shouldn't be null!");
+        Preconditions.checkArgument(destination.getInterplanetaryResultingOrbit() != null, "destination resulting orbit shouldn't be null!");
 
         final Orbit positionOnHyperLimit = NavigationCalculator.getPositionOnHyperlimit(destination);
         // todo currently there are fixed entry points into a system - this must be changed
-        return getDuration(EModuleType.PROPULSION, restrictingTechnologyType, acceleration, positionOnHyperLimit, destination.getResultingOrbit());
+        return getDuration(EModuleType.PROPULSION, restrictingTechnologyType, acceleration, positionOnHyperLimit, destination.getInterplanetaryResultingOrbit());
     }
 
 
@@ -178,7 +178,7 @@ public class DistanceCalculator {
         Preconditions.checkNotNull(origin, "origin shouldn't be null!");
 
         final StarSystem originSystem = origin.getSystem();
-        final Orbit originOrbit = origin.getResultingOrbit();
+        final Orbit originOrbit = origin.getInterplanetaryResultingOrbit();
         if (originOrbit == null || originSystem == null) {
             throw new NotifyWebUserException("You must be in a system to travel to the hyper limit from the inwards.");
         }

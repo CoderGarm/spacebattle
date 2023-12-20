@@ -10,6 +10,7 @@ import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import java.util.Objects;
 
 @Embeddable
 public class FleetOrbit {
@@ -86,11 +87,19 @@ public class FleetOrbit {
     }
 
     @Nullable
-    public Orbit getResultingOrbit() {
+    public Orbit getInterplanetaryResultingOrbit() {
         if (planet != null) {
             return planet.getOrbit();
         }
         return orbit;
+    }
+
+    @Nonnull
+    public Orbit getGalacticResultingOrbit() {
+        if (system != null) {
+            return system.getOrbit();
+        }
+        return Objects.requireNonNull(orbit);
     }
 
     /**

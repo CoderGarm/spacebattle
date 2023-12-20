@@ -1,3 +1,9 @@
+------------
+chaviha will be replaced
+Fireflair will be transferred to shannon
+------------
+
+
 The upcoming release will introduce the wormholes, lets celebrate it with an event of epic proportions.  
 I would say, everyone should have the chance to conquer a planet.
 
@@ -36,7 +42,7 @@ The snippets of the forum posts could be used to make some noise at reddit, if t
 1. The timeframe will be something like 01.01.'24 to 14:01.'24.
 2. INTERCEPT fleets will not attack each other.  
    They are politically independent of their owner, but still under theirs admiralty control.
-3. The home systems of inactive players will be listed at the beginning. The list represents civilian involvement in piracy.
+3. The home systems of abandoned planets will be listed at the beginning. The list represents civilian involvement in piracy.
     - The planets and resources will be upgraded - slightly - in beforehand.
     - The fleets will be restored to the initial three 'Songbird' destroyer with around 85 k tons.
       If an inactive player returns, the planet will be removed from the list of goals and the fleet will be upgraded (message me ingame) in order to take part in the event.

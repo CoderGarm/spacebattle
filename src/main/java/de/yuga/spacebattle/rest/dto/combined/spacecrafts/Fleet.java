@@ -36,12 +36,6 @@ public class Fleet {
     @Schema(required = true, description = "The fleet's individual war ships.")
     private Set<WarShip> ships = new HashSet<>();
 
-    /**
-     * The current location of this fleet. <br>
-     * <br>
-     * If null, then this is in hyper space.<br>
-     * The planet could be null if the fleet is on a local movement.
-     */
     @Nullable
     @JsonProperty
     @Schema(description = "The current location of this fleet.\n" +
@@ -49,6 +43,11 @@ public class Fleet {
             "     If null, then this is in hyper space.\n" +
             "     The planet could be null if the fleet is on a local movement.")
     private FleetOrbit orbit;
+
+    @Nullable
+    @JsonProperty
+    @Schema(description = "The location of this fleet when at move.")
+    private FleetOrbit currentOrbit;
 
     /**
      * The move includes the origin and the destination if the start is different from the current {@link #orbit}.
@@ -97,6 +96,7 @@ public class Fleet {
         this.owner = new Player(fleet.getOwner());
         this.name = fleet.getName();
         this.orbit = fleet.getOrbit() != null ? new FleetOrbit(fleet.getOrbit()) : null;
+        this.currentOrbit = fleet.getCurrentOrbit() != null ? new FleetOrbit(fleet.getCurrentOrbit()) : null;
         this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;
         this.ships.addAll(containingShips.stream().map(w -> new WarShip(w, w.getWarshipHealthState(), languageCode)).collect(Collectors.toList()));
         this.spacecraftCapabilities = new SpacecraftCapabilities(fleet);
@@ -115,6 +115,7 @@ public class Fleet {
         this.owner = new Player(fleet.getOwner());
         this.name = fleet.getName();
         this.orbit = fleet.getOrbit() != null ? new FleetOrbit(fleet.getOrbit()) : null;
+        this.currentOrbit = fleet.getCurrentOrbit() != null ? new FleetOrbit(fleet.getCurrentOrbit()) : null;
         this.move = fleet.getMove() != null ? new Move(fleet.getMove()) : null;
         this.ships.addAll(fleetSnapshot.getShips().stream().map(w -> new WarShip(w, languageCode)).collect(Collectors.toList()));
         this.spacecraftCapabilities = new SpacecraftCapabilities(fleetSnapshot);
