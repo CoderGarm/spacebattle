@@ -15,6 +15,7 @@ schiffe auf move tauchen auf keinen scannern auf?
 
     → eine kleine Anpassung der Systemnamen
     → neue bewegungsanimationen auf der map
+    → select indicator auf map ist gefixt. ebenso das verschwinden von Flottem beim zoom
 
     → wurmlöcher werden von handelsreisenden, für Kolonien und für den Transfer benutzt
 

@@ -13,6 +13,9 @@ import javax.persistence.*;
 @Entity
 @Table(name = "flightPlan")
 @AttributeOverride(name = "id", column = @Column(name = "idFlightPlan"))
+@DiscriminatorValue("FLIGHT_PLAN")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "dType", discriminatorType = DiscriminatorType.STRING)
 public class FlightPlan extends AbstractEntityKey {
 
     @Nonnull

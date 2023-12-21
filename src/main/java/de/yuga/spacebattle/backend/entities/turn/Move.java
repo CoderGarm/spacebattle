@@ -16,6 +16,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.navigation.FlightPlan;
+import de.yuga.spacebattle.backend.entities.turn.navigation.Waypoint;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.ETechnologyType;
 import de.yuga.spacebattle.backend.enums.space.EWormhole;
@@ -91,11 +92,8 @@ public class Move extends Completable implements HasOwner {
     private final Set<FlightPlan> flightPlan = new HashSet<>();
 
     @Nonnull
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "waypoints",
-            joinColumns = @JoinColumn(name = "idMove"),
-            inverseJoinColumns = @JoinColumn(name = "idStarSystem"))
-    private final List<StarSystem> waypoints = new ArrayList<>();
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "move", cascade = CascadeType.ALL)
+    private final List<FlightPlan> waypoints = new ArrayList<>();
 
     public Move() {
     }
@@ -117,7 +115,9 @@ public class Move extends Completable implements HasOwner {
         this.originOrbit = new FleetOrbit(orbit);
         this.destinationOrbit = destination;
         if (isInterstellarTravel()) {
-            this.waypoints.addAll(waypoints);
+            for (int i = 0; i < waypoints.size(); i++) {
+                this.waypoints.add(new Waypoint(this, new FleetOrbit(null, waypoints.get(i)), i));
+            }
         }
 
         final boolean ftlCapable = fleet.isFTLCapable();
@@ -206,7 +206,11 @@ public class Move extends Completable implements HasOwner {
 
     @Nonnull
     public List<StarSystem> getWaypoints() {
-        return waypoints;
+        return waypoints.stream()
+                .sorted(Comparator.comparingInt(FlightPlan::getTimeAfterStart))
+                .map(FlightPlan::getLocation)
+                .map(FleetOrbit::getSystem)
+                .collect(Collectors.toList());
     }
 
     @Nonnull
