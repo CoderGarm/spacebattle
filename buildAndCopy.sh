@@ -27,7 +27,6 @@ else
     echo 'build failure'; exit 1;
 fi
 
-# fixme check scp scripts/startSB.sh medusa:spacebattle/
 scp $versionFile medusa:spacebattle/
 scp scripts/deployBackend.sh medusa:
 rsync -a --ignore-existing --progress data/sql/delta/ medusa:/home/karsten/uploadTarget/sql/delta/

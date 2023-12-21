@@ -9,7 +9,6 @@ fi
 version="$(cat $versionFile)"
 echo "deploying version $version"
 
-# todo amend about run-check for application
 ./stopSB.sh
 echo "Application stopped"
 
@@ -22,7 +21,6 @@ java \
 -Dserver.port=8081 \
 -Dspring.datasource.username=sbdbuser \
 -Dspring.datasource.password=JYUiAsUkRQ9xQCeM \
--Dsb.tick.cron='0 0 0 * * *' \
 -Dsb.server='medusa' \
 -Dlogging.battle-log.write=false \
 -Dlogging.rest.calls=false \
