@@ -3,7 +3,6 @@ package de.yuga.spacebattle.backend.services.caclulator;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.dijkstra.Dijkstra;
-import de.yuga.spacebattle.backend.calculator.distance.dijkstra.Graph;
 import de.yuga.spacebattle.backend.calculator.distance.dijkstra.Node;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
@@ -121,18 +120,12 @@ public class NavigationCalculatorService {
         Preconditions.checkNotNull(destination, "destination must not be empty");
 
         final Map<StarSystem, Node> systemNodes = createNodes(origin, destination);
-        final Graph graph = new Graph();
-        graph.setNodes(new HashSet<>(systemNodes.values()));
         final Node nodeA = systemNodes.get(origin);
         final Node nodeB = systemNodes.get(destination);
 
-        final Graph shortestPathFromSource = Dijkstra.calculateShortestPathFromSource(graph, nodeA);
+        Dijkstra.calculateShortestPathFromSource(nodeA);
 
-        return shortestPathFromSource.getNodes().stream()
-                .filter(n -> n == nodeB)
-                .findFirst()
-                .orElseThrow(NullPointerException::new)
-                .getShortestPath();
+        return nodeB.getShortestPath();
     }
 
     @Nonnull
@@ -141,11 +134,13 @@ public class NavigationCalculatorService {
         Preconditions.checkNotNull(destination, "destination must not be empty");
 
         final Set<StarSystem> systemsOnTrack = new HashSet<>(wormholeSystems);
+        systemsOnTrack.add(origin);
         systemsOnTrack.add(destination);
 
         final Map<StarSystem, Node> systemNodes = new HashMap<>(systemsOnTrack.stream()
                 .collect(Collectors.toMap(Function.identity(), s -> new Node(s.getName()))));
 
+        // fixme reduce to node a?
         systemsOnTrack.forEach(a ->
                 systemsOnTrack.stream()
                         .filter(b -> !a.equals(b))

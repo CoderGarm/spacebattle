@@ -1,57 +1,70 @@
 package de.yuga.spacebattle.backend.calculator.distance.dijkstra;
 
+import com.google.common.base.Preconditions;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Dijkstra {
 
-    public static Graph calculateShortestPathFromSource(Graph graph, Node source) {
-        // todo please clean me up - I was made without any refactoring and just taken from Baeldung
+    public static void calculateShortestPathFromSource(@Nonnull final Node source) {
+        Preconditions.checkNotNull(source, "source must not be empty");
+
         source.setDistance(0);
 
-        Set<Node> settledNodes = new HashSet<>();
-        Set<Node> unsettledNodes = new HashSet<>();
+        final Set<Node> settledNodes = new HashSet<>();
+        final Set<Node> unsettledNodes = new HashSet<>();
         unsettledNodes.add(source);
 
         while (!unsettledNodes.isEmpty()) {
-            Node currentNode = getLowestDistanceNode(unsettledNodes);
+            final Node currentNode = getLowestDistanceNode(unsettledNodes);
             unsettledNodes.remove(currentNode);
             for (Entry<Node, Integer> adjacencyPair : currentNode.getAdjacentNodes().entrySet()) {
-                Node adjacentNode = adjacencyPair.getKey();
-                Integer edgeWeigh = adjacencyPair.getValue();
+                final Node adjacentNode = adjacencyPair.getKey();
+                final int edgeWeigh = adjacencyPair.getValue();
 
                 if (!settledNodes.contains(adjacentNode)) {
-                    CalculateMinimumDistance(adjacentNode, edgeWeigh, currentNode);
+                    calculateMinimumDistance(adjacentNode, edgeWeigh, currentNode);
                     unsettledNodes.add(adjacentNode);
                 }
             }
             settledNodes.add(currentNode);
         }
-        return graph;
     }
 
-    private static void CalculateMinimumDistance(Node evaluationNode, Integer edgeWeigh, Node sourceNode) {
-        Integer sourceDistance = sourceNode.getDistance();
+    private static void calculateMinimumDistance(@Nonnull final Node evaluationNode, int edgeWeigh, @Nonnull final Node sourceNode) {
+        Preconditions.checkNotNull(evaluationNode, "evaluationNode must not be empty");
+        Preconditions.checkNotNull(sourceNode, "sourceNode must not be empty");
+
+        final Integer sourceDistance = sourceNode.getDistance();
         if (sourceDistance + edgeWeigh < evaluationNode.getDistance()) {
             evaluationNode.setDistance(sourceDistance + edgeWeigh);
-            LinkedList<Node> shortestPath = new LinkedList<>(sourceNode.getShortestPath());
+            final LinkedList<Node> shortestPath = new LinkedList<>(sourceNode.getShortestPath());
             shortestPath.add(sourceNode);
             evaluationNode.setShortestPath(shortestPath);
         }
     }
 
-    private static Node getLowestDistanceNode(Set<Node> unsettledNodes) {
-        Node lowestDistanceNode = null;
-        int lowestDistance = Integer.MAX_VALUE;
-        for (Node node : unsettledNodes) {
+    @Nullable
+    private static Node getLowestDistanceNode(@Nonnull final Set<Node> unsettledNodes) {
+        Preconditions.checkNotNull(unsettledNodes, "unsettledNodes must not be empty");
+
+        final AtomicReference<Node> lowestDistanceNode = new AtomicReference<>();
+        final AtomicInteger lowestDistance = new AtomicInteger(Integer.MAX_VALUE);
+        unsettledNodes.forEach(node -> {
             int nodeDistance = node.getDistance();
-            if (nodeDistance < lowestDistance) {
-                lowestDistance = nodeDistance;
-                lowestDistanceNode = node;
+            if (nodeDistance < lowestDistance.get()) {
+                lowestDistance.set(nodeDistance);
+                lowestDistanceNode.set(node);
             }
-        }
-        return lowestDistanceNode;
+        });
+
+        return lowestDistanceNode.get();
     }
 }
