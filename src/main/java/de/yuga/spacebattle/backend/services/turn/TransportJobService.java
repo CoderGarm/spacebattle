@@ -1,13 +1,13 @@
 package de.yuga.spacebattle.backend.services.turn;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.TransportJob;
 import de.yuga.spacebattle.backend.repositories.turn.TransportJobRepository;
+import de.yuga.spacebattle.backend.services.caclulator.NavigationCalculatorService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,15 +32,20 @@ public class TransportJobService {
     @Nonnull
     private final TickTimeService tickTimeService;
 
+    @Nonnull
+    private final NavigationCalculatorService navigationCalculatorService;
+
     @Autowired
     public TransportJobService(@Nonnull final TransportJobRepository transportJobRepository,
                                @Nonnull final PlanetService planetService,
                                @Nonnull final WarShipService warShipService,
-                               @Nonnull final TickTimeService tickTimeService) {
+                               @Nonnull final TickTimeService tickTimeService,
+                               @Nonnull final NavigationCalculatorService navigationCalculatorService) {
         this.transportJobRepository = Preconditions.checkNotNull(transportJobRepository, "transportJobRepository must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.tickTimeService = Preconditions.checkNotNull(tickTimeService, "tickTimeService must not be empty");
+        this.navigationCalculatorService = Preconditions.checkNotNull(navigationCalculatorService, "navigationCalculatorService must not be empty");
     }
 
     @Nonnull
@@ -94,7 +99,7 @@ public class TransportJobService {
 
         if (transportJob == null) {
             // create if not present or job is not unique for the ship
-            final int timeToTravel = DistanceCalculator.getTimeToTravel(origin, destination);
+            final int timeToTravel = navigationCalculatorService.getTimeToTravel(origin, destination);
             transportJob = new TransportJob(today, destination, warShip, timeToTravel);
         }
 

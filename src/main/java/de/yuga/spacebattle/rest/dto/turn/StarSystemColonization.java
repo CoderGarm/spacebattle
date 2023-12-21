@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.services.caclulator.NavigationCalculatorService;
 import de.yuga.spacebattle.rest.dto.orbitals.StarSystem;
 import de.yuga.spacebattle.rest.dto.turn.resources.ResourceAmount;
 import de.yuga.spacebattle.rest.dto.turn.resources.ResourceDeposit;
@@ -58,10 +59,12 @@ public class StarSystemColonization {
     public StarSystemColonization() {
     }
 
-    public StarSystemColonization(@Nonnull final de.yuga.spacebattle.backend.entities.orbitals.StarSystem starSystem,
+    public StarSystemColonization(@Nonnull final NavigationCalculatorService navigationCalculatorService,
+                                  @Nonnull final de.yuga.spacebattle.backend.entities.orbitals.StarSystem starSystem,
                                   @Nonnull final Collection<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> knownSystems,
                                   @Nonnull final List<de.yuga.spacebattle.backend.entities.turn.Colonization> colonizations,
                                   @Nonnull final de.yuga.spacebattle.backend.entities.orbitals.StarSystem homeSystem) {
+        Preconditions.checkNotNull(navigationCalculatorService, "navigationCalculatorService must not be empty");
         Preconditions.checkNotNull(starSystem, "starSystem shouldn't be null!");
         Preconditions.checkNotNull(knownSystems, "knownSystems shouldn't be null!");
         Preconditions.checkNotNull(colonizations, "colonizations shouldn't be null!");
@@ -76,7 +79,7 @@ public class StarSystemColonization {
         this.travelTimeMap = knownSystems
                 .stream()
                 .collect(Collectors.toMap(AbstractEntityKey::getId,
-                        sys -> DistanceCalculator.getTimeToTravel(homeSystem, sys)));
+                        sys -> navigationCalculatorService.getTimeToTravel(homeSystem, sys)));
 
         costsToBuyColonizationInformation = setColoInformationCosts(starSystem);
         setColonizationCosts(starSystem);

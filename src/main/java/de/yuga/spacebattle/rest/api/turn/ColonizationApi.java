@@ -2,11 +2,11 @@ package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
-import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.backend.services.caclulator.NavigationCalculatorService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
@@ -66,15 +66,20 @@ public class ColonizationApi extends BaseApi {
     @Nonnull
     private final PlanetService planetService;
 
+    @Nonnull
+    private final NavigationCalculatorService navigationCalculatorService;
+
     @Autowired
     public ColonizationApi(@Nonnull final UserService userService,
                            @Nonnull final ColonizationService colonizationService,
                            @Nonnull final StarSystemService starSystemService,
-                           @Nonnull final PlanetService planetService) {
+                           @Nonnull final PlanetService planetService,
+                           @Nonnull final NavigationCalculatorService navigationCalculatorService) {
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.colonizationService = Preconditions.checkNotNull(colonizationService, "colonizationService shouldn't be null!");
         this.starSystemService = Preconditions.checkNotNull(starSystemService, "starSystemService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
+        this.navigationCalculatorService = Preconditions.checkNotNull(navigationCalculatorService, "navigationCalculatorService must not be empty");
     }
 
     @PutMapping
@@ -133,7 +138,7 @@ public class ColonizationApi extends BaseApi {
             return ResponseEntity.ok(999);
         }
         final Planet mainPlanet = planetService.findMainPlanet(idUser);
-        final int timeToTravel = DistanceCalculator.getTimeToTravel(mainPlanet, toColonize);
+        final int timeToTravel = navigationCalculatorService.getTimeToTravel(mainPlanet, toColonize);
         return ResponseEntity.ok(timeToTravel);
     }
 
@@ -191,7 +196,7 @@ public class ColonizationApi extends BaseApi {
                 .findFirst()
                 .orElseThrow(() -> new NullPointerException("Oh my dear, you should live somewhere!"));
 
-        final StarSystemColonization result = new StarSystemColonization(system, knownStarSystems, colonizationsForUser, homeSystem);
+        final StarSystemColonization result = new StarSystemColonization(navigationCalculatorService, system, knownStarSystems, colonizationsForUser, homeSystem);
         return ResponseEntity.ok(result);
     }
 
@@ -246,7 +251,7 @@ public class ColonizationApi extends BaseApi {
         final List<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> all = starSystemService.findAll();
         final Set<de.yuga.spacebattle.backend.entities.orbitals.StarSystem> knownStarSystems = userService.getKnownStarSystems(idUser);
         final List<de.yuga.spacebattle.backend.entities.turn.Colonization> colonizationsForUser = colonizationService.findAll();
-        return ResponseEntity.ok(StarSystemColonizationListConverter.create(idUser, all, knownStarSystems, colonizationsForUser));
+        return ResponseEntity.ok(StarSystemColonizationListConverter.create(navigationCalculatorService, idUser, all, knownStarSystems, colonizationsForUser));
     }
 
     @GetMapping(value = ALL_PENDING_COLONIZATIONS_ENDPOINT)
@@ -269,7 +274,7 @@ public class ColonizationApi extends BaseApi {
                 .map(c -> c.getTarget().getSystem())
                 .collect(Collectors.toSet());
 
-        return ResponseEntity.ok(StarSystemColonizationListConverter.create(idUser, all, knownStarSystems, colonizationsForUser));
+        return ResponseEntity.ok(StarSystemColonizationListConverter.create(navigationCalculatorService, idUser, all, knownStarSystems, colonizationsForUser));
     }
 
     @GetMapping(value = FREE_SYSTEMS_ENDPOINT)

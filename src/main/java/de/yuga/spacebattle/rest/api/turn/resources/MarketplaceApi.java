@@ -1,12 +1,12 @@
 package de.yuga.spacebattle.rest.api.turn.resources;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.dto.turn.resources.trade.TradesInTimeframe;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.services.caclulator.NavigationCalculatorService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.resources.MarketplaceService;
 import de.yuga.spacebattle.rest.api.BaseApi;
@@ -50,11 +50,16 @@ public class MarketplaceApi extends BaseApi {
     @Nonnull
     private final PlanetService planetService;
 
+    @Nonnull
+    private final NavigationCalculatorService navigationCalculatorService;
+
     @Autowired
     public MarketplaceApi(@Nonnull final MarketplaceService marketplaceService,
-                          @Nonnull final PlanetService planetService) {
+                          @Nonnull final PlanetService planetService,
+                          @Nonnull final NavigationCalculatorService navigationCalculatorService) {
         this.marketplaceService = Preconditions.checkNotNull(marketplaceService, "tradedResourceService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
+        this.navigationCalculatorService = navigationCalculatorService;
     }
 
     @GetMapping(TRADE_HISTORY_ENDPOINT + "/{pastTicks}")
@@ -213,7 +218,7 @@ public class MarketplaceApi extends BaseApi {
         PreconditionWebHelper.checkNotNull(planet, "planet must not be empty");
 
         return ResponseEntity.ok(trades.stream().map(tradeOffer -> {
-            final int toTravel = DistanceCalculator.getTimeToTravel(tradeOffer.getOrigin(), planet);
+            final int toTravel = navigationCalculatorService.getTimeToTravel(tradeOffer.getOrigin(), planet);
             final TradeOffer offer = new TradeOffer(tradeOffer);
             offer.setTravelTime(toTravel);
             return offer;

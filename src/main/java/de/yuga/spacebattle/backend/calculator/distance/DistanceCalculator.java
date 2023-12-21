@@ -17,6 +17,7 @@ import de.yuga.spacebattle.backend.enums.ETechnologyType;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
+import de.yuga.spacebattle.backend.enums.space.EWormhole;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
@@ -132,8 +133,9 @@ public class DistanceCalculator {
 
         if (originSystem != null && destinationSystem != null && !originSystem.equals(destinationSystem)) {
             // interstellar traveling
+            final boolean systemsConnected = EWormhole.areSystemsConnected(originSystem, destinationSystem);
             ticksToTravel += getSubLightDurationToHyperLimit(restrictingTechnologyType, acceleration, origin);
-            ticksToTravel += getDuration(EModuleType.FTLPROPULSION, restrictingTechnologyType, acceleration, originSystem.getOrbit(), destinationSystem.getOrbit());
+            ticksToTravel += systemsConnected ? 0 : getDuration(EModuleType.FTLPROPULSION, restrictingTechnologyType, acceleration, originSystem.getOrbit(), destinationSystem.getOrbit());
             ticksToTravel += getSubLightDurationFromHyperLimit(restrictingTechnologyType, acceleration, destination);
         } else if (origin.getInterplanetaryResultingOrbit() != null && destination.getInterplanetaryResultingOrbit() != null) {
             // interplanetary traveling
@@ -324,32 +326,12 @@ public class DistanceCalculator {
         return clone;
     }
 
-    public static int getTimeToTravel(@Nonnull final StarSystem origin,
-                                      @Nonnull final StarSystem target) {
-        Preconditions.checkNotNull(origin, "origin must not be empty");
-        Preconditions.checkNotNull(target, "target must not be empty");
-
-        return DistanceCalculator.calculateTimeToTravel(ETechnologyType.MILITARY, PUBLIC_TRANSPORT_ACCELERATION,
-                new FleetOrbit(Orbit.getCenterOrbit(), origin),
-                new FleetOrbit(Orbit.getCenterOrbit(), target));
-    }
-
-    public static int getTimeToTravel(@Nonnull final Planet origin,
-                                      @Nonnull final Planet target) {
-        Preconditions.checkNotNull(origin, "origin must not be empty");
-        Preconditions.checkNotNull(target, "target must not be empty");
-
-        return DistanceCalculator.calculateTimeToTravel(ETechnologyType.MILITARY, PUBLIC_TRANSPORT_ACCELERATION,
-                new FleetOrbit(origin),
-                new FleetOrbit(target));
-    }
-
-    public static List<Orbit> getWaypoints(@Nonnull final EModuleType propulsionType,
-                                           @Nonnull final ETechnologyType restrictingTechnologyType,
-                                           @Nonnull final Acceleration acceleration,
-                                           @Nonnull final Orbit origin,
-                                           @Nonnull final Orbit destination,
-                                           final int steps) {
+    public static List<Orbit> getWaypointsFromCourse(@Nonnull final EModuleType propulsionType,
+                                                     @Nonnull final ETechnologyType restrictingTechnologyType,
+                                                     @Nonnull final Acceleration acceleration,
+                                                     @Nonnull final Orbit origin,
+                                                     @Nonnull final Orbit destination,
+                                                     final int steps) {
         Preconditions.checkNotNull(propulsionType, "propulsionType must not be empty");
         Preconditions.checkNotNull(restrictingTechnologyType, "restrictingTechnologyType must not be empty");
         Preconditions.checkNotNull(acceleration, "acceleration must not be empty");

@@ -2,7 +2,6 @@ package de.yuga.spacebattle.backend.services.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
-import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.OrbitalDistanceMarker;
 import de.yuga.spacebattle.backend.entities.account.User;
@@ -22,6 +21,7 @@ import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.turn.ColonizationRepository;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
+import de.yuga.spacebattle.backend.services.caclulator.NavigationCalculatorService;
 import de.yuga.spacebattle.backend.services.caclulator.TickOutputCalculator;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
@@ -70,13 +70,17 @@ public class ColonizationService {
     @Nonnull
     private final ConstructionService constructionService;
 
+    @Nonnull
+    private final NavigationCalculatorService navigationCalculatorService;
+
     public ColonizationService(@Nonnull final ColonizationRepository repository,
                                @Nonnull final UserService userService,
                                @Nonnull final PlanetService planetService,
                                @Nonnull final StarSystemService starSystemService,
                                @Nonnull final BuildingService buildingService,
                                @Nonnull final FleetService fleetService,
-                               @Nonnull final ConstructionService constructionService) {
+                               @Nonnull final ConstructionService constructionService,
+                               @Nonnull final NavigationCalculatorService navigationCalculatorService) {
         this.repository = Preconditions.checkNotNull(repository, "colonizationRepository shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
@@ -84,6 +88,7 @@ public class ColonizationService {
         this.buildingService = Preconditions.checkNotNull(buildingService, "buildingService shouldn't be null!");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
+        this.navigationCalculatorService = Preconditions.checkNotNull(navigationCalculatorService, "navigationCalculatorService must not be empty");
     }
 
     @Nonnull
@@ -148,7 +153,7 @@ public class ColonizationService {
         Preconditions.checkNotNull(mainPlanet, "mainPlanet must not be empty");
         Preconditions.checkNotNull(toColonize, "toColonize must not be empty");
 
-        final int timeToTravel = DistanceCalculator.getTimeToTravel(mainPlanet, toColonize);
+        final int timeToTravel = navigationCalculatorService.getTimeToTravel(mainPlanet, toColonize);
         final CrewRequirement crewRequirement = ColonizationCostCalculator.getColonizationCosts(toColonize).getCrewRequirement();
         return save(new Colonization(owner, toColonize, crewRequirement, timeToTravel, true));
     }
@@ -171,7 +176,7 @@ public class ColonizationService {
         final CrewRequirement crewRequirement = colonizationCosts.getCrewRequirement();
         debitorDeposit.updateCrew(crewRequirement, ECalculationType.SUBTRACT);
 
-        final int timeToTravel = DistanceCalculator.getTimeToTravel(mainPlanet, toColonize);
+        final int timeToTravel = navigationCalculatorService.getTimeToTravel(mainPlanet, toColonize);
         final Colonization colonization = new Colonization(user, toColonize, crewRequirement, timeToTravel);
         save(colonization);
         planetService.save(mainPlanet);

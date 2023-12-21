@@ -3,8 +3,8 @@ package de.yuga.spacebattle.backend.entities.turn;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
-import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.turn.FlightPlanDto;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
@@ -17,9 +17,6 @@ import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.navigation.FlightPlan;
 import de.yuga.spacebattle.backend.entities.turn.navigation.Waypoint;
-import de.yuga.spacebattle.backend.enums.EModuleType;
-import de.yuga.spacebattle.backend.enums.ETechnologyType;
-import de.yuga.spacebattle.backend.enums.space.EWormhole;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -30,7 +27,6 @@ import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -101,12 +97,12 @@ public class Move extends Completable implements HasOwner {
     public Move(@Nonnull final Tick today,
                 @Nonnull final Fleet fleet,
                 @Nonnull final FleetOrbit destination,
-                @Nonnull final List<StarSystem> waypoints) {
+                @Nonnull final FlightPlanDto flightPlanDto) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
         Preconditions.checkState(fleet.getOrbit() != null, "The fleet must have an orbit currently");
-        Preconditions.checkNotNull(waypoints, "waypoints must not be empty");
+        Preconditions.checkNotNull(flightPlanDto, "flightPlanDto must not be empty");
 
         this.started = today;
         this.owner = fleet.getOwner();
@@ -115,8 +111,8 @@ public class Move extends Completable implements HasOwner {
         this.originOrbit = new FleetOrbit(orbit);
         this.destinationOrbit = destination;
         if (isInterstellarTravel()) {
-            for (int i = 0; i < waypoints.size(); i++) {
-                this.waypoints.add(new Waypoint(this, new FleetOrbit(null, waypoints.get(i)), i));
+            for (int i = 0; i < flightPlanDto.getWaypoints().size(); i++) {
+                this.waypoints.add(new Waypoint(this, new FleetOrbit(null, flightPlanDto.getWaypoints().get(i)), i));
             }
         }
 
@@ -130,7 +126,8 @@ public class Move extends Completable implements HasOwner {
         } else {
             if (waypoints.size() > 2) {
                 // origin and destination are always in
-                calculateWaypoints(fleet, waypoints);
+                this.ticksLeft = flightPlanDto.getTicksLeft();
+                this.flightPlan.addAll(flightPlanDto.getFlightPlan(this));
             } else {
                 this.ticksLeft = DistanceCalculator.calculateTimeToTravel(fleet, destination);
             }
@@ -155,53 +152,6 @@ public class Move extends Completable implements HasOwner {
         this.destinationOrbit = destination;
         this.ticksLeft = timeToTravel;
         this.originalDuration = originalDuration;
-    }
-
-
-    private void calculateWaypoints(@Nonnull final Fleet fleet,
-                                    @Nonnull final List<StarSystem> waypoints) {
-        Preconditions.checkNotNull(fleet, "fleet must not be empty");
-        Preconditions.checkState(fleet.getOrbit() != null, "The fleet must have an orbit currently");
-        Preconditions.checkNotNull(waypoints, "waypoints must not be empty");
-
-        double travelTime = 0;
-        final ETechnologyType restrictingTechnologyType = fleet.getRestrictingTechnologyType();
-        final Acceleration acceleration = fleet.getAccelerationFor(EModuleType.FTLPROPULSION);
-        // way from inner-system to hyper limit will be ignored - it's a too small potion of the time tick-wise
-        final FleetOrbit fleetOrbit = fleet.getOrbit();
-
-        travelTime += DistanceCalculator.getSubLightDurationToHyperLimit(restrictingTechnologyType, acceleration, fleetOrbit);
-        for (int i = 1; i < waypoints.size(); i++) {
-            final boolean isLastElement = i == waypoints.size() - 1;
-            final StarSystem before = waypoints.get(i - 1);
-            final StarSystem waypoint = waypoints.get(i);
-            final Orbit beforeOrbit = before.getOrbit();
-            final Orbit waypointOrbit = waypoint.getOrbit();
-
-            if (i == 1) {
-                // set initial flight plan element
-                final Distance distance = beforeOrbit.getDistance(waypointOrbit).multiply(0.5);
-                final Orbit orbit = fleetOrbit.getGalacticResultingOrbit().clone().move(EMovementType.REDUCE_DISTANCE, distance, waypointOrbit);
-                this.flightPlan.add(new FlightPlan(this, new FleetOrbit(orbit, null), 0));
-            }
-
-            final boolean systemsConnected = EWormhole.areSystemsConnected(before, waypoint);
-            final double duration = systemsConnected ? 0.1 : DistanceCalculator.getDuration(EModuleType.FTLPROPULSION, restrictingTechnologyType, acceleration, beforeOrbit, waypointOrbit);
-
-            final BigDecimal durationWithLeftoverDecimals = BigDecimal.valueOf(travelTime)
-                    .subtract(BigDecimal.valueOf(BigDecimal.valueOf(travelTime).intValue()))
-                    .add(BigDecimal.valueOf(duration));
-            final int steps = !isLastElement ? durationWithLeftoverDecimals.intValue() : durationWithLeftoverDecimals.setScale(0, RoundingMode.CEILING).intValue();
-            if (steps >= 1) {
-                final List<Orbit> navPoints = DistanceCalculator.getWaypoints(EModuleType.FTLPROPULSION, restrictingTechnologyType, acceleration, beforeOrbit, waypointOrbit, steps);
-                navPoints.forEach(n -> {
-                    final int index = this.flightPlan.size() + navPoints.indexOf(n);
-                    this.flightPlan.add(new FlightPlan(this, new FleetOrbit(n, null), index));
-                });
-            }
-            travelTime += duration;
-        }
-        this.ticksLeft = (int) Math.ceil(travelTime);
     }
 
     @Nonnull

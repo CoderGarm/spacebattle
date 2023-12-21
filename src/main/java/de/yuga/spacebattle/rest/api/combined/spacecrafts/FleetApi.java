@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.rest.api.combined.spacecrafts;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
+import de.yuga.spacebattle.backend.dto.turn.FlightPlanDto;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.OrbitalStructure;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
@@ -560,7 +560,7 @@ public class FleetApi extends BaseApi {
         Preconditions.checkNotNull(warShip.getMothball(), "warShip.getMothball() must not be empty");
         Preconditions.checkNotNull(destination, "destination must not be empty");
 
-        final int timeToTravel = DistanceCalculator.getTimeToTravel(warShip.getMothball(), destination);
+        final int timeToTravel = navigationCalculatorService.getTimeToTravel(warShip.getMothball(), destination);
         return ResponseEntity.ok(timeToTravel);
     }
 
@@ -682,7 +682,8 @@ public class FleetApi extends BaseApi {
 
                     final Tick today = tickTimeService.getToday();
                     final List<StarSystem> waypoints = navigationCalculatorService.getShortestWaypoints(fleet.getOrbit().getSystem(), targetSystem);
-                    return new de.yuga.spacebattle.backend.entities.turn.Move(today, fleet, destination, waypoints);
+                    final FlightPlanDto flightPlanDto = navigationCalculatorService.calculateWaypoints(fleet, waypoints);
+                    return new de.yuga.spacebattle.backend.entities.turn.Move(today, fleet, destination, flightPlanDto);
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());

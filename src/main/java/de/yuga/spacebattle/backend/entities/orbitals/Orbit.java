@@ -112,11 +112,15 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
         final Distance xC = xCoordinate.subtract(direction.getXCoordinate());
         final Distance yC = yCoordinate.subtract(direction.getYCoordinate());
         final BigDecimal uC = DistanceCalculator.getDistance(xC.getCoordinate(), yC.getCoordinate());
-        final BigDecimal eXC = xC.getCoordinate().divide(uC, MC_HU);
-        final BigDecimal eYC = yC.getCoordinate().divide(uC, MC_HU);
-        final Distance x1 = xCoordinate.add(new Distance(distanceScalar.multiply(eXC), distanceMetric));
-        final Distance y1 = yCoordinate.add(new Distance(distanceScalar.multiply(eYC), distanceMetric));
-        return new Orbit(x1, y1);
+        if (uC.compareTo(BigDecimal.ZERO) != 0) {
+            final BigDecimal eXC = xC.getCoordinate().divide(uC, MC_HU);
+            final BigDecimal eYC = yC.getCoordinate().divide(uC, MC_HU);
+            final Distance x1 = xCoordinate.add(new Distance(distanceScalar.multiply(eXC), distanceMetric));
+            final Distance y1 = yCoordinate.add(new Distance(distanceScalar.multiply(eYC), distanceMetric));
+            return new Orbit(x1, y1);
+        }
+        // cant detect the direction
+        return this;
     }
 
     /**

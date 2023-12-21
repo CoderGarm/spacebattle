@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.services.turn.tick.mission.phases;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.MissionRandomizer;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.turn.FlightPlanDto;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
@@ -164,7 +165,7 @@ public class PirateApproachPhase implements MissionPhaseRunner {
 
             LOGGER.info("\tPirate fleet with idFleet '" + pirateFleet.getId() + "' visiting '" + owner.getUsername() + "' at '" + planet.getName() + "'");
             missionCache.pirateRaidApproach(today, pirateFleet, planet);
-            return new Move(today, pirateFleet, new FleetOrbit(planet), List.of());
+            return new Move(today, pirateFleet, new FleetOrbit(planet), FlightPlanDto.empty());
         }
 
         LOGGER.info("\tPirate fleet with idFleet '" + pirateFleet.getId() + "' withdraw early against the strong opposite '" + owner.getUsername() + "' at '" + planet.getName() + "'");

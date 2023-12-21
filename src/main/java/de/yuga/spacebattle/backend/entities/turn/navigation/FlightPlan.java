@@ -20,7 +20,7 @@ public class FlightPlan extends AbstractEntityKey {
 
     @Nonnull
     @ManyToOne
-    @JoinColumn(name = "idMove")
+    @JoinColumn(name = "idMove", updatable = false)
     private Move move;
 
     @OrderColumn
@@ -34,10 +34,20 @@ public class FlightPlan extends AbstractEntityKey {
     public FlightPlan() {
     }
 
-    public FlightPlan(@Nonnull final Move move, @Nonnull final FleetOrbit location, final int timeAfterStart) {
-        this.move = Preconditions.checkNotNull(move, "move must not be empty");
+    public FlightPlan(@Nonnull final FleetOrbit location, final int timeAfterStart) {
         this.location = Preconditions.checkNotNull(location, "location must not be empty");
         this.timeAfterStart = timeAfterStart;
+    }
+
+    public FlightPlan(@Nonnull final FlightPlan flightPlan, @Nonnull final Move move) {
+        Preconditions.checkNotNull(flightPlan, "flightPlan must not be empty");
+        this.move = Preconditions.checkNotNull(move, "move must not be empty");
+        this.location = flightPlan.getLocation();
+        this.timeAfterStart = flightPlan.getTimeAfterStart();
+    }
+
+    public void setMove(@Nonnull final Move move) {
+        this.move = Preconditions.checkNotNull(move, "move must not be empty");
     }
 
     @Nonnull

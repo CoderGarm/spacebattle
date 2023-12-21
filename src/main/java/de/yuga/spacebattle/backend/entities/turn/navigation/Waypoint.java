@@ -16,6 +16,8 @@ public class Waypoint extends FlightPlan {
     }
 
     public Waypoint(@Nonnull final Move move, @Nonnull final FleetOrbit location, final int timeAfterStart) {
-        super(move, location, timeAfterStart);
+        super(location, timeAfterStart);
+
+        super.setMove(move);
     }
 }

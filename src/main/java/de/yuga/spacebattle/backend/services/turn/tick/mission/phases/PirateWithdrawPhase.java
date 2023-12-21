@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.services.turn.tick.mission.phases;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.turn.FlightPlanDto;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
@@ -147,7 +148,7 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
             raidingPirateCache.dropFirstActionItem(today, pirateFleet, EMissionAction.LEAVE_ORBIT);
             final FleetOrbit destination = new FleetOrbit(planet);
             final Orbit positionOnHyperlimit = NavigationCalculator.getPositionOnHyperlimit(destination);
-            final Move move = new Move(today, pirateFleet, new FleetOrbit(positionOnHyperlimit, planet.getSystem()), List.of());
+            final Move move = new Move(today, pirateFleet, new FleetOrbit(positionOnHyperlimit, planet.getSystem()), FlightPlanDto.empty());
             resultingMoves.add(move);
         }
         executeMovement(today, resultingMoves);

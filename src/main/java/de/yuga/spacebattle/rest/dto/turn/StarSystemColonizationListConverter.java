@@ -3,6 +3,7 @@ package de.yuga.spacebattle.rest.dto.turn;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
+import de.yuga.spacebattle.backend.services.caclulator.NavigationCalculatorService;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -14,10 +15,12 @@ import java.util.stream.Collectors;
 public class StarSystemColonizationListConverter {
 
 
-    public static List<StarSystemColonization> create(final int idUser,
+    public static List<StarSystemColonization> create(@Nonnull final NavigationCalculatorService navigationCalculatorService,
+                                                      final int idUser,
                                                       @Nonnull final Collection<StarSystem> allSystems,
                                                       @Nonnull final Collection<StarSystem> knownStarSystems,
                                                       @Nonnull final Collection<Colonization> colonizationsForUser) {
+        Preconditions.checkNotNull(navigationCalculatorService, "navigationCalculatorService must not be empty");
         Preconditions.checkNotNull(allSystems, "allSystems shouldn't be null!");
         Preconditions.checkNotNull(knownStarSystems, "knownStarSystems shouldn't be null!");
         Preconditions.checkNotNull(colonizationsForUser, "colonizationsForUser shouldn't be null!");
@@ -36,7 +39,7 @@ public class StarSystemColonizationListConverter {
                 .stream()
                 .map(sys -> {
                     final List<Colonization> colonizations = starSystemColonizationMap.computeIfAbsent(sys, starSystem -> new ArrayList<>());
-                    return new StarSystemColonization(sys, knownStarSystems, colonizations, homeSystem);
+                    return new StarSystemColonization(navigationCalculatorService, sys, knownStarSystems, colonizations, homeSystem);
                 })
                 .collect(Collectors.toList());
     }

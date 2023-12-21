@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.services.turn.resources;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.turn.resources.trade.TradesInTimeframe;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
@@ -18,6 +17,7 @@ import de.yuga.spacebattle.backend.enums.ETechLevel;
 import de.yuga.spacebattle.backend.repositories.turn.resource.trade.TradeOfferRepository;
 import de.yuga.spacebattle.backend.repositories.turn.resource.trade.TradedResourceRepository;
 import de.yuga.spacebattle.backend.services.account.OwnerService;
+import de.yuga.spacebattle.backend.services.caclulator.NavigationCalculatorService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -50,17 +50,22 @@ public class MarketplaceService {
     @Nonnull
     private final TradeOfferRepository tradeOfferRepository;
 
+    @Nonnull
+    private final NavigationCalculatorService navigationCalculatorService;
+
     @Autowired
     public MarketplaceService(@Nonnull final TickTimeService tickService,
                               @Nonnull final OwnerService ownerService,
                               @Nonnull final PlanetService planetService,
                               @Nonnull final TradedResourceRepository tradedResourceRepository,
-                              @Nonnull final TradeOfferRepository tradeOfferRepository) {
+                              @Nonnull final TradeOfferRepository tradeOfferRepository,
+                              @Nonnull final NavigationCalculatorService navigationCalculatorService) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
         this.ownerService = Preconditions.checkNotNull(ownerService, "ownerService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.tradedResourceRepository = Preconditions.checkNotNull(tradedResourceRepository, "tradedResourceRepository shouldn't be null!");
         this.tradeOfferRepository = Preconditions.checkNotNull(tradeOfferRepository, "tradeOfferRepository must not be empty");
+        this.navigationCalculatorService = Preconditions.checkNotNull(navigationCalculatorService, "navigationCalculatorService must not be empty");
     }
 
     @Nonnull
@@ -143,7 +148,7 @@ public class MarketplaceService {
             destination.getResourceDeposit().pay(EResourceType.CREDITS, price);
             planetService.save(destination);
         }
-        final int toTravel = DistanceCalculator.getTimeToTravel(tradeOffer.getOrigin(), destination);
+        final int toTravel = navigationCalculatorService.getTimeToTravel(tradeOffer.getOrigin(), destination);
         final TradedResource tradedResource = new TradedResource(today, toTravel, tradeOffer, buyer, destination);
         return tradedResourceRepository.save(tradedResource);
     }
