@@ -1,3 +1,17 @@
+# Time Table
+
+1. 24th announcement of event and the release with the "call to arms"
+2. ~ 25th or when your story is finished the more and specific information
+3. between 27. - 30. the release
+4. 06.01.'24 beginning of the event
+5. 18.01.'24 the end
+
+
+- INTERCEPT Fleets kämpfen nicht gegeneinander
+- event forum
+- 20 - 50 planeten in mind 20 systemen
+
+---
 
 The upcoming release will introduce the wormholes, lets celebrate it with an event of epic proportions.  
 I would say, everyone should have the chance to conquer a planet.

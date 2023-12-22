@@ -26,6 +26,9 @@ newly recruited people and their families stay in the place where they feel comf
 
 1. Doubled systems were renamed.
 2. Wormhole travel is hidden for other players as before. Even when you use a terminus which has colonies from other players, they will not notice the travel.
+3. The gravimetric sensor output was misleading, so it worked in my head but not outside of it.  
+   The mechanics has shifted: The more sensor value is present, the better if the resolution of ship mass and ship amount.  
+   An example can be seen [here](https://postimg.cc/MXZJPXxM).
 
 #### Diverses
 
@@ -46,16 +49,13 @@ todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in 
 ### Bugs fixed
 
 1. The irritating bug with disappearing fleets and wrongly sized indicators on the map is completely gone.
-2. The sensor issue, especially for the Songbird is solved. The yard displayed wrong masses of the ships. This is corrected.
+2. The sensor issue, especially for the Songbird is solved. The yard displayed wrongly a mass of around 85 kt. This is corrected, correct mass is 65 kt.  
+   The single segments, the stern and the bow hull, the cigar in the middle and the hammerheads were weighted correctly, but the total was wrong.
 
-todo. fix sensor display issue
 todo. missile issue
 todo. expansion list - travel time is always based on home planet
-todo. fleet calc hyper limit position in backend - georges error -> numeric overflow?
 
 #### next steps
-
-todo. unlimied reasearch at the tick of new colos
 
 ---
 todo. distance based duration
@@ -106,6 +106,8 @@ todo. chat search: empire name, ingame name, username
 todo. quoting in chat und forum
 todo. preview in chat und forum
 todo. fleet detachment submit button disable when no change
+todo. unlimied reasearch at the tick of new colos
+todo. fleet calc hyper limit position in backend - georges error -> numeric overflow?
 
 #### for later
 
