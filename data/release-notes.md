@@ -9,40 +9,43 @@ article orbital modules
 
 #### Gameplay
 
----
-wormhole travel:
-schiffe auf move tauchen auf keinen scannern auf?
+This release introduces wormhole travel!
 
-    → eine kleine Anpassung der Systemnamen
-    → neue bewegungsanimationen auf der map
-    → select indicator auf map ist gefixt. ebenso das verschwinden von Flottem beim zoom
+The main point of this are a new navigation at the map, which receives some love!  
+You can move your fleet as before, but the waypoints will be marked at the map and the course plot is visible.  
+When you start a movement the fleet will follow the planned course. It could be a little confusing to search a fleet in motion, because if the wormhole travel is faster it could
+fly in a counterintuitive direction ;)
 
-    → wurmlöcher werden von handelsreisenden, für Kolonien und für den Transfer benutzt
+The wormhole travel will be used also from civil transport companies which are e.g. moving your stuff through the galaxy.  
+What is not changed is transferring resources and pops.
 
----
+This is still done through statistical processes. Since most freighters weigh in the megaton range, smaller resource movements can certainly be carried out spontaneously.
 
----
-todo. distance based duration
+Since commercial shipping naturally also specializes in passenger transport, there are usually enough day travelers on the road to cover short-term needs. Most of the time, the
+newly recruited people and their families stay in the place where they feel comfortable.
 
-- all manual transfer stuff takes time
-- If pops and resource transfers between your own planets are difficult, you need another option to do it.
-  This option is the market place. Then this element become more important.
-  And what we need then is a way to let people migrate between the empires. This offers in the end a lot of diplomatic opportunities (migration treaty like in Stellaris e.g.)...
----
+1. Doubled systems were renamed.
+2. Wormhole travel is hidden for other players as before. Even when you use a terminus which has colonies from other players, they will not notice the travel.
 
 #### Diverses
-
-zweistufige registrierung - während mail prefs abgefragt werden gibt es die account creation im hintergrund
-mails bei "nix mehr zu tun" schicken
 
 todo. star map filter für flotten
 
 - eigene inop
 - fremde inop
-- moves ...
-- Sensorreichweite?
+- in motion
+- orbital icons auf map
+- Sensorstärke?
+- Flottensuche
+
+zweistufige registrierung - während mail prefs abgefragt werden gibt es die account creation im hintergrund
+mails bei "nix mehr zu tun" schicken
+
+todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
 
 ### Bugs fixed
+
+1. The irritating bug with disappearing fleets and wrongly sized indicators on the map is completely gone.
 
 todo. expansion list - travel time is always based on home planet
 todo. fix sensor display issue
@@ -52,7 +55,23 @@ todo. unlimied reasearch on colo?
 
 #### next steps
 
-todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
+---
+todo. distance based duration
+
+- all manual transfer stuff takes time
+- If pops and resource transfers between your own planets are difficult, you need another option to do it.
+  This option is the market place. Then this element become more important.
+  And what we need then is a way to let people migrate between the empires. This offers in the end a lot of diplomatic opportunities (migration treaty like in Stellaris e.g.)...
+
+---
+
+---
+um bei den Planis besser zu sehen, welche Marktplatz lieferungen demnächst ankommen, schlage ich folgendes vor:  
+Beim Marktplatz-tab unten drunter, eine kauf / verkauf historie als tabelle mit Rohstoff, tick gekauft/verkauft, tick geliefert und convoy beschützt oder nicht.  
+Ich sehe nämlich manchmal, dass ein plani zu wenig geld hat und will was verkaufen, muss dann aber erstmal ins journal um mich zu erinnern, dass ich das im tick zuvor auch schon
+gemacht habe und dann wieder zum plani zurück. das nervt. :D
+---
+
 todo. calculate pop deposit in demand calculation for displaying?
 
 todo. manual transfer to fleet overrides capacity
@@ -91,10 +110,6 @@ todo. fleet detachment submit button disable when no change
 todo. schiffe am markt verkaufen
 todo. schiffsbeute machen -> schiffsklasse muss erforscht werden
 todo. journal report via mail
-
-nope. zu weiter/schneller zoom removed flotten aus map
-nope. zoom issue at map -> warten auf d3 replacement
-nope. fleetsharks at zoom and move -> warten auf d3 replacement
 
 todo. durchsuchbare release notes?
 todo. battle reports mit anderen teilen
