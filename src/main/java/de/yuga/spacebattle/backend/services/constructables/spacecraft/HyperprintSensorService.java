@@ -86,6 +86,11 @@ public class HyperprintSensorService {
         });
 
         // 10 is base sensor value for every ship by design
+        final Map<StarSystem, Integer> result = new HashMap<>();
+        final Map<StarSystem, Integer> interim = new HashMap<>();
+        shipsBySystem.keySet().forEach(sys -> interim.put(sys, 0));
+        structures.keySet().forEach(sys -> interim.put(sys, 0));
+
         final Map<StarSystem, Integer> maxSensorStrengthByShip = shipsBySystem.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey,
                         e -> e.getValue().stream()
@@ -103,19 +108,11 @@ public class HyperprintSensorService {
                                 .reduce(10, Integer::sum)
                 ));
 
-        final Map<StarSystem, Integer> result = new HashMap<>();
-        maxSensorStrengthByShip.forEach((starSystem, sensorValue) -> {
-            final int knownSensorValue = result.getOrDefault(starSystem, 0);
-            if (sensorValue > knownSensorValue) {
-                result.put(starSystem, sensorValue);
-            }
-        });
-
-        combinedSensorStrengthByArrayStructures.forEach((starSystem, sensorValue) -> {
-            final int knownSensorValue = result.getOrDefault(starSystem, 0);
-            if (sensorValue > knownSensorValue) {
-                result.put(starSystem, sensorValue);
-            }
+        interim.forEach((starSystem, knownSensorValue) -> {
+            final Integer shipValue = maxSensorStrengthByShip.getOrDefault(starSystem, 0);
+            final Integer arrayValue = combinedSensorStrengthByArrayStructures.getOrDefault(starSystem, 0);
+            final int max = Integer.max(Integer.max(shipValue, arrayValue), knownSensorValue);
+            result.put(starSystem, max);
         });
 
         return result.entrySet().stream().filter(e -> e.getValue() > 0).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
