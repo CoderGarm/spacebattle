@@ -442,13 +442,16 @@ public class SpacecraftCalculator {
     private void setCapacityValue(@Nonnull final ShipClass shipClass) {
         Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
 
+        Mass total = new Mass();
         for (final ECapacityAreaType capacityAreaType : ECapacityAreaType.getValuesWithoutOverall()) {
             final CapacityValue orDefault = capacities.getOrDefault(capacityAreaType, new CapacityValue());
             orDefault.setCapacityArea(capacityAreaType);
-            orDefault.setTonnage(shipClass.getTonnage(capacityAreaType));
+            final Mass tonnage = shipClass.getTonnage(capacityAreaType);
+            orDefault.setTonnage(tonnage);
             capacities.put(capacityAreaType, orDefault);
+            total = total.add(tonnage);
         }
-        capacities.put(ECapacityAreaType.OVERALL, new CapacityValue(ECapacityAreaType.OVERALL, SpacecraftTonnageCalculator.getFullTonnage(shipClass)));
+        capacities.put(ECapacityAreaType.OVERALL, new CapacityValue(ECapacityAreaType.OVERALL, total));
     }
 
     @Nonnull

@@ -46,14 +46,16 @@ todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in 
 ### Bugs fixed
 
 1. The irritating bug with disappearing fleets and wrongly sized indicators on the map is completely gone.
+2. The sensor issue, especially for the Songbird is solved. The yard displayed wrong masses of the ships. This is corrected.
 
-todo. expansion list - travel time is always based on home planet
 todo. fix sensor display issue
 todo. missile issue
+todo. expansion list - travel time is always based on home planet
 todo. fleet calc hyper limit position in backend - georges error -> numeric overflow?
-todo. unlimied reasearch on colo?
 
 #### next steps
+
+todo. unlimied reasearch at the tick of new colos
 
 ---
 todo. distance based duration

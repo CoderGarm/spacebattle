@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.enums.EStarClassType;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -108,9 +107,7 @@ public class StarSystem extends AbstractEntityKey {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("name", name)
-                .toString();
+        return name;
     }
 
     public static boolean equalsAtMap(@Nullable final StarSystem o1, @Nullable final StarSystem o2) {

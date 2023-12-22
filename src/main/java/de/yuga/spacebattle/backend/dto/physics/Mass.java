@@ -31,6 +31,8 @@ public class Mass implements Cloneable, Comparable<Mass> {
     private EMassMetric massMetric;
 
     public Mass() {
+        this.coordinate = BigDecimal.ZERO;
+        this.massMetric = EMassMetric.T;
     }
 
     public Mass(final int coordinate, @Nonnull final EMassMetric massMetric) {
