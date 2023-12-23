@@ -47,4 +47,6 @@ update move set idTickStarted = (select max(idTick) - (originalDuration - move.t
        foreign key (idTickStarted)
        references tick (idTick);
 
+update move set ticksLeft = 1 where ticksLeft > 1 and isDeleted = FALSE;
+
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'introduce waypoints', '0.1.17-1');

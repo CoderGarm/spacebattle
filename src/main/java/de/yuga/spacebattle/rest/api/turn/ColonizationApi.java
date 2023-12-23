@@ -53,6 +53,7 @@ public class ColonizationApi extends BaseApi {
     private static final String HOME_SYSTEM_ENDPOINT = "home";
     private static final String BUY_SYSTEM_INFO_ENDPOINT = "buy";
     private static final String COSTS_SYSTEM_INFO_ENDPOINT = "costs";
+    private static final String DURATION_INFO_ENDPOINT = "duration";
 
     @Nonnull
     private final UserService userService;
@@ -121,7 +122,7 @@ public class ColonizationApi extends BaseApi {
         return ResponseEntity.ok(new Colonization(colonization));
     }
 
-    @GetMapping("duration/{idPlanet}")
+    @GetMapping(DURATION_INFO_ENDPOINT + "/{idStarSystem}")
     @Operation(summary = "Fetches the time which is needed for the colonization of a planet.", operationId = "fetchColonizingTime",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -130,14 +131,14 @@ public class ColonizationApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> fetchColonizingTime(@PathVariable final int idPlanet) {
+    public ResponseEntity<?> fetchColonizingTime(@PathVariable final int idStarSystem) {
 
         final int idUser = getIdUser();
-        final Planet toColonize = planetService.find(idPlanet);
-        if (toColonize == null || toColonize.getOwner() != null) {
+        final de.yuga.spacebattle.backend.entities.orbitals.StarSystem toColonize = starSystemService.find(idStarSystem);
+        if (toColonize == null) {
             return ResponseEntity.ok(999);
         }
-        final Planet mainPlanet = planetService.findMainPlanet(idUser);
+        final de.yuga.spacebattle.backend.entities.orbitals.StarSystem mainPlanet = planetService.findMainPlanet(idUser).getSystem();
         final int timeToTravel = navigationCalculatorService.getTimeToTravel(mainPlanet, toColonize);
         return ResponseEntity.ok(timeToTravel);
     }

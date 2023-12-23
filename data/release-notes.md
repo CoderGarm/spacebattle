@@ -24,8 +24,10 @@ This is still done through statistical processes. Since most freighters weigh in
 Since commercial shipping naturally also specializes in passenger transport, there are usually enough day travelers on the road to cover short-term needs. Most of the time, the
 newly recruited people and their families stay in the place where they feel comfortable.
 
+All movements will be finished by tomorrow.
+
 1. Doubled systems were renamed.
-2. Wormhole travel is hidden for other players as before. Even when you use a terminus which has colonies from other players, they will not notice the travel.
+2. Wormhole travelling fleets are hidden for other players as before. Even when you use a terminus which has colonies from other players, they will not notice the travel.
 3. The gravimetric sensor output was misleading, so it worked in my head but not outside of it.  
    The mechanics has shifted: The more sensor value is present, the better if the resolution of ship mass and ship amount.  
    An example can be seen [here](https://postimg.cc/MXZJPXxM).
@@ -41,6 +43,7 @@ todo. star map filter für flotten
 - Sensorstärke?
 - Flottensuche
 
+todo. async account creation
 zweistufige registrierung - während mail prefs abgefragt werden gibt es die account creation im hintergrund
 mails bei "nix mehr zu tun" schicken
 
@@ -54,7 +57,6 @@ todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in 
 3. Missiles which aren't used by any launcher in the fitting are removed.  
    If a fitting is stored, the unused missiles will be removed before saving, also.
 
-todo. expansion list - travel time is always based on home planet
 
 #### next steps
 
@@ -121,8 +123,9 @@ todo. battle reports mit anderen teilen
 
 todo. placing new players must be improved -> select cluster, by neighbour usw usw
 
-todo. async account creation
 todo: JobRunr for running async jobs?
+
+todo. expansion list - travel time is always based on home planet -> takes to long at all, fetch them one by one for the displayed items
 
 todo. multiple browser tabs
 todo. transportmenge zusammenfassen und bilanz bilden

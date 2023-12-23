@@ -38,11 +38,6 @@ public class StarSystemColonization {
 
     @Nonnull
     @JsonProperty
-    @Schema(required = true, description = "The star system with its travel time to all known systems by id.")
-    private Map<Integer, Integer> travelTimeMap;
-
-    @Nonnull
-    @JsonProperty
     @Schema(required = true, description = "The costs to buy the colonization information about the system.")
     private String costsToBuyColonizationInformation;
 
@@ -76,11 +71,6 @@ public class StarSystemColonization {
                 .collect(Collectors.toMap(AbstractEntityKey::getId,
                         sys -> DistanceCalculator.getOrbitalDistance(starSystem.getOrbit(), sys.getOrbit()).convertToMetric(STAR_SYSTEM_STANDARD_METRIC)));
 
-        this.travelTimeMap = knownSystems
-                .stream()
-                .collect(Collectors.toMap(AbstractEntityKey::getId,
-                        sys -> navigationCalculatorService.getTimeToTravel(homeSystem, sys)));
-
         costsToBuyColonizationInformation = setColoInformationCosts(starSystem);
         setColonizationCosts(starSystem);
         colonizationsByPlanet = colonizations.stream().collect(Collectors.toMap(c -> c.getTarget().getId(), Colonization::new));
@@ -104,30 +94,5 @@ public class StarSystemColonization {
         final EResourceType resourceType = costsDTO.getRealType();
         final Long amountWithDiff = costsDTO.getAmount();
         return amountWithDiff + " " + resourceType;
-    }
-
-    @Nonnull
-    public StarSystem getStarSystem() {
-        return starSystem;
-    }
-
-    @Nonnull
-    public Map<Integer, Distance> getDistanceMap() {
-        return distanceMap;
-    }
-
-    @Nonnull
-    public String getCostsToBuyColonizationInformation() {
-        return costsToBuyColonizationInformation;
-    }
-
-    @Nonnull
-    public Map<Integer, ResourceDeposit> getCostsToColonization() {
-        return costsToColonization;
-    }
-
-    @Nonnull
-    public Map<Integer, Colonization> getColonizationsByPlanet() {
-        return colonizationsByPlanet;
     }
 }

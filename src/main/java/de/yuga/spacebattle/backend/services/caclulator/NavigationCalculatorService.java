@@ -61,6 +61,7 @@ public class NavigationCalculatorService {
         Preconditions.checkNotNull(origin, "origin must not be empty");
         Preconditions.checkNotNull(destination, "destination must not be empty");
 
+        LOGGER.info("Duration from {} to {}", origin.getName(), destination.getName());
         return getTimeToTravel(new FleetOrbit(Orbit.getCenterOrbit(), origin), new FleetOrbit(Orbit.getCenterOrbit(), destination));
     }
 
