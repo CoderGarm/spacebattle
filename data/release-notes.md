@@ -1,3 +1,12 @@
+# Event War Harvest Release
+
+todo. fleets not agress each other
+todo. create foritied bases with rewards
+todo. create player-to-delete bases with rewards
+todo. punkte sammeln
+todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
+todo. ladderboard
+
 article priorisierung bei pop demand und migration
 article orbital modules
 
@@ -28,26 +37,30 @@ All movements will be finished by tomorrow.
 
 1. Doubled systems were renamed.
 2. Wormhole travelling fleets are hidden for other players as before. Even when you use a terminus which has colonies from other players, they will not notice the travel.
+
+    <img src="https://media.battleforhonor.de/hyperlanes.gif" alt="mao control" width="550px">
+
+   [https://media.battleforhonor.de/hyperlanes.gif](https://media.battleforhonor.de/hyperlanes.gif)
+
 3. The gravimetric sensor output was misleading, so it worked in my head but not outside of it.  
-   The mechanics has shifted: The more sensor value is present, the better if the resolution of ship mass and ship amount.  
-   An example can be seen [here](https://postimg.cc/MXZJPXxM).
+   The mechanics has shifted: The more sensor value is present, the better if the resolution of ship mass and ship amount.
+
+    <img src="https://media.battleforhonor.de/sensor-view.png" alt="mao control" width="350px">
+
+   [https://media.battleforhonor.de/sensor-view.png](https://media.battleforhonor.de/sensor-view.png)
 
 #### Diverses
 
-todo. star map filter für flotten
+The star map received love, as I said.  
+Now we have a small legend and some more filter, e.g. for fleets with a Warshawski sail or those with only an Impeller wedge.
 
-- eigene inop
-- fremde inop
-- in motion
-- orbital icons auf map
-- Sensorstärke?
-- Flottensuche
+<img src="https://media.battleforhonor.de/map-control.gif" alt="mao control" width="550px">
+
+[https://media.battleforhonor.de/map-control.gif](https://media.battleforhonor.de/map-control.gif)
 
 todo. async account creation
 zweistufige registrierung - während mail prefs abgefragt werden gibt es die account creation im hintergrund
 mails bei "nix mehr zu tun" schicken
-
-todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
 
 ### Bugs fixed
 
@@ -56,7 +69,6 @@ todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in 
    The single segments, the stern and the bow hull, the cigar in the middle and the hammerheads were weighted correctly, but the total was wrong.
 3. Missiles which aren't used by any launcher in the fitting are removed.  
    If a fitting is stored, the unused missiles will be removed before saving, also.
-
 
 #### next steps
 
