@@ -51,8 +51,9 @@ todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in 
 1. The irritating bug with disappearing fleets and wrongly sized indicators on the map is completely gone.
 2. The sensor issue, especially for the Songbird is solved. The yard displayed wrongly a mass of around 85 kt. This is corrected, correct mass is 65 kt.  
    The single segments, the stern and the bow hull, the cigar in the middle and the hammerheads were weighted correctly, but the total was wrong.
+3. Missiles which aren't used by any launcher in the fitting are removed.  
+   If a fitting is stored, the unused missiles will be removed before saving, also.
 
-todo. missile issue
 todo. expansion list - travel time is always based on home planet
 
 #### next steps
