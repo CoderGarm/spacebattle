@@ -10,8 +10,8 @@
 1. 24th announcement of event and the release with the "call to arms"
 2. ~ 25th or when your story is finished the more and specific information
 3. between 27. - 30. the release
-4. 06.01.'24 beginning of the event
-5. 18.01.'24 the end
+4. 04.01.'24 beginning of the event
+5. 16.01.'24 the end
 
 
 - INTERCEPT Fleets kämpfen nicht gegeneinander
@@ -69,4 +69,36 @@ The snippets of the forum posts could be used to make some noise at reddit, if t
 
 1. An entry in the event ladder with the destroyed and lost ship tonnage and conquered planets for the war harvest event!
 2. Gaining the conquered planets with a lot of shipyard capacity for your own empire!
-3. An insignia for your participment in Operation War Harvest at your empires official description. 
+3. An insignia for your participment in Operation War Harvest at your empires official description.
+
+---
+
+##### Attention, Governors, Lords, Ladies and Commanders!
+
+The new year is incoming and there are some presents prepared for us ;)
+
+##### 🚀 New Release Incoming! 🚀
+
+The last few days were of course dedicated to the upcoming vacation days, but in between there was always some time to prepare the new release.  
+I don't want to give too much away, but this will be a big milestone on the way to becoming a real game in the Honorverse!  
+In order to adequately acknowledge the enormous development of Battle for Honor, I would like to release the new features this year.
+
+##### 🎉 Celebrate, fellow Commanders! 🎉
+
+I've been told from various quarters that Operation Sunflower should have been a game event and not just a statement to clean up game mechanics.
+
+We have taken this to heart and our first event will start in the first weeks of the new year.  
+Further information will follow in the next few days.
+
+I strongly recommend that any interested commander-in-chief strengthen their fleets.
+
+<p align="center" style="margin: 35px 0;">
+    <img src="https://media.battleforhonor.de/wh/intro-poster.png" alt="wh-1" width="350px">
+</p>
+
+##### Saver Worlds through superior firepower!
+
+Strap yourself into your commander's chairs and eat enough over the holidays, you won't be able to do it in the new year!
+
+See you in the stars, Commanders!  
+Flashkid
