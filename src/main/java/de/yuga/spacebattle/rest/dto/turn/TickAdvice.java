@@ -65,4 +65,32 @@ public class TickAdvice {
     public void setSuggestedMission(final EMissionType suggestedMission) {
         this.suggestedMission = suggestedMission;
     }
+
+    public boolean isConstructionPossible() {
+        return constructionPossible;
+    }
+
+    public boolean isShipyardPossible() {
+        return shipyardPossible;
+    }
+
+    public boolean isResearchPossible() {
+        return researchPossible;
+    }
+
+    public Building getSuggestedBuilding() {
+        return suggestedBuilding;
+    }
+
+    public Research getSuggestedResearch() {
+        return suggestedResearch;
+    }
+
+    public EShipClassType getSuggestedShipClass() {
+        return suggestedShipClass;
+    }
+
+    public EMissionType getSuggestedMission() {
+        return suggestedMission;
+    }
 }

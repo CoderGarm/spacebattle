@@ -63,7 +63,9 @@ All movements will be finished by tomorrow.
 2. The register process is streamlined.  
    Next to change some interesting role-play options like the ship's prefix, you can select directly if you want to receive information mails about new releases or about the
    current development of the empire.  
-   The latter is short information about the most important points of the tick, e.g. if foreign fleets have entered an own system.
+   The latter is short information about the most important points of the tick, e.g. if planets can handle shipyard jobs.  
+   As every time privacy and data sovereignty is king. You need to activate this setting to receive mails.  
+   The mail is pretty simple and the time will show if that feature is useful and what should be displayed there.
 
     <img src="https://media.battleforhonor.de/unrelated/register-step-2.png" alt="mao control" width="550px">
 

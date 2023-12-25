@@ -43,4 +43,12 @@ public interface UserRepository extends JpaRepository<User, Integer>, CustomUser
     @Nullable
     @Query("SELECT u.alliance FROM User u WHERE u.id = :idUser")
     Alliance findAlliance(int idUser);
+
+    @Nullable
+    @Query("SELECT u FROM User u " +
+            "WHERE u.userSetting.receiveTickAdvice = true " +
+            "AND u.userSetting.isEMailVerified = true " +
+            "AND u.userSetting.noEMailWanted = false " +
+            "AND u.userSetting.isLoginForbidden = false")
+    Set<User> getEMailAddressesForAdviceRecipients();
 }

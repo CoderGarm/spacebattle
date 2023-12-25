@@ -3,7 +3,9 @@ package de.yuga.spacebattle.backend.services;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.converter.PasswordConverter;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import de.yuga.spacebattle.rest.dto.turn.TickAdvice;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -173,6 +175,46 @@ public class MailService {
 
         final SimpleMailMessage mailException = templateMailRelease(title, description, message, recipients);
         emailSender.send(mailException);
+    }
+
+    public void sendAdviceMail(@Nonnull final Tick today,
+                               @Nonnull final User recipient,
+                               @Nonnull final TickAdvice tickAdvice) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(recipient, "recipient must not be empty");
+        Preconditions.checkNotNull(tickAdvice, "tickAdvice must not be empty");
+
+        final SimpleMailMessage mailException = templateMailRelease(today, recipient, tickAdvice);
+        emailSender.send(mailException);
+    }
+
+    @Nonnull
+    private SimpleMailMessage templateMailRelease(@Nonnull final Tick today,
+                                                  @Nonnull final User recipient,
+                                                  @Nonnull final TickAdvice tickAdvice) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(recipient, "recipient must not be empty");
+        Preconditions.checkNotNull(tickAdvice, "tickAdvice must not be empty");
+
+        String text = "Moin " + recipient.getUsername() + ",\n";
+        text += "there are some points to look at!\n\n";
+        text += p(tickAdvice.isResearchPossible(), "There are no research jobs running.\n");
+        text += p(tickAdvice.isConstructionPossible(), "There are construction jobs possible on your planets.\n");
+        text += p(tickAdvice.isShipyardPossible(), "There are shipyard jobs possible on your planets.\n");
+
+
+        final SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("noreply@battleforhonor.de");
+        message.setTo(recipient.getUserSetting().getEmail());
+        message.setSubject("Battle for Honor - Tick Advice: " + today.getNo());
+        message.setText(text);
+        return message;
+    }
+
+    private String p(final boolean condition, @Nonnull final String text) {
+        Preconditions.checkNotNull(text, "text must not be empty");
+
+        return condition ? text : "";
     }
 
     public static class VerificationParameter {

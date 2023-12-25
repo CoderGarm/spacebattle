@@ -31,7 +31,8 @@ public interface TickRunner extends Comparable<TickRunner> {
                 NPCMissionRunner.class,
                 UserBattleRunner.class,
                 HeatMapRunner.class,
-                HousekeepingRunner.class
+                HousekeepingRunner.class,
+                TickAdviceEMailRunner.class
         );
 
         final int i = sequenceOfRunners.indexOf(this.getClass());

@@ -251,6 +251,11 @@ public class UserService {
     }
 
     @Nonnull
+    public Set<User> findAdviceRecipients() {
+        return Objects.requireNonNullElse(userRepository.getEMailAddressesForAdviceRecipients(), new HashSet<>());
+    }
+
+    @Nonnull
     public Set<String> getShipNamesFor(final int idUser) {
         final RolePlaySetting rolePlaySetting = userRolePlaySettingRepository.findForUser(idUser);
         if (rolePlaySetting == null) {
