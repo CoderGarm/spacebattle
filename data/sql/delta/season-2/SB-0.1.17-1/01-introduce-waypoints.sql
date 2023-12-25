@@ -49,4 +49,6 @@ update move set idTickStarted = (select max(idTick) - (originalDuration - move.t
 
 update move set ticksLeft = 1 where ticksLeft > 1 and isDeleted = FALSE;
 
+alter table userSetting add column receiveTickAdvice boolean not null default false after receiveChangelogInfos;
+
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'introduce waypoints', '0.1.17-1');

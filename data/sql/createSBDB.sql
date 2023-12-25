@@ -805,6 +805,7 @@
         password varchar(255) not null,
         profilePic varchar(50) default 'perspective-dice-six-faces-random' not null,
         receiveChangelogInfos boolean not null default false,
+        receiveTickAdvice boolean not null default false,
         idUser integer not null,
         primary key (idUserSetting)
     ) engine=InnoDB;

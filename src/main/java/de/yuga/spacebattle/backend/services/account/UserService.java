@@ -2,6 +2,8 @@ package de.yuga.spacebattle.backend.services.account;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.converter.EGameUserRolesConverter;
+import de.yuga.spacebattle.backend.converter.PasswordConverter;
+import de.yuga.spacebattle.backend.dto.account.InitialPlayerSettings;
 import de.yuga.spacebattle.backend.dto.account.UserSettings;
 import de.yuga.spacebattle.backend.entities.account.RolePlaySetting;
 import de.yuga.spacebattle.backend.entities.account.User;
@@ -233,6 +235,7 @@ public class UserService {
 
         final UserSetting userSetting = user.getUserSetting();
         userSetting.setReceiveChangelogInfos(settings.isReceiveChangelogInfos());
+        userSetting.setReceiveTickAdvice(settings.isReceiveTickAdvice());
         userSetting.setProfilePic(settings.getProfilePic());
         return userSettingRepository.save(userSetting);
     }
@@ -313,5 +316,37 @@ public class UserService {
     @Nullable
     public Alliance findAlliance(final int idUser) {
         return userRepository.findAlliance(idUser);
+    }
+
+    public void updateInitialSettings(@Nonnull final InitialPlayerSettings settings,
+                                      final int idUser,
+                                      @Nonnull final String password) {
+        Preconditions.checkNotNull(settings, "settings must not be empty");
+        Preconditions.checkNotNull(password, "password must not be empty");
+
+        final User user = find(idUser);
+        if (user == null) {
+            return;
+        }
+
+        final UserSetting userSetting = user.getUserSetting();
+        final String hashed = userSetting.getPassword();
+        final String hash = new PasswordConverter().convertToDatabaseColumn(password);
+        if (!hashed.equals(hash)) {
+            return;
+        }
+
+        final RolePlaySetting rolePlaySetting = user.getRolePlaySetting();
+        rolePlaySetting.setShipPrefix(settings.getRolePlayData().getShipPrefix());
+        rolePlaySetting.setTitle(settings.getRolePlayData().getTitle());
+        rolePlaySetting.setTitleAbbreviation(settings.getRolePlayData().getTitleAbbreviation());
+        rolePlaySetting.setFirstname(settings.getRolePlayData().getFirstname());
+        rolePlaySetting.setSurname(settings.getRolePlayData().getSurname());
+
+        userSetting.setProfilePic(settings.getProfilePic());
+        userSetting.setReceiveChangelogInfos(settings.isReceiveChangelogInfos());
+        userSetting.setReceiveTickAdvice(settings.isReceiveTickAdvice());
+
+        save(user);
     }
 }

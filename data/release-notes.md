@@ -42,6 +42,7 @@ All movements will be finished by tomorrow.
 
    [https://media.battleforhonor.de/hyperlanes.gif](https://media.battleforhonor.de/hyperlanes.gif)
 
+
 3. The gravimetric sensor output was misleading, so it worked in my head but not outside of it.  
    The mechanics has shifted: The more sensor value is present, the better if the resolution of ship mass and ship amount.
 
@@ -51,16 +52,22 @@ All movements will be finished by tomorrow.
 
 #### Diverses
 
-The star map received love, as I said.  
-Now we have a small legend and some more filter, e.g. for fleets with a Warshawski sail or those with only an Impeller wedge.
+1. The star map received love, as I said.  
+   Now we have a small legend and some more filter, e.g. for fleets with a Warshawski sail or those with only an Impeller wedge.
 
-<img src="https://media.battleforhonor.de/map-control.gif" alt="mao control" width="550px">
+    <img src="https://media.battleforhonor.de/map-control.gif" alt="mao control" width="550px">
 
-[https://media.battleforhonor.de/map-control.gif](https://media.battleforhonor.de/map-control.gif)
+   [https://media.battleforhonor.de/map-control.gif](https://media.battleforhonor.de/map-control.gif)
 
-todo. async account creation
-zweistufige registrierung - während mail prefs abgefragt werden gibt es die account creation im hintergrund
-mails bei "nix mehr zu tun" schicken
+
+2. The register process is streamlined.  
+   Next to change some interesting role-play options like the ship's prefix, you can select directly if you want to receive information mails about new releases or about the
+   current development of the empire.  
+   The latter is short information about the most important points of the tick, e.g. if foreign fleets have entered an own system.
+
+    <img src="https://media.battleforhonor.de/unrelated/register-step-2.png" alt="mao control" width="550px">
+
+   [https://media.battleforhonor.de/unrelated/register-step-2.png](https://media.battleforhonor.de/unrelated/register-step-2.png)
 
 ### Bugs fixed
 

@@ -15,6 +15,10 @@ public class UserSettings {
     private boolean receiveChangelogInfos;
 
     @JsonProperty
+    @Schema(required = true, description = "If the user want to receive infos about the current's tick advice.")
+    private boolean receiveTickAdvice;
+
+    @JsonProperty
     @Schema(required = true, description = "If the user must not log in.")
     private boolean loginForbidden;
 
@@ -42,6 +46,7 @@ public class UserSettings {
         Preconditions.checkNotNull(userSetting, "userSetting must not be empty");
 
         this.receiveChangelogInfos = userSetting.isReceiveChangelogInfos();
+        this.receiveTickAdvice = userSetting.isReceiveTickAdvice();
         this.loginForbidden = userSetting.isLoginForbidden();
         this.eMailVerified = userSetting.isEMailVerified();
         this.eMail = userSetting.getEmail();
@@ -51,6 +56,10 @@ public class UserSettings {
 
     public boolean isReceiveChangelogInfos() {
         return receiveChangelogInfos;
+    }
+
+    public boolean isReceiveTickAdvice() {
+        return receiveTickAdvice;
     }
 
     @Nonnull

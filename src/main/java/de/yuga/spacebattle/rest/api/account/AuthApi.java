@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.api.account;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
+import de.yuga.spacebattle.backend.dto.account.InitialPlayerSettings;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -64,7 +65,7 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PUBLIC_BASE_ENDPOI
 @RequestMapping(value = "/" + PUBLIC_BASE_ENDPOINT + "/" + AuthApi.ENDPOINT + "/")
 public class AuthApi {
 
-    private static SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy HH:mm");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthApi.class);
 
@@ -86,7 +87,7 @@ public class AuthApi {
             "  " +
             "  " +
             "Sincerely and with the best wishes,  " +
-            DEFEATED_OPPONENT + "  ";
+            DEFEATED_OPPONENT + "  "; // fixme rework and check formatting -> some hints via images for the first steps
 
     @Nonnull
     private final UserService userService;
@@ -285,6 +286,26 @@ public class AuthApi {
                 httpServletResponse.setStatus(302);
             }
         }
+    }
+
+
+    @PutMapping(value = "/settings/{idUser}/{auth}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Changes settings for the user.", operationId = "initialPlayerSettings",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> initialPlayerSettings(@Nonnull @RequestBody final InitialPlayerSettings settings,
+                                                   @PathVariable("idUser") final int idUser,
+                                                   @Nonnull @PathVariable("auth") final String auth) {
+        PreconditionWebHelper.checkNotNull(settings, "settings must not be empty");
+
+        this.userService.updateInitialSettings(settings, idUser, auth);
+
+        return ResponseEntity.ok(true);
     }
 
     @PostMapping("/create")

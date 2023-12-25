@@ -69,6 +69,12 @@ public class UserSetting extends AbstractEntityKey {
     @Column(columnDefinition = "boolean not null default false")
     private boolean receiveChangelogInfos = false;
 
+    /**
+     * Marks if the user wants to receive eMails about important empire updates.
+     */
+    @Column(columnDefinition = "boolean not null default false")
+    private boolean receiveTickAdvice = false;
+
     @Nonnull
     @NotNull
     @Size(min = 1, max = 50)
@@ -139,6 +145,14 @@ public class UserSetting extends AbstractEntityKey {
 
     public void setReceiveChangelogInfos(final boolean receiveChangelogInfos) {
         this.receiveChangelogInfos = receiveChangelogInfos;
+    }
+
+    public boolean isReceiveTickAdvice() {
+        return receiveTickAdvice;
+    }
+
+    public void setReceiveTickAdvice(final boolean receiveTickAdvice) {
+        this.receiveTickAdvice = receiveTickAdvice;
     }
 
     @Nonnull
