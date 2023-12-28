@@ -18,66 +18,11 @@ article orbital modules
 
 #### Gameplay
 
-This release introduces wormhole travel!
-
-The main point of this are a new navigation at the map, which receives some love!  
-You can move your fleet as before, but the waypoints will be marked at the map and the course plot is visible.  
-When you start a movement the fleet will follow the planned course. It could be a little confusing to search a fleet in motion, because if the wormhole travel is faster it could
-fly in a counterintuitive direction ;)
-
-The wormhole travel will be used also from civil transport companies which are e.g. moving your stuff through the galaxy.  
-What is not changed is transferring resources and pops.
-
-This is still done through statistical processes. Since most freighters weigh in the megaton range, smaller resource movements can certainly be carried out spontaneously.
-
-Since commercial shipping naturally also specializes in passenger transport, there are usually enough day travelers on the road to cover short-term needs. Most of the time, the
-newly recruited people and their families stay in the place where they feel comfortable.
-
-All movements will be finished by tomorrow.
-
-1. Doubled systems were renamed.
-2. Wormhole travelling fleets are hidden for other players as before. Even when you use a terminus which has colonies from other players, they will not notice the travel.
-
-    <img src="https://media.battleforhonor.de/hyperlanes.gif" alt="mao control" width="550px">
-
-   [https://media.battleforhonor.de/hyperlanes.gif](https://media.battleforhonor.de/hyperlanes.gif)
-
-
-3. The gravimetric sensor output was misleading, so it worked in my head but not outside of it.  
-   The mechanics has shifted: The more sensor value is present, the better if the resolution of ship mass and ship amount.
-
-    <img src="https://media.battleforhonor.de/sensor-view.png" alt="mao control" width="350px">
-
-   [https://media.battleforhonor.de/sensor-view.png](https://media.battleforhonor.de/sensor-view.png)
+todo. more speed!
+todo. new trade outpost near haven, another near
 
 #### Diverses
 
-1. The star map received love, as I said.  
-   Now we have a small legend and some more filter, e.g. for fleets with a Warshawski sail or those with only an Impeller wedge.
-
-    <img src="https://media.battleforhonor.de/map-control.gif" alt="mao control" width="550px">
-
-   [https://media.battleforhonor.de/map-control.gif](https://media.battleforhonor.de/map-control.gif)
-
-
-2. The register process is streamlined.  
-   Next to change some interesting role-play options like the ship's prefix, you can select directly if you want to receive information mails about new releases or about the
-   current development of the empire.  
-   The latter is short information about the most important points of the tick, e.g. if planets can handle shipyard jobs.  
-   As every time privacy and data sovereignty is king. You need to activate this setting to receive mails.  
-   The mail is pretty simple and the time will show if that feature is useful and what should be displayed there.
-
-    <img src="https://media.battleforhonor.de/unrelated/register-step-2.png" alt="mao control" width="550px">
-
-   [https://media.battleforhonor.de/unrelated/register-step-2.png](https://media.battleforhonor.de/unrelated/register-step-2.png)
-
-### Bugs fixed
-
-1. The irritating bug with disappearing fleets and wrongly sized indicators on the map is completely gone.
-2. The sensor issue, especially for the Songbird is solved. The yard displayed wrongly a mass of around 85 kt. This is corrected, correct mass is 65 kt.  
-   The single segments, the stern and the bow hull, the cigar in the middle and the hammerheads were weighted correctly, but the total was wrong.
-3. Missiles which aren't used by any launcher in the fitting are removed.  
-   If a fitting is stored, the unused missiles will be removed before saving, also.
 
 #### next steps
 
