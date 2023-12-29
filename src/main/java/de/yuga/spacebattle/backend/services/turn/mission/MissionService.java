@@ -188,4 +188,16 @@ public class MissionService {
     public List<PirateHuntMission> findPirateHuntForUser(final int idOwner) {
         return Objects.requireNonNullElse(pirateHuntMissionRepository.findPirateHuntForUser(idOwner), new ArrayList<>());
     }
+
+    public List<Mission> forDeletionFindAllByUser(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+
+        return Objects.requireNonNullElse(missionRepository.forDeletionFindAllByUser(user.getId()), new ArrayList<>());
+    }
+
+    public void saveAll(@Nonnull final Collection<Mission> missions) {
+        Preconditions.checkNotNull(missions, "missions must not be empty");
+
+        missionRepository.saveAll(missions);
+    }
 }

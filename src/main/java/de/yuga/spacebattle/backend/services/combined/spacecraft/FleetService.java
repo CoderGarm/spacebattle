@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.combat.dto.FleetClash;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.misc.Operationable;
@@ -21,6 +22,7 @@ import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.ECalculationType;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.repositories.combined.spacecraft.FleetRepository;
+import de.yuga.spacebattle.backend.repositories.combined.spacecraft.FleetSnapshotRepository;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.MoveService;
@@ -65,19 +67,24 @@ public class FleetService {
     @Nonnull
     private final TransportJobService transportJobService;
 
+    @Nonnull
+    private final FleetSnapshotRepository fleetSnapshotRepository;
+
     @Autowired
     public FleetService(@Nonnull final FleetRepository fleetRepository,
                         @Nonnull final WarShipService warShipService,
                         @Nonnull final PlanetService planetService,
                         @Nonnull final TickTimeService tickTimeService,
                         @Nonnull final MoveService moveService,
-                        @Nonnull final TransportJobService transportJobService) {
+                        @Nonnull final TransportJobService transportJobService,
+                        @Nonnull final FleetSnapshotRepository fleetSnapshotRepository) {
         this.fleetRepository = Preconditions.checkNotNull(fleetRepository, "fleetR shouldn't be null!");
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.tickTimeService = Preconditions.checkNotNull(tickTimeService, "tickTimeService must not be empty");
         this.moveService = Preconditions.checkNotNull(moveService, "moveService must not be empty");
         this.transportJobService = Preconditions.checkNotNull(transportJobService, "transportJobService must not be empty");
+        this.fleetSnapshotRepository = Preconditions.checkNotNull(fleetSnapshotRepository, "fleetSnapshotRepository must not be empty");
     }
 
     /**
@@ -380,6 +387,20 @@ public class FleetService {
     }
 
     @Nonnull
+    public List<Fleet> forDeletionFindAllFleetsByUser(@Nonnull final Owner owner) {
+        Preconditions.checkNotNull(owner, "owner must not be empty");
+
+        return Objects.requireNonNullElse(fleetRepository.forDeletionFindAllFleetsByUser(owner.getId()), new ArrayList<>());
+    }
+
+    @Nonnull
+    public List<FleetSnapshot> forDeletionFindAllFleetSnapsByUser(@Nonnull final Owner owner) {
+        Preconditions.checkNotNull(owner, "owner must not be empty");
+
+        return Objects.requireNonNullElse(fleetSnapshotRepository.forDeletionFindAllFleetsByUser(owner.getId()), new ArrayList<>());
+    }
+
+    @Nonnull
     public List<AbstractId> findAllAliveFleetsBy(final int idUser) {
         return Objects.requireNonNullElse(fleetRepository.findAllAliveFleetsBy(idUser), new ArrayList<>());
     }
@@ -431,6 +452,12 @@ public class FleetService {
 
         final Iterable<Fleet> saveAll = fleetRepository.saveAll(fleets);
         return StreamSupport.stream(saveAll.spliterator(), false).collect(Collectors.toSet());
+    }
+
+    public void saveAllFleetSnaps(@Nonnull final Collection<FleetSnapshot> fleets) {
+        Preconditions.checkNotNull(fleets, "fleets shouldn't be null!");
+
+        fleetSnapshotRepository.saveAll(fleets);
     }
 
     @Nonnull

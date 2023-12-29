@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.entities.turn.mission;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.misc.Deletable;
@@ -26,8 +27,8 @@ public class Mission extends Deletable {
     @Nonnull
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "idActor", updatable = false)
-    private User actor;
+    @JoinColumn(name = "idActor")
+    private Owner actor;
 
     @Nonnull
     @NotNull
@@ -61,7 +62,7 @@ public class Mission extends Deletable {
     }
 
     @Nonnull
-    public User getActor() {
+    public Owner getActor() {
         return actor;
     }
 
@@ -116,5 +117,9 @@ public class Mission extends Deletable {
 
     public void finish() {
 
+    }
+
+    public void setOwner(@Nonnull final Owner owner) {
+        this.actor = Preconditions.checkNotNull(owner, "owner must not be empty");
     }
 }

@@ -182,6 +182,9 @@ public class MasterOfTheUniverseService {
     @Nonnull
     private final OrbitalModuleService orbitalModuleService;
 
+    @Nonnull
+    private final UserDeleteServiceService userDeleteServiceService;
+
     @Autowired
     public MasterOfTheUniverseService(@Nonnull final TickRunnerService tickService,
                                       @Nonnull final UserService userService,
@@ -200,7 +203,9 @@ public class MasterOfTheUniverseService {
                                       @Nonnull final ResourceService resourceService,
                                       @Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
                                       @Nonnull final OwnerService ownerService,
-                                      @Nonnull final OrbitalModuleService orbitalModuleService) {
+                                      @Nonnull final OrbitalModuleService orbitalModuleService,
+                                      @Nonnull final UserDeleteServiceService userDeleteServiceService) {
+        this.validator = Validation.buildDefaultValidatorFactory().getValidator();
         this.tickService = Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.allianceService = Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");
@@ -219,8 +224,7 @@ public class MasterOfTheUniverseService {
         this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
         this.ownerService = Preconditions.checkNotNull(ownerService, "ownerService must not be empty");
         this.orbitalModuleService = Preconditions.checkNotNull(orbitalModuleService, "orbitalModuleService must not be empty");
-
-        this.validator = Validation.buildDefaultValidatorFactory().getValidator();
+        this.userDeleteServiceService = Preconditions.checkNotNull(userDeleteServiceService, "userDeleteServiceService must not be empty");
     }
 
     @PostConstruct
@@ -228,34 +232,13 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = true;
+        final boolean transformationNeeded = userService.findByUsername("TanteManfred").isPresent();
         if (transformationNeeded) {
-            cleanUpUnusedAmmunitionFittings(); /* fixme remove me after release */
-
+            userDeleteServiceService.deleteAllInactiveUsers();
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
         }
-    }
-
-    private void cleanUpUnusedAmmunitionFittings() {
-        final List<ShipClass> shipClasses = shipClassService.findAll();
-        final List<ShipClass> toStore = new ArrayList<>();
-        shipClasses.forEach(shipClass -> {
-            final Set<Missile> allowedMissiles = shipClass.getFittings().stream()
-                    .map(AlignedFitting::getLauncher)
-                    .filter(Objects::nonNull)
-                    .map(Launcher::getAllowedMissiles)
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toSet());
-
-            final List<AmmunitionFitting> unusedMissiles = shipClass.getAmmunitionFittings().stream().filter(af -> !allowedMissiles.contains(af.getMissile())).collect(Collectors.toList());
-            if (!unusedMissiles.isEmpty()) {
-                unusedMissiles.forEach(shipClass.getAmmunitionFittings()::remove);
-                toStore.add(shipClass);
-            }
-        });
-        shipClassService.saveAll(toStore);
     }
 
     @SuppressWarnings("unused")

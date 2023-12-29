@@ -33,6 +33,85 @@
 
 ---
 
+### announcement post:
+
+##### Dispatch by **Foreign Affairs Police Forces of the Star Kingdom of Manticore**
+
+---
+
+***[top secret!]***  
+To all star nation governments.
+
+Ships of the **Foreign Affairs Police Forces** have captured and secured the rogue courier vessel, recently wanted by the government of Arch. The vessel was raised and secured as
+it attempted to traverse the UAG5654 system.
+
+Upon interrogation of its crew and analysis of its computer cores we have discovered leads on what apparently is a widespread conspiracy by Kersey’s Association.
+
+Combined with the earlier findings by the Royal Solan ONI we feel certain to assume that Kersey’s agents have infiltrated and corrupted several small star nation governments. The
+objective of this conspiracy is to destabilize the galactic community and have local system navies resources at their disposal for a possible attack of a grander scale.
+
+Evidence includes lists of names and governments, systems, planets and naval bases now controlled by Kersey’s. It is without doubt.
+
+**If you receive this message, your government is not among the corrupted!**
+
+The attempt in Arch system failed and handed us the puzzle piece that was missing, a list of Kersey’s new bases and strongholds.
+
+Seine kaiserliche Majestät Ragnar Odinson is calling all free systems to join the fight against piracy and join us in Operation War Harvest and commit a fleet to a decisive strike
+against this military infrastructure of Kersey’s.
+
+War Harvest follows a schedule coordinated by His Imperial Majesty's Admiralty Staff, but you are called upon and instructed to deploy your fleets under your own command.
+
+If you wish to join the operation but do not possess any offensive fleet capability, S.k.M. navy is in the process of reactivating former Solarian ships from a depot and will
+assist to bolster your forces. Have your military attaché contact ours about it.
+Codeword: Flashkid
+
+**More operational details to follow!**
+
+(PM me, if you have only the basic Songbirds or less, to have your fleet improved with Ex-Solarian surplus to participate in War Harvest!
+Everyone else - activate your yards and build ships for action!)
+
+---
+
+##### Versand durch **Polizeikräfte für auswärtige Angelegenheiten des Sternenkönigreichs Manticore**
+
+---
+
+***[streng geheim!]***  
+An alle Regierungen der Sternennationen.
+
+Schiffe der **Foreign Affairs Police Forces** haben das Schurkenkurierschiff gekapert und gesichert, das kürzlich von der Regierung von Arch gesucht wurde. Das Schiff wurde
+angehoben und gesichert, als es versuchte, das UAG5654-System zu durchqueren.
+
+Bei der Befragung seiner Besatzung und der Analyse seiner Computerkerne haben wir Hinweise auf eine offenbar weit verbreitete Verschwörung der Kersey’s Association entdeckt.
+
+In Kombination mit den früheren Erkenntnissen des Royal Solan ONI gehen wir mit Sicherheit davon aus, dass Kerseys Agenten mehrere Regierungen kleiner Sternennationen infiltriert
+und korrumpiert haben. Das Ziel dieser Verschwörung besteht darin, die galaktische Gemeinschaft zu destabilisieren und die Ressourcen der lokalen Systemmarine für einen möglichen
+Angriff größeren Ausmaßes zur Verfügung zu haben.
+
+Zu den Beweisen gehören Listen mit Namen und Regierungen, Systemen, Planeten und Marinestützpunkten, die jetzt von Kersey kontrolliert werden. Es besteht kein Zweifel.
+
+**Wenn Sie diese Nachricht erhalten, gehört Ihre Regierung nicht zu den Korrupten!**
+
+Der Versuch im Arch-System scheiterte und lieferte uns das fehlende Puzzleteil, eine Liste von Kerseys neuen Stützpunkten und Festungen.
+
+Seine kaiserliche Majestät Ragnar Odinson ruft alle freien Systeme auf, sich dem Kampf gegen die Piraterie anzuschließen und sich uns bei der Operation War Harvest anzuschließen
+und eine Flotte zu einem entscheidenden Schlag gegen diese militärische Infrastruktur von Kersey zu entsenden.
+
+War Harvest folgt einem Zeitplan, der vom Admiralitätsstab Seiner Kaiserlichen Majestät koordiniert wird, aber Sie werden aufgefordert und angewiesen, Ihre Flotten unter Ihrem
+eigenen Kommando einzusetzen.
+
+Wenn Sie sich der Operation anschließen möchten, aber über keine Angriffsflottenfähigkeiten verfügen, kann S.k.M. Die Marine ist dabei, ehemalige solarianische Schiffe aus einem
+Depot zu reaktivieren und wird dabei helfen, Ihre Streitkräfte zu verstärken. Bitten Sie Ihren Militärattaché, sich diesbezüglich an uns zu wenden.
+Codewort: Flashkid
+
+**Weitere Betriebsdetails folgen!**
+
+(Schreiben Sie mir eine Nachricht, wenn Sie nur über die grundlegenden Singvögel oder weniger verfügen, damit Ihre Flotte mit Ex-Solarian-Überschüssen aufgerüstet wird, um an War
+Harvest teilzunehmen!
+Alle anderen – aktiviert eure Werften und baut Schiffe für den Einsatz!)
+
+---
+
 # Time Table
 
 1. 24th announcement of event and the release with the "call to arms"

@@ -168,6 +168,10 @@ public class ShipClass extends Deletable implements HasOwner {
         this.supportFittings.addAll(toCopy.getSupportFittings());
     }
 
+    public void setOwner(@Nonnull final Owner owner) {
+        this.owner = Preconditions.checkNotNull(owner, "owner must not be empty");
+    }
+
     @Nonnull
     @Override
     public Owner getOwner() {

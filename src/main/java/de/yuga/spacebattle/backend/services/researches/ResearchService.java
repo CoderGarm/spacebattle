@@ -178,4 +178,10 @@ public class ResearchService {
 
         return researchRepository.save(research);
     }
+
+    public void deleteAll(@Nonnull final Set<ResearchLevel> researchLevels) {
+        Preconditions.checkNotNull(researchLevels, "researchLevels must not be empty");
+
+        levelRepository.deleteAll(researchLevels);
+    }
 }

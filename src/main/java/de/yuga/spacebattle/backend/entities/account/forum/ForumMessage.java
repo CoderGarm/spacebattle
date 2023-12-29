@@ -1,12 +1,16 @@
 package de.yuga.spacebattle.backend.entities.account.forum;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -22,7 +26,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "forumMessage")
 @AttributeOverride(name = "id", column = @Column(name = "idForumMessage"))
-public class ForumMessage extends AbstractEntityKey {
+public class ForumMessage extends AbstractEntityKey implements HasOwner {
 
     @Nonnull
     @NotNull
@@ -34,7 +38,7 @@ public class ForumMessage extends AbstractEntityKey {
     @NotNull
     @ManyToOne(optional = false)
     @JoinColumn(name = "idUserAuthor")
-    private User author;
+    private Owner author;
 
     @Nonnull
     @NotNull
@@ -66,9 +70,14 @@ public class ForumMessage extends AbstractEntityKey {
         return forumThread;
     }
 
+    public void setAuthor(@Nonnull final Owner author) {
+        this.author = Preconditions.checkNotNull(author, "author must not be empty");
+    }
+
     @Nonnull
     public User getAuthor() {
-        return author;
+        final User humanOwner = getHumanOwner();
+        return humanOwner != null ? humanOwner : new User();
     }
 
     public void setMessage(@Nonnull final String message) {
@@ -85,6 +94,30 @@ public class ForumMessage extends AbstractEntityKey {
     @Nonnull
     public LocalDateTime getSentAt() {
         return sentAt;
+    }
+
+    @Nonnull
+    @Override
+    public Owner getOwner() {
+        return author;
+    }
+
+    @Nullable
+    @Override
+    public User getHumanOwner() {
+        if (!(author instanceof User)) {
+            return null;
+        }
+        return (User) author;
+    }
+
+    @Nullable
+    @Override
+    public NonPlayerCharacter getNpcOwner() {
+        if (!(author instanceof NonPlayerCharacter)) {
+            return null;
+        }
+        return (NonPlayerCharacter) author;
     }
 
     @Override

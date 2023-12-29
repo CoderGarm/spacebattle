@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services.turn;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
@@ -66,9 +67,15 @@ public class MoveService {
     }
 
     @Nonnull
-    public List<Move> saveAll(@Nonnull final List<Move> moves) {
+    public List<Move> saveAll(@Nonnull final Collection<Move> moves) {
         Preconditions.checkNotNull(moves, "moves must not be empty");
 
         return moveRepository.saveAll(moves);
+    }
+
+    public List<Move> forDeletionFindAllByOwner(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+
+        return Objects.requireNonNullElse(moveRepository.forDeletionFindAllByOwner(user), new ArrayList<>());
     }
 }

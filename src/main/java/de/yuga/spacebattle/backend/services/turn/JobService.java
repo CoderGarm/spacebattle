@@ -362,6 +362,13 @@ public class JobService {
     }
 
     @Nonnull
+    public List<Job> forDeletionFindAllJobsForUser(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+
+        return Objects.requireNonNullElse(jobRepository.forDeletionFindAllJobsForUser(user.getId()), new ArrayList<>());
+    }
+
+    @Nonnull
     public List<Job> findAllJobsForUser(final int idUser) {
         return jobRepository.findAllJobsForUser(idUser);
     }
@@ -392,5 +399,11 @@ public class JobService {
     @Nullable
     public Job findById(final int idJob) {
         return jobRepository.findById(idJob).orElse(null);
+    }
+
+    public void deleteAll(@Nonnull final Collection<Job> jobs) {
+        Preconditions.checkNotNull(jobs, "jobs must not be empty");
+
+        jobRepository.deleteAll(jobs);
     }
 }

@@ -1,12 +1,15 @@
 package de.yuga.spacebattle.backend.repositories.account;
 
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.account.chat.UserMessage;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Optional;
+import java.util.Set;
 
 public interface UserMessageRepository extends CrudRepository<UserMessage, Integer> {
 
@@ -24,4 +27,8 @@ public interface UserMessageRepository extends CrudRepository<UserMessage, Integ
             "AND (t.userOne.id = :idReceiver OR t.userTwo.id = :idReceiver) " +
             "AND msg.receivedAt IS NULL")
     boolean hasUserUnreadMessages(@Param("idReceiver") final int idReceiver);
+
+    @Nullable
+    @Query("SELECT m FROM UserMessage m WHERE m.sender = :user")
+    Set<UserMessage> findAllForAuthor(@Nonnull final User user);
 }

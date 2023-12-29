@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services.turn.battle;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
 import de.yuga.spacebattle.backend.repositories.turn.battle.BattleReportRepository;
 import de.yuga.spacebattle.rest.dto.turn.battle.BattleReportStatistics;
@@ -60,7 +61,8 @@ public class BattleReportService {
         battleReportRepository.delete(entity);
     }
 
-    public List<BattleReport> saveAll(@Nonnull final List<BattleReport> reports) {
+    @Nonnull
+    public List<BattleReport> saveAll(@Nonnull final Collection<BattleReport> reports) {
         Preconditions.checkNotNull(reports, "reports shouldn't be null!");
 
         final Iterable<BattleReport> fightingReports = battleReportRepository.saveAll(reports);
@@ -82,5 +84,12 @@ public class BattleReportService {
 
     public boolean hasNewReportsSince(final int idUser, final int since) {
         return battleReportRepository.hasNewReportsSince(idUser, since);
+    }
+
+    @Nonnull
+    public List<BattleReport> forDeletionFindAllByUser(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+
+        return Objects.requireNonNullElse(battleReportRepository.findAllForUser(user), new ArrayList<>());
     }
 }

@@ -28,7 +28,7 @@ public class OrbitalStructure extends Operationable implements HasOwner {
     @Nonnull
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "idOwner", updatable = false)
+    @JoinColumn(name = "idOwner")
     private Owner owner;
 
     @Nonnull
@@ -64,6 +64,12 @@ public class OrbitalStructure extends Operationable implements HasOwner {
     @Override
     public Owner getOwner() {
         return owner;
+    }
+
+    public void setOwner(@Nonnull final Owner owner) {
+        Preconditions.checkNotNull(owner, "owner shouldn't be null!");
+
+        this.owner = owner;
     }
 
     @Nullable

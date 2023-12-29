@@ -11,10 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -52,6 +49,13 @@ public class ShipClassService {
         Preconditions.checkNotNull(owner, "owner shouldn't be null!");
 
         return sort(shipClassRepository.findAllShipClassesByOwner(owner));
+    }
+
+    @Nonnull
+    public List<ShipClass> forDeletionFindAllByOwner(@Nonnull final User owner) {
+        Preconditions.checkNotNull(owner, "owner shouldn't be null!");
+
+        return Objects.requireNonNullElse(shipClassRepository.forDeletionFindAllByOwner(owner), new ArrayList<>());
     }
 
     /**

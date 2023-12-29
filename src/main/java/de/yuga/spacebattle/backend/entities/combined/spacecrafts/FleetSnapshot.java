@@ -47,7 +47,7 @@ public class FleetSnapshot extends Deletable implements HasOwner {
     @Nonnull
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "idOwner", updatable = false)
+    @JoinColumn(name = "idOwner")
     private Owner owner;
 
     @Nonnull
@@ -90,6 +90,11 @@ public class FleetSnapshot extends Deletable implements HasOwner {
     @Nonnull
     public String getName() {
         return name;
+    }
+
+
+    public void setOwner(@Nonnull final Owner owner) {
+        this.owner = Preconditions.checkNotNull(owner, "owner must not be empty");
     }
 
     @Nonnull

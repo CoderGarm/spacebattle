@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.services.account;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.forum.IdToId;
+import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.account.forum.Forum;
 import de.yuga.spacebattle.backend.entities.account.forum.ForumMessage;
@@ -14,6 +15,7 @@ import de.yuga.spacebattle.backend.repositories.account.ForumMessageRepository;
 import de.yuga.spacebattle.backend.repositories.account.ForumRepository;
 import de.yuga.spacebattle.backend.repositories.account.ForumThreadRepository;
 import de.yuga.spacebattle.backend.services.MailService;
+import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,19 +46,24 @@ public class ForumService {
     @Nonnull
     private final UserService userService;
 
+    @Nonnull
+    private final NonPlayerCharacterService nonPlayerCharacterService;
+
     @Autowired
     public ForumService(@Nonnull final ForumRepository forumRepository,
                         @Nonnull final ForumThreadRepository forumThreadRepository,
                         @Nonnull final ForumMessageRepository forumMessageRepository,
                         @Nonnull final ForumMessageReadRepository messageReadRepository,
                         @Nonnull final MailService mailService,
-                        @Nonnull final UserService userService) {
+                        @Nonnull final UserService userService,
+                        @Nonnull final NonPlayerCharacterService nonPlayerCharacterService) {
         this.forumRepository = Preconditions.checkNotNull(forumRepository, "forumRepository shouldn't be null!");
         this.forumThreadRepository = Preconditions.checkNotNull(forumThreadRepository, "forumThreadRepository shouldn't be null!");
         this.forumMessageRepository = Preconditions.checkNotNull(forumMessageRepository, "forumMessageRepository shouldn't be null!");
         this.messageReadRepository = Preconditions.checkNotNull(messageReadRepository, "messageReadRepository shouldn't be null!");
         this.mailService = Preconditions.checkNotNull(mailService, "mailService must not be empty");
         this.userService = Preconditions.checkNotNull(userService, "userService must not be empty");
+        this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
     }
 
     @Nonnull
@@ -245,5 +252,19 @@ public class ForumService {
     @Nonnull
     public List<Integer> findUnreadMessages(final int idThread, final int idUser) {
         return Objects.requireNonNullElse(messageReadRepository.findUnreadMessages(idThread, idUser), new ArrayList<>());
+    }
+
+    public void markAsDeletedForUser(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+
+        final NonPlayerCharacter newAuthor = nonPlayerCharacterService.findByUsername(MasterOfTheUniverseService.PIRATE);
+        Preconditions.checkNotNull(newAuthor, "newAuthor must not be empty");
+
+        final Set<ForumMessage> allForAuthors = Objects.requireNonNullElse(forumMessageRepository.findAllForAuthor(user), new HashSet<>());
+        allForAuthors.forEach(m -> m.setAuthor(newAuthor));
+        forumMessageRepository.saveAll(allForAuthors);
+
+        final Set<ForumMessageRead> readsForAuthors = Objects.requireNonNullElse(messageReadRepository.findAllForAuthor(user), new HashSet<>());
+        messageReadRepository.deleteAll(readsForAuthors);
     }
 }

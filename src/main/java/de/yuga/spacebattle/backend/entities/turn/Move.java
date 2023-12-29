@@ -39,7 +39,7 @@ public class Move extends Completable implements HasOwner {
     @Nonnull
     @NotNull
     @OneToOne
-    @JoinColumn(name = "idUser", updatable = false)
+    @JoinColumn(name = "idUser")
     private Owner owner;
 
     @Nullable
@@ -296,5 +296,9 @@ public class Move extends Completable implements HasOwner {
 
     public int getMoveHash() {
         return originOrbit.hashCode() + destinationOrbit.hashCode();
+    }
+
+    public void setOwner(@Nonnull final Owner owner) {
+        this.owner = Preconditions.checkNotNull(owner, "owner must not be empty");
     }
 }

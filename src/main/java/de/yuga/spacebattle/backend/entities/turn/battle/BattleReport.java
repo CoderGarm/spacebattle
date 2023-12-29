@@ -11,6 +11,7 @@ import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.combat.round.MissileSalvoHealthState;
 import de.yuga.spacebattle.backend.converter.CombatRoundConverter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
@@ -348,5 +349,18 @@ public class BattleReport extends AbstractEntityKey {
             final Integer leftOver = missileSalvoHealthState.getCurrentAmountByType().get(missile);
             counterMissileHits.add(new CounterMissileHit(volley, missile, leftOver, lostAmount));
         });
+    }
+
+    public void changeParticipant(@Nonnull final User toRemove, @Nonnull final Owner pirate) {
+        Preconditions.checkNotNull(toRemove, "toRemove must not be empty");
+        Preconditions.checkNotNull(pirate, "pirate must not be empty");
+
+        participatingUsers.remove(toRemove);
+        participatingUsers.add(pirate);
+
+        final Set<LossRole> impactedRoles = getLossRole().stream().filter(l -> toRemove.equals(l.getHumanOwner())).collect(Collectors.toSet());
+        impactedRoles.forEach(l -> l.setOwner(pirate));
+
+        participatingFleets.stream().filter(f -> f.getOwner().equals(toRemove)).forEach(f -> f.setOwner(pirate));
     }
 }

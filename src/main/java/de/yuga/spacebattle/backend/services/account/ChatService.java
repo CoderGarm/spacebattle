@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 public class ChatService {
@@ -24,14 +26,16 @@ public class ChatService {
     @Nonnull
     private final UserMessageRepository userMessageRepository;
 
+    @Nonnull
+    private final NonPlayerCharacterService nonPlayerCharacterService;
+
     @Autowired
     public ChatService(@Nonnull final MessageThreadRepository messageThreadRepository,
-                       @Nonnull final UserMessageRepository userMessageRepository) {
-        Preconditions.checkNotNull(messageThreadRepository, "userMessageRepository should not be null");
-        Preconditions.checkNotNull(userMessageRepository, "userMessageRepository shouldn't be null!");
-
-        this.messageThreadRepository = messageThreadRepository;
-        this.userMessageRepository = userMessageRepository;
+                       @Nonnull final UserMessageRepository userMessageRepository,
+                       @Nonnull final NonPlayerCharacterService nonPlayerCharacterService) {
+        this.messageThreadRepository = Preconditions.checkNotNull(messageThreadRepository, "userMessageRepository should not be null");
+        this.userMessageRepository = Preconditions.checkNotNull(userMessageRepository, "userMessageRepository shouldn't be null!");
+        this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
     }
 
     /**
@@ -136,5 +140,18 @@ public class ChatService {
      */
     public boolean hasUserUnreadMessages(final int idUser) {
         return userMessageRepository.hasUserUnreadMessages(idUser);
+    }
+
+
+    public void deleteForUser(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+
+        // fixme delete chats
+
+        final Set<UserMessage> allForAuthors = Objects.requireNonNullElse(userMessageRepository.findAllForAuthor(user), new HashSet<>());
+        userMessageRepository.deleteAll(allForAuthors);
+
+        final Set<MessageThread> threadsForAuthors = Objects.requireNonNullElse(messageThreadRepository.findAllForAuthor(user), new HashSet<>());
+        messageThreadRepository.deleteAll(threadsForAuthors);
     }
 }

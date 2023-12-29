@@ -62,7 +62,7 @@ public class Fleet extends Operationable implements HasOwner {
     @Nonnull
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "idOwner", updatable = false)
+    @JoinColumn(name = "idOwner")
     private Owner owner;
 
     @Nonnull
@@ -113,6 +113,10 @@ public class Fleet extends Operationable implements HasOwner {
         this.owner = owner;
         this.name = name;
         this.orbit = orbit;
+    }
+
+    public void setOwner(@Nonnull final Owner owner) {
+        this.owner = Preconditions.checkNotNull(owner, "owner must not be empty");
     }
 
     public boolean isActive() {

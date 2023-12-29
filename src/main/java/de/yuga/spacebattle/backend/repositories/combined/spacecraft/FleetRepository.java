@@ -38,4 +38,8 @@ public interface FleetRepository extends JpaRepository<Fleet, Integer>, CustomFl
     @Nullable
     @Query("SELECT DISTINCT f.orbit.system.id FROM Fleet f WHERE f.owner.id = :idUser")
     Set<Integer> findAllSystemIDsWithFleetsForUser(final int idUser);
+
+    @Nullable
+    @Query("SELECT f FROM Fleet f WHERE f.owner.id = :idUser")
+    List<Fleet> forDeletionFindAllFleetsByUser(final int idUser);
 }

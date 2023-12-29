@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.backend.repositories.account;
 
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.account.forum.ForumMessageRead;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.enums.EWebUserRole;
@@ -7,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
@@ -35,4 +37,8 @@ public interface ForumMessageReadRepository extends PagingAndSortingRepository<F
     @Nullable
     @Query("SELECT MIN(r.forumMessage.id) FROM ForumMessageRead r WHERE r.user.id = :idUser AND r.isRead = false AND r.forumThread.id = :idForumThread")
     Integer findFirstUnreadMessageId(final int idForumThread, final int idUser);
+
+    @Nullable
+    @Query("SELECT m FROM ForumMessageRead m WHERE m.user = :user")
+    Set<ForumMessageRead> findAllForAuthor(@Nonnull final User user);
 }

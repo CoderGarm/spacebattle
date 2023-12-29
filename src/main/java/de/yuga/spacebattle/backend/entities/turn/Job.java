@@ -27,7 +27,7 @@ public class Job extends PointsCompletable implements Comparable<Job> {
     @Nonnull
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "idOwner", updatable = false)
+    @JoinColumn(name = "idOwner")
     private User owner;
 
     @Nonnull

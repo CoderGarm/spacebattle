@@ -8,6 +8,8 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -104,5 +106,25 @@ public class LossRole implements HasOwner {
     @Nonnull
     public ShipClass getShipClass() {
         return shipClass;
+    }
+
+    public void setOwner(@Nonnull final Owner owner) {
+        this.owner = Preconditions.checkNotNull(owner, "owner must not be empty");
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final LossRole lossRole = (LossRole) o;
+
+        return new EqualsBuilder().append(idWarship, lossRole.idWarship).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(idWarship).toHashCode();
     }
 }

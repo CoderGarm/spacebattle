@@ -18,13 +18,18 @@ article orbital modules
 
 #### Gameplay
 
-todo. more speed!
-todo. new trade outpost near haven, another near
+1. More speed!  
+   I figured out what's wrong with the flight speed and this topic is quite bigger then I thought. As a workaround, the acceleration for all NPC flights are increased to the
+   physically maximum.
+   todo. new trade outpost near haven, another near
 
 #### Diverses
 
-
 #### next steps
+
+todo. colo duration through wormholes are NaN
+todo. tonnage calc not on every input -> timeout should be enough
+todo. carrier menu: order planets by system like in the planet menu
 
 ---
 todo. distance based duration

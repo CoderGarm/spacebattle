@@ -380,4 +380,10 @@ public class ColonizationService {
         /* todo payback the paycheck */
         repository.delete(colonization);
     }
+
+    public void deleteAll(@Nonnull final Collection<Colonization> colonizations) {
+        Preconditions.checkNotNull(colonizations, "colonizations must not be empty");
+
+        repository.deleteAll(colonizations);
+    }
 }

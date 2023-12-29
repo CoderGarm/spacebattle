@@ -67,7 +67,7 @@ public class User extends Owner {
      * </p>
      */
     @Nonnull
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    @ManyToMany
     @JoinTable(name = "knownStarSystem",
             joinColumns = @JoinColumn(name = "idOwner"),
             inverseJoinColumns = @JoinColumn(name = "idStarSystem"),

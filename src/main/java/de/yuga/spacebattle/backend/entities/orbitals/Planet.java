@@ -151,6 +151,7 @@ public class Planet extends AbstractEntityKey implements HasOwner {
 
         colonizedAt = LocalDateTime.now();
         this.owner = owner;
+        this.isMain = false;
     }
 
     @Nonnull

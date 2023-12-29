@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.services.constructables.spacecraft;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.OrbitalStructure;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.repositories.constructables.spacecraft.OrbitalStructureRepository;
@@ -81,5 +82,19 @@ public class OrbitalStructureService {
     @Nonnull
     public List<OrbitalStructure> findAliveInoperationalForPlanet(final int idPlanet) {
         return Objects.requireNonNullElse(orbitalStructureRepository.findAliveInoperationalForPlanet(idPlanet), new ArrayList<>());
+    }
+
+    @Nonnull
+    public List<OrbitalStructure> findAllByOwner(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+
+        return Objects.requireNonNullElse(orbitalStructureRepository.findAllByOwner(user), new ArrayList<>());
+    }
+
+    @Nonnull
+    public List<OrbitalStructure> forDeletionFindAllByOwner(@Nonnull final User user) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+
+        return Objects.requireNonNullElse(orbitalStructureRepository.forDeletionFindAllByOwner(user), new ArrayList<>());
     }
 }
