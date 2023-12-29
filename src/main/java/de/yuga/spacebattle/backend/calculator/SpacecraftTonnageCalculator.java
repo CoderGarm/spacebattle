@@ -7,7 +7,6 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AmmunitionFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.SupportFitting;
 import de.yuga.spacebattle.backend.enums.ECapacityAreaType;
-import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
@@ -44,34 +43,7 @@ public class SpacecraftTonnageCalculator {
     public static Mass getFullTonnage(@Nonnull final ShipClass shipClass) {
         Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
 
-        final Mass bowMass = shipClass.getTonnage(ECapacityAreaType.BOW);
-        final Mass sternMass = shipClass.getTonnage(ECapacityAreaType.STERN);
-
-        final Mass max = bowMass.max(sternMass);
-        final Mass broadsidesMass = shipClass.getTonnage(ECapacityAreaType.BROADSIDE).add(shipClass.getTonnage(ECapacityAreaType.MODULE));
-
-        final BigDecimal hammerhead = getOrOne(max.getCoordinateInMetric(EMassMetric.KT));
-        final BigDecimal cigar = getOrOne(broadsidesMass.getCoordinateInMetric(EMassMetric.KT));
-
-        final BigDecimal realRatio = cigar.divide(hammerhead, MC);
-        final int compareTo = realRatio.compareTo(HULL_SECTION_RATIO);
-
-        Mass mass;
-        if (compareTo < 0) {
-            // hammerhead is heavier than cigar
-            mass = max.add(max);
-            final Mass newBroadsideMass = max.multiply(HULL_SECTION_RATIO);
-            mass = mass.add(newBroadsideMass);
-        } else if (compareTo > 0) {
-            // cigar is heavier than hammerhead
-            mass = broadsidesMass;
-            final Mass newHammerheadMass = broadsidesMass.divide(HULL_SECTION_RATIO);
-            mass = mass.add(newHammerheadMass).add(newHammerheadMass);
-        } else {
-            // perfect fit
-            mass = shipClass.getTonnage();
-        }
-        return mass;
+        return shipClass.getTonnage(ECapacityAreaType.OVERALL);
     }
 
     @Nonnull

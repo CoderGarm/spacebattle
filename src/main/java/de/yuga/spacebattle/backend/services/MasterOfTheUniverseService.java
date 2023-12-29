@@ -228,34 +228,21 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = true;
+        final boolean transformationNeeded = starsystemService.findByName("Manticore").getOrbit().getXCoordinate().getCoordinateInMetric(EDistanceMetric.LY).intValue() >= 214;
         if (transformationNeeded) {
-            cleanUpUnusedAmmunitionFittings(); /* fixme remove me after release */
+
+            final List<StarSystem> systems = starsystemService.findAll();
+            systems.forEach(sys -> {
+                final Orbit orbit = sys.getOrbit();
+                final Orbit d = orbit.divide(EDistanceMetric.LY_TO_PIXEL_CONVERSION_FACTOR); // fixme this idea is a start but this is not all - the distance and navigation calculation must be made understandable
+                sys.setOrbit(new Orbit(d.getXCoordinate().convertToMetric(EDistanceMetric.LY), d.getYCoordinate().convertToMetric(EDistanceMetric.LY)));
+            });
+            starsystemService.saveAll(systems);
 
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
         }
-    }
-
-    private void cleanUpUnusedAmmunitionFittings() {
-        final List<ShipClass> shipClasses = shipClassService.findAll();
-        final List<ShipClass> toStore = new ArrayList<>();
-        shipClasses.forEach(shipClass -> {
-            final Set<Missile> allowedMissiles = shipClass.getFittings().stream()
-                    .map(AlignedFitting::getLauncher)
-                    .filter(Objects::nonNull)
-                    .map(Launcher::getAllowedMissiles)
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toSet());
-
-            final List<AmmunitionFitting> unusedMissiles = shipClass.getAmmunitionFittings().stream().filter(af -> !allowedMissiles.contains(af.getMissile())).collect(Collectors.toList());
-            if (!unusedMissiles.isEmpty()) {
-                unusedMissiles.forEach(shipClass.getAmmunitionFittings()::remove);
-                toStore.add(shipClass);
-            }
-        });
-        shipClassService.saveAll(toStore);
     }
 
     @SuppressWarnings("unused")

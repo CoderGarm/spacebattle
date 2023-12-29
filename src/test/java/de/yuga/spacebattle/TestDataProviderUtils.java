@@ -412,7 +412,7 @@ public class TestDataProviderUtils {
     @Nonnull
     public static Propulsion createPropulsion(@Nonnull final String name,
                                               @Nonnull final String description,
-                                              final int tonnage,
+                                              final int tonnagePercentage,
                                               final int value,
                                               final ETechLevel techLevel,
                                               @Nonnull final EHyperBand hyperBand,
@@ -423,7 +423,7 @@ public class TestDataProviderUtils {
         Preconditions.checkNotNull(technologyType, "technologyType must not be empty");
 
         final NamedTechLevel namedTechLevel = new NamedTechLevel(name, description, research(), techLevel, Propulsion.class);
-        final Propulsion propulsion = new Propulsion(namedTechLevel, "xXx", 1, tonnage, value, hyperBand, technologyType);
+        final Propulsion propulsion = new Propulsion(namedTechLevel, "xXx", 1, value, tonnagePercentage, hyperBand, technologyType);
         setId(propulsion);
         return propulsion;
     }

@@ -81,7 +81,7 @@ public class Distance implements Cloneable, Comparable<Distance> {
     @Override
     public String toString() {
         final Distance distance = DistanceCalculator.convertToScale(this);
-        return distance.coordinate + " " + distance.getDistanceMetric();
+        return distance.coordinate.stripTrailingZeros() + " " + distance.getDistanceMetric();
     }
 
     @Nonnull

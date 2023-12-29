@@ -1,6 +1,5 @@
 package de.yuga.spacebattle.backend.calculator.distance;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
@@ -151,7 +150,6 @@ public class DistanceCalculator {
      *
      * @return the time to travel from the current position of the fleet to the hyper limit
      */
-    @VisibleForTesting
     private static double getSubLightDurationFromHyperLimit(@Nonnull final ETechnologyType restrictingTechnologyType,
                                                             @Nonnull final Acceleration acceleration,
                                                             @Nonnull final FleetOrbit destination) {

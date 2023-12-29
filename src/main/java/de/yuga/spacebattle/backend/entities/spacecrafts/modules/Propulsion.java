@@ -75,8 +75,8 @@ public class Propulsion extends HasNamedTechLevel implements HasEffectValue {
 
         this.hyperBand = hyperBand;
         this.technologyType = technologyType;
-        this.costsPercentage = costsPercentage;
         this.effectValue = effectValue;
+        this.costsPercentage = costsPercentage;
     }
 
     @Nonnull

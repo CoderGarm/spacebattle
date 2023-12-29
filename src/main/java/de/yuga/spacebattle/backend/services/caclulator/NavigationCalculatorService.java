@@ -148,7 +148,7 @@ public class NavigationCalculatorService {
                         .forEach(b -> {
                             final Node nodeA = systemNodes.get(a);
                             final Node nodeB = systemNodes.get(b);
-                            final int coordinateInMetric = a.getOrbit().getDistance(b.getOrbit()).getCoordinateInMetric(EDistanceMetric.LY).intValue();
+                            final int coordinateInMetric = a.getOrbit().getDistance(b.getOrbit()).getCoordinateInMetric(EDistanceMetric.LD).intValue();
                             final int distance = EWormhole.areSystemsConnected(a, b) ? EWormhole.getConnectionGrade(a, b) : coordinateInMetric;
                             nodeA.addDestination(nodeB, distance);
                         })

@@ -25,8 +25,14 @@ public enum EDistanceMetric {
     ;
 
     /**
+     * The factor which the pixels are wider than light years from the coordinates.
+     */
+    public static double LY_TO_PIXEL_CONVERSION_FACTOR = 3.9;
+
+    /**
      * The value which is needed to divide the original value to get the result in the basic unit {@link EDistanceMetric#M}.
      */
+    @Nonnull
     final BigDecimal meterEquivalent;
 
     /**
@@ -42,7 +48,8 @@ public enum EDistanceMetric {
     @Nonnull
     final String unit;
 
-    EDistanceMetric(final BigDecimal meterEquivalent, final int digitCount, final int scale, @Nonnull final String unit) {
+    EDistanceMetric(@Nonnull final BigDecimal meterEquivalent, final int digitCount, final int scale, @Nonnull final String unit) {
+        Preconditions.checkNotNull(meterEquivalent, "meterEquivalent must not be empty");
         Preconditions.checkNotNull(unit, "unit shouldn't be null!");
 
         this.meterEquivalent = meterEquivalent;

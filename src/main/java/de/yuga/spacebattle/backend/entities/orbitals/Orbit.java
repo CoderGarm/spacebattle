@@ -252,9 +252,16 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
     }
 
     @Nonnull
-    public Orbit divide(final int dividend) {
+    public Orbit divide(final double dividend) {
         final Distance newX = xCoordinate.divide(new Distance(dividend, xCoordinate.getDistanceMetric()));
         final Distance newY = yCoordinate.divide(new Distance(dividend, yCoordinate.getDistanceMetric()));
+        return new Orbit(newX, newY);
+    }
+
+    @Nonnull
+    public Orbit multiply(final double dividend) {
+        final Distance newX = xCoordinate.multiply(new Distance(dividend, xCoordinate.getDistanceMetric()));
+        final Distance newY = yCoordinate.multiply(new Distance(dividend, yCoordinate.getDistanceMetric()));
         return new Orbit(newX, newY);
     }
 }

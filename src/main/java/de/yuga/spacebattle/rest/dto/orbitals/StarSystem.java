@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.dto.orbitals;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -45,7 +46,7 @@ public class StarSystem {
 
         this.idStarSystem = starSystem.getId();
         this.name = starSystem.getName();
-        this.orbit = new Orbit(starSystem.getOrbit());
+        this.orbit = new Orbit(starSystem.getOrbit().multiply(EDistanceMetric.LY_TO_PIXEL_CONVERSION_FACTOR));
         this.starClassType = new de.yuga.spacebattle.rest.dto.enums.EStarClassType(starSystem.getStarClassType());
         this.planets.addAll(starSystem.getPlanets().stream().map(Planet::new).collect(Collectors.toList()));
     }
@@ -58,20 +59,5 @@ public class StarSystem {
     @Nonnull
     public String getName() {
         return name;
-    }
-
-    @Nonnull
-    public Orbit getOrbit() {
-        return orbit;
-    }
-
-    @Nonnull
-    public de.yuga.spacebattle.rest.dto.enums.EStarClassType getStarClassType() {
-        return starClassType;
-    }
-
-    @Nonnull
-    public List<Planet> getPlanets() {
-        return planets;
     }
 }

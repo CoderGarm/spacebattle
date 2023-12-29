@@ -464,7 +464,6 @@ public class SpacecraftCalculator {
         Preconditions.checkNotNull(hyperBand, "hyperBand must not be empty");
         Preconditions.checkNotNull(supportFittings, "supportFittings must not be empty");
 
-
         final double maxAccelerationOfMilitary = propulsion.getTechnologyType().getMaxAccelerationOfMilitary();
         final EModuleType eModuleType = hyperBand == EHyperBand.NONE ? EModuleType.PROPULSION : EModuleType.FTLPROPULSION;
         final double propulsionSupportFactor = supportFittings.stream()

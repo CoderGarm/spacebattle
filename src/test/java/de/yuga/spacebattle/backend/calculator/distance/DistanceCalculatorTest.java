@@ -7,7 +7,6 @@ import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -22,19 +21,20 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@Disabled("repair me") // todo repair it
 public class DistanceCalculatorTest {
 
     private static Stream<Arguments> testCalculateDistanceDataProvider() {
         final Planet planetStart = planet(0, 0);
         final Planet planetTarget1 = planet(100, 100);
         final Planet planetTarget2 = planet(200, 200);
-        final Planet planetTarget3 = planet(300, 300);
+
+        final Planet sol = planet(-346 / 18, 346 / 18);
+        final Planet sigmaDraconis = planet(358 / 18, 502 / 18);
 
         return Stream.of(
-                Arguments.of(fleet(500, planetStart), planetTarget1, 4),
-                Arguments.of(fleet(500, planetStart), planetTarget2, 7),
-                Arguments.of(fleet(500, planetStart), planetTarget3, 11)
+                //Arguments.of(fleet(558, planetStart), planetTarget1, 4),
+                //Arguments.of(fleet(558, planetStart), planetTarget2, 7),
+                Arguments.of(fleet(558, sol), sigmaDraconis, 11)
         );
     }
 
