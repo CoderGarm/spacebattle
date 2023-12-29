@@ -5,6 +5,7 @@ import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.turn.resources.trade.TradesInTimeframe;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
@@ -381,5 +382,18 @@ public class MarketplaceService {
     @Nullable
     private Integer existsActiveOfferForUser(final int idUser, final int idTradeOffer) {
         return tradeOfferRepository.findActiveOffer(idUser, idTradeOffer);
+    }
+
+    public void changeOwnership(@Nonnull final User user, @Nonnull final Owner newOwner) {
+        Preconditions.checkNotNull(user, "user must not be empty");
+        Preconditions.checkNotNull(newOwner, "newOwner must not be empty");
+
+        final List<TradeOffer> offers = Objects.requireNonNullElse(tradeOfferRepository.forDeletionFindAllByOwner(user), new ArrayList<>());
+        offers.forEach(o -> o.setOwner(newOwner));
+        tradeOfferRepository.saveAll(offers);
+
+        final List<TradedResource> tradedResources = Objects.requireNonNullElse(tradedResourceRepository.forDeletionFindAllByOwner(user), new ArrayList<>());
+        tradedResources.forEach(o -> o.setOwner(newOwner));
+        tradedResourceRepository.saveAll(tradedResources);
     }
 }

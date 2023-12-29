@@ -41,8 +41,7 @@ public class MessageThread extends AbstractEntityKey {
 
     @Nonnull
     @NotNull
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
-    @JoinColumn(name = "idMessageThread")
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "messageThread", orphanRemoval = true)
     private final Set<UserMessage> messages = new HashSet<>();
 
     public MessageThread() {

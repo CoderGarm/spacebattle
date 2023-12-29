@@ -31,6 +31,13 @@
 | Split                    |    Haswell    |       3       |
 | [BM83] X5298+852         |     Enki      |       3       |
 
+Player to keep:
+
+- DF12612
+- Wlad1990
+- ElGuapo
+- Mathias
+
 ---
 
 ### announcement post:

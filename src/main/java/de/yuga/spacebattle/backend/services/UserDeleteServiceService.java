@@ -28,6 +28,7 @@ import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.MoveService;
 import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
 import de.yuga.spacebattle.backend.services.turn.mission.MissionService;
+import de.yuga.spacebattle.backend.services.turn.resources.MarketplaceService;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -87,6 +88,9 @@ public class UserDeleteServiceService {
     @Nonnull
     private final MissionService missionService;
 
+    @Nonnull
+    private final MarketplaceService marketplaceService;
+
     @Autowired
     public UserDeleteServiceService(@Nonnull final UserService userService,
                                     @Nonnull final PlanetService planetService,
@@ -101,7 +105,8 @@ public class UserDeleteServiceService {
                                     @Nonnull final ChatService chatService,
                                     @Nonnull final OrbitalStructureService orbitalStructureService,
                                     @Nonnull final MoveService moveService,
-                                    @Nonnull final MissionService missionService) {
+                                    @Nonnull final MissionService missionService,
+                                    @Nonnull final MarketplaceService marketplaceService) {
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.shipClassService = Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
@@ -116,6 +121,7 @@ public class UserDeleteServiceService {
         this.orbitalStructureService = Preconditions.checkNotNull(orbitalStructureService, "orbitalStructureService must not be empty");
         this.moveService = Preconditions.checkNotNull(moveService, "moveService must not be empty");
         this.missionService = Preconditions.checkNotNull(missionService, "missionService must not be empty");
+        this.marketplaceService = Preconditions.checkNotNull(marketplaceService, "marketplaceService must not be empty");
     }
 
     public void deleteAllInactiveUsers() {
@@ -134,7 +140,7 @@ public class UserDeleteServiceService {
 
         for (final User user : toWipe) {
             final int idUserToWipe = user.getId();
-            LOGGER.info("Delete user {}, {}", user.getUsername(), idUserToWipe);
+            LOGGER.info("\t\tDelete user {}, {}", user.getUsername(), idUserToWipe);
             final Owner newOwner = idUserToWipe == 30 ? sandkiste : idUserToWipe == 17 ? novaBallard : pirate;
             changeOwnership(user, newOwner);
             deleteUser(idUserToWipe);
@@ -149,62 +155,59 @@ public class UserDeleteServiceService {
         Preconditions.checkNotNull(toWipe, "toWipe must not be empty");
         Preconditions.checkNotNull(newOwner, "newOwner must not be empty");
 
-        LOGGER.info("Change owner of planets");
+        LOGGER.info("\tChange owner of planets");
         final List<Planet> planetsToChangeOwner = planetService.findAllColonizedBy(toWipe);
         planetsToChangeOwner.forEach(p -> p.setOwner(newOwner));
         planetService.saveAll(planetsToChangeOwner);
 
-        LOGGER.info("Change owner of orbitals");
+        LOGGER.info("\tChange owner of orbitals");
         final List<OrbitalStructure> orbsToChangeOwner = orbitalStructureService.forDeletionFindAllByOwner(toWipe);
         orbsToChangeOwner.forEach(p -> p.setOwner(newOwner));
         orbitalStructureService.saveAll(orbsToChangeOwner);
 
-        LOGGER.info("Change owner of fleets");
+        LOGGER.info("\tChange owner of fleets");
         final List<Fleet> fleetsToChangeOwner = fleetService.forDeletionFindAllFleetsByUser(toWipe);
         fleetsToChangeOwner.forEach(p -> p.setOwner(newOwner));
         fleetService.saveAll(fleetsToChangeOwner);
-
-        /* fixme for other stuff useful?
-        LOGGER.info("Change owner of fleet snapshots");
-        final List<FleetSnapshot> fleetSnapsToChangeOwner = fleetService.forDeletionFindAllFleetSnapsByUser(toWipe);
-        fleetSnapsToChangeOwner.forEach(p -> p.setOwner(newOwner));
-        fleetService.saveAllFleetSnaps(fleetSnapsToChangeOwner);
-        */
 
         final List<Mission> missionsToChangeOwner = missionService.forDeletionFindAllByUser(toWipe);
         missionsToChangeOwner.forEach(p -> p.setOwner(newOwner));
         missionService.saveAll(missionsToChangeOwner);
 
-        LOGGER.info("Change owner of battle reports");
+        LOGGER.info("\tChange owner of battle reports");
         final List<BattleReport> repsToChangeOwner = battleReportService.forDeletionFindAllByUser(toWipe);
         repsToChangeOwner.forEach(p -> p.changeParticipant(toWipe, newOwner));
         battleReportService.saveAll(repsToChangeOwner);
 
-        LOGGER.info("Change owner of ship classes");
+        LOGGER.info("\tChange owner of ship classes");
         final List<ShipClass> shipClassesToChangeOwner = shipClassService.forDeletionFindAllByOwner(toWipe);
         shipClassesToChangeOwner.forEach(p -> p.setOwner(newOwner));
         shipClassService.saveAll(shipClassesToChangeOwner);
 
-        LOGGER.info("Change owner of fleet moves");
+        LOGGER.info("\tChange owner of fleet moves");
         final List<Move> movesToChangeOwner = moveService.forDeletionFindAllByOwner(toWipe);
         movesToChangeOwner.forEach(p -> p.setOwner(newOwner));
         moveService.saveAll(movesToChangeOwner);
 
-        LOGGER.info("Deleting resarch levels");
+        LOGGER.info("\tDeleting resarch levels");
         final Set<ResearchLevel> researchLevels = researchService.getResearchesForUser(toWipe);
         researchService.deleteAll(researchLevels);
 
-        LOGGER.info("Deleting jobs");
-        final List<Job> jobs = jobService.forDeletionFindAllJobsForUser(toWipe);
-        jobService.deleteAll(jobs);
+        LOGGER.info("\tChange owner of jobs");
+        final List<Job> jobsToChangeOwner = jobService.forDeletionFindAllJobsForUser(toWipe);
+        jobsToChangeOwner.forEach(p -> p.setOwner(newOwner));
+        jobService.saveAll(jobsToChangeOwner);
 
-        LOGGER.info("Change author of forum messages");
+        LOGGER.info("\tChange author of forum messages");
         forumService.markAsDeletedForUser(toWipe);
 
-        LOGGER.info("Delete chat messages");
+        LOGGER.info("\tDelete chat messages");
         chatService.deleteForUser(toWipe);
 
-        LOGGER.info("Deleting colonizations");
+        LOGGER.info("\tDelete trade offers");
+        marketplaceService.changeOwnership(toWipe, newOwner);
+
+        LOGGER.info("\tDeleting colonizations");
         final List<Colonization> colonizationsToWipe = colonizationService.findAllForUser(toWipe);
         colonizationService.deleteAll(colonizationsToWipe);
     }

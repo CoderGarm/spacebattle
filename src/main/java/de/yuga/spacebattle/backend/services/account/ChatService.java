@@ -146,10 +146,8 @@ public class ChatService {
     public void deleteForUser(@Nonnull final User user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
-        // fixme delete chats
-
-        final Set<UserMessage> allForAuthors = Objects.requireNonNullElse(userMessageRepository.findAllForAuthor(user), new HashSet<>());
-        userMessageRepository.deleteAll(allForAuthors);
+        /*final Set<UserMessage> allForAuthors = Objects.requireNonNullElse(userMessageRepository.findAllForAuthor(user), new HashSet<>());
+        userMessageRepository.deleteAll(allForAuthors);*/
 
         final Set<MessageThread> threadsForAuthors = Objects.requireNonNullElse(messageThreadRepository.findAllForAuthor(user), new HashSet<>());
         messageThreadRepository.deleteAll(threadsForAuthors);

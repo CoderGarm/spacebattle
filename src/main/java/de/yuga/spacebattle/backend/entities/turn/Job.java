@@ -1,13 +1,17 @@
 package de.yuga.spacebattle.backend.entities.turn;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
+import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 import de.yuga.spacebattle.backend.entities.misc.PointsCompletable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.EJobPriority;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
@@ -22,13 +26,13 @@ import javax.validation.constraints.NotNull;
     @Check(constraints = "(idBuilding IS NOT NULL AND targetLevel IS NOT NULL) " +
         "OR (idResearch IS NOT NULL AND targetLevel IS NOT NULL) " +
         "OR (idFleet IS NOT NULL OR idFleetSnapshot IS NOT NULL) ")*/
-public class Job extends PointsCompletable implements Comparable<Job> {
+public class Job extends PointsCompletable implements Comparable<Job>, HasOwner {
 
     @Nonnull
     @NotNull
     @ManyToOne
     @JoinColumn(name = "idOwner")
-    private User owner;
+    private Owner owner;
 
     @Nonnull
     @NotNull
@@ -76,15 +80,35 @@ public class Job extends PointsCompletable implements Comparable<Job> {
         }
     }
 
-    @Nonnull
-    public User getOwner() {
-        return owner;
-    }
-
-    public void setOwner(@Nonnull final User owner) {
+    public void setOwner(@Nonnull final Owner owner) {
         Preconditions.checkNotNull(owner, "owner shouldn't be null!");
 
         this.owner = owner;
+    }
+
+
+    @Nonnull
+    @Override
+    public Owner getOwner() {
+        return owner;
+    }
+
+    @Nullable
+    @Override
+    public User getHumanOwner() {
+        if (!(owner instanceof User)) {
+            return null;
+        }
+        return (User) owner;
+    }
+
+    @Nullable
+    @Override
+    public NonPlayerCharacter getNpcOwner() {
+        if (!(owner instanceof NonPlayerCharacter)) {
+            return null;
+        }
+        return (NonPlayerCharacter) owner;
     }
 
     @Nonnull

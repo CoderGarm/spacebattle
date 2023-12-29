@@ -83,6 +83,12 @@ public class TradeOffer extends Deletable {
         return seller;
     }
 
+    public void setOwner(@Nonnull final Owner owner) {
+        Preconditions.checkNotNull(owner, "owner shouldn't be null!");
+
+        this.seller = owner;
+    }
+
     @Nonnull
     public EResourceType getResourceType() {
         return resourceType;

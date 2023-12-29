@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.backend.repositories.turn.resource.trade;
 
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradedResource;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -38,4 +39,9 @@ public interface TradedResourceRepository extends JpaRepository<TradedResource, 
     @Nullable
     @Query("SELECT t FROM TradedResource t WHERE t.finished.id = :tickNo AND t.isDeleted = true")
     List<TradedResource> findTodayTrades(@Param("tickNo") final int tickNo);
+
+
+    @Nullable
+    @Query("SELECT o FROM TradedResource o WHERE o.buyer = :user")
+    List<TradedResource> forDeletionFindAllByOwner(@Nonnull final User user);
 }

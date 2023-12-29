@@ -77,6 +77,12 @@ public class TradedResource extends Completable {
         return buyer;
     }
 
+    public void setOwner(@Nonnull final Owner owner) {
+        Preconditions.checkNotNull(owner, "owner shouldn't be null!");
+
+        this.buyer = owner;
+    }
+
     @Nonnull
     public Planet getDestination() {
         return destination;

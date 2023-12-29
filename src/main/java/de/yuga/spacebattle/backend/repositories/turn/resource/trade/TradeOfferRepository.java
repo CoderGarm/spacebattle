@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.backend.repositories.turn.resource.trade;
 
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.turn.resources.trade.TradeOffer;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +15,7 @@ import java.util.List;
 public interface TradeOfferRepository extends JpaRepository<TradeOffer, Integer> {
 
     @Nullable
-    @Query("SELECT o FROM TradeOffer  o WHERE o.isDeleted = false")
+    @Query("SELECT o FROM TradeOffer o WHERE o.isDeleted = false")
     List<TradeOffer> findActiveOffers();
 
     @Nullable
@@ -22,6 +23,10 @@ public interface TradeOfferRepository extends JpaRepository<TradeOffer, Integer>
     List<TradeOffer> findLatestOffer(@Param("resourceType") @Nonnull final EResourceType resourceType, @Nonnull final Pageable pageable);
 
     @Nullable
-    @Query("SELECT o.id FROM TradeOffer  o WHERE o.isDeleted = false AND o.seller.id = :idUser AND o.id = :idTradeOffer")
+    @Query("SELECT o.id FROM TradeOffer o WHERE o.isDeleted = false AND o.seller.id = :idUser AND o.id = :idTradeOffer")
     Integer findActiveOffer(@Param("idUser") int idUser, @Param("idTradeOffer") int idTradeOffer);
+
+    @Nullable
+    @Query("SELECT o FROM TradeOffer o WHERE o.seller = :user")
+    List<TradeOffer> forDeletionFindAllByOwner(@Nonnull final User user);
 }

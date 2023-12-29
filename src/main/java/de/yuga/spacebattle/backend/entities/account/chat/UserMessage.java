@@ -1,8 +1,11 @@
 package de.yuga.spacebattle.backend.entities.account.chat;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
+import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -17,7 +20,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "userMessage")
 @AttributeOverride(name = "id", column = @Column(name = "idUserMessage"))
-public class UserMessage extends AbstractEntityKey {
+public class UserMessage extends AbstractEntityKey implements HasOwner {
 
     @Nonnull
     @NotNull
@@ -90,6 +93,35 @@ public class UserMessage extends AbstractEntityKey {
         if (this.receivedAt == null) {
             this.receivedAt = LocalDateTime.now();
         }
+    }
+
+
+    @Nonnull
+    @Override
+    public Owner getOwner() {
+        return sender;
+    }
+
+    public void setAuthor(@Nonnull final Owner author) {
+        this.sender = Preconditions.checkNotNull(author, "author must not be empty");
+    }
+
+    @Nullable
+    @Override
+    public User getHumanOwner() {
+        if (!(sender instanceof User)) {
+            return null;
+        }
+        return (User) sender;
+    }
+
+    @Nullable
+    @Override
+    public NonPlayerCharacter getNpcOwner() {
+        if (!(sender instanceof NonPlayerCharacter)) {
+            return null;
+        }
+        return (NonPlayerCharacter) sender;
     }
 
     @Override
