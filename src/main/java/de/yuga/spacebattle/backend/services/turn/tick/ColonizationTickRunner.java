@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.backend.services.turn.tick;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
@@ -91,9 +91,9 @@ public class ColonizationTickRunner implements TickRunner {
         final Set<Colonization> planned = colonizations.stream().filter(Colonization::isPlanned).collect(Collectors.toSet());
         colonizations.removeAll(planned);
 
-        final Map<User, Planet> mains = new HashMap<>();
+        final Map<Owner, Planet> mains = new HashMap<>();
         planned.forEach(colonization -> {
-            final User user = colonization.getUser();
+            final Owner user = colonization.getOwner();
             final Planet main = mains.getOrDefault(user, planetService.findMainPlanet(user));
             mains.put(user, main);
 

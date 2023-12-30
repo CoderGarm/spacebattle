@@ -52,12 +52,11 @@ public class PlanetService {
     }
 
     @Nonnull
-    public List<Planet> findAllColonizedBy(@Nonnull final User user) {
+    public List<Planet> findAllColonizedBy(@Nonnull final Owner user) {
         Preconditions.checkNotNull(user, "user shouldn't be null!");
 
         return planetRepository.findAllPlanetsColonizedByUser(user);
     }
-
 
     public List<Integer> findAllColonizedByForID(final int idUser) {
         return planetRepository.findAllColonizedByForID(idUser);

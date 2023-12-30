@@ -240,7 +240,8 @@ public class DistanceCalculator {
         final int targetedPercentageOfTopSpeed = propulsionType == EModuleType.FTLPROPULSION ? 100 : 8;
         final int duration = NavigationCalculator.getDurationForTargetedEndSpeed(propulsionType, targetedPercentageOfTopSpeed, restrictingTechnologyType, acceleration, distance);
 
-        return (double) duration / Tick.TICK_DURATION_IN_SECONDS;
+        // todo this is heavily related to the origin/repair_flight_duration thing
+        return (duration / 3.9) / Tick.TICK_DURATION_IN_SECONDS;
     }
 
     /**

@@ -2,7 +2,7 @@ package de.yuga.spacebattle.backend.repositories.orbitals;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
-import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import org.slf4j.Logger;
@@ -27,12 +27,14 @@ public class CustomPlanetRepositoryImpl implements CustomPlanetRepository {
     @PersistenceContext
     private EntityManager em;
 
+    @Nonnull
     @Override
     public List<Planet> findAllPlanets() {
         return em.createNamedQuery("Planet.getAll", Planet.class)
                 .getResultList();
     }
 
+    @Nonnull
     @Override
     public List<Planet> findAllOwnedPlanets() {
         return em.createNamedQuery("Planet.getAllOwned", Planet.class)
@@ -41,7 +43,7 @@ public class CustomPlanetRepositoryImpl implements CustomPlanetRepository {
 
     @Nonnull
     @Override
-    public List<Planet> findAllPlanetsColonizedByUser(@Nonnull final User owner) {
+    public List<Planet> findAllPlanetsColonizedByUser(@Nonnull final Owner owner) {
         Preconditions.checkNotNull(owner, "owner shouldn't be null!");
 
         return findAllPlanetsColonizedByID(owner.getId());

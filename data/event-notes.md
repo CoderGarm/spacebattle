@@ -1,44 +1,53 @@
----
-
-1. chaviha to sandkiste
-2. Fireflair to Shannon
-
----
-
 ### Kersey's naval bases
 
-| System                   |    Planet     | Goal Category |
-|:-------------------------|:-------------:|:-------------:|
-| New Berlin               |     Orca      |       2       |
-| Hilt 286                 |    Gorgon     |       1       |
-| SBC9 3633                |  San Martin   |       1       |
-| HIC 3297                 | Saltash Delta |       2       |
-| HIC 1698                 |    Swallow    |       1       |
-| Asgerd                   |     Anvil     |       3       |
-| Hilt 477                 |    Central    |       2       |
-| Talmu                    |     Urako     |       3       |
-| Basilisk                 |   Himalaya    |       3       |
-| Terrance                 |    Thurso     |       1       |
-| Cerberus                 |  La Martine   |       3       |
-| Congo                    |   Saraqael    |       3       |
-| Maya                     |  Maidan Howe  |       3       |
-| AG+24 2586               |    Toulon     |       3       |
-| BD+41 7881               |   Sidemore    |       3       |
-| 1XRS 87161+633           |    Osiris     |       2       |
-| 3A 7757+189              |      Elm      |       3       |
-| 2MASS J46763136+ 2133537 |   Fattoria    |       3       |
-| Spindle                  |    Grayson    |       3       |
-| Split                    |    Haswell    |       3       |
-| [BM83] X5298+852         |     Enki      |       3       |
-
-Player to keep:
-
-- DF12612
-- Wlad1990
-- ElGuapo
-- Mathias
-
----
+| Planet        |          System          | Goal Category |
+|:--------------|:------------------------:|:-------------:|
+| Naismith      |         Hilt 832         |       1       |
+| Marienbad     |        BD+63 4496        |       1       |
+| Sidemore      |       Grendelsbane       |       1       |
+| Monica        |         SBC7 342         |       1       |
+| Maiden Howe   |     [BM83] X8285+232     |       1       |
+| Lugh          |        BD+75 8353        |       1       |
+| Tesserow      |          Casca           |       1       |
+| New Tuscany   |       3A 5348+546        |       1       |
+| Sharpton      |        WEB 91877         |       1       |
+| Maslow        |          Sigma           |       1       |
+| Hope          |      1XRS 15534+119      |       1       |
+| New Geneva    | 2MASS J67789534+ 4342183 |       1       |
+| Quarre        |         Lutrell          |       1       |
+| Vespasien     |         Barnett          |       1       |
+| Central       |        HIC 57869         |       1       |
+| Tomlinson     |        AG+42 5822        |       1       |
+| Grayson       | 2MASS J55755931+ 8357257 |       1       |
+| Beowulf       |    SWIFT J2937.4+7728    |       1       |
+| Enki          |       3A 4311+729        |       1       |
+| New Glasgow   |          Secour          |       1       |
+| Calvin III    |        BD+46 3965        |       1       |
+| Torch         |        Maastricht        |       1       |
+| Shakin        |        HD 586614         |       1       |
+| Artemis       |         Suchien          |       1       |
+| Mesa          |       Arendscheldt       |       1       |
+| Helier        |          Yorik           |       1       |
+| Gorgon        |         Hilt 286         |       1       |
+| Swallow       |         HIC 1698         |       1       |
+| Thurso        |         Terrance         |       1       |
+| San Martin    |        SBC9 3633         |       1       |
+| Osiris        |      1XRS 87161+633      |       2       |
+| Central       |         Hilt 477         |       2       |
+| Saltash Delta |         HIC 3297         |       2       |
+| Orca          |        New Berlin        |       2       |
+| Sidemore      |        BD+41 7881        |       3       |
+| Himalaya      |         Basilisk         |       3       |
+| La Martine    |         Cerberus         |       3       |
+| Saraqael      |          Congo           |       3       |
+| Toulon        |        AG+24 2586        |       3       |
+| Anvil         |          Asgerd          |       3       |
+| Grayson       |         Spindle          |       3       |
+| Enki          |     [BM83] X5298+852     |       3       |
+| Haswell       |          Split           |       3       |
+| Fattoria      | 2MASS J46763136+ 2133537 |       3       |
+| Urako         |          Talmu           |       3       |
+| Elm           |       3A 7757+189        |       3       |
 
 ### announcement post:
 

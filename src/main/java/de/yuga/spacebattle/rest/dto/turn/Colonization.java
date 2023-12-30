@@ -45,7 +45,7 @@ public class Colonization {
         Preconditions.checkNotNull(colonization, "colonization shouldn't be null!");
 
         this.idColonization = colonization.getId();
-        this.user = new Player(colonization.getUser());
+        this.user = new Player(colonization.getOwner());
         this.target = new Planet(colonization.getTarget());
         this.doneAtZero = colonization.getDoneAtZero();
         this.isPlanned = colonization.isPlanned();

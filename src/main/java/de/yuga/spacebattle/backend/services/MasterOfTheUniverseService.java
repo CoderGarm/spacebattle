@@ -123,6 +123,14 @@ public class MasterOfTheUniverseService {
     private static final Map<EEducationType, Long> CIVIL_XL_ORBITAL_CREW = Map.of(EEducationType.SCHOOL, 51L, EEducationType.UNIVERSITY, 30L);
     private static final Map<EEducationType, Long> CIVIL_XXL_ORBITAL_CREW = Map.of(EEducationType.SCHOOL, 150L, EEducationType.UNIVERSITY, 100L);
 
+    private static final Map<EEducationType, Long> CONQUERABLE_PLANET = Map.of(
+            EEducationType.NONE, 4000L,
+            EEducationType.SCHOOL, 5000L,
+            EEducationType.UNIVERSITY, 600L,
+            EEducationType.ENLISTED, 1800L,
+            EEducationType.OFFICER, 400L
+    );
+
     public static final String FLASHKID = "Flashkid";
 
     @Nonnull
@@ -235,10 +243,83 @@ public class MasterOfTheUniverseService {
         final boolean transformationNeeded = userService.findByUsername("TanteManfred").isPresent();
         if (transformationNeeded) {
             userDeleteServiceService.deleteAllInactiveUsers();
+
+            final NonPlayerCharacter pirate = nonPlayerCharacterService.findByUsername(MasterOfTheUniverseService.PIRATE);
+            final List<Planet> level1 = planetService.findAllColonizedBy(pirate);
+            for (final Planet planet : level1) {
+                createGuardFleet(planet, 1);
+            }
+
+            final List<Planet> toColonize = planetService.findAll(List.of(1330, 1780, 1768, 904, 1732, 1631, 1253, 1067, 1233, 2282, 148, 461, 610, 820, 137, 2341, 2249, 2177, 2214, 2182));
+            toColonize
+                    .forEach(planet -> colonizationService.colonizePlanet(new Colonization(pirate, planet, new CrewRequirement(CONQUERABLE_PLANET, EDepositType.COSTS), 0)));
+
+            final Map<Integer, List<Integer>> m = Map.of(
+                    1, List.of(1330, 1780, 1768, 904),
+                    2, List.of(1732, 1631, 1253, 1067),
+                    3, List.of(1233, 2282, 148, 461, 610, 820, 137, 2341, 2249, 2177, 2214, 2182)
+            );
+
+            m.forEach((strengthLevel, planetIDs) -> {
+                final List<Planet> planets = planetService.findAll(planetIDs);
+
+                for (Planet planet : planets) {
+                    createGuardFleet(planet, strengthLevel);
+                }
+            });
+
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
         }
+    }
+
+    private void createGuardFleet(@Nonnull final Planet planet, final int strengthLevel) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+        final NonPlayerCharacter owner = planet.getNpcOwner();
+        Preconditions.checkNotNull(owner, "owner must not be empty");
+
+        LOGGER.info("Creating guard fleet for the planet {} in {} with strength {}", planet.getName(), planet.getSystem().getName(), strengthLevel);
+
+        final List<ShipClass> classList = shipClassService.findAllLatestByOwner(owner.getId());
+        final ShipClass warGoose = classList.stream().filter(s -> s.getName().equals("War Goose")).findFirst().orElseThrow(NullPointerException::new);
+        final ShipClass songbird = classList.stream().filter(s -> s.getName().equals("Songbird") && s.getFlight() == 1).findFirst().orElseThrow(NullPointerException::new);
+
+        final Fleet opponentsFleet = createFleet(owner, planet, planet.getName() + " Buccaneers");
+        switch (strengthLevel) {
+            case 1:
+                createShipForFleet(planet, resourceService.getRandomWarshipName(), opponentsFleet, warGoose);
+                createShipForFleet(planet, resourceService.getRandomWarshipName(), opponentsFleet, warGoose);
+                createShipForFleet(planet, resourceService.getRandomWarshipName(), opponentsFleet, songbird);
+                break;
+            case 2:
+                createShipForFleet(planet, resourceService.getRandomWarshipName(), opponentsFleet, warGoose);
+                createShipForFleet(planet, resourceService.getRandomWarshipName(), opponentsFleet, songbird);
+                createShipForFleet(planet, resourceService.getRandomWarshipName(), opponentsFleet, songbird);
+                break;
+            case 3:
+                createShipForFleet(planet, resourceService.getRandomWarshipName(), opponentsFleet, warGoose);
+                createShipForFleet(planet, resourceService.getRandomWarshipName(), opponentsFleet, warGoose);
+                createShipForFleet(planet, resourceService.getRandomWarshipName(), opponentsFleet, warGoose);
+                createShipForFleet(planet, resourceService.getRandomWarshipName(), opponentsFleet, songbird);
+                createShipForFleet(planet, resourceService.getRandomWarshipName(), opponentsFleet, songbird);
+                break;
+        }
+    }
+
+    private void createShipForFleet(@Nonnull final Planet planet,
+                                    @Nonnull final String name,
+                                    @Nonnull final Fleet fleet,
+                                    @Nonnull final ShipClass shipClass) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(name, "name must not be empty");
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+        Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
+
+        final WarShip warShip = new WarShip(name, planet, fleet, shipClass);
+        warShip.setOperational();
+        warShipService.save(warShip);
     }
 
     @SuppressWarnings("unused")

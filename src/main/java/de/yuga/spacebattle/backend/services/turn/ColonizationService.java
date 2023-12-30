@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.dto.physics.OrbitalDistanceMarker;
+import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
@@ -190,7 +191,50 @@ public class ColonizationService {
         Preconditions.checkNotNull(colonization, "colonization shouldn't be null!");
         Preconditions.checkState(colonization.getDoneAtZero() == 0, "colonization cannot be done if the ship isn't in the orbit!");
 
-        final User owner = userService.findWithKnownStarSystems(colonization.getUser());
+        if (colonization.getHumanOwner() != null) {
+            return colonizeForUser(colonization);
+        }
+        return colonizeForNPC(colonization);
+    }
+
+    private Planet colonizeForNPC(@Nonnull final Colonization colonization) {
+        Preconditions.checkNotNull(colonization, "colonization must not be empty");
+        Preconditions.checkNotNull(colonization.getNpcOwner(), "colonization.getNpcOwner() must not be empty");
+
+        final NonPlayerCharacter owner = colonization.getNpcOwner();
+        final Planet planet = colonization.getTarget();
+        assert owner != null : "When this happens, the end is near.";
+        planet.setOwner(owner);
+        planet.getResourceDeposit().equalize(false);
+
+        final ResourceDeposit creditorDeposit = planet.getResourceDeposit();
+        final CrewRequirement requiredCrew = colonization.getCosts().getCrewRequirement();
+        // set crew from the ship to the planet
+        creditorDeposit.updateCrew(requiredCrew, ECalculationType.ADD);
+
+        final List<Construction> constructions = new ArrayList<>();
+        final List<Building> basicBuildings = buildingService.findBasicBuildings();
+        basicBuildings.forEach(building -> {
+            final int level;
+            final ProductionType productionType = building.getProductionType();
+            final boolean idPopulationCapacity = EResourceType.POPULATION == productionType.getProductionTarget() && EProductionCategory.CAPACITY == productionType.getProductionCategory();
+            if (idPopulationCapacity) {
+                // calculate which level must a capacity construction have to suit all the people
+                level = detectPopCapStartingLevel(creditorDeposit, building);
+            } else {
+                level = 1;
+            }
+            constructions.add(new Construction(planet, building, level));
+        });
+        constructionService.saveAll(constructions);
+        return planetService.save(planet);
+    }
+
+    private Planet colonizeForUser(@Nonnull final Colonization colonization) {
+        Preconditions.checkNotNull(colonization, "colonization must not be empty");
+        Preconditions.checkNotNull(colonization.getHumanOwner(), "colonization.getHumanOwner() must not be empty");
+
+        final User owner = userService.findWithKnownStarSystems(colonization.getHumanOwner());
         final Planet planet = colonization.getTarget();
         assert owner != null : "When this happens, the end is near.";
         planet.setOwner(owner);
@@ -374,7 +418,7 @@ public class ColonizationService {
 
     public void stopPlannedColonization(final int idUser, final int idColonization) {
         final Colonization colonization = repository.findById(idColonization).orElse(null);
-        if (colonization == null || colonization.getUser().getId() != idUser) {
+        if (colonization == null || colonization.getOwner().getId() != idUser) {
             return;
         }
         /* todo payback the paycheck */

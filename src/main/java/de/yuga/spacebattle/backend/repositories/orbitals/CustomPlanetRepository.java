@@ -1,7 +1,7 @@
 package de.yuga.spacebattle.backend.repositories.orbitals;
 
 import de.yuga.spacebattle.backend.dto.physics.Distance;
-import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 
 import javax.annotation.Nonnull;
@@ -17,7 +17,7 @@ public interface CustomPlanetRepository {
     List<Planet> findAllOwnedPlanets();
 
     @Nonnull
-    List<Planet> findAllPlanetsColonizedByUser(@Nonnull final User owner);
+    List<Planet> findAllPlanetsColonizedByUser(@Nonnull final Owner owner);
 
     @Nonnull
     List<Planet> findAllPlanetsColonizedByID(final int idUser);

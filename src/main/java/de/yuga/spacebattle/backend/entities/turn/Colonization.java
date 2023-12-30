@@ -2,8 +2,11 @@ package de.yuga.spacebattle.backend.entities.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
+import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
+import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.ECalculationType;
@@ -11,6 +14,7 @@ import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
@@ -24,13 +28,13 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "colonization")
 @AttributeOverride(name = "id", column = @Column(name = "idColonization"))
-public class Colonization extends AbstractEntityKey {
+public class Colonization extends AbstractEntityKey implements HasOwner {
 
     @Nonnull
     @NotNull
     @ManyToOne
     @JoinColumn(name = "idUser", updatable = false, nullable = false)
-    private User user;
+    private Owner user;
 
     @Nonnull
     @NotNull
@@ -65,7 +69,7 @@ public class Colonization extends AbstractEntityKey {
         this.isPlanned = isPlanned;
     }
 
-    public Colonization(@Nonnull final User user,
+    public Colonization(@Nonnull final Owner user,
                         @Nonnull final Planet target,
                         @Nonnull final CrewRequirement crewRequirement,
                         final int doneAtZero) {
@@ -80,14 +84,27 @@ public class Colonization extends AbstractEntityKey {
     }
 
     @Nonnull
-    public User getUser() {
+    @Override
+    public Owner getOwner() {
         return user;
     }
 
-    public void setUser(@Nonnull final User owner) {
-        Preconditions.checkNotNull(owner, "owner shouldn't be null!");
+    @Nullable
+    @Override
+    public User getHumanOwner() {
+        if (!(user instanceof User)) {
+            return null;
+        }
+        return (User) user;
+    }
 
-        this.user = owner;
+    @Nullable
+    @Override
+    public NonPlayerCharacter getNpcOwner() {
+        if (!(user instanceof NonPlayerCharacter)) {
+            return null;
+        }
+        return (NonPlayerCharacter) user;
     }
 
     @Nonnull
