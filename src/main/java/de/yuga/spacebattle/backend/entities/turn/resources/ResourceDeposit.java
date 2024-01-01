@@ -386,6 +386,13 @@ public class ResourceDeposit extends AbstractEntityKey {
         return amount != null ? amount : 0;
     }
 
+    public void makeEventReward() {
+        for (EResourceType type : EResourceType.values()) {
+            final Long amount = resources.getOrDefault(type, 50000L);
+            resources.put(type, amount * 2);
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

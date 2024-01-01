@@ -264,4 +264,11 @@ public class PlanetService {
         });
         return result;
     }
+
+    @Nonnull
+    public Set<Planet> findForModification(@Nonnull final Collection<Integer> planetIDs) {
+        Preconditions.checkNotNull(planetIDs, "planetIDs must not be empty");
+
+        return Objects.requireNonNullElse(planetRepository.findForModification(planetIDs), new HashSet<>());
+    }
 }

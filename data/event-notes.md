@@ -1,6 +1,7 @@
 ### Kersey's naval bases
 
-It is pretty recommended to scout the positions in beforehand - the intel data is obviously only an estimation.
+It is pretty recommended to scout the positions in beforehand - the intel data is obviously only an estimation.  
+Regarding the gathered intel data the Kersey Association has developed an infrastructure program.
 
 | Planet        |          System          | Goal Category |
 |:--------------|:------------------------:|:-------------:|

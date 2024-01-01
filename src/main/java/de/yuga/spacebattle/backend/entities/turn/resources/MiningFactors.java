@@ -83,4 +83,10 @@ public class MiningFactors extends AbstractEntityKey {
             resources.put(type, 100L);
         }
     }
+
+    public void makeEventReward() {
+        for (EResourceType type : EResourceType.values()) {
+            resources.put(type, 200L);
+        }
+    }
 }

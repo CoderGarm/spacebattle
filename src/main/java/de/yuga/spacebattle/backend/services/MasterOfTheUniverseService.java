@@ -15,8 +15,10 @@ import de.yuga.spacebattle.backend.entities.buildings.ProductionType;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.OrbitalModule;
+import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
+import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.misc.HasName;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
@@ -244,27 +246,35 @@ public class MasterOfTheUniverseService {
         if (transformationNeeded) {
             userDeleteServiceService.deleteAllInactiveUsers();
 
+            final List<Building> buildings = buildingService.findAll();
+
             final NonPlayerCharacter pirate = nonPlayerCharacterService.findByUsername(MasterOfTheUniverseService.PIRATE);
-            final List<Planet> level1 = planetService.findAllColonizedBy(pirate);
+            final Set<Integer> level1PlanetIDs = planetService.findAllColonizedBy(pirate).stream().map(AbstractEntityKey::getId).collect(Collectors.toSet());
+            final Set<Planet> level1 = new HashSet<>(planetService.findForModification(level1PlanetIDs));
             for (final Planet planet : level1) {
                 createGuardFleet(planet, 1);
+                createBuildingSetup(planet, buildings, 1);
             }
 
-            final List<Planet> toColonize = planetService.findAll(List.of(1330, 1780, 1768, 904, 1732, 1631, 1253, 1067, 1233, 2282, 148, 461, 610, 820, 137, 2341, 2249, 2177, 2214, 2182));
+            final Set<Planet> toColonize = planetService.findForModification(List.of(
+                    1330, 1780, 1768, 904,
+                    1732, 1631, 1253, 1067,
+                    1233, 2282, 148, 461, 610, 820, 137, 2341, 2249, 2177, 2214, 2182));
             toColonize
                     .forEach(planet -> colonizationService.colonizePlanet(new Colonization(pirate, planet, new CrewRequirement(CONQUERABLE_PLANET, EDepositType.COSTS), 0)));
 
-            final Map<Integer, List<Integer>> m = Map.of(
-                    1, List.of(1330, 1780, 1768, 904),
-                    2, List.of(1732, 1631, 1253, 1067),
-                    3, List.of(1233, 2282, 148, 461, 610, 820, 137, 2341, 2249, 2177, 2214, 2182)
+            final Map<Integer, Set<Integer>> m = Map.of(
+                    1, Set.of(1330, 1780, 1768, 904),
+                    2, Set.of(1732, 1631, 1253, 1067),
+                    3, Set.of(1233, 2282, 148, 461, 610, 820, 137, 2341, 2249, 2177, 2214, 2182)
             );
 
             m.forEach((strengthLevel, planetIDs) -> {
-                final List<Planet> planets = planetService.findAll(planetIDs);
+                final Set<Planet> planets = planetService.findForModification(planetIDs);
 
                 for (Planet planet : planets) {
                     createGuardFleet(planet, strengthLevel);
+                    createBuildingSetup(planet, buildings, strengthLevel);
                 }
             });
 
@@ -274,13 +284,37 @@ public class MasterOfTheUniverseService {
         }
     }
 
+    private void createBuildingSetup(@Nonnull final Planet planet,
+                                     @Nonnull final List<Building> buildings,
+                                     final int strengthLevel) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+        LOGGER.info("Creating constructions for planet {} in {} with strength {}", planet.getName(), planet.getSystem().getName(), strengthLevel);
+
+        planet.getMiningFactors().makeEventReward();
+        for (int i = 0; i < strengthLevel; i++) {
+            planet.getResourceDeposit().makeEventReward();
+        }
+
+        final Set<Building> notBuild = new HashSet<>(buildings);
+        final Set<Construction> constructions = planet.getConstructions();
+        constructions.forEach(construction -> construction.setLevel(construction.getLevel() + (strengthLevel * 3)));
+
+        notBuild.stream()
+                .filter(b -> !constructions.stream().map(Construction::getBuilding).collect(Collectors.toSet()).contains(b))
+                .forEach(building -> constructions.add(new Construction(planet, building, (strengthLevel * 3))));
+
+        constructions.forEach(construction -> construction.setOperationalLevel(construction.getLevel()));
+        planetService.save(planet);
+    }
+
     private void createGuardFleet(@Nonnull final Planet planet, final int strengthLevel) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
         final NonPlayerCharacter owner = planet.getNpcOwner();
         Preconditions.checkNotNull(owner, "owner must not be empty");
 
-        LOGGER.info("Creating guard fleet for the planet {} in {} with strength {}", planet.getName(), planet.getSystem().getName(), strengthLevel);
+        LOGGER.info("Creating guard fleet for planet {} in {} with strength {}", planet.getName(), planet.getSystem().getName(), strengthLevel);
 
         final List<ShipClass> classList = shipClassService.findAllLatestByOwner(owner.getId());
         final ShipClass warGoose = classList.stream().filter(s -> s.getName().equals("War Goose")).findFirst().orElseThrow(NullPointerException::new);
