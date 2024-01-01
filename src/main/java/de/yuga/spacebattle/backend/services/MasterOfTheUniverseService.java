@@ -286,7 +286,8 @@ public class MasterOfTheUniverseService {
         final ShipClass warGoose = classList.stream().filter(s -> s.getName().equals("War Goose")).findFirst().orElseThrow(NullPointerException::new);
         final ShipClass songbird = classList.stream().filter(s -> s.getName().equals("Songbird") && s.getFlight() == 1).findFirst().orElseThrow(NullPointerException::new);
 
-        final Fleet opponentsFleet = createFleet(owner, planet, planet.getName() + " Buccaneers");
+        final Set<Fleet> anchored = fleetService.findAllAnchoredForPlanet(planet).stream().filter(f -> f.getOwner().equals(owner)).collect(Collectors.toSet());
+        final Fleet opponentsFleet = anchored.isEmpty() ? createFleet(owner, planet, planet.getName() + " Buccaneers") : anchored.stream().findFirst().orElse(null);
         switch (strengthLevel) {
             case 1:
                 createShipForFleet(planet, resourceService.getRandomWarshipName(), opponentsFleet, warGoose);

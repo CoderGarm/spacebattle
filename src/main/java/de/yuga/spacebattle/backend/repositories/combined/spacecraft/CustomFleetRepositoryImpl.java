@@ -82,7 +82,13 @@ public class CustomFleetRepositoryImpl implements CustomFleetRepository {
                 .filter(f -> f.getOrbit() != null)
                 .collect(Collectors.groupingBy(Fleet::getOrbit, Collectors.mapping(Function.identity(), Collectors.toList())));
 
+        final Set<FleetOrbit> candidates = fleetsToOrbit.entrySet().stream()
+                .filter(e -> e.getValue().size() > 1 && e.getValue().stream().map(Fleet::getOwner).collect(Collectors.toSet()).size() > 1)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+
         return fleetsToOrbit.entrySet().stream()
+                .filter(entry -> candidates.contains(entry.getKey()))
                 .filter(entry -> {
                     final List<Fleet> fleets = entry.getValue();
                     final Set<Owner> owners = fleets.stream().map(Fleet::getOwner).collect(Collectors.toSet());

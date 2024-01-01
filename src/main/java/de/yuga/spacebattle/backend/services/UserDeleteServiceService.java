@@ -133,11 +133,12 @@ public class UserDeleteServiceService {
         final User sandkiste = userService.findByUsername("Sandkiste").get().getUser();
         final User novaBallard = userService.findByUsername("NovaBallard").get().getUser();
 
-        final Set<String> toKeep = Set.of("Flashkid", "yufiel", "endofline", "Corben", "ShannonForaker", "Corben1", "NovaBallard", "GeorgeWeberPhillies", "Puidwen", "Sandkiste", "DF12612", "Wlad1990", "ElGuapo", "Mathias")
-                .stream().map(String::toLowerCase).collect(Collectors.toSet());
+        final Set<String> toRemove = Set.of("lmg", "Tribun", "Gaunt900", "RexGarrison", "Petrock", "Exzitus", "TanteManfred", "oknau", "Zhapenoth", "fester", "Legionlynx2",
+                        "The95thRifleman", "chaviha", "Drumbl", "Nomar", "ccate13", "Thrandir", "Molitor7", "Saaa", "popcanon", "Loki", "Fireflair", "Skaith666", "Yeltsin", "Wlad",
+                        "kaunos", "marcsterz", "Legionylnx").stream()
+                .map(String::toLowerCase).collect(Collectors.toSet());
 
-        final Set<User> toWipe = userService.findAll().stream().filter(u -> !toKeep.contains(u.getUsername().toLowerCase())).collect(Collectors.toSet());
-
+        final Set<User> toWipe = userService.findAll().stream().filter(u -> toRemove.contains(u.getUsername().toLowerCase())).collect(Collectors.toSet());
         for (final User user : toWipe) {
             final int idUserToWipe = user.getId();
             LOGGER.info("\t\tDelete user {}, {}", user.getUsername(), idUserToWipe);

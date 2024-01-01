@@ -1,5 +1,7 @@
 ### Kersey's naval bases
 
+It is pretty recommended to scout the positions in beforehand - the intel data is obviously only an estimation.
+
 | Planet        |          System          | Goal Category |
 |:--------------|:------------------------:|:-------------:|
 | Naismith      |         Hilt 832         |       1       |
