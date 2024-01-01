@@ -225,3 +225,145 @@ Strap yourself into your commander's chairs and eat enough over the holidays, yo
 
 See you in the stars, Commanders!  
 Flashkid
+
+
+---
+
+------------------
+
+### Operation War Harvest - Rules and timeline
+
+-- Andermani below --
+
+Operation Sunflower once wiped out all known naval bases of the Kersey Association, the main pirate syndicate in the human populated galaxy.
+
+Sunflower was quite effective and all main goals and targets were reached.
+
+But those who remained withdrew and things became quiet around Kersey. It was a misleading peaceful time.
+
+The Kersey Association, licking their wounds, tried to expand by other means.  
+They penetrated civil society through diplomatic channels and corrupted some star nation governments.
+
+The **I**nterstellar **N**aval **T**askforce for **E**radicating **R**ogue **C**orsair **P**resence (**INTERCEPT**) calls out Operation War Harvest.
+
+The main goal of this operation is to wipe out the withstanding pirate forces, their new strongholds and their shipyard infrastructure.
+
+This event will designate several planets as targets which are currently assigned to abandoned accounts! For the event, it is to be assumed that these governments are corrupted by
+the Kersey influence.
+
+<p align="center" style="margin: 35px 0;">
+    <img src="https://media.battleforhonor.de/wh/join-wh.png" alt="wh-1" width="350px">
+</p>
+
+##### Rules
+
+- Every participating fleet has to be placed in the home system of its owner by the first tick of the event.
+- The participating fleet's name has to begin with ***INTERCEPT***, followed by a whitespace, and the name must not be changed during the event (e.g.: “INTERCEPT Task Force
+  3” ).
+- INTERCEPT fleets must not be used for other means or combats during the event.
+- It is not allowed to reinforce fleets from other, non-participating fleets during the event.
+- It is allowed to reinforce INTERCEPT fleets from your planets.
+- It is not allowed to attack a marked target system with a fleet that is not an INTERCEPT fleet.
+- INTERCEPT fleets will not attack each other automatically, even is they are in the same orbit.
+    - Only Fleets with the ***INTERCEPT*** prefix will ignore other INTERCEPT fleets.
+    - Regular fleets will attack every other fleet by the regular rules.
+- During the event, every INTERCEPT fleet can conquer a designated target planet by being the only fleet in the orbit.
+  The conquered planet must then be claimed by a forum post in the corresponding INTERCEPT event thread.
+
+A little fluff in describing your conquest is very appreciated! Strong emotions, flying missiles and losing the reactor's containment are accepted favorably.  
+The snippets of the forum posts could be used to make some noise at reddit, if the author allows it.
+
+##### Conditions
+
+1. The timeframe is from tick 243 to 255.
+2. INTERCEPT fleets will not be able to attack each other.  
+   They are politically independent of their owner, but still under their admiralty control.
+3. The designated INTERCEPT target systems will be listed at the beginning. The list represents civilian involvement in piracy.
+    - The planets and resources will be upgraded - slightly - in advance.
+    - The regular nations’ guard fleets will be three 'Songbird' destroyers.
+    - Kersey's reinforced naval bases have bigger fleets of unknown size, but offer higher rewards. Use your sensors to see if you want to take the enemy on.
+4. Every interested player without enough hyper-space capable ships can request assistance from the INTERCEPT Central Command (Flashkid). Send me a PM!
+
+If you have a ship class in your inventory you wish to have more units of before the event, it can be arranged (only up to 390 kt total fleet tonnage for assisted build!).  
+If you have no ships to spare and no designs ready yet, you can request ships up to 390 kt in total from INTERCEPT Central Command too!  
+This is intended for players with only the basic Songbirds or less. It is at the discretion of the admin. Such additional ships can be kept after the event - if they survive!
+
+##### What is the win?
+
+1. Bragging rights in every spacer bar!
+2. Gaining the conquered planets with a lot of resources and shipyard capacity for your own empire!
+3. An insignia for your participation in Operation War Harvest at your empire's official description.
+4. An entry in the event ranking with the destroyed and lost ship tonnage and conquered planets for the War Harvest event!
+
+**If something is missed or assistance is needed - just write a PM to me!**
+
+---
+
+### Operation War Harvest – Regeln und Zeitplan
+
+Die Operation Sunflower vernichtete einst alle bekannten Marinestützpunkte der Kersey Association, dem größten Piratensyndikat in der von Menschen besiedelten Galaxis.
+
+Sunflower war sehr effektiv und alle Hauptziele wurden erreicht.
+
+Doch die Zurückgebliebenen zogen sich zurück und es wurde still um Kersey. Es war eine irreführende friedliche Zeit.
+
+Die Kersey Association leckte ihre Wunden und versuchte, auf andere Weise zu expandieren.
+Sie drangen über diplomatische Kanäle in die Zivilgesellschaft ein und korrumpierten die Regierungen einiger Sternennationen.
+
+Die **I**nterstellar **N**aval **T**askforce for **E**radicating **R**ogue **C**orsair **P**resence (**INTERCEPT** ) ruft die Operation War Harvest aus.
+
+Das Hauptziel dieser Operation ist die Vernichtung der Widerstandskräfte der Piraten, ihrer neuen Festungen und ihrer Werftinfrastruktur.
+
+Dieses Event wird mehrere Planeten als Ziele festlegen, die derzeit verlassenen Konten zugeordnet sind! Für den Fall ist davon auszugehen, dass diese Regierungen korrumpiert sind
+der Kersey-Einfluss.
+
+##### Regeln
+
+- Jede teilnehmende Flotte muss beim ersten Tick des Events im Heimatsystem ihres Besitzers platziert sein.
+- Der Name der teilnehmenden Flotte muss mit ***INTERCEPT*** beginnen, gefolgt von einem Leerzeichen, und der Name darf während der Veranstaltung nicht geändert werden (z. B.:
+  „INTERCEPT Task Force“.
+  3" ).
+- INTERCEPT-Flotten dürfen während der Veranstaltung nicht für andere Zwecke oder Kämpfe eingesetzt werden.
+- Es ist nicht gestattet, Flotten anderer, nicht teilnehmender Flotten während der Veranstaltung zu verstärken.
+- Es ist erlaubt, INTERCEPT-Flotten von Ihren Planeten aus zu verstärken.
+- Es ist nicht erlaubt, ein markiertes Zielsystem mit einer Flotte anzugreifen, die keine INTERCEPT-Flotte ist.
+- INTERCEPT-Flotten greifen sich nicht automatisch gegenseitig an, auch nicht, wenn sie im selben Orbit kreisen.
+    - Nur Flotten mit dem Präfix ***INTERCEPT*** ignorieren andere INTERCEPT-Flotten.
+    - Reguläre Flotten greifen nach den regulären Regeln jede andere Flotte an.
+      – Während des Events kann jede INTERCEPT-Flotte einen bestimmten Zielplaneten erobern, indem sie die einzige Flotte im Orbit ist.
+      Der eroberte Planet muss dann durch einen Forumsbeitrag im entsprechenden INTERCEPT-Event-Thread beansprucht werden.
+
+Ein wenig Kreativität bei der Beschreibung deiner Eroberung ist sehr willkommen! Starke Emotionen, fliegende Raketen und der Verlust des Reaktorsicherheitsbehälters werden
+wohlwollend akzeptiert.
+Die Ausschnitte der Forenbeiträge könnten verwendet werden, um bei Reddit für Aufsehen zu sorgen, sofern der Autor dies zulässt.
+
+##### Bedingungen
+
+1. Das Event läuft von Tick 243 bis 255.
+2. INTERCEPT-Flotten können sich nicht gegenseitig angreifen.  
+   Sie sind politisch unabhängig von ihrem Besitzer, stehen aber dennoch unter der Kontrolle ihrer Admiralität.
+3. Zu Beginn werden die vorgesehenen INTERCEPT-Zielsysteme aufgelistet.  
+   Die Liste stellt zivile Beteiligung der Piraterie dar.
+    - Die Planeten und Ressourcen werden im Voraus leicht verbessert.
+    - Die Wachflotten der regulären Nationen werden aus drei „Songbird“-Zerstörern bestehen.
+      – Kerseys verstärkte Marinestützpunkte verfügen über größere Flotten unbekannter Größe, bieten aber höhere Belohnungen. Verwenden Sie Ihre Sensoren, um zu sehen, ob Sie es
+      mit dem Feind aufnehmen möchten.
+4. Jeder interessierte Spieler, der nicht über genügend hyperraumfähige Schiffe verfügt, kann Unterstützung beim INTERCEPT Central Command (Flashkid) anfordern. Schicken Sie mir
+   eine PN!
+
+Wenn du eine Schiffsklasse in deinem Inventar hast, von der du vor der Veranstaltung mehr Einheiten haben möchtest, kann dies arrangiert werden - bis zu 390 kt
+Gesamtflottentonnage für unterstützten Bau.
+Wenn du keine Schiffe übrig und noch keine Entwürfe fertig hast, kannst du auch Schiffe mit einer Gesamttonnage von bis zu 390 kt beim INTERCEPT Central Command
+anfordern!
+
+Dies ist für Spieler gedacht, die nur über die grundlegenden Songbirds oder weniger verfügen. Es liegt im Ermessen des Administrators.  
+Solche zusätzlichen Schiffe können nach dem Ereignis behalten werden – sofern sie überleben!
+
+##### Was gibt es zu gewinnen?
+
+1. Angeberrechte in jeder Bar diesseits von Messier 87!
+2. Behalte die eroberten Planeten mit vielen Ressourcen und Werftkapazitäten für dein eigenes Imperium!
+3. Ein Abzeichen für Ihre Teilnahme an der Operation War Harvest gemäß der offiziellen diplomatischen Vertretung Ihres Imperiums.
+4. Ein Eintrag im Event-Ranking mit der zerstörten und verlorenen Schiffstonnage und eroberten Planeten für das War Harvest-Event!
+
+**Sollte etwas fehlen oder Hilfe benötigt werden – schreib mir einfach eine PN!**
