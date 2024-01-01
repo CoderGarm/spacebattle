@@ -1,56 +1,65 @@
 ### Kersey's naval bases
 
 It is pretty recommended to scout the positions in beforehand - the intel data is obviously only an estimation.  
-Regarding the gathered intel data the Kersey Association has developed an infrastructure program.
+Regarding the gathered intel data the Kersey Association has developed an infrastructure program.  
+It should be valid to assume that the objective's danger leven represents the importance for the infrastructure program.
 
-| Planet        |          System          | Goal Category |
-|:--------------|:------------------------:|:-------------:|
-| Naismith      |         Hilt 832         |       1       |
-| Marienbad     |        BD+63 4496        |       1       |
-| Sidemore      |       Grendelsbane       |       1       |
-| Monica        |         SBC7 342         |       1       |
-| Maiden Howe   |     [BM83] X8285+232     |       1       |
-| Lugh          |        BD+75 8353        |       1       |
-| Tesserow      |          Casca           |       1       |
-| New Tuscany   |       3A 5348+546        |       1       |
-| Sharpton      |        WEB 91877         |       1       |
-| Maslow        |          Sigma           |       1       |
-| Hope          |      1XRS 15534+119      |       1       |
-| New Geneva    | 2MASS J67789534+ 4342183 |       1       |
-| Quarre        |         Lutrell          |       1       |
-| Vespasien     |         Barnett          |       1       |
-| Central       |        HIC 57869         |       1       |
-| Tomlinson     |        AG+42 5822        |       1       |
-| Grayson       | 2MASS J55755931+ 8357257 |       1       |
-| Beowulf       |    SWIFT J2937.4+7728    |       1       |
-| Enki          |       3A 4311+729        |       1       |
-| New Glasgow   |          Secour          |       1       |
-| Calvin III    |        BD+46 3965        |       1       |
-| Torch         |        Maastricht        |       1       |
-| Shakin        |        HD 586614         |       1       |
-| Artemis       |         Suchien          |       1       |
-| Mesa          |       Arendscheldt       |       1       |
-| Helier        |          Yorik           |       1       |
-| Gorgon        |         Hilt 286         |       1       |
-| Swallow       |         HIC 1698         |       1       |
-| Thurso        |         Terrance         |       1       |
-| San Martin    |        SBC9 3633         |       1       |
-| Osiris        |      1XRS 87161+633      |       2       |
-| Central       |         Hilt 477         |       2       |
-| Saltash Delta |         HIC 3297         |       2       |
-| Orca          |        New Berlin        |       2       |
-| Sidemore      |        BD+41 7881        |       3       |
-| Himalaya      |         Basilisk         |       3       |
-| La Martine    |         Cerberus         |       3       |
-| Saraqael      |          Congo           |       3       |
-| Toulon        |        AG+24 2586        |       3       |
-| Anvil         |          Asgerd          |       3       |
-| Grayson       |         Spindle          |       3       |
-| Enki          |     [BM83] X5298+852     |       3       |
-| Haswell       |          Split           |       3       |
-| Fattoria      | 2MASS J46763136+ 2133537 |       3       |
-| Urako         |          Talmu           |       3       |
-| Elm           |       3A 7757+189        |       3       |
+According to the active agents reports and observation measures the fortification can be classified into three grades.
+
+1. two heavily armed frigates and a bigger cruiser
+2. two heavily armed frigates and two assault cruisers
+3. a half-division of assault cruisers with the same or more amount of heavy frigates
+
+**Attention:** The OpSec must be guaranteed. Deploy scout vessels with experienced crews only.
+
+| Planet        |          System          | Hazard classification |
+|:--------------|:------------------------:|:---------------------:|
+| Naismith      |         Hilt 832         |           1           |
+| Marienbad     |        BD+63 4496        |           1           |
+| Sidemore      |       Grendelsbane       |           1           |
+| Monica        |         SBC7 342         |           1           |
+| Maiden Howe   |     [BM83] X8285+232     |           1           |
+| Lugh          |        BD+75 8353        |           1           |
+| Tesserow      |          Casca           |           1           |
+| New Tuscany   |       3A 5348+546        |           1           |
+| Sharpton      |        WEB 91877         |           1           |
+| Maslow        |          Sigma           |           1           |
+| Hope          |      1XRS 15534+119      |           1           |
+| New Geneva    | 2MASS J67789534+ 4342183 |           1           |
+| Quarre        |         Lutrell          |           1           |
+| Vespasien     |         Barnett          |           1           |
+| Central       |        HIC 57869         |           1           |
+| Tomlinson     |        AG+42 5822        |           1           |
+| Grayson       | 2MASS J55755931+ 8357257 |           1           |
+| Beowulf       |    SWIFT J2937.4+7728    |           1           |
+| Enki          |       3A 4311+729        |           1           |
+| New Glasgow   |          Secour          |           1           |
+| Calvin III    |        BD+46 3965        |           1           |
+| Torch         |        Maastricht        |           1           |
+| Shakin        |        HD 586614         |           1           |
+| Artemis       |         Suchien          |           1           |
+| Mesa          |       Arendscheldt       |           1           |
+| Helier        |          Yorik           |           1           |
+| Gorgon        |         Hilt 286         |           1           |
+| Swallow       |         HIC 1698         |           1           |
+| Thurso        |         Terrance         |           1           |
+| San Martin    |        SBC9 3633         |           1           |
+| Osiris        |      1XRS 87161+633      |           2           |
+| Central       |         Hilt 477         |           2           |
+| Saltash Delta |         HIC 3297         |           2           |
+| Orca          |        New Berlin        |           2           |
+| Sidemore      |        BD+41 7881        |           3           |
+| Himalaya      |         Basilisk         |           3           |
+| La Martine    |         Cerberus         |           3           |
+| Saraqael      |          Congo           |           3           |
+| Toulon        |        AG+24 2586        |           3           |
+| Anvil         |          Asgerd          |           3           |
+| Grayson       |         Spindle          |           3           |
+| Enki          |     [BM83] X5298+852     |           3           |
+| Haswell       |          Split           |           3           |
+| Fattoria      | 2MASS J46763136+ 2133537 |           3           |
+| Urako         |          Talmu           |           3           |
+| Elm           |       3A 7757+189        |           3           |
 
 ### announcement post:
 
