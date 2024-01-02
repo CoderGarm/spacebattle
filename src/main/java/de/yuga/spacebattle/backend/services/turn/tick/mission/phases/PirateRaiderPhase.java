@@ -29,10 +29,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -127,6 +124,7 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
                     LOGGER.info("\tPirate fleet with idFleet '" + pirateFleet.getId() + "' defeated from '" + owner.getUsername() + "' at '" + target.getName() + "'");
                 }
             }
+            releasingResourcesToOwnPlanet(pirateFleet, planetToStore, fleetToStore);
         }
         planetService.saveAll(planetToStore);
         fleetService.saveAll(fleetToStore);
@@ -182,6 +180,11 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
             return;
         }
 
+        if (target.getOwner().equals(pirateFleet.getOwner())) {
+            LOGGER.info("\tNot raiding own planet at '" + target.getName() + "'");
+            return;
+        }
+
         LOGGER.info("\tRaiding '" + target.getOwner().getUsername() + "' at '" + target.getName() + "'");
         final ResourceDeposit raid = target.getResourceDeposit().raid(pirateFleet, freeCargoUnits);
         planetToStore.add(target);
@@ -189,5 +192,25 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
         transportationCache.add(today, pirateFleet, target, raid, ETransportType.PLANET_TO_FLEET);
         missionCache.pirateRaidTargetRaided(today, pirateFleet, target);
         raidingPirateCache.executeNext(today, pirateFleet, EMissionAction.LEAVE_ORBIT, EMissionAction.WITHDRAW);
+    }
+
+    private void releasingResourcesToOwnPlanet(@Nonnull final Fleet fleet,
+                                               @Nonnull final List<Planet> planetToStore,
+                                               @Nonnull final List<Fleet> fleetToStore) {
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+        Preconditions.checkNotNull(planetToStore, "planetToStore must not be empty");
+        Preconditions.checkNotNull(fleetToStore, "fleetToStore must not be empty");
+
+        final Planet planet = fleet.isInPlanetaryOrbit() ? Objects.requireNonNull(fleet.getOrbit()).getPlanet() : null;
+        if (planet != null && planet.getOwner() != null && planet.getOwner().equals(fleet.getOwner())) {
+            final ResourceDeposit deposit = fleet.getResourceDeposit();
+            if (deposit.hasData()) {
+                LOGGER.info("Releasing resources and population to '{}' from idFleet '{}'", planet.getName(), fleet.getId());
+                planet.getResourceDeposit().add(deposit);
+                deposit.setZero();
+                planetToStore.add(planet);
+                fleetToStore.add(fleet);
+            }
+        }
     }
 }

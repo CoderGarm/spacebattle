@@ -51,7 +51,10 @@ public class TickRunnerService {
                              @Nonnull final TickRepository tickRepository,
                              @Nonnull final MailService mailService) {
         Preconditions.checkNotNull(tickRunners, "tickRunners must not be empty");
-        this.tickRunners = tickRunners.stream().sorted((TickRunner::compareTo)).collect(Collectors.toList());
+        this.tickRunners = tickRunners.stream()
+                .filter(TickRunner::isActive)
+                .sorted((TickRunner::compareTo))
+                .collect(Collectors.toList());
 
         this.server = Preconditions.checkNotNull(server, "server must not be empty");
         this.tickRepository = Preconditions.checkNotNull(tickRepository, "tickRepository shouldn't be null!");

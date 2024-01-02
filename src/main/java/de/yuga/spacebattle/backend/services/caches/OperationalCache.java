@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import com.google.gson.GsonBuilder;
 import de.yuga.spacebattle.backend.dto.turn.Commissioning;
-import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.OrbitalStructure;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
@@ -112,7 +112,7 @@ public class OperationalCache extends BaseCache {
     }
 
     private void dropAndWrite(@Nonnull final Tick today,
-                              @Nonnull final User user) {
+                              @Nonnull final Owner user) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(user, "user must not be empty");
 
@@ -125,7 +125,7 @@ public class OperationalCache extends BaseCache {
 
     @Nonnull
     private String toJson(@Nonnull final Tick today,
-                          @Nonnull final User user,
+                          @Nonnull final Owner user,
                           @Nonnull final Set<Commissioning> commissionings) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(user, "user must not be empty");
@@ -157,7 +157,7 @@ public class OperationalCache extends BaseCache {
 
     @Nonnull
     private Set<Commissioning> getTodayCommissioning(@Nonnull final Tick today,
-                                                     @Nonnull final User user) {
+                                                     @Nonnull final Owner user) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(user, "user must not be empty");
 
@@ -169,11 +169,11 @@ public class OperationalCache extends BaseCache {
                                  @Nonnull final List<WarShip> operationals) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
-        Preconditions.checkNotNull(planet.getHumanOwner(), "planet.getOwner() must not be empty");
+        Preconditions.checkNotNull(planet.getOwner(), "planet.getOwner() must not be empty");
         Preconditions.checkNotNull(operationals, "operationals must not be empty");
 
         addWarships(today, planet, operationals);
-        dropAndWrite(today, planet.getHumanOwner());
+        dropAndWrite(today, planet.getOwner());
     }
 
     public void activateConstructions(@Nonnull final Tick today,
@@ -181,11 +181,11 @@ public class OperationalCache extends BaseCache {
                                       @Nonnull final Set<Construction> operationals) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
-        Preconditions.checkNotNull(planet.getHumanOwner(), "planet.getOwner() must not be empty");
+        Preconditions.checkNotNull(planet.getOwner(), "planet.getOwner() must not be empty");
         Preconditions.checkNotNull(operationals, "operationals must not be empty");
 
         addConstructions(today, planet, operationals);
-        dropAndWrite(today, planet.getHumanOwner());
+        dropAndWrite(today, planet.getOwner());
     }
 
     public void activateOrbitalConstructions(@Nonnull final Tick today,
@@ -193,11 +193,11 @@ public class OperationalCache extends BaseCache {
                                              @Nonnull final List<OrbitalStructure> operationals) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
-        Preconditions.checkNotNull(planet.getHumanOwner(), "planet.getOwner() must not be empty");
+        Preconditions.checkNotNull(planet.getOwner(), "planet.getOwner() must not be empty");
         Preconditions.checkNotNull(operationals, "operationals must not be empty");
 
         addOrbitalConstructions(today, planet, operationals);
-        dropAndWrite(today, planet.getHumanOwner());
+        dropAndWrite(today, planet.getOwner());
     }
 
     private void addConstructions(@Nonnull final Tick today, @Nonnull final Planet planet, @Nonnull final Set<Construction> operationals) {
@@ -205,7 +205,7 @@ public class OperationalCache extends BaseCache {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(operationals, "operationals must not be empty");
 
-        final Set<Commissioning> commissionings = getTodayCommissioning(today, Objects.requireNonNull(planet.getHumanOwner()));
+        final Set<Commissioning> commissionings = getTodayCommissioning(today, Objects.requireNonNull(planet.getOwner()));
         commissionings.stream()
                 .filter(c -> c.getPlanet().equals(planet))
                 .findFirst()
@@ -218,7 +218,7 @@ public class OperationalCache extends BaseCache {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(operationals, "operationals must not be empty");
 
-        final Set<Commissioning> commissionings = getTodayCommissioning(today, Objects.requireNonNull(planet.getHumanOwner()));
+        final Set<Commissioning> commissionings = getTodayCommissioning(today, Objects.requireNonNull(planet.getOwner()));
         commissionings.stream()
                 .filter(c -> c.getPlanet().equals(planet))
                 .findFirst()
@@ -231,7 +231,7 @@ public class OperationalCache extends BaseCache {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(operationals, "operationals must not be empty");
 
-        final Set<Commissioning> commissionings = getTodayCommissioning(today, Objects.requireNonNull(planet.getHumanOwner()));
+        final Set<Commissioning> commissionings = getTodayCommissioning(today, Objects.requireNonNull(planet.getOwner()));
         commissionings.stream()
                 .filter(c -> c.getPlanet().equals(planet))
                 .findFirst()
@@ -244,7 +244,7 @@ public class OperationalCache extends BaseCache {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(operational, "operational must not be empty");
 
-        final Set<Commissioning> commissionings = getTodayCommissioning(today, Objects.requireNonNull(planet.getHumanOwner()));
+        final Set<Commissioning> commissionings = getTodayCommissioning(today, Objects.requireNonNull(planet.getOwner()));
         final Set<Construction> operationals = new HashSet<>();
         operationals.add(operational);
         commissionings.stream()
@@ -259,7 +259,7 @@ public class OperationalCache extends BaseCache {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(operational, "operational must not be empty");
 
-        final Set<Commissioning> commissionings = getTodayCommissioning(today, Objects.requireNonNull(planet.getHumanOwner()));
+        final Set<Commissioning> commissionings = getTodayCommissioning(today, Objects.requireNonNull(planet.getOwner()));
         final List<WarShip> operationals = new ArrayList<>();
         operationals.add(operational);
         commissionings.stream()
@@ -274,7 +274,7 @@ public class OperationalCache extends BaseCache {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(operational, "operational must not be empty");
 
-        final Set<Commissioning> commissionings = getTodayCommissioning(today, Objects.requireNonNull(planet.getHumanOwner()));
+        final Set<Commissioning> commissionings = getTodayCommissioning(today, Objects.requireNonNull(planet.getOwner()));
         final List<OrbitalStructure> operationals = new ArrayList<>();
         operationals.add(operational);
         commissionings.stream()

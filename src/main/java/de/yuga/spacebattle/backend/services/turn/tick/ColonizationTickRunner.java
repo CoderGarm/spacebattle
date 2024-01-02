@@ -10,8 +10,6 @@ import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.ECalculationType;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.services.caches.ColonizationCache;
-import de.yuga.spacebattle.backend.services.caches.OperationalCache;
-import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
@@ -47,28 +45,17 @@ public class ColonizationTickRunner implements TickRunner {
     private final ColonizationCache colonizationCache;
 
     @Nonnull
-    private final OperationalCache operationalCache;
-
-    @Nonnull
     private final OperationalService operationalService;
-
-    @Nonnull
-    private final FleetService fleetService;
-
 
     @Autowired
     public ColonizationTickRunner(@Nonnull final ColonizationService colonizationService,
                                   @Nonnull final PlanetService planetService,
                                   @Nonnull final ColonizationCache colonizationCache,
-                                  @Nonnull final OperationalCache operationalCache,
-                                  @Nonnull final OperationalService operationalService,
-                                  @Nonnull final FleetService fleetService) {
+                                  @Nonnull final OperationalService operationalService) {
         this.colonizationService = Preconditions.checkNotNull(colonizationService, "colonizationService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.colonizationCache = Preconditions.checkNotNull(colonizationCache, "colonizationCache must not be empty");
-        this.operationalCache = Preconditions.checkNotNull(operationalCache, "operationalCache must not be empty");
         this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
-        this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
     }
 
     @Override

@@ -153,6 +153,7 @@ public class RaidingPirateCache {
         Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
         Preconditions.checkNotNull(target, "target must not be empty");
 
+        // todo include the tick -> some fleet will never go away
         targetCache.put(pirateFleet, target);
         cacheFileWriter.writeToFile(RaidingPirateCache.TargetDto.class, String.valueOf(pirateFleet.getId()), toJsonTargetDto(pirateFleet, target));
     }

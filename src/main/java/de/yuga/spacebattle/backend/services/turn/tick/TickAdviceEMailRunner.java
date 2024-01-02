@@ -11,6 +11,7 @@ import de.yuga.spacebattle.rest.dto.turn.TickAdvice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -35,10 +36,15 @@ public class TickAdviceEMailRunner implements TickRunner {
     @SuppressWarnings("NotNullFieldNotInitialized")
     private Tick today;
 
+    @Nonnull
+    private final String server;
+
     @Autowired
-    public TickAdviceEMailRunner(@Nonnull final TickAdviceService tickAdviceService,
+    public TickAdviceEMailRunner(@Nonnull @Value("${sb.server:localhost}") final String server,
+                                 @Nonnull final TickAdviceService tickAdviceService,
                                  @Nonnull final UserService userService,
                                  @Nonnull final MailService mailService) {
+        this.server = Preconditions.checkNotNull(server, "server must not be empty");
         this.tickAdviceService = Preconditions.checkNotNull(tickAdviceService, "tickAdviceService must not be empty");
         this.userService = Preconditions.checkNotNull(userService, "userService must not be empty");
         this.mailService = Preconditions.checkNotNull(mailService, "mailService must not be empty");
@@ -48,6 +54,11 @@ public class TickAdviceEMailRunner implements TickRunner {
     @Override
     public void tick(@Nonnull final Tick today) {
         this.today = Preconditions.checkNotNull(today, "today must not be empty");
+
+        if (this.server.equals("localhost")) {
+            LOGGER.info("Sending nothing - I'm localhost");
+            return;
+        }
 
         LOGGER.info("Sending tick advice mails is important every day");
 

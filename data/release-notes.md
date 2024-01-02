@@ -1,8 +1,8 @@
 # Event War Harvest Release
 
 todo. fleets not agress each other
-todo. create foritied bases with rewards
-todo. create player-to-delete bases with rewards
+check. create foritied bases with rewards
+check. create player-to-delete bases with rewards
 todo. punkte sammeln
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
 todo. ladderboard

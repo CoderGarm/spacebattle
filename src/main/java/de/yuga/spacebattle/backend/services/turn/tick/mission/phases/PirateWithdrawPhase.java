@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -78,9 +79,9 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
         final List<Fleet> pirateFleets = fleetService.findAllFleetsWithoutMovementByUser(pirate.getId());
         final List<Fleet> leaveOrbit = pirateFleets.stream().filter(fleet -> {
             final Planet planet = raidingPirateCache.getTarget(fleet);
-            final boolean isInOrbitOfTarget = planet != null && fleet.getOrbit() != null && fleet.getOrbit().getOrbit() != null &&
-                    planet.getOrbit().getDistance(fleet.getOrbit().getOrbit()).equals(Distance.ZERO);
-            if (!isInOrbitOfTarget) {
+            final boolean isPiratePlanet = isPiratePlanet(fleet);
+            final boolean isInOrbitOfTarget = isInOrbitOfTarget(fleet, planet);
+            if (!isInOrbitOfTarget || isPiratePlanet) {
                 return false;
             }
             if (raidingPirateCache.getNextActions(fleet).isEmpty()) {
@@ -98,9 +99,9 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
 
         final List<Fleet> withdrawHyperspace = pirateFleets.stream().filter(fleet -> {
             final Planet planet = raidingPirateCache.getTarget(fleet);
-            final boolean isInOrbitOfTarget = planet != null && fleet.getOrbit() != null && fleet.getOrbit().getOrbit() != null &&
-                    planet.getOrbit().getDistance(fleet.getOrbit().getOrbit()).equals(Distance.ZERO);
-            if (isInOrbitOfTarget) {
+            final boolean isPiratePlanet = isPiratePlanet(fleet);
+            final boolean isInOrbitOfTarget = isInOrbitOfTarget(fleet, planet);
+            if (isInOrbitOfTarget || isPiratePlanet) {
                 return false;
             }
             if (raidingPirateCache.getNextActions(fleet).isEmpty()) {
@@ -114,6 +115,19 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
             return raidingPirateCache.isPhaseSequenceValid(fleet, EMissionAction.WITHDRAW);
         }).collect(Collectors.toList());
         retreatToHyperspace(today, withdrawHyperspace);
+    }
+
+    private static boolean isInOrbitOfTarget(@Nonnull final Fleet fleet, @Nullable final Planet planet) {
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+
+        return planet != null && fleet.getOrbit() != null && fleet.getOrbit().getOrbit() != null && planet.getOrbit().getDistance(fleet.getOrbit().getOrbit()).equals(Distance.ZERO);
+    }
+
+    private static boolean isPiratePlanet(@Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+
+        //noinspection DataFlowIssue
+        return fleet.isInPlanetaryOrbit() && fleet.getOrbit().getPlanet().getOwner() != null && fleet.getOrbit().getPlanet().getOwner().equals(fleet.getOwner());
     }
 
     private void retreatToHyperspace(@Nonnull final Tick today, @Nonnull final List<Fleet> fleets) {
@@ -136,8 +150,8 @@ public class PirateWithdrawPhase implements MissionPhaseRunner {
         final List<Move> resultingMoves = new ArrayList<>();
         for (final Fleet pirateFleet : fleets) {
             final Planet planet = raidingPirateCache.getTarget(pirateFleet);
-            final boolean isInOrbitOfTarget = planet != null && pirateFleet.getOrbit() != null && pirateFleet.getOrbit().getOrbit() != null &&
-                    planet.getOrbit().getDistance(pirateFleet.getOrbit().getOrbit()).equals(Distance.ZERO);
+            final boolean isInOrbitOfTarget = planet != null && pirateFleet.getOrbit() != null && pirateFleet.getOrbit().getInterplanetaryResultingOrbit() != null &&
+                    planet.getOrbit().getDistance(pirateFleet.getOrbit().getInterplanetaryResultingOrbit()).equals(Distance.ZERO);
             if (!isInOrbitOfTarget) {
                 // not in a planetary orbit
                 LOGGER.warn("\tPirate fleet with idFleet '" + pirateFleet.getId() + "' is not in a planetary orbit");

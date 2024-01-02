@@ -242,8 +242,10 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = userService.findByUsername("TanteManfred").isPresent();
+        final boolean transformationNeeded = false;
         if (transformationNeeded) {
+
+            //fixme tidy up for later events
             userDeleteServiceService.deleteAllInactiveUsers();
 
             final List<Building> buildings = buildingService.findAll();

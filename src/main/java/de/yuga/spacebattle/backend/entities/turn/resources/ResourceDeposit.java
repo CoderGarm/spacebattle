@@ -460,6 +460,11 @@ public class ResourceDeposit extends AbstractEntityKey {
         }
     }
 
+    public void setZero() {
+        Arrays.stream(EResourceType.valuesWhichAreCollectable()).forEach(educationType -> resources.put(educationType, 0L));
+        Arrays.stream(EEducationType.values()).forEach(educationType -> humanResources.put(educationType, 0L));
+    }
+
     public boolean isDemandPresent() {
         Preconditions.checkArgument(DEMAND == subType, "I must be a represent a need!");
 
