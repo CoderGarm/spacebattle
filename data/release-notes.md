@@ -1,11 +1,15 @@
 # Event War Harvest Release
 
+todo. highlight kersey bases
 todo. fleets not agress each other
+todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
+todo. punkte sammeln -> flottenpunkte durch kämpfende tonnage, zerstörte tonnage; planetenpunkte durch anzahl eroberte planeten und gebäudelevel
+todo. ladderboard
+
 check. create foritied bases with rewards
 check. create player-to-delete bases with rewards
-todo. punkte sammeln
-todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
-todo. ladderboard
+
+### Wiki Articles
 
 article priorisierung bei pop demand und migration
 article orbital modules
