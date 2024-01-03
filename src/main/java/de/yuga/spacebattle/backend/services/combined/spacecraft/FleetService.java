@@ -671,13 +671,4 @@ public class FleetService {
         warShips.forEach(warShip -> warShip.setMothball(planet));
         warShipService.saveAll(warShips);
     }
-
-    @Deprecated
-    public void deletAll() {
-        // fixme remove me!
-
-        final List<Fleet> all = fleetRepository.findAll();
-        markAsDestroyed(all);
-
-    }
 }

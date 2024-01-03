@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
+import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import org.apache.commons.lang3.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,26 +68,57 @@ public class GameEventService {
         for (final FleetOrbit fleetOrbit : fleetsByOrbit.keySet().stream().filter(candidates::contains).collect(Collectors.toSet())) {
             final List<Fleet> participatingFleets = fleetsByOrbit.get(fleetOrbit);
 
-
             final Set<Fleet> interceptFleets = participatingFleets.stream().filter(f -> f.getName().startsWith(INTERCEPT_PREFIX)).collect(Collectors.toSet());
-            final Set<Fleet> otherFleets = participatingFleets.stream().filter(f -> !f.getName().startsWith(INTERCEPT_PREFIX)).collect(Collectors.toSet());
-            if (interceptFleets.size() <= 1) {
+            if (interceptFleets.isEmpty()) {
                 // process regularly on single or no intercept fleet
-                setUpFleetClashes(fleetOrbit, otherFleets, result);
+                setUpFleetClashes(fleetOrbit, participatingFleets, result);
             } else {
                 // assign combatants based on event status
-
-                final Set<Fleet> iFleets = new HashSet<>(interceptFleets);
-                final Set<Fleet> oFleets = new HashSet<>(otherFleets);
-                matchInterceptFleetsToCombatants(iFleets, oFleets, result, fleetOrbit);
-
+                matchInterceptFleetsToCombatants(participatingFleets, result, fleetOrbit);
+                final Set<Fleet> otherFleets = participatingFleets.stream().filter(f -> !f.getName().startsWith(INTERCEPT_PREFIX)).collect(Collectors.toSet());
                 if (otherFleets.stream().map(Fleet::getOwner).collect(Collectors.toSet()).size() >= 2) {
-                    result.add(new FleetClash(fleetOrbit, oFleets));
+                    // process regularly on single or no intercept fleet
+                    setUpFleetClashes(fleetOrbit, otherFleets, result);
                 }
             }
         }
 
         return result;
+    }
+
+    private static void matchInterceptFleetsToCombatants(@Nonnull final Collection<Fleet> fleets,
+                                                         @Nonnull final List<FleetClash> result,
+                                                         @Nonnull final FleetOrbit fleetOrbit) {
+        Preconditions.checkNotNull(fleets, "fleets must not be empty");
+        Preconditions.checkNotNull(result, "result must not be empty");
+        Preconditions.checkNotNull(fleetOrbit, "fleetOrbit must not be empty");
+
+        final Set<Owner> participants = fleets.stream().filter(f -> f.getName().startsWith(INTERCEPT_PREFIX)).map(Fleet::getOwner).collect(Collectors.toSet());
+        for (final Owner attacker : participants) {
+            final Set<Fleet> attackersInterceptFleets = fleets.stream()
+                    .filter(f -> f.getName().startsWith(INTERCEPT_PREFIX))
+                    .filter(f -> f.getOwner().equals(attacker))
+                    .collect(Collectors.toSet());
+
+            for (int i = 0; i < attackersInterceptFleets.size(); i++) {
+                final List<Fleet> otherFleets = fleets.stream()
+                        .filter(fleet -> !isCoalition(attacker, fleet) && !fleet.getName().startsWith(INTERCEPT_PREFIX))
+                        .collect(Collectors.toList());
+
+                final Set<Fleet> pirates = otherFleets.stream()
+                        .filter(fleet -> fleet.getOwner().getUsername().equals(MasterOfTheUniverseService.PIRATE))
+                        .collect(Collectors.toSet());
+
+                final Fleet biggestAttacker = attackersInterceptFleets.stream().max(Comparator.comparing(GameEventService::getTonnage)).orElse(null);
+                final Fleet biggestOther = (!pirates.isEmpty() ? pirates : otherFleets).stream().max(Comparator.comparing(GameEventService::getTonnage)).orElse(null);
+
+                if (biggestOther != null) {
+                    result.add(new FleetClash(fleetOrbit, List.of(biggestAttacker, biggestOther)));
+                    fleets.remove(biggestAttacker);
+                    fleets.remove(biggestOther);
+                }
+            }
+        }
     }
 
     private static void setUpFleetClashes(@Nonnull final FleetOrbit fleetOrbit,
@@ -124,30 +156,6 @@ public class GameEventService {
         final Alliance ownerAlliance = owner.getHumanOwner() != null ? owner.getHumanOwner().getAlliance() : null;
 
         return fleetOwner.equals(owner) || (fleetAlliance != null && fleetAlliance.equals(ownerAlliance));
-    }
-
-    private static void matchInterceptFleetsToCombatants(@Nonnull final Set<Fleet> iFleets,
-                                                         @Nonnull final Set<Fleet> oFleets,
-                                                         @Nonnull final List<FleetClash> result,
-                                                         @Nonnull final FleetOrbit fleetOrbit) {
-        Preconditions.checkNotNull(iFleets, "iFleets must not be empty");
-        Preconditions.checkNotNull(oFleets, "oFleets must not be empty");
-        Preconditions.checkNotNull(result, "result must not be empty");
-        Preconditions.checkNotNull(fleetOrbit, "fleetOrbit must not be empty");
-
-        for (int i = 0; i < iFleets.size(); i++) {
-            final Fleet biggestIntercept = iFleets.stream().max(Comparator.comparing(GameEventService::getTonnage)).orElse(null);
-            final Owner owner = biggestIntercept.getOwner();
-
-            final Fleet biggestOther = oFleets.stream()
-                    .filter(f -> !f.getOwner().equals(owner))
-                    .max(Comparator.comparing(GameEventService::getTonnage)).orElse(null);
-            if (biggestOther != null) {
-                result.add(new FleetClash(fleetOrbit, List.of(biggestIntercept, biggestOther)));
-                iFleets.remove(biggestIntercept);
-                oFleets.remove(biggestOther);
-            }
-        }
     }
 
     @Nonnull

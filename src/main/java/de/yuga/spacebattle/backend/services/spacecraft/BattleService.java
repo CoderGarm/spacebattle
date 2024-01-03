@@ -65,8 +65,6 @@ public class BattleService {
     public void runBattles(@Nonnull final Tick today) {
         Preconditions.checkNotNull(today, "today shouldn't be null!");
 
-        // todo first step is just to fight all users against each other
-
         final List<FleetClash> fleetClashes = fleetService.findAllFleetClashes();
         LOGGER.info("# {} battles for {}", fleetClashes.size(), today);
 

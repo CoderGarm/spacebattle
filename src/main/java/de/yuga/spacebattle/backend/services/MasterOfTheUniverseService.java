@@ -246,16 +246,9 @@ public class MasterOfTheUniverseService {
                 .map(Fleet::getAliveShips)
                 .flatMap(Collection::stream)
                 .map(AbstractEntityKey::getId)
-                .filter(id -> id == 26).count() < 7;
+                .filter(id -> id == 26).count() < 7; // fixme remove me after tomorrow
         if (transformationNeeded) {
-
-            fleetService.deletAll(); // fixme remove me!
-
             createShannonsFleet();
-            createFlashsFleet(); /* fixme test event methods by different names and strength */
-            createYufielsFleet();
-            createPirateFleet();
-
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
@@ -267,39 +260,6 @@ public class MasterOfTheUniverseService {
         final Fleet reinforcement = createFleet(Objects.requireNonNull(mainPlanet.getHumanOwner()), mainPlanet, "INTERCEPT Reinforcement");
 
         final ShipClass songbird = shipClassService.find(26);
-
-        for (int i = 0; i < 6; i++) {
-            createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
-        }
-    }
-
-    private void createFlashsFleet() {
-        final Planet mainPlanet = planetService.findMainPlanet(13);
-        final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(1)), mainPlanet, "INTERCEPT Flash");
-
-        final ShipClass songbird = shipClassService.find(2);
-
-        for (int i = 0; i < 6; i++) {
-            createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
-        }
-    }
-
-    private void createYufielsFleet() {
-        final Planet mainPlanet = planetService.findMainPlanet(13);
-        final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(3)), mainPlanet, "INTERCEPT Yufiel");
-
-        final ShipClass songbird = shipClassService.find(3);
-
-        for (int i = 0; i < 6; i++) {
-            createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
-        }
-    }
-
-    private void createPirateFleet() {
-        final Planet mainPlanet = planetService.findMainPlanet(13);
-        final Fleet reinforcement = createFleet(Objects.requireNonNull(ownerService.find(15)), mainPlanet, "INTERCEPT Pirate");
-
-        final ShipClass songbird = shipClassService.find(9);
 
         for (int i = 0; i < 6; i++) {
             createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);

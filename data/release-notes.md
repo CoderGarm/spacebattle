@@ -8,6 +8,8 @@ todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in 
 todo. punkte sammeln -> flottenpunkte durch kämpfende tonnage, zerstörte tonnage; planetenpunkte durch anzahl eroberte planeten und gebäudelevel
 todo. ladderboard
 
+todo. schiffstonnage bei verbünderten zeigen
+
 check. INTERCEPT Fleets kämpfen nicht gegeneinander
 check. reinforce shannon
 check. create foritied bases with rewards
