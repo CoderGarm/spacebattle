@@ -42,6 +42,10 @@ public class Tick extends AbstractEntityKey implements Comparable<Tick> {
     public Tick() {
     }
 
+    public Tick(final int tickNo) {
+        this.id = tickNo;
+    }
+
     @Nonnull
     public LocalDateTime getTickStarts() {
         return tickStarts;

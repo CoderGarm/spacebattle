@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.combat.dto.RangeDefinition;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.physics.Mass;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
@@ -22,10 +23,8 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
-import de.yuga.spacebattle.backend.enums.EDepositType;
-import de.yuga.spacebattle.backend.enums.EModuleType;
-import de.yuga.spacebattle.backend.enums.ETechnologyType;
-import de.yuga.spacebattle.backend.enums.EWeaponType;
+import de.yuga.spacebattle.backend.enums.*;
+import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -290,6 +289,13 @@ public class Fleet extends Operationable implements HasOwner {
                 .collect(Collectors.toList());
 
         return accelerations.get(0);
+    }
+
+    @Nonnull
+    public Mass getTonnage(@Nonnull final EMassMetric massMetric) {
+        Preconditions.checkNotNull(massMetric, "massMetric must not be empty");
+
+        return getAliveShips().stream().map(w -> w.getShipClass().getTonnage(ECapacityAreaType.OVERALL)).reduce(Mass.ZERO, Mass::add);
     }
 
     /**

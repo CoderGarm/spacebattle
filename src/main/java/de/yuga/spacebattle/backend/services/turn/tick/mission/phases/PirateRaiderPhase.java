@@ -106,7 +106,7 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
                 assert pirateFleet.getOrbit() != null;
                 assert pirateFleet.getOrbit().getPlanet() != null;
                 final Planet target = pirateFleet.getOrbit().getPlanet();
-                final BattleReport battleReport = fight(today, target);
+                final BattleReport battleReport = fight(today, target, pirateFleet);
                 final Owner owner = target.getOwner() != null ? target.getOwner() : Owner.UNCOLONIZED;
                 boolean userDefeated = true;
                 if (battleReport == null) {
@@ -131,11 +131,15 @@ public class PirateRaiderPhase implements MissionPhaseRunner {
     }
 
     @Nullable
-    private BattleReport fight(@Nonnull final Tick today, @Nonnull final Planet target) {
+    private BattleReport fight(@Nonnull final Tick today, @Nonnull final Planet target, @Nonnull final Fleet pirateFleet) {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(target, "target must not be empty");
+        Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
 
-        return battleService.runBattleAtPlanet(today, target);
+        final List<BattleReport> battleReports = battleService.runBattleAtPlanet(today, target);
+        return battleReports.stream()
+                .filter(r -> r.getParticipatingFleets().stream().map(FleetSnapshot::getFleet).collect(Collectors.toSet()).contains(pirateFleet))
+                .findFirst().orElse(null);
     }
 
     private boolean hasPirateWon(@Nonnull final BattleReport battleReport) {

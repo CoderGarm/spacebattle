@@ -95,6 +95,11 @@ public class PirateApproachPhase implements MissionPhaseRunner {
 
         final List<Fleet> pirateFleets = fleetService.findAllFleetsWithoutMovementByUser(pirate.getId());
         pirateFleets.removeIf(fleet -> {
+            if (isAtOwnPlanet(fleet)) {
+                // at own planet, stay forever
+                return true;
+            }
+
             if (raidingPirateCache.getNextActions(fleet).isEmpty()) {
                 // no instruction, just proceed
                 return false;
@@ -133,6 +138,18 @@ public class PirateApproachPhase implements MissionPhaseRunner {
         final int heatAddition = -HeatMapRunner.BASIC_HEAT_INCREMENT * 3;
         heatMapService.reduceHeat(heating, EMissionType.PIRATE_RAID, heatAddition);
         executeMovement(today, resultingMoves);
+    }
+
+    private static boolean isAtOwnPlanet(@Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+
+        if (fleet.getOrbit() != null) {
+            final Planet planet = fleet.getOrbit().getPlanet();
+            if (planet != null && planet.getOwner() != null) {
+                return planet.getOwner().equals(fleet.getOwner());
+            }
+        }
+        return false;
     }
 
     private void executeMovement(@Nonnull final Tick today, @Nonnull final List<Move> resultingMoves) {

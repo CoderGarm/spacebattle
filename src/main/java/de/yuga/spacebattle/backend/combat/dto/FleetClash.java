@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -37,7 +38,17 @@ public class FleetClash {
         final Map<Owner, List<Fleet>> byOwner = entry.getValue().stream()
                 .collect(Collectors.groupingBy(Fleet::getOwner,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
-        byOwner.forEach((owner, fleets) -> participatingFleets.add(fleets.get(0)));
+        byOwner.forEach((owner, fleets) -> this.participatingFleets.add(fleets.get(0)));
+    }
+
+    public FleetClash(@Nonnull final FleetOrbit fleetOrbit, @Nonnull final Collection<Fleet> combatants) {
+        this.orbit = Preconditions.checkNotNull(fleetOrbit, "fleetOrbit must not be empty");
+        Preconditions.checkNotNull(combatants, "combatants must not be empty");
+
+        final Map<Owner, List<Fleet>> byOwner = combatants.stream()
+                .collect(Collectors.groupingBy(Fleet::getOwner,
+                        Collectors.mapping(Function.identity(), Collectors.toList())));
+        byOwner.forEach((owner, fleets) -> this.participatingFleets.add(fleets.get(0)));
     }
 
     @Nonnull

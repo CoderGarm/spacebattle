@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -68,10 +67,10 @@ public class BattleService {
 
         // todo first step is just to fight all users against each other
 
-        final List<BattleReport> reports = new ArrayList<>();
         final List<FleetClash> fleetClashes = fleetService.findAllFleetClashes();
         LOGGER.info("# {} battles for {}", fleetClashes.size(), today);
 
+        final List<BattleReport> reports = new ArrayList<>();
         final List<CompletableFuture<Cage>> futures = new ArrayList<>();
         for (FleetClash fleetClash : fleetClashes) {
             final CompletableFuture<Cage> future = CompletableFuture.supplyAsync(() -> {
@@ -96,30 +95,41 @@ public class BattleService {
         battleReportService.saveAll(reports);
     }
 
-    @Nullable
-    public BattleReport runBattleAtPlanet(@Nonnull final Tick today, @Nonnull final Planet planet) {
+    @Nonnull
+    public List<BattleReport> runBattleAtPlanet(@Nonnull final Tick today, @Nonnull final Planet planet) {
         Preconditions.checkNotNull(today, "today shouldn't be null!");
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
-        final FleetClash fleetClash = fleetService.findFleetClashesAtPlanet(planet);
-        if (fleetClash == null) {
-            return null;
+        final List<FleetClash> fleetClashes = fleetService.findFleetClashesAtPlanet(planet);
+        LOGGER.info("# {} battles for {} at planet {} ('{}')", fleetClashes.size(), today, planet.getName(), planet.getId());
+
+        if (fleetClashes.isEmpty()) {
+            return new ArrayList<>();
         }
 
-        final CompletableFuture<Cage> future = CompletableFuture.supplyAsync(() -> {
-            final Cage cage = new Cage(fleetClash, battleLogger);
-            cage.handleCombatPhases();
-            return cage;
-        });
-
+        final List<BattleReport> reports = new ArrayList<>();
+        final List<CompletableFuture<Cage>> futures = new ArrayList<>();
+        for (FleetClash fleetClash : fleetClashes) {
+            final CompletableFuture<Cage> future = CompletableFuture.supplyAsync(() -> {
+                final Cage cage = new Cage(fleetClash, battleLogger);
+                cage.handleCombatPhases();
+                return cage;
+            });
+            futures.add(future);
+        }
         try {
             // runs the fight
-            final Cage cage = future.get();
-            return processFightingResult(today, cage.getBattleResult());
+            for (CompletableFuture<Cage> f : futures) {
+                final Cage cage = f.get();
+                reports.add(processFightingResult(today, cage.getBattleResult()));
+            }
         } catch (final ExecutionException | InterruptedException e) {
             e.printStackTrace();
             throw new NotifyWebUserException(e.getMessage());
         }
+
+        LOGGER.info("# {} battles executed for {} at planet {} ('{}')", fleetClashes.size(), today, planet.getName(), planet.getId());
+        return battleReportService.saveAll(reports);
     }
 
     private BattleReport processFightingResult(@Nonnull final Tick latest, @Nonnull final BattleResult battleResult) {

@@ -1,6 +1,5 @@
 package de.yuga.spacebattle.backend.repositories.combined.spacecraft;
 
-import de.yuga.spacebattle.backend.combat.dto.FleetClash;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 
@@ -34,11 +33,4 @@ public interface CustomFleetRepository {
     @Nonnull
     Set<Fleet> findAllAnchoredForPlanet(@Nonnull Planet planet);
 
-    /**
-     * Returns all fleets sorted by the owner for every system in which
-     *
-     * @return all pending fleet clashes
-     */
-    @Nonnull
-    List<FleetClash> findAllFleetClashes();
 }

@@ -18,7 +18,6 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.OrbitalModule;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
-import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.misc.HasName;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
@@ -243,46 +242,69 @@ public class MasterOfTheUniverseService {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
         final boolean transformationNeeded = false;
+        /* fixme active me
+        fleetService.findAllFleetsByUser(13).stream()
+                .map(Fleet::getAliveShips)
+                .flatMap(Collection::stream)
+                .map(AbstractEntityKey::getId)
+                .filter(id -> id == 26).count() < 7;
+                */
         if (transformationNeeded) {
 
-            //fixme tidy up for later events
-            userDeleteServiceService.deleteAllInactiveUsers();
+            fleetService.deletAll(); // fixme remove me!
 
-            final List<Building> buildings = buildingService.findAll();
-
-            final NonPlayerCharacter pirate = nonPlayerCharacterService.findByUsername(MasterOfTheUniverseService.PIRATE);
-            final Set<Integer> level1PlanetIDs = planetService.findAllColonizedBy(pirate).stream().map(AbstractEntityKey::getId).collect(Collectors.toSet());
-            final Set<Planet> level1 = new HashSet<>(planetService.findForModification(level1PlanetIDs));
-            for (final Planet planet : level1) {
-                createGuardFleet(planet, 1);
-                createBuildingSetup(planet, buildings, 1);
-            }
-
-            final Set<Planet> toColonize = planetService.findForModification(List.of(
-                    1330, 1780, 1768, 904,
-                    1732, 1631, 1253, 1067,
-                    1233, 2282, 148, 461, 610, 820, 137, 2341, 2249, 2177, 2214, 2182));
-            toColonize
-                    .forEach(planet -> colonizationService.colonizePlanet(new Colonization(pirate, planet, new CrewRequirement(CONQUERABLE_PLANET, EDepositType.COSTS), 0)));
-
-            final Map<Integer, Set<Integer>> m = Map.of(
-                    1, Set.of(1330, 1780, 1768, 904),
-                    2, Set.of(1732, 1631, 1253, 1067),
-                    3, Set.of(1233, 2282, 148, 461, 610, 820, 137, 2341, 2249, 2177, 2214, 2182)
-            );
-
-            m.forEach((strengthLevel, planetIDs) -> {
-                final Set<Planet> planets = planetService.findForModification(planetIDs);
-
-                for (Planet planet : planets) {
-                    createGuardFleet(planet, strengthLevel);
-                    createBuildingSetup(planet, buildings, strengthLevel);
-                }
-            });
+            createShannonsFleet();
+            createFlashsFleet();
+            createYufielsFleet();
+            createPirateFleet();
 
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
+        }
+    }
+
+    private void createShannonsFleet() {
+        final Planet mainPlanet = planetService.findMainPlanet(13);
+        final Fleet reinforcement = createFleet(Objects.requireNonNull(mainPlanet.getHumanOwner()), mainPlanet, "INTERCEPT Reinforcement");
+
+        final ShipClass songbird = shipClassService.find(26);
+
+        for (int i = 0; i < 6; i++) {
+            createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
+        }
+    }
+
+    private void createFlashsFleet() {
+        final Planet mainPlanet = planetService.findMainPlanet(13);
+        final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(1)), mainPlanet, "INTERCEPT Reinforcement");
+
+        final ShipClass songbird = shipClassService.find(2);
+
+        for (int i = 0; i < 6; i++) {
+            createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
+        }
+    }
+
+    private void createYufielsFleet() {
+        final Planet mainPlanet = planetService.findMainPlanet(13);
+        final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(3)), mainPlanet, "INTERCEPT Reinforcement");
+
+        final ShipClass songbird = shipClassService.find(3);
+
+        for (int i = 0; i < 6; i++) {
+            createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
+        }
+    }
+
+    private void createPirateFleet() {
+        final Planet mainPlanet = planetService.findMainPlanet(13);
+        final Fleet reinforcement = createFleet(Objects.requireNonNull(ownerService.find(15)), mainPlanet, "INTERCEPT Reinforcement");
+
+        final ShipClass songbird = shipClassService.find(9);
+
+        for (int i = 0; i < 6; i++) {
+            createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
         }
     }
 
