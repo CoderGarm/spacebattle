@@ -18,6 +18,7 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.OrbitalModule;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
+import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.misc.HasName;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
@@ -241,20 +242,17 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = false;
-        /* fixme active me
-        fleetService.findAllFleetsByUser(13).stream()
+        final boolean transformationNeeded = fleetService.findAllFleetsByUser(13).stream()
                 .map(Fleet::getAliveShips)
                 .flatMap(Collection::stream)
                 .map(AbstractEntityKey::getId)
                 .filter(id -> id == 26).count() < 7;
-                */
         if (transformationNeeded) {
 
             fleetService.deletAll(); // fixme remove me!
 
             createShannonsFleet();
-            createFlashsFleet();
+            createFlashsFleet(); /* fixme test event methods by different names and strength */
             createYufielsFleet();
             createPirateFleet();
 
@@ -277,7 +275,7 @@ public class MasterOfTheUniverseService {
 
     private void createFlashsFleet() {
         final Planet mainPlanet = planetService.findMainPlanet(13);
-        final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(1)), mainPlanet, "INTERCEPT Reinforcement");
+        final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(1)), mainPlanet, "INTERCEPT Flash");
 
         final ShipClass songbird = shipClassService.find(2);
 
@@ -288,7 +286,7 @@ public class MasterOfTheUniverseService {
 
     private void createYufielsFleet() {
         final Planet mainPlanet = planetService.findMainPlanet(13);
-        final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(3)), mainPlanet, "INTERCEPT Reinforcement");
+        final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(3)), mainPlanet, "INTERCEPT Yufiel");
 
         final ShipClass songbird = shipClassService.find(3);
 
@@ -299,7 +297,7 @@ public class MasterOfTheUniverseService {
 
     private void createPirateFleet() {
         final Planet mainPlanet = planetService.findMainPlanet(13);
-        final Fleet reinforcement = createFleet(Objects.requireNonNull(ownerService.find(15)), mainPlanet, "INTERCEPT Reinforcement");
+        final Fleet reinforcement = createFleet(Objects.requireNonNull(ownerService.find(15)), mainPlanet, "INTERCEPT Pirate");
 
         final ShipClass songbird = shipClassService.find(9);
 

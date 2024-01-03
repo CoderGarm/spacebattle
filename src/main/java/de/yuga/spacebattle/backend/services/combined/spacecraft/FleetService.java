@@ -1,13 +1,10 @@
 package de.yuga.spacebattle.backend.services.combined.spacecraft;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.CombatAllowanceCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.combat.dto.FleetClash;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.account.Owner;
-import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
@@ -427,51 +424,19 @@ public class FleetService {
 
     @Nonnull
     public List<FleetClash> findAllFleetClashes() {
-
         final List<Fleet> nonMovingFleets = fleetRepository.findAllFleetsWithoutMovement();
-        final Map<FleetOrbit, List<Fleet>> fleetsToOrbit = nonMovingFleets.stream()
+        final Map<FleetOrbit, List<Fleet>> fleetsByOrbit = detectActiveFleetsByOrbit(nonMovingFleets);
+        return gameEventService.organize(fleetsByOrbit);
+    }
+
+    @Nonnull
+    private static Map<FleetOrbit, List<Fleet>> detectActiveFleetsByOrbit(@Nonnull final Collection<Fleet> fleets) {
+        Preconditions.checkNotNull(fleets, "fleets must not be empty");
+
+        return fleets.stream()
                 .filter(Fleet::isActive)
                 .filter(f -> f.getOrbit() != null)
                 .collect(Collectors.groupingBy(Fleet::getOrbit, Collectors.mapping(Function.identity(), Collectors.toList())));
-
-        final Set<FleetOrbit> candidates = fleetsToOrbit.entrySet().stream()
-                .filter(e -> e.getValue().size() > 1 && e.getValue().stream().map(Fleet::getOwner).collect(Collectors.toSet()).size() > 1)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
-
-        final List<FleetClash> fleetClashes = fleetsToOrbit.entrySet().stream()
-                .filter(entry -> candidates.contains(entry.getKey()))
-                .filter(entry -> {
-                    final List<Fleet> fleets = entry.getValue();
-                    final Set<Owner> owners = fleets.stream().map(Fleet::getOwner).collect(Collectors.toSet());
-                    if (!CombatAllowanceCalculator.isCombatAllowed(owners)) {
-                        // todo implement 3-way combat anyhow
-                        return false;
-                    }
-                    final Set<User> users = owners.stream()
-                            .map(Owner::getHumanOwner)
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toSet());
-
-                    if (owners.size() - users.size() == 1) {
-                        // single npc present
-                        return true;
-                    }
-
-                    final boolean userWithAlliancePresent = users.stream().anyMatch(user -> user.getAlliance() != null);
-                    final boolean userWithoutAlliancePresent = users.stream().anyMatch(user -> user.getAlliance() == null);
-                    if (userWithAlliancePresent && userWithoutAlliancePresent) {
-                        return true;
-                    }
-                    final Set<Alliance> participatingAlliances = users.stream().map(User::getAlliance).filter(Objects::nonNull).collect(Collectors.toSet());
-                    if (participatingAlliances.size() > 1) {
-                        return true;
-                    }
-                    final Set<User> usersWithoutAlliances = users.stream().filter(user -> user.getAlliance() == null).collect(Collectors.toSet());
-                    return CombatAllowanceCalculator.isCombatAllowed(usersWithoutAlliances);
-                })
-                .map(FleetClash::new).collect(Collectors.toList());
-        return gameEventService.organize(fleetClashes);
     }
 
     @Nonnull
@@ -479,24 +444,8 @@ public class FleetService {
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
         final Set<Fleet> allFleetsByPlanet = fleetRepository.findAllFleetsByPlanet(planet);
-        final Set<Owner> users = allFleetsByPlanet.stream().map(Fleet::getOwner).collect(Collectors.toSet());
-        if (!CombatAllowanceCalculator.isCombatAllowed(users)) {
-            // todo implement 3-way combat anyhow
-            return new ArrayList<>();
-        }
-        final Map<FleetOrbit, List<Fleet>> fleetsByOrbit = allFleetsByPlanet.stream()
-                .filter(f -> Objects.nonNull(f.getOrbit()))
-                .collect(Collectors.groupingBy(Fleet::getOrbit, Collectors.mapping(Function.identity(), Collectors.toList())));
-        if (fleetsByOrbit.size() > 1) {
-            throw new NotifyWebUserException("There cannot be more than one orbit for a single planet.");
-        }
-        if (fleetsByOrbit.isEmpty()) {
-            return new ArrayList<>();
-        }
-        final List<FleetClash> clashes = new ArrayList<>();
-        fleetsByOrbit.entrySet().forEach(entry -> clashes.add(new FleetClash(entry)));
-
-        return gameEventService.organize(clashes);
+        final Map<FleetOrbit, List<Fleet>> fleetsByOrbit = detectActiveFleetsByOrbit(allFleetsByPlanet);
+        return gameEventService.organize(fleetsByOrbit);
     }
 
     @Nonnull

@@ -92,4 +92,9 @@ public class Owner extends AbstractEntityKey implements HasOwner {
     public int hashCode() {
         return new HashCodeBuilder(17, 37).append(dType).append(username).toHashCode();
     }
+
+    @Override
+    public String toString() {
+        return username;
+    }
 }

@@ -3,11 +3,14 @@ package de.yuga.spacebattle.backend.services.turn;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.dto.FleetClash;
 import de.yuga.spacebattle.backend.entities.account.Owner;
+import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
 import org.apache.commons.lang3.Range;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +20,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class GameEventService {
+
+    @Nonnull
+    private static final Logger LOGGER = LoggerFactory.getLogger(GameEventService.class);
 
     @Nonnull
     private final TickTimeService timeService;
@@ -38,27 +44,36 @@ public class GameEventService {
     }
 
     @Nonnull
-    public List<FleetClash> organize(@Nonnull final List<FleetClash> clashes) {
-        Preconditions.checkNotNull(clashes, "clashes must not be empty");
+    public List<FleetClash> organize(@Nonnull final Map<FleetOrbit, List<Fleet>> fleetsByOrbit) {
+        Preconditions.checkNotNull(fleetsByOrbit, "fleetsByOrbit must not be empty");
 
-        if (!isWarHarvest23()) {
-            return clashes;
-        }
+        final Set<FleetOrbit> candidates = fleetsByOrbit.entrySet().stream()
+                .filter(e -> e.getValue().size() > 1 && e.getValue().stream().map(Fleet::getOwner).collect(Collectors.toSet()).size() > 1)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
 
         final List<FleetClash> result = new ArrayList<>();
 
-        clashes.forEach(clash -> {
-            final FleetOrbit fleetOrbit = clash.getOrbit();
-            final List<Fleet> participatingFleets = clash.getParticipatingFleets();
+        if (!isWarHarvest23()) {
+            LOGGER.info("Setting up regular fleet clashes");
+            for (final FleetOrbit fleetOrbit : fleetsByOrbit.keySet().stream().filter(candidates::contains).collect(Collectors.toSet())) {
+                final List<Fleet> fleets = fleetsByOrbit.get(fleetOrbit);
+                setUpFleetClashes(fleetOrbit, fleets, result);
+            }
+            return result;
+        }
+
+        LOGGER.info("Setting up war harvest fleet clashes");
+        for (final FleetOrbit fleetOrbit : fleetsByOrbit.keySet().stream().filter(candidates::contains).collect(Collectors.toSet())) {
+            final List<Fleet> participatingFleets = fleetsByOrbit.get(fleetOrbit);
+
 
             final Set<Fleet> interceptFleets = participatingFleets.stream().filter(f -> f.getName().startsWith(INTERCEPT_PREFIX)).collect(Collectors.toSet());
             final Set<Fleet> otherFleets = participatingFleets.stream().filter(f -> !f.getName().startsWith(INTERCEPT_PREFIX)).collect(Collectors.toSet());
             if (interceptFleets.size() <= 1) {
                 // process regularly on single or no intercept fleet
-                result.add(clash);
-            }
-
-            if (interceptFleets.size() > 1) {
+                setUpFleetClashes(fleetOrbit, otherFleets, result);
+            } else {
                 // assign combatants based on event status
 
                 final Set<Fleet> iFleets = new HashSet<>(interceptFleets);
@@ -69,9 +84,46 @@ public class GameEventService {
                     result.add(new FleetClash(fleetOrbit, oFleets));
                 }
             }
-        });
+        }
 
         return result;
+    }
+
+    private static void setUpFleetClashes(@Nonnull final FleetOrbit fleetOrbit,
+                                          @Nonnull final Collection<Fleet> fleets,
+                                          @Nonnull final Collection<FleetClash> result) {
+        Preconditions.checkNotNull(fleetOrbit, "fleetOrbit must not be empty");
+        Preconditions.checkNotNull(fleets, "fleets must not be empty");
+        Preconditions.checkNotNull(result, "result must not be empty");
+
+        final Set<Owner> participants = fleets.stream().map(Fleet::getOwner).collect(Collectors.toSet());
+        for (final Owner attacker : participants) {
+            final Set<Fleet> attackersFleets = fleets.stream().filter(f -> f.getOwner().equals(attacker)).collect(Collectors.toSet());
+
+            for (int i = 0; i < attackersFleets.size(); i++) {
+                final Set<Fleet> otherFleets = fleets.stream().filter(others -> !isCoalition(attacker, others)).collect(Collectors.toSet());
+
+                final Fleet biggestAttacker = attackersFleets.stream().max(Comparator.comparing(GameEventService::getTonnage)).orElse(null);
+                final Fleet biggestOther = otherFleets.stream().max(Comparator.comparing(GameEventService::getTonnage)).orElse(null);
+
+                if (biggestOther != null) {
+                    result.add(new FleetClash(fleetOrbit, List.of(biggestAttacker, biggestOther)));
+                    fleets.remove(biggestAttacker);
+                    fleets.remove(biggestOther);
+                }
+            }
+        }
+    }
+
+    private static boolean isCoalition(@Nonnull final Owner owner, @Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(owner, "owner must not be empty");
+        Preconditions.checkNotNull(fleet, "fleet must not be empty");
+
+        final Owner fleetOwner = fleet.getOwner();
+        final Alliance fleetAlliance = fleetOwner.getHumanOwner() != null ? fleetOwner.getHumanOwner().getAlliance() : null;
+        final Alliance ownerAlliance = owner.getHumanOwner() != null ? owner.getHumanOwner().getAlliance() : null;
+
+        return fleetOwner.equals(owner) || (fleetAlliance != null && fleetAlliance.equals(ownerAlliance));
     }
 
     private static void matchInterceptFleetsToCombatants(@Nonnull final Set<Fleet> iFleets,

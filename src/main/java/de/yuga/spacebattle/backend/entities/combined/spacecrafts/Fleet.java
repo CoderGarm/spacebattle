@@ -401,4 +401,9 @@ public class Fleet extends Operationable implements HasOwner {
     public boolean isInYard() {
         return getJobs().stream().anyMatch(j -> !j.isDeleted());
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
