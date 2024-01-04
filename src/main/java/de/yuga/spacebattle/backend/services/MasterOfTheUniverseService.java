@@ -18,7 +18,6 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.OrbitalModule;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
-import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.misc.HasName;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
@@ -242,13 +241,9 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = fleetService.findAllFleetsByUser(13).stream()
-                .map(Fleet::getAliveShips)
-                .flatMap(Collection::stream)
-                .map(AbstractEntityKey::getId)
-                .filter(id -> id == 26).count() < 7; // fixme remove me after tomorrow
+        final boolean transformationNeeded = tickService.getToday().getNo() == 243;
         if (transformationNeeded) {
-            createShannonsFleet();
+            tickService.doTick();
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");

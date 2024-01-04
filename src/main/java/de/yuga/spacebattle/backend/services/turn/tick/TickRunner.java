@@ -10,19 +10,19 @@ import java.util.List;
 public interface TickRunner extends Comparable<TickRunner> {
 
     List<Class<? extends TickRunner>> SEQUENCE_OF_RUNNERS = List.of(
-            //NPCFleetTickRunner.class,
-            //EmpireTransportationTickRunner.class,
-            //EmpireMigrationTickRunner.class,
-            //TradeTickRunner.class,
-            //PlanetTickRunner.class,
-            //ResearchTickRunner.class,
-            //OperationalTickRunner.class,
-            //FleetMovementTickRunner.class,
-            //ColonizationTickRunner.class,
-            //NPCMissionRunner.class,
+            NPCFleetTickRunner.class,
+            EmpireTransportationTickRunner.class,
+            EmpireMigrationTickRunner.class,
+            TradeTickRunner.class,
+            PlanetTickRunner.class,
+            ResearchTickRunner.class,
+            OperationalTickRunner.class,
+            FleetMovementTickRunner.class,
+            ColonizationTickRunner.class,
+            NPCMissionRunner.class,
             UserBattleRunner.class,
-            //HeatMapRunner.class,
-            //HousekeepingRunner.class,
+            HeatMapRunner.class,
+            HousekeepingRunner.class,
             TickAdviceEMailRunner.class
     );
 
