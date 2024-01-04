@@ -241,24 +241,40 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = tickService.getToday().getNo() == 243;
+        final boolean transformationNeeded = false;
         if (transformationNeeded) {
-            tickService.doTick();
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
         }
     }
 
-    private void createShannonsFleet() {
-        final Planet mainPlanet = planetService.findMainPlanet(13);
-        final Fleet reinforcement = createFleet(Objects.requireNonNull(mainPlanet.getHumanOwner()), mainPlanet, "INTERCEPT Reinforcement");
+    private void createFlashsFleet() {
+        final Planet mainPlanet = planetService.find(112);
+        final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(1)), mainPlanet, "INTERCEPT Flash");
 
-        final ShipClass songbird = shipClassService.find(26);
+        final ShipClass songbird = shipClassService.find(2);
 
-        for (int i = 0; i < 6; i++) {
-            createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
-        }
+        createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
+
+    }
+
+    private void createYufielsFleet() {
+        final Planet mainPlanet = planetService.find(112);
+        final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(3)), mainPlanet, "INTERCEPT Yufiel");
+
+        final ShipClass songbird = shipClassService.find(3);
+
+        createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
+    }
+
+    private void createPirateFleet() {
+        final Planet mainPlanet = planetService.find(112);
+        final Fleet reinforcement = createFleet(Objects.requireNonNull(ownerService.find(15)), mainPlanet, "INTERCEPT Pirate");
+
+        final ShipClass songbird = shipClassService.find(9);
+
+        createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
     }
 
     private void createBuildingSetup(@Nonnull final Planet planet,

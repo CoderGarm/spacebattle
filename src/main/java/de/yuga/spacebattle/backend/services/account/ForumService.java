@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.services.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.forum.IdToId;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.account.forum.Forum;
 import de.yuga.spacebattle.backend.entities.account.forum.ForumMessage;
@@ -93,7 +94,7 @@ public class ForumService {
 
     @Nonnull
     public ForumMessage createForumMessage(@Nonnull final ForumThread forumThread,
-                                           @Nonnull final User author,
+                                           @Nonnull final Owner author,
                                            @Nonnull final String message) {
         Preconditions.checkNotNull(forumThread, "messageThread shouldn't be null!");
         Preconditions.checkNotNull(author, "author shouldn't be null!");

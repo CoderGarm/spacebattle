@@ -2,7 +2,6 @@ package de.yuga.spacebattle.backend.services.combined.spacecraft;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
-import de.yuga.spacebattle.backend.combat.dto.FleetClash;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
@@ -24,7 +23,6 @@ import de.yuga.spacebattle.backend.repositories.combined.spacecraft.FleetReposit
 import de.yuga.spacebattle.backend.repositories.combined.spacecraft.FleetSnapshotRepository;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
-import de.yuga.spacebattle.backend.services.turn.GameEventService;
 import de.yuga.spacebattle.backend.services.turn.MoveService;
 import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import de.yuga.spacebattle.backend.services.turn.TransportJobService;
@@ -33,6 +31,8 @@ import de.yuga.spacebattle.rest.dto.AbstractId;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMerge;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMergeResult;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetSplit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +48,9 @@ import static de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposi
 
 @Service
 public class FleetService {
+
+    @Nonnull
+    private static final Logger LOGGER = LoggerFactory.getLogger(FleetService.class);
 
     @Nonnull
     private final FleetRepository fleetRepository;
@@ -70,9 +73,6 @@ public class FleetService {
     @Nonnull
     private final FleetSnapshotRepository fleetSnapshotRepository;
 
-    @Nonnull
-    private final GameEventService gameEventService;
-
     @Autowired
     public FleetService(@Nonnull final FleetRepository fleetRepository,
                         @Nonnull final WarShipService warShipService,
@@ -80,8 +80,7 @@ public class FleetService {
                         @Nonnull final TickTimeService tickTimeService,
                         @Nonnull final MoveService moveService,
                         @Nonnull final TransportJobService transportJobService,
-                        @Nonnull final FleetSnapshotRepository fleetSnapshotRepository,
-                        @Nonnull final GameEventService gameEventService) {
+                        @Nonnull final FleetSnapshotRepository fleetSnapshotRepository) {
         this.fleetRepository = Preconditions.checkNotNull(fleetRepository, "fleetR shouldn't be null!");
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
@@ -89,7 +88,6 @@ public class FleetService {
         this.moveService = Preconditions.checkNotNull(moveService, "moveService must not be empty");
         this.transportJobService = Preconditions.checkNotNull(transportJobService, "transportJobService must not be empty");
         this.fleetSnapshotRepository = Preconditions.checkNotNull(fleetSnapshotRepository, "fleetSnapshotRepository must not be empty");
-        this.gameEventService = Preconditions.checkNotNull(gameEventService, "gameEventService must not be empty");
     }
 
     /**
@@ -423,29 +421,15 @@ public class FleetService {
     }
 
     @Nonnull
-    public List<FleetClash> findAllFleetClashes() {
-        final List<Fleet> nonMovingFleets = fleetRepository.findAllFleetsWithoutMovement();
-        final Map<FleetOrbit, List<Fleet>> fleetsByOrbit = detectActiveFleetsByOrbit(nonMovingFleets);
-        return gameEventService.organize(fleetsByOrbit);
+    public List<Fleet> findAllFleetsWithoutMovement() {
+        return fleetRepository.findAllFleetsWithoutMovement();
     }
 
     @Nonnull
-    private static Map<FleetOrbit, List<Fleet>> detectActiveFleetsByOrbit(@Nonnull final Collection<Fleet> fleets) {
-        Preconditions.checkNotNull(fleets, "fleets must not be empty");
-
-        return fleets.stream()
-                .filter(Fleet::isActive)
-                .filter(f -> f.getOrbit() != null)
-                .collect(Collectors.groupingBy(Fleet::getOrbit, Collectors.mapping(Function.identity(), Collectors.toList())));
-    }
-
-    @Nonnull
-    public List<FleetClash> findFleetClashesAtPlanet(@Nonnull final Planet planet) {
+    public Set<Fleet> findAllFleetsByPlanet(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
-        final Set<Fleet> allFleetsByPlanet = fleetRepository.findAllFleetsByPlanet(planet);
-        final Map<FleetOrbit, List<Fleet>> fleetsByOrbit = detectActiveFleetsByOrbit(allFleetsByPlanet);
-        return gameEventService.organize(fleetsByOrbit);
+        return fleetRepository.findAllFleetsByPlanet(planet);
     }
 
     @Nonnull

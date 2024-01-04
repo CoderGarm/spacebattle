@@ -73,20 +73,20 @@ public class AuthApi {
     public static final String ENDPOINT = "auth";
 
     private static final String NAME_PLACEHOLDER = "NAME_PLACEHOLDER";
-    private static final String WELCOME_MESSAGE = "Hello " + NAME_PLACEHOLDER + ",  " +
-            "  " +
-            "welcome to the honorverse. If you want to survive, listen carefully.  " +
-            "  " +
-            "I suggest that you have a look at the planet you conquered from the pirates.  " +
-            "You can replay the battle at the journals section to see the glorious victory of your admirals and crews.  " +
-            "  " +
-            "In order to improve the conditions for your colonists you should have a look if you can build some houses or hospitals.  " +
-            "But keep in mind, you can only house as many persons as you can support.  " +
-            "  " +
-            "If you noticed, the universe is a hostile place so it could be a good idea to build a shipyard and build ships to control your space.  " +
-            "  " +
-            "  " +
-            "Sincerely and with the best wishes,  " +
+    private static final String WELCOME_MESSAGE = "Hello " + NAME_PLACEHOLDER + ",  \n" +
+            "\n" +
+            "welcome to the honorverse. If you want to survive, listen carefully.\n" +
+            "\n" +
+            "I suggest that you have a look at the planet you conquered from the pirates.  \n" +
+            "You can replay the battle at the journals section to see the glorious victory of your admirals and crews.\n" +
+            "\n" +
+            "In order to improve the conditions for your colonists you should have a look if you can build some houses or hospitals.\n" +
+            "But keep in mind, you can only house as many persons as you can support.\n" +
+            "\n" +
+            "If you noticed, the universe is a hostile place so it could be a good idea to build a shipyard and build ships to control your space.\n" +
+            "\n" +
+            "\n" +
+            "Sincerely and with the best wishes,\n" +
             DEFEATED_OPPONENT + "  "; // fixme rework and check formatting -> some hints via images for the first steps
 
     @Nonnull

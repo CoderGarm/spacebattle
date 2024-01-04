@@ -7,12 +7,14 @@ import de.yuga.spacebattle.backend.combat.dto.FleetClash;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
+import de.yuga.spacebattle.backend.services.turn.GameEventService;
 import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
 import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStateService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -49,23 +51,56 @@ public class BattleService {
     @Nonnull
     private final WarshipHealthStateService warshipHealthStateService;
 
+    @Nonnull
+    private final GameEventService gameEventService;
+
     @Autowired
     public BattleService(@Nonnull final FleetService fleetService,
                          @Nonnull final BattleReportService battleReportService,
                          @Nonnull final WarShipService warShipService,
                          @Nonnull final BattleLogger battleLogger,
-                         @Nonnull final WarshipHealthStateService warshipHealthStateService) {
+                         @Nonnull final WarshipHealthStateService warshipHealthStateService,
+                         @Nonnull final GameEventService gameEventService) {
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
         this.battleReportService = Preconditions.checkNotNull(battleReportService, "battleReportService shouldn't be null!");
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService shouldn't be null!");
         this.battleLogger = Preconditions.checkNotNull(battleLogger, "battleLogger shouldn't be null!");
         this.warshipHealthStateService = Preconditions.checkNotNull(warshipHealthStateService, "warshipHealthStateService must not be empty");
+        this.gameEventService = Preconditions.checkNotNull(gameEventService, "gameEventService must not be empty");
+    }
+
+
+    @Nonnull
+    private List<FleetClash> findAllFleetClashes() {
+        final List<Fleet> nonMovingFleets = fleetService.findAllFleetsWithoutMovement();
+        final Map<FleetOrbit, List<Fleet>> fleetsByOrbit = detectActiveFleetsByOrbit(nonMovingFleets);
+        return gameEventService.organize(fleetsByOrbit);
+    }
+
+
+    @Nonnull
+    private static Map<FleetOrbit, List<Fleet>> detectActiveFleetsByOrbit(@Nonnull final Collection<Fleet> fleets) {
+        Preconditions.checkNotNull(fleets, "fleets must not be empty");
+
+        return fleets.stream()
+                .filter(Fleet::isActive)
+                .filter(f -> f.getOrbit() != null)
+                .collect(Collectors.groupingBy(Fleet::getOrbit, Collectors.mapping(Function.identity(), Collectors.toList())));
+    }
+
+    @Nonnull
+    private List<FleetClash> findFleetClashesAtPlanet(@Nonnull final Planet planet) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+
+        final Set<Fleet> allFleetsByPlanet = fleetService.findAllFleetsByPlanet(planet);
+        final Map<FleetOrbit, List<Fleet>> fleetsByOrbit = detectActiveFleetsByOrbit(allFleetsByPlanet);
+        return gameEventService.organize(fleetsByOrbit);
     }
 
     public void runBattles(@Nonnull final Tick today) {
         Preconditions.checkNotNull(today, "today shouldn't be null!");
 
-        final List<FleetClash> fleetClashes = fleetService.findAllFleetClashes();
+        final List<FleetClash> fleetClashes = findAllFleetClashes();
         LOGGER.info("# {} battles for {}", fleetClashes.size(), today);
 
         final List<BattleReport> reports = new ArrayList<>();
@@ -98,7 +133,7 @@ public class BattleService {
         Preconditions.checkNotNull(today, "today shouldn't be null!");
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
-        final List<FleetClash> fleetClashes = fleetService.findFleetClashesAtPlanet(planet);
+        final List<FleetClash> fleetClashes = findFleetClashesAtPlanet(planet);
         LOGGER.info("# {} battles for {} at planet {} ('{}')", fleetClashes.size(), today, planet.getName(), planet.getId());
 
         if (fleetClashes.isEmpty()) {

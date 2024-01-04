@@ -3,12 +3,20 @@ package de.yuga.spacebattle.backend.services.turn;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.dto.FleetClash;
 import de.yuga.spacebattle.backend.entities.account.Owner;
+import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.forum.ForumMessage;
+import de.yuga.spacebattle.backend.entities.account.forum.ForumThread;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
+import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
 import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
+import de.yuga.spacebattle.backend.services.account.ForumService;
+import de.yuga.spacebattle.backend.services.account.OwnerService;
+import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
+import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import org.apache.commons.lang3.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,19 +34,40 @@ public class GameEventService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GameEventService.class);
 
     @Nonnull
-    private final TickTimeService timeService;
-
-    @Nonnull
     private static final Range<Tick> WAR_HARVEST_2023 = Range.between(new Tick(244), new Tick(255), Tick::compareTo);
 
     @Nonnull
     private static final String INTERCEPT_PREFIX = "INTERCEPT";
 
+    @Nonnull
+    private final TickTimeService timeService;
+
+    @Nonnull
+    private final ForumService forumService;
+
+    @Nonnull
+    private final OwnerService ownerService;
+
+    @Nonnull
+    private final FleetService fleetService;
+
+    @Nonnull
+    private final PlanetService planetService;
+
     @Autowired
-    public GameEventService(@Nonnull final TickTimeService timeService) {
+    public GameEventService(@Nonnull final TickTimeService timeService,
+                            @Nonnull final ForumService forumService,
+                            @Nonnull final OwnerService ownerService,
+                            @Nonnull final FleetService fleetService,
+                            @Nonnull final PlanetService planetService) {
         this.timeService = Preconditions.checkNotNull(timeService, "timeService must not be empty");
+        this.forumService = Preconditions.checkNotNull(forumService, "forumService must not be empty");
+        this.ownerService = Preconditions.checkNotNull(ownerService, "ownerService must not be empty");
+        this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
+        this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean isWarHarvest23() {
         final Tick today = timeService.getToday();
         return WAR_HARVEST_2023.contains(today);
@@ -147,6 +176,7 @@ public class GameEventService {
         }
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private static boolean isCoalition(@Nonnull final Owner owner, @Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(owner, "owner must not be empty");
         Preconditions.checkNotNull(fleet, "fleet must not be empty");
@@ -163,5 +193,79 @@ public class GameEventService {
         Preconditions.checkNotNull(fleet, "fleet must not be empty");
 
         return fleet.getTonnage(EMassMetric.KT).getCoordinate().intValue();
+    }
+
+    @Nonnull
+    public ForumMessage warHarvestClaimResponse(@Nonnull final ForumMessage forumMessage) {
+        Preconditions.checkNotNull(forumMessage, "forumMessage must not be empty");
+
+        final ForumThread forumThread = forumMessage.getForumThread();
+        if (!isWarHarvest23() || forumThread.getId() != 149 || forumMessage.getAuthor().getHumanOwner() == null) {
+            return forumMessage;
+        }
+
+        final String message = forumMessage.getMessage();
+
+        final User author = forumMessage.getAuthor().getHumanOwner();
+        final List<Fleet> fleets = fleetService.findAllFleetsWithoutMovementByUser(author.getId());
+        final Set<Fleet> fleetsInGoalOrbit = fleets.stream()
+                .filter(f -> f.getName().startsWith(INTERCEPT_PREFIX))
+                .filter(f -> f.getOrbit() != null)
+                .filter(f -> f.getOrbit().getPlanet() != null)
+                .filter(f -> f.getOrbit().getPlanet().getOwner() != null)
+                .filter(f -> f.getOrbit().getPlanet().getOwner().getId() == 15)
+                .filter(fleet -> {
+                    final Planet planet = fleet.getOrbit().getPlanet();
+                    final String name = planet.getName();
+                    return message.toLowerCase().contains(name.toLowerCase());
+                }).collect(Collectors.toSet());
+
+        final Set<Fleet> onlyFleetInOrbit = fleetsInGoalOrbit.stream()
+                .filter(f -> f.getOrbit() != null)
+                .filter(f -> f.getOrbit().getPlanet() != null)
+                .filter(fleet -> {
+                    final Set<Fleet> allAnchoredForPlanet = fleetService.findAllAnchoredForPlanet(fleet.getOrbit().getPlanet());
+                    allAnchoredForPlanet.removeIf(f -> f.getOwner().equals(fleet.getOwner()));
+                    return allAnchoredForPlanet.isEmpty();
+                }).collect(Collectors.toSet());
+
+        final Set<Planet> conquered = onlyFleetInOrbit.stream()
+                .filter(f -> f.getOrbit() != null)
+                .filter(f -> f.getOrbit().getPlanet() != null)
+                .map(f -> f.getOrbit().getPlanet()).collect(Collectors.toSet());
+
+        if (conquered.isEmpty()) {
+            return forumMessage;
+        }
+
+        conquered.forEach(p -> p.setOwner(author));
+        planetService.saveAll(conquered);
+
+        LOGGER.info(author.getUsername() + " has claimed '" + conquered.stream().map(p -> p.getName() + "(" + p.getId() + ")").collect(Collectors.joining(", ")) + "'");
+
+        final Owner pirate = ownerService.findByUsername(MasterOfTheUniverseService.PIRATE);
+        Preconditions.checkNotNull(pirate, "pirate must not be empty");
+
+        final ArrayList<Planet> planets = new ArrayList<>(conquered);
+
+        String prey = "";
+
+        for (final Planet p : planets) {
+            //noinspection StringConcatenationInLoop
+            prey += p.getName() + ", " + p.getSystem().getName() + "  \n";
+        }
+
+        String text = "You Sir,  \n";
+        text += "are great!\n";
+        text += "\n";
+        text += "You liberated the following planets by claiming it with your INTERCEPT fleet in the orbit!\n";
+        text += "\n";
+        text += prey;
+        text += "\n";
+        text += "Sincerely,  \n";
+        text += "Kersey Blackbeard\n";
+        text += "Kersey Outpost " + planets.get(0).getName();
+
+        return forumService.createForumMessage(forumThread, pirate, text);
     }
 }

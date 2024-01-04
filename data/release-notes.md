@@ -10,6 +10,7 @@ todo. ladderboard
 
 todo. schiffstonnage bei verbünderten zeigen
 
+check. claim in forum
 check. INTERCEPT Fleets kämpfen nicht gegeneinander
 check. reinforce shannon
 check. create foritied bases with rewards

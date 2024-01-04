@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.services.account.ForumService;
 import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.backend.services.turn.GameEventService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -58,14 +59,16 @@ public class ForumApi extends BaseApi {
     @Nonnull
     private final UserService userService;
 
+    @Nonnull
+    private final GameEventService gameEventService;
+
     @Autowired
     public ForumApi(@Nonnull final ForumService forumService,
-                    @Nonnull final UserService userService) {
-        Preconditions.checkNotNull(forumService, "forumService shouldn't be null!");
-        Preconditions.checkNotNull(userService, "userService shouldn't be null!");
-
-        this.forumService = forumService;
-        this.userService = userService;
+                    @Nonnull final UserService userService,
+                    @Nonnull final GameEventService gameEventService) {
+        this.forumService = Preconditions.checkNotNull(forumService, "forumService shouldn't be null!");
+        this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
+        this.gameEventService = Preconditions.checkNotNull(gameEventService, "gameEventService must not be empty");
     }
 
     @AllowedRoles(roles = EGameUserRole.FORUM_READ)
@@ -325,7 +328,10 @@ public class ForumApi extends BaseApi {
         PreconditionWebHelper.checkNotNull(forumThread, "forumThread shouldn't be null!");
         final User user = validateAccessToForum(idUser, forumThread.getForum());
 
-        final de.yuga.spacebattle.backend.entities.account.forum.ForumMessage forumMessage = forumService.createForumMessage(forumThread, user, threadMessage.getMessage());
+        de.yuga.spacebattle.backend.entities.account.forum.ForumMessage forumMessage = forumService.createForumMessage(forumThread, user, threadMessage.getMessage());
+
+        forumMessage = gameEventService.warHarvestClaimResponse(forumMessage);
+
         return ResponseEntity.ok(new ForumMessage(forumMessage));
     }
 
@@ -352,7 +358,8 @@ public class ForumApi extends BaseApi {
         }
         msg.setMessage(threadMessage.getMessage());
 
-        forumService.save(msg);
+        final de.yuga.spacebattle.backend.entities.account.forum.ForumMessage forumMessage = forumService.save(msg);
+        gameEventService.warHarvestClaimResponse(forumMessage);
         return ResponseEntity.ok(true);
     }
 

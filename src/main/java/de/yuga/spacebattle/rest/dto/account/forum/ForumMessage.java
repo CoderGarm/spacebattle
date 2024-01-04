@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.dto.account.forum;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.UserSetting;
 import de.yuga.spacebattle.rest.dto.account.Player;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -53,7 +54,11 @@ public class ForumMessage {
         this.idForumMessage = message.getId();
         this.idForumThread = message.getForumThread().getId();
         this.idForum = message.getForumThread().getForum().getId();
-        this.profilePic = message.getAuthor().getUserSetting().getProfilePic();
+        if (message.getHumanOwner() != null) {
+            this.profilePic = message.getHumanOwner().getUserSetting().getProfilePic();
+        } else {
+            this.profilePic = UserSetting.DEFAULT_PROFILE_PIC;
+        }
         this.author = new Player(message.getAuthor());
         this.message = message.getMessage();
         this.sentAt = message.getSentAt();

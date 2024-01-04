@@ -53,7 +53,7 @@ public class ForumMessage extends AbstractEntityKey implements HasOwner {
     }
 
     public ForumMessage(@Nonnull final ForumThread forumThread,
-                        @Nonnull final User author,
+                        @Nonnull final Owner author,
                         @Nonnull final String message) {
         Preconditions.checkNotNull(forumThread, "messageThread shouldn't be null!");
         Preconditions.checkNotNull(author, "author shouldn't be null!");
@@ -75,9 +75,8 @@ public class ForumMessage extends AbstractEntityKey implements HasOwner {
     }
 
     @Nonnull
-    public User getAuthor() {
-        final User humanOwner = getHumanOwner();
-        return humanOwner != null ? humanOwner : new User();
+    public Owner getAuthor() {
+        return author;
     }
 
     public void setMessage(@Nonnull final String message) {
