@@ -141,7 +141,7 @@ public class NavigationCalculatorService {
         final Map<StarSystem, Node> systemNodes = new HashMap<>(systemsOnTrack.stream()
                 .collect(Collectors.toMap(Function.identity(), s -> new Node(s.getName()))));
 
-        // fixme reduce to node a?
+        // todo reduce to node a?
         systemsOnTrack.forEach(a ->
                 systemsOnTrack.stream()
                         .filter(b -> !a.equals(b))

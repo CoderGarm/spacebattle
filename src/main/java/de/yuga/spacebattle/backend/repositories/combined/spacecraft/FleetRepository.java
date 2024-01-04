@@ -42,4 +42,8 @@ public interface FleetRepository extends JpaRepository<Fleet, Integer>, CustomFl
     @Nullable
     @Query("SELECT f FROM Fleet f WHERE f.owner.id = :idUser")
     List<Fleet> forDeletionFindAllFleetsByUser(final int idUser);
+
+    @Nullable
+    @Query("SELECT f FROM Fleet f WHERE f.isDeleted = false")
+    List<Fleet> findAllAliveFleets();
 }

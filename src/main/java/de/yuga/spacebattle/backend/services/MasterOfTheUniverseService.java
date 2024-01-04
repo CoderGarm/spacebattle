@@ -243,6 +243,13 @@ public class MasterOfTheUniverseService {
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
         final boolean transformationNeeded = false;
         if (transformationNeeded) {
+
+            /*
+            fleetService.deleteAll();
+            createFlashsFleet();
+            createPirateFleet();
+            */
+
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
@@ -255,8 +262,9 @@ public class MasterOfTheUniverseService {
 
         final ShipClass songbird = shipClassService.find(2);
 
-        createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
-
+        for (int i = 0; i < 2; i++) {
+            createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
+        }
     }
 
     private void createYufielsFleet() {
@@ -270,7 +278,7 @@ public class MasterOfTheUniverseService {
 
     private void createPirateFleet() {
         final Planet mainPlanet = planetService.find(112);
-        final Fleet reinforcement = createFleet(Objects.requireNonNull(ownerService.find(15)), mainPlanet, "INTERCEPT Pirate");
+        final Fleet reinforcement = createFleet(Objects.requireNonNull(ownerService.find(15)), mainPlanet, "Pirate");
 
         final ShipClass songbird = shipClassService.find(9);
 

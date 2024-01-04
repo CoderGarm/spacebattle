@@ -87,7 +87,7 @@ public class AuthApi {
             "\n" +
             "\n" +
             "Sincerely and with the best wishes,\n" +
-            DEFEATED_OPPONENT + "  "; // fixme rework and check formatting -> some hints via images for the first steps
+            DEFEATED_OPPONENT + "  "; // todo some hints via images for the first steps
 
     @Nonnull
     private final UserService userService;

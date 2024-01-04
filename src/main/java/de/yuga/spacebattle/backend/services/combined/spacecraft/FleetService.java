@@ -5,7 +5,6 @@ import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.dto.crew.CrewRequirement;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.misc.Operationable;
@@ -397,13 +396,6 @@ public class FleetService {
     }
 
     @Nonnull
-    public List<FleetSnapshot> forDeletionFindAllFleetSnapsByUser(@Nonnull final Owner owner) {
-        Preconditions.checkNotNull(owner, "owner must not be empty");
-
-        return Objects.requireNonNullElse(fleetSnapshotRepository.forDeletionFindAllFleetsByUser(owner.getId()), new ArrayList<>());
-    }
-
-    @Nonnull
     public List<AbstractId> findAllAliveFleetsBy(final int idUser) {
         return Objects.requireNonNullElse(fleetRepository.findAllAliveFleetsBy(idUser), new ArrayList<>());
     }
@@ -438,12 +430,6 @@ public class FleetService {
 
         final Iterable<Fleet> saveAll = fleetRepository.saveAll(fleets);
         return StreamSupport.stream(saveAll.spliterator(), false).collect(Collectors.toSet());
-    }
-
-    public void saveAllFleetSnaps(@Nonnull final Collection<FleetSnapshot> fleets) {
-        Preconditions.checkNotNull(fleets, "fleets shouldn't be null!");
-
-        fleetSnapshotRepository.saveAll(fleets);
     }
 
     @Nonnull
@@ -654,5 +640,12 @@ public class FleetService {
 
         warShips.forEach(warShip -> warShip.setMothball(planet));
         warShipService.saveAll(warShips);
+    }
+
+    @Deprecated
+    public void deleteAll() {
+        final List<Fleet> all = Objects.requireNonNullElse(fleetRepository.findAllAliveFleets(), new ArrayList<>());
+        LOGGER.warn("You deleted all fleets '{}'!", all.stream().map(Fleet::getId).map(String::valueOf).collect(Collectors.joining(", ")));
+        markAsDestroyed(all);
     }
 }

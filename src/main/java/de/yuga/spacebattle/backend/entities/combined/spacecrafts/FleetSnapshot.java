@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.entities.combined.spacecrafts;
 
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Mass;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
@@ -10,6 +11,8 @@ import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.misc.HasOwner;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateSnapshot;
+import de.yuga.spacebattle.backend.enums.ECapacityAreaType;
+import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -124,6 +127,17 @@ public class FleetSnapshot extends Deletable implements HasOwner {
     @Nonnull
     public Set<WarshipHealthStateSnapshot> getShips() {
         return ships;
+    }
+
+    @Nonnull
+    public Mass getTonnage(@Nonnull final EMassMetric massMetric) {
+        Preconditions.checkNotNull(massMetric, "massMetric must not be empty");
+
+        return getShips().stream()
+                .filter(WarshipHealthStateSnapshot::isFightingCapable)
+                .map(WarshipHealthStateSnapshot::getWarShip)
+                .map(w -> w.getShipClass().getTonnage(ECapacityAreaType.OVERALL))
+                .reduce(Mass.ZERO, Mass::add);
     }
 
     @Override

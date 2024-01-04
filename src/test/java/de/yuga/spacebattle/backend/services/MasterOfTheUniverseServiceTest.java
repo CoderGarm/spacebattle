@@ -1,18 +1,13 @@
 package de.yuga.spacebattle.backend.services;
 
 import de.yuga.spacebattle.SpringBootProdProfile;
-import de.yuga.spacebattle.backend.calculator.colonization.ColonizationCostCalculator;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.account.forum.Forum;
 import de.yuga.spacebattle.backend.entities.account.forum.ForumMessage;
 import de.yuga.spacebattle.backend.entities.account.forum.ForumThread;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
-import de.yuga.spacebattle.backend.entities.researches.Research;
-import de.yuga.spacebattle.backend.entities.turn.Colonization;
-import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
-import de.yuga.spacebattle.backend.enums.EWebUserRole;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.services.account.ForumService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
@@ -21,6 +16,7 @@ import de.yuga.spacebattle.backend.services.constructables.buildings.Constructio
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.researches.ResearchService;
+import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.TickRunnerService;
@@ -32,8 +28,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -87,6 +81,9 @@ public class MasterOfTheUniverseServiceTest {
     @Autowired
     private OperationalService operationalService;
 
+    @Autowired
+    private BattleService battleService;
+
     @Test
     void t() {
         final Set<Junction> junctions = resourceService.readWormholes();
@@ -102,40 +99,9 @@ public class MasterOfTheUniverseServiceTest {
 
     @Test
     void runBattle() {
-        final String random = random();
-        final User entity = new User(random, "12457aA!", random + "@de", EWebUserRole.USER, false);
-        final User saved = userService.save(entity);
-
-        final List<Research> researchesWithoutPrecondition = researchService.getResearchesWithoutPrecondition();
-        researchService.addResearch(saved, researchesWithoutPrecondition);
-
-        final Planet planet = colonizationService.findPlanetForNewUser();
-        planetService.save(planet);
-        final Colonization colonization = new Colonization(saved, planet, ColonizationCostCalculator.getCrewRequirementForColonization(), 0);
-        colonizationService.colonizePlanet(colonization);
-
-        masterOfTheUniverseService.createFleetForUser(saved);
-        final WarShip opponentForUser = masterOfTheUniverseService.createOpponentFleetForUser(saved);
-        final WarshipHealthState warshipHealthState = opponentForUser.getWarshipHealthState();
-        warshipHealthState.getCapabilities().forEach(cap -> cap.setValue(cap.getValue().divide(BigDecimal.valueOf(3), MathContext.DECIMAL32)));
-
-        warShipService.save(opponentForUser);
-        tickService.doTick();
-
-        System.out.println("Login: " + random);
-    }
-
-    @Test
-    void runSecondBattle() {
-        final String username = "fluqhsjqda";
-        final User saved = userService.findByUsername(username).get().getUser();
-
-        final WarShip opponentForUser = masterOfTheUniverseService.createOpponentFleetForUser(saved);
-
-        warShipService.save(opponentForUser);
-        tickService.doTick();
-
-        System.out.println("Login: " + username);
+        final Planet planet = planetService.find(112);
+        final Tick today = tickService.getToday();
+        battleService.runBattleAtPlanet(today, planet);
     }
 
     private String random() {
