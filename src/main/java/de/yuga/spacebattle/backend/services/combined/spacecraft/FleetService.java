@@ -19,9 +19,9 @@ import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.ECalculationType;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.repositories.combined.spacecraft.FleetRepository;
-import de.yuga.spacebattle.backend.repositories.combined.spacecraft.FleetSnapshotRepository;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.backend.services.turn.GameEventService;
 import de.yuga.spacebattle.backend.services.turn.MoveService;
 import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import de.yuga.spacebattle.backend.services.turn.TransportJobService;
@@ -69,24 +69,19 @@ public class FleetService {
     @Nonnull
     private final TransportJobService transportJobService;
 
-    @Nonnull
-    private final FleetSnapshotRepository fleetSnapshotRepository;
-
     @Autowired
     public FleetService(@Nonnull final FleetRepository fleetRepository,
                         @Nonnull final WarShipService warShipService,
                         @Nonnull final PlanetService planetService,
                         @Nonnull final TickTimeService tickTimeService,
                         @Nonnull final MoveService moveService,
-                        @Nonnull final TransportJobService transportJobService,
-                        @Nonnull final FleetSnapshotRepository fleetSnapshotRepository) {
+                        @Nonnull final TransportJobService transportJobService) {
         this.fleetRepository = Preconditions.checkNotNull(fleetRepository, "fleetR shouldn't be null!");
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.tickTimeService = Preconditions.checkNotNull(tickTimeService, "tickTimeService must not be empty");
         this.moveService = Preconditions.checkNotNull(moveService, "moveService must not be empty");
         this.transportJobService = Preconditions.checkNotNull(transportJobService, "transportJobService must not be empty");
-        this.fleetSnapshotRepository = Preconditions.checkNotNull(fleetSnapshotRepository, "fleetSnapshotRepository must not be empty");
     }
 
     /**
@@ -99,6 +94,7 @@ public class FleetService {
 
         final Map<Integer, List<Integer>> fleetConstellations = merge.getFleetConstellations();
         final List<Fleet> fleets = findByIds(fleetConstellations.keySet());
+
         final Set<WarShip> knownWarShips = fleets.stream().map(Fleet::getAliveShips).flatMap(Collection::stream).collect(Collectors.toSet());
         final Set<Integer> poolShipsToFetch = fleetConstellations.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
         poolShipsToFetch.removeAll(knownWarShips.stream().map(AbstractEntityKey::getId).collect(Collectors.toSet()));
@@ -111,6 +107,9 @@ public class FleetService {
             throw new NotifyWebUserException("You must own all the merged fleets.");
         }
 
+        final Map<Fleet, Integer> interceptHas = fleets.stream().collect(Collectors.toMap(Function.identity(), f -> f.getAliveShips().size()));
+        final Map<Fleet, Integer> interceptGains = new HashMap<>();
+
         final Set<TransportJob> toRemove = new HashSet<>();
         final Map<Integer, WarShip> warshipsById = knownWarShips.stream().collect(Collectors.toMap(WarShip::getId, Function.identity()));
         fleetConstellations.forEach((idFleet, warshipIDs) -> {
@@ -118,6 +117,14 @@ public class FleetService {
             assert fleet != null : "Would be good at this stage.";
             final Set<WarShip> toAdd = warshipsById.values().stream().filter(w -> warshipIDs.contains(w.getId())).collect(Collectors.toSet());
             fleet.addShips(toAdd);
+
+            final boolean isNotOwnPlanet = fleet.getOrbit() == null || fleet.getOrbit().getPlanet() == null
+                    || fleet.getOrbit().getPlanet().getOwner() == null || !fleet.getOrbit().getPlanet().getOwner().equals(fleet.getOwner());
+            if (fleet.getName().startsWith(GameEventService.INTERCEPT_PREFIX)
+                    && isNotOwnPlanet) {
+                final int amount = interceptGains.getOrDefault(fleet, 0) + toAdd.size();
+                interceptGains.put(fleet, amount);
+            }
 
             final Set<TransportJob> transportJobs = toAdd.stream().map(WarShip::getTransportJob).filter(Objects::nonNull).collect(Collectors.toSet());
             toAdd.forEach(w -> w.setFleet(fleet));
@@ -131,6 +138,16 @@ public class FleetService {
         final Set<Fleet> toMarkAsDeleted = fleets.stream().filter(f -> f.getAliveShips().isEmpty()).collect(Collectors.toSet());
         markAsDestroyed(toMarkAsDeleted);
         toStore = calculateFleetState(toStore.stream().map(AbstractEntityKey::getId).collect(Collectors.toSet()));
+
+        interceptGains.forEach((fleet, newAmount) -> {
+            final Integer hasHadBefore = interceptHas.getOrDefault(fleet, 0);
+            LOGGER.info(GameEventService.WAR_HARVEST_2023_PREFIX + " Reinforced fleet '{}' of '{}' from '{}' to '{}' ships.",
+                    fleet.getName(),
+                    fleet.getOwner().getUsername(),
+                    hasHadBefore,
+                    newAmount);
+        });
+
         transportJobService.deleteAll(toRemove);
         return new FleetMergeResult(toStore, toMarkAsDeleted);
     }

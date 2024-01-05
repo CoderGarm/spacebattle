@@ -16,6 +16,7 @@ import de.yuga.spacebattle.backend.services.constructables.spacecraft.OrbitalStr
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.orbitals.StarSystemService;
+import de.yuga.spacebattle.backend.services.turn.GameEventService;
 import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import de.yuga.spacebattle.backend.services.turn.TransportJobService;
 import de.yuga.spacebattle.rest.api.BaseApi;
@@ -36,6 +37,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -54,6 +57,9 @@ import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPO
 @RestController
 @RequestMapping(value = "/" + PRIVATE_BASE_ENDPOINT + "/" + FleetApi.ENDPOINT + "/")
 public class FleetApi extends BaseApi {
+
+    @Nonnull
+    private static final Logger LOGGER = LoggerFactory.getLogger(FleetApi.class);
 
     @Nonnull
     public static final String ENDPOINT = "fleet";
@@ -466,9 +472,10 @@ public class FleetApi extends BaseApi {
         if (fleet == null || fleet.getOwner().getId() != getIdUser()) {
             throw new NotifyWebUserException("Nope, I guess not.");
         }
-
+        final String oldName = fleet.getName();
         fleet.setName(name);
         fleetService.save(fleet);
+        LOGGER.info(GameEventService.WAR_HARVEST_2023_PREFIX + " Renaming fleet of '{}' from '{}' to '{}'", fleet.getOwner().getUsername(), oldName, name);
         return ResponseEntity.ok(true);
     }
 

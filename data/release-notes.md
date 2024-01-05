@@ -1,21 +1,19 @@
 # Event War Harvest Release
 
-todo. fleet name change logging
-todo. fleet reinforcement logging
-
-todo. highlight kersey bases
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
-todo. punkte sammeln -> flottenpunkte durch kämpfende tonnage, zerstörte tonnage; planetenpunkte durch anzahl eroberte planeten und gebäudelevel
 todo. ladderboard
 
-todo. schiffstonnage bei verbünderten zeigen
-
+check. highlight kersey bases
+check. fleet name change logging
+check. fleet reinforcement logging
 check. intercept fleet combat loggen -> tonnage
 check. claim in forum
 check. INTERCEPT Fleets kämpfen nicht gegeneinander
 check. reinforce shannon
 check. create foritied bases with rewards
 check. create player-to-delete bases with rewards
+check. schiffstonnage bei verbünderten zeigen
+todo. punkte sammeln -> flottenpunkte durch kämpfende tonnage, zerstörte tonnage; planetenpunkte durch anzahl eroberte planeten und gebäudelevel
 
 ### Wiki Articles
 
