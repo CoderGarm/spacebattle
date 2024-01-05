@@ -2,8 +2,6 @@
 
 todo. fleet name change logging
 todo. fleet reinforcement logging
-todo. intercept fleet combat loggen -> tonnage
-todo. planet
 
 todo. highlight kersey bases
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
@@ -12,6 +10,7 @@ todo. ladderboard
 
 todo. schiffstonnage bei verbünderten zeigen
 
+check. intercept fleet combat loggen -> tonnage
 check. claim in forum
 check. INTERCEPT Fleets kämpfen nicht gegeneinander
 check. reinforce shannon

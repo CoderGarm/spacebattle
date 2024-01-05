@@ -10,10 +10,13 @@ import de.yuga.spacebattle.backend.entities.account.forum.ForumThread;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
+import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
+import de.yuga.spacebattle.backend.enums.ECapacityAreaType;
 import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
 import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import de.yuga.spacebattle.backend.services.account.ForumService;
@@ -247,7 +250,11 @@ public class GameEventService {
         conquered.forEach(p -> p.setOwner(author));
         planetService.saveAll(conquered);
 
-        LOGGER.info(WAR_HARVEST_2023_PREFIX + author.getUsername() + " has claimed '" + conquered.stream().map(p -> p.getName() + "(" + p.getId() + ")").collect(Collectors.joining(", ")) + "'");
+        final int gainedLevels = conquered.stream().map(Planet::getConstructions).flatMap(Collection::stream).mapToInt(Construction::getLevel).sum();
+
+        LOGGER.info(WAR_HARVEST_2023_PREFIX + author.getUsername() + " has claimed the planet(s) '"
+                + conquered.stream().map(p -> p.getName() + "(" + p.getId() + ")").collect(Collectors.joining(", ")) + "'"
+                + " with collected gained construction levels of '{}'.", gainedLevels);
 
         final Owner pirate = ownerService.findByUsername(MasterOfTheUniverseService.PIRATE);
         Preconditions.checkNotNull(pirate, "pirate must not be empty");
@@ -275,7 +282,7 @@ public class GameEventService {
         return forumService.createForumMessage(forumThread, pirate, text);
     }
 
-    public void logResult(@Nonnull final BattleReport battleReport) {
+    public void logResult(@Nonnull final BattleReport battleReport, @Nonnull final Set<WarShip> losses) {
         Preconditions.checkNotNull(battleReport, "battleReport must not be empty");
 
         if (!isWarHarvest23()) {
@@ -284,17 +291,21 @@ public class GameEventService {
 
         final Set<FleetSnapshot> resultingFleets = battleReport.getParticipatingFleets();
 
-        // fixme reload active ships and remove comment in log
         for (final FleetSnapshot snap : resultingFleets) {
             final Fleet fleet = snap.getFleet();
             final Mass tonnage = fleet.getTonnage(EMassMetric.KT);
-            final Mass snapTonnage = snap.getTonnage(EMassMetric.KT);
-            LOGGER.info(WAR_HARVEST_2023_PREFIX + "Battle for Planet {} - {} starts with fleet {} and a mass of {} and ends with a mass of {} - not reliable",
+
+            final Mass tonnageLoss = losses.stream()
+                    .filter(f -> f.getFleet() != null)
+                    .filter(f -> f.getFleet().getOwner().equals(fleet.getOwner()))
+                    .map(w -> w.getShipClass().getTonnage(ECapacityAreaType.OVERALL)).reduce(Mass.ZERO, Mass::add);
+
+            LOGGER.info(WAR_HARVEST_2023_PREFIX + "Battle for Planet {} - {} starts with fleet {} and a mass of {} and ends with a mass loss of {} - not reliable",
                     battleReport.getVenue().getPlanet().getName(),
                     fleet.getOwner().getUsername(),
                     fleet.getName(),
                     tonnage,
-                    snapTonnage);
+                    tonnageLoss);
         }
 
     }

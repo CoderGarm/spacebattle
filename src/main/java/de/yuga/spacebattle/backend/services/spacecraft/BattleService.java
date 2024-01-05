@@ -199,7 +199,7 @@ public class BattleService {
         fleetService.markFleetsWithoutShipsAsDeleted(battleResult.getFleetClash().getParticipatingFleets());
 
         battleLogger.logBattleResult(battleReport, battleResult);
-        gameEventService.logResult(battleReport);
+        gameEventService.logResult(battleReport, losses);
         return battleReport;
     }
 }
