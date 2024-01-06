@@ -250,7 +250,9 @@ public class GameEventService {
         conquered.forEach(p -> p.setOwner(author));
         planetService.saveAll(conquered);
 
-        final int gainedLevels = conquered.stream().map(Planet::getConstructions).flatMap(Collection::stream).mapToInt(Construction::getLevel).sum();
+        final List<Planet> planets = planetService.findWithConstructions(conquered);
+
+        final int gainedLevels = planets.stream().map(Planet::getConstructions).flatMap(Collection::stream).mapToInt(Construction::getLevel).sum();
 
         LOGGER.info(WAR_HARVEST_2023_PREFIX + author.getUsername() + " has claimed the planet(s) '"
                 + conquered.stream().map(p -> p.getName() + "(" + p.getId() + ")").collect(Collectors.joining(", ")) + "'"
@@ -259,7 +261,13 @@ public class GameEventService {
         final Owner pirate = ownerService.findByUsername(MasterOfTheUniverseService.PIRATE);
         Preconditions.checkNotNull(pirate, "pirate must not be empty");
 
-        final ArrayList<Planet> planets = new ArrayList<>(conquered);
+        final String text = createConquerText(planets);
+        return forumService.createForumMessage(forumThread, pirate, text);
+    }
+
+    @Nonnull
+    private static String createConquerText(@Nonnull final List<Planet> planets) {
+        Preconditions.checkNotNull(planets, "planets must not be empty");
 
         String prey = "";
 
@@ -278,8 +286,7 @@ public class GameEventService {
         text += "Sincerely,  \n";
         text += "Kersey Blackbeard\n";
         text += "Kersey Outpost " + planets.get(0).getName();
-
-        return forumService.createForumMessage(forumThread, pirate, text);
+        return text;
     }
 
     public void logResult(@Nonnull final BattleReport battleReport, @Nonnull final Set<WarShip> losses) {

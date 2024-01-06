@@ -271,4 +271,11 @@ public class PlanetService {
 
         return Objects.requireNonNullElse(planetRepository.findForModification(planetIDs), new HashSet<>());
     }
+
+    @Nonnull
+    public List<Planet> findWithConstructions(@Nonnull final Collection<Planet> planets) {
+        Preconditions.checkNotNull(planets, "planets must not be empty");
+
+        return Objects.requireNonNullElse(planetRepository.findWithConstructions(planets), new ArrayList<>());
+    }
 }

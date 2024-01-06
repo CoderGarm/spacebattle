@@ -46,6 +46,10 @@ public interface PlanetRepository extends JpaRepository<Planet, Integer>, Custom
     @Query("SELECT DISTINCT p FROM Planet p LEFT JOIN FETCH p.constructions c WHERE p.owner IS NOT NULL AND p.owner.dType = de.yuga.spacebattle.backend.enums.OwnerType.USER")
     List<Planet> findAllForTick();
 
+    @Nullable
+    @Query("SELECT DISTINCT p FROM Planet p LEFT JOIN FETCH p.constructions c WHERE p in (:planets)")
+    List<Planet> findWithConstructions(@Nonnull final Collection<Planet> planets);
+
     @Nonnull
     @Query("SELECT DISTINCT p FROM Planet p LEFT JOIN FETCH p.constructions c WHERE p.id IN (:planetIDs)")
     Set<Planet> findForModification(@Nonnull final Collection<Integer> planetIDs);
