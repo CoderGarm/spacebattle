@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.services.turn;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.dto.FleetClash;
 import de.yuga.spacebattle.backend.dto.physics.Mass;
+import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.account.forum.ForumMessage;
@@ -22,6 +23,7 @@ import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import de.yuga.spacebattle.backend.services.account.ForumService;
 import de.yuga.spacebattle.backend.services.account.OwnerService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
+import de.yuga.spacebattle.backend.services.events.RankingService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import org.apache.commons.lang3.Range;
 import org.slf4j.Logger;
@@ -63,17 +65,22 @@ public class GameEventService {
     @Nonnull
     private final PlanetService planetService;
 
+    @Nonnull
+    private final RankingService rankingService;
+
     @Autowired
     public GameEventService(@Nonnull final TickTimeService timeService,
                             @Nonnull final ForumService forumService,
                             @Nonnull final OwnerService ownerService,
                             @Nonnull final FleetService fleetService,
-                            @Nonnull final PlanetService planetService) {
+                            @Nonnull final PlanetService planetService,
+                            @Nonnull final RankingService rankingService) {
         this.timeService = Preconditions.checkNotNull(timeService, "timeService must not be empty");
         this.forumService = Preconditions.checkNotNull(forumService, "forumService must not be empty");
         this.ownerService = Preconditions.checkNotNull(ownerService, "ownerService must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
+        this.rankingService = Preconditions.checkNotNull(rankingService, "rankingService must not be empty");
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -258,6 +265,8 @@ public class GameEventService {
                 + conquered.stream().map(p -> p.getName() + "(" + p.getId() + ")").collect(Collectors.joining(", ")) + "'"
                 + " with collected gained construction levels of '{}'.", gainedLevels);
 
+        rankingService.addPoints(author, planets.size(), gainedLevels);
+
         final Owner pirate = ownerService.findByUsername(MasterOfTheUniverseService.PIRATE);
         Preconditions.checkNotNull(pirate, "pirate must not be empty");
 
@@ -292,28 +301,45 @@ public class GameEventService {
     public void logResult(@Nonnull final BattleReport battleReport, @Nonnull final Set<WarShip> losses) {
         Preconditions.checkNotNull(battleReport, "battleReport must not be empty");
 
-        if (!isWarHarvest23()) {
+        final boolean isNotAPiratePlanet = battleReport.getVenue().getPlanet() == null || battleReport.getVenue().getPlanet().getOwner() == null || battleReport.getVenue().getPlanet().getOwner().getId() != 15;
+        if (!isWarHarvest23() || isNotAPiratePlanet) {
+            return;
+        }
+        // todo multicombat will affect this
+
+        final User player = battleReport.getParticipatingUsers().stream().map(Owner::getHumanOwner).filter(Objects::nonNull).findFirst().orElseThrow(NullPointerException::new);
+        final NonPlayerCharacter pirate = battleReport.getParticipatingUsers().stream().map(Owner::getNpcOwner).filter(Objects::nonNull).findFirst().orElse(null);
+
+        if (pirate == null) {
             return;
         }
 
-        final Set<FleetSnapshot> resultingFleets = battleReport.getParticipatingFleets();
+        final String fleetName = battleReport.getParticipatingFleets().stream()
+                .map(FleetSnapshot::getFleet)
+                .filter(f -> f.getOwner().equals(player))
+                .map(Fleet::getName).findFirst().orElse("NO NAME FOUND");
 
-        for (final FleetSnapshot snap : resultingFleets) {
-            final Fleet fleet = snap.getFleet();
-            final Mass tonnage = fleet.getTonnage(EMassMetric.KT);
-
-            final Mass tonnageLoss = losses.stream()
-                    .filter(f -> f.getFleet() != null)
-                    .filter(f -> f.getFleet().getOwner().equals(fleet.getOwner()))
-                    .map(w -> w.getShipClass().getTonnage(ECapacityAreaType.OVERALL)).reduce(Mass.ZERO, Mass::add);
-
-            LOGGER.info(WAR_HARVEST_2023_PREFIX + "Battle for Planet {} - {} starts with fleet {} and a mass of {} and ends with a mass loss of {} - not reliable",
-                    battleReport.getVenue().getPlanet().getName(),
-                    fleet.getOwner().getUsername(),
-                    fleet.getName(),
-                    tonnage,
-                    tonnageLoss);
+        if (!fleetName.startsWith(INTERCEPT_PREFIX)) {
+            return;
         }
 
+        final Mass tonnageDestroyed = losses.stream()
+                .filter(f -> f.getFleet() != null)
+                .filter(f -> f.getFleet().getOwner().equals(pirate))
+                .map(w -> w.getShipClass().getTonnage(ECapacityAreaType.OVERALL)).reduce(Mass.ZERO, Mass::add);
+
+        final Mass tonnageLoss = losses.stream()
+                .filter(f -> f.getFleet() != null)
+                .filter(f -> f.getFleet().getOwner().equals(player))
+                .map(w -> w.getShipClass().getTonnage(ECapacityAreaType.OVERALL)).reduce(Mass.ZERO, Mass::add);
+
+        rankingService.addPoints(player, tonnageDestroyed, tonnageLoss);
+
+        LOGGER.info(WAR_HARVEST_2023_PREFIX + "Battle for Planet {} - {} starts with fleet {} and destroyed a ship mass of {} and ends with a mass loss of {}",
+                battleReport.getVenue().getPlanet().getName(),
+                player.getUsername(),
+                fleetName,
+                tonnageDestroyed,
+                tonnageLoss);
     }
 }
