@@ -232,6 +232,7 @@ public class WarshipHealthState extends AbstractEntityKey implements WarshipHeal
         this.capabilities.addAll(new SpacecraftCalculator().getCapabilityValues(shipClass));
         this.activeFittings.clear();
         this.activeFittings.addAll(shipClass.getFittings());
+        warShip.setOperational();
         ammoUp();
     }
 

@@ -263,6 +263,8 @@ public class PlanetTickRunner implements TickRunner {
                 .collect(Collectors.toSet());
         toRepair.forEach(WarshipHealthState::repair);
         warshipHealthStateService.saveAll(toRepair);
+        fleet.setOperational();
+        fleetService.save(fleet);
         log(planet, job, "Done repairing fleet.");
     }
 

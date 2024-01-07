@@ -675,7 +675,7 @@ public class FleetApi extends BaseApi {
         return moves.stream().map(move -> {
                     final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = fleetsToMoveById.get(move.getIdFleetToMove());
                     final boolean stationedInSystem = fleet.getOrbit() != null && fleet.getOrbit().getSystem() != null;
-                    if (fleet.getMove() != null || !stationedInSystem) {
+                    if (fleet.getMove() != null || fleet.getOwner().getId() != idUser || !stationedInSystem) {
                         return null;
                     }
                     final StarSystem targetSystem = targetSystemsByIds.get(move.getIdDestinationSystem());

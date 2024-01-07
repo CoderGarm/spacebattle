@@ -1,6 +1,5 @@
 # Event War Harvest Release
 
-todo. fix sending others fleet
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
 todo. ladderboard
 
