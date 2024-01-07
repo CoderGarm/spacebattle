@@ -475,7 +475,9 @@ public class FleetApi extends BaseApi {
         final String oldName = fleet.getName();
         fleet.setName(name);
         fleetService.save(fleet);
-        LOGGER.info(GameEventService.WAR_HARVEST_2023_PREFIX + " Renaming fleet of '{}' from '{}' to '{}'", fleet.getOwner().getUsername(), oldName, name);
+        if (!oldName.startsWith(GameEventService.INTERCEPT_PREFIX) && name.startsWith(GameEventService.INTERCEPT_PREFIX)) {
+            LOGGER.info(GameEventService.WAR_HARVEST_2023_PREFIX + " Renaming fleet of '{}' from '{}' to '{}'", fleet.getOwner().getUsername(), oldName, name);
+        }
         return ResponseEntity.ok(true);
     }
 
