@@ -183,6 +183,15 @@
         primary key (idElectronicWarfare)
     ) engine=InnoDB;
 
+    create table eventRanking (
+       idEventRanking integer not null auto_increment,
+        gameEvent varchar(255) not null,
+        points integer not null,
+        rankingCategory varchar(255) not null,
+        idUser integer not null,
+        primary key (idEventRanking)
+    ) engine=InnoDB;
+
     create table fleet (
        idFleet integer not null auto_increment,
         isDeleted boolean not null default false,
@@ -884,6 +893,9 @@
     alter table counterMissileHits
         add constraint UK_5t1h6fs2csdnofihl1lsysbf9 unique (idCounterMissileHit);
 
+    alter table eventRanking 
+       add constraint POINTS_UK unique (idUser, gameEvent, rankingCategory);
+
     alter table fleet
         add constraint UK_duhimx7ydhmssl7vqp5w29yx0 unique (idMove);
 
@@ -1153,6 +1165,11 @@
         add constraint FKccj76id0r5pq3p7f4viriwdqf
             foreign key (idCosts)
                 references resourceDeposit (idResourceDeposit);
+
+    alter table eventRanking 
+       add constraint FKa03fqyutfi8ul5kr37ce7kra9 
+       foreign key (idUser) 
+       references user (idUser);
 
     alter table fleet
         add constraint FK5yy9whqh6562iaxuym0wrkjeq
