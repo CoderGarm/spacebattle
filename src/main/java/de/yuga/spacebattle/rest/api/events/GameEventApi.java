@@ -56,4 +56,5 @@ public class GameEventApi extends BaseApi {
         return ResponseEntity.ok(rankings.stream().map(EventRanking::new).collect(Collectors.toList()));
     }
 
+    // todo add GET for "is an event active" to hide the ladderboard when not
 }

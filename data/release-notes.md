@@ -3,6 +3,18 @@
 
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
 
+- imperums profilseite
+    - mit emblem / logo / avatar
+    - stichpunkte zum leader, title, name ...
+    - mit "trophy case" z.b. season 2 participant, war harvest 24 participant ...
+    - allgemeine textbox für "sichtbar für alle", "sichtbar für ally", "sichtbar für freunde"
+    - textbox für spezifischere beschreibungen der navy, der gesellschaft, des spielers ...
+    - liste aller interaktionen der eigenen navy, diplomatischer kontakt seit "erste chat-nachricht"-datum
+- imperiumsprofil wird als dialog immer aufgerufen wenn man auf den usernamen, usericon ... klickt
+- die letzten forumsbeiträge ...
+- allianzmitgliedschaft ...
+- chat optisch aufarbeiten und auf imperiumsseite des anderen anzeigen
+
 check. heat für steffen und alle anderen
 check. ladderboard
 check. highlight kersey bases
@@ -15,7 +27,7 @@ check. reinforce shannon
 check. create foritied bases with rewards
 check. create player-to-delete bases with rewards
 check. schiffstonnage bei verbünderten zeigen
-todo. punkte sammeln -> flottenpunkte durch kämpfende tonnage, zerstörte tonnage; planetenpunkte durch anzahl eroberte planeten und gebäudelevel
+check. punkte sammeln -> flottenpunkte durch kämpfende tonnage, zerstörte tonnage; planetenpunkte durch anzahl eroberte planeten und gebäudelevel
 
 ### Wiki Articles
 
@@ -39,10 +51,28 @@ article orbital modules
 
 #### next steps
 
-todo. heat as correcting mechanism?
+todo. planis bomben, allianzfunktionen, kämpfen von mehreren flottenverbänden
+todo. flotten auf karte als shortcut-icon rechts am rand darstellen
+todo. eigene systeme auf karte als shortcut-icon rechts am rand darstellen?
+
+season 3:
+
+- neue passwortrichtlinie (kompliziert oder laaang)
+- heat as correcting mechanism?
+- [maps from the info dump einpflegen](https://web.archive.org/web/20220812004938/https://infodump.thefifthimperium.com/images/congo-maya-erewhon_map.gif)
+- wormhole travel kostet credits und muss diplomatisch freigeschaltet werden -> npc missionen
+- tech 2 und 3 ressis für tech
+- entweder koloniezentrale auf main plani oder sowas wie gebäude für bevölkerungszufriedenheit -> steuereinnahmen
+- map für neue season fertig machen
+- kampfsystem verbessern
+- ressourcen so balancen, dass es einen need gibt -> nicht jeder kann alles ernten? auf jeden fall muss es einen need geben: handel oder kampf soll angeregt werden
+- fremde planis bomben
+- allianzfunktionen
+
 todo. colo duration through wormholes are NaN
 todo. tonnage calc not on every input -> timeout should be enough
 todo. carrier menu: order planets by system like in the planet menu
+todo. carrier menu: filter by "has ressource below X" or "has ressource more thn X"
 
 ---
 todo. distance based duration
