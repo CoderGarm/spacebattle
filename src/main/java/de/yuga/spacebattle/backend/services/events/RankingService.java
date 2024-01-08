@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Service
 public class RankingService {
@@ -75,5 +78,12 @@ public class RankingService {
         ranking.addPoints(tonnageLoss.getCoordinateInMetric(EMassMetric.KT).intValue());
         rankingRepository.save(ranking);
 
+    }
+
+    @Nonnull
+    public Set<EventRanking> findAll(@Nonnull final EGameEvent gameEvent) {
+        Preconditions.checkNotNull(gameEvent, "gameEvent must not be empty");
+
+        return Objects.requireNonNullElse(rankingRepository.findAll(gameEvent), new HashSet<>());
     }
 }

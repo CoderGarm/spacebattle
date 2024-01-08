@@ -71,6 +71,7 @@ public class Player {
             this.rolePlayData.setFirstname(((User) user).getRolePlaySetting().getFirstname());
             this.rolePlayData.setSurname(((User) user).getRolePlaySetting().getSurname());
             this.rolePlayData.setTitle(((User) user).getRolePlaySetting().getTitle());
+            this.rolePlayData.setTitleAbbreviation(((User) user).getRolePlaySetting().getTitleAbbreviation());
         } else {
             isNpc = true;
         }

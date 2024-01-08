@@ -1,8 +1,10 @@
 # Event War Harvest Release
 
-todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
-todo. ladderboard
 
+todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
+
+check. heat für steffen und alle anderen
+check. ladderboard
 check. highlight kersey bases
 check. fleet name change logging
 check. fleet reinforcement logging
@@ -37,6 +39,7 @@ article orbital modules
 
 #### next steps
 
+todo. heat as correcting mechanism?
 todo. colo duration through wormholes are NaN
 todo. tonnage calc not on every input -> timeout should be enough
 todo. carrier menu: order planets by system like in the planet menu

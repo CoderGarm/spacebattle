@@ -17,7 +17,9 @@ import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
+import de.yuga.spacebattle.backend.entities.turn.mission.HeatMap;
 import de.yuga.spacebattle.backend.enums.ECapacityAreaType;
+import de.yuga.spacebattle.backend.enums.EMissionType;
 import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
 import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import de.yuga.spacebattle.backend.services.account.ForumService;
@@ -25,6 +27,7 @@ import de.yuga.spacebattle.backend.services.account.OwnerService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.events.RankingService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.backend.services.turn.tick.mission.HeatMapService;
 import org.apache.commons.lang3.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,19 +71,24 @@ public class GameEventService {
     @Nonnull
     private final RankingService rankingService;
 
+    @Nonnull
+    private final HeatMapService heatMapService;
+
     @Autowired
     public GameEventService(@Nonnull final TickTimeService timeService,
                             @Nonnull final ForumService forumService,
                             @Nonnull final OwnerService ownerService,
                             @Nonnull final FleetService fleetService,
                             @Nonnull final PlanetService planetService,
-                            @Nonnull final RankingService rankingService) {
+                            @Nonnull final RankingService rankingService,
+                            @Nonnull final HeatMapService heatMapService) {
         this.timeService = Preconditions.checkNotNull(timeService, "timeService must not be empty");
         this.forumService = Preconditions.checkNotNull(forumService, "forumService must not be empty");
         this.ownerService = Preconditions.checkNotNull(ownerService, "ownerService must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.rankingService = Preconditions.checkNotNull(rankingService, "rankingService must not be empty");
+        this.heatMapService = Preconditions.checkNotNull(heatMapService, "heatMapService must not be empty");
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -256,6 +264,17 @@ public class GameEventService {
 
         conquered.forEach(p -> p.setOwner(author));
         planetService.saveAll(conquered);
+
+        final Set<HeatMap> heatMap = heatMapService.findHeatForPlanets(conquered, EMissionType.PIRATE_RAID);
+        final Set<Planet> known = heatMap.stream().map(HeatMap::getPlanet).collect(Collectors.toSet());
+        final Set<Planet> withoutHeat = conquered.stream().filter(h -> !known.contains(h)).collect(Collectors.toSet());
+
+        final List<HeatMap> newHeat = withoutHeat.stream()
+                .filter(p -> p.getOwner() != null)
+                .map(p -> new HeatMap(p, EMissionType.PIRATE_RAID, p.getOwner().getId() == 3 ? 30 : 15))
+                .collect(Collectors.toList());
+        heatMapService.saveAll(newHeat);
+
 
         final List<Planet> planets = planetService.findWithConstructions(conquered);
 

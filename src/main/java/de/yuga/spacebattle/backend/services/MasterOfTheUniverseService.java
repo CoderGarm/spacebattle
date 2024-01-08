@@ -35,6 +35,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
+import de.yuga.spacebattle.backend.entities.turn.mission.HeatMap;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
@@ -56,6 +57,7 @@ import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.TickRunnerService;
+import de.yuga.spacebattle.backend.services.turn.tick.mission.HeatMapService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.misc.Coords;
 import org.slf4j.LoggerFactory;
@@ -194,6 +196,9 @@ public class MasterOfTheUniverseService {
     @Nonnull
     private final UserDeleteServiceService userDeleteServiceService;
 
+    @Nonnull
+    private final HeatMapService heatMapService;
+
     @Autowired
     public MasterOfTheUniverseService(@Nonnull final TickRunnerService tickService,
                                       @Nonnull final UserService userService,
@@ -213,7 +218,8 @@ public class MasterOfTheUniverseService {
                                       @Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
                                       @Nonnull final OwnerService ownerService,
                                       @Nonnull final OrbitalModuleService orbitalModuleService,
-                                      @Nonnull final UserDeleteServiceService userDeleteServiceService) {
+                                      @Nonnull final UserDeleteServiceService userDeleteServiceService,
+                                      @Nonnull final HeatMapService heatMapService) {
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
         this.tickService = Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
@@ -234,6 +240,7 @@ public class MasterOfTheUniverseService {
         this.ownerService = Preconditions.checkNotNull(ownerService, "ownerService must not be empty");
         this.orbitalModuleService = Preconditions.checkNotNull(orbitalModuleService, "orbitalModuleService must not be empty");
         this.userDeleteServiceService = Preconditions.checkNotNull(userDeleteServiceService, "userDeleteServiceService must not be empty");
+        this.heatMapService = Preconditions.checkNotNull(heatMapService, "heatMapService must not be empty");
     }
 
     @PostConstruct
@@ -241,8 +248,18 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = false;
+        final boolean transformationNeeded = tickService.getToday().getNo() == 248; // fixme remove me afterwards
         if (transformationNeeded) {
+
+            final List<Planet> colonized = planetService.findAllColonized();
+            final Set<HeatMap> heatMap = heatMapService.findHeatForPlanets(colonized, EMissionType.PIRATE_RAID);
+            final Set<Planet> known = heatMap.stream().map(HeatMap::getPlanet).collect(Collectors.toSet());
+            final Set<Planet> withoutHeat = colonized.stream().filter(h -> !known.contains(h)).collect(Collectors.toSet());
+
+            final List<HeatMap> newHeat = withoutHeat.stream()
+                    .map(p -> new HeatMap(p, EMissionType.PIRATE_RAID, p.getOwner().getId() == 3 ? 30 : 0))
+                    .collect(Collectors.toList());
+            heatMapService.saveAll(newHeat);
 
             /*
             fleetService.deleteAll();
