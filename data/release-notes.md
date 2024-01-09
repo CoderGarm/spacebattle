@@ -1,10 +1,10 @@
 # Event War Harvest Release
 
-
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
 
 - imperums profilseite
     - mit emblem / logo / avatar
+      check: roleplaysetting: add empire name
     - stichpunkte zum leader, title, name ...
     - mit "trophy case" z.b. season 2 participant, war harvest 24 participant ...
     - allgemeine textbox für "sichtbar für alle", "sichtbar für ally", "sichtbar für freunde"

@@ -9,6 +9,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -41,11 +42,18 @@ public class Owner extends AbstractEntityKey implements HasOwner {
     @Column(unique = true)
     private String username;
 
+    @Valid
+    @Nonnull
+    @NotNull
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
+    private RolePlaySetting rolePlaySetting = new RolePlaySetting();
+
     public Owner() {
     }
 
     public Owner(@Nonnull final String username) {
         this.username = Preconditions.checkNotNull(username, "username must not be empty");
+        this.rolePlaySetting = new RolePlaySetting(this);
     }
 
     @Nonnull
@@ -75,6 +83,11 @@ public class Owner extends AbstractEntityKey implements HasOwner {
             return null;
         }
         return (NonPlayerCharacter) this;
+    }
+
+    @Nonnull
+    public RolePlaySetting getRolePlaySetting() {
+        return rolePlaySetting;
     }
 
     @Override

@@ -44,6 +44,12 @@ public class RolePlayData {
     @Schema(description = "The user's selected ship names.")
     private String shipPrefix;
 
+    @Nullable
+    @JsonProperty
+    @Size(max = 50)
+    @Schema(description = "The empire's name.")
+    private String empireName;
+
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The user's selected ship name templates.")
@@ -64,6 +70,7 @@ public class RolePlayData {
         this.titleAbbreviation = rolePlaySetting.getTitleAbbreviation();
         this.firstname = rolePlaySetting.getFirstname();
         this.surname = rolePlaySetting.getSurname();
+        this.empireName = rolePlaySetting.getEmpireName();
     }
 
     public void setTitle(@Nullable final String title) {
@@ -92,6 +99,15 @@ public class RolePlayData {
 
     public void setShipNames(@Nonnull final Set<String> shipNames) {
         this.shipNames = shipNames;
+    }
+
+    @Nullable
+    public String getEmpireName() {
+        return empireName;
+    }
+
+    public void setEmpireName(@Nullable final String empireName) {
+        this.empireName = empireName;
     }
 
     @Nullable

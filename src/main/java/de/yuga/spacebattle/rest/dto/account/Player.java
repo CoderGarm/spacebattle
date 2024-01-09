@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.UserSetting;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -68,13 +69,16 @@ public class Player {
             this.allianceTag = ((User) user).getAlliance() != null ? ((User) user).getAlliance().getCode() : null;
             this.role = ((User) user).getUserRole().getName();
             this.profilePic = ((User) user).getUserSetting().getProfilePic();
-            this.rolePlayData.setFirstname(((User) user).getRolePlaySetting().getFirstname());
-            this.rolePlayData.setSurname(((User) user).getRolePlaySetting().getSurname());
-            this.rolePlayData.setTitle(((User) user).getRolePlaySetting().getTitle());
-            this.rolePlayData.setTitleAbbreviation(((User) user).getRolePlaySetting().getTitleAbbreviation());
         } else {
+            this.profilePic = UserSetting.DEFAULT_PROFILE_PIC;
             isNpc = true;
         }
+
+        this.rolePlayData.setFirstname(user.getRolePlaySetting().getFirstname());
+        this.rolePlayData.setSurname(user.getRolePlaySetting().getSurname());
+        this.rolePlayData.setTitle(user.getRolePlaySetting().getTitle());
+        this.rolePlayData.setTitleAbbreviation(user.getRolePlaySetting().getTitleAbbreviation());
+        this.rolePlayData.setEmpireName(user.getRolePlaySetting().getEmpireName());
     }
 
     public int getIdUser() {

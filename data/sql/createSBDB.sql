@@ -649,6 +649,7 @@
 
     create table rolePlaySetting (
        idRolePlaySetting integer not null auto_increment,
+        empireName varchar(50),
         firstname varchar(50),
         shipNameTemplates varchar(255) not null,
         shipNames longtext,
@@ -2049,3 +2050,4 @@ INSERT INTO dbPatch VALUES (NULL, NOW(), 'change tech names', '0.1.16-3');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'add tick to transport job', '0.1.16-4');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'introduce waypoints', '0.1.17-1');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'introduce game events', '0.1.17-2');
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'more roleplay', '0.1.17-3');

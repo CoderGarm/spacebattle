@@ -23,7 +23,7 @@ public class RolePlaySetting extends AbstractEntityKey {
     @NotNull
     @JoinColumn(name = "idUser")
     @OneToOne(optional = false)
-    private User user;
+    private Owner user;
 
     @Nullable
     @Size(max = 50)
@@ -45,6 +45,10 @@ public class RolePlaySetting extends AbstractEntityKey {
     @Size(max = 6)
     private String shipPrefix;
 
+    @Nullable
+    @Size(max = 50)
+    private String empireName;
+
     @Nonnull
     @NotNull
     @Convert(converter = EStarNationConverter.class)
@@ -58,7 +62,7 @@ public class RolePlaySetting extends AbstractEntityKey {
     public RolePlaySetting() {
     }
 
-    public RolePlaySetting(@Nonnull final User user) {
+    public RolePlaySetting(@Nonnull final Owner user) {
         this.user = Preconditions.checkNotNull(user, "user must not be empty");
     }
 
@@ -123,6 +127,15 @@ public class RolePlaySetting extends AbstractEntityKey {
 
     public void setShipNames(@Nonnull final Set<String> shipNames) {
         this.shipNames = shipNames;
+    }
+
+    @Nullable
+    public String getEmpireName() {
+        return empireName;
+    }
+
+    public void setEmpireName(@Nullable final String empireName) {
+        this.empireName = empireName;
     }
 
     @Override

@@ -107,6 +107,7 @@ public class RolePlayApi extends BaseApi {
         rolePlaySetting.setTitleAbbreviation(data.getTitleAbbreviation());
         rolePlaySetting.setFirstname(data.getFirstname());
         rolePlaySetting.setSurname(data.getSurname());
+        rolePlaySetting.setEmpireName(data.getEmpireName());
         userService.save(user);
 
         return ResponseEntity.ok(true);

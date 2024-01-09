@@ -3,15 +3,11 @@ package de.yuga.spacebattle.backend.entities.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.converter.EGameUserRolesConverter;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
-import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
-import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.enums.EWebUserRole;
 import de.yuga.spacebattle.backend.enums.OwnerType;
-import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
-import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -55,17 +51,6 @@ public class User extends Owner {
     @JoinColumn(name = "idAlliance")
     private Alliance alliance;
 
-    /**
-     * Represents all star systems which information was bought by the user in order to colonize them.<br>
-     * <p>
-     * <b>Attention: </b>
-     * Currently this implies that the new owner will get all information about the system without buying it especially.<br>
-     * <br>
-     * Compare:<br>
-     * - {@link ColonizationService#startColonizingPlanet(User, Planet)}<br>
-     * - {@link PlanetService#createPlanet(String, StarSystem, Orbit)}<br>
-     * </p>
-     */
     @Nonnull
     @ManyToMany
     @JoinTable(name = "knownStarSystem",
@@ -84,12 +69,6 @@ public class User extends Owner {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
     private UserSetting userSetting = new UserSetting();
 
-    @Valid
-    @Nonnull
-    @NotNull
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
-    private RolePlaySetting rolePlaySetting = new RolePlaySetting();
-
     public User() {
     }
 
@@ -105,7 +84,6 @@ public class User extends Owner {
         Preconditions.checkNotNull(role, "role shouldn't be null!");
 
         this.userSetting = new UserSetting(this, email, password, noEMailWanted);
-        this.rolePlaySetting = new RolePlaySetting(this);
         this.userRole = role;
         if (gameUserRoles != null) {
             this.gameUserRoles.addAll(Arrays.stream(gameUserRoles).collect(Collectors.toSet()));
@@ -162,8 +140,4 @@ public class User extends Owner {
         return userSetting;
     }
 
-    @Nonnull
-    public RolePlaySetting getRolePlaySetting() {
-        return rolePlaySetting;
-    }
 }

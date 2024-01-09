@@ -35,7 +35,6 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
-import de.yuga.spacebattle.backend.entities.turn.mission.HeatMap;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
@@ -248,18 +247,8 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = tickService.getToday().getNo() == 248; // fixme remove me afterwards
+        final boolean transformationNeeded = false;
         if (transformationNeeded) {
-
-            final List<Planet> colonized = planetService.findAllColonized();
-            final Set<HeatMap> heatMap = heatMapService.findHeatForPlanets(colonized, EMissionType.PIRATE_RAID);
-            final Set<Planet> known = heatMap.stream().map(HeatMap::getPlanet).collect(Collectors.toSet());
-            final Set<Planet> withoutHeat = colonized.stream().filter(h -> !known.contains(h)).collect(Collectors.toSet());
-
-            final List<HeatMap> newHeat = withoutHeat.stream()
-                    .map(p -> new HeatMap(p, EMissionType.PIRATE_RAID, p.getOwner().getId() == 3 ? 30 : 0))
-                    .collect(Collectors.toList());
-            heatMapService.saveAll(newHeat);
 
             /*
             fleetService.deleteAll();

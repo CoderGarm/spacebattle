@@ -121,8 +121,8 @@ public class WarShip extends Operationable {
     @Nonnull
     public String getName() {
         String name = "";
-        if (getShipClass().getHumanOwner() != null && StringUtils.isNotBlank(getShipClass().getHumanOwner().getRolePlaySetting().getShipPrefix())) {
-            name += getShipClass().getHumanOwner().getRolePlaySetting().getShipPrefix() + " ";
+        if (StringUtils.isNotBlank(getShipClass().getOwner().getRolePlaySetting().getShipPrefix())) {
+            name += getShipClass().getOwner().getRolePlaySetting().getShipPrefix() + " ";
         }
         name += this.name;
         return name;
