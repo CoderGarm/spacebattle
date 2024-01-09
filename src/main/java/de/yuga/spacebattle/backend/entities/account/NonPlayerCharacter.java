@@ -13,7 +13,9 @@ public class NonPlayerCharacter extends Owner {
     public NonPlayerCharacter() {
     }
 
-    public NonPlayerCharacter(@Nonnull final String username) {
+    public NonPlayerCharacter(@Nonnull final String username, @Nonnull final String shipPrefix) {
         super(username);
+
+        this.getRolePlaySetting().setShipPrefix(shipPrefix);
     }
 }

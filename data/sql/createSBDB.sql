@@ -1981,6 +1981,7 @@ INSERT INTO userSetting (idUserSetting, email, password, createdAt, isEMailVerif
 INSERT INTO rolePlaySetting (idUser, shipNameTemplates) VALUE (1, 'MANTICORE|HAVEN|ANDERMAN|SILESIA|SOLARIAN_LEAGUE');
 
 INSERT INTO user (username, dType) VALUES ('Defeated Opponent', 'NPC');
+INSERT INTO rolePlaySetting (idUser, shipNameTemplates) VALUE (2, 'MANTICORE|HAVEN|ANDERMAN|SILESIA|SOLARIAN_LEAGUE');
 
 
 DELIMITER //

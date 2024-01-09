@@ -43,10 +43,11 @@ public class NonPlayerCharacterService {
 
     @Nonnull
     @Deprecated(since = "productive")
-    public NonPlayerCharacter createNPC(@Nonnull final String username) {
+    public NonPlayerCharacter createNPC(@Nonnull final String username, @Nonnull final String shipPrefix) {
         Preconditions.checkNotNull(username, "username shouldn't be null!");
+        Preconditions.checkNotNull(shipPrefix, "shipPrefix must not be empty");
 
-        return this.save(new NonPlayerCharacter(username));
+        return this.save(new NonPlayerCharacter(username, shipPrefix));
     }
 
     @Nullable

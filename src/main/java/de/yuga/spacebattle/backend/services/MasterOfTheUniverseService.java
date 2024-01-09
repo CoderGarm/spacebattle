@@ -505,7 +505,7 @@ public class MasterOfTheUniverseService {
         final Fitting fitting = new Fitting(propulsions, armors, eloka, sidewalls, weapons, missiles, passiveModules);
         chansonDestroyer(Objects.requireNonNull(pirate), fitting);
 
-        pirate = nonPlayerCharacterService.createNPC(PIRATE);
+        pirate = nonPlayerCharacterService.createNPC(PIRATE, "OPA");
         createPirateShip(pirate, fitting);
         LOGGER.info("ShipClass created");
 
@@ -522,47 +522,47 @@ public class MasterOfTheUniverseService {
 
     @SuppressWarnings("DataFlowIssue")
     private void createNPCs() {
-        NonPlayerCharacter npc = nonPlayerCharacterService.createNPC("Star Kingdom of Manticore");
+        NonPlayerCharacter npc = nonPlayerCharacterService.createNPC("Star Kingdom of Manticore", "HMS");
         StarSystem sys = starsystemService.findByName("Manticore");
         Planet planet = sys.getPlanets().stream().findFirst().orElse(null);
         colonizeNPC(planet, npc);
 
-        npc = nonPlayerCharacterService.createNPC("Solarian League");
+        npc = nonPlayerCharacterService.createNPC("Solarian League", "SLNS");
         sys = starsystemService.findByName("Sol");
         planet = sys.getPlanets().stream().findFirst().orElse(null);
         colonizeNPC(planet, npc);
 
-        npc = nonPlayerCharacterService.createNPC("Haven Republic");
+        npc = nonPlayerCharacterService.createNPC("Haven Republic", "PNS");
         sys = starsystemService.findByName("Haven");
         planet = sys.getPlanets().stream().findFirst().orElse(null);
         colonizeNPC(planet, npc);
 
-        npc = nonPlayerCharacterService.createNPC("Anderman Empire");
+        npc = nonPlayerCharacterService.createNPC("Anderman Empire", "SMS");
         sys = starsystemService.findByName("Gregor");
         planet = sys.getPlanets().stream().findFirst().orElse(null);
         colonizeNPC(planet, npc);
 
-        npc = nonPlayerCharacterService.createNPC("Silesia Confederacy");
+        npc = nonPlayerCharacterService.createNPC("Silesia Confederacy", "SCNS");
         sys = starsystemService.findByName("Silesia");
         planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
         colonizeNPC(planet, npc);
 
-        npc = nonPlayerCharacterService.createNPC("Midgard Federation");
+        npc = nonPlayerCharacterService.createNPC("Midgard Federation", "MFS");
         sys = starsystemService.findByName("Midgard");
         planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
         colonizeNPC(planet, npc);
 
-        npc = nonPlayerCharacterService.createNPC("Asgard Association");
+        npc = nonPlayerCharacterService.createNPC("Asgard Association", "AAS");
         sys = starsystemService.findByName("Asgard");
         planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
         colonizeNPC(planet, npc);
 
-        npc = nonPlayerCharacterService.createNPC("Rembrandt Trade Union");
+        npc = nonPlayerCharacterService.createNPC("Rembrandt Trade Union", "RTU");
         sys = starsystemService.findByName("Rembrandt");
         planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
         colonizeNPC(planet, npc);
 
-        npc = nonPlayerCharacterService.createNPC("Meroa Trading Association");
+        npc = nonPlayerCharacterService.createNPC("Meroa Trading Association", "MTA");
         sys = starsystemService.findByName("Meroa");
         planet = sys.getPlanets().stream().filter(Planet::isColonizable).findFirst().orElse(null);
         colonizeNPC(planet, npc);

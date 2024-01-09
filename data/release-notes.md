@@ -3,9 +3,9 @@
 todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
 
 - imperums profilseite
-    - mit emblem / logo / avatar
-      check: roleplaysetting: add empire name
-    - stichpunkte zum leader, title, name ...
+    - check. mit emblem / logo / avatar
+    - check: roleplaysetting: add empire name
+  - check: stichpunkte zum leader, title, name ...
     - mit "trophy case" z.b. season 2 participant, war harvest 24 participant ...
     - allgemeine textbox für "sichtbar für alle", "sichtbar für ally", "sichtbar für freunde"
     - textbox für spezifischere beschreibungen der navy, der gesellschaft, des spielers ...
@@ -65,9 +65,11 @@ season 3:
 - entweder koloniezentrale auf main plani oder sowas wie gebäude für bevölkerungszufriedenheit -> steuereinnahmen
 - map für neue season fertig machen
 - kampfsystem verbessern
-- ressourcen so balancen, dass es einen need gibt -> nicht jeder kann alles ernten? auf jeden fall muss es einen need geben: handel oder kampf soll angeregt werden
 - fremde planis bomben
 - allianzfunktionen
+- ressourcen so balancen, dass es einen need gibt -> nicht jeder kann alles ernten? auf jeden fall muss es einen need geben: handel oder kampf soll angeregt werden
+- forschung muss ab dem early-game mehr kosten
+- schiffswerten müssen mehr output haben
 
 todo. colo duration through wormholes are NaN
 todo. tonnage calc not on every input -> timeout should be enough

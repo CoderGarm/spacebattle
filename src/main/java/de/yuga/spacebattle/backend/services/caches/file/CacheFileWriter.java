@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import java.io.*;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +22,7 @@ public class CacheFileWriter {
     private static final String USR_HOME = System.getProperty("user.home");
 
     @Nonnull
-    private static final String PS = System.getProperty("file.separator");
+    private static final String PS = FileSystems.getDefault().getSeparator();
 
     @Nonnull
     private static final String KEY_SEPARATOR = "<\\|>";
@@ -33,7 +34,7 @@ public class CacheFileWriter {
     private final String cacheDir;
 
     @Autowired
-    public CacheFileWriter(@Nonnull @Value("${cache-dir:file-cache}") final String cacheDir) {
+    public CacheFileWriter(@Nonnull @Value("${sb.cache-dir:file-cache}") final String cacheDir) {
         this.cacheDir = Preconditions.checkNotNull(cacheDir, "cacheDir shouldn't be null!");
     }
 

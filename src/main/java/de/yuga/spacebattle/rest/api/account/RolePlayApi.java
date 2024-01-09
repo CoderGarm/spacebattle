@@ -5,12 +5,15 @@ import de.yuga.spacebattle.backend.entities.account.RolePlaySetting;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.enums.EStarNation;
 import de.yuga.spacebattle.backend.services.ResourceService;
+import de.yuga.spacebattle.backend.services.account.RolePlayService;
 import de.yuga.spacebattle.backend.services.account.UserService;
+import de.yuga.spacebattle.backend.services.misc.FileSystemStorageService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.account.RolePlayData;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
+import de.yuga.spacebattle.rest.dto.misc.FileUpload;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,12 +25,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Base64;
 import java.util.List;
 import java.util.Set;
 
@@ -44,6 +52,8 @@ public class RolePlayApi extends BaseApi {
     public static final String SHIP_NAMES_ENDPOINT = "shipNames";
     public static final String SHIP_PREFIX_ENDPOINT = "shipPrefix";
     public static final String SHIP_TEMPLATE_ENDPOINT = "shipTemplate";
+    public static final String EMPIRE_IMAGE_ENDPOINT = "empire-emblem";
+    public static final String EMPIRE_IMAGE_PREFIX = "empire-emblem-";
 
     @Nonnull
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
@@ -54,11 +64,21 @@ public class RolePlayApi extends BaseApi {
     @Nonnull
     private final ResourceService resourceService;
 
+    @Nonnull
+    private final FileSystemStorageService storageService;
+
+    @Nonnull
+    private final RolePlayService rolePlayService;
+
     @Autowired
     public RolePlayApi(@Nonnull final UserService userService,
-                       @Nonnull final ResourceService resourceService) {
+                       @Nonnull final ResourceService resourceService,
+                       @Nonnull final FileSystemStorageService storageService,
+                       @Nonnull final RolePlayService rolePlayService) {
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
         this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
+        this.storageService = Preconditions.checkNotNull(storageService, "storageService must not be empty");
+        this.rolePlayService = Preconditions.checkNotNull(rolePlayService, "rolePlayService must not be empty");
     }
 
     @GetMapping
@@ -71,11 +91,9 @@ public class RolePlayApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getRPGData() {
-        final User user = userService.find(getIdUser());
-        if (user == null) {
-            throw new NotifyWebUserException("Nothing there, mate!");
-        }
-        return ResponseEntity.ok(new RolePlayData(user.getRolePlaySetting()));
+        final RolePlaySetting rolePlaySetting = rolePlayService.findForUser(getIdUser());
+        Preconditions.checkNotNull(rolePlaySetting, "Nothing there, mate!");
+        return ResponseEntity.ok(new RolePlayData(rolePlaySetting));
     }
 
     @PutMapping
@@ -97,18 +115,14 @@ public class RolePlayApi extends BaseApi {
     public ResponseEntity<?> setRPGData(@RequestBody @Nonnull final RolePlayData data) {
         Preconditions.checkNotNull(data, "data must not be empty");
 
-        final User user = userService.find(getIdUser());
-        if (user == null) {
-            throw new NotifyWebUserException("Nothing there, mate!");
-        }
-
-        final RolePlaySetting rolePlaySetting = user.getRolePlaySetting();
+        final RolePlaySetting rolePlaySetting = rolePlayService.findForUser(getIdUser());
+        Preconditions.checkNotNull(rolePlaySetting, "Nothing there, mate!");
         rolePlaySetting.setTitle(data.getTitle());
         rolePlaySetting.setTitleAbbreviation(data.getTitleAbbreviation());
         rolePlaySetting.setFirstname(data.getFirstname());
         rolePlaySetting.setSurname(data.getSurname());
         rolePlaySetting.setEmpireName(data.getEmpireName());
-        userService.save(user);
+        rolePlayService.save(rolePlaySetting);
 
         return ResponseEntity.ok(true);
     }
@@ -293,4 +307,75 @@ public class RolePlayApi extends BaseApi {
         return ResponseEntity.ok(true);
     }
 
+    @GetMapping(EMPIRE_IMAGE_ENDPOINT + "/{idUser}")
+    @Operation(summary = "Get the emblem of the empire of the given user.", operationId = "getEmpireEmblem",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FileUpload.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getEmpireEmblem(@PathVariable final int idUser) throws IOException {
+
+        final File file = storageService.loadAsResource(createEmpireEmblemFileName(idUser));
+        if (file == null) {
+            return ResponseEntity.ok().build();
+        }
+
+        final String encodeImage = Base64.getEncoder().withoutPadding().encodeToString(Files.readAllBytes(file.toPath()));
+        final FileUpload fileUpload = new FileUpload(file.getName(), encodeImage);
+
+        return ResponseEntity.ok(fileUpload);
+    }
+
+    /**
+     * Due to the inability of the swagger codegen to generate a useful file upload, this is faked because it can't be suppressed for generation, too.
+     */
+    @PostMapping(EMPIRE_IMAGE_ENDPOINT)
+    @Operation(summary = "Uploads the empires emblem.", operationId = "uploadEmpireEmblemBUTFAKE",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            schema = @Schema(implementation = File.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> uploadEmpireEmblem(@Nonnull @RequestBody final MultipartFile file) {
+        Preconditions.checkNotNull(file, "file must not be empty");
+
+        storageService.store(file, createEmpireEmblemFileName(getIdUser()));
+        return ResponseEntity.ok(true);
+    }
+
+
+    @DeleteMapping(EMPIRE_IMAGE_ENDPOINT)
+    @Operation(summary = "Deletes the empires emblem.", operationId = "deleteEmpireEmblem",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> deleteEmpireEmblem() {
+
+        final File file = storageService.loadAsResource(createEmpireEmblemFileName(getIdUser()));
+        if (file == null) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.ok(file.delete());
+    }
+
+    @Nonnull
+    private static String createEmpireEmblemFileName(final int idUser) {
+        return EMPIRE_IMAGE_PREFIX + idUser;
+    }
 }
