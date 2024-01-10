@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.validation.Valid;
 import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
@@ -60,6 +61,12 @@ public class RolePlayData {
     @Schema(required = true, description = "The user's selected ship names.")
     private Set<String> shipNames = new HashSet<>();
 
+    @Valid
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The user's selected ship names.")
+    private RPGTextBlocks textBlocks = new RPGTextBlocks();
+
     public RolePlayData() {
     }
 
@@ -71,6 +78,11 @@ public class RolePlayData {
         this.firstname = rolePlaySetting.getFirstname();
         this.surname = rolePlaySetting.getSurname();
         this.empireName = rolePlaySetting.getEmpireName();
+
+        this.textBlocks.setLeftUpper(rolePlaySetting.getLeftUpper());
+        this.textBlocks.setRightUpper(rolePlaySetting.getRightUpper());
+        this.textBlocks.setLeftBottom(rolePlaySetting.getLeftBottom());
+        this.textBlocks.setRightBottom(rolePlaySetting.getRightBottom());
     }
 
     public void setTitle(@Nullable final String title) {
@@ -89,17 +101,10 @@ public class RolePlayData {
         this.surname = surname;
     }
 
-    public void setShipPrefix(@Nullable final String shipPrefix) {
-        this.shipPrefix = shipPrefix;
-    }
-
     public void setShipNameTemplates(@Nonnull final Set<EStarNation> shipNameTemplates) {
         this.shipNameTemplates = shipNameTemplates;
     }
 
-    public void setShipNames(@Nonnull final Set<String> shipNames) {
-        this.shipNames = shipNames;
-    }
 
     @Nullable
     public String getEmpireName() {
@@ -135,13 +140,4 @@ public class RolePlayData {
         return shipPrefix;
     }
 
-    @Nonnull
-    public Set<EStarNation> getShipNameTemplates() {
-        return shipNameTemplates;
-    }
-
-    @Nonnull
-    public Set<String> getShipNames() {
-        return shipNames;
-    }
 }

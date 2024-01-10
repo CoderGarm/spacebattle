@@ -11,6 +11,7 @@ import de.yuga.spacebattle.backend.services.misc.FileSystemStorageService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import de.yuga.spacebattle.rest.dto.account.RPGTextBlocks;
 import de.yuga.spacebattle.rest.dto.account.RolePlayData;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.misc.FileUpload;
@@ -54,6 +55,7 @@ public class RolePlayApi extends BaseApi {
     public static final String SHIP_TEMPLATE_ENDPOINT = "shipTemplate";
     public static final String EMPIRE_IMAGE_ENDPOINT = "empire-emblem";
     public static final String EMPIRE_IMAGE_PREFIX = "empire-emblem-";
+    public static final String RPG_TEXTS = "rpg-texts";
 
     @Nonnull
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
@@ -114,6 +116,8 @@ public class RolePlayApi extends BaseApi {
     )
     public ResponseEntity<?> setRPGData(@RequestBody @Nonnull final RolePlayData data) {
         Preconditions.checkNotNull(data, "data must not be empty");
+
+        validateOrThrow(data);
 
         final RolePlaySetting rolePlaySetting = rolePlayService.findForUser(getIdUser());
         Preconditions.checkNotNull(rolePlaySetting, "Nothing there, mate!");
@@ -211,6 +215,15 @@ public class RolePlayApi extends BaseApi {
             return ResponseEntity.ok(true);
         }
         throw new NotifyWebUserException(constraintViolations);
+    }
+
+    private void validateOrThrow(@Nonnull final RolePlayData rolePlayData) {
+        Preconditions.checkNotNull(rolePlayData, "rolePlayData must not be empty");
+
+        final Set<ConstraintViolation<RolePlayData>> constraintViolations = validator.validate(rolePlayData);
+        if (!constraintViolations.isEmpty()) {
+            throw new NotifyWebUserException(constraintViolations);
+        }
     }
 
     @GetMapping(SHIP_NAMES_ENDPOINT)
@@ -355,7 +368,6 @@ public class RolePlayApi extends BaseApi {
         return ResponseEntity.ok(true);
     }
 
-
     @DeleteMapping(EMPIRE_IMAGE_ENDPOINT)
     @Operation(summary = "Deletes the empires emblem.", operationId = "deleteEmpireEmblem",
             responses = {
@@ -372,6 +384,40 @@ public class RolePlayApi extends BaseApi {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.ok(file.delete());
+    }
+
+    @PostMapping(RPG_TEXTS)
+    @Operation(summary = "Changes the empire texts.", operationId = "editRPGTextBlocks",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = RPGTextBlocks.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = RPGTextBlocks.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> editRPGTextBlocks(@Nonnull @RequestBody final RPGTextBlocks textBlocks) {
+        Preconditions.checkNotNull(textBlocks, "textBlocks must not be empty");
+
+        final Set<ConstraintViolation<RPGTextBlocks>> validate = validator.validate(textBlocks);
+        if (validate.isEmpty()) {
+            final RolePlaySetting forUser = rolePlayService.findForUser(getIdUser());
+            if (forUser != null) {
+                forUser.setLeftUpper(textBlocks.getLeftUpper());
+                forUser.setRightUpper(textBlocks.getRightUpper());
+                forUser.setLeftBottom(textBlocks.getLeftBottom());
+                forUser.setRightBottom(textBlocks.getRightBottom());
+                rolePlayService.save(forUser);
+            }
+            return ResponseEntity.ok(true);
+        }
+        throw new NotifyWebUserException("This must be changed.", validate);
     }
 
     @Nonnull

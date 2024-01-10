@@ -59,6 +59,26 @@ public class RolePlaySetting extends AbstractEntityKey {
     @Convert(converter = EStringSetConverter.class)
     private Set<String> shipNames = new HashSet<>();
 
+    @Lob
+    @Nullable
+    @Size(max = 2000)
+    private String leftUpper;
+
+    @Lob
+    @Nullable
+    @Size(max = 4000)
+    private String rightUpper;
+
+    @Lob
+    @Nullable
+    @Size(max = 4000)
+    private String leftBottom;
+
+    @Lob
+    @Nullable
+    @Size(max = 6000)
+    private String rightBottom;
+
     public RolePlaySetting() {
     }
 
@@ -136,6 +156,42 @@ public class RolePlaySetting extends AbstractEntityKey {
 
     public void setEmpireName(@Nullable final String empireName) {
         this.empireName = empireName;
+    }
+
+    @Nullable
+    public String getLeftUpper() {
+        return leftUpper;
+    }
+
+    public void setLeftUpper(@Nullable final String leftUpper) {
+        this.leftUpper = leftUpper;
+    }
+
+    @Nullable
+    public String getRightUpper() {
+        return rightUpper;
+    }
+
+    public void setRightUpper(@Nullable final String rightUpper) {
+        this.rightUpper = rightUpper;
+    }
+
+    @Nullable
+    public String getLeftBottom() {
+        return leftBottom;
+    }
+
+    public void setLeftBottom(@Nullable final String leftBottom) {
+        this.leftBottom = leftBottom;
+    }
+
+    @Nullable
+    public String getRightBottom() {
+        return rightBottom;
+    }
+
+    public void setRightBottom(@Nullable final String rightBottom) {
+        this.rightBottom = rightBottom;
     }
 
     @Override

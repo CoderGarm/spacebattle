@@ -13,4 +13,9 @@ INSERT INTO rolePlaySetting (idUser, shipPrefix, empireName, shipNameTemplates) 
 (51, 'RTU', 'Rembrandt Trade Union', 'MANTICORE|HAVEN|ANDERMAN|SILESIA|SOLARIAN_LEAGUE'),
 (52, 'MTA', 'Meroa Trading Association', 'MANTICORE|HAVEN|ANDERMAN|SILESIA|SOLARIAN_LEAGUE');
 
+alter table rolePlaySetting add column leftBottom longtext after empireName;
+alter table rolePlaySetting add column leftUpper longtext after leftBottom;
+alter table rolePlaySetting add column rightBottom longtext after leftUpper;
+alter table rolePlaySetting add column rightUpper longtext after rightBottom;
+
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'more roleplay', '0.1.17-3');

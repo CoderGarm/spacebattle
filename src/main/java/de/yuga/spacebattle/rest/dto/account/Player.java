@@ -64,6 +64,7 @@ public class Player {
 
         this.idUser = user.getId();
         this.username = user.getUsername();
+        this.rolePlayData = new RolePlayData(user.getRolePlaySetting());
         if (user instanceof User) {
             this.idAlliance = ((User) user).getAlliance() != null ? ((User) user).getAlliance().getId() : null;
             this.allianceTag = ((User) user).getAlliance() != null ? ((User) user).getAlliance().getCode() : null;
@@ -73,12 +74,6 @@ public class Player {
             this.profilePic = UserSetting.DEFAULT_PROFILE_PIC;
             isNpc = true;
         }
-
-        this.rolePlayData.setFirstname(user.getRolePlaySetting().getFirstname());
-        this.rolePlayData.setSurname(user.getRolePlaySetting().getSurname());
-        this.rolePlayData.setTitle(user.getRolePlaySetting().getTitle());
-        this.rolePlayData.setTitleAbbreviation(user.getRolePlaySetting().getTitleAbbreviation());
-        this.rolePlayData.setEmpireName(user.getRolePlaySetting().getEmpireName());
     }
 
     public int getIdUser() {

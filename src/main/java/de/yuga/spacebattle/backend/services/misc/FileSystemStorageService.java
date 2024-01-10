@@ -2,6 +2,8 @@ package de.yuga.spacebattle.backend.services.misc;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -22,6 +24,9 @@ import java.util.Objects;
 
 @Service
 public class FileSystemStorageService {
+
+    @Nonnull
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(FileSystemStorageService.class);
 
     @Nonnull
     private static final String USR_HOME = System.getProperty("user.home");
@@ -58,7 +63,13 @@ public class FileSystemStorageService {
                     //noinspection ResultOfMethodCallIgnored
                     dir.mkdirs();
                 }
-                Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+
+                long size = FileUtils.sizeOfDirectory(cacheDir.toFile());
+                if (size > 500000000L) {
+                    LOGGER.info("File '{}' not written due folder size > 500 MB", destinationFile);
+                } else {
+                    Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+                }
             }
         } catch (IOException e) {
             throw new NotifyWebUserException("Failed to store file.");
