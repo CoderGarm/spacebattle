@@ -1,15 +1,15 @@
 # Event War Harvest Release
 
-todo. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
+check. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
 
 - imperums profilseite
     - check. mit emblem / logo / avatar
     - check: roleplaysetting: add empire name
-  - check: stichpunkte zum leader, title, name ...
-    - mit "trophy case" z.b. season 2 participant, war harvest 24 participant ...
-    - allgemeine textbox für "sichtbar für alle", "sichtbar für ally", "sichtbar für freunde"
-    - textbox für spezifischere beschreibungen der navy, der gesellschaft, des spielers ...
-    - liste aller interaktionen der eigenen navy, diplomatischer kontakt seit "erste chat-nachricht"-datum
+        - check: stichpunkte zum leader, title, name ...
+            - mit "trophy case" z.b. season 2 participant, war harvest 24 participant ...
+            - allgemeine textbox für "sichtbar für alle", "sichtbar für ally", "sichtbar für freunde"
+            - textbox für spezifischere beschreibungen der navy, der gesellschaft, des spielers ...
+            - liste aller interaktionen der eigenen navy, diplomatischer kontakt seit "erste chat-nachricht"-datum
 - imperiumsprofil wird als dialog immer aufgerufen wenn man auf den usernamen, usericon ... klickt
 - die letzten forumsbeiträge ...
 - allianzmitgliedschaft ...
@@ -51,6 +51,7 @@ article orbital modules
 
 #### next steps
 
+todo. plani menu anzeiigen ob SY oder CY job möglich
 todo. planis bomben, allianzfunktionen, kämpfen von mehreren flottenverbänden
 todo. flotten auf karte als shortcut-icon rechts am rand darstellen
 todo. eigene systeme auf karte als shortcut-icon rechts am rand darstellen?
@@ -70,6 +71,7 @@ season 3:
 - ressourcen so balancen, dass es einen need gibt -> nicht jeder kann alles ernten? auf jeden fall muss es einen need geben: handel oder kampf soll angeregt werden
 - forschung muss ab dem early-game mehr kosten
 - schiffswerten müssen mehr output haben
+- regelmäßige konvoys wie in anno -> kann man abfangen per mission und schützen mit eigenen missionen -> mehrere ressourcen pro convoy
 
 todo. colo duration through wormholes are NaN
 todo. tonnage calc not on every input -> timeout should be enough

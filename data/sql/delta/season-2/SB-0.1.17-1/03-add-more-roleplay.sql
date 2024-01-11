@@ -13,6 +13,8 @@ INSERT INTO rolePlaySetting (idUser, shipPrefix, empireName, shipNameTemplates) 
 (51, 'RTU', 'Rembrandt Trade Union', 'MANTICORE|HAVEN|ANDERMAN|SILESIA|SOLARIAN_LEAGUE'),
 (52, 'MTA', 'Meroa Trading Association', 'MANTICORE|HAVEN|ANDERMAN|SILESIA|SOLARIAN_LEAGUE');
 
+INSERT INTO rolePlaySetting (idUser, shipNameTemplates) VALUES (2, 'MANTICORE|HAVEN|ANDERMAN|SILESIA|SOLARIAN_LEAGUE');
+
 alter table rolePlaySetting add column leftBottom longtext after empireName;
 alter table rolePlaySetting add column leftUpper longtext after leftBottom;
 alter table rolePlaySetting add column rightBottom longtext after leftUpper;
