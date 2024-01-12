@@ -1,51 +1,34 @@
-package de.yuga.spacebattle.rest.dto.account;
+package de.yuga.spacebattle.backend.entities.account;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.account.EmbassyTextBlocks;
-import io.swagger.v3.oas.annotations.media.Schema;
-
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.persistence.Embeddable;
+import javax.persistence.Lob;
 import javax.validation.constraints.Size;
 
-@Schema(description = ".")
-public class RPGTextBlocks {
+@Embeddable
+public class EmbassyTextBlocks {
 
+    @Lob
     @Nullable
     @Size(max = 2000)
-    @JsonProperty
-    @Schema(description = "The text. max 2000")
     private String leftUpper;
 
+    @Lob
     @Nullable
     @Size(max = 4000)
-    @JsonProperty
-    @Schema(description = "The text. max 4000")
     private String rightUpper;
 
+    @Lob
     @Nullable
     @Size(max = 4000)
-    @JsonProperty
-    @Schema(description = "The text. max 4000")
     private String leftBottom;
 
+    @Lob
     @Nullable
     @Size(max = 6000)
-    @JsonProperty
-    @Schema(description = "The text. max 6000")
     private String rightBottom;
 
-    public RPGTextBlocks() {
-    }
-
-    public RPGTextBlocks(@Nonnull final EmbassyTextBlocks embassyTextBlocks) {
-        Preconditions.checkNotNull(embassyTextBlocks, "embassyTextBlocks must not be empty");
-
-        setLeftUpper(embassyTextBlocks.getLeftUpper());
-        setRightUpper(embassyTextBlocks.getRightUpper());
-        setLeftBottom(embassyTextBlocks.getLeftBottom());
-        setRightBottom(embassyTextBlocks.getRightBottom());
+    public EmbassyTextBlocks() {
     }
 
     @Nullable

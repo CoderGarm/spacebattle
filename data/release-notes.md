@@ -51,6 +51,7 @@ article orbital modules
 
 #### next steps
 
+todo. carrier menu planetengebäude und mining factors
 todo. plani menu anzeiigen ob SY oder CY job möglich
 todo. planis bomben, allianzfunktionen, kämpfen von mehreren flottenverbänden
 todo. flotten auf karte als shortcut-icon rechts am rand darstellen

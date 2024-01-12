@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.dto.account;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.EmbassyTextBlocks;
 import de.yuga.spacebattle.backend.entities.account.RolePlaySetting;
 import de.yuga.spacebattle.backend.enums.EStarNation;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -79,10 +80,14 @@ public class RolePlayData {
         this.surname = rolePlaySetting.getSurname();
         this.empireName = rolePlaySetting.getEmpireName();
 
-        this.textBlocks.setLeftUpper(rolePlaySetting.getLeftUpper());
-        this.textBlocks.setRightUpper(rolePlaySetting.getRightUpper());
-        this.textBlocks.setLeftBottom(rolePlaySetting.getLeftBottom());
-        this.textBlocks.setRightBottom(rolePlaySetting.getRightBottom());
+        final EmbassyTextBlocks embassyTextBlocks = rolePlaySetting.getEmbassyTextBlocks();
+        if (embassyTextBlocks == null) {
+            int b = 1;
+        }
+        this.textBlocks.setLeftUpper(embassyTextBlocks.getLeftUpper());
+        this.textBlocks.setRightUpper(embassyTextBlocks.getRightUpper());
+        this.textBlocks.setLeftBottom(embassyTextBlocks.getLeftBottom());
+        this.textBlocks.setRightBottom(embassyTextBlocks.getRightBottom());
     }
 
     public void setTitle(@Nullable final String title) {

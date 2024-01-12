@@ -27,6 +27,10 @@
        idAlliance integer not null auto_increment,
         code varchar(30) not null,
         createdAt datetime(6) not null,
+        leftBottom longtext,
+        leftUpper longtext,
+        rightBottom longtext,
+        rightUpper longtext,
         name varchar(30) not null,
         idFounder integer not null,
         primary key (idAlliance)
@@ -649,12 +653,12 @@
 
     create table rolePlaySetting (
        idRolePlaySetting integer not null auto_increment,
-        empireName varchar(50),
-        firstname varchar(50),
         leftBottom longtext,
         leftUpper longtext,
         rightBottom longtext,
         rightUpper longtext,
+        empireName varchar(50),
+        firstname varchar(50),
         shipNameTemplates varchar(255) not null,
         shipNames longtext,
         shipPrefix varchar(6),
@@ -2056,3 +2060,4 @@ INSERT INTO dbPatch VALUES (NULL, NOW(), 'add tick to transport job', '0.1.16-4'
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'introduce waypoints', '0.1.17-1');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'introduce game events', '0.1.17-2');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'more roleplay', '0.1.17-3');
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'more more roleplay', '0.1.17-4');

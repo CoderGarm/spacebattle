@@ -13,15 +13,10 @@ import javax.annotation.Nullable;
 public class RolePlayService {
 
     @Nonnull
-    private final OwnerService ownerService;
-
-    @Nonnull
     private final UserRolePlaySettingRepository rolePlaySettingRepository;
 
     @Autowired
-    public RolePlayService(@Nonnull final OwnerService ownerService,
-                           @Nonnull final UserRolePlaySettingRepository rolePlaySettingRepository) {
-        this.ownerService = Preconditions.checkNotNull(ownerService, "ownerService must not be empty");
+    public RolePlayService(@Nonnull final UserRolePlaySettingRepository rolePlaySettingRepository) {
         this.rolePlaySettingRepository = Preconditions.checkNotNull(rolePlaySettingRepository, "rolePlaySettingRepository must not be empty");
     }
 

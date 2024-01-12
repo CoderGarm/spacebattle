@@ -409,10 +409,10 @@ public class RolePlayApi extends BaseApi {
         if (validate.isEmpty()) {
             final RolePlaySetting forUser = rolePlayService.findForUser(getIdUser());
             if (forUser != null) {
-                forUser.setLeftUpper(textBlocks.getLeftUpper());
-                forUser.setRightUpper(textBlocks.getRightUpper());
-                forUser.setLeftBottom(textBlocks.getLeftBottom());
-                forUser.setRightBottom(textBlocks.getRightBottom());
+                forUser.getEmbassyTextBlocks().setLeftUpper(textBlocks.getLeftUpper());
+                forUser.getEmbassyTextBlocks().setRightUpper(textBlocks.getRightUpper());
+                forUser.getEmbassyTextBlocks().setLeftBottom(textBlocks.getLeftBottom());
+                forUser.getEmbassyTextBlocks().setRightBottom(textBlocks.getRightBottom());
                 rolePlayService.save(forUser);
             }
             return ResponseEntity.ok(true);

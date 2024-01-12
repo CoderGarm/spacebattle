@@ -5,14 +5,19 @@ import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.account.forum.Forum;
 import de.yuga.spacebattle.backend.enums.EGameUserRole;
 import de.yuga.spacebattle.backend.services.account.ForumService;
+import de.yuga.spacebattle.backend.services.account.RolePlayService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.combined.account.AllianceService;
+import de.yuga.spacebattle.backend.services.misc.FileSystemStorageService;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.config.role.AllowedRoles;
 import de.yuga.spacebattle.rest.dto.account.Player;
+import de.yuga.spacebattle.rest.dto.account.RPGTextBlocks;
 import de.yuga.spacebattle.rest.dto.combined.account.Alliance;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
+import de.yuga.spacebattle.rest.dto.misc.FileUpload;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,10 +29,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.security.RolesAllowed;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Base64;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -43,6 +56,12 @@ public class AllianceApi extends BaseApi {
     @Nonnull
     public static final String ENDPOINT = "alliances";
     private static final String APPLY_FOR_MEMBERSHIP = "membership";
+    public static final String ALLIANCE_IMAGE_ENDPOINT = "empire-emblem";
+    public static final String ALLIANCE_IMAGE_PREFIX = "alliance-image-";
+    public static final String RPG_TEXTS = "rpg-texts";
+
+    @Nonnull
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     @Nonnull
     private final AllianceService allianceService;
@@ -53,17 +72,23 @@ public class AllianceApi extends BaseApi {
     @Nonnull
     private final ForumService forumService;
 
+    @Nonnull
+    private final FileSystemStorageService storageService;
+
+    @Nonnull
+    private final RolePlayService rolePlayService;
+
     @Autowired
     public AllianceApi(@Nonnull final AllianceService allianceService,
                        @Nonnull final UserService userService,
-                       @Nonnull final ForumService forumService) {
-        Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");
-        Preconditions.checkNotNull(userService, "userService shouldn't be null!");
-        Preconditions.checkNotNull(forumService, "forumService shouldn't be null!");
-
-        this.allianceService = allianceService;
-        this.userService = userService;
-        this.forumService = forumService;
+                       @Nonnull final ForumService forumService,
+                       @Nonnull final FileSystemStorageService storageService,
+                       @Nonnull final RolePlayService rolePlayService) {
+        this.allianceService = Preconditions.checkNotNull(allianceService, "allianceService shouldn't be null!");
+        this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
+        this.forumService = Preconditions.checkNotNull(forumService, "forumService shouldn't be null!");
+        this.storageService = Preconditions.checkNotNull(storageService, "storageService must not be empty");
+        this.rolePlayService = Preconditions.checkNotNull(rolePlayService, "rolePlayService must not be empty");
     }
 
 
@@ -327,5 +352,136 @@ public class AllianceApi extends BaseApi {
             return ResponseEntity.ok(false);
         }
         return ResponseEntity.ok(true);
+    }
+
+    @GetMapping(ALLIANCE_IMAGE_ENDPOINT + "/{idAlliance}")
+    @Operation(summary = "Get the emblem of the empire of the given user.", operationId = "getAllianceEmblem",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FileUpload.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getAllianceEmblem(@PathVariable final int idAlliance) throws IOException {
+
+        final File file = storageService.loadAsResource(createAllianceEmblemFileName(idAlliance));
+        if (file == null) {
+            return ResponseEntity.ok().build();
+        }
+
+        final String encodeImage = Base64.getEncoder().withoutPadding().encodeToString(Files.readAllBytes(file.toPath()));
+        final FileUpload fileUpload = new FileUpload(file.getName(), encodeImage);
+
+        return ResponseEntity.ok(fileUpload);
+    }
+
+    /**
+     * Due to the inability of the swagger codegen to generate a useful file upload, this is faked because it can't be suppressed for generation, too.
+     */
+    @PostMapping(ALLIANCE_IMAGE_ENDPOINT + "/{idAlliance}")
+    @Operation(summary = "Uploads the empires emblem.", operationId = "uploadAllianceEmblemBUTFAKE",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            schema = @Schema(implementation = File.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> uploadAllianceEmblem(@Nonnull @RequestBody final MultipartFile file, @PathVariable final int idAlliance) {
+        Preconditions.checkNotNull(file, "file must not be empty");
+
+        final de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance = allianceService.find(idAlliance);
+        if (alliance != null && alliance.getFounder().getId() == getIdUser()) {
+            storageService.store(file, createAllianceEmblemFileName(idAlliance));
+        }
+        return ResponseEntity.ok(true);
+    }
+
+    @DeleteMapping(ALLIANCE_IMAGE_ENDPOINT + "/{idAlliance}")
+    @Operation(summary = "Deletes the empires emblem.", operationId = "deleteAllianceEmblem",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> deleteAllianceEmblem(@PathVariable final int idAlliance) {
+
+        final de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance = allianceService.find(idAlliance);
+        if (alliance != null && alliance.getFounder().getId() == getIdUser()) {
+            final File file = storageService.loadAsResource(createAllianceEmblemFileName(idAlliance));
+            if (file == null) {
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.ok(file.delete());
+        }
+        return ResponseEntity.ok().build();
+    }
+
+
+    @GetMapping(RPG_TEXTS + "/{idAlliance}")
+    @Operation(summary = "Get the rpg data", operationId = "getAllianceRPGData",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = RPGTextBlocks.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getAllianceRPGData(@PathVariable final int idAlliance) {
+        final de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance = allianceService.find(idAlliance);
+        if (alliance != null) {
+            return ResponseEntity.ok(new RPGTextBlocks(alliance.getEmbassyTextBlocks()));
+
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping(RPG_TEXTS + "/{idAlliance}")
+    @Operation(summary = "Changes the empire texts.", operationId = "editAllianceTextBlocks",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = RPGTextBlocks.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = RPGTextBlocks.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> editAllianceTextBlocks(@Nonnull @RequestBody final RPGTextBlocks textBlocks, @PathVariable final int idAlliance) {
+        Preconditions.checkNotNull(textBlocks, "textBlocks must not be empty");
+
+        final Set<ConstraintViolation<RPGTextBlocks>> validate = validator.validate(textBlocks);
+        if (validate.isEmpty()) {
+            final de.yuga.spacebattle.backend.entities.combined.account.Alliance alliance = allianceService.find(idAlliance);
+            if (alliance != null && alliance.getFounder().getId() == getIdUser()) {
+                alliance.getEmbassyTextBlocks().setLeftUpper(textBlocks.getLeftUpper());
+                alliance.getEmbassyTextBlocks().setRightUpper(textBlocks.getRightUpper());
+                alliance.getEmbassyTextBlocks().setLeftBottom(textBlocks.getLeftBottom());
+                alliance.getEmbassyTextBlocks().setRightBottom(textBlocks.getRightBottom());
+                allianceService.save(alliance);
+            }
+            return ResponseEntity.ok(true);
+        }
+        throw new NotifyWebUserException("This must be changed.", validate);
+    }
+
+    @Nonnull
+    private static String createAllianceEmblemFileName(final int idUser) {
+        return ALLIANCE_IMAGE_PREFIX + idUser;
     }
 }

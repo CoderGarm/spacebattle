@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.entities.combined.account;
 
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.account.EmbassyTextBlocks;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 
@@ -56,6 +57,10 @@ public class Alliance extends AbstractEntityKey {
     @Nonnull
     @NotNull
     private final LocalDateTime createdAt = LocalDateTime.now();
+
+    @NotNull
+    @Embedded
+    private EmbassyTextBlocks embassyTextBlocks = new EmbassyTextBlocks();
 
     public Alliance() {
     }
@@ -114,6 +119,14 @@ public class Alliance extends AbstractEntityKey {
     @Nonnull
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    @Nonnull
+    public EmbassyTextBlocks getEmbassyTextBlocks() {
+        if (embassyTextBlocks == null) {
+            embassyTextBlocks = new EmbassyTextBlocks();
+        }
+        return embassyTextBlocks;
     }
 
     @Override

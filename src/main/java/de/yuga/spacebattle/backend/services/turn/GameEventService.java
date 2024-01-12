@@ -45,7 +45,7 @@ public class GameEventService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GameEventService.class);
 
     @Nonnull
-    private static final Range<Tick> WAR_HARVEST_2023 = Range.between(new Tick(244), new Tick(255), Tick::compareTo);
+    private static final Range<Tick> WAR_HARVEST_2023 = Range.between(new Tick(244), new Tick(257), Tick::compareTo);
 
     @Nonnull
     public static final String INTERCEPT_PREFIX = "INTERCEPT";
