@@ -16,6 +16,7 @@ import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.mission.HeatMap;
 import de.yuga.spacebattle.backend.enums.EMissionAction;
 import de.yuga.spacebattle.backend.enums.EMissionType;
+import de.yuga.spacebattle.backend.services.ResourceService;
 import de.yuga.spacebattle.backend.services.account.NonPlayerCharacterService;
 import de.yuga.spacebattle.backend.services.caches.MissionCache;
 import de.yuga.spacebattle.backend.services.caches.RaidingPirateCache;
@@ -25,6 +26,7 @@ import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipSer
 import de.yuga.spacebattle.backend.services.spacecraft.FleetMovementExecutorService;
 import de.yuga.spacebattle.backend.services.turn.MoveService;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.HeatMapService;
+import de.yuga.spacebattle.backend.services.turn.tick.mission.MissionCategorizationService;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.MissionPhaseRunner;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.RaidingPiratesMission;
 import org.slf4j.Logger;
@@ -79,6 +81,12 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
     @Nonnull
     private final FleetMovementExecutorService fleetMovementExecutor;
 
+    @Nonnull
+    private final ResourceService resourceService;
+
+    @Nonnull
+    private final MissionCategorizationService missionCategorizationService;
+
     @Autowired
     public PirateSpawnPhase(@Nonnull final NonPlayerCharacterService nonPlayerCharacterService,
                             @Nonnull final FleetService fleetService,
@@ -88,7 +96,9 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
                             @Nonnull final MissionCache missionCache,
                             @Nonnull final RaidingPirateCache raidingPirateCache,
                             @Nonnull final MoveService moveService,
-                            @Nonnull final FleetMovementExecutorService fleetMovementExecutor) {
+                            @Nonnull final FleetMovementExecutorService fleetMovementExecutor,
+                            @Nonnull final ResourceService resourceService,
+                            @Nonnull final MissionCategorizationService missionCategorizationService) {
         this.nonPlayerCharacterService = Preconditions.checkNotNull(nonPlayerCharacterService, "nonPlayerCharacterService must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
         this.shipClassService = Preconditions.checkNotNull(shipClassService, "shipClassService must not be empty");
@@ -98,6 +108,8 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
         this.raidingPirateCache = Preconditions.checkNotNull(raidingPirateCache, "raidingPirateCache must not be empty");
         this.moveService = Preconditions.checkNotNull(moveService, "moveService must not be empty");
         this.fleetMovementExecutor = Preconditions.checkNotNull(fleetMovementExecutor, "fleetMovementExecutor must not be empty");
+        this.resourceService = Preconditions.checkNotNull(resourceService, "resourceService must not be empty");
+        this.missionCategorizationService = Preconditions.checkNotNull(missionCategorizationService, "missionCategorizationService must not be empty");
     }
 
     @Override
@@ -143,7 +155,10 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
 
         final NonPlayerCharacter opponent = nonPlayerCharacterService.findByUsername(PIRATE);
         final List<ShipClass> classList = shipClassService.findAllLatestByOwner(Objects.requireNonNull(opponent).getId());
-        final ShipClass ship = classList.get(0);
+        final ShipClass ship = classList
+                // todo rework season 3 mitigate a stange issue with bikini-ships from the wrong class and no battle
+                .stream().reduce((o1, o2) -> o1.getId() > o2.getId() ? o2 : o1)
+                .orElseThrow(NullPointerException::new);
 
         final FleetOrbit planetsPosition = new FleetOrbit(target.getOrbit(), target.getSystem());
         final Fleet pirateFleet = createFleet(opponent, target, planetsPosition);
@@ -157,12 +172,27 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
         fleetMovementExecutor.executeMove(save, today);
 
         raidingPirateCache.setTarget(today, pirateFleet, target);
-        final WarShip warShip = new WarShip("Corsair", target, pirateFleet, ship);
-        warShip.setOperational();
-        warShipService.save(warShip);
+
+        final int planetaryImpactPoints = missionCategorizationService.getPlanetaryImpact(target);
+        final int i = planetaryImpactPoints / 100;
+        for (int j = 0; j < i; j++) {
+            createPirateShip(target, pirateFleet, ship);
+        }
         missionCache.pirateRaidSpawn(today, pirateFleet, target);
         LOGGER.info("\tPirate spawn for '" + owner.getUsername() + "' at '" + target.getName() + "'");
         return pirateFleet;
+    }
+
+    private void createPirateShip(@Nonnull final Planet target,
+                                  @Nonnull final Fleet pirateFleet,
+                                  @Nonnull final ShipClass ship) {
+        Preconditions.checkNotNull(target, "target must not be empty");
+        Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
+        Preconditions.checkNotNull(ship, "ship must not be empty");
+
+        final WarShip warShip = new WarShip(resourceService.getRandomWarshipName(), target, pirateFleet, ship);
+        warShip.setOperational();
+        warShipService.save(warShip);
     }
 
     @Nonnull

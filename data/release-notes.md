@@ -1,5 +1,9 @@
 # Event War Harvest Release
 
+todo. no bikini ships without fight
+todo. alliance color for map
+todo. filter for own / allied / only enemy
+
 check. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
 
 - imperums profilseite
