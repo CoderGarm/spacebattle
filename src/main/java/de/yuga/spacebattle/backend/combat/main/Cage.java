@@ -49,11 +49,6 @@ public class Cage implements Future<Cage> {
     private static final BigDecimal INITIAL_CAGE_DIAMETER_MULTIPLIER = BigDecimal.valueOf(2);
 
     /**
-     * If zero, then the multiplier will be chosen for calculation.
-     */
-    private static final BigDecimal INITIAL_CAGE_DIAMETER = BigDecimal.valueOf(0);
-
-    /**
      * The current combat round.
      */
     private final CombatRound currentCombatRound;
@@ -358,19 +353,15 @@ public class Cage implements Future<Cage> {
      *
      * @return the diameter
      */
+    @Nonnull
     private BigDecimal getInitialCageDiameter() {
         final Distance f1 = fleetOne.getMaximumWeaponRange();
         final Distance f2 = fleetTwo.getMaximumWeaponRange();
-        final BigDecimal initialCageDiameter;
-        if (INITIAL_CAGE_DIAMETER.compareTo(BigDecimal.ZERO) == 0) {
-            final Distance min = f1.min(f2);
-            System.out.println("Weapon range: " + min.getCoordinateInMetric(LS) + " LS");
-            final BigDecimal coordinateInMetric = min.getCoordinateInMetric(Planet.PLANET_STANDARD_METRIC);
-            initialCageDiameter = coordinateInMetric.multiply(INITIAL_CAGE_DIAMETER_MULTIPLIER, DistanceCalculator.MC_HU);
-        } else {
-            initialCageDiameter = INITIAL_CAGE_DIAMETER;
-        }
-        return initialCageDiameter;
+
+        final Distance max = f1.max(f2);
+        System.out.println("Weapon range: " + max.getCoordinateInMetric(LS) + " LS");
+        final BigDecimal coordinateInMetric = max.getCoordinateInMetric(Planet.PLANET_STANDARD_METRIC);
+        return coordinateInMetric.multiply(INITIAL_CAGE_DIAMETER_MULTIPLIER, DistanceCalculator.MC_HU);
     }
 
     /**

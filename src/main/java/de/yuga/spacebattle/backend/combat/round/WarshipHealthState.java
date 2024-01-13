@@ -153,16 +153,15 @@ public class WarshipHealthState implements Cloneable {
      * @return <code>true</code> if the ship can fight, <code>false</code> otherwise
      */
     public boolean isFightingCapable() {
-        if (!isAlive()) {
+        if (!isAlive() || (isStatValueLost(armorState, hasArmor) || isStatValueLost(sidewallState, hasSidewall) || propulsionState <= 0 || isStatValueLost(elokaState, hasEloka))) {
             return false;
         }
-        if (isStatValueLost(armorState, hasArmor) || isStatValueLost(sidewallState, hasSidewall) || propulsionState <= 0 || isStatValueLost(elokaState, hasEloka)) return false;
         for (Boolean aBoolean : fittings.values()) {
             if (aBoolean) {
                 return true;
             }
         }
-        return false;
+        return hullState > 0;
     }
 
     @Nonnull

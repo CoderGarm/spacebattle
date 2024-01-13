@@ -99,7 +99,7 @@ public class MasterOfTheUniverseServiceTest {
 
     @Test
     void runBattle() {
-        final Planet planet = planetService.find(112);
+        final Planet planet = planetService.find(1761);
         final Tick today = tickService.getToday();
         battleService.runBattleAtPlanet(today, planet);
     }

@@ -1,6 +1,5 @@
 # Event War Harvest Release
 
-todo. no bikini ships without fight
 todo. alliance color for map
 todo. filter for own / allied / only enemy
 
@@ -19,6 +18,7 @@ check. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in
 - allianzmitgliedschaft ...
 - chat optisch aufarbeiten und auf imperiumsseite des anderen anzeigen
 
+check. no bikini ships without fight
 check. heat für steffen und alle anderen
 check. ladderboard
 check. highlight kersey bases
