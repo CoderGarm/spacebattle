@@ -3,7 +3,6 @@ package de.yuga.spacebattle.rest.api.turn.resources;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
@@ -49,7 +48,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 
@@ -278,7 +276,7 @@ public class ResourcesApi extends BaseApi {
     )
     public ResponseEntity<?> getIncomeForUser() {
         final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit ticklyIncome = new de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit(EDepositType.INCOME);
-        planetService.findAllColonizedByForID(getIdUser()).forEach(idPlanet -> ticklyIncome.add(tickOutputCalculator.getTicklyIncome(idPlanet)));
+        planetService.findAllColonizedByForIdPlanet(getIdUser()).forEach(idPlanet -> ticklyIncome.add(tickOutputCalculator.getTicklyIncome(idPlanet)));
         return ResponseEntity.ok(new ResourceDeposit(ticklyIncome));
     }
 
@@ -307,16 +305,18 @@ public class ResourcesApi extends BaseApi {
     )
     public ResponseEntity<?> getPopOverview() {
 
-        final List<Planet> planets = planetService.findAllColonizedBy(getIdUser());
+        final List<Integer> planetIDs = planetService.findAllColonizedByForIdPlanet(getIdUser());
 
         final long utilizedPopulationForUser = operationalService.getUtilizedPopulationForUser(getIdUser()).getResourceAmountByType(de.yuga.spacebattle.backend.enums.EResourceType.POPULATION);
         final PopulationOverview populationOverview = new PopulationOverview();
         populationOverview.addPresent(utilizedPopulationForUser);
 
-        final Map<Integer, de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit> resourceCapacities = tickOutputCalculator.getResourceCapacities(planets.stream().map(AbstractEntityKey::getId).collect(Collectors.toSet()));
-        for (final Planet planet : planets) {
-            final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit resourceDeposit = planet.getResourceDeposit();
-            final long capacity = resourceCapacities.get(planet.getId()).getResourceAmountByType(de.yuga.spacebattle.backend.enums.EResourceType.POPULATION);
+        final Map<Integer, de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit> resourceCapacities =
+                tickOutputCalculator.getResourceCapacities(planetIDs);
+        for (final Integer idPlanet : planetIDs) {
+            final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit resourceDeposit = planetService.findResourceDeposit(idPlanet);
+            Preconditions.checkNotNull(resourceDeposit, "resourceDeposit must not be empty");
+            final long capacity = resourceCapacities.get(idPlanet).getResourceAmountByType(de.yuga.spacebattle.backend.enums.EResourceType.POPULATION);
             populationOverview.addCapacity(capacity);
             populationOverview.addPresent(resourceDeposit.getCrewRequirement().getSumOfPopulation());
         }

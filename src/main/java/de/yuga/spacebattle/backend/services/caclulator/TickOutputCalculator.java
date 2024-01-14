@@ -148,7 +148,7 @@ public class TickOutputCalculator {
     }
 
     @Nonnull
-    public Map<Integer, ResourceDeposit> getResourceCapacities(@Nonnull final Set<Integer> planetIDs) {
+    public Map<Integer, ResourceDeposit> getResourceCapacities(@Nonnull final Collection<Integer> planetIDs) {
         Preconditions.checkNotNull(planetIDs, "planetIDs must not be empty");
 
         return planetIDs.stream().collect(Collectors.toMap(Function.identity(), this::getResourceCapacity));

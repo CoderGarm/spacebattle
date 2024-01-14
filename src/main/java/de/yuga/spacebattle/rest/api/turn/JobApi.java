@@ -2,9 +2,6 @@ package de.yuga.spacebattle.rest.api.turn;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.research.EmpireResearchCapability;
-import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
-import de.yuga.spacebattle.backend.entities.orbitals.Planet;
-import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.services.caclulator.TickOutputCalculator;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
@@ -27,10 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
@@ -43,6 +39,7 @@ public class JobApi extends BaseApi {
 
     public static final String ENDPOINT = "job";
     private static final String JOB_RUNNING_AT_ENDPOINT = "runningAt";
+    private static final String RESEARCH_JOB_RUNNING_AT_ENDPOINT = "runningResearch";
     private static final String JOB_RUNNING_FOR_FLEET_ENDPOINT = "runningForFleet";
     private static final String JOB_CANCEL = "cancel";
 
@@ -82,8 +79,8 @@ public class JobApi extends BaseApi {
                 .collect(Collectors.toList()));
     }
 
-    @GetMapping(value = JOB_RUNNING_AT_ENDPOINT)
-    @Operation(summary = "Get all jobs which are running for the questioning user.", operationId = "getJobsForEmpire",
+    @GetMapping(value = RESEARCH_JOB_RUNNING_AT_ENDPOINT)
+    @Operation(summary = "Get all jobs which are running for the questioning user.", operationId = "getResearchJobsForEmpire",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
@@ -93,26 +90,12 @@ public class JobApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getJobsForEmpire() {
+    public ResponseEntity<?> getResearchJobsForEmpire() {
 
         final int idUser = getIdUser();
-        final List<de.yuga.spacebattle.backend.entities.turn.Job> jobs = jobService.findAllJobsForUser(idUser);
+        final List<de.yuga.spacebattle.backend.entities.turn.Job> researchJobs = jobService.findAllResearchJobsForUser(idUser);
 
-        final Set<de.yuga.spacebattle.backend.entities.turn.Job> researchJobs = jobs.stream().filter(j -> j.getConstructable().isResearchJob()).collect(Collectors.toSet());
-        jobs.removeAll(researchJobs);
-
-        final Set<Planet> planets = jobs.stream().map(j -> j.getFacility().getPlanet()).collect(Collectors.toSet());
-
-        final Map<Integer, ResourceDeposit> incomeMap = tickOutputCalculator.getTicklyIncomeForPlanets(planets.stream().map(AbstractEntityKey::getId).collect(Collectors.toSet()));
-        final Map<Integer, ResourceDeposit> depositMap = planetService.findResourceDepositsForPlanets(planets.stream().map(AbstractEntityKey::getId).collect(Collectors.toSet()));
-
-        final List<Job> result = jobs.stream()
-                .map(j -> {
-                    final ResourceDeposit ticklyIncome = incomeMap.get(j.getFacility().getPlanet().getId());
-                    final ResourceDeposit resourceDeposit = depositMap.get(j.getFacility().getPlanet().getId());
-                    return new Job(j, ticklyIncome, resourceDeposit, getPreferredLanguage());
-                })
-                .collect(Collectors.toList());
+        final List<Job> result = new ArrayList<>();
 
         if (!researchJobs.isEmpty()) {
             final EmpireResearchCapability capability = planetService.getEmpireWideResearchPoints(idUser);

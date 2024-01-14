@@ -373,6 +373,12 @@ public class JobService {
         return jobRepository.findAllJobsForUser(idUser);
     }
 
+
+    @Nonnull
+    public List<Job> findAllResearchJobsForUser(final int idUser) {
+        return Objects.requireNonNullElse(jobRepository.findAllResearchJobsForUser(idUser), new ArrayList<>());
+    }
+
     public boolean isJobRunningFor(final int idUser, final int idFleet) {
         return jobRepository.isActiveJobRunningFor(idUser, idFleet);
     }

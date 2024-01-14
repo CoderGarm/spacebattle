@@ -33,4 +33,8 @@ public interface JobRepository extends JpaRepository<Job, Integer>, CustomJobRep
     @Nullable
     @Query("SELECT j FROM Job j WHERE j.owner.id = :idUser")
     List<Job> forDeletionFindAllJobsForUser(final int idUser);
+
+    @Nullable
+    @Query("SELECT j FROM Job j WHERE j.owner.id = :idUser AND j.isDeleted = false AND j.constructable.research IS NOT NULL")
+    List<Job> findAllResearchJobsForUser(final int idUser);
 }

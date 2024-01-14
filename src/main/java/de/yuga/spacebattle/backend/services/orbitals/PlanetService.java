@@ -58,7 +58,7 @@ public class PlanetService {
         return planetRepository.findAllPlanetsColonizedByUser(user);
     }
 
-    public List<Integer> findAllColonizedByForID(final int idUser) {
+    public List<Integer> findAllColonizedByForIdPlanet(final int idUser) {
         return planetRepository.findAllColonizedByForID(idUser);
     }
 
