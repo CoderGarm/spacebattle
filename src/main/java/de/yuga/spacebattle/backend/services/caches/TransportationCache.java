@@ -248,8 +248,13 @@ public class TransportationCache {
         Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(from, "from must not be empty");
         Preconditions.checkNotNull(to, "to must not be empty");
-        //noinspection ConstantConditions
-        Preconditions.checkState(from.getOwner().equals(to.getOwner()), "The id should match");
+
+        if (!from.getOwner().equals(to.getOwner())) {
+            LOGGER.warn("Strange case - what happens? {}, {}, {} - check the file cache.",
+                    today.getNo(),
+                    from.getId(),
+                    to.getId());
+        }
 
         Set<TransportJob> transportJobs = transportCache.get(from.getOwner().getId());
         if (transportJobs == null) {
