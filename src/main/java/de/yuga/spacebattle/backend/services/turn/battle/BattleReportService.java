@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -91,5 +88,10 @@ public class BattleReportService {
         Preconditions.checkNotNull(user, "user must not be empty");
 
         return Objects.requireNonNullElse(battleReportRepository.findAllForUser(user), new ArrayList<>());
+    }
+
+    @Nonnull
+    public Set<BattleReport> findAllBetweenTick(final int fromTick, final int toTick) {
+        return Objects.requireNonNullElse(battleReportRepository.findAllBetweenTick(fromTick, toTick), new HashSet<>());
     }
 }

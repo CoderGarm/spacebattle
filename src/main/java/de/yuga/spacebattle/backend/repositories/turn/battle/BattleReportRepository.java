@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public interface BattleReportRepository extends JpaRepository<BattleReport, Integer>, CustomBattleReportRepository {
 
@@ -17,4 +18,8 @@ public interface BattleReportRepository extends JpaRepository<BattleReport, Inte
     @Nullable
     @Query("SELECT DISTINCT r FROM BattleReport r WHERE :user MEMBER OF r.participatingUsers")
     List<BattleReport> findAllForUser(@Nonnull final User user);
+
+    @Nullable
+    @Query("SELECT DISTINCT r FROM BattleReport r WHERE r.tick.id BETWEEN :fromTick AND :toTick ")
+    Set<BattleReport> findAllBetweenTick(int fromTick, int toTick);
 }

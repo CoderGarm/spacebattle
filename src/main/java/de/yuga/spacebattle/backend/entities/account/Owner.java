@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.entities.account;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.misc.HasOwner;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -59,6 +60,30 @@ public class Owner extends AbstractEntityKey implements HasOwner {
     @Nonnull
     public String getUsername() {
         return username;
+    }
+
+    @Nonnull
+    public String getRPGName() {
+        final String titleAbbreviation = rolePlaySetting.getTitleAbbreviation();
+        final String firstname = rolePlaySetting.getFirstname();
+        final String surname = rolePlaySetting.getSurname();
+        final String empireName = rolePlaySetting.getEmpireName();
+
+        String result = "";
+        if (titleAbbreviation != null) {
+            result += titleAbbreviation + " ";
+        }
+        if (firstname != null) {
+            result += firstname + " ";
+        }
+        if (surname != null) {
+            result += surname + " ";
+        }
+        if (empireName != null) {
+            result += " of " + empireName;
+        }
+
+        return StringUtils.isNotBlank(result) ? result : username;
     }
 
     @Nullable

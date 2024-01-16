@@ -1,13 +1,23 @@
 package de.yuga.spacebattle.backend.services;
 
+import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.SpringBootProdProfile;
+import de.yuga.spacebattle.backend.dto.physics.Mass;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.account.forum.Forum;
 import de.yuga.spacebattle.backend.entities.account.forum.ForumMessage;
 import de.yuga.spacebattle.backend.entities.account.forum.ForumThread;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
+import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
+import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
+import de.yuga.spacebattle.backend.entities.turn.battle.LossRole;
+import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateSnapshot;
+import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
 import de.yuga.spacebattle.backend.services.account.ForumService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
@@ -20,6 +30,7 @@ import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.TickRunnerService;
+import de.yuga.spacebattle.backend.services.turn.battle.BattleReportService;
 import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStateService;
 import de.yuga.spacebattle.backend.transformer.BuildingCsvTransformer;
 import de.yuga.spacebattle.rest.dto.misc.Coords;
@@ -28,9 +39,10 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import javax.annotation.Nonnull;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.transformer.CSVTransformer.CSV_SEPARATOR;
 import static org.junit.jupiter.api.Assertions.*;
@@ -84,10 +96,100 @@ public class MasterOfTheUniverseServiceTest {
     @Autowired
     private BattleService battleService;
 
+    @Autowired
+    private BattleReportService battleReportService;
+
     @Test
     void t() {
         final Set<Junction> junctions = resourceService.readWormholes();
         assertNotNull(junctions);
+    }
+
+    @Test
+    void battles() {
+
+        final Set<BattleReport> reps = battleReportService.findAllBetweenTick(244, 257)
+                .stream().filter(br -> br.getParticipatingUsers().stream().anyMatch(u -> u.getId() == 15))
+                .collect(Collectors.toSet());
+
+        final Map<Owner, List<LossRole>> lossRoles = new HashMap<>();
+        final Map<Owner, List<WarShip>> involved = new HashMap<>();
+
+        for (final BattleReport battleReport : reps) {
+            final FleetSnapshot pirate = battleReport.getParticipatingFleets().stream().filter(f -> f.getOwner().getNpcOwner() != null).findFirst().orElse(null);
+            final FleetSnapshot intercept = battleReport.getParticipatingFleets().stream().filter(f -> f.getOwner().getHumanOwner() != null).findFirst().orElse(null);
+
+            if (pirate == null || intercept == null) {
+                continue;
+            }
+
+            battleReport.getLossRole().forEach(lossRole -> {
+                final List<LossRole> orDefault = lossRoles.getOrDefault(lossRole.getOwner(), new ArrayList<>());
+                orDefault.add(lossRole);
+                lossRoles.put(lossRole.getOwner(), orDefault);
+            });
+
+            List<WarShip> orDefault = involved.getOrDefault(pirate.getOwner(), new ArrayList<>());
+            orDefault.addAll(pirate.getShips().stream().map(WarshipHealthStateSnapshot::getWarShip).collect(Collectors.toList()));
+            involved.put(pirate.getOwner(), orDefault);
+
+            orDefault = involved.getOrDefault(intercept.getOwner(), new ArrayList<>());
+            orDefault.addAll(intercept.getShips().stream().map(WarshipHealthStateSnapshot::getWarShip).collect(Collectors.toList()));
+            involved.put(intercept.getOwner(), orDefault);
+        }
+
+        final Set<Owner> owners = new HashSet<>(lossRoles.keySet());
+        owners.addAll(involved.keySet());
+
+        Mass playerLoss = new Mass(0, EMassMetric.KT);
+
+        System.out.println("<div class=\"headline hl6\">Loss Role</div>");
+        System.out.println("<div class=\"main-loss-list\">");
+        for (final Owner owner : owners.stream().filter(o -> o.getHumanOwner() != null).collect(Collectors.toList())) {
+            final List<LossRole> lossRolesByOwner = lossRoles.getOrDefault(owner, new ArrayList<>());
+
+            final List<String> lostNames = lossRolesByOwner.stream().map(LossRole::getWarShipName).collect(Collectors.toList());
+            if (!lostNames.isEmpty()) {
+                final Map<ShipClass, List<LossRole>> lossesByClass = lossRolesByOwner.stream().collect(Collectors.groupingBy(LossRole::getShipClass,
+                        Collectors.mapping(Function.identity(), Collectors.toList())));
+
+                final List<LossRole> collect = lossesByClass.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
+                for (final LossRole lossRole : collect) {
+                    playerLoss = playerLoss.add(lossRole.getShipClass().getTonnage());
+                }
+
+                System.out.println("<div class=\"loss-element\">");
+                System.out.println("<div class=\"loss-title\">" + owner.getRPGName() + "</div>");
+                System.out.println("<div class=\"loss-list\">");
+                lossesByClass.forEach((shipClass, losses) -> {
+                    losses.forEach(lossRole -> System.out.println("<span><span class=\"ship\"><b>" + lossRole.getWarShipName() + "</b></span>, " + getClass(shipClass) + "</span>"));
+                });
+                System.out.println("</div>");
+                System.out.println("</div>");
+            }
+        }
+        System.out.println("</div>");
+        System.out.println("\n");
+
+        Mass pirateLoss = new Mass(0, EMassMetric.KT);
+        final Owner owner = owners.stream().filter(o -> o.getNpcOwner() != null).findFirst().orElseThrow(NullPointerException::new);
+        final List<LossRole> lossRoles1 = lossRoles.get(owner);
+        for (final LossRole lossRole : lossRoles1) {
+            pirateLoss = pirateLoss.add(lossRole.getShipClass().getTonnage());
+        }
+        System.out.println("Player Losses: " + playerLoss.getInMetricWithScale(EMassMetric.MT));
+        System.out.println("Pirate Losses: " + pirateLoss.getInMetricWithScale(EMassMetric.MT));
+    }
+
+    @Nonnull
+    private String getClass(@Nonnull final ShipClass shipClass) {
+        Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
+
+        final int mass = shipClass.getTonnage().getCoordinateInMetric(EMassMetric.KT).intValue();
+        return "<span class=\"class-complement\">"
+                + "<i>" + shipClass.getName() + " Flt. " + shipClass.getFlight() + "</i>, " + shipClass.getShipClassType() + ", " + mass + " " + EMassMetric.KT
+                + ", " + shipClass.getCosts().getCrewRequirement().getSumOfPopulation() + " Officers and Enlisted"
+                + "</span>";
     }
 
     @Test
