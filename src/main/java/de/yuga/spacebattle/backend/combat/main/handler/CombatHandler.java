@@ -25,6 +25,7 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The combat handler will handle every combat related round for the {@link #cage}.<br>
@@ -72,6 +73,7 @@ public class CombatHandler {
         final Distance agentsMissileRange = agentsState.getMaximumWeaponRangePerType(EWeaponType.MISSILE);
         final Distance targetsMissileRange = targetsState.getMaximumWeaponRangePerType(EWeaponType.MISSILE);
         if (agentsMissileRange.compareTo(Distance.ZERO) == 0 && targetsMissileRange.compareTo(Distance.ZERO) == 0) {
+            // fixme battlelogger service
             System.out.println("Out of ammo");
         }
 
@@ -134,6 +136,7 @@ public class CombatHandler {
         }
         final int no = cage.getCurrentCombatRound().getNo();
         if (no % 10 == 0) {
+            // fixme battlelogger service
             System.out.println(msg);
         }
     }
@@ -163,7 +166,8 @@ public class CombatHandler {
     @VisibleForTesting
     protected void handleDirectWeaponDamage() {
         final List<BeamVolley> flyingBeamVolleys = cage.getFlyingBeamVolleys();
-        new ArrayList<>(flyingBeamVolleys).forEach(BeamVolley::applyDamage);
+        new ArrayList<>(flyingBeamVolleys)
+                .forEach(BeamVolley::applyDamage);
         if (!flyingBeamVolleys.isEmpty()) {
             cage.setActionHappened(true);
         }
@@ -176,7 +180,9 @@ public class CombatHandler {
     @VisibleForTesting
     protected void handleMissileDamage() {
         final List<MissileSalvo> flyingMissileSalvos = cage.getFlyingMissileSalvos();
-        new ArrayList<>(flyingMissileSalvos).stream().filter(MissileSalvo::isInDetonationRange).forEach(MissileSalvo::detonate);
+        new ArrayList<>(flyingMissileSalvos).stream()
+                .filter(MissileSalvo::isInDetonationRange)
+                .forEach(MissileSalvo::detonate);
         if (!flyingMissileSalvos.isEmpty()) {
             cage.setActionHappened(true);
         }
@@ -224,6 +230,8 @@ public class CombatHandler {
         final boolean flippingPositions = commonMobility.compareTo(distance) >= 0;
 
         final Set<EWeaponAlignment> applicableAlignments = EWeaponAlignment.getApplicableAlignments(agentsPos, agentsDirection, targetPos);
+        // fixme battlelogger service
+        System.out.println(agent.getOwner().getUsername() + " tries to fire beams for " + applicableAlignments.stream().map(Enum::name).collect(Collectors.joining(", ")));
         final boolean isAlignedToFire = agentsState.hasWeaponsForAlignment(applicableAlignments, EWeaponType.BEAM);
         if ((isInRange || flippingPositions) && isAlignedToFire) {
             cage.addToFlyingBeamVolleys(new BeamVolley(cage, agent, target));
@@ -250,6 +258,8 @@ public class CombatHandler {
         // todo real distance-to-chance-to-hit calculation
         final boolean isInRange = distance.compareTo(actorsMaximumMissileRange) <= 0;
         final Set<EWeaponAlignment> applicableAlignments = EWeaponAlignment.getApplicableAlignments(actorPos, actorsDirection, targetPos);
+        // fixme battlelogger service
+        System.out.println(actor.getOwner().getUsername() + " tries to fire missiles for " + applicableAlignments.stream().map(Enum::name).collect(Collectors.joining(", ")));
         final boolean isAlignedToFire = actorsState.hasWeaponsForAlignment(applicableAlignments, EWeaponType.MISSILE);
         if (isInRange && isAlignedToFire) {
             final boolean hasShotsLeft = actorsState.getFleetHealthState().hasShotsLeft();

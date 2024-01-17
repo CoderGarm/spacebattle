@@ -401,6 +401,7 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         // calculate vector velocity by difference in directions -> change initialVelocity
         final CombatRound combatRound = getUpcomingRound();
         Velocity initialVelocity = agentsCurrentVelocity.getByAlignmentFactor(alignmentFactor);
+        // fixme battlelogger service
         System.out.println("rounds to travel '" + roundsToTravel + "' for " + getAgent().getName());
         for (int i = 1; i <= roundsToTravel; i++) {
             final CourseOrderElement latestCourseElement = getLatestCourseElement();
@@ -669,7 +670,10 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         Preconditions.checkState(courseElement != null, "courseElement shouldn't be null!");
         courseElement.executeOrder();
         final FleetRoundState currentStateByFleet = cage.getCurrentStateByFleet(agent);
-        currentStateByFleet.setMovementType(courseElement.getMovementType());
+        final EMovementType movementType = courseElement.getMovementType();
+        // fixme battlelogger service
+        System.out.println(agent.getOwner().getUsername() + " moves " + movementType);
+        currentStateByFleet.setMovementType(movementType);
         currentStateByFleet.setDirection(getCurrentDirection());
         currentStateByFleet.setVelocity(getCurrentVelocity());
     }

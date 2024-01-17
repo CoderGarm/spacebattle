@@ -234,6 +234,7 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
             return;
         }
 
+
         final int elokaEffectValue = targetsState.getElokaEffectValue();
         final Map<Missile, Integer> lostByType = new HashMap<>();
         missileSalvoHealthState.getCurrentAmountByType().forEach((missile, amount) -> {
@@ -261,6 +262,8 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
         calculateRangePerCombatRound();
         calculateAttackRange();
         historize();
+        // fixme battlelogger service
+        System.out.println("Eloka attacked " + Integer.toHexString(hashCode()) + " and killed " + lostByType.values().stream().mapToInt(Integer::intValue).sum() + " (" + missileSalvoHealthState.getCurrentAmountByType().values().stream().mapToInt(Integer::intValue).sum() + " left) against " + target.getOwner().getUsername());
     }
 
     private void historize() {
@@ -307,6 +310,8 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
         calculateRangePerCombatRound();
         calculateAttackRange();
         historize();
+        // fixme battlelogger service
+        System.out.println("Counter attacked " + Integer.toHexString(hashCode()) + " and killed " + lostByType.values().stream().mapToInt(Integer::intValue).sum() + " (" + missileSalvoHealthState.getCurrentAmountByType().values().stream().mapToInt(Integer::intValue).sum() + " left) against " + target.getOwner().getUsername());
     }
 
     /**
@@ -321,6 +326,11 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
             return;
         }
         final FleetRoundState targetsCurrentStateByFleet = cage.getCurrentStateByFleet(target);
+        if (targetsCurrentStateByFleet.getFleetHealthState().isNotFightingCapable()) {
+            executeEffectiveDetonation();
+            return;
+        }
+
         targetPosition = targetsCurrentStateByFleet.getPosition().clone();
         final Distance distanceToTarget = position.getDistance(targetPosition);
         if (distanceToTarget.compareTo(longestOffensiveRange) <= 0) {
@@ -372,6 +382,10 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
             });
             result = DAMAGE_APPLIED;
         }
+        executeEffectiveDetonation();
+    }
+
+    private void executeEffectiveDetonation() {
         missileSalvoHealthState.getCurrentAmountByType().clear();
         historize();
     }

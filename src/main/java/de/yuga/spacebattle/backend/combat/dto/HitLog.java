@@ -50,6 +50,9 @@ public class HitLog extends Historizable<HitLog> implements Cloneable {
         this.attackedPart = attackedPart;
         this.isAlive = isAlive;
         this.isFightingCapable = isFightingCapable;
+
+        // fixme battlelogger service
+        System.out.println(this);
     }
 
     @Nonnull
@@ -81,6 +84,16 @@ public class HitLog extends Historizable<HitLog> implements Cloneable {
 
     public boolean isFightingCapable() {
         return isFightingCapable;
+    }
+
+    @Override
+    public String toString() {
+
+        final boolean idBeamVolley = damageDealer instanceof BeamVolley;
+
+        return damageDealer.getUuid() + " applied " + damageValue + " " + (idBeamVolley ? "beam" : "missile") + " damage to " + attackedPart + " (" + state + " left)"
+                + " to " + warshipHealthState.getWarShip().getName() + " of " + warshipHealthState.getWarShip().getShipClass().getOwner().getUsername() + "."
+                + " Ship is " + (isAlive ? "alive" : "dead") + " and " + (isFightingCapable ? "active" : "finished");
     }
 
     @Override

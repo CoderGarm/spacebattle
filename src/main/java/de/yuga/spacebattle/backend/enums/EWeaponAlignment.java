@@ -22,13 +22,13 @@ public enum EWeaponAlignment {
      * If it is aligned to the front.
      * These aligned weapons are mainly used in a hunt.
      */
-    BOW(Pair.of(330D, 30D)),
+    BOW(Pair.of(315, 45)),
 
     /**
      * If it is aligned to the back.
      * These aligned weapons are mainly used if the ship is fleeing.
      */
-    STERN(Pair.of(150D, 210D)),
+    STERN(Pair.of(135, 225)),
 
     /**
      * If it is aligned to the broad sides.
@@ -36,17 +36,17 @@ public enum EWeaponAlignment {
      * <p>
      * Note that this alignment indicates that a such aligned weapon must be doubled by design.
      */
-    BROADSIDE(Pair.of(30D, 150D), Pair.of(210D, 330D));
+    BROADSIDE(Pair.of(45, 135), Pair.of(225, 315));
 
     /**
      * The angle from first thing to second thing which can be swept by the given alignment.<br>
      * Everything in between can be reached.
      */
     @Nonnull
-    private final Pair<Double, Double>[] angle;
+    private final Pair<Integer, Integer>[] angle;
 
     @SafeVarargs
-    EWeaponAlignment(@Nonnull final Pair<Double, Double>... angle) {
+    EWeaponAlignment(@Nonnull final Pair<Integer, Integer>... angle) {
         Preconditions.checkNotNull(angle, "angle shouldn't be null!");
 
         this.angle = angle;
@@ -58,7 +58,7 @@ public enum EWeaponAlignment {
      * @param base            the base position
      * @param baseDirection   the direction of the bases' position
      * @param targetsPosition the targets position
-     * @return the amount of alignments which can be watch to the targets position
+     * @return the alignments which can be watch to the targets position
      */
     @Nonnull
     public static Set<EWeaponAlignment> getApplicableAlignments(@Nonnull final Orbit base,
@@ -68,28 +68,30 @@ public enum EWeaponAlignment {
         Preconditions.checkNotNull(baseDirection, "baseDirection shouldn't be null!");
         Preconditions.checkNotNull(targetsPosition, "targetsPosition shouldn't be null!");
 
-        final Direction direction = new Direction(base, targetsPosition);
-        final double angle = baseDirection.getAngleBetween(direction);
-        return Arrays.stream(EWeaponAlignment.values()).filter(a ->
+        final double angle = Direction.getAngleBetween(base, baseDirection, targetsPosition);
+        final Set<EWeaponAlignment> collect = Arrays.stream(EWeaponAlignment.values()).filter(a ->
                 Arrays.stream(a.angle).anyMatch(p -> {
                     if (angle < -360 || angle > 360) {
                         // if any wildcard angle is returned - the direct angle between could not be determined - everything is possible
                         return true;
                     }
 
-                    final Double first = p.getFirst();
-                    final Double second = p.getSecond();
+                    final double first = (double) p.getFirst();
+                    final double second = (double) p.getSecond();
 
                     if (second < first) {
                         // special case for the bow angle
                         final Range<Double> toZero = Range.between(second, 0D);
-                        final Range<Double> fromZero = Range.between(0D, first);
-                        return toZero.contains(angle) && fromZero.contains(angle);
+                        final Range<Double> fromZero = Range.between(first, 360D);
+                        return toZero.contains(angle) || fromZero.contains(angle);
                     }
 
                     return angle >= first && angle <= second;
                 })
         ).collect(Collectors.toSet());
+        // fixme battlelogger service
+        System.out.println("getApplicableAlignments with angle of " + angle + "°: '" + collect.stream().map(Enum::name).collect(Collectors.joining(", ")) + "'");
+        return collect;
 
     }
 

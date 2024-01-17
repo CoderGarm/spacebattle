@@ -73,7 +73,9 @@ public class BattleService {
 
     @Nonnull
     private List<FleetClash> findAllFleetClashes() {
-        final List<Fleet> nonMovingFleets = fleetService.findAllFleetsWithoutMovement();
+        final List<Fleet> nonMovingFleets = fleetService.findAllFleetsWithoutMovement().stream()
+                .filter(f -> !f.getAliveShips().isEmpty())
+                .collect(Collectors.toList());
         final Map<FleetOrbit, List<Fleet>> fleetsByOrbit = detectActiveFleetsByOrbit(nonMovingFleets);
         return gameEventService.organize(fleetsByOrbit);
     }
@@ -93,7 +95,9 @@ public class BattleService {
     private List<FleetClash> findFleetClashesAtPlanet(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
-        final Set<Fleet> allFleetsByPlanet = fleetService.findAllFleetsByPlanet(planet);
+        final Set<Fleet> allFleetsByPlanet = fleetService.findAllFleetsByPlanet(planet)
+                .stream().filter(f -> !f.getAliveShips().isEmpty())
+                .collect(Collectors.toSet());
         final Map<FleetOrbit, List<Fleet>> fleetsByOrbit = detectActiveFleetsByOrbit(allFleetsByPlanet);
         return gameEventService.organize(fleetsByOrbit);
     }

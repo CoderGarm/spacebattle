@@ -18,7 +18,9 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.OrbitalModule;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
+import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.misc.HasName;
+import de.yuga.spacebattle.backend.entities.misc.Operationable;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
@@ -34,6 +36,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.SupportFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.*;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.entities.turn.Colonization;
+import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.enums.*;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
@@ -56,6 +59,7 @@ import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
 import de.yuga.spacebattle.backend.services.turn.GameEventService;
+import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.TickRunnerService;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.HeatMapService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -200,6 +204,9 @@ public class MasterOfTheUniverseService {
     @Nonnull
     private final GameEventService gameEventService;
 
+    @Nonnull
+    private final JobService jobService;
+
     @Autowired
     public MasterOfTheUniverseService(@Nonnull final TickRunnerService tickService,
                                       @Nonnull final UserService userService,
@@ -221,6 +228,7 @@ public class MasterOfTheUniverseService {
                                       @Nonnull final OrbitalModuleService orbitalModuleService,
                                       @Nonnull final UserDeleteServiceService userDeleteServiceService,
                                       @Nonnull final HeatMapService heatMapService,
+                                      @Nonnull final JobService jobService,
                                       @Nonnull final GameEventService gameEventService) {
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
         this.tickService = Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
@@ -243,6 +251,7 @@ public class MasterOfTheUniverseService {
         this.orbitalModuleService = Preconditions.checkNotNull(orbitalModuleService, "orbitalModuleService must not be empty");
         this.userDeleteServiceService = Preconditions.checkNotNull(userDeleteServiceService, "userDeleteServiceService must not be empty");
         this.heatMapService = Preconditions.checkNotNull(heatMapService, "heatMapService must not be empty");
+        this.jobService = Preconditions.checkNotNull(jobService, "jobService must not be empty");
         this.gameEventService = Preconditions.checkNotNull(gameEventService, "gameEventService must not be empty");
     }
 
@@ -262,6 +271,12 @@ public class MasterOfTheUniverseService {
             createFlashsFleet();
             battleService.runBattleAtPlanet(tickService.getToday(), planetService.find(112));
              */
+
+            // fixme
+            // - manual transportation shown when to transportation target is present
+            // - ship fitting breaks no longer at to many offensive modules
+            // - ship transportation: set back to origin when not moved works now
+            // - resource & pop transportation: UI is disabled until all planets are loaded
 
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
@@ -290,7 +305,7 @@ public class MasterOfTheUniverseService {
         }
     }
 
-    private void createKalusFleet() {
+    public void createKalusFleet() {
         final Planet mainPlanet = planetService.find(2229);
         final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(65)), mainPlanet, "1st Battle Fleet");
 
@@ -301,36 +316,29 @@ public class MasterOfTheUniverseService {
         }
     }
 
-    private void createFlashsFleet() {
+    public void createFlashsFleet() {
         final Planet mainPlanet = planetService.find(112);
         final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(1)), mainPlanet, "TD1-Flash");
 
         final ShipClass songbird = shipClassService.find(2);
 
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 2; i++) {
             createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
         }
     }
 
-    private void createYufielsFleet() {
+    public void createYufielsFleet() {
         final Planet mainPlanet = planetService.find(112);
         final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(3)), mainPlanet, "TD1-Yufiel");
 
         final ShipClass songbird = shipClassService.find(3);
 
-        createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
+        for (int i = 0; i < 8; i++) {
+            createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
+        }
     }
 
-    private void createShannonsFleet() {
-        final Planet mainPlanet = planetService.find(112);
-        final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(13)), mainPlanet, "TD1-Shannon");
-
-        final ShipClass songbird = shipClassService.find(26);
-
-        createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
-    }
-
-    private void createPirateFleet() {
+    public void createPirateFleet() {
         final Planet mainPlanet = planetService.find(112);
         final Fleet reinforcement = createFleet(Objects.requireNonNull(ownerService.find(15)), mainPlanet, "Pirate");
 

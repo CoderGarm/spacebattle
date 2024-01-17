@@ -366,6 +366,7 @@ public class WarshipHealthState implements Cloneable {
             // no hit area points to a destroyed hull
             return;
         }
+        long min;
         switch (attackedPart) {
             case FITTING_AND_HULL:
                 hullState = applyDamageToHitArea(hullState, damageValue, attackedPart, damageDealer);
@@ -392,12 +393,12 @@ public class WarshipHealthState implements Cloneable {
                 hitLog.add(new HitLog(damageDealer, this, damageValue, sidewallState, attackedPart, isAlive(), isFightingCapable()));
                 break;
             case PROPULSION:
-                long min = Math.min((long) (propulsionState * 0.1), damageValue);
+                min = Math.min((long) (propulsionState * 0.1), damageValue);
                 propulsionState = applyDamageToHitArea(propulsionState, min, attackedPart, damageDealer);
                 hitLog.add(new HitLog(damageDealer, this, min, propulsionState, attackedPart, isAlive(), isFightingCapable()));
                 break;
             case ELOKA:
-                min = Math.min((long) (propulsionState * 0.1), damageValue);
+                min = Math.min((long) (elokaState * 0.1), damageValue);
                 elokaState = applyDamageToHitArea(elokaState, min, attackedPart, damageDealer);
                 hitLog.add(new HitLog(damageDealer, this, min, elokaState, attackedPart, isAlive(), isFightingCapable()));
                 break;

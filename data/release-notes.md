@@ -30,12 +30,14 @@ article orbital modules
 
 ### Features
 
+
 #### Gameplay
 
-1. More speed!  
-   I figured out what's wrong with the flight speed and this topic is quite bigger then I thought. As a workaround, the acceleration for all NPC flights are increased to the
-   physically maximum.
-   todo. new trade outpost near haven, another near
+- kampfsystem repariert
+    - check: Raketen fliegen bis zum ende - keine unfairen "zu null siege" mehr
+    - todo: ship movement
+
+- endpoint für "streamlined battle reports" -> trajektorienbasierte kampfbeschreibung für unity
 
 #### Diverses
 
@@ -49,6 +51,8 @@ todo. eigene systeme auf karte als shortcut-icon rechts am rand darstellen?
 
 season 3:
 
+- More speed! I figured out what's wrong with the flight speed and this topic is quite bigger then I thought. As a workaround, the acceleration for all NPC flights are increased to
+  the physically maximum. FIXME
 - neue passwortrichtlinie (kompliziert oder laaang)
 - heat as correcting mechanism?
 - [maps from the info dump einpflegen](https://web.archive.org/web/20220812004938/https://infodump.thefifthimperium.com/images/congo-maya-erewhon_map.gif)
@@ -56,14 +60,12 @@ season 3:
 - tech 2 und 3 ressis für tech
 - entweder koloniezentrale auf main plani oder sowas wie gebäude für bevölkerungszufriedenheit -> steuereinnahmen
 - map für neue season fertig machen
-- kampfsystem verbessern
 - fremde planis bomben
 - allianzfunktionen
 - ressourcen so balancen, dass es einen need gibt -> nicht jeder kann alles ernten? auf jeden fall muss es einen need geben: handel oder kampf soll angeregt werden
 - forschung muss ab dem early-game mehr kosten
-- schiffswerten müssen mehr output haben
+- schiffswerften müssen mehr output haben
 - regelmäßige konvoys wie in anno -> kann man abfangen per mission und schützen mit eigenen missionen -> mehrere ressourcen pro convoy
-- stop the job: job wird inaktiv gesetzt und kann wieder aufgenommen werden
 
 todo. colo duration through wormholes are NaN
 todo. tonnage calc not on every input -> timeout should be enough

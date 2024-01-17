@@ -63,10 +63,7 @@ public class Direction implements Cloneable {
     private boolean isDifferentFromZero(@Nonnull final BigDecimal val) {
         Preconditions.checkNotNull(val, "val shouldn't be null!");
 
-        if (val.compareTo(BigDecimal.ZERO) != 0) {
-            return true;
-        }
-        return false;
+        return val.compareTo(BigDecimal.ZERO) != 0;
     }
 
     private Direction() {
@@ -151,12 +148,12 @@ public class Direction implements Cloneable {
      * @param that that
      * @return the angular difference
      */
-    public double getAngleBetween(@Nonnull final Direction that) {
+    public double getAngleBetween(@Nonnull final Direction that) { // fixme ist quark
         Preconditions.checkNotNull(that, "that shouldn't be null!");
 
         if (isNullDirection() || that.isNullDirection()) {
             // if one or both are "not defined" they have no clear choice, it is handled always as wildcard
-            return Double.NEGATIVE_INFINITY;
+            return Double.NEGATIVE_INFINITY; // fixme rework - there is a direction every time between two points with bow and stern
         }
         // calculate scalar product
         final BigDecimal scalar = xCoordinate.multiply(that.getXCoordinate()).add(yCoordinate.multiply(that.getYCoordinate()));
@@ -168,6 +165,39 @@ public class Direction implements Cloneable {
         final BigDecimal cosinesOfPhi = scalar.divide(multiply, MC_HU);
         final double acos = Math.acos(cosinesOfPhi.doubleValue());
         return Math.toDegrees(acos);
+    }
+
+    /**
+     * Calculates the angle between the two positions where the origin position has a given facing.<br>
+     * Will return an angle between 0° and 360°.<br>
+     * <br>
+     * <a href="https://www.maths2mind.com/schluesselwoerter/verbindungsvektor-zwischen-2-punkten">Source</a>
+     *
+     * @return the angular difference
+     */
+    public static double getAngleBetween(@Nonnull final Orbit origin,
+                                         @Nonnull final Direction originsDirection,
+                                         @Nonnull final Orbit pointToLookAt) {
+        Preconditions.checkNotNull(origin, "origin must not be empty");
+        Preconditions.checkNotNull(originsDirection, "originsDirection must not be empty");
+        Preconditions.checkNotNull(pointToLookAt, "pointToLookAt must not be empty");
+
+        final double x1 = origin.getXCoordinate().getCoordinate().doubleValue();
+        final double x2 = pointToLookAt.getXCoordinate().getCoordinateInMetric(origin.getXCoordinate().getDistanceMetric()).doubleValue();
+        final double y1 = origin.getYCoordinate().getCoordinate().doubleValue();
+        final double y2 = pointToLookAt.getYCoordinate().getCoordinateInMetric(origin.getYCoordinate().getDistanceMetric()).doubleValue();
+        final double angleOfDirectionVector = Math.atan2(y2 - y1, x2 - x1);
+
+        final double x = originsDirection.getXCoordinate().doubleValue();
+        final double y = originsDirection.getYCoordinate().doubleValue();
+
+        final double angleOfDirectionVectorToAxis = Math.atan2(y, x);
+        final double angrad = angleOfDirectionVectorToAxis - angleOfDirectionVector;
+        double angle = Math.toDegrees(angrad);
+        if (angle < 0) {
+            angle += 360;
+        }
+        return Math.ceil(angle);
     }
 
     /**

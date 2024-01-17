@@ -21,6 +21,7 @@ import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
 import de.yuga.spacebattle.backend.services.account.ForumService;
 import de.yuga.spacebattle.backend.services.account.UserService;
 import de.yuga.spacebattle.backend.services.buildings.BuildingService;
+import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
@@ -97,7 +98,10 @@ public class MasterOfTheUniverseServiceTest {
     private BattleService battleService;
 
     @Autowired
+
     private BattleReportService battleReportService;
+    @Autowired
+    private FleetService fleetService;
 
     @Test
     void t() {
@@ -106,7 +110,7 @@ public class MasterOfTheUniverseServiceTest {
     }
 
     @Test
-    void battles() {
+    void warHarvestAssessment() {
 
         final Set<BattleReport> reps = battleReportService.findAllBetweenTick(244, 257)
                 .stream().filter(br -> br.getParticipatingUsers().stream().anyMatch(u -> u.getId() == 15))
@@ -201,7 +205,7 @@ public class MasterOfTheUniverseServiceTest {
 
     @Test
     void runBattle() {
-        final Planet planet = planetService.find(1761);
+        final Planet planet = planetService.find(112);
         final Tick today = tickService.getToday();
         battleService.runBattleAtPlanet(today, planet);
     }
