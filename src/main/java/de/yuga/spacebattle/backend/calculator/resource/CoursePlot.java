@@ -406,9 +406,9 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
             final CourseOrderElement latestCourseElement = getLatestCourseElement();
             final Orbit position = latestCourseElement != null ? latestCourseElement.getPosition() : origin;
             final Distance distanceByTime = acceleration.getDistanceByTime(COMBAT_ROUND, initialVelocity, EDistanceMetric.LS);
-            final Velocity resultingVelocity = initialVelocity.getVelocityByAcceleration(acceleration, COMBAT_ROUND);
+            Velocity resultingVelocity = initialVelocity.getVelocityByAcceleration(acceleration, COMBAT_ROUND);
             if (resultingVelocity.compareTo(topSpeed) > 0) {
-                throw new NotifyWebUserException("The velocity must not exceed the top speed.");
+                resultingVelocity = topSpeed.clone(); // fixme this change has a weird result -> doubled ship count in UI? And ships need a real combat mechanism
             }
             // calculate resulting orbit
             final Orbit stepDestination = position.getDestinationBy(distanceByTime, courseDirection);

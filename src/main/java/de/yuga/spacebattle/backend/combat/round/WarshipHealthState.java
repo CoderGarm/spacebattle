@@ -163,7 +163,7 @@ public class WarshipHealthState implements Cloneable {
      * @return <code>true</code> if the ship can fight, <code>false</code> otherwise
      */
     public boolean isFightingCapable() {
-        if (!isAlive() || (isStatValueLost(armorState, hasArmor) || isStatValueLost(sidewallState, hasSidewall) || propulsionState <= 0 || isStatValueLost(elokaState, hasEloka))) {
+        if (!isAlive() || (isStatValueLost(armorState, hasArmor) || isStatValueLost(armorState, hasSidewall) || propulsionState <= 0 || isStatValueLost(elokaState, hasEloka))) {
             return false;
         }
         for (Boolean aBoolean : fittings.values()) {
@@ -359,7 +359,7 @@ public class WarshipHealthState implements Cloneable {
     public void applyDamage(final long damageValue, @Nonnull final Historizable<? extends Cloneable> damageDealer) {
         Preconditions.checkNotNull(damageDealer, "damageDealer shouldn't be null!");
 
-        final EHitArea attackedPart = EHitArea.getRandomToApplyDamage();
+        final EHitArea attackedPart = EHitArea.SIDEWALL;
         applyDamage(damageValue, attackedPart, damageDealer);
     }
 

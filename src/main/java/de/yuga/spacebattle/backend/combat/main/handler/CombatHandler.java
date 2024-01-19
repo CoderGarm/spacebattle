@@ -218,9 +218,9 @@ public class CombatHandler {
         final boolean flippingPositions = commonMobility.compareTo(distance) >= 0;
 
         final Set<EWeaponAlignment> applicableAlignments = EWeaponAlignment.getApplicableAlignments(agentsPos, agentsDirection, targetPos);
-        cage.logMessage(agent.getOwner().getUsername() + " tries to fire beams for " + applicableAlignments.stream().map(Enum::name).collect(Collectors.joining(", ")));
         final boolean isAlignedToFire = agentsState.hasWeaponsForAlignment(applicableAlignments, EWeaponType.BEAM);
         if ((isInRange || flippingPositions) && isAlignedToFire) {
+            cage.logMessage(agent.getOwner().getUsername() + " tries to fire beams for " + applicableAlignments.stream().map(Enum::name).collect(Collectors.joining(", ")));
             cage.addToFlyingBeamVolleys(new BeamVolley(cage, agent, target));
         }
     }
@@ -245,11 +245,11 @@ public class CombatHandler {
         // todo real distance-to-chance-to-hit calculation
         final boolean isInRange = distance.compareTo(actorsMaximumMissileRange) <= 0;
         final Set<EWeaponAlignment> applicableAlignments = EWeaponAlignment.getApplicableAlignments(actorPos, actorsDirection, targetPos);
-        cage.logMessage(actor.getOwner().getUsername() + " tries to fire missiles for " + applicableAlignments.stream().map(Enum::name).collect(Collectors.joining(", ")));
         final boolean isAlignedToFire = actorsState.hasWeaponsForAlignment(applicableAlignments, EWeaponType.MISSILE);
         if (isInRange && isAlignedToFire) {
             final boolean hasShotsLeft = actorsState.getFleetHealthState().hasShotsLeft();
             if (hasShotsLeft) {
+                cage.logMessage(actor.getOwner().getUsername() + " tries to fire missiles for " + applicableAlignments.stream().map(Enum::name).collect(Collectors.joining(", ")));
                 cage.addToFlyingMissileSalvos(new MissileSalvo(cage, actor, target, applicableAlignments));
                 cage.setActionHappened(true);
             }
