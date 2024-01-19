@@ -50,9 +50,6 @@ public class HitLog extends Historizable<HitLog> implements Cloneable {
         this.attackedPart = attackedPart;
         this.isAlive = isAlive;
         this.isFightingCapable = isFightingCapable;
-
-        // fixme battlelogger service
-        System.out.println(this);
     }
 
     @Nonnull

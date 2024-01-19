@@ -150,8 +150,7 @@ public class Cage implements Future<Cage> {
     public boolean isDone() {
         final boolean isDone;
         if (forceDone) {
-            // fixme battlelogger service
-            System.out.println("forced battle end");
+            battleLogger.logMessage("forced battle end");
             isDone = true;
         } else {
 
@@ -162,18 +161,15 @@ public class Cage implements Future<Cage> {
             final boolean noActiveWeapons = flyingMissileSalvos.isEmpty() && flyingBeamVolleys.isEmpty();
             isDone = fightingCount <= 1 && noActiveWeapons;
             if (isDone) {
-                // fixme battlelogger service
-                System.out.println("fighting count <= 1");
+                battleLogger.logMessage("fighting count <= 1");
                 currentRoundStates.forEach(fleetRoundState -> {
                     final String username = fleetRoundState.getFleet().getOwner().getUsername();
                     final Map<WarShip, WarshipHealthState> losses = fleetRoundState.getFleetHealthState().getLosses();
                     final Set<WarshipHealthState> leftOver = fleetRoundState.getFightingWarShips().collect(Collectors.toSet());
-                    // fixme battlelogger service
-                    System.out.println(username + " has lost " + losses.size() + " ships and " + leftOver.size() + " ships left.");
+                    battleLogger.logMessage(username + " has lost " + losses.size() + " ships and " + leftOver.size() + " ships left.");
                 });
             }
 
-            // todo remove this
             final CombatRound nextRound = currentCombatRound.clone();
             nextRound.next();
             final boolean nextRoundNotPresent = currentRoundStates.stream().anyMatch(roundState -> {
@@ -181,8 +177,7 @@ public class Cage implements Future<Cage> {
                 return !coursePlot.isFreshPlotWithoutAnyMovement() && coursePlot.hasPlotExceeded();
             });
             if (nextRoundNotPresent) {
-                // fixme battlelogger service
-                System.out.println("\nbattle proudly presents by counting stuff\n");
+                battleLogger.logMessage("\nbattle proudly presents by counting stuff\n");
                 return true;
             }
         }
@@ -259,8 +254,7 @@ public class Cage implements Future<Cage> {
         /* todo implement forced battle end at condition
          */
         if (no >= 1000) {
-            // fixme battlelogger service
-            System.out.println("#" + no + " BATTLE FORCED DONE");
+            logMessage("#" + no + " BATTLE FORCED DONE");
             forceDone = true;
         }
 
@@ -276,8 +270,7 @@ public class Cage implements Future<Cage> {
         log("tidy up", start, end);
         if (no % 1 == 0) {
             final Distance distance = getCurrentStateByFleet(fleetOne).getPosition().getDistance(getCurrentStateByFleet(fleetTwo).getPosition());
-            // fixme battlelogger service
-            System.out.println("#" + no + "\t\t - " + distance.getCoordinateInMetric(LS) + " LS");
+            logMessage("#" + no + "\t\t - " + distance.getCoordinateInMetric(LS) + " LS");
         }
     }
 
@@ -332,8 +325,7 @@ public class Cage implements Future<Cage> {
     private void initiateCombat() {
         final BigDecimal initialCageDiameter = getInitialCageDiameter();
         final BigDecimal initialCageRadius = initialCageDiameter.divide(BigDecimal.valueOf(2), DistanceCalculator.MC_HU);
-        // fixme battlelogger service
-        System.out.println("Initial cage radius: " + initialCageRadius + " LS");
+        logMessage("Initial cage radius: " + initialCageRadius + " LS");
         final Orbit fleetOneStartingOrbit = DistanceCalculator.createByRadiusAndQuadrant(new Distance(initialCageRadius, LS), Quadrant.Q1, Planet.PLANET_STANDARD_METRIC);
         final Orbit fleetTwoStartingOrbit = DistanceCalculator.createByRadiusAndQuadrant(new Distance(initialCageRadius, LS), Quadrant.Q3, Planet.PLANET_STANDARD_METRIC);
 
@@ -375,8 +367,7 @@ public class Cage implements Future<Cage> {
         final Distance f2 = fleetTwo.getMaximumWeaponRange();
 
         final Distance max = f1.max(f2);
-        // fixme battlelogger service
-        System.out.println("Weapon range: " + max.getCoordinateInMetric(LS) + " LS");
+        logMessage("Weapon range: " + max.getCoordinateInMetric(LS) + " LS");
         final BigDecimal coordinateInMetric = max.getCoordinateInMetric(Planet.PLANET_STANDARD_METRIC);
         return coordinateInMetric.multiply(INITIAL_CAGE_DIAMETER_MULTIPLIER, DistanceCalculator.MC_HU);
     }
@@ -538,5 +529,11 @@ public class Cage implements Future<Cage> {
     @Nonnull
     public BattleResult getBattleResult() {
         return new BattleResult(this);
+    }
+
+    public void logMessage(@Nonnull final String msg) {
+        Preconditions.checkNotNull(msg, "msg must not be empty");
+
+        battleLogger.logMessage(msg);
     }
 }

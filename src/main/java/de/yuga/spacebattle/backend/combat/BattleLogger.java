@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -61,7 +62,15 @@ public class BattleLogger {
         this.logBattleResult = Boolean.parseBoolean(logBattleResult);
     }
 
-    public void logMessage(String msg, final Long start, final Long end) {
+    public void logMessage(@Nonnull final String msg) {
+        Preconditions.checkNotNull(msg, "msg must not be empty");
+
+        LOGGER.info(msg);
+    }
+
+    public void logMessage(@Nonnull final String msg, @Nullable final Long start, @Nullable final Long end) {
+        Preconditions.checkNotNull(msg, "msg must not be empty");
+
         if (logBattleResult) {
             if (start != null && end != null) {
                 final double duration = (double) (end - start) / 1000;

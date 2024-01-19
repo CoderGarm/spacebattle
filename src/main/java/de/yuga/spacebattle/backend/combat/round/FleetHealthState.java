@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.combat.round;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.dto.*;
 import de.yuga.spacebattle.backend.combat.enums.EDamageImpact;
+import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -28,11 +29,12 @@ public class FleetHealthState implements Cloneable {
     @Nonnull
     private Map<WarShip, WarshipHealthState> losses = new HashMap<>();
 
-    public FleetHealthState(@Nonnull final Fleet fleet) {
+    public FleetHealthState(@Nonnull final Cage cage, @Nonnull final Fleet fleet) {
+        Preconditions.checkNotNull(cage, "cage must not be empty");
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
         this.fleet = fleet;
-        this.warshipHealthStates = fleet.getAliveShips().stream().collect(Collectors.toMap(Function.identity(), WarshipHealthState::new));
+        this.warshipHealthStates = fleet.getAliveShips().stream().collect(Collectors.toMap(Function.identity(), w -> new WarshipHealthState(cage, w)));
     }
 
     /**

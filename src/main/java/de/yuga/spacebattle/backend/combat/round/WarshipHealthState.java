@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.combat.dto.Historizable;
 import de.yuga.spacebattle.backend.combat.dto.HitLog;
 import de.yuga.spacebattle.backend.combat.dto.RangeDefinition;
+import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
@@ -25,6 +26,9 @@ import java.util.stream.Collectors;
 import static de.yuga.spacebattle.backend.calculator.FittingUtils.DEFENSIVE_FITTING;
 
 public class WarshipHealthState implements Cloneable {
+
+    @Nullable
+    private Cage cage;
 
     /**
      * The war ship which is this state for.
@@ -95,6 +99,12 @@ public class WarshipHealthState implements Cloneable {
 
     @Nullable
     private final ElectronicWarfare electronicWarfare;
+
+    public WarshipHealthState(@Nonnull final Cage cage, @Nonnull final WarShip warShip) {
+        this(warShip);
+
+        this.cage = Preconditions.checkNotNull(cage, "cage must not be empty");
+    }
 
     public WarshipHealthState(@Nonnull final WarShip warShip) {
         Preconditions.checkNotNull(warShip, "warShip shouldn't be null!");
@@ -402,6 +412,9 @@ public class WarshipHealthState implements Cloneable {
                 elokaState = applyDamageToHitArea(elokaState, min, attackedPart, damageDealer);
                 hitLog.add(new HitLog(damageDealer, this, min, elokaState, attackedPart, isAlive(), isFightingCapable()));
                 break;
+        }
+        if (cage != null) {
+            cage.logMessage(hitLog.get(hitLog.size() - 1).toString());
         }
     }
 

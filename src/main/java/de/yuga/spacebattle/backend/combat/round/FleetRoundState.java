@@ -103,7 +103,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         this.combatRound = cage.getCurrentCombatRound();
         this.fleet = fleet;
         this.position = position.clone();
-        this.fleetHealthState = new FleetHealthState(fleet);
+        this.fleetHealthState = new FleetHealthState(cage, fleet);
         this.coursePlot = new CoursePlot(cage, fleet, position);
         this.velocity = coursePlot.getAgentsVelocity();
         this.direction = coursePlot.getCurrentDirection();

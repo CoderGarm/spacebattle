@@ -262,8 +262,7 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
         calculateRangePerCombatRound();
         calculateAttackRange();
         historize();
-        // fixme battlelogger service
-        System.out.println("Eloka attacked " + Integer.toHexString(hashCode()) + " and killed " + lostByType.values().stream().mapToInt(Integer::intValue).sum() + " (" + missileSalvoHealthState.getCurrentAmountByType().values().stream().mapToInt(Integer::intValue).sum() + " left) against " + target.getOwner().getUsername());
+        cage.logMessage("Eloka attacked " + Integer.toHexString(hashCode()) + " and killed " + lostByType.values().stream().mapToInt(Integer::intValue).sum() + " (" + missileSalvoHealthState.getCurrentAmountByType().values().stream().mapToInt(Integer::intValue).sum() + " left) against " + target.getOwner().getUsername());
     }
 
     private void historize() {
@@ -310,8 +309,7 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
         calculateRangePerCombatRound();
         calculateAttackRange();
         historize();
-        // fixme battlelogger service
-        System.out.println("Counter attacked " + Integer.toHexString(hashCode()) + " and killed " + lostByType.values().stream().mapToInt(Integer::intValue).sum() + " (" + missileSalvoHealthState.getCurrentAmountByType().values().stream().mapToInt(Integer::intValue).sum() + " left) against " + target.getOwner().getUsername());
+        cage.logMessage("Counter attacked " + Integer.toHexString(hashCode()) + " and killed " + lostByType.values().stream().mapToInt(Integer::intValue).sum() + " (" + missileSalvoHealthState.getCurrentAmountByType().values().stream().mapToInt(Integer::intValue).sum() + " left) against " + target.getOwner().getUsername());
     }
 
     /**

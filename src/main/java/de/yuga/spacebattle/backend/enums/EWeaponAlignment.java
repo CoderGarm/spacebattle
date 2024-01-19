@@ -69,7 +69,7 @@ public enum EWeaponAlignment {
         Preconditions.checkNotNull(targetsPosition, "targetsPosition shouldn't be null!");
 
         final double angle = Direction.getAngleBetween(base, baseDirection, targetsPosition);
-        final Set<EWeaponAlignment> collect = Arrays.stream(EWeaponAlignment.values()).filter(a ->
+        return Arrays.stream(EWeaponAlignment.values()).filter(a ->
                 Arrays.stream(a.angle).anyMatch(p -> {
                     if (angle < -360 || angle > 360) {
                         // if any wildcard angle is returned - the direct angle between could not be determined - everything is possible
@@ -89,9 +89,6 @@ public enum EWeaponAlignment {
                     return angle >= first && angle <= second;
                 })
         ).collect(Collectors.toSet());
-        // fixme battlelogger service
-        System.out.println("getApplicableAlignments with angle of " + angle + "°: '" + collect.stream().map(Enum::name).collect(Collectors.joining(", ")) + "'");
-        return collect;
 
     }
 
