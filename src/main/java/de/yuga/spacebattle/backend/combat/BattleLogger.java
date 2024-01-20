@@ -55,6 +55,9 @@ public class BattleLogger {
 
     private static final String PS = System.getProperty("file.separator");
 
+    @Nullable
+    private CombatRound combatRound;
+
     @Autowired
     public BattleLogger(@Nonnull @Value("${logging.battle-log.write:true}") final String logBattleResult) {
         Preconditions.checkNotNull(logBattleResult, "logBattleResult shouldn't be null!");
@@ -64,19 +67,21 @@ public class BattleLogger {
 
     public void logMessage(@Nonnull final String msg) {
         Preconditions.checkNotNull(msg, "msg must not be empty");
+        Preconditions.checkNotNull(combatRound, "combatRound must not be empty");
 
-        LOGGER.info(msg);
+        LOGGER.info(combatRound + ": " + msg);
     }
 
     public void logMessage(@Nonnull final String msg, @Nullable final Long start, @Nullable final Long end) {
         Preconditions.checkNotNull(msg, "msg must not be empty");
+        Preconditions.checkNotNull(combatRound, "combatRound must not be empty");
 
         if (logBattleResult) {
             if (start != null && end != null) {
                 final double duration = (double) (end - start) / 1000;
-                LOGGER.info("\t" + msg + "\t\t - duration: " + duration + " seconds");
+                LOGGER.info(combatRound + ": " + "\t" + msg + "\t\t - duration: " + duration + " seconds");
             } else {
-                LOGGER.info("\t" + msg);
+                LOGGER.info(combatRound + ": " + "\t" + msg);
             }
         }
     }
@@ -450,5 +455,19 @@ public class BattleLogger {
             return;
         }
         write(bw, sb.toString());
+    }
+
+    public void init(@Nonnull final CombatRound combatRound) {
+        this.combatRound = Preconditions.checkNotNull(combatRound, "combatRound must not be empty");
+    }
+
+    public void closeRound() {
+        this.combatRound = null;
+    }
+
+    public void initiateCombat(@Nonnull final String msg) {
+        Preconditions.checkNotNull(msg, "msg must not be empty");
+
+        LOGGER.info(msg);
     }
 }

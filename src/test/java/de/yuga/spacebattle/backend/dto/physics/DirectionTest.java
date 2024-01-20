@@ -36,7 +36,7 @@ class DirectionTest {
         final Orbit origin = new Orbit(BigDecimal.valueOf(0), BigDecimal.valueOf(0), EDistanceMetric.M);
         final Direction originsDirection = new Direction(BigDecimal.valueOf(1), BigDecimal.valueOf(0));
 
-        final double angleBetween = Direction.getAngleBetween(origin, originsDirection, pointToLookAt);
+        final double angleBetween = Direction.getAngleLineOfSight(origin, originsDirection, pointToLookAt);
         assertEquals(resultingAngleByFlippedYAxis, angleBetween);
     }
 

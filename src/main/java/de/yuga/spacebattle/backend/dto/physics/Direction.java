@@ -49,6 +49,15 @@ public class Direction implements Cloneable {
     }
 
     @Nonnull
+    public static Direction clockWiseHoldRadius(@Nonnull final Orbit currentPosition, @Nonnull final Orbit center) {
+        Preconditions.checkNotNull(currentPosition, "currentPosition shouldn't be null!");
+        Preconditions.checkNotNull(center, "center shouldn't be null!");
+
+        final Direction direction = new Direction(currentPosition, center);
+        return new Direction(direction.getXCoordinate(), direction.getYCoordinate().negate());
+    }
+
+    @Nonnull
     private BigDecimal normCoordinate(@Nonnull final BigDecimal val, @Nonnull final BigDecimal other) {
         Preconditions.checkNotNull(val, "val shouldn't be null!");
         Preconditions.checkNotNull(other, "other shouldn't be null!");
@@ -148,12 +157,12 @@ public class Direction implements Cloneable {
      * @param that that
      * @return the angular difference
      */
-    public double getAngleBetween(@Nonnull final Direction that) { // fixme ist quark
+    public double getAngleBetween(@Nonnull final Direction that) {
         Preconditions.checkNotNull(that, "that shouldn't be null!");
 
         if (isNullDirection() || that.isNullDirection()) {
             // if one or both are "not defined" they have no clear choice, it is handled always as wildcard
-            return Double.NEGATIVE_INFINITY; // fixme rework - there is a direction every time between two points with bow and stern
+            return Double.NEGATIVE_INFINITY;
         }
         // calculate scalar product
         final BigDecimal scalar = xCoordinate.multiply(that.getXCoordinate()).add(yCoordinate.multiply(that.getYCoordinate()));
@@ -175,9 +184,9 @@ public class Direction implements Cloneable {
      *
      * @return the angular difference
      */
-    public static double getAngleBetween(@Nonnull final Orbit origin,
-                                         @Nonnull final Direction originsDirection,
-                                         @Nonnull final Orbit pointToLookAt) {
+    public static double getAngleLineOfSight(@Nonnull final Orbit origin,
+                                             @Nonnull final Direction originsDirection,
+                                             @Nonnull final Orbit pointToLookAt) {
         Preconditions.checkNotNull(origin, "origin must not be empty");
         Preconditions.checkNotNull(originsDirection, "originsDirection must not be empty");
         Preconditions.checkNotNull(pointToLookAt, "pointToLookAt must not be empty");

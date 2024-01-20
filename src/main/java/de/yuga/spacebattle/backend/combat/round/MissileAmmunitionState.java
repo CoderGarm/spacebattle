@@ -4,10 +4,13 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AmmunitionFitting;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
+import de.yuga.spacebattle.backend.enums.EWarheadType;
+import de.yuga.spacebattle.backend.enums.EWeaponType;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -77,8 +80,25 @@ public class MissileAmmunitionState implements Cloneable {
      *
      * @return <code>true</code> if there are missiles remaining, <code>false</code> otherwise
      */
-    public boolean hasShotsLeft() {
-        return shotsPerMissile.values().stream().mapToInt(Integer::intValue).sum() > 0;
+    public boolean hasShotsLeft(@Nonnull final EWeaponType weaponType) {
+        Preconditions.checkNotNull(weaponType, "weaponType must not be empty");
+
+
+        final Set<EWarheadType> allowedTypes = new HashSet<>();
+        switch (weaponType) {
+            case MISSILE:
+                allowedTypes.add(EWarheadType.KINETIC);
+                allowedTypes.add(EWarheadType.EXPLOSION);
+                allowedTypes.add(EWarheadType.LASER);
+                break;
+            case COUNTER_MISSILE:
+                allowedTypes.add(EWarheadType.COUNTER_MISSILE);
+                break;
+        }
+        return shotsPerMissile.entrySet().stream()
+                .filter(m -> allowedTypes.contains(m.getKey().getWarhead().getWarheadType())).map(Map.Entry::getValue)
+                .mapToInt(Integer::intValue)
+                .sum() > 0;
     }
 
     /**

@@ -245,9 +245,11 @@ public class WarshipHealthState implements Cloneable {
                     }
                     final Launcher launcher = fitting.getLauncher();
                     if (launcher != null) {
-                        final Missile missile = launcher.getHeaviestMissile();
-                        if (missileAmmunitionState.hasShotsLeft(missile)) {
-                            damageProjectionRange = missile.getMaximumMissileRange();
+                        final Set<Missile> allowedMissiles = launcher.getAllowedMissiles();
+                        for (final Missile allowedMissile : allowedMissiles) {
+                            if (missileAmmunitionState.hasShotsLeft(allowedMissile)) {
+                                damageProjectionRange = allowedMissile.getMaximumMissileRange();
+                            }
                         }
                     }
                     return damageProjectionRange;

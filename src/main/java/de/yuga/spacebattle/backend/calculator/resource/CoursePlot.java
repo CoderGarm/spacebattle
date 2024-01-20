@@ -150,20 +150,22 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         final Direction direction;
         final Velocity resultingVelocity;
         switch (movementType) {
-            default:
-            case REDUCE_DISTANCE:
-                direction = new Direction(agentsPosition, targetsPosition);
-                resultingVelocity = velocity.getVelocityByAcceleration(acceleration, COMBAT_ROUND);
-                break;
             case EVASION_MOVEMENT:
             case INCREASE_DISTANCE:
                 direction = new Direction(targetsPosition, agentsPosition);
                 final Acceleration negate = acceleration.negate();
                 resultingVelocity = velocity.getVelocityByAcceleration(negate, COMBAT_ROUND);
                 break;
+            case IMPELLER_WEDGE_PROTECTION:
+            case OFFENSIVE_ROLL:
             case HOLD_DISTANCE:
-                direction = Direction.ZERO;
+                direction = Direction.clockWiseHoldRadius(agentsPosition, targetsPosition);
                 resultingVelocity = velocity;
+                break;
+            default:
+            case REDUCE_DISTANCE:
+                direction = new Direction(agentsPosition, targetsPosition);
+                resultingVelocity = velocity.getVelocityByAcceleration(acceleration, COMBAT_ROUND);
                 break;
         }
 
@@ -403,12 +405,12 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         Velocity initialVelocity = agentsCurrentVelocity.getByAlignmentFactor(alignmentFactor);
         cage.logMessage("rounds to travel '" + roundsToTravel + "' for " + getAgent().getName());
         for (int i = 1; i <= roundsToTravel; i++) {
-            final CourseOrderElement latestCourseElement = getLatestCourseElement();
+            final CourseOrderElement latestCourseElement = getLatestCourseElement(); // fixme the speed must be decelerated - is done by alignment factor?
             final Orbit position = latestCourseElement != null ? latestCourseElement.getPosition() : origin;
             final Distance distanceByTime = acceleration.getDistanceByTime(COMBAT_ROUND, initialVelocity, EDistanceMetric.LS);
             Velocity resultingVelocity = initialVelocity.getVelocityByAcceleration(acceleration, COMBAT_ROUND);
             if (resultingVelocity.compareTo(topSpeed) > 0) {
-                resultingVelocity = topSpeed.clone(); // fixme this change has a weird result -> doubled ship count in UI? And ships need a real combat mechanism
+                resultingVelocity = topSpeed;
             }
             // calculate resulting orbit
             final Orbit stepDestination = position.getDestinationBy(distanceByTime, courseDirection);
@@ -670,10 +672,11 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         courseElement.executeOrder();
         final FleetRoundState currentStateByFleet = cage.getCurrentStateByFleet(agent);
         final EMovementType movementType = courseElement.getMovementType();
-        cage.logMessage(agent.getOwner().getUsername() + " moves " + movementType);
+        final Velocity currentVelocity = getCurrentVelocity();
+        cage.logMessage(agent.getOwner().getUsername() + " moves " + movementType + " with velocity of " + currentVelocity);
         currentStateByFleet.setMovementType(movementType);
         currentStateByFleet.setDirection(getCurrentDirection());
-        currentStateByFleet.setVelocity(getCurrentVelocity());
+        currentStateByFleet.setVelocity(currentVelocity);
     }
 
     public void clearFutureCourseElements() {

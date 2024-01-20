@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static de.yuga.spacebattle.backend.enums.physics.EDistanceMetric.LS;
+
 /**
  * The combat handler will handle every combat related round for the {@link #cage}.<br>
  * <br>
@@ -61,6 +63,9 @@ public class CombatHandler {
         // execute movement
         executeMovement(fleetOne);
         executeMovement(fleetTwo);
+
+        final Distance distance = cage.getCurrentStateByFleet(fleetOne).getPosition().getDistance(cage.getCurrentStateByFleet(fleetTwo).getPosition());
+        cage.logMessage("2 #" + cage.getCurrentCombatRound().getNo() + "\t\t - " + distance.getCoordinateInMetric(LS) + " LS");
     }
 
     private void createCoursePlot(@Nonnull final Fleet agent, @Nonnull final Fleet target) {
@@ -206,21 +211,43 @@ public class CombatHandler {
         final Direction agentsDirection = agentsState.getDirection();
         final FleetRoundState targetsState = cage.getCurrentStateByFleet(target);
         final Orbit targetPos = targetsState.getPosition();
+        final Direction targetDirection = targetsState.getDirection();
         final Distance distance = agentsPos.getDistance(targetPos);
 
         final Distance maximumBeamRangeOne = agent.getMaximumWeaponRangePerType(EWeaponType.BEAM);
         final boolean isInRange = distance.compareTo(maximumBeamRangeOne) <= 0;
 
-        final Distance agentsMobility = agentsState.getMobilityForDirection(new Direction(agentsPos, targetPos));
-        final Distance targetsMobility = targetsState.getMobilityForDirection(new Direction(targetPos, agentsPos));
-        final Distance commonMobility = agentsMobility.add(targetsMobility).subtract(maximumBeamRangeOne);
         // both fleets could reach them with their movement in one round - beam weapon range is too small for the endurance of a combat round
-        final boolean flippingPositions = commonMobility.compareTo(distance) >= 0;
+        boolean inRangeWhilePassing = false;
+        if (!isInRange) {
+            final Distance agentsMobility = agentsState.getMobilityForDirection(agentsDirection);
+            final Distance targetsMobility = targetsState.getMobilityForDirection(targetDirection);
+
+            final Orbit designatedAgentsPosition = agentsPos.clone().move(EMovementType.REDUCE_DISTANCE, agentsMobility, targetPos);
+            final Orbit designatedTargetsPosition = targetPos.clone().move(EMovementType.REDUCE_DISTANCE, targetsMobility, agentsPos);
+
+            final Orbit agentsMove = agentsPos.clone();
+            final Orbit targetsMove = targetPos.clone();
+            final Distance steps = agentsMobility.divide(maximumBeamRangeOne);
+
+            while (designatedAgentsPosition.getDistance(agentsMove).compareTo(maximumBeamRangeOne) <= 0) {
+
+                final boolean inRange = agentsMove.getDistance(targetsMove).compareTo(maximumBeamRangeOne) <= 0;
+                if (inRange) {
+                    inRangeWhilePassing = true;
+                    break;
+                }
+
+                agentsMove.move(EMovementType.REDUCE_DISTANCE, steps, designatedTargetsPosition);
+                targetsMove.move(EMovementType.REDUCE_DISTANCE, steps, designatedAgentsPosition);
+            }
+        }
 
         final Set<EWeaponAlignment> applicableAlignments = EWeaponAlignment.getApplicableAlignments(agentsPos, agentsDirection, targetPos);
         final boolean isAlignedToFire = agentsState.hasWeaponsForAlignment(applicableAlignments, EWeaponType.BEAM);
-        if ((isInRange || flippingPositions) && isAlignedToFire) {
-            cage.logMessage(agent.getOwner().getUsername() + " tries to fire beams for " + applicableAlignments.stream().map(Enum::name).collect(Collectors.joining(", ")));
+        if ((isInRange || inRangeWhilePassing) && isAlignedToFire) {
+            cage.logMessage(agent.getOwner().getUsername() + " tries to fire beams for " + applicableAlignments.stream().map(Enum::name).collect(Collectors.joining(", "))
+                    + " at range of " + distance);
             cage.addToFlyingBeamVolleys(new BeamVolley(cage, agent, target));
         }
     }
@@ -247,9 +274,10 @@ public class CombatHandler {
         final Set<EWeaponAlignment> applicableAlignments = EWeaponAlignment.getApplicableAlignments(actorPos, actorsDirection, targetPos);
         final boolean isAlignedToFire = actorsState.hasWeaponsForAlignment(applicableAlignments, EWeaponType.MISSILE);
         if (isInRange && isAlignedToFire) {
-            final boolean hasShotsLeft = actorsState.getFleetHealthState().hasShotsLeft();
+            final boolean hasShotsLeft = actorsState.getFleetHealthState().hasShotsLeft(EWeaponType.MISSILE);
             if (hasShotsLeft) {
-                cage.logMessage(actor.getOwner().getUsername() + " tries to fire missiles for " + applicableAlignments.stream().map(Enum::name).collect(Collectors.joining(", ")));
+                cage.logMessage(actor.getOwner().getUsername() + " tries to fire missiles for " + applicableAlignments.stream().map(Enum::name).collect(Collectors.joining(", "))
+                        + " at range of " + distance);
                 cage.addToFlyingMissileSalvos(new MissileSalvo(cage, actor, target, applicableAlignments));
                 cage.setActionHappened(true);
             }

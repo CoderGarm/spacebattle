@@ -103,7 +103,7 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
                 break;
             default:
             case HOLD_DISTANCE:
-                // todo LOGGER.info("This should be implemented if we are in the space without any acting force by Newton III.");
+                System.out.println("This should be implemented if we are in the space without any acting force by Newton III.");
                 return this.clone();
         }
 

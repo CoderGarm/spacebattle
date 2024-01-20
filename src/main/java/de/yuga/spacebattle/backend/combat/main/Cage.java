@@ -20,8 +20,6 @@ import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,9 +34,6 @@ import static de.yuga.spacebattle.backend.enums.physics.EDistanceMetric.LS;
  * The cage is the fighting area for a {@link FleetClash} and will handle the complete combat phase on its own.
  */
 public class Cage implements Future<Cage> {
-
-    @Nonnull
-    private static final Logger LOGGER = LoggerFactory.getLogger(Cage.class);
 
     @Nonnull
     private final BattleLogger battleLogger;
@@ -216,62 +211,52 @@ public class Cage implements Future<Cage> {
         }
     }
 
-    private void log(String msg, final Long start, final Long end) {
-        battleLogger.logMessage(msg, start, end);
-    }
-
-
     /**
      * Runs the combat round completely.
      */
     @VisibleForTesting
     protected void executeCombatRound() {
         final CombatRound currentCombatRound = getCurrentCombatRound();
-        log("#" + currentCombatRound + " new round " + Calendar.getInstance(Locale.GERMANY).getTime(), null, null);
+        battleLogger.init(currentCombatRound);
+        battleLogger.logMessage("#" + currentCombatRound + " new round " + Calendar.getInstance(Locale.GERMANY).getTime());
+        final int no = currentCombatRound.getNo();
+        final Distance distance = getCurrentStateByFleet(fleetOne).getPosition().getDistance(getCurrentStateByFleet(fleetTwo).getPosition());
+        logMessage("#" + no + "\t\t - " + distance.getCoordinateInMetric(LS) + " LS"); // fixme why is the distance known here?
         long start = System.currentTimeMillis();
         combatHandler.handleMovementPhase();
         long end = System.currentTimeMillis();
-        log("movement", start, end);
+        battleLogger.logMessage("movement", start, end);
         start = System.currentTimeMillis();
         combatHandler.handleMissilePhase();
         end = System.currentTimeMillis();
-        log("missile", start, end);
+        battleLogger.logMessage("missile", start, end);
         start = System.currentTimeMillis();
         combatHandler.handleIncomingWeaponFirePhase();
         end = System.currentTimeMillis();
-        log("incoming fire", start, end);
+        battleLogger.logMessage("incoming fire", start, end);
         start = System.currentTimeMillis();
         combatHandler.handleFireWeaponPhase();
         end = System.currentTimeMillis();
-        log("fire weapon", start, end);
+        battleLogger.logMessage("fire weapon", start, end);
 
         start = System.currentTimeMillis();
-        final int no = currentCombatRound.getNo();
-        if (no > 2000) {
-            //logIt = true;
-        }
 
-        /* todo implement forced battle end at condition
-         */
+        /* fixme implement forced battle end at condition
         if (no >= 1000) {
             logMessage("#" + no + " BATTLE FORCED DONE");
             forceDone = true;
-        }
+        }*/
 
         if (!isDone()) {
             prepareNextCombatRound(currentCombatRound);
         } else {
             // state the last round results
             participatingFleets.forEach(fleet -> getCurrentStateByFleet(fleet).historize());
-            // todo run combat until every missile is gone
             // todo create the last combat round with the resulting setup
         }
         end = System.currentTimeMillis();
-        log("tidy up", start, end);
-        if (no % 1 == 0) {
-            final Distance distance = getCurrentStateByFleet(fleetOne).getPosition().getDistance(getCurrentStateByFleet(fleetTwo).getPosition());
-            logMessage("#" + no + "\t\t - " + distance.getCoordinateInMetric(LS) + " LS");
-        }
+        battleLogger.logMessage("tidy up", start, end);
+        battleLogger.closeRound();
     }
 
     /**
@@ -325,7 +310,7 @@ public class Cage implements Future<Cage> {
     private void initiateCombat() {
         final BigDecimal initialCageDiameter = getInitialCageDiameter();
         final BigDecimal initialCageRadius = initialCageDiameter.divide(BigDecimal.valueOf(2), DistanceCalculator.MC_HU);
-        logMessage("Initial cage radius: " + initialCageRadius + " LS");
+        battleLogger.initiateCombat("Initial cage radius: " + initialCageRadius + " LS");
         final Orbit fleetOneStartingOrbit = DistanceCalculator.createByRadiusAndQuadrant(new Distance(initialCageRadius, LS), Quadrant.Q1, Planet.PLANET_STANDARD_METRIC);
         final Orbit fleetTwoStartingOrbit = DistanceCalculator.createByRadiusAndQuadrant(new Distance(initialCageRadius, LS), Quadrant.Q3, Planet.PLANET_STANDARD_METRIC);
 
@@ -367,7 +352,7 @@ public class Cage implements Future<Cage> {
         final Distance f2 = fleetTwo.getMaximumWeaponRange();
 
         final Distance max = f1.max(f2);
-        logMessage("Weapon range: " + max.getCoordinateInMetric(LS) + " LS");
+        battleLogger.initiateCombat("Weapon range: " + max.getCoordinateInMetric(LS) + " LS");
         final BigDecimal coordinateInMetric = max.getCoordinateInMetric(Planet.PLANET_STANDARD_METRIC);
         return coordinateInMetric.multiply(INITIAL_CAGE_DIAMETER_MULTIPLIER, DistanceCalculator.MC_HU);
     }
@@ -391,7 +376,7 @@ public class Cage implements Future<Cage> {
             return roundState;
         }
 
-        LOGGER.info("There is no fleet state for idFleet '" + fleet.getId() + "'.");
+        battleLogger.logMessage("There is no fleet state for idFleet '" + fleet.getId() + "'.");
         throw new NotifyWebUserException("No state present - please call the administrator.");
     }
 

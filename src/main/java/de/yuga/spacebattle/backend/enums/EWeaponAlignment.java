@@ -68,7 +68,7 @@ public enum EWeaponAlignment {
         Preconditions.checkNotNull(baseDirection, "baseDirection shouldn't be null!");
         Preconditions.checkNotNull(targetsPosition, "targetsPosition shouldn't be null!");
 
-        final double angle = Direction.getAngleBetween(base, baseDirection, targetsPosition);
+        final double angle = Direction.getAngleLineOfSight(base, baseDirection, targetsPosition);
         return Arrays.stream(EWeaponAlignment.values()).filter(a ->
                 Arrays.stream(a.angle).anyMatch(p -> {
                     if (angle < -360 || angle > 360) {

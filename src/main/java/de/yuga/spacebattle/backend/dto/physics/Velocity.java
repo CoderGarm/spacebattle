@@ -141,7 +141,8 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
     @Override
     @JsonIgnore
     public String toString() {
-        return value + " " + distanceMetric + "/" + timeMetric;
+        final BigDecimal coordinateInMetric = getCoordinateInMetric(EDistanceMetric.LS, ETimeMetric.SECOND);
+        return coordinateInMetric + " " + EDistanceMetric.LS + "/" + ETimeMetric.SECOND;
     }
 
     @Override

@@ -10,6 +10,7 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
+import de.yuga.spacebattle.backend.enums.EWeaponType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -182,7 +183,7 @@ class CombatHandlerTest {
         when(roundStateActorMock.getPosition()).thenReturn(position);
         when(cageMock.getCurrentStateByFleet(target)).thenReturn(roundStateTargetMock);
         when(roundStateTargetMock.getPosition()).thenReturn(position);
-        when(fleetHealthStateActorMock.hasShotsLeft()).thenReturn(true);
+        when(fleetHealthStateActorMock.hasShotsLeft(EWeaponType.MISSILE)).thenReturn(true);
         doCallRealMethod().when(cageMock).addToFlyingMissileSalvos(any());
         doCallRealMethod().when(cageMock).getFlyingMissileSalvos();
         // test method

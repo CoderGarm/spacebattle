@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.combat.enums.EDamageImpact;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.backend.enums.EWeaponType;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -170,8 +171,10 @@ public class FleetHealthState implements Cloneable {
      *
      * @return <code>true</code> if there are missiles remaining, <code>false</code> otherwise
      */
-    public boolean hasShotsLeft() {
-        return warshipHealthStates.values().stream().anyMatch(w -> w.getMissileAmmunitionState().hasShotsLeft());
+    public boolean hasShotsLeft(@Nonnull final EWeaponType weaponType) {
+        Preconditions.checkNotNull(weaponType, "weaponType must not be empty");
+
+        return warshipHealthStates.values().stream().anyMatch(w -> w.getMissileAmmunitionState().hasShotsLeft(weaponType));
     }
 
     /**

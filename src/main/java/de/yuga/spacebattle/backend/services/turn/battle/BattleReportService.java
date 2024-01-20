@@ -45,13 +45,6 @@ public class BattleReportService {
         return StreamSupport.stream(fightingReports.spliterator(), false).collect(Collectors.toList());
     }
 
-    @Nullable
-    public BattleReport find(@Nonnull final Integer idBattleReport) {
-        Preconditions.checkNotNull(idBattleReport, "idBattleReport shouldn't be null!");
-
-        return battleReportRepository.findById(idBattleReport).orElse(null);
-    }
-
     @Nonnull
     public List<BattleReport> findAll(@Nonnull final Collection<Integer> idBattleReports) {
         Preconditions.checkNotNull(idBattleReports, "idBattleReports shouldn't be null!");
