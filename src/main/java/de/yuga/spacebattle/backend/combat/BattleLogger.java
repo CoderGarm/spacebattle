@@ -72,6 +72,13 @@ public class BattleLogger {
         LOGGER.info(combatRound + ": " + msg);
     }
 
+    public void logWarning(@Nonnull final String msg) {
+        Preconditions.checkNotNull(msg, "msg must not be empty");
+        Preconditions.checkNotNull(combatRound, "combatRound must not be empty");
+
+        LOGGER.warn(combatRound + ": " + msg);
+    }
+
     public void logMessage(@Nonnull final String msg, @Nullable final Long start, @Nullable final Long end) {
         Preconditions.checkNotNull(msg, "msg must not be empty");
         Preconditions.checkNotNull(combatRound, "combatRound must not be empty");

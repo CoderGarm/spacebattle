@@ -272,7 +272,8 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
         Preconditions.checkNotNull(duration, "duration shouldn't be null!");
 
         // v = a · t + v0
-        final BigDecimal velocityFromAcceleration = acceleration.getCoordinateInMetric(EAccelerationMetric.MS2).multiply(duration.getCoordinateInMetric(ETimeMetric.SECOND));
+        final BigDecimal velocityFromAcceleration = acceleration.getCoordinateInMetric(EAccelerationMetric.MS2)
+                .multiply(duration.getCoordinateInMetric(ETimeMetric.SECOND));
         return new Velocity(velocityFromAcceleration, distanceMetric, timeMetric).add(this);
     }
 

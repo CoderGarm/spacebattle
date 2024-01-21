@@ -148,7 +148,7 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         final Acceleration acceleration = agentsState.getAccelerationFor(EModuleType.PROPULSION);
 
         final Direction direction;
-        final Velocity resultingVelocity;
+        Velocity resultingVelocity;
         switch (movementType) {
             case EVASION_MOVEMENT:
             case INCREASE_DISTANCE:
@@ -167,6 +167,9 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
                 direction = new Direction(agentsPosition, targetsPosition);
                 resultingVelocity = velocity.getVelocityByAcceleration(acceleration, COMBAT_ROUND);
                 break;
+        }
+        if (hasViolatedTopSpeed(resultingVelocity)) {
+            resultingVelocity = getAgentsTopSpeed();
         }
 
         final Distance distanceByTime = acceleration.getDistanceByTime(COMBAT_ROUND, resultingVelocity, EDistanceMetric.LS);
@@ -393,7 +396,6 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         Preconditions.checkNotNull(acceleration, "acceleration shouldn't be null!");
         Preconditions.checkNotNull(travelDuration, "travelDuration shouldn't be null!");
 
-        final Velocity topSpeed = Velocity.SOL.multiply(BigDecimal.valueOf(agent.getRestrictingTechnologyType().getMaxVelocitySOL()));
 
         final int roundsToTravel = travelDuration.intValue() / CombatRound.COMBAT_ROUND_DURATION;
         // calculate desired direction by origin and destination
@@ -409,7 +411,8 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
             final Orbit position = latestCourseElement != null ? latestCourseElement.getPosition() : origin;
             final Distance distanceByTime = acceleration.getDistanceByTime(COMBAT_ROUND, initialVelocity, EDistanceMetric.LS);
             Velocity resultingVelocity = initialVelocity.getVelocityByAcceleration(acceleration, COMBAT_ROUND);
-            if (resultingVelocity.compareTo(topSpeed) > 0) {
+            final Velocity topSpeed = getAgentsTopSpeed();
+            if (hasViolatedTopSpeed(resultingVelocity)) {
                 resultingVelocity = topSpeed;
             }
             // calculate resulting orbit
@@ -418,6 +421,18 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
             initialVelocity = resultingVelocity;
             combatRound.next();
         }
+    }
+
+    private boolean hasViolatedTopSpeed(@Nonnull final Velocity velocity) {
+        Preconditions.checkNotNull(velocity, "velocity must not be empty");
+
+        final Velocity topSpeed = getAgentsTopSpeed();
+        return velocity.compareTo(topSpeed) > 0;
+    }
+
+    @Nonnull
+    private Velocity getAgentsTopSpeed() {
+        return Velocity.SOL.multiply(BigDecimal.valueOf(agent.getRestrictingTechnologyType().getMaxVelocitySOL()));
     }
 
     public void addCourseOrder(@Nonnull final CombatRound combatRound,
@@ -430,6 +445,10 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         Preconditions.checkNotNull(velocity, "velocity shouldn't be null!");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
         Preconditions.checkNotNull(target, "target shouldn't be null!");
+
+        if (hasViolatedTopSpeed(velocity)) {
+            cage.logWarning("VELOCITY VIOLATED from fleet " + agent.getId());
+        }
 
         courseOrderElements.add(new CourseOrderElement(combatRound, movementType, velocity, destination, target));
     }

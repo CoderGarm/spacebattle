@@ -219,9 +219,6 @@ public class Cage implements Future<Cage> {
         final CombatRound currentCombatRound = getCurrentCombatRound();
         battleLogger.init(currentCombatRound);
         battleLogger.logMessage("#" + currentCombatRound + " new round " + Calendar.getInstance(Locale.GERMANY).getTime());
-        final int no = currentCombatRound.getNo();
-        final Distance distance = getCurrentStateByFleet(fleetOne).getPosition().getDistance(getCurrentStateByFleet(fleetTwo).getPosition());
-        logMessage("#" + no + "\t\t - " + distance.getCoordinateInMetric(LS) + " LS"); // fixme why is the distance known here?
         long start = System.currentTimeMillis();
         combatHandler.handleMovementPhase();
         long end = System.currentTimeMillis();
@@ -520,5 +517,11 @@ public class Cage implements Future<Cage> {
         Preconditions.checkNotNull(msg, "msg must not be empty");
 
         battleLogger.logMessage(msg);
+    }
+
+    public void logWarning(@Nonnull final String msg) {
+        Preconditions.checkNotNull(msg, "msg must not be empty");
+
+        battleLogger.logWarning(msg);
     }
 }

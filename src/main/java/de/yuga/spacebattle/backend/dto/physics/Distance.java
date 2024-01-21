@@ -80,12 +80,8 @@ public class Distance implements Cloneable, Comparable<Distance> {
     @JsonIgnore
     @Override
     public String toString() {
-        Distance distance = DistanceCalculator.convertToScale(this);
-        if (true) {
-            // fixme roll back
-            distance = distance.getInMetricWithScale(EDistanceMetric.LS);
-        }
-
+        final Distance distance = DistanceCalculator.convertToScale(this)
+                .getInMetricWithScale(EDistanceMetric.LS);
         return distance.coordinate.stripTrailingZeros().toPlainString() + " " + distance.getDistanceMetric();
     }
 

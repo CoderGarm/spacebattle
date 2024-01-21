@@ -65,7 +65,7 @@ public class CombatHandler {
         executeMovement(fleetTwo);
 
         final Distance distance = cage.getCurrentStateByFleet(fleetOne).getPosition().getDistance(cage.getCurrentStateByFleet(fleetTwo).getPosition());
-        cage.logMessage("2 #" + cage.getCurrentCombatRound().getNo() + "\t\t - " + distance.getCoordinateInMetric(LS) + " LS");
+        cage.logMessage("#" + cage.getCurrentCombatRound().getNo() + "\t\t - " + distance.getCoordinateInMetric(LS) + " LS");
     }
 
     private void createCoursePlot(@Nonnull final Fleet agent, @Nonnull final Fleet target) {
