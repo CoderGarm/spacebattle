@@ -147,24 +147,23 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         final Velocity velocity = agentsState.getVelocity();
         final Acceleration acceleration = agentsState.getAccelerationFor(EModuleType.PROPULSION);
 
-        final Direction direction;
         Velocity resultingVelocity;
         switch (movementType) {
             case EVASION_MOVEMENT:
             case INCREASE_DISTANCE:
-                direction = new Direction(targetsPosition, agentsPosition);
+                this.agentsDirection = new Direction(targetsPosition, agentsPosition);
                 final Acceleration negate = acceleration.negate();
-                resultingVelocity = velocity.getVelocityByAcceleration(negate, COMBAT_ROUND);
+                resultingVelocity = velocity.getVelocityByAcceleration(negate, COMBAT_ROUND); // fixme unify course plotting and make a reliable speed calculation
                 break;
             case IMPELLER_WEDGE_PROTECTION:
             case OFFENSIVE_ROLL:
             case HOLD_DISTANCE:
-                direction = Direction.clockWiseHoldRadius(agentsPosition, targetsPosition);
+                this.agentsDirection = Direction.clockWiseHoldRadius(agentsPosition, targetsPosition);
                 resultingVelocity = velocity;
                 break;
             default:
             case REDUCE_DISTANCE:
-                direction = new Direction(agentsPosition, targetsPosition);
+                this.agentsDirection = new Direction(agentsPosition, targetsPosition);
                 resultingVelocity = velocity.getVelocityByAcceleration(acceleration, COMBAT_ROUND);
                 break;
         }
@@ -173,13 +172,12 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         }
 
         final Distance distanceByTime = acceleration.getDistanceByTime(COMBAT_ROUND, resultingVelocity, EDistanceMetric.LS);
-        final Orbit destination = agentsPosition.getDestinationBy(distanceByTime, direction);
+        final Orbit destination = agentsPosition.getDestinationBy(distanceByTime, this.agentsDirection);
 
         this.agentsVelocity = resultingVelocity;
-        this.agentsDirection = direction;
         this.origin = agentsPosition;
         this.destination = targetsPosition;
-        this.courseDirection = direction;
+        this.courseDirection = this.agentsDirection;
 
         final CombatRound cc = cage.getCurrentCombatRound().clone();
         cc.next();

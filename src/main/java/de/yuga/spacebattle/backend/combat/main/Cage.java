@@ -145,7 +145,7 @@ public class Cage implements Future<Cage> {
     public boolean isDone() {
         final boolean isDone;
         if (forceDone) {
-            battleLogger.logMessage("forced battle end");
+            battleLogger.logMessagePlain("forced battle end");
             isDone = true;
         } else {
 
@@ -239,10 +239,12 @@ public class Cage implements Future<Cage> {
         start = System.currentTimeMillis();
 
         /* fixme implement forced battle end at condition
+         */
+        final int no = currentCombatRound.getNo();
         if (no >= 1000) {
             logMessage("#" + no + " BATTLE FORCED DONE");
             forceDone = true;
-        }*/
+        }
 
         if (!isDone()) {
             prepareNextCombatRound(currentCombatRound);
@@ -307,7 +309,7 @@ public class Cage implements Future<Cage> {
     private void initiateCombat() {
         final BigDecimal initialCageDiameter = getInitialCageDiameter();
         final BigDecimal initialCageRadius = initialCageDiameter.divide(BigDecimal.valueOf(2), DistanceCalculator.MC_HU);
-        battleLogger.initiateCombat("Initial cage radius: " + initialCageRadius + " LS");
+        battleLogger.logMessagePlain("Initial cage radius: " + initialCageRadius + " LS");
         final Orbit fleetOneStartingOrbit = DistanceCalculator.createByRadiusAndQuadrant(new Distance(initialCageRadius, LS), Quadrant.Q1, Planet.PLANET_STANDARD_METRIC);
         final Orbit fleetTwoStartingOrbit = DistanceCalculator.createByRadiusAndQuadrant(new Distance(initialCageRadius, LS), Quadrant.Q3, Planet.PLANET_STANDARD_METRIC);
 
@@ -349,7 +351,7 @@ public class Cage implements Future<Cage> {
         final Distance f2 = fleetTwo.getMaximumWeaponRange();
 
         final Distance max = f1.max(f2);
-        battleLogger.initiateCombat("Weapon range: " + max.getCoordinateInMetric(LS) + " LS");
+        battleLogger.logMessagePlain("Weapon range: " + max.getCoordinateInMetric(LS) + " LS");
         final BigDecimal coordinateInMetric = max.getCoordinateInMetric(Planet.PLANET_STANDARD_METRIC);
         return coordinateInMetric.multiply(INITIAL_CAGE_DIAMETER_MULTIPLIER, DistanceCalculator.MC_HU);
     }

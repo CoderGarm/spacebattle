@@ -472,7 +472,7 @@ public class BattleLogger {
         this.combatRound = null;
     }
 
-    public void initiateCombat(@Nonnull final String msg) {
+    public void logMessagePlain(@Nonnull final String msg) {
         Preconditions.checkNotNull(msg, "msg must not be empty");
 
         LOGGER.info(msg);
