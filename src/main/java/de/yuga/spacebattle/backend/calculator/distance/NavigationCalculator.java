@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.calculator.distance;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.MathHelper;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Time;
@@ -77,7 +78,7 @@ public class NavigationCalculator {
         final BigDecimal vesselTopSpeed = hyperBand.getEffectiveTopSpeed(restrictingTechnologyType);
 
         // calculate acceleration to top speed
-        final BigDecimal accelerationValue = acceleration.convertToMetric(EAccelerationMetric.MS2);
+        final BigDecimal accelerationValue = MathHelper.getOrEpsilon(acceleration.convertToMetric(EAccelerationMetric.MS2));
         final BigDecimal timeToTopSpeed = vesselTopSpeed.divide(accelerationValue, MC_HU);
 
         // Stage 2: calculate time to halfway distance

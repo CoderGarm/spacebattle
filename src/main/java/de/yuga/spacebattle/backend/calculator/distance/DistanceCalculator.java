@@ -88,9 +88,7 @@ public class DistanceCalculator {
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
         Preconditions.checkArgument(fleet.getOrbit() != null, "fleet should be placed at a location!");
 
-        final ETechnologyType restrictingTechnologyType = fleet.getRestrictingTechnologyType();
-        final Acceleration acceleration = fleet.getAccelerationFor(EModuleType.FTLPROPULSION);
-        return calculateTimeToTravel(restrictingTechnologyType, acceleration, fleet.getOrbit(), destination);
+        return calculateTimeToTravel(fleet, fleet.getOrbit(), destination);
     }
 
     /**
@@ -113,7 +111,10 @@ public class DistanceCalculator {
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
 
         final ETechnologyType restrictingTechnologyType = fleet.getRestrictingTechnologyType();
-        final Acceleration acceleration = fleet.getAccelerationFor(EModuleType.FTLPROPULSION);
+
+        final boolean isInterplanetaryTravel = origin.getSystem() != null && origin.getSystem().equals(destination.getSystem());
+        final EModuleType moduleType = isInterplanetaryTravel ? EModuleType.PROPULSION : EModuleType.FTLPROPULSION;
+        final Acceleration acceleration = fleet.getAccelerationFor(moduleType);
         return calculateTimeToTravel(restrictingTechnologyType, acceleration, origin, destination);
     }
 
