@@ -45,9 +45,10 @@ article orbital modules
 
 todo. carrier menu planetengebäude und mining factors
 todo. plani menu anzeiigen ob SY oder CY job möglich
-todo. planis bomben, allianzfunktionen, kämpfen von mehreren flottenverbänden
 todo. flotten auf karte als shortcut-icon rechts am rand darstellen
 todo. eigene systeme auf karte als shortcut-icon rechts am rand darstellen?
+todo. flottenenmove: zielplani direkt festlegen
+todo. acc registering -> user direkt anmelden
 
 season 3:
 
@@ -62,10 +63,12 @@ season 3:
 - map für neue season fertig machen
 - fremde planis bomben
 - allianzfunktionen
+- kämpfen von mehreren flottenverbänden
 - ressourcen so balancen, dass es einen need gibt -> nicht jeder kann alles ernten? auf jeden fall muss es einen need geben: handel oder kampf soll angeregt werden
 - forschung muss ab dem early-game mehr kosten
 - schiffswerften müssen mehr output haben
 - regelmäßige konvoys wie in anno -> kann man abfangen per mission und schützen mit eigenen missionen -> mehrere ressourcen pro convoy
+- reguläres Ranking soll zerstörte und verlorene tonnage enthalten
 
 todo. colo duration through wormholes are NaN
 todo. tonnage calc not on every input -> timeout should be enough
