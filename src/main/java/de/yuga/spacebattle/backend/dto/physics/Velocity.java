@@ -105,7 +105,7 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
         if (distanceMetric == targetDistanceMetric && timeMetric == targetTimeMetric) {
             return value;
         }
-        final int scale = value.scale();
+        final int scale = value.scale() < 0 ? 1 : value.scale();
         final BigDecimal distanceMetricConversionFactor = distanceMetric.getConversionFactor(targetDistanceMetric);
         final BigDecimal timeMetricConversionFactor = timeMetric.getConversionFactor(targetTimeMetric);
         return value.multiply(distanceMetricConversionFactor)
@@ -283,6 +283,12 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
         Preconditions.checkNotNull(multiplier, "multiplier shouldn't be null!");
 
         return new Velocity(value.multiply(multiplier), distanceMetric, timeMetric);
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public Velocity multiply(final double multiplier) {
+        return new Velocity(value.multiply(BigDecimal.valueOf(multiplier)), distanceMetric, timeMetric);
     }
 
     /**

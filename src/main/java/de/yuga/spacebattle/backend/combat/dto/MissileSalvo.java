@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.combat.round.*;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
@@ -84,7 +85,14 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
     /**
      * The initial distance of this shot.
      */
+    @Nonnull
     private final Distance initialDistance;
+
+    /**
+     * The initial velocity.
+     */
+    @Nonnull
+    private final Velocity initialVelocity;
 
     /**
      * The composition of the salvo by missile type, amount and it's current state.
@@ -121,26 +129,33 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
     @Nullable
     private EDamageResult result;
 
+    private int roundsTravelled = 1;
+
     public MissileSalvo(@Nonnull final Cage cage,
                         @Nonnull final Fleet actor,
                         @Nonnull final Fleet target,
-                        @Nonnull final Set<EWeaponAlignment> applicableAlignments) {
+                        @Nonnull final Set<EWeaponAlignment> applicableAlignments,
+                        @Nonnull final Set<Missile> applicableMissiles) {
         Preconditions.checkNotNull(cage, "cage shouldn't be null!");
+        Preconditions.checkNotNull(actor, "actor must not be empty");
         Preconditions.checkNotNull(target, "target shouldn't be null!");
+        Preconditions.checkNotNull(applicableAlignments, "applicableAlignments must not be empty");
+        Preconditions.checkNotNull(applicableMissiles, "applicableMissiles must not be empty");
 
         this.combatSubPhase = ECombatSubPhase.MISSILE_FIRE_PHASE;
         this.cage = cage;
-        combatRound = cage.getCurrentCombatRound();
-        final FleetRoundState actorState = cage.getCurrentStateByFleet(actor);
-        this.position = actorState.getPosition().clone();
+        this.combatRound = cage.getCurrentCombatRound().clone();
+        final FleetRoundState actorsState = cage.getCurrentStateByFleet(actor);
+        this.position = actorsState.getPosition().clone();
         this.lastPosition = position;
         this.actor = actor;
         this.target = target;
         this.targetPosition = cage.getCurrentStateByFleet(target).getPosition().clone();
         this.initialDistance = position.getDistance(targetPosition);
+        this.initialVelocity = actorsState.getVelocity();
         final Map<Missile, Integer> amountByType = new HashMap<>();
 
-        actorState.getFightingWarShips()
+        actorsState.getFightingWarShips()
                 .filter(WarshipHealthState::isFightingCapable)
                 .forEach(w -> w.getFittings().entrySet().stream()
                         // filter active fittings
@@ -152,26 +167,29 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
                         .forEach(alignedFitting -> {
                             final Launcher launcher = alignedFitting.getLauncher();
                             final int amountOfLauncher = alignedFitting.getAmount();
-                            final Missile missile = launcher.getHeaviestMissile();
-                            final MissileAmmunitionState missileAmmunitionState = w.getMissileAmmunitionState();
-                            final int remainingShots = missileAmmunitionState.getRemainingShots(missile);
-                            if (remainingShots <= 0) {
-                                return;
-                            }
 
-                            final WarShip warShip = w.getWarShip(); /*todo notice the warship's potion of the salvo */
+                            final Set<Missile> allowedMissiles = launcher.getAllowedMissiles();
+                            final HashSet<Missile> missiles = new HashSet<>(allowedMissiles);
+                            missiles.removeIf(m -> !applicableMissiles.contains(m));
+                            for (final Missile missile : missiles) {
+                                final MissileAmmunitionState missileAmmunitionState = w.getMissileAmmunitionState();
+                                final int remainingShots = missileAmmunitionState.getRemainingShots(missile);
+                                if (remainingShots <= 0) {
+                                    return;
+                                }
 
-                            // setting missiles to the salvo
-                            if (remainingShots >= amountOfLauncher) {
-                                amountByType.merge(missile, amountOfLauncher, Integer::sum);
-                                missileAmmunitionState.reduce(missile, amountOfLauncher);
-                            } else {
-                                amountByType.merge(missile, remainingShots, Integer::sum);
-                                missileAmmunitionState.reduce(missile, remainingShots);
+                                // setting missiles to the salvo
+                                if (remainingShots >= amountOfLauncher) {
+                                    amountByType.merge(missile, amountOfLauncher, Integer::sum);
+                                    missileAmmunitionState.reduce(missile, amountOfLauncher);
+                                } else {
+                                    amountByType.merge(missile, remainingShots, Integer::sum);
+                                    missileAmmunitionState.reduce(missile, remainingShots);
+                                }
                             }
                         }));
         this.missileSalvoHealthState = new MissileSalvoHealthState(amountByType);
-        calculateRangePerCombatRound();
+        calculateRangeForActiveCombatRound();
         calculateAttackRange();
         historize();
     }
@@ -192,15 +210,20 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
         if (missileSalvoHealthState.isActive()) {
             handleMovement();
         }
+        if (missileSalvoHealthState.isActive()) {
+            this.roundsTravelled++;
+        }
     }
 
     /**
      * This calculates and sets the range per round.<br>
      * Could be useful if the salvo is reduced to the slower missile types.
      */
-    private void calculateRangePerCombatRound() {
+    private void calculateRangeForActiveCombatRound() {
         if (missileSalvoHealthState.isActive()) {
-            rangePerCombatRound = missileSalvoHealthState.getRangePerCombatRound();
+            final CombatRound currentCombatRound = cage.getCurrentCombatRound();
+            final int endurance = (currentCombatRound.getNo() - combatRound.getNo()) * CombatRound.COMBAT_ROUND_DURATION;
+            rangePerCombatRound = missileSalvoHealthState.getRangePerCombatRound(initialVelocity, endurance);
         } else {
             rangePerCombatRound = Distance.ZERO;
         }
@@ -259,7 +282,7 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
             missileSalvoHealthState.setNewMissileAmounts(missile, newValue, oldValue);
         });
 
-        calculateRangePerCombatRound();
+        calculateRangeForActiveCombatRound();
         calculateAttackRange();
         historize();
         cage.logMessage("Eloka attacked " + Integer.toHexString(hashCode()) + " and killed " + lostByType.values().stream().mapToInt(Integer::intValue).sum() + " (" + missileSalvoHealthState.getCurrentAmountByType().values().stream().mapToInt(Integer::intValue).sum() + " left) against " + target.getOwner().getUsername());
@@ -306,7 +329,7 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
             missileSalvoHealthState.setNewMissileAmounts(missile, newValue, oldValue);
         });
 
-        calculateRangePerCombatRound();
+        calculateRangeForActiveCombatRound();
         calculateAttackRange();
         historize();
         cage.logMessage("Counter attacked " + Integer.toHexString(hashCode()) + " and killed " + lostByType.values().stream().mapToInt(Integer::intValue).sum() + " (" + missileSalvoHealthState.getCurrentAmountByType().values().stream().mapToInt(Integer::intValue).sum() + " left) against " + target.getOwner().getUsername());
@@ -451,8 +474,14 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
         return target;
     }
 
+    @Nonnull
     public Distance getInitialDistance() {
         return initialDistance;
+    }
+
+    @Nonnull
+    public Velocity getInitialVelocity() {
+        return initialVelocity;
     }
 
     @Nonnull
@@ -484,5 +513,9 @@ public class MissileSalvo extends Historizable<MissileSalvo> implements Cloneabl
             }
             return result;
         }).flatMap(Collection::stream).collect(Collectors.toList());
+    }
+
+    public int roundsTravelled() {
+        return roundsTravelled;
     }
 }

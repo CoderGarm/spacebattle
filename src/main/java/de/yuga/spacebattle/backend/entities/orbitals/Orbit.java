@@ -56,6 +56,13 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
         this.yCoordinate = new Distance(yCoordinate, distanceMetric);
     }
 
+    public Orbit(final double xCoordinate, final double yCoordinate, @Nonnull final EDistanceMetric distanceMetric) {
+        Preconditions.checkNotNull(distanceMetric, "distanceMetric shouldn't be null!");
+
+        this.xCoordinate = new Distance(xCoordinate, distanceMetric);
+        this.yCoordinate = new Distance(yCoordinate, distanceMetric);
+    }
+
     public Distance getXCoordinate() {
         return xCoordinate;
     }

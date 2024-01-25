@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.rest.dto.turn.battle.combat;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
@@ -9,38 +10,37 @@ import de.yuga.spacebattle.rest.dto.orbitals.Orbit;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Set;
 
 @Schema(description = ".")
 public class MovementAction {
 
-    @Nullable
+    @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The round and phase information.")
     private CombatRoundKey combatRoundKey;
 
-    @Nullable
+    @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The fleet which acts.")
     private de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMarker actor;
 
-    @Nullable
+    @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The selected movement option for this action.")
     private EMovementType movementType;
 
-    @Nullable
+    @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The starting position for this movement.")
     private de.yuga.spacebattle.rest.dto.orbitals.Orbit origin;
 
-    @Nullable
+    @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The next step to the targeted position.")
     private de.yuga.spacebattle.rest.dto.orbitals.Orbit interimDestination;
 
-    @Nullable
+    @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The point of the targeted position.")
     private de.yuga.spacebattle.rest.dto.orbitals.Orbit destination;
@@ -62,5 +62,11 @@ public class MovementAction {
         this.origin = new Orbit(input.getOrigin());
         this.interimDestination = new Orbit(input.getInterimDestination());
         this.destination = new Orbit(input.getDestination());
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public CombatRoundKey getCombatRoundKey() {
+        return combatRoundKey;
     }
 }

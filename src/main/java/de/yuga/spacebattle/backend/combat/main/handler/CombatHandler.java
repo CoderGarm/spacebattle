@@ -2,8 +2,8 @@ package de.yuga.spacebattle.backend.combat.main.handler;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.resource.BezierCoursePlot;
 import de.yuga.spacebattle.backend.calculator.resource.CourseOrderElement;
-import de.yuga.spacebattle.backend.calculator.resource.CoursePlot;
 import de.yuga.spacebattle.backend.combat.dto.BeamVolley;
 import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
 import de.yuga.spacebattle.backend.combat.dto.MovementAction;
@@ -15,6 +15,7 @@ import de.yuga.spacebattle.backend.dto.physics.Direction;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
 import de.yuga.spacebattle.backend.enums.ECombatPhase.ECombatSubPhase;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
@@ -55,52 +56,55 @@ public class CombatHandler {
         final Fleet fleetOne = cage.getFleetOne();
         final Fleet fleetTwo = cage.getFleetTwo();
 
-        // todo state and execute movement by initiative
         // state and execute movement
-        createCoursePlot(fleetOne, fleetTwo);
-        createCoursePlot(fleetTwo, fleetOne);
+        if (cage.getCurrentCombatRound().getNo() == 1) {
+            createInitialCoursePlot();
+        }
 
         // execute movement
-        executeMovement(fleetOne);
-        executeMovement(fleetTwo);
+        executeMovement(cage.getAggressor());
+        executeMovement(cage.getDefender());
 
-        final Distance distance = cage.getCurrentStateByFleet(fleetOne).getPosition().getDistance(cage.getCurrentStateByFleet(fleetTwo).getPosition());
-        cage.logMessage("#" + cage.getCurrentCombatRound().getNo() + "\t\t - " + distance.getCoordinateInMetric(LS) + " LS");
+        final Orbit aggroPos = cage.getCurrentStateByFleet(cage.getAggressor()).getPosition();
+        final Orbit defPos = cage.getCurrentStateByFleet(cage.getDefender()).getPosition();
+        cage.logMessage("#" + cage.getCurrentCombatRound().getNo() + "\t\t - " + aggroPos.getDistance(defPos).getCoordinateInMetric(LS) + " LS");
     }
 
-    private void createCoursePlot(@Nonnull final Fleet agent, @Nonnull final Fleet target) {
-        Preconditions.checkNotNull(agent, "agent shouldn't be null!");
-        Preconditions.checkNotNull(target, "target shouldn't be null!");
+    private void createInitialCoursePlot() {
 
-        final FleetRoundState agentsState = cage.getCurrentStateByFleet(agent);
-        final FleetRoundState targetsState = cage.getCurrentStateByFleet(target);
+        final FleetRoundState aggressorsState = cage.getCurrentStateByFleet(cage.getAggressor());
+        final FleetRoundState defendersState = cage.getCurrentStateByFleet(cage.getDefender());
 
-        final Distance agentsMissileRange = agentsState.getMaximumWeaponRangePerType(EWeaponType.MISSILE);
-        final Distance targetsMissileRange = targetsState.getMaximumWeaponRangePerType(EWeaponType.MISSILE);
-        if (agentsMissileRange.compareTo(Distance.ZERO) == 0 && targetsMissileRange.compareTo(Distance.ZERO) == 0) {
+        final Distance aggressorsMissileRange = aggressorsState.getMaximumWeaponRangePerType(EWeaponType.MISSILE);
+        final Distance defendersMissileRange = defendersState.getMaximumWeaponRangePerType(EWeaponType.MISSILE);
+        if (aggressorsMissileRange.compareTo(Distance.ZERO) == 0 && defendersMissileRange.compareTo(Distance.ZERO) == 0) {
             cage.logMessage("Out of ammo");
         }
 
-        final CoursePlot agentsCoursePlot = agentsState.getCoursePlot();
-        final boolean creatingCoursePlotNeeded = agentsCoursePlot.isFreshPlotWithoutAnyMovement();
-        final boolean hasPlotToBeRepainted = agentsCoursePlot.hasPlotExceeded();
-        final boolean ableToAttack = agentsState.isAbleToAttack();
+        final BezierCoursePlot aggressorsCoursePlot = aggressorsState.getCoursePlot();
+        final BezierCoursePlot defendersCoursePlot = defendersState.getCoursePlot();
+        final boolean creatingCoursePlotNeeded = aggressorsCoursePlot.isFreshPlotWithoutAnyMovement();
+        final boolean hasPlotToBeRepainted = aggressorsCoursePlot.hasPlotExceeded();
+        final boolean ableToAttack = aggressorsState.isAbleToAttack();
         if (!ableToAttack && (creatingCoursePlotNeeded || hasPlotToBeRepainted || cage.isActionHappened())) {
             // actor has no weapons
-            agentsCoursePlot.createEscapeCourse(target);
+            aggressorsCoursePlot.createEscapeCourse(cage.getDefender());
             return;
         }
         // the current plan is to reach the best attack distance and then create the course round by round
         if (creatingCoursePlotNeeded) {
             // plot the course to attack the target
-            agentsCoursePlot.createAggressiveCourse(target);
+            aggressorsCoursePlot.createAggressiveCourse();
+            defendersCoursePlot.createDefensiveCourse();
         } else if (hasPlotToBeRepainted) {
             // plot the next round's course for the upcoming round
-            agentsCoursePlot.createNextAggressiveCourseElement(target);
+            // fixme implement case "no course elements left" aggressorsCoursePlot.createNextAggressiveCourseElement(target);
         } else if (cage.isActionHappened()) {
             // plot the next round's course for the upcoming round
-            agentsCoursePlot.clearFutureCourseElements();
-            agentsCoursePlot.createNextAggressiveCourseElement(target);
+            /* fixme implement case "attack or retreat"
+             * aggressorsCoursePlot.clearFutureCourseElements();
+             * aggressorsCoursePlot.createNextAggressiveCourseElement(target);
+             */
         }
     }
 
@@ -108,7 +112,7 @@ public class CombatHandler {
         Preconditions.checkNotNull(agent, "agent shouldn't be null!");
 
         final FleetRoundState agentsState = cage.getCurrentStateByFleet(agent);
-        final CoursePlot coursePlot = agentsState.getCoursePlot();
+        final BezierCoursePlot coursePlot = agentsState.getCoursePlot();
         final CombatRound currentCombatRound = cage.getCurrentCombatRound();
         final CourseOrderElement courseElement = coursePlot.getCourseElement(currentCombatRound);
         if (courseElement == null) {
@@ -126,7 +130,9 @@ public class CombatHandler {
         }
         final Orbit interimDestination = courseElement.getPosition().clone();
         final Orbit destination = coursePlot.getDestination();
-        assert destination != null : "There should be a destination.";
+        if (destination == null) {
+            throw new NotifyWebUserException("There should be a destination at round '" + currentCombatRound + "'.");
+        }
         final EMovementType movementType = courseElement.getMovementType();
         new MovementAction(cage, agent, movementType, position, interimDestination, destination);
         agentsState.getPosition().moveTo(interimDestination);
@@ -264,23 +270,26 @@ public class CombatHandler {
         Preconditions.checkNotNull(target, "target shouldn't be null!");
 
         final FleetRoundState actorsState = cage.getCurrentStateByFleet(actor);
+        final FleetRoundState targetsState = cage.getCurrentStateByFleet(target);
+
         final Orbit actorPos = actorsState.getPosition();
         final Direction actorsDirection = actorsState.getDirection();
-        final Orbit targetPos = cage.getCurrentStateByFleet(target).getPosition();
+        final Orbit targetPos = targetsState.getPosition();
         final Distance distance = actorPos.getDistance(targetPos);
-        final Distance actorsMaximumMissileRange = actor.getMaximumWeaponRangePerType(EWeaponType.MISSILE);
+
         // todo real distance-to-chance-to-hit calculation
-        final boolean isInRange = distance.compareTo(actorsMaximumMissileRange) <= 0;
         final Set<EWeaponAlignment> applicableAlignments = EWeaponAlignment.getApplicableAlignments(actorPos, actorsDirection, targetPos);
-        final boolean isAlignedToFire = actorsState.hasWeaponsForAlignment(applicableAlignments, EWeaponType.MISSILE);
-        if (isInRange && isAlignedToFire) {
-            final boolean hasShotsLeft = actorsState.getFleetHealthState().hasShotsLeft(EWeaponType.MISSILE);
-            if (hasShotsLeft) {
-                cage.logMessage(actor.getOwner().getUsername() + " tries to fire missiles for " + applicableAlignments.stream().map(Enum::name).collect(Collectors.joining(", "))
-                        + " at range of " + distance);
-                cage.addToFlyingMissileSalvos(new MissileSalvo(cage, actor, target, applicableAlignments));
-                cage.setActionHappened(true);
-            }
+
+        final Set<Missile> applicableMissiles = actorsState.getApplicableMissiles(applicableAlignments).stream()
+                .filter(m -> distance.compareTo(m.getMaximumMissileRange(actorsState, targetsState)) <= 0)
+                .collect(Collectors.toSet());
+
+        final boolean hasShotsLeft = actorsState.getFleetHealthState().hasShotsLeft(EWeaponType.MISSILE);
+        if (!applicableMissiles.isEmpty() && hasShotsLeft) {
+            cage.logMessage(actor.getOwner().getUsername() + " tries to fire missiles for " + applicableAlignments.stream().map(Enum::name).collect(Collectors.joining(", "))
+                    + " at range of " + distance);
+            cage.addToFlyingMissileSalvos(new MissileSalvo(cage, actor, target, applicableAlignments, applicableMissiles));
+            cage.setActionHappened(true);
         }
     }
 

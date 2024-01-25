@@ -9,10 +9,7 @@ import de.yuga.spacebattle.rest.dto.turn.battle.combat.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Schema(description = ".")
@@ -44,27 +41,27 @@ public class BattleReport {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The movements which were done in this clash.")
-    private final Set<MovementAction> movementActions = new HashSet<>();
+    private final List<MovementAction> movementActions = new ArrayList<>();
 
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The hits against missile salvos.")
-    private final Set<CounterMissileHit> counterMissileHits = new HashSet<>();
+    private final List<CounterMissileHit> counterMissileHits = new ArrayList<>();
 
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "All loose off weapon action.")
-    private final Set<ReleasedVolley> releasedVolleys = new HashSet<>();
+    private final List<ReleasedVolley> releasedVolleys = new ArrayList<>();
 
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The missile movements during this combat.")
-    private final Set<MissileMovement> missileMovements = new HashSet<>();
+    private final List<MissileMovement> missileMovements = new ArrayList<>();
 
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "All hits of ship killer weapons during this combat.")
-    private final Set<ShipKillerHit> shipKillerHits = new HashSet<>();
+    private final List<ShipKillerHit> shipKillerHits = new ArrayList<>();
 
     public BattleReport() {
     }
@@ -78,7 +75,9 @@ public class BattleReport {
         this.participatingUsers.addAll(battleReport.getParticipatingUsers().stream().map(Player::new).collect(Collectors.toSet()));
         this.participatingFleets.addAll(battleReport.getParticipatingFleets().stream().map(f -> new Fleet(f, languageCode)).collect(Collectors.toList()));
         this.lossRole.addAll(battleReport.getLossRole().stream().map(l -> new LossRole(l, languageCode)).collect(Collectors.toList()));
-        this.movementActions.addAll(battleReport.getMovementActions().stream().map(m -> new MovementAction(m, languageCode, battleReport.getParticipatingFleets())).collect(Collectors.toList()));
+        this.movementActions.addAll(battleReport.getMovementActions().stream().map(m -> new MovementAction(m, languageCode, battleReport.getParticipatingFleets()))
+                .sorted(Comparator.comparingInt(o -> o.getCombatRoundKey().getCombatRound().getNo()))
+                .collect(Collectors.toList()));
         this.counterMissileHits.addAll(battleReport.getCounterMissileHits().stream().map(c -> new CounterMissileHit(c, languageCode)).collect(Collectors.toList()));
         this.releasedVolleys.addAll(battleReport.getReleasedVolleys().stream().map(r -> new ReleasedVolley(r, languageCode)).collect(Collectors.toList()));
         this.missileMovements.addAll(battleReport.getMissileMovements().stream().map(m -> new MissileMovement(m, languageCode)).collect(Collectors.toList()));

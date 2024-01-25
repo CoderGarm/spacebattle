@@ -4,8 +4,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.CombatAllowanceCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
-import de.yuga.spacebattle.backend.calculator.distance.Quadrant;
-import de.yuga.spacebattle.backend.calculator.resource.CoursePlot;
+import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
+import de.yuga.spacebattle.backend.calculator.resource.BezierCoursePlot;
 import de.yuga.spacebattle.backend.combat.BattleLogger;
 import de.yuga.spacebattle.backend.combat.dto.*;
 import de.yuga.spacebattle.backend.combat.main.handler.CombatHandler;
@@ -46,6 +46,7 @@ public class Cage implements Future<Cage> {
     /**
      * The current combat round.
      */
+    @Nonnull
     private final CombatRound currentCombatRound;
 
     /**
@@ -73,6 +74,24 @@ public class Cage implements Future<Cage> {
      */
     @Nonnull
     private final Fleet fleetTwo;
+
+    /**
+     * The intruder.
+     */
+    @Nonnull
+    private final Fleet aggressor;
+
+    /**
+     * Yeah, well, the defender...
+     */
+    @Nonnull
+    private final Fleet defender;
+
+    /**
+     * The destination of the aggressor. Currentlyn the only acceptable option for a fight.
+     */
+    @Nonnull
+    private final Planet target;
 
     /**
      * The involved fleets.
@@ -122,12 +141,16 @@ public class Cage implements Future<Cage> {
         }
 
         // todo guessing that there are only two participants which are foes
-        fleetOne = participatingFleets.get(0);
-        fleetTwo = participatingFleets.get(1);
+        this.fleetOne = participatingFleets.get(0);
+        this.fleetTwo = participatingFleets.get(1);
 
-        currentCombatRound = new CombatRound();
+        this.target = Objects.requireNonNull(fleetClash.getOrbit().getPlanet());
+        this.aggressor = fleetOne.isInPlanetaryOrbit() && Objects.equals(Objects.requireNonNull(fleetOne.getOrbit()).getPlanet(), target) ? fleetOne : fleetTwo;
+        this.defender = fleetOne.equals(this.aggressor) ? fleetTwo : fleetOne;
+
+        this.currentCombatRound = new CombatRound();
         initiateCombat();
-        combatHandler = new CombatHandler(this);
+        this.combatHandler = new CombatHandler(this);
     }
 
     @Override
@@ -168,11 +191,11 @@ public class Cage implements Future<Cage> {
             final CombatRound nextRound = currentCombatRound.clone();
             nextRound.next();
             final boolean nextRoundNotPresent = currentRoundStates.stream().anyMatch(roundState -> {
-                final CoursePlot coursePlot = roundState.getCoursePlot();
+                final BezierCoursePlot coursePlot = roundState.getCoursePlot();
                 return !coursePlot.isFreshPlotWithoutAnyMovement() && coursePlot.hasPlotExceeded();
             });
             if (nextRoundNotPresent) {
-                battleLogger.logMessage("\nbattle proudly presents by counting stuff\n");
+                battleLogger.logMessagePlain("\nbattle proudly presents by counting stuff\n");
                 return true;
             }
         }
@@ -303,18 +326,19 @@ public class Cage implements Future<Cage> {
     }
 
     /**
-     * Creates the first combat round for all participating fleet.<br>
-     * Places the participating fleets in opposite corners of the cage.
+     * Creates the first combat round for all participating fleet.
      */
     private void initiateCombat() {
-        final BigDecimal initialCageDiameter = getInitialCageDiameter();
-        final BigDecimal initialCageRadius = initialCageDiameter.divide(BigDecimal.valueOf(2), DistanceCalculator.MC_HU);
-        battleLogger.logMessagePlain("Initial cage radius: " + initialCageRadius + " LS");
-        final Orbit fleetOneStartingOrbit = DistanceCalculator.createByRadiusAndQuadrant(new Distance(initialCageRadius, LS), Quadrant.Q1, Planet.PLANET_STANDARD_METRIC);
-        final Orbit fleetTwoStartingOrbit = DistanceCalculator.createByRadiusAndQuadrant(new Distance(initialCageRadius, LS), Quadrant.Q3, Planet.PLANET_STANDARD_METRIC);
+        final Orbit positionOnHyperlimit = NavigationCalculator.getPositionOnHyperlimit(Objects.requireNonNull(aggressor.getOrbit()));
+        final Orbit defendersPos = Objects.requireNonNull(defender.getOrbit()).getInterplanetaryResultingOrbit();
+        Preconditions.checkNotNull(positionOnHyperlimit, "aggressorsPos must not be empty");
+        Preconditions.checkNotNull(defendersPos, "defendersPos must not be empty");
 
-        roundStates.add(new FleetRoundState(this, fleetOne, fleetOneStartingOrbit));
-        roundStates.add(new FleetRoundState(this, fleetTwo, fleetTwoStartingOrbit));
+        final BigDecimal initialCageRadius = positionOnHyperlimit.getDistance(defendersPos).getCoordinateInMetric(LS);
+        battleLogger.logMessagePlain("Initial cage radius: " + initialCageRadius + " LS");
+
+        roundStates.add(new FleetRoundState(this, aggressor, positionOnHyperlimit));
+        roundStates.add(new FleetRoundState(this, defender, defendersPos));
     }
 
     /**
@@ -338,22 +362,6 @@ public class Cage implements Future<Cage> {
 
     public void setActionHappened(final boolean actionHappened) {
         this.actionHappened = actionHappened;
-    }
-
-    /**
-     * Returns the initial diameter of the cage.
-     *
-     * @return the diameter
-     */
-    @Nonnull
-    private BigDecimal getInitialCageDiameter() {
-        final Distance f1 = fleetOne.getMaximumWeaponRange();
-        final Distance f2 = fleetTwo.getMaximumWeaponRange();
-
-        final Distance max = f1.max(f2);
-        battleLogger.logMessagePlain("Weapon range: " + max.getCoordinateInMetric(LS) + " LS");
-        final BigDecimal coordinateInMetric = max.getCoordinateInMetric(Planet.PLANET_STANDARD_METRIC);
-        return coordinateInMetric.multiply(INITIAL_CAGE_DIAMETER_MULTIPLIER, DistanceCalculator.MC_HU);
     }
 
     /**
@@ -441,6 +449,21 @@ public class Cage implements Future<Cage> {
     @Nonnull
     public Fleet getFleetTwo() {
         return fleetTwo;
+    }
+
+    @Nonnull
+    public Fleet getAggressor() {
+        return aggressor;
+    }
+
+    @Nonnull
+    public Fleet getDefender() {
+        return defender;
+    }
+
+    @Nonnull
+    public Planet getTarget() {
+        return target;
     }
 
     @Nonnull

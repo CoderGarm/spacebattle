@@ -1,11 +1,9 @@
 package de.yuga.spacebattle.backend.entities.spacecrafts.ammunition;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.combat.round.CombatRound;
-import de.yuga.spacebattle.backend.dto.physics.Acceleration;
-import de.yuga.spacebattle.backend.dto.physics.Distance;
-import de.yuga.spacebattle.backend.dto.physics.Time;
-import de.yuga.spacebattle.backend.dto.physics.Velocity;
+import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
+import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
+import de.yuga.spacebattle.backend.dto.physics.*;
 import de.yuga.spacebattle.backend.entities.misc.HasCostsByOwn;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.basics.NamedTechLevel;
 import de.yuga.spacebattle.backend.enums.EShipClassType;
@@ -18,6 +16,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 
 @NamedQueries({
         @NamedQuery(name = "Missile.getAll", query = "SELECT a FROM Missile a"),
@@ -116,15 +115,39 @@ public class Missile extends HasCostsByOwn {
         return maxRange;
     }
 
-    /**
-     * Returns the range which can be covered by this missile in a combat round.
-     *
-     * @return the distance which will be covered under drive, in meter
-     */
     @Nonnull
-    public Distance getRangePerCombatRound() {
-        final int endurance = CombatRound.COMBAT_ROUND_DURATION;
+    public Distance getRangeOverEndurance(@Nonnull final Velocity initialVelocity, final int endurance) {
+        Preconditions.checkNotNull(initialVelocity, "initialVelocity must not be empty");
+
         final Acceleration acceleration = missileMotor.getAcceleration();
-        return acceleration.getDistanceByTime(new Time(endurance, ETimeMetric.SECOND), Velocity.ZERO, EDistanceMetric.LS);
+        return acceleration.getDistanceByTime(new Time(endurance, ETimeMetric.SECOND), initialVelocity, EDistanceMetric.LS);
+    }
+
+    @Nonnull
+    public Distance getMaximumMissileRange(@Nonnull final FleetRoundState actorsState, @Nonnull final FleetRoundState targetsState) {
+        Preconditions.checkNotNull(actorsState, "actorsState must not be empty");
+        Preconditions.checkNotNull(targetsState, "targetsState must not be empty");
+
+        final Direction actorsDirection = actorsState.getDirection();
+        final Direction targetsDirection = targetsState.getDirection();
+        final double angleBetween = actorsDirection.getAngleBetween(targetsDirection); // todo unbedingt abtesten
+        final double cos = Math.cos(Math.toRadians(angleBetween));
+
+        final Velocity velocity = actorsState.getVelocity();
+        final BigDecimal c = velocity.getValue();
+        final BigDecimal b = targetsState.getVelocity().getCoordinateInMetric(velocity.getDistanceMetric(), velocity.getTimeMetric());
+
+        // KOSINUSSATZ
+        final BigDecimal vectorVelocity = b.pow(2).add(c.pow(2)).subtract(BigDecimal.valueOf(2).multiply(b).multiply(c).multiply(BigDecimal.valueOf(cos))).sqrt(DistanceCalculator.MC_HU);
+        final BigDecimal combinedFleetsVelocity = new Velocity(vectorVelocity, velocity.getDistanceMetric(), velocity.getTimeMetric()).getCoordinateInMetric(EDistanceMetric.KM, ETimeMetric.SECOND);
+
+
+        final int endurance = missileMotor.getEndurance();
+        final Distance distanceByFleetsMovement = new Distance(combinedFleetsVelocity.multiply(BigDecimal.valueOf(endurance)), EDistanceMetric.KM);
+
+        final Distance missileRange = getMaximumMissileRange();
+        System.out.println("MISSILE RANGE CALC: combined fleet velocity '" + combinedFleetsVelocity + "' KM/S on angle '" + angleBetween + "' added '" + distanceByFleetsMovement + "' to missile range of '" + missileRange + "'.");
+
+        return distanceByFleetsMovement.add(missileRange);
     }
 }

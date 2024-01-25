@@ -1,9 +1,7 @@
 package de.yuga.spacebattle.backend.entities.turn.battle.combat;
 
-import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
 import de.yuga.spacebattle.backend.converter.UUIDConverter;
-import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 
@@ -91,9 +89,7 @@ public class MissileMovement extends CombatRoundKey {
         this.lastPosition = volley.getLastPosition().clone();
         this.missileAmount = volley.getMissileSalvoHealthState().getCurrentAmountByType().values().stream().mapToInt(Integer::intValue).sum();
         this.targetPosition = volley.getTargetPosition().clone();
-        final Distance currentDistance = targetPosition.getDistance(position);
-        final Distance rangePerCombatRound = volley.getRangePerCombatRound();
-        this.roundsToTravel = DistanceCalculator.getCombatRoundsToTravel(currentDistance, rangePerCombatRound);
+        this.roundsToTravel = volley.roundsTravelled();
     }
 
     @Nonnull

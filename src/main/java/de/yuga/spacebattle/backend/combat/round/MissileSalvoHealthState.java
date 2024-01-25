@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.combat.round;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.dto.Historizable;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.enums.ECombatPhase.ECombatSubPhase;
 
@@ -82,16 +83,15 @@ public class MissileSalvoHealthState extends Historizable<MissileSalvoHealthStat
         return damageProjectionRanges.get(damageProjectionRanges.size() - 1);
     }
 
-    /**
-     * This calculates and sets the range per round.<br>
-     * Could be useful if the salvo is reduced to the slower missile types.
-     */
-    public Distance getRangePerCombatRound() {
+    @Nonnull
+    public Distance getRangePerCombatRound(@Nonnull final Velocity initialVelocity, final int endurance) {
+        Preconditions.checkNotNull(initialVelocity, "initialVelocity must not be empty");
+
         if (!isActive()) {
             return Distance.ZERO;
         }
         final List<Distance> rangesPerCombatRoundAsc = currentAmountByType.keySet().stream()
-                .map(Missile::getRangePerCombatRound)
+                .map(m -> m.getRangeOverEndurance(initialVelocity, endurance))
                 .sorted()
                 .collect(Collectors.toList());
         return rangesPerCombatRoundAsc.get(0);

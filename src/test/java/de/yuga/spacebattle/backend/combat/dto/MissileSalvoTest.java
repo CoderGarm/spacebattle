@@ -38,7 +38,7 @@ class MissileSalvoTest {
         final Cage cage = cage();
         final Fleet actor = cage.getParticipatingFleets().get(0);
         target = cage.getParticipatingFleets().get(1);
-        testObject = new MissileSalvo(cage, actor, target, Set.of(EWeaponAlignment.BROADSIDE, EWeaponAlignment.BOW, EWeaponAlignment.STERN));
+        testObject = new MissileSalvo(cage, actor, target, Set.of(EWeaponAlignment.BROADSIDE, EWeaponAlignment.BOW, EWeaponAlignment.STERN), Set.of());
     }
 
     @Test

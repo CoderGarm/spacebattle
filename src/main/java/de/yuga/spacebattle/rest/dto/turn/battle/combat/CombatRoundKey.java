@@ -1,5 +1,6 @@
 package de.yuga.spacebattle.rest.dto.turn.battle.combat;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -10,6 +11,7 @@ import javax.annotation.Nullable;
 @Schema(description = ".")
 public class CombatRoundKey {
 
+    @JsonProperty
     @Schema(required = true, description = "The id of the parent.")
     private int id;
 
@@ -17,7 +19,8 @@ public class CombatRoundKey {
      * The current combat round.<br>
      * A volley of direct weapons will hit in the same weapon.
      */
-    @Nullable
+    @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The combat round in which this action happens.")
     private CombatRound combatRound;
 
@@ -25,6 +28,7 @@ public class CombatRoundKey {
      * The current phase.
      */
     @Nullable
+    @JsonProperty
     @Schema(required = true, description = "The combat phase in which this action happens.")
     private ECombatPhase.ECombatSubPhase combatPhase;
 
@@ -43,29 +47,8 @@ public class CombatRoundKey {
     public CombatRoundKey() {
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(final int id) {
-        this.id = id;
-    }
-
-    @Nullable
+    @Nonnull
     public CombatRound getCombatRound() {
         return combatRound;
-    }
-
-    @Nullable
-    public ECombatPhase.ECombatSubPhase getCombatPhase() {
-        return combatPhase;
-    }
-
-    public void setCombatRound(@Nullable final CombatRound combatRound) {
-        this.combatRound = combatRound;
-    }
-
-    public void setCombatPhase(@Nullable final ECombatPhase.ECombatSubPhase combatPhase) {
-        this.combatPhase = combatPhase;
     }
 }

@@ -160,6 +160,7 @@ public class Direction implements Cloneable {
     public double getAngleBetween(@Nonnull final Direction that) {
         Preconditions.checkNotNull(that, "that shouldn't be null!");
 
+        // fixme unittest schreiben
         if (isNullDirection() || that.isNullDirection()) {
             // if one or both are "not defined" they have no clear choice, it is handled always as wildcard
             return Double.NEGATIVE_INFINITY;
@@ -191,6 +192,7 @@ public class Direction implements Cloneable {
         Preconditions.checkNotNull(originsDirection, "originsDirection must not be empty");
         Preconditions.checkNotNull(pointToLookAt, "pointToLookAt must not be empty");
 
+        // fixme unittest schreiben
         final double x1 = origin.getXCoordinate().getCoordinate().doubleValue();
         final double x2 = pointToLookAt.getXCoordinate().getCoordinateInMetric(origin.getXCoordinate().getDistanceMetric()).doubleValue();
         final double y1 = origin.getYCoordinate().getCoordinate().doubleValue();

@@ -37,17 +37,35 @@ article orbital modules
     - check: Raketen fliegen bis zum ende - keine unfairen "zu null siege" mehr
     - todo: ship movement
 
+ship movement:
+
+1. wer hat die initiaitve?
+2. initiative legt ziel fest, bestimmt kurs
+3. vert legt kurs fest
+4. warten
+
+abfangkurs bestimmen:
+
+1. eindringling legt kurs fest
+2. verteidiger bestimmt abfangkurs
+
+
 - endpoint für "streamlined battle reports" -> trajektorienbasierte kampfbeschreibung für unity
 
 #### Diverses
 
+1. There is an outline at the star map where all own systems and fleets are listed.  
+   You can select one system and/or multiple fleets and use the "zoom to" button to cycle through them.
+
 #### next steps
 
-todo. carrier menu planetengebäude und mining factors
-todo. plani menu anzeiigen ob SY oder CY job möglich
 todo. flotten auf karte als shortcut-icon rechts am rand darstellen
 todo. eigene systeme auf karte als shortcut-icon rechts am rand darstellen?
-todo. flottenenmove: zielplani direkt festlegen
+
+todo. forfeitable construction punkte in DB merken zwecks schnellerem dashboard
+todo. carrier menu planetengebäude und mining factors
+todo. plani menu anzeiigen ob SY oder CY job möglich
+todo. flottenenmove auf map: zielplani direkt festlegen
 todo. acc registering -> user direkt anmelden
 
 season 3:

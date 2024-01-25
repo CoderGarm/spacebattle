@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.calculator.resource;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.geometry.CubicBezier;
 import de.yuga.spacebattle.backend.combat.dto.*;
 import de.yuga.spacebattle.backend.combat.enums.EDamageImpact;
 import de.yuga.spacebattle.backend.combat.enums.EMovementMotivation;
@@ -10,12 +11,14 @@ import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.FleetHealthState;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
-import de.yuga.spacebattle.backend.dto.physics.*;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
+import de.yuga.spacebattle.backend.dto.physics.Direction;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
-import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -31,7 +34,7 @@ import static de.yuga.spacebattle.backend.combat.enums.EMovementType.*;
 import static de.yuga.spacebattle.backend.combat.round.CombatRound.COMBAT_ROUND;
 import static de.yuga.spacebattle.backend.enums.EWeaponAlignment.BROADSIDE;
 
-public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
+public class BezierCoursePlot extends Historizable<BezierCoursePlot> implements Cloneable {
 
     @Nonnull
     private final Cage cage;
@@ -69,9 +72,9 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
     @Nonnull
     private final Map<Fleet, FleetDamageProjectionPerRange> fleetDamages = new HashMap<>();
 
-    public CoursePlot(@Nonnull final Cage cage,
-                      @Nonnull final Fleet agent,
-                      @Nonnull final Orbit position) {
+    public BezierCoursePlot(@Nonnull final Cage cage,
+                            @Nonnull final Fleet agent,
+                            @Nonnull final Orbit position) {
         Preconditions.checkNotNull(cage, "cage shouldn't be null!");
         Preconditions.checkNotNull(agent, "agent shouldn't be null!");
         Preconditions.checkNotNull(position, "position shouldn't be null!");
@@ -84,9 +87,11 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         this.origin = position.clone();
     }
 
-    private void setInformationForCreatingPlot(@Nonnull final Fleet target,
+    private void setInformationForCreatingPlot(@Nonnull final Orbit agentsOrigin,
+                                               @Nonnull final Fleet target,
                                                @Nonnull final Orbit destination,
                                                @Nonnull final EMovementMotivation movementMotivation) {
+        Preconditions.checkNotNull(agentsOrigin, "agentsOrigin must not be empty");
         Preconditions.checkNotNull(target, "target shouldn't be null!");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
         Preconditions.checkNotNull(movementMotivation, "movementMotivation shouldn't be null!");
@@ -94,14 +99,16 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         this.target = target;
         this.agentsVelocity = getCurrentVelocity();
         this.agentsDirection = getCurrentDirection();
-        this.origin = cage.getCurrentStateByFleet(agent).getPosition().clone();
+        this.origin = agentsOrigin;
         this.destination = destination;
-        this.courseDirection = new Direction(origin, destination);
+        this.courseDirection = new Direction(agentsOrigin, destination);
         this.movementMotivation = movementMotivation;
     }
 
     public void createEscapeCourse(@Nonnull final Fleet target) {
         Preconditions.checkNotNull(target, "target shouldn't be null!");
+
+        // fixme check if fleet is fast enough to escape sub-light and check if can enter hyperspace
 
         this.target = target;
         final FleetRoundState agentsState = cage.getCurrentStateByFleet(agent);
@@ -129,6 +136,7 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
 
         // flee for 50 rounds
         setCourseOrderElements(agentsPosition, destination, INCREASE_DISTANCE, velocity, acceleration, COMBAT_ROUND.multiply(50).getCoordinate());
+        // fixme enter hyperspace
     }
 
     public void createNextAggressiveCourseElement(@Nonnull final Fleet target) {
@@ -184,77 +192,107 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         addCourseOrder(cc, movementType, resultingVelocity, destination);
     }
 
-    public void createAggressiveCourse(@Nonnull final Fleet target) {
-        Preconditions.checkNotNull(target, "target shouldn't be null!");
+    public void createAggressiveCourse() {
+        final Orbit origin = cage.getCurrentStateByFleet(cage.getAggressor()).getPosition();
 
-        final Orbit destinationForBestDamage = getDestinationForBestDamageAtFirstApproach(target);
-        if (destinationForBestDamage == null) {
-            throw new NotifyWebUserException("Please make sure that you have any weapon to approach your enemy.");
-        }
+        final long originX = origin.getXCoordinate().getCoordinateInMetric(EDistanceMetric.KM).longValue();
+        final long originY = origin.getYCoordinate().getCoordinateInMetric(EDistanceMetric.KM).longValue();
 
-        setInformationForCreatingPlot(target, destinationForBestDamage, EMovementMotivation.INITIATE_COMBAT);
-        Preconditions.checkState(this.target != null, "target shouldn't be null!");
-        Preconditions.checkState(this.destination != null, "destination shouldn't be null!");
+        final Orbit destination = cage.getTarget().getOrbit();
+        final long destinationX = destination.getXCoordinate().getCoordinateInMetric(EDistanceMetric.KM).longValue();
+        final long destinationY = destination.getYCoordinate().getCoordinateInMetric(EDistanceMetric.KM).longValue();
 
-        // Stage 1: preparation
-        final EDistanceMetric distanceMetric = EDistanceMetric.M;
-        final ETimeMetric timeMetric = ETimeMetric.SECOND;
         final Distance distance = origin.getDistance(destination);
-        final FleetRoundState currentStateByFleet = cage.getCurrentStateByFleet(agent);
-        final Acceleration acceleration = currentStateByFleet.getAccelerationFor(EModuleType.PROPULSION);
-        final BigDecimal vesselTopSpeed = currentStateByFleet.getMaxSubLightVelocity().getCoordinateInMetric(distanceMetric, timeMetric);
+        final Velocity maxVelocity = cage.getCurrentStateByFleet(cage.getAggressor()).getMaxSubLightVelocity();
+        // fixme bestimme kontrollpunkt aus den impellerantrieben and der system geometrie
+        final long vKMperMin = maxVelocity.getInMetricWithScale(EDistanceMetric.M, ETimeMetric.SECOND).getValue().longValue();
 
-        // calculate acceleration to top speed
-        final BigDecimal accelerationValue = acceleration.convertToMetric(EAccelerationMetric.MS2);
-        final BigDecimal timeToTopSpeed = vesselTopSpeed.divide(accelerationValue, MC_HU);
+        setInformationForCreatingPlot(origin, cage.getDefender(), destination, EMovementMotivation.INITIATE_COMBAT);
+        /*
+         * https://gamedev.stackexchange.com/a/197381
+         * c0 = p0
+         * c1 = p0 + v0 * duration / 3.0f
+         * c2 = p1 - v1 * duration / 3.0f
+         * c3 = p1
+         */
 
-        // Stage 2: calculate time to halfway distance
-        final BigDecimal halfwayDistanceInMetric = distance.getCoordinateInMetric(distanceMetric).divide(BigDecimal.valueOf(2), MC_HU);
-        final BigDecimal timeToHalfwaySquared = halfwayDistanceInMetric.divide(new BigDecimal("0.5").multiply(accelerationValue), MC_HU);
-        final BigDecimal timeToHalfwayDistance = timeToHalfwaySquared.sqrt(MC_HU);
+        final double[] c0 = {originX, originY};
+        final double[] c1 = {originX + vKMperMin, originY + vKMperMin};
+        final double[] c2 = {destinationX - vKMperMin, destinationY - vKMperMin};
+        final double[] c3 = {destinationX, destinationY};
+        final CubicBezier bezier = new CubicBezier(new double[][]{c0, c1, c2, c3});
+        double length = bezier.getLength();
 
-        final BigDecimal speedAtHalfway;
-        final boolean isTravellingWithConstantVelocityNecessary = timeToHalfwayDistance.compareTo(timeToTopSpeed) > 0;
-        if (isTravellingWithConstantVelocityNecessary) {
-            // timeToHalfwayDistance > timeToTopSpeed - by avoiding speed of light issues
-            // accelerate only to top speed time and travel
-            final Distance distanceToTopSpeed = acceleration.getDistanceByTime(new Time(timeToTopSpeed, timeMetric), agentsVelocity, distanceMetric);
-            final Distance halfway = new Distance(halfwayDistanceInMetric, distanceMetric);
-            final Distance distanceToTravelWithTopSpeed = halfway.subtract(distanceToTopSpeed);
-            // Stage 2.1 calc time to travel at top speed
-            final BigDecimal travelTimeAtTopSpeed = distanceToTravelWithTopSpeed.getCoordinateInMetric(distanceMetric).divide(vesselTopSpeed, MC_HU);
+        final CombatRound combatRound = cage.getCurrentCombatRound().clone();
+        for (double i = 0; i <= 1; ) {
+            double j = i + 0.01;
 
-            setCourseOrderElements(origin, destination, REDUCE_DISTANCE, agentsVelocity, acceleration, timeToTopSpeed);
-            final CourseOrderElement latestCourseElement = getLatestCourseElement();
-            if (latestCourseElement == null) {
-                throw new NotifyWebUserException("The time to top speed seems to be zero");
-            }
-            final Velocity velocity = latestCourseElement.getVelocity();
-            final Orbit position = latestCourseElement.getPosition();
-            setCourseOrderElements(position, destination, REDUCE_DISTANCE, velocity, Acceleration.ZERO, travelTimeAtTopSpeed);
+            final double[] start = bezier.getPointAtLength(length * j);
+            final double[] end = bezier.getPointAtLength(length * j);
 
-            speedAtHalfway = vesselTopSpeed;
-        } else {
-            // effective case: timeToHalfwayDistance <= timeToTopSpeed
-            // accelerate only to half distance time
-            speedAtHalfway = accelerationValue.multiply(timeToHalfwayDistance, MC_HU);
-            setCourseOrderElements(origin, destination, REDUCE_DISTANCE, agentsVelocity, acceleration, timeToHalfwayDistance);
+            addCourseOrder(
+                    combatRound.clone(),
+                    REDUCE_DISTANCE,
+                    maxVelocity.multiply(0.05).clone(),
+                    new Orbit(end[0], end[1], EDistanceMetric.KM)
+            );
+
+            i = j;
+            combatRound.next();
         }
-
-        // Stage 3: Slow down to targeted speed
-        final BigDecimal targetedVesselEndSpeed = BigDecimal.ZERO;
-        final BigDecimal speedToSlowDownFrom = speedAtHalfway.compareTo(targetedVesselEndSpeed) > 0 ? speedAtHalfway.subtract(targetedVesselEndSpeed) : speedAtHalfway;
-        // t = v / a
-        final BigDecimal timeToSlowDown = speedToSlowDownFrom.divide(accelerationValue, MC_HU);
-
-        final CourseOrderElement latestCourseElement = getLatestCourseElement();
-        if (latestCourseElement == null) {
-            throw new NotifyWebUserException("The time to top speed seems to be zero");
-        }
-        final Velocity velocity = latestCourseElement.getVelocity();
-        final Orbit position = latestCourseElement.getPosition();
-        setCourseOrderElements(position, destination, REDUCE_DISTANCE, velocity, acceleration, timeToSlowDown);
     }
+
+
+    public void createDefensiveCourse() {
+
+        final Orbit origin = cage.getTarget().getOrbit();
+        final long originX = origin.getXCoordinate().getCoordinateInMetric(EDistanceMetric.KM).longValue();
+        final long originY = origin.getYCoordinate().getCoordinateInMetric(EDistanceMetric.KM).longValue();
+
+        final Orbit destination = cage.getCurrentStateByFleet(cage.getAggressor()).getPosition();
+        final long destinationX = destination.getXCoordinate().getCoordinateInMetric(EDistanceMetric.KM).longValue();
+        final long destinationY = destination.getYCoordinate().getCoordinateInMetric(EDistanceMetric.KM).longValue();
+
+        final Distance distance = destination.getDistance(origin);
+        final Velocity maxVelocity = cage.getCurrentStateByFleet(cage.getAggressor()).getMaxSubLightVelocity();
+        // fixme bestimme kontrollpunkt aus den impellerantrieben and der system geometrie
+        final long vKMperMin = maxVelocity.getInMetricWithScale(EDistanceMetric.M, ETimeMetric.SECOND).getValue().longValue();
+
+        setInformationForCreatingPlot(origin, cage.getAggressor(), destination, EMovementMotivation.INITIATE_COMBAT);
+        /*
+         * https://gamedev.stackexchange.com/a/197381
+         * c0 = p0
+         * c1 = p0 + v0 * duration / 3.0f
+         * c2 = p1 - v1 * duration / 3.0f
+         * c3 = p1
+         */
+
+        final double[] c0 = {originX, originY};
+        final double[] c1 = {originX + vKMperMin, originY + vKMperMin};
+        final double[] c2 = {destinationX - vKMperMin, destinationY - vKMperMin};
+        final double[] c3 = {destinationX, destinationY};
+        final CubicBezier bezier = new CubicBezier(new double[][]{c0, c1, c2, c3});
+        double length = bezier.getLength();
+
+        final CombatRound combatRound = cage.getCurrentCombatRound().clone();
+        for (double i = 0; i <= 1; ) {
+            double j = i + 0.01;
+
+            final double[] start = bezier.getPointAtLength(length * j);
+            final double[] end = bezier.getPointAtLength(length * j);
+
+            addCourseOrder(
+                    combatRound.clone(),
+                    REDUCE_DISTANCE,
+                    maxVelocity.multiply(0.05).clone(),
+                    new Orbit(end[0], end[1], EDistanceMetric.KM)
+            );
+
+            i = j;
+            combatRound.next();
+        }
+    }
+
 
     /**
      * Returns the position where the agent is onto a course towards the target and has the best range for damage projection.
@@ -645,8 +683,8 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
     }
 
     @Override
-    public CoursePlot clone() {
-        final CoursePlot clone = (CoursePlot) super.clone();
+    public BezierCoursePlot clone() {
+        final BezierCoursePlot clone = (BezierCoursePlot) super.clone();
         clone.startingRound = startingRound.clone();
         clone.agentsVelocity = agentsVelocity.clone();
         clone.agentsDirection = agentsDirection.clone();

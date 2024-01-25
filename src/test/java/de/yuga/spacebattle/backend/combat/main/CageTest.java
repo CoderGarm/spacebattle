@@ -172,7 +172,7 @@ class CageTest extends BaseTestCase {
         final MovementAction movementAction = new MovementAction(testObject, fleet, EMovementType.HOLD_DISTANCE, orbit, orbit, orbit);
         final UUID uuidMA = UUID.fromString(movementAction.getUuid().toString());
 
-        final MissileSalvo missileSalvo = new MissileSalvo(testObject, fleet, fleet, Set.of(EWeaponAlignment.BROADSIDE, EWeaponAlignment.BOW, EWeaponAlignment.STERN));
+        final MissileSalvo missileSalvo = new MissileSalvo(testObject, fleet, fleet, Set.of(EWeaponAlignment.BROADSIDE, EWeaponAlignment.BOW, EWeaponAlignment.STERN), Set.of());
         final UUID uuidMS = UUID.fromString(missileSalvo.getUuid().toString());
 
         final BeamVolley beamVolley = new BeamVolley(testObject, fleet, fleet);

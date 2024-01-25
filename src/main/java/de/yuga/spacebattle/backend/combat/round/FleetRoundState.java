@@ -1,8 +1,8 @@
 package de.yuga.spacebattle.backend.combat.round;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.resource.BezierCoursePlot;
 import de.yuga.spacebattle.backend.calculator.resource.CourseOrderElement;
-import de.yuga.spacebattle.backend.calculator.resource.CoursePlot;
 import de.yuga.spacebattle.backend.combat.dto.CounterMissileWeaponry;
 import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.combat.dto.Historizable;
@@ -15,8 +15,10 @@ import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.ElectronicWarfare;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Propulsion;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.ETechnologyType;
@@ -90,7 +92,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
     private EMovementType movementType;
 
     @Nonnull
-    private CoursePlot coursePlot;
+    private BezierCoursePlot coursePlot;
 
     public FleetRoundState(@Nonnull final Cage cage,
                            @Nonnull final Fleet fleet,
@@ -104,7 +106,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         this.fleet = fleet;
         this.position = position.clone();
         this.fleetHealthState = new FleetHealthState(cage, fleet);
-        this.coursePlot = new CoursePlot(cage, fleet, position);
+        this.coursePlot = new BezierCoursePlot(cage, fleet, position);
         this.velocity = coursePlot.getAgentsVelocity();
         this.direction = coursePlot.getCurrentDirection();
         historize();
@@ -169,7 +171,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
     }
 
     @Nonnull
-    public CoursePlot getCoursePlot() {
+    public BezierCoursePlot getCoursePlot() {
         return coursePlot;
     }
 
@@ -177,10 +179,6 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         Preconditions.checkNotNull(movementType, "movementType shouldn't be null!");
 
         this.movementType = movementType;
-    }
-
-    public void setPosition(@Nonnull final Orbit position) {
-        this.position = position;
     }
 
     @Nonnull
@@ -462,22 +460,49 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
     }
 
     @Nonnull
-    public Velocity getMaxVelocity(@Nonnull final EModuleType propulsion) {
-        Preconditions.checkNotNull(propulsion, "propulsion shouldn't be null!");
-        Preconditions.checkArgument(propulsion == EModuleType.PROPULSION || propulsion == EModuleType.FTLPROPULSION, "propulsion must be propulsion type!");
-
+    public Velocity getMaxSubLightVelocity() {
         final ETechnologyType restrictingTechnologyType = getFightingWarShips()
                 .map(WarshipHealthState::getPropulsion)
                 .map(Propulsion::getTechnologyType)
                 .reduce((o1, o2) -> o1.getMaxVelocitySOL() < o2.getMaxVelocitySOL() ? o1 : o2)
                 .orElse(ETechnologyType.CIVIL);
 
-        final EHyperBand hyperBand = getLowestHyperBand();
-        final BigDecimal vesselTopSpeed = hyperBand.getEffectiveTopSpeed(restrictingTechnologyType);
+        final BigDecimal vesselTopSpeed = EHyperBand.NONE.getEffectiveTopSpeed(restrictingTechnologyType);
         return new Velocity(vesselTopSpeed, EDistanceMetric.M, ETimeMetric.SECOND);
     }
 
     public boolean isAbleToAttack() {
         return hasOffensiveWeaponry();
+    }
+
+
+    @Nonnull
+    public Set<Missile> getApplicableMissiles(@Nonnull final Set<EWeaponAlignment> applicableAlignments) {
+        Preconditions.checkNotNull(applicableAlignments, "applicableAlignments must not be empty");
+
+        return getFightingWarShips()
+                .filter(WarshipHealthState::isFightingCapable)
+                .flatMap(w -> w.getFittings().entrySet().stream()
+                        // filter active fittings
+                        .filter(Map.Entry::getValue)
+                        .map(Map.Entry::getKey)
+                        .filter(a -> a.getWeaponType() == EWeaponType.MISSILE)
+                        .filter(a -> a.getLauncher() != null)
+                        .filter(f -> applicableAlignments.contains(f.getWeaponAlignment()))
+                        .map(alignedFitting -> {
+                            final Launcher launcher = alignedFitting.getLauncher();
+                            final Set<Missile> allowedMissiles = launcher.getAllowedMissiles();
+                            final HashSet<Missile> result = new HashSet<>(allowedMissiles);
+                            for (final Missile allowedMissile : allowedMissiles) {
+                                final MissileAmmunitionState missileAmmunitionState = w.getMissileAmmunitionState();
+                                final int remainingShots = missileAmmunitionState.getRemainingShots(allowedMissile);
+                                if (remainingShots <= 0) {
+                                    result.remove(allowedMissile);
+                                }
+                            }
+                            return result;
+                        }))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
     }
 }

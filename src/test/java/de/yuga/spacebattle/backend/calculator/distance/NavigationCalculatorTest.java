@@ -46,10 +46,11 @@ class NavigationCalculatorTest {
         }
     }
 
+    // todo remove orekit incl resource files when not useful
 
     @Test
     void thrustManeuvers() {
-        final double mu = 1;// fixme set up gravitational attraction CelestialBodyFactory.getEarth().getGM();
+        final double mu = 1;// todo set up gravitational attraction CelestialBodyFactory.getEarth().getGM();
 
         final double initialX = 7100e3;
         final double initialY = 0.0;
