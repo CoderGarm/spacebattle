@@ -53,7 +53,7 @@ public class TestDataProviderUtils {
         final FleetOrbit fo = new FleetOrbit(pl.getOrbit(), pl.getSystem());
         final Map.Entry<FleetOrbit, List<Fleet>> e = Map.entry(fo, List.of(minimalFleet(), minimalFleet()));
         final FleetClash fleetClash = new FleetClash(e);
-        return new Cage(fleetClash, new BattleLogger("true"));
+        return new Cage(fleetClash, new BattleLogger("true", "nichtLocalhost"));
     }
 
     @Nonnull

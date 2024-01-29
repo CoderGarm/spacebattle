@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.combat;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
+import de.yuga.spacebattle.backend.calculator.geometry.CubicBezier;
 import de.yuga.spacebattle.backend.combat.dto.*;
 import de.yuga.spacebattle.backend.combat.enums.EDamageResult;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
@@ -10,7 +11,9 @@ import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.combat.round.MissileSalvoHealthState;
 import de.yuga.spacebattle.backend.combat.round.WarshipHealthState;
+import de.yuga.spacebattle.backend.devtools.XYSplineChart;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.i18n.Translation;
@@ -25,6 +28,7 @@ import de.yuga.spacebattle.backend.enums.EHitArea;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.apache.commons.lang3.StringUtils;
+import org.jfree.chart.ui.UIUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,11 +62,70 @@ public class BattleLogger {
     @Nullable
     private CombatRound combatRound;
 
+    @Nonnull
+    private final Map<Owner, CubicBezier> curves = new HashMap<>();
+
+    @Nullable
+    private XYSplineChart demo;
+
+    @Nonnull
+    private final String server;
+
+    @Nonnull
+    private Orbit planetaryOrbit;
+
     @Autowired
-    public BattleLogger(@Nonnull @Value("${logging.battle-log.write:true}") final String logBattleResult) {
+    public BattleLogger(@Nonnull @Value("${logging.battle-log.write:true}") final String logBattleResult,
+                        @Nonnull @Value("${sb.server:localhost}") final String server) {
         Preconditions.checkNotNull(logBattleResult, "logBattleResult shouldn't be null!");
 
         this.logBattleResult = Boolean.parseBoolean(logBattleResult);
+        this.server = Preconditions.checkNotNull(server, "server must not be empty");
+    }
+
+
+    public void createChart(@Nonnull final Owner o1,
+                            @Nonnull final Owner o2,
+                            @Nonnull final Orbit planetaryOrbit) {
+        Preconditions.checkNotNull(o1, "o1 must not be empty");
+        Preconditions.checkNotNull(o2, "o2 must not be empty");
+        Preconditions.checkNotNull(planetaryOrbit, "planetaryOrbit must not be empty");
+
+        final String title = o1.getUsername() + " vs. " + o2.getUsername();
+
+        if (!this.server.equals("localhost")) {
+            return;
+        }
+
+        this.demo = new XYSplineChart(title);
+        this.planetaryOrbit = planetaryOrbit;
+    }
+
+    public void attachToChart(@Nonnull final Owner owner, @Nonnull final CubicBezier curve) {
+        Preconditions.checkNotNull(owner, "owner must not be empty");
+        Preconditions.checkNotNull(curve, "curve must not be empty");
+
+        if (!this.server.equals("localhost")) {
+            return;
+        }
+
+        curves.put(owner, curve);
+
+        logMessage("CubicBezier for " + owner.getUsername() + ": " + curve);
+
+        if (demo != null && curves.size() == 2) {
+            demo.run(planetaryOrbit, curves);
+            demo.pack();
+            UIUtils.centerFrameOnScreen(demo);
+            demo.setVisible(true);
+            runIndefinite();
+        }
+    }
+
+    private static void runIndefinite() {
+        while (true) {
+
+        }
     }
 
     public void logMessage(@Nonnull final String msg) {

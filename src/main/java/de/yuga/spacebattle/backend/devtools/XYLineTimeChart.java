@@ -1,5 +1,6 @@
-package de.yuga.spacebattle.misc.fandom.spacecraft;
+package de.yuga.spacebattle.backend.devtools;
 
+import com.google.common.base.Preconditions;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -12,6 +13,7 @@ import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
 
+import javax.annotation.Nonnull;
 import javax.swing.*;
 import java.awt.*;
 import java.text.SimpleDateFormat;
@@ -31,8 +33,10 @@ public class XYLineTimeChart extends ApplicationFrame {
      *
      * @param title the frame title.
      */
-    public XYLineTimeChart(final String title, final TimeSeriesCollection dataset) {
+    public XYLineTimeChart(@Nonnull final String title, @Nonnull final TimeSeriesCollection dataset) {
         super(title);
+        Preconditions.checkNotNull(dataset, "dataset must not be empty");
+
         ChartPanel chartPanel = (ChartPanel) createDemoPanel(dataset);
         chartPanel.setPreferredSize(new Dimension(500, 270));
         setContentPane(chartPanel);
@@ -44,7 +48,9 @@ public class XYLineTimeChart extends ApplicationFrame {
      * @param dataset a dataset.
      * @return A chart.
      */
-    private static JFreeChart createChart(XYDataset dataset) {
+    @Nonnull
+    private static JFreeChart createChart(@Nonnull final XYDataset dataset) {
+        Preconditions.checkNotNull(dataset, "dataset must not be empty");
 
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
                 "Legal & General Unit Trust Prices",  // title
@@ -81,7 +87,10 @@ public class XYLineTimeChart extends ApplicationFrame {
      *
      * @return A panel.
      */
-    public static JPanel createDemoPanel(final TimeSeriesCollection dataset) {
+    @Nonnull
+    public static JPanel createDemoPanel(@Nonnull final TimeSeriesCollection dataset) {
+        Preconditions.checkNotNull(dataset, "dataset must not be empty");
+
         JFreeChart chart = createChart(dataset);
         ChartPanel panel = new ChartPanel(chart, false);
         panel.setFillZoomRectangle(true);

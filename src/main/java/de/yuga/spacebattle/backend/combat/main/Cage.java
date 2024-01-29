@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.CombatAllowanceCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
+import de.yuga.spacebattle.backend.calculator.geometry.CubicBezier;
 import de.yuga.spacebattle.backend.calculator.resource.BezierCoursePlot;
 import de.yuga.spacebattle.backend.combat.BattleLogger;
 import de.yuga.spacebattle.backend.combat.dto.*;
@@ -151,6 +152,7 @@ public class Cage implements Future<Cage> {
         this.currentCombatRound = new CombatRound();
         initiateCombat();
         this.combatHandler = new CombatHandler(this);
+        this.battleLogger.createChart(aggressor.getOwner(), defender.getOwner(), fleetClash.getOrbit().getInterplanetaryResultingOrbit());
     }
 
     @Override
@@ -548,5 +550,12 @@ public class Cage implements Future<Cage> {
         Preconditions.checkNotNull(msg, "msg must not be empty");
 
         battleLogger.logWarning(msg);
+    }
+
+    public void attachToChart(@Nonnull final Owner owner, @Nonnull final CubicBezier curve) {
+        Preconditions.checkNotNull(owner, "owner must not be empty");
+        Preconditions.checkNotNull(curve, "curve must not be empty");
+
+        battleLogger.attachToChart(owner, curve);
     }
 }

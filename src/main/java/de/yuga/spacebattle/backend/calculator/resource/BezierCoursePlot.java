@@ -221,6 +221,9 @@ public class BezierCoursePlot extends Historizable<BezierCoursePlot> implements 
         final double[] c2 = {destinationX - vKMperMin, destinationY - vKMperMin};
         final double[] c3 = {destinationX, destinationY};
         final CubicBezier bezier = new CubicBezier(new double[][]{c0, c1, c2, c3});
+
+        cage.attachToChart(cage.getAggressor().getOwner(), bezier);
+
         double length = bezier.getLength();
 
         final CombatRound combatRound = cage.getCurrentCombatRound().clone();
@@ -273,6 +276,8 @@ public class BezierCoursePlot extends Historizable<BezierCoursePlot> implements 
         final double[] c3 = {destinationX, destinationY};
         final CubicBezier bezier = new CubicBezier(new double[][]{c0, c1, c2, c3});
         double length = bezier.getLength();
+
+        cage.attachToChart(cage.getDefender().getOwner(), bezier);
 
         final CombatRound combatRound = cage.getCurrentCombatRound().clone();
         for (double i = 0; i <= 1; ) {

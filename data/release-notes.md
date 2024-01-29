@@ -59,9 +59,6 @@ abfangkurs bestimmen:
 
 #### next steps
 
-todo. flotten auf karte als shortcut-icon rechts am rand darstellen
-todo. eigene systeme auf karte als shortcut-icon rechts am rand darstellen?
-
 todo. forfeitable construction punkte in DB merken zwecks schnellerem dashboard
 todo. carrier menu planetengebäude und mining factors
 todo. plani menu anzeiigen ob SY oder CY job möglich

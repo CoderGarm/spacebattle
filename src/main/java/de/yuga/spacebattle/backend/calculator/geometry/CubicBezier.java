@@ -397,4 +397,12 @@ public class CubicBezier {
             return Math.sqrt(dx * dx + dy * dy);
         };
     }
+
+    @Override
+    public String toString() {
+        return "p1: " + p1[0] + ", " + p1[0] +
+                "cp1: " + cp1[0] + ", " + cp1[0] +
+                "cp2: " + cp2[0] + ", " + cp2[0] +
+                "p2: " + p2[0] + ", " + p2[0];
+    }
 }

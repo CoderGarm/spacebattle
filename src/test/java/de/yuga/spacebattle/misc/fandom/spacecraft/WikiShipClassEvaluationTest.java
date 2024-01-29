@@ -3,6 +3,7 @@ package de.yuga.spacebattle.misc.fandom.spacecraft;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import de.yuga.spacebattle.TestUtils;
+import de.yuga.spacebattle.backend.devtools.XYLineTimeChart;
 import de.yuga.spacebattle.backend.enums.EShipClassType;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.misc.fandom.EWikiCategories;
