@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.services;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.SpringBootProdProfile;
+import de.yuga.spacebattle.backend.combat.BattleLogger;
 import de.yuga.spacebattle.backend.dto.physics.Mass;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
@@ -98,10 +99,13 @@ public class MasterOfTheUniverseServiceTest {
     private BattleService battleService;
 
     @Autowired
-
     private BattleReportService battleReportService;
+
     @Autowired
     private FleetService fleetService;
+
+    @Autowired
+    private BattleLogger battleLogger;
 
     @Test
     void t() {
@@ -205,8 +209,16 @@ public class MasterOfTheUniverseServiceTest {
 
     @Test
     void runBattle() {
+
+        fleetService.deleteAll();
+        masterOfTheUniverseService.createFlashsFleet();
+        masterOfTheUniverseService.createYufielsFleet();
+
         final Planet planet = planetService.find(112);
         final Tick today = tickService.getToday();
+
+        battleLogger.setChartActive(true);
+
         battleService.runBattleAtPlanet(today, planet);
     }
 

@@ -51,6 +51,8 @@ abfangkurs bestimmen:
 
 
 - endpoint für "streamlined battle reports" -> trajektorienbasierte kampfbeschreibung für unity
+- planeten für handel blockieren
+- handelsstörer-missionen
 
 #### Diverses
 

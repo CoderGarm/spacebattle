@@ -23,7 +23,7 @@ import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussInteg
  *
  * @author Michael Carleton / <a href="https://github.com/micycle1/BetterBeziers">github</a>
  */
-public class CubicBezier {
+public class CubicBezier implements Cloneable {
 
     /**
      * The maximum difference in measured vs user-specified arc length that is
@@ -400,9 +400,36 @@ public class CubicBezier {
 
     @Override
     public String toString() {
-        return "p1: " + p1[0] + ", " + p1[0] +
-                "cp1: " + cp1[0] + ", " + cp1[0] +
-                "cp2: " + cp2[0] + ", " + cp2[0] +
-                "p2: " + p2[0] + ", " + p2[0];
+        return " p1: " + p1[0] + ", " + p1[0] +
+                " cp1: " + cp1[0] + ", " + cp1[0] +
+                " cp2: " + cp2[0] + ", " + cp2[0] +
+                " p2: " + p2[0] + ", " + p2[0];
+    }
+
+    @Override
+    public CubicBezier clone() {
+        try {
+            //noinspection UnnecessaryLocalVariable
+            final CubicBezier clone = (CubicBezier) super.clone();
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
+
+    public double[] getP1() {
+        return p1;
+    }
+
+    public double[] getCp1() {
+        return cp1;
+    }
+
+    public double[] getCp2() {
+        return cp2;
+    }
+
+    public double[] getP2() {
+        return p2;
     }
 }

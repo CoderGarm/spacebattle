@@ -2,8 +2,8 @@ package de.yuga.spacebattle.backend.combat.main.handler;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.resource.BezierCoursePlot;
 import de.yuga.spacebattle.backend.calculator.resource.CourseOrderElement;
+import de.yuga.spacebattle.backend.calculator.resource.CoursePlot;
 import de.yuga.spacebattle.backend.combat.dto.BeamVolley;
 import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
 import de.yuga.spacebattle.backend.combat.dto.MovementAction;
@@ -53,8 +53,6 @@ public class CombatHandler {
      * Compare: @see <a href="kampfsystem.md#movement types">Combat System - Movement</a>
      */
     public void handleMovementPhase() {
-        final Fleet fleetOne = cage.getFleetOne();
-        final Fleet fleetTwo = cage.getFleetTwo();
 
         // state and execute movement
         if (cage.getCurrentCombatRound().getNo() == 1) {
@@ -81,8 +79,8 @@ public class CombatHandler {
             cage.logMessage("Out of ammo");
         }
 
-        final BezierCoursePlot aggressorsCoursePlot = aggressorsState.getCoursePlot();
-        final BezierCoursePlot defendersCoursePlot = defendersState.getCoursePlot();
+        final CoursePlot aggressorsCoursePlot = aggressorsState.getCoursePlot();
+        final CoursePlot defendersCoursePlot = defendersState.getCoursePlot();
         final boolean creatingCoursePlotNeeded = aggressorsCoursePlot.isFreshPlotWithoutAnyMovement();
         final boolean hasPlotToBeRepainted = aggressorsCoursePlot.hasPlotExceeded();
         final boolean ableToAttack = aggressorsState.isAbleToAttack();
@@ -112,7 +110,7 @@ public class CombatHandler {
         Preconditions.checkNotNull(agent, "agent shouldn't be null!");
 
         final FleetRoundState agentsState = cage.getCurrentStateByFleet(agent);
-        final BezierCoursePlot coursePlot = agentsState.getCoursePlot();
+        final CoursePlot coursePlot = agentsState.getCoursePlot();
         final CombatRound currentCombatRound = cage.getCurrentCombatRound();
         final CourseOrderElement courseElement = coursePlot.getCourseElement(currentCombatRound);
         if (courseElement == null) {

@@ -6,7 +6,7 @@ import de.yuga.spacebattle.backend.calculator.CombatAllowanceCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
 import de.yuga.spacebattle.backend.calculator.geometry.CubicBezier;
-import de.yuga.spacebattle.backend.calculator.resource.BezierCoursePlot;
+import de.yuga.spacebattle.backend.calculator.resource.CoursePlot;
 import de.yuga.spacebattle.backend.combat.BattleLogger;
 import de.yuga.spacebattle.backend.combat.dto.*;
 import de.yuga.spacebattle.backend.combat.main.handler.CombatHandler;
@@ -38,11 +38,6 @@ public class Cage implements Future<Cage> {
 
     @Nonnull
     private final BattleLogger battleLogger;
-
-    /**
-     * The multiplier for defining the initial cage diameter by the maximum fleet's weapon ranges.
-     */
-    private static final BigDecimal INITIAL_CAGE_DIAMETER_MULTIPLIER = BigDecimal.valueOf(2);
 
     /**
      * The current combat round.
@@ -193,7 +188,7 @@ public class Cage implements Future<Cage> {
             final CombatRound nextRound = currentCombatRound.clone();
             nextRound.next();
             final boolean nextRoundNotPresent = currentRoundStates.stream().anyMatch(roundState -> {
-                final BezierCoursePlot coursePlot = roundState.getCoursePlot();
+                final CoursePlot coursePlot = roundState.getCoursePlot();
                 return !coursePlot.isFreshPlotWithoutAnyMovement() && coursePlot.hasPlotExceeded();
             });
             if (nextRoundNotPresent) {

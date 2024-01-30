@@ -189,6 +189,7 @@ public class Distance implements Cloneable, Comparable<Distance> {
             thisValue = getCoordinate();
             thatValue = that.getCoordinate();
         }
+
         return new OnePercentComparator().compare(thisValue, thatValue);
     }
 

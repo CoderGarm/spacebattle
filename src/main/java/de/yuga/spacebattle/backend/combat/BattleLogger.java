@@ -71,8 +71,10 @@ public class BattleLogger {
     @Nonnull
     private final String server;
 
-    @Nonnull
+    @Nullable
     private Orbit planetaryOrbit;
+
+    private boolean chartActive = false;
 
     @Autowired
     public BattleLogger(@Nonnull @Value("${logging.battle-log.write:true}") final String logBattleResult,
@@ -83,6 +85,9 @@ public class BattleLogger {
         this.server = Preconditions.checkNotNull(server, "server must not be empty");
     }
 
+    public void setChartActive(final boolean chartActive) {
+        this.chartActive = chartActive;
+    }
 
     public void createChart(@Nonnull final Owner o1,
                             @Nonnull final Owner o2,
@@ -93,7 +98,7 @@ public class BattleLogger {
 
         final String title = o1.getUsername() + " vs. " + o2.getUsername();
 
-        if (!this.server.equals("localhost")) {
+        if (!chartActive || !this.server.equals("localhost")) {
             return;
         }
 
@@ -105,7 +110,7 @@ public class BattleLogger {
         Preconditions.checkNotNull(owner, "owner must not be empty");
         Preconditions.checkNotNull(curve, "curve must not be empty");
 
-        if (!this.server.equals("localhost")) {
+        if (!chartActive || !this.server.equals("localhost")) {
             return;
         }
 
@@ -122,7 +127,7 @@ public class BattleLogger {
         }
     }
 
-    private static void runIndefinite() {
+    private void runIndefinite() {
         while (true) {
 
         }

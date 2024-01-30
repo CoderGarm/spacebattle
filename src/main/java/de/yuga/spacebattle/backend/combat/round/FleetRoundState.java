@@ -1,8 +1,8 @@
 package de.yuga.spacebattle.backend.combat.round;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.resource.BezierCoursePlot;
 import de.yuga.spacebattle.backend.calculator.resource.CourseOrderElement;
+import de.yuga.spacebattle.backend.calculator.resource.CoursePlot;
 import de.yuga.spacebattle.backend.combat.dto.CounterMissileWeaponry;
 import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
 import de.yuga.spacebattle.backend.combat.dto.Historizable;
@@ -92,7 +92,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
     private EMovementType movementType;
 
     @Nonnull
-    private BezierCoursePlot coursePlot;
+    private CoursePlot coursePlot;
 
     public FleetRoundState(@Nonnull final Cage cage,
                            @Nonnull final Fleet fleet,
@@ -106,7 +106,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         this.fleet = fleet;
         this.position = position.clone();
         this.fleetHealthState = new FleetHealthState(cage, fleet);
-        this.coursePlot = new BezierCoursePlot(cage, fleet, position);
+        this.coursePlot = new CoursePlot(cage, fleet, position);
         this.velocity = coursePlot.getAgentsVelocity();
         this.direction = coursePlot.getCurrentDirection();
         historize();
@@ -171,7 +171,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
     }
 
     @Nonnull
-    public BezierCoursePlot getCoursePlot() {
+    public CoursePlot getCoursePlot() {
         return coursePlot;
     }
 
