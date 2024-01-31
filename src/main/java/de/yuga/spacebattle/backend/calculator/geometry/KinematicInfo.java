@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Direction;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.enums.EModuleType;
@@ -22,16 +23,16 @@ public class KinematicInfo implements Cloneable {
     private final Direction direction;
 
     @Nonnull
-    private final Orbit position;
+    private Orbit position;
 
     public KinematicInfo(@Nonnull final Acceleration acceleration,
                          @Nonnull final Velocity velocity,
                          @Nonnull final Direction direction,
                          @Nonnull final Orbit position) {
-        this.acceleration = Preconditions.checkNotNull(acceleration, "acceleration must not be empty");
-        this.velocity = Preconditions.checkNotNull(velocity, "velocity must not be empty");
-        this.direction = Preconditions.checkNotNull(direction, "direction must not be empty");
-        this.position = Preconditions.checkNotNull(position, "position must not be empty");
+        this.acceleration = Preconditions.checkNotNull(acceleration, "acceleration must not be empty").clone();
+        this.velocity = Preconditions.checkNotNull(velocity, "velocity must not be empty").clone();
+        this.direction = Preconditions.checkNotNull(direction, "direction must not be empty").clone();
+        this.position = Preconditions.checkNotNull(position, "position must not be empty").clone();
     }
 
     public static KinematicInfo getFrom(@Nonnull final FleetRoundState roundState) {
@@ -73,5 +74,23 @@ public class KinematicInfo implements Cloneable {
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
+    }
+
+    public void goSouth(@Nonnull final Distance distance) {
+        Preconditions.checkNotNull(distance, "distance must not be empty");
+
+        position.moveAbout(distance, Direction.SOUTH);
+    }
+
+    public void goWest(@Nonnull final Distance distance) {
+        Preconditions.checkNotNull(distance, "distance must not be empty");
+
+        position.moveAbout(distance, Direction.WEST);
+    }
+
+    @Nonnull
+    public KinematicInfo with(@Nonnull final Orbit orbit) {
+        this.position = Preconditions.checkNotNull(orbit, "orbit must not be empty").clone();
+        return this;
     }
 }

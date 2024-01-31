@@ -12,6 +12,8 @@ public class CombatRound implements Cloneable, Comparable<CombatRound> {
 
     public static final Time COMBAT_ROUND = new Time(CombatRound.COMBAT_ROUND_DURATION, ETimeMetric.SECOND);
 
+    public static final ETimeMetric COMBAT_ROUND_METRIC = ETimeMetric.MINUTE;
+
     /**
      * The battle round number.
      */

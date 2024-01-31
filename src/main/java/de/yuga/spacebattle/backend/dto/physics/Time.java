@@ -234,4 +234,9 @@ public class Time implements Cloneable, Comparable<Time> {
         final String[] split = fromDb.trim().split("\\s");
         return new Time(new BigDecimal(split[0]), ETimeMetric.getByName(split[1]));
     }
+
+    @Override
+    public String toString() {
+        return coordinate.toPlainString() + " " + timeMetric.getUnit();
+    }
 }

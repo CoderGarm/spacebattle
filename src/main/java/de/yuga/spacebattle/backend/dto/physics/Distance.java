@@ -244,11 +244,20 @@ public class Distance implements Cloneable, Comparable<Distance> {
 
     @Nonnull
     @JsonIgnore
-    public Distance divide(@Nonnull final Distance o) {
-        Preconditions.checkNotNull(o, "o shouldn't be null!");
+    public Distance divide(@Nonnull final Distance divisor) {
+        Preconditions.checkNotNull(divisor, "divisor shouldn't be null!");
+        Preconditions.checkArgument(divisor.compareTo(Distance.ZERO) != 0, "divisor must not be zero");
 
-        final BigDecimal factor = o.getCoordinateInMetric(distanceMetric);
-        return new Distance(coordinate.divide(factor, MC_HU), distanceMetric);
+        final BigDecimal div = divisor.getCoordinateInMetric(distanceMetric);
+        return new Distance(coordinate.divide(div, MC_HU), distanceMetric);
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public Distance divide(final double divisor) {
+        Preconditions.checkArgument(divisor != 0, "divisor must not be zero");
+
+        return new Distance(coordinate.divide(BigDecimal.valueOf(divisor), MC_HU), distanceMetric);
     }
 
     @Nonnull
@@ -283,5 +292,15 @@ public class Distance implements Cloneable, Comparable<Distance> {
         Preconditions.checkNotNull(o, "o shouldn't be null!");
 
         return compareTo(o) > 0 ? this : o;
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public Time calculateTimeToPass(@Nonnull final Velocity o) {
+        Preconditions.checkNotNull(o, "o shouldn't be null!");
+
+        final BigDecimal distance = getCoordinateInMetric(o.getDistanceMetric());
+        final BigDecimal timeValue = distance.divide(o.getValue(), MC_HU);
+        return new Time(timeValue, o.getTimeMetric());
     }
 }

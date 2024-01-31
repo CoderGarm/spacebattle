@@ -5,11 +5,11 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.CombatAllowanceCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
-import de.yuga.spacebattle.backend.calculator.geometry.CubicBezier;
 import de.yuga.spacebattle.backend.calculator.resource.CoursePlot;
 import de.yuga.spacebattle.backend.combat.BattleLogger;
 import de.yuga.spacebattle.backend.combat.dto.*;
 import de.yuga.spacebattle.backend.combat.main.handler.CombatHandler;
+import de.yuga.spacebattle.backend.combat.maneuver.Maneuver;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.FleetHealthState;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
@@ -361,12 +361,16 @@ public class Cage implements Future<Cage> {
         this.actionHappened = actionHappened;
     }
 
-    /**
-     * Returns the current state for the given fleet.
-     *
-     * @param fleet the fleet
-     * @return the state for the fleet
-     */
+    @Nonnull
+    public FleetRoundState getAgressorsState() {
+        return getCurrentStateByFleet(aggressor);
+    }
+
+    @Nonnull
+    public FleetRoundState getDefendersState() {
+        return getCurrentStateByFleet(defender);
+    }
+
     @Nonnull
     public FleetRoundState getCurrentStateByFleet(@Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
@@ -547,10 +551,10 @@ public class Cage implements Future<Cage> {
         battleLogger.logWarning(msg);
     }
 
-    public void attachToChart(@Nonnull final Owner owner, @Nonnull final CubicBezier curve) {
+    public void attachToChart(@Nonnull final Owner owner, @Nonnull final Maneuver maneuver) {
         Preconditions.checkNotNull(owner, "owner must not be empty");
-        Preconditions.checkNotNull(curve, "curve must not be empty");
+        Preconditions.checkNotNull(maneuver, "maneuver must not be empty");
 
-        battleLogger.attachToChart(owner, curve);
+        battleLogger.attachToChart(owner, maneuver);
     }
 }

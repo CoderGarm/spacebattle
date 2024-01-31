@@ -31,6 +31,8 @@ article orbital modules
 ### Features
 
 
+- Wenn kampfsystem durch und planis bomben drin -> neues Event bis rundenende "Krieg gegen KI".
+
 #### Gameplay
 
 - kampfsystem repariert
@@ -86,7 +88,10 @@ season 3:
 - schiffswerften müssen mehr output haben
 - regelmäßige konvoys wie in anno -> kann man abfangen per mission und schützen mit eigenen missionen -> mehrere ressourcen pro convoy
 - reguläres Ranking soll zerstörte und verlorene tonnage enthalten
+- alliierte flotten verschicken per Allianz-Commander
 
+todo. krieg als entity, jeder kann namen für konflikt vergeben, dem krieg werden verluste usw zugeordnet, medallie / feldzugsstreifen kann hochgeladen werden und
+todo. gefechtstheater auf karte kennzeichnen
 todo. colo duration through wormholes are NaN
 todo. tonnage calc not on every input -> timeout should be enough
 todo. carrier menu: order planets by system like in the planet menu

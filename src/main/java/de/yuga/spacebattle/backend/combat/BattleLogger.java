@@ -7,6 +7,8 @@ import de.yuga.spacebattle.backend.combat.dto.*;
 import de.yuga.spacebattle.backend.combat.enums.EDamageResult;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
+import de.yuga.spacebattle.backend.combat.maneuver.Maneuver;
+import de.yuga.spacebattle.backend.combat.maneuver.ManeuverElement;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.combat.round.MissileSalvoHealthState;
@@ -63,7 +65,7 @@ public class BattleLogger {
     private CombatRound combatRound;
 
     @Nonnull
-    private final Map<Owner, CubicBezier> curves = new HashMap<>();
+    private final Map<Owner, Maneuver> curves = new HashMap<>();
 
     @Nullable
     private XYSplineChart demo;
@@ -106,17 +108,21 @@ public class BattleLogger {
         this.planetaryOrbit = planetaryOrbit;
     }
 
-    public void attachToChart(@Nonnull final Owner owner, @Nonnull final CubicBezier curve) {
+    public void attachToChart(@Nonnull final Owner owner, @Nonnull final Maneuver maneuver) {
         Preconditions.checkNotNull(owner, "owner must not be empty");
-        Preconditions.checkNotNull(curve, "curve must not be empty");
+        Preconditions.checkNotNull(maneuver, "maneuver must not be empty");
 
         if (!chartActive || !this.server.equals("localhost")) {
             return;
         }
 
-        curves.put(owner, curve);
+        curves.put(owner, maneuver);
 
-        logMessage("CubicBezier for " + owner.getUsername() + ": " + curve);
+        final String string = maneuver.getCourseItems().getManeuverElements().stream()
+                .map(ManeuverElement::getCurve)
+                .map(CubicBezier::toString)
+                .collect(Collectors.joining(","));
+        logMessage("CubicBezier for " + owner.getUsername() + ": " + string);
 
         if (demo != null && curves.size() == 2) {
             demo.run(planetaryOrbit, curves);

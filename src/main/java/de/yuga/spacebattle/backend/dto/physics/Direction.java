@@ -14,7 +14,20 @@ import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator
  */
 public class Direction implements Cloneable {
 
+    @Nonnull
     public static final Direction ZERO = new Direction();
+
+    @Nonnull
+    public static final Direction NORTH = new Direction(BigDecimal.ZERO, BigDecimal.ONE);
+
+    @Nonnull
+    public static final Direction EAST = new Direction(BigDecimal.ONE.negate(), BigDecimal.ZERO);
+
+    @Nonnull
+    public static final Direction SOUTH = new Direction(BigDecimal.ZERO, BigDecimal.ONE.negate());
+
+    @Nonnull
+    public static final Direction WEST = new Direction(BigDecimal.ONE, BigDecimal.ZERO);
 
     /**
      * The normed y coordinate of the direction vector.
@@ -230,5 +243,10 @@ public class Direction implements Cloneable {
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
+    }
+
+    @Nonnull
+    public Direction negate() {
+        return new Direction(xCoordinate.negate(), yCoordinate.negate());
     }
 }

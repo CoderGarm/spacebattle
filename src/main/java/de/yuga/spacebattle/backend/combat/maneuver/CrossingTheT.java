@@ -12,18 +12,20 @@ import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import javax.annotation.Nonnull;
 
 /**
- * Tries to fly most direct to the given designation.<br>
+ * fixme change target detection to individual ships by angle
+ * <br>
+ * Tries to take the others fleet's course orthogonal and pass them in the middle.
  * Compare<br>
- * <img src="data/bezier-curves/time-optimized-course.png">
+ * <img src="data/bezier-curves/crossing-the-t.png"> in respect to the time-optimized-course as opponent.
  */
-public class TimeOptimizedCourse extends Maneuver {
+public class CrossingTheT extends Maneuver {
 
-    protected TimeOptimizedCourse(@Nonnull final Cage cage,
-                               @Nonnull final CombatRound start,
-                               @Nonnull final Fleet agent,
-                               @Nonnull final KinematicInfo agentsKinematicInitial,
-                               @Nonnull final KinematicInfo agentsKinematicDesignated,
-                                  @Nonnull final Fleet target) {
+    protected CrossingTheT(@Nonnull final Cage cage,
+                           @Nonnull final CombatRound start,
+                           @Nonnull final Fleet agent,
+                           @Nonnull final KinematicInfo agentsKinematicInitial,
+                           @Nonnull final KinematicInfo agentsKinematicDesignated,
+                           @Nonnull final Fleet target) {
         super(cage, start, agent, agentsKinematicInitial, agentsKinematicDesignated, target);
 
     }
@@ -41,9 +43,10 @@ public class TimeOptimizedCourse extends Maneuver {
         final long destinationY = destination.getYCoordinate().getCoordinateInMetric(EDistanceMetric.KM).longValue();
 
         final long diffX = (Math.abs(originX) + Math.abs(destinationX)) / 2;
+        final long diffY = (Math.abs(originY) + Math.abs(destinationY)) / 2;
         final double[] c0 = {originX, originY};
-        final double[] c1 = {originX + diffX, originY};
-        final double[] c2 = {destinationX - diffX, destinationY};
+        final double[] c1 = {originX, originY + (diffY * 2)};
+        final double[] c2 = {destinationX - (diffX * 2), destinationY};
         final double[] c3 = {destinationX, destinationY};
         final CubicBezier cubicBezier = new CubicBezier(new double[][]{c0, c1, c2, c3});
 

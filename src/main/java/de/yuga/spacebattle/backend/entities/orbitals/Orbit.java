@@ -63,6 +63,14 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
         this.yCoordinate = new Distance(yCoordinate, distanceMetric);
     }
 
+    public Orbit(final double[] coordinate, @Nonnull final EDistanceMetric distanceMetric) {
+        Preconditions.checkNotNull(distanceMetric, "distanceMetric shouldn't be null!");
+        Preconditions.checkArgument(coordinate.length == 2, "coordinate.length must be 2");
+
+        this.xCoordinate = new Distance(coordinate[0], distanceMetric);
+        this.yCoordinate = new Distance(coordinate[1], distanceMetric);
+    }
+
     public Distance getXCoordinate() {
         return xCoordinate;
     }
@@ -128,6 +136,45 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
         }
         // cant detect the direction
         return this;
+    }
+
+    /**
+     * Moves this position to the direction for the given distance by the given movement plan.
+     *
+     * @param distance  the distance which this orbit will be moved
+     * @param direction the normalized direction vector
+     */
+    public void moveAbout(@Nonnull final Distance distance,
+                          @Nonnull final Direction direction) {
+        Preconditions.checkNotNull(distance, "distance shouldn't be null!");
+        Preconditions.checkNotNull(direction, "direction shouldn't be null!");
+
+        final EDistanceMetric distanceMetric = getXCoordinate().getDistanceMetric();
+        final BigDecimal eXC = direction.getXCoordinate().multiply(distance.getCoordinateInMetric(distanceMetric), MC_HU);
+        final BigDecimal eYC = direction.getYCoordinate().multiply(distance.getCoordinateInMetric(distanceMetric), MC_HU);
+        xCoordinate = xCoordinate.add(new Distance(eXC, distanceMetric));
+        yCoordinate = yCoordinate.add(new Distance(eYC, distanceMetric));
+    }
+
+    /**
+     * Calculates the position of 'this' to the direction for the given distance by the given movement plan.<br>
+     *
+     * @param distance  the distance which this orbit will be moved
+     * @param direction the normalized direction vector
+     * @return the resulting immutable.
+     */
+    public Orbit moveAboutAndGet(@Nonnull final Distance distance,
+                                 @Nonnull final Direction direction) {
+        Preconditions.checkNotNull(distance, "distance shouldn't be null!");
+        Preconditions.checkNotNull(direction, "direction shouldn't be null!");
+
+        final EDistanceMetric distanceMetric = getXCoordinate().getDistanceMetric();
+
+        final BigDecimal eXC = direction.getXCoordinate().multiply(distance.getCoordinateInMetric(distanceMetric), MC_HU);
+        final BigDecimal eYC = direction.getYCoordinate().multiply(distance.getCoordinateInMetric(distanceMetric), MC_HU);
+        final Distance x = xCoordinate.add(new Distance(eXC, distanceMetric));
+        final Distance y = yCoordinate.add(new Distance(eYC, distanceMetric));
+        return new Orbit(x, y);
     }
 
     /**

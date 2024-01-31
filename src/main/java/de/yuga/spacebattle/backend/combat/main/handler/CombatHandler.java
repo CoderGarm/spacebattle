@@ -59,6 +59,10 @@ public class CombatHandler {
             createInitialCoursePlot();
         }
 
+        // fixme add check for "will we have a fight on the current course"
+        extendAggressiveCoursePlot(cage.getAggressor(), cage.getDefender());
+        // fixme same for defender
+
         // execute movement
         executeMovement(cage.getAggressor());
         executeMovement(cage.getDefender());
@@ -73,36 +77,33 @@ public class CombatHandler {
         final FleetRoundState aggressorsState = cage.getCurrentStateByFleet(cage.getAggressor());
         final FleetRoundState defendersState = cage.getCurrentStateByFleet(cage.getDefender());
 
-        final Distance aggressorsMissileRange = aggressorsState.getMaximumWeaponRangePerType(EWeaponType.MISSILE);
-        final Distance defendersMissileRange = defendersState.getMaximumWeaponRangePerType(EWeaponType.MISSILE);
-        if (aggressorsMissileRange.compareTo(Distance.ZERO) == 0 && defendersMissileRange.compareTo(Distance.ZERO) == 0) {
-            cage.logMessage("Out of ammo");
-        }
-
         final CoursePlot aggressorsCoursePlot = aggressorsState.getCoursePlot();
         final CoursePlot defendersCoursePlot = defendersState.getCoursePlot();
         final boolean creatingCoursePlotNeeded = aggressorsCoursePlot.isFreshPlotWithoutAnyMovement();
         final boolean hasPlotToBeRepainted = aggressorsCoursePlot.hasPlotExceeded();
         final boolean ableToAttack = aggressorsState.isAbleToAttack();
-        if (!ableToAttack && (creatingCoursePlotNeeded || hasPlotToBeRepainted || cage.isActionHappened())) {
+        if (!ableToAttack && (creatingCoursePlotNeeded || hasPlotToBeRepainted || cage.isActionHappened())) { // fixme auslagern und voran stellen
             // actor has no weapons
-            aggressorsCoursePlot.createEscapeCourse(cage.getDefender());
+            aggressorsCoursePlot.createEscapeCourse();
             return;
         }
-        // the current plan is to reach the best attack distance and then create the course round by round
-        if (creatingCoursePlotNeeded) {
-            // plot the course to attack the target
-            aggressorsCoursePlot.createAggressiveCourse();
-            defendersCoursePlot.createDefensiveCourse();
-        } else if (hasPlotToBeRepainted) {
+        // plot the course to attack the target
+        aggressorsCoursePlot.createAggressiveCourse();
+        defendersCoursePlot.createDefensiveCourse();
+    }
+
+    private void extendAggressiveCoursePlot(@Nonnull final Fleet agent, @Nonnull final Fleet target) {
+        Preconditions.checkNotNull(agent, "agent must not be empty");
+        Preconditions.checkNotNull(target, "target must not be empty");
+
+        final FleetRoundState aggressorsState = cage.getCurrentStateByFleet(agent);
+        final CoursePlot aggressorsCoursePlot = aggressorsState.getCoursePlot();
+        final boolean hasPlotToBeRepainted = aggressorsCoursePlot.hasPlotExceeded();
+
+        if (hasPlotToBeRepainted || cage.isActionHappened()) {
             // plot the next round's course for the upcoming round
-            // fixme implement case "no course elements left" aggressorsCoursePlot.createNextAggressiveCourseElement(target);
-        } else if (cage.isActionHappened()) {
-            // plot the next round's course for the upcoming round
-            /* fixme implement case "attack or retreat"
-             * aggressorsCoursePlot.clearFutureCourseElements();
-             * aggressorsCoursePlot.createNextAggressiveCourseElement(target);
-             */
+            // fixme weiter hier aggressorsCoursePlot.createNextAggressiveCourseElement();
+            cage.logWarning("Course of '" + agent.getOwner().getUsername() + "' will be refreshed.");
         }
     }
 

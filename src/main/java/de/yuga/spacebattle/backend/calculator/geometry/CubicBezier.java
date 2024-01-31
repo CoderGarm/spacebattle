@@ -1,7 +1,12 @@
 package de.yuga.spacebattle.backend.calculator.geometry;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
+
+import javax.annotation.Nonnull;
+import java.util.UUID;
 
 /**
  * Represents a 2D cubic Bezier curve defined by four control points.
@@ -19,11 +24,16 @@ import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussInteg
  * function of the curve to a high precision.
  * <p>
  * The CubicBezier class is immutable; once a CubicBezier is instantiated, its
- * properties cannot be changed.
+ * properties cannot be changed.<br>
+ * <a href="https://javascript.info/bezier-curve">Display Beziers online</a>
+ * <br>
  *
- * @author Michael Carleton / <a href="https://github.com/micycle1/BetterBeziers">github</a>
+ * @author Michael Carleton / <a href="https://github.com/micycle1/BetterBeziers">github</a><br>
  */
 public class CubicBezier implements Cloneable {
+
+    @Nonnull
+    private final UUID uuid = UUID.randomUUID();
 
     /**
      * The maximum difference in measured vs user-specified arc length that is
@@ -431,5 +441,21 @@ public class CubicBezier implements Cloneable {
 
     public double[] getP2() {
         return p2;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final CubicBezier that = (CubicBezier) o;
+
+        return new EqualsBuilder().append(uuid, that.uuid).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(uuid).toHashCode();
     }
 }

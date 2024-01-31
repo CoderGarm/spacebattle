@@ -1,6 +1,5 @@
 package de.yuga.spacebattle.backend.calculator.resource;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.dto.*;
 import de.yuga.spacebattle.backend.combat.enums.EDamageImpact;
@@ -42,8 +41,8 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
     @Nonnull
     private final Fleet agent;
 
-    @Nullable
-    private Fleet target;
+    @Nonnull
+    private final Fleet target;
 
     @Nonnull
     private CombatRound startingRound;
@@ -84,6 +83,7 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
 
         this.cage = cage;
         this.agent = agent;
+        this.target = cage.getParticipatingFleets().stream().filter(f -> !f.equals(agent)).findFirst().orElseThrow(() -> new NotifyWebUserException("No opponent found"));
         this.startingRound = cage.getCurrentCombatRound().clone();
         this.agentsVelocity = Velocity.ZERO;
         this.agentsDirection = Direction.ZERO;
@@ -91,15 +91,12 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
     }
 
     private void setInformationForCreatingPlot(@Nonnull final Orbit agentsOrigin,
-                                               @Nonnull final Fleet target,
                                                @Nonnull final Orbit destination,
                                                @Nonnull final EMovementMotivation movementMotivation) {
         Preconditions.checkNotNull(agentsOrigin, "agentsOrigin must not be empty");
-        Preconditions.checkNotNull(target, "target shouldn't be null!");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
         Preconditions.checkNotNull(movementMotivation, "movementMotivation shouldn't be null!");
 
-        this.target = target;
         this.agentsVelocity = getCurrentVelocity();
         this.agentsDirection = getCurrentDirection();
         this.origin = agentsOrigin;
@@ -108,12 +105,10 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         this.movementMotivation = movementMotivation;
     }
 
-    public void createEscapeCourse(@Nonnull final Fleet target) {
-        Preconditions.checkNotNull(target, "target shouldn't be null!");
+    public void createEscapeCourse() {
 
         // fixme check if fleet is fast enough to escape sub-light and check if can enter hyperspace
 
-        this.target = target;
         final FleetRoundState agentsState = cage.getCurrentStateByFleet(agent);
         final Orbit agentsPosition = agentsState.getPosition();
 
@@ -142,10 +137,39 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         // fixme enter hyperspace
     }
 
-    public void createNextAggressiveCourseElement(@Nonnull final Fleet target) {
-        Preconditions.checkNotNull(target, "target shouldn't be null!");
+    public void createNextAggressiveCourseElement() {
 
-        this.target = target;
+        // fixme check if next course should be cleared or is suitable
+        clearFutureCourseElements();
+        cage.logMessage("clearFutureCourseElements();");
+
+
+        /*
+         1. motivation feststellen
+            1a. angriffsfall
+         2. ist-soll abgleich
+            2a.
+         3. berechnen
+        */
+
+
+        final FleetRoundState agentsState = cage.getAgressorsState();
+        final Orbit aPos = agentsState.getPosition();
+        final Velocity aVel = agentsState.getVelocity();
+        final Acceleration aAcc = agentsState.getAccelerationFor(EModuleType.PROPULSION);
+
+        final FleetRoundState targetsState = cage.getDefendersState();
+        final Orbit dPos = targetsState.getPosition();
+
+        final Distance distance = aPos.getDistance(dPos);
+
+        final EMovementType movementType = detectMovementType(distance);
+
+
+    }
+
+    public void createNextCourseElement() { // fixme spezifizieren
+
         final FleetRoundState agentsState = cage.getCurrentStateByFleet(agent);
         final Orbit agentsPosition = agentsState.getPosition();
 
@@ -164,7 +188,7 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
             case INCREASE_DISTANCE:
                 this.agentsDirection = new Direction(targetsPosition, agentsPosition);
                 final Acceleration negate = acceleration.negate();
-                resultingVelocity = velocity.getVelocityByAcceleration(negate, COMBAT_ROUND); // fixme unify course plotting and make a reliable speed calculation
+                resultingVelocity = velocity.getVelocityByAcceleration(negate, COMBAT_ROUND);
                 break;
             case IMPELLER_WEDGE_PROTECTION:
             case OFFENSIVE_ROLL:
@@ -199,9 +223,9 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         final Orbit origin = cage.getCurrentStateByFleet(cage.getAggressor()).getPosition();
         final Orbit destination = cage.getTarget().getOrbit();
 
-        setInformationForCreatingPlot(origin, cage.getDefender(), destination, EMovementMotivation.INITIATE_COMBAT);
+        setInformationForCreatingPlot(origin, destination, EMovementMotivation.INITIATE_COMBAT);
         maneuver = new ManeuverFactory(cage).createInitial();
-        cage.attachToChart(cage.getAggressor().getOwner(), maneuver.getCubicBezier());
+        cage.attachToChart(cage.getAggressor().getOwner(), maneuver);
         courseOrderElements.addAll(maneuver.getCourseOrderElements());
     }
 
@@ -209,11 +233,11 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         final Orbit origin = cage.getTarget().getOrbit();
         final Orbit destination = cage.getCurrentStateByFleet(cage.getAggressor()).getPosition();
 
-        setInformationForCreatingPlot(origin, cage.getAggressor(), destination, EMovementMotivation.INITIATE_COMBAT);
+        setInformationForCreatingPlot(origin, destination, EMovementMotivation.INITIATE_COMBAT);
         final Maneuver aggressiveManeuver = cage.getCurrentStateByFleet(cage.getAggressor()).getCoursePlot().getManeuver();
         Preconditions.checkNotNull(aggressiveManeuver, "aggressiveManeuver must not be empty");
         maneuver = new ManeuverFactory(cage).createInitialResponseManeuver(aggressiveManeuver);
-        cage.attachToChart(cage.getDefender().getOwner(), maneuver.getCubicBezier());
+        cage.attachToChart(cage.getDefender().getOwner(), maneuver);
         courseOrderElements.addAll(maneuver.getCourseOrderElements());
     }
 
@@ -347,7 +371,6 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
                                         @Nonnull final Velocity agentsCurrentVelocity,
                                         @Nonnull final Acceleration acceleration,
                                         @Nonnull final BigDecimal travelDuration) {
-        Preconditions.checkState(this.target != null, "target shouldn't be null!");
         Preconditions.checkNotNull(agentsCurrentVelocity, "agentsCurrentVelocity shouldn't be null!");
         Preconditions.checkNotNull(origin, "origin shouldn't be null!");
         Preconditions.checkNotNull(destination, "destination shouldn't be null!");
@@ -437,8 +460,7 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
      * @return the movement type for the next round for fleet one
      */
     @Nonnull
-    @VisibleForTesting
-    protected EMovementType detectMovementType(@Nonnull final Distance distance) {
+    private EMovementType detectMovementType(@Nonnull final Distance distance) {
         Preconditions.checkNotNull(distance, "distance shouldn't be null!");
         Preconditions.checkNotNull(target, "target shouldn't be null!");
 

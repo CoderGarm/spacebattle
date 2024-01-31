@@ -14,16 +14,16 @@ import javax.annotation.Nonnull;
 /**
  * Tries to fly most direct to the given designation.<br>
  * Compare<br>
- * <img src="data/bezier-curves/time-optimized-course.png">
+ * <img src="data/bezier-curves/simple-course.png"> fixme better name for lower U
  */
-public class TimeOptimizedCourse extends Maneuver {
+public class SimpleCourse extends Maneuver {
 
-    protected TimeOptimizedCourse(@Nonnull final Cage cage,
-                               @Nonnull final CombatRound start,
-                               @Nonnull final Fleet agent,
-                               @Nonnull final KinematicInfo agentsKinematicInitial,
-                               @Nonnull final KinematicInfo agentsKinematicDesignated,
-                                  @Nonnull final Fleet target) {
+    protected SimpleCourse(@Nonnull final Cage cage,
+                           @Nonnull final CombatRound start,
+                           @Nonnull final Fleet agent,
+                           @Nonnull final KinematicInfo agentsKinematicInitial,
+                           @Nonnull final KinematicInfo agentsKinematicDesignated,
+                           @Nonnull final Fleet target) {
         super(cage, start, agent, agentsKinematicInitial, agentsKinematicDesignated, target);
 
     }
@@ -42,8 +42,8 @@ public class TimeOptimizedCourse extends Maneuver {
 
         final long diffX = (Math.abs(originX) + Math.abs(destinationX)) / 2;
         final double[] c0 = {originX, originY};
-        final double[] c1 = {originX + diffX, originY};
-        final double[] c2 = {destinationX - diffX, destinationY};
+        final double[] c1 = {originX, originY};
+        final double[] c2 = {destinationX, destinationY};
         final double[] c3 = {destinationX, destinationY};
         final CubicBezier cubicBezier = new CubicBezier(new double[][]{c0, c1, c2, c3});
 
