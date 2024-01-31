@@ -33,6 +33,8 @@ article orbital modules
 
 - Wenn kampfsystem durch und planis bomben drin -> neues Event bis rundenende "Krieg gegen KI".
 
+- Wenn kampfsystem durch und planis bomben drin -> neues Event bis rundenende "Krieg gegen KI".
+
 #### Gameplay
 
 - kampfsystem repariert
