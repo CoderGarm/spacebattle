@@ -179,7 +179,7 @@ public abstract class Maneuver implements Cloneable {
         final CombatRound combatRound = getStart().clone();
 
         final double totalLength = maneuverElements.getTotalLength();
-        final Velocity maxVelocity = getAgentsTopSpeed();
+        final Velocity maxVelocity = getAgentsTopSpeed().multiply(0.05);
 
         final int timeToPassTotalLength = getLengthInCombatRounds(totalLength, maxVelocity);
         LOGGER.info("Maneuver for '{}' with a total length of '{}' passed in '{}' rounds.", getAgent().getOwner().getUsername(), totalLength, timeToPassTotalLength);
@@ -193,7 +193,7 @@ public abstract class Maneuver implements Cloneable {
             addCourseOrder(
                     combatRound.clone(),
                     REDUCE_DISTANCE,
-                    maxVelocity.multiply(0.01).clone(),
+                    maxVelocity.clone(),
                     new Orbit(pointAtLength, EDistanceMetric.KM)
             );
 
