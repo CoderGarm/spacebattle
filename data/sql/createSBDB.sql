@@ -15,6 +15,14 @@
         weaponAlignment varchar(255)
     ) engine=InnoDB;
 
+    create table alignedAuraStates (
+       idMovementAction integer not null,
+        alignment varchar(255),
+        antiMissileMissileRange varchar(255),
+        antiShipMissileRange varchar(255),
+        weaponRange varchar(255)
+    ) engine=InnoDB;
+
     create table alignedFitting (
        idShipClass integer not null,
         amount integer not null,
@@ -932,27 +940,18 @@
 
     alter table eventRanking
        add constraint POINTS_UK unique (idUser, gameEvent, rankingCategory);
-create index IO_FL on fleet (isOperational);
-create index ID_FL on fleet (isDeleted);
 
     alter table fleet
         add constraint UK_duhimx7ydhmssl7vqp5w29yx0 unique (idMove);
-create index ID_FS on fleetSnapshot (isDeleted);
-create index ID_JO on job (isDeleted);
 
     alter table messageThread
         add constraint messageThread_UC unique (idUserOne, idUserTwo);
 
     alter table missileMovements
         add constraint UK_7i21tt2alyj9dggioukympy2t unique (idMissileMovement);
-create index ID_MI on mission (isDeleted);
-create index TL_MO on move (ticksLeft);
-create index ID_MO on move (isDeleted);
 
     alter table movementActions
         add constraint UK_k7lndwnt1rxmmjj2xslfrkuv unique (idMovementAction);
-create index IO_OS on orbitalStructure (isOperational);
-create index ID_OS on orbitalStructure (isDeleted);
 
     alter table orderedHitLog
         add constraint UK_mpoyl8losmb1ep0fxewrpbuf3 unique (idHitLog);
@@ -966,7 +965,7 @@ create index ID_OS on orbitalStructure (isDeleted);
     alter table rolePlaySetting
        add constraint UK_5sx33g2kpg6lhpamw75ibqb9i unique (idUser);
 
-    alter table sharedBattleReport 
+    alter table sharedBattleReport
        add constraint UK_hpe1gr8wmca659sm228uhgp6u unique (idBattleReport);
 create index ID_SC on shipClass (isDeleted);
 
@@ -981,11 +980,6 @@ create index ID_SC on shipClass (isDeleted);
 
     alter table starSystem
         add constraint COORDINATE_UK unique (xCoordinate, yCoordinate);
-create index TL_TR on tradedResource (ticksLeft);
-create index ID_TR on tradedResource (isDeleted);
-create index ID_TO on tradeOffer (isDeleted);
-create index TL_TJ on transportJob (ticksLeft);
-create index ID_TJ on transportJob (isDeleted);
 
     alter table user
         add constraint UK_sb8bbouer5wak8vyiiy4pf2bx unique (username);
@@ -995,10 +989,6 @@ create index ID_TJ on transportJob (isDeleted);
 
     alter table userSetting
        add constraint EMAIL_UK unique (email);
-create index IO_WS on warShip (isOperational);
-create index ID_WS on warShip (isDeleted);
-create index IO_WHSS on warshipHealthStateSnapshot (isOperational);
-create index ID_WHSS on warshipHealthStateSnapshot (isDeleted);
 
     alter table activeFittings
         add constraint FK9kawhm3fqubxvebrl8pjl10lv
@@ -1029,6 +1019,11 @@ create index ID_WHSS on warshipHealthStateSnapshot (isDeleted);
         add constraint FKm7x7patbu0qiko7r2v7hdnoi
             foreign key (idWarshipHealthStateSnapshot)
                 references warshipHealthStateSnapshot (idWarshipHealthStateSnapshot);
+
+    alter table alignedAuraStates
+       add constraint FKqnx37coh1u0vvasr19plbsk5t
+       foreign key (idMovementAction)
+       references movementAction (idMovementAction);
 
     alter table alignedFitting
         add constraint FKkhnl9hmtdgol96bsu6d5csqxg
@@ -1666,8 +1661,8 @@ create index ID_WHSS on warshipHealthStateSnapshot (isDeleted);
                 references user (idUser);
 
     alter table participatingUsers
-       add constraint FK5cqqxdpvyx4jmlpmu1khk00sv 
-       foreign key (idSharedBattleReport) 
+       add constraint FK5cqqxdpvyx4jmlpmu1khk00sv
+       foreign key (idSharedBattleReport)
        references sharedBattleReport (idSharedBattleReport);
 
     alter table passiveModule
@@ -1805,29 +1800,29 @@ create index ID_WHSS on warshipHealthStateSnapshot (isDeleted);
        foreign key (idUser)
        references user (idUser);
 
-    alter table sharedBattleReport 
-       add constraint FKyk7jxlttaktlvdhc231rwt80 
-       foreign key (idBattleReport) 
+    alter table sharedBattleReport
+       add constraint FKyk7jxlttaktlvdhc231rwt80
+       foreign key (idBattleReport)
        references battleReport (idBattleReport);
 
-    alter table sharedWithAlliances 
-       add constraint FK3tp6tcx1ulbyfxa69lhh7ad1e 
-       foreign key (idAlliance) 
+    alter table sharedWithAlliances
+       add constraint FK3tp6tcx1ulbyfxa69lhh7ad1e
+       foreign key (idAlliance)
        references alliance (idAlliance);
 
-    alter table sharedWithAlliances 
-       add constraint FKn7nuh81nwugcay3yigdhmaqva 
-       foreign key (idSharedBattleReport) 
+    alter table sharedWithAlliances
+       add constraint FKn7nuh81nwugcay3yigdhmaqva
+       foreign key (idSharedBattleReport)
        references sharedBattleReport (idSharedBattleReport);
 
-    alter table sharedWithUsers 
-       add constraint FK3wt2lys7aqxisvvcxjhkh2iit 
-       foreign key (idUser) 
+    alter table sharedWithUsers
+       add constraint FK3wt2lys7aqxisvvcxjhkh2iit
+       foreign key (idUser)
        references user (idUser);
 
-    alter table sharedWithUsers 
-       add constraint FKm9oj0tt8rij6u5r5mmfaexlwn 
-       foreign key (idSharedBattleReport) 
+    alter table sharedWithUsers
+       add constraint FKm9oj0tt8rij6u5r5mmfaexlwn
+       foreign key (idSharedBattleReport)
        references sharedBattleReport (idSharedBattleReport);
 
     alter table shipClass
@@ -2165,3 +2160,4 @@ INSERT INTO dbPatch VALUES (NULL, NOW(), 'add indices', '0.1.17-5');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'add event participations', '0.1.17-6');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'replace operational cache', '0.1.17-7');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'share battle reports', '0.1.17-8');
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'introduce aligned ranges', '0.1.18-1');

@@ -213,6 +213,7 @@ public class MasterOfTheUniverseServiceTest {
         fleetService.deleteAll();
         masterOfTheUniverseService.createFlashsFleet();
         masterOfTheUniverseService.createYufielsFleet();
+        masterOfTheUniverseService.transformationNeeded = true;
 
         final Planet planet = planetService.find(112);
         final Tick today = tickService.getToday();

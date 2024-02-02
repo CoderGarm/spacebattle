@@ -3,10 +3,7 @@ package de.yuga.spacebattle.backend.combat.round;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.CourseOrderElement;
 import de.yuga.spacebattle.backend.calculator.resource.CoursePlot;
-import de.yuga.spacebattle.backend.combat.dto.CounterMissileWeaponry;
-import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
-import de.yuga.spacebattle.backend.combat.dto.Historizable;
-import de.yuga.spacebattle.backend.combat.dto.RangeDefinition;
+import de.yuga.spacebattle.backend.combat.dto.*;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
@@ -94,6 +91,9 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
     @Nonnull
     private CoursePlot coursePlot;
 
+    @Nonnull
+    private final AuraState auraState;
+
     public FleetRoundState(@Nonnull final Cage cage,
                            @Nonnull final Fleet fleet,
                            @Nonnull final Orbit position) {
@@ -109,6 +109,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         this.coursePlot = new CoursePlot(cage, fleet, position);
         this.velocity = coursePlot.getAgentsVelocity();
         this.direction = coursePlot.getCurrentDirection();
+        this.auraState = new AuraState(cage, fleet, this);
         historize();
     }
 
@@ -126,6 +127,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         this.coursePlot = state.getCoursePlot();
         this.velocity = coursePlot.getAgentsVelocity();
         this.direction = coursePlot.getCurrentDirection();
+        this.auraState = new AuraState(cage, fleet, this);
         historize();
     }
 
@@ -173,6 +175,11 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
     @Nonnull
     public CoursePlot getCoursePlot() {
         return coursePlot;
+    }
+
+    @Nonnull
+    public AuraState getAuraState() {
+        return auraState;
     }
 
     public void setMovementType(@Nonnull final EMovementType movementType) {

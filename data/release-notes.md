@@ -51,6 +51,8 @@ abfangkurs bestimmen:
 1. eindringling legt kurs fest
 2. verteidiger bestimmt abfangkurs
 
+aura auf combat arena: raketenreichweite, effektive sensorreichweite ...
+
 
 - endpoint für "streamlined battle reports" -> trajektorienbasierte kampfbeschreibung für unity
 - planeten für handel blockieren

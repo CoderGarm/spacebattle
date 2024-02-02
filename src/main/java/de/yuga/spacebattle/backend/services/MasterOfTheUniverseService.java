@@ -96,6 +96,8 @@ public class MasterOfTheUniverseService {
     public static final String DEFEATED_OPPONENT = "Defeated Opponent";
     public static final String PIRATE = "Scharteke";
 
+    public boolean transformationNeeded = false;
+
     public static final ProductionType CONSTRUCTION_YARD_PT = new ProductionType(EResourceType.CONSTRUCTION, EProductionCategory.PRODUCE, null);
     public static final ProductionType SHIPYARD_PT = new ProductionType(EResourceType.ORBITAL_CONSTRUCTION, EProductionCategory.PRODUCE, null);
     public static final ProductionType RESEARCH_LAB_PT = new ProductionType(EResourceType.RESEARCH, EProductionCategory.PRODUCE, null);
@@ -257,7 +259,7 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = true; // fixme remove before prod!
+        final boolean transformationNeeded = this.transformationNeeded; // fixme remove before prod!
         if (transformationNeeded) {
 
             gameEventService.repairAllWarships();

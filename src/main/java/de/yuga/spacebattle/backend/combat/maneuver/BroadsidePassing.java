@@ -41,6 +41,7 @@ public class BroadsidePassing extends Maneuver {
         final long destinationY = destination.getYCoordinate().getCoordinateInMetric(EDistanceMetric.KM).longValue();
 
         final long halfXLength = (Math.abs(originX) + Math.abs(destinationX)) / 2;
+        final long halfYLength = (Math.abs(originY) + Math.abs(destinationY)) / 2; // fixme instead of moving the control points they can be weighted - could be more useful
 
         final double[] c0 = {originX, originY};
         final double[] c1 = {originX - halfXLength, originY};

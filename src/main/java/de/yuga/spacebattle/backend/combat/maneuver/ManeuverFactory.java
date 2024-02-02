@@ -97,14 +97,14 @@ public class ManeuverFactory {
         );
 
 
-        return new BroadsidePassing(
+        return new CrossingTheT(
                 cage,
                 cage.getCurrentCombatRound(),
                 agent,
-                KinematicInfo.getFrom(agentState).with(agentsManeuverStart),
+                KinematicInfo.getFrom(agentState)/*.with(agentsManeuverStart)*/,
                 KinematicInfo.getFrom(agentState).with(agentsManeuverEnd),
                 target
-        ).withTransferCourse(transferCourse.getCombatElement())
+        )/*.withTransferCourse(transferCourse.getCombatElement())*/
                 .createCoursePlot();
     }
 }

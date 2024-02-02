@@ -45,6 +45,11 @@ public class MovementAction {
     @Schema(required = true, description = "The point of the targeted position.")
     private de.yuga.spacebattle.rest.dto.orbitals.Orbit destination;
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The aura range states.")
+    private AuraState auraState;
+
     public MovementAction(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction input,
                           @Nonnull final String languageCode,
                           @Nonnull final Set<FleetSnapshot> participatingFleets) {
@@ -62,6 +67,7 @@ public class MovementAction {
         this.origin = new Orbit(input.getOrigin());
         this.interimDestination = new Orbit(input.getInterimDestination());
         this.destination = new Orbit(input.getDestination());
+        this.auraState = new AuraState(input.getAlignedAuraStates());
     }
 
     @Nonnull

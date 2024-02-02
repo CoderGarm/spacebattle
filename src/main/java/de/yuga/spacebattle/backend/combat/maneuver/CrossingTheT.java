@@ -44,9 +44,10 @@ public class CrossingTheT extends Maneuver {
 
         final long diffX = (Math.abs(originX) + Math.abs(destinationX)) / 2;
         final long diffY = (Math.abs(originY) + Math.abs(destinationY)) / 2;
+
         final double[] c0 = {originX, originY};
-        final double[] c1 = {originX, originY + (diffY * 2)};
-        final double[] c2 = {destinationX - (diffX * 2), destinationY};
+        final double[] c1 = {originX + ((double) diffX / 2), originY + ((double) diffY / 2)};
+        final double[] c2 = {destinationX + diffX, destinationY + diffY};
         final double[] c3 = {destinationX, destinationY};
         final CubicBezier cubicBezier = new CubicBezier(new double[][]{c0, c1, c2, c3});
 

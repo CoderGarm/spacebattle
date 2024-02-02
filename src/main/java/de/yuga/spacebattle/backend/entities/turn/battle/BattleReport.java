@@ -2,21 +2,21 @@ package de.yuga.spacebattle.backend.entities.turn.battle;
 
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.combat.dto.BattleResult;
-import de.yuga.spacebattle.backend.combat.dto.BeamVolley;
 import de.yuga.spacebattle.backend.combat.dto.HitLog;
-import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
+import de.yuga.spacebattle.backend.combat.dto.*;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.combat.round.MissileSalvoHealthState;
 import de.yuga.spacebattle.backend.converter.CombatRoundConverter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
+import de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.*;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -211,6 +211,10 @@ public class BattleReport extends AbstractEntityKey {
                 .collect(Collectors.groupingBy(de.yuga.spacebattle.backend.combat.dto.MovementAction::getCombatRound,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
 
+        final Map<CombatRound, List<AuraState>> aurasByRound = allRoundStates.stream()
+                .collect(Collectors.groupingBy(FleetRoundState::getCombatRound,
+                        Collectors.mapping(FleetRoundState::getAuraState, Collectors.toList())));
+
         final Map<CombatRound, List<BeamVolley>> beamVolleyByRound = allBeamVolleys.stream()
                 .collect(Collectors.groupingBy(BeamVolley::getCombatRound,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
@@ -235,12 +239,13 @@ public class BattleReport extends AbstractEntityKey {
             final List<BeamVolley> beamVolleys = beamVolleyByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
             final List<MissileSalvo> missileSalvos = missileSalvosByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
             final List<de.yuga.spacebattle.backend.combat.dto.MovementAction> movementActions = movementsByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
+            final List<AuraState> auraStates = aurasByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
             for (final ECombatPhase combatPhase : combatPhases) {
                 final List<ECombatPhase.ECombatSubPhase> combatSubPhases = ECombatPhase.ECombatSubPhase.getByCombatPhase(combatPhase);
                 for (final ECombatPhase.ECombatSubPhase combatSubPhase : combatSubPhases) {
                     switch (combatSubPhase) {
                         case MOVEMENT_PHASE:
-                            addMovementAction(movementActions);
+                            addMovementAction(movementActions, auraStates);
                             break;
                         case ELOKA_PHASE:
                         case COUNTER_MISSILE_PHASE:
@@ -285,8 +290,15 @@ public class BattleReport extends AbstractEntityKey {
         }
     }
 
-    private void addMovementAction(final List<de.yuga.spacebattle.backend.combat.dto.MovementAction> movementActions) {
-        movementActions.forEach(ma -> this.movementActions.add(new de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction(ma)));
+    private void addMovementAction(@Nonnull final List<de.yuga.spacebattle.backend.combat.dto.MovementAction> movementActions, @Nonnull final List<AuraState> auraStates) {
+        Preconditions.checkNotNull(movementActions, "movementActions must not be empty");
+        Preconditions.checkNotNull(auraStates, "auraStates must not be empty");
+
+        movementActions.forEach(ma -> {
+            final Fleet actor = ma.getActor();
+            final AuraState auraState = auraStates.stream().filter(a -> a.getActor().equals(actor)).findFirst().orElseThrow();
+            this.movementActions.add(new de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction(ma, auraState));
+        });
     }
 
     private void addMissileMovement(@Nonnull final MissileSalvo volley) {

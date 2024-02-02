@@ -1,5 +1,8 @@
 package de.yuga.spacebattle.backend.entities.turn.battle.combat;
 
+import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.combat.dto.AlignedAuraState;
+import de.yuga.spacebattle.backend.combat.dto.AuraState;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
@@ -7,6 +10,8 @@ import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "movementAction")
@@ -58,17 +63,25 @@ public class MovementAction extends CombatRoundKey {
     @AttributeOverride(name = "yCoordinate", column = @Column(name = "yCoordDestination"))
     private Orbit destination;
 
+    @Nonnull
+    @NotNull
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "alignedAuraStates", joinColumns = @JoinColumn(name = "idMovementAction"))
+    private final Set<AlignedAuraState> alignedAuraStates = new HashSet<>();
+
     public MovementAction() {
     }
 
-    public MovementAction(@Nonnull final de.yuga.spacebattle.backend.combat.dto.MovementAction movementAction) {
+    public MovementAction(@Nonnull final de.yuga.spacebattle.backend.combat.dto.MovementAction movementAction, @Nonnull final AuraState auraState) {
         super(movementAction.getCombatRound(), movementAction.getCombatPhase());
+        Preconditions.checkNotNull(auraState, "auraState must not be empty");
 
         this.actor = movementAction.getActor();
         this.movementType = movementAction.getMovementType();
         this.origin = movementAction.getOrigin().clone();
         this.interimDestination = movementAction.getInterimDestination().clone();
         this.destination = movementAction.getDestination().clone();
+        this.alignedAuraStates.addAll(auraState.getAlignedAuraStates().values());
     }
 
     @Nonnull
@@ -94,5 +107,10 @@ public class MovementAction extends CombatRoundKey {
     @Nonnull
     public Orbit getDestination() {
         return destination;
+    }
+
+    @Nonnull
+    public Set<AlignedAuraState> getAlignedAuraStates() {
+        return alignedAuraStates;
     }
 }
