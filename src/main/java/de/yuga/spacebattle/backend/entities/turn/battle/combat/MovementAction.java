@@ -53,16 +53,6 @@ public class MovementAction extends CombatRoundKey {
     @AttributeOverride(name = "yCoordinate", column = @Column(name = "yCoordInterimDestination"))
     private Orbit interimDestination;
 
-    /**
-     * The point of the targeted position.
-     */
-    @NotNull
-    @Nonnull
-    @Embedded
-    @AttributeOverride(name = "xCoordinate", column = @Column(name = "xCoordDestination"))
-    @AttributeOverride(name = "yCoordinate", column = @Column(name = "yCoordDestination"))
-    private Orbit destination;
-
     @Nonnull
     @NotNull
     @ElementCollection(fetch = FetchType.EAGER)
@@ -80,7 +70,6 @@ public class MovementAction extends CombatRoundKey {
         this.movementType = movementAction.getMovementType();
         this.origin = movementAction.getOrigin().clone();
         this.interimDestination = movementAction.getInterimDestination().clone();
-        this.destination = movementAction.getDestination().clone();
         this.alignedAuraStates.addAll(auraState.getAlignedAuraStates().values());
     }
 
@@ -102,11 +91,6 @@ public class MovementAction extends CombatRoundKey {
     @Nonnull
     public Orbit getInterimDestination() {
         return interimDestination;
-    }
-
-    @Nonnull
-    public Orbit getDestination() {
-        return destination;
     }
 
     @Nonnull

@@ -55,12 +55,6 @@ public class MovementAction extends Historizable<MovementAction> implements Clon
     @Nonnull
     private Orbit interimDestination;
 
-    /**
-     * The point of the targeted position.
-     */
-    @Nonnull
-    private Orbit destination;
-
     public MovementAction(@Nonnull final Cage cage,
                           @Nonnull final Fleet actor,
                           @Nonnull final EMovementType movementType,
@@ -80,7 +74,6 @@ public class MovementAction extends Historizable<MovementAction> implements Clon
         this.movementType = movementType;
         this.origin = origin;
         this.interimDestination = interimDestination;
-        this.destination = destination;
         historize();
     }
 
@@ -119,18 +112,12 @@ public class MovementAction extends Historizable<MovementAction> implements Clon
         return interimDestination;
     }
 
-    @Nonnull
-    public Orbit getDestination() {
-        return destination;
-    }
-
     @Override
     public MovementAction clone() {
         final MovementAction clone = (MovementAction) super.clone();
         clone.combatRound = combatRound.clone();
         clone.origin = origin.clone();
         clone.interimDestination = interimDestination.clone();
-        clone.destination = destination.clone();
         return clone;
     }
 }

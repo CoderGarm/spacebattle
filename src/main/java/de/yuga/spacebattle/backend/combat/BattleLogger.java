@@ -478,12 +478,9 @@ public class BattleLogger {
         final EMovementType movementType = ma.getMovementType();
         final Orbit origin = ma.getOrigin();
         final Orbit interimDestination = ma.getInterimDestination();
-        final Orbit destination = ma.getDestination();
-        final String distanceAsString = stringify(interimDestination.getDistance(destination));
         final String distanceToTargetAsString = stringify(interimDestination.getDistance(targetsPosition));
         final String moveDist = stringify(origin.getDistance(interimDestination));
         final String msg = "#" + combatRound.getNo() + " " + actor.getName() + " moves about " + moveDist +
-                ", distance to destination " + distanceAsString +
                 ", distance to target " + distanceToTargetAsString +
                 " with the plan to " + movementType;
         write(bw, msg);

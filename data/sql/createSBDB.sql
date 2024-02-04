@@ -475,8 +475,6 @@
        idMovementAction integer not null auto_increment,
         combatPhase varchar(255) not null,
         combatRound integer not null,
-        xCoordDestination varchar(255),
-        yCoordDestination varchar(255),
         xCoordInterimDestination varchar(255),
         yCoordInterimDestination varchar(255),
         movementType varchar(255) not null,

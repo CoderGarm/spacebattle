@@ -186,7 +186,7 @@ public abstract class Maneuver implements Cloneable {
 
         for (int i = 1; i <= timeToPassTotalLength; i++) {
 
-            final int percentOfTrack = (int) (((double) i / timeToPassTotalLength) * 100);
+            final double percentOfTrack = (((double) i / timeToPassTotalLength) * 100);
             final double lengthOnTrack = totalLength * percentOfTrack / 100;
             final ManeuverElement maneuverElement = maneuverElements.getManeuverForPart(percentOfTrack);
             final double[] pointAtLength = maneuverElement.getCurve().getPointAtLength(lengthOnTrack);

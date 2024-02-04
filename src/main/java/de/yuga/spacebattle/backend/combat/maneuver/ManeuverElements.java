@@ -75,7 +75,7 @@ public class ManeuverElements implements Cloneable {
     }
 
     @Nonnull
-    public ManeuverElement getManeuverForPart(final int percent) {
+    public ManeuverElement getManeuverForPart(final double percent) {
         Preconditions.checkArgument(0 <= percent && percent <= 100, "percent must be between 0 and 100 included.");
 
         int summedUp = 0;
