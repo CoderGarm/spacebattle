@@ -9,6 +9,8 @@ import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
 import de.yuga.spacebattle.backend.combat.dto.MovementAction;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
+import de.yuga.spacebattle.backend.combat.maneuver.Maneuver;
+import de.yuga.spacebattle.backend.combat.maneuver.ManeuverElement;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.dto.physics.Direction;
@@ -128,15 +130,22 @@ public class CombatHandler {
             position = coursePlot.getOrigin();
         }
         final Orbit interimDestination = courseElement.getPosition().clone();
-        final Orbit destination = coursePlot.getDestination();
-        if (destination == null) {
-            throw new NotifyWebUserException("There should be a destination at round '" + currentCombatRound + "'.");
-        }
+
         final EMovementType movementType = courseElement.getMovementType();
-        new MovementAction(cage, agent, movementType, position, interimDestination, destination);
+        final Maneuver maneuver = courseElement.getManeuver();
+        final ManeuverElement maneuverElement = courseElement.getManeuverElement();
+        final MovementAction movementAction = new MovementAction(cage, agent, maneuver, maneuverElement, movementType, position, interimDestination);
         agentsState.getPosition().moveTo(interimDestination);
 
         coursePlot.executeLatestPendingOrder();
+        // fixme solve reliable
+        final boolean fakeEnd = currentCombatRound.getNo() > 500;
+        if (coursePlot.hasPlotExceeded() || fakeEnd) {
+            coursePlot.clearFutureCourseElements();
+            maneuver.setEnd(currentCombatRound.clone());
+        }
+
+        movementAction.historize();
     }
 
     /**

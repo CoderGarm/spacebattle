@@ -5,7 +5,6 @@ import de.yuga.spacebattle.TestDataProviderUtils;
 import de.yuga.spacebattle.backend.combat.dto.BeamVolley;
 import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
 import de.yuga.spacebattle.backend.combat.dto.MovementAction;
-import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.handler.CombatHandler;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.FleetHealthState;
@@ -168,10 +167,8 @@ class CageTest extends BaseTestCase {
         // prepare stuff
         final Fleet fleet = testObject.getParticipatingFleets().get(0);
         final Orbit orbit = Orbit.getCenterOrbit();
-        // test method - constructor calls historizing in testObject
-        final MovementAction movementAction = new MovementAction(testObject, fleet, EMovementType.HOLD_DISTANCE, orbit, orbit, orbit);
-        final UUID uuidMA = UUID.fromString(movementAction.getUuid().toString());
 
+        // test method - constructor calls historizing in testObject
         final MissileSalvo missileSalvo = new MissileSalvo(testObject, fleet, fleet, Set.of(EWeaponAlignment.BROADSIDE, EWeaponAlignment.BOW, EWeaponAlignment.STERN), Set.of());
         final UUID uuidMS = UUID.fromString(missileSalvo.getUuid().toString());
 
@@ -189,7 +186,6 @@ class CageTest extends BaseTestCase {
 
         // assertions are a little strange while the first uuid which can be fetched is already resetted is the constructor is passed
         assertFalse(historyMovement.isEmpty());
-        assertEquals(uuidMA, movementAction.getUuid());
 
         assertFalse(historyOfMissileSalvos.isEmpty());
         assertEquals(uuidMS, missileSalvo.getUuid());

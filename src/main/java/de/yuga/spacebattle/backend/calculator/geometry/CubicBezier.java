@@ -81,7 +81,7 @@ public class CubicBezier implements Cloneable {
         this.cp2 = cp2;
         this.p2 = p2;
 
-        speedFunction = makeSpeedFunction();
+        this.speedFunction = makeSpeedFunction();
     }
 
     /**

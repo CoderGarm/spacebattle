@@ -45,6 +45,11 @@ public class BattleReport {
 
     @Nonnull
     @JsonProperty
+    @Schema(required = true, description = "The maneuvers which were done in this clash.")
+    private final List<Maneuver> maneuvers = new ArrayList<>();
+
+    @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The hits against missile salvos.")
     private final List<CounterMissileHit> counterMissileHits = new ArrayList<>();
 
@@ -78,6 +83,7 @@ public class BattleReport {
         this.movementActions.addAll(battleReport.getMovementActions().stream().map(m -> new MovementAction(m, languageCode, battleReport.getParticipatingFleets()))
                 .sorted(Comparator.comparingInt(o -> o.getCombatRoundKey().getCombatRound().getNo()))
                 .collect(Collectors.toList()));
+        this.maneuvers.addAll(battleReport.getManeuvers().stream().map(m -> new Maneuver(m, battleReport.getParticipatingFleets())).collect(Collectors.toList()));
         this.counterMissileHits.addAll(battleReport.getCounterMissileHits().stream().map(c -> new CounterMissileHit(c, languageCode)).collect(Collectors.toList()));
         this.releasedVolleys.addAll(battleReport.getReleasedVolleys().stream().map(r -> new ReleasedVolley(r, languageCode)).collect(Collectors.toList()));
         this.missileMovements.addAll(battleReport.getMissileMovements().stream().map(m -> new MissileMovement(m, languageCode)).collect(Collectors.toList()));

@@ -1,18 +1,19 @@
 package de.yuga.spacebattle.rest.dto.turn.battle.combat;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMarker;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Schema(description = ".")
-public class MovementAction {
+public class Maneuver {
 
     @Nonnull
     @JsonProperty
@@ -21,39 +22,44 @@ public class MovementAction {
 
     @Nonnull
     @JsonProperty
+    @Schema(required = true, description = "The name of the maneuver.")
+    private String name;
+
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The planned end.")
+    private CombatRound designatedEnd;
+
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The real end.")
+    private CombatRound end;
+
+    @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The fleet which acts.")
-    private de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMarker actor;
+    private FleetMarker actor;
 
     @Nonnull
     @JsonProperty
-    @Schema(required = true, description = "The selected movement option for this action.")
-    private EMovementType movementType;
+    @Schema(required = true, description = "The fleet which acts.")
+    private List<ManeuverElement> maneuverElements = new ArrayList<>();
 
-    @Nonnull
-    @JsonProperty
-    @Schema(required = true, description = "The aura range states.")
-    private AuraState auraState;
-
-    public MovementAction(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction input,
-                          @Nonnull final String languageCode,
-                          @Nonnull final Set<FleetSnapshot> participatingFleets) {
-        Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
+    public Maneuver(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.Maneuver input,
+                    @Nonnull final Set<FleetSnapshot> participatingFleets) {
         Preconditions.checkNotNull(input, "input shouldn't be null!");
         Preconditions.checkNotNull(participatingFleets, "participatingFleets must not be empty");
 
         this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound(), input.getCombatPhase());
+        this.designatedEnd = new CombatRound(input.getDesignatedEnd());
+        this.end = new CombatRound(input.getEnd());
         final FleetSnapshot fleetSnapshot = participatingFleets.stream()
                 .filter(snap -> snap.getFleet().equals(input.getActor()))
                 .findFirst()
                 .orElseThrow(NullPointerException::new);
         this.actor = new FleetMarker(fleetSnapshot);
-        this.movementType = input.getMovementType();
-        this.auraState = new AuraState(input.getAlignedAuraStates());
+        this.name = input.getName();
+        this.maneuverElements.addAll(input.getManeuverElements().stream().map(ManeuverElement::new).collect(Collectors.toList()));
     }
 
-    @Nonnull
-    @JsonIgnore
-    public CombatRoundKey getCombatRoundKey() {
-        return combatRoundKey;
-    }
 }

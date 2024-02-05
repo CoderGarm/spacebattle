@@ -363,6 +363,34 @@
         primary key (idShipKillerHit, idHitLog)
     ) engine=InnoDB;
 
+    create table maneuver (
+       idManeuver integer not null auto_increment,
+        combatPhase varchar(255) not null,
+        combatRound integer not null,
+        designatedEnd integer not null,
+        end integer not null,
+        name varchar(255) not null,
+        idActor integer not null,
+        idTarget integer not null,
+        primary key (idManeuver)
+    ) engine=InnoDB;
+
+    create table maneuverElement (
+       idManeuverElement integer not null auto_increment,
+        xCoordinateCP1 varchar(255),
+        yCoordinateCP1 varchar(255),
+        xCoordinateCP2 varchar(255),
+        yCoordinateCP2 varchar(255),
+        xCoordinateP1 varchar(255),
+        yCoordinateP1 varchar(255),
+        xCoordinateP2 varchar(255),
+        yCoordinateP2 varchar(255),
+        partOfManeuver integer not null,
+        sequenceNo integer not null,
+        idManeuver integer not null,
+        primary key (idManeuverElement)
+    ) engine=InnoDB;
+
     create table messageThread (
        idMessageThread integer not null auto_increment,
         idUserOne integer not null,
@@ -475,12 +503,9 @@
        idMovementAction integer not null auto_increment,
         combatPhase varchar(255) not null,
         combatRound integer not null,
-        xCoordInterimDestination varchar(255),
-        yCoordInterimDestination varchar(255),
         movementType varchar(255) not null,
-        xCoordinate varchar(255),
-        yCoordinate varchar(255),
         idActor integer not null,
+        idManeuver integer not null,
         primary key (idMovementAction)
     ) engine=InnoDB;
 
@@ -1423,6 +1448,21 @@ create index ID_SC on shipClass (isDeleted);
             foreign key (idShipKillerHit)
                 references shipKillerHit (idShipKillerHit);
 
+    alter table maneuver 
+       add constraint FKcvx1o183kutmyqa1jj40bij56 
+       foreign key (idActor) 
+       references fleet (idFleet);
+
+    alter table maneuver 
+       add constraint FKb3vcn9udn13s92hu6spvmbs9y 
+       foreign key (idTarget) 
+       references fleet (idFleet);
+
+    alter table maneuverElement 
+       add constraint FK5rat96hasfnv0pnxdyti3nsrv 
+       foreign key (idManeuver) 
+       references maneuver (idManeuver);
+
     alter table messageThread
         add constraint FK1d5qqscr6uidy4lithqwkfcsb
             foreign key (idUserOne)
@@ -1552,6 +1592,11 @@ create index ID_SC on shipClass (isDeleted);
         add constraint FK2fc6fy40a1twi3bedin6c2sr1
             foreign key (idActor)
                 references fleet (idFleet);
+
+    alter table movementAction 
+       add constraint FK88r923vtbqffqy7u3n62bw5d7 
+       foreign key (idManeuver) 
+       references maneuver (idManeuver);
 
     alter table movementActions
         add constraint FKlsfd21vc6bericbiwv6huwo
@@ -2159,3 +2204,4 @@ INSERT INTO dbPatch VALUES (NULL, NOW(), 'add event participations', '0.1.17-6')
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'replace operational cache', '0.1.17-7');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'share battle reports', '0.1.17-8');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'introduce aligned ranges', '0.1.18-1');
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'switch to bezier course', '0.1.18-2');

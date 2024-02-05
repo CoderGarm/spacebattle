@@ -13,6 +13,8 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +23,6 @@ import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.combat.enums.EMovementType.REDUCE_DISTANCE;
 
@@ -68,19 +69,19 @@ public abstract class Maneuver implements Cloneable {
     private final List<CourseOrderElement> courseOrderElements = new ArrayList<>();
 
     @Nonnull
-    private ManeuverElements maneuverElements;
+    private final ManeuverElements maneuverElements;
 
     protected Maneuver(@Nonnull final Cage cage,
-                    @Nonnull final CombatRound start,
-                    @Nonnull final Fleet agent,
-                    @Nonnull final KinematicInfo agentsKinematicInitial,
-                    @Nonnull final KinematicInfo agentsKinematicDesignated,
-                    @Nonnull final Fleet target) {
+                       @Nonnull final CombatRound start,
+                       @Nonnull final Fleet agent,
+                       @Nonnull final KinematicInfo agentsKinematicInitial,
+                       @Nonnull final KinematicInfo agentsKinematicDesignated,
+                       @Nonnull final Fleet target) {
         this.cage = Preconditions.checkNotNull(cage, "cage must not be empty");
         this.start = Preconditions.checkNotNull(start, "start must not be empty").clone();
         this.agent = Preconditions.checkNotNull(agent, "agent must not be empty");
-        this.agentsKinematicInitial = Preconditions.checkNotNull(agentsKinematicInitial, "agentsKinematicInitial must not be empty");
-        this.agentsKinematicDesignated = Preconditions.checkNotNull(agentsKinematicDesignated, "agentsKinematicDesignated must not be empty");
+        this.agentsKinematicInitial = Preconditions.checkNotNull(agentsKinematicInitial, "agentsKinematicInitial must not be empty").clone();
+        this.agentsKinematicDesignated = Preconditions.checkNotNull(agentsKinematicDesignated, "agentsKinematicDesignated must not be empty").clone();
         this.target = Preconditions.checkNotNull(target, "target must not be empty");
 
         this.maneuverElements = this.calculateCourse();
@@ -103,14 +104,20 @@ public abstract class Maneuver implements Cloneable {
         return start;
     }
 
-    @Nullable
+    @Nonnull
     public CombatRound getDesignatedEnd() {
+        Preconditions.checkNotNull(designatedEnd, "designatedEnd must not be empty");
         return designatedEnd;
     }
 
-    @Nullable
+    @Nonnull
     public CombatRound getEnd() {
+        Preconditions.checkNotNull(end, "end must not be empty");
         return end;
+    }
+
+    public boolean isValid() {
+        return end != null;
     }
 
     @Nonnull
@@ -160,17 +167,36 @@ public abstract class Maneuver implements Cloneable {
             clone.start = start.clone();
             clone.end = end != null ? end.clone() : null;
             clone.designatedEnd = designatedEnd != null ? designatedEnd.clone() : null;
-            clone.maneuverElements = maneuverElements.clone();
-            clone.courseOrderElements.addAll(courseOrderElements.stream().map(CourseOrderElement::clone).collect(Collectors.toList()));
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
     }
 
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final Maneuver maneuver = (Maneuver) o;
+
+        return new EqualsBuilder().append(start, maneuver.start).append(agent, maneuver.agent).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(start).append(agent).toHashCode();
+    }
+
     @Nonnull
     public String getManeuverName() {
         return this.getClass().getSimpleName();
+    }
+
+    @Nonnull
+    public ManeuverElements getManeuverElements() {
+        return maneuverElements;
     }
 
     @Nonnull
@@ -190,8 +216,10 @@ public abstract class Maneuver implements Cloneable {
             final double lengthOnTrack = totalLength * percentOfTrack / 100;
             final ManeuverElement maneuverElement = maneuverElements.getManeuverForPart(percentOfTrack);
             final double[] pointAtLength = maneuverElement.getCurve().getPointAtLength(lengthOnTrack);
+            // fixme add percent on track to course element
             addCourseOrder(
                     combatRound.clone(),
+                    maneuverElement,
                     REDUCE_DISTANCE,
                     maxVelocity.clone(),
                     new Orbit(pointAtLength, EDistanceMetric.KM)
@@ -211,19 +239,21 @@ public abstract class Maneuver implements Cloneable {
     }
 
     public void addCourseOrder(@Nonnull final CombatRound combatRound,
+                               @Nonnull final ManeuverElement maneuverElement,
                                @Nonnull final EMovementType movementType,
                                @Nonnull final Velocity velocity,
-                               @Nonnull final Orbit destination) {
+                               @Nonnull final Orbit position) {
         Preconditions.checkNotNull(combatRound, "combatRound shouldn't be null!");
+        Preconditions.checkNotNull(maneuverElement, "maneuverElement must not be empty");
         Preconditions.checkNotNull(movementType, "movementType shouldn't be null!");
         Preconditions.checkNotNull(velocity, "velocity shouldn't be null!");
-        Preconditions.checkNotNull(destination, "destination shouldn't be null!");
+        Preconditions.checkNotNull(position, "position shouldn't be null!");
 
         if (hasViolatedTopSpeed(velocity)) {
             cage.logWarning("VELOCITY VIOLATED from fleet " + agent.getId());
         }
 
-        courseOrderElements.add(new CourseOrderElement(combatRound, movementType, velocity, destination));
+        courseOrderElements.add(new CourseOrderElement(this, maneuverElement, combatRound, movementType, velocity, position));
     }
 
     public boolean hasViolatedTopSpeed(@Nonnull final Velocity velocity) {

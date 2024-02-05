@@ -5,7 +5,6 @@ import de.yuga.spacebattle.backend.combat.dto.AlignedAuraState;
 import de.yuga.spacebattle.backend.combat.dto.AuraState;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -18,40 +17,22 @@ import java.util.Set;
 @AttributeOverride(name = "id", column = @Column(name = "idMovementAction"))
 public class MovementAction extends CombatRoundKey {
 
-    /**
-     * The source of the salvo.
-     */
+    @NotNull
+    @Nonnull
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "idManeuver", updatable = false)
+    private de.yuga.spacebattle.backend.entities.turn.battle.combat.Maneuver maneuver;
+
     @NotNull
     @Nonnull
     @ManyToOne(optional = false)
     @JoinColumn(name = "idActor", nullable = false, updatable = false)
     private Fleet actor;
 
-    /**
-     * The selected movement option for this action.
-     */
     @NotNull
     @Nonnull
     @Enumerated(EnumType.STRING)
     private EMovementType movementType;
-
-    /**
-     * The starting position for this movement.
-     */
-    @NotNull
-    @Nonnull
-    @Embedded
-    private Orbit origin;
-
-    /**
-     * The next step to the targeted position.
-     */
-    @NotNull
-    @Nonnull
-    @Embedded
-    @AttributeOverride(name = "xCoordinate", column = @Column(name = "xCoordInterimDestination"))
-    @AttributeOverride(name = "yCoordinate", column = @Column(name = "yCoordInterimDestination"))
-    private Orbit interimDestination;
 
     @Nonnull
     @NotNull
@@ -62,15 +43,25 @@ public class MovementAction extends CombatRoundKey {
     public MovementAction() {
     }
 
-    public MovementAction(@Nonnull final de.yuga.spacebattle.backend.combat.dto.MovementAction movementAction, @Nonnull final AuraState auraState) {
+    public MovementAction(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.Maneuver maneuver,
+                          @Nonnull final de.yuga.spacebattle.backend.combat.dto.MovementAction movementAction,
+                          @Nonnull final AuraState auraState) {
         super(movementAction.getCombatRound(), movementAction.getCombatPhase());
         Preconditions.checkNotNull(auraState, "auraState must not be empty");
 
+        this.maneuver = Preconditions.checkNotNull(maneuver, "maneuver must not be empty");
         this.actor = movementAction.getActor();
         this.movementType = movementAction.getMovementType();
-        this.origin = movementAction.getOrigin().clone();
-        this.interimDestination = movementAction.getInterimDestination().clone();
         this.alignedAuraStates.addAll(auraState.getAlignedAuraStates().values());
+    }
+
+    @Nonnull
+    public Maneuver getManeuver() {
+        return maneuver;
+    }
+
+    public void replaceByPersistedManeuver(@Nonnull final Maneuver maneuver) {
+        this.maneuver = Preconditions.checkNotNull(maneuver, "maneuver must not be empty");
     }
 
     @Nonnull
@@ -81,16 +72,6 @@ public class MovementAction extends CombatRoundKey {
     @Nonnull
     public EMovementType getMovementType() {
         return movementType;
-    }
-
-    @Nonnull
-    public Orbit getOrigin() {
-        return origin;
-    }
-
-    @Nonnull
-    public Orbit getInterimDestination() {
-        return interimDestination;
     }
 
     @Nonnull

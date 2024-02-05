@@ -13,6 +13,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import javax.annotation.Nonnull;
 import javax.persistence.Convert;
 import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC_HU;
@@ -20,15 +21,13 @@ import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator
 @Embeddable
 public class Orbit implements Comparable<Orbit>, Cloneable {
 
-    /**
-     * Just to position the system.
-     */
+    @Nonnull
+    @NotNull
     @Convert(converter = DistanceConverter.class)
     private Distance xCoordinate;
 
-    /**
-     * Just to position the system.
-     */
+    @Nonnull
+    @NotNull
     @Convert(converter = DistanceConverter.class)
     private Distance yCoordinate;
 
@@ -71,10 +70,12 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
         this.yCoordinate = new Distance(coordinate[1], distanceMetric);
     }
 
+    @Nonnull
     public Distance getXCoordinate() {
         return xCoordinate;
     }
 
+    @Nonnull
     public Distance getYCoordinate() {
         return yCoordinate;
     }
@@ -100,6 +101,7 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
      * @param direction    the direction
      * @return the resulting position
      */
+    @Nonnull
     public Orbit move(@Nonnull final EMovementType movementType,
                       @Nonnull final Distance distance,
                       @Nonnull final Orbit direction) {
@@ -163,6 +165,7 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
      * @param direction the normalized direction vector
      * @return the resulting immutable.
      */
+    @Nonnull
     public Orbit moveAboutAndGet(@Nonnull final Distance distance,
                                  @Nonnull final Direction direction) {
         Preconditions.checkNotNull(distance, "distance shouldn't be null!");
@@ -275,6 +278,7 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
         return 1;
     }
 
+    @Nonnull
     public static Orbit getCenterOrbit() {
         return new Orbit(Distance.ZERO, Distance.ZERO);
     }

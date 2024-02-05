@@ -31,8 +31,10 @@ public class ManeuverFactory {
         final FleetRoundState agentState = cage.getCurrentStateByFleet(agent);
         final FleetRoundState targetState = cage.getCurrentStateByFleet(target);
 
-        final KinematicInfo agentsKinematicInitial = KinematicInfo.getFrom(agentState);
         final KinematicInfo agentsKinematicDesignation = KinematicInfo.getFrom(targetState);
+        final KinematicInfo agentsKinematicInitial = KinematicInfo.getFrom(agentState)
+                // shifts the position ot of the planets center
+                .shiftInPlanetaryOrbit(agentsKinematicDesignation.getPosition());
 
         return new TimeOptimizedCourse(
                 cage,

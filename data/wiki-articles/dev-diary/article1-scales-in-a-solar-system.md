@@ -9,12 +9,16 @@ problembeschreibung:
 3. die darstellung muss einen mehrwert bringen, d.h. man muss beim raketenbeschuss die skala von "3 millionen km zu 600 km flottenumfang" sinnvoll darstellen
 4. reisezeiten in kampfrunden sind absurd - 681 runden bewegung und 19 runden kampf
 
+---
+
 Bitte schreibe mir einen Artikel über die Problematiken des Skalierens von Entfernungen in den Größenordnungen eines Sonnensystems im Vergleich zu einer Flotte von Raumschiffen.
 
 Es geht darum den Nutzern eines Computerspiels ein bisschen Content für die Wartezeit auf das neue Release zu liefern.  
 Bitte aus der Perspektive des Spieleentwicklers neu schreiben. Das Thema soll getragen, allerdings nicht konstant angesprochen werden.
 
-Der Artikel soll folgende Punkte im Fließtext ansprechen:
+Der Artikel soll ein Vorwort enthalten, dass folgendes beschreibt:
+
+Der Artikel selbst soll folgende Punkte im Fließtext ansprechen:
 
 - Man muss die Größe von Raumschiffen ebenso darstellen können wie die des Sonnensystems und seiner Planeten. Es soll gleichzeitig die schieren Ausmaße in der UI/UX transportiert
   werden wie natürlich die Benutzbarkeit des Interfaces.
@@ -36,5 +40,7 @@ Zum Glück kann man immer auf die Mathematik bauen, es gibt immer einen Weg, um 
 - Das Skalierungsproblem der Entfernungen gibt es auch in der zeitlichen Dimension.
   Eine eindringende Flotte hat eine enorme Entfernung zu überbrücken, selbst wenn die Verteidiger ihr entgegen fliegen. Das Userinterface muss so gestaltet sein, dass man die
   Darstellung der ablaufenden Kampfrunden sinnvoll "vorspulen" kann, so dass die Zeiten, in denen sich die Flotten in Position bringen, zwar unterhaltsam, aber nicht eintönig sind.
+
+Das Nachwort soll auf einen Folgeartikel zum Thema virtuelle Flottenmanöver im Weltraum, Splines und Bezierkurven hinweisen.
 
 ---

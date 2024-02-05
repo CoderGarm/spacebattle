@@ -8,6 +8,7 @@ import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.enums.EModuleType;
+import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 
 import javax.annotation.Nonnull;
 
@@ -91,6 +92,16 @@ public class KinematicInfo implements Cloneable {
     @Nonnull
     public KinematicInfo with(@Nonnull final Orbit orbit) {
         this.position = Preconditions.checkNotNull(orbit, "orbit must not be empty").clone();
+
+        return this;
+    }
+
+    @Nonnull
+    public KinematicInfo shiftInPlanetaryOrbit(@Nonnull final Orbit direction) {
+        Preconditions.checkNotNull(direction, "direction must not be empty");
+
+        this.position.moveAbout(new Distance(1500000, EDistanceMetric.KM), new Direction(position, direction));
+
         return this;
     }
 }

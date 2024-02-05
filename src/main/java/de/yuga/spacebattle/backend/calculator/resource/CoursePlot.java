@@ -216,7 +216,7 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
 
         final CombatRound cc = cage.getCurrentCombatRound().clone();
         cc.next();
-        addCourseOrder(cc, movementType, resultingVelocity, destination);
+        // fixme is maneuver creation addCourseOrder(cc, movementType, resultingVelocity, destination);
     }
 
     public void createAggressiveCourse() {
@@ -399,7 +399,7 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
             }
             // calculate resulting orbit
             final Orbit stepDestination = position.getDestinationBy(distanceByTime, courseDirection);
-            addCourseOrder(combatRound.clone(), movementType, resultingVelocity, stepDestination);
+            // fixme is maneuver creation addCourseOrder(combatRound.clone(), movementType, resultingVelocity, stepDestination);
             initialVelocity = resultingVelocity;
             combatRound.next();
         }
@@ -416,23 +416,6 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
     private Velocity getAgentsTopSpeed() {
         return Velocity.SOL.multiply(BigDecimal.valueOf(agent.getRestrictingTechnologyType().getMaxVelocitySOL()));
     }
-
-    public void addCourseOrder(@Nonnull final CombatRound combatRound,
-                               @Nonnull final EMovementType movementType,
-                               @Nonnull final Velocity velocity,
-                               @Nonnull final Orbit destination) {
-        Preconditions.checkNotNull(combatRound, "combatRound shouldn't be null!");
-        Preconditions.checkNotNull(movementType, "movementType shouldn't be null!");
-        Preconditions.checkNotNull(velocity, "velocity shouldn't be null!");
-        Preconditions.checkNotNull(destination, "destination shouldn't be null!");
-
-        if (hasViolatedTopSpeed(velocity)) {
-            cage.logWarning("VELOCITY VIOLATED from fleet " + agent.getId());
-        }
-
-        courseOrderElements.add(new CourseOrderElement(combatRound, movementType, velocity, destination));
-    }
-
 
     /**
      * Returns or creates the damage projection for the fleet depending on their current state.<br>
@@ -633,10 +616,6 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         return maneuver;
     }
 
-    public void setManeuver(@Nullable final Maneuver maneuver) {
-        this.maneuver = maneuver;
-    }
-
     @Override
     public CoursePlot clone() {
         final CoursePlot clone = (CoursePlot) super.clone();
@@ -647,6 +626,7 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         clone.destination = destination != null ? destination.clone() : null;
         clone.courseDirection = courseDirection != null ? courseDirection.clone() : null;
         clone.courseOrderElements = courseOrderElements.stream().map(CourseOrderElement::clone).collect(Collectors.toList());
+        clone.maneuver = maneuver != null ? maneuver.clone() : null;
         return clone;
     }
 

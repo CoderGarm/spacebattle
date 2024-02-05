@@ -476,6 +476,9 @@ public class Cage implements Future<Cage> {
     public void addHistorizable(@Nonnull final Historizable historizable) {
         Preconditions.checkNotNull(historizable, "historizable shouldn't be null!");
 
+        // fixme replace the historizable concept by transferring directly into the new dto classes and not cloning them
+        //  the idea is to remove all cloning
+
         if (historizable instanceof MovementAction) {
             historyMovement.add(((MovementAction) historizable).clone());
         } else if (historizable instanceof MissileSalvo) {

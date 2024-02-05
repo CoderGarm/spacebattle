@@ -176,6 +176,11 @@ public class BattleReport extends AbstractEntityKey {
     }
 
     @Nonnull
+    public Set<Maneuver> getManeuvers() {
+        return movementActions.stream().map(MovementAction::getManeuver).collect(Collectors.toSet());
+    }
+
+    @Nonnull
     public Set<CounterMissileHit> getCounterMissileHits() {
         return counterMissileHits;
     }
@@ -211,10 +216,15 @@ public class BattleReport extends AbstractEntityKey {
                 .collect(Collectors.groupingBy(de.yuga.spacebattle.backend.combat.dto.MovementAction::getCombatRound,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
 
+        final Map<de.yuga.spacebattle.backend.combat.maneuver.Maneuver, Maneuver> maneuvers = allMovements.stream()
+                .filter(m -> m.getManeuver().isValid())
+                .collect(Collectors.toMap(de.yuga.spacebattle.backend.combat.dto.MovementAction::getManeuver, m -> new Maneuver(m.getManeuver())));
+
         final Map<CombatRound, List<AuraState>> aurasByRound = allRoundStates.stream()
                 .collect(Collectors.groupingBy(FleetRoundState::getCombatRound,
                         Collectors.mapping(FleetRoundState::getAuraState, Collectors.toList())));
 
+        //noinspection DuplicatedCode
         final Map<CombatRound, List<BeamVolley>> beamVolleyByRound = allBeamVolleys.stream()
                 .collect(Collectors.groupingBy(BeamVolley::getCombatRound,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
@@ -225,6 +235,7 @@ public class BattleReport extends AbstractEntityKey {
 
         final List<CombatRound> combatRounds = statesByRound.keySet().stream().sorted(CombatRound::compareTo).collect(Collectors.toList());
         for (final CombatRound combatRound : combatRounds) {
+            //noinspection DuplicatedCode
             final List<ECombatPhase> combatPhases = Arrays.stream(ECombatPhase.values()).collect(Collectors.toList());
 
             final List<FleetRoundState> fleetRoundStates = statesByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
@@ -245,7 +256,7 @@ public class BattleReport extends AbstractEntityKey {
                 for (final ECombatPhase.ECombatSubPhase combatSubPhase : combatSubPhases) {
                     switch (combatSubPhase) {
                         case MOVEMENT_PHASE:
-                            addMovementAction(movementActions, auraStates);
+                            addMovementAction(movementActions, auraStates, maneuvers);
                             break;
                         case ELOKA_PHASE:
                         case COUNTER_MISSILE_PHASE:
@@ -290,14 +301,17 @@ public class BattleReport extends AbstractEntityKey {
         }
     }
 
-    private void addMovementAction(@Nonnull final List<de.yuga.spacebattle.backend.combat.dto.MovementAction> movementActions, @Nonnull final List<AuraState> auraStates) {
+    private void addMovementAction(@Nonnull final List<de.yuga.spacebattle.backend.combat.dto.MovementAction> movementActions,
+                                   @Nonnull final List<AuraState> auraStates,
+                                   @Nonnull final Map<de.yuga.spacebattle.backend.combat.maneuver.Maneuver, Maneuver> maneuvers) {
         Preconditions.checkNotNull(movementActions, "movementActions must not be empty");
         Preconditions.checkNotNull(auraStates, "auraStates must not be empty");
+        Preconditions.checkNotNull(maneuvers, "maneuvers must not be empty");
 
         movementActions.forEach(ma -> {
             final Fleet actor = ma.getActor();
             final AuraState auraState = auraStates.stream().filter(a -> a.getActor().equals(actor)).findFirst().orElseThrow();
-            this.movementActions.add(new de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction(ma, auraState));
+            this.movementActions.add(new de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction(maneuvers.get(ma.getManeuver()), ma, auraState));
         });
     }
 
