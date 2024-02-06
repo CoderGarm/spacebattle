@@ -503,6 +503,7 @@
        idMovementAction integer not null auto_increment,
         combatPhase varchar(255) not null,
         combatRound integer not null,
+        lengthOnTrack varchar(255) not null,
         movementType varchar(255) not null,
         idActor integer not null,
         idManeuver integer not null,

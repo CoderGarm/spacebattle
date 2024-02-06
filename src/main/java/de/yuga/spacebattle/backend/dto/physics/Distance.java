@@ -77,12 +77,18 @@ public class Distance implements Cloneable, Comparable<Distance> {
         return new Distance(new BigDecimal(split[0]), EDistanceMetric.getByName(split[1]));
     }
 
-    @JsonIgnore
     @Override
+    @JsonIgnore
     public String toString() {
         final Distance distance = DistanceCalculator.convertToScale(this)
                 .getInMetricWithScale(EDistanceMetric.LS);
         return distance.coordinate.stripTrailingZeros().toPlainString() + " " + distance.getDistanceMetric();
+    }
+
+    @JsonIgnore
+    public String toDatabaseString() {
+        final Distance distance = DistanceCalculator.convertToScale(this);
+        return distance.coordinate + " " + distance.getDistanceMetric();
     }
 
     @Nonnull

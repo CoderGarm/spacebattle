@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "maneuverElement")
 @AttributeOverride(name = "id", column = @Column(name = "idManeuverElement"))
-public class ManeuverElement extends AbstractEntityKey implements Cloneable {
+public class ManeuverElement extends AbstractEntityKey {
 
     @NotNull
     @Nonnull

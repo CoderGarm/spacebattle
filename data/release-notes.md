@@ -51,7 +51,8 @@ abfangkurs bestimmen:
 1. eindringling legt kurs fest
 2. verteidiger bestimmt abfangkurs
 
-aura auf combat arena: raketenreichweite, effektive sensorreichweite ...
+todo: aura auf combat arena: raketenreichweite, effektive sensorreichweite ...
+todo: fleetstats an der aura: overall health, dieses signalstärke dings als impellerstärke, schiffsanzahl nach typ
 
 
 - endpoint für "streamlined battle reports" -> trajektorienbasierte kampfbeschreibung für unity

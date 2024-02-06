@@ -476,6 +476,7 @@ public class BattleLogger {
         final Orbit targetsPosition = targetState.getPosition();
 
         final EMovementType movementType = ma.getMovementType();
+        /* fixme is file logger replaced by cage logger?
         final Orbit origin = ma.getOrigin();
         final Orbit interimDestination = ma.getInterimDestination();
         final String distanceToTargetAsString = stringify(interimDestination.getDistance(targetsPosition));
@@ -483,7 +484,7 @@ public class BattleLogger {
         final String msg = "#" + combatRound.getNo() + " " + actor.getName() + " moves about " + moveDist +
                 ", distance to target " + distanceToTargetAsString +
                 " with the plan to " + movementType;
-        write(bw, msg);
+        write(bw, msg);*/
     }
 
     private static String stringify(Distance distance) {

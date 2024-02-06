@@ -5,6 +5,7 @@ import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.maneuver.Maneuver;
 import de.yuga.spacebattle.backend.combat.maneuver.ManeuverElement;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 
@@ -17,6 +18,9 @@ public class CourseOrderElement implements Cloneable {
 
     @Nonnull
     private final ManeuverElement maneuverElement;
+
+    @Nonnull
+    private final Distance lengthOnTrack;
 
     @Nonnull
     private CombatRound combatRound;
@@ -34,12 +38,14 @@ public class CourseOrderElement implements Cloneable {
 
     public CourseOrderElement(@Nonnull final Maneuver maneuver,
                               @Nonnull final ManeuverElement maneuverElement,
+                              @Nonnull final Distance lengthOnTrack,
                               @Nonnull final CombatRound combatRound,
                               @Nonnull final EMovementType movementType,
                               @Nonnull final Velocity velocity,
                               @Nonnull final Orbit position) {
         this.maneuver = Preconditions.checkNotNull(maneuver, "maneuver must not be empty");
         this.maneuverElement = Preconditions.checkNotNull(maneuverElement, "maneuverElement must not be empty");
+        this.lengthOnTrack = Preconditions.checkNotNull(lengthOnTrack, "lengthOnTrack must not be empty");
         this.movementType = Preconditions.checkNotNull(movementType, "movementType shouldn't be null!");
         this.combatRound = Preconditions.checkNotNull(combatRound, "combatRound shouldn't be null!");
         this.velocity = Preconditions.checkNotNull(velocity, "velocity shouldn't be null!");
@@ -58,6 +64,11 @@ public class CourseOrderElement implements Cloneable {
     @Nonnull
     public ManeuverElement getManeuverElement() {
         return maneuverElement;
+    }
+
+    @Nonnull
+    public Distance getLengthOnTrack() {
+        return lengthOnTrack;
     }
 
     @Nonnull

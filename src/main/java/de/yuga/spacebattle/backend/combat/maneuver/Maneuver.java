@@ -208,7 +208,7 @@ public abstract class Maneuver implements Cloneable {
         final Velocity maxVelocity = getAgentsTopSpeed().multiply(0.05);
 
         final int timeToPassTotalLength = getLengthInCombatRounds(totalLength, maxVelocity);
-        LOGGER.info("Maneuver for '{}' with a total length of '{}' passed in '{}' rounds.", getAgent().getOwner().getUsername(), totalLength, timeToPassTotalLength);
+        cage.logMessage("Maneuver for '" + getAgent().getOwner().getUsername() + "' with a total length of '" + totalLength + "' passed in '" + timeToPassTotalLength + "' rounds.");
 
         for (int i = 1; i <= timeToPassTotalLength; i++) {
 
@@ -216,10 +216,11 @@ public abstract class Maneuver implements Cloneable {
             final double lengthOnTrack = totalLength * percentOfTrack / 100;
             final ManeuverElement maneuverElement = maneuverElements.getManeuverForPart(percentOfTrack);
             final double[] pointAtLength = maneuverElement.getCurve().getPointAtLength(lengthOnTrack);
-            // fixme add percent on track to course element
+
             addCourseOrder(
                     combatRound.clone(),
                     maneuverElement,
+                    new Distance(lengthOnTrack, EDistanceMetric.KM),
                     REDUCE_DISTANCE,
                     maxVelocity.clone(),
                     new Orbit(pointAtLength, EDistanceMetric.KM)
@@ -240,11 +241,13 @@ public abstract class Maneuver implements Cloneable {
 
     public void addCourseOrder(@Nonnull final CombatRound combatRound,
                                @Nonnull final ManeuverElement maneuverElement,
+                               @Nonnull final Distance lengthOnTrack,
                                @Nonnull final EMovementType movementType,
                                @Nonnull final Velocity velocity,
                                @Nonnull final Orbit position) {
         Preconditions.checkNotNull(combatRound, "combatRound shouldn't be null!");
         Preconditions.checkNotNull(maneuverElement, "maneuverElement must not be empty");
+        Preconditions.checkNotNull(lengthOnTrack, "lengthOnTrack must not be empty");
         Preconditions.checkNotNull(movementType, "movementType shouldn't be null!");
         Preconditions.checkNotNull(velocity, "velocity shouldn't be null!");
         Preconditions.checkNotNull(position, "position shouldn't be null!");
@@ -253,7 +256,7 @@ public abstract class Maneuver implements Cloneable {
             cage.logWarning("VELOCITY VIOLATED from fleet " + agent.getId());
         }
 
-        courseOrderElements.add(new CourseOrderElement(this, maneuverElement, combatRound, movementType, velocity, position));
+        courseOrderElements.add(new CourseOrderElement(this, maneuverElement, lengthOnTrack, combatRound, movementType, velocity, position));
     }
 
     public boolean hasViolatedTopSpeed(@Nonnull final Velocity velocity) {

@@ -12,7 +12,7 @@ public class DistanceConverter implements AttributeConverter<Distance, String> {
 
     @Override
     public String convertToDatabaseColumn(@Nullable final Distance attribute) {
-        return attribute != null ? attribute.toString() : null;
+        return attribute != null ? attribute.toDatabaseString() : null;
     }
 
     @Override

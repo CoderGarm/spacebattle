@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.combat.maneuver.Maneuver;
 import de.yuga.spacebattle.backend.combat.maneuver.ManeuverElement;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
@@ -38,25 +39,25 @@ public class MovementAction extends Historizable<MovementAction> implements Clon
     private final EMovementType movementType;
 
     @Nonnull
-    private Orbit origin;
+    private final Distance lengthOnTrack;
 
     @Nonnull
-    private Orbit interimDestination;
+    private final Orbit position;
 
     public MovementAction(@Nonnull final Cage cage,
                           @Nonnull final Fleet actor,
                           @Nonnull final Maneuver maneuver,
                           @Nonnull final ManeuverElement maneuverElement,
-                          @Nonnull final EMovementType movementType,
-                          @Nonnull final Orbit origin,
-                          @Nonnull final Orbit interimDestination) {
+                          @Nonnull final Distance lengthOnTrack,
+                          @Nonnull final Orbit position,
+                          @Nonnull final EMovementType movementType) {
         this.cage = Preconditions.checkNotNull(cage, "cage shouldn't be null!");
         this.actor = Preconditions.checkNotNull(actor, "actor shouldn't be null!");
         this.maneuver = Preconditions.checkNotNull(maneuver, "maneuver must not be empty");
         this.maneuverElement = Preconditions.checkNotNull(maneuverElement, "maneuverElement must not be empty");
         this.movementType = Preconditions.checkNotNull(movementType, "movementType shouldn't be null!");
-        this.origin = Preconditions.checkNotNull(origin, "origin shouldn't be null!");
-        this.interimDestination = Preconditions.checkNotNull(interimDestination, "interimDestination shouldn't be null!");
+        this.lengthOnTrack = Preconditions.checkNotNull(lengthOnTrack, "lengthOnTrack must not be empty");
+        this.position = Preconditions.checkNotNull(position, "position must not be empty");
         this.combatRound = cage.getCurrentCombatRound();
     }
 
@@ -96,13 +97,13 @@ public class MovementAction extends Historizable<MovementAction> implements Clon
     }
 
     @Nonnull
-    public Orbit getOrigin() {
-        return origin;
+    public Distance getLengthOnTrack() {
+        return lengthOnTrack;
     }
 
     @Nonnull
-    public Orbit getInterimDestination() {
-        return interimDestination;
+    public Orbit getPosition() {
+        return position;
     }
 
     @Override
@@ -111,8 +112,6 @@ public class MovementAction extends Historizable<MovementAction> implements Clon
         clone.combatRound = combatRound.clone();
         clone.maneuver = maneuver.clone();
         clone.maneuverElement = maneuverElement.clone();
-        clone.origin = origin.clone();
-        clone.interimDestination = interimDestination.clone();
         return clone;
     }
 

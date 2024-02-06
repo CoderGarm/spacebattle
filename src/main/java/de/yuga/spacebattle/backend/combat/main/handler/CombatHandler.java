@@ -119,26 +119,17 @@ public class CombatHandler {
         if (courseElement == null) {
             throw new NotifyWebUserException("There should be a course element at round '" + currentCombatRound + "'.");
         }
-        final Orbit position;
-        if (currentCombatRound.getNo() > 1) {
-            final CombatRound previousCombatRound = currentCombatRound.clone();
-            previousCombatRound.previous();
-            final CourseOrderElement previousCourseElement = coursePlot.getCourseElement(previousCombatRound);
-            assert previousCourseElement != null : "The previous element must be present at this place.";
-            position = previousCourseElement.getPosition();
-        } else {
-            position = coursePlot.getOrigin();
-        }
-        final Orbit interimDestination = courseElement.getPosition().clone();
 
+        final Orbit interimDestination = courseElement.getPosition().clone();
         final EMovementType movementType = courseElement.getMovementType();
         final Maneuver maneuver = courseElement.getManeuver();
         final ManeuverElement maneuverElement = courseElement.getManeuverElement();
-        final MovementAction movementAction = new MovementAction(cage, agent, maneuver, maneuverElement, movementType, position, interimDestination);
+        final Distance lengthOnTrack = courseElement.getLengthOnTrack();
+        final MovementAction movementAction = new MovementAction(cage, agent, maneuver, maneuverElement, lengthOnTrack, interimDestination, movementType);
         agentsState.getPosition().moveTo(interimDestination);
 
         coursePlot.executeLatestPendingOrder();
-        // fixme solve reliable
+        // fixme create course generation when nothing more but other has
         final boolean fakeEnd = currentCombatRound.getNo() > 500;
         if (coursePlot.hasPlotExceeded() || fakeEnd) {
             coursePlot.clearFutureCourseElements();

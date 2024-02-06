@@ -1,10 +1,15 @@
 
-alter table movementAction drop column xCoordinate;
-alter table movementAction drop column yCoordinate;
+/*alter table movementAction drop column xCoordinate; fixme rollback */
+/*alter table movementAction drop column yCoordinate; fixme rollback */
 alter table movementAction drop column xCoordDestination;
 alter table movementAction drop column yCoordDestination;
 alter table movementAction drop column xCoordInterimDestination;
 alter table movementAction drop column yCoordInterimDestination;
+
+ alter table movementAction add column lengthOnTrack varchar(255) not null after combatRound;
+
+ # noinspection SqlWithoutWhere
+ update movementAction set lengthOnTrack = '0 M';
 
     create table maneuver (
        idManeuver integer not null auto_increment,
