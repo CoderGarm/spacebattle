@@ -58,6 +58,7 @@ todo: fleetstats an der aura: overall health, dieses signalstärke dings als imp
 - endpoint für "streamlined battle reports" -> trajektorienbasierte kampfbeschreibung für unity
 - planeten für handel blockieren
 - handelsstörer-missionen
+- performance beim gebäude bauen bis der button wieder frei ist + snackbar text ist falsch
 
 #### Diverses
 
