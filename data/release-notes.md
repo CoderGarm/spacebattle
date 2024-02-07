@@ -44,6 +44,8 @@ article orbital modules
 
 ### Features
 
+1. faster build
+
 #### Gameplay
 
 1. More speed!  
