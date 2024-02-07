@@ -104,7 +104,7 @@ public class ColonizationTickRunner implements TickRunner {
 
             if (doneAtZero < 1) {
                 final Planet planet = colonizationService.colonizePlanet(colonization);
-                operationalService.operateInoperationals(today, planet);
+                operationalService.operateInoperationals(today, planet.getId());
                 colonizationService.delete(colonization);
                 colonizationCache.add(today, planet);
             } else {

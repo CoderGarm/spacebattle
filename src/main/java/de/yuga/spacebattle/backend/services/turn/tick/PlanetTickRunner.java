@@ -402,7 +402,7 @@ public class PlanetTickRunner implements TickRunner {
         Preconditions.checkNotNull(job, "job must not be empty");
 
         final Planet planet = job.getFacility().getPlanet();
-        if (JobService.isLocalInstaJobPossible(planet, job)) {
+        if (jobService.isLocalInstaJobPossible(planet.getId(), job)) {
             final long points = planet.getResourceDeposit().getResourceAmountByType(EResourceType.ORBITAL_CONSTRUCTION);
             final long usedPoints = tickJob(job, points);
             planet.getResourceDeposit().updateResource(EResourceType.ORBITAL_CONSTRUCTION, -usedPoints);
@@ -421,7 +421,7 @@ public class PlanetTickRunner implements TickRunner {
 
         final Planet planet = job.getFacility().getPlanet();
         final Set<Construction> constructions = constructionService.findAllConstructionsOnPlanet(planet.getId());
-        if (JobService.isLocalInstaJobPossible(planet, job)) {
+        if (jobService.isLocalInstaJobPossible(planet.getId(), job)) {
             final long points = planet.getResourceDeposit().getResourceAmountByType(EResourceType.CONSTRUCTION);
             final long usedPoints = tickJob(job, points);
             planet.getResourceDeposit().updateResource(EResourceType.CONSTRUCTION, -usedPoints);

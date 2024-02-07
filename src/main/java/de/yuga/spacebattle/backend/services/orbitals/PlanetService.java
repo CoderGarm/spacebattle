@@ -230,6 +230,12 @@ public class PlanetService {
         return planetRepository.findResourceDeposit(idPlanet);
     }
 
+    public int howMuchInDeposit(final int idPlanet, @Nonnull final EResourceType resourceType) {
+        Preconditions.checkNotNull(resourceType, "resourceType must not be empty");
+
+        return planetRepository.howMuchInDeposit(idPlanet, resourceType);
+    }
+
     @Nullable
     public MiningFactors findMiningFactors(final int idPlanet) {
         return planetRepository.findMiningFactors(idPlanet);

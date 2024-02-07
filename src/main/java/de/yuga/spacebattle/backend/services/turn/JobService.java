@@ -159,11 +159,11 @@ public class JobService {
         debtorDeposit.pay(costs);
     }
 
-    public static boolean isLocalInstaJobPossible(@Nonnull final Planet planet, @Nonnull final Job job) {
-        Preconditions.checkNotNull(planet, "planet must not be empty");
+    public boolean isLocalInstaJobPossible(final int idPlanet, @Nonnull final Job job) {
         Preconditions.checkNotNull(job, "job must not be empty");
 
-        return job.getPointsLeft() <= planet.getResourceDeposit().getResourceAmountByType(job.getConstructable().getResourceType());
+        final int inDeposit = planetService.howMuchInDeposit(idPlanet, job.getConstructable().getResourceType());
+        return job.getPointsLeft() <= inDeposit;
     }
 
 
@@ -250,10 +250,11 @@ public class JobService {
     }
 
     @Nonnull
-    public Job createShipyardJob(@Nonnull final Planet planet, @Nonnull final Map<ShipClass, Integer> shipJobPayload) {
-        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+    public Job createShipyardJob(final int idPlanet, @Nonnull final Map<ShipClass, Integer> shipJobPayload) {
         Preconditions.checkNotNull(shipJobPayload, "shipJobPayload shouldn't be null!");
 
+        final Planet planet = planetService.find(idPlanet);
+        Preconditions.checkNotNull(planet, "planet must not be empty");
         final User owner = planet.getHumanOwner();
         if (owner == null) {
             throw new NotifyWebUserException("You should own this planet, buddy.");
@@ -291,10 +292,11 @@ public class JobService {
     }
 
 
-    public Job createShipyardOrbitalModuleJob(@Nonnull final Planet planet, @Nonnull final Map<OrbitalModule, Integer> jobLoad) {
-        Preconditions.checkNotNull(planet, "planet shouldn't be null!");
+    public Job createShipyardOrbitalModuleJob(final int idPlanet, @Nonnull final Map<OrbitalModule, Integer> jobLoad) {
         Preconditions.checkNotNull(jobLoad, "jobLoad shouldn't be null!");
 
+        final Planet planet = planetService.find(idPlanet);
+        Preconditions.checkNotNull(planet, "planet must not be empty");
         final User owner = planet.getHumanOwner();
         if (owner == null) {
             throw new NotifyWebUserException("You should own this planet, buddy.");

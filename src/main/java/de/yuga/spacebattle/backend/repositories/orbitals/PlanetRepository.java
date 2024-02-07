@@ -4,6 +4,7 @@ package de.yuga.spacebattle.backend.repositories.orbitals;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.resources.MiningFactors;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.EResourceType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -57,4 +58,11 @@ public interface PlanetRepository extends JpaRepository<Planet, Integer>, Custom
     @Nullable
     @Query("SELECT DISTINCT p.system.id FROM Planet p WHERE p.owner.id = :idUser")
     Set<Integer> findAllSystemIDsForUser(final int idUser);
+
+    @Nullable
+    @Query("SELECT VALUE(ress) FROM Planet p"
+            + " LEFT JOIN ResourceDeposit r ON (r.id = p.resourceDeposit.id)"
+            + " JOIN r.resources ress "
+            + " WHERE p.id = :idPlanet AND KEY(ress) = :resourceType")
+    Integer howMuchInDeposit(final int idPlanet, final EResourceType resourceType);
 }

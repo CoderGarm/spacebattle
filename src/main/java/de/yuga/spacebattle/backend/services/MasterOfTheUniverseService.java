@@ -250,6 +250,7 @@ public class MasterOfTheUniverseService {
         final boolean transformationNeeded = false;
         if (transformationNeeded) {
 
+            // fixme file cache älter als zehn tage ignorieren
             /*
             fleetService.deleteAll();
             createFlashsFleet();

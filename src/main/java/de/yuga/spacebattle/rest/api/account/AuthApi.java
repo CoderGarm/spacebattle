@@ -352,7 +352,7 @@ public class AuthApi {
         planet = planetService.save(planet);
         final Colonization colonization = new Colonization(saved, planet, ColonizationCostCalculator.getCrewRequirementForColonization(), 0);
         planet = colonizationService.colonizePlanet(colonization);
-        operationalService.operateInoperationals(tickTimeService.getToday(), planet);
+        operationalService.operateInoperationals(tickTimeService.getToday(), planet.getId());
 
         heatMapService.createHeatForMainPlanet(planet);
 

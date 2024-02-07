@@ -438,12 +438,11 @@ public class OperationalService {
         return operationals;
     }
 
-    public void operateInoperationals(@Nonnull final Tick today, @Nonnull Planet planet) {
+    public void operateInoperationals(@Nonnull final Tick today, final int idPlanet) {
         Preconditions.checkNotNull(today, "today must not be empty");
+
+        final Planet planet = planetService.find(idPlanet);
         Preconditions.checkNotNull(planet, "planet must not be empty");
-
-
-        planet = planetService.find(planet);
         final List<WarShip> activated = activateWarships(today, planet);
         if (!activated.isEmpty()) {
             operationalCache.activateWarships(today, planet, activated);

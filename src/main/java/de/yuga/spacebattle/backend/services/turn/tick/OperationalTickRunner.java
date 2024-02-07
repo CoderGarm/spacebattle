@@ -92,7 +92,7 @@ public class OperationalTickRunner implements TickRunner {
         Preconditions.checkState(planet.getOwner() != null, "The owner must be set, otherwise there is nothing to do.");
 
         log(planet, "Start activating operationals.");
-        operationalService.operateInoperationals(today, planet);
+        operationalService.operateInoperationals(today, planet.getId());
         log(planet, "Done activating operationals.");
     }
 

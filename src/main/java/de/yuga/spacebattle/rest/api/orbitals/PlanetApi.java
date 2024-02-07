@@ -196,11 +196,10 @@ public class PlanetApi extends BaseApi {
     )
     public ResponseEntity<?> buildConstruction(@PathVariable("idPlanet") final int idPlanet, @PathVariable("idBuilding") final int idBuilding) {
         final Job job = jobService.createConstructionYardJob(idPlanet, idBuilding);
-        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = job.getFacility().getPlanet();
-        if (JobService.isLocalInstaJobPossible(planet, job)) {
+        if (jobService.isLocalInstaJobPossible(idPlanet, job)) {
             final Tick today = tickTimeService.getToday();
             planetTickRunner.tickInstaConstruction(job, today);
-            operationalService.operateInoperationals(today, planet);
+            operationalService.operateInoperationals(today, idPlanet);
         }
         return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(job, getPreferredLanguage()));
     }
@@ -261,10 +260,6 @@ public class PlanetApi extends BaseApi {
         Preconditions.checkNotNull(shipyardConstructionOrder, "shipyardConstructionOrder shouldn't be null!");
 
         final int idPlanet = shipyardConstructionOrder.getIdPlanet();
-        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetService.find(idPlanet);
-        if (planet == null) {
-            throw new NotifyWebUserException("There is no planet, sorry");
-        }
         final List<ShipyardConstructionSelection> shipJobPayload = shipyardConstructionOrder.getShipJobPayload();
         final List<Integer> idShipClasses = shipJobPayload.stream().map(ShipyardConstructionSelection::getIdShipClass).collect(Collectors.toList());
 
@@ -274,11 +269,11 @@ public class PlanetApi extends BaseApi {
         final Map<ShipClass, Integer> jobLoad = shipJobPayload.stream()
                 .collect(Collectors.toMap(entry -> foundClassesByID.get(entry.getIdShipClass()), ShipyardConstructionSelection::getAmount));
 
-        final Job job = jobService.createShipyardJob(planet, jobLoad);
-        if (JobService.isLocalInstaJobPossible(planet, job)) {
+        final Job job = jobService.createShipyardJob(idPlanet, jobLoad);
+        if (jobService.isLocalInstaJobPossible(idPlanet, job)) {
             final Tick today = tickTimeService.getToday();
             planetTickRunner.tickInstaShipyard(job, today);
-            operationalService.operateInoperationals(today, planet);
+            operationalService.operateInoperationals(today, idPlanet);
         }
         return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(job, getPreferredLanguage()));
     }
@@ -323,7 +318,7 @@ public class PlanetApi extends BaseApi {
         final FleetPlanetDto fleetPlanetDto = getResult(idFleet);
 
         final Job job = jobService.startShipyardRepairJob(fleetPlanetDto.planet, fleetPlanetDto.fleet);
-        if (JobService.isLocalInstaJobPossible(fleetPlanetDto.planet, job)) {
+        if (jobService.isLocalInstaJobPossible(fleetPlanetDto.planet.getId(), job)) {
             planetTickRunner.tickInstaShipyard(job, tickTimeService.getToday());
         }
         return ResponseEntity.ok(true);
@@ -366,7 +361,7 @@ public class PlanetApi extends BaseApi {
 
         final FleetPlanetDto fleetPlanetDto = getResult(idFleet);
         final Job job = jobService.createShipyardUpgradeJob(fleetPlanetDto.planet, fleetPlanetDto.fleet);
-        if (JobService.isLocalInstaJobPossible(fleetPlanetDto.planet, job)) {
+        if (jobService.isLocalInstaJobPossible(fleetPlanetDto.planet.getId(), job)) {
             planetTickRunner.tickInstaShipyard(job, tickTimeService.getToday());
         }
         return ResponseEntity.ok(true);
@@ -527,10 +522,6 @@ public class PlanetApi extends BaseApi {
         Preconditions.checkNotNull(shipyardConstructionOrder, "shipyardConstructionOrder shouldn't be null!");
 
         final int idPlanet = shipyardConstructionOrder.getIdPlanet();
-        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetService.find(idPlanet);
-        if (planet == null) {
-            throw new NotifyWebUserException("There is no planet, sorry");
-        }
         final List<ShipyardOrbitalModuleConstructionSelection> jobPayload = shipyardConstructionOrder.getOrbitalsJobPayload();
         final List<Integer> orbitalModuleIDs = jobPayload.stream().map(ShipyardOrbitalModuleConstructionSelection::getIdOrbitalModule).collect(Collectors.toList());
 
@@ -540,8 +531,8 @@ public class PlanetApi extends BaseApi {
         final Map<OrbitalModule, Integer> jobLoad = jobPayload.stream()
                 .collect(Collectors.toMap(entry -> foundClassesByID.get(entry.getIdOrbitalModule()), ShipyardOrbitalModuleConstructionSelection::getAmount));
 
-        final Job job = jobService.createShipyardOrbitalModuleJob(planet, jobLoad);
-        if (JobService.isLocalInstaJobPossible(planet, job)) {
+        final Job job = jobService.createShipyardOrbitalModuleJob(idPlanet, jobLoad);
+        if (jobService.isLocalInstaJobPossible(idPlanet, job)) {
             planetTickRunner.tickInstaShipyard(job, tickTimeService.getToday());
         }
         return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(job, getPreferredLanguage()));
