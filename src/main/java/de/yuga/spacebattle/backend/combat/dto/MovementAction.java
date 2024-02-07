@@ -8,7 +8,6 @@ import de.yuga.spacebattle.backend.combat.maneuver.ManeuverElement;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -41,15 +40,11 @@ public class MovementAction extends Historizable<MovementAction> implements Clon
     @Nonnull
     private final Distance lengthOnTrack;
 
-    @Nonnull
-    private final Orbit position;
-
     public MovementAction(@Nonnull final Cage cage,
                           @Nonnull final Fleet actor,
                           @Nonnull final Maneuver maneuver,
                           @Nonnull final ManeuverElement maneuverElement,
                           @Nonnull final Distance lengthOnTrack,
-                          @Nonnull final Orbit position,
                           @Nonnull final EMovementType movementType) {
         this.cage = Preconditions.checkNotNull(cage, "cage shouldn't be null!");
         this.actor = Preconditions.checkNotNull(actor, "actor shouldn't be null!");
@@ -57,7 +52,6 @@ public class MovementAction extends Historizable<MovementAction> implements Clon
         this.maneuverElement = Preconditions.checkNotNull(maneuverElement, "maneuverElement must not be empty");
         this.movementType = Preconditions.checkNotNull(movementType, "movementType shouldn't be null!");
         this.lengthOnTrack = Preconditions.checkNotNull(lengthOnTrack, "lengthOnTrack must not be empty");
-        this.position = Preconditions.checkNotNull(position, "position must not be empty");
         this.combatRound = cage.getCurrentCombatRound();
     }
 
@@ -99,11 +93,6 @@ public class MovementAction extends Historizable<MovementAction> implements Clon
     @Nonnull
     public Distance getLengthOnTrack() {
         return lengthOnTrack;
-    }
-
-    @Nonnull
-    public Orbit getPosition() {
-        return position;
     }
 
     @Override

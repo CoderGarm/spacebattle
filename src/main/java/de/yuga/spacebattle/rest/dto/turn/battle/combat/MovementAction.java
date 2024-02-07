@@ -7,7 +7,6 @@ import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMarker;
-import de.yuga.spacebattle.rest.dto.orbitals.Orbit;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -41,11 +40,6 @@ public class MovementAction {
     @Schema(required = true, description = "The total length on the main track.")
     private Distance lengthOnTrack;
 
-    @Nonnull
-    @JsonProperty
-    @Schema(required = true, description = "The total length on the main track.")
-    private Orbit position;
-
     public MovementAction(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction input,
                           @Nonnull final String languageCode,
                           @Nonnull final Set<FleetSnapshot> participatingFleets) {
@@ -62,9 +56,6 @@ public class MovementAction {
         this.movementType = input.getMovementType();
         this.auraState = new AuraState(input.getAlignedAuraStates());
         this.lengthOnTrack = input.getLengthOnTrack();
-
-        // fixme if necessary to keep the orbit calculate from bezier and remove db
-        this.position = new Orbit(input.getPosition());
     }
 
     @Nonnull

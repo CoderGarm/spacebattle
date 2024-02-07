@@ -1,6 +1,6 @@
 
-/*alter table movementAction drop column xCoordinate; fixme rollback */
-/*alter table movementAction drop column yCoordinate; fixme rollback */
+alter table movementAction drop column xCoordinate;
+alter table movementAction drop column yCoordinate;
 alter table movementAction drop column xCoordDestination;
 alter table movementAction drop column yCoordDestination;
 alter table movementAction drop column xCoordInterimDestination;

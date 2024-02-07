@@ -7,7 +7,6 @@ import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.converter.DistanceConverter;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -48,11 +47,6 @@ public class MovementAction extends CombatRoundKey {
     @Convert(converter = DistanceConverter.class)
     private Distance lengthOnTrack;
 
-    @Nonnull
-    @NotNull
-    @Embedded
-    private Orbit position;
-
     public MovementAction() {
     }
 
@@ -67,7 +61,6 @@ public class MovementAction extends CombatRoundKey {
         this.movementType = movementAction.getMovementType();
         this.alignedAuraStates.addAll(auraState.getAlignedAuraStates().values());
         this.lengthOnTrack = movementAction.getLengthOnTrack();
-        this.position = movementAction.getPosition();
     }
 
     @Nonnull
@@ -99,8 +92,4 @@ public class MovementAction extends CombatRoundKey {
         return lengthOnTrack;
     }
 
-    @Nonnull
-    public Orbit getPosition() {
-        return position;
-    }
 }
