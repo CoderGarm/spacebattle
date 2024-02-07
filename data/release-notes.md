@@ -44,7 +44,7 @@ article orbital modules
 
 ### Features
 
-1. faster build
+1. faster build - half around removing cascades
 
 #### Gameplay
 

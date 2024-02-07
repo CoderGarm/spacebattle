@@ -44,7 +44,11 @@ import java.util.stream.Collectors;
 })
 @Entity
 @ShipValidator
-@Table(name = "shipClass")
+@Table(name = "shipClass",
+        indexes = {
+                @Index(name = "ID_SC", columnList = "isDeleted")
+        }
+)
 @AttributeOverride(name = "id", column = @Column(name = "idShipClass"))
 public class ShipClass extends Deletable implements HasOwner {
 

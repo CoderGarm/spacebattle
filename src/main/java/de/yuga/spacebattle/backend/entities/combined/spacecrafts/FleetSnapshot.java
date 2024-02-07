@@ -25,7 +25,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
-@Table(name = "fleetSnapshot")
+@Table(name = "fleetSnapshot",
+        indexes = {
+                @Index(name = "ID_FS", columnList = "isDeleted")
+        }
+)
 @AttributeOverride(name = "id", column = @Column(name = "idFleetSnapshot"))
 public class FleetSnapshot extends Deletable implements HasOwner {
 

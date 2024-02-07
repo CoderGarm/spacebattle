@@ -66,7 +66,7 @@ public class Planet extends AbstractEntityKey implements HasOwner {
      */
     @Nonnull
     @NotNull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "idMiningFactors", nullable = false)
     private final MiningFactors miningFactors = new MiningFactors();
 
@@ -74,23 +74,23 @@ public class Planet extends AbstractEntityKey implements HasOwner {
      * The amount of resources at this planet.
      */
     @Nonnull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "idResourceDeposit", updatable = false)
     private final ResourceDeposit resourceDeposit = ResourceDepositInitializerCalculator.initializeResourceDeposit();
 
     @Nonnull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "idResourceTransportationDemand", updatable = false)
     private final ResourceDeposit resourceTransportationDemand = new ResourceDeposit(EDepositType.TRANSPORTATION_DEMAND);
 
     @Nonnull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "idResourceTransportationDelivery", updatable = false)
     private final ResourceDeposit resourceTransportationDelivery = new ResourceDeposit(EDepositType.TRANSPORTATION_DELIVERY);
 
     @Nonnull
     @SuppressWarnings("unused")
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, mappedBy = "planet")
+    @OneToMany(mappedBy = "planet")
     private final Set<Construction> constructions = new HashSet<>();
 
     @Nullable

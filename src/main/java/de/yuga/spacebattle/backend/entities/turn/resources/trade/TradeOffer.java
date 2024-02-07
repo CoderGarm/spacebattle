@@ -14,7 +14,11 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "tradeOffer")
+@Table(name = "tradeOffer",
+        indexes = {
+                @Index(name = "ID_TO", columnList = "isDeleted")
+        }
+)
 @AttributeOverride(name = "id", column = @Column(name = "idTradeOffer"))
 public class TradeOffer extends Deletable {
 

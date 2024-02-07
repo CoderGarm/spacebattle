@@ -23,7 +23,12 @@ import java.math.BigDecimal;
         @NamedQuery(name = "WarShip.getAll", query = "SELECT a FROM WarShip a WHERE a.isDeleted = false")
 })
 @Entity
-@Table(name = "warShip")
+@Table(name = "warShip",
+        indexes = {
+                @Index(name = "IO_WS", columnList = "isOperational"),
+                @Index(name = "ID_WS", columnList = "isDeleted")
+        }
+)
 @AttributeOverride(name = "id", column = @Column(name = "idWarShip"))
 public class WarShip extends Operationable {
 

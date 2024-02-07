@@ -233,7 +233,8 @@ public class PlanetService {
     public int howMuchInDeposit(final int idPlanet, @Nonnull final EResourceType resourceType) {
         Preconditions.checkNotNull(resourceType, "resourceType must not be empty");
 
-        return planetRepository.howMuchInDeposit(idPlanet, resourceType);
+        final Integer amount = planetRepository.howMuchInDeposit(idPlanet, resourceType);
+        return amount != null ? amount : 0;
     }
 
     @Nullable

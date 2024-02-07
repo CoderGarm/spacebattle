@@ -31,7 +31,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
-@Table(name = "move")
+@Table(name = "move",
+        indexes = {
+                @Index(name = "TL_MO", columnList = "ticksLeft"),
+                @Index(name = "ID_MO", columnList = "isDeleted")
+        }
+)
 @Check(constraints = "xCoordinateOrigin != xCoordinateDestination AND yCoordinateOrigin != yCoordinateDestination")
 @AttributeOverride(name = "id", column = @Column(name = "idMove"))
 public class Move extends Completable implements HasOwner {

@@ -14,7 +14,12 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name = "transportJob")
+@Table(name = "transportJob",
+        indexes = {
+                @Index(name = "TL_TJ", columnList = "ticksLeft"),
+                @Index(name = "ID_TJ", columnList = "isDeleted")
+        }
+)
 @AttributeOverride(name = "id", column = @Column(name = "idTransportJob"))
 public class TransportJob extends Completable {
 

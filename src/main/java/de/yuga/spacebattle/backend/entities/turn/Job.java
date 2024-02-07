@@ -20,7 +20,11 @@ import javax.validation.constraints.NotNull;
         @NamedQuery(name = "Job.getAllForPlanet", query = "SELECT j FROM Job j WHERE j.isDeleted = false AND j.facility.planet.id = :idPlanet")
 })
 @Entity
-@Table(name = "job")
+@Table(name = "job",
+        indexes = {
+                @Index(name = "ID_JO", columnList = "isDeleted")
+        }
+)
 @AttributeOverride(name = "id", column = @Column(name = "idJob"))
 /* todo replace by validation necessary?
     @Check(constraints = "(idBuilding IS NOT NULL AND targetLevel IS NOT NULL) " +

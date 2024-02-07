@@ -50,7 +50,12 @@ import static de.yuga.spacebattle.backend.calculator.FittingUtils.DEFENSIVE_FITT
                 query = "SELECT f FROM Fleet f WHERE f.isDeleted = false AND f.orbit.planet = :planet")
 })
 @Entity
-@Table(name = "fleet")
+@Table(name = "fleet",
+        indexes = {
+                @Index(name = "IO_FL", columnList = "isOperational"),
+                @Index(name = "ID_FL", columnList = "isDeleted")
+        }
+)
 @AttributeOverride(name = "id", column = @Column(name = "idFleet"))
 public class Fleet extends Operationable implements HasOwner {
 
@@ -66,12 +71,12 @@ public class Fleet extends Operationable implements HasOwner {
 
     @Nonnull
     @NotNull
-    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST})
     @JoinColumn(name = "idFleet")
     private final Set<WarShip> ships = new HashSet<>();
 
     @Nonnull
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "idResourceDeposit", updatable = false)
     private final ResourceDeposit resourceDeposit = new ResourceDeposit(EDepositType.DEPOSITS);
 

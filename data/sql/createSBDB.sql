@@ -902,20 +902,29 @@
     alter table counterMissileHits
         add constraint UK_5t1h6fs2csdnofihl1lsysbf9 unique (idCounterMissileHit);
 
-    alter table eventRanking 
+    alter table eventRanking
        add constraint POINTS_UK unique (idUser, gameEvent, rankingCategory);
+create index IO_FL on fleet (isOperational);
+create index ID_FL on fleet (isDeleted);
 
     alter table fleet
         add constraint UK_duhimx7ydhmssl7vqp5w29yx0 unique (idMove);
+create index ID_FS on fleetSnapshot (isDeleted);
+create index ID_JO on job (isDeleted);
 
     alter table messageThread
         add constraint messageThread_UC unique (idUserOne, idUserTwo);
 
     alter table missileMovements
         add constraint UK_7i21tt2alyj9dggioukympy2t unique (idMissileMovement);
+create index ID_MI on mission (isDeleted);
+create index TL_MO on move (ticksLeft);
+create index ID_MO on move (isDeleted);
 
     alter table movementActions
         add constraint UK_k7lndwnt1rxmmjj2xslfrkuv unique (idMovementAction);
+create index IO_OS on orbitalStructure (isOperational);
+create index ID_OS on orbitalStructure (isDeleted);
 
     alter table orderedHitLog
         add constraint UK_mpoyl8losmb1ep0fxewrpbuf3 unique (idHitLog);
@@ -926,8 +935,9 @@
     alter table releasesVolleys
         add constraint UK_hsr966dv9qpnj1i7nhg3nlbc6 unique (idReleasedVolley);
 
-    alter table rolePlaySetting 
+    alter table rolePlaySetting
        add constraint UK_5sx33g2kpg6lhpamw75ibqb9i unique (idUser);
+create index ID_SC on shipClass (isDeleted);
 
     alter table shipClass
         add constraint UK_4sgs4ew920mkttyjueq19n70q unique (idPredecessor);
@@ -939,16 +949,25 @@
         add constraint UK_nd3dfq3yjyhaauawah5lm5mj2 unique (idShipKillerHit);
 
     alter table starSystem
-        add constraint COORDINATE_UK unique (xCoordinate, yCoordinate);  
+        add constraint COORDINATE_UK unique (xCoordinate, yCoordinate);
+create index TL_TR on tradedResource (ticksLeft);
+create index ID_TR on tradedResource (isDeleted);
+create index ID_TO on tradeOffer (isDeleted);
+create index TL_TJ on transportJob (ticksLeft);
+create index ID_TJ on transportJob (isDeleted);
 
     alter table user
         add constraint UK_sb8bbouer5wak8vyiiy4pf2bx unique (username);
 
-    alter table userSetting 
+    alter table userSetting
        add constraint UK_de78bv8lgkrdwqxfpqr8k3wfu unique (idUser);
 
-    alter table userSetting 
+    alter table userSetting
        add constraint EMAIL_UK unique (email);
+create index IO_WS on warShip (isOperational);
+create index ID_WS on warShip (isDeleted);
+create index IO_WHSS on warshipHealthStateSnapshot (isOperational);
+create index ID_WHSS on warshipHealthStateSnapshot (isDeleted);
 
     alter table activeFittings
         add constraint FK9kawhm3fqubxvebrl8pjl10lv
@@ -1175,9 +1194,9 @@
             foreign key (idCosts)
                 references resourceDeposit (idResourceDeposit);
 
-    alter table eventRanking 
-       add constraint FKa03fqyutfi8ul5kr37ce7kra9 
-       foreign key (idUser) 
+    alter table eventRanking
+       add constraint FKa03fqyutfi8ul5kr37ce7kra9
+       foreign key (idUser)
        references user (idUser);
 
     alter table fleet
@@ -1220,19 +1239,19 @@
             foreign key (idOwner)
                 references user (idUser);
 
-    alter table flightPlan 
-       add constraint FK5r9d4uu2n4b4twymkxbmg7x7b 
-       foreign key (idPlanet) 
+    alter table flightPlan
+       add constraint FK5r9d4uu2n4b4twymkxbmg7x7b
+       foreign key (idPlanet)
        references planet (idPlanet);
 
-    alter table flightPlan 
-       add constraint FKf4ew7t3sk8e7uid5vq61rm0qd 
-       foreign key (idStarSystem) 
+    alter table flightPlan
+       add constraint FKf4ew7t3sk8e7uid5vq61rm0qd
+       foreign key (idStarSystem)
        references starSystem (idStarSystem);
 
-    alter table flightPlan 
-       add constraint FK8pnr4eib22sc2tyr556x0750w 
-       foreign key (idMove) 
+    alter table flightPlan
+       add constraint FK8pnr4eib22sc2tyr556x0750w
+       foreign key (idMove)
        references move (idMove);
 
     alter table forum
@@ -1275,9 +1294,9 @@
             foreign key (idForum)
                 references forum (idForum);
 
-    alter table heatMap 
-       add constraint FKafi78glkfnkhp6l63bjifnuqr 
-       foreign key (idPlanet) 
+    alter table heatMap
+       add constraint FKafi78glkfnkhp6l63bjifnuqr
+       foreign key (idPlanet)
        references planet (idPlanet);
 
     alter table hitLog
@@ -1291,11 +1310,11 @@
                 references resourceDeposit (idResourceDeposit);
 
     alter table job
-       add constraint FK9is567pcts10d2t0ciolkwt7p 
-       foreign key (idTickCompleted) 
+       add constraint FK9is567pcts10d2t0ciolkwt7p
+       foreign key (idTickCompleted)
        references tick (idTick);
 
-    alter table job 
+    alter table job
         add constraint FK7otfjvk4vhy0gt0m3hnyam6au
             foreign key (idBuilding)
                 references building (idBuilding);
@@ -1306,11 +1325,11 @@
                 references fleet (idFleet);
 
     alter table job
-       add constraint FK7qelga4rbeqyxcbvr96lwcwh7 
-       foreign key (idFleetSnapshot) 
+       add constraint FK7qelga4rbeqyxcbvr96lwcwh7
+       foreign key (idFleetSnapshot)
        references fleetSnapshot (idFleetSnapshot);
 
-    alter table job 
+    alter table job
         add constraint FKdno72guom99osq9f36eixsd87
             foreign key (idResearch)
                 references research (idResearch);
@@ -1415,39 +1434,39 @@
             foreign key (idBattleReport)
                 references battleReport (idBattleReport);
 
-    alter table mission 
-       add constraint FKbvhlv330gufbb2p7aeeyagtu8 
-       foreign key (idActor) 
+    alter table mission
+       add constraint FKbvhlv330gufbb2p7aeeyagtu8
+       foreign key (idActor)
        references user (idUser);
 
-    alter table mission 
-       add constraint FKav28cevdimw8uypty1f3sgu3c 
-       foreign key (idTickStartedAt) 
+    alter table mission
+       add constraint FKav28cevdimw8uypty1f3sgu3c
+       foreign key (idTickStartedAt)
        references tick (idTick);
 
-    alter table mission 
-       add constraint FKfjo5uacvj75iku0n27y8f781q 
-       foreign key (idTickStoppedAt) 
+    alter table mission
+       add constraint FKfjo5uacvj75iku0n27y8f781q
+       foreign key (idTickStoppedAt)
        references tick (idTick);
 
-    alter table mission 
-       add constraint FKgn39ow7ddmkf4bhyk50s47m1f 
-       foreign key (idTradeResource) 
+    alter table mission
+       add constraint FKgn39ow7ddmkf4bhyk50s47m1f
+       foreign key (idTradeResource)
        references tradedResource (idTradedResource);
 
-    alter table mission 
-       add constraint FKholrjg4864rt9j8qqs349b7ue 
-       foreign key (idPlanet) 
+    alter table mission
+       add constraint FKholrjg4864rt9j8qqs349b7ue
+       foreign key (idPlanet)
        references planet (idPlanet);
 
-    alter table missionItem 
-       add constraint FKjw6nl0yyik5mtyv227litad57 
-       foreign key (idTickCreatedAt) 
+    alter table missionItem
+       add constraint FKjw6nl0yyik5mtyv227litad57
+       foreign key (idTickCreatedAt)
        references tick (idTick);
 
-    alter table missionItem 
-       add constraint FKpiatw8caol0quww65cxgqeayc 
-       foreign key (idTradeResource) 
+    alter table missionItem
+       add constraint FKpiatw8caol0quww65cxgqeayc
+       foreign key (idTradeResource)
        references tradedResource (idTradedResource);
 
     alter table move
@@ -1490,9 +1509,9 @@
             foreign key (idUser)
                 references user (idUser);
 
-    alter table move 
-       add constraint FK6f36ja23cxfke6ft2pu3j23fg 
-       foreign key (idTickStarted) 
+    alter table move
+       add constraint FK6f36ja23cxfke6ft2pu3j23fg
+       foreign key (idTickStarted)
        references tick (idTick);
 
     alter table movementAction
@@ -1525,54 +1544,54 @@
             foreign key (idResearch)
                 references research (idResearch);
 
-    alter table orbitalModule 
-       add constraint FK96s9g1xhrqa6mb0vdfptri16j 
-       foreign key (idTranslatableDescription) 
+    alter table orbitalModule
+       add constraint FK96s9g1xhrqa6mb0vdfptri16j
+       foreign key (idTranslatableDescription)
        references translatable (idTranslatable);
 
-    alter table orbitalModule 
-       add constraint FKjnv18sflhrm4m6dwn86ewb80 
-       foreign key (idTranslatableName) 
+    alter table orbitalModule
+       add constraint FKjnv18sflhrm4m6dwn86ewb80
+       foreign key (idTranslatableName)
        references translatable (idTranslatable);
 
-    alter table orbitalModule 
-       add constraint FKjkhnt794699qh7ruud29r2tt 
-       foreign key (idCosts) 
+    alter table orbitalModule
+       add constraint FKjkhnt794699qh7ruud29r2tt
+       foreign key (idCosts)
        references resourceDeposit (idResourceDeposit);
 
-    alter table orbitalModule 
-       add constraint FK2nshm5a979bu2dnqk8wswlqcm 
-       foreign key (idResearch) 
+    alter table orbitalModule
+       add constraint FK2nshm5a979bu2dnqk8wswlqcm
+       foreign key (idResearch)
        references research (idResearch);
 
-    alter table orbitalModuleJobElements 
-       add constraint FKhr85m1salx7enm27qj75gwg63 
-       foreign key (idOrbitalModule) 
+    alter table orbitalModuleJobElements
+       add constraint FKhr85m1salx7enm27qj75gwg63
+       foreign key (idOrbitalModule)
        references orbitalModule (idOrbitalModule);
 
-    alter table orbitalModuleJobElements 
-       add constraint FKagpanf4seayijqw1ywrfs5ds4 
-       foreign key (idJob) 
+    alter table orbitalModuleJobElements
+       add constraint FKagpanf4seayijqw1ywrfs5ds4
+       foreign key (idJob)
        references job (idJob);
 
-    alter table orbitalStructure 
-       add constraint FKhd287pobvlknx1eo1b9rrix9x 
-       foreign key (idOrbitalModule) 
+    alter table orbitalStructure
+       add constraint FKhd287pobvlknx1eo1b9rrix9x
+       foreign key (idOrbitalModule)
        references orbitalModule (idOrbitalModule);
 
-    alter table orbitalStructure 
-       add constraint FK4kmotox08ph1avbt2f98l4x5 
-       foreign key (idPlanet) 
+    alter table orbitalStructure
+       add constraint FK4kmotox08ph1avbt2f98l4x5
+       foreign key (idPlanet)
        references planet (idPlanet);
 
-    alter table orbitalStructure 
-       add constraint FKnia95vlkjkyjdrqw3qwi1dt4e 
-       foreign key (idStarSystem) 
+    alter table orbitalStructure
+       add constraint FKnia95vlkjkyjdrqw3qwi1dt4e
+       foreign key (idStarSystem)
        references starSystem (idStarSystem);
 
-    alter table orbitalStructure 
-       add constraint FK89io2i6h4mwlhimons9paalqh 
-       foreign key (idOwner) 
+    alter table orbitalStructure
+       add constraint FK89io2i6h4mwlhimons9paalqh
+       foreign key (idOwner)
        references user (idUser);
 
     alter table orderedHitLog
@@ -1735,9 +1754,9 @@
             foreign key (idResourceDeposit)
                 references resourceDeposit (idResourceDeposit);
 
-    alter table rolePlaySetting 
-       add constraint FKhphq3ivotnm200m2l1h30rej4 
-       foreign key (idUser) 
+    alter table rolePlaySetting
+       add constraint FKhphq3ivotnm200m2l1h30rej4
+       foreign key (idUser)
        references user (idUser);
 
     alter table shipClass
@@ -1816,53 +1835,53 @@
                 references shipClass (idShipClass);
 
     alter table tradedResource
-       add constraint FKnd475bqr8f5kdwemu760355mq 
-       foreign key (idTickCompleted) 
+       add constraint FKnd475bqr8f5kdwemu760355mq
+       foreign key (idTickCompleted)
        references tick (idTick);
 
-    alter table tradedResource 
-       add constraint FK8i0ewnl7jdr7irx9pmilmq7ge 
+    alter table tradedResource
+       add constraint FK8i0ewnl7jdr7irx9pmilmq7ge
             foreign key (idBuyer)
                 references user (idUser);
 
     alter table tradedResource
-       add constraint FKcsfo7nv11frvg320e28xpoldi 
-       foreign key (idDestination) 
+       add constraint FKcsfo7nv11frvg320e28xpoldi
+       foreign key (idDestination)
        references planet (idPlanet);
 
-    alter table tradedResource 
-       add constraint FKabd9jeuxd64c5r489056kpp17 
-       foreign key (idTickInitiated) 
+    alter table tradedResource
+       add constraint FKabd9jeuxd64c5r489056kpp17
+       foreign key (idTickInitiated)
        references tick (idTick);
 
-    alter table tradedResource 
-       add constraint FK5qw2mbtgucyq10mdhxc2ho72t 
-       foreign key (idTradeOffer) 
+    alter table tradedResource
+       add constraint FK5qw2mbtgucyq10mdhxc2ho72t
+       foreign key (idTradeOffer)
        references tradeOffer (idTradeOffer);
 
-    alter table tradeOffer 
-       add constraint FK48vicymhu5tup2co4k91e2urw 
-       foreign key (idOrigin) 
+    alter table tradeOffer
+       add constraint FK48vicymhu5tup2co4k91e2urw
+       foreign key (idOrigin)
        references planet (idPlanet);
 
-    alter table tradeOffer 
-       add constraint FKi02ss97mli085wfdg9ngg49ja 
+    alter table tradeOffer
+       add constraint FKi02ss97mli085wfdg9ngg49ja
             foreign key (idSeller)
                 references user (idUser);
 
-    alter table tradeOffer 
-       add constraint FKfs5vnnx3isy8srun4xll4rw0i 
-       foreign key (idTickInitiated) 
+    alter table tradeOffer
+       add constraint FKfs5vnnx3isy8srun4xll4rw0i
+       foreign key (idTickInitiated)
                 references tick (idTick);
 
-    alter table transferredShips 
-       add constraint FKdi04kj2s8phv98b06t97b0g1b 
-       foreign key (idWarship) 
+    alter table transferredShips
+       add constraint FKdi04kj2s8phv98b06t97b0g1b
+       foreign key (idWarship)
        references warShip (idWarShip);
 
-    alter table transferredShips 
-       add constraint FK8nikh4493iao57u0gjtht1bkn 
-       foreign key (idTransportJob) 
+    alter table transferredShips
+       add constraint FK8nikh4493iao57u0gjtht1bkn
+       foreign key (idTransportJob)
        references transportJob (idTransportJob);
 
     alter table translation
@@ -1870,29 +1889,29 @@
             foreign key (idTranslatable)
                 references translatable (idTranslatable);
 
-    alter table transportJob 
-       add constraint FK3p8d8qmsdvengg6kmvnesqipi 
-       foreign key (idTickCompleted) 
+    alter table transportJob
+       add constraint FK3p8d8qmsdvengg6kmvnesqipi
+       foreign key (idTickCompleted)
        references tick (idTick);
 
-    alter table transportJob 
-       add constraint FKq08wsniijayb6pwmfolhdphsl 
-       foreign key (idDestination) 
+    alter table transportJob
+       add constraint FKq08wsniijayb6pwmfolhdphsl
+       foreign key (idDestination)
        references planet (idPlanet);
 
-    alter table transportJob 
-       add constraint FKc0d66ie3d1ungo75ft5ntsjj 
-       foreign key (idOrigin) 
+    alter table transportJob
+       add constraint FKc0d66ie3d1ungo75ft5ntsjj
+       foreign key (idOrigin)
        references planet (idPlanet);
 
-    alter table transportJob 
-       add constraint FK1t3cfowqftboj0yqntyki29fv 
-       foreign key (idOwner) 
+    alter table transportJob
+       add constraint FK1t3cfowqftboj0yqntyki29fv
+       foreign key (idOwner)
        references user (idUser);
 
-    alter table transportJob 
-       add constraint FK9c2tnkoa6jp6j4hnqnpmstl16 
-       foreign key (idTickInitiated) 
+    alter table transportJob
+       add constraint FK9c2tnkoa6jp6j4hnqnpmstl16
+       foreign key (idTickInitiated)
        references tick (idTick);
 
     alter table user
@@ -1921,21 +1940,21 @@
                 references fleet (idFleet);
 
     alter table warShip
-       add constraint FKr1fjudewjfngri3nq6axpbf5r 
-       foreign key (idMission) 
+       add constraint FKr1fjudewjfngri3nq6axpbf5r
+       foreign key (idMission)
        references mission (idMission);
 
-    alter table warShip 
-       add constraint FKgxsukhuxoyaglnxcaawuyuh30 
-       foreign key (idMothball) 
+    alter table warShip
+       add constraint FKgxsukhuxoyaglnxcaawuyuh30
+       foreign key (idMothball)
        references planet (idPlanet);
 
-    alter table warShip 
-       add constraint FKeyf0wphylpn2gwbgwtvvspw4h 
-       foreign key (idTransportJob) 
+    alter table warShip
+       add constraint FKeyf0wphylpn2gwbgwtvvspw4h
+       foreign key (idTransportJob)
        references transportJob (idTransportJob);
 
-    alter table warShip 
+    alter table warShip
         add constraint FKjr13y2u3qkka7d3npp9omwdoa
             foreign key (idShipClass)
                 references shipClass (idShipClass);
@@ -2061,3 +2080,4 @@ INSERT INTO dbPatch VALUES (NULL, NOW(), 'introduce waypoints', '0.1.17-1');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'introduce game events', '0.1.17-2');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'more roleplay', '0.1.17-3');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'more more roleplay', '0.1.17-4');
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'add indices', '0.1.17-5');

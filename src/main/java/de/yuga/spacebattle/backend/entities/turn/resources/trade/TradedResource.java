@@ -16,7 +16,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "tradedResource")
+@Table(name = "tradedResource",
+        indexes = {
+                @Index(name = "TL_TR", columnList = "ticksLeft"),
+                @Index(name = "ID_TR", columnList = "isDeleted")
+        }
+)
 @AttributeOverride(name = "id", column = @Column(name = "idTradedResource"))
 public class TradedResource extends Completable {
 

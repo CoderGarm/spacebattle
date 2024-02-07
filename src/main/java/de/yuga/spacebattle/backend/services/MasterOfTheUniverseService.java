@@ -251,6 +251,9 @@ public class MasterOfTheUniverseService {
         if (transformationNeeded) {
 
             // fixme file cache älter als zehn tage ignorieren
+            // fixme cache service der teure operationen regelmäßig rechnet?
+            // fixme login log für user
+            // fixme open the carrier planets on click
             /*
             fleetService.deleteAll();
             createFlashsFleet();

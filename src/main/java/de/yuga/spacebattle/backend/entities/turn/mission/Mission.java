@@ -19,7 +19,11 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "mission")
+@Table(name = "mission",
+        indexes = {
+                @Index(name = "ID_MI", columnList = "isDeleted")
+        }
+)
 @AttributeOverride(name = "id", column = @Column(name = "idMission"))
 @DiscriminatorColumn(name = "missionType", discriminatorType = DiscriminatorType.STRING)
 public class Mission extends Deletable {

@@ -20,7 +20,12 @@ import java.util.Map;
 import java.util.Set;
 
 @Entity
-@Table(name = "warshipHealthStateSnapshot")
+@Table(name = "warshipHealthStateSnapshot",
+        indexes = {
+                @Index(name = "IO_WHSS", columnList = "isOperational"),
+                @Index(name = "ID_WHSS", columnList = "isDeleted")
+        }
+)
 @AttributeOverride(name = "id", column = @Column(name = "idWarshipHealthStateSnapshot"))
 public class WarshipHealthStateSnapshot extends Operationable implements WarshipHealthStateAccessor {
 

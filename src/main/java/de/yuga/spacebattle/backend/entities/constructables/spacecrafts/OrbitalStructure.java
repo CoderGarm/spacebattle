@@ -21,7 +21,12 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "orbitalStructure")
+@Table(name = "orbitalStructure",
+        indexes = {
+                @Index(name = "IO_OS", columnList = "isOperational"),
+                @Index(name = "ID_OS", columnList = "isDeleted")
+        }
+)
 @AttributeOverride(name = "id", column = @Column(name = "idOrbitalStructure"))
 public class OrbitalStructure extends Operationable implements HasOwner {
 
