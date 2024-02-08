@@ -73,15 +73,6 @@ public class MovementAction extends CombatRoundKey {
     }
 
     @Nonnull
-    public Maneuver getManeuver() {
-        return maneuver;
-    }
-
-    public void replaceByPersistedManeuver(@Nonnull final Maneuver maneuver) {
-        this.maneuver = Preconditions.checkNotNull(maneuver, "maneuver must not be empty");
-    }
-
-    @Nonnull
     public Fleet getActor() {
         return actor;
     }

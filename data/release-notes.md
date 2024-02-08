@@ -24,14 +24,11 @@ todo:
 article priorisierung bei pop demand und migration
 article orbital modules
 
-- combat theatre
+- map project: combat theatre
     - battles by conflict and date
     - all battles by date
 
 ### Features
-
-
-- Wenn kampfsystem durch und planis bomben drin -> neues Event bis rundenende "Krieg gegen KI".
 
 - Wenn kampfsystem durch und planis bomben drin -> neues Event bis rundenende "Krieg gegen KI".
 
@@ -53,9 +50,11 @@ abfangkurs bestimmen:
 1. eindringling legt kurs fest
 2. verteidiger bestimmt abfangkurs
 
+-> alte KBs sind ab jetzt kaputt
+
 todo: aura auf combat arena: raketenreichweite, effektive sensorreichweite ...
 todo: fleetstats an der aura: overall health, dieses signalstärke dings als impellerstärke, schiffsanzahl nach typ
-
+todo. email for messages
 
 - endpoint für "streamlined battle reports" -> trajektorienbasierte kampfbeschreibung für unity
 - planeten für handel blockieren
@@ -66,6 +65,7 @@ todo: fleetstats an der aura: overall health, dieses signalstärke dings als imp
 
 1. There is an outline at the star map where all own systems and fleets are listed.  
    You can select one system and/or multiple fleets and use the "zoom to" button to cycle through them.
+2. The bottom menu on the map is replaced by a right click driven menu. The reason behind it is pretty simple: More space for better looking things.
 
 #### next steps
 
@@ -74,6 +74,7 @@ todo. carrier menu planetengebäude und mining factors
 todo. plani menu anzeiigen ob SY oder CY job möglich
 todo. flottenenmove auf map: zielplani direkt festlegen
 todo. acc registering -> user direkt anmelden
+todo. radial menu on map instead right-click button toggle group
 
 season 3:
 
