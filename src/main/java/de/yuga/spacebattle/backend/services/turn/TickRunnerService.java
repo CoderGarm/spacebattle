@@ -44,7 +44,6 @@ public class TickRunnerService {
     @Nonnull
     private final List<TickRunner> tickRunners;
 
-
     @Autowired
     public TickRunnerService(@Nonnull @Value("${sb.server:localhost}") final String server,
                              @Nonnull final Set<TickRunner> tickRunners,

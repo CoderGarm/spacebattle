@@ -12,13 +12,16 @@ import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.ERefinementSequence;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.services.caches.PlanetaryResourceCache;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.OrbitalStructureService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.rest.api.error.LogInfo;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import de.yuga.spacebattle.rest.dto.turn.resources.PopulationOverview;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -53,15 +56,54 @@ public class PopulationControlCalculator {
     @Nonnull
     private final OrbitalStructureService orbitalStructureService;
 
+    @Nonnull
+    private final PlanetaryResourceCache planetaryResourceCache;
+
     @Autowired
     public PopulationControlCalculator(@Nonnull final ConstructionService constructionService,
                                        @Nonnull final OperationalService operationalService,
                                        @Nonnull final PlanetService planetService,
-                                       @Nonnull final OrbitalStructureService orbitalStructureService) {
+                                       @Nonnull final OrbitalStructureService orbitalStructureService,
+                                       @Nonnull final PlanetaryResourceCache planetaryResourceCache) {
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
         this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.orbitalStructureService = Preconditions.checkNotNull(orbitalStructureService, "orbitalStructureService must not be empty");
+        this.planetaryResourceCache = Preconditions.checkNotNull(planetaryResourceCache, "planetaryResourceCache must not be empty");
+    }
+
+
+    @Async
+    public void reloadPopOverview(final int idUser) {
+        planetaryResourceCache.invalidePopulationOverview(idUser);
+        getPopOverview(idUser);
+    }
+
+    @Nonnull
+    public PopulationOverview getPopOverview(final int idUser) {
+
+        PopulationOverview populationOverview = planetaryResourceCache.getPopulationOverview(idUser);
+        if (populationOverview != null) {
+            return populationOverview;
+        }
+
+        final List<Integer> planetIDs = planetService.findAllColonizedByForIdPlanet(idUser);
+        final long utilizedPopulationForUser = operationalService.getUtilizedPopulationForUser(idUser).getResourceAmountByType(de.yuga.spacebattle.backend.enums.EResourceType.POPULATION);
+        populationOverview = new PopulationOverview();
+        populationOverview.addPresent(utilizedPopulationForUser);
+
+        final Map<Integer, de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit> resourceCapacities =
+                planetService.getResourceCapacities(planetIDs);
+        for (final Integer idPlanet : planetIDs) {
+            final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit resourceDeposit = planetService.findResourceDeposit(idPlanet);
+            Preconditions.checkNotNull(resourceDeposit, "resourceDeposit must not be empty");
+            final long capacity = resourceCapacities.get(idPlanet).getResourceAmountByType(de.yuga.spacebattle.backend.enums.EResourceType.POPULATION);
+            populationOverview.addCapacity(capacity);
+            populationOverview.addPresent(resourceDeposit.getCrewRequirement().getSumOfPopulation());
+        }
+
+        planetaryResourceCache.addPopulationOverview(idUser, populationOverview);
+        return populationOverview;
     }
 
     /**

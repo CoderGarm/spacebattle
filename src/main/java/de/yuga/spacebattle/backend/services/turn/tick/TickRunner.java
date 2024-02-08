@@ -10,6 +10,7 @@ import java.util.List;
 public interface TickRunner extends Comparable<TickRunner> {
 
     List<Class<? extends TickRunner>> SEQUENCE_OF_RUNNERS = List.of(
+            TickPreparationRunner.class,
             NPCFleetTickRunner.class,
             EmpireTransportationTickRunner.class,
             EmpireMigrationTickRunner.class,

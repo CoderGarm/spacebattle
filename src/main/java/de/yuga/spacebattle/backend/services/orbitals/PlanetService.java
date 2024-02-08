@@ -12,6 +12,9 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.resources.MiningFactors;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
+import de.yuga.spacebattle.backend.enums.ECollectableType;
+import de.yuga.spacebattle.backend.enums.EDepositType;
+import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.orbitals.PlanetRepository;
 import de.yuga.spacebattle.backend.services.caclulator.TickOutputCalculator;
@@ -20,7 +23,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class PlanetService {
@@ -58,8 +64,9 @@ public class PlanetService {
         return planetRepository.findAllPlanetsColonizedByUser(user);
     }
 
+    @Nonnull
     public List<Integer> findAllColonizedByForIdPlanet(final int idUser) {
-        return planetRepository.findAllColonizedByForID(idUser);
+        return Objects.requireNonNullElse(planetRepository.findAllColonizedByForID(idUser), new ArrayList<>());
     }
 
     @Nonnull
@@ -284,5 +291,35 @@ public class PlanetService {
         Preconditions.checkNotNull(planets, "planets must not be empty");
 
         return Objects.requireNonNullElse(planetRepository.findWithConstructions(planets), new ArrayList<>());
+    }
+
+    /**
+     * Returns the capacity of {@link ECollectableType#COLLECTABLE} or {@link ECollectableType#VIABLE} which can be placed in the storages of the planet.<br>
+     * <br>
+     * If a resource type isn't present, it means that there is no capacity restriction.
+     */
+    @Nonnull
+    public ResourceDeposit getResourceCapacity(final int idPlanet) {
+        final ResourceDeposit cap = new ResourceDeposit(EDepositType.CAPACITY);
+        final Set<Construction> constructions = constructionService.findAllConstructionsOnPlanet(idPlanet);
+        final Set<Construction> capacityBuildings = constructions.stream()
+                .filter(construction -> EProductionCategory.CAPACITY == construction.getBuilding().getProductionType().getProductionCategory())
+                .collect(Collectors.toSet());
+
+        for (final EResourceType resourceType : EResourceType.values()) {
+            final Set<Construction> forResource = capacityBuildings.stream().filter(c -> resourceType == c.getBuilding().getProductionTarget()).collect(Collectors.toSet());
+            if (!forResource.isEmpty()) {
+                final BigDecimal capacityValue = TickOutputCalculator.getTickOutput(forResource);
+                cap.updateResource(resourceType, capacityValue.longValue());
+            }
+        }
+        return cap;
+    }
+
+    @Nonnull
+    public Map<Integer, ResourceDeposit> getResourceCapacities(@Nonnull final Collection<Integer> planetIDs) {
+        Preconditions.checkNotNull(planetIDs, "planetIDs must not be empty");
+
+        return planetIDs.stream().collect(Collectors.toMap(Function.identity(), this::getResourceCapacity));
     }
 }

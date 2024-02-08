@@ -46,6 +46,10 @@ article orbital modules
 
 1. faster ground construction - removing cascades
 2. faster server start - initial cache load reduced
+3. job dashboard - sorted by system like planet menu
+4. carrier module - sorted by system like planet menu
+5. carrier module - expand all
+6. planet construction state at planet menu
 
 #### Gameplay
 

@@ -6,8 +6,10 @@ import de.yuga.spacebattle.backend.entities.constructables.buildings.Constructio
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
+import de.yuga.spacebattle.backend.services.caches.PlanetaryResourceCache;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -27,13 +29,17 @@ public class TickOutputCalculator {
     @Nonnull
     private final PopulationControlCalculator populationControlCalculator;
 
+    @Nonnull
+    private final PlanetaryResourceCache planetaryResourceCache;
+
     @Autowired
     public TickOutputCalculator(@Nonnull final ConstructionService constructionService,
-                                @Nonnull final PopulationControlCalculator populationControlCalculator) {
+                                @Nonnull final PopulationControlCalculator populationControlCalculator,
+                                @Nonnull final PlanetaryResourceCache planetaryResourceCache) {
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
         this.populationControlCalculator = Preconditions.checkNotNull(populationControlCalculator, "populationControlCalculator must not be empty");
+        this.planetaryResourceCache = Preconditions.checkNotNull(planetaryResourceCache, "planetaryResourceCache must not be empty");
     }
-
 
     /**
      * Calculates the production per tick of this planet for the given resource type.<br>
@@ -86,6 +92,12 @@ public class TickOutputCalculator {
      */
     @Nonnull
     public ResourceDeposit getTicklyIncome(final int idPlanet) {
+
+        final ResourceDeposit cachedResult = planetaryResourceCache.getTicklyIncome(idPlanet);
+        if (cachedResult != null) {
+            return cachedResult;
+        }
+
         final ResourceDeposit income = new ResourceDeposit(EDepositType.INCOME);
         final Map<EResourceType, List<Construction>> resourceConstructionsByType = constructionService.findAllConstructionsOnPlanet(idPlanet).stream()
                 .collect(Collectors.groupingBy(c -> c.getBuilding().getProductionTarget(),
@@ -114,44 +126,14 @@ public class TickOutputCalculator {
         income.setAbsolutePopulationValue(tickOutputForPopulation);
         income.setAbsolutePopulation(EEducationType.NONE, tickOutputForPopulation);
 
+        planetaryResourceCache.addTicklyIncome(idPlanet, income);
         return income;
     }
 
-    @Nonnull
-    public Map<Integer, ResourceDeposit> getTicklyIncomeForPlanets(@Nonnull final Set<Integer> planetIDs) {
-        Preconditions.checkNotNull(planetIDs, "planetIDs must not be empty");
-
-        return planetIDs.stream().collect(Collectors.toMap(Function.identity(), this::getTicklyIncome));
-    }
-
-    /**
-     * Returns the capacity of {@link ECollectableType#COLLECTABLE} or {@link ECollectableType#VIABLE} which can be placed in the storages of the planet.<br>
-     * <br>
-     * If a resource type isn't present, it means that there is no capacity restriction.
-     */
-    @Nonnull
-    public ResourceDeposit getResourceCapacity(final int idPlanet) {
-        final ResourceDeposit cap = new ResourceDeposit(EDepositType.CAPACITY);
-        final Set<Construction> constructions = constructionService.findAllConstructionsOnPlanet(idPlanet);
-        final Set<Construction> capacityBuildings = constructions.stream()
-                .filter(construction -> EProductionCategory.CAPACITY == construction.getBuilding().getProductionType().getProductionCategory())
-                .collect(Collectors.toSet());
-
-        for (final EResourceType resourceType : EResourceType.values()) {
-            final Set<Construction> forResource = capacityBuildings.stream().filter(c -> resourceType == c.getBuilding().getProductionTarget()).collect(Collectors.toSet());
-            if (!forResource.isEmpty()) {
-                final BigDecimal capacityValue = TickOutputCalculator.getTickOutput(forResource);
-                cap.updateResource(resourceType, capacityValue.longValue());
-            }
-        }
-        return cap;
-    }
-
-    @Nonnull
-    public Map<Integer, ResourceDeposit> getResourceCapacities(@Nonnull final Collection<Integer> planetIDs) {
-        Preconditions.checkNotNull(planetIDs, "planetIDs must not be empty");
-
-        return planetIDs.stream().collect(Collectors.toMap(Function.identity(), this::getResourceCapacity));
+    @Async
+    public void reloadTicklyIncome(final int idPlanet) {
+        planetaryResourceCache.invalideTicklyIncome(idPlanet);
+        getTicklyIncome(idPlanet);
     }
 
     @Nonnull

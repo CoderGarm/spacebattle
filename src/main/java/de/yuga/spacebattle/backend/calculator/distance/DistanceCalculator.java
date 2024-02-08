@@ -37,7 +37,7 @@ public class DistanceCalculator {
     public final static MathContext MC_HU = new MathContext(8, RoundingMode.HALF_UP);
 
     /**
-     * 154 g at gamma is so fucking slow. fixme Its because the distances are so fucking wrong! Correct them following branch origin/repair_flight_duration
+     * 154 g at gamma is so fucking slow. todo Its because the distances are so fucking wrong! Correct them following branch origin/repair_flight_duration
      */
     @Nonnull
     public static final Acceleration PUBLIC_TRANSPORT_ACCELERATION = new Acceleration(500000, EAccelerationMetric.G, EHyperBand.THETA);

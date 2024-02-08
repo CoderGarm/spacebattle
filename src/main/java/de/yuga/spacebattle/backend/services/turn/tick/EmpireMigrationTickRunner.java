@@ -85,7 +85,7 @@ public class EmpireMigrationTickRunner implements TickRunner {
         final Set<Integer> planetIDs = planetsByUser.values().stream()
                 .flatMap(Collection::stream)
                 .map(AbstractEntityKey::getId).collect(Collectors.toSet());
-        final Map<Integer, ResourceDeposit> capacitiesByPlanetID = tickOutputCalculator.getResourceCapacities(planetIDs);
+        final Map<Integer, ResourceDeposit> capacitiesByPlanetID = planetService.getResourceCapacities(planetIDs);
         final Map<Integer, Long> popCapacitiesByPlanetID = new HashMap<>();
         capacitiesByPlanetID.forEach((idPlanet, resourceDeposit) -> popCapacitiesByPlanetID.put(idPlanet, resourceDeposit.getResourceAmountByType(EResourceType.POPULATION)));
         limitDemandToCapacity(demands, popCapacitiesByPlanetID);

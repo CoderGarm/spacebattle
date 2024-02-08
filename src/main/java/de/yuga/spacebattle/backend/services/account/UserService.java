@@ -354,4 +354,9 @@ public class UserService {
 
         save(user);
     }
+
+    @Nonnull
+    public Set<Integer> findAllUserIDs() {
+        return userRepository.findAllUserIDs();
+    }
 }

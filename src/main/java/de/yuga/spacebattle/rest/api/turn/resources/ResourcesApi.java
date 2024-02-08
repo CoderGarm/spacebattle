@@ -10,6 +10,7 @@ import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.EJobType;
 import de.yuga.spacebattle.backend.enums.ETransportType;
 import de.yuga.spacebattle.backend.services.caches.TransportationCache;
+import de.yuga.spacebattle.backend.services.caclulator.PopulationControlCalculator;
 import de.yuga.spacebattle.backend.services.caclulator.TickOutputCalculator;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
@@ -47,7 +48,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
 import java.util.List;
-import java.util.Map;
 
 import static de.yuga.spacebattle.rest.api.EndpointDefinition.PRIVATE_BASE_ENDPOINT;
 
@@ -102,6 +102,9 @@ public class ResourcesApi extends BaseApi {
     @Nonnull
     private final TickOutputCalculator tickOutputCalculator;
 
+    @Nonnull
+    private final PopulationControlCalculator populationControlCalculator;
+
     @Autowired
     public ResourcesApi(@Nonnull final PlanetService planetService,
                         @Nonnull final ConstructionService constructionService,
@@ -111,7 +114,8 @@ public class ResourcesApi extends BaseApi {
                         @Nonnull final TransportationCache transportationCache,
                         @Nonnull final TickTimeService tickService,
                         @Nonnull final OperationalService operationalService,
-                        @Nonnull final TickOutputCalculator tickOutputCalculator) {
+                        @Nonnull final TickOutputCalculator tickOutputCalculator,
+                        @Nonnull final PopulationControlCalculator populationControlCalculator) {
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
         this.shipClassCreationService = Preconditions.checkNotNull(shipClassCreationService, "shipClassCreationService shouldn't be null!");
@@ -121,6 +125,7 @@ public class ResourcesApi extends BaseApi {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
         this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
         this.tickOutputCalculator = Preconditions.checkNotNull(tickOutputCalculator, "tickOutputCalculator must not be empty");
+        this.populationControlCalculator = Preconditions.checkNotNull(populationControlCalculator, "populationControlCalculator must not be empty");
     }
 
     @GetMapping(value = MINING_FACTORS_ENDPOINT + "/{idPlanet}")
@@ -290,7 +295,7 @@ public class ResourcesApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getPlanetaryCapacity(@PathVariable("idPlanet") final int idPlanet) {
-        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit capacity = tickOutputCalculator.getResourceCapacity(idPlanet);
+        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit capacity = planetService.getResourceCapacity(idPlanet);
         return ResponseEntity.ok(new ResourceDeposit(capacity));
     }
 
@@ -305,21 +310,7 @@ public class ResourcesApi extends BaseApi {
     )
     public ResponseEntity<?> getPopOverview() {
 
-        final List<Integer> planetIDs = planetService.findAllColonizedByForIdPlanet(getIdUser());
-
-        final long utilizedPopulationForUser = operationalService.getUtilizedPopulationForUser(getIdUser()).getResourceAmountByType(de.yuga.spacebattle.backend.enums.EResourceType.POPULATION);
-        final PopulationOverview populationOverview = new PopulationOverview();
-        populationOverview.addPresent(utilizedPopulationForUser);
-
-        final Map<Integer, de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit> resourceCapacities =
-                tickOutputCalculator.getResourceCapacities(planetIDs);
-        for (final Integer idPlanet : planetIDs) {
-            final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit resourceDeposit = planetService.findResourceDeposit(idPlanet);
-            Preconditions.checkNotNull(resourceDeposit, "resourceDeposit must not be empty");
-            final long capacity = resourceCapacities.get(idPlanet).getResourceAmountByType(de.yuga.spacebattle.backend.enums.EResourceType.POPULATION);
-            populationOverview.addCapacity(capacity);
-            populationOverview.addPresent(resourceDeposit.getCrewRequirement().getSumOfPopulation());
-        }
+        final PopulationOverview populationOverview = populationControlCalculator.getPopOverview(getIdUser());
         return ResponseEntity.ok(populationOverview);
     }
 

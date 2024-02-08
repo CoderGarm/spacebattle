@@ -71,8 +71,6 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.entities.orbitals.StarSystem.STAR_SYSTEM_STANDARD_METRIC;
@@ -250,10 +248,6 @@ public class MasterOfTheUniverseService {
         final boolean transformationNeeded = false;
         if (transformationNeeded) {
 
-            // fixme file cache älter als zehn tage ignorieren
-            // fixme cache service der teure operationen regelmäßig rechnet?
-            // fixme login log für user
-            // fixme open the carrier planets on click
             /*
             fleetService.deleteAll();
             createFlashsFleet();
@@ -1314,18 +1308,11 @@ public class MasterOfTheUniverseService {
         }
     }
 
-    @Async("asyncTaskExecutor")
+    @Async
     public void createOpponentAndFightAsync(final User saved) {
-        try {
-            CompletableFuture.runAsync(() -> {
-                createFleetForUser(saved);
-                createOpponentFleetForUser(saved);
-                runBattleForNewUser(saved);
-            }).get();
-        } catch (final ExecutionException | InterruptedException e) {
-            LOGGER.error("createOpponentAndFightAsync", e);
-            throw new NotifyWebUserException(e.getMessage());
-        }
+        createFleetForUser(saved);
+        createOpponentFleetForUser(saved);
+        runBattleForNewUser(saved);
     }
 
     public void createFleetForUser(@Nonnull final Owner user) {

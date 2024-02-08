@@ -11,6 +11,8 @@ import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.enums.EEducationType;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.backend.services.caclulator.PopulationControlCalculator;
+import de.yuga.spacebattle.backend.services.caclulator.TickOutputCalculator;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.OrbitalModuleService;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
@@ -67,10 +69,10 @@ public class PlanetApi extends BaseApi {
     private static final String SHIPYARD_EXISTS_ENDPOINT = "shipyardExists";
     private static final String SHIPYARD_BUILD_IT_ENDPOINT = "shipyardConstructionBuild";
     private static final String SHIPYARD_BUILD_ORBITAL_ENDPOINT = "shipyardConstructionOrbitalBuild";
-    private static final String GET_PLANET_BY_COORDINATES_ENDPOINT = "byCoord";
-    private static final String GET_MAIN_PLANET = "main";
     private static final String REPAIR_FLEET_ENDPOINT = SHIPYARD_BUILD_IT_ENDPOINT + "/repair";
     private static final String UPGRADE_FLEET_ENDPOINT = SHIPYARD_BUILD_IT_ENDPOINT + "/upgrade";
+    private static final String GET_PLANET_BY_COORDINATES_ENDPOINT = "byCoord";
+    private static final String GET_MAIN_PLANET = "main";
     private static final String TRANSPORTATION_ENDPOINT = "transportation";
 
     @Nonnull
@@ -100,6 +102,12 @@ public class PlanetApi extends BaseApi {
     @Nonnull
     private final OperationalService operationalService;
 
+    @Nonnull
+    private final TickOutputCalculator tickOutputCalculator;
+
+    @Nonnull
+    private final PopulationControlCalculator populationControlCalculator;
+
     @Autowired
     public PlanetApi(@Nonnull final PlanetService planetService,
                      @Nonnull final JobService jobService,
@@ -109,7 +117,9 @@ public class PlanetApi extends BaseApi {
                      @Nonnull final TickTimeService tickTimeService,
                      @Nonnull final ConstructionService constructionService,
                      @Nonnull final OrbitalModuleService orbitalModuleService,
-                     @Nonnull final OperationalService operationalService) {
+                     @Nonnull final OperationalService operationalService,
+                     @Nonnull final TickOutputCalculator tickOutputCalculator,
+                     @Nonnull final PopulationControlCalculator populationControlCalculator) {
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
         this.jobService = Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
         this.shipClassService = Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
@@ -119,6 +129,8 @@ public class PlanetApi extends BaseApi {
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
         this.orbitalModuleService = Preconditions.checkNotNull(orbitalModuleService, "orbitalModuleService must not be empty");
         this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
+        this.tickOutputCalculator = Preconditions.checkNotNull(tickOutputCalculator, "tickOutputCalculator must not be empty");
+        this.populationControlCalculator = Preconditions.checkNotNull(populationControlCalculator, "populationControlCalculator must not be empty");
     }
 
     @GetMapping
@@ -200,6 +212,8 @@ public class PlanetApi extends BaseApi {
             final Tick today = tickTimeService.getToday();
             planetTickRunner.tickInstaConstruction(job, today);
             operationalService.operateInoperationals(today, idPlanet);
+            tickOutputCalculator.reloadTicklyIncome(idPlanet);
+            populationControlCalculator.reloadPopOverview(getIdUser());
         }
         return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(job, getPreferredLanguage()));
     }
@@ -274,6 +288,7 @@ public class PlanetApi extends BaseApi {
             final Tick today = tickTimeService.getToday();
             planetTickRunner.tickInstaShipyard(job, today);
             operationalService.operateInoperationals(today, idPlanet);
+            populationControlCalculator.reloadPopOverview(getIdUser());
         }
         return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(job, getPreferredLanguage()));
     }
@@ -320,6 +335,7 @@ public class PlanetApi extends BaseApi {
         final Job job = jobService.startShipyardRepairJob(fleetPlanetDto.planet, fleetPlanetDto.fleet);
         if (jobService.isLocalInstaJobPossible(fleetPlanetDto.planet.getId(), job)) {
             planetTickRunner.tickInstaShipyard(job, tickTimeService.getToday());
+            populationControlCalculator.reloadPopOverview(getIdUser());
         }
         return ResponseEntity.ok(true);
     }
@@ -363,6 +379,7 @@ public class PlanetApi extends BaseApi {
         final Job job = jobService.createShipyardUpgradeJob(fleetPlanetDto.planet, fleetPlanetDto.fleet);
         if (jobService.isLocalInstaJobPossible(fleetPlanetDto.planet.getId(), job)) {
             planetTickRunner.tickInstaShipyard(job, tickTimeService.getToday());
+            populationControlCalculator.reloadPopOverview(getIdUser());
         }
         return ResponseEntity.ok(true);
     }
@@ -534,6 +551,8 @@ public class PlanetApi extends BaseApi {
         final Job job = jobService.createShipyardOrbitalModuleJob(idPlanet, jobLoad);
         if (jobService.isLocalInstaJobPossible(idPlanet, job)) {
             planetTickRunner.tickInstaShipyard(job, tickTimeService.getToday());
+            tickOutputCalculator.reloadTicklyIncome(idPlanet);
+            populationControlCalculator.reloadPopOverview(getIdUser());
         }
         return ResponseEntity.ok(new de.yuga.spacebattle.rest.dto.turn.Job(job, getPreferredLanguage()));
     }

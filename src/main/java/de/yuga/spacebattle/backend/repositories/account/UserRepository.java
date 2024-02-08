@@ -51,4 +51,8 @@ public interface UserRepository extends JpaRepository<User, Integer>, CustomUser
             "AND u.userSetting.noEMailWanted = false " +
             "AND u.userSetting.isLoginForbidden = false")
     Set<User> getEMailAddressesForAdviceRecipients();
+
+    @Nonnull
+    @Query("SELECT u.id FROM User u")
+    Set<Integer> findAllUserIDs();
 }
