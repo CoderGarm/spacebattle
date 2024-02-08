@@ -68,12 +68,22 @@ public class TransportationCache {
     private void loadCache() {
         LOGGER.info("Loading from persistent cache.");
 
+        // remove ticks older ten days
+        final Tick today = tickTimeService.getToday();
+        final int tickLimit = today.getNo() - 2;
+
         final Map<String, List<String>> transportJobCache = cacheFileWriter.getFileCacheContent(TransportJob.class);
+        final Set<String> toRemoveTJ = transportJobCache.keySet().stream().filter(key -> getTickId(key) < tickLimit).collect(Collectors.toSet());
+        toRemoveTJ.forEach(transportJobCache::remove);
+
         final Map<String, List<String>> orbitalTransportJobCache = cacheFileWriter.getFileCacheContent(OrbitalTransportJob.class);
+        final Set<String> toRemoveOTJ = orbitalTransportJobCache.keySet().stream().filter(key -> getTickId(key) < tickLimit).collect(Collectors.toSet());
+        toRemoveOTJ.forEach(orbitalTransportJobCache::remove);
 
         LOGGER.info("\t...loading ticks");
         final Set<Integer> idTicks = transportJobCache.keySet().stream().map(this::getTickId).collect(Collectors.toSet());
         idTicks.addAll(orbitalTransportJobCache.keySet().stream().map(this::getTickId).collect(Collectors.toSet()));
+        idTicks.removeIf(tickNo -> tickNo < tickLimit);
         final Map<Integer, Tick> tickMap = tickTimeService.findAll(idTicks).stream()
                 .collect(Collectors.toMap(AbstractEntityKey::getId, Function.identity()));
 

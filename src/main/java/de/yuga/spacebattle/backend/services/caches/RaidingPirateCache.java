@@ -11,6 +11,7 @@ import de.yuga.spacebattle.backend.enums.EMissionAction;
 import de.yuga.spacebattle.backend.services.caches.file.CacheFileWriter;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.backend.services.turn.TickTimeService;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,27 +47,41 @@ public class RaidingPirateCache {
     @Nonnull
     private final PlanetService planetService;
 
+    @Nonnull
+    private final TickTimeService tickTimeService;
+
     @Autowired
     public RaidingPirateCache(@Nonnull final CacheFileWriter cacheFileWriter,
                               @Nonnull final FleetService fleetService,
-                              @Nonnull final PlanetService planetService) {
+                              @Nonnull final PlanetService planetService,
+                              @Nonnull final TickTimeService tickTimeService) {
         this.cacheFileWriter = Preconditions.checkNotNull(cacheFileWriter, "cacheFileWriter must not be empty");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
+        this.tickTimeService = Preconditions.checkNotNull(tickTimeService, "tickTimeService must not be empty");
     }
 
     @PostConstruct
     private void loadCache() {
         LOGGER.info("Loading from persistent cache.");
 
+        // remove ticks older ten days
+        final Tick today = tickTimeService.getToday();
+        final int tickLimit = today.getNo() - 10;
+
         final Map<String, List<String>> targetCacheContent = cacheFileWriter.getFileCacheContent(TargetDto.class);
+        final Set<String> toRemoveTargets = targetCacheContent.keySet().stream().filter(key -> getTickId(key) < tickLimit).collect(Collectors.toSet());
+        toRemoveTargets.forEach(targetCacheContent::remove);
+
         final List<TargetDto> targetDtos = targetCacheContent.values().stream()
                 .flatMap(Collection::stream)
                 .map(this::fromJsonTargetDto)
                 .collect(Collectors.toList());
 
-
         final Map<String, List<String>> missionActionContent = cacheFileWriter.getFileCacheContent(RaidingPirateCache.MissionActionDto.class);
+        final Set<String> toRemoveMission = missionActionContent.keySet().stream().filter(key -> getTickId(key) < tickLimit).collect(Collectors.toSet());
+        toRemoveMission.forEach(missionActionContent::remove);
+
         final List<MissionActionDto> actionDtos = missionActionContent.values().stream()
                 .flatMap(Collection::stream)
                 .map(this::fromJson)
@@ -153,9 +168,9 @@ public class RaidingPirateCache {
         Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
         Preconditions.checkNotNull(target, "target must not be empty");
 
-        // todo include the tick -> some fleet will never go away
         targetCache.put(pirateFleet, target);
-        cacheFileWriter.writeToFile(RaidingPirateCache.TargetDto.class, String.valueOf(pirateFleet.getId()), toJsonTargetDto(pirateFleet, target));
+        final String key = getKey(today, pirateFleet);
+        cacheFileWriter.writeToFile(RaidingPirateCache.TargetDto.class, key, toJsonTargetDto(pirateFleet, target));
     }
 
     @Nullable

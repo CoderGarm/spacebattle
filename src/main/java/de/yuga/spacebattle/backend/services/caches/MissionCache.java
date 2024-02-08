@@ -74,6 +74,12 @@ public class MissionCache {
 
         final Map<String, List<String>> fileCacheContent = cacheFileWriter.getFileCacheContent(this.getClass());
 
+        // remove ticks older ten days
+        final Tick today = tickTimeService.getToday();
+        final int tickLimit = today.getNo() - 10;
+        final Set<String> toRemove = fileCacheContent.keySet().stream().filter(key -> getTickId(key) < tickLimit).collect(Collectors.toSet());
+        toRemove.forEach(fileCacheContent::remove);
+
         final List<MissionItemDto> allItems = fileCacheContent.values().stream()
                 .flatMap(Collection::stream)
                 .map(this::fromJson)
@@ -99,6 +105,8 @@ public class MissionCache {
 
         LOGGER.info("\t...loading ticks");
         final Set<Integer> idTicks = fileCacheContent.keySet().stream().map(this::getTickId).collect(Collectors.toSet());
+        idTicks.removeIf(tickNo -> tickNo < tickLimit);
+
         final Map<Integer, Tick> ticks = tickTimeService.findAll(idTicks).stream()
                 .collect(Collectors.toMap(AbstractEntityKey::getId, Function.identity()));
 
@@ -108,6 +116,7 @@ public class MissionCache {
         LOGGER.info("\t...constructing cache");
         result.forEach((key, serializedItems) -> {
             final List<MissionItem> lst = serializedItems.stream()
+                    .filter(item -> ticks.containsKey(item.getTickNo()))
                     .map(s -> {
                                 final MissionItem item = new MissionItem(
                                         ticks.get(s.getTickNo()),

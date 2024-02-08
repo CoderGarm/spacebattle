@@ -44,7 +44,8 @@ article orbital modules
 
 ### Features
 
-1. faster build - half around removing cascades
+1. faster ground construction - removing cascades
+2. faster server start - initial cache load reduced
 
 #### Gameplay
 

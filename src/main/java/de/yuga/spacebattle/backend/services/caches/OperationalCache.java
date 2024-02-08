@@ -72,9 +72,18 @@ public class OperationalCache extends BaseCache {
 
         final Map<String, List<String>> fileCacheContent = cacheFileWriter.getFileCacheContent(this.getClass());
         final Map<String, List<CommissioningDto>> dtos = new HashMap<>();
-        fileCacheContent.forEach((key, values) -> dtos.put(key, values.stream().map(this::fromJson).collect(Collectors.toList())));
+
+        // remove ticks older ten days
+        final Tick today = tickTimeService.getToday();
+        final int tickLimit = today.getNo() - 10;
 
         final Set<Integer> tickIDs = fileCacheContent.keySet().stream().map(this::getTickId).collect(Collectors.toSet());
+        tickIDs.removeIf(tickNo -> tickNo < tickLimit);
+        final Set<String> toRemove = fileCacheContent.keySet().stream().filter(key -> getTickId(key) < tickLimit).collect(Collectors.toSet());
+        toRemove.forEach(fileCacheContent::remove);
+
+        fileCacheContent.forEach((key, values) -> dtos.put(key, values.stream().map(this::fromJson).collect(Collectors.toList())));
+
         final Map<Integer, Tick> tickMap = tickTimeService.findAll(tickIDs).stream()
                 .collect(Collectors.toMap(AbstractEntityKey::getId, Function.identity()));
 
@@ -90,15 +99,18 @@ public class OperationalCache extends BaseCache {
         final Map<Integer, OrbitalStructure> orbitalStructureMap = orbitalStructureService.findAll(orbitalStructureIDs).stream()
                 .collect(Collectors.toMap(AbstractEntityKey::getId, Function.identity()));
 
+
         dtos.forEach((key, values) -> values.forEach(dto -> {
             final Tick tick = tickMap.get(getTickId(key));
-            final Set<Construction> constructions = dto.getConstructions().stream().map(constructionMap::get).collect(Collectors.toSet());
-            final List<WarShip> warships = dto.getWarships().stream().map(warShipMap::get).collect(Collectors.toList());
-            final List<OrbitalStructure> orbitalStructures = dto.getOrbitalConstructions().stream().map(orbitalStructureMap::get).collect(Collectors.toList());
+            if (tickMap.containsKey(getTickId(key))) {
+                final Set<Construction> constructions = dto.getConstructions().stream().map(constructionMap::get).collect(Collectors.toSet());
+                final List<WarShip> warships = dto.getWarships().stream().map(warShipMap::get).collect(Collectors.toList());
+                final List<OrbitalStructure> orbitalStructures = dto.getOrbitalConstructions().stream().map(orbitalStructureMap::get).collect(Collectors.toList());
 
-            constructions.stream().filter(Objects::nonNull).forEach(c -> addConstruction(tick, c.getPlanet(), c));
-            warships.stream().filter(Objects::nonNull).forEach(c -> addWarship(tick, c.getShipyard(), c));
-            orbitalStructures.stream().filter(Objects::nonNull).forEach(c -> addOrbitalStructure(tick, Objects.requireNonNull(c.getOrbit().getPlanet()), c));
+                constructions.stream().filter(Objects::nonNull).forEach(c -> addConstruction(tick, c.getPlanet(), c));
+                warships.stream().filter(Objects::nonNull).forEach(c -> addWarship(tick, c.getShipyard(), c));
+                orbitalStructures.stream().filter(Objects::nonNull).forEach(c -> addOrbitalStructure(tick, Objects.requireNonNull(c.getOrbit().getPlanet()), c));
+            }
         }));
     }
 
