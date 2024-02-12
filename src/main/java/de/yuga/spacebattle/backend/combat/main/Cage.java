@@ -252,7 +252,7 @@ public class Cage implements Future<Cage> {
         end = System.currentTimeMillis();
         battleLogger.logMessage("incoming fire", start, end);
         start = System.currentTimeMillis();
-        combatHandler.handleFireWeaponPhase();
+        combatHandler.handleFireWeaponPhase(); // fixme check missile movement and find a way for better displaying tiny missiles in the big space
         end = System.currentTimeMillis();
         battleLogger.logMessage("fire weapon", start, end);
 
@@ -552,6 +552,12 @@ public class Cage implements Future<Cage> {
         Preconditions.checkNotNull(msg, "msg must not be empty");
 
         battleLogger.logWarning(msg);
+    }
+
+    public void logMessagePlain(@Nonnull final String msg) {
+        Preconditions.checkNotNull(msg, "msg must not be empty");
+
+        battleLogger.logMessagePlain(msg);
     }
 
     public void attachToChart(@Nonnull final Owner owner, @Nonnull final Maneuver maneuver) {

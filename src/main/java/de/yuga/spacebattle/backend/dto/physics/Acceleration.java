@@ -14,6 +14,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 
+import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC_HU;
+
 @Schema(description = ".")
 public class Acceleration implements Cloneable, Comparable<Acceleration> {
 
@@ -68,12 +70,15 @@ public class Acceleration implements Cloneable, Comparable<Acceleration> {
         this.hyperBand = hyperBand;
     }
 
-    public Acceleration(final double value, @Nonnull final EAccelerationMetric accelerationMetric) {
+    public Acceleration(final double value,
+                        @Nonnull final EAccelerationMetric accelerationMetric,
+                        @Nonnull final EHyperBand hyperBand) {
         Preconditions.checkNotNull(accelerationMetric, "lengthDefinition shouldn't be null!");
+        Preconditions.checkNotNull(hyperBand, "hyperBand must not be empty");
 
         this.value = BigDecimal.valueOf(value);
         this.accelerationMetric = accelerationMetric;
-        this.hyperBand = EHyperBand.NONE;
+        this.hyperBand = hyperBand;
     }
 
     @Nonnull
@@ -157,6 +162,102 @@ public class Acceleration implements Cloneable, Comparable<Acceleration> {
         final BigDecimal distanceFromVelocity = velocity.getCoordinateInMetric(EDistanceMetric.M, ETimeMetric.SECOND).multiply(time);
         final BigDecimal sum = distanceFromAccelerationValue.add(distanceFromVelocity);
         return new Distance(sum, EDistanceMetric.M).convertToMetric(targetMetric);
+    }
+
+
+    @Nonnull
+    @JsonIgnore
+    public Acceleration add(@Nonnull final Acceleration o) {
+        Preconditions.checkNotNull(o, "o shouldn't be null!");
+
+        final BigDecimal additional = o.getCoordinateInMetric(accelerationMetric);
+        return new Acceleration(value.add(additional), accelerationMetric, hyperBand);
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public Acceleration subtract(@Nonnull final Acceleration o) {
+        Preconditions.checkNotNull(o, "o shouldn't be null!");
+
+        final BigDecimal subtrahend = o.getCoordinateInMetric(accelerationMetric);
+        return new Acceleration(value.subtract(subtrahend), accelerationMetric, hyperBand);
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public Acceleration multiply(@Nonnull final Acceleration o) {
+        Preconditions.checkNotNull(o, "o shouldn't be null!");
+
+        final BigDecimal factor = o.getCoordinateInMetric(accelerationMetric);
+        return new Acceleration(value.multiply(factor), accelerationMetric, hyperBand);
+    }
+
+    @Nonnull
+    public Acceleration multiply(final int multiplier) {
+        return multiply(new Acceleration(multiplier, accelerationMetric, hyperBand));
+    }
+
+    @Nonnull
+    public Acceleration multiply(final double multiplier) {
+        return multiply(new Acceleration(multiplier, accelerationMetric, hyperBand));
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public Acceleration pow(final int o) {
+        return new Acceleration(value.pow(o), accelerationMetric, hyperBand);
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public Acceleration sqrt() {
+        return new Acceleration(value.sqrt(MC_HU), accelerationMetric, hyperBand);
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public Acceleration divide(@Nonnull final Acceleration divisor) {
+        Preconditions.checkNotNull(divisor, "divisor shouldn't be null!");
+        Preconditions.checkArgument(divisor.compareTo(Acceleration.ZERO) != 0, "divisor must not be zero");
+
+        final BigDecimal div = divisor.getCoordinateInMetric(accelerationMetric);
+        return new Acceleration(value.divide(div, MC_HU), accelerationMetric, hyperBand);
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public Acceleration divide(final double divisor) {
+        Preconditions.checkArgument(divisor != 0, "divisor must not be zero");
+
+        return new Acceleration(value.divide(BigDecimal.valueOf(divisor), MC_HU), accelerationMetric, hyperBand);
+    }
+
+    /**
+     * Returns the lowest of both.
+     *
+     * @param o the one
+     * @return the lowest
+     */
+    @Nonnull
+    @JsonIgnore
+    public Acceleration min(@Nonnull final Acceleration o) {
+        Preconditions.checkNotNull(o, "o shouldn't be null!");
+
+        return compareTo(o) < 0 ? this : o;
+    }
+
+    /**
+     * Returns the bigger of both.
+     *
+     * @param o the one
+     * @return the bigger
+     */
+    @Nonnull
+    @JsonIgnore
+    public Acceleration max(@Nonnull final Acceleration o) {
+        Preconditions.checkNotNull(o, "o shouldn't be null!");
+
+        return compareTo(o) > 0 ? this : o;
     }
 
     @Nonnull

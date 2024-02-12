@@ -308,11 +308,11 @@ public class BattleReport extends AbstractEntityKey {
         Preconditions.checkNotNull(auraStates, "auraStates must not be empty");
         Preconditions.checkNotNull(maneuvers, "maneuvers must not be empty");
 
-        movementActions.forEach(ma -> {
-            final Fleet actor = ma.getActor();
+        for (final de.yuga.spacebattle.backend.combat.dto.MovementAction movementAction : movementActions) {
+            final Fleet actor = movementAction.getActor();
             final AuraState auraState = auraStates.stream().filter(a -> a.getActor().equals(actor)).findFirst().orElseThrow();
-            this.movementActions.add(new de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction(maneuvers.get(ma.getManeuver()), ma, auraState));
-        });
+            this.movementActions.add(new de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction(maneuvers.get(movementAction.getManeuver()), movementAction, auraState));
+        }
     }
 
     private void addMissileMovement(@Nonnull final MissileSalvo volley) {

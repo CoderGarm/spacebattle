@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
+import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
+import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -302,11 +304,27 @@ public class Distance implements Cloneable, Comparable<Distance> {
 
     @Nonnull
     @JsonIgnore
-    public Time calculateTimeToPass(@Nonnull final Velocity o) {
-        Preconditions.checkNotNull(o, "o shouldn't be null!");
+    public Time calculateTimeToPass(@Nonnull final Velocity velocity) {
+        Preconditions.checkNotNull(velocity, "velocity shouldn't be null!");
 
-        final BigDecimal distance = getCoordinateInMetric(o.getDistanceMetric());
-        final BigDecimal timeValue = distance.divide(o.getValue(), MC_HU);
-        return new Time(timeValue, o.getTimeMetric());
+        // t = s / v
+
+        final BigDecimal distance = getCoordinateInMetric(velocity.getDistanceMetric());
+        final BigDecimal timeValue = distance.divide(velocity.getValue(), MC_HU);
+        return new Time(timeValue, velocity.getTimeMetric());
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public Time calculateTimeToPass(@Nonnull final Acceleration acceleration) {
+        Preconditions.checkNotNull(acceleration, "acceleration shouldn't be null!");
+
+        // t = sqrt ( 2s / a)
+
+        final BigDecimal acc = acceleration.getCoordinateInMetric(EAccelerationMetric.MS2);
+        final BigDecimal distance = getCoordinateInMetric(EDistanceMetric.M);
+        final BigDecimal timeValue = distance.multiply(BigDecimal.valueOf(2)).divide(acc, MC_HU);
+        final BigDecimal result = timeValue.sqrt(MC_HU);
+        return new Time(result, ETimeMetric.SECOND);
     }
 }

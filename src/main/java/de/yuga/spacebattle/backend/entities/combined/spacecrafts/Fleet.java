@@ -24,12 +24,15 @@ import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.*;
+import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
+import de.yuga.spacebattle.backend.enums.physics.EHyperBand;
 import de.yuga.spacebattle.backend.enums.physics.EMassMetric;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -288,12 +291,31 @@ public class Fleet extends Operationable implements HasOwner {
         if (shipClasses.isEmpty()) {
             return Acceleration.ZERO;
         }
-        final List<Acceleration> accelerations = shipClasses.stream()
-                .map(sc -> sc.getAcceleration(sc.getPropulsion().getHyperBand()))
-                .sorted(Comparator.comparing(Acceleration::getValue))
-                .collect(Collectors.toList());
+        final int lowestAcceleration = getLowestAccelerationValue();
 
-        return accelerations.get(0);
+        final EAccelerationMetric accelerationMetric = eModuleType == EModuleType.PROPULSION ? EAccelerationMetric.G : EAccelerationMetric.C;
+        final EHyperBand activeBand = eModuleType == EModuleType.PROPULSION ? EHyperBand.NONE : getLowestHyperBand();
+        return new Acceleration(BigDecimal.valueOf(lowestAcceleration), accelerationMetric, activeBand);
+    }
+
+
+    private int getLowestAccelerationValue() {
+        return getAliveShips()
+                .stream().map(WarShip::getShipClass)
+                .map(ShipClass::getPropulsion)
+                .map(Propulsion::getEffectValue)
+                .min(Integer::compareTo)
+                .orElse(0);
+    }
+
+    @Nonnull
+    private EHyperBand getLowestHyperBand() {
+        return getAliveShips()
+                .stream().map(WarShip::getShipClass)
+                .map(ShipClass::getPropulsion)
+                .map(Propulsion::getHyperBand)
+                .reduce((o1, o2) -> o1.getVelocityMultiplier() < o2.getVelocityMultiplier() ? o1 : o2)
+                .orElse(EHyperBand.NONE);
     }
 
     @Nonnull

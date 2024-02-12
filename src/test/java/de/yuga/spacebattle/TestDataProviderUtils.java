@@ -154,7 +154,7 @@ public class TestDataProviderUtils {
 
     @Nonnull
     public static Acceleration acc(final double value, EAccelerationMetric metric) {
-        return new Acceleration(value, metric);
+        return new Acceleration(value, metric, EHyperBand.NONE);
     }
 
     @Nonnull

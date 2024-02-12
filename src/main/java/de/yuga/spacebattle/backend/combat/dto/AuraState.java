@@ -31,7 +31,7 @@ public class AuraState {
     private final CombatRound combatRound;
 
     @Nonnull
-    private Map<EWeaponAlignment, AlignedAuraState> alignedAuraStates = new HashMap<>();
+    private final Map<EWeaponAlignment, AlignedAuraState> alignedAuraStates = new HashMap<>();
 
     public AuraState(@Nonnull final Cage cage, @Nonnull final Fleet actor, @Nonnull final FleetRoundState actorsRoundState) {
         Preconditions.checkNotNull(cage, "cage must not be empty");
@@ -42,6 +42,8 @@ public class AuraState {
         this.combatRound = cage.getCurrentCombatRound().clone();
 
         alignedAuraStates.putAll(Arrays.stream(EWeaponAlignment.values()).collect(Collectors.toMap(ewa -> ewa, AlignedAuraState::new)));
+
+        // fixme aura states must be circle
 
         final boolean isFirstRound = this.combatRound.getNo() == 1;
         final Fleet opponent = cage.getParticipatingFleets().stream().filter(f -> !f.equals(actor)).findFirst().orElseThrow();

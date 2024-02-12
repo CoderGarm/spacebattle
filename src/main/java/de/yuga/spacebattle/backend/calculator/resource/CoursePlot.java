@@ -557,8 +557,9 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
 
     @Nonnull
     public Velocity getCurrentVelocity() {
-        final CourseOrderElement latestCourseElement = getLatestCourseElement();
-        return latestCourseElement != null ? latestCourseElement.getVelocity() : agentsVelocity;
+        final CombatRound currentCombatRound = cage.getCurrentCombatRound();
+        final CourseOrderElement courseElement = getCourseElement(currentCombatRound);
+        return courseElement != null ? courseElement.getVelocity() : agentsVelocity;
     }
 
     @Nonnull
@@ -611,8 +612,9 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
     }
 
 
-    @Nullable
+    @Nonnull
     public Maneuver getManeuver() {
+        Preconditions.checkNotNull(maneuver, "maneuver must not be empty");
         return maneuver;
     }
 

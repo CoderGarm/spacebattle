@@ -69,9 +69,37 @@ public class CombatHandler {
         executeMovement(cage.getAggressor());
         executeMovement(cage.getDefender());
 
+        endCombatByExceededPlot();
+
         final Orbit aggroPos = cage.getCurrentStateByFleet(cage.getAggressor()).getPosition();
         final Orbit defPos = cage.getCurrentStateByFleet(cage.getDefender()).getPosition();
         cage.logMessage("#" + cage.getCurrentCombatRound().getNo() + "\t\t - " + aggroPos.getDistance(defPos).getCoordinateInMetric(LS) + " LS");
+    }
+
+    private void endCombatByExceededPlot() {
+        final boolean isExceeded = cage.getParticipatingFleets().stream()
+                .map(cage::getCurrentStateByFleet)
+                .map(FleetRoundState::getCoursePlot)
+                .anyMatch(CoursePlot::hasPlotExceeded);
+
+        if (isExceeded) {
+            final List<CoursePlot> notExceededPlots = cage.getParticipatingFleets().stream()
+                    .map(cage::getCurrentStateByFleet)
+                    .map(FleetRoundState::getCoursePlot)
+                    .filter(c -> !c.hasPlotExceeded())
+                    .collect(Collectors.toList());
+            for (final CoursePlot notExceededPlot : notExceededPlots) {
+                notExceededPlot.clearFutureCourseElements();
+                notExceededPlot.getManeuver().setEnd(cage.getCurrentCombatRound().clone());
+
+                final MovementAction latestHistorizedMovement = cage.getHistoryMovement().stream()
+                        .filter(ma -> ma.getActor().equals(notExceededPlot.getAgent()))
+                        .reduce((o1, o2) -> o1.getCombatRound().compareTo(o2.getCombatRound()) <= 0 ? o1 : o2)
+                        .orElseThrow(() -> new NotifyWebUserException("I hope we will never get this."));
+
+                latestHistorizedMovement.getManeuver().setEnd(cage.getCurrentCombatRound().clone());
+            }
+        }
     }
 
     private void createInitialCoursePlot() {
@@ -129,11 +157,11 @@ public class CombatHandler {
         agentsState.getPosition().moveTo(interimDestination);
 
         coursePlot.executeLatestPendingOrder();
-        // fixme create course generation when nothing more but other has
-        final boolean fakeEnd = currentCombatRound.getNo() > 500;
-        if (coursePlot.hasPlotExceeded() || fakeEnd) {
+        if (coursePlot.hasPlotExceeded()) {
+            // stop condition
             coursePlot.clearFutureCourseElements();
             maneuver.setEnd(currentCombatRound.clone());
+            cage.logMessage("Combat ended by exceeded course from '" + agent.getOwner().getUsername() + "' in round '" + currentCombatRound + "'");
         }
 
         movementAction.historize();
@@ -228,31 +256,15 @@ public class CombatHandler {
             final Distance agentsMobility = agentsState.getMobilityForDirection(agentsDirection);
             final Distance targetsMobility = targetsState.getMobilityForDirection(targetDirection);
 
-            final Orbit designatedAgentsPosition = agentsPos.clone().move(EMovementType.REDUCE_DISTANCE, agentsMobility, targetPos);
-            final Orbit designatedTargetsPosition = targetPos.clone().move(EMovementType.REDUCE_DISTANCE, targetsMobility, agentsPos);
-
-            final Orbit agentsMove = agentsPos.clone();
-            final Orbit targetsMove = targetPos.clone();
-            final Distance steps = agentsMobility.divide(maximumBeamRangeOne);
-
-            while (designatedAgentsPosition.getDistance(agentsMove).compareTo(maximumBeamRangeOne) <= 0) {
-
-                final boolean inRange = agentsMove.getDistance(targetsMove).compareTo(maximumBeamRangeOne) <= 0;
-                if (inRange) {
-                    inRangeWhilePassing = true;
-                    break;
-                }
-
-                agentsMove.move(EMovementType.REDUCE_DISTANCE, steps, designatedTargetsPosition);
-                targetsMove.move(EMovementType.REDUCE_DISTANCE, steps, designatedAgentsPosition);
-            }
+            inRangeWhilePassing = distance.subtract(agentsMobility).subtract(targetsMobility).compareTo(maximumBeamRangeOne) <= 0;
         }
 
         final Set<EWeaponAlignment> applicableAlignments = EWeaponAlignment.getApplicableAlignments(agentsPos, agentsDirection, targetPos);
         final boolean isAlignedToFire = agentsState.hasWeaponsForAlignment(applicableAlignments, EWeaponType.BEAM);
         if ((isInRange || inRangeWhilePassing) && isAlignedToFire) {
-            cage.logMessage(agent.getOwner().getUsername() + " tries to fire beams for " + applicableAlignments.stream().map(Enum::name).collect(Collectors.joining(", "))
-                    + " at range of " + distance);
+            final String complement = isInRange ? "directly" : "while passing";
+            cage.logMessage(agent.getOwner().getUsername() + " tries to fire beams for '" + applicableAlignments.stream().map(Enum::name).collect(Collectors.joining(", ")) + "' "
+                    + complement + " at range of " + distance);
             cage.addToFlyingBeamVolleys(new BeamVolley(cage, agent, target));
         }
     }

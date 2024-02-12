@@ -68,8 +68,6 @@ public class ManeuverFactory {
 
             - take closer control point of time-optimized-course as geometric center
             - calc p1, p2 based on distance enemy-CP to own P1 by setting enemy-CP in 2/3 of broadside passing baseline
-            fixme - flip the course to the opponents side
-
          */
 
         final CubicBezier combatElement = maneuver.getCombatElement();
