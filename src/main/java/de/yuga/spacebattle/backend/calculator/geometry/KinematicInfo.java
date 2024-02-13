@@ -15,13 +15,13 @@ import javax.annotation.Nonnull;
 public class KinematicInfo implements Cloneable {
 
     @Nonnull
-    private final Acceleration acceleration;
+    private Acceleration acceleration;
 
     @Nonnull
-    private final Velocity velocity;
+    private Velocity velocity;
 
     @Nonnull
-    private final Direction direction;
+    private Direction direction;
 
     @Nonnull
     private Orbit position;
@@ -90,6 +90,15 @@ public class KinematicInfo implements Cloneable {
     }
 
     @Nonnull
+    public KinematicInfo shiftInPlanetaryOrbit(@Nonnull final Orbit direction) {
+        Preconditions.checkNotNull(direction, "direction must not be empty");
+
+        this.position.moveAbout(new Distance(1500000, EDistanceMetric.KM), new Direction(position, direction));
+
+        return this;
+    }
+
+    @Nonnull
     public KinematicInfo with(@Nonnull final Orbit orbit) {
         this.position = Preconditions.checkNotNull(orbit, "orbit must not be empty").clone();
 
@@ -97,10 +106,22 @@ public class KinematicInfo implements Cloneable {
     }
 
     @Nonnull
-    public KinematicInfo shiftInPlanetaryOrbit(@Nonnull final Orbit direction) {
-        Preconditions.checkNotNull(direction, "direction must not be empty");
+    public KinematicInfo with(@Nonnull final Acceleration acceleration) {
+        this.acceleration = Preconditions.checkNotNull(acceleration, "acceleration must not be empty").clone();
 
-        this.position.moveAbout(new Distance(1500000, EDistanceMetric.KM), new Direction(position, direction));
+        return this;
+    }
+
+    @Nonnull
+    public KinematicInfo with(@Nonnull final Velocity velocity) {
+        this.velocity = Preconditions.checkNotNull(velocity, "velocity must not be empty").clone();
+
+        return this;
+    }
+
+    @Nonnull
+    public KinematicInfo with(@Nonnull final Direction direction) {
+        this.direction = Preconditions.checkNotNull(direction, "direction must not be empty").clone();
 
         return this;
     }

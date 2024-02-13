@@ -252,7 +252,7 @@ public class Cage implements Future<Cage> {
         end = System.currentTimeMillis();
         battleLogger.logMessage("incoming fire", start, end);
         start = System.currentTimeMillis();
-        combatHandler.handleFireWeaponPhase(); // fixme check missile movement and find a way for better displaying tiny missiles in the big space
+        combatHandler.handleFireWeaponPhase(); // fixme Missile movements must be handled by maneuvers, too. They must be targeted to the estimated position of a fleet to a given time.
         end = System.currentTimeMillis();
         battleLogger.logMessage("fire weapon", start, end);
 

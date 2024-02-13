@@ -5,8 +5,10 @@ import de.yuga.spacebattle.backend.calculator.geometry.CubicBezier;
 import de.yuga.spacebattle.backend.calculator.geometry.KinematicInfo;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Direction;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
@@ -41,7 +43,7 @@ public class ManeuverFactory {
                 cage.getCurrentCombatRound(),
                 agent,
                 agentsKinematicInitial,
-                agentsKinematicDesignation,
+                agentsKinematicDesignation.with(Acceleration.ZERO).with(Velocity.ZERO),
                 target
         ).createCoursePlot();
     }

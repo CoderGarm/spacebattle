@@ -12,7 +12,6 @@ import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
-import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
@@ -212,11 +211,17 @@ public abstract class Maneuver implements Cloneable {
 
         final double totalLength = maneuverElements.getTotalLength();
         Velocity velocity = Velocity.ZERO.clone();
-        Acceleration acceleration = cage.getCurrentStateByFleet(agent).getAccelerationFor(EModuleType.PROPULSION);
-        if (isAggressor) {
-            // fixme this is also not good
-            acceleration = acceleration.divide(2);
-        }
+        final Acceleration acceleration = agentsKinematicInitial.getAcceleration();
+
+
+        /*
+            fixme Plan zur Bestimmung von Ort und Zeit zu bestimmter Kampfrunde
+            1. Beschleunigungs- und geschwindigkeitsprofil aufbauen - Motionprofile
+                - Anfangs- und Endgeschwindigkeit, Länge der Strecke festhalten
+                - Werte in Kampfrundenabständen berechnen und festhalten
+                - Daraus folgt länge des Kurses und abrufbare Position zu Zeitpunkt x
+         */
+
 
         final int timeToPassTotalLength = getLengthInCombatRounds(totalLength, acceleration);
         cage.logMessage("Maneuver for '" + getAgent().getOwner().getUsername() + "' with a total length of '" + totalLength + "' passed in '" + timeToPassTotalLength + "' rounds.");
