@@ -91,13 +91,6 @@ public class CombatHandler {
             for (final CoursePlot notExceededPlot : notExceededPlots) {
                 notExceededPlot.clearFutureCourseElements();
                 notExceededPlot.getManeuver().setEnd(cage.getCurrentCombatRound().clone());
-
-                final MovementAction latestHistorizedMovement = cage.getHistoryMovement().stream()
-                        .filter(ma -> ma.getActor().equals(notExceededPlot.getAgent()))
-                        .reduce((o1, o2) -> o1.getCombatRound().compareTo(o2.getCombatRound()) <= 0 ? o1 : o2)
-                        .orElseThrow(() -> new NotifyWebUserException("I hope we will never get this."));
-
-                latestHistorizedMovement.getManeuver().setEnd(cage.getCurrentCombatRound().clone());
             }
         }
     }

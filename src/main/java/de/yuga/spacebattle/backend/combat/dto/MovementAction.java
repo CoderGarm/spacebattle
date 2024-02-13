@@ -14,7 +14,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 
-public class MovementAction extends Historizable<MovementAction> implements Cloneable {
+public class MovementAction {
 
     @Nonnull
     private final Cage cage;
@@ -52,12 +52,11 @@ public class MovementAction extends Historizable<MovementAction> implements Clon
         this.maneuverElement = Preconditions.checkNotNull(maneuverElement, "maneuverElement must not be empty");
         this.movementType = Preconditions.checkNotNull(movementType, "movementType shouldn't be null!");
         this.lengthOnTrack = Preconditions.checkNotNull(lengthOnTrack, "lengthOnTrack must not be empty");
-        this.combatRound = cage.getCurrentCombatRound();
+        this.combatRound = cage.getCurrentCombatRound().clone();
     }
 
     public void historize() {
-        //noinspection RedundantCast
-        cage.addHistorizable((MovementAction) this);
+        maneuver.addMovementAction(this);
     }
 
     @Nonnull
@@ -93,15 +92,6 @@ public class MovementAction extends Historizable<MovementAction> implements Clon
     @Nonnull
     public Distance getLengthOnTrack() {
         return lengthOnTrack;
-    }
-
-    @Override
-    public MovementAction clone() {
-        final MovementAction clone = (MovementAction) super.clone();
-        clone.combatRound = combatRound.clone();
-        clone.maneuver = maneuver.clone();
-        clone.maneuverElement = maneuverElement.clone();
-        return clone;
     }
 
     @Override

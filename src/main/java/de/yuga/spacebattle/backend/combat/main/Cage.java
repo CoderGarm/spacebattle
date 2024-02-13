@@ -108,9 +108,6 @@ public class Cage implements Future<Cage> {
     private final List<FleetRoundState> historyOfRounds = new ArrayList<>();
 
     @Nonnull
-    private final List<MovementAction> historyMovement = new ArrayList<>();
-
-    @Nonnull
     private final List<MissileSalvo> historyOfMissileSalvos = new ArrayList<>();
 
     @Nonnull
@@ -479,20 +476,13 @@ public class Cage implements Future<Cage> {
         // fixme replace the historizable concept by transferring directly into the new dto classes and not cloning them
         //  the idea is to remove all cloning
 
-        if (historizable instanceof MovementAction) {
-            historyMovement.add(((MovementAction) historizable).clone());
-        } else if (historizable instanceof MissileSalvo) {
+        if (historizable instanceof MissileSalvo) {
             historyOfMissileSalvos.add(((MissileSalvo) historizable).clone());
         } else if (historizable instanceof BeamVolley) {
             historyOfBeamSalvos.add(((BeamVolley) historizable).clone());
         } else if (historizable instanceof FleetRoundState) {
             historyOfRounds.add(((FleetRoundState) historizable).clone());
         }
-    }
-
-    @Nonnull
-    public List<MovementAction> getHistoryMovement() {
-        return historyMovement;
     }
 
     @Nonnull
@@ -530,6 +520,11 @@ public class Cage implements Future<Cage> {
     @Nonnull
     public List<FleetRoundState> getHistoryOfRounds() {
         return historyOfRounds;
+    }
+
+    @Nonnull
+    public List<FleetRoundState> getRoundStates() {
+        return roundStates;
     }
 
     @Nonnull

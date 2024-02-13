@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.combat;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.calculator.geometry.CubicBezier;
+import de.yuga.spacebattle.backend.calculator.resource.CoursePlot;
 import de.yuga.spacebattle.backend.combat.dto.*;
 import de.yuga.spacebattle.backend.combat.enums.EDamageResult;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
@@ -167,6 +168,7 @@ public class BattleLogger {
         }
     }
 
+    @Nonnull
     private BufferedWriter openStream(@Nonnull final BattleReport battleReport) {
         Preconditions.checkNotNull(battleReport, "battleReport shouldn't be null!");
 
@@ -218,31 +220,29 @@ public class BattleLogger {
         }
 
         final BufferedWriter bw = openStream(battleReport);
-        if (bw == null) {
-            LOGGER.info("Battle result could not be logged.");
-            return;
-        }
 
         final Cage cage = battleResult.getCage();
         final FleetClash fleetClash = battleResult.getFleetClash();
         final Set<WarShip> losses = battleResult.getLosses();
-        final List<FleetRoundState> allRoundStates = battleResult.getRoundStates();
-        final List<MovementAction> allMovements = battleResult.getMovements();
-        final List<BeamVolley> allBeamVolleys = battleResult.getBeamVolleys();
-        final List<MissileSalvo> allMissileSalvos = battleResult.getMissileSalvos();
 
+        final List<FleetRoundState> allRoundStates = battleResult.getRoundStates();
         final Map<CombatRound, List<FleetRoundState>> statesByRound = allRoundStates.stream()
                 .collect(Collectors.groupingBy(FleetRoundState::getCombatRound,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
 
-        final Map<CombatRound, List<MovementAction>> movementsByRound = allMovements.stream()
+        final List<CoursePlot> allCoursePlots = battleResult.getCoursePlots();
+        final Map<CombatRound, List<MovementAction>> movementsByRound = allCoursePlots.stream()
+                .map(c -> c.getManeuver().getMovementActions())
+                .flatMap(Collection::stream)
                 .collect(Collectors.groupingBy(MovementAction::getCombatRound,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
 
+        final List<BeamVolley> allBeamVolleys = battleResult.getBeamVolleys();
         final Map<CombatRound, List<BeamVolley>> beamVolleyByRound = allBeamVolleys.stream()
                 .collect(Collectors.groupingBy(BeamVolley::getCombatRound,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
 
+        final List<MissileSalvo> allMissileSalvos = battleResult.getMissileSalvos();
         final Map<CombatRound, List<MissileSalvo>> missileSalvosByRound = allMissileSalvos.stream()
                 .collect(Collectors.groupingBy(MissileSalvo::getCombatRound,
                         Collectors.mapping(Function.identity(), Collectors.toList())));

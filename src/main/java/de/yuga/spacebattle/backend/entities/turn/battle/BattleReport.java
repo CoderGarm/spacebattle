@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.entities.turn.battle;
 
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.resource.CoursePlot;
 import de.yuga.spacebattle.backend.combat.dto.HitLog;
 import de.yuga.spacebattle.backend.combat.dto.*;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
@@ -204,31 +205,33 @@ public class BattleReport extends AbstractEntityKey {
         Preconditions.checkNotNull(battleResult, "fightingResult shouldn't be null!");
 
         final List<FleetRoundState> allRoundStates = battleResult.getRoundStates();
-        final List<de.yuga.spacebattle.backend.combat.dto.MovementAction> allMovements = battleResult.getMovements();
-        final List<BeamVolley> allBeamVolleys = battleResult.getBeamVolleys();
-        final List<MissileSalvo> allMissileSalvos = battleResult.getMissileSalvos();
-
         final Map<CombatRound, List<FleetRoundState>> statesByRound = allRoundStates.stream()
                 .collect(Collectors.groupingBy(FleetRoundState::getCombatRound,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
 
-        final Map<CombatRound, List<de.yuga.spacebattle.backend.combat.dto.MovementAction>> movementsByRound = allMovements.stream()
+        final List<CoursePlot> allCoursePlots = battleResult.getCoursePlots();
+        final Map<CombatRound, List<de.yuga.spacebattle.backend.combat.dto.MovementAction>> movementsByRound = allCoursePlots.stream()
+                .map(c -> c.getManeuver().getMovementActions())
+                .flatMap(Collection::stream)
                 .collect(Collectors.groupingBy(de.yuga.spacebattle.backend.combat.dto.MovementAction::getCombatRound,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
 
-        final Map<de.yuga.spacebattle.backend.combat.maneuver.Maneuver, Maneuver> maneuvers = allMovements.stream()
-                .filter(m -> m.getManeuver().isValid())
-                .collect(Collectors.toMap(de.yuga.spacebattle.backend.combat.dto.MovementAction::getManeuver, m -> new Maneuver(m.getManeuver())));
+        final Map<de.yuga.spacebattle.backend.combat.maneuver.Maneuver, Maneuver> maneuvers = allCoursePlots.stream()
+                .map(CoursePlot::getManeuver)
+                .filter(de.yuga.spacebattle.backend.combat.maneuver.Maneuver::isValid)
+                .collect(Collectors.toMap(Function.identity(), Maneuver::new));
 
         final Map<CombatRound, List<AuraState>> aurasByRound = allRoundStates.stream()
                 .collect(Collectors.groupingBy(FleetRoundState::getCombatRound,
                         Collectors.mapping(FleetRoundState::getAuraState, Collectors.toList())));
 
         //noinspection DuplicatedCode
+        final List<BeamVolley> allBeamVolleys = battleResult.getBeamVolleys();
         final Map<CombatRound, List<BeamVolley>> beamVolleyByRound = allBeamVolleys.stream()
                 .collect(Collectors.groupingBy(BeamVolley::getCombatRound,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
 
+        final List<MissileSalvo> allMissileSalvos = battleResult.getMissileSalvos();
         final Map<CombatRound, List<MissileSalvo>> missileSalvosByRound = allMissileSalvos.stream()
                 .collect(Collectors.groupingBy(MissileSalvo::getCombatRound,
                         Collectors.mapping(Function.identity(), Collectors.toList())));

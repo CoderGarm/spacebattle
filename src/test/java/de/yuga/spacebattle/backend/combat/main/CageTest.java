@@ -2,24 +2,17 @@ package de.yuga.spacebattle.backend.combat.main;
 
 import de.yuga.spacebattle.BaseTestCase;
 import de.yuga.spacebattle.TestDataProviderUtils;
-import de.yuga.spacebattle.backend.combat.dto.BeamVolley;
-import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
-import de.yuga.spacebattle.backend.combat.dto.MovementAction;
 import de.yuga.spacebattle.backend.combat.main.handler.CombatHandler;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.FleetHealthState;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
-import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -160,41 +153,6 @@ class CageTest extends BaseTestCase {
         // check expectation
         assertNotNull(result);
         assertSame(testObject.getParticipatingFleets().get(0), result.getFleet());
-    }
-
-    @Test
-    void testAddHistorizable() {
-        // prepare stuff
-        final Fleet fleet = testObject.getParticipatingFleets().get(0);
-        final Orbit orbit = Orbit.getCenterOrbit();
-
-        // test method - constructor calls historizing in testObject
-        final MissileSalvo missileSalvo = new MissileSalvo(testObject, fleet, fleet, Set.of(EWeaponAlignment.BROADSIDE, EWeaponAlignment.BOW, EWeaponAlignment.STERN), Set.of());
-        final UUID uuidMS = UUID.fromString(missileSalvo.getUuid().toString());
-
-        final BeamVolley beamVolley = new BeamVolley(testObject, fleet, fleet);
-        final UUID uuidBV = UUID.fromString(beamVolley.getUuid().toString());
-
-        final FleetRoundState fleetRoundState = new FleetRoundState(testObject, fleet, orbit);
-        final UUID uuidFRS = UUID.fromString(fleetRoundState.getUuid().toString());
-
-        // check expectation
-        final List<MovementAction> historyMovement = testObject.getHistoryMovement();
-        final List<MissileSalvo> historyOfMissileSalvos = testObject.getHistoryOfMissileSalvos();
-        final List<BeamVolley> historyOfBeamSalvos = testObject.getHistoryOfBeamSalvos();
-        final List<FleetRoundState> historyOfRounds = testObject.getHistoryOfRounds();
-
-        // assertions are a little strange while the first uuid which can be fetched is already resetted is the constructor is passed
-        assertFalse(historyMovement.isEmpty());
-
-        assertFalse(historyOfMissileSalvos.isEmpty());
-        assertEquals(uuidMS, missileSalvo.getUuid());
-
-        assertFalse(historyOfBeamSalvos.isEmpty());
-        assertEquals(uuidBV, beamVolley.getUuid());
-
-        assertFalse(historyOfRounds.isEmpty());
-        assertEquals(uuidFRS, fleetRoundState.getUuid());
     }
 
     @Test

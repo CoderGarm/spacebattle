@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.geometry.CubicBezier;
 import de.yuga.spacebattle.backend.calculator.geometry.KinematicInfo;
 import de.yuga.spacebattle.backend.calculator.resource.CourseOrderElement;
+import de.yuga.spacebattle.backend.combat.dto.MovementAction;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
@@ -72,6 +73,9 @@ public abstract class Maneuver implements Cloneable {
     private final List<CourseOrderElement> courseOrderElements = new ArrayList<>();
 
     @Nonnull
+    private final List<MovementAction> movementActions = new ArrayList<>();
+
+    @Nonnull
     private final ManeuverElements maneuverElements;
 
     protected Maneuver(@Nonnull final Cage cage,
@@ -109,14 +113,20 @@ public abstract class Maneuver implements Cloneable {
 
     @Nonnull
     public CombatRound getDesignatedEnd() {
-        Preconditions.checkNotNull(designatedEnd, "designatedEnd must not be empty");
-        return designatedEnd;
+        return Preconditions.checkNotNull(designatedEnd, "designatedEnd must not be empty");
+    }
+
+    public void setDesignatedEnd(@Nonnull final CombatRound designatedEnd) {
+        this.designatedEnd = Preconditions.checkNotNull(designatedEnd, "designatedEnd must not be empty").clone();
+    }
+
+    public void setEnd(@Nonnull final CombatRound end) {
+        this.end = Preconditions.checkNotNull(end, "end must not be empty").clone();
     }
 
     @Nonnull
     public CombatRound getEnd() {
-        Preconditions.checkNotNull(end, "end must not be empty");
-        return end;
+        return Preconditions.checkNotNull(end, "end must not be empty");
     }
 
     public boolean isValid() {
@@ -149,16 +159,19 @@ public abstract class Maneuver implements Cloneable {
     }
 
     @Nonnull
+    public List<MovementAction> getMovementActions() {
+        return movementActions;
+    }
+
+    public void addMovementAction(@Nonnull final MovementAction movementAction) {
+        Preconditions.checkNotNull(movementAction, "movementAction must not be empty");
+
+        movementActions.add(movementAction);
+    }
+
+    @Nonnull
     public ManeuverElements getCourseItems() {
         return maneuverElements;
-    }
-
-    public void setDesignatedEnd(@Nonnull final CombatRound designatedEnd) {
-        this.designatedEnd = Preconditions.checkNotNull(designatedEnd, "designatedEnd must not be empty").clone();
-    }
-
-    public void setEnd(@Nonnull final CombatRound end) {
-        this.end = Preconditions.checkNotNull(end, "end must not be empty").clone();
     }
 
     @Override

@@ -74,7 +74,7 @@ public class BattleReportService {
     public BattleReport save(@Nonnull final BattleReport entity) {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
 
-        // fixme this mess must be cleaned up
+        // fixme after tidy up the historizable concept this can be cleaned, too
         final Set<Maneuver> maneuvers = entity.getMovementActions().stream().map(MovementAction::getManeuver).collect(Collectors.toSet());
 
         final Map<Maneuver, Set<ManeuverElement>> maneuverElementsMap = new HashMap<>();

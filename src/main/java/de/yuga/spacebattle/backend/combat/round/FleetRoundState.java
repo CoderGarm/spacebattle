@@ -62,7 +62,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
      * The current position of the acting fleet.
      */
     @Nonnull
-    private Orbit position;
+    private Orbit position; // fixme transfer all of them into course plot
 
     @Nonnull
     private Velocity velocity;

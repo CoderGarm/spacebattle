@@ -614,8 +614,7 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
 
     @Nonnull
     public Maneuver getManeuver() {
-        Preconditions.checkNotNull(maneuver, "maneuver must not be empty");
-        return maneuver;
+        return Preconditions.checkNotNull(maneuver, "maneuver must not be empty");
     }
 
     @Override

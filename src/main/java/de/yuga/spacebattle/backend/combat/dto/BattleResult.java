@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.combat.dto;
 
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.resource.CoursePlot;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.combat.round.WarshipHealthState;
@@ -29,7 +30,7 @@ public class BattleResult {
     private final List<FleetRoundState> roundStates;
 
     @Nonnull
-    private final List<MovementAction> movements;
+    private final List<CoursePlot> coursePlots;
 
     @Nonnull
     private final List<BeamVolley> beamVolleys;
@@ -45,7 +46,9 @@ public class BattleResult {
         this.roundStates = cage.getHistoryOfRounds().stream()
                 .sorted(Comparator.comparing(FleetRoundState::getCombatRound))
                 .collect(Collectors.toList());
-        this.movements = cage.getHistoryMovement();
+        this.coursePlots = cage.getRoundStates().stream()
+                .map(FleetRoundState::getCoursePlot)
+                .collect(Collectors.toList());
         this.beamVolleys = cage.getHistoryOfBeamSalvos();
         this.missileSalvos = cage.getHistoryOfMissileSalvos();
 
@@ -88,8 +91,8 @@ public class BattleResult {
     }
 
     @Nonnull
-    public List<MovementAction> getMovements() {
-        return movements;
+    public List<CoursePlot> getCoursePlots() {
+        return coursePlots;
     }
 
     @Nonnull
