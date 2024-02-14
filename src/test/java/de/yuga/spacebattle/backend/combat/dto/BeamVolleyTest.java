@@ -2,7 +2,6 @@ package de.yuga.spacebattle.backend.combat.dto;
 
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.combat.round.BeamState;
-import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
@@ -17,7 +16,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 import static de.yuga.spacebattle.TestDataProviderUtils.cage;
 import static de.yuga.spacebattle.backend.combat.enums.EDamageResult.DAMAGE_APPLIED;
@@ -61,19 +59,5 @@ class BeamVolleyTest {
         assertSame(ECombatPhase.ECombatSubPhase.BEAM_FIRE_INCOMING_PHASE, testObject.getCombatSubPhase());
         assertSame(DAMAGE_APPLIED, testObject.getResult());
         assertFalse(testObject.getAppliedDamage().isEmpty());
-    }
-
-    @Test
-    void testTestClone() {
-        // prepare stuff
-        final UUID uuid = testObject.getUuid();
-        final CombatRound combatRound = testObject.getCombatRound();
-        // test method
-        final BeamVolley clone = testObject.clone();
-        // check expectation
-        assertEquals(uuid, clone.getUuid());
-        assertNotSame(uuid, clone.getUuid());
-        assertEquals(combatRound, clone.getCombatRound());
-        assertNotSame(combatRound, clone.getCombatRound());
     }
 }

@@ -478,8 +478,6 @@ public class Cage implements Future<Cage> {
 
         if (historizable instanceof MissileSalvo) {
             historyOfMissileSalvos.add(((MissileSalvo) historizable).clone());
-        } else if (historizable instanceof BeamVolley) {
-            historyOfBeamSalvos.add(((BeamVolley) historizable).clone());
         } else if (historizable instanceof FleetRoundState) {
             historyOfRounds.add(((FleetRoundState) historizable).clone());
         }
@@ -515,6 +513,10 @@ public class Cage implements Future<Cage> {
     @Nonnull
     public List<BeamVolley> getHistoryOfBeamSalvos() {
         return historyOfBeamSalvos;
+    }
+
+    public void historizeBeamVolley(@Nonnull final BeamVolley beamVolley) {
+        this.historyOfBeamSalvos.add(Preconditions.checkNotNull(beamVolley, "beamVolley must not be empty"));
     }
 
     @Nonnull

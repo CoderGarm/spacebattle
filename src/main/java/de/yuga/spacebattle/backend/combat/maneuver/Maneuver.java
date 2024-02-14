@@ -163,7 +163,7 @@ public abstract class Maneuver implements Cloneable {
         return movementActions;
     }
 
-    public void addMovementAction(@Nonnull final MovementAction movementAction) {
+    public void historizeMovementAction(@Nonnull final MovementAction movementAction) {
         Preconditions.checkNotNull(movementAction, "movementAction must not be empty");
 
         movementActions.add(movementAction);

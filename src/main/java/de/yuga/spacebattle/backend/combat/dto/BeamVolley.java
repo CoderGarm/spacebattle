@@ -14,6 +14,8 @@ import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
 import de.yuga.spacebattle.backend.enums.ECombatPhase.ECombatSubPhase;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -32,7 +34,7 @@ import static de.yuga.spacebattle.backend.combat.enums.EMovementType.IMPELLER_WE
 /**
  * Represents a salvo of direct hit weapons.
  */
-public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
+public class BeamVolley extends Historizable<BeamVolley> {
 
     /**
      * The cage.
@@ -45,7 +47,7 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
      * A volley of direct weapons will hit in the same weapon.
      */
     @Nonnull
-    private CombatRound combatRound;
+    private final CombatRound combatRound;
 
     /**
      * The current phase.
@@ -137,8 +139,7 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
     }
 
     private void historize() {
-        //noinspection RedundantCast
-        cage.addHistorizable((BeamVolley) this);
+        cage.historizeBeamVolley(this);
     }
 
     /**
@@ -165,7 +166,6 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
             });
             result = DAMAGE_APPLIED;
         }
-        historize();
     }
 
     @Nonnull
@@ -208,13 +208,6 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
         return result;
     }
 
-    @Override
-    public BeamVolley clone() {
-        final BeamVolley clone = (BeamVolley) super.clone();
-        clone.combatRound = combatRound.clone();
-        return clone;
-    }
-
     /**
      * Returns the possible damage which can be applied by this volley.
      *
@@ -223,5 +216,21 @@ public class BeamVolley extends Historizable<BeamVolley> implements Cloneable {
     @Nonnull
     public List<ApplicableDamage> getApplicableDamage() {
         return firedShots.stream().map(ApplicableDamage::new).collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final BeamVolley that = (BeamVolley) o;
+
+        return new EqualsBuilder().appendSuper(super.equals(o)).append(combatRound, that.combatRound).append(actor, that.actor).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).appendSuper(super.hashCode()).append(combatRound).append(actor).toHashCode();
     }
 }

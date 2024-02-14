@@ -56,7 +56,7 @@ public class MovementAction {
     }
 
     public void historize() {
-        maneuver.addMovementAction(this);
+        maneuver.historizeMovementAction(this);
     }
 
     @Nonnull

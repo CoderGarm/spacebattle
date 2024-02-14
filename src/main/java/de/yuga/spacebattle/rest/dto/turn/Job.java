@@ -162,7 +162,7 @@ public class Job {
 
             final de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet fleet = constructable.getFleet();
             final FleetSnapshot fleetSnapshot = constructable.getFleetSnapshot();
-            if (fleet != null | fleetSnapshot != null) {
+            if (fleet != null || fleetSnapshot != null) {
                 final Set<WarShip> ships = fleet != null ? (constructable.isUpgradeJob() ? fleet.getAliveShips() : fleet.getAllShips()) : Objects.requireNonNull(fleetSnapshot).getShips().stream().map(WarshipHealthStateSnapshot::getWarShip).collect(Collectors.toSet());
                 this.fleet = new Fleet(fleet != null ? fleet : fleetSnapshot.getFleet(), ships, languageCode);
             }
