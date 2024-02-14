@@ -54,12 +54,7 @@ public class MissileMovement {
     @Nullable
     @JsonProperty
     @Schema(required = true, description = "The position of the salvo in the last round.")
-    private de.yuga.spacebattle.rest.dto.orbitals.Orbit lastPosition;
-
-    @Nullable
-    @JsonProperty
-    @Schema(required = true, description = "The current position of the target.")
-    private de.yuga.spacebattle.rest.dto.orbitals.Orbit targetPosition;
+    private de.yuga.spacebattle.rest.dto.orbitals.Orbit lastPosition; // fixme replace by direction?
 
     public MissileMovement() {
     }
@@ -77,7 +72,5 @@ public class MissileMovement {
         this.missileAmount = input.getMissileAmount();
         this.roundsToTravel = input.getRoundsToTravel();
         this.position = new Orbit(input.getPosition());
-        this.lastPosition = new Orbit(input.getLastPosition());
-        this.targetPosition = new Orbit(input.getTargetPosition());
     }
 }

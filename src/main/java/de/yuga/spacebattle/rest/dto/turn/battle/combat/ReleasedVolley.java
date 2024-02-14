@@ -2,7 +2,6 @@ package de.yuga.spacebattle.rest.dto.turn.battle.combat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.enums.EWeaponType;
 import de.yuga.spacebattle.rest.dto.AbstractId;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -48,11 +47,6 @@ public class ReleasedVolley {
     @Schema(required = true, description = "The amount of missiles in this salvo.")
     private int amountOfShots;
 
-    @Nullable
-    @JsonProperty
-    @Schema(required = true, description = "The distance of this shot.")
-    private Distance initialDistance;
-
     public ReleasedVolley() {
     }
 
@@ -68,6 +62,5 @@ public class ReleasedVolley {
         this.damageDealer = input.getDamageDealer();
         this.weaponType = input.getWeaponType();
         this.amountOfShots = input.getAmountOfShots();
-        this.initialDistance = input.getInitialDistance();
     }
 }

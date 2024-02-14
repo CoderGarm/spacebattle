@@ -53,7 +53,7 @@ public class BeamVolley extends Historizable<BeamVolley> {
      * The current phase.
      */
     @Nonnull
-    private ECombatSubPhase combatSubPhase;
+    private ECombatSubPhase combatSubPhase; // fixme remove it - not longer symmetrical
 
     /**
      * The source of the salvo.

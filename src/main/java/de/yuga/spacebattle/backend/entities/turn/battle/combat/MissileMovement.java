@@ -1,9 +1,13 @@
 package de.yuga.spacebattle.backend.entities.turn.battle.combat;
 
+import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.geometry.KinematicInfo;
 import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
+import de.yuga.spacebattle.backend.combat.dto.MotionProfile;
 import de.yuga.spacebattle.backend.converter.UUIDConverter;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
+import de.yuga.spacebattle.backend.enums.ECombatPhase;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -59,15 +63,6 @@ public class MissileMovement extends CombatRoundKey {
     private Orbit position;
 
     /**
-     * The position of the salvo in the last round.
-     */
-    @NotNull
-    @Nonnull
-    @AttributeOverride(name = "xCoordinate", column = @Column(name = "xCoordLast"))
-    @AttributeOverride(name = "yCoordinate", column = @Column(name = "yCoordLast"))
-    private Orbit lastPosition;
-
-    /**
      * The current position of the target.
      */
     @NotNull
@@ -79,15 +74,19 @@ public class MissileMovement extends CombatRoundKey {
     public MissileMovement() {
     }
 
-    public MissileMovement(@Nonnull final MissileSalvo volley) {
-        super(volley.getCombatRound(), volley.getCombatSubPhase());
+    public MissileMovement(@Nonnull final MissileSalvo volley,
+                           @Nonnull final MotionProfile motionProfile) {
+        super(
+                Preconditions.checkNotNull(motionProfile, "motionProfile must not be empty").getCombatRound(),
+                ECombatPhase.ECombatSubPhase.MISSILE_MOVEMENT_PHASE
+        );
 
+        final KinematicInfo ki = motionProfile.getKinematicInfo();
         this.actor = volley.getActor();
         this.target = volley.getTarget();
         this.movingMissileSalvo = volley.getUuid();
-        this.position = volley.getPosition().clone();
-        this.lastPosition = volley.getLastPosition().clone();
-        this.missileAmount = volley.getMissileSalvoHealthState().getCurrentAmountByType().values().stream().mapToInt(Integer::intValue).sum();
+        this.position = ki.getPosition().clone();
+        this.missileAmount = volley.getMissileSalvoHealthState().getAmountByTypeAtEndOfCombatRound(motionProfile.getCombatRound()).values().stream().mapToInt(Integer::intValue).sum();
         this.targetPosition = volley.getTargetPosition().clone();
         this.roundsToTravel = volley.roundsTravelled();
     }
@@ -118,11 +117,6 @@ public class MissileMovement extends CombatRoundKey {
     @Nonnull
     public Orbit getPosition() {
         return position;
-    }
-
-    @Nonnull
-    public Orbit getLastPosition() {
-        return lastPosition;
     }
 
     @Nonnull

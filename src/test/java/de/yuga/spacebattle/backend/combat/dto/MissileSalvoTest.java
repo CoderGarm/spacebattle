@@ -2,7 +2,6 @@ package de.yuga.spacebattle.backend.combat.dto;
 
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
-import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.FleetHealthState;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.combat.round.MissileSalvoHealthState;
@@ -11,7 +10,6 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
-import de.yuga.spacebattle.backend.enums.ECombatPhase;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +41,6 @@ class MissileSalvoTest {
 
     @Test
     void testConstructor() {
-        assertSame(ECombatPhase.ECombatSubPhase.MISSILE_FIRE_PHASE, testObject.getCombatSubPhase());
         final MissileSalvoHealthState missileSalvoHealthState = testObject.getMissileSalvoHealthState();
         assertNotNull(missileSalvoHealthState);
         final Distance initialDistance = testObject.getInitialDistance();
@@ -69,35 +66,9 @@ class MissileSalvoTest {
         testObject.handleMissilePhase();
         // check expectation
         verify(salvoHealthStateMock, times(4)).isActive();
-        verify(salvoHealthStateMock, times(1)).clearLosses();
         verify(testObject, times(1)).handleElokaPhase();
         verify(testObject, times(1)).handleCounterMissilePhase();
         verify(testObject, times(1)).handleMovement();
-    }
-
-    @Test
-    void testTestClone() {
-        // prepare stuff
-        final UUID uuid = testObject.getUuid();
-        final CombatRound combatRound = testObject.getCombatRound();
-        final Orbit position = testObject.getPosition();
-        final Orbit lastPosition = testObject.getLastPosition();
-        final MissileSalvoHealthState missileSalvoHealthState = testObject.getMissileSalvoHealthState();
-        // test method
-        final MissileSalvo clone = testObject.clone();
-        // check expectation
-        assertEquals(uuid, clone.getUuid());
-        assertNotSame(uuid, clone.getUuid());
-        assertEquals(combatRound, clone.getCombatRound());
-        assertNotSame(combatRound, clone.getCombatRound());
-        assertEquals(position, clone.getPosition());
-        assertNotSame(position, clone.getPosition());
-        assertEquals(lastPosition, clone.getLastPosition());
-        assertNotSame(lastPosition, clone.getLastPosition());
-        assertEquals(missileSalvoHealthState.getInitialAmountByType(), clone.getMissileSalvoHealthState().getInitialAmountByType());
-        assertEquals(missileSalvoHealthState.getCurrentAmountByType(), clone.getMissileSalvoHealthState().getCurrentAmountByType());
-        assertEquals(missileSalvoHealthState.getLossesByType(), clone.getMissileSalvoHealthState().getLossesByType());
-        assertNotSame(missileSalvoHealthState, clone.getMissileSalvoHealthState());
     }
 
     @Test
@@ -175,7 +146,6 @@ class MissileSalvoTest {
         assertNotNull(resultingDamageList);
         assertTrue(resultingDamageList.contains(111L));
         assertTrue(resultingDamageList.contains(222L));
-        assertSame(ECombatPhase.ECombatSubPhase.MISSILE_FIRE_INCOMING_PHASE, testObject.getCombatSubPhase());
     }
 
     @Test
@@ -213,11 +183,10 @@ class MissileSalvoTest {
         // check expectation
         verify(cageMock).getCurrentStateByFleet(targetMock);
         verify(missileSalvoHealthStateMock, atLeast(1)).getCurrentAmountByType();
-        verify(missileSalvoHealthStateMock, atLeast(1)).setNewMissileAmounts(any(), anyInt(), any());
-        assertEquals(BigDecimal.ZERO, testObject.getRangePerCombatRound());
-        assertEquals(BigDecimal.ZERO, testObject.getLongestOffensiveRange());
+        verify(missileSalvoHealthStateMock, atLeast(1)).addLostMissiles(any(), any(), any(), anyInt());
+        assertEquals(BigDecimal.ZERO, testObject.getRangePerCombatRound().getCoordinate());
+        assertEquals(BigDecimal.ZERO, testObject.getLongestOffensiveRange().getCoordinate());
         verify(cageMock).addHistorizable(testObject);
-        assertSame(ECombatPhase.ECombatSubPhase.ELOKA_PHASE, testObject.getCombatSubPhase());
     }
 
     @Test
@@ -256,11 +225,10 @@ class MissileSalvoTest {
         // check expectation
         verify(cageMock).getCurrentStateByFleet(targetMock);
         verify(missileSalvoHealthStateMock, atLeast(1)).getCurrentAmountByType();
-        verify(missileSalvoHealthStateMock, atLeast(1)).setNewMissileAmounts(any(), anyInt(), any());
+        verify(missileSalvoHealthStateMock, atLeast(1)).addLostMissiles(any(), any(), any(), anyInt());
         assertEquals(Distance.ZERO, testObject.getRangePerCombatRound());
         assertEquals(Distance.ZERO, testObject.getLongestOffensiveRange());
         verify(cageMock).addHistorizable(testObject);
-        assertSame(ECombatPhase.ECombatSubPhase.COUNTER_MISSILE_PHASE, testObject.getCombatSubPhase());
     }
 
     @Test
@@ -299,6 +267,5 @@ class MissileSalvoTest {
         assertEquals(positionMock, resultLastPosition);
         verify(positionMock).moveTo(newPosFake);
         verify(cageMock).addHistorizable(testObject);
-        assertSame(ECombatPhase.ECombatSubPhase.MISSILE_MOVEMENT_PHASE, testObject.getCombatSubPhase());
     }
 }

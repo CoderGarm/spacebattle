@@ -1449,19 +1449,19 @@ create index ID_SC on shipClass (isDeleted);
             foreign key (idShipKillerHit)
                 references shipKillerHit (idShipKillerHit);
 
-    alter table maneuver 
-       add constraint FKcvx1o183kutmyqa1jj40bij56 
-       foreign key (idActor) 
+    alter table maneuver
+       add constraint FKcvx1o183kutmyqa1jj40bij56
+       foreign key (idActor)
        references fleet (idFleet);
 
-    alter table maneuver 
-       add constraint FKb3vcn9udn13s92hu6spvmbs9y 
-       foreign key (idTarget) 
+    alter table maneuver
+       add constraint FKb3vcn9udn13s92hu6spvmbs9y
+       foreign key (idTarget)
        references fleet (idFleet);
 
-    alter table maneuverElement 
-       add constraint FK5rat96hasfnv0pnxdyti3nsrv 
-       foreign key (idManeuver) 
+    alter table maneuverElement
+       add constraint FK5rat96hasfnv0pnxdyti3nsrv
+       foreign key (idManeuver)
        references maneuver (idManeuver);
 
     alter table messageThread
@@ -1594,9 +1594,9 @@ create index ID_SC on shipClass (isDeleted);
             foreign key (idActor)
                 references fleet (idFleet);
 
-    alter table movementAction 
-       add constraint FK88r923vtbqffqy7u3n62bw5d7 
-       foreign key (idManeuver) 
+    alter table movementAction
+       add constraint FK88r923vtbqffqy7u3n62bw5d7
+       foreign key (idManeuver)
        references maneuver (idManeuver);
 
     alter table movementActions
@@ -2206,3 +2206,4 @@ INSERT INTO dbPatch VALUES (NULL, NOW(), 'replace operational cache', '0.1.17-7'
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'share battle reports', '0.1.17-8');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'introduce aligned ranges', '0.1.18-1');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'switch to bezier course', '0.1.18-2');
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'drop cloneable concept', '0.1.18-3');

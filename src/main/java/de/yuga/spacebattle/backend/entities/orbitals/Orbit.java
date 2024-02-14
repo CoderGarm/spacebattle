@@ -137,7 +137,7 @@ public class Orbit implements Comparable<Orbit>, Cloneable {
             return new Orbit(x1, y1);
         }
         // cant detect the direction
-        return this;
+        return this.clone();
     }
 
     /**

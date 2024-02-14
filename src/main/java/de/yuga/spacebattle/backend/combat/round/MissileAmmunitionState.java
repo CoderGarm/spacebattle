@@ -23,6 +23,13 @@ public class MissileAmmunitionState implements Cloneable {
     @Nonnull
     private final Map<Missile, Integer> shotsPerMissile = new HashMap<>();
 
+    public MissileAmmunitionState() {
+    }
+
+    public MissileAmmunitionState(@Nonnull final Map<Missile, Integer> shotsPerMissile) {
+        this.shotsPerMissile.putAll(Preconditions.checkNotNull(shotsPerMissile, "shotsPerMissile must not be empty"));
+    }
+
     public MissileAmmunitionState(@Nonnull final WarshipHealthState healthState) {
         Preconditions.checkNotNull(healthState, "healthState must not be empty");
 
@@ -65,14 +72,23 @@ public class MissileAmmunitionState implements Cloneable {
     public void reduce(@Nonnull final Missile missile, final int amount) {
         Preconditions.checkNotNull(missile, "missile shouldn't be null!");
 
-        final Integer leftOverShots = shotsPerMissile.get(missile);
-        if (leftOverShots != null) {
-            final int newAmount = leftOverShots - amount;
-            if (newAmount < 0) {
-                throw new NotifyWebUserException("This should be checked, you can't use more shots then present.");
-            }
-            shotsPerMissile.put(missile, newAmount);
+        final int leftOverShots = shotsPerMissile.getOrDefault(missile, 0);
+        final int newAmount = leftOverShots - amount;
+        if (newAmount < 0) {
+            throw new NotifyWebUserException("This should be checked, you can't use more shots then present.");
         }
+        shotsPerMissile.put(missile, newAmount);
+    }
+
+    public void increase(@Nonnull final Missile missile, final int amount) {
+        Preconditions.checkNotNull(missile, "missile shouldn't be null!");
+
+        final int leftOverShots = shotsPerMissile.getOrDefault(missile, 0);
+        final int newAmount = leftOverShots + amount;
+        if (newAmount < 0) {
+            throw new NotifyWebUserException("This should be checked, you can't use more shots then present.");
+        }
+        shotsPerMissile.put(missile, newAmount);
     }
 
     /**

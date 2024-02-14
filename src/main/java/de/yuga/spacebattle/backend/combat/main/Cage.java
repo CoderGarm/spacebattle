@@ -476,9 +476,7 @@ public class Cage implements Future<Cage> {
         // fixme replace the historizable concept by transferring directly into the new dto classes and not cloning them
         //  the idea is to remove all cloning
 
-        if (historizable instanceof MissileSalvo) {
-            historyOfMissileSalvos.add(((MissileSalvo) historizable).clone());
-        } else if (historizable instanceof FleetRoundState) {
+        if (historizable instanceof FleetRoundState) {
             historyOfRounds.add(((FleetRoundState) historizable).clone());
         }
     }
@@ -486,6 +484,10 @@ public class Cage implements Future<Cage> {
     @Nonnull
     public List<MissileSalvo> getHistoryOfMissileSalvos() {
         return historyOfMissileSalvos;
+    }
+
+    public void historizeMissileSalvo(@Nonnull final MissileSalvo missileSalvo) {
+        this.historyOfMissileSalvos.add(Preconditions.checkNotNull(missileSalvo, "missileSalvo must not be empty"));
     }
 
     @Nonnull

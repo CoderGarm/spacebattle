@@ -27,10 +27,6 @@ public class CounterMissileHit {
     @Schema(required = true, description = "The fleet which is targeted.")
     private AbstractId target;
 
-    @JsonProperty
-    @Schema(required = true, description = "The leftover amount of missiles of the given type in the salvo.")
-    private int remainingMissiles;
-
     @Nullable
     @JsonProperty
     @Schema(required = true, description = "The UUID of the attacked missile salvo.")
@@ -56,7 +52,6 @@ public class CounterMissileHit {
         this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound(), input.getCombatPhase());
         this.actor = new AbstractId(input.getActor());
         this.target = new AbstractId(input.getTarget());
-        this.remainingMissiles = input.getRemainingMissiles();
         this.attackedMissileSalvo = input.getAttackedMissileSalvo();
         this.destroyedMissiles = input.getDestroyedMissiles();
         this.missile = new AbstractId(input.getMissile());

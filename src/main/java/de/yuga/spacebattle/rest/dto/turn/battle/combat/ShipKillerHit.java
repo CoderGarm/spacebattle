@@ -3,7 +3,6 @@ package de.yuga.spacebattle.rest.dto.turn.battle.combat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.enums.EDamageResult;
-import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.rest.dto.AbstractId;
 import de.yuga.spacebattle.rest.dto.turn.battle.LossRole;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -38,11 +37,6 @@ public class ShipKillerHit {
 
     @Nullable
     @JsonProperty
-    @Schema(required = true, description = "The distance of this shot.")
-    private Distance distance;
-
-    @Nullable
-    @JsonProperty
     @Schema(required = true, description = "The result of this salvo.")
     private EDamageResult result;
 
@@ -68,7 +62,6 @@ public class ShipKillerHit {
         this.actor = new AbstractId(input.getActor());
         this.target = new AbstractId(input.getTarget());
         this.damageDealer = input.getDamageDealer();
-        this.distance = input.getDistance();
         this.result = input.getResult();
         this.hitLogs.addAll(input.getHitLogs().stream().map(h -> new HitLog(h, languageCode)).collect(Collectors.toList()));
         this.lossesByHit.putAll(input.getLossesByHit().entrySet().stream()

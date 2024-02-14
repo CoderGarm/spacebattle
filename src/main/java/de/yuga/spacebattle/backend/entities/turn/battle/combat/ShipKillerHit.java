@@ -4,9 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.dto.BeamVolley;
 import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
 import de.yuga.spacebattle.backend.combat.enums.EDamageResult;
-import de.yuga.spacebattle.backend.converter.DistanceConverter;
 import de.yuga.spacebattle.backend.converter.UUIDConverter;
-import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.turn.battle.LossRole;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
@@ -50,14 +48,6 @@ public class ShipKillerHit extends CombatRoundKey {
     private UUID damageDealer;
 
     /**
-     * The distance of this shot.
-     */
-    @NotNull
-    @Nonnull
-    @Convert(converter = DistanceConverter.class)
-    private Distance distance;
-
-    /**
      * The result of this salvo.
      */
     @NotNull
@@ -90,39 +80,37 @@ public class ShipKillerHit extends CombatRoundKey {
 
     public ShipKillerHit(@Nonnull final BeamVolley volley,
                          @Nonnull final List<de.yuga.spacebattle.backend.combat.dto.HitLog> hitLogs) {
-        super(volley.getCombatRound(), volley.getCombatSubPhase());
+        super(volley.getCombatRound(), ECombatPhase.ECombatSubPhase.BEAM_FIRE_INCOMING_PHASE);
         Preconditions.checkNotNull(hitLogs, "hitLogs shouldn't be null!");
         Preconditions.checkState(volley.getResult() != null, "volley result shouldn't be null!");
 
         this.actor = volley.getActor();
         this.target = volley.getTarget();
         this.damageDealer = volley.getUuid();
-        this.distance = volley.getInitialDistance();
         this.result = volley.getResult();
 
         final Map<de.yuga.spacebattle.backend.combat.dto.HitLog, LossRole> lossesByHitLog = hitLogs.stream()
                 .filter(hitLog -> !hitLog.isAlive() || !hitLog.isFightingCapable())
                 .collect(Collectors.toMap(Function.identity(), h -> new LossRole(h.getWarshipHealthState().getWarShip())));
 
-        generateHitLogs(volley.getUuid(), hitLogs, lossesByHitLog, volley.getCombatSubPhase());
+        generateHitLogs(volley.getUuid(), hitLogs, lossesByHitLog, ECombatPhase.ECombatSubPhase.BEAM_FIRE_INCOMING_PHASE);
     }
 
     public ShipKillerHit(@Nonnull final MissileSalvo volley, @Nonnull final List<de.yuga.spacebattle.backend.combat.dto.HitLog> hitLogs) {
-        super(volley.getCombatRound(), volley.getCombatSubPhase());
+        super(volley.getCombatRound(), ECombatPhase.ECombatSubPhase.MISSILE_FIRE_INCOMING_PHASE);
         Preconditions.checkNotNull(hitLogs, "hitLogs shouldn't be null!");
         Preconditions.checkState(volley.getResult() != null, "volley result shouldn't be null!");
 
         this.actor = volley.getActor();
         this.target = volley.getTarget();
         this.damageDealer = volley.getUuid();
-        this.distance = volley.getInitialDistance();
         this.result = volley.getResult();
 
         final Map<de.yuga.spacebattle.backend.combat.dto.HitLog, LossRole> lossesByHitLog = hitLogs.stream()
                 .filter(hitLog -> !hitLog.isAlive() || !hitLog.isFightingCapable())
                 .collect(Collectors.toMap(Function.identity(), h -> new LossRole(h.getWarshipHealthState().getWarShip())));
 
-        generateHitLogs(volley.getUuid(), hitLogs, lossesByHitLog, volley.getCombatSubPhase());
+        generateHitLogs(volley.getUuid(), hitLogs, lossesByHitLog, ECombatPhase.ECombatSubPhase.MISSILE_FIRE_PHASE);
     }
 
     private void generateHitLogs(@Nonnull final UUID damageDealerId,
@@ -157,11 +145,6 @@ public class ShipKillerHit extends CombatRoundKey {
     @Nonnull
     public UUID getDamageDealer() {
         return damageDealer;
-    }
-
-    @Nonnull
-    public Distance getDistance() {
-        return distance;
     }
 
     @Nonnull

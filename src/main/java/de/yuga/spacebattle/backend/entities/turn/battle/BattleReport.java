@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.combat.dto.HitLog;
 import de.yuga.spacebattle.backend.combat.dto.*;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
+import de.yuga.spacebattle.backend.combat.round.MissileAmmunitionProfile;
 import de.yuga.spacebattle.backend.combat.round.MissileSalvoHealthState;
 import de.yuga.spacebattle.backend.converter.CombatRoundConverter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
@@ -15,7 +16,6 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
-import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.*;
@@ -263,12 +263,11 @@ public class BattleReport extends AbstractEntityKey {
                             break;
                         case ELOKA_PHASE:
                         case COUNTER_MISSILE_PHASE:
-                            final List<MissileSalvo> destroyedWhileEloka = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
-                            destroyedWhileEloka.forEach(this::addCounterMissileHitMissile);
-                            break;
                         case MISSILE_MOVEMENT_PHASE:
-                            final List<MissileSalvo> missileMovement = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
-                            missileMovement.forEach(this::addMissileMovement);
+                        case MISSILE_FIRE_PHASE:
+                            missileSalvos.forEach(this::addCounterMissileHitMissile);
+                            missileSalvos.forEach(this::addMissileMovement);
+                            missileSalvos.forEach(this::addReleasedVolley);
                             break;
                         case BEAM_FIRE_INCOMING_PHASE:
                             final List<BeamVolley> appliedBeams = beamVolleys.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
@@ -281,22 +280,22 @@ public class BattleReport extends AbstractEntityKey {
                             appliedBeams.forEach(beamVolley -> addShipKillerHit(beamVolley, hitLogByBeamVolley.computeIfAbsent(beamVolley, k -> new ArrayList<>())));
                             break;
                         case MISSILE_FIRE_INCOMING_PHASE:
-                            final List<MissileSalvo> detonatedMissiles = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
+                            // fixme ist an dieser stelle nicht mehr rundenabhängig
+                            final List<MissileSalvo> detonatedMissiles = missileSalvos.stream().filter(m -> !m.getAppliedDamage().isEmpty()).collect(Collectors.toList());
+
+                            // fixme all hitlogs der betreffenden damage dealer werden gesammelt -> zuerst fleet round state cloneable entfernen
                             final Map<MissileSalvo, List<HitLog>> hitLogByMissileSalvo = detonatedMissiles.stream()
                                     .map(volley -> hitLogsOfCombatRound.stream().filter(hitLog -> hitLog.getDamageDealer().equals(volley)).collect(Collectors.toList()))
                                     .flatMap(Collection::stream)
                                     .collect(Collectors.groupingBy(hitLog -> (MissileSalvo) hitLog.getDamageDealer(),
                                             Collectors.mapping(Function.identity(), Collectors.toList())));
 
+
                             detonatedMissiles.forEach(missileSalvo -> addShipKillerHit(missileSalvo, hitLogByMissileSalvo.computeIfAbsent(missileSalvo, k -> new ArrayList<>())));
                             break;
                         case BEAM_FIRE_PHASE:
                             final List<BeamVolley> releasedBeamVolleys = beamVolleys.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
                             releasedBeamVolleys.forEach(this::addReleasedVolley);
-                            break;
-                        case MISSILE_FIRE_PHASE:
-                            final List<MissileSalvo> releasedMissileSalvos = missileSalvos.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
-                            releasedMissileSalvos.forEach(this::addReleasedVolley);
                             break;
                     }
                 }
@@ -321,7 +320,8 @@ public class BattleReport extends AbstractEntityKey {
     private void addMissileMovement(@Nonnull final MissileSalvo volley) {
         Preconditions.checkNotNull(volley, "volley shouldn't be null!");
 
-        missileMovements.add(new MissileMovement(volley));
+        volley.getMotionProfile().stream().sorted()
+                .forEach(motionProfile -> missileMovements.add(new MissileMovement(volley, motionProfile)));
     }
 
     private void addReleasedVolley(final MissileSalvo volley) {
@@ -354,11 +354,9 @@ public class BattleReport extends AbstractEntityKey {
         Preconditions.checkNotNull(volley, "volley shouldn't be null!");
 
         final MissileSalvoHealthState missileSalvoHealthState = volley.getMissileSalvoHealthState();
-        final Map<Missile, Integer> lossesByType = missileSalvoHealthState.getLossesByType();
-        lossesByType.forEach((missile, lostAmount) -> {
-            final Integer leftOver = missileSalvoHealthState.getCurrentAmountByType().get(missile);
-            counterMissileHits.add(new CounterMissileHit(volley, missile, leftOver, lostAmount));
-        });
+        final List<MissileAmmunitionProfile> lossesByType = missileSalvoHealthState.getLosses();
+        lossesByType.forEach(missileAmmunitionProfile -> missileAmmunitionProfile.getAmmunitionState().getRemainingShots()
+                .forEach((missile, amount) -> counterMissileHits.add(new CounterMissileHit(volley, missileAmmunitionProfile, missile, amount))));
     }
 
     public void changeParticipant(@Nonnull final SharedBattleReport sharedBattleReport, @Nonnull final User toRemove, @Nonnull final Owner pirate) {
