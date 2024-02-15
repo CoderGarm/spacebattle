@@ -195,6 +195,5 @@ class CombatHandlerTest {
         final MissileSalvo resultingVolleyOne = result.get(0);
         assertEquals(actor, resultingVolleyOne.getActor());
         assertEquals(target, resultingVolleyOne.getTarget());
-        assertSame(ECombatPhase.ECombatSubPhase.MISSILE_FIRE_PHASE, resultingVolleyOne.getCombatSubPhase());
     }
 }

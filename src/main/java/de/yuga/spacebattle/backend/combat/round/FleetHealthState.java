@@ -19,16 +19,16 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class FleetHealthState implements Cloneable {
+public class FleetHealthState {
 
     @Nonnull
     private final Fleet fleet;
 
     @Nonnull
-    private Map<WarShip, WarshipHealthState> warshipHealthStates;
+    private final Map<WarShip, WarshipHealthState> warshipHealthStates;
 
     @Nonnull
-    private Map<WarShip, WarshipHealthState> losses = new HashMap<>();
+    private final Map<WarShip, WarshipHealthState> losses = new HashMap<>();
 
     public FleetHealthState(@Nonnull final Cage cage, @Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(cage, "cage must not be empty");
@@ -93,7 +93,7 @@ public class FleetHealthState implements Cloneable {
     @Nonnull
     public Optional<WarShip> applyDamage(@Nonnull final WarShip target,
                                          final long damageValue,
-                                         @Nonnull final Historizable<? extends Cloneable> damageDealer) {
+                                         @Nonnull final DamageDealer damageDealer) {
         Preconditions.checkNotNull(target, "target shouldn't be null!");
         Preconditions.checkState(damageValue >= 0, "The damage to apply should be positive.");
         Preconditions.checkNotNull(damageDealer, "damageDealer shouldn't be null!");
@@ -107,7 +107,7 @@ public class FleetHealthState implements Cloneable {
             warshipHealthState.applyDamage(damageValue, damageDealer);
         } else {
             final WarShip secondTargetedWarship = getRandomSecondTarget();
-            return applyDamage(secondTargetedWarship, damageValue, damageDealer);
+            return secondTargetedWarship == null ? Optional.empty() : applyDamage(secondTargetedWarship, damageValue, damageDealer);
         }
         cleanUp();
         return Optional.of(warshipHealthState.getWarShip());
@@ -144,13 +144,18 @@ public class FleetHealthState implements Cloneable {
     }
 
     /**
-     * Returns the fleets hit Log up to the current state.
-     *
-     * @return the overall hit log
+     * Returns the fleets hit logs up to the current state ordered by the receiver of damage.
      */
     public Map<WarShip, List<HitLog>> getHitLogs() {
-        final Map<WarShip, List<HitLog>> hitLogsOfActive = warshipHealthStates.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getHitLog()));
-        final Map<WarShip, List<HitLog>> hitLogsOfLoss = losses.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getHitLog()));
+
+        final Map<WarShip, List<HitLog>> hitLogsOfActive = warshipHealthStates.values().stream()
+                .collect(Collectors.toMap(WarshipHealthState::getWarShip,
+                        e -> e.getHitLogs().values().stream().flatMap(Collection::stream).collect(Collectors.toList())));
+
+        final Map<WarShip, List<HitLog>> hitLogsOfLoss = losses.values().stream()
+                .collect(Collectors.toMap(WarshipHealthState::getWarShip,
+                        e -> e.getHitLogs().values().stream().flatMap(Collection::stream).collect(Collectors.toList())));
+
         final Set<WarShip> warShips = new HashSet<>(hitLogsOfActive.keySet());
         warShips.addAll(hitLogsOfLoss.keySet());
         final Map<WarShip, List<HitLog>> result = new HashMap<>();
@@ -211,20 +216,6 @@ public class FleetHealthState implements Cloneable {
     }
 
     @Override
-    public FleetHealthState clone() {
-        try {
-            final FleetHealthState clone = (FleetHealthState) super.clone();
-            clone.warshipHealthStates = warshipHealthStates.entrySet().stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().clone()));
-            clone.losses = losses.entrySet().stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().clone()));
-            return clone;
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError();
-        }
-    }
-
-    @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
 
@@ -232,11 +223,11 @@ public class FleetHealthState implements Cloneable {
 
         final FleetHealthState that = (FleetHealthState) o;
 
-        return new EqualsBuilder().append(fleet, that.fleet).append(warshipHealthStates, that.warshipHealthStates).append(losses, that.losses).isEquals();
+        return new EqualsBuilder().append(fleet, that.fleet).isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(fleet).append(warshipHealthStates).append(losses).toHashCode();
+        return new HashCodeBuilder(17, 37).append(fleet).toHashCode();
     }
 }

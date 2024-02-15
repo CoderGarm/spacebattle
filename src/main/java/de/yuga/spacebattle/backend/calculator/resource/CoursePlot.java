@@ -26,14 +26,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC_HU;
 import static de.yuga.spacebattle.backend.combat.enums.EMovementType.*;
 import static de.yuga.spacebattle.backend.combat.round.CombatRound.COMBAT_ROUND;
 import static de.yuga.spacebattle.backend.enums.EWeaponAlignment.BROADSIDE;
 
-public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
+public class CoursePlot {
 
     @Nonnull
     private final Cage cage;
@@ -45,28 +44,28 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
     private final Fleet target;
 
     @Nonnull
-    private CombatRound startingRound;
+    private final CombatRound startingRound; // fixme replace by round of last course element or similar
 
     @Nonnull
-    private Velocity agentsVelocity;
+    private Velocity agentsVelocity; // fixme replace all by course order elements
 
     @Nonnull
-    private Direction agentsDirection;
+    private Direction agentsDirection; // fixme replace all by course order elements
 
     @Nonnull
     private EMovementMotivation movementMotivation = EMovementMotivation.ESCAPE_MOVEMENT;
 
     @Nonnull
-    private Orbit origin;
+    private Orbit origin; // fixme replace all by course order elements
 
     @Nullable
-    private Orbit destination;
+    private Orbit destination; // fixme replace all by course order elements
 
     @Nullable
-    private Direction courseDirection;
+    private Direction courseDirection; // fixme replace all by course order elements
 
     @Nonnull
-    private List<CourseOrderElement> courseOrderElements = new ArrayList<>();
+    private final List<CourseOrderElement> courseOrderElements = new ArrayList<>(); // replace by coe of maneuver
 
     @Nonnull
     private final Map<Fleet, FleetDamageProjectionPerRange> fleetDamages = new HashMap<>();
@@ -153,7 +152,7 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         */
 
 
-        final FleetRoundState agentsState = cage.getAgressorsState();
+        final FleetRoundState agentsState = cage.getAggressorsState();
         final Orbit aPos = agentsState.getPosition();
         final Velocity aVel = agentsState.getVelocity();
         final Acceleration aAcc = agentsState.getAccelerationFor(EModuleType.PROPULSION);
@@ -577,11 +576,6 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
     }
 
     @Nonnull
-    public CombatRound getStartingRound() {
-        return startingRound;
-    }
-
-    @Nonnull
     public Velocity getAgentsVelocity() {
         return agentsVelocity;
     }
@@ -617,20 +611,6 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         return Preconditions.checkNotNull(maneuver, "maneuver must not be empty");
     }
 
-    @Override
-    public CoursePlot clone() {
-        final CoursePlot clone = (CoursePlot) super.clone();
-        clone.startingRound = startingRound.clone();
-        clone.agentsVelocity = agentsVelocity.clone();
-        clone.agentsDirection = agentsDirection.clone();
-        clone.origin = origin.clone();
-        clone.destination = destination != null ? destination.clone() : null;
-        clone.courseDirection = courseDirection != null ? courseDirection.clone() : null;
-        clone.courseOrderElements = courseOrderElements.stream().map(CourseOrderElement::clone).collect(Collectors.toList());
-        clone.maneuver = maneuver != null ? maneuver.clone() : null;
-        return clone;
-    }
-
     /**
      * Returns whether the course plot has consumed all of its course elements or not.
      *
@@ -663,9 +643,6 @@ public class CoursePlot extends Historizable<CoursePlot> implements Cloneable {
         final EMovementType movementType = courseElement.getMovementType();
         final Velocity currentVelocity = getCurrentVelocity();
         cage.logMessage(agent.getOwner().getUsername() + " moves " + movementType + " with velocity of " + currentVelocity);
-        currentStateByFleet.setMovementType(movementType);
-        currentStateByFleet.setDirection(getCurrentDirection());
-        currentStateByFleet.setVelocity(currentVelocity);
     }
 
     public void clearFutureCourseElements() {

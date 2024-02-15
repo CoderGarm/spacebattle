@@ -150,6 +150,7 @@ public class CombatHandler {
         agentsState.getPosition().moveTo(interimDestination);
 
         coursePlot.executeLatestPendingOrder();
+
         if (coursePlot.hasPlotExceeded()) {
             // stop condition
             coursePlot.clearFutureCourseElements();

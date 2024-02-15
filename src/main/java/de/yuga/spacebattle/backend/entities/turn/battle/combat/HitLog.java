@@ -74,7 +74,7 @@ public class HitLog extends CombatRoundKey {
         Preconditions.checkNotNull(damageDealerId, "damageDealerId shouldn't be null!");
 
         this.damageDealer = damageDealerId;
-        final WarshipHealthState warshipHealthState = hitLog.getWarshipHealthState();
+        final WarshipHealthState warshipHealthState = hitLog.getTargetHealthState();
         this.warShip = warshipHealthState.getWarShip();
         this.damageValue = hitLog.getDamageValue();
         this.state = hitLog.getState();

@@ -3,7 +3,10 @@ package de.yuga.spacebattle.backend.combat.round;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.resource.CourseOrderElement;
 import de.yuga.spacebattle.backend.calculator.resource.CoursePlot;
-import de.yuga.spacebattle.backend.combat.dto.*;
+import de.yuga.spacebattle.backend.combat.dto.AuraState;
+import de.yuga.spacebattle.backend.combat.dto.CounterMissileWeaponry;
+import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
+import de.yuga.spacebattle.backend.combat.dto.RangeDefinition;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
@@ -38,61 +41,22 @@ import static de.yuga.spacebattle.backend.calculator.FittingUtils.OFFENSIVE_FITT
 import static de.yuga.spacebattle.backend.combat.enums.EMovementType.IMPELLER_WEDGE_PROTECTION;
 import static de.yuga.spacebattle.backend.combat.round.CombatRound.COMBAT_ROUND;
 
-public class FleetRoundState extends Historizable<FleetRoundState> implements Cloneable {
+public class FleetRoundState {
 
-    /**
-     * The cage.
-     */
     @Nonnull
     private final Cage cage;
 
-    /**
-     * The combat round of this state.
-     */
-    @Nonnull
-    private CombatRound combatRound;
-
-    /**
-     * The acting fleet.
-     */
     @Nonnull
     private final Fleet fleet;
 
-    /**
-     * The current position of the acting fleet.
-     */
     @Nonnull
-    private Orbit position; // fixme transfer all of them into course plot
+    private final FleetHealthState fleetHealthState;
 
     @Nonnull
-    private Velocity velocity;
+    private final CoursePlot coursePlot;
 
     @Nonnull
-    private Direction direction;
-
-    /**
-     * The health state for the fleet of this round.
-     */
-    @Nonnull
-    private FleetHealthState fleetHealthState;
-
-    /**
-     * Initiative for {@link #fleet}.<br>
-     * The lower the initiative is, the earlier has the actor to move. It is better to move later in order to react on the earlier movement of other fleets.
-     */
-    private int movementInitiative;
-
-    /**
-     * The movement type which is currently active.
-     */
-    @Nullable
-    private EMovementType movementType;
-
-    @Nonnull
-    private CoursePlot coursePlot;
-
-    @Nonnull
-    private final AuraState auraState;
+    private final Map<CombatRound, AuraState> auraStates = new HashMap<>();
 
     public FleetRoundState(@Nonnull final Cage cage,
                            @Nonnull final Fleet fleet,
@@ -102,50 +66,10 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         Preconditions.checkNotNull(position, "position shouldn't be null!");
 
         this.cage = cage;
-        this.combatRound = cage.getCurrentCombatRound();
         this.fleet = fleet;
-        this.position = position.clone();
         this.fleetHealthState = new FleetHealthState(cage, fleet);
         this.coursePlot = new CoursePlot(cage, fleet, position);
-        this.velocity = coursePlot.getAgentsVelocity();
-        this.direction = coursePlot.getCurrentDirection();
-        this.auraState = new AuraState(cage, fleet, this);
-        historize();
-    }
-
-    public FleetRoundState(@Nonnull final Cage cage,
-                           @Nonnull final FleetRoundState state) {
-        Preconditions.checkNotNull(cage, "cage shouldn't be null!");
-        Preconditions.checkNotNull(state, "state shouldn't be null!");
-
-        this.cage = cage;
-        this.combatRound = cage.getCurrentCombatRound();
-        this.fleet = state.getFleet();
-        this.position = state.getPosition().clone();
-        this.fleetHealthState = state.getFleetHealthState();
-        this.movementType = state.getMovementType();
-        this.coursePlot = state.getCoursePlot();
-        this.velocity = coursePlot.getAgentsVelocity();
-        this.direction = coursePlot.getCurrentDirection();
-        this.auraState = new AuraState(cage, fleet, this);
-        historize();
-    }
-
-    /**
-     * Determines the initiative for the actors.<br>
-     * The lower the initiative is, the earlier has the actor to move. It is better to move later in order to react on the earlier movement of other fleets.
-     */
-    public void determineMovementInitiative() {
-        movementInitiative = (int) ((Math.random() * 10) + 0);
-    }
-
-    @Nonnull
-    public CombatRound getCombatRound() {
-        return combatRound;
-    }
-
-    public int getMovementInitiative() {
-        return movementInitiative;
+        this.createCurrentAuraState();
     }
 
     @Nonnull
@@ -154,7 +78,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         if (courseElement != null) {
             return courseElement.getPosition();
         }
-        return position;
+        return coursePlot.getOrigin();
     }
 
     @Nonnull
@@ -169,7 +93,8 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
 
     @Nullable
     public EMovementType getMovementType() {
-        return movementType;
+        final CourseOrderElement latestCourseElement = coursePlot.getLatestCourseElement();
+        return latestCourseElement != null ? latestCourseElement.getMovementType() : null;
     }
 
     @Nonnull
@@ -177,52 +102,32 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         return coursePlot;
     }
 
-    @Nonnull
-    public AuraState getAuraState() {
-        return auraState;
+    @Nullable
+    public AuraState getAuraState(@Nonnull final CombatRound combatRound) {
+        Preconditions.checkNotNull(combatRound, "combatRound must not be empty");
+
+        return auraStates.get(combatRound);
     }
 
-    public void setMovementType(@Nonnull final EMovementType movementType) {
-        Preconditions.checkNotNull(movementType, "movementType shouldn't be null!");
-
-        this.movementType = movementType;
+    @Nonnull
+    public Map<CombatRound, AuraState> getAuraStates() {
+        return auraStates;
     }
 
     @Nonnull
     public Velocity getVelocity() {
-        return velocity;
-    }
-
-    public void setVelocity(@Nonnull final Velocity velocity) {
-        this.velocity = velocity;
+        return coursePlot.getAgentsVelocity();
     }
 
     @Nonnull
     public Direction getDirection() {
-        return direction;
+        return coursePlot.getCurrentDirection();
     }
 
-    public void setDirection(@Nonnull final Direction direction) {
-        this.direction = direction;
-    }
-
-    /**
-     * Checks if this is matching the given parameters.
-     *
-     * @param combatRound the round
-     * @param fleet       the fleet
-     * @return <code>true</code> if the parameters are matching, <code>false</code> otherwise
-     */
-    public boolean isEqualsByFleetAndRound(@Nonnull final CombatRound combatRound, @Nonnull final Fleet fleet) {
-        Preconditions.checkNotNull(combatRound, "combatRound shouldn't be null!");
+    public boolean isEqualsByFleet(@Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
-        return this.combatRound.equals(combatRound) && this.fleet.equals(fleet);
-    }
-
-    public void historize() {
-        //noinspection RedundantCast
-        cage.addHistorizable((FleetRoundState) this);
+        return this.fleet.equals(fleet);
     }
 
     /**
@@ -307,16 +212,6 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public FleetRoundState clone() {
-        final FleetRoundState clone = (FleetRoundState) super.clone();
-        clone.combatRound = combatRound.clone();
-        clone.position = position.clone();
-        clone.fleetHealthState = fleetHealthState.clone();
-        clone.coursePlot = coursePlot.clone();
-        return clone;
-    }
-
     /**
      * Checks if the fleet has any weapons for the given movement type.
      *
@@ -326,6 +221,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
     public boolean hasWeaponsForAlignment(@Nonnull final EWeaponType weaponType) {
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
 
+        final EMovementType movementType = getMovementType();
         if (IMPELLER_WEDGE_PROTECTION == movementType) {
             return false;
         }
@@ -348,7 +244,7 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
         Preconditions.checkNotNull(applicableAlignments, "applicableAlignments shouldn't be null!");
         Preconditions.checkNotNull(weaponType, "weaponType shouldn't be null!");
 
-        if (IMPELLER_WEDGE_PROTECTION == movementType) {
+        if (IMPELLER_WEDGE_PROTECTION == getMovementType()) {
             return false;
         }
         return getFightingWarShips()
@@ -511,5 +407,10 @@ public class FleetRoundState extends Historizable<FleetRoundState> implements Cl
                         }))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
+    }
+
+    public void createCurrentAuraState() {
+        // I'm consuming the active fitting and movement so I need to be executed at the end of a round
+        this.auraStates.put(cage.getCurrentCombatRound().clone(), new AuraState(cage, fleet, this));
     }
 }

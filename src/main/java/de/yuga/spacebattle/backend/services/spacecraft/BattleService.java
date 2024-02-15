@@ -204,7 +204,6 @@ public class BattleService {
         warShipService.markAllAsDestroyed(losses);
         fleetService.markFleetsWithoutShipsAsDeleted(battleResult.getFleetClash().getParticipatingFleets());
 
-        battleLogger.logBattleResult(battleReport, battleResult);
         gameEventService.logResult(sharedBattleReport, battleReport, losses);
         return battleReport;
     }

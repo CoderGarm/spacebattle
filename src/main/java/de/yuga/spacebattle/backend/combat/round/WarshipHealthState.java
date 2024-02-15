@@ -2,8 +2,8 @@ package de.yuga.spacebattle.backend.combat.round;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.FittingUtils;
+import de.yuga.spacebattle.backend.combat.dto.DamageDealer;
 import de.yuga.spacebattle.backend.combat.dto.DamagePerRangeAndAlignment;
-import de.yuga.spacebattle.backend.combat.dto.Historizable;
 import de.yuga.spacebattle.backend.combat.dto.HitLog;
 import de.yuga.spacebattle.backend.combat.dto.RangeDefinition;
 import de.yuga.spacebattle.backend.combat.main.Cage;
@@ -83,7 +83,7 @@ public class WarshipHealthState implements Cloneable {
     private Map<AlignedFitting, Boolean> fittings = new HashMap<>();
 
     @Nonnull
-    private final List<HitLog> hitLog = new ArrayList<>();
+    private final Map<CombatRound, List<HitLog>> hitLogs = new HashMap<>();
 
     @Nonnull
     private MissileAmmunitionState missileAmmunitionState;
@@ -175,8 +175,8 @@ public class WarshipHealthState implements Cloneable {
     }
 
     @Nonnull
-    public List<HitLog> getHitLog() {
-        return hitLog;
+    public Map<CombatRound, List<HitLog>> getHitLogs() {
+        return hitLogs;
     }
 
     @Override
@@ -358,7 +358,7 @@ public class WarshipHealthState implements Cloneable {
      * @param damageValue  the damage to apply
      * @param damageDealer the source of the damage
      */
-    public void applyDamage(final long damageValue, @Nonnull final Historizable<? extends Cloneable> damageDealer) {
+    public void applyDamage(final long damageValue, @Nonnull final DamageDealer damageDealer) {
         Preconditions.checkNotNull(damageDealer, "damageDealer shouldn't be null!");
 
         final EHitArea attackedPart = EHitArea.SIDEWALL;
@@ -371,7 +371,7 @@ public class WarshipHealthState implements Cloneable {
      * @param damageValue  the damage to apply
      * @param attackedPart if null it will be generated, for recursion
      */
-    private void applyDamage(final long damageValue, @Nullable EHitArea attackedPart, @Nonnull final Historizable<? extends Cloneable> damageDealer) {
+    private void applyDamage(final long damageValue, @Nullable EHitArea attackedPart, @Nonnull final DamageDealer damageDealer) {
         Preconditions.checkNotNull(damageDealer, "damageDealer shouldn't be null!");
 
         if (attackedPart == null) {
@@ -394,31 +394,39 @@ public class WarshipHealthState implements Cloneable {
                         }
                     }
                 }
-                hitLog.add(new HitLog(damageDealer, this, damageValue, hullState, attackedPart, isAlive(), isFightingCapable()));
+                addHitLog(new HitLog(damageDealer, this, damageValue, hullState, attackedPart, isAlive(), isFightingCapable()));
                 break;
             case ARMOR:
                 armorState = applyDamageToHitArea(armorState, damageValue, attackedPart, damageDealer);
-                hitLog.add(new HitLog(damageDealer, this, damageValue, armorState, attackedPart, isAlive(), isFightingCapable()));
+                addHitLog(new HitLog(damageDealer, this, damageValue, armorState, attackedPart, isAlive(), isFightingCapable()));
                 break;
             case SIDEWALL:
                 sidewallState = applyDamageToHitArea(sidewallState, damageValue, attackedPart, damageDealer);
-                hitLog.add(new HitLog(damageDealer, this, damageValue, sidewallState, attackedPart, isAlive(), isFightingCapable()));
+                addHitLog(new HitLog(damageDealer, this, damageValue, sidewallState, attackedPart, isAlive(), isFightingCapable()));
                 break;
             case PROPULSION:
                 min = Math.min((long) (propulsionState * 0.1), damageValue);
                 propulsionState = applyDamageToHitArea(propulsionState, min, attackedPart, damageDealer);
-                hitLog.add(new HitLog(damageDealer, this, min, propulsionState, attackedPart, isAlive(), isFightingCapable()));
+                addHitLog(new HitLog(damageDealer, this, min, propulsionState, attackedPart, isAlive(), isFightingCapable()));
                 break;
             case ELOKA:
                 min = Math.min((long) (elokaState * 0.1), damageValue);
                 elokaState = applyDamageToHitArea(elokaState, min, attackedPart, damageDealer);
-                hitLog.add(new HitLog(damageDealer, this, min, elokaState, attackedPart, isAlive(), isFightingCapable()));
+                addHitLog(new HitLog(damageDealer, this, min, elokaState, attackedPart, isAlive(), isFightingCapable()));
                 break;
         }
-        if (cage != null) {
-            cage.logMessage(hitLog.get(hitLog.size() - 1).toString());
-        }
     }
+
+    private void addHitLog(@Nonnull final HitLog hitLog) {
+        Preconditions.checkNotNull(cage, "cage must not be empty");
+        Preconditions.checkNotNull(hitLog, "hitLog must not be empty");
+
+        final List<HitLog> orDefault = hitLogs.getOrDefault(cage.getCurrentCombatRound(), new ArrayList<>());
+        orDefault.add(hitLog);
+        hitLogs.put(cage.getCurrentCombatRound(), orDefault);
+        cage.logMessage(hitLog.toString());
+    }
+
 
     /**
      * Rolls the damage through the parts of the ship.
@@ -428,7 +436,7 @@ public class WarshipHealthState implements Cloneable {
      * @param attackedPart the attacked part
      * @return the new states value
      */
-    private int applyDamageToHitArea(int state, final long damageValue, @Nullable final EHitArea attackedPart, @Nonnull final Historizable<? extends Cloneable> damageDealer) {
+    private int applyDamageToHitArea(int state, final long damageValue, @Nullable final EHitArea attackedPart, @Nonnull final DamageDealer damageDealer) {
         Preconditions.checkNotNull(damageDealer, "damageDealer shouldn't be null!");
 
         if (attackedPart == null) {
@@ -442,7 +450,7 @@ public class WarshipHealthState implements Cloneable {
             state = 0;
             applyDamage(inBetweenDamage, attackedPart.getFallback(), damageDealer);
         } else {
-            state -= damageValue;
+            state -= (int) damageValue;
         }
         return state;
     }
@@ -457,6 +465,7 @@ public class WarshipHealthState implements Cloneable {
         return missileAmmunitionState;
     }
 
+    @Nonnull
     public String asString() {
         return warShip.getName() + "{" +
                 ", hull: " + hullState +

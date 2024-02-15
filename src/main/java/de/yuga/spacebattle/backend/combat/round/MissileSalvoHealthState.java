@@ -1,7 +1,6 @@
 package de.yuga.spacebattle.backend.combat.round;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.combat.dto.Historizable;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
@@ -14,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class MissileSalvoHealthState extends Historizable<MissileSalvoHealthState> {
+public class MissileSalvoHealthState {
 
     /**
      * The initial composition of the salvo by missile type and amount.

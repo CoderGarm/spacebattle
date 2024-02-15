@@ -138,7 +138,6 @@ class MissileSalvoTest {
         verify(missileSalvoHealthStateMock, times(2)).getCurrentAmountByType();
         verify(targetHealthStateMock).applyDamage(warShip, 111, testObject);
         verify(targetHealthStateMock).applyDamage(warShip, 222, testObject);
-        verify(cageMock).addHistorizable(testObject);
         final Map<WarShip, List<Long>> result = testObject.getAppliedDamage();
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -186,7 +185,6 @@ class MissileSalvoTest {
         verify(missileSalvoHealthStateMock, atLeast(1)).addLostMissiles(any(), any(), any(), anyInt());
         assertEquals(BigDecimal.ZERO, testObject.getRangePerCombatRound().getCoordinate());
         assertEquals(BigDecimal.ZERO, testObject.getLongestOffensiveRange().getCoordinate());
-        verify(cageMock).addHistorizable(testObject);
     }
 
     @Test
@@ -228,7 +226,6 @@ class MissileSalvoTest {
         verify(missileSalvoHealthStateMock, atLeast(1)).addLostMissiles(any(), any(), any(), anyInt());
         assertEquals(Distance.ZERO, testObject.getRangePerCombatRound());
         assertEquals(Distance.ZERO, testObject.getLongestOffensiveRange());
-        verify(cageMock).addHistorizable(testObject);
     }
 
     @Test
@@ -266,6 +263,5 @@ class MissileSalvoTest {
         final Orbit resultLastPosition = (Orbit) ReflectionTestUtils.getField(testObject, "lastPosition");
         assertEquals(positionMock, resultLastPosition);
         verify(positionMock).moveTo(newPosFake);
-        verify(cageMock).addHistorizable(testObject);
     }
 }

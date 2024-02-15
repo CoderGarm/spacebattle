@@ -9,7 +9,7 @@ import java.util.Arrays;
 /**
  * Compare to @see <a href="kampfsystem.md#movement types">Combat System - Movement Types</a>
  */
-public enum EMovementType {
+public enum EMovementType { // fixme separate movement from combat action and state movement motivation instead
 
     /**
      * possibly changes the distance to the opponent<br>

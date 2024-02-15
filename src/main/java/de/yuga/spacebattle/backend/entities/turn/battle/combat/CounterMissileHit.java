@@ -57,6 +57,8 @@ public class CounterMissileHit extends CombatRoundKey {
     @JoinColumn(name = "idMissile", nullable = false, updatable = false)
     private Missile missile;
 
+    public CounterMissileHit() {
+    }
 
     public CounterMissileHit(@Nonnull final MissileSalvo volley,
                              @Nonnull final MissileAmmunitionProfile ammunitionProfile,

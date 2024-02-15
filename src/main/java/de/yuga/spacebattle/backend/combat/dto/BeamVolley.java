@@ -34,7 +34,7 @@ import static de.yuga.spacebattle.backend.combat.enums.EMovementType.IMPELLER_WE
 /**
  * Represents a salvo of direct hit weapons.
  */
-public class BeamVolley extends Historizable<BeamVolley> {
+public class BeamVolley extends DamageDealer {
 
     /**
      * The cage.
@@ -134,12 +134,6 @@ public class BeamVolley extends Historizable<BeamVolley> {
                                 }
                             });
                 });
-
-        historize();
-    }
-
-    private void historize() {
-        cage.historizeBeamVolley(this);
     }
 
     /**

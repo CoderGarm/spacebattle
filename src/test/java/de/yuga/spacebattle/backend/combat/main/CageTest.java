@@ -154,20 +154,4 @@ class CageTest extends BaseTestCase {
         assertNotNull(result);
         assertSame(testObject.getParticipatingFleets().get(0), result.getFleet());
     }
-
-    @Test
-    void testPrepareNextCombatRound() {
-        // prepare stuff
-        final int initialSize = testObject.getHistoryOfRounds().size();
-        final CombatRound currentCombatRound = testObject.getCurrentCombatRound();
-        final int currentCombatRoundNo = currentCombatRound.getNo();
-        // test method
-        testObject.prepareNextCombatRound(currentCombatRound);
-        // check expectation
-        final int nextSize = testObject.getHistoryOfRounds().size();
-        final CombatRound nextCombatRound = testObject.getCurrentCombatRound();
-        final int nextCombatRoundNo = nextCombatRound.getNo();
-        assertEquals(1, nextCombatRoundNo - currentCombatRoundNo);
-        assertEquals(testObject.getParticipatingFleets().size(), nextSize - initialSize);
-    }
 }

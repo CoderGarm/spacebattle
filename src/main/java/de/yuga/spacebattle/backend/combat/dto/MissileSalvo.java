@@ -34,7 +34,7 @@ import static de.yuga.spacebattle.backend.combat.enums.EMovementType.IMPELLER_WE
 /**
  * Represents a salvo of missiles.
  */
-public class MissileSalvo extends Historizable<MissileSalvo> {
+public class MissileSalvo extends DamageDealer {
 
     /**
      * The cage.
@@ -127,7 +127,7 @@ public class MissileSalvo extends Historizable<MissileSalvo> {
         this.initialDistance = actorsState.getPosition().getDistance(targetPosition);
 
         this.motionProfile.add(new MotionProfile(
-                actorsState.getCombatRound(),
+                cage.getCurrentCombatRound(),
                 actorsState.getAccelerationFor(EModuleType.PROPULSION),
                 actorsState.getVelocity(),
                 new Direction(actorsState.getPosition(), cage.getCurrentStateByFleet(target).getPosition()),
@@ -172,7 +172,6 @@ public class MissileSalvo extends Historizable<MissileSalvo> {
         this.missileSalvoHealthState = new MissileSalvoHealthState(amountByType);
         calculateRangeForActiveCombatRound();
         calculateAttackRange();
-        historize();
     }
 
     /**
@@ -266,10 +265,6 @@ public class MissileSalvo extends Historizable<MissileSalvo> {
                 + " and killed " + lostByType.values().stream().mapToInt(Integer::intValue).sum()
                 + " (" + missileSalvoHealthState.getCurrentAmountByType().values().stream().mapToInt(Integer::intValue).sum()
                 + " left) against " + target.getOwner().getUsername());
-    }
-
-    private void historize() {
-        cage.historizeMissileSalvo(this);
     }
 
     /**

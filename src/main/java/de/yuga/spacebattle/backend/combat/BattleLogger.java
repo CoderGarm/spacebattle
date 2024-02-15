@@ -55,6 +55,14 @@ public class BattleLogger {
         this.server = Preconditions.checkNotNull(server, "server must not be empty");
     }
 
+    public void init(@Nonnull final CombatRound combatRound) {
+        this.combatRound = Preconditions.checkNotNull(combatRound, "combatRound must not be empty");
+    }
+
+    public void closeRound() {
+        this.combatRound = null;
+    }
+
     public void setChartActive(final boolean chartActive) {
         this.chartActive = chartActive;
     }
@@ -64,16 +72,13 @@ public class BattleLogger {
                             @Nonnull final Orbit planetaryOrbit) {
         Preconditions.checkNotNull(o1, "o1 must not be empty");
         Preconditions.checkNotNull(o2, "o2 must not be empty");
-        Preconditions.checkNotNull(planetaryOrbit, "planetaryOrbit must not be empty");
+        this.planetaryOrbit = Preconditions.checkNotNull(planetaryOrbit, "planetaryOrbit must not be empty");
 
         final String title = o1.getUsername() + " vs. " + o2.getUsername();
 
-        if (!chartActive || !this.server.equals("localhost")) {
-            return;
+        if (chartActive && isLocalhost()) {
+            this.demo = new XYSplineChart(title);
         }
-
-        this.demo = new XYSplineChart(title);
-        this.planetaryOrbit = planetaryOrbit;
     }
 
     public void attachToChart(@Nonnull final Owner owner, @Nonnull final Maneuver maneuver) {
@@ -81,7 +86,7 @@ public class BattleLogger {
         Preconditions.checkNotNull(maneuver, "maneuver must not be empty");
         Preconditions.checkNotNull(planetaryOrbit, "planetaryOrbit must not be empty");
 
-        if (!chartActive || !this.server.equals("localhost")) {
+        if (!chartActive || !isLocalhost()) {
             return;
         }
 
@@ -102,6 +107,10 @@ public class BattleLogger {
         }
     }
 
+    private boolean isLocalhost() {
+        return this.server.equals("localhost");
+    }
+
     private void runIndefinite() {
         //noinspection InfiniteLoopStatement,StatementWithEmptyBody
         while (true) {
@@ -113,21 +122,30 @@ public class BattleLogger {
         Preconditions.checkNotNull(msg, "msg must not be empty");
         Preconditions.checkNotNull(combatRound, "combatRound must not be empty");
 
-        LOGGER.info(combatRound + ": " + msg);
+        if (isLocalhost() || logBattleResult) {
+            LOGGER.info(combatRound + ": " + msg);
+        }
     }
 
     public void logWarning(@Nonnull final String msg) {
         Preconditions.checkNotNull(msg, "msg must not be empty");
         Preconditions.checkNotNull(combatRound, "combatRound must not be empty");
 
-        LOGGER.warn(combatRound + ": " + msg);
+        if (isLocalhost() || logBattleResult) {
+            LOGGER.warn(combatRound + ": " + msg);
+        }
     }
 
     public void logMessage(@Nonnull final String msg, @Nullable final Long start, @Nullable final Long end) {
         Preconditions.checkNotNull(msg, "msg must not be empty");
         Preconditions.checkNotNull(combatRound, "combatRound must not be empty");
 
-        if (logBattleResult) {
+        if (true) {
+            // yes, but the logs are annoying
+            return;
+        }
+
+        if (isLocalhost() || logBattleResult) {
             if (start != null && end != null) {
                 final double duration = (double) (end - start) / 1000;
                 LOGGER.info(combatRound + ": " + "\t" + msg + "\t\t - duration: " + duration + " seconds");
@@ -137,17 +155,11 @@ public class BattleLogger {
         }
     }
 
-    public void init(@Nonnull final CombatRound combatRound) {
-        this.combatRound = Preconditions.checkNotNull(combatRound, "combatRound must not be empty");
-    }
-
-    public void closeRound() {
-        this.combatRound = null;
-    }
-
     public void logMessagePlain(@Nonnull final String msg) {
         Preconditions.checkNotNull(msg, "msg must not be empty");
 
-        LOGGER.info(msg);
+        if (isLocalhost() || logBattleResult) {
+            LOGGER.info(msg);
+        }
     }
 }

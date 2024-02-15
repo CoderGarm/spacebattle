@@ -3,15 +3,15 @@ package de.yuga.spacebattle.backend.combat.dto;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import javax.annotation.Nonnull;
 import java.util.UUID;
 
-/**
- * A unique and cloneable object definition.
- */
-public class Historizable<Type extends Cloneable> implements Cloneable {
+public class DamageDealer {
 
+    @Nonnull
     private UUID uuid = UUID.randomUUID();
 
+    @Nonnull
     public UUID getUuid() {
         return uuid;
     }
@@ -19,8 +19,8 @@ public class Historizable<Type extends Cloneable> implements Cloneable {
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
-        if (!(o instanceof Historizable)) return false;
-        final Historizable<?> that = (Historizable<?>) o;
+        if (!(o instanceof DamageDealer)) return false;
+        final DamageDealer that = (DamageDealer) o;
         return new EqualsBuilder().append(uuid, that.uuid).isEquals();
     }
 
@@ -30,10 +30,9 @@ public class Historizable<Type extends Cloneable> implements Cloneable {
     }
 
     @Override
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public Historizable<Type> clone() {
+    public DamageDealer clone() {
         try {
-            final Historizable clone = (Historizable) super.clone();
+            final DamageDealer clone = (DamageDealer) super.clone();
             clone.uuid = UUID.fromString(getUuid().toString());
             return clone;
         } catch (CloneNotSupportedException e) {

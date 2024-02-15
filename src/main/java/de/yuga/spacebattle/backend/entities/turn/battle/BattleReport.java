@@ -135,11 +135,7 @@ public class BattleReport extends AbstractEntityKey {
         Preconditions.checkNotNull(battleResult, "fightingResult shouldn't be null!");
 
         this.tick = tick;
-        final List<CombatRound> combatRounds = battleResult.getRoundStates().stream()
-                .collect(Collectors.groupingBy(FleetRoundState::getCombatRound,
-                        Collectors.mapping(Function.identity(), Collectors.toList()))).keySet().stream()
-                .sorted(CombatRound::compareTo).collect(Collectors.toList());
-        this.lastRound = Collections.max(combatRounds, CombatRound::compareTo);
+        this.lastRound = Collections.max(battleResult.getCage().getRounds(), CombatRound::compareTo);
         this.venue = battleResult.getFleetClash().getOrbit();
         this.participatingFleets.addAll(battleResult.getFleetClash().getParticipatingFleets().stream().map(f -> new FleetSnapshot(this, f)).collect(Collectors.toSet()));
         this.uuid = this.createUUID();
@@ -204,10 +200,8 @@ public class BattleReport extends AbstractEntityKey {
     private void stateBattleResult(@Nonnull final BattleResult battleResult) {
         Preconditions.checkNotNull(battleResult, "fightingResult shouldn't be null!");
 
-        final List<FleetRoundState> allRoundStates = battleResult.getRoundStates();
-        final Map<CombatRound, List<FleetRoundState>> statesByRound = allRoundStates.stream()
-                .collect(Collectors.groupingBy(FleetRoundState::getCombatRound,
-                        Collectors.mapping(Function.identity(), Collectors.toList())));
+        final List<CombatRound> combatRounds = battleResult.getCage().getRounds();
+        final List<FleetRoundState> fleetRoundStates = battleResult.getRoundStates();
 
         final List<CoursePlot> allCoursePlots = battleResult.getCoursePlots();
         final Map<CombatRound, List<de.yuga.spacebattle.backend.combat.dto.MovementAction>> movementsByRound = allCoursePlots.stream()
@@ -221,11 +215,15 @@ public class BattleReport extends AbstractEntityKey {
                 .filter(de.yuga.spacebattle.backend.combat.maneuver.Maneuver::isValid)
                 .collect(Collectors.toMap(Function.identity(), Maneuver::new));
 
-        final Map<CombatRound, List<AuraState>> aurasByRound = allRoundStates.stream()
-                .collect(Collectors.groupingBy(FleetRoundState::getCombatRound,
-                        Collectors.mapping(FleetRoundState::getAuraState, Collectors.toList())));
+        final Map<CombatRound, List<AuraState>> aurasByRound = new HashMap<>();
+        fleetRoundStates.forEach(fleetRoundState -> {
+            fleetRoundState.getAuraStates().forEach((combatRound, auraState) -> {
+                final List<AuraState> orDefault = aurasByRound.getOrDefault(combatRound, new ArrayList<>());
+                orDefault.add(auraState);
+                aurasByRound.put(combatRound, orDefault);
+            });
+        });
 
-        //noinspection DuplicatedCode
         final List<BeamVolley> allBeamVolleys = battleResult.getBeamVolleys();
         final Map<CombatRound, List<BeamVolley>> beamVolleyByRound = allBeamVolleys.stream()
                 .collect(Collectors.groupingBy(BeamVolley::getCombatRound,
@@ -236,19 +234,11 @@ public class BattleReport extends AbstractEntityKey {
                 .collect(Collectors.groupingBy(MissileSalvo::getCombatRound,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
 
-        final List<CombatRound> combatRounds = statesByRound.keySet().stream().sorted(CombatRound::compareTo).collect(Collectors.toList());
+        final Map<DamageDealer, List<HitLog>> hitLogsByDamageDealer = getHitLogsByDamageDealer(fleetRoundStates);
+
+        final List<ECombatPhase> combatPhases = Arrays.stream(ECombatPhase.values()).collect(Collectors.toList());
         for (final CombatRound combatRound : combatRounds) {
-            //noinspection DuplicatedCode
-            final List<ECombatPhase> combatPhases = Arrays.stream(ECombatPhase.values()).collect(Collectors.toList());
-
-            final List<FleetRoundState> fleetRoundStates = statesByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
-
-            final List<HitLog> hitLogsOfCombatRound = fleetRoundStates.stream().map(f -> f.getFleetHealthState().getHitLogs().values())
-                    .flatMap(Collection::stream)
-                    .flatMap(Collection::stream)
-                    // filter all hit logs from other rounds away - necessary because the fleet round states object character
-                    .filter(hitLog -> hitLog.getCombatRound().compareTo(combatRound) == 0)
-                    .collect(Collectors.toList());
+            // fixme remove the combat-round-addiction from stating the combat
 
             final List<BeamVolley> beamVolleys = beamVolleyByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
             final List<MissileSalvo> missileSalvos = missileSalvosByRound.computeIfAbsent(combatRound, k -> new ArrayList<>());
@@ -271,27 +261,11 @@ public class BattleReport extends AbstractEntityKey {
                             break;
                         case BEAM_FIRE_INCOMING_PHASE:
                             final List<BeamVolley> appliedBeams = beamVolleys.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
-                            final Map<BeamVolley, List<HitLog>> hitLogByBeamVolley = appliedBeams.stream()
-                                    .map(volley -> hitLogsOfCombatRound.stream().filter(hitLog -> hitLog.getDamageDealer().equals(volley)).collect(Collectors.toList()))
-                                    .flatMap(Collection::stream)
-                                    .collect(Collectors.groupingBy(hitLog -> (BeamVolley) hitLog.getDamageDealer(),
-                                            Collectors.mapping(Function.identity(), Collectors.toList())));
-
-                            appliedBeams.forEach(beamVolley -> addShipKillerHit(beamVolley, hitLogByBeamVolley.computeIfAbsent(beamVolley, k -> new ArrayList<>())));
+                            appliedBeams.forEach(beamVolley -> addShipKillerHit(beamVolley, hitLogsByDamageDealer.computeIfAbsent(beamVolley, k -> new ArrayList<>())));
                             break;
                         case MISSILE_FIRE_INCOMING_PHASE:
-                            // fixme ist an dieser stelle nicht mehr rundenabhängig
                             final List<MissileSalvo> detonatedMissiles = missileSalvos.stream().filter(m -> !m.getAppliedDamage().isEmpty()).collect(Collectors.toList());
-
-                            // fixme all hitlogs der betreffenden damage dealer werden gesammelt -> zuerst fleet round state cloneable entfernen
-                            final Map<MissileSalvo, List<HitLog>> hitLogByMissileSalvo = detonatedMissiles.stream()
-                                    .map(volley -> hitLogsOfCombatRound.stream().filter(hitLog -> hitLog.getDamageDealer().equals(volley)).collect(Collectors.toList()))
-                                    .flatMap(Collection::stream)
-                                    .collect(Collectors.groupingBy(hitLog -> (MissileSalvo) hitLog.getDamageDealer(),
-                                            Collectors.mapping(Function.identity(), Collectors.toList())));
-
-
-                            detonatedMissiles.forEach(missileSalvo -> addShipKillerHit(missileSalvo, hitLogByMissileSalvo.computeIfAbsent(missileSalvo, k -> new ArrayList<>())));
+                            detonatedMissiles.forEach(missileSalvo -> addShipKillerHit(missileSalvo, hitLogsByDamageDealer.computeIfAbsent(missileSalvo, k -> new ArrayList<>())));
                             break;
                         case BEAM_FIRE_PHASE:
                             final List<BeamVolley> releasedBeamVolleys = beamVolleys.stream().filter(m -> combatSubPhase == m.getCombatSubPhase()).collect(Collectors.toList());
@@ -301,6 +275,21 @@ public class BattleReport extends AbstractEntityKey {
                 }
             }
         }
+    }
+
+    @Nonnull
+    private static Map<DamageDealer, List<HitLog>> getHitLogsByDamageDealer(@Nonnull final List<FleetRoundState> fleetRoundStates) {
+        Preconditions.checkNotNull(fleetRoundStates, "fleetRoundStates must not be empty");
+
+        final Map<DamageDealer, List<HitLog>> hitLogsByDamageDealer = new HashMap<>();
+        fleetRoundStates.forEach(fleetRoundState -> {
+            fleetRoundState.getFleetHealthState().getHitLogs().values().stream().flatMap(Collection::stream).forEach(hitLog -> {
+                final List<HitLog> orDefault = hitLogsByDamageDealer.getOrDefault(hitLog.getDamageDealer(), new ArrayList<>());
+                orDefault.add(hitLog);
+                hitLogsByDamageDealer.put(hitLog.getDamageDealer(), orDefault);
+            });
+        });
+        return hitLogsByDamageDealer;
     }
 
     private void addMovementAction(@Nonnull final List<de.yuga.spacebattle.backend.combat.dto.MovementAction> movementActions,

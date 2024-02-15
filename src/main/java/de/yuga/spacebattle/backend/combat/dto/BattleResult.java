@@ -43,14 +43,12 @@ public class BattleResult {
 
         this.cage = cage;
         this.fleetClash = cage.getFleetClash();
-        this.roundStates = cage.getHistoryOfRounds().stream()
-                .sorted(Comparator.comparing(FleetRoundState::getCombatRound))
-                .collect(Collectors.toList());
+        this.roundStates = cage.getRoundStates();
         this.coursePlots = cage.getRoundStates().stream()
                 .map(FleetRoundState::getCoursePlot)
                 .collect(Collectors.toList());
-        this.beamVolleys = cage.getHistoryOfBeamSalvos();
-        this.missileSalvos = cage.getHistoryOfMissileSalvos();
+        this.beamVolleys = cage.getFlyingBeamVolleys();
+        this.missileSalvos = cage.getFlyingMissileSalvos();
 
         final Map<WarShip, WarshipHealthState> losses = new HashMap<>();
         this.roundStates.forEach(fleetRoundState -> losses.putAll(fleetRoundState.getFleetHealthState().getLosses()));

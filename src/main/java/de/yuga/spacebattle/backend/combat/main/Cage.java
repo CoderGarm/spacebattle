@@ -7,7 +7,10 @@ import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.CoursePlot;
 import de.yuga.spacebattle.backend.combat.BattleLogger;
-import de.yuga.spacebattle.backend.combat.dto.*;
+import de.yuga.spacebattle.backend.combat.dto.BattleResult;
+import de.yuga.spacebattle.backend.combat.dto.BeamVolley;
+import de.yuga.spacebattle.backend.combat.dto.FleetClash;
+import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
 import de.yuga.spacebattle.backend.combat.main.handler.CombatHandler;
 import de.yuga.spacebattle.backend.combat.maneuver.Maneuver;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
@@ -38,6 +41,9 @@ public class Cage implements Future<Cage> {
 
     @Nonnull
     private final BattleLogger battleLogger;
+
+    @Nonnull
+    private final List<CombatRound> rounds = new ArrayList<>();
 
     /**
      * The current combat round.
@@ -104,15 +110,6 @@ public class Cage implements Future<Cage> {
     @Nonnull
     private final List<FleetRoundState> roundStates = new ArrayList<>();
 
-    @Nonnull
-    private final List<FleetRoundState> historyOfRounds = new ArrayList<>();
-
-    @Nonnull
-    private final List<MissileSalvo> historyOfMissileSalvos = new ArrayList<>();
-
-    @Nonnull
-    private final List<BeamVolley> historyOfBeamSalvos = new ArrayList<>();
-
     /**
      * If <code>true</code> the next combat round will not start.
      */
@@ -142,9 +139,11 @@ public class Cage implements Future<Cage> {
         this.defender = fleetOne.equals(this.aggressor) ? fleetTwo : fleetOne;
 
         this.currentCombatRound = new CombatRound();
+        rounds.add(currentCombatRound.clone());
+
         initiateCombat();
+        this.battleLogger.createChart(aggressor.getOwner(), defender.getOwner(), Objects.requireNonNull(fleetClash.getOrbit().getInterplanetaryResultingOrbit()));
         this.combatHandler = new CombatHandler(this);
-        this.battleLogger.createChart(aggressor.getOwner(), defender.getOwner(), fleetClash.getOrbit().getInterplanetaryResultingOrbit());
     }
 
     @Override
@@ -263,65 +262,21 @@ public class Cage implements Future<Cage> {
             forceDone = true;
         }
 
-        if (!isDone()) {
-            prepareNextCombatRound(currentCombatRound);
-        } else {
-            // state the last round results
-            participatingFleets.forEach(fleet -> getCurrentStateByFleet(fleet).historize());
-            // todo create the last combat round with the resulting setup
-        }
+        prepareNextCombatRound();
+
         end = System.currentTimeMillis();
         battleLogger.logMessage("tidy up", start, end);
         battleLogger.closeRound();
     }
 
-    /**
-     * All collection elements which are older than 10 rounds to the older history which is used only for documentation.<br>
-     * All not active missile salvos, no matter whether destroyed or detonated, were transferred, too.
-     */
-    private void transferToLongHistory() {
-        final CombatRound currentCombatRound = getCurrentCombatRound();
-        final int noOfNoReturn = currentCombatRound.getNo() - 2;
-
-        final List<FleetRoundState> fleetRoundStatesToArchive = roundStates.stream()
-                .filter(ma -> ma.getCombatRound().getNo() < noOfNoReturn)
-                .collect(Collectors.toList());
-        historyOfRounds.addAll(fleetRoundStatesToArchive);
-        roundStates.removeAll(fleetRoundStatesToArchive);
-
-        final List<MissileSalvo> missileSalvosToArchive2 = flyingMissileSalvos.stream()
-                .filter(ma -> !ma.isActive() || ma.getResult() != null)
-                .collect(Collectors.toList());
-        flyingMissileSalvos.removeAll(missileSalvosToArchive2);
-
-        final List<BeamVolley> beamVolleysToArchive = flyingBeamVolleys.stream()
-                .filter(ma -> ma.getCombatRound().getNo() < noOfNoReturn || ma.getResult() != null)
-                .collect(Collectors.toList());
-        flyingBeamVolleys.removeAll(beamVolleysToArchive);
-    }
-
-    /**
-     * Prepares the next combat round.
-     *
-     * @param currentCombatRound the current round
-     */
-    @VisibleForTesting
-    protected void prepareNextCombatRound(@Nonnull final CombatRound currentCombatRound) {
+    protected void prepareNextCombatRound() {
         Preconditions.checkNotNull(currentCombatRound, "currentCombatRound shouldn't be null!");
 
-        final FleetRoundState stateOne = getCurrentStateByFleet(fleetOne);
-        final FleetRoundState stateTwo = getCurrentStateByFleet(fleetTwo);
+        roundStates.forEach(FleetRoundState::createCurrentAuraState);
+        rounds.add(currentCombatRound.clone());
         currentCombatRound.next();
-        // just historizing the state
-        new FleetRoundState(this, stateOne);
-        new FleetRoundState(this, stateTwo);
-
-        transferToLongHistory();
     }
 
-    /**
-     * Creates the first combat round for all participating fleet.
-     */
     private void initiateCombat() {
         final Orbit positionOnHyperlimit = NavigationCalculator.getPositionOnHyperlimit(Objects.requireNonNull(aggressor.getOrbit()));
         final Orbit defendersPos = Objects.requireNonNull(defender.getOrbit()).getInterplanetaryResultingOrbit();
@@ -359,7 +314,7 @@ public class Cage implements Future<Cage> {
     }
 
     @Nonnull
-    public FleetRoundState getAgressorsState() {
+    public FleetRoundState getAggressorsState() {
         return getCurrentStateByFleet(aggressor);
     }
 
@@ -372,9 +327,8 @@ public class Cage implements Future<Cage> {
     public FleetRoundState getCurrentStateByFleet(@Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(fleet, "fleet shouldn't be null!");
 
-        final CombatRound currentCombatRound = getCurrentCombatRound();
         final FleetRoundState roundState = roundStates.stream()
-                .filter(fleetRoundState -> fleetRoundState.isEqualsByFleetAndRound(currentCombatRound, fleet))
+                .filter(fleetRoundState -> fleetRoundState.isEqualsByFleet(fleet))
                 .findFirst()
                 .orElse(null);
         if (roundState != null) {
@@ -439,6 +393,14 @@ public class Cage implements Future<Cage> {
         return new ArrayList<>(warshipHealthStates.keySet()).get(numberOfAttackedShip);
     }
 
+    /**
+     * Returns the already sorted rounds.
+     */
+    @Nonnull
+    public List<CombatRound> getRounds() {
+        return rounds.stream().sorted(CombatRound::compareTo).collect(Collectors.toList());
+    }
+
     @Nonnull
     public Fleet getFleetOne() {
         return fleetOne;
@@ -469,27 +431,6 @@ public class Cage implements Future<Cage> {
         return participatingFleets;
     }
 
-    @SuppressWarnings("rawtypes")
-    public void addHistorizable(@Nonnull final Historizable historizable) {
-        Preconditions.checkNotNull(historizable, "historizable shouldn't be null!");
-
-        // fixme replace the historizable concept by transferring directly into the new dto classes and not cloning them
-        //  the idea is to remove all cloning
-
-        if (historizable instanceof FleetRoundState) {
-            historyOfRounds.add(((FleetRoundState) historizable).clone());
-        }
-    }
-
-    @Nonnull
-    public List<MissileSalvo> getHistoryOfMissileSalvos() {
-        return historyOfMissileSalvos;
-    }
-
-    public void historizeMissileSalvo(@Nonnull final MissileSalvo missileSalvo) {
-        this.historyOfMissileSalvos.add(Preconditions.checkNotNull(missileSalvo, "missileSalvo must not be empty"));
-    }
-
     @Nonnull
     public List<MissileSalvo> getFlyingMissileSalvos() {
         return flyingMissileSalvos;
@@ -510,20 +451,6 @@ public class Cage implements Future<Cage> {
         Preconditions.checkNotNull(beamVolley, "beamVolley shouldn't be null!");
 
         flyingBeamVolleys.add(beamVolley);
-    }
-
-    @Nonnull
-    public List<BeamVolley> getHistoryOfBeamSalvos() {
-        return historyOfBeamSalvos;
-    }
-
-    public void historizeBeamVolley(@Nonnull final BeamVolley beamVolley) {
-        this.historyOfBeamSalvos.add(Preconditions.checkNotNull(beamVolley, "beamVolley must not be empty"));
-    }
-
-    @Nonnull
-    public List<FleetRoundState> getHistoryOfRounds() {
-        return historyOfRounds;
     }
 
     @Nonnull

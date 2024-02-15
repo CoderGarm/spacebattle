@@ -91,7 +91,7 @@ public class ShipKillerHit extends CombatRoundKey {
 
         final Map<de.yuga.spacebattle.backend.combat.dto.HitLog, LossRole> lossesByHitLog = hitLogs.stream()
                 .filter(hitLog -> !hitLog.isAlive() || !hitLog.isFightingCapable())
-                .collect(Collectors.toMap(Function.identity(), h -> new LossRole(h.getWarshipHealthState().getWarShip())));
+                .collect(Collectors.toMap(Function.identity(), h -> new LossRole(h.getTargetHealthState().getWarShip())));
 
         generateHitLogs(volley.getUuid(), hitLogs, lossesByHitLog, ECombatPhase.ECombatSubPhase.BEAM_FIRE_INCOMING_PHASE);
     }
@@ -108,7 +108,7 @@ public class ShipKillerHit extends CombatRoundKey {
 
         final Map<de.yuga.spacebattle.backend.combat.dto.HitLog, LossRole> lossesByHitLog = hitLogs.stream()
                 .filter(hitLog -> !hitLog.isAlive() || !hitLog.isFightingCapable())
-                .collect(Collectors.toMap(Function.identity(), h -> new LossRole(h.getWarshipHealthState().getWarShip())));
+                .collect(Collectors.toMap(Function.identity(), h -> new LossRole(h.getTargetHealthState().getWarShip())));
 
         generateHitLogs(volley.getUuid(), hitLogs, lossesByHitLog, ECombatPhase.ECombatSubPhase.MISSILE_FIRE_PHASE);
     }
