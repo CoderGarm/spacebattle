@@ -2,6 +2,9 @@ package de.yuga.spacebattle.backend.calculator.distance;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.MathHelper;
+import de.yuga.spacebattle.backend.calculator.geometry.KinematicInfo;
+import de.yuga.spacebattle.backend.combat.dto.AccelerationProfile;
+import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Time;
@@ -20,6 +23,9 @@ import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC_HU;
 
@@ -124,5 +130,138 @@ public class NavigationCalculator {
             throw new NotifyWebUserException("Oh dear, this journey is to hard for us.");
         }
         return travelTime.intValue();
+    }
+
+    @Nonnull
+    public static List<AccelerationProfile> createAccelerationProfile(@Nonnull final KinematicInfo startConditions,
+                                                                      @Nonnull final KinematicInfo endConditions,
+                                                                      @Nonnull final Distance lengthOnCurve,
+                                                                      @Nonnull final Velocity topSpeed) {
+        Preconditions.checkNotNull(startConditions, "startConditions must not be empty");
+        Preconditions.checkNotNull(endConditions, "endConditions must not be empty");
+        Preconditions.checkNotNull(lengthOnCurve, "lengthOnCurve must not be empty");
+        Preconditions.checkNotNull(topSpeed, "topSpeed must not be empty");
+
+        final Acceleration constantAcceleration = startConditions.getAcceleration();
+
+        final Velocity startConditionsVelocity = startConditions.getVelocity();
+        final Velocity endConditionsVelocity = endConditions.getVelocity();
+        final Distance toAccelerate = calculateDistanceToAccelerate(startConditionsVelocity, endConditionsVelocity, lengthOnCurve);
+        final Distance toDecelerate = lengthOnCurve.subtract(toAccelerate);
+
+        final Time timeToAccelerate = toAccelerate.calculateTimeToPass(constantAcceleration);
+        final Time timeToAccelerate1 = toAccelerate.calculateTimeToPass(constantAcceleration, topSpeed); // todo sharpen the acceleration profile in the name of Newton
+        final Time timeToDecelerate = toDecelerate.calculateTimeToPass(constantAcceleration);
+
+        final List<AccelerationProfile> result = createAccelerationProfile(new CombatRound(), topSpeed, timeToAccelerate, constantAcceleration, startConditionsVelocity, Distance.ZERO);
+        final AccelerationProfile latest = Collections.max(result);
+        final Velocity max = latest.getDynamicInfo().getVelocity();
+        final CombatRound combatRound = latest.getCombatRound().clone();
+        combatRound.next();
+        result.addAll(createAccelerationProfile(combatRound, Velocity.ZERO, timeToDecelerate, constantAcceleration.negate(), max, latest.getDynamicInfo().getDistance()));
+
+        // fixme workaround to don't overrun distance on rounding issues
+        result.stream()
+                .filter(ap -> ap.getDynamicInfo().getDistance().compareTo(lengthOnCurve) > 0)
+                .forEach(ap -> ap.getDynamicInfo().with(lengthOnCurve));
+
+        return result;
+    }
+
+    @Nonnull
+    private static List<AccelerationProfile> createAccelerationProfile(@Nonnull final CombatRound startingRound,
+                                                                       @Nonnull final Velocity speedLimit,
+                                                                       @Nonnull final Time timeToAccelerate,
+                                                                       @Nonnull final Acceleration constantAcceleration,
+                                                                       @Nonnull final Velocity initialVelocity,
+                                                                       @Nonnull final Distance initialDistance) {
+        Preconditions.checkNotNull(startingRound, "startingRound must not be empty");
+        Preconditions.checkNotNull(speedLimit, "speedLimit must not be empty");
+        Preconditions.checkNotNull(timeToAccelerate, "timeToAccelerate must not be empty");
+        Preconditions.checkNotNull(constantAcceleration, "constantAcceleration must not be empty");
+        Preconditions.checkNotNull(initialVelocity, "initialVelocity must not be empty");
+
+        final boolean isNoAcceleration = constantAcceleration.compareTo(Acceleration.ZERO) == 0;
+        if (isNoAcceleration) {
+            return new ArrayList<>();
+        }
+
+        final boolean isBraking = constantAcceleration.compareTo(Acceleration.ZERO) < 0;
+
+        final List<AccelerationProfile> result = new ArrayList<>();
+
+        Time time = Time.ZERO;
+        Distance distance = initialDistance.clone();
+        final CombatRound round = startingRound.clone();
+        while (time.compareTo(timeToAccelerate) < 0) {
+
+            if (hasZeroVelocity(result)) {
+                // we will never reach the destination without velocity
+                break;
+            }
+
+            time = time.add(CombatRound.COMBAT_ROUND);
+            final Velocity velocityAtRoundEnd = getVelocityRespectSpeedLimit(speedLimit, constantAcceleration, initialVelocity, time, isBraking);
+
+            final Velocity velocityAtRoundBeginning = getVelocityRespectSpeedLimit(speedLimit, constantAcceleration, initialVelocity, time.subtract(CombatRound.COMBAT_ROUND), isBraking);
+            distance = distance.getByVelocityAndConstantAccelerationOverTime(constantAcceleration, velocityAtRoundBeginning, CombatRound.COMBAT_ROUND);
+
+            result.add(new AccelerationProfile(round.clone(), constantAcceleration, velocityAtRoundEnd, distance));
+            round.next();
+        }
+        return result;
+    }
+
+    @Nonnull
+    private static Velocity getVelocityRespectSpeedLimit(@Nonnull final Velocity speedLimit,
+                                                         @Nonnull final Acceleration constantAcceleration,
+                                                         @Nonnull final Velocity initialVelocity,
+                                                         @Nonnull final Time time,
+                                                         final boolean isBraking) {
+        Preconditions.checkNotNull(speedLimit, "speedLimit must not be empty");
+        Preconditions.checkNotNull(constantAcceleration, "constantAcceleration must not be empty");
+        Preconditions.checkNotNull(initialVelocity, "initialVelocity must not be empty");
+        Preconditions.checkNotNull(time, "time must not be empty");
+
+        final Velocity velocity = initialVelocity.getVelocityByAcceleration(constantAcceleration, time);
+        // don't exceed speed limit
+        return !violatesSpeedLimit(isBraking, speedLimit, velocity) ? velocity : speedLimit;
+    }
+
+    private static boolean hasZeroVelocity(@Nonnull final List<AccelerationProfile> accelerationProfile) {
+        Preconditions.checkNotNull(accelerationProfile, "accelerationProfile must not be empty");
+
+        if (accelerationProfile.isEmpty()) {
+            return false;
+        }
+
+        final Velocity lastVelocity = Collections.max(accelerationProfile).getDynamicInfo().getVelocity();
+        return lastVelocity.compareTo(Velocity.ZERO) == 0;
+    }
+
+
+    private static boolean violatesSpeedLimit(final boolean isSlowDown, @Nonnull final Velocity speedLimit, @Nonnull final Velocity velocity) {
+        Preconditions.checkNotNull(speedLimit, "speedLimit must not be empty");
+        Preconditions.checkNotNull(velocity, "velocity must not be empty");
+
+        if (isSlowDown) {
+            return velocity.compareTo(speedLimit) < 0;
+        }
+        return velocity.compareTo(speedLimit) > 0;
+    }
+
+    @Nonnull
+    private static Distance calculateDistanceToAccelerate(@Nonnull final Velocity startVelocity, @Nonnull final Velocity designatedVelocity, @Nonnull final Distance distance) {
+        Preconditions.checkNotNull(startVelocity, "startVelocity must not be empty");
+        Preconditions.checkNotNull(designatedVelocity, "designatedVelocity must not be empty");
+        Preconditions.checkNotNull(distance, "distance must not be empty");
+
+        if (startVelocity.compareTo(designatedVelocity) == 0) {
+            // start- und endgeschwindigkeit identisch → halbe strecke
+            return distance.divide(2);
+        }
+
+        // value is normalized due same metrics and only needed as scalar here
+        return distance.divide(startVelocity.divide(designatedVelocity).getValue().longValue());
     }
 }

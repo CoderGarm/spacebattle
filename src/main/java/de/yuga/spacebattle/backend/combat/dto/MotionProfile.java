@@ -48,4 +48,10 @@ public class MotionProfile implements Comparable<MotionProfile> {
 
         return combatRound.compareTo(o.combatRound);
     }
+
+
+    @Override
+    public String toString() {
+        return combatRound + " " + kinematicInfo;
+    }
 }

@@ -125,4 +125,12 @@ public class KinematicInfo implements Cloneable {
 
         return this;
     }
+
+    @Override
+    public String toString() {
+        return acceleration
+                + " " + velocity
+                + " " + direction
+                + " " + position;
+    }
 }

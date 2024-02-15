@@ -31,6 +31,7 @@ article orbital modules
 ### Features
 
 - Wenn kampfsystem durch und planis bomben drin -> neues Event bis rundenende "Krieg gegen KI".
+- discord nutzen
 
 #### Gameplay
 
@@ -53,13 +54,15 @@ abfangkurs bestimmen:
 -> alte KBs sind ab jetzt kaputt
 
 todo: aura auf combat arena: raketenreichweite, effektive sensorreichweite ...
+todo. schiffsicons je nach movementtype drehen / sidewall darstellen usw...
 todo: fleetstats an der aura: overall health, dieses signalstärke dings als impellerstärke, schiffsanzahl nach typ
-todo. email for messages
+todo. email for chat- and forum-messages
 
 - endpoint für "streamlined battle reports" -> trajektorienbasierte kampfbeschreibung für unity
 - planeten für handel blockieren
+- planeten für bombardieren (damage oder zeit bis reperatur)
 - handelsstörer-missionen
-- performance beim gebäude bauen bis der button wieder frei ist + snackbar text ist falsch
+- beim gebäude bauen: snackbar text ist falsch
 
 #### Diverses
 

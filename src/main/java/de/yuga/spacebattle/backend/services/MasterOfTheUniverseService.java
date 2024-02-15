@@ -267,8 +267,10 @@ public class MasterOfTheUniverseService {
             /*
             fleetService.deleteAll();
             createYufielsFleet();
-            createFlashsFleet();
-            battleService.runBattleAtPlanet(tickService.getToday(), planetService.find(112));
+            final Tick today = tickService.getToday();
+            final Planet planet = planetService.find(112);
+            battleService.runBattleAtPlanet(today, planet);
+            //createPirateFleet();
              */
 
             // fixme

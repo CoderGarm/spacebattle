@@ -57,7 +57,8 @@ public class CombatHandler {
     public void handleMovementPhase() {
 
         // state and execute movement
-        if (cage.getCurrentCombatRound().getNo() == 1) {
+        final CombatRound currentCombatRound = cage.getCurrentCombatRound();
+        if (currentCombatRound.getNo() == 1) {
             createInitialCoursePlot();
         }
 
@@ -73,7 +74,7 @@ public class CombatHandler {
 
         final Orbit aggroPos = cage.getCurrentStateByFleet(cage.getAggressor()).getPosition();
         final Orbit defPos = cage.getCurrentStateByFleet(cage.getDefender()).getPosition();
-        cage.logMessage("#" + cage.getCurrentCombatRound().getNo() + "\t\t - " + aggroPos.getDistance(defPos).getCoordinateInMetric(LS) + " LS");
+        cage.logMessage("#" + currentCombatRound.getNo() + "\t\t - " + aggroPos.getDistance(defPos).getCoordinateInMetric(LS) + " LS");
     }
 
     private void endCombatByExceededPlot() {
@@ -119,15 +120,19 @@ public class CombatHandler {
         Preconditions.checkNotNull(agent, "agent must not be empty");
         Preconditions.checkNotNull(target, "target must not be empty");
 
-        final FleetRoundState aggressorsState = cage.getCurrentStateByFleet(agent);
-        final CoursePlot aggressorsCoursePlot = aggressorsState.getCoursePlot();
-        final boolean hasPlotToBeRepainted = aggressorsCoursePlot.hasPlotExceeded();
+        final boolean hasPlotToBeRepainted = isPlotExceeded(agent);
 
-        if (hasPlotToBeRepainted || cage.isActionHappened()) {
+        if (hasPlotToBeRepainted /* fixme || cage.isActionHappened() */) {
             // plot the next round's course for the upcoming round
             // fixme weiter hier aggressorsCoursePlot.createNextAggressiveCourseElement();
             cage.logWarning("Course of '" + agent.getOwner().getUsername() + "' will be refreshed.");
         }
+    }
+
+    private boolean isPlotExceeded(@Nonnull final Fleet agent) {
+        Preconditions.checkNotNull(agent, "agent must not be empty");
+
+        return cage.getCurrentStateByFleet(agent).getCoursePlot().hasPlotExceeded();
     }
 
     private void executeMovement(@Nonnull final Fleet agent) {

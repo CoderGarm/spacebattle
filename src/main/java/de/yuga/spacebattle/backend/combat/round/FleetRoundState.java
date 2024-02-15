@@ -93,7 +93,8 @@ public class FleetRoundState {
 
     @Nullable
     public EMovementType getMovementType() {
-        final CourseOrderElement latestCourseElement = coursePlot.getLatestCourseElement();
+        final CombatRound currentCombatRound = cage.getCurrentCombatRound();
+        final CourseOrderElement latestCourseElement = coursePlot.getCourseElement(currentCombatRound);
         return latestCourseElement != null ? latestCourseElement.getMovementType() : null;
     }
 

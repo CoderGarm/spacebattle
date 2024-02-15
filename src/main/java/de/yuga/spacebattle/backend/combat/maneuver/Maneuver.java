@@ -1,21 +1,21 @@
 package de.yuga.spacebattle.backend.combat.maneuver;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.distance.NavigationCalculator;
 import de.yuga.spacebattle.backend.calculator.geometry.CubicBezier;
+import de.yuga.spacebattle.backend.calculator.geometry.DynamicInfo;
 import de.yuga.spacebattle.backend.calculator.geometry.KinematicInfo;
 import de.yuga.spacebattle.backend.calculator.resource.CourseOrderElement;
+import de.yuga.spacebattle.backend.combat.dto.AccelerationProfile;
 import de.yuga.spacebattle.backend.combat.dto.MovementAction;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
-import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
-import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
-import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -26,6 +26,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static de.yuga.spacebattle.backend.combat.enums.EMovementType.REDUCE_DISTANCE;
@@ -40,7 +41,7 @@ import static de.yuga.spacebattle.backend.combat.enums.EMovementType.REDUCE_DIST
  *      - todo add beharrungskräfte like impuls
  * - gibt es eine abbruchsvorschrift? z.b. verluste
  */
-public abstract class Maneuver implements Cloneable {
+public abstract class Maneuver {
 
     @Nonnull
     private static final Logger LOGGER = LoggerFactory.getLogger(Maneuver.class);
@@ -49,7 +50,7 @@ public abstract class Maneuver implements Cloneable {
     private final Cage cage;
 
     @Nonnull
-    private CombatRound start;
+    private final CombatRound start;
 
     @Nullable
     private CombatRound designatedEnd;
@@ -61,10 +62,10 @@ public abstract class Maneuver implements Cloneable {
     private final Fleet agent;
 
     @Nonnull
-    private KinematicInfo agentsKinematicInitial;
+    private final KinematicInfo agentsKinematicInitial;
 
     @Nonnull
-    private KinematicInfo agentsKinematicDesignated;
+    private final KinematicInfo agentsKinematicDesignated;
 
     @Nonnull
     private final Fleet target;
@@ -175,21 +176,6 @@ public abstract class Maneuver implements Cloneable {
     }
 
     @Override
-    public Maneuver clone() {
-        try {
-            final Maneuver clone = (Maneuver) super.clone();
-            clone.agentsKinematicInitial = agentsKinematicInitial.clone();
-            clone.agentsKinematicDesignated = agentsKinematicDesignated.clone();
-            clone.start = start.clone();
-            clone.end = end != null ? end.clone() : null;
-            clone.designatedEnd = designatedEnd != null ? designatedEnd.clone() : null;
-            return clone;
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError();
-        }
-    }
-
-    @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
 
@@ -218,65 +204,48 @@ public abstract class Maneuver implements Cloneable {
     @Nonnull
     public Maneuver createCoursePlot() {
         courseOrderElements.clear();
-        final CombatRound combatRound = getStart().clone();
-
-        final boolean isAggressor = cage.getAggressor().equals(agent);
 
         final double totalLength = maneuverElements.getTotalLength();
-        Velocity velocity = Velocity.ZERO.clone();
-        final Acceleration acceleration = agentsKinematicInitial.getAcceleration();
+        final Distance length = new Distance(totalLength, EDistanceMetric.KM);
 
+        final List<AccelerationProfile> motionProfiles = NavigationCalculator.createAccelerationProfile(agentsKinematicInitial, agentsKinematicDesignated, length, getAgentsTopSpeed());
 
         /*
-            fixme Plan zur Bestimmung von Ort und Zeit zu bestimmter Kampfrunde
+            Plan zur Bestimmung von Ort und Zeit zu bestimmter Kampfrunde
             1. Beschleunigungs- und geschwindigkeitsprofil aufbauen - Motionprofile
                 - Anfangs- und Endgeschwindigkeit, Länge der Strecke festhalten
                 - Werte in Kampfrundenabständen berechnen und festhalten
                 - Daraus folgt länge des Kurses und abrufbare Position zu Zeitpunkt x
+            2. Aus Beschleunigngsprofil die Streckenlänge definieren
          */
 
+        final CombatRound latestRound = Collections.max(motionProfiles).getCombatRound();
+        cage.logMessage("Maneuver for '" + getAgent().getOwner().getUsername() + "' with a total length of '" + totalLength + "' passed in '" + latestRound + "' rounds.");
 
-        final int timeToPassTotalLength = getLengthInCombatRounds(totalLength, acceleration);
-        cage.logMessage("Maneuver for '" + getAgent().getOwner().getUsername() + "' with a total length of '" + totalLength + "' passed in '" + timeToPassTotalLength + "' rounds.");
+        motionProfiles.sort(AccelerationProfile::compareTo);
+        for (final AccelerationProfile motionProfile : motionProfiles) {
 
-        for (int i = 1; i <= timeToPassTotalLength; i++) {
+            final DynamicInfo dynamicInfo = motionProfile.getDynamicInfo();
+            final Velocity dynamicInfoVelocity = dynamicInfo.getVelocity();
+            final Distance distance = dynamicInfo.getDistance().getInMetricWithScale(EDistanceMetric.KM);
 
-            final double percentOfTrack = (((double) i / timeToPassTotalLength) * 100);
-            velocity = velocity.getVelocityByAcceleration(acceleration, CombatRound.COMBAT_ROUND);
-            cage.logMessagePlain("Maneuver for '" + getAgent().getOwner().getUsername()
-                    + "' with velocity of '" + velocity.getInMetricWithScale(EDistanceMetric.M, ETimeMetric.SECOND)
-                    + "' and acceleration of '" + acceleration.getCoordinateInMetric(EAccelerationMetric.G)
-                    + "' in round '" + i + "'");
-
+            final double percentOfTrack = (distance.divide(length)).multiply(100).getCoordinate().doubleValue();
             final double lengthOnTrack = totalLength * percentOfTrack / 100;
             final ManeuverElement maneuverElement = maneuverElements.getManeuverForPart(percentOfTrack);
             final double[] pointAtLength = maneuverElement.getCurve().getPointAtLength(lengthOnTrack);
 
             addCourseOrder(
-                    combatRound.clone(),
+                    motionProfile.getCombatRound().clone(),
                     maneuverElement,
-                    new Distance(lengthOnTrack, EDistanceMetric.KM),
+                    new Distance(lengthOnTrack, EDistanceMetric.KM), // fixme can be distance directly - test it
                     REDUCE_DISTANCE,
-                    velocity.clone(),
+                    dynamicInfoVelocity.clone(),
                     new Orbit(pointAtLength, EDistanceMetric.KM)
             );
-            combatRound.next();
         }
 
-        setDesignatedEnd(combatRound);
+        setDesignatedEnd(latestRound);
         return this;
-    }
-
-    private static int getLengthInCombatRounds(final double totalLength, @Nonnull final Velocity velocity) {
-        Preconditions.checkNotNull(velocity, "velocity must not be empty");
-
-        return new Distance(totalLength, EDistanceMetric.KM).calculateTimeToPass(velocity).convertToMetric(CombatRound.COMBAT_ROUND_METRIC).getCoordinate().intValue();
-    }
-
-    private static int getLengthInCombatRounds(final double totalLength, @Nonnull final Acceleration acceleration) {
-        Preconditions.checkNotNull(acceleration, "acceleration must not be empty");
-
-        return new Distance(totalLength, EDistanceMetric.KM).calculateTimeToPass(acceleration).convertToMetric(CombatRound.COMBAT_ROUND_METRIC).getCoordinate().intValue();
     }
 
     public void addCourseOrder(@Nonnull final CombatRound combatRound,

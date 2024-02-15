@@ -25,7 +25,10 @@ import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC_HU;
 import static de.yuga.spacebattle.backend.combat.enums.EMovementType.*;
@@ -384,11 +387,11 @@ public class CoursePlot {
         // calculate difference from current direction to desired direction
         final BigDecimal alignmentFactor = getCurrentDirection().getAlignmentFactor(courseDirection);
         // calculate vector velocity by difference in directions -> change initialVelocity
-        final CombatRound combatRound = getUpcomingRound();
+        final CombatRound combatRound = cage.getCurrentCombatRound().clone();
         Velocity initialVelocity = agentsCurrentVelocity.getByAlignmentFactor(alignmentFactor);
         cage.logMessage("rounds to travel '" + roundsToTravel + "' for " + getAgent().getName());
         for (int i = 1; i <= roundsToTravel; i++) {
-            final CourseOrderElement latestCourseElement = getLatestCourseElement(); // fixme the speed must be decelerated - is done by alignment factor?
+            final CourseOrderElement latestCourseElement = getCourseElement(combatRound); // fixme the speed must be decelerated - is done by alignment factor?
             final Orbit position = latestCourseElement != null ? latestCourseElement.getPosition() : origin;
             final Distance distanceByTime = acceleration.getDistanceByTime(COMBAT_ROUND, initialVelocity, EDistanceMetric.LS);
             Velocity resultingVelocity = initialVelocity.getVelocityByAcceleration(acceleration, COMBAT_ROUND);
@@ -526,27 +529,6 @@ public class CoursePlot {
         return actorsMovementType;
     }
 
-    /**
-     * Returns the round for the next course element.
-     *
-     * @return the upcoming round
-     */
-    @Nonnull
-    public CombatRound getUpcomingRound() {
-        final CourseOrderElement lastElement = getLatestCourseElement();
-        if (lastElement == null) {
-            return startingRound.clone();
-        }
-        final CombatRound combatRound = lastElement.getCombatRound().clone();
-        combatRound.next();
-        return combatRound;
-    }
-
-    @Nullable
-    public CourseOrderElement getLatestCourseElement() {
-        return courseOrderElements.stream().max(Comparator.comparing(CourseOrderElement::getCombatRound)).orElse(null);
-    }
-
     @Nullable
     public CourseOrderElement getCourseElement(@Nonnull final CombatRound combatRound) {
         Preconditions.checkNotNull(combatRound, "combatRound shouldn't be null!");
@@ -639,10 +621,7 @@ public class CoursePlot {
         final CourseOrderElement courseElement = getCourseElement(currentCombatRound);
         Preconditions.checkState(courseElement != null, "courseElement shouldn't be null!");
         courseElement.executeOrder();
-        final FleetRoundState currentStateByFleet = cage.getCurrentStateByFleet(agent);
-        final EMovementType movementType = courseElement.getMovementType();
-        final Velocity currentVelocity = getCurrentVelocity();
-        cage.logMessage(agent.getOwner().getUsername() + " moves " + movementType + " with velocity of " + currentVelocity);
+        cage.logMessage(agent.getOwner().getUsername() + " moves " + courseElement.getMovementType() + " with velocity of " + getCurrentVelocity());
     }
 
     public void clearFutureCourseElements() {

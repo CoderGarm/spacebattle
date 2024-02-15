@@ -15,6 +15,8 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 
+import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC_HU;
+
 @Schema(description = ".")
 public class Velocity implements Cloneable, Comparable<Velocity> {
 
@@ -275,6 +277,24 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
         final BigDecimal velocityFromAcceleration = acceleration.getCoordinateInMetric(EAccelerationMetric.MS2)
                 .multiply(duration.getCoordinateInMetric(ETimeMetric.SECOND));
         return new Velocity(velocityFromAcceleration, distanceMetric, timeMetric).add(this);
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public Velocity divide(final double divisor) {
+        Preconditions.checkArgument(divisor != 0, "divisor must not be zero");
+
+        return new Velocity(value.divide(BigDecimal.valueOf(divisor), MC_HU), distanceMetric, timeMetric);
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public Velocity divide(@Nonnull final Velocity divisor) {
+        Preconditions.checkNotNull(divisor, "divisor must not be empty");
+        Preconditions.checkArgument(divisor.compareTo(Velocity.ZERO) != 0, "divisor must not be zero");
+
+        final BigDecimal div = divisor.getCoordinateInMetric(distanceMetric, timeMetric);
+        return new Velocity(value.divide(div, MC_HU), distanceMetric, timeMetric);
     }
 
     @Nonnull

@@ -321,10 +321,63 @@ public class Distance implements Cloneable, Comparable<Distance> {
 
         // t = sqrt ( 2s / a)
 
-        final BigDecimal acc = acceleration.getCoordinateInMetric(EAccelerationMetric.MS2);
-        final BigDecimal distance = getCoordinateInMetric(EDistanceMetric.M);
-        final BigDecimal timeValue = distance.multiply(BigDecimal.valueOf(2)).divide(acc, MC_HU);
-        final BigDecimal result = timeValue.sqrt(MC_HU);
-        return new Time(result, ETimeMetric.SECOND);
+        final BigDecimal a = acceleration.getCoordinateInMetric(EAccelerationMetric.MS2);
+        final BigDecimal s = getCoordinateInMetric(EDistanceMetric.M);
+        final BigDecimal t = s.multiply(BigDecimal.valueOf(2)).divide(a, MC_HU).sqrt(MC_HU);
+        return new Time(t, ETimeMetric.SECOND);
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public Time calculateTimeToPass(@Nonnull final Acceleration acceleration, @Nonnull final Velocity speedLimit) {
+        Preconditions.checkNotNull(acceleration, "acceleration shouldn't be null!");
+        Preconditions.checkNotNull(speedLimit, "speedLimit must not be empty");
+
+        // t = v/a + (( s - 0.5 at² ) / v )
+
+        final BigDecimal a = acceleration.getCoordinateInMetric(EAccelerationMetric.MS2);
+        final BigDecimal s = getCoordinateInMetric(EDistanceMetric.M);
+        final BigDecimal v = speedLimit.getCoordinateInMetric(EDistanceMetric.M, ETimeMetric.SECOND);
+        final BigDecimal t1 = v.divide(a, MC_HU);
+
+        final BigDecimal A = BigDecimal.valueOf(0.5).multiply(a).multiply(t1.pow(2));
+
+        final BigDecimal t2 = s.subtract(A).divide(v, MC_HU);
+        return new Time(t1.add(t2), ETimeMetric.SECOND);
+    }
+
+    @Nonnull
+    public static Distance getByVelocityAndTime(@Nonnull final Velocity velocity, @Nonnull final Time time) {
+        Preconditions.checkNotNull(velocity, "velocity must not be empty");
+        Preconditions.checkNotNull(time, "time must not be empty");
+
+        // s = v / t
+
+        final BigDecimal v = velocity.getCoordinateInMetric(velocity.getDistanceMetric(), time.getTimeMetric());
+        final BigDecimal t = time.getCoordinate();
+        return new Distance(v.divide(t, MC_HU), velocity.getDistanceMetric());
+    }
+
+
+    @Nonnull
+    public Distance getByVelocityAndConstantAccelerationOverTime(@Nonnull final Acceleration constantAcceleration,
+                                                                 @Nonnull final Velocity initialVelocity,
+                                                                 @Nonnull final Time time) {
+        Preconditions.checkNotNull(constantAcceleration, "constantAcceleration must not be empty");
+        Preconditions.checkNotNull(initialVelocity, "initialVelocity must not be empty");
+        Preconditions.checkNotNull(time, "time must not be empty");
+
+        // s = 0.5 at² + v_0 t + s_0
+
+        final BigDecimal v_0 = initialVelocity.getCoordinateInMetric(EDistanceMetric.M, ETimeMetric.SECOND);
+        final BigDecimal t = time.getCoordinateInMetric(ETimeMetric.SECOND);
+        final BigDecimal a = constantAcceleration.getCoordinateInMetric(EAccelerationMetric.MS2);
+        final BigDecimal s_0 = getCoordinateInMetric(EDistanceMetric.M);
+
+        BigDecimal s = BigDecimal.valueOf(0.5).multiply(a).multiply(t.pow(2));
+        s = s.add(v_0.multiply(t));
+        s = s.add(s_0);
+
+        return new Distance(s, EDistanceMetric.M);
     }
 }

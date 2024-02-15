@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Service // fixme make non-service
+@Service
 public class BattleLogger {
 
     @Nonnull

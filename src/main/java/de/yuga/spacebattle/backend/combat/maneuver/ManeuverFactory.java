@@ -33,7 +33,10 @@ public class ManeuverFactory {
         final FleetRoundState agentState = cage.getCurrentStateByFleet(agent);
         final FleetRoundState targetState = cage.getCurrentStateByFleet(target);
 
-        final KinematicInfo agentsKinematicDesignation = KinematicInfo.getFrom(targetState);
+        final KinematicInfo agentsKinematicDesignation = KinematicInfo.getFrom(targetState)
+                .with(Acceleration.ZERO)
+                .with(Velocity.ZERO);
+
         final KinematicInfo agentsKinematicInitial = KinematicInfo.getFrom(agentState)
                 // shifts the position ot of the planets center
                 .shiftInPlanetaryOrbit(agentsKinematicDesignation.getPosition());
@@ -43,7 +46,7 @@ public class ManeuverFactory {
                 cage.getCurrentCombatRound(),
                 agent,
                 agentsKinematicInitial,
-                agentsKinematicDesignation.with(Acceleration.ZERO).with(Velocity.ZERO),
+                agentsKinematicDesignation,
                 target
         ).createCoursePlot();
     }
@@ -70,6 +73,15 @@ public class ManeuverFactory {
 
             - take closer control point of time-optimized-course as geometric center
             - calc p1, p2 based on distance enemy-CP to own P1 by setting enemy-CP in 2/3 of broadside passing baseline
+         */
+
+        /*
+            fixme react to aggressive course
+
+            - state intersection point
+            - state intersection time
+            - calc acceleration to reach both
+            - proceed normally
          */
 
         final CubicBezier combatElement = maneuver.getCombatElement();

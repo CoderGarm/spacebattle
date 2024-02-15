@@ -108,29 +108,33 @@ public class BattleService {
         final List<FleetClash> fleetClashes = findAllFleetClashes();
         LOGGER.info("# {} battles for {}", fleetClashes.size(), today);
 
+        final List<BattleReport> reports = runBattles(today, fleetClashes);
+
+        LOGGER.info("# {} battles executed for {}", reports.size(), today);
+        battleReportService.saveAll(reports);
+    }
+
+    @Nonnull
+    private List<BattleReport> runBattles(@Nonnull final Tick today, @Nonnull final List<FleetClash> fleetClashes) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(fleetClashes, "fleetClashes must not be empty");
+
         final List<BattleReport> reports = new ArrayList<>();
-        final List<CompletableFuture<Cage>> futures = new ArrayList<>();
-        for (FleetClash fleetClash : fleetClashes) {
-            final CompletableFuture<Cage> future = CompletableFuture.supplyAsync(() -> {
-                final Cage cage = new Cage(fleetClash, battleLogger);
-                cage.handleCombatPhases();
-                return cage;
-            });
-            futures.add(future);
-        }
+        final List<CompletableFuture<Cage>> futures = fleetClashes.stream()
+                .map(fleetClash -> CompletableFuture.supplyAsync(() -> new Cage(fleetClash, battleLogger)))
+                .collect(Collectors.toList());
         try {
             // runs the fight
             for (CompletableFuture<Cage> f : futures) {
                 final Cage cage = f.get();
+                cage.handleCombatPhases();
                 reports.add(processFightingResult(today, cage.getBattleResult()));
             }
         } catch (final ExecutionException | InterruptedException e) {
             e.printStackTrace();
             throw new NotifyWebUserException(e.getMessage());
         }
-
-        LOGGER.info("# {} battles executed for {}", reports.size(), today);
-        battleReportService.saveAll(reports);
+        return reports;
     }
 
     @Nonnull
@@ -145,26 +149,7 @@ public class BattleService {
             return new ArrayList<>();
         }
 
-        final List<BattleReport> reports = new ArrayList<>();
-        final List<CompletableFuture<Cage>> futures = new ArrayList<>();
-        for (FleetClash fleetClash : fleetClashes) {
-            final CompletableFuture<Cage> future = CompletableFuture.supplyAsync(() -> {
-                final Cage cage = new Cage(fleetClash, battleLogger);
-                cage.handleCombatPhases();
-                return cage;
-            });
-            futures.add(future);
-        }
-        try {
-            // runs the fight
-            for (CompletableFuture<Cage> f : futures) {
-                final Cage cage = f.get();
-                reports.add(processFightingResult(today, cage.getBattleResult()));
-            }
-        } catch (final ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-            throw new NotifyWebUserException(e.getMessage());
-        }
+        final List<BattleReport> reports = runBattles(today, fleetClashes);
 
         LOGGER.info("# {} battles executed for {} at planet {} ('{}')", fleetClashes.size(), today, planet.getName(), planet.getId());
         return battleReportService.saveAll(reports);
