@@ -380,4 +380,16 @@ public class Distance implements Cloneable, Comparable<Distance> {
 
         return new Distance(s, EDistanceMetric.M);
     }
+
+    @Nonnull
+    public static Distance getByVelocityAndTime(@Nonnull final Velocity velocity, @Nonnull final Time time) {
+        Preconditions.checkNotNull(velocity, "velocity must not be empty");
+        Preconditions.checkNotNull(time, "time must not be empty");
+
+        // s = v / t
+
+        final BigDecimal v = velocity.getCoordinateInMetric(velocity.getDistanceMetric(), time.getTimeMetric());
+        final BigDecimal t = time.getCoordinate();
+        return new Distance(v.divide(t, MC_HU), velocity.getDistanceMetric());
+    }
 }
