@@ -208,10 +208,9 @@ public class ResourcesApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getResourceDeposit(@PathVariable("idPlanet") final int idPlanet) {
-
-        final Planet planet = planetService.find(idPlanet);
-        PreconditionWebHelper.checkNotNull(planet, "planet shouldn't be null!");
-        return ResponseEntity.ok(new ResourceDeposit(planet.getResourceDeposit()));
+        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit deposit = planetService.findResourceDeposit(idPlanet);
+        PreconditionWebHelper.checkNotNull(deposit, "deposit shouldn't be null!");
+        return ResponseEntity.ok(new ResourceDeposit(deposit));
     }
 
     @GetMapping(value = RESOURCE_DEPOSIT_ENDPOINT + "/fleet/{idFleet}")

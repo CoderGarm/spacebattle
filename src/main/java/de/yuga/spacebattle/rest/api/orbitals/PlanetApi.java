@@ -25,6 +25,7 @@ import de.yuga.spacebattle.backend.services.turn.tick.PlanetTickRunner;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import de.yuga.spacebattle.rest.dto.PlanetAbstractId;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstructionOrder;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardConstructionSelection;
 import de.yuga.spacebattle.rest.dto.constructables.spacecrafts.ShipyardOrbitalModuleConstructionSelection;
@@ -151,6 +152,24 @@ public class PlanetApi extends BaseApi {
         final Map<Integer, Set<EResourceType>> productionCapabilities = planetService.findProductionCapabilities(all.stream().map(de.yuga.spacebattle.backend.entities.orbitals.Planet::getId).collect(Collectors.toSet()));
         final List<Planet> planets = all.stream().map(p -> new Planet(p, productionCapabilities.getOrDefault(p.getId(), new HashSet<>()))).collect(Collectors.toList());
         return ResponseEntity.ok(planets);
+    }
+
+    @GetMapping(value = "/abstractNaming")
+    @Operation(summary = "Get all planets which are colonized by a user.", operationId = "getPlanetByUsersForNaming",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(
+                                            schema = @Schema(implementation = PlanetAbstractId.class))
+                            )),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getPlanetByUsersForNaming() {
+        final int idUser = getIdUser();
+        final List<PlanetAbstractId> all = planetService.findAllColonizedByForNaming(idUser);
+        return ResponseEntity.ok(all);
     }
 
     @GetMapping(value = GET_MAIN_PLANET)
@@ -422,11 +441,9 @@ public class PlanetApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getTransportationDemand(@PathVariable("idPlanet") final int idPlanet) {
-        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetService.find(idPlanet);
-        if (planet == null || planet.getOwner() == null || planet.getOwner().getId() != getIdUser()) {
-            throw new NotifyWebUserException("Well, no.");
-        }
-        return ResponseEntity.ok(new ResourceDeposit(planet.getResourceTransportationDemand()));
+        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit resourceTransportationDemand = planetService.findResourceTransportationDemand(idPlanet);
+        Preconditions.checkNotNull(resourceTransportationDemand, "resourceTransportationDemand must not be empty");
+        return ResponseEntity.ok(new ResourceDeposit(resourceTransportationDemand));
     }
 
     @PutMapping(value = TRANSPORTATION_ENDPOINT + "/demand/{idPlanet}")
@@ -468,11 +485,9 @@ public class PlanetApi extends BaseApi {
             }
     )
     public ResponseEntity<?> getTransportationDelivery(@PathVariable("idPlanet") final int idPlanet) {
-        final de.yuga.spacebattle.backend.entities.orbitals.Planet planet = planetService.find(idPlanet);
-        if (planet == null || planet.getOwner() == null || planet.getOwner().getId() != getIdUser()) {
-            throw new NotifyWebUserException("Well, no.");
-        }
-        return ResponseEntity.ok(new ResourceDeposit(planet.getResourceTransportationDelivery()));
+        final de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit resourceTransportationDelivery = planetService.findResourceTransportationDelivery(idPlanet);
+        Preconditions.checkNotNull(resourceTransportationDelivery, "resourceTransportationDelivery must not be empty");
+        return ResponseEntity.ok(new ResourceDeposit(resourceTransportationDelivery));
     }
 
     @PutMapping(value = TRANSPORTATION_ENDPOINT + "/delivery/{idPlanet}")

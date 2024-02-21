@@ -19,6 +19,7 @@ import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.repositories.orbitals.PlanetRepository;
 import de.yuga.spacebattle.backend.services.caclulator.TickOutputCalculator;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
+import de.yuga.spacebattle.rest.dto.PlanetAbstractId;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -72,6 +73,11 @@ public class PlanetService {
     @Nonnull
     public List<Planet> findAllColonizedBy(final int idUser) {
         return planetRepository.findAllPlanetsColonizedByID(idUser);
+    }
+
+    @Nonnull
+    public List<PlanetAbstractId> findAllColonizedByForNaming(final int idUser) {
+        return planetRepository.findAllPlanetsColonizedByIDForNaming(idUser);
     }
 
     @Nonnull
@@ -235,6 +241,16 @@ public class PlanetService {
     @Nullable
     public ResourceDeposit findResourceDeposit(final int idPlanet) {
         return planetRepository.findResourceDeposit(idPlanet);
+    }
+
+    @Nullable
+    public ResourceDeposit findResourceTransportationDemand(final int idPlanet) {
+        return planetRepository.findResourceTransportationDemand(idPlanet);
+    }
+
+    @Nullable
+    public ResourceDeposit findResourceTransportationDelivery(final int idPlanet) {
+        return planetRepository.findResourceTransportationDelivery(idPlanet);
     }
 
     public int howMuchInDeposit(final int idPlanet, @Nonnull final EResourceType resourceType) {

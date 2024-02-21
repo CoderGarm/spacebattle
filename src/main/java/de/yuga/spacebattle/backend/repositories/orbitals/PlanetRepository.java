@@ -5,6 +5,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.resources.MiningFactors;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EResourceType;
+import de.yuga.spacebattle.rest.dto.PlanetAbstractId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -36,6 +37,14 @@ public interface PlanetRepository extends JpaRepository<Planet, Integer>, Custom
     ResourceDeposit findResourceDeposit(int idPlanet);
 
     @Nullable
+    @Query("SELECT p.resourceTransportationDemand FROM Planet p WHERE p.id = :idPlanet")
+    ResourceDeposit findResourceTransportationDemand(int idPlanet);
+
+    @Nullable
+    @Query("SELECT p.resourceTransportationDelivery FROM Planet p WHERE p.id = :idPlanet")
+    ResourceDeposit findResourceTransportationDelivery(int idPlanet);
+
+    @Nullable
     @Query("SELECT p.miningFactors FROM Planet p WHERE p.id = :idPlanet")
     MiningFactors findMiningFactors(int idPlanet);
 
@@ -65,4 +74,10 @@ public interface PlanetRepository extends JpaRepository<Planet, Integer>, Custom
             + " JOIN r.resources ress "
             + " WHERE p.id = :idPlanet AND KEY(ress) = :resourceType")
     Integer howMuchInDeposit(final int idPlanet, final EResourceType resourceType);
+
+    @Nonnull
+    @Query("SELECT new de.yuga.spacebattle.rest.dto.PlanetAbstractId(" +
+            "p.id, p.name, p.isMain, p.system.id " +
+            ") FROM Planet p WHERE p.owner.id = :idOwner ORDER BY p.colonizedAt")
+    List<PlanetAbstractId> findAllPlanetsColonizedByIDForNaming(final int idOwner);
 }

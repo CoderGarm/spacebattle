@@ -254,6 +254,12 @@ public class MasterOfTheUniverseService {
             createPirateFleet();
             */
 
+            // fixme
+            // - manual transportation shown when to transportation target is present
+            // - ship fitting breaks no longer at to many offensive modules
+            // - ship transportation: set back to origin when not moved works now
+            // - resource & pop transportation: UI is disabled until all planets are loaded
+
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
