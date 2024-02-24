@@ -4,8 +4,10 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
+import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class DynamicInfo implements Cloneable {
 
@@ -17,6 +19,9 @@ public class DynamicInfo implements Cloneable {
 
     @Nonnull
     private Distance distance;
+
+    @Nullable
+    private Orbit position;
 
     public DynamicInfo(@Nonnull final Acceleration acceleration,
                        @Nonnull final Velocity velocity,
@@ -71,6 +76,15 @@ public class DynamicInfo implements Cloneable {
         this.distance = Preconditions.checkNotNull(distance, "distance must not be empty").clone();
 
         return this;
+    }
+
+    @Nullable
+    public Orbit getPosition() {
+        return position;
+    }
+
+    public void setPosition(@Nullable final Orbit position) {
+        this.position = position;
     }
 
     @Override

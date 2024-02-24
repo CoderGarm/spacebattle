@@ -50,4 +50,5 @@ public class AccelerationProfile implements Comparable<AccelerationProfile> {
     public String toString() {
         return combatRound + " " + dynamicInfo;
     }
+
 }

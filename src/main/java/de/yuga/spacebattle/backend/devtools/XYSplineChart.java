@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.devtools;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.geometry.CubicBezier;
+import de.yuga.spacebattle.backend.combat.dto.AccelerationProfile;
 import de.yuga.spacebattle.backend.combat.maneuver.Maneuver;
 import de.yuga.spacebattle.backend.combat.maneuver.ManeuverElement;
 import de.yuga.spacebattle.backend.combat.maneuver.ManeuverElements;
@@ -89,13 +90,47 @@ public class XYSplineChart extends ApplicationFrame /* todo JFrame wenn listener
                 }
             }
             dataset.addSeries(series);
+            drawIntersectionPoint(maneuver, dataset);
+            drawThrustReversalPoints(maneuver, dataset);
         }
-
 
         final ChartPanel chartPanel = createPanel(dataset, helpSeriesIndices);
         chartPanel.setPreferredSize(new Dimension(900, 900));
         setContentPane(chartPanel);
         return chartPanel;
+    }
+
+    private static void drawThrustReversalPoints(@Nonnull final Maneuver maneuver, @Nonnull final XYSeriesCollection dataset) {
+        Preconditions.checkNotNull(maneuver, "maneuver must not be empty");
+        Preconditions.checkNotNull(dataset, "dataset must not be empty");
+
+        final XYSeries series = new XYSeries(maneuver.getAgent().getOwner().getUsername() + " Thrust Reversal Points", false, true);
+        final List<AccelerationProfile> accelerationProfile = maneuver.getAccelerationProfile();
+        for (int i = 1; i < accelerationProfile.size(); i++) {
+            final AccelerationProfile last = accelerationProfile.get(i - 1);
+            final AccelerationProfile current = accelerationProfile.get(i);
+
+            if (current.getDynamicInfo().getAcceleration().compareTo(last.getDynamicInfo().getAcceleration()) != 0) {
+                final Orbit p = last.getDynamicInfo().getPosition();
+                series.add(p.getXCoordinate().getCoordinate(), p.getYCoordinate().getCoordinate());
+            }
+        }
+
+        if (!series.getItems().isEmpty()) {
+            dataset.addSeries(series);
+        }
+    }
+
+    private static void drawIntersectionPoint(@Nonnull final Maneuver maneuver, @Nonnull final XYSeriesCollection dataset) {
+        Preconditions.checkNotNull(maneuver, "maneuver must not be empty");
+        Preconditions.checkNotNull(dataset, "dataset must not be empty");
+
+        final Orbit intersectionPoint = maneuver.getIntersectionPoint();
+        if (intersectionPoint != null) {
+            final XYSeries intersect = new XYSeries("Intersection Point", false, true);
+            intersect.add(intersectionPoint.getXCoordinate().getCoordinate(), intersectionPoint.getYCoordinate().getCoordinate());
+            dataset.addSeries(intersect);
+        }
     }
 
     private static int setControlPoints(@Nonnull final String title,

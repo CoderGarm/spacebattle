@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import static de.yuga.spacebattle.backend.combat.enums.EMovementType.REDUCE_DISTANCE;
@@ -78,6 +79,12 @@ public abstract class Maneuver {
 
     @Nonnull
     private final ManeuverElements maneuverElements;
+
+    @Nullable
+    private Orbit intersectionPoint;
+
+    @Nonnull
+    private final List<AccelerationProfile> accelerationProfile = new ArrayList<>();
 
     protected Maneuver(@Nonnull final Cage cage,
                        @Nonnull final CombatRound start,
@@ -208,7 +215,7 @@ public abstract class Maneuver {
         final double totalLength = maneuverElements.getTotalLength();
         final Distance length = new Distance(totalLength, EDistanceMetric.KM);
 
-        final List<AccelerationProfile> motionProfiles = NavigationCalculator.createAccelerationProfile(agentsKinematicInitial, agentsKinematicDesignated, length, getAgentsTopSpeed());
+        final List<AccelerationProfile> accelerationProfile = NavigationCalculator.createAccelerationProfile(agentsKinematicInitial, agentsKinematicDesignated, length, getAgentsTopSpeed());
 
         /*
             Plan zur Bestimmung von Ort und Zeit zu bestimmter Kampfrunde
@@ -219,11 +226,11 @@ public abstract class Maneuver {
             2. Aus Beschleunigngsprofil die Streckenlänge definieren
          */
 
-        final CombatRound latestRound = Collections.max(motionProfiles).getCombatRound();
+        final CombatRound latestRound = Collections.max(accelerationProfile).getCombatRound();
         cage.logMessage("Maneuver for '" + getAgent().getOwner().getUsername() + "' with a total length of '" + totalLength + "' passed in '" + latestRound + "' rounds.");
 
-        motionProfiles.sort(AccelerationProfile::compareTo);
-        for (final AccelerationProfile motionProfile : motionProfiles) {
+        accelerationProfile.sort(AccelerationProfile::compareTo);
+        for (final AccelerationProfile motionProfile : accelerationProfile) {
 
             final DynamicInfo dynamicInfo = motionProfile.getDynamicInfo();
             final Velocity dynamicInfoVelocity = dynamicInfo.getVelocity();
@@ -234,16 +241,20 @@ public abstract class Maneuver {
             final ManeuverElement maneuverElement = maneuverElements.getManeuverForPart(percentOfTrack);
             final double[] pointAtLength = maneuverElement.getCurve().getPointAtLength(lengthOnTrack);
 
+            final Orbit position = new Orbit(pointAtLength, EDistanceMetric.KM);
+
             addCourseOrder(
                     motionProfile.getCombatRound().clone(),
                     maneuverElement,
                     new Distance(lengthOnTrack, EDistanceMetric.KM), // fixme can be distance directly - test it
                     REDUCE_DISTANCE,
                     dynamicInfoVelocity.clone(),
-                    new Orbit(pointAtLength, EDistanceMetric.KM)
+                    position
             );
+            motionProfile.getDynamicInfo().setPosition(position);
         }
 
+        addAccelerationProfile(accelerationProfile);
         setDesignatedEnd(latestRound);
         return this;
     }
@@ -299,5 +310,32 @@ public abstract class Maneuver {
 
         maneuverElements.withTransferManeuver(cubicBezier);
         return this;
+    }
+
+    @Nullable
+    public CombatRound getIntersectionTimeFor(@Nonnull final Orbit intersectionPoint) {
+        Preconditions.checkNotNull(intersectionPoint, "intersectionPoint must not be empty");
+
+        return Collections.min(courseOrderElements, Comparator.comparing(o -> o.getPosition().getDistance(intersectionPoint))).getCombatRound();
+    }
+
+    private void addAccelerationProfile(final List<AccelerationProfile> accelerationProfile) {
+        Preconditions.checkNotNull(accelerationProfile, "accelerationProfile must not be empty");
+
+        this.accelerationProfile.addAll(accelerationProfile);
+    }
+
+    @Nonnull
+    public List<AccelerationProfile> getAccelerationProfile() {
+        return accelerationProfile;
+    }
+
+    public void setIntersectionPoint(@Nullable final Orbit intersectionPoint) {
+        this.intersectionPoint = intersectionPoint;
+    }
+
+    @Nullable
+    public Orbit getIntersectionPoint() {
+        return intersectionPoint;
     }
 }

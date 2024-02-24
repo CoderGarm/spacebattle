@@ -22,6 +22,7 @@ import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -142,7 +143,10 @@ public class NavigationCalculator {
         Preconditions.checkNotNull(lengthOnCurve, "lengthOnCurve must not be empty");
         Preconditions.checkNotNull(topSpeed, "topSpeed must not be empty");
 
-        final Acceleration constantAcceleration = startConditions.getAcceleration();
+        Acceleration constantAcceleration = startConditions.getAcceleration();
+        final Double accelerationModifier = startConditions.getAccelerationModifier();
+
+        constantAcceleration = NavigationCalculator.applyAccelerationModifier(constantAcceleration, accelerationModifier);
 
         final Velocity startConditionsVelocity = startConditions.getVelocity();
         final Velocity endConditionsVelocity = endConditions.getVelocity();
@@ -150,7 +154,7 @@ public class NavigationCalculator {
         final Distance toDecelerate = lengthOnCurve.subtract(toAccelerate);
 
         final Time timeToAccelerate = toAccelerate.calculateTimeToPass(constantAcceleration);
-        final Time timeToAccelerate1 = toAccelerate.calculateTimeToPass(constantAcceleration, topSpeed); // todo sharpen the acceleration profile in the name of Newton
+        final Time timeToAccelerate1 = toAccelerate.calculateTimeToPass(constantAcceleration, topSpeed); // todo sharpen the acceleration profile in the name of Newton, it doesn't respect the speed of light
         final Time timeToDecelerate = toDecelerate.calculateTimeToPass(constantAcceleration);
 
         final List<AccelerationProfile> result = createAccelerationProfile(new CombatRound(), topSpeed, timeToAccelerate, constantAcceleration, startConditionsVelocity, Distance.ZERO);
@@ -206,7 +210,9 @@ public class NavigationCalculator {
             final Velocity velocityAtRoundBeginning = getVelocityRespectSpeedLimit(speedLimit, constantAcceleration, initialVelocity, time.subtract(CombatRound.COMBAT_ROUND), isBraking);
             distance = distance.getByVelocityAndConstantAccelerationOverTime(constantAcceleration, velocityAtRoundBeginning, CombatRound.COMBAT_ROUND);
 
-            result.add(new AccelerationProfile(round.clone(), constantAcceleration, velocityAtRoundEnd, distance));
+            final Acceleration effectiveAcceleration = new Acceleration(velocityAtRoundBeginning, velocityAtRoundEnd, CombatRound.COMBAT_ROUND);
+
+            result.add(new AccelerationProfile(round.clone(), effectiveAcceleration, velocityAtRoundEnd, distance));
             round.next();
         }
         return result;
@@ -251,7 +257,9 @@ public class NavigationCalculator {
     }
 
     @Nonnull
-    private static Distance calculateDistanceToAccelerate(@Nonnull final Velocity startVelocity, @Nonnull final Velocity designatedVelocity, @Nonnull final Distance distance) {
+    private static Distance calculateDistanceToAccelerate(@Nonnull final Velocity startVelocity,
+                                                          @Nonnull final Velocity designatedVelocity,
+                                                          @Nonnull final Distance distance) {
         Preconditions.checkNotNull(startVelocity, "startVelocity must not be empty");
         Preconditions.checkNotNull(designatedVelocity, "designatedVelocity must not be empty");
         Preconditions.checkNotNull(distance, "distance must not be empty");
@@ -262,6 +270,25 @@ public class NavigationCalculator {
         }
 
         // value is normalized due same metrics and only needed as scalar here
-        return distance.divide(startVelocity.divide(designatedVelocity).getValue().longValue());
+        return distance.divide(startVelocity.divide(designatedVelocity).getValue().doubleValue());
+    }
+
+    /**
+     * The acceleration modifier adapts the acceleration of the second course to match the first.
+     * fixme please change the course instead - but this is hairy
+     */
+    @Nonnull
+    public static Acceleration applyAccelerationModifier(@Nonnull final Acceleration acceleration, @Nullable final Double accelerationModifier) {
+        Preconditions.checkNotNull(acceleration, "acceleration must not be empty");
+
+        if (accelerationModifier == null) {
+            return acceleration;
+        }
+        final double absRelMod = Math.sqrt(Math.abs(accelerationModifier));
+        final Acceleration absMod = acceleration.multiply(absRelMod);
+        if (accelerationModifier < 0) {
+            return acceleration.add(absMod);
+        }
+        return acceleration.subtract(absMod);
     }
 }

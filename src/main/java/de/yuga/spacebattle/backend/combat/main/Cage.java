@@ -233,26 +233,25 @@ public class Cage implements Future<Cage> {
     @VisibleForTesting
     protected void executeCombatRound() {
         final CombatRound currentCombatRound = getCurrentCombatRound();
+
         battleLogger.init(currentCombatRound);
-        battleLogger.logMessage("#" + currentCombatRound + " new round " + Calendar.getInstance(Locale.GERMANY).getTime());
+        logMessage("#" + currentCombatRound + " new round " + Calendar.getInstance(Locale.GERMANY).getTime());
+
         long start = System.currentTimeMillis();
         combatHandler.handleMovementPhase();
-        long end = System.currentTimeMillis();
-        battleLogger.logMessage("movement", start, end);
-        start = System.currentTimeMillis();
-        combatHandler.handleMissilePhase();
-        end = System.currentTimeMillis();
-        battleLogger.logMessage("missile", start, end);
-        start = System.currentTimeMillis();
-        combatHandler.handleIncomingWeaponFirePhase();
-        end = System.currentTimeMillis();
-        battleLogger.logMessage("incoming fire", start, end);
-        start = System.currentTimeMillis();
-        combatHandler.handleFireWeaponPhase(); // fixme Missile movements must be handled by maneuvers, too. They must be targeted to the estimated position of a fleet to a given time.
-        end = System.currentTimeMillis();
-        battleLogger.logMessage("fire weapon", start, end);
+        logMessage("movement", start, start);
 
         start = System.currentTimeMillis();
+        combatHandler.handleMissilePhase();
+        logMessage("missile", start, start);
+
+        start = System.currentTimeMillis();
+        combatHandler.handleIncomingWeaponFirePhase();
+        logMessage("incoming fire", start, start);
+
+        start = System.currentTimeMillis();
+        combatHandler.handleFireWeaponPhase(); // fixme Missile movements must be handled by maneuvers, too. They must be targeted to the estimated position of a fleet to a given time.
+        logMessage("fire weapon", start, start);
 
         /* fixme implement forced battle end at condition
          */
@@ -262,10 +261,10 @@ public class Cage implements Future<Cage> {
             forceDone = true;
         }
 
+        start = System.currentTimeMillis();
         prepareNextCombatRound();
 
-        end = System.currentTimeMillis();
-        battleLogger.logMessage("tidy up", start, end);
+        logMessage("tidy up", start, start);
         battleLogger.closeRound();
     }
 
@@ -466,6 +465,12 @@ public class Cage implements Future<Cage> {
     @Nonnull
     public BattleResult getBattleResult() {
         return new BattleResult(this);
+    }
+
+    public void logMessage(@Nonnull final String msg, @Nullable final Long start, @Nullable final Long end) {
+        Preconditions.checkNotNull(msg, "msg must not be empty");
+
+        battleLogger.logMessage(msg, start, end);
     }
 
     public void logMessage(@Nonnull final String msg) {

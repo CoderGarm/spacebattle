@@ -301,7 +301,7 @@ public class BattleReport extends AbstractEntityKey {
 
         for (final de.yuga.spacebattle.backend.combat.dto.MovementAction movementAction : movementActions) {
             final Fleet actor = movementAction.getActor();
-            final AuraState auraState = auraStates.stream().filter(a -> a.getActor().equals(actor)).findFirst().orElseThrow();
+            final AuraState auraState = auraStates.stream().filter(a -> a.getActor().equals(actor)).findFirst().orElseThrow(); // fixme aura states are constant
             this.movementActions.add(new de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction(maneuvers.get(movementAction.getManeuver()), movementAction, auraState));
         }
     }

@@ -81,6 +81,22 @@ public class Acceleration implements Cloneable, Comparable<Acceleration> {
         this.hyperBand = hyperBand;
     }
 
+    public Acceleration(@Nonnull final Velocity velocityStart, @Nonnull final Velocity velocityEnd, @Nonnull final Time time) {
+        Preconditions.checkNotNull(velocityStart, "velocityStart must not be empty");
+        Preconditions.checkNotNull(velocityEnd, "velocityEnd must not be empty");
+        Preconditions.checkNotNull(time, "time must not be empty");
+
+        // a = v/t
+
+        final Velocity diff = velocityEnd.subtract(velocityStart);
+        final BigDecimal v = diff.getCoordinateInMetric(EDistanceMetric.M, ETimeMetric.SECOND);
+        final BigDecimal t = time.getCoordinateInMetric(ETimeMetric.SECOND);
+
+        this.value = v.divide(t, MC_HU);
+        this.accelerationMetric = EAccelerationMetric.MS2;
+        this.hyperBand = EHyperBand.NONE;
+    }
+
     @Nonnull
     @JsonIgnore
     public static Acceleration getFromString(@Nonnull final String fromDb) {
