@@ -116,8 +116,13 @@ public class FleetRoundState {
     }
 
     @Nonnull
+    public Cage getCage() {
+        return cage;
+    }
+
+    @Nonnull
     public Velocity getVelocity() {
-        return coursePlot.getAgentsVelocity();
+        return coursePlot.getCurrentVelocity();
     }
 
     @Nonnull

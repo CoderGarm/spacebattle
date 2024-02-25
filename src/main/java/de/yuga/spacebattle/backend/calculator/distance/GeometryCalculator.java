@@ -99,12 +99,30 @@ public class GeometryCalculator {
         final Map<Double, Orbit> pointsC1 = new HashMap<>();
         final Map<Double, Orbit> pointsC2 = new HashMap<>();
 
+
         for (double t = 0; t <= 1; t += 0.001) {
             pointsC1.put(t, new Orbit(c1.getPointAtParameter(t), EDistanceMetric.KM));
             pointsC2.put(t, new Orbit(c2.getPointAtParameter(t), EDistanceMetric.KM));
         }
 
-        // fixme improve code - way too long with 5 sec
+        /* fixme cam be improved by newtons approach - start in the middle and go out. following code is other ways around: start an both ends and go inwards - but buggy somehow
+        final double step = 0.001;
+        double t = 0.5;
+        double iterator = t / step;
+        while (iterator > 0) {
+
+            final double upParam = t + (iterator * step);
+            final double downParam = t - (iterator * step);
+
+            pointsC1.put(upParam, new Orbit(c1.getPointAtParameter(upParam), EDistanceMetric.KM));
+            pointsC2.put(upParam, new Orbit(c2.getPointAtParameter(upParam), EDistanceMetric.KM));
+
+            pointsC1.put(downParam, new Orbit(c1.getPointAtParameter(downParam), EDistanceMetric.KM));
+            pointsC2.put(downParam, new Orbit(c2.getPointAtParameter(downParam), EDistanceMetric.KM));
+
+            iterator--;
+        }
+        */
 
         Distance referenceDistance = null;
         Orbit closest = null;

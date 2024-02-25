@@ -72,7 +72,7 @@ todo. email for chat- and forum-messages
 
 #### next steps
 
-todo. forfeitable construction punkte in DB merken zwecks schnellerem dashboard
+todo. trades werden nicht gutgeschrieben
 todo. carrier menu planetengebäude und mining factors
 todo. plani menu anzeiigen ob SY oder CY job möglich
 todo. flottenenmove auf map: zielplani direkt festlegen

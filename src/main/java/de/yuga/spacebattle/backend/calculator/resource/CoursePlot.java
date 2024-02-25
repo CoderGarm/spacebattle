@@ -47,28 +47,7 @@ public class CoursePlot {
     private final Fleet target;
 
     @Nonnull
-    private final CombatRound startingRound; // fixme replace by round of last course element or similar
-
-    @Nonnull
-    private Velocity agentsVelocity; // fixme replace all by course order elements
-
-    @Nonnull
-    private Direction agentsDirection; // fixme replace all by course order elements
-
-    @Nonnull
-    private EMovementMotivation movementMotivation = EMovementMotivation.ESCAPE_MOVEMENT;
-
-    @Nonnull
-    private Orbit origin; // fixme replace all by course order elements
-
-    @Nullable
-    private Orbit destination; // fixme replace all by course order elements
-
-    @Nullable
-    private Direction courseDirection; // fixme replace all by course order elements
-
-    @Nonnull
-    private final List<CourseOrderElement> courseOrderElements = new ArrayList<>(); // replace by coe of maneuver
+    private final EMovementMotivation movementMotivation = EMovementMotivation.INITIATE_COMBAT; // fixme hmm yeah
 
     @Nonnull
     private final Map<Fleet, FleetDamageProjectionPerRange> fleetDamages = new HashMap<>();
@@ -76,35 +55,17 @@ public class CoursePlot {
     @Nullable
     private Maneuver maneuver;
 
+    @Nonnull
+    private final Orbit origin;
+
     public CoursePlot(@Nonnull final Cage cage,
                       @Nonnull final Fleet agent,
                       @Nonnull final Orbit position) {
-        Preconditions.checkNotNull(cage, "cage shouldn't be null!");
-        Preconditions.checkNotNull(agent, "agent shouldn't be null!");
-        Preconditions.checkNotNull(position, "position shouldn't be null!");
+        this.cage = Preconditions.checkNotNull(cage, "cage shouldn't be null!");
+        this.agent = Preconditions.checkNotNull(agent, "agent shouldn't be null!");
+        this.origin = Preconditions.checkNotNull(position, "position shouldn't be null!");
 
-        this.cage = cage;
-        this.agent = agent;
         this.target = cage.getParticipatingFleets().stream().filter(f -> !f.equals(agent)).findFirst().orElseThrow(() -> new NotifyWebUserException("No opponent found"));
-        this.startingRound = cage.getCurrentCombatRound().clone();
-        this.agentsVelocity = Velocity.ZERO;
-        this.agentsDirection = Direction.ZERO;
-        this.origin = position.clone();
-    }
-
-    private void setInformationForCreatingPlot(@Nonnull final Orbit agentsOrigin,
-                                               @Nonnull final Orbit destination,
-                                               @Nonnull final EMovementMotivation movementMotivation) {
-        Preconditions.checkNotNull(agentsOrigin, "agentsOrigin must not be empty");
-        Preconditions.checkNotNull(destination, "destination shouldn't be null!");
-        Preconditions.checkNotNull(movementMotivation, "movementMotivation shouldn't be null!");
-
-        this.agentsVelocity = getCurrentVelocity();
-        this.agentsDirection = getCurrentDirection();
-        this.origin = agentsOrigin;
-        this.destination = destination;
-        this.courseDirection = new Direction(agentsOrigin, destination);
-        this.movementMotivation = movementMotivation;
     }
 
     public void createEscapeCourse() {
@@ -127,12 +88,6 @@ public class CoursePlot {
 
         final Distance distanceByTime = acceleration.getDistanceByTime(COMBAT_ROUND, resultingVelocity, EDistanceMetric.LS);
         final Orbit destination = agentsPosition.getDestinationBy(distanceByTime, direction);
-
-        this.agentsVelocity = resultingVelocity;
-        this.agentsDirection = direction;
-        this.origin = agentsPosition;
-        this.destination = targetsPosition;
-        this.courseDirection = direction;
 
         // flee for 50 rounds
         setCourseOrderElements(agentsPosition, destination, INCREASE_DISTANCE, velocity, acceleration, COMBAT_ROUND.multiply(50).getCoordinate());
@@ -167,80 +122,21 @@ public class CoursePlot {
 
         final EMovementType movementType = detectMovementType(distance);
 
-
     }
 
-    public void createNextCourseElement() { // fixme spezifizieren
-
-        final FleetRoundState agentsState = cage.getCurrentStateByFleet(agent);
-        final Orbit agentsPosition = agentsState.getPosition();
-
-        final FleetRoundState targetsState = cage.getCurrentStateByFleet(target);
-        final Orbit targetsPosition = targetsState.getPosition();
-
-        final Distance distance = agentsPosition.getDistance(targetsPosition);
-
-        final EMovementType movementType = detectMovementType(distance);
-        final Velocity velocity = agentsState.getVelocity();
-        final Acceleration acceleration = agentsState.getAccelerationFor(EModuleType.PROPULSION);
-
-        Velocity resultingVelocity;
-        switch (movementType) {
-            case EVASION_MOVEMENT:
-            case INCREASE_DISTANCE:
-                this.agentsDirection = new Direction(targetsPosition, agentsPosition);
-                final Acceleration negate = acceleration.negate();
-                resultingVelocity = velocity.getVelocityByAcceleration(negate, COMBAT_ROUND);
-                break;
-            case IMPELLER_WEDGE_PROTECTION:
-            case OFFENSIVE_ROLL:
-            case HOLD_DISTANCE:
-                this.agentsDirection = Direction.clockWiseHoldRadius(agentsPosition, targetsPosition);
-                resultingVelocity = velocity;
-                break;
-            default:
-            case REDUCE_DISTANCE:
-                this.agentsDirection = new Direction(agentsPosition, targetsPosition);
-                resultingVelocity = velocity.getVelocityByAcceleration(acceleration, COMBAT_ROUND);
-                break;
-        }
-        if (hasViolatedTopSpeed(resultingVelocity)) {
-            resultingVelocity = getAgentsTopSpeed();
-        }
-
-        final Distance distanceByTime = acceleration.getDistanceByTime(COMBAT_ROUND, resultingVelocity, EDistanceMetric.LS);
-        final Orbit destination = agentsPosition.getDestinationBy(distanceByTime, this.agentsDirection);
-
-        this.agentsVelocity = resultingVelocity;
-        this.origin = agentsPosition;
-        this.destination = targetsPosition;
-        this.courseDirection = this.agentsDirection;
-
-        final CombatRound cc = cage.getCurrentCombatRound().clone();
-        cc.next();
-        // fixme is maneuver creation addCourseOrder(cc, movementType, resultingVelocity, destination);
-    }
 
     public void createAggressiveCourse() {
-        final Orbit origin = cage.getCurrentStateByFleet(cage.getAggressor()).getPosition();
-        final Orbit destination = cage.getTarget().getOrbit();
 
-        setInformationForCreatingPlot(origin, destination, EMovementMotivation.INITIATE_COMBAT);
         maneuver = new ManeuverFactory(cage).createInitial();
         cage.attachToChart(cage.getAggressor().getOwner(), maneuver);
-        courseOrderElements.addAll(maneuver.getCourseOrderElements());
     }
 
     public void createDefensiveCourse() {
-        final Orbit origin = cage.getTarget().getOrbit();
-        final Orbit destination = cage.getCurrentStateByFleet(cage.getAggressor()).getPosition();
 
-        setInformationForCreatingPlot(origin, destination, EMovementMotivation.INITIATE_COMBAT);
         final Maneuver aggressiveManeuver = cage.getCurrentStateByFleet(cage.getAggressor()).getCoursePlot().getManeuver();
         Preconditions.checkNotNull(aggressiveManeuver, "aggressiveManeuver must not be empty");
         maneuver = new ManeuverFactory(cage).createInitialResponseManeuver(aggressiveManeuver);
         cage.attachToChart(cage.getDefender().getOwner(), maneuver);
-        courseOrderElements.addAll(maneuver.getCourseOrderElements());
     }
 
     /**
@@ -533,38 +429,51 @@ public class CoursePlot {
     public CourseOrderElement getCourseElement(@Nonnull final CombatRound combatRound) {
         Preconditions.checkNotNull(combatRound, "combatRound shouldn't be null!");
 
-        return courseOrderElements.stream().filter(elem -> elem.getCombatRound().equals(combatRound)).findFirst().orElse(null);
+        if (maneuver == null) {
+            return null;
+        }
+        return maneuver.getCourseOrderElements().stream().filter(elem -> elem.getCombatRound().equals(combatRound)).findFirst().orElse(null);
     }
 
     @Nonnull
     public Velocity getCurrentVelocity() {
         final CombatRound currentCombatRound = cage.getCurrentCombatRound();
         final CourseOrderElement courseElement = getCourseElement(currentCombatRound);
-        return courseElement != null ? courseElement.getVelocity() : agentsVelocity;
+
+        if (courseElement == null) {
+            return Velocity.ZERO.clone();
+        }
+        return courseElement.getVelocity();
     }
 
     @Nonnull
     public Direction getCurrentDirection() {
-        if (courseOrderElements.size() < 2) {
-            return agentsDirection;
+
+        if (maneuver == null) {
+            final Orbit destination = cage.getCurrentStateByFleet(target).getCoursePlot().getOrigin();
+            return new Direction(origin, destination);
         }
-        assert courseDirection != null : "If there are course elements then there is a direction, too";
-        return courseDirection;
+
+        final CombatRound currentCombatRound = cage.getCurrentCombatRound();
+        final CourseOrderElement courseElement = getCourseElement(currentCombatRound);
+        Preconditions.checkNotNull(courseElement, "courseElement must not be empty");
+
+        final CombatRound previousRound = currentCombatRound.clone();
+        previousRound.previous();
+        final CourseOrderElement last = getCourseElement(previousRound);
+
+        if (last == null) {
+            final CourseOrderElement targetCourseElement = cage.getCurrentStateByFleet(target).getCoursePlot().getCourseElement(currentCombatRound);
+            Preconditions.checkNotNull(targetCourseElement, "targetCourseElement must not be empty");
+            return new Direction(courseElement.getPosition(), targetCourseElement.getPosition());
+        }
+
+        return new Direction(last.getPosition(), courseElement.getPosition());
     }
 
     @Nonnull
     public Fleet getAgent() {
         return agent;
-    }
-
-    @Nonnull
-    public Velocity getAgentsVelocity() {
-        return agentsVelocity;
-    }
-
-    @Nonnull
-    public Direction getAgentsDirection() {
-        return agentsDirection;
     }
 
     @Nonnull
@@ -576,17 +485,6 @@ public class CoursePlot {
     public Orbit getOrigin() {
         return origin;
     }
-
-    @Nullable
-    public Orbit getDestination() {
-        return destination;
-    }
-
-    @Nonnull
-    public List<CourseOrderElement> getCourseOrderElements() {
-        return courseOrderElements;
-    }
-
 
     @Nonnull
     public Maneuver getManeuver() {
@@ -600,7 +498,10 @@ public class CoursePlot {
      * <code>false</code> if there are at least one order left for the next round
      */
     public boolean hasPlotExceeded() {
-        final boolean courseElementsLeftForFuture = courseOrderElements.stream().anyMatch(el -> !el.isCourseOrderExecuted());
+        if (maneuver == null) {
+            return true;
+        }
+        final boolean courseElementsLeftForFuture = maneuver.getCourseOrderElements().stream().anyMatch(el -> !el.isCourseOrderExecuted());
         return !courseElementsLeftForFuture;
     }
 
@@ -610,7 +511,7 @@ public class CoursePlot {
      * @return <code>true</code> if there are no course elements known, <code>false</code> otherwise
      */
     public boolean isFreshPlotWithoutAnyMovement() {
-        return courseOrderElements.isEmpty();
+        return getManeuver().getCourseOrderElements().isEmpty();
     }
 
     /**
@@ -626,6 +527,6 @@ public class CoursePlot {
 
     public void clearFutureCourseElements() {
         final CombatRound currentCombatRound = cage.getCurrentCombatRound();
-        courseOrderElements.removeIf(e -> !e.isCourseOrderExecuted() && e.getCombatRound().compareTo(currentCombatRound) > 0);
+        getManeuver().getCourseOrderElements().removeIf(e -> !e.isCourseOrderExecuted() && e.getCombatRound().compareTo(currentCombatRound) > 0);
     }
 }

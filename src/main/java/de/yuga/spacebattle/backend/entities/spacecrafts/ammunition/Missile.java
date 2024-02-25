@@ -101,7 +101,7 @@ public class Missile extends HasCostsByOwn {
     /**
      * Returns the range over the complete endurance.
      *
-     * @return the distance which will be covered under drive, in meter
+     * @return the distance which will be covered under drive
      */
     @Nonnull
     public Distance getMaximumMissileRange() {
@@ -112,6 +112,26 @@ public class Missile extends HasCostsByOwn {
         final int endurance = missileMotor.getEndurance();
         final Acceleration acceleration = missileMotor.getAcceleration();
         maxRange = acceleration.getDistanceByTime(new Time(endurance, ETimeMetric.SECOND), Velocity.ZERO, EDistanceMetric.LS);
+        return maxRange;
+    }
+
+    /**
+     * Returns the range over the complete endurance.<br>
+     * The base velocity must be the resulting velocity towards the target.
+     *
+     * @return the distance which will be covered under drive
+     */
+    @Nonnull
+    public Distance getMaximumMissileRange(@Nonnull final Velocity baseVelocity) {
+        Preconditions.checkNotNull(baseVelocity, "baseVelocity must not be empty");
+
+        if (maxRange != null) {
+            return maxRange;
+        }
+
+        final int endurance = missileMotor.getEndurance();
+        final Acceleration acceleration = missileMotor.getAcceleration();
+        maxRange = acceleration.getDistanceByTime(new Time(endurance, ETimeMetric.SECOND), baseVelocity, EDistanceMetric.LS);
         return maxRange;
     }
 
@@ -128,28 +148,44 @@ public class Missile extends HasCostsByOwn {
         Preconditions.checkNotNull(actorsState, "actorsState must not be empty");
         Preconditions.checkNotNull(targetsState, "targetsState must not be empty");
 
+
+        /*
+            reichweite besteht aus
+
+                1. reichweite = endurance und beschleuniung
+                2. geschwindigkeitsvektor der plattform
+                3. geschwindigkeitvektor des ziels
+
+                - geschwindigkeitsvektoren zerlegen → geschwindigkeitsskalar in resultierende richtung
+                - effektive reichweite = geschwindigkeitsskalar + reichweite
+         */
+
+        final Velocity velocity = actorsState.getVelocity();
         final Direction actorsDirection = actorsState.getDirection();
         final Direction targetsDirection = targetsState.getDirection();
+
         final double angleBetween = actorsDirection.getAngleBetween(targetsDirection); // todo unbedingt abtesten
         final double cos = Math.cos(Math.toRadians(angleBetween));
 
-        final Velocity velocity = actorsState.getVelocity();
         final BigDecimal c = velocity.getValue();
         final BigDecimal b = targetsState.getVelocity().getCoordinateInMetric(velocity.getDistanceMetric(), velocity.getTimeMetric());
 
         // KOSINUSSATZ
-        final BigDecimal vectorVelocity = b.pow(2).add(c.pow(2)).subtract(BigDecimal.valueOf(2).multiply(b).multiply(c).multiply(BigDecimal.valueOf(cos))).sqrt(DistanceCalculator.MC_HU);
-        final BigDecimal combinedFleetsVelocity = new Velocity(vectorVelocity, velocity.getDistanceMetric(), velocity.getTimeMetric()).getCoordinateInMetric(EDistanceMetric.KM, ETimeMetric.SECOND);
+        final BigDecimal vectorVelocity = b.pow(2)
+                .add(c.pow(2))
+                .subtract(BigDecimal.valueOf(2)
+                        .multiply(b)
+                        .multiply(c)
+                        .multiply(BigDecimal.valueOf(cos)))
+                .sqrt(DistanceCalculator.MC_HU);
+        final Velocity resultingVelocity = new Velocity(vectorVelocity, velocity.getDistanceMetric(), velocity.getTimeMetric());
 
+        final Distance missileRange = getMaximumMissileRange(resultingVelocity);
 
-        final int endurance = missileMotor.getEndurance();
-        final Distance distanceByFleetsMovement = new Distance(combinedFleetsVelocity.multiply(BigDecimal.valueOf(endurance)), EDistanceMetric.KM);
-
-        final Distance missileRange = getMaximumMissileRange();
+        //actorsState.getCage().logMessage("MISSILE RANGE CALC: combined fleet velocity '" + resultingVelocity + "' KM/S on angle '" + angleBetween + "' with missile range of '" + missileRange + "'.");
 
         // todo create segmented information: 'range under drive' with 'additional range by base movements'
-        //  System.out.println("MISSILE RANGE CALC: combined fleet velocity '" + combinedFleetsVelocity + "' KM/S on angle '" + angleBetween + "' added '" + distanceByFleetsMovement + "' to missile range of '" + missileRange + "'.");
 
-        return distanceByFleetsMovement.add(missileRange);
+        return missileRange;
     }
 }

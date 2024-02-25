@@ -74,7 +74,7 @@ public class CombatHandler {
 
         final Orbit aggroPos = cage.getCurrentStateByFleet(cage.getAggressor()).getPosition();
         final Orbit defPos = cage.getCurrentStateByFleet(cage.getDefender()).getPosition();
-        cage.logMessage("#" + currentCombatRound.getNo() + "\t\t - " + aggroPos.getDistance(defPos).getCoordinateInMetric(LS) + " LS");
+        cage.logMessage("#" + currentCombatRound.getNo() + "\t\t - " + aggroPos.getDistance(defPos).getCoordinateInMetric(LS) + " LS"); // fixme distance seems to be wrong
     }
 
     private void endCombatByExceededPlot() {
@@ -103,10 +103,9 @@ public class CombatHandler {
 
         final CoursePlot aggressorsCoursePlot = aggressorsState.getCoursePlot();
         final CoursePlot defendersCoursePlot = defendersState.getCoursePlot();
-        final boolean creatingCoursePlotNeeded = aggressorsCoursePlot.isFreshPlotWithoutAnyMovement();
-        final boolean hasPlotToBeRepainted = aggressorsCoursePlot.hasPlotExceeded();
+
         final boolean ableToAttack = aggressorsState.isAbleToAttack();
-        if (!ableToAttack && (creatingCoursePlotNeeded || hasPlotToBeRepainted || cage.isActionHappened())) { // fixme auslagern und voran stellen
+        if (!ableToAttack) { // fixme auslagern und voran stellen
             // actor has no weapons
             aggressorsCoursePlot.createEscapeCourse();
             return;

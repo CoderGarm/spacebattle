@@ -174,20 +174,32 @@ public class Direction implements Cloneable {
         Preconditions.checkNotNull(that, "that shouldn't be null!");
 
         // fixme unittest schreiben
-        if (isNullDirection() || that.isNullDirection()) {
-            // if one or both are "not defined" they have no clear choice, it is handled always as wildcard
-            return Double.NEGATIVE_INFINITY;
-        }
+
         // calculate scalar product
-        final BigDecimal scalar = xCoordinate.multiply(that.getXCoordinate()).add(yCoordinate.multiply(that.getYCoordinate()));
+        final BigDecimal x1 = epsilonOrValue(xCoordinate);
+        final BigDecimal y1 = epsilonOrValue(yCoordinate);
+        final BigDecimal x2 = epsilonOrValue(that.getXCoordinate());
+        final BigDecimal y2 = epsilonOrValue(that.getYCoordinate());
+
+        final BigDecimal scalar = x1.multiply(x2).add(y1.multiply(y2));
         // calculate quantities of the vectors
-        final BigDecimal thisQuantity = xCoordinate.pow(2).add(yCoordinate.pow(2)).sqrt(MC_HU);
-        final BigDecimal thatQuantity = that.getXCoordinate().pow(2).add(that.getYCoordinate().pow(2)).sqrt(MC_HU);
+        final BigDecimal thisQuantity = x1.pow(2).add(y1.pow(2)).sqrt(MC_HU);
+        final BigDecimal thatQuantity = x2.pow(2).add(y2.pow(2)).sqrt(MC_HU);
         // calculate cosines of angle
         final BigDecimal multiply = thisQuantity.multiply(thatQuantity);
         final BigDecimal cosinesOfPhi = scalar.divide(multiply, MC_HU);
         final double acos = Math.acos(cosinesOfPhi.doubleValue());
         return Math.toDegrees(acos);
+    }
+
+    @Nonnull
+    private BigDecimal epsilonOrValue(@Nonnull final BigDecimal value) {
+        Preconditions.checkNotNull(value, "value must not be empty");
+
+        if (value.equals(BigDecimal.ZERO)) {
+            return new BigDecimal("0.000001");
+        }
+        return value;
     }
 
     /**

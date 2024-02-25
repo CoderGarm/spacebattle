@@ -159,12 +159,17 @@ public class Cage implements Future<Cage> {
 
     @Override
     public boolean isDone() {
+
+        if (getCurrentCombatRound().getNo() == 1) {
+            // first round - just proceed
+            return false;
+        }
+
         final boolean isDone;
         if (forceDone) {
             battleLogger.logMessagePlain("forced battle end");
             isDone = true;
         } else {
-
 
             final List<FleetRoundState> currentRoundStates = participatingFleets.stream().map(this::getCurrentStateByFleet).collect(Collectors.toList());
             final List<Boolean> isFightingCapableStates = currentRoundStates.stream().map(FleetRoundState::getFleetHealthState).map(FleetHealthState::isFightingCapable).collect(Collectors.toList());

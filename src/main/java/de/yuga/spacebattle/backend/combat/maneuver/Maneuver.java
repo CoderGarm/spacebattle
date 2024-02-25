@@ -236,7 +236,11 @@ public abstract class Maneuver {
             final Velocity dynamicInfoVelocity = dynamicInfo.getVelocity();
             final Distance distance = dynamicInfo.getDistance().getInMetricWithScale(EDistanceMetric.KM);
 
-            final double percentOfTrack = (distance.divide(length)).multiply(100).getCoordinate().doubleValue();
+            double percentOfTrack = (distance.divide(length)).multiply(100).getCoordinate().doubleValue();
+
+            // small ugly fix due the fact that you can not accelerate shorter than a combat round
+            percentOfTrack = Double.min(100, percentOfTrack);
+
             final double lengthOnTrack = totalLength * percentOfTrack / 100;
             final ManeuverElement maneuverElement = maneuverElements.getManeuverForPart(percentOfTrack);
             final double[] pointAtLength = maneuverElement.getCurve().getPointAtLength(lengthOnTrack);

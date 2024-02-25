@@ -43,8 +43,6 @@ public class AuraState {
 
         alignedAuraStates.putAll(Arrays.stream(EWeaponAlignment.values()).collect(Collectors.toMap(ewa -> ewa, AlignedAuraState::new)));
 
-        // fixme aura states must be circle
-
         final boolean isFirstRound = this.combatRound.getNo() == 1;
         final Fleet opponent = cage.getParticipatingFleets().stream().filter(f -> !f.equals(actor)).findFirst().orElseThrow();
         final FleetRoundState opponentsState = isFirstRound ? null : cage.getCurrentStateByFleet(opponent);
@@ -61,7 +59,6 @@ public class AuraState {
                 if (launcher != null) {
                     final Distance missileRange = launcher.getAllowedMissiles().stream()
                             .filter(missileAmmunitionState::hasShotsLeft)
-                            // fixme make it direction dependant
                             .map(m -> opponentsState != null ? m.getMaximumMissileRange(actorsRoundState, opponentsState) : m.getMaximumMissileRange())
                             .reduce((o1, o2) -> o1.compareTo(o2) < 0 ? o1 : o2)
                             .orElse(null);

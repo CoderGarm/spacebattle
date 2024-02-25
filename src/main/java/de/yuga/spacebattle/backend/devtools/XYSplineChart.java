@@ -64,6 +64,7 @@ public class XYSplineChart extends ApplicationFrame /* todo JFrame wenn listener
         addPlanetaryOrbit(planetaryOrbit, dataset);
 
         final Set<Integer> helpSeriesIndices = new HashSet<>();
+        final Set<Integer> mainSeriesIndices = new HashSet<>();
         for (final Owner owner : maneuvers.keySet()) {
             final Maneuver maneuver = maneuvers.get(owner);
             final ManeuverElements maneuverElements = maneuver.getCourseItems();
@@ -89,15 +90,20 @@ public class XYSplineChart extends ApplicationFrame /* todo JFrame wenn listener
                     i = j;
                 }
             }
-            dataset.addSeries(series);
+            mainSeriesIndices.add(setSeries(dataset, series));
             drawIntersectionPoint(maneuver, dataset);
             drawThrustReversalPoints(maneuver, dataset);
         }
 
-        final ChartPanel chartPanel = createPanel(dataset, helpSeriesIndices);
+        final ChartPanel chartPanel = createPanel(dataset, mainSeriesIndices, helpSeriesIndices);
         chartPanel.setPreferredSize(new Dimension(900, 900));
         setContentPane(chartPanel);
         return chartPanel;
+    }
+
+    private static int setSeries(final XYSeriesCollection dataset, final XYSeries series) {
+        dataset.addSeries(series);
+        return dataset.indexOf(series);
     }
 
     private static void drawThrustReversalPoints(@Nonnull final Maneuver maneuver, @Nonnull final XYSeriesCollection dataset) {
@@ -146,8 +152,7 @@ public class XYSplineChart extends ApplicationFrame /* todo JFrame wenn listener
         series.add(bezier.getCp1()[0], bezier.getCp1()[1]);
         series.add(bezier.getCp2()[0], bezier.getCp2()[1]);
         series.add(bezier.getP2()[0], bezier.getP2()[1]);
-        dataset.addSeries(series);
-        return dataset.indexOf(series);
+        return setSeries(dataset, series);
     }
 
 
@@ -164,15 +169,27 @@ public class XYSplineChart extends ApplicationFrame /* todo JFrame wenn listener
         dataset.addSeries(planet);
     }
 
-    /**
-     * Creates a chart.
-     *
-     * @param dataset a dataset.
-     * @return A chart.
-     */
     @Nonnull
-    private static JFreeChart createChart(@Nonnull final XYDataset dataset, @Nonnull final Set<Integer> helpSeriesIndices) {
+    public static ChartPanel createPanel(@Nonnull final XYDataset dataset,
+                                         @Nonnull final Set<Integer> mainSeriesIndices,
+                                         @Nonnull final Set<Integer> helpSeriesIndices) {
         Preconditions.checkNotNull(dataset, "dataset must not be empty");
+        Preconditions.checkNotNull(mainSeriesIndices, "mainSeriesIndices must not be empty");
+        Preconditions.checkNotNull(helpSeriesIndices, "helpSeriesIndices must not be empty");
+
+        final JFreeChart chart = createChart(dataset, mainSeriesIndices, helpSeriesIndices);
+        final ChartPanel panel = new ChartPanel(chart, false);
+        panel.setFillZoomRectangle(true);
+        panel.setMouseWheelEnabled(true);
+        return panel;
+    }
+
+    @Nonnull
+    private static JFreeChart createChart(@Nonnull final XYDataset dataset,
+                                          @Nonnull final Set<Integer> mainSeriesIndices,
+                                          @Nonnull final Set<Integer> helpSeriesIndices) {
+        Preconditions.checkNotNull(dataset, "dataset must not be empty");
+        Preconditions.checkNotNull(mainSeriesIndices, "mainSeriesIndices must not be empty");
         Preconditions.checkNotNull(helpSeriesIndices, "helpSeriesIndices must not be empty");
 
         final NumberAxis domain = new NumberAxis("X");
@@ -202,24 +219,10 @@ public class XYSplineChart extends ApplicationFrame /* todo JFrame wenn listener
             renderer.setSeriesItemLabelsVisible((int) index, true);
         });
 
+        mainSeriesIndices.forEach(index -> renderer.setSeriesShapesVisible((int) index, false));
+
         final XYPlot xyplot = new XYPlot(dataset, domain, range, renderer);
         return new JFreeChart(xyplot);
     }
 
-    /**
-     * Creates a panel for the demo (used by SuperDemo.java).
-     *
-     * @return A panel.
-     */
-    @Nonnull
-    public static ChartPanel createPanel(@Nonnull final XYDataset dataset, @Nonnull final Set<Integer> helpSeriesIndices) {
-        Preconditions.checkNotNull(dataset, "dataset must not be empty");
-        Preconditions.checkNotNull(helpSeriesIndices, "helpSeriesIndices must not be empty");
-
-        final JFreeChart chart = createChart(dataset, helpSeriesIndices);
-        final ChartPanel panel = new ChartPanel(chart, false);
-        panel.setFillZoomRectangle(true);
-        panel.setMouseWheelEnabled(true);
-        return panel;
-    }
 }
