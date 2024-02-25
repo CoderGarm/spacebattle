@@ -51,11 +51,6 @@ public class MissileMovement {
     @Schema(required = true, description = "The current position of the salvo.")
     private de.yuga.spacebattle.rest.dto.orbitals.Orbit position;
 
-    @Nullable
-    @JsonProperty
-    @Schema(required = true, description = "The position of the salvo in the last round.")
-    private de.yuga.spacebattle.rest.dto.orbitals.Orbit lastPosition; // fixme replace by direction?
-
     public MissileMovement() {
     }
 
