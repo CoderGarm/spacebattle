@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.combat.round.MissileAmmunitionState;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
 import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Weapon;
@@ -16,10 +17,12 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class AuraState {
@@ -57,11 +60,26 @@ public class AuraState {
 
                 final Launcher launcher = activeFitting.getLauncher();
                 if (launcher != null) {
+                    final Function<Missile, Distance> distanceFunction;
+                    switch (weaponAlignment) {
+                        case BOW:
+                            distanceFunction = getMissileDistanceFunction(actorsRoundState, opponentsState);
+                            break;
+                        case STERN:
+                            distanceFunction = getMissileDistanceFunction(actorsRoundState);
+                            break;
+                        default:
+                        case BROADSIDE:
+                            distanceFunction = getMissileDistanceFunction();
+                            break;
+                    }
                     final Distance missileRange = launcher.getAllowedMissiles().stream()
                             .filter(missileAmmunitionState::hasShotsLeft)
-                            .map(m -> opponentsState != null ? m.getMaximumMissileRange(actorsRoundState, opponentsState) : m.getMaximumMissileRange())
+                            .map(distanceFunction)
                             .reduce((o1, o2) -> o1.compareTo(o2) < 0 ? o1 : o2)
                             .orElse(null);
+
+
                     final EWeaponType weaponType = launcher.getWeaponType();
                     switch (weaponType) {
                         case MISSILE:
@@ -81,6 +99,25 @@ public class AuraState {
             }
 
         });
+    }
+
+    @Nonnull
+    private static Function<Missile, Distance> getMissileDistanceFunction(@Nonnull final FleetRoundState actorsRoundState, @Nullable final FleetRoundState opponentsState) {
+        Preconditions.checkNotNull(actorsRoundState, "actorsRoundState must not be empty");
+
+        return m -> opponentsState != null ? m.getMaximumMissileRange(actorsRoundState, opponentsState) : m.getMaximumMissileRange();
+    }
+
+    @Nonnull
+    private static Function<Missile, Distance> getMissileDistanceFunction(@Nonnull final FleetRoundState actorsRoundState) {
+        Preconditions.checkNotNull(actorsRoundState, "actorsRoundState must not be empty");
+
+        return m -> m.getRearMissileRange(actorsRoundState);
+    }
+
+    @Nonnull
+    private static Function<Missile, Distance> getMissileDistanceFunction() {
+        return Missile::getMaximumMissileRange;
     }
 
     @Nonnull

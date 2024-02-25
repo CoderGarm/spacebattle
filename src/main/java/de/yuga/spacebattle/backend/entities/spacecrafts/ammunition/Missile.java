@@ -13,7 +13,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -37,13 +36,6 @@ public class Missile extends HasCostsByOwn {
     @NotNull
     @Embedded
     private MissileMotor missileMotor;
-
-    /**
-     * Quick performance
-     */
-    @Nullable
-    @Transient
-    private Distance maxRange = null;
 
     public Missile() {
     }
@@ -105,14 +97,10 @@ public class Missile extends HasCostsByOwn {
      */
     @Nonnull
     public Distance getMaximumMissileRange() {
-        if (maxRange != null) {
-            return maxRange;
-        }
 
         final int endurance = missileMotor.getEndurance();
         final Acceleration acceleration = missileMotor.getAcceleration();
-        maxRange = acceleration.getDistanceByTime(new Time(endurance, ETimeMetric.SECOND), Velocity.ZERO, EDistanceMetric.LS);
-        return maxRange;
+        return acceleration.getDistanceByTime(new Time(endurance, ETimeMetric.SECOND), Velocity.ZERO, EDistanceMetric.LS);
     }
 
     /**
@@ -125,14 +113,9 @@ public class Missile extends HasCostsByOwn {
     public Distance getMaximumMissileRange(@Nonnull final Velocity baseVelocity) {
         Preconditions.checkNotNull(baseVelocity, "baseVelocity must not be empty");
 
-        if (maxRange != null) {
-            return maxRange;
-        }
-
         final int endurance = missileMotor.getEndurance();
         final Acceleration acceleration = missileMotor.getAcceleration();
-        maxRange = acceleration.getDistanceByTime(new Time(endurance, ETimeMetric.SECOND), baseVelocity, EDistanceMetric.LS);
-        return maxRange;
+        return acceleration.getDistanceByTime(new Time(endurance, ETimeMetric.SECOND), baseVelocity, EDistanceMetric.LS);
     }
 
     @Nonnull
@@ -175,6 +158,34 @@ public class Missile extends HasCostsByOwn {
                 .add(c.pow(2))
                 .subtract(BigDecimal.valueOf(2)
                         .multiply(b)
+                        .multiply(c)
+                        .multiply(BigDecimal.valueOf(cos)))
+                .sqrt(DistanceCalculator.MC_HU);
+        final Velocity resultingVelocity = new Velocity(vectorVelocity, velocity.getDistanceMetric(), velocity.getTimeMetric());
+
+        final Distance missileRange = getMaximumMissileRange(resultingVelocity);
+
+        //actorsState.getCage().logMessage("MISSILE RANGE CALC: combined fleet velocity '" + resultingVelocity + "' KM/S on angle '" + angleBetween + "' with missile range of '" + missileRange + "'.");
+
+        // todo create segmented information: 'range under drive' with 'additional range by base movements'
+
+        return missileRange;
+    }
+
+    @Nonnull
+    public Distance getRearMissileRange(@Nonnull final FleetRoundState actorsState) {
+        Preconditions.checkNotNull(actorsState, "actorsState must not be empty");
+
+        final Velocity velocity = actorsState.getVelocity();
+
+        final double angleBetween = -180;
+        final double cos = Math.cos(Math.toRadians(angleBetween));
+
+        final BigDecimal c = velocity.getValue();
+
+        // KOSINUSSATZ
+        final BigDecimal vectorVelocity = c.pow(2)
+                .subtract(BigDecimal.valueOf(2)
                         .multiply(c)
                         .multiply(BigDecimal.valueOf(cos)))
                 .sqrt(DistanceCalculator.MC_HU);
