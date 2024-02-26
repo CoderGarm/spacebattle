@@ -255,10 +255,12 @@ public class BattleReport extends AbstractEntityKey {
                             break;
                         case ELOKA_PHASE:
                         case COUNTER_MISSILE_PHASE:
-                        case MISSILE_MOVEMENT_PHASE:
-                        case MISSILE_FIRE_PHASE:
                             missileSalvos.forEach(this::addCounterMissileHitMissile);
+                            break;
+                        case MISSILE_MOVEMENT_PHASE:
                             missileSalvos.forEach(this::addMissileMovement);
+                            break;
+                        case MISSILE_FIRE_PHASE:
                             missileSalvos.forEach(this::addReleasedVolley);
                             break;
                         case BEAM_FIRE_INCOMING_PHASE:

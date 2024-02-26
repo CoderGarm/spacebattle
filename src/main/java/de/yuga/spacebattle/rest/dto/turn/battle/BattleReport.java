@@ -81,7 +81,7 @@ public class BattleReport {
         this.participatingFleets.addAll(battleReport.getParticipatingFleets().stream().map(f -> new Fleet(f, languageCode)).collect(Collectors.toList()));
         this.lossRole.addAll(battleReport.getLossRole().stream().map(l -> new LossRole(l, languageCode)).collect(Collectors.toList()));
         this.movementActions.addAll(battleReport.getMovementActions().stream().map(m -> new MovementAction(m, languageCode, battleReport.getParticipatingFleets()))
-                .sorted(Comparator.comparingInt(o -> o.getCombatRoundKey()))
+                .sorted(Comparator.comparingInt(MovementAction::getCombatRoundKey))
                 .collect(Collectors.toList()));
         this.maneuvers.addAll(battleReport.getManeuvers().stream().map(m -> new Maneuver(m, battleReport.getParticipatingFleets())).collect(Collectors.toList()));
         this.counterMissileHits.addAll(battleReport.getCounterMissileHits().stream().map(c -> new CounterMissileHit(c, languageCode)).collect(Collectors.toList()));
