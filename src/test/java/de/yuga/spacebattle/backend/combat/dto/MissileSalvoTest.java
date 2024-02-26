@@ -43,8 +43,6 @@ class MissileSalvoTest {
     void testConstructor() {
         final MissileSalvoHealthState missileSalvoHealthState = testObject.getMissileSalvoHealthState();
         assertNotNull(missileSalvoHealthState);
-        final Distance initialDistance = testObject.getInitialDistance();
-        assertEquals(new Distance(new BigDecimal("8.032E+8"), EDistanceMetric.M), initialDistance);
         final Distance rangePerCombatRound = testObject.getRangePerCombatRound();
         assertEquals(new Distance(81140000, EDistanceMetric.M), rangePerCombatRound);
         final Distance longestOffensiveRange = testObject.getLongestOffensiveRange();

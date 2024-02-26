@@ -7,9 +7,11 @@ import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMarker;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Schema(description = ".")
@@ -40,6 +42,11 @@ public class Maneuver {
     @Schema(required = true, description = "The fleet which acts.")
     private FleetMarker actor;
 
+    @Nullable
+    @JsonProperty
+    @Schema(description = "The UUID of the missile salvo if this maneuver is for it.")
+    private UUID missileSalvo;
+
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The fleet which acts.")
@@ -59,6 +66,7 @@ public class Maneuver {
                 .orElseThrow(NullPointerException::new);
         this.actor = new FleetMarker(fleetSnapshot);
         this.name = input.getName();
+        this.missileSalvo = input.getMovingMissileSalvo();
         this.maneuverElements.addAll(input.getManeuverElements().stream().map(ManeuverElement::new).collect(Collectors.toList()));
     }
 

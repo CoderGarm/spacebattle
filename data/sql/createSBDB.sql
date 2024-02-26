@@ -164,7 +164,6 @@
         combatRound integer not null,
         attackedMissileSalvo varchar(255) not null,
         destroyedMissiles integer not null,
-        remainingMissiles integer not null,
         idActor integer not null,
         idMissile integer not null,
         idTarget integer not null,
@@ -369,6 +368,7 @@
         combatRound integer not null,
         designatedEnd integer not null,
         end integer not null,
+        movingMissileSalvo varchar(255),
         name varchar(255) not null,
         idActor integer not null,
         idTarget integer not null,
@@ -432,16 +432,11 @@
        idMissileMovement integer not null auto_increment,
         combatPhase varchar(255) not null,
         combatRound integer not null,
-        xCoordLast varchar(255),
-        yCoordLast varchar(255),
+        lengthOnTrack varchar(255) not null,
         missileAmount integer not null,
         movingMissileSalvo varchar(255) not null,
-        xCoordinate varchar(255),
-        yCoordinate varchar(255),
-        roundsToTravel integer not null,
-        xCoordTarget varchar(255),
-        yCoordTarget varchar(255),
         idActor integer not null,
+        idManeuver integer not null,
         idTarget integer not null,
         primary key (idMissileMovement)
     ) engine=InnoDB;
@@ -629,7 +624,6 @@
         combatRound integer not null,
         amountOfShots integer not null,
         damageDealer varchar(255) not null,
-        initialDistance varchar(255) not null,
         weaponType varchar(255) not null,
         idActor integer not null,
         idTarget integer not null,
@@ -747,7 +741,6 @@
         combatPhase varchar(255) not null,
         combatRound integer not null,
         damageDealer varchar(255) not null,
-        distance varchar(255) not null,
         result varchar(255) not null,
         idActor integer not null,
         idTarget integer not null,
@@ -964,18 +957,27 @@
 
     alter table eventRanking
        add constraint POINTS_UK unique (idUser, gameEvent, rankingCategory);
+create index IO_FL on fleet (isOperational);
+create index ID_FL on fleet (isDeleted);
 
     alter table fleet
         add constraint UK_duhimx7ydhmssl7vqp5w29yx0 unique (idMove);
+create index ID_FS on fleetSnapshot (isDeleted);
+create index ID_JO on job (isDeleted);
 
     alter table messageThread
         add constraint messageThread_UC unique (idUserOne, idUserTwo);
 
     alter table missileMovements
         add constraint UK_7i21tt2alyj9dggioukympy2t unique (idMissileMovement);
+create index ID_MI on mission (isDeleted);
+create index TL_MO on move (ticksLeft);
+create index ID_MO on move (isDeleted);
 
     alter table movementActions
         add constraint UK_k7lndwnt1rxmmjj2xslfrkuv unique (idMovementAction);
+create index IO_OS on orbitalStructure (isOperational);
+create index ID_OS on orbitalStructure (isDeleted);
 
     alter table orderedHitLog
         add constraint UK_mpoyl8losmb1ep0fxewrpbuf3 unique (idHitLog);
@@ -988,6 +990,7 @@
 
     alter table rolePlaySetting
        add constraint UK_5sx33g2kpg6lhpamw75ibqb9i unique (idUser);
+create index ID_SC on shipClass (isDeleted);
 
     alter table sharedBattleReport
        add constraint UK_hpe1gr8wmca659sm228uhgp6u unique (idBattleReport);
@@ -1004,6 +1007,11 @@ create index ID_SC on shipClass (isDeleted);
 
     alter table starSystem
         add constraint COORDINATE_UK unique (xCoordinate, yCoordinate);
+create index TL_TR on tradedResource (ticksLeft);
+create index ID_TR on tradedResource (isDeleted);
+create index ID_TO on tradeOffer (isDeleted);
+create index TL_TJ on transportJob (ticksLeft);
+create index ID_TJ on transportJob (isDeleted);
 
     alter table user
         add constraint UK_sb8bbouer5wak8vyiiy4pf2bx unique (username);
@@ -1013,6 +1021,10 @@ create index ID_SC on shipClass (isDeleted);
 
     alter table userSetting
        add constraint EMAIL_UK unique (email);
+create index IO_WS on warShip (isOperational);
+create index ID_WS on warShip (isDeleted);
+create index IO_WHSS on warshipHealthStateSnapshot (isOperational);
+create index ID_WHSS on warshipHealthStateSnapshot (isDeleted);
 
     alter table activeFittings
         add constraint FK9kawhm3fqubxvebrl8pjl10lv
@@ -1495,6 +1507,11 @@ create index ID_SC on shipClass (isDeleted);
                 references fleet (idFleet);
 
     alter table missileMovement
+       add constraint FK89ywf9dupn3xqm5wkoyy8b4v5 
+       foreign key (idManeuver) 
+       references maneuver (idManeuver);
+
+    alter table missileMovement 
         add constraint FKl9frhygmvi1n5d3sjchn19wrx
             foreign key (idTarget)
                 references fleet (idFleet);

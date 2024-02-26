@@ -11,9 +11,13 @@ import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class KinematicInfo implements Cloneable {
+
+    /**
+     * One means one, no modification.
+     */
+    private static final int ACCELERATION_MODIFIER = 1;
 
     @Nonnull
     private Acceleration acceleration;
@@ -27,8 +31,7 @@ public class KinematicInfo implements Cloneable {
     @Nonnull
     private Orbit position;
 
-    @Nullable
-    private Double accelerationModifier;
+    private double accelerationModifier = ACCELERATION_MODIFIER;
 
     public KinematicInfo(@Nonnull final Acceleration acceleration,
                          @Nonnull final Velocity velocity,
@@ -146,8 +149,7 @@ public class KinematicInfo implements Cloneable {
         return this;
     }
 
-    @Nullable
-    public Double getAccelerationModifier() {
+    public double getAccelerationModifier() {
         return accelerationModifier;
     }
 }

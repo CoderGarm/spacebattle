@@ -2,8 +2,9 @@ package de.yuga.spacebattle.rest.dto.turn.battle.combat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.entities.turn.battle.combat.Maneuver;
 import de.yuga.spacebattle.rest.dto.AbstractId;
-import de.yuga.spacebattle.rest.dto.orbitals.Orbit;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -33,7 +34,7 @@ public class MissileMovement {
     @Schema(required = true, description = "The fleet which is targeted.")
     private AbstractId target;
 
-    @Nullable
+    @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The UUID of the moving missile salvo.")
     private UUID movingMissileSalvo;
@@ -42,14 +43,10 @@ public class MissileMovement {
     @Schema(required = true, description = "The amount of missiles in this salvo.")
     private int missileAmount;
 
+    @Nonnull
     @JsonProperty
-    @Schema(required = true, description = "The amount of rounds which have to be passed before in range for a hit.")
-    private int roundsToTravel;
-
-    @Nullable
-    @JsonProperty
-    @Schema(required = true, description = "The current position of the salvo.")
-    private de.yuga.spacebattle.rest.dto.orbitals.Orbit position;
+    @Schema(required = true, description = "The total length on the main track.")
+    private Distance lengthOnTrack;
 
     public MissileMovement() {
     }
@@ -60,12 +57,12 @@ public class MissileMovement {
         Preconditions.checkNotNull(input, "input shouldn't be null!");
 
         this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound(), input.getCombatPhase());
+        final Maneuver maneuver = input.getManeuver();
         this.actor = new AbstractId(input.getActor());
         this.actorOwner = new AbstractId(input.getActor().getOwner());
         this.target = new AbstractId(input.getTarget());
         this.movingMissileSalvo = input.getMovingMissileSalvo();
         this.missileAmount = input.getMissileAmount();
-        this.roundsToTravel = input.getRoundsToTravel();
-        this.position = new Orbit(input.getPosition());
+        this.lengthOnTrack = input.getLengthOnTrack();
     }
 }

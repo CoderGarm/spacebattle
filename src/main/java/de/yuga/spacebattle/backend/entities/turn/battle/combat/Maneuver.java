@@ -3,17 +3,20 @@ package de.yuga.spacebattle.backend.entities.turn.battle.combat;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.converter.CombatRoundConverter;
+import de.yuga.spacebattle.backend.converter.UUIDConverter;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Entity
@@ -26,6 +29,10 @@ public class Maneuver extends CombatRoundKey {
     @ManyToOne(optional = false)
     @JoinColumn(name = "idActor", nullable = false, updatable = false)
     private Fleet actor;
+
+    @Nullable
+    @Convert(converter = UUIDConverter.class)
+    private UUID movingMissileSalvo;
 
     @NotNull
     @Nonnull
@@ -60,6 +67,7 @@ public class Maneuver extends CombatRoundKey {
         super(maneuver.getStart(), ECombatPhase.ECombatSubPhase.MOVEMENT_PHASE);
 
         this.actor = maneuver.getAgent();
+        this.movingMissileSalvo = maneuver.getMissileSalvo() != null ? maneuver.getMissileSalvo().getUuid() : null;
         this.target = maneuver.getTarget();
         this.name = maneuver.getManeuverName();
         this.designatedEnd = maneuver.getDesignatedEnd();
@@ -71,6 +79,11 @@ public class Maneuver extends CombatRoundKey {
     @Nonnull
     public Fleet getActor() {
         return actor;
+    }
+
+    @Nullable
+    public UUID getMovingMissileSalvo() {
+        return movingMissileSalvo;
     }
 
     @Nonnull

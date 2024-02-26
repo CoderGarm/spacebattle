@@ -1,12 +1,12 @@
 package de.yuga.spacebattle.backend.entities.turn.battle.combat;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.calculator.geometry.KinematicInfo;
+import de.yuga.spacebattle.backend.calculator.resource.CourseOrderElement;
 import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
-import de.yuga.spacebattle.backend.combat.dto.MotionProfile;
+import de.yuga.spacebattle.backend.converter.DistanceConverter;
 import de.yuga.spacebattle.backend.converter.UUIDConverter;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
-import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
 
 import javax.annotation.Nonnull;
@@ -18,6 +18,12 @@ import java.util.UUID;
 @Table(name = "missileMovement")
 @AttributeOverride(name = "id", column = @Column(name = "idMissileMovement"))
 public class MissileMovement extends CombatRoundKey {
+
+    @NotNull
+    @Nonnull
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "idManeuver", updatable = false)
+    private de.yuga.spacebattle.backend.entities.turn.battle.combat.Maneuver maneuver;
 
     /**
      * The source of the electronic warfare.
@@ -50,45 +56,36 @@ public class MissileMovement extends CombatRoundKey {
      */
     private int missileAmount;
 
-    /**
-     * The amount of rounds which have to be passed before in range for a hit.
-     */
-    private int roundsToTravel;
-
-    /**
-     * The current position of the salvo.
-     */
-    @NotNull
     @Nonnull
-    private Orbit position;
-
-    /**
-     * The current position of the target.
-     */
     @NotNull
-    @Nonnull
-    @AttributeOverride(name = "xCoordinate", column = @Column(name = "xCoordTarget"))
-    @AttributeOverride(name = "yCoordinate", column = @Column(name = "yCoordTarget"))
-    private Orbit targetPosition;
+    @Convert(converter = DistanceConverter.class)
+    private Distance lengthOnTrack;
 
     public MissileMovement() {
     }
 
     public MissileMovement(@Nonnull final MissileSalvo volley,
-                           @Nonnull final MotionProfile motionProfile) {
+                           @Nonnull final CourseOrderElement courseOrderElement) {
         super(
-                Preconditions.checkNotNull(motionProfile, "motionProfile must not be empty").getCombatRound(),
+                Preconditions.checkNotNull(courseOrderElement, "courseOrderElement must not be empty").getCombatRound(),
                 ECombatPhase.ECombatSubPhase.MISSILE_MOVEMENT_PHASE
         );
 
-        final KinematicInfo ki = motionProfile.getKinematicInfo();
         this.actor = volley.getActor();
         this.target = volley.getTarget();
         this.movingMissileSalvo = volley.getUuid();
-        this.position = ki.getPosition().clone();
-        this.missileAmount = volley.getMissileSalvoHealthState().getAmountByTypeAtEndOfCombatRound(motionProfile.getCombatRound()).values().stream().mapToInt(Integer::intValue).sum();
-        this.targetPosition = volley.getTargetPosition().clone();
-        this.roundsToTravel = volley.roundsTravelled();
+        this.maneuver = new Maneuver(volley.getManeuver());
+        this.lengthOnTrack = courseOrderElement.getLengthOnTrack();
+        this.missileAmount = volley.getMissileSalvoHealthState().getAmountByTypeAtEndOfCombatRound(courseOrderElement.getCombatRound()).values().stream().mapToInt(Integer::intValue).sum();
+    }
+
+    @Nonnull
+    public Maneuver getManeuver() {
+        return maneuver;
+    }
+
+    public void replaceByPersistedManeuver(@Nonnull final Maneuver maneuver) {
+        this.maneuver = Preconditions.checkNotNull(maneuver, "maneuver must not be empty");
     }
 
     @Nonnull
@@ -110,17 +107,8 @@ public class MissileMovement extends CombatRoundKey {
         return missileAmount;
     }
 
-    public int getRoundsToTravel() {
-        return roundsToTravel;
-    }
-
     @Nonnull
-    public Orbit getPosition() {
-        return position;
-    }
-
-    @Nonnull
-    public Orbit getTargetPosition() {
-        return targetPosition;
+    public Distance getLengthOnTrack() {
+        return lengthOnTrack;
     }
 }

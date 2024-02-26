@@ -164,10 +164,9 @@ public class Missile extends HasCostsByOwn {
         final Velocity resultingVelocity = new Velocity(vectorVelocity, velocity.getDistanceMetric(), velocity.getTimeMetric());
 
         final Distance missileRange = getMaximumMissileRange(resultingVelocity);
+        final Distance pure = getMaximumMissileRange();
 
-        //actorsState.getCage().logMessage("MISSILE RANGE CALC: combined fleet velocity '" + resultingVelocity + "' KM/S on angle '" + angleBetween + "' with missile range of '" + missileRange + "'.");
-
-        // todo create segmented information: 'range under drive' with 'additional range by base movements'
+        //actorsState.getCage().logMessage("MISSILE RANGE CALC: combined fleet velocity '" + resultingVelocity + "' KM/S on angle '" + angleBetween + "' with effective missile range of '" + missileRange + "' from range under drive with '" + pure + "'.");
 
         return missileRange;
     }

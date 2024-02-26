@@ -432,7 +432,7 @@ public class CoursePlot {
         if (maneuver == null) {
             return null;
         }
-        return maneuver.getCourseOrderElements().stream().filter(elem -> elem.getCombatRound().equals(combatRound)).findFirst().orElse(null);
+        return maneuver.getCourseElement(combatRound);
     }
 
     @Nonnull

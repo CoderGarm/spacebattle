@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.combat.maneuver;
 
 import de.yuga.spacebattle.backend.calculator.geometry.CubicBezier;
 import de.yuga.spacebattle.backend.calculator.geometry.KinematicInfo;
+import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
@@ -25,6 +26,17 @@ public class SimpleCourse extends Maneuver {
                            @Nonnull final KinematicInfo agentsKinematicDesignated,
                            @Nonnull final Fleet target) {
         super(cage, start, agent, agentsKinematicInitial, agentsKinematicDesignated, target);
+
+    }
+
+    protected SimpleCourse(@Nonnull final Cage cage,
+                           @Nonnull final CombatRound start,
+                           @Nonnull final Fleet agent,
+                           @Nonnull final KinematicInfo agentsKinematicInitial,
+                           @Nonnull final KinematicInfo agentsKinematicDesignated,
+                           @Nonnull final MissileSalvo missileSalvo,
+                           @Nonnull final Fleet target) {
+        super(cage, start, agent, agentsKinematicInitial, agentsKinematicDesignated, missileSalvo, target);
 
     }
 

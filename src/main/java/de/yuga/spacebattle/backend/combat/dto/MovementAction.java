@@ -23,13 +23,13 @@ public class MovementAction {
     private final Fleet actor;
 
     @Nonnull
-    private Maneuver maneuver;
+    private final Maneuver maneuver;
 
     @Nonnull
-    private ManeuverElement maneuverElement;
+    private final ManeuverElement maneuverElement;
 
     @Nonnull
-    private CombatRound combatRound;
+    private final CombatRound combatRound;
 
     @Nonnull
     private final ECombatPhase.ECombatSubPhase combatPhase = ECombatPhase.ECombatSubPhase.MOVEMENT_PHASE;

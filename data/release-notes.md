@@ -79,6 +79,20 @@ todo. flottenenmove auf map: zielplani direkt festlegen
 todo. acc registering -> user direkt anmelden
 todo. radial menu on map instead right-click button toggle group
 
+- Mehrwertsteuer system?
+- trade taxes
+
+- bombing planets back to the stone age (first stage)
+- conquer planets with armies (later stage)
+- blockades for trades and civil movements such as transports (first stage)
+
+The second stage will contain an
+
+- uplifted transportation system (second stage)
+    - clone the Anno games for trade routes and protection
+    - with more options to interrupt foreign trading activity
+    - Jobs for pirates are also in the pipeline as automated convoy protecton and an overworked planetary trading (multiple resource for a single convoy).
+
 season 3:
 
 - More speed! I figured out what's wrong with the flight speed and this topic is quite bigger then I thought. As a workaround, the acceleration for all NPC flights are increased to

@@ -174,7 +174,9 @@ public class BattleReport extends AbstractEntityKey {
 
     @Nonnull
     public Set<Maneuver> getManeuvers() {
-        return movementActions.stream().map(MovementAction::getManeuver).collect(Collectors.toSet());
+        final Set<Maneuver> result = movementActions.stream().map(MovementAction::getManeuver).collect(Collectors.toSet());
+        result.addAll(missileMovements.stream().map(MissileMovement::getManeuver).collect(Collectors.toSet()));
+        return result;
     }
 
     @Nonnull
@@ -301,7 +303,7 @@ public class BattleReport extends AbstractEntityKey {
 
         for (final de.yuga.spacebattle.backend.combat.dto.MovementAction movementAction : movementActions) {
             final Fleet actor = movementAction.getActor();
-            final AuraState auraState = auraStates.stream().filter(a -> a.getActor().equals(actor)).findFirst().orElseThrow(); // fixme aura states are constant
+            final AuraState auraState = auraStates.stream().filter(a -> a.getActor().equals(actor)).findFirst().orElseThrow();
             this.movementActions.add(new de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction(maneuvers.get(movementAction.getManeuver()), movementAction, auraState));
         }
     }
@@ -309,8 +311,7 @@ public class BattleReport extends AbstractEntityKey {
     private void addMissileMovement(@Nonnull final MissileSalvo volley) {
         Preconditions.checkNotNull(volley, "volley shouldn't be null!");
 
-        volley.getMotionProfile().stream().sorted()
-                .forEach(motionProfile -> missileMovements.add(new MissileMovement(volley, motionProfile)));
+        volley.getManeuver().getCourseOrderElements().forEach(courseOrderElement -> missileMovements.add(new MissileMovement(volley, courseOrderElement)));
     }
 
     private void addReleasedVolley(final MissileSalvo volley) {

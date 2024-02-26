@@ -8,7 +8,6 @@ import de.yuga.spacebattle.backend.entities.turn.battle.SharedBattleReport;
 import de.yuga.spacebattle.backend.enums.ECalculationType;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.Maneuver;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.ManeuverElement;
-import de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction;
 import de.yuga.spacebattle.backend.repositories.turn.battle.BattleReportRepository;
 import de.yuga.spacebattle.backend.repositories.turn.battle.SharedBattleReportRepository;
 import de.yuga.spacebattle.backend.services.account.UserService;
@@ -75,7 +74,7 @@ public class BattleReportService {
         Preconditions.checkNotNull(entity, "entity shouldn't be null!");
 
         // fixme after tidy up the historizable concept this can be cleaned, too
-        final Set<Maneuver> maneuvers = entity.getMovementActions().stream().map(MovementAction::getManeuver).collect(Collectors.toSet());
+        final Set<Maneuver> maneuvers = entity.getManeuvers();
 
         final Map<Maneuver, Set<ManeuverElement>> maneuverElementsMap = new HashMap<>();
         maneuvers.forEach(m -> {
@@ -94,7 +93,13 @@ public class BattleReportService {
 
         entity.getMovementActions().forEach(movementAction -> {
             final Maneuver unsaved = movementAction.getManeuver();
-            final Maneuver saved = savedAll.stream().filter(m -> m.equals(unsaved)).findFirst().orElseThrow(() -> new NotifyWebUserException("Can not found one."));
+            final Maneuver saved = savedAll.stream().filter(m -> m.equals(unsaved)).findFirst().orElseThrow(() -> new NotifyWebUserException("Can't be found."));
+            movementAction.replaceByPersistedManeuver(saved);
+        });
+
+        entity.getMissileMovements().forEach(movementAction -> {
+            final Maneuver unsaved = movementAction.getManeuver();
+            final Maneuver saved = savedAll.stream().filter(m -> m.equals(unsaved)).findFirst().orElseThrow(() -> new NotifyWebUserException("Can't be found."));
             movementAction.replaceByPersistedManeuver(saved);
         });
 

@@ -355,7 +355,7 @@ public class Cage implements Future<Cage> {
 
         final Orbit actorPosition = getCurrentStateByFleet(target).getPosition();
         return flyingMissileSalvos.stream().filter(s -> s.getTarget().equals(target)).filter(s -> {
-            final Distance currentDistance = actorPosition.getDistance(s.getPosition());
+            final Distance currentDistance = actorPosition.getDistance(s.getCurrentPosition());
             final Distance rangePerCombatRound = s.getRangePerCombatRound();
             final int toTravel = DistanceCalculator.getCombatRoundsToTravel(currentDistance, rangePerCombatRound);
             return toTravel <= 0;

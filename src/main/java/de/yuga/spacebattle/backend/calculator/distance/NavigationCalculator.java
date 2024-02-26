@@ -22,7 +22,6 @@ import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -143,10 +142,7 @@ public class NavigationCalculator {
         Preconditions.checkNotNull(lengthOnCurve, "lengthOnCurve must not be empty");
         Preconditions.checkNotNull(topSpeed, "topSpeed must not be empty");
 
-        Acceleration constantAcceleration = startConditions.getAcceleration();
-        final Double accelerationModifier = startConditions.getAccelerationModifier();
-
-        constantAcceleration = NavigationCalculator.applyAccelerationModifier(constantAcceleration, accelerationModifier);
+        final Acceleration constantAcceleration = NavigationCalculator.applyAccelerationModifier(startConditions.getAcceleration(), startConditions.getAccelerationModifier());
 
         final Velocity startConditionsVelocity = startConditions.getVelocity();
         final Velocity endConditionsVelocity = endConditions.getVelocity();
@@ -269,8 +265,13 @@ public class NavigationCalculator {
             return distance.divide(2);
         }
 
-        // value is normalized due same metrics and only needed as scalar here
-        return distance.divide(startVelocity.divide(designatedVelocity).getValue().doubleValue());
+        final double divisor = startVelocity.divide(designatedVelocity).getValue().doubleValue();
+        // smallest divisor is 1 because the distance can't be made longer for sure
+        final double correctedDivisor = Math.max(1, divisor);
+        if (correctedDivisor == 1) {
+            return distance.clone();
+        }
+        return distance.divide(correctedDivisor);
     }
 
     /**
@@ -278,10 +279,10 @@ public class NavigationCalculator {
      * fixme please change the course instead - but this is hairy
      */
     @Nonnull
-    public static Acceleration applyAccelerationModifier(@Nonnull final Acceleration acceleration, @Nullable final Double accelerationModifier) {
+    public static Acceleration applyAccelerationModifier(@Nonnull final Acceleration acceleration, final double accelerationModifier) {
         Preconditions.checkNotNull(acceleration, "acceleration must not be empty");
 
-        if (accelerationModifier == null) {
+        if (accelerationModifier == 1) {
             return acceleration;
         }
         final double absRelMod = Math.sqrt(Math.abs(accelerationModifier));

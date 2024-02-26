@@ -1,19 +1,20 @@
 package de.yuga.spacebattle.backend.combat.maneuver;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.calculator.distance.GeometryCalculator;
 import de.yuga.spacebattle.backend.calculator.geometry.CubicBezier;
 import de.yuga.spacebattle.backend.calculator.geometry.KinematicInfo;
+import de.yuga.spacebattle.backend.calculator.resource.CourseOrderElement;
+import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
-import de.yuga.spacebattle.backend.dto.physics.Acceleration;
-import de.yuga.spacebattle.backend.dto.physics.Direction;
-import de.yuga.spacebattle.backend.dto.physics.Distance;
-import de.yuga.spacebattle.backend.dto.physics.Velocity;
+import de.yuga.spacebattle.backend.dto.physics.*;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
+import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
 
 import javax.annotation.Nonnull;
 
@@ -24,6 +25,44 @@ public class ManeuverFactory {
 
     public ManeuverFactory(@Nonnull final Cage cage) {
         this.cage = Preconditions.checkNotNull(cage, "cage must not be empty");
+    }
+
+
+    @Nonnull
+    public Maneuver createMissileTrail(@Nonnull final MissileSalvo volley) {
+        Preconditions.checkNotNull(volley, "volley must not be empty");
+
+        final Fleet agent = volley.getActor();
+        final Fleet target = volley.getTarget();
+
+        final Acceleration accelerationMax = volley.getAcceleration();
+
+        final FleetRoundState agentState = cage.getCurrentStateByFleet(agent);
+        final FleetRoundState targetState = cage.getCurrentStateByFleet(target);
+
+        Orbit targetPosition = cage.getCurrentStateByFleet(target).getPosition().clone();
+        final Distance initialDistance = agentState.getPosition().getDistance(targetPosition);
+        final Time time = initialDistance.calculateTimeToPass(accelerationMax, Velocity.SOL);
+        final int roundsToHit = time.getCoordinateInMetric(ETimeMetric.SECOND)
+                .divide(CombatRound.COMBAT_ROUND.getCoordinateInMetric(ETimeMetric.SECOND), DistanceCalculator.MC_HU).intValue();
+
+        final CombatRound hitTime = cage.getCurrentCombatRound().add(roundsToHit);
+
+        final CourseOrderElement courseElement = targetState.getCoursePlot().getCourseElement(hitTime);
+        if (courseElement == null) {
+            // set expected future position if known
+            targetPosition = cage.getCurrentStateByFleet(target).getPosition().clone();
+        }
+
+        return new SimpleCourse(
+                cage,
+                cage.getCurrentCombatRound(),
+                agent,
+                KinematicInfo.getFrom(agentState).with(volley.getAcceleration()),
+                KinematicInfo.getFrom(targetState).with(targetPosition).with(volley.getAcceleration()).with(Velocity.SOL),
+                volley,
+                target
+        ).createCoursePlot();
     }
 
     @Nonnull

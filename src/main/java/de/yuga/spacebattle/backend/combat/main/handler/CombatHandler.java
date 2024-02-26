@@ -189,7 +189,9 @@ public class CombatHandler {
      */
     @VisibleForTesting
     protected void handleDirectWeaponDamage() {
-        final List<BeamVolley> flyingBeamVolleys = cage.getFlyingBeamVolleys();
+        final List<BeamVolley> flyingBeamVolleys = cage.getFlyingBeamVolleys()
+                .stream().filter(v -> v.getResult() == null)
+                .collect(Collectors.toList());
         new ArrayList<>(flyingBeamVolleys)
                 .forEach(BeamVolley::applyDamage);
         if (!flyingBeamVolleys.isEmpty()) {
@@ -261,9 +263,10 @@ public class CombatHandler {
         final boolean isAlignedToFire = agentsState.hasWeaponsForAlignment(applicableAlignments, EWeaponType.BEAM);
         if ((isInRange || inRangeWhilePassing) && isAlignedToFire) {
             final String complement = isInRange ? "directly" : "while passing";
-            cage.logMessage(agent.getOwner().getUsername() + " tries to fire beams for '" + applicableAlignments.stream().map(Enum::name).collect(Collectors.joining(", ")) + "' "
+            final BeamVolley beamVolley = new BeamVolley(cage, agent, target);
+            cage.logMessage(agent.getOwner().getUsername() + " tries to fire beams " + beamVolley.getUuid() + " for '" + applicableAlignments.stream().map(Enum::name).collect(Collectors.joining(", ")) + "' "
                     + complement + " at range of " + distance);
-            cage.addToFlyingBeamVolleys(new BeamVolley(cage, agent, target));
+            cage.addToFlyingBeamVolleys(beamVolley);
         }
     }
 
@@ -295,9 +298,10 @@ public class CombatHandler {
 
         final boolean hasShotsLeft = actorsState.getFleetHealthState().hasShotsLeft(EWeaponType.MISSILE);
         if (!applicableMissiles.isEmpty() && hasShotsLeft) {
-            cage.logMessage(actor.getOwner().getUsername() + " tries to fire missiles for " + applicableAlignments.stream().map(Enum::name).collect(Collectors.joining(", "))
+            final MissileSalvo missileSalvo = new MissileSalvo(cage, actor, target, applicableAlignments, applicableMissiles);
+            cage.logMessage(actor.getOwner().getUsername() + " tries to fire missiles " + missileSalvo.getUuid() + " for " + applicableAlignments.stream().map(Enum::name).collect(Collectors.joining(", "))
                     + " at range of " + distance);
-            cage.addToFlyingMissileSalvos(new MissileSalvo(cage, actor, target, applicableAlignments, applicableMissiles));
+            cage.addToFlyingMissileSalvos(missileSalvo);
             cage.setActionHappened(true);
         }
     }

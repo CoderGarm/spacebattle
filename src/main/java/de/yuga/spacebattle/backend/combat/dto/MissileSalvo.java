@@ -3,24 +3,27 @@ package de.yuga.spacebattle.backend.combat.dto;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.BattleCalculator;
-import de.yuga.spacebattle.backend.calculator.geometry.KinematicInfo;
+import de.yuga.spacebattle.backend.calculator.resource.CourseOrderElement;
 import de.yuga.spacebattle.backend.combat.enums.EDamageResult;
-import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
-import de.yuga.spacebattle.backend.combat.round.*;
-import de.yuga.spacebattle.backend.dto.physics.Direction;
+import de.yuga.spacebattle.backend.combat.maneuver.Maneuver;
+import de.yuga.spacebattle.backend.combat.maneuver.ManeuverFactory;
+import de.yuga.spacebattle.backend.combat.round.CombatRound;
+import de.yuga.spacebattle.backend.combat.round.FleetHealthState;
+import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
+import de.yuga.spacebattle.backend.combat.round.MissileSalvoHealthState;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
-import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.MissileMotor;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
 import de.yuga.spacebattle.backend.enums.ECombatPhase.ECombatSubPhase;
-import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
-import de.yuga.spacebattle.backend.enums.EWeaponType;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -43,21 +46,6 @@ public class MissileSalvo extends DamageDealer {
     private final Cage cage;
 
     /**
-     * The current position of the target.
-     */
-    @Nonnull
-    private Orbit targetPosition;
-
-    /**
-     * The initial distance of this shot.
-     */
-    @Nonnull
-    private final Distance initialDistance;
-
-    @Nonnull
-    private final List<MotionProfile> motionProfile = new ArrayList<>();
-
-    /**
      * The source of the salvo.
      */
     @Nonnull
@@ -70,23 +58,14 @@ public class MissileSalvo extends DamageDealer {
     @Nonnull
     private final Fleet target;
 
+    @Nonnull
+    private final CombatRound combatRound;
+
     /**
      * The composition of the salvo by missile type, amount and it's current state.
      */
     @Nonnull
     private final MissileSalvoHealthState missileSalvoHealthState;
-
-    /**
-     * The distance which can be covered per combat round.
-     */
-    @Nonnull
-    private Distance rangePerCombatRound = Distance.ZERO;
-
-    /**
-     * The distance in which the damage can be applied to the target.
-     */
-    @Nonnull
-    private Distance longestOffensiveRange = Distance.ZERO;
 
     /**
      * If the salvo is inside detonation range and should not move.
@@ -105,7 +84,8 @@ public class MissileSalvo extends DamageDealer {
     @Nullable
     private EDamageResult result;
 
-    private int roundsTravelled = 1;
+    @Nonnull
+    private final Maneuver maneuver;
 
     public MissileSalvo(@Nonnull final Cage cage,
                         @Nonnull final Fleet actor,
@@ -122,56 +102,10 @@ public class MissileSalvo extends DamageDealer {
 
         this.actor = actor;
         this.target = target;
+        this.combatRound = cage.getCurrentCombatRound().clone();
         final FleetRoundState actorsState = cage.getCurrentStateByFleet(this.actor);
-        this.targetPosition = cage.getCurrentStateByFleet(target).getPosition().clone();
-        this.initialDistance = actorsState.getPosition().getDistance(targetPosition);
-
-        this.motionProfile.add(new MotionProfile(
-                cage.getCurrentCombatRound(),
-                actorsState.getAccelerationFor(EModuleType.PROPULSION),
-                actorsState.getVelocity(),
-                new Direction(actorsState.getPosition(), cage.getCurrentStateByFleet(target).getPosition()),
-                actorsState.getPosition()
-
-        ));
-        final Map<Missile, Integer> amountByType = new HashMap<>();
-
-        actorsState.getFightingWarShips()
-                .filter(WarshipHealthState::isFightingCapable)
-                .forEach(w -> w.getFittings().entrySet().stream()
-                        // filter active fittings
-                        .filter(Map.Entry::getValue)
-                        .map(Map.Entry::getKey)
-                        .filter(a -> a.getWeaponType() == EWeaponType.MISSILE)
-                        .filter(a -> a.getLauncher() != null)
-                        .filter(f -> applicableAlignments.contains(f.getWeaponAlignment()))
-                        .forEach(alignedFitting -> {
-                            final Launcher launcher = alignedFitting.getLauncher();
-                            final int amountOfLauncher = alignedFitting.getAmount();
-
-                            final Set<Missile> allowedMissiles = launcher.getAllowedMissiles();
-                            final HashSet<Missile> missiles = new HashSet<>(allowedMissiles);
-                            missiles.removeIf(m -> !applicableMissiles.contains(m));
-                            for (final Missile missile : missiles) {
-                                final MissileAmmunitionState missileAmmunitionState = w.getMissileAmmunitionState();
-                                final int remainingShots = missileAmmunitionState.getRemainingShots(missile);
-                                if (remainingShots <= 0) {
-                                    return;
-                                }
-
-                                // setting missiles to the salvo
-                                if (remainingShots >= amountOfLauncher) {
-                                    amountByType.merge(missile, amountOfLauncher, Integer::sum);
-                                    missileAmmunitionState.reduce(missile, amountOfLauncher);
-                                } else {
-                                    amountByType.merge(missile, remainingShots, Integer::sum);
-                                    missileAmmunitionState.reduce(missile, remainingShots);
-                                }
-                            }
-                        }));
-        this.missileSalvoHealthState = new MissileSalvoHealthState(amountByType);
-        calculateRangeForActiveCombatRound();
-        calculateAttackRange();
+        this.missileSalvoHealthState = new MissileSalvoHealthState(actorsState, applicableAlignments, applicableMissiles);
+        this.maneuver = new ManeuverFactory(cage).createMissileTrail(this);
     }
 
     /**
@@ -187,38 +121,34 @@ public class MissileSalvo extends DamageDealer {
         if (missileSalvoHealthState.isActive()) {
             handleMovement();
         }
-        if (missileSalvoHealthState.isActive()) {
-            this.roundsTravelled++;
-        }
     }
 
     /**
      * This calculates and sets the range per round.<br>
      * Could be useful if the salvo is reduced to the slower missile types.
      */
-    private void calculateRangeForActiveCombatRound() {
+    @Nonnull
+    public Distance getRangePerCombatRound() {
         if (missileSalvoHealthState.isActive()) {
             final CombatRound currentCombatRound = cage.getCurrentCombatRound();
-            final MotionProfile initialMotionProfile = getInitialMotionProfile();
-            final CombatRound combatRound = initialMotionProfile.getCombatRound();
-            final Velocity initialVelocity = initialMotionProfile.getKinematicInfo().getVelocity();
+            final CombatRound combatRound = getCombatRound();
+            final Velocity initialVelocity = maneuver.getAgentsKinematicInitial().getVelocity();
             // fixme modify the velocity about the direction of the salvo
             final int endurance = (currentCombatRound.getNo() - combatRound.getNo()) * CombatRound.COMBAT_ROUND_DURATION;
-            rangePerCombatRound = missileSalvoHealthState.getRangePerCombatRound(initialVelocity, endurance);
-        } else {
-            rangePerCombatRound = Distance.ZERO;
+            return missileSalvoHealthState.getRangePerCombatRound(initialVelocity, endurance);
         }
+        return Distance.ZERO.clone();
     }
 
     /**
      * Calculates the salvos attack range.
      */
-    private void calculateAttackRange() {
+    @Nonnull
+    protected Distance getLongestOffensiveRange() {
         if (missileSalvoHealthState.isActive()) {
-            longestOffensiveRange = missileSalvoHealthState.getAttackRange();
-        } else {
-            longestOffensiveRange = Distance.ZERO;
+            return missileSalvoHealthState.getAttackRange();
         }
+        return Distance.ZERO.clone();
     }
 
     /**
@@ -232,7 +162,8 @@ public class MissileSalvo extends DamageDealer {
         final CombatRound currentCombatRound = cage.getCurrentCombatRound();
         final Orbit targetsPosition = targetsState.getPosition();
         final Distance elokaRange = targetsState.getElokaRange();
-        final Distance distance = getPosition().getDistance(targetsPosition);
+        final Orbit position = getCurrentPosition();
+        final Distance distance = position.getDistance(targetsPosition);
         if (elokaRange.compareTo(distance) <= 0) {
             // noop if eloka is not in range
             return;
@@ -259,12 +190,17 @@ public class MissileSalvo extends DamageDealer {
         lostByType.forEach((missile, lostAmount) -> missileSalvoHealthState
                 .addLostMissiles(ECombatSubPhase.ELOKA_PHASE, currentCombatRound, missile, lostAmount));
 
-        calculateRangeForActiveCombatRound();
-        calculateAttackRange();
         cage.logMessage("Eloka attacked " + Integer.toHexString(hashCode())
                 + " and killed " + lostByType.values().stream().mapToInt(Integer::intValue).sum()
                 + " (" + missileSalvoHealthState.getCurrentAmountByType().values().stream().mapToInt(Integer::intValue).sum()
                 + " left) against " + target.getOwner().getUsername());
+    }
+
+    @Nonnull
+    public Orbit getCurrentPosition() {
+        final CombatRound currentCombatRound = cage.getCurrentCombatRound();
+        final CourseOrderElement courseElement = maneuver.getCourseElement(currentCombatRound);
+        return courseElement != null ? courseElement.getPosition() : maneuver.getAgentsKinematicInitial().getPosition();
     }
 
     /**
@@ -272,8 +208,8 @@ public class MissileSalvo extends DamageDealer {
      * Handles the impact of the counter missile weaponry of the target fleet against the missile salvo.<br>
      * <br>
      * Currently, all counter missile measures will be applied if the salvo is in range.<br>
-     * The idea is that missiles are so fast that there is only one shot for every counter measure.<br>
-     * In principle, it makes no difference if the counter measure is applied direct after the start or shortly before the impact.
+     * The idea is that missiles are so fast that there is only one shot for every countermeasure.<br>
+     * In principle, it makes no difference if the countermeasure is applied direct after the start or shortly before the impact.
      */
     @VisibleForTesting
     protected void handleCounterMissilePhase() {
@@ -281,7 +217,7 @@ public class MissileSalvo extends DamageDealer {
         final CombatRound currentCombatRound = cage.getCurrentCombatRound();
         final Orbit targetsPosition = targetsState.getPosition();
         final Distance counterMissileRange = targetsState.getCounterMissileRange();
-        final Distance distance = getPosition().getDistance(targetsPosition);
+        final Distance distance = getCurrentPosition().getDistance(targetsPosition);
         if (counterMissileRange.compareTo(distance) <= 0) {
             // noop if counter missile is not in range
             return;
@@ -299,8 +235,6 @@ public class MissileSalvo extends DamageDealer {
         lostByType.forEach((missile, lostAmount) -> missileSalvoHealthState
                 .addLostMissiles(ECombatSubPhase.COUNTER_MISSILE_PHASE, currentCombatRound, missile, lostAmount));
 
-        calculateRangeForActiveCombatRound();
-        calculateAttackRange();
         cage.logMessage("Counter attacked " + Integer.toHexString(hashCode()) + " and killed " + lostByType.values().stream().mapToInt(Integer::intValue).sum() + " (" + missileSalvoHealthState.getCurrentAmountByType().values().stream().mapToInt(Integer::intValue).sum() + " left) against " + target.getOwner().getUsername());
     }
 
@@ -315,43 +249,43 @@ public class MissileSalvo extends DamageDealer {
             return;
         }
         final FleetRoundState targetsCurrentStateByFleet = cage.getCurrentStateByFleet(target);
-        final CombatRound currentCombatRound = cage.getCurrentCombatRound();
         if (targetsCurrentStateByFleet.getFleetHealthState().isNotFightingCapable()) {
             executeEffectiveDetonation();
             return;
         }
 
-        targetPosition = targetsCurrentStateByFleet.getPosition().clone();
-        final Orbit position = getPosition();
-        final Distance distanceToTarget = position.getDistance(targetPosition);
-        if (distanceToTarget.compareTo(longestOffensiveRange) <= 0) {
+        final Orbit position = getCurrentPosition();
+        final Distance distanceToTarget = position.getDistance(targetsCurrentStateByFleet.getPosition());
+
+        if (distanceToTarget.compareTo(getLongestOffensiveRange()) <= 0) {
             isInDetonationRange = true;
             return;
         }
 
-        final Distance minimalDistanceToAttack = distanceToTarget.subtract(longestOffensiveRange);
-        final Distance distance;
-        if (minimalDistanceToAttack.compareTo(rangePerCombatRound) > 0) {
-            // use complete movement to track the target
-            distance = rangePerCombatRound;
-        } else {
-            // move to the targets position directly
-            distance = distanceToTarget;
+        final Distance minimalDistanceToAttack = distanceToTarget.subtract(getLongestOffensiveRange());
+        if (minimalDistanceToAttack.compareTo(getRangePerCombatRound()) <= 0) {
             isInDetonationRange = true;
+            return;
         }
 
-        final MotionProfile latestMotionProfile = getLatestMotionProfile();
-        final KinematicInfo kinematicInfo = latestMotionProfile.getKinematicInfo();
+        final CombatRound currentCombatRound = cage.getCurrentCombatRound();
+        final CourseOrderElement courseElement = maneuver.getCourseElement(currentCombatRound);
+        if (courseElement == null) {
+            // fixme remove workaround for missing plot by new course
+            cage.logWarning("Salve '" + getUuid() + "' detonated without hit the target");
+            executeEffectiveDetonation();
+            return;
+        }
 
-        final Orbit movedTo = position.move(EMovementType.REDUCE_DISTANCE, distance, targetPosition);
-        this.motionProfile.add(new MotionProfile(
-                currentCombatRound,
-                kinematicInfo.getAcceleration(),
-                kinematicInfo.getVelocity().getVelocityByAcceleration(kinematicInfo.getAcceleration(), CombatRound.COMBAT_ROUND),
-                new Direction(position, targetPosition),
-                movedTo
-        ));
+        // the last movement will probably not be placed at the fleets position - will be set on detonation
+        executeLatestPendingOrder();
+    }
 
+    public void executeLatestPendingOrder() {
+        final CombatRound currentCombatRound = cage.getCurrentCombatRound();
+        final CourseOrderElement courseElement = maneuver.getCourseElement(currentCombatRound);
+        Preconditions.checkState(courseElement != null, "courseElement shouldn't be null!");
+        courseElement.executeOrder();
     }
 
     /**
@@ -384,43 +318,9 @@ public class MissileSalvo extends DamageDealer {
         executeEffectiveDetonation();
     }
 
-    @Nonnull
-    public List<MotionProfile> getMotionProfile() {
-        return motionProfile;
-    }
-
-    @Nonnull
-    public MotionProfile getInitialMotionProfile() {
-        return this.motionProfile.get(0);
-    }
-
-    @Nonnull
-    public MotionProfile getLatestMotionProfile() {
-        Preconditions.checkState(!this.motionProfile.isEmpty(), "motionProfile is unfortunately empty");
-        return this.motionProfile.stream().reduce((o1, o2) -> o1.compareTo(o2) < 0 ? o1 : o2).get();
-    }
-
-    @Nonnull
-    public Orbit getPosition() {
-        Preconditions.checkState(!this.motionProfile.isEmpty(), "motionProfile is unfortunately empty");
-        return this.motionProfile.stream().reduce((o1, o2) -> o1.compareTo(o2) < 0 ? o1 : o2).map(m -> m.getKinematicInfo().getPosition()).get();
-    }
-
-    @Nonnull
-    public CombatRound getCombatRound() {
-        return getLatestMotionProfile().getCombatRound();
-    }
-
-    @Nonnull
-    public Orbit getLastPosition() {
-        if (motionProfile.size() > 1) {
-            return motionProfile.get(motionProfile.size() - 2).getKinematicInfo().getPosition();
-        }
-        return motionProfile.get(motionProfile.size() - 1).getKinematicInfo().getPosition();
-    }
-
     private void executeEffectiveDetonation() {
         missileSalvoHealthState.getCurrentAmountByType().clear();
+        maneuver.setEnd(cage.getCurrentCombatRound());
     }
 
     public boolean isInDetonationRange() {
@@ -428,22 +328,12 @@ public class MissileSalvo extends DamageDealer {
     }
 
     @Nonnull
-    public Distance getRangePerCombatRound() {
-        return rangePerCombatRound;
-    }
-
-    @Nonnull
-    public Distance getLongestOffensiveRange() {
-        return longestOffensiveRange;
+    public CombatRound getCombatRound() {
+        return combatRound;
     }
 
     public boolean isActive() {
         return missileSalvoHealthState.isActive();
-    }
-
-    @Nonnull
-    public Orbit getTargetPosition() {
-        return targetPosition;
     }
 
     @Nonnull
@@ -454,11 +344,6 @@ public class MissileSalvo extends DamageDealer {
     @Nonnull
     public Fleet getTarget() {
         return target;
-    }
-
-    @Nonnull
-    public Distance getInitialDistance() {
-        return initialDistance;
     }
 
     @Nonnull
@@ -474,6 +359,11 @@ public class MissileSalvo extends DamageDealer {
     @Nullable
     public EDamageResult getResult() {
         return result;
+    }
+
+    @Nonnull
+    public Maneuver getManeuver() {
+        return maneuver;
     }
 
     /**
@@ -492,7 +382,19 @@ public class MissileSalvo extends DamageDealer {
         }).flatMap(Collection::stream).collect(Collectors.toList());
     }
 
-    public int roundsTravelled() {
-        return roundsTravelled;
+    @Nonnull
+    public Acceleration getAcceleration() {
+        return missileSalvoHealthState.getCurrentAmountByType().entrySet().stream().filter(e -> e.getValue() > 0)
+                .reduce((o1, o2) -> {
+                    final Missile m1 = o1.getKey();
+                    final Missile m2 = o2.getKey();
+
+                    // return smallest acceleration
+                    return m1.getMissileMotor().getAcceleration().compareTo(m2.getMissileMotor().getAcceleration()) < 0 ? o2 : o1;
+                })
+                .map(Map.Entry::getKey)
+                .map(Missile::getMissileMotor)
+                .map(MissileMotor::getAcceleration)
+                .orElseThrow(() -> new NotifyWebUserException("Please ask me not how fast I am when I don't contain missiles."));
     }
 }

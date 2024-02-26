@@ -7,6 +7,7 @@ import de.yuga.spacebattle.backend.calculator.geometry.DynamicInfo;
 import de.yuga.spacebattle.backend.calculator.geometry.KinematicInfo;
 import de.yuga.spacebattle.backend.calculator.resource.CourseOrderElement;
 import de.yuga.spacebattle.backend.combat.dto.AccelerationProfile;
+import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
 import de.yuga.spacebattle.backend.combat.dto.MovementAction;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
@@ -17,6 +18,7 @@ import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
@@ -29,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.combat.enums.EMovementType.REDUCE_DISTANCE;
 
@@ -61,6 +64,9 @@ public abstract class Maneuver {
 
     @Nonnull
     private final Fleet agent;
+
+    @Nullable
+    private MissileSalvo missileSalvo;
 
     @Nonnull
     private final KinematicInfo agentsKinematicInitial;
@@ -102,10 +108,32 @@ public abstract class Maneuver {
         this.maneuverElements = this.calculateCourse();
     }
 
+    protected Maneuver(@Nonnull final Cage cage,
+                       @Nonnull final CombatRound start,
+                       @Nonnull final Fleet agent,
+                       @Nonnull final KinematicInfo agentsKinematicInitial,
+                       @Nonnull final KinematicInfo agentsKinematicDesignated,
+                       @Nonnull final MissileSalvo missileSalvo,
+                       @Nonnull final Fleet target) {
+        this(cage, start, agent, agentsKinematicInitial, agentsKinematicDesignated, target);
+
+        this.missileSalvo = Preconditions.checkNotNull(missileSalvo, "missileSalvo must not be empty");
+    }
+
     abstract public ManeuverElements calculateCourse();
+
+    @Nullable
+    public CourseOrderElement getCourseElement(@Nonnull final CombatRound combatRound) {
+        Preconditions.checkNotNull(combatRound, "combatRound shouldn't be null!");
+
+        return getCourseOrderElements().stream().filter(elem -> elem.getCombatRound().equals(combatRound)).findFirst().orElse(null);
+    }
 
     @Nonnull
     public Velocity getAgentsTopSpeed() {
+        if (missileSalvo != null) {
+            return Velocity.SOL;
+        }
         return Velocity.SOL.multiply(BigDecimal.valueOf(agent.getRestrictingTechnologyType().getMaxVelocitySOL()));
     }
 
@@ -146,6 +174,11 @@ public abstract class Maneuver {
         return agent;
     }
 
+    @Nullable
+    public MissileSalvo getMissileSalvo() {
+        return missileSalvo;
+    }
+
     @Nonnull
     public KinematicInfo getAgentsKinematicInitial() {
         return agentsKinematicInitial;
@@ -163,7 +196,9 @@ public abstract class Maneuver {
 
     @Nonnull
     public List<CourseOrderElement> getCourseOrderElements() {
-        return courseOrderElements;
+        return courseOrderElements.stream()
+                .sorted(Comparator.comparing(CourseOrderElement::getCombatRound))
+                .collect(Collectors.toList());
     }
 
     @Nonnull
@@ -215,7 +250,8 @@ public abstract class Maneuver {
         final double totalLength = maneuverElements.getTotalLength();
         final Distance length = new Distance(totalLength, EDistanceMetric.KM);
 
-        final List<AccelerationProfile> accelerationProfile = NavigationCalculator.createAccelerationProfile(agentsKinematicInitial, agentsKinematicDesignated, length, getAgentsTopSpeed());
+        final List<AccelerationProfile> accelerationProfile =
+                NavigationCalculator.createAccelerationProfile(agentsKinematicInitial, agentsKinematicDesignated, length, getAgentsTopSpeed());
 
         /*
             Plan zur Bestimmung von Ort und Zeit zu bestimmter Kampfrunde
@@ -227,7 +263,14 @@ public abstract class Maneuver {
          */
 
         final CombatRound latestRound = Collections.max(accelerationProfile).getCombatRound();
-        cage.logMessage("Maneuver for '" + getAgent().getOwner().getUsername() + "' with a total length of '" + totalLength + "' passed in '" + latestRound + "' rounds.");
+
+        final String salvoName = getMissileSalvo() != null ? getMissileSalvo().getUuid().toString() : "";
+        final String username = getAgent().getOwner().getUsername();
+        cage.logMessage("Maneuver for '" + (StringUtils.isNotEmpty(salvoName) ? " salvo " + salvoName + " from " : "") + username + "' with a total of '" + length + "' passed in '" + latestRound + "' rounds.");
+
+        final CombatRound currentCombatRound = cage.getCurrentCombatRound().clone();
+        // because its one, not zero-based
+        currentCombatRound.previous();
 
         accelerationProfile.sort(AccelerationProfile::compareTo);
         for (final AccelerationProfile motionProfile : accelerationProfile) {
@@ -248,7 +291,7 @@ public abstract class Maneuver {
             final Orbit position = new Orbit(pointAtLength, EDistanceMetric.KM);
 
             addCourseOrder(
-                    motionProfile.getCombatRound().clone(),
+                    currentCombatRound.add(motionProfile.getCombatRound()),
                     maneuverElement,
                     new Distance(lengthOnTrack, EDistanceMetric.KM), // fixme can be distance directly - test it
                     REDUCE_DISTANCE,
@@ -277,7 +320,7 @@ public abstract class Maneuver {
         Preconditions.checkNotNull(position, "position shouldn't be null!");
 
         if (hasViolatedTopSpeed(velocity)) {
-            cage.logWarning("VELOCITY VIOLATED from fleet " + agent.getId());
+            cage.logWarning("VELOCITY VIOLATED from fleet " + agent.getOwner().getUsername());
         }
 
         courseOrderElements.add(new CourseOrderElement(this, maneuverElement, lengthOnTrack, combatRound, movementType, velocity, position));

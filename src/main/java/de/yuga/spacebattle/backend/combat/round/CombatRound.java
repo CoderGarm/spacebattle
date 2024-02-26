@@ -1,7 +1,10 @@
 package de.yuga.spacebattle.backend.combat.round;
 
+import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.physics.Time;
 import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
+
+import javax.annotation.Nonnull;
 
 public class CombatRound implements Cloneable, Comparable<CombatRound> {
 
@@ -81,5 +84,17 @@ public class CombatRound implements Cloneable, Comparable<CombatRound> {
     @Override
     public String toString() {
         return "# " + no;
+    }
+
+    @Nonnull
+    public CombatRound add(@Nonnull final CombatRound toAdd) {
+        Preconditions.checkNotNull(toAdd, "toAdd must not be empty");
+
+        return new CombatRound(no + toAdd.getNo());
+    }
+
+    @Nonnull
+    public CombatRound add(final int toAdd) {
+        return new CombatRound(no + toAdd);
     }
 }

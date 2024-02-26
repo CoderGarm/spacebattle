@@ -4,13 +4,13 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
+import de.yuga.spacebattle.backend.entities.spacecrafts.modules.Launcher;
 import de.yuga.spacebattle.backend.enums.ECombatPhase.ECombatSubPhase;
+import de.yuga.spacebattle.backend.enums.EWeaponAlignment;
+import de.yuga.spacebattle.backend.enums.EWeaponType;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MissileSalvoHealthState {
@@ -33,11 +33,51 @@ public class MissileSalvoHealthState {
     @Nonnull
     private final List<MissileAmmunitionProfile> losses = new ArrayList<>();
 
-    public MissileSalvoHealthState(@Nonnull final Map<Missile, Integer> initialAmountByType) {
-        Preconditions.checkNotNull(initialAmountByType, "initialAmountByType shouldn't be null!");
+    public MissileSalvoHealthState(@Nonnull final FleetRoundState actorsState,
+                                   @Nonnull final Set<EWeaponAlignment> applicableAlignments,
+                                   @Nonnull final Set<Missile> applicableMissiles) {
+        Preconditions.checkNotNull(actorsState, "actorsState must not be empty");
+        Preconditions.checkNotNull(applicableAlignments, "applicableAlignments must not be empty");
+        Preconditions.checkNotNull(applicableMissiles, "applicableMissiles must not be empty");
 
-        this.initialAmountByType = new MissileAmmunitionState(initialAmountByType);
-        this.currentAmountByType = new MissileAmmunitionState(initialAmountByType);
+        final Map<Missile, Integer> amountByType = new HashMap<>();
+
+        actorsState.getFightingWarShips()
+                .filter(WarshipHealthState::isFightingCapable)
+                .forEach(w -> w.getFittings().entrySet().stream()
+                        // filter active fittings
+                        .filter(Map.Entry::getValue)
+                        .map(Map.Entry::getKey)
+                        .filter(a -> a.getWeaponType() == EWeaponType.MISSILE)
+                        .filter(a -> a.getLauncher() != null)
+                        .filter(f -> applicableAlignments.contains(f.getWeaponAlignment()))
+                        .forEach(alignedFitting -> {
+                            final Launcher launcher = alignedFitting.getLauncher();
+                            final int amountOfLauncher = alignedFitting.getAmount();
+
+                            final Set<Missile> allowedMissiles = launcher.getAllowedMissiles();
+                            final HashSet<Missile> missiles = new HashSet<>(allowedMissiles);
+                            missiles.removeIf(m -> !applicableMissiles.contains(m));
+                            for (final Missile missile : missiles) {
+                                final MissileAmmunitionState missileAmmunitionState = w.getMissileAmmunitionState();
+                                final int remainingShots = missileAmmunitionState.getRemainingShots(missile);
+                                if (remainingShots <= 0) {
+                                    return;
+                                }
+
+                                // setting missiles to the salvo
+                                if (remainingShots >= amountOfLauncher) {
+                                    amountByType.merge(missile, amountOfLauncher, Integer::sum);
+                                    missileAmmunitionState.reduce(missile, amountOfLauncher);
+                                } else {
+                                    amountByType.merge(missile, remainingShots, Integer::sum);
+                                    missileAmmunitionState.reduce(missile, remainingShots);
+                                }
+                            }
+                        }));
+
+        this.initialAmountByType = new MissileAmmunitionState(amountByType);
+        this.currentAmountByType = new MissileAmmunitionState(amountByType);
     }
 
     @Nonnull
@@ -100,7 +140,7 @@ public class MissileSalvoHealthState {
     @Nonnull
     public Distance getAttackRange() {
         if (!isActive()) {
-            return Distance.ZERO;
+            return Distance.ZERO.clone();
         }
         final List<Distance> damageProjectionRanges = getCurrentAmountByType().keySet().stream()
                 .map(missile -> missile.getWarhead().getDamageProjectionRange())
