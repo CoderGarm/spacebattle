@@ -14,10 +14,9 @@ import java.util.UUID;
 @Schema(description = ".")
 public class MissileMovement {
 
-    @Nullable
     @JsonProperty
     @Schema(required = true, description = "The round and phase information.")
-    private CombatRoundKey combatRoundKey;
+    private int combatRoundKey;
 
     @Nullable
     @JsonProperty
@@ -56,7 +55,7 @@ public class MissileMovement {
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(input, "input shouldn't be null!");
 
-        this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound(), input.getCombatPhase());
+        this.combatRoundKey = input.getCombatRound().getNo();
         final Maneuver maneuver = input.getManeuver();
         this.actor = new AbstractId(input.getActor());
         this.actorOwner = new AbstractId(input.getActor().getOwner());

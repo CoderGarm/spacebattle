@@ -15,10 +15,9 @@ import java.util.stream.Collectors;
 @Schema(description = ".")
 public class ShipKillerHit {
 
-    @Nullable
     @JsonProperty
     @Schema(required = true, description = "The round and phase information.")
-    private CombatRoundKey combatRoundKey;
+    private int combatRoundKey;
 
     @Nullable
     @JsonProperty
@@ -58,7 +57,7 @@ public class ShipKillerHit {
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(input, "input shouldn't be null!");
 
-        this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound(), input.getCombatPhase());
+        this.combatRoundKey = input.getCombatRound().getNo();
         this.actor = new AbstractId(input.getActor());
         this.target = new AbstractId(input.getTarget());
         this.damageDealer = input.getDamageDealer();

@@ -17,10 +17,9 @@ import java.util.stream.Collectors;
 @Schema(description = ".")
 public class Maneuver {
 
-    @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The round and phase information.")
-    private CombatRoundKey combatRoundKey;
+    private int combatRoundKey;
 
     @Nonnull
     @JsonProperty
@@ -57,7 +56,7 @@ public class Maneuver {
         Preconditions.checkNotNull(input, "input shouldn't be null!");
         Preconditions.checkNotNull(participatingFleets, "participatingFleets must not be empty");
 
-        this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound(), input.getCombatPhase());
+        this.combatRoundKey = input.getCombatRound().getNo();
         this.designatedEnd = new CombatRound(input.getDesignatedEnd());
         this.end = new CombatRound(input.getEnd());
         final FleetSnapshot fleetSnapshot = participatingFleets.stream()

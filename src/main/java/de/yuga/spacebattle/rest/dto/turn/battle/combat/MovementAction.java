@@ -15,10 +15,9 @@ import java.util.Set;
 @Schema(description = ".")
 public class MovementAction {
 
-    @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The round and phase information.")
-    private CombatRoundKey combatRoundKey;
+    private int combatRoundKey;
 
     @Nonnull
     @JsonProperty
@@ -47,7 +46,7 @@ public class MovementAction {
         Preconditions.checkNotNull(input, "input shouldn't be null!");
         Preconditions.checkNotNull(participatingFleets, "participatingFleets must not be empty");
 
-        this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound(), input.getCombatPhase());
+        this.combatRoundKey = input.getCombatRound().getNo();
         final FleetSnapshot fleetSnapshot = participatingFleets.stream()
                 .filter(snap -> snap.getFleet().equals(input.getActor()))
                 .findFirst()
@@ -58,9 +57,8 @@ public class MovementAction {
         this.lengthOnTrack = input.getLengthOnTrack();
     }
 
-    @Nonnull
     @JsonIgnore
-    public CombatRoundKey getCombatRoundKey() {
+    public int getCombatRoundKey() {
         return combatRoundKey;
     }
 }

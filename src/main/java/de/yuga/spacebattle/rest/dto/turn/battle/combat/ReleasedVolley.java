@@ -13,10 +13,9 @@ import java.util.UUID;
 @Schema(description = ".")
 public class ReleasedVolley {
 
-    @Nullable
     @JsonProperty
     @Schema(required = true, description = "The round and phase information.")
-    private CombatRoundKey combatRoundKey;
+    private int combatRoundKey;
 
     @Nullable
     @JsonProperty
@@ -55,7 +54,7 @@ public class ReleasedVolley {
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(input, "input shouldn't be null!");
 
-        this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound(), input.getCombatPhase());
+        this.combatRoundKey = input.getCombatRound().getNo();
         this.actor = new AbstractId(input.getActor());
         this.actorOwner = new AbstractId(input.getActor().getOwner());
         this.target = new AbstractId(input.getTarget());

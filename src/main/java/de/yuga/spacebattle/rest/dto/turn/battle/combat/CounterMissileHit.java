@@ -12,10 +12,9 @@ import java.util.UUID;
 @Schema(description = ".")
 public class CounterMissileHit {
 
-    @Nullable
     @JsonProperty
     @Schema(required = true, description = "The round and phase information.")
-    private CombatRoundKey combatRoundKey;
+    private int combatRoundKey;
 
     @Nullable
     @JsonProperty
@@ -49,7 +48,7 @@ public class CounterMissileHit {
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(input, "input shouldn't be null!");
 
-        this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound(), input.getCombatPhase());
+        this.combatRoundKey = input.getCombatRound().getNo();
         this.actor = new AbstractId(input.getActor());
         this.target = new AbstractId(input.getTarget());
         this.attackedMissileSalvo = input.getAttackedMissileSalvo();

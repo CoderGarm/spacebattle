@@ -60,7 +60,7 @@ public class HitLog {
         Preconditions.checkNotNull(languageCode, "languageCode must not be empty");
         Preconditions.checkNotNull(input, "input shouldn't be null!");
 
-        this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound(), input.getCombatPhase());
+        this.combatRoundKey = new CombatRoundKey(input.getId(), input.getCombatRound());
         this.damageDealer = input.getDamageDealer();
         this.warShip = new AbstractId(input.getWarShip());
         this.damageValue = input.getDamageValue();
