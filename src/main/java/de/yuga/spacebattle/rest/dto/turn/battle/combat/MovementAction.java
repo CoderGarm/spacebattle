@@ -6,7 +6,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
-import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMarker;
+import de.yuga.spacebattle.rest.dto.AbstractId;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -22,7 +22,7 @@ public class MovementAction {
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The fleet which acts.")
-    private de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMarker actor;
+    private AbstractId actor;
 
     @Nonnull
     @JsonProperty
@@ -51,7 +51,7 @@ public class MovementAction {
                 .filter(snap -> snap.getFleet().equals(input.getActor()))
                 .findFirst()
                 .orElseThrow(NullPointerException::new);
-        this.actor = new FleetMarker(fleetSnapshot);
+        this.actor = new AbstractId(fleetSnapshot.getFleet().getId(), fleetSnapshot.getName());
         this.movementType = input.getMovementType();
         this.auraState = new AuraState(input.getAlignedAuraStates());
         this.lengthOnTrack = input.getLengthOnTrack();
