@@ -293,13 +293,20 @@ public class CombatHandler {
         final Set<EWeaponAlignment> applicableAlignments = EWeaponAlignment.getApplicableAlignments(actorPos, actorsDirection, targetPos);
 
         final Set<Missile> applicableMissiles = actorsState.getApplicableMissiles(applicableAlignments).stream()
-                .filter(m -> distance.compareTo(m.getMaximumMissileRange(actorsState, targetsState)) <= 0)
+                .filter(m -> {
+                    final Distance missileRange = m.getMaximumMissileRange(actorsState, targetsState);
+                    cage.logMessage(actor.getOwner().getUsername() + " tries to fire missiles"
+                            + " at range of " + distance
+                            + " with effective range of " + missileRange);
+                    return distance.compareTo(missileRange) <= 0;
+                })
                 .collect(Collectors.toSet());
 
         final boolean hasShotsLeft = actorsState.getFleetHealthState().hasShotsLeft(EWeaponType.MISSILE);
         if (!applicableMissiles.isEmpty() && hasShotsLeft) {
             final MissileSalvo missileSalvo = new MissileSalvo(cage, actor, target, applicableAlignments, applicableMissiles);
-            cage.logMessage(actor.getOwner().getUsername() + " tries to fire missiles " + missileSalvo.getUuid() + " for " + applicableAlignments.stream().map(Enum::name).collect(Collectors.joining(", "))
+            cage.logMessage(actor.getOwner().getUsername() + " fires missiles " + missileSalvo.getUuid()
+                    + " for " + applicableAlignments.stream().map(Enum::name).collect(Collectors.joining(", "))
                     + " at range of " + distance);
             cage.addToFlyingMissileSalvos(missileSalvo);
             cage.setActionHappened(true);

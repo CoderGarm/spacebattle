@@ -60,19 +60,7 @@ public class AuraState {
 
                 final Launcher launcher = activeFitting.getLauncher();
                 if (launcher != null) {
-                    final Function<Missile, Distance> distanceFunction;
-                    switch (weaponAlignment) {
-                        case BOW:
-                            distanceFunction = getMissileDistanceFunction(actorsRoundState, opponentsState);
-                            break;
-                        case STERN:
-                            distanceFunction = getMissileDistanceFunction(actorsRoundState);
-                            break;
-                        default:
-                        case BROADSIDE:
-                            distanceFunction = getMissileDistanceFunction();
-                            break;
-                    }
+                    final Function<Missile, Distance> distanceFunction = getMissileDistanceFunction(actorsRoundState, weaponAlignment, opponentsState);
                     final Distance missileRange = launcher.getAllowedMissiles().stream()
                             .filter(missileAmmunitionState::hasShotsLeft)
                             .map(distanceFunction)
@@ -99,6 +87,29 @@ public class AuraState {
             }
 
         });
+    }
+
+    @Nonnull
+    private static Function<Missile, Distance> getMissileDistanceFunction(@Nonnull final FleetRoundState actorsRoundState,
+                                                                          @Nonnull final EWeaponAlignment weaponAlignment,
+                                                                          @Nullable final FleetRoundState opponentsState) {
+        Preconditions.checkNotNull(actorsRoundState, "actorsRoundState must not be empty");
+        Preconditions.checkNotNull(weaponAlignment, "weaponAlignment must not be empty");
+
+        final Function<Missile, Distance> distanceFunction;
+        switch (weaponAlignment) {
+            case BOW:
+                distanceFunction = getMissileDistanceFunction(actorsRoundState, opponentsState);
+                break;
+            case STERN:
+                distanceFunction = getMissileDistanceFunction(actorsRoundState);
+                break;
+            default:
+            case BROADSIDE:
+                distanceFunction = getMissileDistanceFunction();
+                break;
+        }
+        return distanceFunction;
     }
 
     @Nonnull

@@ -96,7 +96,7 @@ public class MasterOfTheUniverseService {
     public static final String DEFEATED_OPPONENT = "Defeated Opponent";
     public static final String PIRATE = "Scharteke";
 
-    public boolean transformationNeeded = false; // fixme revert me before prod
+    public boolean transformationNeeded = true; // fixme revert me before prod
 
     public static final ProductionType CONSTRUCTION_YARD_PT = new ProductionType(EResourceType.CONSTRUCTION, EProductionCategory.PRODUCE, null);
     public static final ProductionType SHIPYARD_PT = new ProductionType(EResourceType.ORBITAL_CONSTRUCTION, EProductionCategory.PRODUCE, null);

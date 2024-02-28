@@ -2,6 +2,8 @@ package de.yuga.spacebattle.backend.entities.spacecrafts.ammunition;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
+import de.yuga.spacebattle.backend.calculator.resource.CourseOrderElement;
+import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.dto.physics.*;
 import de.yuga.spacebattle.backend.entities.misc.HasCostsByOwn;
@@ -163,10 +165,28 @@ public class Missile extends HasCostsByOwn {
                 .sqrt(DistanceCalculator.MC_HU);
         final Velocity resultingVelocity = new Velocity(vectorVelocity, velocity.getDistanceMetric(), velocity.getTimeMetric());
 
-        final Distance missileRange = getMaximumMissileRange(resultingVelocity);
-        final Distance pure = getMaximumMissileRange();
+        Distance missileRange = getMaximumMissileRange(resultingVelocity);
 
-        //actorsState.getCage().logMessage("MISSILE RANGE CALC: combined fleet velocity '" + resultingVelocity + "' KM/S on angle '" + angleBetween + "' with effective missile range of '" + missileRange + "' from range under drive with '" + pure + "'.");
+        final Time time = missileRange.calculateTimeToPass(missileMotor.getAcceleration(), Velocity.SOL);
+        final int roundsToHit = time.getCoordinateInMetric(ETimeMetric.SECOND)
+                .divide(CombatRound.COMBAT_ROUND.getCoordinateInMetric(ETimeMetric.SECOND), DistanceCalculator.MC_HU).intValue();
+
+        final CombatRound hitTime = actorsState.getCage().getCurrentCombatRound().add(roundsToHit);
+
+        Distance targetMovement = Distance.ZERO;
+        final CourseOrderElement courseElement = targetsState.getCoursePlot().getCourseElement(hitTime);
+        if (courseElement != null) {
+            targetMovement = courseElement.getPosition().getDistance(targetsState.getPosition());
+            missileRange = missileRange.add(targetMovement);
+        }
+
+
+        final Distance rangeUnderDrive = getMaximumMissileRange();
+
+        actorsState.getCage().logMessage("MISSILE RANGE CALC: combined fleet velocity '"
+                + resultingVelocity + "' KM/S on angle '" + angleBetween + "'"
+                + " with effective missile range of '" + missileRange + "' from range under drive with '" + rangeUnderDrive + "'"
+                + " with target movement of '" + targetMovement + "'.");
 
         return missileRange;
     }
