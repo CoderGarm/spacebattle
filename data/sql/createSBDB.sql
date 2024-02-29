@@ -370,6 +370,7 @@
         end integer not null,
         movingMissileSalvo varchar(255),
         name varchar(255) not null,
+        totalLength varchar(255) not null,
         idActor integer not null,
         idTarget integer not null,
         primary key (idManeuver)

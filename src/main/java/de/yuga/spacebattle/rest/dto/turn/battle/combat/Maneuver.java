@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.dto.turn.battle.combat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.rest.dto.combined.spacecrafts.FleetMarker;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -38,6 +39,11 @@ public class Maneuver {
 
     @Nonnull
     @JsonProperty
+    @Schema(required = true, description = "The real end.")
+    private Distance totalLength;
+
+    @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The fleet which acts.")
     private FleetMarker actor;
 
@@ -59,6 +65,7 @@ public class Maneuver {
         this.combatRoundKey = input.getCombatRound().getNo();
         this.designatedEnd = new CombatRound(input.getDesignatedEnd());
         this.end = new CombatRound(input.getEnd());
+        this.totalLength = input.getTotalLength();
         final FleetSnapshot fleetSnapshot = participatingFleets.stream()
                 .filter(snap -> snap.getFleet().equals(input.getActor()))
                 .findFirst()

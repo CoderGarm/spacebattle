@@ -3,7 +3,9 @@ package de.yuga.spacebattle.backend.entities.turn.battle.combat;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
 import de.yuga.spacebattle.backend.converter.CombatRoundConverter;
+import de.yuga.spacebattle.backend.converter.DistanceConverter;
 import de.yuga.spacebattle.backend.converter.UUIDConverter;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -54,6 +56,11 @@ public class Maneuver extends CombatRoundKey {
     @Convert(converter = CombatRoundConverter.class)
     private CombatRound end;
 
+    @NotNull
+    @Nonnull
+    @Convert(converter = DistanceConverter.class)
+    private Distance totalLength;
+
     @Nonnull
     @NotNull
     @JoinColumn(name = "idManeuver")
@@ -72,6 +79,7 @@ public class Maneuver extends CombatRoundKey {
         this.name = maneuver.getManeuverName();
         this.designatedEnd = maneuver.getDesignatedEnd();
         this.end = maneuver.getEnd();
+        this.totalLength = maneuver.getTotalLength();
         maneuverElements.addAll(maneuver.getManeuverElements().getManeuverElements()
                 .stream().map(m -> new ManeuverElement(this, m)).collect(Collectors.toSet()));
     }
@@ -104,6 +112,11 @@ public class Maneuver extends CombatRoundKey {
     @Nonnull
     public CombatRound getEnd() {
         return end;
+    }
+
+    @Nonnull
+    public Distance getTotalLength() {
+        return totalLength;
     }
 
     @Nonnull

@@ -89,6 +89,9 @@ public abstract class Maneuver {
     @Nullable
     private Orbit intersectionPoint;
 
+    @Nullable
+    private Distance totalLength;
+
     @Nonnull
     private final List<AccelerationProfile> accelerationProfile = new ArrayList<>();
 
@@ -248,10 +251,10 @@ public abstract class Maneuver {
         courseOrderElements.clear();
 
         final double totalLength = maneuverElements.getTotalLength();
-        final Distance length = new Distance(totalLength, EDistanceMetric.KM);
+        this.totalLength = new Distance(totalLength, EDistanceMetric.KM);
 
         final List<AccelerationProfile> accelerationProfile =
-                NavigationCalculator.createAccelerationProfile(agentsKinematicInitial, agentsKinematicDesignated, length, getAgentsTopSpeed());
+                NavigationCalculator.createAccelerationProfile(agentsKinematicInitial, agentsKinematicDesignated, this.totalLength, getAgentsTopSpeed());
 
         /*
             Plan zur Bestimmung von Ort und Zeit zu bestimmter Kampfrunde
@@ -266,7 +269,7 @@ public abstract class Maneuver {
 
         final String salvoName = getMissileSalvo() != null ? getMissileSalvo().getUuid().toString() : "";
         final String username = getAgent().getOwner().getUsername();
-        cage.logMessage("Maneuver for '" + (StringUtils.isNotEmpty(salvoName) ? " salvo " + salvoName + " from " : "") + username + "' with a total of '" + length + "' passed in '" + latestRound + "' rounds.");
+        cage.logMessage("Maneuver for '" + (StringUtils.isNotEmpty(salvoName) ? " salvo " + salvoName + " from " : "") + username + "' with a total of '" + this.totalLength + "' passed in '" + latestRound + "' rounds.");
 
         final CombatRound currentCombatRound = cage.getCurrentCombatRound().clone();
         // because its one, not zero-based
@@ -279,7 +282,7 @@ public abstract class Maneuver {
             final Velocity dynamicInfoVelocity = dynamicInfo.getVelocity();
             final Distance distance = dynamicInfo.getDistance().getInMetricWithScale(EDistanceMetric.KM);
 
-            double percentOfTrack = (distance.divide(length)).multiply(100).getCoordinate().doubleValue();
+            double percentOfTrack = (distance.divide(totalLength)).multiply(100).getCoordinate().doubleValue();
 
             // small ugly fix due the fact that you can not accelerate shorter than a combat round
             percentOfTrack = Double.min(100, percentOfTrack);
@@ -384,5 +387,10 @@ public abstract class Maneuver {
     @Nullable
     public Orbit getIntersectionPoint() {
         return intersectionPoint;
+    }
+
+    @Nonnull
+    public Distance getTotalLength() {
+        return Preconditions.checkNotNull(totalLength, "totalLength must not be empty");
     }
 }
