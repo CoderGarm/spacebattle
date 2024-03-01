@@ -28,6 +28,11 @@ article orbital modules
     - battles by conflict and date
     - all battles by date
 
+
+- points to discuss on reddit
+  - ab einer gewissen geschwindigkeit gibt es keine raketenweichweite nach hinten mehr
+  - ab einer gewissen reichweite ist der vorhalt extrem groß
+
 ### Features
 
 - Wenn kampfsystem durch und planis bomben drin -> neues Event bis rundenende "Krieg gegen KI".

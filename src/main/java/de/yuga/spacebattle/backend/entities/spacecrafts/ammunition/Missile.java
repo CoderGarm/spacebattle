@@ -197,24 +197,10 @@ public class Missile extends HasCostsByOwn {
 
         final Velocity velocity = actorsState.getVelocity();
 
-        final double angleBetween = -180;
-        final double cos = Math.cos(Math.toRadians(angleBetween));
 
-        final BigDecimal c = velocity.getValue();
-
-        // KOSINUSSATZ
-        final BigDecimal vectorVelocity = c.pow(2)
-                .subtract(BigDecimal.valueOf(2)
-                        .multiply(c)
-                        .multiply(BigDecimal.valueOf(cos)))
-                .sqrt(DistanceCalculator.MC_HU);
-        final Velocity resultingVelocity = new Velocity(vectorVelocity, velocity.getDistanceMetric(), velocity.getTimeMetric());
-
-        final Distance missileRange = getMaximumMissileRange(resultingVelocity);
+        final Distance missileRange = getMaximumMissileRange(velocity.negate());
 
         //actorsState.getCage().logMessage("MISSILE RANGE CALC: combined fleet velocity '" + resultingVelocity + "' KM/S on angle '" + angleBetween + "' with missile range of '" + missileRange + "'.");
-
-        // todo create segmented information: 'range under drive' with 'additional range by base movements'
 
         return missileRange;
     }

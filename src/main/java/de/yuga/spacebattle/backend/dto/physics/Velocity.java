@@ -324,4 +324,9 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
 
         return this.multiply(alignmentFactor);
     }
+
+    @Nonnull
+    public Velocity negate() {
+        return new Velocity(value.negate(), distanceMetric, timeMetric);
+    }
 }

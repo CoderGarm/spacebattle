@@ -243,7 +243,7 @@ public class Cage implements Future<Cage> {
         logMessage("#" + currentCombatRound + " new round " + Calendar.getInstance(Locale.GERMANY).getTime());
 
         long start = System.currentTimeMillis();
-        combatHandler.handleMovementPhase();
+        combatHandler.handleMovementPhase(); // fixme two sets of first rounds will be created
         logMessage("movement", start, start);
 
         start = System.currentTimeMillis();
@@ -255,7 +255,7 @@ public class Cage implements Future<Cage> {
         logMessage("incoming fire", start, start);
 
         start = System.currentTimeMillis();
-        combatHandler.handleFireWeaponPhase(); // fixme Missile movements must be handled by maneuvers, too. They must be targeted to the estimated position of a fleet to a given time.
+        combatHandler.handleFireWeaponPhase();
         logMessage("fire weapon", start, start);
 
         /* fixme implement forced battle end at condition
