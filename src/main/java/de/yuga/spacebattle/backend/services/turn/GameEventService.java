@@ -15,8 +15,10 @@ import de.yuga.spacebattle.backend.entities.constructables.buildings.Constructio
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
+import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateSnapshot;
 import de.yuga.spacebattle.backend.entities.turn.mission.HeatMap;
 import de.yuga.spacebattle.backend.enums.ECapacityAreaType;
 import de.yuga.spacebattle.backend.enums.EMissionType;
@@ -48,10 +50,28 @@ public class GameEventService {
     private static final Range<Tick> WAR_HARVEST_2023 = Range.between(new Tick(244), new Tick(257), Tick::compareTo);
 
     @Nonnull
+    private static final Range<Tick> TOURNAMENT_24 = Range.between(new Tick(310), new Tick(324), Tick::compareTo);
+
+    @Nonnull
     public static final String INTERCEPT_PREFIX = "INTERCEPT";
 
     @Nonnull
+    public static final String TOURNAMENT_PREFIX = "TD";
+
+    @Nonnull
+    public static final String TOURNAMENT_v1_PREFIX = "TD1-";
+
+    @Nonnull
+    public static final String TOURNAMENT_v3_PREFIX = "TD3-";
+
+    @Nonnull
+    public static final String TOURNAMENT_v5_PREFIX = "TD5-";
+
+    @Nonnull
     public static final String WAR_HARVEST_2023_PREFIX = "WAR_HARVEST_2023: ";
+
+    @Nonnull
+    public static final String TOURNAMENT_2024_PREFIX = "TOURNAMENT_2024: ";
 
     @Nonnull
     private final TickTimeService timeService;
@@ -97,6 +117,11 @@ public class GameEventService {
         return WAR_HARVEST_2023.contains(today);
     }
 
+    public boolean isTournament24() {
+        final Tick today = timeService.getToday();
+        return TOURNAMENT_24.contains(today);
+    }
+
     @Nonnull
     public List<FleetClash> organize(@Nonnull final Map<FleetOrbit, List<Fleet>> fleetsByOrbit) {
         Preconditions.checkNotNull(fleetsByOrbit, "fleetsByOrbit must not be empty");
@@ -108,32 +133,49 @@ public class GameEventService {
 
         final List<FleetClash> result = new ArrayList<>();
 
-        if (!isWarHarvest23()) {
-            LOGGER.info("Setting up regular fleet clashes");
+        if (isTournament24()) {
+            LOGGER.info("Setting up tournament fleet clashes");
             for (final FleetOrbit fleetOrbit : fleetsByOrbit.keySet().stream().filter(candidates::contains).collect(Collectors.toSet())) {
-                final List<Fleet> fleets = fleetsByOrbit.get(fleetOrbit);
-                setUpFleetClashes(fleetOrbit, fleets, result);
+                final List<Fleet> participatingFleets = fleetsByOrbit.get(fleetOrbit);
+
+                final Set<Fleet> eventFleets = participatingFleets.stream().filter(f -> f.getName().startsWith(TOURNAMENT_PREFIX)).collect(Collectors.toSet());
+                if (eventFleets.isEmpty()) {
+                    // process regularly on single or no intercept fleet
+                    setUpFleetClashes(fleetOrbit, participatingFleets, result);
+                } else {
+                    // assign combatants based on event status
+                    matchTournamentFleetsToCombatants(participatingFleets, result, fleetOrbit);
+                }
             }
             return result;
         }
 
-        LOGGER.info("Setting up war harvest fleet clashes");
-        for (final FleetOrbit fleetOrbit : fleetsByOrbit.keySet().stream().filter(candidates::contains).collect(Collectors.toSet())) {
-            final List<Fleet> participatingFleets = fleetsByOrbit.get(fleetOrbit);
+        if (isWarHarvest23()) {
+            LOGGER.info("Setting up war harvest fleet clashes");
+            for (final FleetOrbit fleetOrbit : fleetsByOrbit.keySet().stream().filter(candidates::contains).collect(Collectors.toSet())) {
+                final List<Fleet> participatingFleets = fleetsByOrbit.get(fleetOrbit);
 
-            final Set<Fleet> interceptFleets = participatingFleets.stream().filter(f -> f.getName().startsWith(INTERCEPT_PREFIX)).collect(Collectors.toSet());
-            if (interceptFleets.isEmpty()) {
-                // process regularly on single or no intercept fleet
-                setUpFleetClashes(fleetOrbit, participatingFleets, result);
-            } else {
-                // assign combatants based on event status
-                matchInterceptFleetsToCombatants(participatingFleets, result, fleetOrbit);
-                final Set<Fleet> otherFleets = participatingFleets.stream().filter(f -> !f.getName().startsWith(INTERCEPT_PREFIX)).collect(Collectors.toSet());
-                if (otherFleets.stream().map(Fleet::getOwner).collect(Collectors.toSet()).size() >= 2) {
+                final Set<Fleet> eventFleets = participatingFleets.stream().filter(f -> f.getName().startsWith(INTERCEPT_PREFIX)).collect(Collectors.toSet());
+                if (eventFleets.isEmpty()) {
                     // process regularly on single or no intercept fleet
-                    setUpFleetClashes(fleetOrbit, otherFleets, result);
+                    setUpFleetClashes(fleetOrbit, participatingFleets, result);
+                } else {
+                    // assign combatants based on event status
+                    matchInterceptFleetsToCombatants(participatingFleets, result, fleetOrbit);
+                    final Set<Fleet> otherFleets = participatingFleets.stream().filter(f -> !f.getName().startsWith(INTERCEPT_PREFIX)).collect(Collectors.toSet());
+                    if (otherFleets.stream().map(Fleet::getOwner).collect(Collectors.toSet()).size() >= 2) {
+                        // process regularly on single or no intercept fleet
+                        setUpFleetClashes(fleetOrbit, otherFleets, result);
+                    }
                 }
             }
+            return result;
+        }
+
+        LOGGER.info("Setting up regular fleet clashes");
+        for (final FleetOrbit fleetOrbit : fleetsByOrbit.keySet().stream().filter(candidates::contains).collect(Collectors.toSet())) {
+            final List<Fleet> fleets = fleetsByOrbit.get(fleetOrbit);
+            setUpFleetClashes(fleetOrbit, fleets, result);
         }
 
         return result;
@@ -170,6 +212,35 @@ public class GameEventService {
                     fleets.remove(biggestAttacker);
                     fleets.remove(biggestOther);
                 }
+            }
+        }
+    }
+
+    private static void matchTournamentFleetsToCombatants(@Nonnull final Collection<Fleet> fleets,
+                                                          @Nonnull final List<FleetClash> result,
+                                                          @Nonnull final FleetOrbit fleetOrbit) {
+        Preconditions.checkNotNull(fleets, "fleets must not be empty");
+        Preconditions.checkNotNull(result, "result must not be empty");
+        Preconditions.checkNotNull(fleetOrbit, "fleetOrbit must not be empty");
+
+        final Set<Owner> participants = fleets.stream().filter(f -> f.getName().startsWith(TOURNAMENT_PREFIX)).map(Fleet::getOwner).collect(Collectors.toSet());
+        if (participants.size() != 2 || fleets.size() != 2) {
+            LOGGER.info(TOURNAMENT_2024_PREFIX + "Ranked Battle sabotaged by {}", participants.stream().map(Owner::getUsername).collect(Collectors.joining(", ")));
+            return;
+        }
+
+        for (final Owner owner : participants) {
+            // old code reusage because lazyness
+            final List<Fleet> ownersFleets = fleets.stream()
+                    .filter(f -> f.getOwner().equals(owner))
+                    .collect(Collectors.toList());
+
+            for (int i = 0; i < ownersFleets.size(); i++) {
+                final List<Fleet> otherFleets = fleets.stream()
+                        .filter(fleet -> !fleet.getOwner().equals(owner))
+                        .collect(Collectors.toList());
+
+                result.add(new FleetClash(fleetOrbit, List.of(ownersFleets.get(0), otherFleets.get(0))));
             }
         }
     }
@@ -319,6 +390,57 @@ public class GameEventService {
 
     public void logResult(@Nonnull final BattleReport battleReport, @Nonnull final Set<WarShip> losses) {
         Preconditions.checkNotNull(battleReport, "battleReport must not be empty");
+
+        logTournamentResult(battleReport, losses);
+        logInterceptResult(battleReport, losses);
+    }
+
+    private void logTournamentResult(@Nonnull final BattleReport battleReport, @Nonnull final Set<WarShip> losses) {
+        Preconditions.checkNotNull(battleReport, "battleReport must not be empty");
+        Preconditions.checkNotNull(losses, "losses must not be empty");
+
+        if (!isTournament24()) {
+            return;
+        }
+        // todo multicombat will affect this
+
+        final User player = battleReport.getParticipatingUsers().stream().map(Owner::getHumanOwner).filter(Objects::nonNull).findFirst().orElseThrow(NullPointerException::new);
+        final User other = battleReport.getParticipatingUsers().stream().map(Owner::getHumanOwner).filter(Objects::nonNull).filter(o1 -> !o1.equals(player)).findFirst().orElseThrow(NullPointerException::new);
+
+        final List<String> names = battleReport.getParticipatingFleets().stream()
+                .map(FleetSnapshot::getFleet)
+                .map(Fleet::getName)
+                .collect(Collectors.toList());
+
+        final boolean matchingNames = names.stream().filter(name -> name.startsWith(TOURNAMENT_PREFIX)).count() == 2;
+        if (!matchingNames) {
+            return;
+        }
+
+        final boolean is1v1 = names.stream().filter(name -> name.startsWith(TOURNAMENT_v1_PREFIX)).count() == 2;
+        final boolean is3v3 = names.stream().filter(name -> name.startsWith(TOURNAMENT_v3_PREFIX)).count() == 2;
+        final boolean is5v5 = names.stream().filter(name -> name.startsWith(TOURNAMENT_v5_PREFIX)).count() == 2;
+
+        final Set<WarShip> warships = battleReport.getParticipatingFleets().stream()
+                .map(FleetSnapshot::getShips)
+                .flatMap(Collection::stream)
+                .map(WarshipHealthStateSnapshot::getWarShip)
+                .collect(Collectors.toSet());
+
+        warships.removeAll(losses);
+
+        final Set<User> owner = warships.stream().map(WarShip::getShipClass).map(ShipClass::getHumanOwner).collect(Collectors.toSet());
+        final User winner = new ArrayList<>(owner).get(0);
+        rankingService.addPoints(winner, is1v1, is3v3, is5v5);
+
+        LOGGER.info(TOURNAMENT_2024_PREFIX + "Ranked Battle - {} won {}",
+                winner.getUsername(),
+                (is1v1 ? "1v1" : is3v3 ? "3v3" : is5v5 ? "5v5" : ""));
+    }
+
+    private void logInterceptResult(@Nonnull final BattleReport battleReport, @Nonnull final Set<WarShip> losses) {
+        Preconditions.checkNotNull(battleReport, "battleReport must not be empty");
+        Preconditions.checkNotNull(losses, "losses must not be empty");
 
         final boolean isNotAPiratePlanet = battleReport.getVenue().getPlanet() == null || battleReport.getVenue().getPlanet().getOwner() == null || battleReport.getVenue().getPlanet().getOwner().getId() != 15;
         if (!isWarHarvest23() || isNotAPiratePlanet) {

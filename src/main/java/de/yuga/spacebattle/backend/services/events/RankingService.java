@@ -86,4 +86,18 @@ public class RankingService {
 
         return Objects.requireNonNullElse(rankingRepository.findAll(gameEvent), new HashSet<>());
     }
+
+    public void addPoints(@Nonnull final User winner, final boolean is1v1, final boolean is3v3, final boolean is5v5) {
+        Preconditions.checkNotNull(winner, "winner must not be empty");
+
+        final EGameEvent gameEvent = EGameEvent.TOURNAMENT_FOR_HONOR_24;
+
+        ERankingCategory rankingCategory = ERankingCategory.WON_FIGHTS;
+        EventRanking ranking = rankingRepository.findFor(winner, gameEvent, rankingCategory);
+        if (ranking == null) {
+            ranking = new EventRanking(winner, gameEvent, rankingCategory);
+        }
+        ranking.addPoints(1);
+        rankingRepository.save(ranking);
+    }
 }
