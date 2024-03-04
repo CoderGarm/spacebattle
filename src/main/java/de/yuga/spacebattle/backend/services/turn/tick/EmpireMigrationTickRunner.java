@@ -13,6 +13,7 @@ import de.yuga.spacebattle.backend.services.caches.TransportationCache;
 import de.yuga.spacebattle.backend.services.caclulator.TickOutputCalculator;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -61,158 +64,159 @@ public class EmpireMigrationTickRunner implements TickRunner {
         this.today = Preconditions.checkNotNull(today, "today must not be empty");
 
         LOGGER.info("Migrate by education in the empires");
-        tickMigrations();
-    }
-
-    private void tickMigrations() {
-        Preconditions.checkNotNull(today, "today must not be empty");
-
         final Map<User, Set<Planet>> planetsByUser = getPlanetsByUser();
 
-        final Map<User, Map<Planet, ResourceDeposit>> originalDemands = new HashMap<>();
-        final Map<User, Map<Planet, ResourceDeposit>> demands = new HashMap<>();
-        planetsByUser.keySet().forEach(user -> demands.put(user, operationalService.getPopulationDemandForUserByPlanet(user.getId())));
+        final List<CompletableFuture<Boolean>> futures = new ArrayList<>();
 
-        demands.forEach((user, map) -> {
-            // clone them
-            final Map<Planet, ResourceDeposit> innterMap = new HashMap<>();
-            map.forEach((planet, resourceDeposit) -> innterMap.put(planet, new ResourceDeposit(resourceDeposit)));
-            originalDemands.put(user, innterMap);
-        });
+        for (final User user : planetsByUser.keySet()) {
+            final Set<Planet> planets = planetsByUser.get(user);
+            final CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
+                tickMigrations(user, planets);
+                return true;
+            });
+            futures.add(future);
+        }
+
+        final CompletableFuture<Void> allCompleted = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        try {
+            allCompleted.get();
+            LOGGER.info("Tick empire migrations done");
+        } catch (final InterruptedException | ExecutionException e) {
+            LOGGER.warn("Exception ticking empire migrations in parallel.", e);
+            throw new NotifyWebUserException(e.getMessage());
+        }
+    }
+
+    private void tickMigrations(@Nonnull final User user, @Nonnull final Set<Planet> planets) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(user, "user must not be empty");
+        Preconditions.checkNotNull(planets, "planets must not be empty");
+
+        LOGGER.info("Start ticking migration for '{}'", user.getId());
+
+        final Map<Planet, ResourceDeposit> originalDemands = new HashMap<>();
+        final Map<Planet, ResourceDeposit> demands = new HashMap<>();
+        final Map<Planet, ResourceDeposit> populationDemandForUserByPlanet = operationalService.getPopulationDemandForUserByPlanet(user.getId());
+
+        // clone them
+        populationDemandForUserByPlanet.forEach((planet, resourceDeposit) -> originalDemands.put(planet, new ResourceDeposit(resourceDeposit)));
 
         reduceDemandAboutDeposit(demands);
 
-        final Set<Integer> planetIDs = planetsByUser.values().stream()
-                .flatMap(Collection::stream)
+        final Set<Integer> planetIDs = planets.stream()
                 .map(AbstractEntityKey::getId).collect(Collectors.toSet());
         final Map<Integer, ResourceDeposit> capacitiesByPlanetID = planetService.getResourceCapacities(planetIDs);
         final Map<Integer, Long> popCapacitiesByPlanetID = new HashMap<>();
         capacitiesByPlanetID.forEach((idPlanet, resourceDeposit) -> popCapacitiesByPlanetID.put(idPlanet, resourceDeposit.getResourceAmountByType(EResourceType.POPULATION)));
         limitDemandToCapacity(demands, popCapacitiesByPlanetID);
 
-        final Map<User, Map<Planet, ResourceDeposit>> giveAway = calculateDeliveryAbility(planetsByUser, demands, originalDemands);
+        final Map<Planet, ResourceDeposit> delivery = calculateDeliveryAbility(planets, demands, originalDemands);
 
-        planetsByUser.keySet().forEach(user -> {
-            final Map<Planet, ResourceDeposit> delivery = giveAway.getOrDefault(user, new HashMap<>());
-            final Map<Planet, ResourceDeposit> demand = demands.getOrDefault(user, new HashMap<>());
+        final Set<Planet> planetsWithDemand = demands.entrySet().stream().filter(e -> e.getValue().getCrewRequirement().getSumOfPopulation() > 0).map(Map.Entry::getKey).collect(Collectors.toSet());
+        final Set<Planet> planetsWithDelivery = delivery.entrySet().stream().filter(e -> e.getValue().getCrewRequirement().getSumOfPopulation() > 0).map(Map.Entry::getKey).collect(Collectors.toSet());
 
-            final Set<Planet> planetsWithDemand = demand.entrySet().stream().filter(e -> e.getValue().getCrewRequirement().getSumOfPopulation() > 0).map(Map.Entry::getKey).collect(Collectors.toSet());
-            final Set<Planet> planetsWithDelivery = delivery.entrySet().stream().filter(e -> e.getValue().getCrewRequirement().getSumOfPopulation() > 0).map(Map.Entry::getKey).collect(Collectors.toSet());
+        for (final Planet to : planetsWithDemand) {
+            final ResourceDeposit demandResourceDeposit = demands.get(to);
 
-            for (final Planet to : planetsWithDemand) {
-                final ResourceDeposit demandResourceDeposit = demand.get(to);
+            for (final Planet from : planetsWithDelivery) {
+                final ResourceDeposit presentResourceDeposit = delivery.get(from);
 
-                for (final Planet from : planetsWithDelivery) {
-                    final ResourceDeposit presentResourceDeposit = delivery.get(from);
+                demandResourceDeposit.getHumanResources().forEach((educationType, neededAmount) -> {
 
-                    demandResourceDeposit.getHumanResources().forEach((educationType, neededAmount) -> {
+                    final long presentAmount = presentResourceDeposit.getCrewAmountByType(educationType);
 
-                        final long presentAmount = presentResourceDeposit.getCrewAmountByType(educationType);
-
-                        long transferredAmount = Math.min(presentAmount, neededAmount);
-                        if (transferredAmount > 0) {
-                            // log transfer
-                            transportationCache.add(today, from, to, educationType, transferredAmount);
-                            // update "organisation data"
-                            presentResourceDeposit.updateCrewRequirement(educationType, -transferredAmount);
-                            demandResourceDeposit.updateCrewRequirement(educationType, -transferredAmount);
-                            // execute transfer
-                            from.getResourceDeposit().updateCrewRequirement(educationType, -transferredAmount);
-                            to.getResourceDeposit().updateCrewRequirement(educationType, transferredAmount);
-                        }
-                    });
-                }
-            }
-        });
-
-        planetService.saveAll(giveAway.values().stream().map(Map::keySet).flatMap(Collection::stream).collect(Collectors.toList()));
-        planetService.saveAll(demands.values().stream().map(Map::keySet).flatMap(Collection::stream).collect(Collectors.toList()));
-    }
-
-    private static Map<User, Map<Planet, ResourceDeposit>> calculateDeliveryAbility(@Nonnull final Map<User, Set<Planet>> planetsByUser,
-                                                                                    @Nonnull final Map<User, Map<Planet, ResourceDeposit>> demands,
-                                                                                    @Nonnull final Map<User, Map<Planet, ResourceDeposit>> originalDemands) {
-        Preconditions.checkNotNull(planetsByUser, "planetsByUser must not be empty");
-        Preconditions.checkNotNull(demands, "demands must not be empty");
-        Preconditions.checkNotNull(originalDemands, "originalDemands must not be empty");
-
-        final Map<User, Map<Planet, ResourceDeposit>> giveAway = new HashMap<>();
-        planetsByUser.forEach((user, planets) -> {
-
-            final Map<Planet, ResourceDeposit> give = giveAway.getOrDefault(user, new HashMap<>());
-
-            final Map<Planet, ResourceDeposit> actuallyDemands = demands.getOrDefault(user, new HashMap<>());
-            final Map<Planet, ResourceDeposit> originals = originalDemands.getOrDefault(user, new HashMap<>());
-
-            for (final Planet planet : planets) {
-                final ResourceDeposit actuallyDemand = actuallyDemands.get(planet);
-                final ResourceDeposit originalDemand = originals.get(planet);
-
-                Arrays.stream(EEducationType.values()).forEach(educationType -> {
-                    final long demand = actuallyDemand != null ? actuallyDemand.getCrewAmountByType(educationType) : 0;
-                    final long presentPops = planet.getResourceDeposit().getCrewAmountByType(educationType);
-                    if (demand == 0 && presentPops > 0) {
-                        // can give
-                        final long toGive = presentPops - (originalDemand != null ? originalDemand.getCrewAmountByType(educationType) : 0);
-                        if (toGive > 0) {
-                            final ResourceDeposit toGiveDeposit = give.getOrDefault(planet, new ResourceDeposit(EDepositType.DEPOSITS));
-                            toGiveDeposit.updateCrewRequirement(educationType, toGive);
-                            give.put(planet, toGiveDeposit);
-                        }
+                    long transferredAmount = Math.min(presentAmount, neededAmount);
+                    if (transferredAmount > 0) {
+                        // log transfer
+                        transportationCache.add(today, from, to, educationType, transferredAmount);
+                        // update "organisation data"
+                        presentResourceDeposit.updateCrewRequirement(educationType, -transferredAmount);
+                        demandResourceDeposit.updateCrewRequirement(educationType, -transferredAmount);
+                        // execute transfer
+                        from.getResourceDeposit().updateCrewRequirement(educationType, -transferredAmount);
+                        to.getResourceDeposit().updateCrewRequirement(educationType, transferredAmount);
                     }
                 });
             }
-            giveAway.put(user, give);
-        });
+        }
+
+        planetService.saveAll(delivery.keySet());
+        planetService.saveAll(demands.keySet());
+    }
+
+    @Nonnull
+    private static Map<Planet, ResourceDeposit> calculateDeliveryAbility(@Nonnull final Set<Planet> planets,
+                                                                         @Nonnull final Map<Planet, ResourceDeposit> demands,
+                                                                         @Nonnull final Map<Planet, ResourceDeposit> originalDemands) {
+        Preconditions.checkNotNull(planets, "planets must not be empty");
+        Preconditions.checkNotNull(demands, "demands must not be empty");
+        Preconditions.checkNotNull(originalDemands, "originalDemands must not be empty");
+
+        final Map<Planet, ResourceDeposit> giveAway = new HashMap<>();
+
+        for (final Planet planet : planets) {
+            final ResourceDeposit actuallyDemand = demands.get(planet);
+            final ResourceDeposit originalDemand = originalDemands.get(planet);
+
+            Arrays.stream(EEducationType.values()).forEach(educationType -> {
+                final long demand = actuallyDemand != null ? actuallyDemand.getCrewAmountByType(educationType) : 0;
+                final long presentPops = planet.getResourceDeposit().getCrewAmountByType(educationType);
+                if (demand == 0 && presentPops > 0) {
+                    // can give
+                    final long toGive = presentPops - (originalDemand != null ? originalDemand.getCrewAmountByType(educationType) : 0);
+                    if (toGive > 0) {
+                        final ResourceDeposit toGiveDeposit = giveAway.getOrDefault(planet, new ResourceDeposit(EDepositType.DEPOSITS));
+                        toGiveDeposit.updateCrewRequirement(educationType, toGive);
+                        giveAway.put(planet, toGiveDeposit);
+                    }
+                }
+            });
+        }
         return giveAway;
     }
 
-    private static void limitDemandToCapacity(@Nonnull final Map<User, Map<Planet, ResourceDeposit>> demands,
+    private static void limitDemandToCapacity(@Nonnull final Map<Planet, ResourceDeposit> demands,
                                               @Nonnull final Map<Integer, Long> popCapacitiesByPlanet) {
         Preconditions.checkNotNull(demands, "demands must not be empty");
         Preconditions.checkNotNull(popCapacitiesByPlanet, "popCapacitiesByPlanet must not be empty");
 
-        demands.values().forEach(map -> {
-            map.forEach((planet, popDemand) -> {
-                final long capacity = popCapacitiesByPlanet.getOrDefault(planet.getId(), 0L);
-                final long summedPopulation = planet.getResourceDeposit().getCrewRequirement().getSumOfPopulation();
-                final long summedDemand = popDemand.getCrewRequirement().getSumOfPopulation();
-                if ((summedPopulation + summedDemand) > capacity) {
-                    // if not enough capacity is present, reduce equally over all education types
-                    final long populationOverflow = capacity - summedPopulation - summedDemand;
-                    final List<EEducationType> demandedTypes = new ArrayList<>(popDemand.getHumanResources().keySet());
-                    int index = 0;
-                    for (long i = 0; i < populationOverflow; i++) {
-                        if (index > demandedTypes.size() - 1) {
-                            index = 0;
-                        }
-
-                        EEducationType type = demandedTypes.get(0);
-                        final long crewAmountByType = popDemand.getCrewAmountByType(type);
-                        if (crewAmountByType >= 1) {
-                            popDemand.updateCrewRequirement(type, -1);
-                        }
-
-                        index++;
+        demands.forEach((planet, popDemand) -> {
+            final long capacity = popCapacitiesByPlanet.getOrDefault(planet.getId(), 0L);
+            final long summedPopulation = planet.getResourceDeposit().getCrewRequirement().getSumOfPopulation();
+            final long summedDemand = popDemand.getCrewRequirement().getSumOfPopulation();
+            if ((summedPopulation + summedDemand) > capacity) {
+                // if not enough capacity is present, reduce equally over all education types
+                final long populationOverflow = capacity - summedPopulation - summedDemand;
+                final List<EEducationType> demandedTypes = new ArrayList<>(popDemand.getHumanResources().keySet());
+                int index = 0;
+                for (long i = 0; i < populationOverflow; i++) {
+                    if (index > demandedTypes.size() - 1) {
+                        index = 0;
                     }
+
+                    EEducationType type = demandedTypes.get(0);
+                    final long crewAmountByType = popDemand.getCrewAmountByType(type);
+                    if (crewAmountByType >= 1) {
+                        popDemand.updateCrewRequirement(type, -1);
+                    }
+
+                    index++;
                 }
-            });
+            }
         });
     }
 
-    private static void reduceDemandAboutDeposit(@Nonnull final Map<User, Map<Planet, ResourceDeposit>> demands) {
+    private static void reduceDemandAboutDeposit(@Nonnull final Map<Planet, ResourceDeposit> demands) {
         Preconditions.checkNotNull(demands, "demands must not be empty");
 
-        demands.values().forEach(map -> {
-            map.forEach((planet, popDemand) -> {
-                Arrays.stream(EEducationType.values()).forEach(educationType -> {
-                    final long presentAmount = planet.getResourceDeposit().getCrewAmountByType(educationType);
-                    if (presentAmount <= popDemand.getCrewAmountByType(educationType)) {
-                        popDemand.updateCrewRequirement(educationType, -presentAmount);
-                    } else {
-                        popDemand.setAbsoluteCrewRequirement(educationType, 0);
-                    }
-                });
+        demands.forEach((planet, popDemand) -> {
+            Arrays.stream(EEducationType.values()).forEach(educationType -> {
+                final long presentAmount = planet.getResourceDeposit().getCrewAmountByType(educationType);
+                if (presentAmount <= popDemand.getCrewAmountByType(educationType)) {
+                    popDemand.updateCrewRequirement(educationType, -presentAmount);
+                } else {
+                    popDemand.setAbsoluteCrewRequirement(educationType, 0);
+                }
             });
         });
     }

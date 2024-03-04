@@ -33,9 +33,12 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
@@ -123,10 +126,26 @@ public class PlanetTickRunner implements TickRunner {
      * Runs the tick for all planets.
      */
     private void tickPlanets() {
+
+        final List<CompletableFuture<Boolean>> futures = new ArrayList<>();
+
         final List<Planet> planets = planetService.findAllForTick();
         for (final Planet p : planets) {
-            log(p, "Start ticking planet");
-            tickPlanet(p);
+            final CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
+                log(p, "Start ticking planet");
+                tickPlanet(p);
+                return true;
+            });
+            futures.add(future);
+        }
+
+        final CompletableFuture<Void> allCompleted = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        try {
+            allCompleted.get();
+            LOGGER.info("Tick planets done");
+        } catch (final InterruptedException | ExecutionException e) {
+            LOGGER.warn("Exception ticking planets in parallel.", e);
+            throw new NotifyWebUserException(e.getMessage());
         }
     }
 
@@ -150,8 +169,12 @@ public class PlanetTickRunner implements TickRunner {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(today, "today must not be empty");
 
+        if (planet.getId() == 1304) {
+            int br = 0;
+        }
         final Set<Construction> constructions = planet.getConstructions().stream()
                 .filter(c -> !c.getJobs().isEmpty())
+                .filter(c -> c.getBuilding().getProductionTarget() != EResourceType.RESEARCH)
                 .collect(Collectors.toSet());
         for (final Construction facility : constructions) {
             final EResourceType resourceType = facility.getBuilding().getProductionTarget();
@@ -295,6 +318,7 @@ public class PlanetTickRunner implements TickRunner {
                 .collect(Collectors.toList());
         orbitalStructureService.saveAll(toStore);
 
+        jobService.save(job);
         log(planet, job, "Done creating orbital modules.");
     }
 

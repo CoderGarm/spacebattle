@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ResearchTickRunner implements TickRunner {
@@ -81,31 +82,29 @@ public class ResearchTickRunner implements TickRunner {
     private void tickPlanets() {
         Preconditions.checkNotNull(today, "today must not be empty");
 
-        final List<User> users = userService.findAll();
-        for (final User user : users) {
-            final Job researchJob = jobService.findAllJobsForUser(user).stream()
-                    .filter(j -> j.getConstructable().isResearchJob())
+        final Set<Integer> users = userService.findAllUserIDs();
+        for (final Integer idUser : users) {
+            final Job researchJob = jobService.findAllResearchJobsForUser(idUser).stream()
                     .findFirst()
                     .orElse(null);
             if (researchJob == null) {
                 continue;
             }
-            tickResearch(user, researchJob);
+            tickResearch(idUser, researchJob);
         }
     }
 
-    private void tickResearch(@Nonnull final User user, @Nonnull final Job researchJob) {
+    private void tickResearch(final int idUser, @Nonnull final Job researchJob) {
         Preconditions.checkNotNull(today, "today must not be empty");
-        Preconditions.checkNotNull(user, "user must not be empty");
         Preconditions.checkNotNull(researchJob, "researchJob must not be empty");
 
-        final Planet researchPlanet = planetService.findResearchPlanet(user);
+        final Planet researchPlanet = planetService.findResearchPlanet(idUser);
         assert researchPlanet != null;
-        final long empireWideResearchPointsLeftOver = planetService.getEmpireWideResearchPoints(user.getId()).getEmpireWideResearchPointsLeftOver();
+        final long empireWideResearchPointsLeftOver = planetService.getEmpireWideResearchPoints(idUser).getEmpireWideResearchPointsLeftOver();
         final long usedPoints = tickJob(researchJob, empireWideResearchPointsLeftOver);
         if (!researchJob.isFinished()) {
             jobService.save(researchJob);
-            planetService.reduceResearchPoints(user.getId(), usedPoints);
+            planetService.reduceResearchPoints(idUser, usedPoints);
             log(researchPlanet, researchJob, "Shifting job for tick after " + today + ".");
             return;
         }

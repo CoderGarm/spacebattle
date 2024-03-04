@@ -12,6 +12,7 @@ import de.yuga.spacebattle.backend.services.caches.TransportationCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.TransportJobService;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -90,77 +93,101 @@ public class EmpireTransportationTickRunner implements TickRunner {
      * todo implement some level of market strength and time to fly
      */
     private void tickTransportations(@Nonnull final Tick today) {
-        final Map<User, Set<Planet>> planetsByUser = getPlanetsByUser();
+        Preconditions.checkNotNull(today, "today must not be empty");
+
+        final List<CompletableFuture<Boolean>> futures = new ArrayList<>();
 
         final Set<Planet> toStore = new HashSet<>();
-        planetsByUser.forEach((user, owned) -> {
-            // fill the main planet's deposit at first
-            final List<Planet> planetSet = owned.stream().sorted((o1, o2) -> o1.isMain() ? -1 : o2.isMain() ? 1 : 0).collect(Collectors.toList());
-
-            final Map<Planet, ResourceDeposit> deposits = planetSet.stream()
-                    .filter(p -> p.getResourceDeposit().hasData())
-                    .collect(Collectors.toMap(Function.identity(), Planet::getResourceDeposit));
-
-            final Map<Planet, ResourceDeposit> deliveries = planetSet.stream()
-                    .filter(p -> p.getResourceTransportationDelivery().hasData())
-                    .collect(Collectors.toMap(Function.identity(), Planet::getResourceTransportationDelivery));
-
-            final Map<Planet, ResourceDeposit> unusedMap = new HashMap<>();
-            // state all possible deliveries and from where it comes
-            stateUnusedResourcesForDelivery(deposits, deliveries, unusedMap);
-
-            final Map<Planet, ResourceDeposit> demands = planetSet.stream()
-                    .filter(p -> p.getResourceTransportationDemand().hasData())
-                    .collect(Collectors.toMap(Function.identity(), p -> new ResourceDeposit(p.getResourceTransportationDemand())));
-            demands.forEach((planet, demand) -> {
-                demand.getResources().forEach((demandedType, demandedAmount) -> {
-                    if (demandedAmount > 0) {
-                        for (final Map.Entry<Planet, ResourceDeposit> e : unusedMap.entrySet()) {
-                            final Planet from = e.getKey();
-                            final ResourceDeposit unused = e.getValue();
-                            if (from.equals(planet)) {
-                                continue;
-                            }
-                            final long present = unused.getResourceAmountByType(demandedType);
-                            demandedAmount = demand.getResourceAmountByType(demandedType);
-                            final long amount = Long.min(present, demandedAmount);
-                            if (amount > 0) {
-                                // reduce the free amount of resources
-                                unused.updateResource(demandedType, -amount);
-                                // reduce the transient storage
-                                demand.updateResource(demandedType, -amount);
-                                // reduce the real demand by updating the deposit
-                                planet.getResourceDeposit().updateResource(demandedType, amount);
-                                // reduce the deposit of the sending planet
-                                from.getResourceDeposit().updateResource(demandedType, -amount);
-                                toStore.add(from);
-                                toStore.add(planet);
-                                transportationCache.add(today, from, planet, demandedType, amount);
-                            }
-                        }
-                    }
-                });
-
-                demand.getHumanResources().forEach((demandedType, demandedAmount) -> {
-                    if (demandedAmount > 0) {
-                        for (final Map.Entry<Planet, ResourceDeposit> e : unusedMap.entrySet()) {
-                            final Planet from = e.getKey();
-                            final ResourceDeposit unused = e.getValue();
-                            if (from.equals(planet)) {
-                                continue;
-                            }
-                            final long present = unused.getCrewAmountByType(demandedType);
-                            demandedAmount = demand.getCrewAmountByType(demandedType);
-                            final long amount = Long.min(present, demandedAmount);
-                            executeTransportation(toStore, planet, demand, demandedType, from, unused, amount);
-                        }
-                    }
-                });
+        getPlanetsByUser().forEach((user, owned) -> {
+            final CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
+                executeTransportations(today, owned, toStore);
+                return true;
             });
+            futures.add(future);
         });
+
+        final CompletableFuture<Void> allCompleted = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        try {
+            allCompleted.get();
+            LOGGER.info("Tick transportations done");
+        } catch (final InterruptedException | ExecutionException e) {
+            LOGGER.warn("Exception ticking transportations in parallel.", e);
+            throw new NotifyWebUserException(e.getMessage());
+        }
+
         if (!toStore.isEmpty()) {
             planetService.saveAll(toStore);
         }
+    }
+
+    private void executeTransportations(@Nonnull final Tick today, @Nonnull final Set<Planet> owned, @Nonnull final Set<Planet> toStore) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(owned, "owned must not be empty");
+        Preconditions.checkNotNull(today, "today must not be empty");
+
+        // fill the main planet's deposit at first
+        final List<Planet> planetSet = owned.stream().sorted((o1, o2) -> o1.isMain() ? -1 : o2.isMain() ? 1 : 0).collect(Collectors.toList());
+
+        final Map<Planet, ResourceDeposit> deposits = planetSet.stream()
+                .filter(p -> p.getResourceDeposit().hasData())
+                .collect(Collectors.toMap(Function.identity(), Planet::getResourceDeposit));
+
+        final Map<Planet, ResourceDeposit> deliveries = planetSet.stream()
+                .filter(p -> p.getResourceTransportationDelivery().hasData())
+                .collect(Collectors.toMap(Function.identity(), Planet::getResourceTransportationDelivery));
+
+        final Map<Planet, ResourceDeposit> unusedMap = new HashMap<>();
+        // state all possible deliveries and from where it comes
+        stateUnusedResourcesForDelivery(deposits, deliveries, unusedMap);
+
+        final Map<Planet, ResourceDeposit> demands = planetSet.stream()
+                .filter(p -> p.getResourceTransportationDemand().hasData())
+                .collect(Collectors.toMap(Function.identity(), p -> new ResourceDeposit(p.getResourceTransportationDemand())));
+        demands.forEach((planet, demand) -> {
+            demand.getResources().forEach((demandedType, demandedAmount) -> {
+                if (demandedAmount > 0) {
+                    for (final Map.Entry<Planet, ResourceDeposit> e : unusedMap.entrySet()) {
+                        final Planet from = e.getKey();
+                        final ResourceDeposit unused = e.getValue();
+                        if (from.equals(planet)) {
+                            continue;
+                        }
+                        final long present = unused.getResourceAmountByType(demandedType);
+                        demandedAmount = demand.getResourceAmountByType(demandedType);
+                        final long amount = Long.min(present, demandedAmount);
+                        if (amount > 0) {
+                            // reduce the free amount of resources
+                            unused.updateResource(demandedType, -amount);
+                            // reduce the transient storage
+                            demand.updateResource(demandedType, -amount);
+                            // reduce the real demand by updating the deposit
+                            planet.getResourceDeposit().updateResource(demandedType, amount);
+                            // reduce the deposit of the sending planet
+                            from.getResourceDeposit().updateResource(demandedType, -amount);
+                            toStore.add(from);
+                            toStore.add(planet);
+                            transportationCache.add(today, from, planet, demandedType, amount);
+                        }
+                    }
+                }
+            });
+
+            demand.getHumanResources().forEach((demandedType, demandedAmount) -> {
+                if (demandedAmount > 0) {
+                    for (final Map.Entry<Planet, ResourceDeposit> e : unusedMap.entrySet()) {
+                        final Planet from = e.getKey();
+                        final ResourceDeposit unused = e.getValue();
+                        if (from.equals(planet)) {
+                            continue;
+                        }
+                        final long present = unused.getCrewAmountByType(demandedType);
+                        demandedAmount = demand.getCrewAmountByType(demandedType);
+                        final long amount = Long.min(present, demandedAmount);
+                        executeTransportation(toStore, planet, demand, demandedType, from, unused, amount);
+                    }
+                }
+            });
+        });
     }
 
     private void executeTransportation(@Nonnull final Set<Planet> toStore,

@@ -28,6 +28,8 @@ import de.yuga.spacebattle.backend.services.constructables.spacecraft.OrbitalStr
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +41,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class OperationalService {
+
+    @Nonnull
+    private static final Logger LOGGER = LoggerFactory.getLogger(OperationalService.class);
 
     @Nonnull
     private final WarShipService warShipService;

@@ -10,6 +10,7 @@ import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStateService;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +18,12 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
@@ -74,13 +78,29 @@ public class OperationalTickRunner implements TickRunner {
      * Runs the tick for all planets.
      */
     private void tickPlanets() {
+        final List<CompletableFuture<Boolean>> futures = new ArrayList<>();
+
         final List<Planet> planets = planetService.findAllColonized();
         for (final Planet p : planets) {
-            log(p, "Start ticking planet");
-            tickPlanet(p);
-            tickFleetsAtStarbase(p);
-            tickFleetsAtStarbase(p);
+            final CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
+                log(p, "Start ticking planet");
+                tickPlanet(p);
+                tickFleetsAtStarbase(p);
+                tickFleetsAtStarbase(p);
+                return true;
+            });
+            futures.add(future);
         }
+
+        final CompletableFuture<Void> allCompleted = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        try {
+            allCompleted.get();
+            LOGGER.info("Tick planet activations done");
+        } catch (final InterruptedException | ExecutionException e) {
+            LOGGER.warn("Exception ticking planet activations in parallel.", e);
+            throw new NotifyWebUserException(e.getMessage());
+        }
+
     }
 
     /**

@@ -16,15 +16,15 @@ import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.GameEventService;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
@@ -114,18 +114,38 @@ public class HousekeepingRunner implements TickRunner {
     }
 
     private void loadCaches() {
+        final List<CompletableFuture<Boolean>> futures = new ArrayList<>();
+
         final Set<Integer> userIDs = userService.findAllUserIDs();
-        int userAmount = userIDs.size();
         for (final Integer idUser : userIDs) {
-            LOGGER.info("Load Pops for '{}' - {} users left", idUser, userAmount--);
-            populationControlCalculator.getPopOverview(idUser);
-            final List<Integer> planetIDs = planetService.findAllColonizedByForIdPlanet(idUser);
-            int planetAmount = planetIDs.size();
-            for (final Integer idPlanet : planetIDs) {
-                LOGGER.info("Load Incomes for '{}' - {} planets left", idPlanet, planetAmount--);
-                tickOutputCalculator.getTicklyIncome(idPlanet);
-            }
+            CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
+                LOGGER.info("Load Pops for '{}'", idUser);
+                populationControlCalculator.getPopOverview(idUser);
+                return true;
+            });
+            futures.add(future);
+
+            future = CompletableFuture.supplyAsync(() -> {
+                final List<Integer> planetIDs = planetService.findAllColonizedByForIdPlanet(idUser);
+
+                for (final Integer idPlanet : planetIDs) {
+                    LOGGER.info("Load Incomes for '{}'", idPlanet);
+                    tickOutputCalculator.getTicklyIncome(idPlanet);
+                }
+                return true;
+            });
+            futures.add(future);
         }
+
+        final CompletableFuture<Void> allCompleted = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        try {
+            allCompleted.get();
+            LOGGER.info("Tick planets done");
+        } catch (final InterruptedException | ExecutionException e) {
+            LOGGER.warn("Exception ticking planets in parallel.", e);
+            throw new NotifyWebUserException(e.getMessage());
+        }
+
     }
 
     private void zeroManualTransports() {
