@@ -659,12 +659,14 @@
         rightUpper longtext,
         empireName varchar(50),
         firstname varchar(50),
+        participant varchar(255) not null,
         shipNameTemplates varchar(255) not null,
         shipNames longtext,
         shipPrefix varchar(6),
         surname varchar(50),
         title varchar(50),
         titleAbbreviation varchar(8),
+        winner varchar(255) not null,
         idUser integer not null,
         primary key (idRolePlaySetting)
     ) engine=InnoDB;
@@ -2081,3 +2083,4 @@ INSERT INTO dbPatch VALUES (NULL, NOW(), 'introduce game events', '0.1.17-2');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'more roleplay', '0.1.17-3');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'more more roleplay', '0.1.17-4');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'add indices', '0.1.17-5');
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'add event participations', '0.1.17-6');

@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.EmbassyTextBlocks;
 import de.yuga.spacebattle.backend.entities.account.RolePlaySetting;
 import de.yuga.spacebattle.backend.enums.EStarNation;
+import de.yuga.spacebattle.backend.enums.events.EGameEvent;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -68,6 +69,16 @@ public class RolePlayData {
     @Schema(required = true, description = "The user's selected ship names.")
     private RPGTextBlocks textBlocks = new RPGTextBlocks();
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The participation.")
+    private Set<EGameEvent> participant = new HashSet<>();
+
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The event wins.")
+    private Set<EGameEvent> winner = new HashSet<>();
+
     public RolePlayData() {
     }
 
@@ -81,13 +92,13 @@ public class RolePlayData {
         this.empireName = rolePlaySetting.getEmpireName();
 
         final EmbassyTextBlocks embassyTextBlocks = rolePlaySetting.getEmbassyTextBlocks();
-        if (embassyTextBlocks == null) {
-            int b = 1;
-        }
         this.textBlocks.setLeftUpper(embassyTextBlocks.getLeftUpper());
         this.textBlocks.setRightUpper(embassyTextBlocks.getRightUpper());
         this.textBlocks.setLeftBottom(embassyTextBlocks.getLeftBottom());
         this.textBlocks.setRightBottom(embassyTextBlocks.getRightBottom());
+
+        this.participant.addAll(rolePlaySetting.getParticipant());
+        this.winner.addAll(rolePlaySetting.getWinner());
     }
 
     public void setTitle(@Nullable final String title) {

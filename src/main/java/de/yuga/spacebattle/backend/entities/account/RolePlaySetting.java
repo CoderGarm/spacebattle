@@ -1,10 +1,12 @@
 package de.yuga.spacebattle.backend.entities.account;
 
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.converter.EGameEventConverter;
 import de.yuga.spacebattle.backend.converter.EStarNationConverter;
 import de.yuga.spacebattle.backend.converter.EStringSetConverter;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.enums.EStarNation;
+import de.yuga.spacebattle.backend.enums.events.EGameEvent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -53,6 +55,16 @@ public class RolePlaySetting extends AbstractEntityKey {
     @NotNull
     @Convert(converter = EStarNationConverter.class)
     private Set<EStarNation> shipNameTemplates = new HashSet<>();
+
+    @Nonnull
+    @NotNull
+    @Convert(converter = EGameEventConverter.class)
+    private Set<EGameEvent> participant = new HashSet<>();
+
+    @Nonnull
+    @NotNull
+    @Convert(converter = EGameEventConverter.class)
+    private Set<EGameEvent> winner = new HashSet<>();
 
     @Lob
     @Nonnull
@@ -140,6 +152,16 @@ public class RolePlaySetting extends AbstractEntityKey {
 
     public void setEmpireName(@Nullable final String empireName) {
         this.empireName = empireName;
+    }
+
+    @Nonnull
+    public Set<EGameEvent> getParticipant() {
+        return participant;
+    }
+
+    @Nonnull
+    public Set<EGameEvent> getWinner() {
+        return winner;
     }
 
     @Nonnull

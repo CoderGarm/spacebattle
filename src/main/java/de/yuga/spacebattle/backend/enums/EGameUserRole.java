@@ -25,7 +25,7 @@ public enum EGameUserRole {
         this.name = name;
     }
 
-
+    @Nonnull
     public String getName() {
         return this.name;
     }
