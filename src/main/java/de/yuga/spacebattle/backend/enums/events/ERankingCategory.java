@@ -6,6 +6,8 @@ public enum ERankingCategory {
     GAINED_CONSTRUCTION_LEVELS,
     FLEET_TONNAGE_LOST,
     FLEET_TONNAGE_DESTROYED,
-    WON_FIGHTS,
+    WON_FIGHTS_V1,
+    WON_FIGHTS_V3,
+    WON_FIGHTS_V5,
     ;
 }

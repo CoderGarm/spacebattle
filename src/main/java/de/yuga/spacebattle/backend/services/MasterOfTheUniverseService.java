@@ -245,14 +245,15 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = false;
+        final boolean transformationNeeded = true; // fixme rollback
         if (transformationNeeded) {
 
             /*
+             */
             fleetService.deleteAll();
             createFlashsFleet();
-            createPirateFleet();
-            */
+            createYufielsFleet();
+            battleService.runBattleAtPlanet(tickService.getToday(), planetService.find(112));
 
             // fixme
             // - manual transportation shown when to transportation target is present
@@ -268,18 +269,18 @@ public class MasterOfTheUniverseService {
 
     private void createFlashsFleet() {
         final Planet mainPlanet = planetService.find(112);
-        final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(1)), mainPlanet, "INTERCEPT Flash");
+        final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(1)), mainPlanet, "TD1-Flash");
 
         final ShipClass songbird = shipClassService.find(2);
 
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 1; i++) {
             createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
         }
     }
 
     private void createYufielsFleet() {
         final Planet mainPlanet = planetService.find(112);
-        final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(3)), mainPlanet, "INTERCEPT Yufiel");
+        final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(3)), mainPlanet, "TD1-Yufiel");
 
         final ShipClass songbird = shipClassService.find(3);
 

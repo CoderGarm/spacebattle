@@ -50,7 +50,7 @@ public class GameEventService {
     private static final Range<Tick> WAR_HARVEST_2023 = Range.between(new Tick(244), new Tick(257), Tick::compareTo);
 
     @Nonnull
-    private static final Range<Tick> TOURNAMENT_24 = Range.between(new Tick(310), new Tick(324), Tick::compareTo);
+    private static final Range<Tick> TOURNAMENT_24 = Range.between(new Tick(304), new Tick(324), Tick::compareTo); // fixme rollback
 
     @Nonnull
     public static final String INTERCEPT_PREFIX = "INTERCEPT";
@@ -420,6 +420,11 @@ public class GameEventService {
         final boolean is1v1 = names.stream().filter(name -> name.startsWith(TOURNAMENT_v1_PREFIX)).count() == 2;
         final boolean is3v3 = names.stream().filter(name -> name.startsWith(TOURNAMENT_v3_PREFIX)).count() == 2;
         final boolean is5v5 = names.stream().filter(name -> name.startsWith(TOURNAMENT_v5_PREFIX)).count() == 2;
+
+        if (!is1v1 && !is3v3 && !is5v5) {
+            LOGGER.info(TOURNAMENT_2024_PREFIX + "Ranked Battle broken - {}. No Match mode detectable,", battleReport.getId());
+            return;
+        }
 
         final Set<WarShip> warships = battleReport.getParticipatingFleets().stream()
                 .map(FleetSnapshot::getShips)

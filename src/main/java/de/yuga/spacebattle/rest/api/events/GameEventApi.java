@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,7 +41,7 @@ public class GameEventApi extends BaseApi {
         this.rankingService = Preconditions.checkNotNull(rankingService, "rankingService must not be empty");
     }
 
-    @GetMapping
+    @GetMapping("/{eGameEvent}")
     @Operation(summary = "Get all jobs which finished today.", operationId = "getEventRanking",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
@@ -51,10 +52,10 @@ public class GameEventApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getEventRanking() {
-        final Set<de.yuga.spacebattle.backend.entities.events.EventRanking> rankings = rankingService.findAll(EGameEvent.WAR_HARVEST_23);
+    public ResponseEntity<?> getEventRanking(@Nonnull @PathVariable final EGameEvent eGameEvent) {
+        Preconditions.checkNotNull(eGameEvent, "eGameEvent must not be empty");
+
+        final Set<de.yuga.spacebattle.backend.entities.events.EventRanking> rankings = rankingService.findAll(eGameEvent);
         return ResponseEntity.ok(rankings.stream().map(EventRanking::new).collect(Collectors.toList()));
     }
-
-    // todo add GET for "is an event active" to hide the ladderboard when not
 }

@@ -92,7 +92,7 @@ public class RankingService {
 
         final EGameEvent gameEvent = EGameEvent.TOURNAMENT_FOR_HONOR_24;
 
-        ERankingCategory rankingCategory = ERankingCategory.WON_FIGHTS;
+        final ERankingCategory rankingCategory = is1v1 ? ERankingCategory.WON_FIGHTS_V1 : is3v3 ? ERankingCategory.WON_FIGHTS_V3 : ERankingCategory.WON_FIGHTS_V5;
         EventRanking ranking = rankingRepository.findFor(winner, gameEvent, rankingCategory);
         if (ranking == null) {
             ranking = new EventRanking(winner, gameEvent, rankingCategory);

@@ -66,4 +66,8 @@ public class EnumValueDto {
     private de.yuga.spacebattle.backend.enums.EJobPriority[] eJobPriorities;
     @JsonProperty
     private de.yuga.spacebattle.backend.enums.ETutorialCategory[] eTutorialCategories;
+    @JsonProperty
+    private de.yuga.spacebattle.backend.enums.events.EGameEvent[] eGameEvents;
+    @JsonProperty
+    private de.yuga.spacebattle.backend.enums.events.ERankingCategory[] eRankingCategories;
 }
