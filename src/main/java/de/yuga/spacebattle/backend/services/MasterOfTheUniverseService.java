@@ -245,25 +245,42 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = false; // fixme rollback
+        final boolean transformationNeeded = starsystemService.findByName("Solaris") == null;
         if (transformationNeeded) {
 
+            createSolarisStarSystems(); // fixme remove after event
+
             /*
-             */
             fleetService.deleteAll();
-            createFlashsFleet();
+            createShannonsFleet();
             createYufielsFleet();
             battleService.runBattleAtPlanet(tickService.getToday(), planetService.find(112));
-
-            // fixme
-            // - manual transportation shown when to transportation target is present
-            // - ship fitting breaks no longer at to many offensive modules
-            // - ship transportation: set back to origin when not moved works now
-            // - resource & pop transportation: UI is disabled until all planets are loaded
+             */
 
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
             LOGGER.info("---------------------------- nothing to transform ----------------------------");
+        }
+    }
+
+    protected void createSolarisStarSystems() {
+
+        if (starsystemService.findByName("Solaris") == null) {
+            final StarSystem solaris = starsystemService.createStarSystem(
+                    "Solaris",
+                    new Orbit(new Distance(120, STAR_SYSTEM_STANDARD_METRIC), new Distance(-2150, STAR_SYSTEM_STANDARD_METRIC))
+            );
+            LOGGER.info("Solaris generated");
+
+            planetService.createPlanet("Hades", solaris, new Orbit(new Distance(-90, Planet.PLANET_STANDARD_METRIC), new Distance(70, Planet.PLANET_STANDARD_METRIC)));
+            planetService.createPlanet("Colosseum", solaris, new Orbit(new Distance(110, Planet.PLANET_STANDARD_METRIC), new Distance(-120, Planet.PLANET_STANDARD_METRIC)));
+            planetService.createPlanet("Mud", solaris, new Orbit(new Distance(270, Planet.PLANET_STANDARD_METRIC), new Distance(250, Planet.PLANET_STANDARD_METRIC)));
+            planetService.createPlanet("Solaris IV", solaris, new Orbit(new Distance(-310, Planet.PLANET_STANDARD_METRIC), new Distance(310, Planet.PLANET_STANDARD_METRIC)));
+            planetService.createPlanet("Prison", solaris, new Orbit(new Distance(350, Planet.PLANET_STANDARD_METRIC), new Distance(-320, Planet.PLANET_STANDARD_METRIC)));
+            planetService.createPlanet("Rock", solaris, new Orbit(new Distance(-550, Planet.PLANET_STANDARD_METRIC), new Distance(-450, Planet.PLANET_STANDARD_METRIC)));
+            planetService.createPlanet("Solaris VII", solaris, new Orbit(new Distance(679, Planet.PLANET_STANDARD_METRIC), new Distance(-594, Planet.PLANET_STANDARD_METRIC)));
+
+            LOGGER.info("New star systems populated");
         }
     }
 
@@ -283,6 +300,15 @@ public class MasterOfTheUniverseService {
         final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(3)), mainPlanet, "TD1-Yufiel");
 
         final ShipClass songbird = shipClassService.find(3);
+
+        createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
+    }
+
+    private void createShannonsFleet() {
+        final Planet mainPlanet = planetService.find(112);
+        final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(13)), mainPlanet, "TD1-Shannon");
+
+        final ShipClass songbird = shipClassService.find(26);
 
         createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
     }

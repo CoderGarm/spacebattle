@@ -50,7 +50,7 @@ public class GameEventService {
     private static final Range<Tick> WAR_HARVEST_2023 = Range.between(new Tick(244), new Tick(257), Tick::compareTo);
 
     @Nonnull
-    private static final Range<Tick> TOURNAMENT_24 = Range.between(new Tick(311), new Tick(325), Tick::compareTo); // fixme rollback
+    private static final Range<Tick> TOURNAMENT_24 = Range.between(new Tick(311), new Tick(326), Tick::compareTo);
 
     @Nonnull
     public static final String INTERCEPT_PREFIX = "INTERCEPT";
@@ -228,21 +228,8 @@ public class GameEventService {
             LOGGER.info(TOURNAMENT_2024_PREFIX + "Ranked Battle sabotaged by {}", participants.stream().map(Owner::getUsername).collect(Collectors.joining(", ")));
             return;
         }
-
-        for (final Owner owner : participants) {
-            // old code reusage because lazyness
-            final List<Fleet> ownersFleets = fleets.stream()
-                    .filter(f -> f.getOwner().equals(owner))
-                    .collect(Collectors.toList());
-
-            for (int i = 0; i < ownersFleets.size(); i++) {
-                final List<Fleet> otherFleets = fleets.stream()
-                        .filter(fleet -> !fleet.getOwner().equals(owner))
-                        .collect(Collectors.toList());
-
-                result.add(new FleetClash(fleetOrbit, List.of(ownersFleets.get(0), otherFleets.get(0))));
-            }
-        }
+        final List<Fleet> list = new ArrayList<>(fleets);
+        result.add(new FleetClash(fleetOrbit, List.of(list.get(0), list.get(1))));
     }
 
     private static void setUpFleetClashes(@Nonnull final FleetOrbit fleetOrbit,

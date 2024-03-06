@@ -41,23 +41,7 @@ public class GameEventApi extends BaseApi {
         this.rankingService = Preconditions.checkNotNull(rankingService, "rankingService must not be empty");
     }
 
-    @GetMapping
-    @Operation(summary = "Get all jobs which finished today.", operationId = "getEventRanking",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "successful",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
-                                    schema = @Schema(implementation = EventRanking.class))
-                            )),
-                    @ApiResponse(responseCode = "400", description = "an error occurred",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
-            }
-    )
-    public ResponseEntity<?> getEventRanking() {
-        final Set<de.yuga.spacebattle.backend.entities.events.EventRanking> rankings = rankingService.findAll(EGameEvent.WAR_HARVEST_23);
-        return ResponseEntity.ok(rankings.stream().map(EventRanking::new).collect(Collectors.toList()));
-    }
-
-    @GetMapping("/{eGameEvent}") // fixme adapt swagger
+    @GetMapping("/{eGameEvent}")
     @Operation(summary = "Get all jobs which finished today.", operationId = "getRankingForEvent",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",

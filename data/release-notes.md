@@ -3,13 +3,85 @@
 - fight for TDx-...
 - autorepair für TD1-... und TD3-
 - punkte für wins
+- badges for old event and season 2 veteran
 
 todo:
 
 - battle reports teilen
-- badges for old event and season 2 veteran
 
-- fix job abbrechen punkte werden nich drauf gerechnet
+---
+Now you will read something what is called a 'Post Mortem' for the issue. I hope that there are some interesting new information in it.
+
+The next release is huge, technically spoken, and I still need some time.  
+I hope that you will be with us in the next season and I hope that we will not encounter these long developing times in the future.
+
+This insight can hopefully explain the complexity of the game and also shorten the time until the event starts and the fresh combat module will be there :)
+
+---
+
+#### Issue Summary
+
+The tick was interupted directly after changing the sequential tick processing to a limited concurrent procedure.
+
+The tick includes following steps of procession in the given sequence:
+
+1. Tick Preparation
+2. NPC Fleet Actions
+3. Empire Transportation
+4. Empire Migration
+5. Trade execution
+6. Execute planetary actions
+    1. update resources
+    2. run construction jobs
+    3. run orbital construction jobs
+7. Execute Researches
+8. Activate Operationals
+    - warships
+    - constructions
+    - orbital constructions
+    - update fleet status according the state of the containing warships
+9. Fleet Movements
+10. Execute Colonization
+11. Run NPC Missions
+12. Execute User Battles
+13. Update HeatMap
+14. Housekeeping
+15. Send TickAdvice EMail
+
+The erroneous change which introduces the concurrent processing was made for the steps 6., 8. and 14. - these steps are executed in parallel for every user now.
+
+This limited concurrent processing reduced the tick time from around 20 minutes to 5 minutes.  
+The scalability of this processing is only restricted by the amount of heap space and database performance.
+
+#### Root Cause
+
+Step 8 was introducing the issue which couldn't be created on the local dev machine in multiple runs.
+
+The activation of operationals was formerly cached for more performance at the journal dashboard.  
+The concurrent activation messages from the operational activation in the new way was braking the cache integrity and ended the tick processing.
+
+This leads to the situation that everything after step 8 wasn't processed for tick 306.
+
+#### Status
+
+Fixed due replacing the cache.
+
+#### Resolution and recovery
+
+No recovery possible - the latest database dump was made around 15:00 o'clock on tick 305. Every action after that timestamp cannot be recovered.
+
+The resolution was replacing the no longer useful operational cache (due the lack of concurrent accessibility) by persisting the activation states in the database.  
+This was intended since Oct. 2023 and could now be done.
+
+The former cache solution had some drawbacks in terms of performance due the complex data model and the new solution is indexed and also implemented concurrent for the relevant
+data structures.  
+The data loading performance is nearly the same as with the cache.
+
+#### Corrective and Preventative Measures
+
+A staging system is needed for the next season.
+
+---
 
 ### Wiki Articles
 
