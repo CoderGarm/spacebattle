@@ -245,16 +245,14 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = starsystemService.findByName("Solaris") == null;
+        final boolean transformationNeeded = false; // fixme rollback
         if (transformationNeeded) {
 
-            createSolarisStarSystems(); // fixme remove after event
-
-            /*
             fleetService.deleteAll();
             createShannonsFleet();
             createYufielsFleet();
             battleService.runBattleAtPlanet(tickService.getToday(), planetService.find(112));
+            /*
              */
 
             LOGGER.info("---------------------------- done transforming -------------------------------");

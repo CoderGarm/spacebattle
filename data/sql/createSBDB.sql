@@ -675,6 +675,20 @@
         primary key (idRolePlaySetting)
     ) engine=InnoDB;
 
+    create table sharedBattleReport (
+       idSharedBattleReport integer not null auto_increment,
+        shareWithEveryone boolean not null default false,
+        idAlliance integer,
+        idBattleReport integer not null,
+        primary key (idSharedBattleReport)
+    ) engine=InnoDB;
+
+    create table sharedWithUsers (
+       idSharedBattleReport integer not null,
+        idUser integer not null,
+        primary key (idSharedBattleReport, idUser)
+    ) engine=InnoDB;
+
     create table shipClass (
        idShipClass integer not null auto_increment,
         isDeleted boolean not null default false,
@@ -945,6 +959,9 @@ create index ID_OS on orbitalStructure (isDeleted);
 
     alter table rolePlaySetting
        add constraint UK_5sx33g2kpg6lhpamw75ibqb9i unique (idUser);
+
+    alter table sharedBattleReport 
+       add constraint UK_hpe1gr8wmca659sm228uhgp6u unique (idBattleReport);
 create index ID_SC on shipClass (isDeleted);
 
     alter table shipClass
@@ -1158,11 +1175,11 @@ create index ID_WHSS on warshipHealthStateSnapshot (isDeleted);
                 references user (idUser);
 
     alter table construction
-       add constraint FKah9i54pwsqd526a91s3ryci5o 
-       foreign key (idTickActivated) 
+       add constraint FKah9i54pwsqd526a91s3ryci5o
+       foreign key (idTickActivated)
        references tick (idTick);
 
-    alter table construction 
+    alter table construction
         add constraint FKlkteuncyf95jg9hhq28yefrcl
             foreign key (idBuilding)
                 references building (idBuilding);
@@ -1213,11 +1230,11 @@ create index ID_WHSS on warshipHealthStateSnapshot (isDeleted);
        references user (idUser);
 
     alter table fleet
-       add constraint FKkv8p42ny0lnkcqrrsvrpltsno 
-       foreign key (idTickActivated) 
+       add constraint FKkv8p42ny0lnkcqrrsvrpltsno
+       foreign key (idTickActivated)
        references tick (idTick);
 
-    alter table fleet 
+    alter table fleet
         add constraint FK5yy9whqh6562iaxuym0wrkjeq
             foreign key (idMove)
                 references move (idMove);
@@ -1593,11 +1610,11 @@ create index ID_WHSS on warshipHealthStateSnapshot (isDeleted);
        references job (idJob);
 
     alter table orbitalStructure
-       add constraint FKcnjc3xew6n67k9q8qhwkntbcb 
-       foreign key (idTickActivated) 
+       add constraint FKcnjc3xew6n67k9q8qhwkntbcb
+       foreign key (idTickActivated)
        references tick (idTick);
 
-    alter table orbitalStructure 
+    alter table orbitalStructure
        add constraint FKhd287pobvlknx1eo1b9rrix9x
        foreign key (idOrbitalModule)
        references orbitalModule (idOrbitalModule);
@@ -1782,6 +1799,26 @@ create index ID_WHSS on warshipHealthStateSnapshot (isDeleted);
        foreign key (idUser)
        references user (idUser);
 
+    alter table sharedBattleReport 
+       add constraint FK7tseyh70o5cbaenxmog7ao3l9 
+       foreign key (idAlliance) 
+       references alliance (idAlliance);
+
+    alter table sharedBattleReport 
+       add constraint FKyk7jxlttaktlvdhc231rwt80 
+       foreign key (idBattleReport) 
+       references battleReport (idBattleReport);
+
+    alter table sharedWithUsers 
+       add constraint FK3wt2lys7aqxisvvcxjhkh2iit 
+       foreign key (idUser) 
+       references user (idUser);
+
+    alter table sharedWithUsers 
+       add constraint FKm9oj0tt8rij6u5r5mmfaexlwn 
+       foreign key (idSharedBattleReport) 
+       references sharedBattleReport (idSharedBattleReport);
+
     alter table shipClass
         add constraint FKouxjssb18x4jeutl5r1l0byeu
             foreign key (idArmor)
@@ -1958,11 +1995,11 @@ create index ID_WHSS on warshipHealthStateSnapshot (isDeleted);
                 references user (idUser);
 
     alter table warShip
-       add constraint FKm26l3odxqppbhlowov3tc64y9 
-       foreign key (idTickActivated) 
+       add constraint FKm26l3odxqppbhlowov3tc64y9
+       foreign key (idTickActivated)
        references tick (idTick);
 
-    alter table warShip 
+    alter table warShip
         add constraint FK3kovfkp6003a62x5ff41h44hw
             foreign key (idFleet)
                 references fleet (idFleet);
@@ -2008,11 +2045,11 @@ create index ID_WHSS on warshipHealthStateSnapshot (isDeleted);
                 references warShip (idWarShip);
 
     alter table warshipHealthStateSnapshot
-       add constraint FK11aatx339r9rwxxawx31i5ub1 
-       foreign key (idTickActivated) 
+       add constraint FK11aatx339r9rwxxawx31i5ub1
+       foreign key (idTickActivated)
        references tick (idTick);
 
-    alter table warshipHealthStateSnapshot 
+    alter table warshipHealthStateSnapshot
         add constraint FKcjim226ew093h6wpualjjrodk
             foreign key (idFleetSnapshot)
                 references fleetSnapshot (idFleetSnapshot);
@@ -2116,3 +2153,4 @@ INSERT INTO dbPatch VALUES (NULL, NOW(), 'more more roleplay', '0.1.17-4');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'add indices', '0.1.17-5');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'add event participations', '0.1.17-6');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'replace operational cache', '0.1.17-7');
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'share battle reports', '0.1.17-8');

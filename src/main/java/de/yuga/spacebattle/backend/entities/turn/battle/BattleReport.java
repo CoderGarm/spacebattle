@@ -140,6 +140,12 @@ public class BattleReport extends AbstractEntityKey {
     )
     private final Set<ShipKillerHit> shipKillerHits = new HashSet<>();
 
+    @Nonnull
+    @NotNull
+    @OneToOne(mappedBy = "battleReport")
+    @JoinColumn(name = "idSharedBattleReport")
+    private SharedBattleReport sharedBattleReport;
+
     public BattleReport() {
     }
 
@@ -157,6 +163,7 @@ public class BattleReport extends AbstractEntityKey {
         this.participatingUsers.addAll(battleResult.getFleetClash().getParticipatingFleets().stream().map(Fleet::getOwner).collect(Collectors.toSet()));
         this.participatingFleets.addAll(battleResult.getFleetClash().getParticipatingFleets().stream().map(f -> new FleetSnapshot(this, f)).collect(Collectors.toSet()));
         stateBattleResult(battleResult);
+        this.sharedBattleReport = new SharedBattleReport(this);
     }
 
     @Nonnull
