@@ -3,13 +3,12 @@
 - fight for TDx-...
 - autorepair für TD1-... und TD3-
 - punkte für wins
+- badges for old event and season 2 veteran
 
 todo:
 
 - battle reports teilen
-- badges for old event and season 2 veteran
 
-- fix job abbrechen punkte werden nich drauf gerechnet
 
 ### Wiki Articles
 
