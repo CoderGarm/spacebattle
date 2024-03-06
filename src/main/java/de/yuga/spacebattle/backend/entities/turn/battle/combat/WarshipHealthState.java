@@ -9,6 +9,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AlignedFitting;
 import de.yuga.spacebattle.backend.entities.spacecrafts.fittings.AmmunitionFitting;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -226,13 +227,15 @@ public class WarshipHealthState extends AbstractEntityKey implements WarshipHeal
         });
     }
 
-    public void repair() {
+    public void repair(@Nonnull final Tick today) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+
         final ShipClass shipClass = warShip.getShipClass();
         this.capabilities.clear();
         this.capabilities.addAll(new SpacecraftCalculator().getCapabilityValues(shipClass));
         this.activeFittings.clear();
         this.activeFittings.addAll(shipClass.getFittings());
-        warShip.setOperational();
+        warShip.setOperational(today);
         ammoUp();
     }
 

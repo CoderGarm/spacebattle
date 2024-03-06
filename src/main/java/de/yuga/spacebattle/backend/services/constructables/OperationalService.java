@@ -21,13 +21,13 @@ import de.yuga.spacebattle.backend.enums.ECalculationType;
 import de.yuga.spacebattle.backend.enums.EDepositType;
 import de.yuga.spacebattle.backend.enums.ERefinementSequence;
 import de.yuga.spacebattle.backend.repositories.turn.JobRepository;
-import de.yuga.spacebattle.backend.services.caches.OperationalCache;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.OrbitalStructureService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -60,9 +62,6 @@ public class OperationalService {
     @Nonnull
     private final ColonizationService colonizationService;
 
-    @Nonnull
-    private final OperationalCache operationalCache;
-
     // todo at a given time separate responsibilities
     @Nonnull
     private final JobRepository jobRepository;
@@ -76,7 +75,6 @@ public class OperationalService {
                               @Nonnull final FleetService fleetService,
                               @Nonnull final PlanetService planetService,
                               @Nonnull final ColonizationService colonizationService,
-                              @Nonnull final OperationalCache operationalCache,
                               @Nonnull final JobRepository jobRepository,
                               @Nonnull final OrbitalStructureService orbitalStructureService) {
         this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
@@ -84,7 +82,6 @@ public class OperationalService {
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.colonizationService = Preconditions.checkNotNull(colonizationService, "colonizationService must not be empty");
-        this.operationalCache = Preconditions.checkNotNull(operationalCache, "operationalCache must not be empty");
         this.jobRepository = Preconditions.checkNotNull(jobRepository, "jobService must not be empty");
         this.orbitalStructureService = Preconditions.checkNotNull(orbitalStructureService, "orbitalStructureService must not be empty");
     }
@@ -403,7 +400,7 @@ public class OperationalService {
                 if (result.isValidForPops()) {
                     deposit.updateCrew(costsForLevel, ECalculationType.SUBTRACT);
 
-                    inoperational.setOperationalLevel(i);
+                    inoperational.setOperationalLevel(i, today);
                     ops.add(inoperational);
                 }
             }
@@ -427,7 +424,7 @@ public class OperationalService {
             if (result.isValidForPops()) {
                 deposit.updateCrew(costs, ECalculationType.SUBTRACT);
 
-                inoperational.setOperational();
+                inoperational.setOperational(today);
                 operationals.add(inoperational);
             }
         }
@@ -436,7 +433,7 @@ public class OperationalService {
             final Set<Fleet> fleets = operationals.stream().map(WarShip::getFleet).filter(Objects::nonNull).collect(Collectors.toSet()).stream()
                     .filter(f -> f.getAliveShips().stream().allMatch(Operationable::isOperational))
                     .collect(Collectors.toSet());
-            fleets.forEach(Fleet::setOperational);
+            fleets.forEach(f -> f.setOperational(today));
             fleetService.saveAll(fleets);
         }
         planetService.save(planet);
@@ -448,20 +445,9 @@ public class OperationalService {
 
         final Planet planet = planetService.find(idPlanet);
         Preconditions.checkNotNull(planet, "planet must not be empty");
-        final List<WarShip> activated = activateWarships(today, planet);
-        if (!activated.isEmpty()) {
-            operationalCache.activateWarships(today, planet, activated);
-        }
-
-        final Set<Construction> alsoActivated = activateConstructions(today, planet);
-        if (!alsoActivated.isEmpty()) {
-            operationalCache.activateConstructions(today, planet, alsoActivated);
-        }
-
-        final List<OrbitalStructure> activatedToo = activateOrbitalConstructions(today, planet);
-        if (!activatedToo.isEmpty()) {
-            operationalCache.activateOrbitalConstructions(today, planet, activatedToo);
-        }
+        activateWarships(today, planet);
+        activateConstructions(today, planet);
+        activateOrbitalConstructions(today, planet);
     }
 
     @Nonnull
@@ -478,7 +464,7 @@ public class OperationalService {
             final PayingPossibleResult result = deposit.isPayingPossible(costs);
             if (result.isValidForPops()) {
                 deposit.updateCrew(costs, ECalculationType.SUBTRACT);
-                inoperational.setOperational();
+                inoperational.setOperational(today);
                 operationals.add(inoperational);
             }
         }
@@ -487,5 +473,118 @@ public class OperationalService {
             planetService.save(planet);
         }
         return operationals;
+    }
+
+    @Nonnull
+    public List<Commissioning> getOperationals(final int idUser, @Nonnull final Tick today) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+
+
+        final List<CompletableFuture<Boolean>> futures = new ArrayList<>();
+        final List<WarShip> activatedShipsByUser = new ArrayList<>();
+        final List<Construction> activatedConstructionsByUser = new ArrayList<>();
+        final List<OrbitalStructure> activatedOrbsByUser = new ArrayList<>();
+
+        futures.add(CompletableFuture.supplyAsync(() -> {
+            activatedShipsByUser.addAll(warShipService.findActivatedByUser(idUser, today));
+            return true;
+        }));
+
+        futures.add(CompletableFuture.supplyAsync(() -> {
+            activatedConstructionsByUser.addAll(constructionService.findActivatedByUser(idUser, today));
+            return true;
+        }));
+
+        futures.add(CompletableFuture.supplyAsync(() -> {
+            activatedOrbsByUser.addAll(orbitalStructureService.findActivatedByUser(idUser, today));
+            return true;
+        }));
+
+
+        final CompletableFuture<Void> allCompleted = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        try {
+            allCompleted.get();
+            LOGGER.info("Fetching operationals done");
+        } catch (final InterruptedException | ExecutionException e) {
+            LOGGER.warn("Exception fetching operationals in parallel.", e);
+            throw new NotifyWebUserException(e.getMessage());
+        }
+
+        final List<Commissioning> result = new ArrayList<>();
+        final Map<Planet, List<WarShip>> ships = activatedShipsByUser.stream().collect(Collectors.groupingBy(WarShip::getShipyard,
+                Collectors.mapping(Function.identity(), Collectors.toList())));
+        ships.forEach((planet, operationals) -> addWarships(result, today, planet, operationals));
+
+        final Map<Planet, List<Construction>> constructions = activatedConstructionsByUser.stream().collect(Collectors.groupingBy(Construction::getPlanet,
+                Collectors.mapping(Function.identity(), Collectors.toList())));
+        constructions.forEach((planet, operationals) -> addConstructions(result, today, planet, operationals));
+
+        final Map<Planet, List<OrbitalStructure>> orbitals = activatedOrbsByUser.stream()
+                .filter(o -> o.getOrbit().getPlanet() != null)
+                .collect(Collectors.groupingBy(o -> o.getOrbit().getPlanet(),
+                        Collectors.mapping(Function.identity(), Collectors.toList())));
+        orbitals.forEach((planet, operationals) -> addOrbitalConstructions(result, today, planet, operationals));
+
+        return result;
+    }
+
+    private void addConstructions(@Nonnull final List<Commissioning> result,
+                                  @Nonnull final Tick today,
+                                  @Nonnull final Planet planet,
+                                  @Nonnull final Collection<Construction> operationals) {
+        Preconditions.checkNotNull(result, "result must not be empty");
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(operationals, "operationals must not be empty");
+
+        Commissioning commissioning = result.stream()
+                .filter(c -> c.isToday(today) && c.getPlanet().equals(planet))
+                .findFirst()
+                .orElse(null);
+        if (commissioning == null) {
+            commissioning = new Commissioning(today, planet);
+            result.add(commissioning);
+        }
+        commissioning.addConstructions(operationals);
+    }
+
+    private void addOrbitalConstructions(@Nonnull final List<Commissioning> result,
+                                         @Nonnull final Tick today,
+                                         @Nonnull final Planet planet,
+                                         @Nonnull final Collection<OrbitalStructure> operationals) {
+        Preconditions.checkNotNull(result, "result must not be empty");
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(operationals, "operationals must not be empty");
+
+        Commissioning commissioning = result.stream()
+                .filter(c -> c.isToday(today) && c.getPlanet().equals(planet))
+                .findFirst()
+                .orElse(null);
+        if (commissioning == null) {
+            commissioning = new Commissioning(today, planet);
+            result.add(commissioning);
+        }
+        commissioning.addOrbitalConstructions(operationals);
+    }
+
+    private void addWarships(@Nonnull final List<Commissioning> result,
+                             @Nonnull final Tick today,
+                             @Nonnull final Planet planet,
+                             @Nonnull final Collection<WarShip> operationals) {
+        Preconditions.checkNotNull(result, "result must not be empty");
+        Preconditions.checkNotNull(today, "today must not be empty");
+        Preconditions.checkNotNull(planet, "planet must not be empty");
+        Preconditions.checkNotNull(operationals, "operationals must not be empty");
+
+        Commissioning commissioning = result.stream()
+                .filter(c -> c.isToday(today) && c.getPlanet().equals(planet))
+                .findFirst()
+                .orElse(null);
+        if (commissioning == null) {
+            commissioning = new Commissioning(today, planet);
+            result.add(commissioning);
+        }
+        commissioning.addWarships(operationals);
     }
 }

@@ -245,7 +245,7 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = true; // fixme rollback
+        final boolean transformationNeeded = false; // fixme rollback
         if (transformationNeeded) {
 
             /*
@@ -316,7 +316,8 @@ public class MasterOfTheUniverseService {
                 .filter(b -> !constructions.stream().map(Construction::getBuilding).collect(Collectors.toSet()).contains(b))
                 .forEach(building -> constructions.add(new Construction(planet, building, (strengthLevel * 3))));
 
-        constructions.forEach(construction -> construction.setOperationalLevel(construction.getLevel()));
+        final Tick today = tickService.getToday();
+        constructions.forEach(construction -> construction.setOperationalLevel(construction.getLevel(), today));
         planetService.save(planet);
     }
 
@@ -365,7 +366,7 @@ public class MasterOfTheUniverseService {
         Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
 
         final WarShip warShip = new WarShip(name, planet, fleet, shipClass);
-        warShip.setOperational();
+        warShip.setOperational(tickService.getToday());
         warShipService.save(warShip);
     }
 
@@ -373,7 +374,7 @@ public class MasterOfTheUniverseService {
     private void repairAllShips() {
         final Set<WarShip> warShips = warShipService.findAll().stream().filter(w -> !w.isDeleted()).collect(Collectors.toSet());
         warShips.forEach(warShip -> {
-            warShip.getWarshipHealthState().repair();
+            warShip.getWarshipHealthState().repair(tickService.getToday());
             warShip.getWarshipHealthState().ammoUp();
             warShip.getWarshipHealthState().setFightingCapable(true);
         });
@@ -1292,7 +1293,7 @@ public class MasterOfTheUniverseService {
 
         final FleetOrbit fleetOrbit = new FleetOrbit(planet);
         final Fleet fleet = new Fleet(name, user, fleetOrbit);
-        fleet.setOperational();
+        fleet.setOperational(tickService.getToday());
         return fleetService.save(fleet);
     }
 
@@ -1325,6 +1326,8 @@ public class MasterOfTheUniverseService {
     public void createFleetForUser(@Nonnull final Owner user) {
         Preconditions.checkNotNull(user, "user must not be empty");
 
+        final Tick today = tickService.getToday();
+
         final NonPlayerCharacter opponent = nonPlayerCharacterService.findByUsername(DEFEATED_OPPONENT);
         final List<ShipClass> classList = shipClassService.findAllLatestByOwner(Objects.requireNonNull(opponent).getId());
         ShipClass ship = classList.get(0);
@@ -1336,13 +1339,13 @@ public class MasterOfTheUniverseService {
 
         final List<String> randomWarshipName = new ArrayList<>(resourceService.getRandomWarshipName(3));
         WarShip warShip = new WarShip(randomWarshipName.get(0), homePlanet, fleet, ship);
-        warShip.setOperational();
+        warShip.setOperational(today);
         warShipService.save(warShip);
         warShip = new WarShip(randomWarshipName.get(1), homePlanet, fleet, ship);
-        warShip.setOperational();
+        warShip.setOperational(today);
         warShipService.save(warShip);
         warShip = new WarShip(randomWarshipName.get(2), homePlanet, fleet, ship);
-        warShip.setOperational();
+        warShip.setOperational(today);
         warShipService.save(warShip);
     }
 
@@ -1358,7 +1361,7 @@ public class MasterOfTheUniverseService {
         final Fleet opponentsFleet = createFleet(opponent, homePlanet, "Pirates bane");
 
         final WarShip warShip = new WarShip("Corsair", homePlanet, opponentsFleet, ship);
-        warShip.setOperational();
+        warShip.setOperational(tickService.getToday());
         return warShipService.save(warShip);
     }
 

@@ -169,9 +169,6 @@ public class PlanetTickRunner implements TickRunner {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(today, "today must not be empty");
 
-        if (planet.getId() == 1304) {
-            int br = 0;
-        }
         final Set<Construction> constructions = planet.getConstructions().stream()
                 .filter(c -> !c.getJobs().isEmpty())
                 .filter(c -> c.getBuilding().getProductionTarget() != EResourceType.RESEARCH)
@@ -244,6 +241,7 @@ public class PlanetTickRunner implements TickRunner {
     private void realizeFleetUpgrade(@Nonnull final Planet planet,
                                      @Nonnull final User owner,
                                      @Nonnull final Job job) {
+        Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(owner, "owner must not be empty");
         Preconditions.checkNotNull(job, "job must not be empty");
@@ -264,7 +262,7 @@ public class PlanetTickRunner implements TickRunner {
             while (Objects.requireNonNull(successor).hasSuccessor()) {
                 successor = successor.getSuccessor();
             }
-            warShip.upgrade(planet, successor);
+            warShip.upgrade(today, planet, successor);
         });
 
         fleetService.save(fleet);
@@ -277,6 +275,7 @@ public class PlanetTickRunner implements TickRunner {
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(owner, "owner must not be empty");
         Preconditions.checkNotNull(job, "job must not be empty");
+        Preconditions.checkNotNull(job.getFinished(), "job.getFinished() must not be empty");
         Preconditions.checkNotNull(job.getConstructable().getFleet(), "job.getConstructable().getFleet() must not be empty");
 
         log(planet, job, "Start repair fleet.");
@@ -284,9 +283,9 @@ public class PlanetTickRunner implements TickRunner {
         final Set<WarshipHealthState> toRepair = fleet.getAliveShips().stream()
                 .map(WarShip::getWarshipHealthState)
                 .collect(Collectors.toSet());
-        toRepair.forEach(WarshipHealthState::repair);
+        toRepair.forEach(w -> w.repair(job.getFinished()));
         warshipHealthStateService.saveAll(toRepair);
-        fleet.setOperational();
+        fleet.setOperational(job.getFinished());
         fleetService.save(fleet);
         log(planet, job, "Done repairing fleet.");
     }

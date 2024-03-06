@@ -2,6 +2,7 @@ package de.yuga.spacebattle.rest.dto.turn;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
@@ -14,9 +15,9 @@ public class FinishedColonization {
     @Schema(required = true, description = "The fresh colonized planet's name.")
     private String colonizedPlanetName;
 
-    public FinishedColonization(@Nonnull final de.yuga.spacebattle.backend.dto.turn.FinishedColonization colonization) {
-        Preconditions.checkNotNull(colonization, "colonization must not be empty");
+    public FinishedColonization(@Nonnull final Planet planet) {
+        Preconditions.checkNotNull(planet, "planet must not be empty");
 
-        this.colonizedPlanetName = colonization.getPlanet().getName();
+        this.colonizedPlanetName = planet.getName();
     }
 }

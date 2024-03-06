@@ -10,6 +10,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.resources.MiningFactors;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.ECollectableType;
@@ -337,5 +338,12 @@ public class PlanetService {
         Preconditions.checkNotNull(planetIDs, "planetIDs must not be empty");
 
         return planetIDs.stream().collect(Collectors.toMap(Function.identity(), this::getResourceCapacity));
+    }
+
+    @Nonnull
+    public List<Planet> findAllFinishedForUser(@Nonnull final Tick today, final int idUser) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+
+        return Objects.requireNonNullElse(planetRepository.findAllFinishedForUser(today.getTickStarts(), idUser), new ArrayList<>());
     }
 }

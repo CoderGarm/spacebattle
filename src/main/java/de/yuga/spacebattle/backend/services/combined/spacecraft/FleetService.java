@@ -229,7 +229,7 @@ public class FleetService {
 
         final FleetOrbit fleetOrbit = new FleetOrbit(planet);
         final Fleet fleet = new Fleet(name, user, fleetOrbit);
-        fleet.setOperational();
+        fleet.setOperational(tickTimeService.getToday());
         return save(fleet);
     }
 
@@ -370,7 +370,7 @@ public class FleetService {
     public void markAsInoperational(@Nonnull final Fleet fleet) {
         Preconditions.checkNotNull(fleet, "fleet must not be empty");
 
-        fleet.setOperational(false);
+        fleet.setInoperational();
         save(fleet);
     }
 
@@ -490,12 +490,13 @@ public class FleetService {
     private Set<Fleet> calculateFleetState(@Nonnull final Set<Integer> fleetIDs) {
         Preconditions.checkNotNull(fleetIDs, "fleetIDs must not be empty");
 
+        final Tick today = tickTimeService.getToday();
         final List<Fleet> fleets = findAll(fleetIDs);
         final Set<Fleet> toSetOperational = fleets.stream().filter(fleet -> {
             final boolean isOperational = fleet.getAliveShips().stream().allMatch(WarShip::isOperational);
             return isOperational && !fleet.isOperationalFromSuper();
         }).collect(Collectors.toSet());
-        toSetOperational.forEach(Fleet::setOperational);
+        toSetOperational.forEach(f -> f.setOperational(today));
         return Objects.requireNonNullElse(saveAll(toSetOperational), new HashSet<>());
     }
 
@@ -607,6 +608,7 @@ public class FleetService {
         Preconditions.checkNotNull(warShips, "warShips must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
+        final Tick today = tickTimeService.getToday();
         final Set<WarShip> toStore = new HashSet<>();
         final Set<WarShip> toOps = warShips.stream()
                 .filter(w -> orderOperational.contains(w.getId()))
@@ -615,7 +617,7 @@ public class FleetService {
         for (final WarShip toOp : toOps) {
             final CrewRequirement crewRequirement = toOp.getShipClass().getCosts().getCrewRequirement();
             if (planet.getResourceDeposit().isPayingPossible(crewRequirement).isValid()) {
-                toOp.setOperational(true);
+                toOp.setOperational(today);
                 planet.getResourceDeposit().updateCrew(crewRequirement, ECalculationType.SUBTRACT);
                 toStore.add(toOp);
             }
@@ -635,7 +637,7 @@ public class FleetService {
                 .filter(Operationable::isOperational)
                 .collect(Collectors.toSet());
         for (final WarShip toInOp : toInOps) {
-            toInOp.setOperational(false);
+            toInOp.setInoperational();
             final CrewRequirement crewRequirement = toInOp.getShipClass().getCosts().getCrewRequirement();
             planet.getResourceDeposit().updateCrew(crewRequirement, ECalculationType.ADD);
             toStore.add(toInOp);

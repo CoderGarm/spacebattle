@@ -37,6 +37,11 @@ public class PointsCompletable extends Deletable {
         return pointsLeft;
     }
 
+    @Nullable
+    public Tick getFinished() {
+        return finished;
+    }
+
     /**
      * A job is done at zero and needed to be counted down.
      *

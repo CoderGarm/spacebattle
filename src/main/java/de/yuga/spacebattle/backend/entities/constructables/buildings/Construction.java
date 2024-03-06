@@ -2,11 +2,10 @@ package de.yuga.spacebattle.backend.entities.constructables.buildings;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
-import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.misc.Deletable;
+import de.yuga.spacebattle.backend.entities.misc.LeveledOperationable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Job;
-import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -19,7 +18,7 @@ import java.util.stream.Collectors;
 @Table(name = "construction",
         uniqueConstraints = @UniqueConstraint(name = "CONSTRUCTION_UK", columnNames = {"idPlanet", "idBuilding"}))
 @AttributeOverride(name = "id", column = @Column(name = "idConstruction"))
-public class Construction extends AbstractEntityKey {
+public class Construction extends LeveledOperationable {
 
     @Nonnull
     @NotNull
@@ -32,10 +31,6 @@ public class Construction extends AbstractEntityKey {
     @ManyToOne
     @JoinColumn(name = "idBuilding", updatable = false)
     private Building building;
-
-    private int level;
-
-    private int operationalLevel = 0;
 
     @Nonnull
     @OneToMany(mappedBy = "facility", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -50,7 +45,7 @@ public class Construction extends AbstractEntityKey {
 
         this.planet = planet;
         this.building = building;
-        this.level = level;
+        this.setLevel(level);
     }
 
     @Nonnull
@@ -61,25 +56,6 @@ public class Construction extends AbstractEntityKey {
     @Nonnull
     public Building getBuilding() {
         return building;
-    }
-
-    public int getOperationalLevel() {
-        return operationalLevel;
-    }
-
-    public void setLevel(final int level) {
-        if (level <= this.level) {
-            throw new NotifyWebUserException("You cannot reduce the level of a construction");
-        }
-        this.level = level;
-    }
-
-    public int getLevel() {
-        return level;
-    }
-
-    public void setOperationalLevel(final int operationalLevel) {
-        this.operationalLevel = operationalLevel;
     }
 
     @Nonnull

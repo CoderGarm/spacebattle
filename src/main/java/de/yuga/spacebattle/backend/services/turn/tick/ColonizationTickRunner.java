@@ -9,7 +9,6 @@ import de.yuga.spacebattle.backend.entities.turn.resources.PayingPossibleResult;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.ECalculationType;
 import de.yuga.spacebattle.backend.enums.EDepositType;
-import de.yuga.spacebattle.backend.services.caches.ColonizationCache;
 import de.yuga.spacebattle.backend.services.constructables.OperationalService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
@@ -42,19 +41,14 @@ public class ColonizationTickRunner implements TickRunner {
     private final PlanetService planetService;
 
     @Nonnull
-    private final ColonizationCache colonizationCache;
-
-    @Nonnull
     private final OperationalService operationalService;
 
     @Autowired
     public ColonizationTickRunner(@Nonnull final ColonizationService colonizationService,
                                   @Nonnull final PlanetService planetService,
-                                  @Nonnull final ColonizationCache colonizationCache,
                                   @Nonnull final OperationalService operationalService) {
         this.colonizationService = Preconditions.checkNotNull(colonizationService, "colonizationService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
-        this.colonizationCache = Preconditions.checkNotNull(colonizationCache, "colonizationCache must not be empty");
         this.operationalService = Preconditions.checkNotNull(operationalService, "operationalService must not be empty");
     }
 
@@ -106,7 +100,6 @@ public class ColonizationTickRunner implements TickRunner {
                 final Planet planet = colonizationService.colonizePlanet(colonization);
                 operationalService.operateInoperationals(today, planet.getId());
                 colonizationService.delete(colonization);
-                colonizationCache.add(today, planet);
             } else {
                 colonizationService.save(colonization);
             }

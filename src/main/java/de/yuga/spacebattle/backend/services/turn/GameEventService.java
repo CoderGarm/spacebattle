@@ -50,7 +50,7 @@ public class GameEventService {
     private static final Range<Tick> WAR_HARVEST_2023 = Range.between(new Tick(244), new Tick(257), Tick::compareTo);
 
     @Nonnull
-    private static final Range<Tick> TOURNAMENT_24 = Range.between(new Tick(304), new Tick(324), Tick::compareTo); // fixme rollback
+    private static final Range<Tick> TOURNAMENT_24 = Range.between(new Tick(311), new Tick(325), Tick::compareTo); // fixme rollback
 
     @Nonnull
     public static final String INTERCEPT_PREFIX = "INTERCEPT";

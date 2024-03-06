@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.repositories.constructables.spacecraft;
 
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.OrbitalStructure;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -35,4 +36,8 @@ public interface OrbitalStructureRepository extends JpaRepository<OrbitalStructu
     @Nullable
     @Query("SELECT s FROM OrbitalStructure s WHERE s.owner = :user")
     List<OrbitalStructure> forDeletionFindAllByOwner(@Nonnull final User user);
+
+    @Nullable
+    @Query("SELECT w FROM OrbitalStructure w WHERE w.owner.id = :idUser AND w.activated = :today")
+    List<OrbitalStructure> findActivatedByUser(final int idUser, @Nonnull final Tick today);
 }

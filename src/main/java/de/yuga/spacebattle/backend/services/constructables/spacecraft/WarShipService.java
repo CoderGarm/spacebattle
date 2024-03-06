@@ -2,6 +2,8 @@ package de.yuga.spacebattle.backend.services.constructables.spacecraft;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.backend.entities.misc.Operationable;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.repositories.constructables.spacecraft.WarShipRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -106,7 +108,7 @@ public class WarShipService {
     public void markAsInoperational(@Nonnull final Set<WarShip> ships) {
         Preconditions.checkNotNull(ships, "ships must not be empty");
 
-        ships.forEach(s -> s.setOperational(false));
+        ships.forEach(Operationable::setInoperational);
         saveAll(ships);
     }
 
@@ -118,5 +120,12 @@ public class WarShipService {
             warShip.setName(shipName);
             save(warShip);
         }
+    }
+
+    @Nonnull
+    public List<WarShip> findActivatedByUser(final int idUser, @Nonnull final Tick today) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+
+        return Objects.requireNonNullElse(warShipRepository.findActivatedByUser(idUser, today), new ArrayList<>());
     }
 }

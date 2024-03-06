@@ -61,11 +61,15 @@ public class NPCFleetTickRunner implements TickRunner {
 
     @Override
     public void tick(@Nonnull final Tick today) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+
         LOGGER.info("Upgrade NPC fleets");
-        upgradeNPCFleets();
+        upgradeNPCFleets(today);
     }
 
-    private void upgradeNPCFleets() {
+    private void upgradeNPCFleets(@Nonnull final Tick today) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+
         final List<NonPlayerCharacter> all = nonPlayerCharacterService.findAll();
         all.removeIf(o -> IGNORE_NPC_NAME.contains(o.getUsername()));
 
@@ -77,7 +81,7 @@ public class NPCFleetTickRunner implements TickRunner {
                 final ShipClass shipClass = fleet.getShipsByClass().keySet().stream().findFirst().orElseThrow(NullPointerException::new);
                 final String randomWarshipName = resourceService.getRandomWarshipName();
                 final WarShip warShip = new WarShip(randomWarshipName, mainPlanet, fleet, shipClass);
-                warShip.setOperational();
+                warShip.setOperational(today);
                 warShipService.save(warShip);
             }
         }

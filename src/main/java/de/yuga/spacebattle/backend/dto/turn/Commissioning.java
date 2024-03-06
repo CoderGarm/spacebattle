@@ -10,10 +10,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Commissioning {
 
@@ -73,19 +70,16 @@ public class Commissioning {
         return planet;
     }
 
-    public void addConstructions(@Nonnull final Set<Construction> operationals) {
+    public void addConstructions(@Nonnull final Collection<Construction> operationals) {
         Preconditions.checkNotNull(operationals, "operationals must not be empty");
 
         operationals.forEach(operational -> {
-            final Construction known = this.constructions.stream().filter(c -> c.getOperationalLevel() < operational.getOperationalLevel()).findFirst().orElse(null);
-            if (known != null) {
-                this.constructions.remove(known);
-                this.constructions.add(operational);
-            }
+            this.constructions.stream().filter(c -> c.getOperationalLevel() < operational.getOperationalLevel()).findFirst().ifPresent(known -> this.constructions.remove(known));
+            this.constructions.add(operational);
         });
     }
 
-    public void addOrbitalConstructions(@Nonnull final List<OrbitalStructure> operationals) {
+    public void addOrbitalConstructions(@Nonnull final Collection<OrbitalStructure> operationals) {
         Preconditions.checkNotNull(operationals, "operationals must not be empty");
 
         this.orbitalStructures.addAll(operationals);
@@ -100,7 +94,7 @@ public class Commissioning {
         this.warships = Preconditions.checkNotNull(warShips, "warShips must not be empty");
     }
 
-    public void addWarships(@Nonnull final List<WarShip> warShips) {
+    public void addWarships(@Nonnull final Collection<WarShip> warShips) {
         this.warships.addAll(Preconditions.checkNotNull(warShips, "warShips must not be empty"));
     }
 

@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.entities.misc;
 
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
+import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -11,7 +12,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public class Operationable extends Deletable {
+public class LeveledOperationable extends AbstractEntityKey {
+
+    private int level = 0;
+
+    private int operationalLevel = 0;
 
     /**
      * Marks if the class is operational and hold its crew.
@@ -24,7 +29,28 @@ public class Operationable extends Deletable {
     @JoinColumn(name = "idTickActivated", referencedColumnName = "idTick")
     private Tick activated;
 
-    public Operationable() {
+    public LeveledOperationable() {
+    }
+
+
+    public int getOperationalLevel() {
+        return operationalLevel;
+    }
+
+    public void setLevel(final int level) {
+        if (level <= this.level) {
+            throw new NotifyWebUserException("You cannot reduce the level of a construction");
+        }
+        this.level = level;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setOperationalLevel(final int operationalLevel, @Nonnull final Tick today) {
+        this.activated = Preconditions.checkNotNull(today, "today must not be empty");
+        this.operationalLevel = operationalLevel;
     }
 
     public void setOperational(@Nonnull final Tick today) {
@@ -33,10 +59,6 @@ public class Operationable extends Deletable {
     }
 
     public boolean isOperational() {
-        return isOperational;
-    }
-
-    public boolean isOperationalFromSuper() {
         return isOperational;
     }
 

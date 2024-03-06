@@ -3,7 +3,6 @@ package de.yuga.spacebattle.backend.services.turn.tick;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
-import de.yuga.spacebattle.backend.entities.misc.Operationable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.enums.EEducationType;
@@ -102,13 +101,13 @@ public class HousekeepingRunner implements TickRunner {
             final Set<WarShip> warShips = toRepair.stream().map(Fleet::getAliveShips).flatMap(Collection::stream).collect(Collectors.toSet());
 
             warShips.forEach(warShip -> {
-                warShip.getWarshipHealthState().repair();
+                warShip.getWarshipHealthState().repair(today);
                 warShip.getWarshipHealthState().ammoUp();
                 warShip.getWarshipHealthState().setFightingCapable(true);
             });
             warShipService.saveAll(warShips);
 
-            toRepair.forEach(Operationable::setOperational);
+            toRepair.forEach(o -> o.setOperational(today));
             fleetService.saveAll(toRepair);
         }
     }

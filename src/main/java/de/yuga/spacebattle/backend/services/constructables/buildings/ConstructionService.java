@@ -5,6 +5,7 @@ import de.yuga.spacebattle.backend.calculator.resource.JobCostsCalculator;
 import de.yuga.spacebattle.backend.entities.buildings.Building;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.EResourceType;
@@ -169,5 +170,12 @@ public class ConstructionService {
     @Nonnull
     public Set<EResourceType> findProductionCapabilities(final int idPlanet) {
         return Objects.requireNonNullElse(constructionRepository.findProductionCapabilities(idPlanet), new HashSet<>());
+    }
+
+    @Nonnull
+    public List<Construction> findActivatedByUser(final int idUser, @Nonnull final Tick today) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+
+        return Objects.requireNonNullElse(constructionRepository.findActivatedByUser(idUser, today), new ArrayList<>());
     }
 }

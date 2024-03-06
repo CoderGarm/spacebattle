@@ -1,10 +1,12 @@
 package de.yuga.spacebattle.backend.repositories.constructables.spacecraft;
 
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
@@ -38,4 +40,8 @@ public interface WarShipRepository extends CrudRepository<WarShip, Integer> {
     @Nullable
     @Query("SELECT w FROM WarShip w WHERE w.shipClass.owner.id = :idUser AND w.isDeleted = false AND w.isOperational = true")
     List<WarShip> findAliveOperationalForUser(@Param("idUser") final int idUser);
+
+    @Nullable
+    @Query("SELECT w FROM WarShip w WHERE w.shipClass.owner.id = :idUser AND w.activated = :today")
+    List<WarShip> findActivatedByUser(final int idUser, @Nonnull final Tick today);
 }

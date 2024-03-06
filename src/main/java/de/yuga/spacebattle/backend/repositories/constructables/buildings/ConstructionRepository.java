@@ -1,6 +1,7 @@
 package de.yuga.spacebattle.backend.repositories.constructables.buildings;
 
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.enums.EProductionCategory;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -70,4 +71,8 @@ public interface ConstructionRepository extends JpaRepository<Construction, Inte
     @Nullable
     @Query("SELECT c.building.productionType.productionTarget FROM Construction c WHERE c.planet.id = :idPlanet AND c.building.productionType.productionCategory = de.yuga.spacebattle.backend.enums.EProductionCategory.PRODUCE")
     Set<EResourceType> findProductionCapabilities(final int idPlanet);
+
+    @Nullable
+    @Query("SELECT w FROM Construction w WHERE w.planet.owner.id = :idUser AND w.activated = :today")
+    List<Construction> findActivatedByUser(final int idUser, @Nonnull final Tick today);
 }

@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -80,4 +81,8 @@ public interface PlanetRepository extends JpaRepository<Planet, Integer>, Custom
             "p.id, p.name, p.isMain, p.system.id " +
             ") FROM Planet p WHERE p.owner.id = :idOwner ORDER BY p.colonizedAt")
     List<PlanetAbstractId> findAllPlanetsColonizedByIDForNaming(final int idOwner);
+
+    @Nullable
+    @Query("SELECT p FROM Planet p WHERE p.owner.id = :idUser AND YEAR(p.colonizedAt) = YEAR(:today) AND MONTH(p.colonizedAt) = MONTH(:today) AND DAY(p.colonizedAt) = DAY(:today)")
+    List<Planet> findAllFinishedForUser(@Nonnull final LocalDateTime today, final int idUser);
 }

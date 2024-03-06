@@ -3,9 +3,6 @@ package de.yuga.spacebattle.backend.entities.misc;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
-/**
- * Simply the entity key.
- */
 @MappedSuperclass
 public class Deletable extends AbstractEntityKey {
 

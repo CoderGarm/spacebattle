@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.entities.account.User;
 import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.OrbitalStructure;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.repositories.constructables.spacecraft.OrbitalStructureRepository;
 import org.springframework.stereotype.Service;
 
@@ -96,5 +97,12 @@ public class OrbitalStructureService {
         Preconditions.checkNotNull(user, "user must not be empty");
 
         return Objects.requireNonNullElse(orbitalStructureRepository.forDeletionFindAllByOwner(user), new ArrayList<>());
+    }
+
+    @Nonnull
+    public List<OrbitalStructure> findActivatedByUser(final int idUser, @Nonnull final Tick today) {
+        Preconditions.checkNotNull(today, "today must not be empty");
+
+        return Objects.requireNonNullElse(orbitalStructureRepository.findActivatedByUser(idUser, today), new ArrayList<>());
     }
 }

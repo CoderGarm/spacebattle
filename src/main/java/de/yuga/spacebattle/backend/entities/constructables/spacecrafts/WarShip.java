@@ -6,6 +6,7 @@ import de.yuga.spacebattle.backend.entities.misc.Operationable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Detachment;
+import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.TransportJob;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.CapabilityValue;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
@@ -110,13 +111,14 @@ public class WarShip extends Operationable {
         this.warshipHealthState = new WarshipHealthState(this);
     }
 
-    public void upgrade(@Nonnull final Planet shipyard, @Nonnull final ShipClass shipClass) {
+    public void upgrade(@Nonnull final Tick today, @Nonnull final Planet shipyard, @Nonnull final ShipClass shipClass) {
+        Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(shipyard, "shipyard must not be empty");
         Preconditions.checkNotNull(shipClass, "shipClass must not be empty");
 
         this.shipyard = shipyard;
         this.shipClass = shipClass;
-        this.warshipHealthState.repair();
+        this.warshipHealthState.repair(today);
     }
 
     public void setName(@Nonnull final String name) {

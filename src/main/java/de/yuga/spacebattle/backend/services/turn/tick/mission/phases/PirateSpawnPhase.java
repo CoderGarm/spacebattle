@@ -186,23 +186,25 @@ public class PirateSpawnPhase implements MissionPhaseRunner {
     private void createPirateShip(@Nonnull final Planet target,
                                   @Nonnull final Fleet pirateFleet,
                                   @Nonnull final ShipClass ship) {
+        Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(target, "target must not be empty");
         Preconditions.checkNotNull(pirateFleet, "pirateFleet must not be empty");
         Preconditions.checkNotNull(ship, "ship must not be empty");
 
         final WarShip warShip = new WarShip(resourceService.getRandomWarshipName(), target, pirateFleet, ship);
-        warShip.setOperational();
+        warShip.setOperational(today);
         warShipService.save(warShip);
     }
 
     @Nonnull
     private Fleet createFleet(@Nonnull final Owner user, @Nonnull final Planet planet, @Nonnull final FleetOrbit planetsPosition) {
+        Preconditions.checkNotNull(today, "today must not be empty");
         Preconditions.checkNotNull(user, "user must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
         Preconditions.checkNotNull(planet, "planet must not be empty");
 
         final Fleet fleet = new Fleet("Kersey Association", user, planetsPosition);
-        fleet.setOperational();
+        fleet.setOperational(today);
 
         return fleetService.save(fleet);
     }

@@ -140,8 +140,10 @@
 
     create table construction (
        idConstruction integer not null auto_increment,
+        isOperational boolean not null default false,
         level integer not null,
         operationalLevel integer not null,
+        idTickActivated integer,
         idBuilding integer not null,
         idPlanet integer not null,
         primary key (idConstruction)
@@ -203,6 +205,7 @@
         name varchar(255) not null,
         xCoordinateLocation varchar(255),
         yCoordinateLocation varchar(255),
+        idTickActivated integer,
         idMove integer,
         idPlanetLocation integer,
         idStarSystemLocation integer,
@@ -516,6 +519,7 @@
         amount integer not null,
         xCoordinate varchar(255),
         yCoordinate varchar(255),
+        idTickActivated integer,
         idOrbitalModule integer not null,
         idPlanet integer,
         idStarSystem integer,
@@ -835,6 +839,7 @@
         isDeleted boolean not null default false,
         isOperational boolean not null default false,
         name varchar(255) not null,
+        idTickActivated integer,
         idFleet integer,
         idMission integer,
         idMothball integer,
@@ -868,6 +873,7 @@
         isDeleted boolean not null default false,
         isOperational boolean not null default false,
         isFightingCapable boolean not null default true,
+        idTickActivated integer,
         idFleetSnapshot integer not null,
         idWarship integer not null,
         primary key (idWarshipHealthStateSnapshot)
@@ -1152,6 +1158,11 @@ create index ID_WHSS on warshipHealthStateSnapshot (isDeleted);
                 references user (idUser);
 
     alter table construction
+       add constraint FKah9i54pwsqd526a91s3ryci5o 
+       foreign key (idTickActivated) 
+       references tick (idTick);
+
+    alter table construction 
         add constraint FKlkteuncyf95jg9hhq28yefrcl
             foreign key (idBuilding)
                 references building (idBuilding);
@@ -1202,6 +1213,11 @@ create index ID_WHSS on warshipHealthStateSnapshot (isDeleted);
        references user (idUser);
 
     alter table fleet
+       add constraint FKkv8p42ny0lnkcqrrsvrpltsno 
+       foreign key (idTickActivated) 
+       references tick (idTick);
+
+    alter table fleet 
         add constraint FK5yy9whqh6562iaxuym0wrkjeq
             foreign key (idMove)
                 references move (idMove);
@@ -1577,6 +1593,11 @@ create index ID_WHSS on warshipHealthStateSnapshot (isDeleted);
        references job (idJob);
 
     alter table orbitalStructure
+       add constraint FKcnjc3xew6n67k9q8qhwkntbcb 
+       foreign key (idTickActivated) 
+       references tick (idTick);
+
+    alter table orbitalStructure 
        add constraint FKhd287pobvlknx1eo1b9rrix9x
        foreign key (idOrbitalModule)
        references orbitalModule (idOrbitalModule);
@@ -1937,6 +1958,11 @@ create index ID_WHSS on warshipHealthStateSnapshot (isDeleted);
                 references user (idUser);
 
     alter table warShip
+       add constraint FKm26l3odxqppbhlowov3tc64y9 
+       foreign key (idTickActivated) 
+       references tick (idTick);
+
+    alter table warShip 
         add constraint FK3kovfkp6003a62x5ff41h44hw
             foreign key (idFleet)
                 references fleet (idFleet);
@@ -1982,6 +2008,11 @@ create index ID_WHSS on warshipHealthStateSnapshot (isDeleted);
                 references warShip (idWarShip);
 
     alter table warshipHealthStateSnapshot
+       add constraint FK11aatx339r9rwxxawx31i5ub1 
+       foreign key (idTickActivated) 
+       references tick (idTick);
+
+    alter table warshipHealthStateSnapshot 
         add constraint FKcjim226ew093h6wpualjjrodk
             foreign key (idFleetSnapshot)
                 references fleetSnapshot (idFleetSnapshot);
@@ -2084,3 +2115,4 @@ INSERT INTO dbPatch VALUES (NULL, NOW(), 'more roleplay', '0.1.17-3');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'more more roleplay', '0.1.17-4');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'add indices', '0.1.17-5');
 INSERT INTO dbPatch VALUES (NULL, NOW(), 'add event participations', '0.1.17-6');
+INSERT INTO dbPatch VALUES (NULL, NOW(), 'replace operational cache', '0.1.17-7');

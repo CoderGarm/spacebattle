@@ -1,37 +1,15 @@
-# Event War Harvest Release
+# Event BfH Tournament Release
 
-todo. alliance color for map
-todo. filter for own / allied / only enemy
+- fight for TDx-...
+- autorepair für TD1-... und TD3-
+- punkte für wins
 
-check. imperiumsnamen wählen (-> externe profilseite, link zum chat?), namen in spielerliste zur wiedererkennung, topic: "Char address"
+todo:
 
-- imperums profilseite
-    - check. mit emblem / logo / avatar
-    - check: roleplaysetting: add empire name
-        - check: stichpunkte zum leader, title, name ...
-            - mit "trophy case" z.b. season 2 participant, war harvest 24 participant ...
-            - allgemeine textbox für "sichtbar für alle", "sichtbar für ally", "sichtbar für freunde"
-            - textbox für spezifischere beschreibungen der navy, der gesellschaft, des spielers ...
-            - liste aller interaktionen der eigenen navy, diplomatischer kontakt seit "erste chat-nachricht"-datum
-- imperiumsprofil wird als dialog immer aufgerufen wenn man auf den usernamen, usericon ... klickt
-- die letzten forumsbeiträge ...
-- allianzmitgliedschaft ...
-- chat optisch aufarbeiten und auf imperiumsseite des anderen anzeigen
+- battle reports teilen
+- badges for old event and season 2 veteran
 
-check. no bikini ships without fight
-check. heat für steffen und alle anderen
-check. ladderboard
-check. highlight kersey bases
-check. fleet name change logging
-check. fleet reinforcement logging
-check. intercept fleet combat loggen -> tonnage
-check. claim in forum
-check. INTERCEPT Fleets kämpfen nicht gegeneinander
-check. reinforce shannon
-check. create foritied bases with rewards
-check. create player-to-delete bases with rewards
-check. schiffstonnage bei verbünderten zeigen
-check. punkte sammeln -> flottenpunkte durch kämpfende tonnage, zerstörte tonnage; planetenpunkte durch anzahl eroberte planeten und gebäudelevel
+- fix job abbrechen punkte werden nich drauf gerechnet
 
 ### Wiki Articles
 
@@ -43,15 +21,6 @@ article orbital modules
     - all battles by date
 
 ### Features
-
-- fight for TDx-...
-- autorepair für TD1-... und TD3-
-- punkte für wins
-
-todo:
-
-- battle reports teilen
-- badges for old event and season 2 veteran
 
 #### Gameplay
 
