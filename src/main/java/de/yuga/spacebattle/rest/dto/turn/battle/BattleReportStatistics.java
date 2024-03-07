@@ -19,6 +19,11 @@ public class BattleReportStatistics {
 
     @Nonnull
     @JsonProperty
+    @Schema(required = true, description = "The uid.")
+    private String uuid;
+
+    @Nonnull
+    @JsonProperty
     @Schema(required = true, description = "The tick where the action happened.")
     private Tick tick;
 
@@ -39,11 +44,29 @@ public class BattleReportStatistics {
     }
 
     public BattleReportStatistics(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.BattleReport battleReport) {
-        Preconditions.checkNotNull(battleReport, "battleReport shouldn't be null!");
+        this(
+                Preconditions.checkNotNull(battleReport, "battleReport must not be empty").getId(),
+                battleReport.getUUID(),
+                battleReport.getLastRound(),
+                battleReport.getTick(),
+                battleReport.getVenue()
+        );
+    }
 
-        this.idBattleReport = battleReport.getId();
-        this.lastRound = new CombatRound(battleReport.getLastRound());
-        this.tick = new Tick(battleReport.getTick());
-        this.orbit = new FleetOrbit(battleReport.getVenue());
+    public BattleReportStatistics(final int idBattleReport,
+                                  @Nonnull String uuid,
+                                  @Nonnull final de.yuga.spacebattle.backend.combat.round.CombatRound combatRound,
+                                  @Nonnull final de.yuga.spacebattle.backend.entities.turn.Tick tick,
+                                  @Nonnull final de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit venue) {
+        Preconditions.checkNotNull(uuid, "uuid must not be empty");
+        Preconditions.checkNotNull(combatRound, "combatRound must not be empty");
+        Preconditions.checkNotNull(tick, "tick must not be empty");
+        Preconditions.checkNotNull(venue, "venue must not be empty");
+
+        this.idBattleReport = idBattleReport;
+        this.uuid = uuid;
+        this.lastRound = new CombatRound(combatRound);
+        this.tick = new Tick(tick);
+        this.orbit = new FleetOrbit(venue);
     }
 }

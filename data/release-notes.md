@@ -7,6 +7,11 @@
 
 todo:
 
+- battle register UI
+    - knopf zum öffnen von overlay (ist beim initialen laden der seite offen)
+    - overlay zeigt ausgewählten kampf und zurück-button um zur liste zu kommen
+    - "battle item" zeigt optionen für sichtbarkeit im klappauf
+
 - battle reports teilen
 
 - teilbar für (kombination aus) allianz, user, alle (farbcodierung je nach individuellstem typ)
@@ -58,6 +63,7 @@ season 3:
 - forschung muss ab dem early-game mehr kosten
 - schiffswerten müssen mehr output haben
 - regelmäßige konvoys wie in anno -> kann man abfangen per mission und schützen mit eigenen missionen -> mehrere ressourcen pro convoy
+- stop the job: job wird inaktiv gesetzt und kann wieder aufgenommen werden
 
 todo. colo duration through wormholes are NaN
 todo. tonnage calc not on every input -> timeout should be enough

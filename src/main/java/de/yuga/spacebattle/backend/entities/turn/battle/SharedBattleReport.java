@@ -2,18 +2,21 @@ package de.yuga.spacebattle.backend.entities.turn.battle;
 
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.account.User;
+import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.combined.account.Alliance;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
+import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "sharedBattleReport")
@@ -22,14 +25,27 @@ public class SharedBattleReport extends AbstractEntityKey {
 
     @Nonnull
     @NotNull
-    @OneToOne(optional = false)
-    @JoinColumn(name = "idBattleReport")
+    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "idBattleReport", updatable = false, nullable = false)
     private BattleReport battleReport;
 
-    @Nullable
-    @ManyToOne
-    @JoinColumn(name = "idAlliance")
-    private Alliance alliance;
+    @Nonnull
+    @NotNull
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "participatingUsers",
+            joinColumns = @JoinColumn(name = "idSharedBattleReport"),
+            inverseJoinColumns = @JoinColumn(name = "idUser"),
+            uniqueConstraints = @UniqueConstraint(name = "participatingUsers_UC", columnNames = {"idUser", "idSharedBattleReport"}))
+    private final Set<Owner> participatingUsers = new HashSet<>();
+
+    @Nonnull
+    @NotNull
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "sharedWithAlliances",
+            joinColumns = @JoinColumn(name = "idSharedBattleReport"),
+            inverseJoinColumns = @JoinColumn(name = "idAlliance"),
+            uniqueConstraints = @UniqueConstraint(name = "participatingUsers_UC", columnNames = {"idAlliance", "idSharedBattleReport"}))
+    private final Set<Alliance> sharedWithAlliances = new HashSet<>();
 
     @Nonnull
     @NotNull
@@ -38,7 +54,7 @@ public class SharedBattleReport extends AbstractEntityKey {
             joinColumns = @JoinColumn(name = "idSharedBattleReport"),
             inverseJoinColumns = @JoinColumn(name = "idUser"),
             uniqueConstraints = @UniqueConstraint(name = "sharedWithUsers_UC", columnNames = {"idUser", "idSharedBattleReport"}))
-    private final Set<User> sharedWithUsers = new HashSet<>();
+    private final Set<Owner> sharedWithUsers = new HashSet<>();
 
     @Column(columnDefinition = "boolean not null default false")
     private boolean shareWithEveryone = false;
@@ -48,6 +64,11 @@ public class SharedBattleReport extends AbstractEntityKey {
 
     public SharedBattleReport(@Nonnull final BattleReport battleReport) {
         this.battleReport = Preconditions.checkNotNull(battleReport, "battleReport must not be empty");
+
+        this.participatingUsers.addAll(battleReport.getParticipatingFleets().stream()
+                .map(FleetSnapshot::getFleet)
+                .map(Fleet::getOwner)
+                .collect(Collectors.toSet()));
     }
 
     @Nonnull
@@ -55,17 +76,18 @@ public class SharedBattleReport extends AbstractEntityKey {
         return battleReport;
     }
 
-    @Nullable
-    public Alliance getAlliance() {
-        return alliance;
-    }
-
-    public void setAlliance(@Nullable final Alliance alliance) {
-        this.alliance = alliance;
+    @Nonnull
+    public Set<Owner> getParticipatingUsers() {
+        return Collections.unmodifiableSet(participatingUsers);
     }
 
     @Nonnull
-    public Set<User> getSharedWithUsers() {
+    public Set<Alliance> getSharedWithAlliances() {
+        return sharedWithAlliances;
+    }
+
+    @Nonnull
+    public Set<Owner> getSharedWithUsers() {
         return sharedWithUsers;
     }
 

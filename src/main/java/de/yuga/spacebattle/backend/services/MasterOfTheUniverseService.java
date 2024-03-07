@@ -248,11 +248,13 @@ public class MasterOfTheUniverseService {
         final boolean transformationNeeded = false; // fixme rollback
         if (transformationNeeded) {
 
-            /*
+            // fixme create fleet for kalus
+
             fleetService.deleteAll();
-            createShannonsFleet();
             createYufielsFleet();
+            createFlashsFleet();
             battleService.runBattleAtPlanet(tickService.getToday(), planetService.find(112));
+            /*
              */
 
             LOGGER.info("---------------------------- done transforming -------------------------------");

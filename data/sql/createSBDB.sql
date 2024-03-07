@@ -104,6 +104,7 @@
     create table battleReport (
        idBattleReport integer not null auto_increment,
         lastRound integer not null,
+        uuid varchar(255) not null,
         xCoordinate varchar(255),
         yCoordinate varchar(255),
         idTick integer not null,
@@ -541,9 +542,9 @@
     ) engine=InnoDB;
 
     create table participatingUsers (
-       idBattleReport integer not null,
+       idSharedBattleReport integer not null,
         idUser integer not null,
-        primary key (idBattleReport, idUser)
+        primary key (idSharedBattleReport, idUser)
     ) engine=InnoDB;
 
     create table passiveModule (
@@ -678,9 +679,14 @@
     create table sharedBattleReport (
        idSharedBattleReport integer not null auto_increment,
         shareWithEveryone boolean not null default false,
-        idAlliance integer,
         idBattleReport integer not null,
         primary key (idSharedBattleReport)
+    ) engine=InnoDB;
+
+    create table sharedWithAlliances (
+       idSharedBattleReport integer not null,
+        idAlliance integer not null,
+        primary key (idSharedBattleReport, idAlliance)
     ) engine=InnoDB;
 
     create table sharedWithUsers (
@@ -1660,9 +1666,9 @@ create index ID_WHSS on warshipHealthStateSnapshot (isDeleted);
                 references user (idUser);
 
     alter table participatingUsers
-        add constraint FKlreg972gg0pgmmoudxk12sy3g
-            foreign key (idBattleReport)
-                references battleReport (idBattleReport);
+       add constraint FK5cqqxdpvyx4jmlpmu1khk00sv 
+       foreign key (idSharedBattleReport) 
+       references sharedBattleReport (idSharedBattleReport);
 
     alter table passiveModule
         add constraint FK3q0uitju15ai7lhv7y7y61549
@@ -1800,14 +1806,19 @@ create index ID_WHSS on warshipHealthStateSnapshot (isDeleted);
        references user (idUser);
 
     alter table sharedBattleReport 
-       add constraint FK7tseyh70o5cbaenxmog7ao3l9 
-       foreign key (idAlliance) 
-       references alliance (idAlliance);
-
-    alter table sharedBattleReport 
        add constraint FKyk7jxlttaktlvdhc231rwt80 
        foreign key (idBattleReport) 
        references battleReport (idBattleReport);
+
+    alter table sharedWithAlliances 
+       add constraint FK3tp6tcx1ulbyfxa69lhh7ad1e 
+       foreign key (idAlliance) 
+       references alliance (idAlliance);
+
+    alter table sharedWithAlliances 
+       add constraint FKn7nuh81nwugcay3yigdhmaqva 
+       foreign key (idSharedBattleReport) 
+       references sharedBattleReport (idSharedBattleReport);
 
     alter table sharedWithUsers 
        add constraint FK3wt2lys7aqxisvvcxjhkh2iit 

@@ -11,6 +11,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
+import de.yuga.spacebattle.backend.entities.turn.battle.SharedBattleReport;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
 import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
@@ -170,6 +171,7 @@ public class BattleService {
         Preconditions.checkNotNull(battleResult, "fightingResult shouldn't be null!");
 
         final BattleReport battleReport = battleReportService.save(new BattleReport(latest, battleResult));
+        final SharedBattleReport sharedBattleReport = battleReportService.save(new SharedBattleReport(battleReport));
         final List<WarShip> warShips = battleResult.getFleetClash()
                 .getParticipatingFleets().stream()
                 .map(Fleet::getAliveShips)
@@ -199,7 +201,7 @@ public class BattleService {
         fleetService.markFleetsWithoutShipsAsDeleted(battleResult.getFleetClash().getParticipatingFleets());
 
         battleLogger.logBattleResult(battleReport, battleResult);
-        gameEventService.logResult(battleReport, losses);
+        gameEventService.logResult(sharedBattleReport, battleReport, losses);
         return battleReport;
     }
 }

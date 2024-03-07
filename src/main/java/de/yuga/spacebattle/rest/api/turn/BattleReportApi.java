@@ -10,6 +10,8 @@ import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.error.FrontendError;
 import de.yuga.spacebattle.rest.dto.turn.battle.BattleReport;
 import de.yuga.spacebattle.rest.dto.turn.battle.BattleReportStatistics;
+import de.yuga.spacebattle.rest.dto.turn.battle.ChangeSharedBattleReport;
+import de.yuga.spacebattle.rest.dto.turn.battle.SharedBattleReport;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,10 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.security.RolesAllowed;
@@ -41,6 +40,7 @@ public class BattleReportApi extends BaseApi {
     public static final String HAS_NEW_REPORTS_ENDPOINT = "hasNew";
     public static final String FIGHTING_BY_ID_ENDPOINT = FIGHTING_ENDPOINT + "/byId";
     public static final String FIGHTING_AMOUNT_ENDPOINT = FIGHTING_ENDPOINT + "/amount";
+    public static final String SHARE_REPORTS_ENDPOINT = "share";
 
     @Nonnull
     private final BattleReportService battleReportService;
@@ -75,8 +75,8 @@ public class BattleReportApi extends BaseApi {
         return ResponseEntity.ok(battleReportService.countAllWithUser(idUser));
     }
 
-    @GetMapping(value = FIGHTING_ENDPOINT + "/{page}/{size}")
-    @Operation(summary = "Get all fighting reports for the user.", operationId = "getReportsWithUserWithPaging",
+    @GetMapping(value = FIGHTING_ENDPOINT)
+    @Operation(summary = "Get all fighting reports for the user.", operationId = "getReportsForUser",
             responses = {
                     @ApiResponse(responseCode = "200", description = "successful",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
@@ -86,10 +86,9 @@ public class BattleReportApi extends BaseApi {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
             }
     )
-    public ResponseEntity<?> getReportsWithUserWithPaging(@PathVariable("page") final int page,
-                                                          @PathVariable("size") final int size) {
+    public ResponseEntity<?> getReportsForUser() {
 
-        final Collection<BattleReportStatistics> reports = battleReportService.findReportBasicInformationByPaging(getIdUser(), page, size);
+        final Collection<BattleReportStatistics> reports = battleReportService.findAllReportsBasicInformationForUser(getIdUser());
         return ResponseEntity.ok(reports);
     }
 
@@ -104,8 +103,7 @@ public class BattleReportApi extends BaseApi {
     )
     public ResponseEntity<?> getReportsById(@PathVariable("idBattleReport") final int idBattleReport) {
 
-        final int idUser = getIdUser();
-        final de.yuga.spacebattle.backend.entities.turn.battle.BattleReport battleReport = battleReportService.findByIdWithAllData(idUser, idBattleReport);
+        final de.yuga.spacebattle.backend.entities.turn.battle.BattleReport battleReport = battleReportService.findByIdWithAllData(idBattleReport);
         if (battleReport == null) {
             throw new NotifyWebUserException("Nothing there, buddy.");
         }
@@ -132,5 +130,40 @@ public class BattleReportApi extends BaseApi {
         }
         final boolean hasNewReportsSince = battleReportService.hasNewReportsSince(idUser, lastQueried != null ? lastQueried : today.getNo());
         return ResponseEntity.ok(hasNewReportsSince);
+    }
+
+    @GetMapping(value = SHARE_REPORTS_ENDPOINT + "/{idBattleReport}")
+    @Operation(summary = "Get all fighting reports for the user.", operationId = "getReportSharings",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = SharedBattleReport.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> getReportSharings(@PathVariable("idBattleReport") final int idBattleReport) {
+
+        final SharedBattleReport sharedReport = battleReportService.findSharedReport(idBattleReport);
+        if (sharedReport == null) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.ok(sharedReport);
+    }
+
+
+    @PutMapping(value = SHARE_REPORTS_ENDPOINT, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all fighting reports for the user.", operationId = "changeReportSharings",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "successful",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Boolean.class))),
+                    @ApiResponse(responseCode = "400", description = "an error occurred",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FrontendError.class)))
+            }
+    )
+    public ResponseEntity<?> changeReportSharings(@RequestBody @Nonnull final ChangeSharedBattleReport change) {
+        Preconditions.checkNotNull(change, "change must not be empty");
+
+        battleReportService.changeReportSharings(change);
+        return ResponseEntity.ok(true);
     }
 }

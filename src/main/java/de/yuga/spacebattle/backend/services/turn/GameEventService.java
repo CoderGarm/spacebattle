@@ -18,6 +18,7 @@ import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
+import de.yuga.spacebattle.backend.entities.turn.battle.SharedBattleReport;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthStateSnapshot;
 import de.yuga.spacebattle.backend.entities.turn.mission.HeatMap;
 import de.yuga.spacebattle.backend.enums.ECapacityAreaType;
@@ -375,14 +376,17 @@ public class GameEventService {
         return text;
     }
 
-    public void logResult(@Nonnull final BattleReport battleReport, @Nonnull final Set<WarShip> losses) {
+    public void logResult(@Nonnull final SharedBattleReport sharedBattleReport, @Nonnull final BattleReport battleReport, @Nonnull final Set<WarShip> losses) {
+        Preconditions.checkNotNull(sharedBattleReport, "sharedBattleReport must not be empty");
         Preconditions.checkNotNull(battleReport, "battleReport must not be empty");
+        Preconditions.checkNotNull(losses, "losses must not be empty");
 
-        logTournamentResult(battleReport, losses);
-        logInterceptResult(battleReport, losses);
+        logTournamentResult(sharedBattleReport, battleReport, losses);
+        logInterceptResult(sharedBattleReport, battleReport, losses);
     }
 
-    private void logTournamentResult(@Nonnull final BattleReport battleReport, @Nonnull final Set<WarShip> losses) {
+    private void logTournamentResult(@Nonnull final SharedBattleReport sharedBattleReport, @Nonnull final BattleReport battleReport, @Nonnull final Set<WarShip> losses) {
+        Preconditions.checkNotNull(sharedBattleReport, "sharedBattleReport must not be empty");
         Preconditions.checkNotNull(battleReport, "battleReport must not be empty");
         Preconditions.checkNotNull(losses, "losses must not be empty");
 
@@ -391,8 +395,8 @@ public class GameEventService {
         }
         // todo multicombat will affect this
 
-        final User player = battleReport.getParticipatingUsers().stream().map(Owner::getHumanOwner).filter(Objects::nonNull).findFirst().orElseThrow(NullPointerException::new);
-        final User other = battleReport.getParticipatingUsers().stream().map(Owner::getHumanOwner).filter(Objects::nonNull).filter(o1 -> !o1.equals(player)).findFirst().orElseThrow(NullPointerException::new);
+        final User player = sharedBattleReport.getParticipatingUsers().stream().map(Owner::getHumanOwner).filter(Objects::nonNull).findFirst().orElseThrow(NullPointerException::new);
+        final User other = sharedBattleReport.getParticipatingUsers().stream().map(Owner::getHumanOwner).filter(Objects::nonNull).filter(o1 -> !o1.equals(player)).findFirst().orElseThrow(NullPointerException::new);
 
         final List<String> names = battleReport.getParticipatingFleets().stream()
                 .map(FleetSnapshot::getFleet)
@@ -430,7 +434,8 @@ public class GameEventService {
                 (is1v1 ? "1v1" : is3v3 ? "3v3" : is5v5 ? "5v5" : ""));
     }
 
-    private void logInterceptResult(@Nonnull final BattleReport battleReport, @Nonnull final Set<WarShip> losses) {
+    private void logInterceptResult(@Nonnull final SharedBattleReport sharedBattleReport, @Nonnull final BattleReport battleReport, @Nonnull final Set<WarShip> losses) {
+        Preconditions.checkNotNull(sharedBattleReport, "sharedBattleReport must not be empty");
         Preconditions.checkNotNull(battleReport, "battleReport must not be empty");
         Preconditions.checkNotNull(losses, "losses must not be empty");
 
@@ -440,8 +445,8 @@ public class GameEventService {
         }
         // todo multicombat will affect this
 
-        final User player = battleReport.getParticipatingUsers().stream().map(Owner::getHumanOwner).filter(Objects::nonNull).findFirst().orElseThrow(NullPointerException::new);
-        final NonPlayerCharacter pirate = battleReport.getParticipatingUsers().stream().map(Owner::getNpcOwner).filter(Objects::nonNull).findFirst().orElse(null);
+        final User player = sharedBattleReport.getParticipatingUsers().stream().map(Owner::getHumanOwner).filter(Objects::nonNull).findFirst().orElseThrow(NullPointerException::new);
+        final NonPlayerCharacter pirate = sharedBattleReport.getParticipatingUsers().stream().map(Owner::getNpcOwner).filter(Objects::nonNull).findFirst().orElse(null);
 
         if (pirate == null) {
             return;

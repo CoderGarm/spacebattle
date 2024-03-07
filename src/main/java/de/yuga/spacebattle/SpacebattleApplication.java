@@ -54,7 +54,6 @@ public class SpacebattleApplication implements Jackson2ObjectMapperBuilderCustom
     private static final String tmpdir = System.getProperty("java.io.tmpdir");
     private static final String separator = System.getProperty("file.separator");
     private static final String createPath = tmpdir + separator + "createSBDB.sql";
-    private static final String dropPath = tmpdir + separator + "dropSBDB.sql";
 
     @Nonnull
     private final String applicationVersion;
@@ -101,7 +100,6 @@ public class SpacebattleApplication implements Jackson2ObjectMapperBuilderCustom
         return bf -> {
             try {
                 Files.deleteIfExists(Path.of(createPath));
-                Files.deleteIfExists(Path.of(dropPath));
             } catch (final IOException e) {
                 throw new IllegalStateException(e);
             }

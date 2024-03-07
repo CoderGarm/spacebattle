@@ -13,6 +13,7 @@ import de.yuga.spacebattle.backend.entities.turn.Colonization;
 import de.yuga.spacebattle.backend.entities.turn.Job;
 import de.yuga.spacebattle.backend.entities.turn.Move;
 import de.yuga.spacebattle.backend.entities.turn.battle.BattleReport;
+import de.yuga.spacebattle.backend.entities.turn.battle.SharedBattleReport;
 import de.yuga.spacebattle.backend.entities.turn.mission.Mission;
 import de.yuga.spacebattle.backend.services.account.ChatService;
 import de.yuga.spacebattle.backend.services.account.ForumService;
@@ -35,7 +36,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -177,8 +180,14 @@ public class UserDeleteServiceService {
 
         LOGGER.info("\tChange owner of battle reports");
         final List<BattleReport> repsToChangeOwner = battleReportService.forDeletionFindAllByUser(toWipe);
-        repsToChangeOwner.forEach(p -> p.changeParticipant(toWipe, newOwner));
+        final List<SharedBattleReport> sharedBattleReports = battleReportService.findByReports(repsToChangeOwner);
+        final Map<BattleReport, SharedBattleReport> reportListMap = sharedBattleReports.stream()
+                .collect(Collectors.toMap(SharedBattleReport::getBattleReport, Function.identity()));
+
+
+        repsToChangeOwner.forEach(p -> p.changeParticipant(reportListMap.get(p), toWipe, newOwner));
         battleReportService.saveAll(repsToChangeOwner);
+        battleReportService.saveAll(sharedBattleReports);
 
         LOGGER.info("\tChange owner of ship classes");
         final List<ShipClass> shipClassesToChangeOwner = shipClassService.forDeletionFindAllByOwner(toWipe);

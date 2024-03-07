@@ -12,7 +12,6 @@ import de.yuga.spacebattle.backend.combat.round.MissileSalvoHealthState;
 import de.yuga.spacebattle.backend.converter.CombatRoundConverter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.backend.entities.misc.AbstractEntityKey;
 import de.yuga.spacebattle.backend.entities.orbitals.FleetOrbit;
@@ -20,6 +19,7 @@ import de.yuga.spacebattle.backend.entities.spacecrafts.ammunition.Missile;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
 import de.yuga.spacebattle.backend.entities.turn.battle.combat.*;
 import de.yuga.spacebattle.backend.enums.ECombatPhase;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -28,12 +28,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@NamedQueries({
-        @NamedQuery(name = "BattleReport.findByIdWithAllData",
-                query = "SELECT r FROM BattleReport r LEFT JOIN r.participatingUsers u ON (u.id = :idUser) WHERE r.id = :idBattleReport"),
-        @NamedQuery(name = "BattleReport.countAllWithUser",
-                query = "SELECT COUNT(u) FROM BattleReport r LEFT JOIN r.participatingUsers u ON (u.id = :idUser)"),
-})
 @Entity
 @Table(name = "battleReport")
 @AttributeOverride(name = "id", column = @Column(name = "idBattleReport"))
@@ -44,6 +38,10 @@ public class BattleReport extends AbstractEntityKey {
     @ManyToOne(optional = false)
     @JoinColumn(name = "idTick")
     private Tick tick;
+
+    @Nonnull
+    @NotNull
+    private String uuid;
 
     /**
      * The current combat round.<br>
@@ -61,18 +59,6 @@ public class BattleReport extends AbstractEntityKey {
     @NotNull
     @Embedded
     private FleetOrbit venue;
-
-    /**
-     * The users which has played a role in this battle.
-     */
-    @Nonnull
-    @NotNull
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "participatingUsers",
-            joinColumns = @JoinColumn(name = "idBattleReport"),
-            inverseJoinColumns = @JoinColumn(name = "idUser"),
-            uniqueConstraints = @UniqueConstraint(name = "participatingUsers_UC", columnNames = {"idUser", "idBattleReport"}))
-    private final Set<Owner> participatingUsers = new HashSet<>();
 
     /**
      * The protagonists - and the antagonists.
@@ -140,14 +126,6 @@ public class BattleReport extends AbstractEntityKey {
     )
     private final Set<ShipKillerHit> shipKillerHits = new HashSet<>();
 
-    /* fixme rollback
-    @Nonnull
-    @NotNull
-    @OneToOne(mappedBy = "battleReport")
-    @JoinColumn(name = "idSharedBattleReport")
-    private SharedBattleReport sharedBattleReport;
-    */
-
     public BattleReport() {
     }
 
@@ -162,10 +140,9 @@ public class BattleReport extends AbstractEntityKey {
                 .sorted(CombatRound::compareTo).collect(Collectors.toList());
         this.lastRound = Collections.max(combatRounds, CombatRound::compareTo);
         this.venue = battleResult.getFleetClash().getOrbit();
-        this.participatingUsers.addAll(battleResult.getFleetClash().getParticipatingFleets().stream().map(Fleet::getOwner).collect(Collectors.toSet()));
         this.participatingFleets.addAll(battleResult.getFleetClash().getParticipatingFleets().stream().map(f -> new FleetSnapshot(this, f)).collect(Collectors.toSet()));
+        this.uuid = this.createUUID();
         stateBattleResult(battleResult);
-        //fixme rollback this.sharedBattleReport = new SharedBattleReport(this);
     }
 
     @Nonnull
@@ -181,11 +158,6 @@ public class BattleReport extends AbstractEntityKey {
     @Nonnull
     public FleetOrbit getVenue() {
         return venue;
-    }
-
-    @Nonnull
-    public Set<Owner> getParticipatingUsers() {
-        return participatingUsers;
     }
 
     @Nonnull
@@ -360,16 +332,35 @@ public class BattleReport extends AbstractEntityKey {
         });
     }
 
-    public void changeParticipant(@Nonnull final User toRemove, @Nonnull final Owner pirate) {
+    public void changeParticipant(@Nonnull final SharedBattleReport sharedBattleReport, @Nonnull final User toRemove, @Nonnull final Owner pirate) {
+        Preconditions.checkNotNull(sharedBattleReport, "sharedBattleReport must not be empty");
         Preconditions.checkNotNull(toRemove, "toRemove must not be empty");
         Preconditions.checkNotNull(pirate, "pirate must not be empty");
 
-        participatingUsers.remove(toRemove);
-        participatingUsers.add(pirate);
+        sharedBattleReport.getParticipatingUsers().remove(toRemove);
+        sharedBattleReport.getParticipatingUsers().add(pirate);
+
+        sharedBattleReport.getSharedWithUsers().remove(toRemove);
 
         final Set<LossRole> impactedRoles = getLossRole().stream().filter(l -> toRemove.equals(l.getHumanOwner())).collect(Collectors.toSet());
         impactedRoles.forEach(l -> l.setOwner(pirate));
 
         participatingFleets.stream().filter(f -> f.getOwner().equals(toRemove)).forEach(f -> f.setOwner(pirate));
+    }
+
+    @Nonnull
+    public Set<Owner> getParticipatingUsers() {
+        return getParticipatingFleets().stream().map(FleetSnapshot::getOwner).collect(Collectors.toSet());
+    }
+
+    @Nonnull
+    private String createUUID() {
+        final String hashCode = "" + new HashCodeBuilder(17, 37).append(tick).append(participatingFleets).toHashCode();
+        return UUID.nameUUIDFromBytes(hashCode.getBytes()).toString();
+    }
+
+    @Nonnull
+    public String getUUID() {
+        return uuid;
     }
 }
