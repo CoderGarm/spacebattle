@@ -45,7 +45,7 @@ public class Construction extends LeveledOperationable {
 
         this.planet = planet;
         this.building = building;
-        this.setLevel(level);
+        this.level = level;
     }
 
     @Nonnull

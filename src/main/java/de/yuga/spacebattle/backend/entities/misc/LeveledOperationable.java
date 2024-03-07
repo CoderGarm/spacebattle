@@ -14,7 +14,7 @@ import javax.persistence.MappedSuperclass;
 @MappedSuperclass
 public class LeveledOperationable extends AbstractEntityKey {
 
-    private int level = 0;
+    protected int level;
 
     private int operationalLevel = 0;
 
