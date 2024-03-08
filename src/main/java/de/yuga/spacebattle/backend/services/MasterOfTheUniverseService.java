@@ -245,16 +245,15 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = false; // fixme rollback
+        final boolean transformationNeeded = tickService.getToday().getNo() == 308; // fixme rollback
         if (transformationNeeded) {
 
-            // fixme create fleet for kalus
-
+            createKalusFleet();
+            /*
             fleetService.deleteAll();
             createYufielsFleet();
             createFlashsFleet();
             battleService.runBattleAtPlanet(tickService.getToday(), planetService.find(112));
-            /*
              */
 
             LOGGER.info("---------------------------- done transforming -------------------------------");
@@ -281,6 +280,17 @@ public class MasterOfTheUniverseService {
             planetService.createPlanet("Solaris VII", solaris, new Orbit(new Distance(679, Planet.PLANET_STANDARD_METRIC), new Distance(-594, Planet.PLANET_STANDARD_METRIC)));
 
             LOGGER.info("New star systems populated");
+        }
+    }
+
+    private void createKalusFleet() {
+        final Planet mainPlanet = planetService.find(2229);
+        final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(65)), mainPlanet, "1st Battle Fleet");
+
+        final ShipClass ship = shipClassService.find(845);
+
+        for (int i = 0; i < 9; i++) {
+            createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, ship);
         }
     }
 
