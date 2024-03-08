@@ -245,10 +245,9 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = tickService.getToday().getNo() == 308; // fixme rollback
+        final boolean transformationNeeded = false; // fixme rollback
         if (transformationNeeded) {
 
-            createKalusFleet();
             /*
             fleetService.deleteAll();
             createYufielsFleet();
