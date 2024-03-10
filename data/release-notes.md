@@ -75,6 +75,10 @@ todo. email for chat- and forum-messages
    You can select one system and/or multiple fleets and use the "zoom to" button to cycle through them.
 2. The bottom menu on the map is replaced by a right click driven menu. The reason behind it is pretty simple: More space for better looking things.
 
+#### Bugs
+
+- todo. chat read and forum read status repair wrong "have read" and faster update of the current state
+
 #### next steps
 
 todo. trades werden nicht gutgeschrieben
@@ -118,6 +122,7 @@ season 3:
 - regelmäßige konvoys wie in anno -> kann man abfangen per mission und schützen mit eigenen missionen -> mehrere ressourcen pro convoy
 - reguläres Ranking soll zerstörte und verlorene tonnage enthalten
 - alliierte flotten verschicken per Allianz-Commander
+- fleet dashboard in mind with some statistics about the fleet, tonnage distribution, most ship classes in battles, win-loss-ratio etc
 
 todo. krieg als entity, jeder kann namen für konflikt vergeben, dem krieg werden verluste usw zugeordnet, medallie / feldzugsstreifen kann hochgeladen werden und
 todo. gefechtstheater auf karte kennzeichnen

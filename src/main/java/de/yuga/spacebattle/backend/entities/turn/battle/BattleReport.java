@@ -375,7 +375,7 @@ public class BattleReport extends AbstractEntityKey {
     @Nonnull
     private String createUUID() {
         final String hashCode = "" + new HashCodeBuilder(17, 37).append(tick).append(participatingFleets).toHashCode();
-        return UUID.nameUUIDFromBytes(hashCode.getBytes()).toString();
+        return UUID.nameUUIDFromBytes(hashCode.getBytes()).toString().split("-")[0];
     }
 
     @Nonnull

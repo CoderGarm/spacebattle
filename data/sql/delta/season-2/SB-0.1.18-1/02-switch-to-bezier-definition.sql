@@ -54,7 +54,7 @@ alter table missileMovement drop column yCoordTarget;
  alter table movementAction add column idManeuver integer not null after idActor;
  alter table missileMovement add column idManeuver integer not null after idActor;
 
- insert into maneuver (combatPhase, combatRound, designatedEnd, end, name, idActor, idTarget) values ('MOVEMENT_PHASE', 1, 1, 30, 'INSERT MANEUVER', 1, 1);
+ insert into maneuver (combatPhase, combatRound, designatedEnd, end, name, totalLength, idActor, idTarget) values ('MOVEMENT_PHASE', 1, 1, 30, 'INSERT MANEUVER', '0 M', 1, 1);
 
  # noinspection SqlWithoutWhere
  update movementAction set idManeuver = 1;
