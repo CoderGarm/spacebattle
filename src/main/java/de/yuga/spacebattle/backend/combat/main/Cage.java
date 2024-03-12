@@ -139,7 +139,6 @@ public class Cage implements Future<Cage> {
         this.defender = fleetOne.equals(this.aggressor) ? fleetTwo : fleetOne;
 
         this.currentCombatRound = new CombatRound();
-        rounds.add(currentCombatRound.clone());
 
         initiateCombat();
         this.battleLogger.createChart(aggressor.getOwner(), defender.getOwner(), Objects.requireNonNull(fleetClash.getOrbit().getInterplanetaryResultingOrbit()));

@@ -5,19 +5,10 @@
 - punkte für wins
 - badges for old event and season 2 veteran
 
-todo:
 
 - battle register UI
-    - knopf zum öffnen von overlay (ist beim initialen laden der seite offen)
-    - overlay zeigt ausgewählten kampf und zurück-button um zur liste zu kommen
-    - "battle item" zeigt optionen für sichtbarkeit im klappauf
-
+  - battle log shows current round actions
 - battle reports teilen
-
-- teilbar für (kombination aus) allianz, user, alle (farbcodierung je nach individuellstem typ)
-- geteilter report taucht farblich markiert im battle register auf
-- battle report bekommt id (natural auf tick, participants und venue)
-- id ist suchbar im register / man kann
 
 ### Wiki Articles
 
@@ -164,8 +155,6 @@ todo. ally interner marktplatz
 todo. mission items more role play "unprotected convoy changes signature of ship to warship and pirate fled ...""
 todo. songbird is out of scope bei researches, aber baubar -> muss nachvollziehbar sein
 
-todo. a overview dashboard for fleet. where are they all and which are they designed for
-
 todo. forum management is more important, e.g. sticky posts
 
 todo. schadensprofil von schiffsklassen und flotten darstellen, Bedienmannschaften von Modulen darstellen
@@ -303,7 +292,6 @@ todo. operationsgebiet auf karte einzeichen -> systeme/planeten erkennen und fü
 todo. Exception per mail an webmaster (warum funzt das nicht auf prod?)
 
 todo. combat aufhübschen and more infos
-todo. fleet movement report im dashboard
 todo. Wartung von Schiffen und Flotten -> Abnutzung der Impeller
 todo. warship icon instead of fleet shark
 todo. library for modules and hulls
