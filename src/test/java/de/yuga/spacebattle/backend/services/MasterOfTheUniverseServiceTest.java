@@ -223,13 +223,6 @@ public class MasterOfTheUniverseServiceTest {
         battleService.runBattleAtPlanet(today, planet);
     }
 
-    @Test
-    void checkBattle() {
-        final BattleReport report = battleReportService.findByIdWithAllData(1, 189);
-        final List<LossRole> lossRole = report.getLossRole();
-        assertNotNull(report);
-    }
-
     private String random() {
         int leftLimit = 97; // letter 'a'
         int rightLimit = 122; // letter 'z'

@@ -183,10 +183,12 @@ public class Missile extends HasCostsByOwn {
 
         final Distance rangeUnderDrive = getMaximumMissileRange();
 
+        /*
         actorsState.getCage().logMessage("MISSILE RANGE CALC: combined fleet velocity '"
                 + resultingVelocity + "' KM/S on angle '" + angleBetween + "'"
                 + " with effective missile range of '" + missileRange + "' from range under drive with '" + rangeUnderDrive + "'"
                 + " with target movement of '" + targetMovement + "'.");
+        */
 
         return missileRange;
     }
