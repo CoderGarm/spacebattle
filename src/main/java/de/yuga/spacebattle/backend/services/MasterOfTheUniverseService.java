@@ -259,12 +259,9 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = this.transformationNeeded; // fixme remove before prod!
+        final boolean transformationNeeded = this.transformationNeeded;
         if (transformationNeeded) {
 
-            gameEventService.repairAllWarships();
-
-            /*
             fleetService.deleteAll();
             createYufielsFleet();
             createFlashsFleet();
@@ -273,12 +270,6 @@ public class MasterOfTheUniverseService {
             battleService.runBattleAtPlanet(today, planet);
             /*
              */
-
-            // fixme
-            // - manual transportation shown when to transportation target is present
-            // - ship fitting breaks no longer at to many offensive modules
-            // - ship transportation: set back to origin when not moved works now
-            // - resource & pop transportation: UI is disabled until all planets are loaded
 
             LOGGER.info("---------------------------- done transforming -------------------------------");
         } else {
@@ -324,7 +315,7 @@ public class MasterOfTheUniverseService {
 
         final ShipClass songbird = shipClassService.find(2);
 
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 8; i++) {
             createShipForFleet(mainPlanet, resourceService.getRandomWarshipName(), reinforcement, songbird);
         }
     }
