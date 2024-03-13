@@ -103,7 +103,7 @@ public class FleetHealthState {
         }
 
         final WarshipHealthState warshipHealthState = warshipHealthStates.get(target);
-        if (warshipHealthState != null && warshipHealthState.isFightingCapable()) {
+        if (warshipHealthState != null) {
             warshipHealthState.applyDamage(damageValue, damageDealer);
         } else {
             final WarShip secondTargetedWarship = getRandomSecondTarget();
@@ -146,6 +146,7 @@ public class FleetHealthState {
     /**
      * Returns the fleets hit logs up to the current state ordered by the receiver of damage.
      */
+    @Nonnull
     public Map<WarShip, List<HitLog>> getHitLogs() {
 
         final Map<WarShip, List<HitLog>> hitLogsOfActive = warshipHealthStates.values().stream()
@@ -160,11 +161,10 @@ public class FleetHealthState {
         warShips.addAll(hitLogsOfLoss.keySet());
         final Map<WarShip, List<HitLog>> result = new HashMap<>();
         warShips.forEach(warShip -> {
-            final List<HitLog> activeLogs = hitLogsOfActive.computeIfAbsent(warShip, k -> new ArrayList<>());
-            final List<HitLog> lossLogs = hitLogsOfLoss.computeIfAbsent(warShip, k -> new ArrayList<>());
-            final List<HitLog> allLogs = new ArrayList<>(activeLogs);
+            final List<HitLog> allLogs = new ArrayList<>();
+            allLogs.addAll(hitLogsOfActive.computeIfAbsent(warShip, k -> new ArrayList<>()));
+            allLogs.addAll(hitLogsOfLoss.computeIfAbsent(warShip, k -> new ArrayList<>()));
             if (!allLogs.isEmpty()) {
-                allLogs.addAll(lossLogs);
                 result.put(warShip, allLogs);
             }
         });
@@ -189,6 +189,7 @@ public class FleetHealthState {
      * @param beamVolleys   the hitting beams
      * @return the estimation of losses in relation to the current fleet
      */
+    @Nonnull
     public EDamageImpact estimateLosses(@Nonnull final List<MissileSalvo> missileSalvos, @Nonnull final List<BeamVolley> beamVolleys) {
         Preconditions.checkNotNull(missileSalvos, "missileSalvos shouldn't be null!");
         Preconditions.checkNotNull(beamVolleys, "beamVolleys shouldn't be null!");

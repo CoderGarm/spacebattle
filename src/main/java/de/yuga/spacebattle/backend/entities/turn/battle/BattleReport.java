@@ -238,6 +238,10 @@ public class BattleReport extends AbstractEntityKey {
 
         final Map<DamageDealer, List<HitLog>> hitLogsByDamageDealer = getHitLogsByDamageDealer(fleetRoundStates);
 
+        final List<MissileSalvo> collect = allMissileSalvos.stream()
+                .filter(missileSalvo -> hitLogsByDamageDealer.get(missileSalvo) == null)
+                .collect(Collectors.toList());
+
         final List<ECombatPhase> combatPhases = Arrays.stream(ECombatPhase.values()).collect(Collectors.toList());
         for (final CombatRound combatRound : combatRounds) {
             // fixme remove the combat-round-addiction from stating the combat

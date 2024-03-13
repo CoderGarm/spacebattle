@@ -33,6 +33,7 @@ article orbital modules
 
 - kampfsystem repariert
     - check: Raketen fliegen bis zum ende - keine unfairen "zu null siege" mehr
+  - check: Raketen greifen in derselben Kampfrunde zerstörte Ziele weiter an
     - todo: ship movement
 
 ship movement:

@@ -376,6 +376,8 @@ public class WarshipHealthState implements Cloneable {
 
         if (attackedPart == null) {
             // no hit area points to a destroyed hull
+            Objects.requireNonNull(cage)
+                    .logMessage("Damage not applied for '" + damageDealer.getUuid() + "' - ship fully destroyed.");
             return;
         }
         long min;
