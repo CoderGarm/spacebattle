@@ -124,7 +124,7 @@ public class Cage implements Future<Cage> {
         this.battleLogger = battleLogger;
         this.participatingFleets = fleetClash.getParticipatingFleets();
 
-        final Set<Owner> users = participatingFleets.stream().map(Fleet::getOwner).collect(Collectors.toSet());
+        final Set<Owner> users = getParticipatingUsers();
         if (!CombatAllowanceCalculator.isCombatAllowed(users)) {
             // todo implement 3-way combat anyhow
             throw new NotifyWebUserException("Yeah probably you couldn't harm yourself!");
@@ -143,6 +143,18 @@ public class Cage implements Future<Cage> {
         initiateCombat();
         this.battleLogger.createChart(aggressor.getOwner(), defender.getOwner(), Objects.requireNonNull(fleetClash.getOrbit().getInterplanetaryResultingOrbit()));
         this.combatHandler = new CombatHandler(this);
+    }
+
+    @Nonnull
+    public Set<Owner> getParticipatingUsers() {
+        return participatingFleets.stream().map(Fleet::getOwner).collect(Collectors.toSet());
+    }
+
+    @Nonnull
+    public Fleet getOpponent(@Nonnull final Fleet agent) {
+        Preconditions.checkNotNull(agent, "agent must not be empty");
+
+        return getParticipatingFleets().stream().filter(u -> !u.equals(agent)).findFirst().orElseThrow(() -> new NotifyWebUserException("Nope."));
     }
 
     @Override
@@ -242,7 +254,7 @@ public class Cage implements Future<Cage> {
         logMessage("#" + currentCombatRound + " new round " + Calendar.getInstance(Locale.GERMANY).getTime());
 
         long start = System.currentTimeMillis();
-        combatHandler.handleMovementPhase(); // fixme two sets of first rounds will be created
+        combatHandler.handleMovementPhase();
         logMessage("movement", start, start);
 
         start = System.currentTimeMillis();

@@ -1,9 +1,19 @@
 package de.yuga.spacebattle.backend.calculator;
 
+import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.resource.CourseOrderElement;
+import de.yuga.spacebattle.backend.calculator.resource.CoursePlot;
+import de.yuga.spacebattle.backend.combat.round.CombatRound;
+import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
+
+import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 public class BattleCalculator {
 
@@ -57,5 +67,59 @@ public class BattleCalculator {
         }
         // the fortune is besides the electronic warfare
         return true;
+    }
+
+    /**
+     * The combat value will be calculated the quality of the course's <b>Contact Phase</b>.<br>
+     * <br>
+     * A <b>Contact Phase</b> is defined by undercutting the outer range limit - not how much it will be undercut.<br>
+     * <br>
+     * The combat value of the course will be stated by the following measurement:<br>
+     * <ol>
+     *     <li>how long to achieve contact  - (shorter is better)</li>
+     *     <li>how long is the contact phase  - (longer is better)</li>
+     * </ol>
+     *
+     * @param agentsPlot      the planned agents plot
+     * @param targetsPlot     the known or assumed targets plot
+     * @param outerRangeLimit the range which must be undercut
+     * @return the combat value
+     */
+    public static int calculateCombatValue(@Nonnull final CoursePlot agentsPlot,
+                                           @Nonnull final CoursePlot targetsPlot,
+                                           @Nonnull final Distance outerRangeLimit) {
+        Preconditions.checkNotNull(agentsPlot, "agentsPlot must not be empty");
+        Preconditions.checkNotNull(targetsPlot, "targetsPlot must not be empty");
+        Preconditions.checkNotNull(outerRangeLimit, "outerRangeLimit must not be empty");
+
+        final List<CourseOrderElement> notExecutedOrders = agentsPlot
+                .getManeuver()
+                .getCourseOrderElements().stream()
+                .filter(coe -> !coe.isCourseOrderExecuted())
+                .collect(Collectors.toList());
+
+        final CombatRound currentCombatRound = agentsPlot.getCage().getCurrentCombatRound();
+
+        int roundsInRange = 0;
+        Integer firstInRangeFromNowOn = null;
+        for (final CourseOrderElement coe : notExecutedOrders) {
+            final CombatRound combatRound = coe.getCombatRound();
+            final Orbit agentsPosition = coe.getPosition();
+
+            final CourseOrderElement targetsCoe = targetsPlot.getCourseElement(combatRound);
+            if (targetsCoe == null) {
+                continue;
+            }
+
+            final Orbit targetsPosition = targetsCoe.getPosition();
+            if (agentsPosition.getDistance(targetsPosition).compareTo(outerRangeLimit) <= 0) {
+                roundsInRange++;
+                if (firstInRangeFromNowOn == null) {
+                    firstInRangeFromNowOn = combatRound.getNo() - currentCombatRound.getNo();
+                }
+            }
+        }
+
+        return roundsInRange == 0 ? 0 : ((roundsInRange * 10) - (firstInRangeFromNowOn / 3));
     }
 }

@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC_HU;
 import static de.yuga.spacebattle.backend.combat.enums.EMovementType.*;
@@ -51,6 +53,9 @@ public class CoursePlot {
 
     @Nonnull
     private final Map<Fleet, FleetDamageProjectionPerRange> fleetDamages = new HashMap<>();
+
+    @Nonnull
+    private final Map<CombatRound, Integer> combatValuesByRound = new HashMap<>();
 
     @Nullable
     private Maneuver maneuver;
@@ -528,5 +533,41 @@ public class CoursePlot {
     public void clearFutureCourseElements() {
         final CombatRound currentCombatRound = cage.getCurrentCombatRound();
         getManeuver().getCourseOrderElements().removeIf(e -> !e.isCourseOrderExecuted() && e.getCombatRound().compareTo(currentCombatRound) > 0);
+    }
+
+    @Nonnull
+    public Cage getCage() {
+        return cage;
+    }
+
+    public void setCombatValue(final int combatValue) {
+        combatValuesByRound.put(cage.getCurrentCombatRound().clone(), combatValue);
+    }
+
+    /**
+     * States the decay of a course plot by the combat value by round.<br>
+     * <br>
+     * If a <b>tenth</b> of all latest course elements have less combat value then their predecessors, a course in decaying.<br>
+     * The combat values are reverse ordered by round.
+     */
+    public boolean isCourseAtDecay() {
+
+        final List<Integer> reverseOrderedCombatValues = combatValuesByRound.entrySet().stream()
+                // reverse ordered
+                .sorted((o1, o2) -> o2.getKey().compareTo(o1.getKey()))
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
+
+        final AtomicInteger lastCombatValue = new AtomicInteger(reverseOrderedCombatValues.get(reverseOrderedCombatValues.size() - 1));
+        final AtomicInteger decayCounter = new AtomicInteger(0);
+
+        reverseOrderedCombatValues.forEach(cv -> {
+            if (cv < lastCombatValue.get()) {
+                decayCounter.incrementAndGet();
+            }
+            lastCombatValue.set(cv);
+        });
+        // fixme there must be a limit for the considered combat rounds - at least only the rounds for the current maneuver element must be used and not they before
+        return decayCounter.get() > (reverseOrderedCombatValues.size() / 10);
     }
 }

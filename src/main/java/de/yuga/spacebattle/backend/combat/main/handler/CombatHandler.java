@@ -2,6 +2,7 @@ package de.yuga.spacebattle.backend.combat.main.handler;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.BattleCalculator;
 import de.yuga.spacebattle.backend.calculator.resource.CourseOrderElement;
 import de.yuga.spacebattle.backend.calculator.resource.CoursePlot;
 import de.yuga.spacebattle.backend.combat.dto.BeamVolley;
@@ -62,9 +63,11 @@ public class CombatHandler {
             createInitialCoursePlot();
         }
 
-        // fixme add check for "will we have a fight on the current course"
-        extendAggressiveCoursePlot(cage.getAggressor(), cage.getDefender());
-        // fixme same for defender
+        stateCombatValue(cage.getAggressor());
+        stateCombatValue(cage.getDefender());
+
+        extendAggressiveCoursePlot(cage.getDefender());
+        extendAggressiveCoursePlot(cage.getDefender());
 
         // execute movement
         executeMovement(cage.getAggressor());
@@ -75,6 +78,29 @@ public class CombatHandler {
         final Orbit aggroPos = cage.getCurrentStateByFleet(cage.getAggressor()).getPosition();
         final Orbit defPos = cage.getCurrentStateByFleet(cage.getDefender()).getPosition();
         cage.logMessage("#" + currentCombatRound.getNo() + "\t\t - " + aggroPos.getDistance(defPos).getCoordinateInMetric(LS) + " LS"); // fixme distance seems to be wrong
+    }
+
+    private void stateCombatValue(@Nonnull final Fleet agent) {
+        Preconditions.checkNotNull(agent, "agent must not be empty");
+
+        cage.getCurrentStateByFleet(agent)
+                .getCoursePlot()
+                .setCombatValue(calculateCombatValue(agent));
+    }
+
+    private int calculateCombatValue(@Nonnull final Fleet agent) {
+        Preconditions.checkNotNull(agent, "agent must not be empty");
+
+        final FleetRoundState agentsState = cage.getCurrentStateByFleet(agent);
+        final CoursePlot coursePlot = agentsState.getCoursePlot();
+
+        final Fleet target = cage.getOpponent(agent);
+        final FleetRoundState targetState = cage.getCurrentStateByFleet(target);
+        final CoursePlot targetsPlot = targetState.getCoursePlot();
+
+        final Distance missileRange = agentsState.getMaximumWeaponRangePerType(EWeaponType.MISSILE);
+
+        return BattleCalculator.calculateCombatValue(coursePlot, targetsPlot, missileRange);
     }
 
     private void endCombatByExceededPlot() {
@@ -115,13 +141,12 @@ public class CombatHandler {
         defendersCoursePlot.createDefensiveCourse();
     }
 
-    private void extendAggressiveCoursePlot(@Nonnull final Fleet agent, @Nonnull final Fleet target) {
+    private void extendAggressiveCoursePlot(@Nonnull final Fleet agent) {
         Preconditions.checkNotNull(agent, "agent must not be empty");
-        Preconditions.checkNotNull(target, "target must not be empty");
 
         final boolean hasPlotToBeRepainted = isPlotExceeded(agent);
-
-        if (hasPlotToBeRepainted /* fixme || cage.isActionHappened() */) {
+        final boolean onDecay = cage.getCurrentStateByFleet(agent).getCoursePlot().isCourseAtDecay();
+        if (hasPlotToBeRepainted || onDecay) {
             // plot the next round's course for the upcoming round
             // fixme weiter hier aggressorsCoursePlot.createNextAggressiveCourseElement();
             cage.logWarning("Course of '" + agent.getOwner().getUsername() + "' will be refreshed.");
