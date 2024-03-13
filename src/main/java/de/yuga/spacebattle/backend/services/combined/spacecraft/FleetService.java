@@ -435,6 +435,11 @@ public class FleetService {
     }
 
     @Nonnull
+    public List<Fleet> findTournamentFleets() {
+        return Objects.requireNonNullElse(fleetRepository.findTournamentFleets(GameEventService.TOURNAMENT_PREFIX), new ArrayList<>());
+    }
+
+    @Nonnull
     public Set<Fleet> findAllFleetsByPlanet(@Nonnull final Planet planet) {
         Preconditions.checkNotNull(planet, "planet must not be empty");
 

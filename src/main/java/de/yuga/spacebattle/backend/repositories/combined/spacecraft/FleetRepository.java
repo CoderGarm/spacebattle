@@ -46,4 +46,8 @@ public interface FleetRepository extends JpaRepository<Fleet, Integer>, CustomFl
     @Nullable
     @Query("SELECT f FROM Fleet f WHERE f.isDeleted = false")
     List<Fleet> findAllAliveFleets();
+
+    @Nullable
+    @Query("SELECT f FROM Fleet f WHERE f.name LIKE CONCAT(:matchPhrase, '%')")
+    List<Fleet> findTournamentFleets(@Nonnull final String matchPhrase);
 }

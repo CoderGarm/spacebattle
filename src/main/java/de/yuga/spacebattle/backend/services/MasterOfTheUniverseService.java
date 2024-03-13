@@ -55,6 +55,7 @@ import de.yuga.spacebattle.backend.services.researches.ResearchService;
 import de.yuga.spacebattle.backend.services.spacecraft.BattleService;
 import de.yuga.spacebattle.backend.services.spacecraft.ModuleService;
 import de.yuga.spacebattle.backend.services.turn.ColonizationService;
+import de.yuga.spacebattle.backend.services.turn.GameEventService;
 import de.yuga.spacebattle.backend.services.turn.TickRunnerService;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.HeatMapService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -196,6 +197,9 @@ public class MasterOfTheUniverseService {
     @Nonnull
     private final HeatMapService heatMapService;
 
+    @Nonnull
+    private final GameEventService gameEventService;
+
     @Autowired
     public MasterOfTheUniverseService(@Nonnull final TickRunnerService tickService,
                                       @Nonnull final UserService userService,
@@ -216,7 +220,8 @@ public class MasterOfTheUniverseService {
                                       @Nonnull final OwnerService ownerService,
                                       @Nonnull final OrbitalModuleService orbitalModuleService,
                                       @Nonnull final UserDeleteServiceService userDeleteServiceService,
-                                      @Nonnull final HeatMapService heatMapService) {
+                                      @Nonnull final HeatMapService heatMapService,
+                                      @Nonnull final GameEventService gameEventService) {
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
         this.tickService = Preconditions.checkNotNull(tickService, "tickService shouldn't be null!");
         this.userService = Preconditions.checkNotNull(userService, "userService shouldn't be null!");
@@ -238,6 +243,7 @@ public class MasterOfTheUniverseService {
         this.orbitalModuleService = Preconditions.checkNotNull(orbitalModuleService, "orbitalModuleService must not be empty");
         this.userDeleteServiceService = Preconditions.checkNotNull(userDeleteServiceService, "userDeleteServiceService must not be empty");
         this.heatMapService = Preconditions.checkNotNull(heatMapService, "heatMapService must not be empty");
+        this.gameEventService = Preconditions.checkNotNull(gameEventService, "gameEventService must not be empty");
     }
 
     @PostConstruct
@@ -245,8 +251,10 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = false; // fixme rollback
+        final boolean transformationNeeded = true; // fixme rollback
         if (transformationNeeded) {
+
+            gameEventService.repairAllWarships();
 
             /*
             fleetService.deleteAll();

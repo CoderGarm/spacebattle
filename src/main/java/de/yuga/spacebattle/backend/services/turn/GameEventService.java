@@ -28,8 +28,10 @@ import de.yuga.spacebattle.backend.services.MasterOfTheUniverseService;
 import de.yuga.spacebattle.backend.services.account.ForumService;
 import de.yuga.spacebattle.backend.services.account.OwnerService;
 import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
+import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.events.RankingService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
+import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStateService;
 import de.yuga.spacebattle.backend.services.turn.tick.mission.HeatMapService;
 import org.apache.commons.lang3.Range;
 import org.slf4j.Logger;
@@ -95,6 +97,12 @@ public class GameEventService {
     @Nonnull
     private final HeatMapService heatMapService;
 
+    @Nonnull
+    private final WarShipService warShipService;
+
+    @Nonnull
+    private final WarshipHealthStateService warshipHealthStateService;
+
     @Autowired
     public GameEventService(@Nonnull final TickTimeService timeService,
                             @Nonnull final ForumService forumService,
@@ -102,7 +110,9 @@ public class GameEventService {
                             @Nonnull final FleetService fleetService,
                             @Nonnull final PlanetService planetService,
                             @Nonnull final RankingService rankingService,
-                            @Nonnull final HeatMapService heatMapService) {
+                            @Nonnull final HeatMapService heatMapService,
+                            @Nonnull final WarShipService warShipService,
+                            @Nonnull final WarshipHealthStateService warshipHealthStateService) {
         this.timeService = Preconditions.checkNotNull(timeService, "timeService must not be empty");
         this.forumService = Preconditions.checkNotNull(forumService, "forumService must not be empty");
         this.ownerService = Preconditions.checkNotNull(ownerService, "ownerService must not be empty");
@@ -110,6 +120,8 @@ public class GameEventService {
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.rankingService = Preconditions.checkNotNull(rankingService, "rankingService must not be empty");
         this.heatMapService = Preconditions.checkNotNull(heatMapService, "heatMapService must not be empty");
+        this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
+        this.warshipHealthStateService = Preconditions.checkNotNull(warshipHealthStateService, "warshipHealthStateService must not be empty");
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -479,5 +491,28 @@ public class GameEventService {
                 fleetName,
                 tonnageDestroyed,
                 tonnageLoss);
+    }
+
+    public void repairAllWarships() {
+        if (isTournament24()) {
+            LOGGER.info("Repair Tournament Fleets");
+
+            final Tick today = timeService.getToday();
+            final Set<Fleet> toRepair = fleetService.findTournamentFleets()
+                    .stream()
+                    .filter(f -> f.getName().startsWith(GameEventService.TOURNAMENT_v1_PREFIX) || f.getName().startsWith(GameEventService.TOURNAMENT_v3_PREFIX))
+                    .collect(Collectors.toSet());
+
+            final Set<WarShip> warShips = toRepair.stream()
+                    .map(Fleet::getAliveShips)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet());
+
+            warShips.forEach(warShip -> warShip.getWarshipHealthState().repair(today));
+            warShipService.saveAll(warShips);
+
+            toRepair.forEach(o -> o.setOperational(today));
+            fleetService.saveAll(toRepair);
+        }
     }
 }
