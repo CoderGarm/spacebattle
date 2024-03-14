@@ -511,7 +511,10 @@ public class GameEventService {
             warShips.forEach(warShip -> warShip.getWarshipHealthState().repair(today));
             warShipService.saveAll(warShips);
 
-            toRepair.forEach(o -> o.setOperational(today));
+            toRepair.forEach(o -> {
+                o.setOperational(today);
+                o.animate();
+            });
             fleetService.saveAll(toRepair);
         }
     }

@@ -6,7 +6,6 @@ import de.yuga.spacebattle.backend.dto.turn.resources.trade.TradesInTimeframe;
 import de.yuga.spacebattle.backend.entities.account.NonPlayerCharacter;
 import de.yuga.spacebattle.backend.entities.account.Owner;
 import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.entities.misc.Deletable;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
 import de.yuga.spacebattle.backend.entities.orbitals.StarSystem;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
@@ -25,7 +24,6 @@ import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import de.yuga.spacebattle.rest.dto.turn.resources.ResourceAmount;
 import de.yuga.spacebattle.rest.dto.turn.resources.trade.SpotOffer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -54,19 +52,24 @@ public class MarketplaceService {
     @Nonnull
     private final NavigationCalculatorService navigationCalculatorService;
 
+    @Nonnull
+    private final TickTimeService tickTimeService;
+
     @Autowired
     public MarketplaceService(@Nonnull final TickTimeService tickService,
                               @Nonnull final OwnerService ownerService,
                               @Nonnull final PlanetService planetService,
                               @Nonnull final TradedResourceRepository tradedResourceRepository,
                               @Nonnull final TradeOfferRepository tradeOfferRepository,
-                              @Nonnull final NavigationCalculatorService navigationCalculatorService) {
+                              @Nonnull final NavigationCalculatorService navigationCalculatorService,
+                              @Nonnull final TickTimeService tickTimeService) {
         this.tickService = Preconditions.checkNotNull(tickService, "tickService must not be empty");
         this.ownerService = Preconditions.checkNotNull(ownerService, "ownerService must not be empty");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService must not be empty");
         this.tradedResourceRepository = Preconditions.checkNotNull(tradedResourceRepository, "tradedResourceRepository shouldn't be null!");
         this.tradeOfferRepository = Preconditions.checkNotNull(tradeOfferRepository, "tradeOfferRepository must not be empty");
         this.navigationCalculatorService = Preconditions.checkNotNull(navigationCalculatorService, "navigationCalculatorService must not be empty");
+        this.tickTimeService = Preconditions.checkNotNull(tickTimeService, "tickTimeService must not be empty");
     }
 
     @Nonnull
@@ -177,22 +180,10 @@ public class MarketplaceService {
     public int findOfferSpotPrice(final int idUser, @Nonnull final EResourceType resourceType) {
         Preconditions.checkNotNull(resourceType, "resourceType must not be empty");
 
-        final List<TradeOffer> offers = Objects.requireNonNullElse(tradeOfferRepository.findLatestOffer(resourceType, PageRequest.of(0, 100)), List.of());
-        if (offers.isEmpty()) {
-            return getBaseSpotPrice(resourceType);
-        }
+        final Tick today = tickTimeService.getToday();
+        final long averagePriceOpen = tradeOfferRepository.findAveragePrice(resourceType, false, today.getNo() - 100, idUser);
+        final long averagePriceClosed = tradeOfferRepository.findAveragePrice(resourceType, true, today.getNo() - 100, null);
 
-        final List<TradeOffer> closedOffers = offers.stream()
-                .filter(Deletable::isDeleted)
-                .collect(Collectors.toList());
-
-        final List<TradeOffer> openOffers = offers.stream()
-                .filter(t -> t.getSeller().getId() != idUser)
-                .filter(Deletable::isAlive)
-                .collect(Collectors.toList());
-
-        final long averagePriceClosed = getAverageUnitPrice(closedOffers);
-        final long averagePriceOpen = getAverageUnitPrice(openOffers);
         if (averagePriceOpen == 0 && averagePriceClosed == 0) {
             return getBaseSpotPrice(resourceType);
         }
@@ -203,7 +194,9 @@ public class MarketplaceService {
         return (int) (averagePriceClosed + averagePriceClosed + averagePriceOpen) / 3;
     }
 
-    private int getBaseSpotPrice(final @Nonnull EResourceType resourceType) {
+    private int getBaseSpotPrice(@Nonnull final EResourceType resourceType) {
+        Preconditions.checkNotNull(resourceType, "resourceType must not be empty");
+
         final ETechLevel techLevelOf = ETechLevel.getTechLevelOf(resourceType);
         switch (techLevelOf) {
             case TECH_I:

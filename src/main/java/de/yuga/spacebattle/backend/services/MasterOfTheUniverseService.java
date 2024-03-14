@@ -251,7 +251,7 @@ public class MasterOfTheUniverseService {
     public void transform() {
         validateUniverse();
         LOGGER.info("---------------------------- transforming the universe ----------------------------");
-        final boolean transformationNeeded = true; // fixme rollback
+        final boolean transformationNeeded = false; // fixme rollback
         if (transformationNeeded) {
 
             gameEventService.repairAllWarships();
