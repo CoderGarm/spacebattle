@@ -1,19 +1,10 @@
 package de.yuga.spacebattle.backend.services.turn.tick;
 
 import com.google.common.base.Preconditions;
-import de.yuga.spacebattle.backend.entities.account.User;
-import de.yuga.spacebattle.backend.entities.buildings.Building;
-import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.constructables.buildings.Construction;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.OrbitalStructure;
-import de.yuga.spacebattle.backend.entities.constructables.spacecrafts.WarShip;
 import de.yuga.spacebattle.backend.entities.orbitals.Planet;
-import de.yuga.spacebattle.backend.entities.spacecrafts.ShipClass;
-import de.yuga.spacebattle.backend.entities.turn.Constructable;
 import de.yuga.spacebattle.backend.entities.turn.Job;
-import de.yuga.spacebattle.backend.entities.turn.OrbitalModuleJobElement;
 import de.yuga.spacebattle.backend.entities.turn.Tick;
-import de.yuga.spacebattle.backend.entities.turn.battle.combat.WarshipHealthState;
 import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.caclulator.PopulationControlCalculator;
@@ -35,7 +26,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -183,7 +173,7 @@ public class PlanetTickRunner implements TickRunner {
             log(planet, job, "Start processing " + resourceType + " job.");
 
             final long points = planet.getResourceDeposit().getResourceAmountByType(resourceType);
-            final long usedPoints = tickJob(job, points);
+            final long usedPoints = jobService.tickJob(job, points);
             planet.getResourceDeposit().updateResource(resourceType, -usedPoints);
             if (!job.isFinished()) {
                 jobService.save(job);
@@ -193,10 +183,14 @@ public class PlanetTickRunner implements TickRunner {
             }
             switch (resourceType) {
                 case CONSTRUCTION:
-                    completeConstruction(planet, planet.getConstructions(), job, today);
+                    log(planet, job, "Start processing construction job.");
+                    jobService.completeConstruction(planet, planet.getConstructions(), job, today);
+                    log(planet, job, "Done processing construction job.");
                     break;
                 case ORBITAL_CONSTRUCTION:
-                    completeShipyard(planet, job, today);
+                    log(planet, job, "Start processing shipyard job .");
+                    jobService.completeShipyard(planet, job, today);
+                    log(planet, job, "Done processing shipyard job.");
                     break;
             }
         }
@@ -211,168 +205,6 @@ public class PlanetTickRunner implements TickRunner {
         }
         LOGGER.info("Saving planet");
         planetService.save(planet);
-    }
-
-    private void completeShipyard(@Nonnull final Planet planet, @Nonnull final Job job, @Nonnull final Tick today) {
-        Preconditions.checkNotNull(planet, "planet must not be empty");
-        Preconditions.checkNotNull(job, "job must not be empty");
-        Preconditions.checkNotNull(today, "today must not be empty");
-
-        log(planet, job, "Start processing shipyard job .");
-        final Constructable constructable = job.getConstructable();
-        if (constructable.getFleet() == null && constructable.getOrbitalModuleJobElements().isEmpty()) {
-            return;
-        }
-
-        final User owner = planet.getHumanOwner();
-        assert owner != null : "There must be a planet's owner.";
-        job.setFinished(today);
-        if (constructable.isRepairJob()) {
-            realizeFleetRepair(planet, owner, job);
-        } else if (constructable.isUpgradeJob()) {
-            realizeFleetUpgrade(planet, owner, job);
-        } else {
-            realizeShipyardProduction(planet, owner, job);
-        }
-
-        log(planet, job, "Done processing shipyard job.");
-    }
-
-    private void realizeFleetUpgrade(@Nonnull final Planet planet,
-                                     @Nonnull final User owner,
-                                     @Nonnull final Job job) {
-        Preconditions.checkNotNull(today, "today must not be empty");
-        Preconditions.checkNotNull(planet, "planet must not be empty");
-        Preconditions.checkNotNull(owner, "owner must not be empty");
-        Preconditions.checkNotNull(job, "job must not be empty");
-        Preconditions.checkNotNull(job.getConstructable().getFleet(), "job.getConstructable().getFleet() must not be empty");
-
-        final Constructable constructable = job.getConstructable();
-        final Fleet fleet = constructable.getFleet();
-
-        log(planet, job, "Start upgrade fleet '" + fleet.getId() + "'.");
-        final Set<WarShip> withSuccessors = fleet.getAliveShips().stream()
-                .filter(w -> w.getShipClass().hasSuccessor())
-                .collect(Collectors.toSet());
-
-        withSuccessors.forEach(warShip -> {
-            // this is introducing a nice exploit by creating a new flight after paying the old one
-            final ShipClass shipClass = warShip.getShipClass();
-            ShipClass successor = shipClass.getSuccessor();
-            while (Objects.requireNonNull(successor).hasSuccessor()) {
-                successor = successor.getSuccessor();
-            }
-            warShip.upgrade(today, planet, successor);
-        });
-
-        fleetService.save(fleet);
-        log(planet, job, "Done upgrade fleet '" + fleet.getId() + "'.");
-    }
-
-    private void realizeFleetRepair(@Nonnull final Planet planet,
-                                    @Nonnull final User owner,
-                                    @Nonnull final Job job) {
-        Preconditions.checkNotNull(planet, "planet must not be empty");
-        Preconditions.checkNotNull(owner, "owner must not be empty");
-        Preconditions.checkNotNull(job, "job must not be empty");
-        Preconditions.checkNotNull(job.getFinished(), "job.getFinished() must not be empty");
-        Preconditions.checkNotNull(job.getConstructable().getFleet(), "job.getConstructable().getFleet() must not be empty");
-
-        log(planet, job, "Start repair fleet.");
-        final Fleet fleet = job.getConstructable().getFleet();
-        final Set<WarshipHealthState> toRepair = fleet.getAliveShips().stream()
-                .map(WarShip::getWarshipHealthState)
-                .collect(Collectors.toSet());
-        toRepair.forEach(w -> w.repair(job.getFinished()));
-        warshipHealthStateService.saveAll(toRepair);
-        fleet.setOperational(job.getFinished());
-        fleetService.save(fleet);
-        log(planet, job, "Done repairing fleet.");
-    }
-
-    private void realizeShipyardProduction(@Nonnull final Planet planet,
-                                           @Nonnull final User owner,
-                                           @Nonnull final Job job) {
-        Preconditions.checkNotNull(planet, "planet must not be empty");
-        Preconditions.checkNotNull(owner, "owner must not be empty");
-        Preconditions.checkNotNull(job, "job must not be empty");
-
-        log(planet, job, "Start realizing shipyard production.");
-
-        realizeWarships(planet, job);
-        realizeOrbitalModules(planet, job);
-    }
-
-    private void realizeOrbitalModules(@Nonnull final Planet planet, @Nonnull final Job job) {
-        Preconditions.checkNotNull(planet, "planet must not be empty");
-        Preconditions.checkNotNull(job, "job must not be empty");
-
-        final Set<OrbitalModuleJobElement> orbitalModuleJobElements = job.getConstructable().getOrbitalModuleJobElements();
-        if (orbitalModuleJobElements.isEmpty()) {
-            return;
-        }
-
-        final List<OrbitalStructure> toStore = orbitalModuleJobElements.stream()
-                .map(e -> new OrbitalStructure(planet, e.getOrbitalModule(), e.getAmount()))
-                .collect(Collectors.toList());
-        orbitalStructureService.saveAll(toStore);
-
-        jobService.save(job);
-        log(planet, job, "Done creating orbital modules.");
-    }
-
-    private void realizeWarships(@Nonnull final Planet planet, @Nonnull final Job job) {
-        Preconditions.checkNotNull(planet, "planet must not be empty");
-        Preconditions.checkNotNull(job, "job must not be empty");
-
-        // fleet is "destroyed" here
-        final Fleet fleet = job.getConstructable().getFleet();
-        if (fleet == null) {
-            return;
-        }
-        final Set<WarShip> newShips = fleet.getAllShips();
-        newShips.forEach(WarShip::animate);
-        newShips.forEach(w -> w.setMothball(planet));
-        warShipService.saveAll(newShips);
-
-        job.getConstructable().snapshotFleet();
-        jobService.save(job);
-
-        log(planet, job, "Done creating warships.");
-    }
-
-    private void completeConstruction(@Nonnull final Planet planet,
-                                      @Nonnull final Set<Construction> constructions,
-                                      @Nonnull final Job job,
-                                      @Nonnull final Tick today) {
-        Preconditions.checkNotNull(planet, "planet must not be empty");
-        Preconditions.checkNotNull(constructions, "constructions must not be empty");
-        Preconditions.checkNotNull(job, "job must not be empty");
-        Preconditions.checkNotNull(today, "today must not be empty");
-        Preconditions.checkNotNull(job.getConstructable().getBuilding(), "job.getConstructable().getBuilding() must not be empty");
-        Preconditions.checkNotNull(job.getConstructable().getTargetLevel(), "job.getConstructable().getTargetLevel() must not be empty");
-
-        log(planet, job, "Start processing construction job.");
-        job.setFinished(today);
-        final Constructable constructable = job.getConstructable();
-        final Integer targetLevel = constructable.getTargetLevel();
-        final Building building = constructable.getBuilding();
-
-        Construction workInProgress = constructions.stream()
-                .filter(c -> c.getBuilding().equals(building)).findFirst().orElse(null);
-        if (workInProgress != null) {
-            if (workInProgress.getLevel() >= targetLevel) {
-                // just delete the job - the last tick wasn't processed correctly
-                LOGGER.warn("Job already processed: " + job.getId());
-            } else {
-                workInProgress.setLevel(targetLevel);
-            }
-        } else {
-            workInProgress = new Construction(planet, building, 1);
-        }
-        constructionService.save(workInProgress);
-        jobService.save(job);
-        log(planet, job, "Done processing construction job.");
     }
 
     /**
@@ -405,51 +237,4 @@ public class PlanetTickRunner implements TickRunner {
         }
     }
 
-    /**
-     * Counts down the remaining {@link Job#getPointsLeft()}.
-     *
-     * @param job the {@link Job} to do
-     * @return the used points will be returned
-     */
-    private long tickJob(@Nonnull final Job job, final long points) {
-        Preconditions.checkNotNull(job, "job shouldn't be null!");
-
-        return job.tick(points);
-    }
-
-    public void tickInstaShipyard(@Nonnull Job job, @Nonnull final Tick today) {
-        Preconditions.checkNotNull(job, "job must not be empty");
-        Preconditions.checkNotNull(today, "today must not be empty");
-
-        job = jobService.findById(job.getId());
-        Preconditions.checkNotNull(job, "job must not be empty");
-
-        final Planet planet = job.getFacility().getPlanet();
-        if (jobService.isLocalInstaJobPossible(planet.getId(), job)) {
-            final long points = planet.getResourceDeposit().getResourceAmountByType(EResourceType.ORBITAL_CONSTRUCTION);
-            final long usedPoints = tickJob(job, points);
-            planet.getResourceDeposit().updateResource(EResourceType.ORBITAL_CONSTRUCTION, -usedPoints);
-            completeShipyard(planet, job, today);
-            planetService.save(planet);
-            jobService.save(job);
-        }
-    }
-
-    public void tickInstaConstruction(@Nonnull Job job, @Nonnull final Tick today) {
-        Preconditions.checkNotNull(job, "job must not be empty");
-        Preconditions.checkNotNull(today, "today must not be empty");
-
-        job = jobService.findById(job.getId());
-        Preconditions.checkNotNull(job, "job must not be empty");
-
-        final Planet planet = job.getFacility().getPlanet();
-        final Set<Construction> constructions = constructionService.findAllConstructionsOnPlanet(planet.getId());
-        if (jobService.isLocalInstaJobPossible(planet.getId(), job)) {
-            final long points = planet.getResourceDeposit().getResourceAmountByType(EResourceType.CONSTRUCTION);
-            final long usedPoints = tickJob(job, points);
-            planet.getResourceDeposit().updateResource(EResourceType.CONSTRUCTION, -usedPoints);
-            completeConstruction(planet, constructions, job, today);
-            planetService.save(planet);
-        }
-    }
 }

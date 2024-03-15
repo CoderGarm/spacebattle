@@ -21,7 +21,6 @@ import de.yuga.spacebattle.backend.services.constructables.spacecraft.ShipClassS
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
 import de.yuga.spacebattle.backend.services.turn.TickTimeService;
-import de.yuga.spacebattle.backend.services.turn.tick.PlanetTickRunner;
 import de.yuga.spacebattle.rest.api.BaseApi;
 import de.yuga.spacebattle.rest.api.PreconditionWebHelper;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
@@ -89,9 +88,6 @@ public class PlanetApi extends BaseApi {
     private final FleetService fleetService;
 
     @Nonnull
-    private final PlanetTickRunner planetTickRunner;
-
-    @Nonnull
     private final TickTimeService tickTimeService;
 
     @Nonnull
@@ -114,7 +110,6 @@ public class PlanetApi extends BaseApi {
                      @Nonnull final JobService jobService,
                      @Nonnull final ShipClassService shipClassService,
                      @Nonnull final FleetService fleetService,
-                     @Nonnull final PlanetTickRunner planetTickRunner,
                      @Nonnull final TickTimeService tickTimeService,
                      @Nonnull final ConstructionService constructionService,
                      @Nonnull final OrbitalModuleService orbitalModuleService,
@@ -125,7 +120,6 @@ public class PlanetApi extends BaseApi {
         this.jobService = Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
         this.shipClassService = Preconditions.checkNotNull(shipClassService, "shipClassService shouldn't be null!");
         this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService must not be empty");
-        this.planetTickRunner = Preconditions.checkNotNull(planetTickRunner, "planetTickRunner must not be empty");
         this.tickTimeService = Preconditions.checkNotNull(tickTimeService, "tickTimeService must not be empty");
         this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService must not be empty");
         this.orbitalModuleService = Preconditions.checkNotNull(orbitalModuleService, "orbitalModuleService must not be empty");
@@ -229,7 +223,7 @@ public class PlanetApi extends BaseApi {
         final Job job = jobService.createConstructionYardJob(idPlanet, idBuilding);
         if (jobService.isLocalInstaJobPossible(idPlanet, job)) {
             final Tick today = tickTimeService.getToday();
-            planetTickRunner.tickInstaConstruction(job, today);
+            jobService.tickInstaConstruction(job, today);
             operationalService.operateInoperationals(today, idPlanet);
             tickOutputCalculator.reloadTicklyIncome(idPlanet);
             populationControlCalculator.reloadPopOverview(getIdUser());
@@ -305,7 +299,7 @@ public class PlanetApi extends BaseApi {
         final Job job = jobService.createShipyardJob(idPlanet, jobLoad);
         if (jobService.isLocalInstaJobPossible(idPlanet, job)) {
             final Tick today = tickTimeService.getToday();
-            planetTickRunner.tickInstaShipyard(job, today);
+            jobService.tickInstaShipyard(job, today);
             operationalService.operateInoperationals(today, idPlanet);
             populationControlCalculator.reloadPopOverview(getIdUser());
         }
@@ -353,7 +347,7 @@ public class PlanetApi extends BaseApi {
 
         final Job job = jobService.startShipyardRepairJob(fleetPlanetDto.planet, fleetPlanetDto.fleet);
         if (jobService.isLocalInstaJobPossible(fleetPlanetDto.planet.getId(), job)) {
-            planetTickRunner.tickInstaShipyard(job, tickTimeService.getToday());
+            jobService.tickInstaShipyard(job, tickTimeService.getToday());
             populationControlCalculator.reloadPopOverview(getIdUser());
         }
         return ResponseEntity.ok(true);
@@ -397,7 +391,7 @@ public class PlanetApi extends BaseApi {
         final FleetPlanetDto fleetPlanetDto = getResult(idFleet);
         final Job job = jobService.createShipyardUpgradeJob(fleetPlanetDto.planet, fleetPlanetDto.fleet);
         if (jobService.isLocalInstaJobPossible(fleetPlanetDto.planet.getId(), job)) {
-            planetTickRunner.tickInstaShipyard(job, tickTimeService.getToday());
+            jobService.tickInstaShipyard(job, tickTimeService.getToday());
             populationControlCalculator.reloadPopOverview(getIdUser());
         }
         return ResponseEntity.ok(true);
@@ -565,7 +559,7 @@ public class PlanetApi extends BaseApi {
 
         final Job job = jobService.createShipyardOrbitalModuleJob(idPlanet, jobLoad);
         if (jobService.isLocalInstaJobPossible(idPlanet, job)) {
-            planetTickRunner.tickInstaShipyard(job, tickTimeService.getToday());
+            jobService.tickInstaShipyard(job, tickTimeService.getToday());
             tickOutputCalculator.reloadTicklyIncome(idPlanet);
             populationControlCalculator.reloadPopOverview(getIdUser());
         }
