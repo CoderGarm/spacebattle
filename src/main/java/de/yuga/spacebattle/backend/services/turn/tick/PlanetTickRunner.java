@@ -9,13 +9,8 @@ import de.yuga.spacebattle.backend.entities.turn.resources.ResourceDeposit;
 import de.yuga.spacebattle.backend.enums.EResourceType;
 import de.yuga.spacebattle.backend.services.caclulator.PopulationControlCalculator;
 import de.yuga.spacebattle.backend.services.caclulator.TickOutputCalculator;
-import de.yuga.spacebattle.backend.services.combined.spacecraft.FleetService;
-import de.yuga.spacebattle.backend.services.constructables.buildings.ConstructionService;
-import de.yuga.spacebattle.backend.services.constructables.spacecraft.OrbitalStructureService;
-import de.yuga.spacebattle.backend.services.constructables.spacecraft.WarShipService;
 import de.yuga.spacebattle.backend.services.orbitals.PlanetService;
 import de.yuga.spacebattle.backend.services.turn.JobService;
-import de.yuga.spacebattle.backend.services.turn.battle.combat.WarshipHealthStateService;
 import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,45 +42,20 @@ public class PlanetTickRunner implements TickRunner {
     private final PlanetService planetService;
 
     @Nonnull
-    private final FleetService fleetService;
-
-    @Nonnull
-    private final ConstructionService constructionService;
-
-    @Nonnull
-    private final WarshipHealthStateService warshipHealthStateService;
-
-    @Nonnull
     private final PopulationControlCalculator populationControlCalculator;
 
     @Nonnull
     private final TickOutputCalculator tickOutputCalculator;
 
-    @Nonnull
-    private final WarShipService warShipService;
-
-    @Nonnull
-    private final OrbitalStructureService orbitalStructureService;
-
     @Autowired
     public PlanetTickRunner(@Nonnull final JobService jobService,
                             @Nonnull final PlanetService planetService,
-                            @Nonnull final FleetService fleetService,
-                            @Nonnull final ConstructionService constructionService,
-                            @Nonnull final WarshipHealthStateService warshipHealthStateService,
                             @Nonnull final PopulationControlCalculator populationControlCalculator,
-                            @Nonnull final TickOutputCalculator tickOutputCalculator,
-                            @Nonnull final WarShipService warShipService,
-                            @Nonnull final OrbitalStructureService orbitalStructureService) {
+                            @Nonnull final TickOutputCalculator tickOutputCalculator) {
         this.jobService = Preconditions.checkNotNull(jobService, "jobService shouldn't be null!");
         this.planetService = Preconditions.checkNotNull(planetService, "planetService shouldn't be null!");
-        this.fleetService = Preconditions.checkNotNull(fleetService, "fleetService shouldn't be null!");
-        this.constructionService = Preconditions.checkNotNull(constructionService, "constructionService shouldn't be null!");
-        this.warshipHealthStateService = Preconditions.checkNotNull(warshipHealthStateService, "warshipHealthStateService must not be empty");
         this.populationControlCalculator = Preconditions.checkNotNull(populationControlCalculator, "populationControlCalculator must not be empty");
         this.tickOutputCalculator = Preconditions.checkNotNull(tickOutputCalculator, "tickOutputCalculator must not be empty");
-        this.warShipService = Preconditions.checkNotNull(warShipService, "warShipService must not be empty");
-        this.orbitalStructureService = Preconditions.checkNotNull(orbitalStructureService, "orbitalStructureService must not be empty");
     }
 
     @Override
