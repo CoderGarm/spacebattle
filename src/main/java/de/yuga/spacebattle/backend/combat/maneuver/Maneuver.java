@@ -12,6 +12,7 @@ import de.yuga.spacebattle.backend.combat.dto.MovementAction;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
@@ -287,6 +288,7 @@ public abstract class Maneuver {
 
             final DynamicInfo dynamicInfo = motionProfile.getDynamicInfo();
             final Velocity dynamicInfoVelocity = dynamicInfo.getVelocity();
+            final Acceleration dynamicInfoAcceleration = dynamicInfo.getAcceleration();
             final Distance distance = dynamicInfo.getDistance().getInMetricWithScale(EDistanceMetric.KM);
 
             double percentOfTrack = (distance.divide(totalLength)).multiply(100).getCoordinate().doubleValue();
@@ -306,6 +308,7 @@ public abstract class Maneuver {
                     new Distance(lengthOnTrack, EDistanceMetric.KM), // fixme can be distance directly - test it
                     REDUCE_DISTANCE,
                     dynamicInfoVelocity.clone(),
+                    dynamicInfoAcceleration.clone(),
                     position
             );
             motionProfile.getDynamicInfo().setPosition(position);
@@ -321,19 +324,21 @@ public abstract class Maneuver {
                                @Nonnull final Distance lengthOnTrack,
                                @Nonnull final EMovementType movementType,
                                @Nonnull final Velocity velocity,
+                               @Nonnull final Acceleration acceleration,
                                @Nonnull final Orbit position) {
         Preconditions.checkNotNull(combatRound, "combatRound shouldn't be null!");
         Preconditions.checkNotNull(maneuverElement, "maneuverElement must not be empty");
         Preconditions.checkNotNull(lengthOnTrack, "lengthOnTrack must not be empty");
         Preconditions.checkNotNull(movementType, "movementType shouldn't be null!");
         Preconditions.checkNotNull(velocity, "velocity shouldn't be null!");
+        Preconditions.checkNotNull(acceleration, "acceleration must not be empty");
         Preconditions.checkNotNull(position, "position shouldn't be null!");
 
         if (hasViolatedTopSpeed(velocity)) {
             cage.logWarning("VELOCITY VIOLATED from fleet " + agent.getOwner().getUsername());
         }
 
-        courseOrderElements.add(new CourseOrderElement(this, maneuverElement, lengthOnTrack, combatRound, movementType, velocity, position));
+        courseOrderElements.add(new CourseOrderElement(this, maneuverElement, lengthOnTrack, combatRound, movementType, velocity, acceleration, position));
     }
 
     public boolean hasViolatedTopSpeed(@Nonnull final Velocity velocity) {

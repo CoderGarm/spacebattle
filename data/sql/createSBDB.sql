@@ -499,8 +499,10 @@
        idMovementAction integer not null auto_increment,
         combatPhase varchar(255) not null,
         combatRound integer not null,
+        acceleration varchar(255) not null,
         lengthOnTrack varchar(255) not null,
         movementType varchar(255) not null,
+        velocity varchar(255) not null,
         idActor integer not null,
         idManeuver integer not null,
         primary key (idMovementAction)
@@ -991,7 +993,6 @@ create index ID_OS on orbitalStructure (isDeleted);
 
     alter table rolePlaySetting
        add constraint UK_5sx33g2kpg6lhpamw75ibqb9i unique (idUser);
-create index ID_SC on shipClass (isDeleted);
 
     alter table sharedBattleReport
        add constraint UK_hpe1gr8wmca659sm228uhgp6u unique (idBattleReport);

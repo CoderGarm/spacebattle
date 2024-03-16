@@ -13,11 +13,17 @@ alter table missileMovement drop column roundsToTravel;
 alter table missileMovement drop column xCoordTarget;
 alter table missileMovement drop column yCoordTarget;
 
- alter table movementAction add column lengthOnTrack varchar(255) not null after combatRound;
+ alter table movementAction add column acceleration varchar(255) not null after combatRound;
+ alter table movementAction add column lengthOnTrack varchar(255) not null after acceleration;
+ alter table movementAction add column velocity varchar(255) not null after movementType;
  alter table missileMovement add column lengthOnTrack varchar(255) not null after combatRound;
 
  # noinspection SqlWithoutWhere
+ update movementAction set acceleration = '0 MS2';
+ # noinspection SqlWithoutWhere
  update movementAction set lengthOnTrack = '0 M';
+ # noinspection SqlWithoutWhere
+ update movementAction set velocity = '0 M SECOND';
  # noinspection SqlWithoutWhere
  update missileMovement set lengthOnTrack = '0 M';
 

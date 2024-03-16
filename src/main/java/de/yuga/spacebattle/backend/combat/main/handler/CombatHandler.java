@@ -182,7 +182,7 @@ public class CombatHandler {
         final Maneuver maneuver = courseElement.getManeuver();
         final ManeuverElement maneuverElement = courseElement.getManeuverElement();
         final Distance lengthOnTrack = courseElement.getLengthOnTrack();
-        final MovementAction movementAction = new MovementAction(cage, agent, maneuver, maneuverElement, lengthOnTrack, movementType);
+        final MovementAction movementAction = new MovementAction(cage, agent, maneuver, maneuverElement, courseElement);
         agentsState.getPosition().moveTo(interimDestination);
 
         coursePlot.executeLatestPendingOrder();

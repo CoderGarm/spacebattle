@@ -148,6 +148,22 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
         return coordinateInMetric + " " + EDistanceMetric.LS + "/" + ETimeMetric.SECOND;
     }
 
+
+    @Nonnull
+    @JsonIgnore
+    public String asString() {
+        return value + " " + distanceMetric + " " + timeMetric;
+    }
+
+    @Nonnull
+    @JsonIgnore
+    public static Velocity getFromString(@Nonnull final String fromDb) {
+        Preconditions.checkNotNull(fromDb, "fromDb shouldn't be null!");
+
+        final String[] split = fromDb.trim().split("\\s");
+        return new Velocity(new BigDecimal(split[0]), EDistanceMetric.getByName(split[1]), ETimeMetric.getByName(split[2]));
+    }
+
     @Override
     @JsonIgnore
     public boolean equals(final Object o) {

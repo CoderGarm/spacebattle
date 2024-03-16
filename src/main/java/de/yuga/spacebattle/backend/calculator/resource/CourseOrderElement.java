@@ -5,6 +5,7 @@ import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.maneuver.Maneuver;
 import de.yuga.spacebattle.backend.combat.maneuver.ManeuverElement;
 import de.yuga.spacebattle.backend.combat.round.CombatRound;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
 import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
@@ -29,6 +30,9 @@ public class CourseOrderElement implements Cloneable {
     private Velocity velocity;
 
     @Nonnull
+    private Acceleration acceleration;
+
+    @Nonnull
     private Orbit position;
 
     @Nonnull
@@ -42,6 +46,7 @@ public class CourseOrderElement implements Cloneable {
                               @Nonnull final CombatRound combatRound,
                               @Nonnull final EMovementType movementType,
                               @Nonnull final Velocity velocity,
+                              @Nonnull final Acceleration acceleration,
                               @Nonnull final Orbit position) {
         this.maneuver = Preconditions.checkNotNull(maneuver, "maneuver must not be empty");
         this.maneuverElement = Preconditions.checkNotNull(maneuverElement, "maneuverElement must not be empty");
@@ -49,6 +54,7 @@ public class CourseOrderElement implements Cloneable {
         this.movementType = Preconditions.checkNotNull(movementType, "movementType shouldn't be null!");
         this.combatRound = Preconditions.checkNotNull(combatRound, "combatRound shouldn't be null!");
         this.velocity = Preconditions.checkNotNull(velocity, "velocity shouldn't be null!");
+        this.acceleration = Preconditions.checkNotNull(acceleration, "acceleration must not be empty");
         this.position = Preconditions.checkNotNull(position, "position shouldn't be null!");
     }
 
@@ -79,6 +85,11 @@ public class CourseOrderElement implements Cloneable {
     @Nonnull
     public Velocity getVelocity() {
         return velocity;
+    }
+
+    @Nonnull
+    public Acceleration getAcceleration() {
+        return acceleration;
     }
 
     @Nonnull

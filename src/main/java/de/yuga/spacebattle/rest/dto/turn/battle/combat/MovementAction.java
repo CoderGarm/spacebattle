@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.FleetSnapshot;
 import de.yuga.spacebattle.rest.dto.AbstractId;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -39,6 +41,17 @@ public class MovementAction {
     @Schema(required = true, description = "The total length on the main track.")
     private Distance lengthOnTrack;
 
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The velocity for this combat round.")
+    private Velocity velocity;
+
+    @Nonnull
+    @JsonProperty
+    @Schema(required = true, description = "The acceleration for this combat round.")
+    private Acceleration acceleration;
+
+
     public MovementAction(@Nonnull final de.yuga.spacebattle.backend.entities.turn.battle.combat.MovementAction input,
                           @Nonnull final String languageCode,
                           @Nonnull final Set<FleetSnapshot> participatingFleets) {
@@ -55,6 +68,8 @@ public class MovementAction {
         this.movementType = input.getMovementType();
         this.auraState = new AuraState(input.getAlignedAuraStates());
         this.lengthOnTrack = input.getLengthOnTrack();
+        this.velocity = input.getVelocity();
+        this.acceleration = input.getAcceleration();
     }
 
     @JsonIgnore

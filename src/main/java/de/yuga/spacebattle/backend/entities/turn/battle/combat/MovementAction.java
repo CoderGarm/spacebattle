@@ -4,8 +4,12 @@ import com.google.common.base.Preconditions;
 import de.yuga.spacebattle.backend.combat.dto.AlignedAuraState;
 import de.yuga.spacebattle.backend.combat.dto.AuraState;
 import de.yuga.spacebattle.backend.combat.enums.EMovementType;
+import de.yuga.spacebattle.backend.converter.AccelerationConverter;
 import de.yuga.spacebattle.backend.converter.DistanceConverter;
+import de.yuga.spacebattle.backend.converter.VelocityConverter;
+import de.yuga.spacebattle.backend.dto.physics.Acceleration;
 import de.yuga.spacebattle.backend.dto.physics.Distance;
+import de.yuga.spacebattle.backend.dto.physics.Velocity;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 
 import javax.annotation.Nonnull;
@@ -47,6 +51,16 @@ public class MovementAction extends CombatRoundKey {
     @Convert(converter = DistanceConverter.class)
     private Distance lengthOnTrack;
 
+    @Nonnull
+    @NotNull
+    @Convert(converter = VelocityConverter.class)
+    private Velocity velocity;
+
+    @Nonnull
+    @NotNull
+    @Convert(converter = AccelerationConverter.class)
+    private Acceleration acceleration;
+
     public MovementAction() {
     }
 
@@ -61,6 +75,8 @@ public class MovementAction extends CombatRoundKey {
         this.movementType = movementAction.getMovementType();
         this.alignedAuraStates.addAll(auraState.getAlignedAuraStates().values());
         this.lengthOnTrack = movementAction.getLengthOnTrack();
+        this.velocity = movementAction.getVelocity();
+        this.acceleration = movementAction.getAcceleration();
     }
 
     @Nonnull
@@ -92,4 +108,13 @@ public class MovementAction extends CombatRoundKey {
         return lengthOnTrack;
     }
 
+    @Nonnull
+    public Velocity getVelocity() {
+        return velocity;
+    }
+
+    @Nonnull
+    public Acceleration getAcceleration() {
+        return acceleration;
+    }
 }
