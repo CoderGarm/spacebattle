@@ -96,6 +96,7 @@ public class ManeuverFactory {
     public Maneuver createInitialResponseManeuver(@Nonnull final Maneuver oppositionManeuver) {
         Preconditions.checkNotNull(oppositionManeuver, "oppositionManeuver must not be empty");
 
+        // needed information
         final Fleet agent = cage.getDefender();
         final Fleet target = oppositionManeuver.getAgent();
 
@@ -108,21 +109,7 @@ public class ManeuverFactory {
         final Direction targetsCourseDirection = new Direction(targetsInitialPos, targetsDesignatedPos);
         final Distance targetsTravelDistance = targetsInitialPos.getDistance(targetsDesignatedPos);
 
-        /*
-            fixme react to aggressive course
-
-            - state intersection point
-            - state intersection time
-            - calc acceleration to reach both
-            - proceed normally
-
-                1. intersect point of courses by intersection of control points
-                2. intersect time by maneuver plot "get combat round for position" for both
-                3. time difference base for adapting and recalc second course with higher/lower acceleration (das ist schummeln!)
-                4. zweiten kurs mit neuer beschleunigung neu bestimmen
-
-         */
-
+        // course calculations
         final CubicBezier combatElement = oppositionManeuver.getCombatElement();
         final Orbit cp1 = new Orbit(combatElement.getCp1(), EDistanceMetric.KM);
         final Orbit cp2 = new Orbit(combatElement.getCp2(), EDistanceMetric.KM);
@@ -130,8 +117,10 @@ public class ManeuverFactory {
         final Distance halfDistance = targetsTravelDistance.divide(2);
 
         final Distance aThird = halfDistance.divide(3);
+        // state the closer control point of the opponents course as pivotal point for own maneuver
         final Orbit agentsManeuverEnd = closerControlPoint.moveAboutAndGet(aThird.multiply(2), targetsCourseDirection.negate());
 
+        // formulate unmodified maneuver to calculate the modifications which are needed for the executed maneuver to hit the target in a good range
         final Maneuver maneuver = new CrossingTheT(
                 cage,
                 cage.getCurrentCombatRound(),
@@ -141,15 +130,20 @@ public class ManeuverFactory {
                 target
         ).createCoursePlot();
 
+        // calculate the intersection point to find the arrival time difference in both maneuvers
         long start = System.currentTimeMillis();
         final Orbit intersectionPoint = GeometryCalculator.calculateClosestPoint(maneuver.getCombatElement(), oppositionManeuver.getCombatElement());
+        Preconditions.checkNotNull(intersectionPoint, "intersectionPoint must not be empty");
         cage.logMessage("intersect curves", start, System.currentTimeMillis());
 
         final CombatRound oppositionIntersectionRound = oppositionManeuver.getIntersectionTimeFor(intersectionPoint);
         final CombatRound intersectionRound = maneuver.getIntersectionTimeFor(intersectionPoint);
+        Preconditions.checkNotNull(oppositionIntersectionRound, "oppositionIntersectionRound must not be empty");
+        Preconditions.checkNotNull(intersectionRound, "intersectionRound must not be empty");
 
         final int combatRoundDifferenceAtPoint = oppositionIntersectionRound.getNo() - intersectionRound.getNo();
         final int designatedEnd = maneuver.getDesignatedEnd().getNo();
+        // calculate the acceleration modifier for this reacting maneuver to arrive nearly at the same round
         final double accelerationModifier = ((double) combatRoundDifferenceAtPoint / designatedEnd);
 
         final Maneuver result = new CrossingTheT(
@@ -162,6 +156,29 @@ public class ManeuverFactory {
         ).createCoursePlot();
 
         result.setIntersectionPoint(intersectionPoint);
+        return result;
+    }
+
+    @Nonnull
+    public Maneuver createAggressiveResponseManeuver(@Nonnull final Maneuver oppositionManeuver) {
+        Preconditions.checkNotNull(oppositionManeuver, "oppositionManeuver must not be empty");
+
+        final Fleet agent = oppositionManeuver.getTarget();
+        final Fleet target = oppositionManeuver.getAgent();
+        final FleetRoundState agentState = cage.getCurrentStateByFleet(agent);
+
+        final KinematicInfo targetsKinematicDesignated = oppositionManeuver.getAgentsKinematicDesignated();
+
+        final Maneuver result = new CrossingTheT(
+                cage,
+                cage.getCurrentCombatRound(),
+                agent,
+                KinematicInfo.getFrom(agentState),
+                targetsKinematicDesignated,
+                target
+        ).createCoursePlot();
+
+
         return result;
     }
 }

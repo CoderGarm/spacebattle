@@ -19,6 +19,11 @@ public class MathHelper {
     }
 
     @Nonnull
+    public static BigDecimal getOrEpsilon(final double value) {
+        return value == 0 ? new BigDecimal("1e-5") : BigDecimal.valueOf(value);
+    }
+
+    @Nonnull
     public static BigDecimal divideWithEpsilon(@Nonnull final BigDecimal dividend, @Nonnull final BigDecimal divisor) {
         Preconditions.checkNotNull(dividend, "dividend must not be empty");
         Preconditions.checkNotNull(divisor, "divisor must not be empty");

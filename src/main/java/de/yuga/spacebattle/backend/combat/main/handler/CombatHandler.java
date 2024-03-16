@@ -66,7 +66,7 @@ public class CombatHandler {
         stateCombatValue(cage.getAggressor());
         stateCombatValue(cage.getDefender());
 
-        extendAggressiveCoursePlot(cage.getDefender());
+        extendAggressiveCoursePlot(cage.getAggressor());
         extendAggressiveCoursePlot(cage.getDefender());
 
         // execute movement
@@ -77,7 +77,7 @@ public class CombatHandler {
 
         final Orbit aggroPos = cage.getCurrentStateByFleet(cage.getAggressor()).getPosition();
         final Orbit defPos = cage.getCurrentStateByFleet(cage.getDefender()).getPosition();
-        cage.logMessage("#" + currentCombatRound.getNo() + "\t\t - " + aggroPos.getDistance(defPos).getCoordinateInMetric(LS) + " LS"); // fixme distance seems to be wrong
+        cage.logMessage("#" + currentCombatRound.getNo() + "\t\t - " + aggroPos.getDistance(defPos).getCoordinateInMetric(LS) + " LS");
     }
 
     private void stateCombatValue(@Nonnull final Fleet agent) {
@@ -116,8 +116,7 @@ public class CombatHandler {
                     .filter(c -> !c.hasPlotExceeded())
                     .collect(Collectors.toList());
             for (final CoursePlot notExceededPlot : notExceededPlots) {
-                notExceededPlot.clearFutureCourseElements();
-                notExceededPlot.getManeuver().setEnd(cage.getCurrentCombatRound().clone());
+                notExceededPlot.getManeuver().setEnd(cage.getCurrentCombatRound());
             }
         }
     }
@@ -144,12 +143,20 @@ public class CombatHandler {
     private void extendAggressiveCoursePlot(@Nonnull final Fleet agent) {
         Preconditions.checkNotNull(agent, "agent must not be empty");
 
-        final boolean hasPlotToBeRepainted = isPlotExceeded(agent);
-        final boolean onDecay = cage.getCurrentStateByFleet(agent).getCoursePlot().isCourseAtDecay();
-        if (hasPlotToBeRepainted || onDecay) {
+        final boolean noMoreCourseElementsLeft = isPlotExceeded(agent);
+        final CoursePlot coursePlot = cage.getCurrentStateByFleet(agent).getCoursePlot();
+        final boolean onDecay = coursePlot.isCourseAtDecay();
+        if (noMoreCourseElementsLeft || onDecay) {
             // plot the next round's course for the upcoming round
-            // fixme weiter hier aggressorsCoursePlot.createNextAggressiveCourseElement();
+            /*
+             * fixme
+             *      1. end maneuver for agent
+             *      2. create aggressive course
+             */
             cage.logWarning("Course of '" + agent.getOwner().getUsername() + "' will be refreshed.");
+
+            coursePlot.getManeuver().setEnd(cage.getCurrentCombatRound());
+            coursePlot.createNextAggressiveCourseElement();
         }
     }
 
@@ -182,8 +189,7 @@ public class CombatHandler {
 
         if (coursePlot.hasPlotExceeded()) {
             // stop condition
-            coursePlot.clearFutureCourseElements();
-            maneuver.setEnd(currentCombatRound.clone());
+            maneuver.setEnd(currentCombatRound);
             cage.logMessage("Combat ended by exceeded course from '" + agent.getOwner().getUsername() + "' in round '" + currentCombatRound + "'");
         }
 

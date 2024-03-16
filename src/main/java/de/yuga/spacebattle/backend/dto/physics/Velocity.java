@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.dto.physics;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.MathHelper;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
@@ -284,16 +285,15 @@ public class Velocity implements Cloneable, Comparable<Velocity> {
     public Velocity divide(final double divisor) {
         Preconditions.checkArgument(divisor != 0, "divisor must not be zero");
 
-        return new Velocity(value.divide(BigDecimal.valueOf(divisor), MC_HU), distanceMetric, timeMetric);
+        return new Velocity(value.divide(MathHelper.getOrEpsilon(divisor), MC_HU), distanceMetric, timeMetric);
     }
 
     @Nonnull
     @JsonIgnore
     public Velocity divide(@Nonnull final Velocity divisor) {
         Preconditions.checkNotNull(divisor, "divisor must not be empty");
-        Preconditions.checkArgument(divisor.compareTo(Velocity.ZERO) != 0, "divisor must not be zero");
 
-        final BigDecimal div = divisor.getCoordinateInMetric(distanceMetric, timeMetric);
+        final BigDecimal div = MathHelper.getOrEpsilon(divisor.getCoordinateInMetric(distanceMetric, timeMetric));
         return new Velocity(value.divide(div, MC_HU), distanceMetric, timeMetric);
     }
 

@@ -159,8 +159,15 @@ public abstract class Maneuver {
         this.designatedEnd = Preconditions.checkNotNull(designatedEnd, "designatedEnd must not be empty").clone();
     }
 
-    public void setEnd(@Nonnull final CombatRound end) {
-        this.end = Preconditions.checkNotNull(end, "end must not be empty").clone();
+    public void setEnd(@Nonnull final CombatRound now) {
+        end = Preconditions.checkNotNull(now, "now must not be empty").clone();
+        clearFutureCourseElements(now);
+    }
+
+    private void clearFutureCourseElements(@Nonnull final CombatRound now) {
+        Preconditions.checkNotNull(now, "now must not be empty");
+
+        getCourseOrderElements().removeIf(e -> !e.isCourseOrderExecuted() && e.getCombatRound().compareTo(now) > 0);
     }
 
     @Nonnull

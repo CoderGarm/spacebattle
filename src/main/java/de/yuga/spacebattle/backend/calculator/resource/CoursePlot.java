@@ -25,14 +25,11 @@ import de.yuga.spacebattle.rest.api.error.NotifyWebUserException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator.MC_HU;
 import static de.yuga.spacebattle.backend.combat.enums.EMovementType.*;
 import static de.yuga.spacebattle.backend.combat.round.CombatRound.COMBAT_ROUND;
 import static de.yuga.spacebattle.backend.enums.EWeaponAlignment.BROADSIDE;
@@ -101,11 +98,6 @@ public class CoursePlot {
 
     public void createNextAggressiveCourseElement() {
 
-        // fixme check if next course should be cleared or is suitable
-        clearFutureCourseElements();
-        cage.logMessage("clearFutureCourseElements();");
-
-
         /*
          1. motivation feststellen
             1a. angriffsfall
@@ -113,159 +105,23 @@ public class CoursePlot {
             2a.
          3. berechnen
         */
-
-
-        final FleetRoundState agentsState = cage.getAggressorsState();
-        final Orbit aPos = agentsState.getPosition();
-        final Velocity aVel = agentsState.getVelocity();
-        final Acceleration aAcc = agentsState.getAccelerationFor(EModuleType.PROPULSION);
-
-        final FleetRoundState targetsState = cage.getDefendersState();
-        final Orbit dPos = targetsState.getPosition();
-
-        final Distance distance = aPos.getDistance(dPos);
-
-        final EMovementType movementType = detectMovementType(distance);
-
+        final CoursePlot coursePlot = cage.getCurrentStateByFleet(agent).getCoursePlot();
+        final CoursePlot opponentsCourse = cage.getCurrentStateByFleet(cage.getOpponent(agent)).getCoursePlot();
+        final Maneuver aggressiveManeuver = new ManeuverFactory(cage).createAggressiveResponseManeuver(opponentsCourse.getManeuver());
+        // fixme do something with it
     }
 
 
     public void createAggressiveCourse() {
-
         maneuver = new ManeuverFactory(cage).createInitial();
-        cage.attachToChart(cage.getAggressor().getOwner(), maneuver);
+        cage.attachToChart(agent.getOwner(), maneuver);
     }
 
     public void createDefensiveCourse() {
-
-        final Maneuver aggressiveManeuver = cage.getCurrentStateByFleet(cage.getAggressor()).getCoursePlot().getManeuver();
+        final Maneuver aggressiveManeuver = cage.getCurrentStateByFleet(cage.getOpponent(agent)).getCoursePlot().getManeuver();
         Preconditions.checkNotNull(aggressiveManeuver, "aggressiveManeuver must not be empty");
         maneuver = new ManeuverFactory(cage).createInitialResponseManeuver(aggressiveManeuver);
-        cage.attachToChart(cage.getDefender().getOwner(), maneuver);
-    }
-
-    /**
-     * Returns the position where the agent is onto a course towards the target and has the best range for damage projection.
-     *
-     * @param target the target
-     * @return the orbit
-     */
-    @Nullable
-    public Orbit getDestinationForBestDamageAtFirstApproach(@Nonnull final Fleet target) {
-        Preconditions.checkNotNull(target, "target shouldn't be null!");
-
-        final FleetDamageProjectionPerRange actorInfo = getFleetDamageProjectionPerRange(agent);
-        final FleetDamageProjectionPerRange targetInfo = getFleetDamageProjectionPerRange(target);
-
-        final DamagePerRangePerAlignment bestDamagePotential = actorInfo.getDistanceWithBestDamageAgainst(targetInfo);
-        if (bestDamagePotential == null) {
-            return null;
-        }
-        final RangeDefinition bestDamagePotentialRangeDefinition = bestDamagePotential.getRangeDefinition();
-        final Distance minRange = bestDamagePotentialRangeDefinition.getMinRange();
-        final Distance maxRange = bestDamagePotentialRangeDefinition.getMaxRange();
-        final Distance difference = maxRange.subtract(minRange);
-        final BigDecimal divide = difference.getCoordinate().divide(BigDecimal.valueOf(2), MC_HU);
-        // state distance from target
-        final Distance bestDistanceToTarget = new Distance(divide, difference.getDistanceMetric());
-
-        final FleetRoundState agentsState = cage.getCurrentStateByFleet(agent);
-        final FleetRoundState targetsState = cage.getCurrentStateByFleet(target);
-
-        final Orbit agentsPosition = agentsState.getPosition().clone();
-        final Orbit targetsPosition = targetsState.getPosition().clone();
-
-        // assume enemies movement and set up destination accordingly!
-        final Orbit destination = getFirstIntersection(agentsPosition, agentsState, targetsPosition, targetsState, 1);
-
-        // state direction from target
-        final Direction direction = new Direction(destination, agentsPosition);
-        return destination.getDestinationBy(bestDistanceToTarget, direction);
-    }
-
-    @Nonnull
-    private Orbit getFirstIntersection(@Nonnull final Orbit agentsPosition,
-                                       @Nonnull final FleetRoundState agentsState,
-                                       @Nonnull final Orbit targetsPosition,
-                                       @Nonnull final FleetRoundState targetsState,
-                                       final int amountOfRounds) {
-        Preconditions.checkNotNull(agentsPosition, "agentsPosition shouldn't be null!");
-        Preconditions.checkNotNull(agentsState, "agentsState shouldn't be null!");
-        Preconditions.checkNotNull(targetsPosition, "targetsPosition shouldn't be null!");
-        Preconditions.checkNotNull(targetsState, "targetsState shouldn't be null!");
-
-
-        final Distance agentsMobility = agentsState.getMobilityForDirection(new Direction(agentsPosition, targetsPosition), amountOfRounds);
-        final Distance targetsMobility = agentsState.getMobilityForDirection(new Direction(targetsPosition, agentsPosition), amountOfRounds);
-
-        final List<Orbit> circleIntersectionPoints = getCircleIntersectionPoints(agentsPosition, agentsMobility, targetsPosition, targetsMobility);
-        if (circleIntersectionPoints.isEmpty()) {
-            return getFirstIntersection(agentsPosition, agentsState, targetsPosition, targetsState, amountOfRounds + 1);
-        }
-        final Orbit one = circleIntersectionPoints.get(0);
-        if (circleIntersectionPoints.size() == 1) {
-            return one;
-        }
-        final Orbit two = circleIntersectionPoints.get(1);
-
-        final Orbit locationVector = two.subtract(one);
-        return locationVector.divide(2);
-    }
-
-    /**
-     * Calculates the intersection points of two circles.
-     *
-     * @param centerA center of circle a
-     * @param radiusA the radius of circle a
-     * @param centerB center of circle b
-     * @param radiusB the radius of circle b
-     * @return all existing intersection coordinates
-     */
-    @Nonnull
-    private List<Orbit> getCircleIntersectionPoints(@Nonnull final Orbit centerA, @Nonnull final Distance radiusA, @Nonnull final Orbit centerB, @Nonnull final Distance radiusB) {
-        Preconditions.checkNotNull(centerA, "centerA shouldn't be null!");
-        Preconditions.checkNotNull(radiusA, "radiusA shouldn't be null!");
-        Preconditions.checkNotNull(centerB, "centerB shouldn't be null!");
-        Preconditions.checkNotNull(radiusB, "radiusB shouldn't be null!");
-
-        final Orbit locationVectorAB = centerB.subtract(centerA);
-        final Distance AB0 = locationVectorAB.getXCoordinate();
-        final Distance AB1 = locationVectorAB.getYCoordinate();
-        final Distance distance = centerA.getDistance(centerB);
-        final List<Orbit> intersectionCoordinates = new ArrayList<>();
-        if (distance.compareTo(Distance.ZERO) == 0) {
-            // no distance between centers
-            return intersectionCoordinates;
-        }
-        final Distance x = (radiusA.pow(2).add(distance.pow(2)).subtract(radiusB.pow(2))).divide(distance.add(distance));
-        Distance y = radiusA.pow(2).subtract(x.pow(2));
-        if (y.compareTo(Distance.ZERO) < 0) {
-            // no intersection
-            return intersectionCoordinates;
-        }
-        if (y.compareTo(Distance.ZERO) > 0) {
-            y = y.sqrt();
-        }
-        // compute unit vectors ex and ey
-        final Distance ex0 = AB0.divide(distance);
-        final Distance ex1 = AB1.divide(distance);
-        final Distance ey0 = ex1.negate();
-        final Distance ey1 = ex0.clone();
-        Distance Q1x = centerA.getXCoordinate().add(x.multiply(ex0));
-        Distance Q1y = centerA.getYCoordinate().add(x.multiply(ex1));
-        if (y.compareTo(Distance.ZERO) == 0) {
-            // one touch point
-            intersectionCoordinates.add(new Orbit(Q1x, Q1y));
-            return intersectionCoordinates;
-        }
-        // two intersections
-        final Distance Q2x = Q1x.subtract(y.multiply(ey0));
-        final Distance Q2y = Q1y.subtract(y.multiply(ey1));
-        Q1x = Q1x.add(y.multiply(ey0));
-        Q1y = Q1y.add(y.multiply(ey1));
-        intersectionCoordinates.add(new Orbit(Q1x, Q1y));
-        intersectionCoordinates.add(new Orbit(Q2x, Q2y));
-        return intersectionCoordinates;
+        cage.attachToChart(agent.getOwner(), maneuver);
     }
 
     private void setCourseOrderElements(@Nonnull final Orbit origin,
@@ -530,11 +386,6 @@ public class CoursePlot {
         cage.logMessage(agent.getOwner().getUsername() + " moves " + courseElement.getMovementType() + " with velocity of " + getCurrentVelocity());
     }
 
-    public void clearFutureCourseElements() {
-        final CombatRound currentCombatRound = cage.getCurrentCombatRound();
-        getManeuver().getCourseOrderElements().removeIf(e -> !e.isCourseOrderExecuted() && e.getCombatRound().compareTo(currentCombatRound) > 0);
-    }
-
     @Nonnull
     public Cage getCage() {
         return cage;
@@ -547,27 +398,28 @@ public class CoursePlot {
     /**
      * States the decay of a course plot by the combat value by round.<br>
      * <br>
-     * If a <b>tenth</b> of all latest course elements have less combat value then their predecessors, a course in decaying.<br>
-     * The combat values are reverse ordered by round.
+     * If the combat value is decreasing once, the course is decaying for every round after.
      */
     public boolean isCourseAtDecay() {
 
-        final List<Integer> reverseOrderedCombatValues = combatValuesByRound.entrySet().stream()
+        if (combatValuesByRound.entrySet().size() <= 1) {
+            return false;
+        }
+
+        final List<Integer> orderedCombatValues = combatValuesByRound.entrySet().stream()
                 // reverse ordered
                 .sorted((o1, o2) -> o2.getKey().compareTo(o1.getKey()))
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
 
-        final AtomicInteger lastCombatValue = new AtomicInteger(reverseOrderedCombatValues.get(reverseOrderedCombatValues.size() - 1));
-        final AtomicInteger decayCounter = new AtomicInteger(0);
+        for (int i = 1; i < orderedCombatValues.size(); i++) {
+            final int before = orderedCombatValues.get(i);
+            final int now = orderedCombatValues.get(i - 1);
+            if (now < before) {
+                return true;
 
-        reverseOrderedCombatValues.forEach(cv -> {
-            if (cv < lastCombatValue.get()) {
-                decayCounter.incrementAndGet();
             }
-            lastCombatValue.set(cv);
-        });
-        // fixme there must be a limit for the considered combat rounds - at least only the rounds for the current maneuver element must be used and not they before
-        return decayCounter.get() > (reverseOrderedCombatValues.size() / 10);
+        }
+        return false;
     }
 }
