@@ -504,7 +504,7 @@ public class GameEventService {
                     .collect(Collectors.toSet());
 
             final Set<WarShip> warShips = toRepair.stream()
-                    .map(Fleet::getAliveShips)
+                    .map(Fleet::getAllShips)
                     .flatMap(Collection::stream)
                     .collect(Collectors.toSet());
 
