@@ -104,20 +104,27 @@ public class CombatHandler {
     }
 
     private void endCombatByExceededPlot() {
-        final boolean isExceeded = cage.getParticipatingFleets().stream()
+        final List<FleetRoundState> states = cage.getParticipatingFleets().stream()
                 .map(cage::getCurrentStateByFleet)
+                .collect(Collectors.toList());
+        final boolean isExceeded = states.stream()
                 .map(FleetRoundState::getCoursePlot)
                 .anyMatch(CoursePlot::hasPlotExceeded);
 
         if (isExceeded) {
-            final List<CoursePlot> notExceededPlots = cage.getParticipatingFleets().stream()
-                    .map(cage::getCurrentStateByFleet)
+            final List<CoursePlot> notExceededPlots = states.stream()
                     .map(FleetRoundState::getCoursePlot)
                     .filter(c -> !c.hasPlotExceeded())
                     .collect(Collectors.toList());
+            final CombatRound now = cage.getCurrentCombatRound();
             for (final CoursePlot notExceededPlot : notExceededPlots) {
-                notExceededPlot.getManeuver().setEnd(cage.getCurrentCombatRound());
+                notExceededPlot.getManeuver().setEnd(now);
             }
+
+            // fixme this did not work - why?
+            cage.getFlyingMissileSalvos()
+                    .stream().filter(s -> !s.getManeuver().isValid())
+                    .forEach(MissileSalvo::executeEffectiveDetonation);
         }
     }
 

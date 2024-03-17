@@ -318,7 +318,7 @@ public class MissileSalvo extends DamageDealer {
         executeEffectiveDetonation();
     }
 
-    private void executeEffectiveDetonation() {
+    public void executeEffectiveDetonation() {
         missileSalvoHealthState.getCurrentAmountByType().clear();
         maneuver.setEnd(cage.getCurrentCombatRound());
     }

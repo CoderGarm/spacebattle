@@ -231,16 +231,15 @@ public class BattleReport extends AbstractEntityKey {
                 .collect(Collectors.groupingBy(BeamVolley::getCombatRound,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
 
-        final List<MissileSalvo> allMissileSalvos = battleResult.getMissileSalvos();
+        final List<MissileSalvo> allMissileSalvos = battleResult.getMissileSalvos().stream()
+                // small hack because for fuck's sake - they will not be marked as ended
+                .filter(m -> m.getManeuver().isValid())
+                .collect(Collectors.toList());
         final Map<CombatRound, List<MissileSalvo>> missileSalvosByRound = allMissileSalvos.stream()
                 .collect(Collectors.groupingBy(MissileSalvo::getCombatRound,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
 
         final Map<DamageDealer, List<HitLog>> hitLogsByDamageDealer = getHitLogsByDamageDealer(fleetRoundStates);
-
-        final List<MissileSalvo> collect = allMissileSalvos.stream()
-                .filter(missileSalvo -> hitLogsByDamageDealer.get(missileSalvo) == null)
-                .collect(Collectors.toList());
 
         final List<ECombatPhase> combatPhases = Arrays.stream(ECombatPhase.values()).collect(Collectors.toList());
         for (final CombatRound combatRound : combatRounds) {
