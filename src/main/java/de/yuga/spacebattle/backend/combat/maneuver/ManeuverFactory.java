@@ -13,6 +13,7 @@ import de.yuga.spacebattle.backend.combat.round.FleetRoundState;
 import de.yuga.spacebattle.backend.dto.physics.*;
 import de.yuga.spacebattle.backend.entities.combined.spacecrafts.Fleet;
 import de.yuga.spacebattle.backend.entities.orbitals.Orbit;
+import de.yuga.spacebattle.backend.enums.EModuleType;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
 import de.yuga.spacebattle.backend.enums.physics.ETimeMetric;
 
@@ -173,7 +174,7 @@ public class ManeuverFactory {
                 cage,
                 cage.getCurrentCombatRound(),
                 agent,
-                KinematicInfo.getFrom(agentState),
+                KinematicInfo.getFrom(agentState).with(agentState.getMaxSubLightVelocity()).with(agentState.getAccelerationFor(EModuleType.PROPULSION)),
                 targetsKinematicDesignated,
                 target
         ).createCoursePlot();

@@ -13,32 +13,18 @@ public class ManeuverElement implements Cloneable, Comparable<ManeuverElement> {
     private final CubicBezier curve;
 
     /**
-     * Represented as percent value.
-     */
-    private int partOfManeuver;
-
-    /**
      * The number of planned execution for the complete maneuver.
      */
-    private int sequenceNo;
+    private final int sequenceNo;
 
-    public ManeuverElement(@Nonnull final CubicBezier curve, final int partOfManeuver, final int sequenceNo) {
+    public ManeuverElement(@Nonnull final CubicBezier curve, final int sequenceNo) {
         this.curve = Preconditions.checkNotNull(curve, "curve must not be empty");
-        this.partOfManeuver = partOfManeuver;
         this.sequenceNo = sequenceNo;
     }
 
     @Nonnull
     public CubicBezier getCurve() {
         return curve;
-    }
-
-    public int getPartOfManeuver() {
-        return partOfManeuver;
-    }
-
-    public void setPartOfManeuver(final int partOfManeuver) {
-        this.partOfManeuver = partOfManeuver;
     }
 
     public int getSequenceNo() {
@@ -77,9 +63,5 @@ public class ManeuverElement implements Cloneable, Comparable<ManeuverElement> {
         Preconditions.checkNotNull(o, "o must not be empty");
 
         return Integer.compare(getSequenceNo(), o.getSequenceNo());
-    }
-
-    public void increaseSequenceNo() {
-        sequenceNo++;
     }
 }

@@ -20,9 +20,6 @@ import javax.annotation.Nonnull;
 public class MovementAction {
 
     @Nonnull
-    private final Cage cage;
-
-    @Nonnull
     private final Fleet actor;
 
     @Nonnull
@@ -44,10 +41,10 @@ public class MovementAction {
     private final Distance lengthOnTrack;
 
     @Nonnull
-    private Velocity velocity;
+    private final Velocity velocity;
 
     @Nonnull
-    private Acceleration acceleration;
+    private final Acceleration acceleration;
 
     public MovementAction(@Nonnull final Cage cage,
                           @Nonnull final Fleet actor,
@@ -55,7 +52,6 @@ public class MovementAction {
                           @Nonnull final ManeuverElement maneuverElement,
                           @Nonnull final CourseOrderElement courseElement) {
         Preconditions.checkNotNull(courseElement, "courseElement must not be empty");
-        this.cage = Preconditions.checkNotNull(cage, "cage shouldn't be null!");
         this.actor = Preconditions.checkNotNull(actor, "actor shouldn't be null!");
         this.maneuver = Preconditions.checkNotNull(maneuver, "maneuver must not be empty");
         this.maneuverElement = Preconditions.checkNotNull(maneuverElement, "maneuverElement must not be empty");

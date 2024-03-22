@@ -29,6 +29,8 @@ public class MovementAction extends CombatRoundKey {
     @JoinColumn(name = "idManeuver", updatable = false)
     private de.yuga.spacebattle.backend.entities.turn.battle.combat.Maneuver maneuver;
 
+    private int maneuverSequenceNo;
+
     @NotNull
     @Nonnull
     @ManyToOne(optional = false)
@@ -74,6 +76,7 @@ public class MovementAction extends CombatRoundKey {
         this.actor = movementAction.getActor();
         this.movementType = movementAction.getMovementType();
         this.alignedAuraStates.addAll(auraState.getAlignedAuraStates().values());
+        this.maneuverSequenceNo = movementAction.getManeuverElement().getSequenceNo();
         this.lengthOnTrack = movementAction.getLengthOnTrack();
         this.velocity = movementAction.getVelocity();
         this.acceleration = movementAction.getAcceleration();
@@ -82,6 +85,10 @@ public class MovementAction extends CombatRoundKey {
     @Nonnull
     public Maneuver getManeuver() {
         return maneuver;
+    }
+
+    public int getManeuverSequenceNo() {
+        return maneuverSequenceNo;
     }
 
     public void replaceByPersistedManeuver(@Nonnull final Maneuver maneuver) {

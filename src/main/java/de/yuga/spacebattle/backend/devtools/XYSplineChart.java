@@ -76,7 +76,6 @@ public class XYSplineChart extends ApplicationFrame /* todo JFrame wenn listener
 
             for (final ManeuverElement courseElement : courseElements) {
                 final CubicBezier bezier = courseElement.getCurve();
-                final int partOfCourse = courseElement.getPartOfManeuver();
                 final int sequenceNo = courseElement.getSequenceNo();
 
                 helpSeriesIndices.add(setControlPoints(username + " #" + sequenceNo, bezier, dataset));

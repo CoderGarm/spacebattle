@@ -52,11 +52,6 @@ public class ManeuverElement extends AbstractEntityKey {
     private Orbit p2;
 
     /**
-     * Represented as percent value.
-     */
-    private int partOfManeuver;
-
-    /**
      * The number of planned execution for the complete maneuver.
      */
     private int sequenceNo;
@@ -74,7 +69,6 @@ public class ManeuverElement extends AbstractEntityKey {
         this.cp1 = getOrbit(curve.getCp1());
         this.cp2 = getOrbit(curve.getCp2());
         this.p2 = getOrbit(curve.getP2());
-        this.partOfManeuver = maneuverElement.getPartOfManeuver();
         this.sequenceNo = maneuverElement.getSequenceNo();
     }
 
@@ -108,10 +102,6 @@ public class ManeuverElement extends AbstractEntityKey {
     @Nonnull
     public Maneuver getManeuver() {
         return maneuver;
-    }
-
-    public int getPartOfManeuver() {
-        return partOfManeuver;
     }
 
     public int getSequenceNo() {

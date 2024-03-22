@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
 public class CourseOrderElement implements Cloneable {
 
     @Nonnull
-    private final Maneuver maneuver;
+    private Maneuver maneuver;
 
     @Nonnull
     private final ManeuverElement maneuverElement;
@@ -30,7 +30,7 @@ public class CourseOrderElement implements Cloneable {
     private Velocity velocity;
 
     @Nonnull
-    private Acceleration acceleration;
+    private final Acceleration acceleration;
 
     @Nonnull
     private Orbit position;
@@ -65,6 +65,10 @@ public class CourseOrderElement implements Cloneable {
     @Nonnull
     public Maneuver getManeuver() {
         return maneuver;
+    }
+
+    public void setManeuver(@Nonnull final Maneuver maneuver) {
+        this.maneuver = Preconditions.checkNotNull(maneuver, "maneuver must not be empty");
     }
 
     @Nonnull

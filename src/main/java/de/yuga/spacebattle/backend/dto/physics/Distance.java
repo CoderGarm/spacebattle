@@ -3,6 +3,7 @@ package de.yuga.spacebattle.backend.dto.physics;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import de.yuga.spacebattle.backend.calculator.MathHelper;
 import de.yuga.spacebattle.backend.calculator.distance.DistanceCalculator;
 import de.yuga.spacebattle.backend.enums.physics.EAccelerationMetric;
 import de.yuga.spacebattle.backend.enums.physics.EDistanceMetric;
@@ -323,7 +324,7 @@ public class Distance implements Cloneable, Comparable<Distance> {
 
         final BigDecimal a = acceleration.getCoordinateInMetric(EAccelerationMetric.MS2);
         final BigDecimal s = getCoordinateInMetric(EDistanceMetric.M);
-        final BigDecimal t = s.multiply(BigDecimal.valueOf(2)).divide(a, MC_HU).sqrt(MC_HU);
+        final BigDecimal t = s.multiply(BigDecimal.valueOf(2)).divide(MathHelper.getOrEpsilon(a), MC_HU).sqrt(MC_HU);
         return new Time(t, ETimeMetric.SECOND);
     }
 
@@ -338,11 +339,11 @@ public class Distance implements Cloneable, Comparable<Distance> {
         final BigDecimal a = acceleration.getCoordinateInMetric(EAccelerationMetric.MS2);
         final BigDecimal s = getCoordinateInMetric(EDistanceMetric.M);
         final BigDecimal v = speedLimit.getCoordinateInMetric(EDistanceMetric.M, ETimeMetric.SECOND);
-        final BigDecimal t1 = v.divide(a, MC_HU);
+        final BigDecimal t1 = v.divide(MathHelper.getOrEpsilon(a), MC_HU);
 
         final BigDecimal A = BigDecimal.valueOf(0.5).multiply(a).multiply(t1.pow(2));
 
-        final BigDecimal t2 = s.subtract(A).divide(v, MC_HU);
+        final BigDecimal t2 = s.subtract(A).divide(MathHelper.getOrEpsilon(v), MC_HU);
         return new Time(t1.add(t2), ETimeMetric.SECOND);
     }
 

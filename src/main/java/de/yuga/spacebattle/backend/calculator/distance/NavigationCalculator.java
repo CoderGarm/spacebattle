@@ -132,6 +132,9 @@ public class NavigationCalculator {
         return travelTime.intValue();
     }
 
+    /**
+     * Will return an empty list when no acceleration / movement is needed to overcome the distance.
+     */
     @Nonnull
     public static List<AccelerationProfile> createAccelerationProfile(@Nonnull final KinematicInfo startConditions,
                                                                       @Nonnull final KinematicInfo endConditions,
@@ -150,18 +153,25 @@ public class NavigationCalculator {
         final Distance toDecelerate = lengthOnCurve.subtract(toAccelerate);
 
         final Time timeToAccelerate = toAccelerate.calculateTimeToPass(constantAcceleration);
-        final Time timeToAccelerate1 = toAccelerate.calculateTimeToPass(constantAcceleration, topSpeed); // todo sharpen the acceleration profile in the name of Newton, it doesn't respect the speed of light
+        // todo sharpen the acceleration profile in the name of Newton, it doesn't respect the speed of light
+        final Time timeToAccelerate1 = toAccelerate.calculateTimeToPass(constantAcceleration, topSpeed);
         final Time timeToDecelerate = toDecelerate.calculateTimeToPass(constantAcceleration);
 
-        final List<AccelerationProfile> result = createAccelerationProfile(new CombatRound(), topSpeed, timeToAccelerate, constantAcceleration, startConditionsVelocity, Distance.ZERO);
-        final AccelerationProfile latest = Collections.max(result);
-        final Velocity max = latest.getDynamicInfo().getVelocity();
-        final CombatRound combatRound = latest.getCombatRound().clone();
+        CombatRound combatRound = new CombatRound();
+        Velocity velocity = startConditionsVelocity;
+        Distance distance = Distance.ZERO;
+        final List<AccelerationProfile> result = createAccelerationProfile(combatRound, topSpeed, timeToAccelerate, constantAcceleration, velocity, distance);
+        if (!result.isEmpty()) {
+            final AccelerationProfile latest = Collections.max(result);
+            velocity = latest.getDynamicInfo().getVelocity();
+            distance = latest.getDynamicInfo().getDistance();
+            combatRound = latest.getCombatRound().clone();
+        }
         combatRound.next();
-        result.addAll(createAccelerationProfile(combatRound, Velocity.ZERO, timeToDecelerate, constantAcceleration.negate(), max, latest.getDynamicInfo().getDistance()));
+        result.addAll(createAccelerationProfile(combatRound, endConditions.getVelocity(), timeToDecelerate, constantAcceleration.negate(), velocity, distance));
 
-        // fixme workaround to don't overrun distance on rounding issues
         result.stream()
+                // fixme workaround to don't overrun distance on rounding issues
                 .filter(ap -> ap.getDynamicInfo().getDistance().compareTo(lengthOnCurve) > 0)
                 .forEach(ap -> ap.getDynamicInfo().with(lengthOnCurve));
 
@@ -211,6 +221,7 @@ public class NavigationCalculator {
             result.add(new AccelerationProfile(round.clone(), effectiveAcceleration, velocityAtRoundEnd, distance));
             round.next();
         }
+
         return result;
     }
 

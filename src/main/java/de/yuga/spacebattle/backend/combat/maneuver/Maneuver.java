@@ -28,10 +28,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.yuga.spacebattle.backend.combat.enums.EMovementType.REDUCE_DISTANCE;
@@ -162,12 +159,12 @@ public abstract class Maneuver {
 
     public void setEnd(@Nonnull final CombatRound now) {
         this.end = Preconditions.checkNotNull(now, "now must not be empty").clone();
-        clearFutureCourseElements();
+        courseOrderElements.removeIf(e -> !e.isCourseOrderExecuted() && e.getCombatRound().compareTo(Objects.requireNonNull(this.end)) > 0);
     }
 
-    private void clearFutureCourseElements() {
-        Preconditions.checkNotNull(end, "end must not be empty");
-        courseOrderElements.removeIf(e -> !e.isCourseOrderExecuted() && e.getCombatRound().compareTo(end) > 0);
+    public void clearEnd() {
+        this.end = null;
+        courseOrderElements.removeIf(e -> !e.isCourseOrderExecuted());
     }
 
     @Nonnull
@@ -272,7 +269,7 @@ public abstract class Maneuver {
             2. Aus Beschleunigngsprofil die Streckenlänge definieren
          */
 
-        final CombatRound latestRound = Collections.max(accelerationProfile).getCombatRound();
+        final CombatRound latestRound = !accelerationProfile.isEmpty() ? Collections.max(accelerationProfile).getCombatRound() : cage.getCurrentCombatRound();
 
         final String salvoName = getMissileSalvo() != null ? getMissileSalvo().getUuid().toString() : "";
         final String username = getAgent().getOwner().getUsername();
@@ -291,20 +288,18 @@ public abstract class Maneuver {
             final Distance distance = dynamicInfo.getDistance().getInMetricWithScale(EDistanceMetric.KM);
 
             double percentOfTrack = (distance.divide(totalLength)).multiply(100).getCoordinate().doubleValue();
-
             // small ugly fix due the fact that you can not accelerate shorter than a combat round
             percentOfTrack = Double.min(100, percentOfTrack);
-
             final double lengthOnTrack = totalLength * percentOfTrack / 100;
-            final ManeuverElement maneuverElement = maneuverElements.getManeuverForPart(percentOfTrack);
-            final double[] pointAtLength = maneuverElement.getCurve().getPointAtLength(lengthOnTrack);
 
+            final ManeuverElement maneuverElement = maneuverElements.getInitial();
+            final double[] pointAtLength = maneuverElement.getCurve().getPointAtLength(lengthOnTrack);
             final Orbit position = new Orbit(pointAtLength, EDistanceMetric.KM);
 
             addCourseOrder(
                     currentCombatRound.add(motionProfile.getCombatRound()),
                     maneuverElement,
-                    new Distance(lengthOnTrack, EDistanceMetric.KM), // fixme can be distance directly - test it
+                    distance,
                     REDUCE_DISTANCE,
                     dynamicInfoVelocity.clone(),
                     dynamicInfoAcceleration.clone(),
@@ -314,7 +309,7 @@ public abstract class Maneuver {
         }
 
         addAccelerationProfile(accelerationProfile);
-        setDesignatedEnd(latestRound);
+        setDesignatedEnd(latestRound.clone().add(currentCombatRound));
         return this;
     }
 
@@ -361,16 +356,8 @@ public abstract class Maneuver {
         Preconditions.checkNotNull(cubicBezier, "cubicBezier must not be empty");
 
         final ManeuverElements result = new ManeuverElements();
-        result.set(cubicBezier);
+        result.add(cubicBezier);
         return result;
-    }
-
-    @Nonnull
-    public Maneuver withTransferCourse(@Nonnull final CubicBezier cubicBezier) {
-        Preconditions.checkNotNull(cubicBezier, "cubicBezier must not be empty");
-
-        maneuverElements.withTransferManeuver(cubicBezier);
-        return this;
     }
 
     @Nullable
@@ -403,5 +390,26 @@ public abstract class Maneuver {
     @Nonnull
     public Distance getTotalLength() {
         return Preconditions.checkNotNull(totalLength, "totalLength must not be empty");
+    }
+
+    public void extendManeuver(@Nonnull final Maneuver nextManeuver) {
+        Preconditions.checkNotNull(nextManeuver, "nextManeuver must not be empty");
+
+        final List<CourseOrderElement> courseOrderElements = nextManeuver.getCourseOrderElements();
+        final CombatRound latestRound = courseOrderElements.stream()
+                .map(CourseOrderElement::getCombatRound)
+                .reduce((o1, o2) -> o1.compareTo(o2) < 0 ? o2 : o1)
+                .orElse(null);
+
+        if (latestRound == null) {
+            // the combat has ended here
+            return;
+        }
+
+        clearEnd();
+        setDesignatedEnd(getDesignatedEnd().add(latestRound));
+        courseOrderElements.forEach(c -> c.setManeuver(this));
+        this.courseOrderElements.addAll(courseOrderElements);
+        this.maneuverElements.add(nextManeuver.getCombatElement());
     }
 }

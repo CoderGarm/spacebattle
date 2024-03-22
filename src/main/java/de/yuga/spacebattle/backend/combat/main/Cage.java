@@ -269,12 +269,12 @@ public class Cage implements Future<Cage> {
         combatHandler.handleFireWeaponPhase();
         logMessage("fire weapon", start, start);
 
-        /* fixme implement forced battle end at condition
-         */
+        // fixme implement forced battle end at condition
         final int no = currentCombatRound.getNo();
-        if (no >= 1000) {
+        if (no >= 300) {
             logMessage("#" + no + " BATTLE FORCED DONE");
             forceDone = true;
+            combatHandler.finalizeAllActiveManeuvers();
         }
 
         start = System.currentTimeMillis();
@@ -336,6 +336,13 @@ public class Cage implements Future<Cage> {
     @Nonnull
     public FleetRoundState getDefendersState() {
         return getCurrentStateByFleet(defender);
+    }
+
+    @Nonnull
+    public FleetRoundState getOpponentsState(@Nonnull final Fleet agent) {
+        Preconditions.checkNotNull(agent, "agent must not be empty");
+
+        return aggressor.equals(agent) ? getDefendersState() : getAggressorsState();
     }
 
     @Nonnull

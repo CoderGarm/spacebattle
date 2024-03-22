@@ -97,20 +97,13 @@ public class CoursePlot {
     }
 
     public void createNextAggressiveCourseElement() {
+        Preconditions.checkNotNull(maneuver, "maneuver must not be empty");
 
-        /*
-         1. motivation feststellen
-            1a. angriffsfall
-         2. ist-soll abgleich
-            2a.
-         3. berechnen
-        */
-        final CoursePlot coursePlot = cage.getCurrentStateByFleet(agent).getCoursePlot();
-        final CoursePlot opponentsCourse = cage.getCurrentStateByFleet(cage.getOpponent(agent)).getCoursePlot();
-        final Maneuver aggressiveManeuver = new ManeuverFactory(cage).createAggressiveResponseManeuver(opponentsCourse.getManeuver());
-        // fixme do something with it
+        final Maneuver aggressiveManeuver = new ManeuverFactory(cage)
+                .createAggressiveResponseManeuver(cage.getOpponentsState(agent).getCoursePlot().getManeuver());
+        maneuver.extendManeuver(aggressiveManeuver);
+        clearCombatValue();
     }
-
 
     public void createAggressiveCourse() {
         maneuver = new ManeuverFactory(cage).createInitial();
@@ -393,6 +386,10 @@ public class CoursePlot {
 
     public void setCombatValue(final int combatValue) {
         combatValuesByRound.put(cage.getCurrentCombatRound().clone(), combatValue);
+    }
+
+    public void clearCombatValue() {
+        combatValuesByRound.clear();
     }
 
     /**

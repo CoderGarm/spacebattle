@@ -15,6 +15,7 @@ alter table missileMovement drop column yCoordTarget;
 
  alter table movementAction add column acceleration varchar(255) not null after combatRound;
  alter table movementAction add column lengthOnTrack varchar(255) not null after acceleration;
+ alter table movementAction add column maneuverSequenceNo integer not null not null after lengthOnTrack;
  alter table movementAction add column velocity varchar(255) not null after movementType;
  alter table missileMovement add column lengthOnTrack varchar(255) not null after combatRound;
 
@@ -51,7 +52,6 @@ alter table missileMovement drop column yCoordTarget;
         yCoordinateP1 varchar(255),
         xCoordinateP2 varchar(255),
         yCoordinateP2 varchar(255),
-        partOfManeuver integer not null,
         sequenceNo integer not null,
         idManeuver integer not null,
         primary key (idManeuverElement)

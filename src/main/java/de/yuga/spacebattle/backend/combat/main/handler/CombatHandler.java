@@ -8,7 +8,6 @@ import de.yuga.spacebattle.backend.calculator.resource.CoursePlot;
 import de.yuga.spacebattle.backend.combat.dto.BeamVolley;
 import de.yuga.spacebattle.backend.combat.dto.MissileSalvo;
 import de.yuga.spacebattle.backend.combat.dto.MovementAction;
-import de.yuga.spacebattle.backend.combat.enums.EMovementType;
 import de.yuga.spacebattle.backend.combat.main.Cage;
 import de.yuga.spacebattle.backend.combat.maneuver.Maneuver;
 import de.yuga.spacebattle.backend.combat.maneuver.ManeuverElement;
@@ -66,6 +65,8 @@ public class CombatHandler {
         stateCombatValue(cage.getAggressor());
         stateCombatValue(cage.getDefender());
 
+        // fixme 1. not for all rounds are movements present - probably because no acceperation profiles are generated?
+
         extendAggressiveCoursePlot(cage.getAggressor());
         extendAggressiveCoursePlot(cage.getDefender());
 
@@ -104,28 +105,32 @@ public class CombatHandler {
     }
 
     private void endCombatByExceededPlot() {
+        final boolean isExceeded = cage.getParticipatingFleets().stream()
+                .map(cage::getCurrentStateByFleet)
+                .map(FleetRoundState::getCoursePlot)
+                .anyMatch(CoursePlot::hasPlotExceeded);
+        if (isExceeded) {
+            finalizeAllActiveManeuvers();
+        }
+    }
+
+    public void finalizeAllActiveManeuvers() {
         final List<FleetRoundState> states = cage.getParticipatingFleets().stream()
                 .map(cage::getCurrentStateByFleet)
                 .collect(Collectors.toList());
-        final boolean isExceeded = states.stream()
+        final List<CoursePlot> notExceededPlots = states.stream()
                 .map(FleetRoundState::getCoursePlot)
-                .anyMatch(CoursePlot::hasPlotExceeded);
-
-        if (isExceeded) {
-            final List<CoursePlot> notExceededPlots = states.stream()
-                    .map(FleetRoundState::getCoursePlot)
-                    .filter(c -> !c.hasPlotExceeded())
-                    .collect(Collectors.toList());
-            final CombatRound now = cage.getCurrentCombatRound();
-            for (final CoursePlot notExceededPlot : notExceededPlots) {
-                notExceededPlot.getManeuver().setEnd(now);
-            }
-
-            // fixme this did not work - why?
-            cage.getFlyingMissileSalvos()
-                    .stream().filter(s -> !s.getManeuver().isValid())
-                    .forEach(MissileSalvo::executeEffectiveDetonation);
+                .filter(c -> !c.hasPlotExceeded())
+                .collect(Collectors.toList());
+        final CombatRound now = cage.getCurrentCombatRound();
+        for (final CoursePlot notExceededPlot : notExceededPlots) {
+            notExceededPlot.getManeuver().setEnd(now);
         }
+
+        // fixme this did not work - why?
+        cage.getFlyingMissileSalvos()
+                .stream().filter(s -> !s.getManeuver().isValid())
+                .forEach(MissileSalvo::executeEffectiveDetonation);
     }
 
     private void createInitialCoursePlot() {
@@ -155,14 +160,7 @@ public class CombatHandler {
         final boolean onDecay = coursePlot.isCourseAtDecay();
         if (noMoreCourseElementsLeft || onDecay) {
             // plot the next round's course for the upcoming round
-            /*
-             * fixme
-             *      1. end maneuver for agent
-             *      2. create aggressive course
-             */
             cage.logWarning("Course of '" + agent.getOwner().getUsername() + "' will be refreshed.");
-
-            coursePlot.getManeuver().setEnd(cage.getCurrentCombatRound());
             coursePlot.createNextAggressiveCourseElement();
         }
     }
@@ -185,10 +183,8 @@ public class CombatHandler {
         }
 
         final Orbit interimDestination = courseElement.getPosition().clone();
-        final EMovementType movementType = courseElement.getMovementType();
         final Maneuver maneuver = courseElement.getManeuver();
         final ManeuverElement maneuverElement = courseElement.getManeuverElement();
-        final Distance lengthOnTrack = courseElement.getLengthOnTrack();
         final MovementAction movementAction = new MovementAction(cage, agent, maneuver, maneuverElement, courseElement);
         agentsState.getPosition().moveTo(interimDestination);
 

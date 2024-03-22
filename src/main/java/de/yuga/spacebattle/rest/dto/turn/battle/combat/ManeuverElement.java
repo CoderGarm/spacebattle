@@ -38,10 +38,6 @@ public class ManeuverElement {
     private de.yuga.spacebattle.rest.dto.orbitals.Orbit p2;
 
     @JsonProperty
-    @Schema(required = true, description = "Represented as percent value.")
-    private int partOfManeuver;
-
-    @JsonProperty
     @Schema(required = true, description = "The number of planned execution as part of the parent maneuver.")
     private int sequenceNo;
 
@@ -56,7 +52,6 @@ public class ManeuverElement {
         this.cp1 = getOrbit(maneuverElement.getCp1());
         this.cp2 = getOrbit(maneuverElement.getCp2());
         this.p2 = getOrbit(maneuverElement.getP2());
-        this.partOfManeuver = maneuverElement.getPartOfManeuver();
         this.sequenceNo = maneuverElement.getSequenceNo();
     }
 

@@ -41,6 +41,10 @@ public class MovementAction {
     @Schema(required = true, description = "The total length on the main track.")
     private Distance lengthOnTrack;
 
+    @JsonProperty
+    @Schema(required = true, description = "The maneuver element on the main track.")
+    private int maneuverSequenceNo;
+
     @Nonnull
     @JsonProperty
     @Schema(required = true, description = "The velocity for this combat round.")
@@ -68,6 +72,7 @@ public class MovementAction {
         this.movementType = input.getMovementType();
         this.auraState = new AuraState(input.getAlignedAuraStates());
         this.lengthOnTrack = input.getLengthOnTrack();
+        this.maneuverSequenceNo = input.getManeuverSequenceNo();
         this.velocity = input.getVelocity();
         this.acceleration = input.getAcceleration();
     }

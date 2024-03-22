@@ -272,7 +272,7 @@ public class MissileSalvo extends DamageDealer {
         final CourseOrderElement courseElement = maneuver.getCourseElement(currentCombatRound);
         if (courseElement == null) {
             // fixme remove workaround for missing plot by new course
-            cage.logWarning("Salve '" + getUuid() + "' detonated without hit the target");
+            cage.logWarning("Salvo '" + getUuid() + "' detonated without hit the target");
             executeEffectiveDetonation();
             return;
         }

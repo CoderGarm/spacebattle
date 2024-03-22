@@ -386,7 +386,6 @@
         yCoordinateP1 varchar(255),
         xCoordinateP2 varchar(255),
         yCoordinateP2 varchar(255),
-        partOfManeuver integer not null,
         sequenceNo integer not null,
         idManeuver integer not null,
         primary key (idManeuverElement)
@@ -501,6 +500,7 @@
         combatRound integer not null,
         acceleration varchar(255) not null,
         lengthOnTrack varchar(255) not null,
+        maneuverSequenceNo integer not null,
         movementType varchar(255) not null,
         velocity varchar(255) not null,
         idActor integer not null,
@@ -1509,11 +1509,11 @@ create index ID_WHSS on warshipHealthStateSnapshot (isDeleted);
                 references fleet (idFleet);
 
     alter table missileMovement
-       add constraint FK89ywf9dupn3xqm5wkoyy8b4v5 
-       foreign key (idManeuver) 
+       add constraint FK89ywf9dupn3xqm5wkoyy8b4v5
+       foreign key (idManeuver)
        references maneuver (idManeuver);
 
-    alter table missileMovement 
+    alter table missileMovement
         add constraint FKl9frhygmvi1n5d3sjchn19wrx
             foreign key (idTarget)
                 references fleet (idFleet);
