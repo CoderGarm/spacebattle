@@ -28,6 +28,10 @@ public class ManeuverFactory {
         this.cage = Preconditions.checkNotNull(cage, "cage must not be empty");
     }
 
+    /*
+     * fixme
+     *      1. course plotting by control points needs better control point generation
+     */
 
     @Nonnull
     public Maneuver createMissileTrail(@Nonnull final MissileSalvo volley) {

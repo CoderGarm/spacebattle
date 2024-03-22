@@ -155,6 +155,12 @@ public class CombatHandler {
     private void extendAggressiveCoursePlot(@Nonnull final Fleet agent) {
         Preconditions.checkNotNull(agent, "agent must not be empty");
 
+        if (agent.equals(cage.getAggressor())) {
+            // fixme the aggressor must not change the course because he wants to enter the orbit?
+            cage.logWarning("No course change for aggressor '" + agent.getOwner().getUsername() + "'.");
+            return;
+        }
+
         final boolean noMoreCourseElementsLeft = isPlotExceeded(agent);
         final CoursePlot coursePlot = cage.getCurrentStateByFleet(agent).getCoursePlot();
         final boolean onDecay = coursePlot.isCourseAtDecay();

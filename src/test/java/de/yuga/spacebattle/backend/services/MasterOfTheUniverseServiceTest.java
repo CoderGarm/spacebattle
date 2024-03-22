@@ -210,12 +210,13 @@ public class MasterOfTheUniverseServiceTest {
     @Test
     void runBattle() {
 
+        final int idPlanet = 112;
         fleetService.deleteAll();
-        masterOfTheUniverseService.createFlashsFleet();
-        masterOfTheUniverseService.createYufielsFleet();
+        masterOfTheUniverseService.createFlashsFleet(idPlanet);
+        masterOfTheUniverseService.createYufielsFleet(idPlanet);
         masterOfTheUniverseService.transformationNeeded = false;
 
-        final Planet planet = planetService.find(112);
+        final Planet planet = planetService.find(idPlanet);
         final Tick today = tickService.getToday();
 
         battleLogger.setChartActive(true);

@@ -262,11 +262,14 @@ public class MasterOfTheUniverseService {
         final boolean transformationNeeded = this.transformationNeeded;
         if (transformationNeeded) {
 
+            final int idPlanet =
+                    //955;
+                    112;
             fleetService.deleteAll();
-            createYufielsFleet();
-            createFlashsFleet();
+            createYufielsFleet(idPlanet);
+            createFlashsFleet(idPlanet);
             final Tick today = tickService.getToday();
-            final Planet planet = planetService.find(112);
+            final Planet planet = planetService.find(idPlanet);
             battleService.runBattleAtPlanet(today, planet);
             /*
              */
@@ -298,8 +301,8 @@ public class MasterOfTheUniverseService {
         }
     }
 
-    public void createKalusFleet() {
-        final Planet mainPlanet = planetService.find(2229);
+    public void createKalusFleet(final int idPlanet) {
+        final Planet mainPlanet = planetService.find(idPlanet);
         final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(65)), mainPlanet, "1st Battle Fleet");
 
         final ShipClass ship = shipClassService.find(845);
@@ -309,8 +312,8 @@ public class MasterOfTheUniverseService {
         }
     }
 
-    public void createFlashsFleet() {
-        final Planet mainPlanet = planetService.find(112);
+    public void createFlashsFleet(final int idPlanet) {
+        final Planet mainPlanet = planetService.find(idPlanet);
         final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(1)), mainPlanet, "TD1-Flash");
 
         final ShipClass songbird = shipClassService.find(2);
@@ -320,8 +323,8 @@ public class MasterOfTheUniverseService {
         }
     }
 
-    public void createYufielsFleet() {
-        final Planet mainPlanet = planetService.find(112);
+    public void createYufielsFleet(final int idPlanet) {
+        final Planet mainPlanet = planetService.find(idPlanet);
         final Fleet reinforcement = createFleet(Objects.requireNonNull(userService.find(3)), mainPlanet, "TD1-Yufiel");
 
         final ShipClass songbird = shipClassService.find(3);
@@ -331,8 +334,8 @@ public class MasterOfTheUniverseService {
         }
     }
 
-    public void createPirateFleet() {
-        final Planet mainPlanet = planetService.find(112);
+    public void createPirateFleet(final int idPlanet) {
+        final Planet mainPlanet = planetService.find(idPlanet);
         final Fleet reinforcement = createFleet(Objects.requireNonNull(ownerService.find(15)), mainPlanet, "Pirate");
 
         final ShipClass songbird = shipClassService.find(9);
