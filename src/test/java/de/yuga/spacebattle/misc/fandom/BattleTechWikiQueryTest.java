@@ -68,9 +68,13 @@ public class BattleTechWikiQueryTest {
 
         final Map<Integer, Set<SystemWikiEntry>> printOut = new HashMap<>();
         final Map<Integer, Map<String, String>> yearsWithAffiliationBySystem = new HashMap<>();
-        yearsWithSystemsByAffiliation.forEach((year, systemsByAffiliation) -> {
+        years.forEach(year -> {
+            final Map<String, List<String>> systemsByAffiliation = yearsWithSystemsByAffiliation.getOrDefault(year, new HashMap<>());
+
             systemsByAffiliation.forEach((affiliation, systems) -> {
                 final Map<String, String> affiliationBySystem = yearsWithAffiliationBySystem.getOrDefault(year, new HashMap<>());
+
+                // set up regular data structure for this year
                 systems.forEach(system -> {
                     affiliationBySystem.put(system, affiliation);
                     final Set<SystemWikiEntry> wikiEntries = printOut.getOrDefault(year, new HashSet<>());
@@ -78,7 +82,18 @@ public class BattleTechWikiQueryTest {
                     printOut.put(year, wikiEntries);
                 });
                 yearsWithAffiliationBySystem.put(year, affiliationBySystem);
+
             });
+
+            // fill up all data from the last year excluded the current's year systems
+            final List<Integer> yearsUpToNow = printOut.keySet().stream().sorted().collect(Collectors.toList());
+            final Integer lastYear = yearsUpToNow.get(Math.max(yearsUpToNow.size() - 2, 0));
+            final Set<SystemWikiEntry> wikiEntriesOfLastYear = new HashSet<>(printOut.getOrDefault(lastYear, new HashSet<>()));
+            wikiEntriesOfLastYear.removeIf(e -> e.isIncludedByName(systemsByAffiliation.values().stream().flatMap(Collection::stream).collect(Collectors.toList())));
+
+            final Set<SystemWikiEntry> wikiEntries = printOut.getOrDefault(year, new HashSet<>());
+            wikiEntries.addAll(wikiEntriesOfLastYear);
+            printOut.put(year, wikiEntries);
         });
 
         final Gson gson = new Gson();
@@ -90,14 +105,20 @@ public class BattleTechWikiQueryTest {
 
     private static class SystemWikiEntry {
         @JsonProperty
-        String name;
+        String n;
 
         @JsonProperty
-        String affiliation;
+        String a;
 
         public SystemWikiEntry(final String name, final String affiliation) {
-            this.name = name;
-            this.affiliation = affiliation;
+            this.n = name;
+            this.a = affiliation;
+        }
+
+        private boolean isIncludedByName(@Nonnull final List<String> names) {
+            Preconditions.checkNotNull(names, "names must not be empty");
+
+            return names.contains(n);
         }
 
         @Override
@@ -108,12 +129,12 @@ public class BattleTechWikiQueryTest {
 
             final SystemWikiEntry that = (SystemWikiEntry) o;
 
-            return new EqualsBuilder().append(name, that.name).append(affiliation, that.affiliation).isEquals();
+            return new EqualsBuilder().append(n, that.n).append(a, that.a).isEquals();
         }
 
         @Override
         public int hashCode() {
-            return new HashCodeBuilder(17, 37).append(name).append(affiliation).toHashCode();
+            return new HashCodeBuilder(17, 37).append(n).append(a).toHashCode();
         }
     }
 
