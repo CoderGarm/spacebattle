@@ -3,6 +3,7 @@ package de.yuga.spacebattle.misc.fandom;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import de.yuga.spacebattle.TestUtils;
 import io.github.fastily.jwiki.core.MQuery;
 import io.github.fastily.jwiki.core.Wiki;
@@ -96,7 +97,7 @@ public class BattleTechWikiQueryTest {
             printOut.put(year, wikiEntries);
         });
 
-        final Gson gson = new Gson();
+        final Gson gson = new GsonBuilder().setPrettyPrinting().create();
         printOut.forEach((year, systemWikiEntries) ->
                 TestUtils.writeString(DIR + "systemsByAffiliation" + FS, year + ".json", gson.toJson(systemWikiEntries))
         );
